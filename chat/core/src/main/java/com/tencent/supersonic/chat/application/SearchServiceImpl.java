@@ -144,7 +144,7 @@ public class SearchServiceImpl implements SearchService {
         String nature = natureToNameEntry.getKey();
         String wordName = natureToNameEntry.getValue();
 
-        Integer domain = BaseWordNature.getDomain(nature);
+        Integer domain = NatureHelper.getDomain(nature);
         SchemaElementType schemaElementType = NatureConverter.convertTo(nature);
 
         if (SchemaElementType.ENTITY.equals(schemaElementType)) {
@@ -219,7 +219,7 @@ public class SearchServiceImpl implements SearchService {
         for (MapResult mapResult : mapResults) {
 
             List<DomainWithSemanticType> dimensionMetricClassIds = mapResult.getNatures().stream()
-                    .map(nature -> new DomainWithSemanticType(BaseWordNature.getDomain(nature),
+                    .map(nature -> new DomainWithSemanticType(NatureHelper.getDomain(nature),
                             NatureConverter.convertTo(nature)))
                     .filter(entry -> matchCondition(entry, possibleDomains)).collect(Collectors.toList());
 

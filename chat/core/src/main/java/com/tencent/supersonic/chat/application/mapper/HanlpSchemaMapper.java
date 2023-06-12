@@ -37,6 +37,7 @@ public class HanlpSchemaMapper implements SchemaMapper {
         QueryMatchStrategy matchStrategy = ContextUtils.getBean(QueryMatchStrategy.class);
 
         List<MapResult> matches = matchStrategy.match(searchCtx.getQueryText(), terms, 0);
+        LOGGER.info("searchCtx:{},matches:{}", searchCtx, matches);
 
         convertTermsToSchemaMapInfo(matches, searchCtx.getMapInfo());
     }

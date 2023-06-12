@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.application.knowledge;
 
 import com.hankcs.hanlp.corpus.tag.Nature;
 import com.hankcs.hanlp.seg.common.Term;
+import com.tencent.supersonic.chat.application.mapper.HanlpSchemaMapper;
 import com.tencent.supersonic.chat.domain.pojo.search.DomainInfoStat;
 import com.tencent.supersonic.common.nlp.NatureType;
 import com.tencent.supersonic.knowledge.application.online.BaseWordNature;
@@ -13,13 +14,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * nature parse helper
  */
 public class NatureHelper {
 
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(NatureHelper.class);
     private static boolean isDomainOrEntity(Term term, Integer domain) {
         return (NatureType.NATURE_SPILT + domain).equals(term.nature.toString()) || term.nature.toString()
                 .endsWith(NatureType.ENTITY.getType());
@@ -36,8 +39,16 @@ public class NatureHelper {
     }
 
     public static Integer getDomain(String nature) {
-        String[] split = nature.split(NatureType.NATURE_SPILT);
-        return Integer.valueOf(split[1]);
+        try {
+            String[] split = nature.split(NatureType.NATURE_SPILT);
+            if (split.length <= 1) {
+                return null;
+            }
+            return Integer.valueOf(split[1]);
+        } catch (NumberFormatException e) {
+            LOGGER.error("", e);
+        }
+        return null;
     }
 
     public static boolean isDimensionValueClassId(String nature) {
@@ -96,7 +107,7 @@ public class NatureHelper {
                 term -> term.nature.startsWith(NatureType.NATURE_SPILT)
         ).forEach(term -> {
             NatureType natureType = NatureType.getNatureType(String.valueOf(term.nature));
-            Integer domain = BaseWordNature.getDomain(String.valueOf(term.nature));
+            Integer domain = getDomain(String.valueOf(term.nature));
 
             Map<NatureType, Integer> natureTypeMap = new HashMap<>();
             natureTypeMap.put(natureType, 1);
