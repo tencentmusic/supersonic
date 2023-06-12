@@ -8,6 +8,7 @@ buildDir=$baseDir/build
 cd $baseDir
 
 #1. clear file
+mkdir -p ${runtimeDir}
 rm -fr ${runtimeDir}/*
 
 #2. package lib
@@ -15,8 +16,8 @@ rm -fr ${runtimeDir}/*
 tar -zxvf ${buildDir}/supersonic-semantic.tar.gz  -C ${runtimeDir}
 tar -zxvf ${buildDir}/supersonic-chat.tar.gz  -C ${runtimeDir}
 
-mv ${runtimeDir}/launchers-chat-1.0.0-SNAPSHOT ${runtimeDir}/supersonic-chat
-mv ${runtimeDir}/launchers-semantic-1.0.0-SNAPSHOT ${runtimeDir}/supersonic-semantic
+mv ${runtimeDir}/launchers-chat-* ${runtimeDir}/supersonic-chat
+mv ${runtimeDir}/launchers-semantic-* ${runtimeDir}/supersonic-semantic
 
 tar -zxvf ${buildDir}/supersonic-webapp.tar.gz  -C ${buildDir}
 

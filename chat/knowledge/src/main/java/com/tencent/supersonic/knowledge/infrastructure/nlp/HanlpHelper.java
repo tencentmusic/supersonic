@@ -25,7 +25,6 @@ public class HanlpHelper {
     public static volatile DynamicCustomDictionary CustomDictionary;
     public static final String DICT_MAIN_FILE_NAME = "CustomDictionary.txt";
     public static final String DICT_CLASS = "classes";
-    public static final String NER = "crf";
 
     static {
         // reset hanlp config
@@ -40,7 +39,7 @@ public class HanlpHelper {
         if (segment == null) {
             synchronized (HanlpHelper.class) {
                 if (segment == null) {
-                    segment = HanLP.newSegment(NER)
+                    segment = HanLP.newSegment()
                             .enableIndexMode(true).enableIndexMode(4)
                             .enableCustomDictionary(true).enableCustomDictionaryForcing(true).enableOffset(true)
                             .enableJapaneseNameRecognize(false).enableNameRecognize(false)
