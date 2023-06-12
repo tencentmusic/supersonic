@@ -48,10 +48,4 @@ public abstract class BaseWordNature {
         }
         return 0;
     }
-
-    public static Integer getDomain(String nature) {
-        String[] split = nature.split(NatureType.NATURE_SPILT);
-        return Integer.valueOf(split[1]);
-    }
-
 }
