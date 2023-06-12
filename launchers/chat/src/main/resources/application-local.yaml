@@ -1,0 +1,25 @@
+spring:
+  h2:
+    console:
+      path: /h2-console/chat
+      # enabled web
+      enabled: true
+  datasource:
+    driver-class-name: org.h2.Driver
+    schema: classpath:db/chat-schema-h2.sql
+    data: classpath:db/chat-data-h2.sql
+    url: jdbc:h2:mem:chat;DATABASE_TO_UPPER=false
+    username: root
+    password: chat
+
+server:
+  port: 9080
+
+authentication:
+  enable: true
+  exclude:
+    path: /api/auth/user/register,/api/auth/user/login
+
+semantic:
+  url:
+    prefix: http://127.0.0.1:9081

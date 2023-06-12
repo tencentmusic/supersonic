@@ -1,0 +1,7 @@
+tom _1_2 52
+alice _1_2 47
+lucy _1_2 31
+dean _1_2 36
+john _1_2 50
+jack _1_2 38
+admin _1_2 70

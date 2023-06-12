@@ -1,0 +1,2 @@
+com.tencent.supersonic.auth.authentication.domain.interceptor.AuthenticationInterceptor=\
+    com.tencent.supersonic.auth.authentication.domain.interceptor.DefaultAuthenticationInterceptor

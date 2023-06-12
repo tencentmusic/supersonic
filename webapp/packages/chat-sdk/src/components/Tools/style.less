@@ -1,0 +1,37 @@
+@import '../../styles/index.less';
+
+@tools-cls: ~'@{supersonic-chat-prefix}-tools';
+
+.@{tools-cls} {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  column-gap: 6px;
+
+  &-feedback {
+    display: flex;
+    align-items: center;
+    margin-left: 4px;
+    color: var(--text-color-third);
+    column-gap: 6px;
+  }
+
+  &-like {
+    margin-right: 4px;
+  }
+
+  &-mobile-tools {
+    display: flex;
+    flex-direction: column;
+    margin-top: 12px;
+    row-gap: 10px;
+  }
+
+  &-tools {
+    margin-top: 0;
+  }
+
+  &-feedback {
+    margin-left: 2px;
+  }
+}

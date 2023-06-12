@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.supersonic.semantic.core.infrastructure.mapper.MetricDOCustomMapper">
+    <resultMap id="BaseResultMap"
+            type="com.tencent.supersonic.semantic.core.domain.dataobject.MetricDO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="domain_id" jdbcType="BIGINT" property="domainId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="biz_name" jdbcType="VARCHAR" property="bizName"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="created_at" jdbcType="TIMESTAMP" property="createdAt"/>
+        <result column="created_by" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt"/>
+        <result column="updated_by" jdbcType="VARCHAR" property="updatedBy"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs"
+            type="com.tencent.supersonic.semantic.core.domain.dataobject.MetricDO">
+        <result column="type_params" jdbcType="LONGVARCHAR" property="typeParams"/>
+    </resultMap>
+    <sql id="Example_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and
+                                    #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem"
+                                            open="(" separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+    <sql id="Base_Column_List">
+        id
+        , domain_id, name, biz_name, description, type, created_at, created_by, updated_at,
+    updated_by
+    </sql>
+    <sql id="Blob_Column_List">
+        typeParams
+    </sql>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into s2_metric (domain_id, name,
+        biz_name, description, type,status,sensitive_level,
+        created_at, created_by, updated_at,
+        updated_by, type_params
+        )
+        values
+        <foreach collection="list" item="metric" separator=",">
+            ( #{metric.domainId,jdbcType=BIGINT}, #{metric.name,jdbcType=VARCHAR},
+            #{metric.bizName,jdbcType=VARCHAR}, #{metric.description,jdbcType=VARCHAR},
+            #{metric.type,jdbcType=VARCHAR},
+            #{metric.status,jdbcType=VARCHAR},#{metric.sensitiveLevel,jdbcType=VARCHAR},
+            #{metric.createdAt,jdbcType=TIMESTAMP}, #{metric.createdBy,jdbcType=VARCHAR},
+            #{metric.updatedAt,jdbcType=TIMESTAMP},
+            #{metric.updatedBy,jdbcType=VARCHAR}, #{metric.typeParams,jdbcType=LONGVARCHAR}
+            )
+        </foreach>
+    </insert>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        <foreach collection="list" item="metric" separator=";">
+            update s2_metric
+            set domain_id = #{metric.domainId,jdbcType=BIGINT},
+            name = #{metric.name,jdbcType=VARCHAR},
+            biz_name = #{metric.bizName,jdbcType=VARCHAR},
+            description = #{metric.description,jdbcType=VARCHAR},
+            type = #{metric.type,jdbcType=VARCHAR},
+            status = #{metric.status,jdbcType=VARCHAR},
+            created_at = #{metric.createdAt,jdbcType=TIMESTAMP},
+            created_by = #{metric.createdBy,jdbcType=VARCHAR},
+            updated_at = #{metric.updatedAt,jdbcType=TIMESTAMP},
+            updated_by = #{metric.updatedBy,jdbcType=VARCHAR},
+            sensitive_level = #{metric.sensitiveLevel,jdbcType=INTEGER},
+            type_params = #{metric.typeParams,jdbcType=LONGVARCHAR}
+            where id = #{metric.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+</mapper>

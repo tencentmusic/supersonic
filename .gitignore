@@ -1,0 +1,15 @@
+target/
+.idea/
+.vscode/
+logs/
+log/
+*.DS_Store
+*.iml
+*.bin
+*.log
+*.tar.gz
+*.lib
+assembly/runtime/*
+**/dist/
+*.umi/
+/assembly/deploy

@@ -1,0 +1,18 @@
+@borderColor: #eee;
+
+.sqlEditor {
+  min-width: 0;
+  height: 100%;
+  border: solid 1px @borderColor;
+
+  :global {
+    .ace_editor {
+      font-family: 'Menlo', 'Monaco', 'Ubuntu Mono', 'Consolas', 'source-code-pro' !important;
+    }
+  }
+}
+
+.fullScreenBtnBox {
+  display: flex;
+  justify-content: end;
+}

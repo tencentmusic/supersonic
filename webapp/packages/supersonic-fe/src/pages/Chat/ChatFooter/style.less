@@ -1,0 +1,153 @@
+.chatFooter {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+  margin-right: 20px;
+  margin-bottom: 40px;
+
+  .composer {
+    display: flex;
+    height: 46px;
+
+    .composerInputWrapper {
+      flex: 1;
+
+      .composerInput {
+        width: 100%;
+        height: 100%;
+        :global {
+          .ant-select-selector {
+            box-sizing: border-box;
+            height: 100%;
+            overflow: hidden;
+            color: rgba(0, 0, 0, 0.87);
+            font-size: 16px;
+            word-break: break-all;
+            background: #fff;
+            border: 0;
+            border-radius: 24px;
+            box-shadow: rgba(0, 0, 0, 0.07) 0 -0.5px 0, rgba(0, 0, 0, 0.1) 0 0 18px;
+            transition: border-color 0.15s ease-in-out;
+            resize: none;
+
+            .ant-select-selection-search-input {
+              height: 100% !important;
+              padding: 0 20px;
+            }
+
+            .ant-select-selection-search {
+              right: 0 !important;
+              left: 0 !important;
+            }
+
+            .ant-select-selection-placeholder {
+              padding-left: 10px !important;
+              line-height: 45px;
+            }
+          }
+
+          .ant-select-clear {
+            right: auto;
+            left: 500px;
+            width: 16px;
+            height: 16px;
+            margin-top: -8px;
+            font-size: 16px;
+          }
+        }
+      }
+
+      :global {
+        .ant-select-focused {
+          .ant-select-selector {
+            box-shadow: rgb(74, 114, 245) 0 0 3px !important;
+          }
+        }
+      }
+    }
+  }
+
+  .sendBtn {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    color: #fff;
+    font-size: 20px;
+    background-color: rgb(184, 184, 191);
+    border: unset;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    transition: background-color 0.3s ease 0s;
+
+    &.sendBtnActive {
+      background-color: var(--chat-blue);
+    }
+  }
+
+  &.mobile {
+    height: 40px;
+    margin: 12px;
+    margin-bottom: 20px;
+
+    .composer {
+      height: 40px;
+
+      :global {
+        .ant-select-selector {
+          font-size: 14px !important;
+        }
+
+        .ant-select-selection-placeholder {
+          line-height: 39px !important;
+        }
+      }
+    }
+  }
+}
+
+.searchOption {
+  padding: 6px 20px;
+  color: #212121;
+  font-size: 16px;
+}
+
+.mobile {
+  .searchOption {
+    min-height: 26px;
+    padding: 2px 12px;
+    font-size: 14px;
+  }
+}
+
+.domain {
+  margin-top: 2px;
+  color: var(--text-color-fourth);
+  font-size: 13px;
+  line-height: 12px;
+}
+
+.autoCompleteDropdown {
+  left: 285px !important;
+  width: fit-content !important;
+  min-width: 50px !important;
+  border-radius: 6px;
+
+  &.external {
+    left: 226px !important;
+  }
+
+  &.mobile {
+    left: 20px !important;
+  }
+}
+
+.semanticType {
+  margin-right: 10px;
+}

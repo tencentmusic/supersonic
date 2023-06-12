@@ -1,0 +1,38 @@
+@import '../../styles/index.less';
+
+@chat-item-prefix-cls: ~'@{supersonic-chat-prefix}-item';
+
+.@{chat-item-prefix-cls} {
+  &-metric-info-list {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 30px;
+  }
+
+  &-typing {
+    width: 100%;
+    padding: 0 5px;
+
+    .ant-spin-dot {
+      width: 100% !important;
+      height: 100% !important;
+    }
+  }
+
+  &-typing-bubble {
+    width: fit-content;
+    padding: 16px !important;
+  }
+
+  &-text-bubble {
+    width: fit-content;
+  }
+
+  &-text {
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    user-select: text;
+  }
+}

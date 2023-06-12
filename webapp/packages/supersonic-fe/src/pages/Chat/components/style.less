@@ -1,0 +1,277 @@
+.message {
+  .messageContent {
+    display: flex;
+    align-items: flex-start;
+
+    .messageBody {
+      width: 100%;
+    }
+
+    .avatar {
+      margin-right: 4px;
+    }
+
+    .bubble {
+      box-sizing: border-box;
+      min-width: 1px;
+      max-width: 100%;
+      padding: 8px 16px 10px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid transparent;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+
+      .text {
+        line-height: 1.5;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+        user-select: text;
+      }
+
+      .textMsg {
+        padding: 12px 0 5px;
+      }
+
+      .topBar {
+        display: flex;
+        align-items: center;
+        max-width: 100%;
+        padding: 4px 0 8px;
+        overflow-x: auto;
+        color: var(--text-color);
+        font-weight: 500;
+        font-size: 14px;
+        white-space: nowrap;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+
+        .messageTitleWrapper {
+          display: flex;
+          align-items: center;
+        }
+
+        .messageTitle {
+          display: flex;
+          align-items: center;
+          color: var(--text-color);
+          font-weight: 500;
+          font-size: 14px;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+
+  &.right {
+    .messageContent {
+      flex-direction: row-reverse;
+
+      .bubble {
+        float: right;
+        box-sizing: border-box;
+        padding: 8px 16px;
+        color: #fff;
+        font-size: 16px;
+        background: linear-gradient(81.62deg, #2870ea 8.72%, var(--chat-blue) 85.01%);
+        border: 1px solid transparent;
+        border-radius: 12px 4px 12px 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+
+        .text {
+          &::selection {
+            background: #1ba1f7;
+          }
+        }
+      }
+    }
+  }
+}
+
+.textBubble {
+  width: fit-content;
+}
+
+.listenerSex {
+  padding-bottom: 24px;
+}
+
+.listenerArea {
+  padding-top: 24px;
+  padding-bottom: 12px;
+}
+
+.typing {
+  width: 100%;
+  padding: 0 5px;
+
+  :global {
+    .ant-spin-dot {
+      width: 100%;
+    }
+  }
+}
+
+.messageEntityName {
+  cursor: pointer;
+
+  &:hover {
+    color: var(--primary-color);
+  }
+}
+
+.messageAvatar {
+  margin-right: 8px;
+}
+
+.dataHolder {
+  position: relative;
+}
+
+.subTitle {
+  margin-left: 20px;
+  color: var(--text-color-third);
+  font-weight: normal;
+  font-size: 12px;
+
+  .subTitleValue {
+    margin-left: 6px;
+    color: var(--text-color);
+    font-size: 13px;
+  }
+}
+
+.avatarPopover {
+  :global {
+    .ant-popover-inner-content {
+      padding: 3px 4px !important;
+    }
+  }
+}
+
+.moreOption {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  color: var(--text-color-fourth);
+  font-size: 12px;
+
+  .selectOthers {
+    color: var(--text-color);
+    cursor: pointer;
+    &:hover {
+      color: var(--primary-color);
+    }
+  }
+
+  .indicators {
+    display: flex;
+    align-items: center;
+    margin-left: 12px;
+    column-gap: 12px;
+
+    .indicator {
+      cursor: pointer;
+      &:hover {
+        color: var(--primary-color);
+      }
+    }
+  }
+}
+
+.contentName {
+  max-width: 350px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.aggregatorIndicator {
+  color: var(--text-color);
+  font-weight: 500;
+  font-size: 20px;
+}
+
+.entityId {
+  display: flex;
+  align-items: center;
+  margin-left: 12px;
+  column-gap: 4px;
+
+  .idTitle {
+    color: var(--text-color-fourth);
+    font-size: 12px;
+  }
+  .idValue {
+    color: var(--text-color-fourth);
+    font-size: 13px;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--primary-color);
+    }
+  }
+}
+
+.typingBubble {
+  width: fit-content;
+}
+
+.quote {
+  margin-bottom: 4px;
+  padding: 0 4px 0 6px;
+  color: var(--border-color-base);
+  font-size: 13px;
+  border-left: 4px solid var(--border-color-base);
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+
+.filterSection {
+  display: flex;
+  align-items: center;
+  color: var(--text-color-secondary);
+  font-weight: normal;
+  font-size: 13px;
+  .filterItem {
+    padding: 2px 12px;
+    color: var(--text-color-secondary);
+    background-color: #edf2f2;
+    border-radius: 13px;
+  }
+}
+
+.noPermissionTip {
+  display: flex;
+  align-items: center;
+}
+
+.tip {
+  margin-left: 6px;
+  color: var(--text-color-third);
+}
+
+.infoBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 20px;
+  column-gap: 20px;
+}
+
+.mainEntityInfo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 13px;
+  column-gap: 20px;
+
+  .infoItem {
+    display: flex;
+    align-items: center;
+    .infoName {
+      color: var(--text-color-fourth);
+    }
+
+    .infoValue {
+      color: var(--text-color-secondary);
+    }
+  }
+}

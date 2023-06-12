@@ -1,0 +1,50 @@
+@light-border: 1px solid #d9d9d9;
+@primaryColor: #c1cdf7;
+
+.xflow-group-node {
+  z-index: 9;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  box-shadow: ~'rgb(17 49 96 / 12%) 0px 1px 3px 0px, rgb(17 49 96 / 4%) 0px 0px 0px 1px';
+  cursor: grab;
+  &:hover {
+    background-color: rgba(227, 244, 255, 0.45);
+    border: 1px solid @primaryColor;
+    box-shadow: 0 0 3px 3px rgba(64, 169, 255, 0.2);
+    cursor: move;
+  }
+  .xflow-group-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 12px;
+    font-size: 14px;
+    line-height: 38px;
+    .header-left {
+      width: 80%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .header-right {
+      display: inline-flex;
+      align-items: center;
+      span.anticon {
+        margin-left: 8px;
+      }
+    }
+  }
+}
+
+.x6-node-selected {
+  .xflow-group-node {
+    background-color: rgba(243, 249, 255, 0.92);
+    border: 1px solid @primaryColor;
+    box-shadow: 0 0 3px 3px rgb(64 169 255 / 20%);
+    &:hover {
+      background-color: rgba(243, 249, 255, 0.6);
+    }
+  }
+}

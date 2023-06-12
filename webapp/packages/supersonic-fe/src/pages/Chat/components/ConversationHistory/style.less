@@ -1,0 +1,64 @@
+.conversationHistory {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  width: 215px;
+  height: calc(100vh - 48px);
+  overflow: hidden;
+  background: #f3f3f7;
+  border-right: 1px solid var(--border-color-base);
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 50px;
+    padding: 0 16px;
+    border-bottom: 1px solid #e8e8e8;
+    .headerTitle {
+      color: var(--text-color);
+      font-weight: 500;
+      font-size: 16px;
+    }
+    .headerClose {
+      color: var(--text-color-third);
+      font-size: 16px;
+      cursor: pointer;
+      &:hover {
+        color: var(--chat-blue);
+      }
+    }
+  }
+  .conversationContent {
+    flex: 1;
+    overflow: auto;
+    .conversationItem {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border-color-base-bg-5);
+      cursor: pointer;
+      row-gap: 2px;
+
+      &:hover {
+        background: var(--light-blue-background);
+      }
+      .conversationName {
+        width: 170px;
+        overflow: hidden;
+        color: var(--text-color);
+        font-size: 14px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .conversationTime {
+        color: var(--text-color-third);
+        font-size: 13px;
+      }
+    }
+  }
+}

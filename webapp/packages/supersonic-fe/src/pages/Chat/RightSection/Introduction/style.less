@@ -1,0 +1,63 @@
+.introduction {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 4px;
+
+  .title {
+    margin-bottom: 22px;
+    color: var(--text-color);
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .desc {
+    max-height: 350px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    overflow-y: auto;
+    color: var(--text-color-third);
+    font-size: 13px;
+    line-height: 22px;
+  }
+
+  .field {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 10px;
+
+    &.columnLayout {
+      flex-direction: column;
+    }
+
+    .avatar {
+      margin-right: 8px;
+    }
+  }
+
+  .fieldName {
+    margin-right: 6px;
+    color: var(--text-color);
+    font-weight: 500;
+  }
+
+  .fieldValue {
+    color: var(--text-color);
+
+    &.switchField {
+      cursor: pointer;
+    }
+
+    &.dimensionFieldValue {
+      max-width: 90px;
+      // white-space: nowrap;
+    }
+
+    &.mainNameFieldValue {
+      max-width: 90px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+}

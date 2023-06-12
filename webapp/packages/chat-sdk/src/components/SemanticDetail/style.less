@@ -1,0 +1,129 @@
+@import '../../styles/variables.less';
+
+@semantic-detail-cls: ~'@{supersonic-chat-prefix}-semantic-detail';
+
+.@{semantic-detail-cls} {
+  &-info-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 20px 0;
+    column-gap: 20px;
+  }
+
+  &-description {
+    font-size: 13px;
+    color: var(--text-color-fourth);
+  }
+
+  &-main-entity-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 13px;
+    column-gap: 20px;
+  }
+
+  &-info-item {
+    display: flex;
+    align-items: center;
+  }
+
+  &-info-name {
+    color: var(--text-color-fourth);
+  }
+
+  &-info-value {
+    color: var(--text-color-secondary);
+  }
+
+  &-title {
+    font-size: 16px;
+    margin-left: 15px;
+    line-height: 30px;
+    &::before {
+      display: block;
+      position: absolute;
+      content: "";
+      left: 0;
+      top: 6px;
+      height: 15px;
+      width: 3px;
+      font-size: 0;
+      background: #0e73ff;
+      border-radius: 2px;
+      border: 1px solid #0e73ff;
+    }
+  }
+
+  &-label {
+    font-size: 14px;
+    color: var(--text-color-fourth);
+  }
+
+  &-section-item {
+    cursor: pointer;
+
+    &:hover {
+      color: var(--chat-blue);
+    }
+  }
+
+  &-reload {
+    display: flex;
+    align-items: center;
+    color: var(--text-color-fourth);
+    font-size: 12px;
+    column-gap: 4px;
+    cursor: pointer;
+    position: relative;
+    top: 3px;
+    &:hover {
+      color: var(--chat-blue);
+    }
+  }
+
+  &-reload-icon {
+    font-size: 10px;
+    position: relative;
+  }
+
+  &-header {
+    font-size: 14px;
+    color: var(--text-color-fourth);
+    margin-bottom: 5px;
+  }
+
+  &-more {
+    cursor: pointer;
+    font-size: 12px;
+    &:hover {
+      color: var(--chat-blue);
+    }
+  }
+  
+  &-recommend-questions-content {
+    height: 300px;
+    overflow: auto;
+  }
+
+  &-question {
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.87);
+    &:hover {
+      color: var(--chat-blue);
+    }
+  }
+
+  &-content-col {
+    min-width: 300px;
+    overflow-y: hidden;
+    height: 32px;
+    overflow-x: scroll;
+  }
+
+  &-content-col-box{
+    width: max-content;
+  }
+}
+

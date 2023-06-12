@@ -1,0 +1,26 @@
+data_source:
+  name: s2_pv_uv_statis
+  sql_query: select imp_date,user_name from s2_pv_uv_statis
+  identifiers:
+    - name: sys_imp_date
+      type: primary
+      expr: imp_date
+    - name: user_name
+      type: primary
+  dimensions:
+    - name: page
+      type: categorical
+    - name: sys_imp_date
+      type: time
+      type_params:
+        is_primary: True
+        time_granularity: day
+  measures:
+    - name: uv
+      agg: count_distinct
+      expr: user_name
+      create_metric: True
+    - name: pv
+      agg: sum
+      expr: 1
+      create_metric: True

@@ -1,0 +1,50 @@
+@import './index.less';
+
+@prefix-cls: ~'@{supersonic-chat-prefix}';
+
+.@{prefix-cls} {
+  &-dimension,
+  &-metric {
+    position: relative;
+
+    &::after {
+      position: absolute;
+      right: 0.5px;
+      bottom: -2px;
+      left: 0.5px;
+      height: 2px;
+      margin: 0 1px;
+      content: '';
+    }
+  }
+
+  &-dimension {
+    &::after {
+      background: var(--chat-blue);
+    }
+  }
+
+  &-metric {
+    &::after {
+      background: #31c462;
+    }
+  }
+
+  &-table-row {
+    cursor: pointer;
+  }
+
+  &-even-row {
+    background-color: #fbfbfb;
+  }
+
+  &-no-border-table {
+    .ant-table-cell {
+      border: none !important;
+    }
+
+    .ant-table-tbody > tr.ant-table-row:hover > td {
+      background-color: #efefef !important;
+    }
+  } 
+}

@@ -1,0 +1,124 @@
+@import '../../../styles/index.less';
+
+@metric-trend-prefix-cls: ~'@{supersonic-chat-prefix}-metric-trend';
+
+.@{metric-trend-prefix-cls} {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  width: 100%;
+  row-gap: 4px;
+
+  &-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  &-date-range {
+    color: var(--text-color-fourth);
+    font-size: 14px;
+  }
+
+  &-indicator-value {
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 30px;
+  }
+
+  &-indicator-name {
+    color: var(--text-color-fourth);
+    font-size: 14px;
+  }
+
+  &-flow-trend-chart {
+    height: 300px;
+  }
+
+  &-charts {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    row-gap: 20px;
+  }
+
+  &-metric-fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 12px;
+  }
+
+  &-metric-field {
+    display: inline-block;
+    box-sizing: border-box;
+    height: auto;
+    margin: 0;
+    margin-right: 8px;
+    padding: 1px 8px;
+    color: var(--text-color-third);
+    font-variant: tabular-nums;
+    line-height: 20px;
+    white-space: nowrap;
+    list-style: none;
+    border-color: transparent;
+    border-radius: 2px;
+    cursor: pointer;
+    opacity: 1;
+    transition: all 0.3s;
+    font-feature-settings: 'tnum', 'tnum';
+
+    &:hover {
+      color: var(--chat-blue);
+    }
+  }
+
+  &-metric-field-active {
+    color: #fff !important;
+    background-color: var(--chat-blue);
+  }
+
+  &-date-options {
+    display: flex;
+    align-items: center;
+    column-gap: 20px;
+    font-size: 14px;
+  }
+
+  &-date-option {
+    position: relative;
+    color: var(--text-color-secondary);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--chat-blue);
+    }
+  }
+
+  &-date-option-active {
+    color: var(--chat-blue);
+  }
+
+  &-date-option-mobile {
+    font-size: 12px;
+  }
+
+  &-active-identifier {
+    position: absolute;
+    bottom: -6px;
+    width: 100%;
+    height: 4px;
+    background-color: var(--chat-blue);
+    border-radius: 4px 4px 0 0;
+  }
+
+  &-date-option-divider {
+    width: 1px;
+    height: 16px;
+    background-color: var(--text-color-fifth);
+  }
+}
+

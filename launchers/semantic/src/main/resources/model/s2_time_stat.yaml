@@ -1,0 +1,22 @@
+data_source:
+  name: s2_stay_time_statis
+  sql_query: select imp_date,page,stay_hours from s2_stay_time_statis
+  identifiers:
+    - name: sys_imp_date
+      type: primary
+      expr: imp_date
+    - name: user_name
+      type: primary
+  dimensions:
+    - name: page
+      type: categorical
+    - name: imp_date
+      type: time
+      type_params:
+        is_primary: True
+        time_granularity: day
+  measures:
+    - name: stay_hours
+      agg: sum
+      expr: stay_hours
+      create_metric: True

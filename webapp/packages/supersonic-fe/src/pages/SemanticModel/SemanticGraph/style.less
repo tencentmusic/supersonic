@@ -1,0 +1,759 @@
+@borderColor: #eee;
+@activeColor: #a0c5e8;
+@hoverColor: #dee4e9;
+
+.pageContainer {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  // margin: -24px;
+  background: #fff;
+
+  &.externalPageContainer {
+    margin: 0 !important;
+  }
+}
+
+.searchBar {
+  :global {
+    .ant-form-item-label {
+      width: 70px;
+    }
+  }
+}
+
+.main {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  :global {
+    .ant-tabs {
+      height: 100% !important;
+      .ant-tabs-content {
+        height: 100% !important;
+        .ant-tabs-tabpane {
+          height: 100%;
+        }
+      }
+    }
+  }
+}
+
+.rightSide {
+  position: relative;
+  z-index: 1;
+  min-width: 250px;
+  height: 100%;
+  margin-left: 4px;
+  padding: 10px;
+  overflow: hidden;
+  :global {
+    .ant-form-item {
+      margin-bottom: 6px;
+
+      .ant-form-item-label {
+        width: 70px;
+      }
+
+      .ant-form-item-control {
+        min-width: 100px;
+      }
+    }
+  }
+}
+
+.rightListSide {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  height: 100%;
+  // padding: 10px 10px 0;
+  background-color: #fff;
+  // 去掉标签间距
+  :global {
+    .ant-tabs-card.ant-tabs-top > .ant-tabs-nav .ant-tabs-tab + .ant-tabs-tab,
+    .ant-tabs-card.ant-tabs-bottom > .ant-tabs-nav .ant-tabs-tab + .ant-tabs-tab,
+    .ant-tabs-card.ant-tabs-top > div > .ant-tabs-nav .ant-tabs-tab + .ant-tabs-tab,
+    .ant-tabs-card.ant-tabs-bottom > div > .ant-tabs-nav .ant-tabs-tab + .ant-tabs-tab {
+      margin-left: 0;
+    }
+    .ant-tabs > .ant-tabs-nav .ant-tabs-nav-add,
+    .ant-tabs > div > .ant-tabs-nav .ant-tabs-nav-add {
+      margin-left: 0;
+    }
+  }
+}
+
+.leftListSide {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  height: 100%;
+  // padding: 10px 10px 0;
+  background-color: #fff;
+}
+
+.tableTotal {
+  margin: 0 2px;
+  color: #296df3;
+  font-weight: bold;
+}
+
+.tableDetaildrawer {
+  :global {
+    .ant-drawer-header {
+      padding: 10px 45px 10px 10px;
+    }
+
+    .ant-drawer-close {
+      padding: 10px;
+    }
+
+    .ant-drawer-body {
+      padding: 0 10px 10px;
+    }
+
+    .ant-tabs-top > .ant-tabs-nav {
+      margin-bottom: 8px;
+    }
+  }
+}
+
+.tableDetailTable {
+  :global {
+    .ant-table-cell,
+    .resultTableRow > td {
+      padding: 8px;
+      font-size: 12px;
+    }
+  }
+}
+
+.sqlEditor {
+  min-width: 0;
+  height: 100%;
+  border: solid 1px @borderColor;
+
+  :global {
+    .ace_editor {
+      font-family: 'Menlo', 'Monaco', 'Ubuntu Mono', 'Consolas', 'source-code-pro' !important;
+    }
+  }
+}
+
+.sqlOprBar {
+  margin-top: -10px;
+  padding: 5px;
+  display: flex;
+  .sqlOprBarLeftBox {
+    flex: 1 1 200px;
+  }
+  .sqlOprBarRightBox {
+    flex: 0 1 210px;
+  }
+  :global {
+    .ant-btn-round.ant-btn-sm {
+      font-size: 12px;
+    }
+    .ant-btn-primary {
+      color: #fff;
+      background: #02a7f0;
+      border-color: #02a7f0;
+    }
+    .ant-segmented-item-selected {
+      color: #fff;
+      background: #02a7f0;
+      border-color: #02a7f0;
+    }
+  }
+}
+
+.sqlOprIcon {
+  margin-right: 30px;
+  color: #02a7f0;
+  font-size: 22px;
+
+  &:hover {
+    cursor: pointer;
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.sqlOprBtn {
+  margin-right: 30px;
+  vertical-align: super !important;
+
+  &:hover {
+    cursor: pointer;
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.sqlOprSwitch {
+  // vertical-align: super !important;
+  float: right;
+  margin-right: 10px !important;
+}
+
+:global {
+  .is-sql-full-select {
+    background-color: #02a7f0;
+  }
+  .cjjWdp:hover {
+    z-index: 10;
+  }
+}
+
+.sqlMain {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+
+  .sqlEditorWrapper {
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .sqlParams {
+    width: 20%;
+    height: 100% !important;
+    overflow: auto;
+  }
+  .hideSqlParams {
+    width: 0;
+    height: 100% !important;
+    overflow: auto;
+  }
+}
+
+.sqlParamsBody {
+  .header {
+    display: flex;
+    padding: 10px;
+    font-weight: bold;
+
+    .title {
+      flex: 1;
+    }
+
+    .icon {
+      display: flex;
+      align-items: center;
+      margin-right: 10px !important;
+      cursor: pointer;
+    }
+  }
+
+  .paramsList {
+    .paramsItem {
+      display: flex;
+      padding: 10px;
+      :global {
+        .ant-list-item-action {
+          margin-left: 5px;
+        }
+      }
+
+      .name {
+        flex: 1;
+        width: 80%;
+        overflow: hidden;
+        font-size: 12px;
+        text-overflow: ellipsis;
+        &:hover {
+          cursor: pointer;
+        }
+      }
+
+      .icon {
+        // display: none;
+        margin-left: 10px;
+      }
+    }
+  }
+
+  // .paramsItem:hover {
+  //   .icon {
+  //     display: inline-block;
+  //     margin-left: 8px;
+  //     cursor: pointer;
+  //   }
+  // }
+}
+
+.disableIcon {
+  vertical-align: super !important;
+  // color: rgba(0, 10, 36, 0.25);
+  background: #7d7f80 !important;
+  border-color: #7d7f80 !important;
+  :global {
+    .anticon .anticon-play-circle {
+      color: #fff;
+    }
+  }
+
+  &:hover {
+    cursor: not-allowed;
+    opacity: 1;
+  }
+}
+
+.sqlTaskListWrap {
+  position: relative;
+  width: 262px;
+  border-top: 0 !important;
+  border-radius: 0;
+
+  :global {
+    .ant-card-head {
+      min-height: 20px;
+    }
+
+    .ant-card-head-title {
+      padding: 8px 0;
+    }
+  }
+}
+
+.sqlTaskList {
+  position: absolute !important;
+  top: 42px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: auto;
+}
+
+.sqlBottmWrap {
+  // position: absolute;
+  // top: 484px;
+  // right: 0;
+  // bottom: 0;
+  // left: 0;
+  display: flex;
+  height: 100%;
+  // padding: 0 10px;
+
+  &:global(.small) {
+    top: 334px;
+  }
+
+  &:global(.middle) {
+    top: 384px;
+  }
+}
+
+.sqlResultWrap {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: auto;
+  border: solid 1px @borderColor;
+  border-top: 0;
+  border-left: 0;
+}
+
+.sqlToolBar {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  height: 41px;
+  padding: 5px 0;
+  text-align: right;
+}
+
+.sqlResultPane {
+  flex: 1;
+  border-top: solid 1px @borderColor;
+}
+
+.sqlToolBtn {
+  margin-right: 15px;
+}
+.runScriptBtn {
+  margin-right: 15px;
+  background-color: #e87954;
+  border-color: #e87954;
+  &:hover{
+    border-color: #f89878;
+    background: #f89878;
+  }
+  &:focus {
+    border-color: #f89878;
+    background: #f89878;
+  }
+}
+
+.taskFailed {
+  padding: 20px 20px 0 20px;
+}
+
+.sqlResultContent {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  color: rgba(0, 0, 0, 0.25);
+  font-size: 16px;
+  text-align: center;
+}
+
+.sqlResultLog {
+  padding: 20px;
+  word-wrap: break-word;
+}
+
+.tableList {
+  position: absolute !important;
+  top: 160px;
+  right: 0;
+  bottom: 26px;
+  left: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-bottom: solid 1px @borderColor;
+}
+
+.tablePage {
+  position: absolute !important;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  min-width: 250px;
+  overflow: hidden;
+}
+
+.tableListItem {
+  width: 88%;
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.tableItem {
+  &:global(.ant-list-item) {
+    padding: 6px 0 6px 6px;
+  }
+
+  :global(.ant-list-item-action) {
+    margin-left: 12px !important;
+  }
+
+  &:hover {
+    background: @hoverColor;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  &:global(.active) {
+    background: @activeColor;
+  }
+}
+
+
+.taskIcon {
+  margin-right: 10px;
+  color: #1890ff;
+  font-size: 14px;
+}
+
+.taskSuccessIcon {
+  .taskIcon();
+
+  color: #67c23a;
+}
+
+.taskFailIcon {
+  .taskIcon();
+
+  color: #f56c6c;
+}
+
+.resultFailIcon {
+  margin-right: 8px;
+  color: #f56c6c;
+}
+
+.taskItem {
+  padding: 10px 8px !important;
+  font-size: 12px;
+  cursor: pointer;
+
+  &:global(.ant-list-item) {
+    justify-content: flex-start;
+  }
+
+  &:hover {
+    background: @hoverColor;
+  }
+}
+
+.activeTask {
+  background: @activeColor;
+}
+
+.resultTable {
+  width: 100%;
+
+  :global {
+    .ant-table-body {
+      width: 100%;
+      // max-height: none !important;
+      overflow: auto !important;
+    }
+
+    .ant-table-cell,
+    .resultTableRow > td {
+      padding: 8px;
+      font-size: 12px;
+    }
+  }
+}
+
+.taskLogWrap {
+  word-wrap: break-word;
+}
+
+.siteTagPlus {
+  background: #fff;
+  border-style: dashed;
+}
+
+.editTag {
+  margin-bottom: 5px;
+  user-select: none;
+}
+
+.tagInput {
+  width: 78px;
+  margin-right: 8px;
+  vertical-align: top;
+}
+.outside {
+  position: relative;
+  height: 100%;
+}
+.collapseRightBtn {
+  position: absolute;
+  top: calc(50% + 50px);
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  height: 70px;
+  color: #fff;
+  font-size: 12px;
+  background-color: rgba(40, 46, 54, 0.2);
+  border-radius: 24px 0 0 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.collapseLeftBtn {
+  position: absolute;
+  top: calc(50% + 45px);
+  left: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  height: 70px;
+  color: #fff;
+  font-size: 12px;
+  background-color: rgba(40, 46, 54, 0.2);
+  border-radius: 0 24px 24px 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.detail {
+  .titleCollapse {
+    float: right;
+    padding-right: 18px;
+    color: #1890ff;
+    line-height: 35px;
+    text-align: right;
+    cursor: pointer;
+  }
+
+  .tableTitle {
+    display: inline-block;
+    width: 85%;
+    margin-left: 15px;
+    overflow: hidden;
+    line-height: 35px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+
+  :global {
+    .ant-divider-horizontal {
+      margin: 0;
+    }
+  }
+}
+
+.search {
+  margin-left: 10px;
+}
+
+.middleArea {
+  :global {
+    .ant-tabs-nav .ant-tabs-tab {
+      border: none;
+      // background: #d9d9d96e;
+      border-right: 1px solid #f0f0f0;
+      border-radius: 0 !important;
+    }
+    .ant-tabs-nav-add {
+      border-radius: 0 !important;
+    }
+
+    .ant-tabs-tab {
+      .ant-tabs-tab-remove {
+        .closeTab {
+          opacity: 0;
+        }
+        .dot {
+          opacity: 1;
+        }
+      }
+    }
+    .ant-tabs-tab:hover {
+      .ant-tabs-tab-remove {
+        .closeTab {
+          opacity: 1 !important;
+        }
+        .dot {
+          opacity: 0;
+        }
+      }
+    }
+  }
+}
+
+.menu {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  padding: 5px;
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  :global {
+    .ant-form {
+      margin: -2px;
+    }
+  }
+}
+
+.menuList {
+  position: absolute !important;
+  top: 95px;
+  right: 0;
+  bottom: 26px;
+  left: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-bottom: solid 1px @borderColor;
+  .menuItem {
+    &:global(.ant-list-item) {
+      padding: 6px 0 6px 14px;
+    }
+
+    :global(.ant-list-item-action) {
+      margin-left: 12px !important;
+    }
+
+    &:hover {
+      background: @hoverColor;
+      border-bottom: 1px solid #f0f0f0;
+      .icon {
+        display: block;
+      }
+    }
+
+    &:global(.active) {
+      background: @activeColor;
+    }
+    .menuListItem {
+      width: 90%;
+      overflow: hidden;
+      font-size: 12px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      &:hover {
+        cursor: pointer;
+      }
+    }
+    .icon {
+      display: none;
+      margin-right: 15px !important;
+      cursor: pointer;
+    }
+    .menuIcon {
+      display: flex;
+    }
+  }
+}
+
+.scriptFile {
+  width: 100%;
+  margin: 10px;
+  overflow: hidden;
+  font-size: 14px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  .icon {
+    margin-right: 10px;
+  }
+}
+
+.sqlScriptName {
+  width: 93% !important;
+  margin: 14px 0 0 14px !important;
+}
+
+.fileIcon {
+  width: 20px !important;
+  height: 20px !important;
+  padding-top: 2px !important;
+  padding-right: 5px !important;
+  vertical-align: middle;
+}
+
+.itemName {
+  vertical-align: middle;
+}
+
+.paneName {
+  width: 100px;
+  overflow: hidden;
+  font-size: 12px !important;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.titleIcon {
+  width: 16px !important;
+  height: 16px !important;
+  margin: 0 3px 4px;
+}

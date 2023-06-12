@@ -1,0 +1,36 @@
+@import '../../../styles/index.less';
+
+@metric-card-prefix-cls: ~'@{supersonic-chat-prefix}-metric-card';
+
+.@{metric-card-prefix-cls} {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 150px;
+  row-gap: 4px;
+
+  &-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  &-date-range {
+    color: var(--text-color-fourth);
+    font-size: 14px;
+  }
+
+  &-indicator-value {
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 30px;
+  }
+
+  &-indicator-name {
+    color: var(--text-color-fourth);
+    font-size: 14px;
+  }
+}

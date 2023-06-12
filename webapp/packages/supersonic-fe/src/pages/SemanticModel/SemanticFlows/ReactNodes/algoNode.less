@@ -1,0 +1,101 @@
+@light-border: 1px solid #d9d9d9;
+@primaryColor: #c2c8d5;
+
+.xflow-algo-node {
+  z-index: 10;
+  display: flex;
+  width: 180px;
+  height: 36px;
+  line-height: 36px;
+  text-align: center;
+  background-color: #fff;
+  border: 1px solid @primaryColor;
+  border-radius: 2px;
+  box-shadow: ~'-1px -1px 4px 0 rgba(223,223,223,0.50), -2px 2px 4px 0 rgba(244,244,244,0.50), 2px 3px 8px 2px rgba(151,151,151,0.05)';
+  transition: all ease-in-out 0.15s;
+  &:hover {
+    background-color: #fff;
+    border: 1px solid #3057e3;
+    // border: 1px solid @primaryColor;
+    box-shadow: 0 0 3px 3px rgba(48, 86, 227, 0.15);
+    cursor: move;
+  }
+  .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+  }
+  .label {
+    width: 108px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: break-word;
+  }
+  .status {
+    width: 36px;
+  }
+  &.panel-node {
+    border: 0;
+  }
+}
+
+.x6-node-selected {
+  .xflow-algo-node {
+    background-color: rgba(48, 86, 227, 0.05);
+    border: 1px solid #3057e3;
+    box-shadow: 0 0 3px 3px rgba(48, 86, 227, 0.15);
+    &:hover {
+      background-color: #fff;
+      box-shadow: 0 0 5px 5px rgba(48, 86, 227, 0.15);
+    }
+  }
+}
+
+.dag-solution-layout {
+  .xflow-canvas-root {
+    .xflow-algo-node {
+      height: 72px !important;
+      line-height: 72px !important;
+    }
+  }
+}
+
+.dataSourceTooltipWrapper {
+  max-width: 500px;
+  .ant-tooltip-inner {
+    padding:0;
+  }
+  .dataSourceTooltip {
+    width: 300px;
+    background: #fff;
+    border-radius: 5px;
+    color: #4d4d4d;
+    padding: 15px;
+    opacity: .9;
+    font-size: 11px;
+    box-shadow: 0 0 5px #d8d8d8;
+    p {
+      margin-bottom: 0;
+      font-size: 13px;
+      padding: 4px;
+      line-height: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+      .dataSourceTooltipLabel {
+        display: block;
+        width: 64px;
+        color: grey;
+      }
+      .dataSourceTooltipValue{
+        flex: 1 1;
+        display: block;
+        width: 220px;
+        padding: 0 4px;
+        word-break: break-all;
+      }
+    }
+  }
+}

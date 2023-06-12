@@ -1,0 +1,17 @@
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+
+spring:
+  h2:
+    console:
+      path: /h2-console/semantic
+      # enabled web
+      enabled: true
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false
+    username: root
+    password: semantic
+    schema: classpath:db/chat-schema-h2.sql
+    data: classpath:db/chat-data-h2.sql
+

@@ -1,0 +1,6 @@
+tom _1_2 5
+alice _1_2 6
+lucy _1_2 4
+dean _1_2 2
+john _1_2 8
+jack _1_2 8

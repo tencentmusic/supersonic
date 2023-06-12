@@ -1,0 +1,103 @@
+@body-bg: #fafafa;
+@primaryColor: #3056e3;
+@light-border: 1px solid #d9d9d9;
+
+
+.dag-solution {
+  .__dumi-default-previewer-actions {
+    border: 0;
+  }
+}
+
+.dag-solution-layout {
+  position: relative;
+  height: 610px;
+  border: @light-border;
+  .xflow-x6-canvas {
+    background: @body-bg;
+  }
+  .x6-edge {
+    &:hover {
+      path:nth-child(2) {
+        stroke: @primaryColor;
+        stroke-width: 2px;
+      }
+    }
+    &.x6-edge-selected {
+      path:nth-child(2) {
+        stroke: @primaryColor;
+        stroke-width: 2px;
+      }
+    }
+  }
+
+  .xflow-canvas-dnd-node-tree {
+    border-right: @light-border;
+  }
+  
+
+  .xflow-workspace-toolbar-top {
+    background-image: ~'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)';
+    border-bottom: @light-border;
+  }
+
+  .xflow-workspace-toolbar-bottom {
+    text-align: center;
+    background: #fff;
+    border-top: @light-border;
+  }
+
+  .xflow-modal-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+  }
+
+  .xflow-collapse-panel {
+    .xflow-collapse-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      background: #f7f8fa;
+      .ant-input-affix-wrapper {
+        padding: 2px 11px;
+      }
+    }
+    .xflow-collapse-panel-body {
+      background: #f7f8fa;
+      .xflow-collapse-header {
+        padding: 12px 8px;
+      }
+    }
+    .xflow-node-dnd-panel-footer {
+      display: none;
+    }
+  }
+
+  .xflow-json-form .tabs .ant-tabs-nav {
+    box-shadow: unset;
+  }
+  // .xflow-json-schema-form {
+  //   .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  //     color: #525252;
+  //     font-weight: 300 !important;
+  //   }
+  //   .xflow-json-schema-form-footer {
+  //     display: none;
+  //   }
+  //   .xflow-json-form .tabs.xTab .ant-tabs-nav .ant-tabs-nav-list,
+  //   .xflow-json-form .tabs.xTab .ant-tabs-nav .ant-tabs-nav-list .ant-tabs-tab {
+  //     background: #f7f8fa;
+  //   }
+  //   .xflow-json-schema-form-body {
+  //     position: relative;
+  //     width: 100%;
+  //     height: 100%;
+  //     background: #f7f8fa;
+  //     box-shadow: 0 1px 1px 0 rgb(206 201 201 / 50%);
+  //   }
+  // }
+}

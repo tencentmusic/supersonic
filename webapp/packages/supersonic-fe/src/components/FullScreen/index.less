@@ -1,0 +1,39 @@
+.normalState {
+  position: static;
+  height: 100%;
+
+  .backNormal {
+    display: none;
+  }
+}
+
+.maxState {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 999;
+
+  .innerWrap {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: #fff;
+  }
+
+  .backNormal {
+    display: block;
+    height: 30px;
+    padding-right: 20px;
+    color: #02a7f0;
+    font-size: 22px;
+    line-height: 30px;
+    text-align: right;
+
+    .fullscreenExitIcon {
+      cursor: pointer;
+    }
+  }
+}
