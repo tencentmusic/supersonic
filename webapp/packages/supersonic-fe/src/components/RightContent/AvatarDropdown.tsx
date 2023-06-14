@@ -40,7 +40,7 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = () => {
   };
 
   const { currentUser = {} } = initialState as any;
-  console.log(currentUser, 'currentUser');
+
   const menuHeaderDropdown = (
     <Menu className={styles.menu} selectedKeys={[]} onClick={onMenuClick}>
       <Menu.Item key="logout">

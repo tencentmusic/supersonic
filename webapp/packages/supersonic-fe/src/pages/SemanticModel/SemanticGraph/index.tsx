@@ -3,9 +3,10 @@ import { connect } from 'umi';
 import type { StateType } from '../model';
 import type { Dispatch } from 'umi';
 import { typeConfigs } from './utils';
-import { message } from 'antd';
+import { message, Row, Col, Radio } from 'antd';
 import { getDatasourceList, getDomainSchemaRela } from '../service';
 import initToolBar from './components/ToolBar';
+import initTooltips from './components/ToolTips';
 import G6 from '@antv/g6';
 
 type Props = {
@@ -17,11 +18,13 @@ type Props = {
 const DomainManger: React.FC<Props> = ({ domainManger, domainId }) => {
   const ref = useRef(null);
   const [graphData, setGraphData] = useState<any>({});
+  const [dataSourceListData, setDataSourceListData] = useState<any[]>([]);
+  const [graphShowType, setGraphShowType] = useState<string>('dimension');
   const legendDataRef = useRef<any[]>([]);
   const graphRef = useRef<any>(null);
   const legendDataFilterFunctions = useRef<any>({});
 
-  const { dimensionList } = domainManger;
+  // const { dimensionList } = domainManger;
 
   const toggleNodeVisibility = (graph, node, visible) => {
     if (visible) {
@@ -42,37 +45,80 @@ const DomainManger: React.FC<Props> = ({ domainManger, domainId }) => {
     }
   };
 
-  const formatterRelationData = (dataSourceList: any[]) => {
-    const relationData = dataSourceList.reduce((relationList: any[], item: any) => {
-      const { id, name } = item;
-      const dataSourceId = `dataSource-${id}`;
-      const dimensionChildrenList = dimensionList.reduce(
-        (dimensionChildren: any[], dimension: any) => {
-          const { id: dimensionId, name: dimensionName, datasourceId } = dimension;
-          if (datasourceId === id) {
-            dimensionChildren.push({
-              nodeType: 'dimension',
-              legendType: dataSourceId,
-              id: `dimension-${dimensionId}`,
-              name: dimensionName,
-              style: {
-                lineWidth: 2,
-                fill: '#f0f7ff',
-                stroke: '#a6ccff',
-              },
-            });
-          }
-          return dimensionChildren;
+  const getDimensionChildren = (dimensions: any[], dataSourceId: string) => {
+    const dimensionChildrenList = dimensions.reduce((dimensionChildren: any[], dimension: any) => {
+      const {
+        id: dimensionId,
+        name: dimensionName,
+        bizName,
+        description,
+        createdBy,
+        updatedAt,
+      } = dimension;
+      // if (datasourceId === id) {
+      dimensionChildren.push({
+        nodeType: 'dimension',
+        legendType: dataSourceId,
+        id: `dimension-${dimensionId}`,
+        name: dimensionName,
+        bizName,
+        description,
+        createdBy,
+        updatedAt,
+        style: {
+          lineWidth: 2,
+          fill: '#f0f7ff',
+          stroke: '#a6ccff',
         },
-        [],
-      );
+      });
+      // }
+      return dimensionChildren;
+    }, []);
+    return dimensionChildrenList;
+  };
+
+  const getMetricChildren = (metrics: any[], dataSourceId: string) => {
+    const metricsChildrenList = metrics.reduce((metricsChildren: any[], dimension: any) => {
+      const { id, name, bizName, description, createdBy, updatedAt } = dimension;
+      metricsChildren.push({
+        nodeType: 'metric',
+        legendType: dataSourceId,
+        id: `dimension-${id}`,
+        name,
+        bizName,
+        description,
+        createdBy,
+        updatedAt,
+        style: {
+          lineWidth: 2,
+          fill: '#f0f7ff',
+          stroke: '#a6ccff',
+        },
+      });
+      return metricsChildren;
+    }, []);
+    return metricsChildrenList;
+  };
+
+  const formatterRelationData = (dataSourceList: any[], type = graphShowType) => {
+    const relationData = dataSourceList.reduce((relationList: any[], item: any) => {
+      const { datasource, dimensions, metrics } = item;
+      const { id, name } = datasource;
+      const dataSourceId = `dataSource-${id}`;
+      let childrenList = [];
+      if (type === 'metirc') {
+        childrenList = getMetricChildren(metrics, dataSourceId);
+      }
+      if (type === 'dimension') {
+        childrenList = getDimensionChildren(dimensions, dataSourceId);
+      }
       relationList.push({
         name,
         legendType: dataSourceId,
         id: dataSourceId,
         nodeType: 'datasource',
         size: 40,
-        children: [...dimensionChildrenList],
+        children: [...childrenList],
         style: {
           lineWidth: 2,
           fill: '#BDEFDB',
@@ -84,26 +130,33 @@ const DomainManger: React.FC<Props> = ({ domainManger, domainId }) => {
     return relationData;
   };
 
+  const changeGraphData = (data: any, type?: string) => {
+    const relationData = formatterRelationData(data, type);
+    const legendList = relationData.map((item: any) => {
+      const { id, name } = item;
+      return {
+        id,
+        label: name,
+        order: 4,
+        ...typeConfigs.datasource,
+      };
+    });
+    legendDataRef.current = legendList;
+    const graphRootData = {
+      id: 'root',
+      name: domainManger.selectDomainName,
+      children: relationData,
+    };
+    setGraphData(graphRootData);
+  };
+
   const queryDataSourceList = async (params: any) => {
-    getDomainSchemaRela(params.domainId);
-    const { code, data, msg } = await getDatasourceList({ ...params });
+    const { code, data, msg } = await getDomainSchemaRela(params.domainId);
     if (code === 200) {
-      const relationData = formatterRelationData(data);
-      const legendList = relationData.map((item: any) => {
-        const { id, name } = item;
-        return {
-          id,
-          label: name,
-          order: 4,
-          ...typeConfigs.datasource,
-        };
-      });
-      legendDataRef.current = legendList;
-      setGraphData({
-        id: 'root',
-        name: domainManger.selectDomainName,
-        children: relationData,
-      });
+      if (data) {
+        changeGraphData(data);
+        setDataSourceListData(data);
+      }
     } else {
       message.error(msg);
     }
@@ -111,7 +164,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, domainId }) => {
 
   useEffect(() => {
     queryDataSourceList({ domainId });
-  }, []);
+  }, [domainId]);
 
   const getLegendDataFilterFunctions = () => {
     legendDataRef.current.map((item: any) => {
@@ -143,201 +196,214 @@ const DomainManger: React.FC<Props> = ({ domainManger, domainId }) => {
   };
   // const [visible, setVisible] = useState(false);
   useEffect(() => {
+    console.log(domainId, graphData, 'domainId');
     if (!(Array.isArray(graphData.children) && graphData.children.length > 0)) {
       return;
     }
+
     const container = document.getElementById('semanticGraph');
     const width = container!.scrollWidth;
     const height = container!.scrollHeight || 500;
 
-    if (!graphRef.current) {
-      getLegendDataFilterFunctions();
+    // if (!graphRef.current) {
+    getLegendDataFilterFunctions();
 
-      const toolbar = initToolBar();
-      // const toolbar = new G6.ToolBar({
-      //   getContent: (graph) => {
-      //     const searchIcon = document.createElement('i');
-      //     searchIcon.className = 'g6-toolbar-search-icon';
-      //     searchIcon.style.cssText = `
-      //       display: inline-block;
-      //       width: 16px;
-      //       height: 16px;
-      //       background-image: url(https://gw.alipayobjects.com/zos/rmsportal/wzQIcOMRTkQwFgaaDIFs.svg);
-      //       background-size: 16px 16px;
-      //       margin-right: 8px;
-      //       cursor: pointer;
-      //     `;
-
-      //     searchIcon.addEventListener('click', () => {
-      //       setVisible((prevVisible) => !prevVisible);
-      //     });
-
-      //     const ul = document.createElement('ul');
-      //     ul.className = 'g6-component-toolbar';
-      //     ul.appendChild(searchIcon);
-
-      //     return ul;
-      //   },
-      // });
-
-      const tooltip = new G6.Tooltip({
-        offsetX: 10,
-        offsetY: 10,
-        fixToNode: [1, 0.5],
-        // the types of items that allow the tooltip show up
-        // 允许出现 tooltip 的 item 类型
-        // itemTypes: ['node', 'edge'],
-        itemTypes: ['node'],
-        // custom the tooltip's content
-        // 自定义 tooltip 内容
-        getContent: (e) => {
-          const outDiv = document.createElement('div');
-          outDiv.style.width = 'fit-content';
-          outDiv.style.height = 'fit-content';
-          const model = e.item.getModel();
-          if (e.item.getType() === 'node') {
-            outDiv.innerHTML = `${model.name}`;
-          }
-          //  else {
-          // const source = e.item.getSource();
-          // const target = e.item.getTarget();
-          // outDiv.innerHTML = `来源：${source.getModel().name}<br/>去向：${
-          //   target.getModel().name
-          // }`;
-          // }
-          return outDiv;
+    const toolbar = initToolBar();
+    const tooltip = initTooltips();
+    const legend = new G6.Legend({
+      // container: 'legendContainer',
+      data: {
+        nodes: legendDataRef.current,
+      },
+      align: 'center',
+      layout: 'horizontal', // vertical
+      position: 'bottom-right',
+      vertiSep: 12,
+      horiSep: 24,
+      offsetY: -24,
+      padding: [4, 16, 8, 16],
+      containerStyle: {
+        fill: '#ccc',
+        lineWidth: 1,
+      },
+      title: '可见数据源',
+      titleConfig: {
+        position: 'center',
+        offsetX: 0,
+        offsetY: 12,
+        style: {
+          fontSize: 12,
+          fontWeight: 500,
+          fill: '#000',
         },
-      });
-      const legend = new G6.Legend({
-        // container: 'legendContainer',
-        data: {
-          nodes: legendDataRef.current,
+      },
+      filter: {
+        enable: true,
+        multiple: true,
+        trigger: 'click',
+        graphActiveState: 'activeByLegend',
+        graphInactiveState: 'inactiveByLegend',
+        filterFunctions: {
+          ...legendDataFilterFunctions.current,
         },
-        align: 'center',
-        layout: 'horizontal', // vertical
-        position: 'bottom-right',
-        vertiSep: 12,
-        horiSep: 24,
-        offsetY: -24,
-        padding: [4, 16, 8, 16],
-        containerStyle: {
-          fill: '#ccc',
-          lineWidth: 1,
-        },
-        title: '可见数据源',
-        titleConfig: {
-          position: 'center',
-          offsetX: 0,
-          offsetY: 12,
+      },
+    });
+    // 我使用TreeGraph进行layout布局，采用{type: 'compactBox',direction: 'LR'}模式，如何使子节点与根节点的连线只连接到上下连接桩上
+
+    graphRef.current = new G6.TreeGraph({
+      container: 'semanticGraph',
+      width,
+      height,
+      linkCenter: true,
+      modes: {
+        default: [
+          {
+            type: 'collapse-expand',
+            onChange: function onChange(item, collapsed) {
+              const data = item.get('model');
+              data.collapsed = collapsed;
+              return true;
+            },
+          },
+          'drag-node',
+          'drag-canvas',
+          // 'activate-relations',
+          'zoom-canvas',
+          {
+            type: 'activate-relations',
+            trigger: 'mouseenter', // 触发方式，可以是 'mouseenter' 或 'click'
+            resetSelected: true, // 点击空白处时，是否取消高亮
+          },
+        ],
+      },
+      defaultNode: {
+        size: 26,
+        labelCfg: {
+          position: 'right',
+          offset: 5,
           style: {
-            fontSize: 12,
-            fontWeight: 500,
-            fill: '#000',
+            stroke: '#fff',
+            lineWidth: 4,
           },
         },
-        filter: {
-          enable: true,
-          multiple: true,
-          trigger: 'click',
-          graphActiveState: 'activeByLegend',
-          graphInactiveState: 'inactiveByLegend',
-          filterFunctions: {
-            ...legendDataFilterFunctions.current,
-          },
+      },
+      defaultEdge: {
+        type: 'cubic-horizontal',
+        // type: 'flow-line',
+        // type: 'polyline',
+        // type: 'line',
+        /* configure the bending radius and min distance to the end nodes */
+        style: {
+          radius: 10,
+          offset: 30,
+          endArrow: true,
+          /* and other styles */
+          // stroke: '#F6BD16',
         },
-      });
-
-      graphRef.current = new G6.TreeGraph({
-        container: 'semanticGraph',
-        width,
-        height,
-        linkCenter: true,
-        modes: {
-          default: [
-            {
-              type: 'collapse-expand',
-              onChange: function onChange(item, collapsed) {
-                const data = item.get('model');
-                data.collapsed = collapsed;
-                return true;
-              },
-            },
-            'drag-node',
-            'drag-canvas',
-            // 'activate-relations',
-            'zoom-canvas',
-            {
-              type: 'activate-relations',
-              trigger: 'mouseenter', // 触发方式，可以是 'mouseenter' 或 'click'
-              resetSelected: true, // 点击空白处时，是否取消高亮
-            },
-          ],
+        // style: {
+        //   stroke: '#A3B1BF',
+        // },
+      },
+      layout: {
+        type: 'mindmap',
+        direction: 'H',
+        getId: function getId(d) {
+          return d.id;
         },
-        defaultNode: {
-          size: 26,
-          labelCfg: {
-            position: 'bottom',
-            style: {
-              stroke: '#fff',
-              lineWidth: 4,
-            },
-          },
+        getHeight: function getHeight() {
+          return 16;
         },
-
-        layout: {
-          type: 'dendrogram',
-          direction: 'LR',
-          nodeSep: 200,
-          rankSep: 300,
-          radial: true,
+        getWidth: function getWidth() {
+          return 16;
         },
-        plugins: [legend, tooltip, toolbar],
-      });
+        getVGap: function getVGap() {
+          return 30;
+        },
+        getHGap: function getHGap() {
+          return 100;
+        },
+        // type: 'dendrogram',
+        // direction: 'LR',
+        // nodeSep: 200,
+        // rankSep: 300,
+        // radial: true,
+      },
+      plugins: [legend, tooltip, toolbar],
+    });
 
-      const legendCanvas = legend._cfgs.legendCanvas;
+    const legendCanvas = legend._cfgs.legendCanvas;
 
-      // legend模式事件方法bindEvents会有点击图例空白清空选中的逻辑，在注册click事件前，先将click事件队列清空；
-      legend._cfgs.legendCanvas._events.click = [];
-      legendCanvas.on('click', (e) => {
-        const shape = e.target;
-        const shapeGroup = shape.get('parent');
-        const shapeGroupId = shapeGroup?.cfg?.id;
-        if (shapeGroupId) {
-          const isActive = shapeGroup.get('active');
-          const targetNode = graph.findById(shapeGroupId);
-          // const model = targetNode.getModel();
-          toggleNodeVisibility(graph, targetNode, isActive);
-          toggleChildrenVisibility(graph, targetNode, isActive);
-        }
-      });
+    // legend模式事件方法bindEvents会有点击图例空白清空选中的逻辑，在注册click事件前，先将click事件队列清空；
+    legend._cfgs.legendCanvas._events.click = [];
+    legendCanvas.on('click', (e) => {
+      const shape = e.target;
+      const shapeGroup = shape.get('parent');
+      const shapeGroupId = shapeGroup?.cfg?.id;
+      if (shapeGroupId) {
+        const isActive = shapeGroup.get('active');
+        const targetNode = graph.findById(shapeGroupId);
+        // const model = targetNode.getModel();
+        toggleNodeVisibility(graph, targetNode, isActive);
+        toggleChildrenVisibility(graph, targetNode, isActive);
+      }
+    });
 
-      const graph = graphRef.current;
+    const graph = graphRef.current;
 
-      graph.node(function (node) {
-        return {
-          label: node.name,
-          labelCfg: { style: { fill: '#3c3c3c' } },
-        };
-      });
+    graph.node(function (node) {
+      return {
+        label: node.name,
+        labelCfg: { style: { fill: '#3c3c3c' } },
+      };
+    });
+    console.log(graphData, 'graphData');
+    // graph.data(graphData);
+    graph.changeData(graphData);
+    graph.render();
+    graph.fitView();
 
-      graph.data(graphData);
-      graph.render();
-      graph.fitView();
+    setAllActiveLegend(legend);
 
-      setAllActiveLegend(legend);
+    const rootNode = graph.findById('root');
+    graph.hideItem(rootNode);
+    if (typeof window !== 'undefined')
+      window.onresize = () => {
+        if (!graph || graph.get('destroyed')) return;
+        if (!container || !container.scrollWidth || !container.scrollHeight) return;
+        graph.changeSize(container.scrollWidth, container.scrollHeight);
+      };
+    // }
+  }, [graphData]);
 
-      const rootNode = graph.findById('root');
-      graph.hideItem(rootNode);
-      if (typeof window !== 'undefined')
-        window.onresize = () => {
-          if (!graph || graph.get('destroyed')) return;
-          if (!container || !container.scrollWidth || !container.scrollHeight) return;
-          graph.changeSize(container.scrollWidth, container.scrollHeight);
-        };
-    }
-  }, [domainId, graphData]);
-
-  return <div ref={ref} id="semanticGraph" style={{ width: '100%', height: '100%' }} />;
+  return (
+    <>
+      <Row>
+        <Col flex="auto" />
+        <Col flex="100px">
+          <Radio.Group
+            buttonStyle="solid"
+            size="small"
+            value={graphShowType}
+            onChange={(e) => {
+              const { value } = e.target;
+              console.log(value, 'value');
+              setGraphShowType(value);
+              changeGraphData(dataSourceListData, value);
+            }}
+          >
+            <Radio.Button value="dimension">维度</Radio.Button>
+            <Radio.Button value="metric">指标</Radio.Button>
+          </Radio.Group>
+        </Col>
+      </Row>
+      <div
+        ref={ref}
+        key={`${domainId}-${graphShowType}`}
+        id="semanticGraph"
+        style={{ width: '100%', height: '100%' }}
+      />
+    </>
+  );
 };
 export default connect(({ domainManger }: { domainManger: StateType }) => ({
   domainManger,
