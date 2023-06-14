@@ -12,7 +12,7 @@ import { postUserLogin, userRegister } from './services';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
 import { queryCurrentUser } from '@/services/user';
 import { history, useModel } from 'umi';
-import { setToken as setChatSdkToken } from 'supersonic-chat-sdk';
+// import { setToken as setChatSdkToken } from 'supersonic-chat-sdk';
 
 const { Item } = Form;
 const LoginPage: React.FC = () => {
@@ -25,7 +25,7 @@ const LoginPage: React.FC = () => {
     const { code, data, msg } = await postUserLogin(values);
     if (code === 200) {
       localStorage.setItem(AUTH_TOKEN_KEY, data);
-      setChatSdkToken(data || '');
+      // setChatSdkToken(data || '');
       const { code: queryUserCode, data: queryUserData } = await queryCurrentUser();
       if (queryUserCode === 200) {
         const currentUser = {

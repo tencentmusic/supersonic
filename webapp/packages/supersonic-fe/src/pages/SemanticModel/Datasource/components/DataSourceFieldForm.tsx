@@ -167,7 +167,12 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
                 disabled={!editState}
                 onChange={(e) => {
                   const value = e.target.value;
-                  handleFieldChange(record, 'name', value);
+                  // handleFieldChange(record, 'name', value);
+                  onFieldChange(record.bizName, {
+                    ...record,
+                    name: value,
+                    [isCreateName]: 1,
+                  });
                 }}
                 placeholder="请输入中文名"
               />
