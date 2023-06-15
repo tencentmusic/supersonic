@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.application.query.MetricDomain;
 import com.tencent.supersonic.chat.application.query.MetricFilter;
 import com.tencent.supersonic.chat.application.query.MetricGroupBy;
 import com.tencent.supersonic.chat.application.query.MetricOrderBy;
-import com.tencent.supersonic.chat.domain.pojo.semantic.DomainInfos;
+import com.tencent.supersonic.chat.domain.pojo.chat.DomainInfos;
 import com.tencent.supersonic.common.constant.Constants;
 import com.tencent.supersonic.common.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.enums.AggregateTypeEnum;

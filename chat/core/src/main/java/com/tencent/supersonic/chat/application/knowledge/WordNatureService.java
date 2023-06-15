@@ -4,7 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.tencent.supersonic.chat.api.service.SemanticLayer;
-import com.tencent.supersonic.chat.domain.pojo.semantic.DomainInfos;
+import com.tencent.supersonic.chat.domain.pojo.chat.DomainInfos;
 import com.tencent.supersonic.chat.domain.utils.SchemaInfoConverter;
 import com.tencent.supersonic.common.nlp.ItemDO;
 import com.tencent.supersonic.common.nlp.NatureType;

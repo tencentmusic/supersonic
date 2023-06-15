@@ -18,7 +18,7 @@ import com.tencent.supersonic.chat.domain.pojo.config.DefaultMetric;
 import com.tencent.supersonic.chat.domain.pojo.config.DefaultMetricInfo;
 import com.tencent.supersonic.chat.domain.pojo.config.EntityInternalDetail;
 import com.tencent.supersonic.chat.domain.pojo.config.EntityRichInfo;
-import com.tencent.supersonic.chat.domain.pojo.semantic.DomainInfos;
+import com.tencent.supersonic.chat.domain.pojo.chat.DomainInfos;
 import com.tencent.supersonic.chat.domain.service.ChatService;
 import com.tencent.supersonic.chat.domain.service.QueryService;
 import com.tencent.supersonic.chat.domain.utils.SchemaInfoConverter;

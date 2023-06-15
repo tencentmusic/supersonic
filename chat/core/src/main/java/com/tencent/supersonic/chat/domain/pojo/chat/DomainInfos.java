@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.domain.pojo.semantic;
+package com.tencent.supersonic.chat.domain.pojo.chat;
 
 import com.tencent.supersonic.common.nlp.ItemDO;
 import java.io.Serializable;
