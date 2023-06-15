@@ -19,6 +19,7 @@ import com.tencent.supersonic.common.pojo.SchemaItem;
 import com.tencent.supersonic.common.util.context.ContextUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -43,7 +44,7 @@ public class ListFilterParser implements SemanticParser {
         this.fillDateEntityFilter(queryContext.getParseInfo());
         this.addEntityDetailAndOrderByMetric(queryContext, chatCtx);
         this.dealNativeQuery(queryContext, true);
-        return false;
+        return true;
 
     }
 
@@ -56,15 +57,15 @@ public class ListFilterParser implements SemanticParser {
         semanticParseInfo.setDateInfo(dateInfo);
     }
 
-    private void addEntityDetailAndOrderByMetric(QueryContextReq searchCtx, ChatContext chatCtx) {
-        if (searchCtx.getParseInfo().getDomainId() > 0L) {
+    private void addEntityDetailAndOrderByMetric(QueryContextReq queryContext, ChatContext chatCtx) {
+        if (queryContext.getParseInfo().getDomainId() > 0L) {
             ChatConfigRichInfo chaConfigRichDesc = defaultSemanticUtils.getChatConfigRichInfo(
-                    searchCtx.getParseInfo().getDomainId());
+                    queryContext.getParseInfo().getDomainId());
             if (chaConfigRichDesc != null) {
-                SemanticParseInfo semanticParseInfo = searchCtx.getParseInfo();
-                List<SchemaItem> dimensions = new ArrayList();
+                SemanticParseInfo semanticParseInfo = queryContext.getParseInfo();
+                Set<SchemaItem> dimensions = new LinkedHashSet();
                 Set<String> primaryDimensions = this.addPrimaryDimension(chaConfigRichDesc.getEntity(), dimensions);
-                List<SchemaItem> metrics = new ArrayList();
+                Set<SchemaItem> metrics = new LinkedHashSet();
                 if (chaConfigRichDesc.getEntity() != null
                         && chaConfigRichDesc.getEntity().getEntityInternalDetailDesc() != null) {
                     chaConfigRichDesc.getEntity().getEntityInternalDetailDesc().getMetricList().stream()
@@ -76,7 +77,7 @@ public class ListFilterParser implements SemanticParser {
 
                 semanticParseInfo.setDimensions(dimensions);
                 semanticParseInfo.setMetrics(metrics);
-                List<Order> orders = new ArrayList();
+                Set<Order> orders = new LinkedHashSet();
                 if (chaConfigRichDesc.getEntity() != null
                         && chaConfigRichDesc.getEntity().getEntityInternalDetailDesc() != null) {
                     chaConfigRichDesc.getEntity().getEntityInternalDetailDesc().getMetricList().stream()
@@ -89,7 +90,7 @@ public class ListFilterParser implements SemanticParser {
 
     }
 
-    private Set<String> addPrimaryDimension(EntityRichInfo entity, List<SchemaItem> dimensions) {
+    private Set<String> addPrimaryDimension(EntityRichInfo entity, Set<SchemaItem> dimensions) {
         Set<String> primaryDimensions = new HashSet();
         if (!Objects.isNull(entity) && !CollectionUtils.isEmpty(entity.getEntityIds())) {
             entity.getEntityIds().stream().forEach((dimSchemaDesc) -> {
@@ -120,9 +121,9 @@ public class ListFilterParser implements SemanticParser {
         return queryMeta;
     }
 
-    private void dealNativeQuery(QueryContextReq searchCtx, boolean isNativeQuery) {
-        if (Objects.nonNull(searchCtx) && Objects.nonNull(searchCtx.getParseInfo())) {
-            searchCtx.getParseInfo().setNativeQuery(isNativeQuery);
+    private void dealNativeQuery(QueryContextReq queryContext, boolean isNativeQuery) {
+        if (Objects.nonNull(queryContext) && Objects.nonNull(queryContext.getParseInfo())) {
+            queryContext.getParseInfo().setNativeQuery(isNativeQuery);
         }
 
     }

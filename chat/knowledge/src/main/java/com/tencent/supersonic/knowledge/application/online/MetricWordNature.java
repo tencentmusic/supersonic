@@ -34,11 +34,11 @@ public class MetricWordNature extends BaseWordNature {
     private WordNature getOnwWordNature(String word, ItemDO itemDO, boolean isSuffix) {
         WordNature wordNature = new WordNature();
         wordNature.setWord(word);
-        Integer classId = itemDO.getDomain();
-        String nature = NatureType.NATURE_SPILT + classId + NatureType.NATURE_SPILT + itemDO.getItemId()
+        Integer domainId = itemDO.getDomain();
+        String nature = NatureType.NATURE_SPILT + domainId + NatureType.NATURE_SPILT + itemDO.getItemId()
                 + NatureType.METRIC.getType();
         if (isSuffix) {
-            nature = NatureType.NATURE_SPILT + classId + NatureType.NATURE_SPILT + itemDO.getItemId()
+            nature = NatureType.NATURE_SPILT + domainId + NatureType.NATURE_SPILT + itemDO.getItemId()
                     + NatureType.SUFFIX.getType() + NatureType.METRIC.getType();
         }
         wordNature.setNatureWithFrequency(String.format("%s 100000", nature));

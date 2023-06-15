@@ -23,20 +23,16 @@ public class SearchMatchStrategy implements MatchStrategy {
 
     private static final int SEARCH_SIZE = 3;
 
+
     @Override
-    public List<MapResult> match(String text, List<Term> terms, int retryCount) {
+    public List<MapResult> match(String text, List<Term> terms, Integer detectDomainId) {
 
         return null;
     }
 
     @Override
-    public List<MapResult> match(String text, List<Term> terms, int retryCount, Integer detectDomainId) {
-
-        return null;
-    }
-
-    @Override
-    public Map<MatchText, List<MapResult>> matchWithMatchText(String text, List<Term> originals) {
+    public Map<MatchText, List<MapResult>> matchWithMatchText(String text, List<Term> originals,
+            Integer detectDomainId) {
 
         Map<Integer, Integer> regOffsetToLength = originals.stream()
                 .filter(entry -> !entry.nature.toString().startsWith(NatureType.NATURE_SPILT))
@@ -70,7 +66,17 @@ public class SearchMatchStrategy implements MatchStrategy {
                         mapResults = mapResults.stream().filter(entry -> {
                             List<String> natures = entry.getNatures().stream()
                                     .filter(nature -> !nature.endsWith(NatureType.ENTITY.getType()))
-                                    .collect(Collectors.toList());
+                                    .filter(nature -> {
+                                                if (Objects.isNull(detectDomainId) || detectDomainId <= 0) {
+                                                    return true;
+                                                }
+                                                if (nature.startsWith(NatureType.NATURE_SPILT + detectDomainId)
+                                                        && nature.startsWith(NatureType.NATURE_SPILT)) {
+                                                    return true;
+                                                }
+                                                return false;
+                                            }
+                                    ).collect(Collectors.toList());
                             if (CollectionUtils.isEmpty(natures)) {
                                 return false;
                             }

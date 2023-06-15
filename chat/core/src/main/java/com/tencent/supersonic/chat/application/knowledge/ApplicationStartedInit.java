@@ -10,7 +10,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -23,7 +22,6 @@ public class ApplicationStartedInit implements ApplicationListener<ApplicationSt
     @Autowired
     private WordNatureService wordNatureService;
 
-    private List<WordNature> preWordNatures = new ArrayList<>();
 
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
@@ -32,7 +30,7 @@ public class ApplicationStartedInit implements ApplicationListener<ApplicationSt
 
             List<WordNature> wordNatures = wordNatureService.getAllWordNature();
 
-            this.preWordNatures = wordNatures;
+            wordNatureService.setPreWordNatures(wordNatures);
 
             onlineKnowledgeService.reloadAllData(wordNatures);
 
@@ -51,14 +49,15 @@ public class ApplicationStartedInit implements ApplicationListener<ApplicationSt
 
         try {
             List<WordNature> wordNatures = wordNatureService.getAllWordNature();
+            List<WordNature> preWordNatures = wordNatureService.getPreWordNatures();
 
             if (CollectionUtils.isEqualCollection(wordNatures, preWordNatures)) {
                 log.debug("wordNatures is not change, reloadKnowledge end");
                 return;
             }
-            this.preWordNatures = wordNatures;
-
+            wordNatureService.setPreWordNatures(wordNatures);
             onlineKnowledgeService.updateOnlineKnowledge(wordNatureService.getAllWordNature());
+            wordNatureService.getCache().refresh("");
 
         } catch (Exception e) {
             log.error("reloadKnowledge error", e);

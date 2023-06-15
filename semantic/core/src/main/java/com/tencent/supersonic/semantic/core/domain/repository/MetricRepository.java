@@ -15,7 +15,7 @@ public interface MetricRepository {
 
     void updateMetric(MetricDO metricDO);
 
-    List<MetricDO> getMetricList(Long classId);
+    List<MetricDO> getMetricList(Long domainId);
 
     List<MetricDO> getMetricListByIds(List<Long> ids);
 

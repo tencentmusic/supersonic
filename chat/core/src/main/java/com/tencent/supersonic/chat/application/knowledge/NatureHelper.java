@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class NatureHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NatureHelper.class);
+
     private static boolean isDomainOrEntity(Term term, Integer domain) {
         return (NatureType.NATURE_SPILT + domain).equals(term.nature.toString()) || term.nature.toString()
                 .endsWith(NatureType.ENTITY.getType());
@@ -96,7 +97,7 @@ public class NatureHelper {
 
     /**
      * Get the number of types of class parts of speech
-     * classId -> (nature , natureCount)
+     * domainId -> (nature , natureCount)
      *
      * @param terms
      * @return

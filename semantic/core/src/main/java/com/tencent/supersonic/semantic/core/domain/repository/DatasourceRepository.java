@@ -15,7 +15,7 @@ public interface DatasourceRepository {
 
     List<DatasourceDO> getDatasourceList();
 
-    List<DatasourceDO> getDatasourceList(Long classId);
+    List<DatasourceDO> getDatasourceList(Long domainId);
 
     DatasourceDO getDatasourceById(Long id);
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 public class EntityListFilter extends BaseSemanticQuery {
 
     public static String QUERY_MODE = "ENTITY_LIST_FILTER";
+    private static Long entityListLimit = 200L;
 
     public EntityListFilter() {
         queryModeOption.setAggregation(QueryModeElementOption.unused());
@@ -42,6 +43,7 @@ public class EntityListFilter extends BaseSemanticQuery {
     public SemanticParseInfo getContext(ChatContext chatCtx, QueryContextReq queryCtx) {
         SemanticParseInfo semanticParseInfo = queryCtx.getParseInfo();
         ContextHelper.addIfEmpty(chatCtx.getParseInfo().getDimensionFilters(), semanticParseInfo.getDimensionFilters());
+        semanticParseInfo.setLimit(entityListLimit);
         return semanticParseInfo;
     }
 

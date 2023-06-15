@@ -8,7 +8,9 @@ import com.tencent.supersonic.common.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.SchemaItem;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.Data;
 
 public class SemanticParseObjectHelper {
@@ -29,9 +31,9 @@ public class SemanticParseObjectHelper {
 
     private static SemanticParseInfo getSemanticParseInfo(SemanticParseJson semanticParseJson) {
         Long domain = semanticParseJson.getDomain();
-        List<SchemaItem> dimensionList = new ArrayList<>();
-        List<SchemaItem> metricList = new ArrayList<>();
-        List<Filter> chatFilters = new ArrayList<>();
+        Set<SchemaItem> dimensionList = new LinkedHashSet();
+        Set<SchemaItem> metricList = new LinkedHashSet();
+        Set<Filter> chatFilters = new LinkedHashSet();
 
         if (semanticParseJson.getFilter() != null && semanticParseJson.getFilter().size() > 0) {
             for (List<String> filter : semanticParseJson.getFilter()) {

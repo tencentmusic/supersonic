@@ -14,11 +14,13 @@ import com.tencent.supersonic.chat.domain.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.infrastructure.mapper.ChatQueryDOMapper;
 import com.tencent.supersonic.common.util.json.JsonUtil;
 import com.tencent.supersonic.common.util.mybatis.PageUtils;
+import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 @Repository
 @Primary
@@ -68,5 +70,25 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         chatQueryDO.setQueryResponse(JsonUtil.toString(queryResponse));
         Long queryId = Long.valueOf(chatQueryDOMapper.insert(chatQueryDO));
         queryResponse.setQueryId(queryId);
+    }
+
+    @Override
+    public ChatQueryDO getLastChatQuery(long chatId) {
+        ChatQueryDOExample example = new ChatQueryDOExample();
+        example.setOrderByClause("question_id desc");
+        example.setLimitEnd(1);
+        example.setLimitStart(0);
+        Criteria criteria = example.createCriteria();
+        criteria.andChatIdEqualTo(chatId);
+        List<ChatQueryDO> chatQueryDOS = chatQueryDOMapper.selectByExampleWithBLOBs(example);
+        if (!CollectionUtils.isEmpty(chatQueryDOS)) {
+            return chatQueryDOS.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public int updateChatQuery(ChatQueryDO chatQueryDO) {
+        return chatQueryDOMapper.updateByPrimaryKeyWithBLOBs(chatQueryDO);
     }
 }

@@ -13,6 +13,7 @@ import com.tencent.supersonic.common.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.SchemaItem;
 import com.tencent.supersonic.common.util.context.ContextUtils;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Component;
 public class AggregateSemanticParser implements SemanticParser {
 
     private final Logger logger = LoggerFactory.getLogger(AggregateSemanticParser.class);
-    public static final Integer TOPN_LIMIT = 10;
+    public static final Integer TOPN_LIMIT = 1000;
 
     private AggregateTypeResolver aggregateTypeResolver;
 
@@ -33,7 +34,7 @@ public class AggregateSemanticParser implements SemanticParser {
 
         SemanticParseInfo semanticParse = queryContext.getParseInfo();
 
-        List<SchemaItem> metrics = semanticParse.getMetrics();
+        Set<SchemaItem> metrics = semanticParse.getMetrics();
 
         semanticParse.setNativeQuery(getNativeQuery(aggregateType, queryContext));
 
@@ -47,12 +48,12 @@ public class AggregateSemanticParser implements SemanticParser {
     /**
      * query mode reset by the AggregateType
      *
-     * @param searchCtx
+     * @param queryContext
      * @param aggregateType
      */
-    private void resetQueryModeByAggregateType(QueryContextReq searchCtx, AggregateTypeEnum aggregateType) {
+    private void resetQueryModeByAggregateType(QueryContextReq queryContext, AggregateTypeEnum aggregateType) {
 
-        SemanticParseInfo parseInfo = searchCtx.getParseInfo();
+        SemanticParseInfo parseInfo = queryContext.getParseInfo();
         String queryMode = parseInfo.getQueryMode();
         if (MetricGroupBy.QUERY_MODE.equals(queryMode) || MetricGroupBy.QUERY_MODE.equals(queryMode)) {
             if (AggregateTypeEnum.MAX.equals(aggregateType) || AggregateTypeEnum.MIN.equals(aggregateType)
@@ -63,7 +64,7 @@ public class AggregateSemanticParser implements SemanticParser {
             }
         }
         if (MetricFilter.QUERY_MODE.equals(queryMode) || MetricCompare.QUERY_MODE.equals(queryMode)) {
-            if (aggregateTypeResolver.hasCompareIntentionalWords(searchCtx.getQueryText())) {
+            if (aggregateTypeResolver.hasCompareIntentionalWords(queryContext.getQueryText())) {
                 parseInfo.setQueryMode(MetricCompare.QUERY_MODE);
             } else {
                 parseInfo.setQueryMode(MetricFilter.QUERY_MODE);
@@ -72,11 +73,11 @@ public class AggregateSemanticParser implements SemanticParser {
         logger.info("queryMode mode  [{}]->[{}]", queryMode, parseInfo.getQueryMode());
     }
 
-    private boolean getNativeQuery(AggregateTypeEnum aggregateType, QueryContextReq searchCtx) {
+    private boolean getNativeQuery(AggregateTypeEnum aggregateType, QueryContextReq queryContext) {
         if (AggregateTypeEnum.TOPN.equals(aggregateType)) {
             return true;
         }
-        return searchCtx.getParseInfo().getNativeQuery();
+        return queryContext.getParseInfo().getNativeQuery();
     }
 
 

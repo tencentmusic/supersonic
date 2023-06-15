@@ -10,6 +10,7 @@ import com.tencent.supersonic.chat.api.service.SemanticQuery;
 import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
 import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichInfo;
 import com.tencent.supersonic.common.pojo.SchemaItem;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -71,7 +72,7 @@ public class ContextHelper {
      * @param from
      * @param to
      */
-    public static void addIfEmpty(List from, List to) {
+    public static void addIfEmpty(Set from, Set to) {
         if (to.isEmpty() && !from.isEmpty()) {
             to.addAll(from);
         }
@@ -82,7 +83,7 @@ public class ContextHelper {
      * @param from
      * @param to
      */
-    public static void appendList(List from, List to) {
+    public static void appendList(Set from, Set to) {
         if (!from.isEmpty()) {
             to.addAll(from);
         }
@@ -94,7 +95,7 @@ public class ContextHelper {
      * @param from
      * @param to
      */
-    public static void updateList(List from, List to) {
+    public static void updateList(Set from, Set to) {
         if (!from.isEmpty()) {
             to.clear();
             to.addAll(from);

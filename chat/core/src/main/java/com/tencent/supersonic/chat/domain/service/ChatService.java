@@ -6,6 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.request.QueryContextReq;
 import com.tencent.supersonic.chat.api.response.QueryResultResp;
 import com.tencent.supersonic.chat.domain.dataobject.ChatDO;
+import com.tencent.supersonic.chat.domain.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.domain.pojo.chat.ChatQueryVO;
 import com.tencent.supersonic.chat.domain.pojo.chat.PageQueryInfoReq;
 import java.util.List;
@@ -40,4 +41,8 @@ public interface ChatService {
     PageInfo<ChatQueryVO> queryInfo(PageQueryInfoReq pageQueryInfoCommend, long chatId);
 
     public void addQuery(QueryResultResp queryResponse, QueryContextReq queryContext, ChatContext chatCtx);
+
+    public ChatQueryDO getLastQuery(long chatId);
+
+    public int updateQuery(ChatQueryDO chatQueryDO);
 }

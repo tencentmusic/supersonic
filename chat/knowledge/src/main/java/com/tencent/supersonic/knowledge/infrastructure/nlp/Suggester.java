@@ -53,7 +53,7 @@ public class Suggester {
         return result.stream().map(
                         entry -> {
                             String name = entry.getKey().replace("#", " ");
-                            return new MapResult(name, entry.getValue());
+                            return new MapResult(name, entry.getValue(),key);
                         }
                 ).sorted((a, b) -> -(b.getName().length() - a.getName().length()))
                 .limit(SEARCH_SIZE)
@@ -79,7 +79,7 @@ public class Suggester {
                                     .map(nature -> nature.replaceAll(NatureType.SUFFIX.getType(), ""))
                                     .collect(Collectors.toList());
                             name = StringUtils.reverse(name);
-                            return new MapResult(name, natures);
+                            return new MapResult(name, natures, key);
                         }
                 ).sorted((a, b) -> -(b.getName().length() - a.getName().length()))
                 .limit(SEARCH_SIZE)

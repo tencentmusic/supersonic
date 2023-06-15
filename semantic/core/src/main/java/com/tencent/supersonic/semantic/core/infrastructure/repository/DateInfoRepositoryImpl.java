@@ -13,9 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -25,29 +23,12 @@ import org.springframework.util.CollectionUtils;
 @Repository
 public class DateInfoRepositoryImpl implements DateInfoRepository {
 
-//    @Autowired
-//    private SqlSessionTemplate sqlSessionTemplate;
-
-    private SqlSession sqlSession;
 
     private ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     private DateInfoMapper dateInfoMapper;
 
-//    @PostConstruct
-//    public void init() {
-//        if (Objects.isNull(sqlSession)) {
-//            sqlSession = sqlSessionTemplate.getSqlSessionFactory().openSession(ExecutorType.BATCH, false);
-//        }
-//    }
-
-    @PreDestroy
-    public void preDestroy() {
-        if (Objects.nonNull(sqlSession)) {
-            sqlSession.close();
-        }
-    }
 
     @Override
     public Integer upsertDateInfo(List<DateInfoReq> dateInfoCommends) {
@@ -85,12 +66,6 @@ public class DateInfoRepositoryImpl implements DateInfoRepository {
         Stopwatch stopwatch = Stopwatch.createStarted();
         for (DateInfoDO dateInfoDO : dateInfoDOList) {
             dateInfoMapper.upsertDateInfo(dateInfoDO);
-        }
-        try {
-            sqlSession.commit();
-            return dateInfoDOList.size();
-        } catch (Exception e) {
-            log.warn("e:", e);
         }
         log.info("before final, elapsed time:{}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
         return 0;

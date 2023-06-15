@@ -11,5 +11,5 @@ import com.tencent.supersonic.chat.api.request.QueryContextReq;
  */
 public interface SchemaMapper {
 
-    void map(QueryContextReq searchCtx);
+    void map(QueryContextReq queryContext);
 }

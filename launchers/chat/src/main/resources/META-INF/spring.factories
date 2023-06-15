@@ -1,6 +1,9 @@
 com.tencent.supersonic.chat.api.service.SchemaMapper=\
     com.tencent.supersonic.chat.application.mapper.HanlpSchemaMapper
 
+com.tencent.supersonic.chat.application.parser.resolver.DomainResolver=\
+  com.tencent.supersonic.chat.application.parser.resolver.HeuristicDomainResolver
+
 com.tencent.supersonic.chat.api.service.SemanticParser=\
     com.tencent.supersonic.chat.application.parser.TimeSemanticParser, \
     com.tencent.supersonic.chat.application.parser.DomainSemanticParser, \

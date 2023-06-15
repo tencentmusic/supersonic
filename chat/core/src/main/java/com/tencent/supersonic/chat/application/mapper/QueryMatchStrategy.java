@@ -40,35 +40,31 @@ public class QueryMatchStrategy implements MatchStrategy {
     private Double dimensionValueThresholdConfig;
 
     @Override
-    public List<MapResult> match(String text, List<Term> terms, int retryCount) {
-        return match(text, terms, retryCount, null);
-    }
-
-    @Override
-    public List<MapResult> match(String text, List<Term> terms, int retryCount, Integer detectDomainId) {
+    public List<MapResult> match(String text, List<Term> terms, Integer detectDomainId) {
         if (CollectionUtils.isEmpty(terms) || StringUtils.isEmpty(text)) {
             return null;
         }
         Map<Integer, Integer> regOffsetToLength = terms.stream().sorted(Comparator.comparing(Term::length))
                 .collect(Collectors.toMap(Term::getOffset, term -> term.word.length(), (value1, value2) -> value2));
+
         List<Integer> offsetList = terms.stream().sorted(Comparator.comparing(Term::getOffset))
                 .map(term -> term.getOffset()).collect(Collectors.toList());
 
-        LOGGER.debug("retryCount:{},terms:{},regOffsetToLength:{},offsetList:{},detectDomainId:{}", retryCount, terms,
-                regOffsetToLength, offsetList,
-                detectDomainId);
+        LOGGER.debug("retryCount:{},terms:{},regOffsetToLength:{},offsetList:{},detectDomainId:{}", terms,
+                regOffsetToLength, offsetList, detectDomainId);
 
-        return detect(text, regOffsetToLength, offsetList, detectDomainId, retryCount);
+        return detect(text, regOffsetToLength, offsetList, detectDomainId);
     }
 
     @Override
-    public Map<MatchText, List<MapResult>> matchWithMatchText(String text, List<Term> originals) {
+    public Map<MatchText, List<MapResult>> matchWithMatchText(String text, List<Term> originals,
+            Integer detectDomainId) {
 
         return null;
     }
 
     private List<MapResult> detect(String text, Map<Integer, Integer> regOffsetToLength, List<Integer> offsetList,
-            Integer detectDomainId, int retryCount) {
+            Integer detectDomainId) {
         List<MapResult> results = Lists.newArrayList();
 
         for (Integer index = 0; index <= text.length() - 1; ) {
@@ -79,7 +75,7 @@ public class QueryMatchStrategy implements MatchStrategy {
                 int offset = getStepOffset(offsetList, index);
                 i = getStepIndex(regOffsetToLength, i);
                 if (i <= text.length()) {
-                    List<MapResult> mapResults = detectByStep(text, detectDomainId, index, i, offset, retryCount);
+                    List<MapResult> mapResults = detectByStep(text, detectDomainId, index, i, offset);
                     mapResultRowSet.addAll(mapResults);
                 }
             }
@@ -90,8 +86,7 @@ public class QueryMatchStrategy implements MatchStrategy {
         return results;
     }
 
-    private List<MapResult> detectByStep(String text, Integer detectClassId, Integer index, Integer i, int offset,
-            int retryCount) {
+    private List<MapResult> detectByStep(String text, Integer detectDomainId, Integer index, Integer i, int offset) {
         String detectSegment = text.substring(index, i);
         // step1. pre search
         LinkedHashSet<MapResult> mapResults = Suggester.prefixSearch(detectSegment, oneDetectionMaxSize)
@@ -109,11 +104,11 @@ public class QueryMatchStrategy implements MatchStrategy {
         mapResults = mapResults.stream().sorted((a, b) -> -(b.getName().length() - a.getName().length()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         // step4. filter by classId
-        if (Objects.nonNull(detectClassId) && detectClassId > 0) {
+        if (Objects.nonNull(detectDomainId) && detectDomainId > 0) {
             LOGGER.debug("detectDomainId:{}, before parseResults:{}", mapResults);
             mapResults = mapResults.stream().map(entry -> {
                 List<String> natures = entry.getNatures().stream().filter(
-                        nature -> nature.startsWith(NatureType.NATURE_SPILT + detectClassId) || (nature.startsWith(
+                        nature -> nature.startsWith(NatureType.NATURE_SPILT + detectDomainId) || (nature.startsWith(
                                 NatureType.NATURE_SPILT))
                 ).collect(Collectors.toList());
                 entry.setNatures(natures);
@@ -123,8 +118,7 @@ public class QueryMatchStrategy implements MatchStrategy {
         }
         // step5. filter by similarity
         mapResults = mapResults.stream()
-                .filter(term -> getSimilarity(detectSegment, term.getName()) >= getThresholdMatch(term.getNatures(),
-                        retryCount))
+                .filter(term -> getSimilarity(detectSegment, term.getName()) >= getThresholdMatch(term.getNatures()))
                 .filter(term -> CollectionUtils.isNotEmpty(term.getNatures()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -170,11 +164,11 @@ public class QueryMatchStrategy implements MatchStrategy {
         return index;
     }
 
-    private double getThresholdMatch(List<String> natures, int retryCount) {
+    private double getThresholdMatch(List<String> natures) {
         if (existDimensionValues(natures)) {
             return dimensionValueThresholdConfig;
         }
-        return metricDimensionThresholdConfig - STEP * retryCount;
+        return metricDimensionThresholdConfig;
     }
 
 }

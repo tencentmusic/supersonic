@@ -359,6 +359,16 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
         return false;
     }
 
+    public static boolean isLowerLetter(String str) {
+        char[] chars = str.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if ((chars[i] >= 'a' && chars[i] <= 'z')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static String getWordBySpace(String word) {
         if (word.contains(HanlpHelper.SPACE_SPILT)) {
             return word.replace(HanlpHelper.SPACE_SPILT, " ");

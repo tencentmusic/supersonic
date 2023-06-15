@@ -13,14 +13,14 @@ class TimeSemanticParserTest {
     void parse() {
         TimeSemanticParser timeSemanticParser = new TimeSemanticParser();
 
-        QueryContextReq searchCtx = new QueryContextReq();
+        QueryContextReq queryContext = new QueryContextReq();
         ChatContext chatCtx = new ChatContext();
         SchemaMapInfo schemaMap = new SchemaMapInfo();
-        searchCtx.setQueryText("supersonic最近30天访问次数");
+        queryContext.setQueryText("supersonic最近30天访问次数");
 
-        boolean parse = timeSemanticParser.parse(searchCtx, chatCtx);
+        boolean parse = timeSemanticParser.parse(queryContext, chatCtx);
 
-        DateConf dateInfo = searchCtx.getParseInfo().getDateInfo();
+        DateConf dateInfo = queryContext.getParseInfo().getDateInfo();
 
 
     }
