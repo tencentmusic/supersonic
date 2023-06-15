@@ -11,7 +11,7 @@ import com.tencent.supersonic.chat.domain.pojo.search.DomainInfoStat;
 import com.tencent.supersonic.chat.domain.pojo.search.DomainWithSemanticType;
 import com.tencent.supersonic.chat.domain.pojo.search.MatchText;
 import com.tencent.supersonic.chat.domain.pojo.search.SearchResult;
-import com.tencent.supersonic.chat.domain.pojo.semantic.DomainInfos;
+import com.tencent.supersonic.chat.domain.pojo.chat.DomainInfos;
 import com.tencent.supersonic.chat.domain.service.ChatService;
 import com.tencent.supersonic.chat.domain.service.SearchService;
 import com.tencent.supersonic.chat.domain.utils.NatureConverter;

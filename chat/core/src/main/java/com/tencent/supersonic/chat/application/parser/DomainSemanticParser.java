@@ -11,7 +11,7 @@ import com.tencent.supersonic.chat.api.service.SemanticParser;
 import com.tencent.supersonic.chat.api.service.SemanticQuery;
 import com.tencent.supersonic.chat.application.parser.resolver.DomainResolver;
 import com.tencent.supersonic.chat.application.parser.resolver.SemanticQueryResolver;
-import com.tencent.supersonic.chat.domain.pojo.semantic.DomainInfos;
+import com.tencent.supersonic.chat.domain.pojo.chat.DomainInfos;
 import com.tencent.supersonic.chat.domain.utils.ContextHelper;
 import com.tencent.supersonic.chat.domain.utils.SchemaInfoConverter;
 import com.tencent.supersonic.common.util.context.ContextUtils;
