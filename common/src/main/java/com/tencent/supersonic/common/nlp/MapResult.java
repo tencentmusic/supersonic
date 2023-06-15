@@ -16,13 +16,16 @@ public class MapResult implements Serializable {
 
     private double similarity;
 
+    private String detectWord;
+
     public MapResult() {
 
     }
 
-    public MapResult(String name, List<String> natures) {
+    public MapResult(String name, List<String> natures, String detectWord) {
         this.name = name;
         this.natures = natures;
+        this.detectWord = detectWord;
     }
 
     @Override

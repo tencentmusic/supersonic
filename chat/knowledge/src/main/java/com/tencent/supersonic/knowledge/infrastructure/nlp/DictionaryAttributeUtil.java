@@ -30,6 +30,9 @@ public class DictionaryAttributeUtil {
                 list.stream().map(i -> i.getKey()).collect(Collectors.toList()).toArray(new Nature[0]),
                 list.stream().map(i -> i.getValue()).mapToInt(Integer::intValue).toArray(),
                 list.stream().map(i -> i.getValue()).findFirst().get());
+        if (old.original != null || add.original != null) {
+            attribute.original = add.original != null ? add.original : old.original;
+        }
         return attribute;
     }
 }

@@ -25,4 +25,8 @@ public class SchemaMapInfo {
         domainElementMatches.put(domain, elementMatches);
     }
 
+    public void setDomainElementMatches(
+            Map<Integer, List<SchemaElementMatch>> domainElementMatches) {
+        this.domainElementMatches = domainElementMatches;
+    }
 }

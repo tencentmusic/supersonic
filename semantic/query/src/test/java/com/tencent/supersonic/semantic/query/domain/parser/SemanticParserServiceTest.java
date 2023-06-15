@@ -12,7 +12,7 @@ import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.semantic.query.domain.parser.convertor.planner.AggPlanner;
 import com.tencent.supersonic.semantic.query.domain.parser.schema.SemanticSchema;
-import com.tencent.supersonic.semantic.query.application.SemanticSchemaManagerImpl;
+import com.tencent.supersonic.semantic.query.application.parser.SemanticSchemaManagerImpl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

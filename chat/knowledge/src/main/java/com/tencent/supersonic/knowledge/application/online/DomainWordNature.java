@@ -20,10 +20,15 @@ public class DomainWordNature extends BaseWordNature {
         List<WordNature> result = Lists.newArrayList();
         WordNature wordNature = new WordNature();
         wordNature.setWord(word);
-        Integer classId = itemDO.getDomain();
-        String nature = NatureType.NATURE_SPILT + classId;
+        Integer domainId = itemDO.getDomain();
+        String nature = NatureType.NATURE_SPILT + domainId;
         wordNature.setNatureWithFrequency(String.format("%s 100000", nature));
         result.add(wordNature);
         return result;
+    }
+
+    @Override
+    public Long getFrequency(String nature) {
+        return 0L;
     }
 }

@@ -2,6 +2,7 @@ package com.tencent.supersonic.common.pojo;
 
 import static com.tencent.supersonic.common.constant.Constants.ASC_UPPER;
 
+import com.google.common.base.Objects;
 import javax.validation.constraints.NotBlank;
 
 import lombok.Data;
@@ -31,5 +32,23 @@ public class Order {
                 .append(direction).append('\"');
         sb.append('}');
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Order order = (Order) o;
+        return Objects.equal(column, order.column) && Objects.equal(direction,
+                order.direction);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(column, direction);
     }
 }

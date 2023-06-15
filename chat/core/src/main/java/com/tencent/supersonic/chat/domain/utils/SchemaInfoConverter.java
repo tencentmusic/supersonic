@@ -21,9 +21,14 @@ import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
 import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
 
 public class SchemaInfoConverter {
@@ -40,6 +45,7 @@ public class SchemaInfoConverter {
         queryStructCmd.setDateInfo(parseInfo.getDateInfo());
 
         List<Filter> dimensionFilters = parseInfo.getDimensionFilters().stream()
+                .filter(chatFilter -> Strings.isNotEmpty(chatFilter.getBizName()))
                 .map(chatFilter -> new Filter(chatFilter.getBizName(), chatFilter.getOperator(), chatFilter.getValue()))
                 .collect(Collectors.toList());
         queryStructCmd.setDimensionFilters(dimensionFilters);
@@ -54,12 +60,13 @@ public class SchemaInfoConverter {
                 .collect(Collectors.toList());
         queryStructCmd.setGroups(dimensions);
         queryStructCmd.setLimit(parseInfo.getLimit());
-        queryStructCmd.setOrders(getOrder(parseInfo.getOrders(), parseInfo.getAggType(), parseInfo.getMetrics()));
+        Set<Order> order = getOrder(parseInfo.getOrders(), parseInfo.getAggType(), parseInfo.getMetrics());
+        queryStructCmd.setOrders(new ArrayList<>(order));
         queryStructCmd.setAggregators(getAggregatorByMetric(parseInfo.getMetrics(), parseInfo.getAggType()));
         return queryStructCmd;
     }
 
-    private static List<Aggregator> getAggregatorByMetric(List<SchemaItem> metrics, AggregateTypeEnum aggregateType) {
+    private static List<Aggregator> getAggregatorByMetric(Set<SchemaItem> metrics, AggregateTypeEnum aggregateType) {
         List<Aggregator> aggregators = new ArrayList<>();
         String agg = (aggregateType == null || aggregateType.equals(AggregateTypeEnum.NONE)) ? ""
                 : aggregateType.name();
@@ -157,11 +164,11 @@ public class SchemaInfoConverter {
         return result;
     }
 
-    public static List<Order> getOrder(List<Order> parseOrder, AggregateTypeEnum aggregator, List<SchemaItem> metrics) {
+    public static Set<Order> getOrder(Set<Order> parseOrder, AggregateTypeEnum aggregator, Set<SchemaItem> metrics) {
         if (!CollectionUtils.isEmpty(parseOrder)) {
             return parseOrder;
         }
-        List<Order> orders = new ArrayList<>();
+        Set<Order> orders = new LinkedHashSet();
         if (CollectionUtils.isEmpty(metrics)) {
             return orders;
         }

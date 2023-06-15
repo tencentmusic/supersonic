@@ -8,17 +8,17 @@ import lombok.ToString;
 public class SchemaElementMatch {
 
     SchemaElementType elementType;
+
     int elementID;
+
     double similarity;
+
+    String detectWord;
+
     String word;
 
-    public SchemaElementMatch() {
-    }
+    Long frequency;
 
-    public SchemaElementMatch(SchemaElementType schemaElementType, int elementID, double similarity, String word) {
-        this.elementID = elementID;
-        this.elementType = schemaElementType;
-        this.similarity = similarity;
-        this.word = word;
+    public SchemaElementMatch() {
     }
 }

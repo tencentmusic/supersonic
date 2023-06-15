@@ -20,6 +20,8 @@ import com.tencent.supersonic.chat.domain.utils.DefaultSemanticInternalUtils;
 import com.tencent.supersonic.chat.domain.utils.SchemaInfoConverter;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.SchemaItem;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,7 +139,7 @@ public class DomainEntityService {
         chatFilter.setValue(String.valueOf(entity));
         chatFilter.setOperator(FilterOperatorEnum.EQUALS);
         chatFilter.setBizName(getEntityPrimaryName(domainInfo));
-        List<Filter> chatFilters = new ArrayList<>();
+        Set<Filter> chatFilters = new LinkedHashSet();
         chatFilters.add(chatFilter);
         semanticParseInfo.setDimensionFilters(chatFilters);
 
@@ -167,8 +169,8 @@ public class DomainEntityService {
         }
     }
 
-    private List<SchemaItem> getDimensions(EntityInfo domainInfo) {
-        List<SchemaItem> dimensions = new ArrayList<>();
+    private Set<SchemaItem> getDimensions(EntityInfo domainInfo) {
+        Set<SchemaItem> dimensions = new LinkedHashSet();
         for (DataInfo mainEntityDimension : domainInfo.getDimensions()) {
             SchemaItem dimension = new SchemaItem();
             dimension.setBizName(mainEntityDimension.getBizName());
@@ -186,8 +188,8 @@ public class DomainEntityService {
         return entryKey;
     }
 
-    private List<SchemaItem> getMetrics(EntityInfo domainInfo) {
-        List<SchemaItem> metrics = new ArrayList<>();
+    private Set<SchemaItem> getMetrics(EntityInfo domainInfo) {
+        Set<SchemaItem> metrics = new LinkedHashSet();
         for (DataInfo metricValue : domainInfo.getMetrics()) {
             SchemaItem metric = new SchemaItem();
             metric.setBizName(metricValue.getBizName());

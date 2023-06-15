@@ -12,6 +12,7 @@ import com.tencent.supersonic.common.nlp.MapResult;
 import com.tencent.supersonic.common.nlp.NatureType;
 import com.tencent.supersonic.common.util.context.ContextUtils;
 import com.tencent.supersonic.common.util.json.JsonUtil;
+import com.tencent.supersonic.knowledge.application.online.BaseWordNature;
 import com.tencent.supersonic.knowledge.application.online.WordNatureStrategyFactory;
 import com.tencent.supersonic.knowledge.infrastructure.nlp.HanlpHelper;
 import java.util.ArrayList;
@@ -28,18 +29,22 @@ public class HanlpSchemaMapper implements SchemaMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(HanlpSchemaMapper.class);
 
     @Override
-    public void map(QueryContextReq searchCtx) {
+    public void map(QueryContextReq queryContext) {
 
-        List<Term> terms = HanlpHelper.getSegment().seg(searchCtx.getQueryText()).stream().collect(Collectors.toList());
+        List<Term> terms = HanlpHelper.getSegment().seg(queryContext.getQueryText().toLowerCase()).stream()
+                .collect(Collectors.toList());
+
         terms.forEach(
-                item -> LOGGER.info("word:{},nature:{},frequency:{}", item.word, item.nature.toString(), item.frequency)
+                item -> LOGGER.info("word:{},nature:{},frequency:{}", item.word, item.nature.toString(),
+                        item.getFrequency())
         );
         QueryMatchStrategy matchStrategy = ContextUtils.getBean(QueryMatchStrategy.class);
 
-        List<MapResult> matches = matchStrategy.match(searchCtx.getQueryText(), terms, 0);
-        LOGGER.info("searchCtx:{},matches:{}", searchCtx, matches);
+        List<MapResult> matches = matchStrategy.match(queryContext.getQueryText(), terms, queryContext.getDomainId());
+        HanlpHelper.transLetterOriginal(matches);
+        LOGGER.info("queryContext:{},matches:{}", queryContext, matches);
 
-        convertTermsToSchemaMapInfo(matches, searchCtx.getMapInfo());
+        convertTermsToSchemaMapInfo(matches, queryContext.getMapInfo());
     }
 
     private void convertTermsToSchemaMapInfo(List<MapResult> mapResults, SchemaMapInfo schemaMap) {
@@ -59,11 +64,14 @@ public class HanlpSchemaMapper implements SchemaMapper {
                 SchemaElementMatch schemaElementMatch = new SchemaElementMatch();
 
                 schemaElementMatch.setElementType(elementType);
-                Integer elementID = WordNatureStrategyFactory.get(NatureType.getNatureType(nature))
-                        .getElementID(nature);
+                BaseWordNature baseWordNature = WordNatureStrategyFactory.get(NatureType.getNatureType(nature));
+                Integer elementID = baseWordNature.getElementID(nature);
                 schemaElementMatch.setElementID(elementID);
+                Long frequency = baseWordNature.getFrequency(nature);
+                schemaElementMatch.setFrequency(frequency);
                 schemaElementMatch.setWord(mapResult.getName());
                 schemaElementMatch.setSimilarity(mapResult.getSimilarity());
+                schemaElementMatch.setDetectWord(mapResult.getDetectWord());
 
                 Map<Integer, List<SchemaElementMatch>> domainElementMatches = schemaMap.getDomainElementMatches();
                 List<SchemaElementMatch> schemaElementMatches = domainElementMatches.putIfAbsent(domain,

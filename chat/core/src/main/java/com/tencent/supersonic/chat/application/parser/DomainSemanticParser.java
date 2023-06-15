@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -32,9 +33,14 @@ import org.springframework.util.CollectionUtils;
 public class DomainSemanticParser implements SemanticParser {
 
     private final Logger logger = LoggerFactory.getLogger(DomainSemanticParser.class);
-    private DomainResolver domainResolver;
+    private List<DomainResolver> domainResolverList;
 
     private SemanticQueryResolver semanticQueryResolver;
+
+    public DomainSemanticParser() {
+        domainResolverList = SpringFactoriesLoader.loadFactories(DomainResolver.class,
+                Thread.currentThread().getContextClassLoader());
+    }
 
     @Override
     public boolean parse(QueryContextReq queryContext, ChatContext chatCtx) {
@@ -45,7 +51,7 @@ public class DomainSemanticParser implements SemanticParser {
         SchemaMapInfo mapInfo = queryContext.getMapInfo();
         SemanticParseInfo parseInfo = queryContext.getParseInfo();
 
-        domainResolver = ContextUtils.getBean(DomainResolver.class);
+        //domainResolver = ContextUtils.getBean(DomainResolver.class);
         semanticQueryResolver = ContextUtils.getBean(SemanticQueryResolver.class);
 
         Map<Integer, SemanticQuery> domainSemanticQuery = new HashMap<>();
@@ -72,15 +78,19 @@ public class DomainSemanticParser implements SemanticParser {
             }
         } else if (domainSemanticQuery.size() > 1) {
             // will choose one by the domain select
-            Integer domainId = domainResolver.resolve(domainSemanticQuery, queryContext, chatCtx, mapInfo);
-            if (domainId > 0) {
-                Map.Entry<Integer, SemanticQuery> match = domainSemanticQuery.entrySet().stream()
-                        .filter(entry -> entry.getKey().equals(domainId)).findFirst().orElse(null);
-                logger.info("select by selectStrategy [{}:{}]", domainId, match.getValue());
-                parseInfo.setDomainId(Long.valueOf(match.getKey()));
-                parseInfo.setDomainName(domainToName.get(Integer.valueOf(match.getKey())));
-                parseInfo.setQueryMode(match.getValue().getQueryMode());
-                return false;
+            Optional<Integer> domainId = domainResolverList.stream()
+                    .map(domainResolver -> domainResolver.resolve(domainSemanticQuery, queryContext, chatCtx, mapInfo))
+                    .filter(d -> d > 0).findFirst();
+            if (domainId.isPresent() && domainId.get() > 0) {
+                for (Map.Entry<Integer, SemanticQuery> match : domainSemanticQuery.entrySet()) {
+                    if (match.getKey().equals(domainId.get())) {
+                        logger.info("select by selectStrategy [{}:{}]", domainId.get(), match.getValue());
+                        parseInfo.setDomainId(Long.valueOf(match.getKey()));
+                        parseInfo.setDomainName(domainToName.get(Integer.valueOf(match.getKey())));
+                        parseInfo.setQueryMode(match.getValue().getQueryMode());
+                        return false;
+                    }
+                }
             }
         }
         // Round 2: no domains can be found yet, count in chat context

@@ -1,4 +1,4 @@
-package com.tencent.supersonic.semantic.query.application;
+package com.tencent.supersonic.semantic.query.application.parser;
 
 import com.tencent.supersonic.semantic.api.core.response.SqlParserResp;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;

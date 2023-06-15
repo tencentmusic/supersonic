@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.request.QueryContextReq;
-import com.tencent.supersonic.chat.api.service.SemanticLayer;
 import com.tencent.supersonic.chat.application.knowledge.NatureHelper;
+import com.tencent.supersonic.chat.application.knowledge.WordNatureService;
 import com.tencent.supersonic.chat.application.mapper.SearchMatchStrategy;
 import com.tencent.supersonic.chat.domain.pojo.search.DomainInfoStat;
 import com.tencent.supersonic.chat.domain.pojo.search.DomainWithSemanticType;
@@ -15,12 +15,10 @@ import com.tencent.supersonic.chat.domain.pojo.semantic.DomainInfos;
 import com.tencent.supersonic.chat.domain.service.ChatService;
 import com.tencent.supersonic.chat.domain.service.SearchService;
 import com.tencent.supersonic.chat.domain.utils.NatureConverter;
-import com.tencent.supersonic.chat.domain.utils.SchemaInfoConverter;
 import com.tencent.supersonic.common.nlp.ItemDO;
 import com.tencent.supersonic.common.nlp.MapResult;
 import com.tencent.supersonic.common.nlp.NatureType;
 import com.tencent.supersonic.common.nlp.WordNature;
-import com.tencent.supersonic.knowledge.application.online.BaseWordNature;
 import com.tencent.supersonic.knowledge.infrastructure.nlp.HanlpHelper;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,12 +45,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class SearchServiceImpl implements SearchService {
 
-    private final Logger logger = LoggerFactory.getLogger(SearchServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SearchServiceImpl.class);
     @Autowired
-    private SemanticLayer semanticLayer;
+    private WordNatureService wordNatureService;
     @Autowired
     private ChatService chatService;
-
     @Autowired
     private SearchMatchStrategy searchMatchStrategy;
 
@@ -63,13 +60,16 @@ public class SearchServiceImpl implements SearchService {
     public List<SearchResult> search(QueryContextReq queryCtx) {
         String queryText = queryCtx.getQueryText();
         // 1.get meta info
-        DomainInfos domainInfosDb = SchemaInfoConverter.convert(semanticLayer.getDomainSchemaInfo(new ArrayList<>()));
+        DomainInfos domainInfosDb = wordNatureService.getCache().getUnchecked("");
+
         List<ItemDO> metricsDb = domainInfosDb.getMetrics();
         final Map<Integer, String> domainToName = domainInfosDb.getDomainToName();
         // 2.detect by segment
-        List<Term> originals = HanlpHelper.getSegment().seg(queryText).stream().collect(Collectors.toList());
-        Map<MatchText, List<MapResult>> regTextMap = searchMatchStrategy.matchWithMatchText(queryText, originals);
-
+        List<Term> originals = HanlpHelper.getSegment().seg(queryText.toLowerCase()).stream()
+                .collect(Collectors.toList());
+        Map<MatchText, List<MapResult>> regTextMap = searchMatchStrategy.matchWithMatchText(queryText, originals,
+                queryCtx.getDomainId());
+        regTextMap.entrySet().stream().forEach(m -> HanlpHelper.transLetterOriginal(m.getValue()));
         // 3.get the most matching data
         Optional<Entry<MatchText, List<MapResult>>> mostSimilarSearchResult = regTextMap.entrySet()
                 .stream()
@@ -77,28 +77,28 @@ public class SearchServiceImpl implements SearchService {
                 .reduce((entry1, entry2) ->
                         entry1.getKey().getDetectSegment().length() >= entry2.getKey().getDetectSegment().length()
                                 ? entry1 : entry2);
-        logger.debug("mostSimilarSearchResult:{}", mostSimilarSearchResult);
+        LOGGER.debug("mostSimilarSearchResult:{}", mostSimilarSearchResult);
         // 4.optimize the results after the query
         if (!mostSimilarSearchResult.isPresent()) {
-            logger.info("unable to find any information through search , queryCtx:{}", queryCtx);
+            LOGGER.info("unable to find any information through search , queryCtx:{}", queryCtx);
             return Lists.newArrayList();
         }
         Map.Entry<MatchText, List<MapResult>> searchTextEntry = mostSimilarSearchResult.get();
-        logger.info("searchTextEntry:{},queryCtx:{}", searchTextEntry, queryCtx);
+        LOGGER.info("searchTextEntry:{},queryCtx:{}", searchTextEntry, queryCtx);
 
         Set<SearchResult> searchResults = new LinkedHashSet();
         DomainInfoStat domainStat = NatureHelper.getDomainStat(originals);
 
-        List<Integer> possibleDomains = getPossibleDomains(queryCtx, originals, domainStat);
+        List<Integer> possibleDomains = getPossibleDomains(queryCtx, originals, domainStat, queryCtx.getDomainId());
 
         // 4.1 priority dimension metric
         boolean existMetricAndDimension = searchMetricAndDimension(new HashSet<>(possibleDomains), domainToName,
-                searchTextEntry,
-                searchResults);
+                searchTextEntry, searchResults);
 
         // 4.2 process based on dimension values
         MatchText matchText = searchTextEntry.getKey();
-        Map<String, String> natureToNameMap = getNatureToNameMap(searchTextEntry);
+        Map<String, String> natureToNameMap = getNatureToNameMap(searchTextEntry, new HashSet<>(possibleDomains));
+        LOGGER.debug("possibleDomains:{},natureToNameMap:{}", possibleDomains, natureToNameMap);
 
         for (Map.Entry<String, String> natureToNameEntry : natureToNameMap.entrySet()) {
             searchDimensionValue(metricsDb, domainToName, domainStat.getMetricDomainCount(), searchResults,
@@ -108,12 +108,19 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private List<Integer> getPossibleDomains(QueryContextReq queryCtx, List<Term> originals,
-            DomainInfoStat domainStat) {
+            DomainInfoStat domainStat, Integer webDomainId) {
+
+        if (Objects.nonNull(webDomainId) && webDomainId > 0) {
+            List<Integer> result = new ArrayList<>();
+            result.add(webDomainId);
+            return result;
+        }
+
         List<Integer> possibleDomains = NatureHelper.selectPossibleDomains(originals);
 
         Long contextDomain = chatService.getContextDomain(queryCtx.getChatId());
 
-        logger.debug("possibleDomains:{},domainStat:{},contextDomain:{}", possibleDomains, domainStat, contextDomain);
+        LOGGER.debug("possibleDomains:{},domainStat:{},contextDomain:{}", possibleDomains, domainStat, contextDomain);
 
         // If nothing is recognized or only metric are present, then add the contextDomain.
         if (nothingOrOnlyMetric(domainStat) && effectiveDomain(contextDomain)) {
@@ -195,16 +202,25 @@ public class SearchServiceImpl implements SearchService {
      * @param recommendTextListEntry
      * @return
      */
-    private Map<String, String> getNatureToNameMap(Map.Entry<MatchText, List<MapResult>> recommendTextListEntry) {
+    private Map<String, String> getNatureToNameMap(Map.Entry<MatchText, List<MapResult>> recommendTextListEntry,
+            Set<Integer> possibleDomains) {
         List<MapResult> recommendValues = recommendTextListEntry.getValue();
         return recommendValues.stream()
-                .flatMap(entry -> entry.getNatures().stream().map(nature -> {
-                            WordNature posDO = new WordNature();
-                            posDO.setWord(entry.getName());
-                            posDO.setNature(nature);
-                            return posDO;
-                        }
-                )).sorted(Comparator.comparingInt(a -> a.getWord().length()))
+                .flatMap(entry -> entry.getNatures().stream()
+                        .filter(nature -> {
+                            if (CollectionUtils.isEmpty(possibleDomains)) {
+                                return true;
+                            }
+                            Integer domain = NatureHelper.getDomain(nature);
+                            return possibleDomains.contains(domain);
+                        })
+                        .map(nature -> {
+                                    WordNature posDO = new WordNature();
+                                    posDO.setWord(entry.getName());
+                                    posDO.setNature(nature);
+                                    return posDO;
+                                }
+                        )).sorted(Comparator.comparingInt(a -> a.getWord().length()))
                 .collect(Collectors.toMap(WordNature::getNature, WordNature::getWord, (value1, value2) -> value1,
                         LinkedHashMap::new));
     }
@@ -233,7 +249,7 @@ public class SearchServiceImpl implements SearchService {
                                     domainToName.get(domain), domain, semanticType));
                 }
             }
-            logger.info("parseResult:{},dimensionMetricClassIds:{},possibleDomains:{}", mapResult,
+            LOGGER.info("parseResult:{},dimensionMetricClassIds:{},possibleDomains:{}", mapResult,
                     dimensionMetricClassIds, possibleDomains);
         }
         return existMetric;

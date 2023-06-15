@@ -22,7 +22,7 @@ public class RegexAggregateTypeResolver implements AggregateTypeResolver {
         aggregateRegexMap.put(AggregateTypeEnum.MAX, Pattern.compile("(?i)(最大值|最大|max|峰值|最高)"));
         aggregateRegexMap.put(AggregateTypeEnum.MIN, Pattern.compile("(?i)(最小值|最小|min|最低)"));
         aggregateRegexMap.put(AggregateTypeEnum.SUM, Pattern.compile("(?i)(汇总|总和|sum)"));
-        aggregateRegexMap.put(AggregateTypeEnum.AVG, Pattern.compile("(?i)(平均值|平均|avg)"));
+        aggregateRegexMap.put(AggregateTypeEnum.AVG, Pattern.compile("(?i)(平均值|日均|平均|avg)"));
         aggregateRegexMap.put(AggregateTypeEnum.TOPN, Pattern.compile("(?i)(top)"));
         aggregateRegexMap.put(AggregateTypeEnum.DISTINCT, Pattern.compile("(?i)(uv)"));
         aggregateRegexMap.put(AggregateTypeEnum.COUNT, Pattern.compile("(?i)(总数|pv)"));

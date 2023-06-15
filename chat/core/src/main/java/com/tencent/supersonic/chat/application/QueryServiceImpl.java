@@ -3,6 +3,8 @@ package com.tencent.supersonic.chat.application;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.request.QueryContextReq;
 import com.tencent.supersonic.chat.api.response.QueryResultResp;
@@ -18,6 +20,9 @@ import com.tencent.supersonic.chat.domain.service.QueryService;
 import com.tencent.supersonic.chat.domain.utils.SchemaInfoConverter;
 import com.tencent.supersonic.common.util.json.JsonUtil;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;

@@ -13,18 +13,10 @@ import java.util.Map;
  */
 public interface MatchStrategy {
 
-    /***
-     * match
-     * @param terms
-     * @return
-     */
-    List<MapResult> match(String text, List<Term> terms, int retryCount);
+    List<MapResult> match(String text, List<Term> terms, Integer detectDomainId);
 
 
-    List<MapResult> match(String text, List<Term> terms, int retryCount, Integer detectDomainId);
-
-
-    Map<MatchText, List<MapResult>> matchWithMatchText(String text, List<Term> originals);
+    Map<MatchText, List<MapResult>> matchWithMatchText(String text, List<Term> originals, Integer detectDomainId);
 
     /***
      * exist dimension values

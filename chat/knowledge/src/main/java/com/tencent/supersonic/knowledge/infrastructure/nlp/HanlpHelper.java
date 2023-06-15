@@ -3,12 +3,15 @@ package com.tencent.supersonic.knowledge.infrastructure.nlp;
 import static com.hankcs.hanlp.HanLP.Config.CustomDictionaryPath;
 
 import com.hankcs.hanlp.HanLP;
+import com.hankcs.hanlp.dictionary.CoreDictionary;
 import com.hankcs.hanlp.dictionary.DynamicCustomDictionary;
 import com.hankcs.hanlp.seg.Segment;
+import com.tencent.supersonic.common.nlp.MapResult;
 import com.tencent.supersonic.common.nlp.WordNature;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ResourceUtils;
@@ -152,5 +155,19 @@ public class HanlpHelper {
         LOGGER.debug("wordNature:{}", wordNature);
         return getDynamicCustomDictionary().insert(wordNature.getWord(), wordNature.getNatureWithFrequency());
     }
+
+    public static void transLetterOriginal(List<MapResult> mapResults) {
+        for (MapResult mapResult : mapResults) {
+            if (MultiCustomDictionary.isLowerLetter(mapResult.getName())) {
+                if (CustomDictionary.contains(mapResult.getName())) {
+                    CoreDictionary.Attribute attribute = CustomDictionary.get(mapResult.getName());
+                    if (attribute != null && attribute.original != null) {
+                        mapResult.setName(attribute.original);
+                    }
+                }
+            }
+        }
+    }
+
 
 }

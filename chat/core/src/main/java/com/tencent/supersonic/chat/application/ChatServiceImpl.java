@@ -7,6 +7,7 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.request.QueryContextReq;
 import com.tencent.supersonic.chat.api.response.QueryResultResp;
 import com.tencent.supersonic.chat.domain.dataobject.ChatDO;
+import com.tencent.supersonic.chat.domain.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.domain.dataobject.QueryDO;
 import com.tencent.supersonic.chat.domain.pojo.chat.ChatQueryVO;
 import com.tencent.supersonic.chat.domain.pojo.chat.PageQueryInfoReq;
@@ -128,6 +129,16 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public void addQuery(QueryResultResp queryResponse, QueryContextReq queryContext, ChatContext chatCtx) {
         chatQueryRepository.createChatQuery(queryResponse, queryContext, chatCtx);
+    }
+
+    @Override
+    public ChatQueryDO getLastQuery(long chatId) {
+        return chatQueryRepository.getLastChatQuery(chatId);
+    }
+
+    @Override
+    public int updateQuery(ChatQueryDO chatQueryDO) {
+        return chatQueryRepository.updateChatQuery(chatQueryDO);
     }
 
 }

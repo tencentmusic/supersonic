@@ -1,4 +1,4 @@
-package com.tencent.supersonic.semantic.query.application;
+package com.tencent.supersonic.semantic.query.application.parser;
 
 
 import com.google.common.cache.CacheBuilder;

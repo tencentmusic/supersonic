@@ -93,6 +93,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     private QueryResultWithSchemaResp queryWithColumns(String sql, DatabaseResp databaseResp) {
         QueryResultWithSchemaResp queryResultWithColumns = new QueryResultWithSchemaResp();
         SqlUtils sqlUtils = this.sqlUtils.init(databaseResp);
+        log.info("query SQL: {}" , sql);
         sqlUtils.queryInternal(sql, queryResultWithColumns);
         return queryResultWithColumns;
     }

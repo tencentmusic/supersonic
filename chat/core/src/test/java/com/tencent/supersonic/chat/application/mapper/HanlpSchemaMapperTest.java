@@ -11,11 +11,11 @@ class HanlpSchemaMapperTest extends ContextTest {
 
     @Test
     void map() {
-        QueryContextReq searchCtx = new QueryContextReq();
-        searchCtx.setChatId(1);
-        searchCtx.setDomainId(2);
-        searchCtx.setQueryText("supersonic按部门访问次数");
+        QueryContextReq queryContext = new QueryContextReq();
+        queryContext.setChatId(1);
+        queryContext.setDomainId(2);
+        queryContext.setQueryText("supersonic按部门访问次数");
         HanlpSchemaMapper hanlpSchemaMapper = new HanlpSchemaMapper();
-        hanlpSchemaMapper.map(searchCtx);
+        hanlpSchemaMapper.map(queryContext);
     }
 }

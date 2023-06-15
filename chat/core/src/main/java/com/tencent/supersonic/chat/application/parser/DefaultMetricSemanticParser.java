@@ -9,8 +9,6 @@ import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.request.QueryContextReq;
 import com.tencent.supersonic.chat.api.service.SemanticParser;
-import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
 import com.tencent.supersonic.chat.application.parser.resolver.DomainResolver;
 import com.tencent.supersonic.chat.application.query.EntityDetail;
 import com.tencent.supersonic.chat.application.query.EntityListFilter;
@@ -24,8 +22,10 @@ import com.tencent.supersonic.chat.domain.utils.DefaultSemanticInternalUtils;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.SchemaItem;
 import com.tencent.supersonic.common.util.context.ContextUtils;
-import java.util.ArrayList;
+import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
+import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -104,33 +104,39 @@ public class DefaultMetricSemanticParser implements SemanticParser {
         return primaryDimensions;
     }
 
-    protected void addEntityDetailDimensionMetric(QueryContextReq searchCtx, ChatContext chatCtx) {
-        if (searchCtx.getParseInfo().getDomainId() > 0) {
-            ChatConfigRichInfo chaConfigRichDesc = defaultSemanticUtils.getChatConfigRichInfo(
-                    searchCtx.getParseInfo().getDomainId());
+    protected void addEntityDetailDimensionMetric(QueryContextReq queryContext, ChatContext chatCtx) {
+        if (queryContext.getParseInfo().getDomainId() > 0) {
+            Long domainId = queryContext.getParseInfo().getDomainId();
+            ChatConfigRichInfo chaConfigRichDesc = defaultSemanticUtils.getChatConfigRichInfo(domainId);
             if (chaConfigRichDesc != null) {
-                SemanticParseInfo semanticParseInfo = searchCtx.getParseInfo();
-                if (Objects.nonNull(semanticParseInfo) && CollectionUtils.isEmpty(semanticParseInfo.getDimensions())) {
-                    List<SchemaItem> dimensions = new ArrayList<>();
-                    List<SchemaItem> metrics = new ArrayList<>();
-                    if (chaConfigRichDesc.getEntity() != null
-                            && chaConfigRichDesc.getEntity().getEntityInternalDetailDesc() != null) {
-                        chaConfigRichDesc.getEntity().getEntityInternalDetailDesc().getMetricList().stream()
-                                .forEach(m -> metrics.add(getMetric(m)));
-                        chaConfigRichDesc.getEntity().getEntityInternalDetailDesc().getDimensionList().stream()
-                                .forEach(m -> dimensions.add(getDimension(m)));
-                    }
-                    semanticParseInfo.setDimensions(dimensions);
-                    semanticParseInfo.setMetrics(metrics);
+                if (chaConfigRichDesc.getEntity() == null
+                        || chaConfigRichDesc.getEntity().getEntityInternalDetailDesc() == null) {
+                    return;
                 }
+                SemanticParseInfo semanticParseInfo = queryContext.getParseInfo();
+                Set<SchemaItem> metrics = new LinkedHashSet();
+                chaConfigRichDesc.getEntity().getEntityInternalDetailDesc().getMetricList().stream()
+                        .forEach(m -> metrics.add(getMetric(m)));
+                semanticParseInfo.setMetrics(metrics);
 
+                List<SchemaElementMatch> schemaElementMatches = queryContext.getMapInfo()
+                        .getMatchedElements(domainId.intValue());
+                if (CollectionUtils.isEmpty(schemaElementMatches) || schemaElementMatches.stream()
+                        .filter(s -> SchemaElementType.DIMENSION.equals(s.getElementType())).count() <= 0) {
+                    logger.info("addEntityDetailDimensionMetric catch");
+                    Set<SchemaItem> dimensions = new LinkedHashSet();
+                    chaConfigRichDesc.getEntity().getEntityInternalDetailDesc().getDimensionList().stream()
+                            .forEach(m -> dimensions.add(getDimension(m)));
+                    semanticParseInfo.setDimensions(dimensions);
+
+                }
             }
         }
     }
 
-    protected void defaultQueryMode(QueryContextReq searchCtx, ChatContext chatCtx) {
-        SchemaMapInfo schemaMap = searchCtx.getMapInfo();
-        SemanticParseInfo parseInfo = searchCtx.getParseInfo();
+    protected void defaultQueryMode(QueryContextReq queryContext, ChatContext chatCtx) {
+        SchemaMapInfo schemaMap = queryContext.getMapInfo();
+        SemanticParseInfo parseInfo = queryContext.getParseInfo();
         if (StringUtils.isEmpty(parseInfo.getQueryMode())) {
             if (chatCtx.getParseInfo() != null && chatCtx.getParseInfo().getDomainId() > 0) {
                 //
@@ -182,12 +188,12 @@ public class DefaultMetricSemanticParser implements SemanticParser {
     }
 
 
-    private void fillDateDomain(ChatContext chatCtx, QueryContextReq searchCtx) {
-        SemanticParseInfo parseInfo = searchCtx.getParseInfo();
+    private void fillDateDomain(ChatContext chatCtx, QueryContextReq queryContext) {
+        SemanticParseInfo parseInfo = queryContext.getParseInfo();
 
         if (parseInfo == null || parseInfo.getDateInfo() == null) {
             boolean isUpdateTime = false;
-            if (selectStrategy.isDomainSwitch(chatCtx, searchCtx)) {
+            if (selectStrategy.isDomainSwitch(chatCtx, queryContext)) {
                 isUpdateTime = true;
             }
             if (chatCtx.getParseInfo() == null
@@ -212,7 +218,7 @@ public class DefaultMetricSemanticParser implements SemanticParser {
 
         if (CollectionUtils.isEmpty(semanticParseInfo.getMetrics()) && CollectionUtils.isEmpty(
                 semanticParseInfo.getDimensions())) {
-            List<SchemaItem> metrics = new ArrayList<>();
+            Set<SchemaItem> metrics = new LinkedHashSet();
             chaConfigRichDesc.getDefaultMetrics().stream().forEach(metric -> {
                 SchemaItem metricTmp = new SchemaItem();
                 metricTmp.setId(metric.getMetricId());
