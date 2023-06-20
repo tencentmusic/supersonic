@@ -10,9 +10,11 @@ import Conversation from './Conversation';
 import RightSection from './RightSection';
 import ChatFooter from './ChatFooter';
 import classNames from 'classnames';
-import { DEFAULT_CONVERSATION_NAME, WEB_TITLE } from '@/common/constants';
+import { AUTH_TOKEN_KEY, DEFAULT_CONVERSATION_NAME, WEB_TITLE } from '@/common/constants';
 import { HistoryMsgItemType, MsgDataType, getHistoryMsg, queryContext } from 'supersonic-chat-sdk';
 import { getConversationContext } from './utils';
+import { setToken as setChatSdkToken } from 'supersonic-chat-sdk';
+import 'supersonic-chat-sdk/dist/index.css';
 
 const Chat = () => {
   const [messageList, setMessageList] = useState<MessageItem[]>([]);
@@ -26,6 +28,10 @@ const Chat = () => {
   const [currentEntity, setCurrentEntity] = useState<MsgDataType>();
   const conversationRef = useRef<any>();
   const chatFooterRef = useRef<any>();
+
+  useEffect(() => {
+    setChatSdkToken(localStorage.getItem(AUTH_TOKEN_KEY) || '');
+  }, []);
 
   const sendHelloRsp = () => {
     setMessageList([

@@ -1,6 +1,6 @@
 {
   "name": "supersonic-chat-sdk",
-  "version": "0.1.6",
+  "version": "0.1.0",
   "main": "dist/index.es.js",
   "module": "dist/index.es.js",
   "unpkg": "dist/index.umd.js",
@@ -63,6 +63,7 @@
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@rollup/plugin-replace": "^5.0.2",
+    "@rollup/plugin-terser": "^0.4.3",
     "@svgr/webpack": "^5.5.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -117,7 +118,6 @@
     "rollup-plugin-exclude-dependencies-from-bundle": "^1.1.23",
     "rollup-plugin-less": "^1.1.3",
     "rollup-plugin-postcss": "^4.0.2",
-    "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.34.1",
     "sass-loader": "^12.3.0",
     "semver": "^7.3.5",

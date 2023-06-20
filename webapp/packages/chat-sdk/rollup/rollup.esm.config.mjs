@@ -1,5 +1,4 @@
 import basicConfig from './rollup.config.mjs'
-// import { terser } from "rollup-plugin-terser"
 import excludeDependenciesFromBundle from "rollup-plugin-exclude-dependencies-from-bundle"
 
 const config = {
@@ -7,10 +6,7 @@ const config = {
   output: [
     {
       file: 'dist/index.es.js',
-      format: 'es',
-      // plugins: [
-      //   terser()
-      // ],
+      format: 'es',      
     },
   ],
   plugins: [

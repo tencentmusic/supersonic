@@ -1,5 +1,5 @@
 import basicConfig from './rollup.config.mjs'
-import { terser } from "rollup-plugin-terser"
+import terser from '@rollup/plugin-terser';
 import replace from '@rollup/plugin-replace'
 
 const config = {
