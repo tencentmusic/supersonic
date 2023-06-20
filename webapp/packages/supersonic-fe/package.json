@@ -64,7 +64,7 @@
     "@antv/layout": "^0.3.20",
     "@antv/xflow": "^1.0.55",
     "@babel/runtime": "^7.22.5",
-    "supersonic-chat-sdk": "^0.1.6",
+    "supersonic-chat-sdk": "^0.1.0",
     "@types/numeral": "^2.0.2",
     "@types/react-draft-wysiwyg": "^1.13.2",
     "@types/react-syntax-highlighter": "^13.5.0",
@@ -137,7 +137,7 @@
     "typescript": "^4.0.3"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=10.0.0 <17.0.0"
   },
   "resolutions": {
     "@types/react": "17.0.0"

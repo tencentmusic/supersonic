@@ -12,8 +12,6 @@ import defaultSettings from '../config/defaultSettings';
 import settings from '../config/themeSettings';
 import { deleteUrlQuery } from './utils/utils';
 import { AUTH_TOKEN_KEY, FROM_URL_KEY } from '@/common/constants';
-import 'supersonic-chat-sdk/dist/index.css';
-import { setToken as setChatSdkToken } from 'supersonic-chat-sdk';
 export { request } from './services/request';
 import { ROUTE_AUTH_CODES } from '../config/routes';
 
@@ -97,8 +95,6 @@ export async function getInitialState(): Promise<{
   if (window.location.host.includes('tmeoa') && !currentToken) {
     await getToken();
   }
-
-  setChatSdkToken(localStorage.getItem(AUTH_TOKEN_KEY) || '');
 
   const currentUser = await fetchUserInfo();
 
