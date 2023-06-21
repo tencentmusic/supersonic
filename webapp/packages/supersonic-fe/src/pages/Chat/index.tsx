@@ -11,9 +11,14 @@ import RightSection from './RightSection';
 import ChatFooter from './ChatFooter';
 import classNames from 'classnames';
 import { AUTH_TOKEN_KEY, DEFAULT_CONVERSATION_NAME, WEB_TITLE } from '@/common/constants';
-import { HistoryMsgItemType, MsgDataType, getHistoryMsg, queryContext } from 'supersonic-chat-sdk';
+import {
+  HistoryMsgItemType,
+  MsgDataType,
+  getHistoryMsg,
+  queryContext,
+  setToken as setChatSdkToken,
+} from 'supersonic-chat-sdk';
 import { getConversationContext } from './utils';
-import { setToken as setChatSdkToken } from 'supersonic-chat-sdk';
 import 'supersonic-chat-sdk/dist/index.css';
 
 const Chat = () => {

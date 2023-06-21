@@ -50,7 +50,7 @@ const getToken = async () => {
     try {
       const fromUrl = localStorage.getItem(FROM_URL_KEY);
       const res = await queryToken(data.code as string);
-      localStorage.setItem(TOKEN_KEY, res.data.authToken);
+      localStorage.setItem(TOKEN_KEY, res.payload);
       const newUrl = deleteUrlQuery(window.location.href, 'code');
       window.location.href = fromUrl || newUrl;
     } catch (err) {

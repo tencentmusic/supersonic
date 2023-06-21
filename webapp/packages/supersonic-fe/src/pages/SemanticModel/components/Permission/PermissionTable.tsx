@@ -53,14 +53,14 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
 
   const queryDepartmentData = async () => {
     const { code, data } = await getDepartmentTree();
-    if (code === 200) {
+    if (code === 200 || code === '0') {
       setDepartmentTreeData(data);
     }
   };
 
   const queryTmePersonData = async () => {
     const { code, data } = await getAllUser();
-    if (code === 200) {
+    if (code === 200 || Number(code) === 0) {
       setTmePerson(data);
     }
   };
