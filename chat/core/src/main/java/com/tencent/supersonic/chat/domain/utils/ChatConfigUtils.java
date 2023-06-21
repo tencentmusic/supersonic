@@ -154,7 +154,7 @@ public class ChatConfigUtils {
                 JsonUtil.toList(chaConfigDO.getDefaultMetrics(), DefaultMetricInfo.class));
         chaConfigDescriptor.setVisibility(JsonUtil.toObject(chaConfigDO.getVisibility(), ItemVisibility.class));
         chaConfigDescriptor.setEntity(JsonUtil.toObject(chaConfigDO.getEntity(), Entity.class));
-        chaConfigDescriptor.setDictionaryInfos(JsonUtil.toList(chaConfigDO.getKnowledgeInfo(), KnowledgeInfo.class));
+        chaConfigDescriptor.setKnowledgeInfos(JsonUtil.toList(chaConfigDO.getKnowledgeInfo(), KnowledgeInfo.class));
         chaConfigDescriptor.setStatusEnum(StatusEnum.of(chaConfigDO.getStatus()));
 
         chaConfigDescriptor.setCreatedBy(chaConfigDO.getCreatedBy());
