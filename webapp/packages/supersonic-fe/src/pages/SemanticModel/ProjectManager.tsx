@@ -26,6 +26,7 @@ type Props = {
 const DEFAULT_LEFT_SIZE = '300px';
 
 const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
+  window.RUNNING_ENV = 'semantic';
   const [collapsed, setCollapsed] = useState(false);
   const [leftSize, setLeftSize] = useState('');
   const { selectDomainId, selectDomainName } = domainManger;

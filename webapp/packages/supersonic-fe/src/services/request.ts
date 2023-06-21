@@ -20,6 +20,7 @@ const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
 
   const token = query[TOKEN_KEY] || localStorage.getItem(TOKEN_KEY);
   if (token) {
+    headers.Authorization = `Bearer ${token}`;
     headers.auth = `Bearer ${token}`;
     localStorage.setItem(TOKEN_KEY, token);
   }
@@ -31,25 +32,19 @@ const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
 };
 
 const responseInterceptor = async (response: Response) => {
-  const data: Result<any> = await response?.clone()?.json?.();
-  if (Number(data.code) === 403) {
-    history.push('/login');
-    return response;
-  }
-
   const redirect = response.headers.get('redirect'); // 若HEADER中含有REDIRECT说明后端想重定向
   if (redirect === 'REDIRECT') {
     localStorage.removeItem(TOKEN_KEY);
-    let win: any = window;
-    while (win !== win.top) {
-      win = win.top;
-    }
-    if (!/fromExternal=true/.test(win.location.search)) {
-      localStorage.setItem(FROM_URL_KEY, win.location.href);
-    }
+    const win: any = window;
     // 将后端重定向的地址取出来,使用win.location.href去实现重定向的要求
     const contextpath = response.headers.get('contextpath');
     win.location.href = contextpath;
+  } else {
+    const data: Result<any> = await response?.clone()?.json?.();
+    if (Number(data.code) === 403) {
+      history.push('/login');
+      return response;
+    }
   }
 
   return response;

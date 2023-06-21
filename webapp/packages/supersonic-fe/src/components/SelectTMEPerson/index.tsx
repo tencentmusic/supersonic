@@ -22,11 +22,12 @@ const SelectTMEPerson: FC<Props> = ({ placeholder, value, isMultiple = true, onC
     {
       fetcher: async () => {
         const res = await getAllUser();
-        if (res.code !== 200) {
+        if (res.code == 200 || Number(res.code) == 0) {
+          return res.data || [];
+        } else {
           message.error(res.msg);
           throw new Error(res.msg);
         }
-        return res.data || [];
       },
       updater: (list) => {
         const users = list.map((item: UserItem) => {
