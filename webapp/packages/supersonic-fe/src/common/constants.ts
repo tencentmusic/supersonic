@@ -1,6 +1,5 @@
 // 登陆 token key
-export const AUTH_TOKEN_KEY = 'SUPERSONIC_TOKEN';
-
+export const AUTH_TOKEN_KEY = process.env.APP_TARGET === 'inner' ? 'TME_TOKEN' : 'SUPERSONIC_TOKEN';
 // 记录上次访问页面
 export const FROM_URL_KEY = 'FROM_URL';
 
