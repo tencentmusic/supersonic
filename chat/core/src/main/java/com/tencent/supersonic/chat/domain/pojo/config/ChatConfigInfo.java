@@ -30,7 +30,7 @@ public class ChatConfigInfo {
     /**
      * information about dictionary about the domain
      */
-    private List<KnowledgeInfo> dictionaryInfos;
+    private List<KnowledgeInfo> knowledgeInfos;
 
     /**
      * available status

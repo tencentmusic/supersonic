@@ -14,6 +14,7 @@ import com.tencent.supersonic.chat.domain.pojo.config.ItemVisibilityInfo;
 import com.tencent.supersonic.chat.domain.pojo.config.KnowledgeInfo;
 import com.tencent.supersonic.knowledge.domain.pojo.DictUpdateMode;
 import com.tencent.supersonic.knowledge.domain.pojo.DimValue2DictCommand;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -37,7 +39,7 @@ public class DictMetaUtils {
     private final DefaultSemanticInternalUtils defaultSemanticUtils;
 
     public DictMetaUtils(SemanticLayer semanticLayer,
-            DefaultSemanticInternalUtils defaultSemanticUtils) {
+                         DefaultSemanticInternalUtils defaultSemanticUtils) {
         this.semanticLayer = semanticLayer;
         this.defaultSemanticUtils = defaultSemanticUtils;
     }
@@ -129,21 +131,21 @@ public class DictMetaUtils {
     }
 
     private void fillDimValueDOList(List<DimValueDO> dimValueDOList, Long domainId,
-            Map<Long, DimSchemaResp> dimIdAndDescPair) {
+                                    Map<Long, DimSchemaResp> dimIdAndDescPair) {
         ChatConfigRichInfo chaConfigRichDesc = defaultSemanticUtils.getChatConfigRichInfo(domainId);
         if (Objects.nonNull(chaConfigRichDesc)) {
 
             List<DefaultMetric> defaultMetricDescList = chaConfigRichDesc.getDefaultMetrics();
 
-            List<KnowledgeInfo> dictionaryInfos = chaConfigRichDesc.getDictionaryInfos();
-            if (!CollectionUtils.isEmpty(dictionaryInfos)) {
+            List<KnowledgeInfo> knowledgeInfos = chaConfigRichDesc.getKnowledgeInfos();
+            if (!CollectionUtils.isEmpty(knowledgeInfos)) {
                 List<Dim4Dict> dimensions = new ArrayList<>();
-                dictionaryInfos.stream()
-                        .filter(dictionaryInfo -> dictionaryInfo.getIsDictInfo()
-                                && isVisibleDim(dictionaryInfo, chaConfigRichDesc.getVisibility()))
-                        .forEach(dictionaryInfo -> {
-                            if (dimIdAndDescPair.containsKey(dictionaryInfo.getItemId())) {
-                                DimSchemaResp dimensionDesc = dimIdAndDescPair.get(dictionaryInfo.getItemId());
+                knowledgeInfos.stream()
+                        .filter(knowledgeInfo -> knowledgeInfo.getIsDictInfo()
+                                && isVisibleDim(knowledgeInfo, chaConfigRichDesc.getVisibility()))
+                        .forEach(knowledgeInfo -> {
+                            if (dimIdAndDescPair.containsKey(knowledgeInfo.getItemId())) {
+                                DimSchemaResp dimensionDesc = dimIdAndDescPair.get(knowledgeInfo.getItemId());
 
                                 //default cnt
                                 if (CollectionUtils.isEmpty(defaultMetricDescList)) {
@@ -156,9 +158,9 @@ public class DictMetaUtils {
                                 }
 
                                 String bizName = dimensionDesc.getBizName();
-                                dimensions.add(new Dim4Dict(dictionaryInfo.getItemId(), bizName,
-                                        dictionaryInfo.getBlackList(), dictionaryInfo.getWhiteList(),
-                                        dictionaryInfo.getRuleList()));
+                                dimensions.add(new Dim4Dict(knowledgeInfo.getItemId(), bizName,
+                                        knowledgeInfo.getBlackList(), knowledgeInfo.getWhiteList(),
+                                        knowledgeInfo.getRuleList()));
                             }
 
                         });
@@ -173,10 +175,10 @@ public class DictMetaUtils {
         }
     }
 
-    private boolean isVisibleDim(KnowledgeInfo dictionaryInfo, ItemVisibilityInfo itemVisibilityDesc) {
+    private boolean isVisibleDim(KnowledgeInfo knowledgeInfo, ItemVisibilityInfo itemVisibilityDesc) {
         if (Objects.isNull(itemVisibilityDesc) || CollectionUtils.isEmpty(itemVisibilityDesc.getBlackDimIdList())) {
             return true;
         }
-        return !itemVisibilityDesc.getBlackDimIdList().contains(dictionaryInfo.getItemId());
+        return !itemVisibilityDesc.getBlackDimIdList().contains(knowledgeInfo.getItemId());
     }
 }
