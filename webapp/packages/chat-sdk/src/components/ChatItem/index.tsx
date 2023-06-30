@@ -86,13 +86,13 @@ const ChatItem: React.FC<Props> = ({
   const onSendMsg = async () => {
     setLoading(true);
     const semanticRes = await chatQuery(msg, conversationId, classId);
-    const semanticValid = updateData(semanticRes.data);
-    if (suggestionEnable && semanticValid) {
-      const semanticResData = semanticRes.data.data;
-      await getSuggestions(semanticResData.entityInfo?.domainInfo?.itemId, semanticRes.data.data);
-    } else {
-      setSuggestionData(undefined);
-    }
+    updateData(semanticRes.data);
+    // if (suggestionEnable && semanticValid) {
+    //   const semanticResData = semanticRes.data.data;
+    //   await getSuggestions(semanticResData.entityInfo?.domainInfo?.itemId, semanticRes.data.data);
+    // } else {
+    //   setSuggestionData(undefined);
+    // }
     if (onLastMsgDataLoaded) {
       onLastMsgDataLoaded(semanticRes.data.data);
     }

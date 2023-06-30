@@ -2,7 +2,7 @@ import axios from './axiosInstance';
 import { ChatContextType, HistoryType, MsgDataType, SearchRecommendItem } from '../common/type';
 import { QueryDataType } from '../common/type';
 
-const DEFAULT_CHAT_ID = 0;
+const DEFAULT_CHAT_ID = 2;
 
 const prefix = '/api';
 
