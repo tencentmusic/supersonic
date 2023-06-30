@@ -9,7 +9,7 @@ export type LoginParamsType = {
 };
 
 export async function queryToken(code: string) {
-  return request(`${process.env.API_BASE_URL}user/ioaLoginCallback`, {
+  return request(`/davinciapi/login/tmeloginCallback`, {
     params: { code },
   });
 }

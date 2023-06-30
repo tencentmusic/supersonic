@@ -26,13 +26,13 @@ const DimensionSearchVisibleModal: React.FC<Props> = ({
   const [dictRules, setDictRules] = useState<string>('');
 
   useEffect(() => {
-    const dictionaryInfos = themeData?.dictionaryInfos;
-    if (Array.isArray(dictionaryInfos)) {
-      const target = dictionaryInfos[0];
+    const knowledgeInfos = themeData?.knowledgeInfos;
+    if (Array.isArray(knowledgeInfos)) {
+      const target = knowledgeInfos[0];
       if (Array.isArray(target?.ruleList)) {
         setDictRules(target.ruleList[0]);
       }
-      const selectKeys = dictionaryInfos.map((item: any) => {
+      const selectKeys = knowledgeInfos.map((item: any) => {
         return item.itemId;
       });
       setSelectedKeyList(selectKeys);
@@ -48,7 +48,7 @@ const DimensionSearchVisibleModal: React.FC<Props> = ({
   }, [settingSourceList]);
 
   const saveDictBatch = async () => {
-    const dictionaryInfos = selectedKeyList.map((key: string) => {
+    const knowledgeInfos = selectedKeyList.map((key: string) => {
       return {
         itemId: key,
         type: 'DIMENSION',
@@ -62,7 +62,7 @@ const DimensionSearchVisibleModal: React.FC<Props> = ({
       saveDomainExtendQuery = editDomainExtend;
     }
     const { code, msg } = await saveDomainExtendQuery({
-      dictionaryInfos,
+      knowledgeInfos,
       domainId,
       id,
     });

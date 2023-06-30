@@ -196,7 +196,6 @@ const DomainManger: React.FC<Props> = ({ domainManger, domainId }) => {
   };
   // const [visible, setVisible] = useState(false);
   useEffect(() => {
-    console.log(domainId, graphData, 'domainId');
     if (!(Array.isArray(graphData.children) && graphData.children.length > 0)) {
       return;
     }
@@ -356,7 +355,6 @@ const DomainManger: React.FC<Props> = ({ domainManger, domainId }) => {
         labelCfg: { style: { fill: '#3c3c3c' } },
       };
     });
-    console.log(graphData, 'graphData');
     // graph.data(graphData);
     graph.changeData(graphData);
     graph.render();
@@ -386,7 +384,6 @@ const DomainManger: React.FC<Props> = ({ domainManger, domainId }) => {
             value={graphShowType}
             onChange={(e) => {
               const { value } = e.target;
-              console.log(value, 'value');
               setGraphShowType(value);
               changeGraphData(dataSourceListData, value);
             }}

@@ -17,15 +17,17 @@ const Context: React.FC<Props> = ({ chatContext }) => {
           <span className={styles.fieldName}>主题域：</span>
           <span className={styles.fieldValue}>{domainName}</span>
         </div>
-        {dateInfo && (
-          <div className={styles.field}>
-            <span className={styles.fieldName}>时间范围：</span>
-            <span className={styles.fieldValue}>
-              {dateInfo.text ||
-                `近${moment(dateInfo.endDate).diff(moment(dateInfo.startDate), 'days') + 1}天`}
-            </span>
-          </div>
-        )}
+        {
+          dateInfo && (
+            <div className={styles.field}>
+              <span className={styles.fieldName}>时间范围：</span>
+              <span className={styles.fieldValue}>
+                {dateInfo.text ||
+                  `近${moment(dateInfo.endDate).diff(moment(dateInfo.startDate), 'days') + 1}天`}
+              </span>
+            </div>
+          )
+        }
         {metrics && metrics.length > 0 && (
           <div className={styles.field}>
             <span className={styles.fieldName}>指标：</span>
