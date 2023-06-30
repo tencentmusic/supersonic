@@ -5,6 +5,7 @@ import themeSettings from './themeSettings';
 import proxy from './proxy';
 import routes from './routes';
 import moment from 'moment';
+import ENV_CONFIG from './envConfig';
 
 const { REACT_APP_ENV, RUN_TYPE } = process.env;
 
@@ -19,6 +20,7 @@ export default defineConfig({
       API_BASE_URL: '/api/semantic/', // 直接在define中挂载裸露的全局变量还需要配置eslint，ts相关配置才能导致在使用中不会飘红，冗余较高，这里挂在进程环境下
       CHAT_API_BASE_URL: '/api/chat/',
       AUTH_API_BASE_URL: '/api/auth/',
+      ...ENV_CONFIG,
     },
   },
   metas: [

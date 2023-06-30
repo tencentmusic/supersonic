@@ -1,6 +1,6 @@
 import IconFont from '@/components/IconFont';
-import { getTextWidth, groupByColumn, isMobile } from '@/utils/utils';
-import { AutoComplete, Select, Tag } from 'antd';
+import { getTextWidth, groupByColumn } from '@/utils/utils';
+import { AutoComplete, Select, Tag, Tooltip } from 'antd';
 import classNames from 'classnames';
 import { debounce } from 'lodash';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
@@ -8,13 +8,18 @@ import type { ForwardRefRenderFunction } from 'react';
 import { searchRecommend } from 'supersonic-chat-sdk';
 import { SemanticTypeEnum, SEMANTIC_TYPE_MAP } from '../constants';
 import styles from './style.less';
-import { PLACE_HOLDER } from '@/common/constants';
+import { PLACE_HOLDER } from '../constants';
+import { DomainType } from '../type';
 
 type Props = {
   inputMsg: string;
   chatId?: number;
+  currentDomain?: DomainType;
+  domains: DomainType[];
+  isMobileMode?: boolean;
   onInputMsgChange: (value: string) => void;
   onSendMsg: (msg: string, domainId?: number) => void;
+  onAddConversation: () => void;
 };
 
 const { OptGroup, Option } = Select;
@@ -30,9 +35,19 @@ const compositionEndEvent = () => {
 };
 
 const ChatFooter: ForwardRefRenderFunction<any, Props> = (
-  { inputMsg, chatId, onInputMsgChange, onSendMsg },
+  {
+    inputMsg,
+    chatId,
+    currentDomain,
+    domains,
+    isMobileMode,
+    onInputMsgChange,
+    onSendMsg,
+    onAddConversation,
+  },
   ref,
 ) => {
+  const [domainOptions, setDomainOptions] = useState<DomainType[]>([]);
   const [stepOptions, setStepOptions] = useState<Record<string, any[]>>({});
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -73,39 +88,61 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     };
   }, []);
 
+  const getStepOptions = (recommends: any[]) => {
+    const data = groupByColumn(recommends, 'domainName');
+    return isMobileMode && recommends.length > 6
+      ? Object.keys(data)
+          .slice(0, 4)
+          .reduce((result, key) => {
+            result[key] = data[key].slice(
+              0,
+              Object.keys(data).length > 2 ? 2 : Object.keys(data).length > 1 ? 3 : 6,
+            );
+            return result;
+          }, {})
+      : data;
+  };
+
+  const processMsg = (msg: string, domains: DomainType[]) => {
+    let msgValue = msg;
+    let domainId: number | undefined;
+    if (msg?.[0] === '@') {
+      const domain = domains.find((item) => msg.includes(`@${item.name}`));
+      msgValue = domain ? msg.replace(`@${domain.name}`, '') : msg;
+      domainId = domain?.id;
+    }
+    return { msgValue, domainId };
+  };
+
   const debounceGetWordsFunc = useCallback(() => {
-    const getAssociateWords = async (msg: string, chatId?: number) => {
+    const getAssociateWords = async (
+      msg: string,
+      domains: DomainType[],
+      chatId?: number,
+      domain?: DomainType,
+    ) => {
       if (isPinyin) {
+        return;
+      }
+      if (msg === '' || (msg.length === 1 && msg[0] === '@')) {
         return;
       }
       fetchRef.current += 1;
       const fetchId = fetchRef.current;
-      const res = await searchRecommend(msg, chatId);
+      const { msgValue, domainId } = processMsg(msg, domains);
+      const res = await searchRecommend(msgValue.trim(), chatId, domainId || domain?.id);
       if (fetchId !== fetchRef.current) {
         return;
       }
-      const recommends = msg ? res.data.data || [] : [];
+
+      const recommends = msgValue ? res.data.data || [] : [];
       const stepOptionList = recommends.map((item: any) => item.subRecommend);
 
       if (stepOptionList.length > 0 && stepOptionList.every((item: any) => item !== null)) {
-        const data = groupByColumn(recommends, 'domainName');
-        const optionsData =
-          isMobile && recommends.length > 6
-            ? Object.keys(data)
-              .slice(0, 4)
-              .reduce((result, key) => {
-                result[key] = data[key].slice(
-                  0,
-                  Object.keys(data).length > 2 ? 2 : Object.keys(data).length > 1 ? 3 : 6,
-                );
-                return result;
-              }, {})
-            : data;
-        setStepOptions(optionsData);
+        setStepOptions(getStepOptions(recommends));
       } else {
         setStepOptions({});
       }
-
       setOpen(recommends.length > 0);
     };
     return debounce(getAssociateWords, 20);
@@ -114,13 +151,27 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   const [debounceGetWords] = useState<any>(debounceGetWordsFunc);
 
   useEffect(() => {
+    if (inputMsg.length === 1 && inputMsg[0] === '@') {
+      setOpen(true);
+      setDomainOptions(domains);
+      setStepOptions({});
+      return;
+    } else {
+      setOpen(false);
+      if (domainOptions.length > 0) {
+        setTimeout(() => {
+          setDomainOptions([]);
+        }, 500);
+      }
+    }
     if (!isSelect) {
-      debounceGetWords(inputMsg, chatId);
+      debounceGetWords(inputMsg, domains, chatId, currentDomain);
     } else {
       isSelect = false;
     }
     if (!inputMsg) {
       setStepOptions({});
+      fetchRef.current = 0;
     }
   }, [inputMsg]);
 
@@ -140,6 +191,10 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     const textWidth = getTextWidth(inputMsg);
     if (Object.keys(stepOptions).length > 0) {
       autoCompleteDropdown.style.marginLeft = `${textWidth}px`;
+    } else {
+      setTimeout(() => {
+        autoCompleteDropdown.style.marginLeft = `0px`;
+      }, 200);
     }
   }, [stepOptions]);
 
@@ -157,18 +212,20 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     if (option && isSelect) {
       onSendMsg(option.recommend, option.domainId);
     } else {
-      onSendMsg(value);
+      onSendMsg(value.trim());
     }
   };
 
   const autoCompleteDropdownClass = classNames(styles.autoCompleteDropdown, {
-    [styles.external]: true,
-    [styles.mobile]: isMobile,
+    [styles.mobile]: isMobileMode,
+    [styles.domainOptions]: domainOptions.length > 0,
   });
 
   const onSelect = (value: string) => {
     isSelect = true;
-    sendMsg(value);
+    if (domainOptions.length === 0) {
+      sendMsg(value);
+    }
     setOpen(false);
     setTimeout(() => {
       isSelect = false;
@@ -176,20 +233,31 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   };
 
   const chatFooterClass = classNames(styles.chatFooter, {
-    [styles.mobile]: isMobile,
+    [styles.mobile]: isMobileMode,
   });
 
   return (
     <div className={chatFooterClass}>
       <div className={styles.composer}>
+        <Tooltip title="新建对话">
+          <IconFont
+            type="icon-icon-add-conversation-line"
+            className={styles.addConversation}
+            onClick={onAddConversation}
+          />
+        </Tooltip>
         <div className={styles.composerInputWrapper}>
           <AutoComplete
             className={styles.composerInput}
-            placeholder={PLACE_HOLDER}
+            placeholder={
+              currentDomain
+                ? `请输入【${currentDomain.name}】主题的问题，可使用@切换到其他主题`
+                : PLACE_HOLDER
+            }
             value={inputMsg}
             onChange={onInputMsgChange}
             onSelect={onSelect}
-            autoFocus={!isMobile}
+            autoFocus={!isMobileMode}
             backfill
             ref={inputRef}
             id="chatInput"
@@ -210,46 +278,68 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
             listHeight={500}
             allowClear
             open={open}
-            getPopupContainer={isMobile ? (triggerNode) => triggerNode.parentNode : undefined}
+            getPopupContainer={(triggerNode) => triggerNode.parentNode}
           >
-            {Object.keys(stepOptions).map((key) => {
-              return (
-                <OptGroup key={key} label={key}>
-                  {stepOptions[key].map((option) => (
+            {domainOptions.length > 0
+              ? domainOptions.map((domain) => {
+                  return (
                     <Option
-                      key={`${option.recommend}${option.domainName ? `_${option.domainName}` : ''}`}
-                      value={
-                        Object.keys(stepOptions).length === 1
-                          ? option.recommend
-                          : `${option.domainName || ''}${option.recommend}`
-                      }
+                      key={domain.id}
+                      value={`@${domain.name} `}
                       className={styles.searchOption}
                     >
-                      <div className={styles.optionContent}>
-                        {option.schemaElementType && (
-                          <Tag
-                            className={styles.semanticType}
-                            color={
-                              option.schemaElementType === SemanticTypeEnum.DIMENSION ||
-                              option.schemaElementType === SemanticTypeEnum.DOMAIN
-                                ? 'blue'
-                                : option.schemaElementType === SemanticTypeEnum.VALUE
-                                  ? 'geekblue'
-                                  : 'orange'
-                            }
-                          >
-                            {SEMANTIC_TYPE_MAP[option.schemaElementType] ||
-                              option.schemaElementType ||
-                              '维度'}
-                          </Tag>
-                        )}
-                        {option.subRecommend}
-                      </div>
+                      {domain.name}
                     </Option>
-                  ))}
-                </OptGroup>
-              );
-            })}
+                  );
+                })
+              : Object.keys(stepOptions).map((key) => {
+                  return (
+                    <OptGroup key={key} label={key}>
+                      {stepOptions[key].map((option) => {
+                        let optionValue =
+                          Object.keys(stepOptions).length === 1
+                            ? option.recommend
+                            : `${option.domainName || ''}${option.recommend}`;
+                        if (inputMsg[0] === '@') {
+                          const domain = domains.find((item) => inputMsg.includes(item.name));
+                          optionValue = domain
+                            ? `@${domain.name} ${option.recommend}`
+                            : optionValue;
+                        }
+                        return (
+                          <Option
+                            key={`${option.recommend}${
+                              option.domainName ? `_${option.domainName}` : ''
+                            }`}
+                            value={optionValue}
+                            className={styles.searchOption}
+                          >
+                            <div className={styles.optionContent}>
+                              {option.schemaElementType && (
+                                <Tag
+                                  className={styles.semanticType}
+                                  color={
+                                    option.schemaElementType === SemanticTypeEnum.DIMENSION ||
+                                    option.schemaElementType === SemanticTypeEnum.DOMAIN
+                                      ? 'blue'
+                                      : option.schemaElementType === SemanticTypeEnum.VALUE
+                                      ? 'geekblue'
+                                      : 'orange'
+                                  }
+                                >
+                                  {SEMANTIC_TYPE_MAP[option.schemaElementType] ||
+                                    option.schemaElementType ||
+                                    '维度'}
+                                </Tag>
+                              )}
+                              {option.subRecommend}
+                            </div>
+                          </Option>
+                        );
+                      })}
+                    </OptGroup>
+                  );
+                })}
           </AutoComplete>
           <div
             className={classNames(styles.sendBtn, {

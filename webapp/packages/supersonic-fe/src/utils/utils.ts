@@ -343,3 +343,48 @@ export const getFormattedValueData = (value: number | string, remainZero?: boole
   }
   return `${formattedValue}${unit === NumericUnit.None ? '' : unit}`;
 };
+
+function getLeafNodes(treeNodes: any[]): any[] {
+  const leafNodes: any[] = [];
+
+  function traverse(node: any) {
+    if (!node.children || node.children.length === 0) {
+      leafNodes.push(node);
+    } else {
+      node.children.forEach((child: any) => traverse(child));
+    }
+  }
+
+  treeNodes.forEach((node) => traverse(node));
+
+  return leafNodes;
+}
+
+function buildTree(nodes: any[]): any[] {
+  const map: Record<number, any> = {};
+  const roots: any[] = [];
+
+  nodes.forEach((node) => {
+    map[node.id] = node;
+    node.children = [];
+  });
+
+  nodes.forEach((node) => {
+    if (node.parentId) {
+      const parent = map[node.parentId];
+      if (parent) {
+        parent.children.push(node);
+      }
+    } else {
+      roots.push(node);
+    }
+  });
+
+  return roots;
+}
+
+export function getLeafList(flatNodes: any[]): any[] {
+  const treeNodes = buildTree(flatNodes);
+  const leafNodes = getLeafNodes(treeNodes);
+  return leafNodes;
+}

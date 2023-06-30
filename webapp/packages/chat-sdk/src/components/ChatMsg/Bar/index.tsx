@@ -8,10 +8,11 @@ import NoPermissionChart from '../NoPermissionChart';
 
 type Props = {
   data: MsgDataType;
+  triggerResize?: boolean;
   onApplyAuth?: (domain: string) => void;
 };
 
-const BarChart: React.FC<Props> = ({ data, onApplyAuth }) => {
+const BarChart: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
   const chartRef = useRef<any>();
   const [instance, setInstance] = useState<ECharts>();
 
@@ -133,7 +134,13 @@ const BarChart: React.FC<Props> = ({ data, onApplyAuth }) => {
     }
   }, [queryResults]);
 
-  if (!metricColumn?.authorized) {
+  useEffect(() => {
+    if (triggerResize && instance) {
+      instance.resize();
+    }
+  }, [triggerResize]);
+
+  if (metricColumn && !metricColumn?.authorized) {
     return (
       <NoPermissionChart
         domain={entityInfo?.domainInfo.name || ''}

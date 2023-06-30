@@ -20,11 +20,15 @@ const Introduction: React.FC<Props> = ({ currentEntity }) => {
           return (
             <div className={styles.field} key={dimension.name}>
               <span className={styles.fieldName}>{dimension.name}：</span>
-              <span className={styles.fieldValue}>
-                {dimension.bizName.includes('publish_time')
-                  ? moment(dimension.value).format('YYYY-MM-DD')
-                  : dimension.value}
-              </span>
+              {dimension.bizName.includes('photo') ? (
+                <img width={40} height={40} src={dimension.value} alt="" />
+              ) : (
+                <span className={styles.fieldValue}>
+                  {dimension.bizName.includes('publish_time')
+                    ? moment(dimension.value).format('YYYY-MM-DD')
+                    : dimension.value}
+                </span>
+              )}
             </div>
           );
         })}

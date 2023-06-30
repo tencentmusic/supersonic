@@ -1,49 +1,48 @@
-import { MsgDataType, MsgValidTypeEnum, SuggestionDataType } from '../../common/type';
+import { MsgDataType, MsgValidTypeEnum } from '../../common/type';
 import { useEffect, useState } from 'react';
 import Typing from './Typing';
 import ChatMsg from '../ChatMsg';
-import { querySuggestionInfo, chatQuery } from '../../service';
+import { chatQuery } from '../../service';
 import { MSG_VALID_TIP, PARSE_ERROR_TIP, PREFIX_CLS } from '../../common/constants';
 import Text from './Text';
-import Suggestion from '../Suggestion';
 import Tools from '../Tools';
 import SemanticDetail from '../SemanticDetail';
+import IconFont from '../IconFont';
 
 type Props = {
   msg: string;
+  followQuestions?: string[];
   conversationId?: number;
-  classId?: number;
+  domainId?: number;
   isLastMessage?: boolean;
-  suggestionEnable?: boolean;
   msgData?: MsgDataType;
-  onLastMsgDataLoaded?: (data: MsgDataType) => void;
+  isMobileMode?: boolean;
+  triggerResize?: boolean;
+  onMsgDataLoaded?: (data: MsgDataType) => void;
   onSelectSuggestion?: (value: string) => void;
   onUpdateMessageScroll?: () => void;
 };
 
 const ChatItem: React.FC<Props> = ({
   msg,
+  followQuestions,
   conversationId,
-  classId,
+  domainId,
   isLastMessage,
-  suggestionEnable,
+  isMobileMode,
+  triggerResize,
   msgData,
-  onLastMsgDataLoaded,
+  onMsgDataLoaded,
   onSelectSuggestion,
   onUpdateMessageScroll,
 }) => {
   const [data, setData] = useState<MsgDataType>();
-  const [suggestionData, setSuggestionData] = useState<SuggestionDataType>();
   const [loading, setLoading] = useState(false);
   const [metricInfoList, setMetricInfoList] = useState<any[]>([]);
   const [tip, setTip] = useState('');
 
-  const setMsgData = (value: MsgDataType) => {
-    setData(value);
-  };
-
   const updateData = (res: Result<MsgDataType>) => {
-    if (res.code === 401) {
+    if (res.code === 401 || res.code === 412) {
       setTip(res.msg);
       return false;
     }
@@ -51,13 +50,13 @@ const ChatItem: React.FC<Props> = ({
       setTip(PARSE_ERROR_TIP);
       return false;
     }
-    const { queryColumns, queryResults, queryState } = res.data || {};
+    const { queryColumns, queryResults, queryState, queryMode } = res.data || {};
     if (queryState !== MsgValidTypeEnum.NORMAL && queryState !== MsgValidTypeEnum.EMPTY) {
       setTip(MSG_VALID_TIP[queryState || MsgValidTypeEnum.INVALID]);
       return false;
     }
-    if (queryColumns && queryColumns.length > 0 && queryResults) {
-      setMsgData(res.data);
+    if ((queryColumns && queryColumns.length > 0 && queryResults) || queryMode === 'INSTRUCTION') {
+      setData(res.data);
       setTip('');
       return true;
     }
@@ -65,41 +64,20 @@ const ChatItem: React.FC<Props> = ({
     return false;
   };
 
-  const updateSuggestionData = (semanticRes: MsgDataType, suggestionRes: any) => {
-    const { aggregateType, queryColumns, entityInfo } = semanticRes;
-    setSuggestionData({
-      currentAggregateType: aggregateType,
-      columns: queryColumns || [],
-      mainEntity: entityInfo,
-      suggestions: suggestionRes,
-    });
-  };
-
-  const getSuggestions = async (domainId: number, semanticResData: MsgDataType) => {
-    if (!domainId) {
-      return;
-    }
-    const res = await querySuggestionInfo(domainId);
-    updateSuggestionData(semanticResData, res.data.data);
-  };
-
   const onSendMsg = async () => {
     setLoading(true);
-    const semanticRes = await chatQuery(msg, conversationId, classId);
+    const semanticRes = await chatQuery(msg, conversationId, domainId);
     updateData(semanticRes.data);
-    // if (suggestionEnable && semanticValid) {
-    //   const semanticResData = semanticRes.data.data;
-    //   await getSuggestions(semanticResData.entityInfo?.domainInfo?.itemId, semanticRes.data.data);
-    // } else {
-    //   setSuggestionData(undefined);
-    // }
-    if (onLastMsgDataLoaded) {
-      onLastMsgDataLoaded(semanticRes.data.data);
+    if (onMsgDataLoaded) {
+      onMsgDataLoaded(semanticRes.data.data);
     }
     setLoading(false);
   };
 
   useEffect(() => {
+    if (data !== undefined) {
+      return;
+    }
     if (msgData) {
       updateData({ code: 200, data: msgData, msg: 'success' });
     } else if (msg) {
@@ -107,15 +85,27 @@ const ChatItem: React.FC<Props> = ({
     }
   }, [msg, msgData]);
 
+  const prefixCls = `${PREFIX_CLS}-item`;
+
   if (loading) {
-    return <Typing />;
+    return (
+      <div className={prefixCls}>
+        <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />
+        <Typing />
+      </div>
+    );
   }
 
   if (tip) {
-    return <Text data={tip} />;
+    return (
+      <div className={prefixCls}>
+        <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />
+        <Text data={tip} />
+      </div>
+    );
   }
 
-  if (!data) {
+  if (!data || data.queryMode === 'INSTRUCTION') {
     return null;
   }
 
@@ -126,26 +116,33 @@ const ChatItem: React.FC<Props> = ({
     }
   };
 
-  const prefixCls = `${PREFIX_CLS}-item`;
-
   return (
-    <div>
-      <ChatMsg data={data} onCheckMetricInfo={onCheckMetricInfo} />
-      <Tools isLastMessage={isLastMessage} />
-      {suggestionEnable && suggestionData && isLastMessage && (
-        <Suggestion {...suggestionData} onSelect={onSelectSuggestion} />
-      )}
-      <div className={`${prefixCls}-metric-info-list`}>
-        {metricInfoList.map(item => (
-          <SemanticDetail
-            dataSource={item}
-            onDimensionSelect={(value: string) => {
-              if (onSelectSuggestion) {
-                onSelectSuggestion(value);
-              }
-            }}
-          />
-        ))}
+    <div className={prefixCls}>
+      <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />
+      <div className={`${prefixCls}-content`}>
+        <ChatMsg
+          question={msg}
+          followQuestions={followQuestions}
+          data={data}
+          isMobileMode={isMobileMode}
+          triggerResize={triggerResize}
+          onCheckMetricInfo={onCheckMetricInfo}
+        />
+        <Tools data={data} isLastMessage={isLastMessage} isMobileMode={isMobileMode} />
+        {metricInfoList.length > 0 && (
+          <div className={`${prefixCls}-metric-info-list`}>
+            {metricInfoList.map(item => (
+              <SemanticDetail
+                dataSource={item}
+                onDimensionSelect={(value: string) => {
+                  if (onSelectSuggestion) {
+                    onSelectSuggestion(value);
+                  }
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

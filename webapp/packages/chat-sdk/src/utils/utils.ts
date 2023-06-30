@@ -159,7 +159,6 @@ export function getChartLightenColor(col) {
 
 export const isMobile = window.navigator.userAgent.match(/(iPhone|iPod|Android|ios)/i);
 
-
 export function setToken(token: string) {
   localStorage.setItem('SUPERSONIC_CHAT_TOKEN', token);
 }

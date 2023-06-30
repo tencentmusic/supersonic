@@ -79,7 +79,7 @@ const Suggestion: React.FC<Props> = ({
 
   return (
     <div className={suggestionClass}>
-      <Message position="left" width="fit-content" noWaterMark>
+      <Message position="left" width="fit-content">
         <div className={`${prefixCls}-tip`}>问答支持多轮对话，您可以继续输入：</div>
         {metricList.length > 0 && (
           <div className={`${prefixCls}-content-section`}>

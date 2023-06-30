@@ -19,6 +19,7 @@ type Props = {
   categoryColumnName: string;
   metricField: ColumnType;
   resultList: any[];
+  triggerResize?: boolean;
   onApplyAuth?: (domain: string) => void;
 };
 
@@ -28,6 +29,7 @@ const MetricTrendChart: React.FC<Props> = ({
   categoryColumnName,
   metricField,
   resultList,
+  triggerResize,
   onApplyAuth,
 }) => {
   const chartRef = useRef<any>();
@@ -40,6 +42,7 @@ const MetricTrendChart: React.FC<Props> = ({
       setInstance(instanceObj);
     } else {
       instanceObj = instance;
+      instanceObj.clear();
     }
 
     const valueColumnName = metricField.nameEn;
@@ -51,13 +54,13 @@ const MetricTrendChart: React.FC<Props> = ({
         endDate &&
         (dateColumnName.includes('date') || dateColumnName.includes('month'))
           ? normalizeTrendData(
-            groupDataValue[key],
-            dateColumnName,
-            valueColumnName,
-            startDate,
-            endDate,
-            dateColumnName.includes('month') ? 'months' : 'days'
-          )
+              groupDataValue[key],
+              dateColumnName,
+              valueColumnName,
+              startDate,
+              endDate,
+              dateColumnName.includes('month') ? 'months' : 'days'
+            )
           : groupDataValue[key].reverse();
       return result;
     }, {});
@@ -114,8 +117,8 @@ const MetricTrendChart: React.FC<Props> = ({
             return value === 0
               ? 0
               : metricField.dataFormatType === 'percent'
-                ? `${formatByDecimalPlaces(value, metricField.dataFormat?.decimalPlaces || 2)}%`
-                : getFormattedValue(value);
+              ? `${formatByDecimalPlaces(value, metricField.dataFormat?.decimalPlaces || 2)}%`
+              : getFormattedValue(value);
           },
         },
       },
@@ -135,11 +138,11 @@ const MetricTrendChart: React.FC<Props> = ({
                   item.value === ''
                     ? '-'
                     : metricField.dataFormatType === 'percent'
-                      ? `${formatByDecimalPlaces(
+                    ? `${formatByDecimalPlaces(
                         item.value,
                         metricField.dataFormat?.decimalPlaces || 2
                       )}%`
-                      : getFormattedValue(item.value)
+                    : getFormattedValue(item.value)
                 }</span></div>`
             )
             .join('');
@@ -180,6 +183,12 @@ const MetricTrendChart: React.FC<Props> = ({
       renderChart();
     }
   }, [resultList, metricField]);
+
+  useEffect(() => {
+    if (triggerResize && instance) {
+      instance.resize();
+    }
+  }, [triggerResize]);
 
   const prefixCls = `${CLS_PREFIX}-metric-trend`;
 

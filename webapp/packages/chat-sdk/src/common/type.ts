@@ -46,7 +46,7 @@ export type FilterItemType = {
   name: string;
   operator: string;
   type: string;
-  value: string;
+  value: string[];
 };
 
 export type ChatContextType = {
@@ -57,7 +57,7 @@ export type ChatContextType = {
   dimensions: FieldType[];
   metrics: FieldType[];
   entity: number;
-  filters: FilterItemType[];
+  dimensionFilters: FilterItemType[];
 };
 
 export enum MsgValidTypeEnum {
@@ -67,11 +67,22 @@ export enum MsgValidTypeEnum {
   INVALID = 3,
 };
 
+export type InstructionResonseType = {
+  description: string;
+  instructionConfig: {
+    showElements: { elementId: string, params: any }[];
+    showType: string;
+    relaShowElements: { elementId: string, params: any }[];
+    relaShowType: string;
+  };
+  instructionId: number;
+  instructionType: string;
+  name: string;
+}
+
 export type MsgDataType = {
   id: number;
   question: string;
-  aggregateType: string;
-  appletResponse: string;
   chatContext: ChatContextType;
   entityInfo: EntityInfoType;
   queryAuthorization: any;
@@ -80,6 +91,7 @@ export type MsgDataType = {
   queryId: number;
   queryMode: string;
   queryState: MsgValidTypeEnum;
+  response: InstructionResonseType;
 };
 
 export type QueryDataType = {

@@ -1,3 +1,5 @@
+import classNames from 'classnames';
+import LeftAvatar from './LeftAvatar';
 import Message from './Message';
 import styles from './style.less';
 
@@ -8,11 +10,17 @@ type Props = {
 };
 
 const Text: React.FC<Props> = ({ position, data, quote }) => {
+  const textWrapperClass = classNames(styles.textWrapper, {
+    [styles.rightTextWrapper]: position === 'right',
+  });
   return (
-    <Message position={position} bubbleClassName={styles.textBubble}>
-      {position === 'right' && quote && <div className={styles.quote}>{quote}</div>}
-      <div className={styles.text}>{data}</div>
-    </Message>
+    <div className={textWrapperClass}>
+      {position === 'left' && <LeftAvatar />}
+      <Message position={position} bubbleClassName={styles.textBubble}>
+        {position === 'right' && quote && <div className={styles.quote}>{quote}</div>}
+        <div className={styles.text}>{data}</div>
+      </Message>
+    </div>
   );
 };
 

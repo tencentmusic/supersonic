@@ -2,7 +2,7 @@ import axios from './axiosInstance';
 import { ChatContextType, HistoryType, MsgDataType, SearchRecommendItem } from '../common/type';
 import { QueryDataType } from '../common/type';
 
-const DEFAULT_CHAT_ID = 2;
+const DEFAULT_CHAT_ID = 0;
 
 const prefix = '/api';
 
@@ -57,7 +57,7 @@ export function getRelatedDimensionFromStatInfo(data: any) {
 
 export function getMetricQueryInfo(data: any) {
   return axios.get<any>(
-    `getMetricQueryInfo/${data.classId}/${data.metricName}`
+    `/openapi/bd-bi/api/polaris/intelligentQuery/getMetricQueryInfo/${data.classId}/${data.metricName}`
   );
 }
 
@@ -67,4 +67,11 @@ export function saveConversation(chatName: string) {
 
 export function getAllConversations() {
   return axios.get<Result<any>>(`${prefix}/chat/manage/getAll`);
+}
+
+export function queryEntities(entityId: string | number, domainId: number) {
+  return axios.post<Result<any>>(`${prefix}/chat/query/choice`, {
+    entityId,
+    domainId,
+  });
 }

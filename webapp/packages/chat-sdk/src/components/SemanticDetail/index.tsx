@@ -17,7 +17,7 @@ const SemanticDetail: React.FC<Props> = ({ dataSource, onDimensionSelect }) => {
   const semanticDetailCls = `${CLS_PREFIX}-semantic-detail`;
 
   return (
-    <Message position="left" width="100%" noTime>
+    <Message position="left" width="100%">
       <div>
         <div>
           <Row>
