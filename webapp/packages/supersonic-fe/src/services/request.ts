@@ -1,4 +1,3 @@
-import { FROM_URL_KEY } from '@/common/constants';
 import type {
   RequestOptionsInit,
   RequestOptionsWithoutResponse,

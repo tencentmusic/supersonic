@@ -26,3 +26,11 @@ export const SEMANTIC_TYPE_MAP = {
   [SemanticTypeEnum.METRIC]: '指标',
   [SemanticTypeEnum.VALUE]: '维度值',
 };
+
+export const DEFAULT_CONVERSATION_NAME = '新问答对话'
+
+export const WEB_TITLE = '问答对话'
+
+export const CHAT_TITLE = '问答'
+
+export const PLACE_HOLDER = '请输入您的问题'

@@ -1,5 +1,5 @@
 import IconFont from '@/components/IconFont';
-import { Dropdown, Menu, message } from 'antd';
+import { Dropdown, Menu } from 'antd';
 import classNames from 'classnames';
 import {
   useEffect,
@@ -9,11 +9,12 @@ import {
   useImperativeHandle,
 } from 'react';
 import { useLocation } from 'umi';
-import ConversationHistory from './components/ConversationHistory';
-import ConversationModal from './components/ConversationModal';
-import { deleteConversation, getAllConversations, saveConversation } from './service';
+import ConversationHistory from './ConversationHistory';
+import ConversationModal from './ConversationModal';
+import { deleteConversation, getAllConversations, saveConversation } from '../../service';
 import styles from './style.less';
-import { ConversationDetailType } from './type';
+import { ConversationDetailType } from '../../type';
+import { DEFAULT_CONVERSATION_NAME } from '../../constants';
 
 type Props = {
   currentConversation?: ConversationDetailType;
@@ -65,7 +66,7 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
   };
 
   useEffect(() => {
-    if (q && cid === undefined) {
+    if (q && cid === undefined && location.pathname === '/workbench/chat') {
       onAddConversation(q);
     } else {
       initData();
@@ -73,7 +74,7 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
   }, [q]);
 
   const addConversation = async (name?: string) => {
-    await saveConversation(name || '新问答对话');
+    await saveConversation(name || DEFAULT_CONVERSATION_NAME);
     return updateData();
   };
 
@@ -96,21 +97,14 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
     }
   };
 
-  const onNewChat = () => {
-    onAddConversation('新问答对话');
-  };
-
   const onShowHistory = () => {
     setHistoryVisible(true);
   };
 
-  const onShare = () => {
-    message.info('正在开发中，敬请期待');
-  };
-
   return (
     <div className={styles.conversation}>
-      <div className={styles.leftSection}>
+      <div className={styles.conversationSection}>
+        <div className={styles.sectionTitle}>对话管理</div>
         <div className={styles.conversationList}>
           {conversations.map((item) => {
             const conversationItemClass = classNames(styles.conversationItem, {
@@ -133,7 +127,6 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
                 trigger={['contextMenu']}
               >
                 <div
-                  key={item.chatId}
                   className={conversationItemClass}
                   onClick={() => {
                     onSelectConversation(item);
@@ -157,19 +150,6 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
               />
               <div className={styles.conversationContent}>查看更多对话</div>
             </div>
-          </div>
-        </div>
-        <div className={styles.operateSection}>
-          <div className={styles.operateItem} onClick={onNewChat}>
-            <IconFont type="icon-add" className={`${styles.operateIcon} ${styles.addIcon}`} />
-            <div className={styles.operateLabel}>新建对话</div>
-          </div>
-          <div className={styles.operateItem} onClick={onShare}>
-            <IconFont
-              type="icon-fenxiang2"
-              className={`${styles.operateIcon} ${styles.shareIcon}`}
-            />
-            <div className={styles.operateLabel}>分享</div>
           </div>
         </div>
       </div>

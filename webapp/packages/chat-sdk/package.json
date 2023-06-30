@@ -1,12 +1,12 @@
 {
   "name": "supersonic-chat-sdk",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "main": "dist/index.es.js",
   "module": "dist/index.es.js",
   "unpkg": "dist/index.umd.js",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "antd": "^5.5.0",
+    "antd": "^5.5.2",
     "axios": "^1.4.0",
     "classnames": "^2.3.2",
     "echarts": "^5.4.2",
@@ -19,7 +19,7 @@
     "react-dom": ">=16.8.0"
   },
   "scripts": {
-    "start": "npm run build-es",
+    "start": "npm run start:dev",
     "start:dev": "node scripts/start.js",
     "clean": "rimraf ./dist",
     "build": "npm run clean && npm run build-es",

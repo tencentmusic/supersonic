@@ -22,7 +22,7 @@ const MetricCard: React.FC<Props> = ({ data, onApplyAuth }) => {
         {/* <div className={`${prefixCls}-date-range`}>
           {startTime === endTime ? startTime : `${startTime} ~ ${endTime}`}
         </div> */}
-        {!indicatorColumn?.authorized ? (
+        {indicatorColumn && !indicatorColumn?.authorized ? (
           <ApplyAuth domain={entityInfo?.domainInfo.name || ''} onApplyAuth={onApplyAuth} />
         ) : (
           <div className={`${prefixCls}-indicator-value`}>

@@ -5,17 +5,11 @@ import { history } from 'umi';
 import type { RunTimeLayoutConfig } from 'umi';
 import RightContent from '@/components/RightContent';
 import S2Icon, { ICON } from '@/components/S2Icon';
-import qs from 'qs';
 import { queryCurrentUser } from './services/user';
-import { queryToken } from './services/login';
 import defaultSettings from '../config/defaultSettings';
 import settings from '../config/themeSettings';
-import { deleteUrlQuery } from './utils/utils';
-import { AUTH_TOKEN_KEY, FROM_URL_KEY } from '@/common/constants';
 export { request } from './services/request';
 import { ROUTE_AUTH_CODES } from '../config/routes';
-
-const TOKEN_KEY = AUTH_TOKEN_KEY;
 
 const replaceRoute = '/';
 
@@ -38,25 +32,6 @@ export const initialStateConfig = {
       <div className="loadingPlaceholder" />
     </Spin>
   ),
-};
-
-const getToken = async () => {
-  let { search } = window.location;
-  if (search.length > 0) {
-    search = search.slice(1);
-  }
-  const data = qs.parse(search);
-  if (data.code) {
-    try {
-      const fromUrl = localStorage.getItem(FROM_URL_KEY);
-      const res = await queryToken(data.code as string);
-      localStorage.setItem(TOKEN_KEY, res.payload);
-      const newUrl = deleteUrlQuery(window.location.href, 'code');
-      window.location.href = fromUrl || newUrl;
-    } catch (err) {
-      console.log(err);
-    }
-  }
 };
 
 const getAuthCodes = () => {
@@ -89,12 +64,6 @@ export async function getInitialState(): Promise<{
     } catch (error) {}
     return undefined;
   };
-  const { query } = history.location as any;
-  const currentToken = query[TOKEN_KEY] || localStorage.getItem(TOKEN_KEY);
-
-  if (window.location.host.includes('tmeoa') && !currentToken) {
-    await getToken();
-  }
 
   const currentUser = await fetchUserInfo();
 

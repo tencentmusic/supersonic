@@ -1,24 +1,44 @@
 import { Input } from 'antd';
 import styles from './style.module.less';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ChatItem from '../components/ChatItem';
 import { queryContext, searchRecommend } from '../service';
 
 const { Search } = Input;
 
 const Chat = () => {
+  const [data, setData] = useState<any>();
   const [inputMsg, setInputMsg] = useState('');
   const [msg, setMsg] = useState('');
+  const [followQuestions, setFollowQuestions] = useState<string[]>([]);
+  const [triggerResize, setTriggerResize] = useState(false);
+
+  const onWindowResize = () => {
+    setTriggerResize(true);
+    setTimeout(() => {
+      setTriggerResize(false);
+    }, 0);
+  };
+
+  useEffect(() => {
+    window.addEventListener('resize', onWindowResize);
+    return () => {
+      window.removeEventListener('resize', onWindowResize);
+    };
+  }, []);
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setInputMsg(value);
-    searchRecommend(value);
   };
 
   const onSearch = () => {
     setMsg(inputMsg);
-    queryContext(inputMsg);
+  };
+
+  const onMsgDataLoaded = (msgData: any) => {
+    setData(msgData);
+    setFollowQuestions(['测试1234测试', '测试1234测试', '测试1234测试']);
   };
 
   return (
@@ -32,7 +52,15 @@ const Chat = () => {
         />
       </div>
       <div className={styles.chatItem}>
-        <ChatItem msg={msg} suggestionEnable isLastMessage />
+        <ChatItem
+          msg={msg}
+          msgData={data}
+          onMsgDataLoaded={onMsgDataLoaded}
+          followQuestions={followQuestions}
+          isLastMessage
+          isMobileMode
+          triggerResize={triggerResize}
+        />
       </div>
     </div>
   );

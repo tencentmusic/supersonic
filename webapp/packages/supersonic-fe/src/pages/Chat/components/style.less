@@ -1,10 +1,28 @@
 .message {
+  .domainName {
+    margin-bottom: 2px;
+    margin-left: 4px;
+    color: var(--text-color);
+    font-weight: 500;
+  }
   .messageContent {
     display: flex;
     align-items: flex-start;
 
     .messageBody {
       width: 100%;
+
+      .messageTopBar {
+        max-width: 90%;
+        margin: 0 16px;
+        padding: 12px 0 8px;
+        overflow: hidden;
+        color: var(--text-color-third);
+        font-size: 13px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        background-color: #fff;
+      }
     }
 
     .avatar {
@@ -73,7 +91,6 @@
         font-size: 16px;
         background: linear-gradient(81.62deg, #2870ea 8.72%, var(--chat-blue) 85.01%);
         border: 1px solid transparent;
-        border-radius: 12px 4px 12px 12px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
 
         .text {
@@ -273,5 +290,18 @@
     .infoValue {
       color: var(--text-color-secondary);
     }
+  }
+}
+
+.textWrapper {
+  display: flex;
+  align-items: center;
+
+  &.rightTextWrapper {
+    justify-content: flex-end;
+  }
+
+  .rightAvatar {
+    margin-left: 6px;
   }
 }

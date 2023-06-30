@@ -56,14 +56,21 @@ const Table: React.FC<Props> = ({ data, onApplyAuth }) => {
     }
   );
 
+  const getRowClassName = (_: any, index: number) => {
+    return index % 2 !== 0 ? `${prefixCls}-even-row` : '';
+  };
+
   return (
     <div className={prefixCls}>
       <AntTable
-        pagination={queryResults.length <= 10 ? false : undefined}
-        size={queryResults.length === 1 ? 'middle' : 'small'}
+        pagination={
+          queryResults.length <= 10 ? false : { defaultPageSize: 10, position: ['bottomCenter'] }
+        }
         columns={tableColumns}
         dataSource={queryResults}
         style={{ width: '100%' }}
+        scroll={{ x: 'max-content' }}
+        rowClassName={getRowClassName}
       />
     </div>
   );

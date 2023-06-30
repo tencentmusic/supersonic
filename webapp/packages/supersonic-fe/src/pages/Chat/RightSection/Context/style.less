@@ -1,6 +1,8 @@
 .context {
   display: flex;
   flex-direction: column;
+  padding: 20px 10px 0;
+  border-top: 1px solid #ccc;
 
   .title {
     margin-bottom: 22px;
@@ -45,11 +47,11 @@
   }
 
   .fieldValue {
+    max-width: 150px;
+    overflow: hidden;
     color: var(--text-color);
-
-    &.switchField {
-      cursor: pointer;
-    }
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   .filterValues {

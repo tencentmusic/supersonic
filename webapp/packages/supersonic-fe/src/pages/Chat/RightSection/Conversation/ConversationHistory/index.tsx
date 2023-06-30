@@ -1,6 +1,6 @@
 import { CloseOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import type { ConversationDetailType } from '../../type';
+import type { ConversationDetailType } from '../../../type';
 import styles from './style.less';
 
 type Props = {

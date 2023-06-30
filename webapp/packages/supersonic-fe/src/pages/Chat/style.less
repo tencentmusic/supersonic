@@ -1,167 +1,258 @@
+@import '~antd/es/style/themes/default.less';
+
 .chat {
   height: calc(100vh - 48px) !important;
-  overflow-y: hidden;
+  overflow: hidden;
   background: linear-gradient(180deg, rgba(23, 74, 228, 0) 29.44%, rgba(23, 74, 228, 0.06) 100%),
     linear-gradient(90deg, #f3f3f7 0%, #f3f3f7 20%, #ebf0f9 60%, #f3f3f7 80%, #f3f3f7 100%);
 
-  &.external {
-    .chatApp {
-      width: calc(100vw - 450px) !important;
-      height: calc(100vh - 58px) !important;
+  .chatSection {
+    display: flex;
+    width: 100vw !important;
+    height: calc(100vh - 48px) !important;
+    overflow: hidden;
+  }
+
+  .chatApp {
+    display: flex;
+    flex-direction: column;
+    width: calc(100vw - 225px);
+    height: calc(100vh - 48px);
+    padding-left: 20px;
+    color: rgba(0, 0, 0, 0.87);
+
+    .emptyHolder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .navBar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      height: 40px;
+      padding: 0 10px;
+      background: rgb(243 243 243);
+      border-bottom: 1px solid rgb(228, 228, 228);
+
+      .conversationNameWrapper {
+        display: flex;
+        align-items: center;
+
+        .conversationName {
+          padding: 4px 12px;
+          color: var(--text-color-third) !important;
+          font-size: 14px !important;
+          border-radius: 4px;
+          cursor: pointer;
+
+          .editIcon {
+            margin-left: 10px;
+            color: var(--text-color-fourth);
+            font-size: 14px;
+          }
+
+          &:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+          }
+        }
+
+        .divider {
+          width: 1px;
+          height: 16px;
+          margin-right: 4px;
+          margin-left: 12px;
+          background-color: var(--text-color-fourth);
+        }
+      }
+
+      .conversationInput {
+        width: 300px;
+        color: var(--text-color-third) !important;
+        font-size: 14px !important;
+        cursor: default !important;
+      }
+    }
+
+    .chatBody {
+      display: flex;
+      flex: 1;
+      height: 100%;
+
+      .chatContent {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+
+        .messageContainer {
+          position: relative;
+          display: flex;
+          flex: 1;
+          flex-direction: column;
+          min-height: 0;
+          overflow-x: hidden;
+          overflow-y: scroll;
+
+          .messageList {
+            display: flex;
+            flex-direction: column;
+            padding: 20px 20px 90px 4px;
+            row-gap: 10px;
+
+            .messageItem {
+              display: flex;
+              flex-direction: column;
+              row-gap: 10px;
+
+              :global {
+                .ant-table-row {
+                  background-color: #fff;
+                }
+
+                .ant-table-tbody > tr > td {
+                  border-bottom: 1px solid #f0f0f0;
+                  transition: background 0.2s, border-color 0.2s;
+                }
+
+                .ss-chat-table-even-row {
+                  background-color: #fbfbfb;
+                }
+
+                .ant-table-wrapper .ant-table-pagination {
+                  display: flex;
+                  flex-wrap: wrap;
+                  justify-content: center;
+                  margin: 16px 0;
+                  row-gap: 8px;
+                }
+
+                .ant-pagination .ant-pagination-prev,
+                .ant-pagination .ant-pagination-next {
+                  display: inline-block;
+                  min-width: 32px;
+                  height: 32px;
+                  color: rgba(0, 0, 0, 0.88);
+                  line-height: 32px;
+                  text-align: center;
+                  vertical-align: middle;
+                  list-style: none;
+                  border-radius: 6px;
+                  cursor: pointer;
+                  transition: all 0.2s;
+
+                  .ant-pagination-item-link {
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                    padding: 0;
+                    font-size: 12px;
+                    text-align: center;
+                    background-color: transparent;
+                    border: 1px solid transparent;
+                    border-radius: 6px;
+                    outline: none;
+                    transition: border 0.2s;
+                  }
+                }
+
+                .ant-pagination-jump-prev,
+                .ant-pagination-jump-next {
+                  .ant-pagination-item-link {
+                    display: inline-block;
+                    min-width: 32px;
+                    height: 32px;
+                    color: rgba(0, 0, 0, 0.25);
+                    line-height: 32px;
+                    text-align: center;
+                    vertical-align: middle;
+                    list-style: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                  }
+                }
+
+                .ant-pagination-options {
+                  display: inline-block;
+                  margin-left: 16px;
+                  vertical-align: middle;
+                }
+
+                .ant-pagination .ant-pagination-item {
+                  display: inline-block;
+                  min-width: 32px;
+                  height: 32px;
+                  line-height: 30px;
+                  text-align: center;
+                  vertical-align: middle;
+                  list-style: none;
+                  background-color: transparent;
+                  border: 1px solid transparent;
+                  border-radius: 6px;
+                  outline: 0;
+                  cursor: pointer;
+                  user-select: none;
+                  margin-inline-end: 8px;
+                }
+
+                .ant-pagination .ant-pagination-item-active {
+                  font-weight: 600;
+                  background-color: #ffffff;
+                  border-color: var(--primary-color);
+                }
+
+                .ant-pagination {
+                  box-sizing: border-box;
+                  margin: 0;
+                  padding: 0;
+                  color: #606266;
+                  font-size: 14px;
+                  font-variant: tabular-nums;
+                  line-height: 1.5715;
+                  list-style: none;
+                  font-feature-settings: 'tnum', 'tnum';
+                }
+              }
+            }
+
+            &.miniProgramLoading {
+              position: absolute;
+              bottom: 10000px;
+              width: 100%;
+            }
+          }
+        }
+      }
     }
   }
 
   &.mobile {
-    height: 100vh !important;
+    height: 100% !important;
 
     .chatSection {
-      // height: 100vh !important;
+      width: 100% !important;
       height: 100% !important;
     }
 
     .conversation {
-      // height: 100vh !important;
       height: 100% !important;
     }
 
     .chatApp {
-      width: 100vw !important;
-      // height: 100vh !important;
+      width: calc(100% - 225px) !important;
       height: 100% !important;
-    }
-  }
-}
-
-.chatSection {
-  display: flex;
-  height: calc(100vh - 48px) !important;
-  overflow-y: hidden;
-}
-
-.chatBody {
-  height: 100%;
-}
-
-.conversation {
-  position: relative;
-  width: 225px;
-  height: calc(100vh - 48px);
-
-  .leftSection {
-    width: 100%;
-    height: 100%;
-  }
-}
-
-.chatApp {
-  display: flex;
-  flex-direction: column;
-  width: calc(100vw - 510px);
-  height: calc(100vh - 58px) !important;
-  margin-top: 10px;
-  color: rgba(0, 0, 0, 0.87);
-
-  .emptyHolder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-  }
-
-  .navBar {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    height: 40px;
-    padding: 0 10px;
-    background: rgb(243 243 243);
-    border-bottom: 1px solid rgb(228, 228, 228);
-
-    .conversationNameWrapper {
-      display: flex;
-      align-items: center;
-
-      .conversationName {
-        padding: 4px 12px;
-        color: var(--text-color-third) !important;
-        font-size: 14px !important;
-        border-radius: 4px;
-        cursor: pointer;
-
-        .editIcon {
-          margin-left: 10px;
-          color: var(--text-color-fourth);
-          font-size: 14px;
-        }
-
-        &:hover {
-          background-color: rgba(0, 0, 0, 0.03);
-        }
-      }
-
-      .divider {
-        width: 1px;
-        height: 16px;
-        margin-right: 4px;
-        margin-left: 12px;
-        background-color: var(--text-color-fourth);
-      }
-    }
-
-    .conversationInput {
-      width: 300px;
-      color: var(--text-color-third) !important;
-      font-size: 14px !important;
-      cursor: default !important;
-    }
-  }
-
-  .chatBody {
-    display: flex;
-    flex: 1;
-
-    .chatContent {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-
-      .messageContainer {
-        position: relative;
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        min-height: 0;
-        overflow-x: hidden;
-        overflow-y: scroll;
-
-        .messageList {
-          display: flex;
-          flex-direction: column;
-          padding: 0 20px 90px 4px;
-          row-gap: 20px;
-
-          .messageItem {
-            display: flex;
-            flex-direction: column;
-            row-gap: 20px;
-          }
-
-          &.reportLoading {
-            position: absolute;
-            bottom: 10000px;
-            width: 100%;
-          }
-        }
-      }
+      margin-top: 0 !important;
     }
   }
 }
 
 .mobile {
   .messageList {
-    padding: 0 12px 20px !important;
+    padding: 20px 12px 20px !important;
   }
 }
 
@@ -235,7 +326,7 @@
   }
 
   :global {
-    button[ant-click-animating-without-extra-node]::after {
+    button[ant-click-animating-without-extra-node]:after {
       border: 0 none;
       opacity: 0;
       animation: none 0 ease 0 1 normal;
@@ -358,42 +449,6 @@
   }
 }
 
-.conversationList {
-  padding-top: 20px;
-  .conversationItem {
-    padding-left: 16px;
-    cursor: pointer;
-
-    .conversationItemContent {
-      display: flex;
-      align-items: center;
-      padding: 12px 0;
-      color: var(--text-color-third);
-
-      .conversationIcon {
-        margin-right: 10px;
-        color: var(--text-color-fourth);
-        font-size: 20px;
-      }
-
-      .conversationContent {
-        width: 160px;
-        overflow: hidden;
-        color: var(--text-color-third);
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      }
-    }
-
-    &.activeConversationItem,
-    &:hover {
-      .conversationContent {
-        color: var(--chat-blue);
-      }
-    }
-  }
-}
-
 .addConversation {
   display: flex;
   align-items: center;
@@ -437,17 +492,6 @@
   }
 }
 
-.collapseBtn {
-  margin: 0 10px;
-  color: var(--text-color-third);
-  font-size: 16px;
-  cursor: pointer;
-
-  &:hover {
-    color: var(--primary-color);
-  }
-}
-
 .autoCompleteDropdown {
   width: 650px !important;
   min-width: 650px !important;
@@ -462,10 +506,6 @@
         background: #f5f5f5 !important;
       }
     }
-
-    // .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
-    //   background-color: #fff;
-    // }
   }
 }
 
@@ -545,35 +585,20 @@
   font-size: 12px;
 }
 
-.operateSection {
-  margin-top: 20px;
-  padding-left: 15px;
-}
-
-.operateItem {
-  display: flex;
-  align-items: center;
-  padding: 10px 0;
-  cursor: pointer;
-
-  .operateIcon {
-    margin-right: 10px;
-    color: var(--text-color-fourth);
-    font-size: 20px;
-  }
-
-  .operateLabel {
-    color: var(--text-color-third);
-    font-size: 14px;
-  }
-
-  &:hover {
-    .operateLabel {
-      color: var(--chat-blue);
-    }
-  }
-}
-
 .messageLoading {
   margin-top: 30px;
+  padding: 0 20px;
+}
+
+:global {
+  .ss-chat-recommend-options {
+    .ant-table-thead .ant-table-cell {
+      padding: 8px !important;
+    }
+
+    .ant-table-tbody .ant-table-cell {
+      padding: 8px !important;
+      border-bottom: 1px solid #f0f0f0;
+    }
+  }
 }

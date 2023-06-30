@@ -3,6 +3,13 @@
 @msg-prefix-cls: ~'@{supersonic-chat-prefix}-message';
 
 .@{msg-prefix-cls} {
+  &-domain-name {
+    color: var(--text-color);
+    margin-bottom: 2px;
+    margin-left: 4px;
+    font-weight: 500;
+  }
+
   &-content {
     display: flex;
     align-items: flex-start;
@@ -24,15 +31,14 @@
   }
 
   &-top-bar {
-    display: flex;
-    align-items: center;
+    position: relative;
     max-width: 100%;
     padding: 4px 0 8px;
-    overflow-x: auto;
-    color: var(--text-color);
-    font-weight: 500;
-    font-size: 14px;
+    color: var(--text-color-third);
+    font-size: 13px;
     white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
     border-bottom: 1px solid rgba(0, 0, 0, 0.03);
   }
 
@@ -44,11 +50,21 @@
     font-size: 13px;
   }
 
+  &-filter-values {
+    display: flex;
+    align-items: center;
+    column-gap: 6px;
+  }
+
   &-filter-item {
     padding: 2px 12px;
     color: var(--text-color-secondary);
     background-color: #edf2f2;
     border-radius: 13px;
+    max-width: 200px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
 
   &-tip {
@@ -58,10 +74,16 @@
 
   &-info-bar {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
+    row-gap: 12px;
+    flex-wrap: wrap;
     margin-top: 20px;
     column-gap: 20px;
+    color: var(--text-color-secondary);
+    background: rgba(133, 156, 241, 0.1);
+    padding: 4px 12px;
+    width: fit-content;
+    border-radius: 8px;
   }
 
   &-main-entity-info {
@@ -70,6 +92,7 @@
     align-items: center;
     font-size: 13px;
     column-gap: 20px;
+    row-gap: 10px;
   }
 
   &-info-item {
@@ -77,12 +100,12 @@
     align-items: center;
   }
 
-  &-info-Name {
-    color: var(--text-color-fourth);
+  &-info-name {
+    color: var(--text-color-third);
   }
 
   &-info-value {
-    color: var(--text-color-secondary);
+    color: var(--text-color);
   }
 }
 

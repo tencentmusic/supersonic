@@ -19,7 +19,7 @@ axiosInstance.interceptors.request.use(
   (config: any) => {
     const token = getToken();
     if (token && config?.headers) {
-      config.headers.auth = `Bearer ${token}`;
+      config.headers.Auth = `Bearer ${token}`;
     }
     return config;
   },
@@ -32,9 +32,16 @@ axiosInstance.interceptors.request.use(
 // 响应拦截器
 axiosInstance.interceptors.response.use(
   (response: any) => {
-    if (Number(response.data.code) === 403) {
-      window.location.href = '/#/login';
-      return response;
+    const redirect = response.headers.get('redirect');
+    if (redirect === 'REDIRECT') {
+      let win: any = window;
+      while (win !== win.top) {
+        win = win.top;
+      }
+      const contextpath = response.headers.get('contextpath');
+      win.location.href =
+        contextpath?.substring(0, contextpath?.indexOf('&')) +
+        `&redirect_uri=${encodeURIComponent(`http://${win.location.host}`)}`;
     }
     return response;
   },

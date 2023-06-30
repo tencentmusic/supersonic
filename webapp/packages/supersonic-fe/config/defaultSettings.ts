@@ -13,8 +13,7 @@ const Settings: LayoutSettings & {
   colorWeak: false,
   title: '',
   pwa: false,
-  // logo: 'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
-  iconfontUrl: '//at.alicdn.com/t/c/font_3201979_rncj6jun6k.js',
+  iconfontUrl: '//at.alicdn.com/t/c/font_3201979_drwu4z3kkbi.js',
   splitMenus: true,
   menu: {
     defaultOpenAll: true,

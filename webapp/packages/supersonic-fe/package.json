@@ -65,7 +65,7 @@
     "@antv/layout": "^0.3.20",
     "@antv/xflow": "^1.0.55",
     "@babel/runtime": "^7.22.5",
-    "supersonic-chat-sdk": "^0.1.0",
+    "supersonic-chat-sdk": "^0.0.0",
     "@types/numeral": "^2.0.2",
     "@types/react-draft-wysiwyg": "^1.13.2",
     "@types/react-syntax-highlighter": "^13.5.0",

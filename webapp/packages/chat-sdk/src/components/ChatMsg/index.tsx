@@ -7,12 +7,23 @@ import Table from './Table';
 import { MsgDataType } from '../../common/type';
 
 type Props = {
+  question: string;
+  followQuestions?: string[];
   data: MsgDataType;
+  isMobileMode?: boolean;
+  triggerResize?: boolean;
   onCheckMetricInfo?: (data: any) => void;
 };
 
-const ChatMsg: React.FC<Props> = ({ data, onCheckMetricInfo }) => {
-  const { aggregateType, queryColumns, queryResults, chatContext, entityInfo } = data;
+const ChatMsg: React.FC<Props> = ({
+  question,
+  followQuestions,
+  data,
+  isMobileMode,
+  triggerResize,
+  onCheckMetricInfo,
+}) => {
+  const { queryColumns, queryResults, chatContext, entityInfo, queryMode } = data;
 
   if (!queryColumns || !queryResults) {
     return null;
@@ -24,20 +35,30 @@ const ChatMsg: React.FC<Props> = ({ data, onCheckMetricInfo }) => {
   const metricFields = queryColumns.filter(item => item.showType === 'NUMBER');
 
   const getMsgContent = () => {
-    if (categoryField.length > 1 || aggregateType === 'tag') {
+    if (
+      categoryField.length > 1 ||
+      queryMode === 'ENTITY_DETAIL' ||
+      queryMode === 'ENTITY_DIMENSION'
+    ) {
       return <Table data={data} />;
     }
     if (dateField && metricFields.length > 0) {
-      return <MetricTrend data={data} onCheckMetricInfo={onCheckMetricInfo} />;
+      return (
+        <MetricTrend
+          data={data}
+          triggerResize={triggerResize}
+          onCheckMetricInfo={onCheckMetricInfo}
+        />
+      );
     }
     if (singleData) {
       return <MetricCard data={data} />;
     }
-    return <Bar data={data} />;
+    return <Bar data={data} triggerResize={triggerResize} />;
   };
 
   let width = '100%';
-  if ((categoryField.length > 1 || aggregateType === 'tag') && !isMobile) {
+  if (categoryField.length > 1 && !isMobile && !isMobileMode) {
     if (queryColumns.length === 1) {
       width = '600px';
     } else if (queryColumns.length === 2) {
@@ -50,8 +71,9 @@ const ChatMsg: React.FC<Props> = ({ data, onCheckMetricInfo }) => {
       position="left"
       chatContext={chatContext}
       entityInfo={entityInfo}
-      aggregator={aggregateType}
-      tip={''}
+      title={question}
+      followQuestions={followQuestions}
+      isMobileMode={isMobileMode}
       width={width}
     >
       {getMsgContent()}

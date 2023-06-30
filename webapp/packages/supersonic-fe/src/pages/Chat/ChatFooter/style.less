@@ -11,6 +11,32 @@
     display: flex;
     height: 46px;
 
+    .collapseBtn {
+      height: 46px;
+      margin: 0 10px;
+      color: var(--text-color-third);
+      font-size: 20px;
+      line-height: 46px;
+      cursor: pointer;
+
+      &:hover {
+        color: var(--chat-blue);
+      }
+    }
+
+    .addConversation {
+      height: 46px;
+      margin: 0 20px 0 10px;
+      color: var(--text-color-fourth);
+      font-size: 26px;
+      line-height: 54px;
+      cursor: pointer;
+
+      &:hover {
+        color: var(--chat-blue);
+      }
+    }
+
     .composerInputWrapper {
       flex: 1;
 
@@ -28,7 +54,7 @@
             background: #fff;
             border: 0;
             border-radius: 24px;
-            box-shadow: rgba(0, 0, 0, 0.07) 0 -0.5px 0, rgba(0, 0, 0, 0.1) 0 0 18px;
+            box-shadow: rgba(0, 0, 0, 0.07) 0px -0.5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 18px;
             transition: border-color 0.15s ease-in-out;
             resize: none;
 
@@ -62,7 +88,7 @@
       :global {
         .ant-select-focused {
           .ant-select-selector {
-            box-shadow: rgb(74, 114, 245) 0 0 3px !important;
+            box-shadow: rgb(74, 114, 245) 0px 0px 3px !important;
           }
         }
       }
@@ -95,6 +121,11 @@
     height: 40px;
     margin: 12px;
     margin-bottom: 20px;
+
+    .addConversation {
+      height: 40px;
+      margin: 0 12px 0 4px;
+    }
 
     .composer {
       height: 40px;
@@ -134,17 +165,26 @@
 }
 
 .autoCompleteDropdown {
-  left: 285px !important;
+  left: 20px !important;
   width: fit-content !important;
-  min-width: 50px !important;
+  min-width: 100px !important;
   border-radius: 6px;
 
-  &.external {
-    left: 226px !important;
-  }
+  &.domainOptions {
+    width: 150px !important;
 
-  &.mobile {
-    left: 20px !important;
+    .searchOption {
+      padding: 0 10px;
+      color: var(--text-color-secondary);
+      font-size: 14px;
+    }
+
+    :global {
+      .ant-select-item {
+        height: 30px !important;
+        line-height: 30px !important;
+      }
+    }
   }
 }
 
