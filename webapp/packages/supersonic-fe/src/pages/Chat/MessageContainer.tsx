@@ -68,7 +68,6 @@ const MessageContainer: React.FC<Props> = ({
       if (
         (msg.type === MessageTypeEnum.QUESTION || msg.type === MessageTypeEnum.INSTRUCTION) &&
         !!currentMsgDomainId &&
-        !!currentMsgEntityId &&
         msgDomainId === currentMsgDomainId &&
         msgEntityId === currentMsgEntityId &&
         msg.msg
