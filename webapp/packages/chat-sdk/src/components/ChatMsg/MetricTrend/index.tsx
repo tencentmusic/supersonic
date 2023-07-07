@@ -17,12 +17,18 @@ type Props = {
 
 const MetricTrend: React.FC<Props> = ({ data, triggerResize, onApplyAuth, onCheckMetricInfo }) => {
   const { queryColumns, queryResults, entityInfo, chatContext } = data;
+
+  const dateOptions = DATE_TYPES[chatContext?.dateInfo?.period] || DATE_TYPES[0];
+  const initialDateOption = dateOptions.find(
+    (option: any) => option.value === chatContext?.dateInfo?.unit
+  )?.value;
+
   const [columns, setColumns] = useState<ColumnType[]>(queryColumns);
   const currentMetricField = columns.find((column: any) => column.showType === 'NUMBER');
 
   const [activeMetricField, setActiveMetricField] = useState<FieldType>(chatContext.metrics?.[0]);
   const [dataSource, setDataSource] = useState<any[]>(queryResults);
-  const [currentDateOption, setCurrentDateOption] = useState<number>();
+  const [currentDateOption, setCurrentDateOption] = useState<number>(initialDateOption);
   const [loading, setLoading] = useState(false);
 
   const dateField: any = columns.find(
@@ -35,8 +41,6 @@ const MetricTrend: React.FC<Props> = ({ data, triggerResize, onApplyAuth, onChec
   useEffect(() => {
     setDataSource(queryResults);
   }, [queryResults]);
-
-  const dateOptions = DATE_TYPES[chatContext?.dateInfo?.period] || DATE_TYPES[0];
 
   const onLoadData = async (value: any) => {
     setLoading(true);
