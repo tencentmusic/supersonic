@@ -26,16 +26,9 @@ import java.util.TreeMap;
  */
 public class CoreDictionary {
 
-    public static final String PATH = HanLP.Config.CoreDictionaryPath;
     public static DoubleArrayTrie<Attribute> trie = new DoubleArrayTrie<Attribute>();
-    // 一些特殊的WORD_ID
-    public static final int NR_WORD_ID = getWordID(Predefine.TAG_PEOPLE);
-    public static final int NS_WORD_ID = getWordID(Predefine.TAG_PLACE);
-    public static final int NT_WORD_ID = getWordID(Predefine.TAG_GROUP);
-    public static final int T_WORD_ID = getWordID(Predefine.TAG_TIME);
-    public static final int X_WORD_ID = getWordID(Predefine.TAG_CLUSTER);
-    public static final int M_WORD_ID = getWordID(Predefine.TAG_NUMBER);
-    public static final int NX_WORD_ID = getWordID(Predefine.TAG_PROPER);
+
+    public static final String PATH = HanLP.Config.CoreDictionaryPath;
 
     // 自动加载词典
     static {
@@ -46,6 +39,15 @@ public class CoreDictionary {
             logger.info(PATH + "加载成功，" + trie.size() + "个词条，耗时" + (System.currentTimeMillis() - start) + "ms");
         }
     }
+
+    // 一些特殊的WORD_ID
+    public static final int NR_WORD_ID = getWordID(Predefine.TAG_PEOPLE);
+    public static final int NS_WORD_ID = getWordID(Predefine.TAG_PLACE);
+    public static final int NT_WORD_ID = getWordID(Predefine.TAG_GROUP);
+    public static final int T_WORD_ID = getWordID(Predefine.TAG_TIME);
+    public static final int X_WORD_ID = getWordID(Predefine.TAG_CLUSTER);
+    public static final int M_WORD_ID = getWordID(Predefine.TAG_NUMBER);
+    public static final int NX_WORD_ID = getWordID(Predefine.TAG_PROPER);
 
     private static boolean load(String path) {
         logger.info("核心词典开始加载:" + path);
@@ -196,29 +198,6 @@ public class CoreDictionary {
      */
     public static boolean contains(String key) {
         return trie.get(key) != null;
-    }
-
-    /**
-     * 获取词语的ID
-     *
-     * @param a 词语
-     * @return ID, 如果不存在, 则返回-1
-     */
-    public static int getWordID(String a) {
-        return CoreDictionary.trie.exactMatchSearch(a);
-    }
-
-    /**
-     * 热更新核心词典<br>
-     * 集群环境（或其他IOAdapter）需要自行删除缓存文件
-     *
-     * @return 是否成功
-     */
-    public static boolean reload() {
-        String path = CoreDictionary.PATH;
-        IOUtil.deleteFile(path + Predefine.BIN_EXT);
-
-        return load(path);
     }
 
     /**
@@ -386,6 +365,29 @@ public class CoreDictionary {
                 out.writeInt(frequency[i]);
             }
         }
+    }
+
+    /**
+     * 获取词语的ID
+     *
+     * @param a 词语
+     * @return ID, 如果不存在, 则返回-1
+     */
+    public static int getWordID(String a) {
+        return CoreDictionary.trie.exactMatchSearch(a);
+    }
+
+    /**
+     * 热更新核心词典<br>
+     * 集群环境（或其他IOAdapter）需要自行删除缓存文件
+     *
+     * @return 是否成功
+     */
+    public static boolean reload() {
+        String path = CoreDictionary.PATH;
+        IOUtil.deleteFile(path + Predefine.BIN_EXT);
+
+        return load(path);
     }
 }
 
