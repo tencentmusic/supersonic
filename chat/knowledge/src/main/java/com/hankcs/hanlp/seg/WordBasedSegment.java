@@ -236,10 +236,6 @@ public abstract class WordBasedSegment extends Segment {
         }
     }
 
-    protected static void speechTagging(List<Vertex> vertexList) {
-        Viterbi.compute(vertexList, CoreDictionaryTransformMatrixDictionary.transformMatrixDictionary);
-    }
-
     protected void generateWordNet(final WordNet wordNetStorage) {
         final char[] charArray = wordNetStorage.charArray;
         DoubleArrayTrie.Searcher searcher = CoreDictionary.trie.getSearcher(charArray, 0);
@@ -324,6 +320,10 @@ public abstract class WordBasedSegment extends Segment {
         }
 
         return termList;
+    }
+
+    protected static void speechTagging(List<Vertex> vertexList) {
+        Viterbi.compute(vertexList, CoreDictionaryTransformMatrixDictionary.transformMatrixDictionary);
     }
 
     protected void addTerms(List<Term> terms, Vertex vertex, int offset) {

@@ -19,7 +19,6 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
      * 状态数组，方便读取的时候用
      */
     static final Status[] ARRAY_STATUS = Status.values();
-    public String prefix = null;
     /**
      * 子节点
      */
@@ -36,6 +35,8 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
      * 节点代表的值
      */
     protected V value;
+
+    public String prefix = null;
 
     public BaseNode<V> transition(String path, int begin) {
         BaseNode<V> cur = this;
@@ -230,6 +231,37 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
         }
     }
 
+    public enum Status {
+        /**
+         * 未指定，用于删除词条
+         */
+        UNDEFINED_0,
+        /**
+         * 不是词语的结尾
+         */
+        NOT_WORD_1,
+        /**
+         * 是个词语的结尾，并且还可以继续
+         */
+        WORD_MIDDLE_2,
+        /**
+         * 是个词语的结尾，并且没有继续
+         */
+        WORD_END_3,
+    }
+
+    public class TrieEntry extends AbstractMap.SimpleEntry<String, V> implements Comparable<TrieEntry> {
+
+        public TrieEntry(String key, V value) {
+            super(key, value);
+        }
+
+        @Override
+        public int compareTo(TrieEntry o) {
+            return getKey().compareTo(String.valueOf(o.getKey()));
+        }
+    }
+
     @Override
     public String toString() {
         return "BaseNode{"
@@ -281,37 +313,6 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
                 node.prefix = prefix;
                 queue.add(node);
             }
-        }
-    }
-
-    public enum Status {
-        /**
-         * 未指定，用于删除词条
-         */
-        UNDEFINED_0,
-        /**
-         * 不是词语的结尾
-         */
-        NOT_WORD_1,
-        /**
-         * 是个词语的结尾，并且还可以继续
-         */
-        WORD_MIDDLE_2,
-        /**
-         * 是个词语的结尾，并且没有继续
-         */
-        WORD_END_3,
-    }
-
-    public class TrieEntry extends AbstractMap.SimpleEntry<String, V> implements Comparable<TrieEntry> {
-
-        public TrieEntry(String key, V value) {
-            super(key, value);
-        }
-
-        @Override
-        public int compareTo(TrieEntry o) {
-            return getKey().compareTo(String.valueOf(o.getKey()));
         }
     }
 
