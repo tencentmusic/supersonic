@@ -27,4 +27,22 @@ public class ClickHouseAdaptor extends EngineAdaptor {
         return column;
     }
 
+    @Override
+    public String getDbMetaQueryTpl() {
+        return " "
+                + " select "
+                + " name from system.databases "
+                + " where name not in('_temporary_and_external_tables','benchmark','default','system');";
+    }
+
+    @Override
+    public String getTableMetaQueryTpl() {
+        return "select name from system.tables where database = '%s';";
+    }
+
+    @Override
+    public String getColumnMetaQueryTpl() {
+        return "select name,type as dataType, comment from system.columns where database = '%s' and table='%s'";
+    }
+
 }

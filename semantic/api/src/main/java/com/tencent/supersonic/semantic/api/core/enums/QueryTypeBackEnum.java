@@ -14,14 +14,6 @@ public enum QueryTypeBackEnum {
         this.state = state;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public Integer getState() {
-        return state;
-    }
-
     public static QueryTypeBackEnum of(String src) {
         for (QueryTypeBackEnum operatorEnum : QueryTypeBackEnum.values()) {
             if (src.toUpperCase().contains(operatorEnum.value)) {
@@ -29,6 +21,14 @@ public enum QueryTypeBackEnum {
             }
         }
         return null;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public Integer getState() {
+        return state;
     }
 
 

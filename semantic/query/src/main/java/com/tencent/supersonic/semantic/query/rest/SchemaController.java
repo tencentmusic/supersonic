@@ -32,8 +32,8 @@ public class SchemaController {
 
     @PostMapping
     public List<DomainSchemaResp> fetchDomainSchema(@RequestBody DomainSchemaFilterReq filter,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return schemaService.fetchDomainSchema(filter, user);
     }
@@ -45,23 +45,23 @@ public class SchemaController {
      */
     @GetMapping("/domain/list")
     public List<DomainResp> getDomainList(HttpServletRequest request,
-                                          HttpServletResponse response) {
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return schemaService.getDomainListForAdmin(user);
     }
 
     @PostMapping("/dimension/page")
     public PageInfo<DimensionResp> queryDimension(@RequestBody PageDimensionReq pageDimensionCmd,
-                                                  HttpServletRequest request,
-                                                  HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return schemaService.queryDimension(pageDimensionCmd, user);
     }
 
     @PostMapping("/metric/page")
     public PageInfo<MetricResp> queryMetric(@RequestBody PageMetricReq pageMetricCmd,
-                                            HttpServletRequest request,
-                                            HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return schemaService.queryMetric(pageMetricCmd, user);
     }

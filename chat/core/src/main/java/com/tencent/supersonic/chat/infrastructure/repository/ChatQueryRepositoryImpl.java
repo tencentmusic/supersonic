@@ -14,6 +14,7 @@ import com.tencent.supersonic.chat.domain.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.infrastructure.mapper.ChatQueryDOMapper;
 import com.tencent.supersonic.common.util.json.JsonUtil;
 import com.tencent.supersonic.common.util.mybatis.PageUtils;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     @Override
     public PageInfo<ChatQueryVO> getChatQuery(PageQueryInfoReq pageQueryInfoCommend, long chatId) {
         ChatQueryDOExample example = new ChatQueryDOExample();
-        example.setOrderByClause("question_id");
+        example.setOrderByClause("question_id desc");
         Criteria criteria = example.createCriteria();
         criteria.andChatIdEqualTo(chatId);
         criteria.andUserNameEqualTo(pageQueryInfoCommend.getUserName());
@@ -47,7 +48,9 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
 
         PageInfo<ChatQueryVO> chatQueryVOPageInfo = PageUtils.pageInfo2PageInfoVo(pageInfo);
         chatQueryVOPageInfo.setList(
-                pageInfo.getList().stream().map(chatQueryDO -> convertTo(chatQueryDO)).collect(Collectors.toList()));
+                pageInfo.getList().stream().map(this::convertTo)
+                        .sorted(Comparator.comparingInt(o -> o.getQuestionId().intValue()))
+                        .collect(Collectors.toList()));
         return chatQueryVOPageInfo;
     }
 
@@ -55,6 +58,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         ChatQueryVO chatQueryVO = new ChatQueryVO();
         BeanUtils.copyProperties(chatQueryDO, chatQueryVO);
         QueryResultResp queryResponse = JsonUtil.toObject(chatQueryDO.getQueryResponse(), QueryResultResp.class);
+        queryResponse.setQueryId(chatQueryDO.getQuestionId());
         chatQueryVO.setQueryResponse(queryResponse);
         return chatQueryVO;
     }
@@ -68,7 +72,9 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         chatQueryDO.setQueryState(queryResponse.getQueryState());
         chatQueryDO.setQueryText(queryContext.getQueryText());
         chatQueryDO.setQueryResponse(JsonUtil.toString(queryResponse));
-        Long queryId = Long.valueOf(chatQueryDOMapper.insert(chatQueryDO));
+        chatQueryDOMapper.insert(chatQueryDO);
+        ChatQueryDO lastChatQuery = getLastChatQuery(queryContext.getChatId());
+        Long queryId = lastChatQuery.getQuestionId();
         queryResponse.setQueryId(queryId);
     }
 

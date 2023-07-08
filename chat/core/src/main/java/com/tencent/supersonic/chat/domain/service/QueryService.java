@@ -11,9 +11,9 @@ import com.tencent.supersonic.chat.domain.pojo.chat.QueryData;
  */
 public interface QueryService {
 
-    public QueryResultResp executeQuery(QueryContextReq queryCtx) throws Exception;
+    QueryResultResp executeQuery(QueryContextReq queryCtx) throws Exception;
 
-    public SemanticParseInfo queryContext(QueryContextReq queryCtx);
+    SemanticParseInfo queryContext(QueryContextReq queryCtx);
 
-    QueryResultResp queryData(QueryData queryData, User user) throws Exception;
+    QueryResultResp executeDirectQuery(QueryData queryData, User user) throws Exception;
 }

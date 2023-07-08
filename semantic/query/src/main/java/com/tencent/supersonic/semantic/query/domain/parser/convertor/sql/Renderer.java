@@ -25,21 +25,6 @@ public abstract class Renderer {
 
     protected TableView tableView = new TableView();
 
-    public void setTable(SqlNode table) {
-        tableView.setTable(table);
-    }
-
-    public SqlNode builder() {
-        return tableView.build();
-    }
-
-    public SqlNode builderAs(String alias) throws Exception {
-        return SemanticNode.buildAs(alias, tableView.build());
-    }
-
-    public abstract void render(MetricReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
-            SemanticSchema schema, boolean nonAgg) throws Exception;
-
     public static Optional<Dimension> getDimensionByName(String name, DataSource datasource) {
         return datasource.getDimensions().stream().filter(d -> d.getName().equalsIgnoreCase(name)).findFirst();
     }
@@ -57,7 +42,6 @@ public abstract class Renderer {
     public static Optional<Identify> getIdentifyByName(String name, DataSource datasource) {
         return datasource.getIdentifiers().stream().filter(i -> i.getName().equalsIgnoreCase(name)).findFirst();
     }
-
 
     public static MetricNode buildMetricNode(String metric, DataSource datasource, SqlValidatorScope scope,
             SemanticSchema schema, boolean nonAgg, String alias) throws Exception {
@@ -105,4 +89,19 @@ public abstract class Renderer {
         Set<String> tmp = new HashSet<>(list);
         return tmp.stream().collect(Collectors.toList());
     }
+
+    public void setTable(SqlNode table) {
+        tableView.setTable(table);
+    }
+
+    public SqlNode builder() {
+        return tableView.build();
+    }
+
+    public SqlNode builderAs(String alias) throws Exception {
+        return SemanticNode.buildAs(alias, tableView.build());
+    }
+
+    public abstract void render(MetricReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
+            SemanticSchema schema, boolean nonAgg) throws Exception;
 }

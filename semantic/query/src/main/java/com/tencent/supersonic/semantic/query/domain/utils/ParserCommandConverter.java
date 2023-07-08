@@ -30,12 +30,11 @@ public class ParserCommandConverter {
     private final ParserService parserService;
     private final DomainService domainService;
     private final CalculateConverterAgg calculateCoverterAgg;
+    private final DimensionService dimensionService;
+    private final QueryStructUtils queryStructUtils;
     @Value("${internal.metric.cnt.suffix:internal_cnt}")
     private String internalMetricNameSuffix;
-    private final DimensionService dimensionService;
-
     private List<CalculateConverter> calculateCoverters = new LinkedList<>();
-    private final QueryStructUtils queryStructUtils;
 
     public ParserCommandConverter(ParserService parserService,
             DomainService domainService,
@@ -78,11 +77,14 @@ public class ParserCommandConverter {
         sqlCommend.setLimit(queryStructCmd.getLimit());
         String rootPath = domainService.getDomainFullPath(queryStructCmd.getDomainId());
         sqlCommend.setRootPath(rootPath);
+
+        // todo tmp delete
         // support detail query
         if (queryStructCmd.getNativeQuery() && CollectionUtils.isEmpty(sqlCommend.getMetrics())) {
             String internalMetricName = generateInternalMetricName(queryStructCmd);
             sqlCommend.getMetrics().add(internalMetricName);
         }
+
         return sqlCommend;
     }
 

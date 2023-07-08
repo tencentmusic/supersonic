@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Button, Modal, message } from 'antd';
 import { addDomainExtend, editDomainExtend, getDomainExtendDetailConfig } from '../../service';
 import DimensionMetricVisibleTransfer from './DimensionMetricVisibleTransfer';
+import { exChangeRichEntityListToIds } from './utils';
+
 type Props = {
   domainId: number;
   themeData: any;
@@ -36,7 +38,6 @@ const DimensionMetricVisibleModal: React.FC<Props> = ({
   onSubmit,
 }) => {
   const [sourceList, setSourceList] = useState<any[]>([]);
-  const [visibilityData, setVisibilityData] = useState<any>({});
   const [selectedKeyList, setSelectedKeyList] = useState<string[]>([]);
   const settingTypeConfig = settingType === 'dimension' ? dimensionConfig : metricConfig;
   useEffect(() => {
@@ -47,27 +48,12 @@ const DimensionMetricVisibleModal: React.FC<Props> = ({
     setSourceList(list);
   }, [settingSourceList]);
 
-  const queryThemeListData: any = async () => {
-    const { code, data } = await getDomainExtendDetailConfig({
-      domainId,
-    });
-    if (code === 200) {
-      setVisibilityData(data.visibility);
-      return;
-    }
-    message.error('获取可见信息失败');
-  };
-
   useEffect(() => {
-    queryThemeListData();
-  }, []);
-
-  useEffect(() => {
-    setSelectedKeyList(visibilityData?.[settingTypeConfig.visibleIdListKey] || []);
-  }, [visibilityData]);
+    setSelectedKeyList(themeData.visibility?.[settingTypeConfig.visibleIdListKey] || []);
+  }, [themeData]);
 
   const saveEntity = async () => {
-    const { id } = themeData;
+    const { id, entity } = themeData;
     let saveDomainExtendQuery = addDomainExtend;
     if (id) {
       saveDomainExtendQuery = editDomainExtend;
@@ -79,6 +65,8 @@ const DimensionMetricVisibleModal: React.FC<Props> = ({
       }
       return list;
     }, []);
+    const entityParams = exChangeRichEntityListToIds(entity);
+    themeData.entity = entityParams;
     const params = {
       ...themeData,
       visibility: themeData.visibility || {},

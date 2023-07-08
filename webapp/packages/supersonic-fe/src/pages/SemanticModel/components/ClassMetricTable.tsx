@@ -69,6 +69,10 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '指标名称',
     },
     {
+      dataIndex: 'alias',
+      title: '别名',
+    },
+    {
       dataIndex: 'bizName',
       title: '字段名称',
     },
@@ -118,12 +122,12 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               okText="是"
               cancelText="否"
               onConfirm={async () => {
-                const { code } = await deleteMetric(record.id);
+                const { code, msg } = await deleteMetric(record.id);
                 if (code === 200) {
                   setMetricItem(undefined);
                   actionRef.current?.reload();
                 } else {
-                  message.error('删除失败');
+                  message.error(msg);
                 }
               }}
             >

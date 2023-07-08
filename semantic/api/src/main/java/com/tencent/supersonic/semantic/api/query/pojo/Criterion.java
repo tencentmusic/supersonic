@@ -20,6 +20,26 @@ public class Criterion {
 
     private String dataType;
 
+    public Criterion(String column, FilterOperatorEnum operator, Object value, String dataType) {
+        super();
+        this.column = column;
+        this.operator = operator;
+        this.value = value;
+        this.dataType = dataType;
+
+        if (FilterOperatorEnum.BETWEEN.name().equals(operator) || FilterOperatorEnum.IN.name().equals(operator)
+                || FilterOperatorEnum.NOT_IN.name().equals(operator)) {
+            this.values = (List) value;
+        }
+    }
+
+    public boolean isNeedApostrophe() {
+        return Arrays.stream(StringDataType.values())
+                .filter(value -> this.dataType.equalsIgnoreCase(value.getType())).findFirst()
+                .isPresent();
+    }
+
+
     public enum NumericDataType {
         TINYINT("TINYINT"),
         SMALLINT("SMALLINT"),
@@ -43,6 +63,7 @@ public class Criterion {
         }
     }
 
+
     public enum StringDataType {
         VARCHAR("VARCHAR"),
         STRING("STRING"),
@@ -56,27 +77,6 @@ public class Criterion {
         public String getType() {
             return type;
         }
-    }
-
-
-    public Criterion(String column, FilterOperatorEnum operator, Object value, String dataType) {
-        super();
-        this.column = column;
-        this.operator = operator;
-        this.value = value;
-        this.dataType = dataType;
-
-        if (FilterOperatorEnum.BETWEEN.name().equals(operator) || FilterOperatorEnum.IN.name().equals(operator)
-                || FilterOperatorEnum.NOT_IN.name().equals(operator)) {
-            this.values = (List) value;
-        }
-    }
-
-
-    public boolean isNeedApostrophe() {
-        return Arrays.stream(StringDataType.values())
-                .filter(value -> this.dataType.equalsIgnoreCase(value.getType())).findFirst()
-                .isPresent();
     }
 
 

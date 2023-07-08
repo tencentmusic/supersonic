@@ -18,4 +18,6 @@ public interface ConfigService {
     List<ChatConfigInfo> search(ChatConfigFilter filter, User user);
 
     ChatConfigRichInfo getConfigRichInfo(Long domainId);
+
+    List<ChatConfigRichInfo> getAllChatRichConfig();
 }

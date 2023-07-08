@@ -21,12 +21,12 @@ public class SchemaMapInfo {
         return domainElementMatches;
     }
 
-    public void setMatchedElements(Integer domain, List<SchemaElementMatch> elementMatches) {
-        domainElementMatches.put(domain, elementMatches);
-    }
-
     public void setDomainElementMatches(
             Map<Integer, List<SchemaElementMatch>> domainElementMatches) {
         this.domainElementMatches = domainElementMatches;
+    }
+
+    public void setMatchedElements(Integer domain, List<SchemaElementMatch> elementMatches) {
+        domainElementMatches.put(domain, elementMatches);
     }
 }

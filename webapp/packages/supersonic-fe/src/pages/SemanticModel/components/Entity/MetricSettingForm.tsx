@@ -17,7 +17,7 @@ const FormItem = Form.Item;
 const Option = Select.Option;
 
 const MetricSettingForm: ForwardRefRenderFunction<any, Props> = (
-  { metricList, domainId, themeData: uniqueMetricData },
+  { metricList, domainId, themeData: uniqueMetricData, onSubmit },
   ref,
 ) => {
   const [form] = Form.useForm();
@@ -82,6 +82,7 @@ const MetricSettingForm: ForwardRefRenderFunction<any, Props> = (
 
     if (code === 200) {
       form.setFieldValue('id', data);
+      onSubmit?.();
       message.success('保存成功');
       return;
     }
@@ -116,6 +117,13 @@ const MetricSettingForm: ForwardRefRenderFunction<any, Props> = (
             allowClear
             showSearch
             style={{ width: '100%' }}
+            filterOption={(inputValue: string, item: any) => {
+              const { label } = item;
+              if (label.includes(inputValue)) {
+                return true;
+              }
+              return false;
+            }}
             placeholder="请选择展示指标信息"
             options={metricListOptions}
           />

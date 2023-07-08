@@ -42,20 +42,6 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
         super(path);
     }
 
-    public boolean load(String... path) {
-        this.path = path;
-        long start = System.currentTimeMillis();
-        if (!this.loadMainDictionary(path[0])) {
-            Predefine.logger.warning("自定义词典" + Arrays.toString(path) + "加载失败");
-            return false;
-        } else {
-            Predefine.logger.info(
-                    "自定义词典加载成功:" + this.dat.size() + "个词条，耗时" + (System.currentTimeMillis() - start) + "ms");
-            this.path = path;
-            return true;
-        }
-    }
-
     /***
      * load dictionary
      * @param path
@@ -137,10 +123,6 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
             logger.severe("自定义词典" + path + "读取错误！" + var12);
             return false;
         }
-    }
-
-    public boolean loadMainDictionary(String mainPath) {
-        return loadMainDictionary(mainPath, this.path, this.dat, true, addToSuggesterTrie);
     }
 
     /***
@@ -291,6 +273,53 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
         }
     }
 
+    public static boolean isLetters(String str) {
+        char[] chars = str.toCharArray();
+        if (chars.length <= 1) {
+            return false;
+        }
+        for (int i = 0; i < chars.length; i++) {
+            if ((chars[i] >= 'A' && chars[i] <= 'Z')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isLowerLetter(String str) {
+        char[] chars = str.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if ((chars[i] >= 'a' && chars[i] <= 'z')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String getWordBySpace(String word) {
+        if (word.contains(HanlpHelper.SPACE_SPILT)) {
+            return word.replace(HanlpHelper.SPACE_SPILT, " ");
+        }
+        return word;
+    }
+
+    public boolean load(String... path) {
+        this.path = path;
+        long start = System.currentTimeMillis();
+        if (!this.loadMainDictionary(path[0])) {
+            Predefine.logger.warning("自定义词典" + Arrays.toString(path) + "加载失败");
+            return false;
+        } else {
+            Predefine.logger.info(
+                    "自定义词典加载成功:" + this.dat.size() + "个词条，耗时" + (System.currentTimeMillis() - start) + "ms");
+            this.path = path;
+            return true;
+        }
+    }
+
+    public boolean loadMainDictionary(String mainPath) {
+        return loadMainDictionary(mainPath, this.path, this.dat, true, addToSuggesterTrie);
+    }
 
     public boolean reload() {
         if (this.path != null && this.path.length != 0) {
@@ -343,36 +372,5 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
             }
             return true;
         }
-    }
-
-
-    public static boolean isLetters(String str) {
-        char[] chars = str.toCharArray();
-        if (chars.length <= 1) {
-            return false;
-        }
-        for (int i = 0; i < chars.length; i++) {
-            if ((chars[i] >= 'A' && chars[i] <= 'Z')) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean isLowerLetter(String str) {
-        char[] chars = str.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            if ((chars[i] >= 'a' && chars[i] <= 'z')) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static String getWordBySpace(String word) {
-        if (word.contains(HanlpHelper.SPACE_SPILT)) {
-            return word.replace(HanlpHelper.SPACE_SPILT, " ");
-        }
-        return word;
     }
 }

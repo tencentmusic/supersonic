@@ -85,6 +85,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
         >
           <Input placeholder="名称不可重复" disabled={isEdit} />
         </FormItem>
+
         <FormItem
           name="datasourceId"
           label="所属数据源"
@@ -97,6 +98,9 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
               </Option>
             ))}
           </Select>
+        </FormItem>
+        <FormItem name="alias" label="别名">
+          <Input placeholder="多个别名用英文逗号隔开" />
         </FormItem>
         <FormItem
           name="semanticType"

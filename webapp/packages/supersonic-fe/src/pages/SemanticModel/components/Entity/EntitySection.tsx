@@ -3,10 +3,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../../model';
-import { getDomainExtendConfig } from '../../service';
+import { getDomainExtendConfig, getDomainExtendDetailConfig } from '../../service';
 import ProCard from '@ant-design/pro-card';
 import EntityCreateForm from './EntityCreateForm';
 import MetricSettingForm from './MetricSettingForm';
+import type { IChatConfig } from '../../data';
 import DimensionMetricVisibleForm from './DimensionMetricVisibleForm';
 
 type Props = {
@@ -17,18 +18,21 @@ type Props = {
 const EntitySection: React.FC<Props> = ({ domainManger, dispatch }) => {
   const { selectDomainId, dimensionList, metricList } = domainManger;
 
-  const [entityData, setEntityData] = useState<any>({});
+  const [entityData, setEntityData] = useState<IChatConfig.IEntity>({} as IChatConfig.IEntity);
 
   const [themeData, setThemeData] = useState<any>({});
 
   const entityCreateRef = useRef<any>({});
 
   const queryThemeListData: any = async () => {
-    const { code, data } = await getDomainExtendConfig({
+    const { code, data } = await getDomainExtendDetailConfig({
       domainId: selectDomainId,
     });
+    // getDomainExtendConfig({
+    //   domainId: selectDomainId,
+    // });
     if (code === 200) {
-      const target = data?.[0] || {};
+      const target = data;
       if (target) {
         setThemeData(target);
         setEntityData({
@@ -75,7 +79,14 @@ const EntitySection: React.FC<Props> = ({ domainManger, dispatch }) => {
           <MetricSettingForm
             domainId={Number(selectDomainId)}
             themeData={themeData}
-            metricList={metricList}
+            // metricList={metricList}
+            metricList={metricList.filter((item) => {
+              const blackMetricIdList = themeData.visibility?.blackMetricIdList;
+              if (Array.isArray(blackMetricIdList)) {
+                return !blackMetricIdList.includes(item.id);
+              }
+              return false;
+            })}
             onSubmit={() => {
               queryThemeListData();
             }}
@@ -86,8 +97,22 @@ const EntitySection: React.FC<Props> = ({ domainManger, dispatch }) => {
             ref={entityCreateRef}
             domainId={Number(selectDomainId)}
             entityData={entityData}
-            metricList={metricList}
-            dimensionList={dimensionList}
+            // metricList={metricList}
+            metricList={metricList.filter((item) => {
+              const blackMetricIdList = themeData.visibility?.blackMetricIdList;
+              if (Array.isArray(blackMetricIdList)) {
+                return !blackMetricIdList.includes(item.id);
+              }
+              return false;
+            })}
+            // dimensionList={dimensionList}
+            dimensionList={dimensionList.filter((item) => {
+              const blackDimensionList = themeData.visibility?.blackDimIdList;
+              if (Array.isArray(blackDimensionList)) {
+                return !blackDimensionList.includes(item.id);
+              }
+              return false;
+            })}
             onSubmit={() => {
               queryThemeListData();
             }}

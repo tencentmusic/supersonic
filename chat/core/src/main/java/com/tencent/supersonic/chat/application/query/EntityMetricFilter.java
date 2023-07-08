@@ -1,26 +1,24 @@
 package com.tencent.supersonic.chat.application.query;
 
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.METRIC;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.VALUE;
+import static com.tencent.supersonic.chat.application.query.QueryMatchOption.RequireNumberType.AT_LEAST;
+import static com.tencent.supersonic.chat.domain.pojo.chat.SchemaElementOption.REQUIRED;
+
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.request.QueryContextReq;
-import com.tencent.supersonic.chat.domain.pojo.chat.SchemaElementOption;
 import com.tencent.supersonic.chat.domain.utils.ContextHelper;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-public class EntityMetricFilter extends BaseSemanticQuery {
+@Component
+public class EntityMetricFilter extends EntitySemanticQuery {
 
     public static String QUERY_MODE = "ENTITY_METRIC_FILTER";
 
-
     public EntityMetricFilter() {
-        queryModeOption.setAggregation(QueryModeElementOption.optional());
-        queryModeOption.setDate(QueryModeElementOption.optional());
-        queryModeOption.setDimension(QueryModeElementOption.unused());
-        queryModeOption.setFilter(SchemaElementOption.REQUIRED, QueryModeElementOption.RequireNumberType.AT_LEAST, 1);
-        queryModeOption.setMetric(SchemaElementOption.REQUIRED, QueryModeElementOption.RequireNumberType.AT_LEAST, 1);
-        queryModeOption.setEntity(SchemaElementOption.REQUIRED, QueryModeElementOption.RequireNumberType.AT_LEAST, 1);
-        queryModeOption.setDomain(QueryModeElementOption.optional());
+        super();
+        queryMatcher.addOption(METRIC, REQUIRED, AT_LEAST, 1)
+                .addOption(VALUE, REQUIRED, AT_LEAST, 1);
     }
 
     @Override
@@ -29,21 +27,9 @@ public class EntityMetricFilter extends BaseSemanticQuery {
     }
 
     @Override
-    public SemanticParseInfo getParseInfo(QueryContextReq queryCtx, ChatContext chatCtx) {
-        SemanticParseInfo semanticParseInfo = chatCtx.getParseInfo();
-        ContextHelper.updateDomain(queryCtx.getParseInfo(), semanticParseInfo);
-        ContextHelper.updateSemanticQuery(queryCtx.getParseInfo(), semanticParseInfo);
-        ContextHelper.updateList(queryCtx.getParseInfo().getDimensionFilters(),
-                semanticParseInfo.getDimensionFilters());
-        ContextHelper.updateEntity(queryCtx.getParseInfo(), semanticParseInfo);
-        return semanticParseInfo;
-    }
-
-    @Override
-    public SemanticParseInfo getContext(ChatContext chatCtx, QueryContextReq queryCtx) {
-        SemanticParseInfo semanticParseInfo = queryCtx.getParseInfo();
-        ContextHelper.addIfEmpty(chatCtx.getParseInfo().getDimensionFilters(), semanticParseInfo.getDimensionFilters());
-        return semanticParseInfo;
+    public void inheritContext(ChatContext chatContext) {
+        SemanticParseInfo chatParseInfo = chatContext.getParseInfo();
+        ContextHelper.addIfEmpty(chatParseInfo.getDimensionFilters(), parseInfo.getDimensionFilters());
     }
 
 }

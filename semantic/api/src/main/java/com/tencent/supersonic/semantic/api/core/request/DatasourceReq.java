@@ -19,7 +19,7 @@ public class DatasourceReq extends SchemaItem {
 
     private String sqlQuery;
 
-    private String sqlTable;
+    private String tableQuery;
 
     private Long domainId;
 

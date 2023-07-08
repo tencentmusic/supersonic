@@ -1,32 +1,23 @@
-com.tencent.supersonic.chat.api.service.SchemaMapper=\
-    com.tencent.supersonic.chat.application.mapper.HanlpSchemaMapper
+com.tencent.supersonic.chat.api.component.SchemaMapper=\
+    com.tencent.supersonic.chat.application.mapper.HanlpSchemaMapper, \
+    com.tencent.supersonic.chat.application.mapper.DatabaseSchemaMapper, \
+    com.tencent.supersonic.chat.application.mapper.QueryFilterMapper
 
-com.tencent.supersonic.chat.application.parser.resolver.DomainResolver=\
-  com.tencent.supersonic.chat.application.parser.resolver.HeuristicDomainResolver
-
-com.tencent.supersonic.chat.api.service.SemanticParser=\
-    com.tencent.supersonic.chat.application.parser.TimeSemanticParser, \
+com.tencent.supersonic.chat.api.component.SemanticParser=\
     com.tencent.supersonic.chat.application.parser.DomainSemanticParser, \
-    com.tencent.supersonic.chat.application.parser.ListFilterParser, \
-    com.tencent.supersonic.chat.application.parser.DefaultMetricSemanticParser, \
+    com.tencent.supersonic.chat.application.parser.TimeSemanticParser, \
     com.tencent.supersonic.chat.application.parser.AggregateSemanticParser
+#    com.tencent.supersonic.chat.application.parser.LLMSemanticParser
 
 
-com.tencent.supersonic.chat.api.service.SemanticQuery=\
-    com.tencent.supersonic.chat.application.query.EntityDetail, \
-    com.tencent.supersonic.chat.application.query.EntityListTopN, \
-    com.tencent.supersonic.chat.application.query.EntityMetricFilter, \
-    com.tencent.supersonic.chat.application.query.EntityListFilter, \
-    com.tencent.supersonic.chat.application.query.MetricCompare, \
-    com.tencent.supersonic.chat.application.query.MetricDomain, \
-    com.tencent.supersonic.chat.application.query.MetricFilter, \
-    com.tencent.supersonic.chat.application.query.MetricGroupBy, \
-    com.tencent.supersonic.chat.application.query.MetricOrderBy
+com.tencent.supersonic.chat.api.component.SemanticLayer=\
+    com.tencent.supersonic.chat.infrastructure.semantic.RemoteSemanticLayerImpl
 
+com.tencent.supersonic.chat.application.query.QuerySelector=\
+   com.tencent.supersonic.chat.application.query.HeuristicQuerySelector
 
-com.tencent.supersonic.chat.api.service.SemanticLayer=\
-    com.tencent.supersonic.chat.infrastructure.semantic.DefaultSemanticLayerImpl
-
+com.tencent.supersonic.chat.application.parser.DomainResolver=\
+  com.tencent.supersonic.chat.application.parser.HeuristicDomainResolver
 
 com.tencent.supersonic.auth.authentication.domain.interceptor.AuthenticationInterceptor=\
     com.tencent.supersonic.auth.authentication.domain.interceptor.DefaultAuthenticationInterceptor

@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS `s2_metric` (
     `updated_by` varchar(100) NOT NULL ,
     `data_format_type` varchar(50) DEFAULT NULL ,
     `data_format` varchar(500) DEFAULT NULL,
+    `alias` varchar(500) DEFAULT NULL,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_metric IS 'metric information table';
@@ -106,6 +107,8 @@ CREATE TABLE IF NOT EXISTS `s2_dimension` (
     `updated_at` TIMESTAMP  NOT NULL ,
     `updated_by` varchar(100)  NOT NULL ,
     `semantic_type` varchar(20)  NOT NULL,  -- semantic type: DATE, ID, CATEGORY
+    `alias` varchar(500) DEFAULT NULL,
+    `default_values` varchar(500) DEFAULT NULL,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_dimension IS 'dimension information table';

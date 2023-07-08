@@ -53,7 +53,7 @@ public class DatasourceRepositoryImpl implements DatasourceRepository {
     public DatasourceDO getDatasourceById(Long id) {
         return datasourceMapper.selectByPrimaryKey(id);
     }
-    
+
     @Override
     public void deleteDatasource(Long id) {
         datasourceMapper.deleteByPrimaryKey(id);

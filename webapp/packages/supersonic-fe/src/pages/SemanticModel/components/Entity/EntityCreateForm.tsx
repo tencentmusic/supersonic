@@ -2,15 +2,17 @@ import { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import type { ForwardRefRenderFunction } from 'react';
 import { message, Form, Input, Select, Button } from 'antd';
 import { addDomainExtend, editDomainExtend } from '../../service';
+import type { ISemantic, IChatConfig } from '../../data';
 import { formLayout } from '@/components/FormHelper/utils';
-
+import { exChangeRichEntityListToIds } from './utils';
 import styles from '../style.less';
+
 type Props = {
-  entityData: any;
-  metricList: any[];
-  dimensionList: any[];
+  entityData: IChatConfig.IEntity;
+  metricList: ISemantic.IMetricList;
+  dimensionList: ISemantic.IDimensionList;
   domainId: number;
-  onSubmit: (params?: any) => void;
+  onSubmit: () => void;
 };
 
 const FormItem = Form.Item;
@@ -34,33 +36,19 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
     if (Object.keys(entityData).length === 0) {
       return;
     }
-    const { detailData = {}, names = [] } = entityData;
-    if (!detailData.dimensionIds) {
-      entityData = {
-        ...entityData,
-        detailData: {
-          ...detailData,
-          dimensionIds: [],
-        },
-      };
-    }
-    if (!detailData.metricIds) {
-      entityData = {
-        ...entityData,
-        detailData: {
-          ...detailData,
-          metricIds: [],
-        },
-      };
-    }
-    form.setFieldsValue({ ...entityData, name: names.join(',') });
+    const names = entityData.names || [];
+    const formatEntityData = exChangeRichEntityListToIds(entityData);
+    form.setFieldsValue({
+      ...formatEntityData,
+      name: names.join(','),
+    });
   }, [entityData]);
 
   useImperativeHandle(ref, () => ({
     getFormValidateFields,
   }));
   useEffect(() => {
-    const metricOption = metricList.map((item: any) => {
+    const metricOption = metricList.map((item: ISemantic.IMetricItem) => {
       return {
         label: item.name,
         value: item.id,
@@ -70,7 +58,7 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
   }, [metricList]);
 
   useEffect(() => {
-    const dimensionEnum = dimensionList.map((item: any) => {
+    const dimensionEnum = dimensionList.map((item: ISemantic.IDimensionItem) => {
       return {
         label: item.name,
         value: item.id,
@@ -128,6 +116,13 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
             mode="multiple"
             allowClear
             style={{ width: '100%' }}
+            filterOption={(inputValue: string, item: any) => {
+              const { label } = item;
+              if (label.includes(inputValue)) {
+                return true;
+              }
+              return false;
+            }}
             placeholder="请选择主体标识"
             options={dimensionListOptions}
           />
@@ -137,6 +132,13 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
             mode="multiple"
             allowClear
             style={{ width: '100%' }}
+            filterOption={(inputValue: string, item: any) => {
+              const { label } = item;
+              if (label.includes(inputValue)) {
+                return true;
+              }
+              return false;
+            }}
             placeholder="请选择展示维度信息"
             options={dimensionListOptions}
           />
@@ -146,6 +148,13 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
             mode="multiple"
             allowClear
             style={{ width: '100%' }}
+            filterOption={(inputValue: string, item: any) => {
+              const { label } = item;
+              if (label.includes(inputValue)) {
+                return true;
+              }
+              return false;
+            }}
             placeholder="请选择展示指标信息"
             options={metricListOptions}
           />

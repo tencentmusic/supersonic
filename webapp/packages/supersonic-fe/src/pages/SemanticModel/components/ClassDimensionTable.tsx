@@ -89,6 +89,10 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '维度名称',
     },
     {
+      dataIndex: 'alias',
+      title: '别名',
+    },
+    {
       dataIndex: 'bizName',
       title: '字段名称',
       order: 9,
@@ -146,12 +150,12 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               okText="是"
               cancelText="否"
               onConfirm={async () => {
-                const { code } = await deleteDimension(record.id);
+                const { code, msg } = await deleteDimension(record.id);
                 if (code === 200) {
                   setDimensionItem(undefined);
                   actionRef.current?.reload();
                 } else {
-                  message.error('删除失败');
+                  message.error(msg);
                 }
               }}
             >

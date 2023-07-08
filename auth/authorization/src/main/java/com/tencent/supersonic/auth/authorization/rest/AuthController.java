@@ -2,8 +2,8 @@ package com.tencent.supersonic.auth.authorization.rest;
 
 import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
-import com.tencent.supersonic.auth.authorization.application.AuthApplicationService;
-import com.tencent.supersonic.auth.authorization.domain.pojo.AuthGroup;
+import com.tencent.supersonic.auth.api.authorization.service.AuthService;
+import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -19,16 +19,16 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class AuthController {
 
-    private final AuthApplicationService service;
+    private final AuthService authService;
 
-    public AuthController(AuthApplicationService service) {
-        this.service = service;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @GetMapping("/queryGroup")
     public List<AuthGroup> queryAuthGroup(@RequestParam("domainId") String domainId,
             @RequestParam(value = "groupId", required = false) Integer groupId) {
-        return service.queryAuthGroups(domainId, groupId);
+        return authService.queryAuthGroups(domainId, groupId);
     }
 
     /**
@@ -37,12 +37,12 @@ public class AuthController {
     @PostMapping("/createGroup")
     public void newAuthGroup(@RequestBody AuthGroup group) {
         group.setGroupId(null);
-        service.updateAuthGroup(group);
+        authService.updateAuthGroup(group);
     }
 
     @PostMapping("/removeGroup")
     public void removeAuthGroup(@RequestBody AuthGroup group) {
-        service.removeAuthGroup(group);
+        authService.removeAuthGroup(group);
     }
 
     /**
@@ -55,7 +55,7 @@ public class AuthController {
         if (group.getGroupId() == null || group.getGroupId() == 0) {
             throw new RuntimeException("groupId is empty");
         }
-        service.updateAuthGroup(group);
+        authService.updateAuthGroup(group);
     }
 
     /**
@@ -68,6 +68,6 @@ public class AuthController {
     @PostMapping("/queryAuthorizedRes")
     public AuthorizedResourceResp queryAuthorizedResources(@RequestBody QueryAuthResReq req,
             HttpServletRequest request) {
-        return service.queryAuthorizedResources(req, request);
+        return authService.queryAuthorizedResources(req, request);
     }
 }

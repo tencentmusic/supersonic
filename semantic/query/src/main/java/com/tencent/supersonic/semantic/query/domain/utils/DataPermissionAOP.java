@@ -57,26 +57,20 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class DataPermissionAOP {
 
-    @Autowired
-    private QueryStructUtils queryStructUtils;
-
-    @Autowired
-    private AuthService authService;
-
-    @Autowired
-    private DimensionService dimensionService;
-
-    @Autowired
-    private MetricService metricService;
-
-    @Autowired
-    private DomainService domainService;
-
-    @Value("${permission.data.enable:true}")
-    private Boolean permissionDataEnable;
-
     private static final ObjectMapper MAPPER = new ObjectMapper().setDateFormat(
             new SimpleDateFormat(Constants.DAY_FORMAT));
+    @Autowired
+    private QueryStructUtils queryStructUtils;
+    @Autowired
+    private AuthService authService;
+    @Autowired
+    private DimensionService dimensionService;
+    @Autowired
+    private MetricService metricService;
+    @Autowired
+    private DomainService domainService;
+    @Value("${permission.data.enable:true}")
+    private Boolean permissionDataEnable;
 
     @Pointcut("@annotation(com.tencent.supersonic.semantic.query.domain.annotation.DataPermission)")
     public void dataPermissionAOP() {
@@ -179,7 +173,7 @@ public class DataPermissionAOP {
     }
 
     private void addPromptInfoInfo(Long domainId, QueryResultWithSchemaResp queryResultWithColumns,
-                                   AuthorizedResourceResp authorizedResource) {
+            AuthorizedResourceResp authorizedResource) {
         List<DimensionFilter> filters = authorizedResource.getFilters();
         if (!CollectionUtils.isEmpty(filters)) {
             log.debug("dimensionFilters:{}", filters);
@@ -258,7 +252,7 @@ public class DataPermissionAOP {
     }
 
     private AuthorizedResourceResp getAuthorizedResource(User user, HttpServletRequest request, Long domainId,
-                                                         Set<String> sensitiveResReq) {
+            Set<String> sensitiveResReq) {
         List<AuthRes> resourceReqList = new ArrayList<>();
         sensitiveResReq.stream().forEach(res -> resourceReqList.add(new AuthRes(domainId.toString(), res)));
         QueryAuthResReq queryAuthResReq = new QueryAuthResReq();
@@ -375,7 +369,7 @@ public class DataPermissionAOP {
     }
 
     private void doFilterCheckLogic(QueryStructReq queryStructCmd, Set<String> resAuthName,
-                                    Set<String> sensitiveResReq) {
+            Set<String> sensitiveResReq) {
         Set<String> resFilterSet = queryStructUtils.getFilterResNameEnExceptInternalCol(queryStructCmd);
         Set<String> need2Apply = resFilterSet.stream()
                 .filter(res -> !resAuthName.contains(res) && sensitiveResReq.contains(res)).collect(Collectors.toSet());
@@ -405,7 +399,7 @@ public class DataPermissionAOP {
     private AuthorizedResourceResp fetchAuthRes(HttpServletRequest request, QueryAuthResReq queryAuthResReq) {
         log.info("Authorization:{}", request.getHeader("Authorization"));
         log.info("queryAuthResReq:{}", queryAuthResReq);
-        return authService.queryAuthorizedResources(request, queryAuthResReq);
+        return authService.queryAuthorizedResources(queryAuthResReq, request);
     }
 
 }

@@ -106,7 +106,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, domainId }) => {
       const { id, name } = datasource;
       const dataSourceId = `dataSource-${id}`;
       let childrenList = [];
-      if (type === 'metirc') {
+      if (type === 'metric') {
         childrenList = getMetricChildren(metrics, dataSourceId);
       }
       if (type === 'dimension') {
@@ -247,7 +247,6 @@ const DomainManger: React.FC<Props> = ({ domainManger, domainId }) => {
         },
       },
     });
-    // 我使用TreeGraph进行layout布局，采用{type: 'compactBox',direction: 'LR'}模式，如何使子节点与根节点的连线只连接到上下连接桩上
 
     graphRef.current = new G6.TreeGraph({
       container: 'semanticGraph',

@@ -45,7 +45,7 @@ public class ApplicationStartedInit implements ApplicationListener<ApplicationSt
      */
     @Scheduled(cron = "${reload.knowledge.corn:0 0/1 * * * ?}")
     public void reloadKnowledge() {
-        log.debug("reloadKnowledge start");
+        log.info("reloadKnowledge start");
 
         try {
             List<WordNature> wordNatures = wordNatureService.getAllWordNature();
@@ -55,6 +55,7 @@ public class ApplicationStartedInit implements ApplicationListener<ApplicationSt
                 log.debug("wordNatures is not change, reloadKnowledge end");
                 return;
             }
+            log.info("wordNatures is change");
             wordNatureService.setPreWordNatures(wordNatures);
             onlineKnowledgeService.updateOnlineKnowledge(wordNatureService.getAllWordNature());
             wordNatureService.getCache().refresh("");
@@ -63,6 +64,6 @@ public class ApplicationStartedInit implements ApplicationListener<ApplicationSt
             log.error("reloadKnowledge error", e);
         }
 
-        log.debug("reloadKnowledge end");
+        log.info("reloadKnowledge end");
     }
 }

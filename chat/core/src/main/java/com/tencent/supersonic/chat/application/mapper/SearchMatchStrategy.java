@@ -23,15 +23,8 @@ public class SearchMatchStrategy implements MatchStrategy {
 
     private static final int SEARCH_SIZE = 3;
 
-
     @Override
-    public List<MapResult> match(String text, List<Term> terms, Integer detectDomainId) {
-
-        return null;
-    }
-
-    @Override
-    public Map<MatchText, List<MapResult>> matchWithMatchText(String text, List<Term> originals,
+    public Map<MatchText, List<MapResult>> match(String text, List<Term> originals,
             Integer detectDomainId) {
 
         Map<Integer, Integer> regOffsetToLength = originals.stream()

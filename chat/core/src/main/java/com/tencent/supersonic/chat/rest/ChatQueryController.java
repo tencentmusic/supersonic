@@ -9,6 +9,7 @@ import com.tencent.supersonic.chat.domain.service.SearchService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChatQueryController {
 
     @Autowired
+    @Qualifier("chatQueryService")
     private QueryService queryService;
+
     @Autowired
     private SearchService searchService;
 
@@ -51,7 +54,7 @@ public class ChatQueryController {
     @PostMapping("queryData")
     public Object queryData(@RequestBody QueryData queryData, HttpServletRequest request, HttpServletResponse response)
             throws Exception {
-        return queryService.queryData(queryData, UserHolder.findUser(request, response));
+        return queryService.executeDirectQuery(queryData, UserHolder.findUser(request, response));
     }
 
 }

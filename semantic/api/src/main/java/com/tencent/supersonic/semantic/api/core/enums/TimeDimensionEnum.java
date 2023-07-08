@@ -18,11 +18,11 @@ public enum TimeDimensionEnum {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public static List<String> getNameList() {
         return Arrays.stream(TimeDimensionEnum.values()).map(TimeDimensionEnum::getName).collect(Collectors.toList());
+    }
+
+    public String getName() {
+        return name;
     }
 }

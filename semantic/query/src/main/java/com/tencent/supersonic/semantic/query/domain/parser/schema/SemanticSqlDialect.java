@@ -12,7 +12,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SemanticSqlDialect extends SqlDialect {
 
-    private static final SqlConformance tagTdwSqlConformance = new SemanticSqlConformance();
     public static final Context DEFAULT_CONTEXT = SqlDialect.EMPTY_CONTEXT
             .withDatabaseProduct(DatabaseProduct.BIG_QUERY)
             .withLiteralQuoteString("'")
@@ -22,11 +21,35 @@ public class SemanticSqlDialect extends SqlDialect {
             .withUnquotedCasing(Casing.UNCHANGED)
             .withQuotedCasing(Casing.UNCHANGED)
             .withCaseSensitive(false);
-
     public static final SqlDialect DEFAULT = new SemanticSqlDialect(DEFAULT_CONTEXT);
+    private static final SqlConformance tagTdwSqlConformance = new SemanticSqlConformance();
 
     public SemanticSqlDialect(Context context) {
         super(context);
+    }
+
+    public static void unparseFetchUsingAnsi(SqlWriter writer, @Nullable SqlNode offset, @Nullable SqlNode fetch) {
+        Preconditions.checkArgument(fetch != null || offset != null);
+        SqlWriter.Frame fetchFrame;
+        writer.newlineAndIndent();
+        fetchFrame = writer.startList(SqlWriter.FrameTypeEnum.OFFSET);
+        writer.keyword("LIMIT");
+        if (offset != null) {
+            //writer.keyword("OFFSET");
+            offset.unparse(writer, -1, -1);
+            //writer.keyword("ROWS");
+        }
+
+        if (fetch != null) {
+            //writer.newlineAndIndent();
+            //fetchFrame = writer.startList(SqlWriter.FrameTypeEnum.FETCH);
+            writer.keyword(",");
+            //writer.keyword("NEXT");
+            fetch.unparse(writer, -1, -1);
+        }
+
+        writer.endList(fetchFrame);
+
     }
 
     @Override
@@ -35,7 +58,6 @@ public class SemanticSqlDialect extends SqlDialect {
         buf.append(val);
         buf.append("'");
     }
-
 
     @Override
     public void quoteStringLiteral(StringBuilder buf, String charsetName, String val) {
@@ -69,29 +91,5 @@ public class SemanticSqlDialect extends SqlDialect {
 
     public void unparseOffsetFetch(SqlWriter writer, @Nullable SqlNode offset, @Nullable SqlNode fetch) {
         unparseFetchUsingAnsi(writer, offset, fetch);
-    }
-
-    public static void unparseFetchUsingAnsi(SqlWriter writer, @Nullable SqlNode offset, @Nullable SqlNode fetch) {
-        Preconditions.checkArgument(fetch != null || offset != null);
-        SqlWriter.Frame fetchFrame;
-        writer.newlineAndIndent();
-        fetchFrame = writer.startList(SqlWriter.FrameTypeEnum.OFFSET);
-        writer.keyword("LIMIT");
-        if (offset != null) {
-            //writer.keyword("OFFSET");
-            offset.unparse(writer, -1, -1);
-            //writer.keyword("ROWS");
-        }
-
-        if (fetch != null) {
-            //writer.newlineAndIndent();
-            //fetchFrame = writer.startList(SqlWriter.FrameTypeEnum.FETCH);
-            writer.keyword(",");
-            //writer.keyword("NEXT");
-            fetch.unparse(writer, -1, -1);
-        }
-
-        writer.endList(fetchFrame);
-
     }
 }

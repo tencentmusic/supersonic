@@ -3,62 +3,7 @@
   flex-direction: row;
   background-color: #fff;
   height: calc(100vh - 48px);
-  .projectList {
-    display: flex;
-    flex-direction: column;
-    // width: 400px;
-    overflow: hidden;
-    // min-height: calc(100vh - 48px);
-    border-right: 1px solid #d9d9d9;
 
-    .treeTitle {
-      margin-bottom: 0;
-      padding: 20px;
-      line-height: 34px;
-      text-align: right;
-      background: #fff;
-      border-bottom: 1px solid #d9d9d9;
-
-      .title {
-        float: left;
-      }
-
-      .addBtn {
-        cursor: pointer;
-        &:hover {
-          color: #296DF3;
-        }
-      }
-    }
-
-    .search {
-      width: calc(100% - 20px);
-      margin: 10px;
-    }
-
-    .tree {
-      flex: 1;
-      padding: 10px;
-
-      .projectItem {
-        display: flex;
-        width: 100%;
-        cursor: auto;
-
-        .title {
-          flex: 1;
-          cursor: pointer;
-        }
-
-        .operation {
-          .icon {
-            margin-left: 6px;
-            cursor: pointer;
-          }
-        }
-      }
-    }
-  }
 
   .projectManger {
     width: 100%;
@@ -134,6 +79,65 @@
 
       .selectTypesBtn {
         margin-right: 8px;
+      }
+    }
+  }
+}
+
+.projectList {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  overflow: hidden;
+  // min-height: calc(100vh - 48px);
+  .addBtn {
+    cursor: pointer;
+    width: 100%;
+    font-size: 18px;
+    margin-top: 18px;
+    &:hover {
+      color: #296DF3;
+    }
+  }
+  .treeTitle {
+    margin-bottom: 0;
+    padding: 20px;
+    line-height: 34px;
+    text-align: right;
+    background: #fff;
+    border-bottom: 1px solid #d9d9d9;
+
+    .title {
+      float: left;
+    }
+
+
+  }
+
+  .search {
+    width: calc(100% - 20px);
+    margin: 10px;
+  }
+
+  .tree {
+    flex: 1;
+    padding: 10px;
+
+    .projectItem {
+      display: flex;
+      width: 100%;
+      cursor: auto;
+
+      .title {
+        flex: 1;
+        cursor: pointer;
+      }
+
+      .operation {
+        .icon {
+          margin-left: 6px;
+          cursor: pointer;
+        }
       }
     }
   }
@@ -220,5 +224,26 @@
     .ant-drawer-body {
       background: #f8f9fb;
     }
+  }
+}
+
+
+.domainSelector {
+  display: flex;
+  width: max-content;
+  padding: 0 11px;
+  cursor: pointer;
+  position: relative;
+  // background-color: #fff;
+  // border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  color: #000a24d9;
+  .downIcon {
+    margin-left: 10px;
+    font-size: 14px;
+  }
+  &:hover {
+    color:#296DF3;
   }
 }

@@ -13,6 +13,8 @@ public interface MetricService {
 
     List<MetricResp> getMetrics(Long domainId);
 
+    List<MetricResp> getMetrics();
+
     List<MetricResp> getMetrics(Long domainId, Long datasourceId);
 
     void creatExprMetric(MetricReq metricReq, User user) throws Exception;

@@ -13,19 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Filter {
 
-    public enum Relation {
-        FILTER, OR, AND
-    }
-
     private Relation relation = Relation.FILTER;
     private String bizName;
-
     private String name;
-
     private FilterOperatorEnum operator;
-
     private Object value;
-
     private List<Filter> children;
 
     public Filter(String bizName, FilterOperatorEnum operator, Object value) {
@@ -33,7 +25,6 @@ public class Filter {
         this.operator = operator;
         this.value = value;
     }
-
 
     public Filter(Relation relation, String bizName, FilterOperatorEnum operator, Object value) {
         this.relation = relation;
@@ -59,5 +50,9 @@ public class Filter {
                 .append(children);
         sb.append('}');
         return sb.toString();
+    }
+
+    public enum Relation {
+        FILTER, OR, AND
     }
 }

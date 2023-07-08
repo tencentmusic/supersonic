@@ -1,12 +1,12 @@
 package com.tencent.supersonic.semantic.api.core.request;
 
+import com.tencent.supersonic.semantic.api.core.enums.DataTypeEnum;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 
 @Data
 public class DatabaseReq {
-
 
     private Long id;
 
@@ -33,6 +33,10 @@ public class DatabaseReq {
     public String getUrl() {
         if (StringUtils.isNotBlank(url)) {
             return url;
+        }
+        if (type.equalsIgnoreCase(DataTypeEnum.MYSQL.getFeature())) {
+            return String.format("jdbc:%s://%s:%s?sessionVariables=sql_mode='IGNORE_SPACE'&allowMultiQueries=true",
+                    type, host, port);
         }
         return String.format("jdbc:%s://%s:%s", type, host, port);
     }

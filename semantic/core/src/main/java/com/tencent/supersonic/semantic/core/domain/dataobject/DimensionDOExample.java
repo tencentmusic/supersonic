@@ -41,13 +41,6 @@ public class DimensionDOExample {
     /**
      * @mbg.generated
      */
-    public void setOrderByClause(String orderByClause) {
-        this.orderByClause = orderByClause;
-    }
-
-    /**
-     * @mbg.generated
-     */
     public String getOrderByClause() {
         return orderByClause;
     }
@@ -55,8 +48,8 @@ public class DimensionDOExample {
     /**
      * @mbg.generated
      */
-    public void setDistinct(boolean distinct) {
-        this.distinct = distinct;
+    public void setOrderByClause(String orderByClause) {
+        this.orderByClause = orderByClause;
     }
 
     /**
@@ -64,6 +57,13 @@ public class DimensionDOExample {
      */
     public boolean isDistinct() {
         return distinct;
+    }
+
+    /**
+     * @mbg.generated
+     */
+    public void setDistinct(boolean distinct) {
+        this.distinct = distinct;
     }
 
     /**
@@ -120,13 +120,6 @@ public class DimensionDOExample {
     /**
      * @mbg.generated
      */
-    public void setLimitStart(Integer limitStart) {
-        this.limitStart = limitStart;
-    }
-
-    /**
-     * @mbg.generated
-     */
     public Integer getLimitStart() {
         return limitStart;
     }
@@ -134,8 +127,8 @@ public class DimensionDOExample {
     /**
      * @mbg.generated
      */
-    public void setLimitEnd(Integer limitEnd) {
-        this.limitEnd = limitEnd;
+    public void setLimitStart(Integer limitStart) {
+        this.limitStart = limitStart;
     }
 
     /**
@@ -143,6 +136,13 @@ public class DimensionDOExample {
      */
     public Integer getLimitEnd() {
         return limitEnd;
+    }
+
+    /**
+     * @mbg.generated
+     */
+    public void setLimitEnd(Integer limitEnd) {
+        this.limitEnd = limitEnd;
     }
 
     /**
@@ -665,6 +665,11 @@ public class DimensionDOExample {
             return (Criteria) this;
         }
 
+        public Criteria andSensitiveLevelGreaterThanOrEqualTo(Integer value) {
+            addCriterion("sensitive_level >=", value, "sensitiveLevel");
+            return (Criteria) this;
+        }
+
         public Criteria andSensitiveLevelLessThan(Integer value) {
             addCriterion("sensitive_level <", value, "sensitiveLevel");
             return (Criteria) this;
@@ -1094,6 +1099,146 @@ public class DimensionDOExample {
             addCriterion("semantic_type not between", value1, value2, "semanticType");
             return (Criteria) this;
         }
+
+        public Criteria andAliasIsNull() {
+            addCriterion("alias is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasIsNotNull() {
+            addCriterion("alias is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasEqualTo(String value) {
+            addCriterion("alias =", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasNotEqualTo(String value) {
+            addCriterion("alias <>", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasGreaterThan(String value) {
+            addCriterion("alias >", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasGreaterThanOrEqualTo(String value) {
+            addCriterion("alias >=", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasLessThan(String value) {
+            addCriterion("alias <", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasLessThanOrEqualTo(String value) {
+            addCriterion("alias <=", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasLike(String value) {
+            addCriterion("alias like", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasNotLike(String value) {
+            addCriterion("alias not like", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasIn(List<String> values) {
+            addCriterion("alias in", values, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasNotIn(List<String> values) {
+            addCriterion("alias not in", values, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasBetween(String value1, String value2) {
+            addCriterion("alias between", value1, value2, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasNotBetween(String value1, String value2) {
+            addCriterion("alias not between", value1, value2, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesIsNull() {
+            addCriterion("default_values is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesIsNotNull() {
+            addCriterion("default_values is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesEqualTo(String value) {
+            addCriterion("default_values =", value, "defaultValues");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesNotEqualTo(String value) {
+            addCriterion("default_values <>", value, "defaultValues");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesGreaterThan(String value) {
+            addCriterion("default_values >", value, "defaultValues");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesGreaterThanOrEqualTo(String value) {
+            addCriterion("default_values >=", value, "defaultValues");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesLessThan(String value) {
+            addCriterion("default_values <", value, "defaultValues");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesLessThanOrEqualTo(String value) {
+            addCriterion("default_values <=", value, "defaultValues");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesLike(String value) {
+            addCriterion("default_values like", value, "defaultValues");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesNotLike(String value) {
+            addCriterion("default_values not like", value, "defaultValues");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesIn(List<String> values) {
+            addCriterion("default_values in", values, "defaultValues");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesNotIn(List<String> values) {
+            addCriterion("default_values not in", values, "defaultValues");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesBetween(String value1, String value2) {
+            addCriterion("default_values between", value1, value2, "defaultValues");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValuesNotBetween(String value1, String value2) {
+            addCriterion("default_values not between", value1, value2, "defaultValues");
+            return (Criteria) this;
+        }
     }
 
     /**
@@ -1126,38 +1271,6 @@ public class DimensionDOExample {
         private boolean listValue;
 
         private String typeHandler;
-
-        public String getCondition() {
-            return condition;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public Object getSecondValue() {
-            return secondValue;
-        }
-
-        public boolean isNoValue() {
-            return noValue;
-        }
-
-        public boolean isSingleValue() {
-            return singleValue;
-        }
-
-        public boolean isBetweenValue() {
-            return betweenValue;
-        }
-
-        public boolean isListValue() {
-            return listValue;
-        }
-
-        public String getTypeHandler() {
-            return typeHandler;
-        }
 
         protected Criterion(String condition) {
             super();
@@ -1193,6 +1306,38 @@ public class DimensionDOExample {
 
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
+        }
+
+        public String getCondition() {
+            return condition;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Object getSecondValue() {
+            return secondValue;
+        }
+
+        public boolean isNoValue() {
+            return noValue;
+        }
+
+        public boolean isSingleValue() {
+            return singleValue;
+        }
+
+        public boolean isBetweenValue() {
+            return betweenValue;
+        }
+
+        public boolean isListValue() {
+            return listValue;
+        }
+
+        public String getTypeHandler() {
+            return typeHandler;
         }
     }
 }

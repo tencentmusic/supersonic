@@ -10,4 +10,6 @@ public class MetricBaseReq extends SchemaItem {
 
     private Long domainId;
 
+    private String alias;
+
 }

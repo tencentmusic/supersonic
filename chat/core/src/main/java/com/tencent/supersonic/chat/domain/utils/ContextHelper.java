@@ -2,11 +2,11 @@ package com.tencent.supersonic.chat.domain.utils;
 
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.Filter;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementCount;
+import com.tencent.supersonic.chat.api.pojo.QueryMatchInfo;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.service.SemanticQuery;
+import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
 import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichInfo;
 import com.tencent.supersonic.common.pojo.SchemaItem;
@@ -21,6 +21,21 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class ContextHelper {
+
+    public static Comparator<Map.Entry<Integer, QueryMatchInfo>> DomainStatComparator
+            = (o1, o2) -> domainSchemaElementCountComparator(o1.getValue(), o2.getValue());
+    public static Comparator<Map.Entry<SemanticQuery, QueryMatchInfo>> SemanticQueryStatComparator
+            = (o1, o2) -> domainSchemaElementCountComparator(o1.getValue(), o2.getValue());
+    /**
+     * similarity desc
+     */
+    public static Comparator<SchemaElementMatch> schemaElementMatchComparatorBySimilarity
+            = new Comparator<SchemaElementMatch>() {
+        @Override
+        public int compare(SchemaElementMatch o1, SchemaElementMatch o2) {
+            return (int) ((o2.getSimilarity() - o1.getSimilarity()) * 100);
+        }
+    };
 
     public static void updateDomain(SemanticParseInfo from, SemanticParseInfo to) {
         if (from != null && from.getDomainId() != null) {
@@ -65,6 +80,15 @@ public class ContextHelper {
         }
     }
 
+    public static void updateDomainIfEmpty(SemanticParseInfo from, SemanticParseInfo to) {
+        if (from != null && from.getDomainId() != null && to.getDomainId() == null) {
+            to.setDomainId(from.getDomainId());
+        }
+
+        if (from != null && from.getDomainName() != null && to.getDomainName() == null) {
+            to.setDomainName(from.getDomainName());
+        }
+    }
 
     /**
      * add from to list if  list is empty and from is not empty
@@ -105,29 +129,13 @@ public class ContextHelper {
     /**
      * count desc > similarity desc
      */
-    public static int domainSchemaElementCountComparator(SchemaElementCount o1, SchemaElementCount o2) {
+    public static int domainSchemaElementCountComparator(QueryMatchInfo o1, QueryMatchInfo o2) {
         int difference = o1.getCount() - o2.getCount();
         if (difference == 0) {
             return (int) ((o1.getMaxSimilarity() - o2.getMaxSimilarity()) * 100);
         }
         return difference;
     }
-
-    public static Comparator<Map.Entry<Integer, SchemaElementCount>> DomainStatComparator
-            = (o1, o2) -> domainSchemaElementCountComparator(o1.getValue(), o2.getValue());
-
-    public static Comparator<Map.Entry<SemanticQuery, SchemaElementCount>> SemanticQueryStatComparator
-            = (o1, o2) -> domainSchemaElementCountComparator(o1.getValue(), o2.getValue());
-    /**
-     * similarity desc
-     */
-    public static Comparator<SchemaElementMatch> schemaElementMatchComparatorBySimilarity
-            = new Comparator<SchemaElementMatch>() {
-        @Override
-        public int compare(SchemaElementMatch o1, SchemaElementMatch o2) {
-            return (int) ((o2.getSimilarity() - o1.getSimilarity()) * 100);
-        }
-    };
 
     public static void setEntityId(Long dimensionId, String value, ChatConfigRichInfo chaConfigRichDesc,
             SemanticParseInfo semanticParseInfo) {
@@ -152,35 +160,42 @@ public class ContextHelper {
      * @param toSchemaElementMatch
      * @param elementMatches
      * @param schemaElementTypes
-     * @param contextSemanticParseInfo
+     * @param contextSemanticParse
      */
     public static void mergeContextSchemaElementMatch(List<SchemaElementMatch> toSchemaElementMatch,
             List<SchemaElementMatch> elementMatches, List<SchemaElementType> schemaElementTypes,
-            SemanticParseInfo contextSemanticParseInfo) {
+            SemanticParseInfo contextSemanticParse) {
+
+        SchemaElementMatch domainMatch = SchemaElementMatch.builder()
+                .elementType(SchemaElementType.DOMAIN)
+                .elementID(contextSemanticParse.getDomainId().intValue())
+                .similarity(1.0)
+                .word(contextSemanticParse.getDomainName())
+                .detectWord(contextSemanticParse.getDomainName())
+                .build();
+        toSchemaElementMatch.add(domainMatch);
+
         for (SchemaElementType schemaElementType : schemaElementTypes) {
             switch (schemaElementType) {
                 case DIMENSION:
-                    if (contextSemanticParseInfo.getDimensions() != null
-                            && contextSemanticParseInfo.getDimensions().size() > 0) {
-                        for (SchemaItem dimension : contextSemanticParseInfo.getDimensions()) {
+                    if (contextSemanticParse.getDimensions().size() > 0) {
+                        for (SchemaItem dimension : contextSemanticParse.getDimensions()) {
                             addSchemaElementMatch(toSchemaElementMatch, elementMatches, SchemaElementType.DIMENSION,
                                     dimension);
                         }
                     }
                     break;
                 case METRIC:
-                    if (contextSemanticParseInfo.getMetrics() != null
-                            && contextSemanticParseInfo.getMetrics().size() > 0) {
-                        for (SchemaItem metric : contextSemanticParseInfo.getMetrics()) {
+                    if (contextSemanticParse.getMetrics().size() > 0) {
+                        for (SchemaItem metric : contextSemanticParse.getMetrics()) {
                             addSchemaElementMatch(toSchemaElementMatch, elementMatches, SchemaElementType.METRIC,
                                     metric);
                         }
                     }
                     break;
                 case VALUE:
-                    if (contextSemanticParseInfo.getDimensionFilters() != null
-                            && contextSemanticParseInfo.getDimensionFilters().size() > 0) {
-                        for (Filter chatFilter : contextSemanticParseInfo.getDimensionFilters()) {
+                    if (contextSemanticParse.getDimensionFilters().size() > 0) {
+                        for (Filter chatFilter : contextSemanticParse.getDimensionFilters()) {
                             if (!isInSchemaElementMatchList(elementMatches, SchemaElementType.VALUE,
                                     chatFilter.getValue().toString())) {
                                 toSchemaElementMatch.add(
@@ -228,13 +243,12 @@ public class ContextHelper {
 
     private static SchemaElementMatch getSchemaElementMatchByContext(int id, String word,
             SchemaElementType schemaElementType) {
-        SchemaElementMatch schemaElementMatch = new SchemaElementMatch();
-        schemaElementMatch.setElementID(id);
-        schemaElementMatch.setElementType(schemaElementType);
-        schemaElementMatch.setWord(word);
-        // todo default similarity
-        schemaElementMatch.setSimilarity(0.5);
-        return schemaElementMatch;
+        return SchemaElementMatch.builder()
+                .elementID(id)
+                .elementType(schemaElementType)
+                .word(word)
+                .similarity(0.5)
+                .build();
     }
 
 }

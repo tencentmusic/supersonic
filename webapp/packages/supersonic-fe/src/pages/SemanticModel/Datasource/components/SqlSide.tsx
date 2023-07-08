@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Tabs } from 'antd';
 import SqlDetail from './SqlDetail';
-import type { SqlItem } from '../data';
 
 import styles from '../style.less';
 
@@ -11,7 +10,6 @@ type Panes = {
   type: 'add' | 'edit';
   scriptId?: number;
   sql?: string;
-  sqlInfo?: SqlItem;
   isSave?: boolean; // 暂存提示保存
 };
 

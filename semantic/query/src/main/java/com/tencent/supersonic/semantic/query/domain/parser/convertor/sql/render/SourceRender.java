@@ -33,30 +33,7 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class SourceRender extends Renderer {
 
-    public void render(MetricReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
-            SemanticSchema schema, boolean nonAgg) throws Exception {
-        String queryWhere = metricCommand.getWhere();
-        Set<String> whereFields = new HashSet<>();
-        List<String> fieldWhere = new ArrayList<>();
-        if (queryWhere != null && !queryWhere.isEmpty()) {
-            SqlNode sqlNode = SemanticNode.parse(queryWhere, scope);
-            FilterNode.getFilterField(sqlNode, whereFields);
-            fieldWhere = whereFields.stream().collect(Collectors.toList());
-        }
-        if (dataSources.size() == 1) {
-            DataSource dataSource = dataSources.get(0);
-            super.tableView = renderOne(false, "", fieldWhere, metricCommand.getMetrics(),
-                    metricCommand.getDimensions(),
-                    metricCommand.getWhere(), dataSource, scope, schema, nonAgg);
-            return;
-        }
-        JoinRender joinRender = new JoinRender();
-        joinRender.render(metricCommand, dataSources, scope, schema, nonAgg);
-        super.tableView = joinRender.getTableView();
-    }
-
-
-    public static TableView renderOne(boolean addWhere, String alias, List<String> fieldWhere,
+    public static TableView renderOne(String alias, List<String> fieldWhere,
             List<String> reqMetrics, List<String> reqDimensions, String queryWhere, DataSource datasource,
             SqlValidatorScope scope, SemanticSchema schema, boolean nonAgg) throws Exception {
 
@@ -65,10 +42,10 @@ public class SourceRender extends Renderer {
         List<String> queryMetrics = new ArrayList<>(reqMetrics);
         List<String> queryDimensions = new ArrayList<>(reqDimensions);
         if (!fieldWhere.isEmpty()) {
-            SqlNode sqlNode = SemanticNode.parse(queryWhere, scope);
-            if (addWhere) {
-                output.getFilter().add(sqlNode);
-            }
+//            SqlNode sqlNode = SemanticNode.parse(queryWhere, scope);
+//            if (addWhere) {
+//                output.getFilter().add(sqlNode);
+//            }
             Set<String> dimensions = new HashSet<>();
             Set<String> metrics = new HashSet<>();
             whereDimMetric(fieldWhere, queryMetrics, queryDimensions, datasource, schema, dimensions, metrics);
@@ -103,7 +80,6 @@ public class SourceRender extends Renderer {
                         .substring(32), dataSet.build()));
         return output;
     }
-
 
     private static void buildDimension(String alias, String dimension, DataSource datasource, SemanticSchema schema,
             boolean nonAgg, TableView dataSet, TableView output, SqlValidatorScope scope) throws Exception {
@@ -159,7 +135,6 @@ public class SourceRender extends Renderer {
             output.getDimension().add(DimensionNode.buildName(dimensionOptional.get(), scope));
         }
     }
-
 
     private static boolean isWhereHasMetric(List<String> fields, DataSource datasource) {
         Long metricNum = datasource.getMeasures().stream().filter(m -> fields.contains(m.getName().toLowerCase()))
@@ -227,7 +202,6 @@ public class SourceRender extends Renderer {
         //getWhere(outputSet,fields,queryMetrics,queryDimensions,datasource,scope,schema);
     }
 
-
     public static void whereDimMetric(List<String> fields, List<String> queryMetrics,
             List<String> queryDimensions, DataSource datasource, SemanticSchema schema, Set<String> dimensions,
             Set<String> metrics) {
@@ -291,7 +265,6 @@ public class SourceRender extends Renderer {
         return false;
     }
 
-
     private static void expandWhere(MetricReq metricCommand, TableView tableView, SqlValidatorScope scope)
             throws Exception {
         if (metricCommand.getWhere() != null && !metricCommand.getWhere().isEmpty()) {
@@ -301,6 +274,28 @@ public class SourceRender extends Renderer {
             //super.tableView.getFilter().add(sqlNode);
             tableView.getFilter().add(sqlNode);
         }
+    }
+
+    public void render(MetricReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
+            SemanticSchema schema, boolean nonAgg) throws Exception {
+        String queryWhere = metricCommand.getWhere();
+        Set<String> whereFields = new HashSet<>();
+        List<String> fieldWhere = new ArrayList<>();
+        if (queryWhere != null && !queryWhere.isEmpty()) {
+            SqlNode sqlNode = SemanticNode.parse(queryWhere, scope);
+            FilterNode.getFilterField(sqlNode, whereFields);
+            fieldWhere = whereFields.stream().collect(Collectors.toList());
+        }
+        if (dataSources.size() == 1) {
+            DataSource dataSource = dataSources.get(0);
+            super.tableView = renderOne("", fieldWhere, metricCommand.getMetrics(),
+                    metricCommand.getDimensions(),
+                    metricCommand.getWhere(), dataSource, scope, schema, nonAgg);
+            return;
+        }
+        JoinRender joinRender = new JoinRender();
+        joinRender.render(metricCommand, dataSources, scope, schema, nonAgg);
+        super.tableView = joinRender.getTableView();
     }
 
 

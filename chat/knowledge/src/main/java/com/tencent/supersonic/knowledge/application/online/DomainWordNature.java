@@ -27,8 +27,4 @@ public class DomainWordNature extends BaseWordNature {
         return result;
     }
 
-    @Override
-    public Long getFrequency(String nature) {
-        return 0L;
-    }
 }

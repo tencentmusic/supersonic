@@ -1,0 +1,113 @@
+package com.tencent.supersonic.chat.application.query;
+
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.domain.pojo.chat.SchemaElementOption;
+import com.tencent.supersonic.common.enums.AggregateTypeEnum;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import com.tencent.supersonic.common.pojo.SchemaItem;
+import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
+import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
+import lombok.Data;
+import lombok.ToString;
+
+@Data
+@ToString
+public class QueryMatcher {
+
+    private HashMap<SchemaElementType, QueryMatchOption> elementOptionMap = new HashMap<>();
+    private boolean supportCompare;
+    private boolean supportOrderBy;
+    private List<AggregateTypeEnum> orderByTypes = Arrays.asList(AggregateTypeEnum.MAX, AggregateTypeEnum.MIN,
+            AggregateTypeEnum.TOPN);
+
+    public QueryMatcher() {
+        for (SchemaElementType type : SchemaElementType.values()) {
+            if (type.equals(SchemaElementType.DOMAIN)) {
+                elementOptionMap.put(type, QueryMatchOption.optional());
+            } else {
+                elementOptionMap.put(type, QueryMatchOption.unused());
+            }
+        }
+    }
+
+    public QueryMatcher addOption(SchemaElementType type, SchemaElementOption option,
+            QueryMatchOption.RequireNumberType requireNumberType, Integer requireNumber) {
+        elementOptionMap.put(type, QueryMatchOption.build(option, requireNumberType, requireNumber));
+        return this;
+    }
+
+    /**
+     * Match schema element with current query according to the options.
+     *
+     * @param candidateElementMatches
+     * @return a list of all matched schema elements,
+     *         empty list if no matches can be found
+     */
+    public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches) {
+        List<SchemaElementMatch> elementMatches = new ArrayList<>();
+
+        HashMap<SchemaElementType, Integer> schemaElementTypeCount = new HashMap<>();
+        for (SchemaElementMatch schemaElementMatch : candidateElementMatches) {
+            SchemaElementType schemaElementType = schemaElementMatch.getElementType();
+            if (schemaElementTypeCount.containsKey(schemaElementType)) {
+                schemaElementTypeCount.put(schemaElementType, schemaElementTypeCount.get(schemaElementType) + 1);
+            } else {
+                schemaElementTypeCount.put(schemaElementType, 1);
+            }
+        }
+
+        // check if current query options are satisfied, return immediately if not
+        for (Map.Entry<SchemaElementType, QueryMatchOption> e : elementOptionMap.entrySet()) {
+            SchemaElementType elementType = e.getKey();
+            QueryMatchOption elementOption = e.getValue();
+            if (!isMatch(elementOption, getCount(schemaElementTypeCount, elementType))) {
+                return new ArrayList<>();
+            }
+        }
+
+        // add element match if its element type is not declared as unused
+        for (SchemaElementMatch elementMatch : candidateElementMatches) {
+            QueryMatchOption elementOption = elementOptionMap.get(elementMatch.getElementType());
+            if (Objects.nonNull(elementOption) && !elementOption.getSchemaElementOption()
+                    .equals(SchemaElementOption.UNUSED)) {
+                elementMatches.add(elementMatch);
+            }
+        }
+
+        return elementMatches;
+    }
+
+    private int getCount(HashMap<SchemaElementType, Integer> schemaElementTypeCount,
+            SchemaElementType schemaElementType) {
+        if (schemaElementTypeCount.containsKey(schemaElementType)) {
+            return schemaElementTypeCount.get(schemaElementType);
+        }
+        return 0;
+    }
+
+    private boolean isMatch(QueryMatchOption queryMatchOption, int count) {
+        // check if required but empty
+        if (queryMatchOption.getSchemaElementOption().equals(SchemaElementOption.REQUIRED) && count <= 0) {
+            return false;
+        }
+        if (queryMatchOption.getRequireNumberType().equals(QueryMatchOption.RequireNumberType.AT_LEAST)
+                && count < queryMatchOption.getRequireNumber()) {
+            return false;
+        }
+        if (queryMatchOption.getRequireNumberType().equals(QueryMatchOption.RequireNumberType.AT_MOST)
+                && count > queryMatchOption.getRequireNumber()) {
+            return false;
+        }
+
+        return true;
+    }
+}

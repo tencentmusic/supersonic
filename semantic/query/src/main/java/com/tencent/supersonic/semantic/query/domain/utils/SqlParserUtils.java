@@ -22,7 +22,7 @@ public class SqlParserUtils {
 
     public SqlParserResp getSqlParserWithoutCache(QueryStructReq queryStructCmd) throws Exception {
         log.info("stat getSqlParser without cache");
-        multiSourceJoinUtils.buildJoinPrefix(queryStructCmd);
+        //multiSourceJoinUtils.buildJoinPrefix(queryStructCmd);
         SqlParserResp sqlParser = parserCommandConverter.getSqlParser(queryStructCmd);
         return sqlParser;
     }

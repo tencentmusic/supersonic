@@ -1,10 +1,16 @@
 package com.tencent.supersonic.chat.api.pojo;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
 @ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class SchemaElementMatch {
 
     SchemaElementType elementType;
@@ -18,7 +24,4 @@ public class SchemaElementMatch {
     String word;
 
     Long frequency;
-
-    public SchemaElementMatch() {
-    }
 }

@@ -1,6 +1,6 @@
 import type { Reducer, Effect } from 'umi';
 import { message } from 'antd';
-import { getDimensionList, queryMetric } from './service';
+import { getDimensionList, queryMetric, excuteSql, getDatabaseByDomainId } from './service';
 
 export type StateType = {
   current: number;
@@ -11,6 +11,8 @@ export type StateType = {
   metricList: any[];
   searchParams: Record<string, any>;
   domainData: any;
+  dataBaseResultColsMap: any;
+  dataBaseConfig: any;
 };
 
 export type ModelType = {
@@ -19,11 +21,15 @@ export type ModelType = {
   effects: {
     queryDimensionList: Effect;
     queryMetricList: Effect;
+    queryDataBaseExcuteSql: Effect;
+    queryDatabaseByDomainId: Effect;
   };
   reducers: {
     setSelectDomain: Reducer<StateType>;
     setPagination: Reducer<StateType>;
     setDimensionList: Reducer<StateType>;
+    setDataBaseScriptColumn: Reducer<StateType>;
+    setDataBaseConfig: Reducer<StateType>;
     setMetricList: Reducer<StateType>;
     reset: Reducer<StateType>;
   };
@@ -38,6 +44,8 @@ export const defaultState: StateType = {
   dimensionList: [],
   metricList: [],
   domainData: {},
+  dataBaseResultColsMap: {},
+  dataBaseConfig: {},
 };
 
 const Model: ModelType = {
@@ -57,6 +65,46 @@ const Model: ModelType = {
       const { code, data, msg } = yield call(queryMetric, payload);
       if (code === 200) {
         yield put({ type: 'setMetricList', payload: { metricList: data.list } });
+      } else {
+        message.error(msg);
+      }
+    },
+    *queryDataBaseExcuteSql({ payload }, { call, put, select }) {
+      const { tableName } = payload;
+      if (!tableName) {
+        return;
+      }
+      const isExists = yield select((state: any) => {
+        return state.domainManger.dataBaseResultColsMap[tableName];
+      });
+      if (isExists) {
+        return;
+      }
+      const { code, data, msg } = yield call(excuteSql, payload);
+      if (code === 200) {
+        const resultList = data.resultList.map((item, index) => {
+          return {
+            ...item,
+            index,
+          };
+        });
+        const scriptColumns = data.columns;
+        yield put({
+          type: 'setDataBaseScriptColumn',
+          payload: { resultList, scriptColumns, tableName },
+        });
+      } else {
+        message.error(msg);
+      }
+    },
+    *queryDatabaseByDomainId({ payload }, { call, put }) {
+      const domainId = payload.domainId;
+      const { code, data, msg } = yield call(getDatabaseByDomainId, domainId);
+      if (code === 200) {
+        yield put({
+          type: 'setDataBaseConfig',
+          payload: { dataBaseConfig: data },
+        });
       } else {
         message.error(msg);
       }
@@ -84,6 +132,21 @@ const Model: ModelType = {
       };
     },
     setMetricList(state = defaultState, action) {
+      return {
+        ...state,
+        ...action.payload,
+      };
+    },
+    setDataBaseScriptColumn(state = defaultState, action) {
+      return {
+        ...state,
+        dataBaseResultColsMap: {
+          ...state.dataBaseResultColsMap,
+          [action.payload.tableName]: { ...action.payload },
+        },
+      };
+    },
+    setDataBaseConfig(state = defaultState, action) {
       return {
         ...state,
         ...action.payload,

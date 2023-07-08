@@ -18,6 +18,6 @@ spring:
     data: classpath:db/semantic-data-h2.sql
 
 authentication:
-  enable: true
+  enable: false
   exclude:
     path: /api/auth/user/register,/api/auth/user/login

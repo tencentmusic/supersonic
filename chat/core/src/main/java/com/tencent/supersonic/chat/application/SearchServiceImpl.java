@@ -32,9 +32,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,18 +43,17 @@ import org.springframework.stereotype.Service;
  * search service impl
  */
 @Service
+@Slf4j
 public class SearchServiceImpl implements SearchService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SearchServiceImpl.class);
+    private static final int RESULT_SIZE = 10;
+
     @Autowired
     private WordNatureService wordNatureService;
     @Autowired
     private ChatService chatService;
     @Autowired
     private SearchMatchStrategy searchMatchStrategy;
-
-    private static final int RESULT_SIZE = 10;
-
 
     @Override
     public List<SearchResult> search(QueryContextReq queryCtx) {
@@ -67,7 +66,7 @@ public class SearchServiceImpl implements SearchService {
         // 2.detect by segment
         List<Term> originals = HanlpHelper.getSegment().seg(queryText.toLowerCase()).stream()
                 .collect(Collectors.toList());
-        Map<MatchText, List<MapResult>> regTextMap = searchMatchStrategy.matchWithMatchText(queryText, originals,
+        Map<MatchText, List<MapResult>> regTextMap = searchMatchStrategy.match(queryText, originals,
                 queryCtx.getDomainId());
         regTextMap.entrySet().stream().forEach(m -> HanlpHelper.transLetterOriginal(m.getValue()));
         // 3.get the most matching data
@@ -77,14 +76,14 @@ public class SearchServiceImpl implements SearchService {
                 .reduce((entry1, entry2) ->
                         entry1.getKey().getDetectSegment().length() >= entry2.getKey().getDetectSegment().length()
                                 ? entry1 : entry2);
-        LOGGER.debug("mostSimilarSearchResult:{}", mostSimilarSearchResult);
+        log.debug("mostSimilarSearchResult:{}", mostSimilarSearchResult);
         // 4.optimize the results after the query
         if (!mostSimilarSearchResult.isPresent()) {
-            LOGGER.info("unable to find any information through search , queryCtx:{}", queryCtx);
+            log.info("unable to find any information through search , queryCtx:{}", queryCtx);
             return Lists.newArrayList();
         }
         Map.Entry<MatchText, List<MapResult>> searchTextEntry = mostSimilarSearchResult.get();
-        LOGGER.info("searchTextEntry:{},queryCtx:{}", searchTextEntry, queryCtx);
+        log.info("searchTextEntry:{},queryCtx:{}", searchTextEntry, queryCtx);
 
         Set<SearchResult> searchResults = new LinkedHashSet();
         DomainInfoStat domainStat = NatureHelper.getDomainStat(originals);
@@ -98,7 +97,7 @@ public class SearchServiceImpl implements SearchService {
         // 4.2 process based on dimension values
         MatchText matchText = searchTextEntry.getKey();
         Map<String, String> natureToNameMap = getNatureToNameMap(searchTextEntry, new HashSet<>(possibleDomains));
-        LOGGER.debug("possibleDomains:{},natureToNameMap:{}", possibleDomains, natureToNameMap);
+        log.debug("possibleDomains:{},natureToNameMap:{}", possibleDomains, natureToNameMap);
 
         for (Map.Entry<String, String> natureToNameEntry : natureToNameMap.entrySet()) {
             searchDimensionValue(metricsDb, domainToName, domainStat.getMetricDomainCount(), searchResults,
@@ -120,7 +119,7 @@ public class SearchServiceImpl implements SearchService {
 
         Long contextDomain = chatService.getContextDomain(queryCtx.getChatId());
 
-        LOGGER.debug("possibleDomains:{},domainStat:{},contextDomain:{}", possibleDomains, domainStat, contextDomain);
+        log.debug("possibleDomains:{},domainStat:{},contextDomain:{}", possibleDomains, domainStat, contextDomain);
 
         // If nothing is recognized or only metric are present, then add the contextDomain.
         if (nothingOrOnlyMetric(domainStat) && effectiveDomain(contextDomain)) {
@@ -249,7 +248,7 @@ public class SearchServiceImpl implements SearchService {
                                     domainToName.get(domain), domain, semanticType));
                 }
             }
-            LOGGER.info("parseResult:{},dimensionMetricClassIds:{},possibleDomains:{}", mapResult,
+            log.info("parseResult:{},dimensionMetricClassIds:{},possibleDomains:{}", mapResult,
                     dimensionMetricClassIds, possibleDomains);
         }
         return existMetric;

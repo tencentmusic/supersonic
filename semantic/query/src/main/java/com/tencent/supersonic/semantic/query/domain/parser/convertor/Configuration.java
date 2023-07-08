@@ -27,18 +27,17 @@ public class Configuration {
     public static RelDataTypeFactory typeFactory = new SqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
     public static SqlOperatorTable operatorTable = SqlStdOperatorTable.instance();
     public static CalciteConnectionConfig config = new CalciteConnectionConfigImpl(configProperties);
+    public static SqlValidator.Config validatorConfig = SqlValidator.Config.DEFAULT
+            .withLenientOperatorLookup(config.lenientOperatorLookup())
+            .withSqlConformance(SemanticSqlDialect.DEFAULT.getConformance())
+            .withDefaultNullCollation(config.defaultNullCollation())
+            .withIdentifierExpansion(true);
 
     static {
         configProperties.put(CalciteConnectionProperty.CASE_SENSITIVE.camelName(), Boolean.TRUE.toString());
         configProperties.put(CalciteConnectionProperty.UNQUOTED_CASING.camelName(), Casing.UNCHANGED.toString());
         configProperties.put(CalciteConnectionProperty.QUOTED_CASING.camelName(), Casing.TO_LOWER.toString());
     }
-
-    public static SqlValidator.Config validatorConfig = SqlValidator.Config.DEFAULT
-            .withLenientOperatorLookup(config.lenientOperatorLookup())
-            .withSqlConformance(SemanticSqlDialect.DEFAULT.getConformance())
-            .withDefaultNullCollation(config.defaultNullCollation())
-            .withIdentifierExpansion(true);
 
     public static SqlParser.Config getParserConfig() {
         CalciteConnectionConfig config = new CalciteConnectionConfigImpl(configProperties);

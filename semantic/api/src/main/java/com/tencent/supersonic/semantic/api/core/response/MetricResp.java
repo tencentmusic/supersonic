@@ -14,16 +14,18 @@ public class MetricResp extends SchemaItem {
 
     private String domainName;
 
-    //measure_proxy ratio expr cumulative derived
+    //ATOMIC DERIVED
     private String type;
 
     private MetricTypeParams typeParams;
 
     private String fullPath;
 
-
     private String dataFormatType;
 
     private DataFormat dataFormat;
+
+    private String alias;
+
 
 }

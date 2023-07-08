@@ -24,10 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 
 public abstract class SemanticNode {
 
-    public void accept(Optimization optimization) {
-        optimization.visit(this);
-    }
-
     public static SqlNode parse(String expression, SqlValidatorScope scope) throws Exception {
         SqlParser sqlParser = SqlParser.create(expression, Configuration.getParserConfig());
         SqlNode sqlNode = sqlParser.parseExpression();
@@ -77,7 +73,6 @@ public abstract class SemanticNode {
         return sqlNode instanceof SqlIdentifier;
     }
 
-
     public static SqlNode getAlias(SqlNode sqlNode, SqlValidatorScope scope) throws Exception {
         if (sqlNode instanceof SqlBasicCall) {
             SqlBasicCall sqlBasicCall = (SqlBasicCall) sqlNode;
@@ -115,6 +110,10 @@ public abstract class SemanticNode {
             }
         }
         return sqlNode;
+    }
+
+    public void accept(Optimization optimization) {
+        optimization.visit(this);
     }
 
 

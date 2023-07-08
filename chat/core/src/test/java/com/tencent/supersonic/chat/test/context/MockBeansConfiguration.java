@@ -5,7 +5,8 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.service.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.domain.service.QueryService;
 import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.core.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
@@ -20,7 +21,6 @@ import com.tencent.supersonic.chat.domain.pojo.config.EntityInternalDetail;
 import com.tencent.supersonic.chat.domain.pojo.config.EntityRichInfo;
 import com.tencent.supersonic.chat.domain.pojo.chat.DomainInfos;
 import com.tencent.supersonic.chat.domain.service.ChatService;
-import com.tencent.supersonic.chat.domain.service.QueryService;
 import com.tencent.supersonic.chat.domain.utils.SchemaInfoConverter;
 import com.tencent.supersonic.chat.infrastructure.mapper.ChatContextMapper;
 import com.tencent.supersonic.chat.infrastructure.repository.ChatContextRepositoryImpl;
@@ -38,51 +38,6 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class MockBeansConfiguration {
-
-    @Bean
-    public ChatContextRepositoryImpl getChatContextRepository() {
-        return Mockito.mock(ChatContextRepositoryImpl.class);
-    }
-
-    @Bean
-    public QueryService getQueryService() {
-        return Mockito.mock(QueryService.class);
-    }
-
-    @Bean
-    public DimensionService getDimensionService() {
-        return Mockito.mock(DimensionService.class);
-    }
-
-    @Bean
-    public MetricService getMetricService() {
-        return Mockito.mock(MetricService.class);
-    }
-
-    @Bean
-    public DomainService getDomainService() {
-        return Mockito.mock(DomainService.class);
-    }
-
-    @Bean
-    public ChatContextMapper getChatContextMapper() {
-        return Mockito.mock(ChatContextMapper.class);
-    }
-
-    @Bean
-    public ConfigServiceImpl getDomainExtendService() {
-        return Mockito.mock(ConfigServiceImpl.class);
-    }
-
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-//    @Bean
-//    public SemanticLayer getSemanticService() {
-//        return Mockito.mock(HttpSemanticServiceImpl.class);
-//    }
-
 
     public static void getOrCreateContextMock(ChatService chatService) {
         ChatContext context = new ChatContext();
@@ -142,8 +97,6 @@ public class MockBeansConfiguration {
         when(configService.fetchConfigByDomainId(anyLong())).thenReturn(chaConfigDesc);
     }
 
-    //queryDimensionDescs
-
     public static void dimensionDescBuild(DimensionService dimensionService, List<DimensionResp> dimensionDescs) {
         when(dimensionService.getDimensions(anyList())).thenReturn(dimensionDescs);
     }
@@ -166,5 +119,51 @@ public class MockBeansConfiguration {
         dimensionDesc.setName(name);
         dimensionDesc.setBizName(bizName);
         return dimensionDesc;
+    }
+
+    @Bean
+    public ChatContextRepositoryImpl getChatContextRepository() {
+        return Mockito.mock(ChatContextRepositoryImpl.class);
+    }
+//    @Bean
+//    public SemanticLayer getSemanticService() {
+//        return Mockito.mock(HttpSemanticServiceImpl.class);
+//    }
+
+    @Bean
+    public QueryService getQueryService() {
+        return Mockito.mock(QueryService.class);
+    }
+
+    @Bean
+    public DimensionService getDimensionService() {
+        return Mockito.mock(DimensionService.class);
+    }
+
+    @Bean
+    public MetricService getMetricService() {
+        return Mockito.mock(MetricService.class);
+    }
+
+    //queryDimensionDescs
+
+    @Bean
+    public DomainService getDomainService() {
+        return Mockito.mock(DomainService.class);
+    }
+
+    @Bean
+    public ChatContextMapper getChatContextMapper() {
+        return Mockito.mock(ChatContextMapper.class);
+    }
+
+    @Bean
+    public ConfigServiceImpl getDomainExtendService() {
+        return Mockito.mock(ConfigServiceImpl.class);
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }

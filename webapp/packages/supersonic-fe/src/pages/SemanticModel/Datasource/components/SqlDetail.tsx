@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button, Table, message, Tooltip, Space, Dropdown } from 'antd';
 import SplitPane from 'react-split-pane';
 import Pane from 'react-split-pane/lib/Pane';
+import { connect } from 'umi';
 import sqlFormatter from 'sql-formatter';
 import {
   FullscreenOutlined,
@@ -15,10 +16,12 @@ import {
 import { isFunction } from 'lodash';
 import FullScreen from '@/components/FullScreen';
 import SqlEditor from '@/components/SqlEditor';
-import type { TaskResultParams, TaskResultItem, DataInstanceItem, TaskResultColumn } from '../data';
-import { excuteSql } from '../service';
-import { getDatabaseByDomainId } from '../../service';
+import type { TaskResultItem, DataInstanceItem, TaskResultColumn } from '../data';
+import { excuteSql } from '@/pages/SemanticModel/service';
+// import { getDatabaseByDomainId } from '../../service';
 import DataSourceCreateForm from './DataSourceCreateForm';
+import type { Dispatch } from 'umi';
+import type { StateType } from '../../model';
 import styles from '../style.less';
 
 import 'ace-builds/src-min-noconflict/ext-searchbox';
@@ -27,7 +30,8 @@ import 'ace-builds/src-min-noconflict/theme-monokai';
 import 'ace-builds/src-min-noconflict/mode-sql';
 
 type IProps = {
-  oprType: 'add' | 'edit';
+  domainManger: StateType;
+  dispatch: Dispatch;
   dataSourceItem: DataInstanceItem;
   domainId: number;
   onUpdateSql?: (sql: string) => void;
@@ -52,6 +56,7 @@ type JdbcSourceItems = {
 };
 
 const SqlDetail: React.FC<IProps> = ({
+  domainManger,
   dataSourceItem,
   onSubmitSuccess,
   domainId,
@@ -59,6 +64,7 @@ const SqlDetail: React.FC<IProps> = ({
   onUpdateSql,
   onJdbcSourceChange,
 }) => {
+  const { dataBaseConfig } = domainManger;
   const [resultTable, setResultTable] = useState<ResultTableItem[]>([]);
   const [resultTableLoading, setResultTableLoading] = useState(false);
   const [resultCols, setResultCols] = useState<ResultColItem[]>([]);
@@ -111,20 +117,30 @@ const SqlDetail: React.FC<IProps> = ({
   //   return 'ClickHouse';
   // });
 
-  const queryDatabaseConfig = async () => {
-    const { code, data } = await getDatabaseByDomainId(domainId);
-    if (code === 200) {
-      setJdbcSourceItems([
-        {
-          label: data?.name,
-          key: data?.id,
-        },
-      ]);
-      onJdbcSourceChange?.(data?.id && Number(data?.id));
-      return;
-    }
-    message.error('数据库配置获取错误');
-  };
+  useEffect(() => {
+    setJdbcSourceItems([
+      {
+        label: dataBaseConfig?.name,
+        key: dataBaseConfig?.id,
+      },
+    ]);
+    onJdbcSourceChange?.(dataBaseConfig?.id && Number(dataBaseConfig?.id));
+  }, [dataBaseConfig]);
+
+  // const queryDatabaseConfig = async () => {
+  //   const { code, data } = await getDatabaseByDomainId(domainId);
+  //   if (code === 200) {
+  //     setJdbcSourceItems([
+  //       {
+  //         label: data?.name,
+  //         key: data?.id,
+  //       },
+  //     ]);
+  //     onJdbcSourceChange?.(data?.id && Number(data?.id));
+  //     return;
+  //   }
+  //   message.error('数据库配置获取错误');
+  // };
 
   function creatCalcItem(key: string, data: string) {
     const line = document.createElement('div'); // 需要每条数据一行，这样避免数据换行的时候获得的宽度不准确
@@ -185,7 +201,7 @@ const SqlDetail: React.FC<IProps> = ({
     }
   };
 
-  const fetchTaskResult = (params: TaskResultParams) => {
+  const fetchTaskResult = (params) => {
     setResultTable(
       params.resultList.map((item, index) => {
         return {
@@ -367,7 +383,7 @@ const SqlDetail: React.FC<IProps> = ({
   }, [resultTable, isSqlResFullScreen]);
 
   useEffect(() => {
-    queryDatabaseConfig();
+    // queryDatabaseConfig();
     const windowHeight = window.innerHeight;
     let size: ScreenSize = 'small';
     if (windowHeight > 1100) {
@@ -527,4 +543,6 @@ const SqlDetail: React.FC<IProps> = ({
   );
 };
 
-export default SqlDetail;
+export default connect(({ domainManger }: { domainManger: StateType }) => ({
+  domainManger,
+}))(SqlDetail);

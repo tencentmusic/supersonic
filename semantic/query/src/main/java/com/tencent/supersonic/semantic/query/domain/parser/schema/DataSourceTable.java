@@ -39,10 +39,13 @@ public class DataSourceTable extends AbstractTable implements ScannableTable, Tr
         this.statistic = statistic;
     }
 
+    public static Builder newBuilder(String tableName) {
+        return new Builder(tableName);
+    }
+
     public String getTableName() {
         return tableName;
     }
-
 
     @Override
     public RelDataType getRowType(RelDataTypeFactory typeFactory) {
@@ -70,11 +73,6 @@ public class DataSourceTable extends AbstractTable implements ScannableTable, Tr
     public Enumerable<Object[]> scan(DataContext root) {
         throw new UnsupportedOperationException("Not implemented");
     }
-
-    public static Builder newBuilder(String tableName) {
-        return new Builder(tableName);
-    }
-
 
     public RelNode toRel(RelOptTable.ToRelContext toRelContext, RelOptTable relOptTable) {
         List<RelHint> hint = new ArrayList<>();

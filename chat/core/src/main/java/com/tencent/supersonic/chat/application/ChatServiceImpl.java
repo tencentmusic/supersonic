@@ -18,20 +18,19 @@ import com.tencent.supersonic.chat.domain.service.ChatService;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service("ChatService")
 @Primary
+@Slf4j
 public class ChatServiceImpl implements ChatService {
 
     private ChatContextRepository chatContextRepository;
     private ChatRepository chatRepository;
     private ChatQueryRepository chatQueryRepository;
-    private final Logger logger = LoggerFactory.getLogger(ChatService.class);
-
 
     public ChatServiceImpl(ChatContextRepository chatContextRepository, ChatRepository chatRepository,
             ChatQueryRepository chatQueryRepository) {
@@ -64,27 +63,32 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public void updateContext(ChatContext chatCtx) {
-        logger.debug("save ChatContext {}", chatCtx);
+        log.debug("save ChatContext {}", chatCtx);
         chatContextRepository.updateContext(chatCtx);
     }
 
     @Override
+    public void updateContext(ChatContext chatCtx, QueryContextReq queryCtx, SemanticParseInfo semanticParseInfo) {
+        chatCtx.setParseInfo(semanticParseInfo);
+        chatCtx.setQueryText(queryCtx.getQueryText());
+        updateContext(chatCtx);
+    }
+
+    @Override
     public void switchContext(ChatContext chatCtx) {
-        logger.debug("switchContext ChatContext {}", chatCtx);
+        log.debug("switchContext ChatContext {}", chatCtx);
         chatCtx.setParseInfo(new SemanticParseInfo());
     }
 
 
     @Override
     public Boolean addChat(User user, String chatName) {
-        SimpleDateFormat tempDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String datetime = tempDate.format(new java.util.Date());
         ChatDO intelligentConversionDO = new ChatDO();
         intelligentConversionDO.setChatName(chatName);
         intelligentConversionDO.setCreator(user.getName());
-        intelligentConversionDO.setCreateTime(datetime);
+        intelligentConversionDO.setCreateTime(getCurrentTime());
         intelligentConversionDO.setIsDelete(0);
-        intelligentConversionDO.setLastTime(datetime);
+        intelligentConversionDO.setLastTime(getCurrentTime());
         intelligentConversionDO.setLastQuestion("Hello, welcome to using supersonic");
         intelligentConversionDO.setIsTop(0);
         return chatRepository.createChat(intelligentConversionDO);
@@ -97,9 +101,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public boolean updateChatName(Long chatId, String chatName, String userName) {
-        SimpleDateFormat tempDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String lastTime = tempDate.format(new java.util.Date());
-        return chatRepository.updateChatName(chatId, chatName, lastTime, userName);
+        return chatRepository.updateChatName(chatId, chatName, getCurrentTime(), userName);
     }
 
     @Override
@@ -129,6 +131,8 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public void addQuery(QueryResultResp queryResponse, QueryContextReq queryContext, ChatContext chatCtx) {
         chatQueryRepository.createChatQuery(queryResponse, queryContext, chatCtx);
+        chatRepository.updateLastQuestion(chatCtx.getChatId().longValue(), queryContext.getQueryText(),
+                getCurrentTime());
     }
 
     @Override
@@ -139,6 +143,11 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public int updateQuery(ChatQueryDO chatQueryDO) {
         return chatQueryRepository.updateChatQuery(chatQueryDO);
+    }
+
+    private String getCurrentTime() {
+        SimpleDateFormat tempDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return tempDate.format(new java.util.Date());
     }
 
 }

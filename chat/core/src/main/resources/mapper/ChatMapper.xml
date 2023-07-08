@@ -38,6 +38,13 @@
           and creator = #{creator}
     </update>
 
+    <update id="updateLastQuestion">
+        update s2_chat
+        set last_question = #{lastQuestion},
+            last_time = #{lastTime}
+        where chat_id = #{chatId}
+    </update>
+
     <insert id="createChat" parameterType="com.tencent.supersonic.chat.domain.dataobject.ChatDO">
         insert into s2_chat
         (chat_name, create_time, last_time, creator, last_question, is_delete, is_top)
@@ -80,7 +87,7 @@
         update s2_chat_query
         set score=#{score},
             feedback=#{feedback}
-        where id = #{id}
+        where question_id = #{id}
     </update>
 
     <insert id="createQuery" parameterType="com.tencent.supersonic.chat.domain.dataobject.QueryDO"

@@ -19,10 +19,12 @@ import com.tencent.supersonic.common.result.ReturnCode;
 import com.tencent.supersonic.common.util.context.S2ThreadContext;
 import com.tencent.supersonic.common.util.context.ThreadContext;
 import com.tencent.supersonic.common.util.json.JsonUtil;
+
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
@@ -139,13 +141,13 @@ public class DefaultSemanticInternalUtils {
                 headers.set(authenticationConfig.getTokenHttpHeaderKey(), threadContext.getToken());
             }
         } else {
-            log.info("threadContext is null:{}", Objects.isNull(threadContext));
+            log.debug("threadContext is null:{}", Objects.isNull(threadContext));
         }
     }
 
-    public List<DomainResp> getDomainListForUser(User user) {
+    public List<DomainResp> getDomainListForAdmin() {
         Object domainDescListObject = fetchHttpResult(semanticUrl + fetchDomainListPath, null, HttpMethod.GET);
-        List<DomainResp> domainDescList = (List<DomainResp>) domainDescListObject;
+        List<DomainResp> domainDescList = JsonUtil.toList(JsonUtil.toString(domainDescListObject), DomainResp.class);
         return domainDescList;
     }
 }

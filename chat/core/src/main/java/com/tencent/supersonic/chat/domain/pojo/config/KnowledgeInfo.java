@@ -1,8 +1,10 @@
 package com.tencent.supersonic.chat.domain.pojo.config;
 
 import com.tencent.supersonic.common.enums.TypeEnums;
+
 import java.util.List;
 import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 
 /**
@@ -17,6 +19,7 @@ public class KnowledgeInfo {
      */
     private Long itemId;
 
+    private String bizName;
     /**
      * type: IntentionTypeEnum
      * temporarily only supports dimension-related information

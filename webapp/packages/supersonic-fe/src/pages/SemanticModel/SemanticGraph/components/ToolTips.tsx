@@ -17,7 +17,7 @@ const initTooltips = () => {
       outDiv.style.width = 'fit-content';
       outDiv.style.height = 'fit-content';
       const model = e.item.getModel();
-      console.log(model, e.item, 'model');
+
       const { name, bizName, createdBy, updatedAt, description } = model;
       const list = [
         {

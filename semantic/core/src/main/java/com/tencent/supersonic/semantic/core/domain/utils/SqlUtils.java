@@ -47,6 +47,15 @@ public class SqlUtils {
     @Getter
     private JdbcDataSourceUtils jdbcDataSourceUtils;
 
+    public SqlUtils() {
+
+    }
+
+    public SqlUtils(DatabaseResp databaseResp) {
+        this.databaseResp = databaseResp;
+        this.dataTypeEnum = DataTypeEnum.urlOf(databaseResp.getUrl());
+    }
+
     public SqlUtils init(DatabaseResp databaseResp) {
         //todo Password decryption
         return SqlUtilsBuilder
@@ -61,16 +70,6 @@ public class SqlUtils {
                 .withIsQueryLogEnable(this.isQueryLogEnable)
                 .build();
     }
-
-    public SqlUtils() {
-
-    }
-
-    public SqlUtils(DatabaseResp databaseResp) {
-        this.databaseResp = databaseResp;
-        this.dataTypeEnum = DataTypeEnum.urlOf(databaseResp.getUrl());
-    }
-
 
     public List<Map<String, Object>> execute(String sql) throws ServerException {
         try {
@@ -97,7 +96,6 @@ public class SqlUtils {
             JdbcDataSourceUtils.releaseConnection(connection);
         }
         DataSource dataSource = jdbcDataSourceUtils.getDataSource(databaseResp);
-
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         jdbcTemplate.setDatabaseProductName(databaseResp.getName());
         jdbcTemplate.setFetchSize(500);

@@ -237,3 +237,32 @@ export function testDatabaseConnect(data: SaveDatabaseParams): Promise<any> {
     data,
   });
 }
+
+type ExcuteSqlParams = {
+  sql: string;
+  domainId: number;
+};
+
+// 执行脚本
+export async function excuteSql(params: ExcuteSqlParams) {
+  const data = { ...params };
+  return request.post(`${process.env.API_BASE_URL}database/executeSql`, { data });
+}
+
+export function getDbNames(dbId: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}database/getDbNames/${dbId}`, {
+    method: 'GET',
+  });
+}
+
+export function getTables(dbId: number, dbName: string): Promise<any> {
+  return request(`${process.env.API_BASE_URL}database/getTables/${dbId}/${dbName}`, {
+    method: 'GET',
+  });
+}
+
+export function getColumns(dbId: number, dbName: string, tableName: string): Promise<any> {
+  return request(`${process.env.API_BASE_URL}database/getColumns/${dbId}/${dbName}/${tableName}`, {
+    method: 'GET',
+  });
+}

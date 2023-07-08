@@ -21,4 +21,6 @@ public class Metric extends SchemaItem {
 
     private DataFormat dataFormat;
 
+    private String alias;
+
 }

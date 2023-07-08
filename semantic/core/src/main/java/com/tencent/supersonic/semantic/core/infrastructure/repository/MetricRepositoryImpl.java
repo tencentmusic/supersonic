@@ -49,6 +49,12 @@ public class MetricRepositoryImpl implements MetricRepository {
     }
 
     @Override
+    public List<MetricDO> getMetricList() {
+        MetricDOExample metricDOExample = new MetricDOExample();
+        return metricDOMapper.selectByExampleWithBLOBs(metricDOExample);
+    }
+
+    @Override
     public List<MetricDO> getMetricListByIds(List<Long> ids) {
         MetricDOExample metricDOExample = new MetricDOExample();
         metricDOExample.createCriteria().andIdIn(ids);

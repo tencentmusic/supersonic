@@ -13,7 +13,6 @@ import com.tencent.supersonic.semantic.api.core.response.DomainResp;
 import com.tencent.supersonic.semantic.api.core.response.MetricResp;
 import com.tencent.supersonic.common.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.semantic.core.domain.dataobject.MetricDO;
-import com.tencent.supersonic.semantic.core.domain.manager.MetricYamlManager;
 import com.tencent.supersonic.semantic.core.domain.pojo.MetricFilter;
 import com.tencent.supersonic.semantic.core.domain.repository.MetricRepository;
 import com.tencent.supersonic.semantic.core.domain.utils.MetricConverter;
@@ -27,6 +26,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -38,30 +38,26 @@ public class MetricServiceImpl implements MetricService {
 
     private MetricRepository metricRepository;
 
-    private MetricYamlManager metricYamlManager;
-
     private DomainService domainService;
 
 
     public MetricServiceImpl(MetricRepository metricRepository,
-            MetricYamlManager metricYamlManager,
             DomainService domainService) {
         this.domainService = domainService;
         this.metricRepository = metricRepository;
-        this.metricYamlManager = metricYamlManager;
     }
 
     @Override
-    public void creatExprMetric(MetricReq metricReq, User user) throws Exception {
+    public void creatExprMetric(MetricReq metricReq, User user) {
         checkExist(Lists.newArrayList(metricReq));
         Metric metric = MetricConverter.convert(metricReq);
         metric.createdBy(user.getName());
         log.info("[create metric] object:{}", JSONObject.toJSONString(metric));
-        saveMetricAndGenerateYaml(metric);
+        saveMetric(metric);
     }
 
     @Override
-    public void createMetricBatch(List<MetricReq> metricReqs, User user) throws Exception {
+    public void createMetricBatch(List<MetricReq> metricReqs, User user) {
         if (CollectionUtils.isEmpty(metricReqs)) {
             return;
         }
@@ -74,14 +70,17 @@ public class MetricServiceImpl implements MetricService {
                 .filter(metric -> !metricDescMap.containsKey(metric.getBizName())).collect(Collectors.toList());
         log.info("[insert metric] object:{}", JSONObject.toJSONString(metricToInsert));
         saveMetricBatch(metricToInsert, user);
-
-        generateYamlFile(metrics.get(0).getDomainId());
     }
 
 
     @Override
     public List<MetricResp> getMetrics(Long domainId) {
         return convertList(metricRepository.getMetricList(domainId));
+    }
+
+    @Override
+    public List<MetricResp> getMetrics() {
+        return convertList(metricRepository.getMetricList());
     }
 
     @Override
@@ -136,27 +135,15 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public void updateExprMetric(MetricReq metricReq, User user) throws Exception {
+    public void updateExprMetric(MetricReq metricReq, User user) {
         preCheckMetric(metricReq);
         Metric metric = MetricConverter.convert(metricReq);
         metric.updatedBy(user.getName());
         log.info("[update metric] object:{}", JSONObject.toJSONString(metric));
         updateMetric(metric);
-        generateYamlFile(metric.getDomainId());
     }
 
 
-    public List<Metric> getMetricList(Long domainId) {
-        List<Metric> metrics = Lists.newArrayList();
-        List<MetricDO> metricDOS = metricRepository.getMetricList(domainId);
-        if (!CollectionUtils.isEmpty(metricDOS)) {
-            metrics = metricDOS.stream().map(MetricConverter::convert2Metric).collect(Collectors.toList());
-        }
-        return metrics;
-    }
-
-
-    //保存并获取自增ID
     public void saveMetric(Metric metric) {
         MetricDO metricDO = MetricConverter.convert2MetricDO(metric);
         log.info("[save metric] metricDO:{}", JSONObject.toJSONString(metricDO));
@@ -205,20 +192,12 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public void deleteMetric(Long id) throws Exception {
+    public void deleteMetric(Long id) {
         MetricDO metricDO = metricRepository.getMetricById(id);
         if (metricDO == null) {
             throw new RuntimeException(String.format("the metric %s not exist", id));
         }
         metricRepository.deleteMetric(id);
-        generateYamlFile(metricDO.getDomainId());
-    }
-
-    protected void generateYamlFile(Long domainId) throws Exception {
-        List<Metric> metrics = getMetricList(domainId);
-        String fullPath = domainService.getDomainFullPath(domainId);
-        String domainBizName = domainService.getDomainBizName(domainId);
-        metricYamlManager.generateYamlFile(metrics, fullPath, domainBizName);
     }
 
 
@@ -232,21 +211,14 @@ public class MetricServiceImpl implements MetricService {
         metricRepository.createMetricBatch(metricDOS);
     }
 
-    private void saveMetricAndGenerateYaml(Metric metric) throws Exception {
-        saveMetric(metric);
-        generateYamlFile(metric.getDomainId());
-    }
-
-
-    private void preCheckMetric(MetricReq exprMetricReq) {
-
-        MetricTypeParams typeParams = exprMetricReq.getTypeParams();
+    private void preCheckMetric(MetricReq metricReq) {
+        MetricTypeParams typeParams = metricReq.getTypeParams();
         List<Measure> measures = typeParams.getMeasures();
         if (CollectionUtils.isEmpty(measures)) {
             throw new RuntimeException("measure can not be none");
         }
-        for (Measure measure : measures) {
-            measure.setExpr(null);
+        if (StringUtils.isBlank(typeParams.getExpr())) {
+            throw new RuntimeException("expr can not be blank");
         }
     }
 

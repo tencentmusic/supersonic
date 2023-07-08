@@ -5,10 +5,13 @@ import com.tencent.supersonic.semantic.core.domain.dataobject.DomainDOExample;
 import com.tencent.supersonic.semantic.core.domain.repository.DomainRepository;
 import com.tencent.supersonic.semantic.core.infrastructure.mapper.DomainDOMapper;
 import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 
 @Component
+@Slf4j
 public class DomainRepositoryImpl implements DomainRepository {
 
     private DomainDOMapper domainDOMapper;

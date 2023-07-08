@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +22,8 @@ import org.slf4j.LoggerFactory;
 /**
  * nature parse helper
  */
+@Slf4j
 public class NatureHelper {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(NatureHelper.class);
 
     private static boolean isDomainOrEntity(Term term, Integer domain) {
         return (NatureType.NATURE_SPILT + domain).equals(term.nature.toString()) || term.nature.toString()
@@ -47,7 +48,7 @@ public class NatureHelper {
             }
             return Integer.valueOf(split[1]);
         } catch (NumberFormatException e) {
-            LOGGER.error("", e);
+            log.error("", e);
         }
         return null;
     }

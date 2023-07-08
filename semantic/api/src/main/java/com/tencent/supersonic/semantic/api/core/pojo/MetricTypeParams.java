@@ -1,12 +1,13 @@
 package com.tencent.supersonic.semantic.api.core.pojo;
 
 import java.util.List;
+import com.google.common.collect.Lists;
 import lombok.Data;
 
 @Data
 public class MetricTypeParams {
 
-    private List<Measure> measures;
+    private List<Measure> measures = Lists.newArrayList();
 
     private String expr;
 

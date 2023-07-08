@@ -7,6 +7,7 @@ import com.tencent.supersonic.chat.domain.dataobject.ChatContextDO;
 import com.tencent.supersonic.chat.domain.repository.ChatContextRepository;
 import com.tencent.supersonic.chat.infrastructure.mapper.ChatContextMapper;
 import com.tencent.supersonic.common.util.json.JsonUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Repository;
 @Primary
 public class ChatContextRepositoryImpl implements ChatContextRepository {
 
+    @Autowired(required = false)
     private final ChatContextMapper chatContextMapper;
 
     public ChatContextRepositoryImpl(ChatContextMapper chatContextMapper) {
@@ -62,6 +64,14 @@ public class ChatContextRepositoryImpl implements ChatContextRepository {
         chatContextDO.setUser(chatContext.getUser());
         if (chatContext.getParseInfo() != null) {
             Gson g = new Gson();
+            chatContext.getParseInfo().getDimensions().stream().forEach(d -> {
+                d.setUpdatedAt(null);
+                d.setCreatedAt(null);
+            });
+            chatContext.getParseInfo().getMetrics().stream().forEach(d -> {
+                d.setUpdatedAt(null);
+                d.setCreatedAt(null);
+            });
             chatContextDO.setSemanticParse(g.toJson(chatContext.getParseInfo()));
         }
         return chatContextDO;

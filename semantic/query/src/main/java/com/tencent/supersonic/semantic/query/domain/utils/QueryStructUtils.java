@@ -42,6 +42,8 @@ import org.springframework.util.CollectionUtils;
 @Component
 public class QueryStructUtils {
 
+    public static Set<String> internalCols = new HashSet<>(
+            Arrays.asList("dayno", "plat_sys_var", "sys_imp_date", "sys_imp_week", "sys_imp_month"));
     private final DatabaseService databaseService;
     private final QueryUtils queryUtils;
     private final ParserService parserService;
@@ -50,15 +52,11 @@ public class QueryStructUtils {
     private final DimensionService dimensionService;
     private final MetricService metricService;
     private final DatasourceService datasourceService;
-    private final com.tencent.supersonic.domain.semantic.query.domain.utils.DateUtils dateUtils;
+    private final DateUtils dateUtils;
     private final SqlFilterUtils sqlFilterUtils;
     private final CacheUtils cacheUtils;
-
     @Value("${query.cache.enable:true}")
     private Boolean cacheEnable;
-
-    Set<String> internalCols = new HashSet<>(
-            Arrays.asList("dayno", "plat_sys_var", "sys_imp_date", "sys_imp_week", "sys_imp_month"));
 
     public QueryStructUtils(DatabaseService databaseService,
             QueryUtils queryUtils,
@@ -68,7 +66,7 @@ public class QueryStructUtils {
             DimensionService dimensionService,
             MetricService metricService,
             DatasourceService datasourceService,
-            com.tencent.supersonic.domain.semantic.query.domain.utils.DateUtils dateUtils,
+            DateUtils dateUtils,
             SqlFilterUtils sqlFilterUtils,
             CacheUtils cacheUtils) {
         this.databaseService = databaseService;
@@ -118,7 +116,10 @@ public class QueryStructUtils {
         queryUtils.checkSqlParse(sqlParser);
         log.info("sqlParser:{}", sqlParser);
 
-        queryUtils.handleDetail(queryStructCmd, sqlParser);
+        // todo tmp delete
+        //queryUtils.handleDetail(queryStructCmd, sqlParser);
+        queryUtils.handleNoMetric(queryStructCmd, sqlParser);
+
         QueryResultWithSchemaResp queryResultWithColumns = databaseService.queryWithColumns(sqlParser);
 
         queryUtils.fillItemNameInfo(queryResultWithColumns, queryStructCmd.getDomainId());

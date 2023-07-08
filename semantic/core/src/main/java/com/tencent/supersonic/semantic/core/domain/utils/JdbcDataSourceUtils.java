@@ -29,10 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JdbcDataSourceUtils {
 
-    private JdbcDataSource jdbcDataSource;
-
     @Getter
     private static Set releaseSourceSet = new HashSet();
+    private JdbcDataSource jdbcDataSource;
 
     public JdbcDataSourceUtils(JdbcDataSource jdbcDataSource) {
         this.jdbcDataSource = jdbcDataSource;
@@ -55,54 +54,6 @@ public class JdbcDataSourceUtils {
         }
 
         return false;
-    }
-
-
-    public DataSource getDataSource(DatabaseResp databaseResp) throws RuntimeException {
-        return jdbcDataSource.getDataSource(databaseResp);
-    }
-
-    public Connection getConnection(DatabaseResp databaseResp) throws RuntimeException {
-        Connection conn = getConnectionWithRetry(databaseResp);
-        if (conn == null) {
-            try {
-                releaseDataSource(databaseResp);
-                DataSource dataSource = getDataSource(databaseResp);
-                return dataSource.getConnection();
-            } catch (Exception e) {
-                log.error("Get connection error, jdbcUrl:{}, e:{}", databaseResp.getUrl(), e);
-                throw new RuntimeException("Get connection error, jdbcUrl:" + databaseResp.getUrl()
-                        + " you can try again later or reset datasource");
-            }
-        }
-        return conn;
-    }
-
-    private Connection getConnectionWithRetry(DatabaseResp databaseResp) {
-        int rc = 1;
-        for (; ; ) {
-
-            if (rc > 3) {
-                return null;
-            }
-
-            try {
-                Connection connection = getDataSource(databaseResp).getConnection();
-                if (connection != null && connection.isValid(5)) {
-                    return connection;
-                }
-            } catch (Exception e) {
-                log.error("e", e);
-            }
-
-            try {
-                Thread.sleep((long) Math.pow(2, rc) * 1000);
-            } catch (InterruptedException e) {
-                log.error("e", e);
-            }
-
-            rc++;
-        }
     }
 
     public static void releaseConnection(Connection connection) {
@@ -177,11 +128,6 @@ public class JdbcDataSourceUtils {
         throw new RuntimeException("Not supported data type: jdbcUrl=" + jdbcUrl);
     }
 
-
-    public void releaseDataSource(DatabaseResp databaseResp) {
-        jdbcDataSource.removeDatasource(databaseResp);
-    }
-
     public static String getKey(String name, String jdbcUrl, String username, String password, String version,
             boolean isExt) {
 
@@ -198,5 +144,56 @@ public class JdbcDataSourceUtils {
         }
 
         return MD5Util.getMD5(sb.toString(), true, 64);
+    }
+
+    public DataSource getDataSource(DatabaseResp databaseResp) throws RuntimeException {
+        return jdbcDataSource.getDataSource(databaseResp);
+    }
+
+    public Connection getConnection(DatabaseResp databaseResp) throws RuntimeException {
+        Connection conn = getConnectionWithRetry(databaseResp);
+        if (conn == null) {
+            try {
+                releaseDataSource(databaseResp);
+                DataSource dataSource = getDataSource(databaseResp);
+                return dataSource.getConnection();
+            } catch (Exception e) {
+                log.error("Get connection error, jdbcUrl:{}, e:{}", databaseResp.getUrl(), e);
+                throw new RuntimeException("Get connection error, jdbcUrl:" + databaseResp.getUrl()
+                        + " you can try again later or reset datasource");
+            }
+        }
+        return conn;
+    }
+
+    private Connection getConnectionWithRetry(DatabaseResp databaseResp) {
+        int rc = 1;
+        for (; ; ) {
+
+            if (rc > 3) {
+                return null;
+            }
+
+            try {
+                Connection connection = getDataSource(databaseResp).getConnection();
+                if (connection != null && connection.isValid(5)) {
+                    return connection;
+                }
+            } catch (Exception e) {
+                log.error("e", e);
+            }
+
+            try {
+                Thread.sleep((long) Math.pow(2, rc) * 1000);
+            } catch (InterruptedException e) {
+                log.error("e", e);
+            }
+
+            rc++;
+        }
+    }
+
+    public void releaseDataSource(DatabaseResp databaseResp) {
+        jdbcDataSource.removeDatasource(databaseResp);
     }
 }

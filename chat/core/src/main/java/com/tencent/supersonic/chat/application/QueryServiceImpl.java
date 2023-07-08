@@ -2,52 +2,44 @@ package com.tencent.supersonic.chat.application;
 
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.chat.api.component.*;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.request.QueryContextReq;
 import com.tencent.supersonic.chat.api.response.QueryResultResp;
-import com.tencent.supersonic.chat.api.service.SchemaMapper;
-import com.tencent.supersonic.chat.api.service.SemanticLayer;
-import com.tencent.supersonic.chat.api.service.SemanticParser;
-import com.tencent.supersonic.chat.api.service.SemanticQuery;
-import com.tencent.supersonic.semantic.api.core.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.chat.application.query.SemanticQueryFactory;
+import com.tencent.supersonic.chat.application.query.QuerySelector;
 import com.tencent.supersonic.chat.domain.pojo.chat.QueryData;
-import com.tencent.supersonic.chat.domain.service.ChatService;
+import com.tencent.supersonic.chat.domain.pojo.search.QueryState;
 import com.tencent.supersonic.chat.domain.service.QueryService;
+import com.tencent.supersonic.chat.domain.service.ChatService;
+import com.tencent.supersonic.chat.domain.utils.ComponentFactory;
 import com.tencent.supersonic.chat.domain.utils.SchemaInfoConverter;
-import com.tencent.supersonic.common.util.json.JsonUtil;
+import com.tencent.supersonic.semantic.api.core.response.QueryResultWithSchemaResp;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 @Service
+@Component("chatQueryService")
+@Primary
+@Slf4j
 public class QueryServiceImpl implements QueryService {
 
-    private final Logger logger = LoggerFactory.getLogger(QueryServiceImpl.class);
-    private List<SchemaMapper> schemaMappers;
-    private List<SemanticParser> semanticParsers;
     @Autowired
     private ChatService chatService;
-    @Autowired
-    private SemanticLayer semanticLayer;
 
-    public QueryServiceImpl() {
-        schemaMappers = SpringFactoriesLoader.loadFactories(SchemaMapper.class,
-                Thread.currentThread().getContextClassLoader());
-        semanticParsers = SpringFactoriesLoader.loadFactories(SemanticParser.class,
-                Thread.currentThread().getContextClassLoader());
-    }
+    private List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
+    private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
+    private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
+    private QuerySelector querySelector = ComponentFactory.getQuerySelector();
 
+    @Override
     public QueryResultResp executeQuery(QueryContextReq queryCtx) throws Exception {
         schemaMappers.stream().forEach(s -> s.map(queryCtx));
 
@@ -55,24 +47,29 @@ public class QueryServiceImpl implements QueryService {
         ChatContext chatCtx = chatService.getOrCreateContext(queryCtx.getChatId());
 
         for (SemanticParser semanticParser : semanticParsers) {
-            logger.info("semanticParser processing:{}", JsonUtil.prettyToString(semanticParser));
-            boolean isFinish = semanticParser.parse(queryCtx, chatCtx);
-            if (isFinish) {
-                logger.info("semanticParser is finish ,semanticParser:{}", semanticParser.getClass().getName());
-                break;
+            log.info("semanticParser processing:[{}]", semanticParser.getClass().getName());
+            semanticParser.parse(queryCtx, chatCtx);
+        }
+
+        if (queryCtx.getCandidateQueries().size() > 0) {
+            log.info("pick before [{}]", queryCtx.getCandidateQueries().stream().collect(
+                    Collectors.toList()));
+            SemanticQuery semanticQuery = querySelector.select(queryCtx.getCandidateQueries());
+            log.info("pick after [{}]", semanticQuery);
+
+            QueryResultResp queryResponse = semanticQuery.execute(queryCtx.getUser());
+            if (queryResponse != null) {
+                // update chat context after a successful semantic query
+                if (queryCtx.isSaveAnswer() && queryResponse.getQueryState() == QueryState.NORMAL.getState()) {
+                    chatService.updateContext(chatCtx, queryCtx, semanticQuery.getParseInfo());
+                }
+                queryResponse.setChatContext(chatCtx.getParseInfo());
+                chatService.addQuery(queryResponse, queryCtx, chatCtx);
+                return queryResponse;
             }
         }
-        // submit semantic query based on the result of semantic parsing
-        SemanticQuery query = SemanticQueryFactory.get(queryCtx.getParseInfo().getQueryMode());
 
-        QueryResultResp queryResponse = query.execute(queryCtx, chatCtx);
-
-        // update chat context after a successful semantic query
-        query.updateContext(queryResponse, chatCtx, queryCtx);
-
-        chatService.addQuery(queryResponse, queryCtx, chatCtx);
-
-        return queryResponse;
+        return null;
     }
 
     @Override
@@ -82,7 +79,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public QueryResultResp queryData(QueryData queryData, User user) throws Exception {
+    public QueryResultResp executeDirectQuery(QueryData queryData, User user) throws Exception {
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         QueryResultResp queryResponse = new QueryResultResp();
         BeanUtils.copyProperties(queryData, semanticParseInfo);

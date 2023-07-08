@@ -62,3 +62,85 @@ export declare namespace IDataSource {
   }
   type IDataSourceList = IDataSourceItem[];
 }
+
+export declare namespace ISemantic {
+  interface IDimensionItem {
+    createdBy: string;
+    updatedBy: string;
+    createdAt: string;
+    updatedAt: string;
+    id: number;
+    name: string;
+    bizName: string;
+    description: string;
+    status: number;
+    typeEnum: any;
+    sensitiveLevel: number;
+    domainId: number;
+    type: string;
+    expr: string;
+    fullPath: string;
+    datasourceId: number;
+    datasourceName: string;
+    datasourceBizName: string;
+    semanticType: string;
+    alias: string;
+    useCnt: number;
+  }
+
+  interface IMeasure {
+    name: string;
+    agg: string;
+    expr: string;
+    constraint: string;
+    alias: string;
+    createMetric: string;
+    bizName: string;
+    isCreateMetric: number;
+    datasourceId: number;
+  }
+  interface ITypeParams {
+    measures: IMeasure[];
+    expr: string;
+  }
+
+  interface IMetricItem {
+    createdBy: string;
+    updatedBy: string;
+    createdAt: string;
+    updatedAt: string;
+    id: number;
+    name: string;
+    bizName: string;
+    description: string;
+    status: number;
+    typeEnum: string;
+    sensitiveLevel: number;
+    domainId: number;
+    domainName: string;
+    type: string;
+    typeParams: TypeParams;
+    fullPath: string;
+    dataFormatType: string;
+    dataFormat: string;
+    alias: string;
+    useCnt: number;
+  }
+
+  type IDimensionList = IDimensionItem[];
+  type IMetricList = IMetricItem[];
+}
+
+export declare namespace IChatConfig {
+  interface IEntity {
+    domainId: number;
+    domainName: string;
+    domainBizName: string;
+    names: string[];
+    entityIds: ISemantic.IMetricItem[];
+    entityInternalDetailDesc: {
+      dimensionList: ISemantic.IDimensionList;
+      metricList: ISemantic.IMetricList;
+    };
+  }
+}

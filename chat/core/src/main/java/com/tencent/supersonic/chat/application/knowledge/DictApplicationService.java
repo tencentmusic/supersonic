@@ -29,19 +29,16 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class DictApplicationService {
 
-    @Value("${dict.flush.enable:true}")
-    private Boolean dictFlushEnable;
-
-    @Value("${dict.file.type:txt}")
-    private String dictFileType;
-    private String dimValue = "DimValue_%d_%d";
-    private String dateTimeFormatter = "yyyyMMddHHmmss";
-
-
     private final DictMetaUtils metaUtils;
     private final DictQueryUtils dictQueryUtils;
     private final FileHandler fileHandler;
     private final DictRepository dictRepository;
+    @Value("${dict.flush.enable:true}")
+    private Boolean dictFlushEnable;
+    @Value("${dict.file.type:txt}")
+    private String dictFileType;
+    private String dimValue = "DimValue_%d_%d";
+    private String dateTimeFormatter = "yyyyMMddHHmmss";
 
     public DictApplicationService(DictMetaUtils metaUtils,
             DictQueryUtils dictQueryUtils,
