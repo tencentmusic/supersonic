@@ -15,12 +15,12 @@ public class QueryColumn {
     private String showType;
     private Boolean authorized = true;
 
-    public void setType(String type) {
-        this.type = type == null ? null : type;
-    }
-
     public QueryColumn(String nameEn, String type) {
         this.type = type;
         this.nameEn = nameEn;
+    }
+
+    public void setType(String type) {
+        this.type = type == null ? null : type;
     }
 }

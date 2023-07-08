@@ -9,18 +9,13 @@ import lombok.Data;
 public class Dimension implements SemanticItem {
 
     String name;
+    private String owners;
+    private String type;
+    private String expr;
+    private DimensionTimeTypeParams dimensionTimeTypeParams;
 
     @Override
     public String getName() {
         return name;
     }
-
-
-    private String owners;
-
-    private String type;
-
-    private String expr;
-
-    private DimensionTimeTypeParams dimensionTimeTypeParams;
 }

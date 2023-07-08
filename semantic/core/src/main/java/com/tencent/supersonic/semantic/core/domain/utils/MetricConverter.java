@@ -26,7 +26,7 @@ public class MetricConverter {
     public static Metric convert(MetricReq metricReq) {
         Metric metric = new Metric();
         BeanUtils.copyProperties(metricReq, metric);
-        metric.setType(MetricTypeEnum.EXPR.getName());
+        metric.setType(metricReq.getMetricType().name());
         metric.setTypeParams(metricReq.getTypeParams());
         return metric;
     }
@@ -75,7 +75,7 @@ public class MetricConverter {
         return metric;
     }
 
-    
+
     public static MetricYamlTpl convert2MetricYamlTpl(Metric metric) {
         MetricYamlTpl metricYamlTpl = new MetricYamlTpl();
         BeanUtils.copyProperties(metric, metricYamlTpl);

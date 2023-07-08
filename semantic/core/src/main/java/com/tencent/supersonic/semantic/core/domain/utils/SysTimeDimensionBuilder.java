@@ -23,7 +23,7 @@ public class SysTimeDimensionBuilder {
         dims.add(generateSysDayDimension(timeDim, engineAdaptor));
         dims.add(generateSysWeekDimension(timeDim, engineAdaptor));
         dims.add(generateSysMonthDimension(timeDim, engineAdaptor));
-        log.info("addSysTimeDimension after:{}, engineAdaptor:{}", dims, engineAdaptor);
+        log.debug("addSysTimeDimension after:{}, engineAdaptor:{}", dims, engineAdaptor);
     }
 
 

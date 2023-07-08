@@ -23,5 +23,9 @@ public class DomainResp extends SchemaItem {
 
     private Integer isOpen = 0;
 
+    private Integer dimensionCnt;
+
+    private Integer metricCnt;
+
 
 }

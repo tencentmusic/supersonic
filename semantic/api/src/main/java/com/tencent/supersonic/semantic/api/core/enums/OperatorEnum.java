@@ -19,11 +19,11 @@ public enum OperatorEnum {
     UNKNOWN("UNKNOWN");
 
 
+    private String operator;
+
     OperatorEnum(String operator) {
         this.operator = operator;
     }
-
-    private String operator;
 
     public String getOperator() {
         return operator;

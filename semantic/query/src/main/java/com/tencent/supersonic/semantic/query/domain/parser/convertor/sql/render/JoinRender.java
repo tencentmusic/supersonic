@@ -90,7 +90,7 @@ public class JoinRender extends Renderer {
                     fieldWhere.add(identify.getName());
                 }
             }
-            TableView tableView = SourceRender.renderOne(false, "", fieldWhere, queryMetrics, queryDimension,
+            TableView tableView = SourceRender.renderOne("", fieldWhere, queryMetrics, queryDimension,
                     metricCommand.getWhere(), dataSources.get(i), scope, schema, true);
             log.info("tableView {}", tableView.getTable().toString());
             String alias = Constants.JOIN_TABLE_PREFIX + dataSource.getName();

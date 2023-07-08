@@ -23,12 +23,11 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class Suggester {
 
+    public static final int SEARCH_SIZE = 200;
     private static final Logger LOGGER = LoggerFactory.getLogger(Suggester.class);
     private static BinTrie<List<String>> trie;
     private static BinTrie<List<String>> suffixTrie;
     private static String localFileCache = "";
-
-    public static final int SEARCH_SIZE = 200;
 
     static {
         trie = new BinTrie<>();
@@ -53,7 +52,7 @@ public class Suggester {
         return result.stream().map(
                         entry -> {
                             String name = entry.getKey().replace("#", " ");
-                            return new MapResult(name, entry.getValue(),key);
+                            return new MapResult(name, entry.getValue(), key);
                         }
                 ).sorted((a, b) -> -(b.getName().length() - a.getName().length()))
                 .limit(SEARCH_SIZE)

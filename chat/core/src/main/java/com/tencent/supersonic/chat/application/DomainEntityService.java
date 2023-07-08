@@ -2,49 +2,44 @@ package com.tencent.supersonic.chat.application;
 
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.pojo.DataInfo;
 import com.tencent.supersonic.chat.api.pojo.DomainInfo;
 import com.tencent.supersonic.chat.api.pojo.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.Filter;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.request.QueryContextReq;
-import com.tencent.supersonic.chat.api.service.SemanticLayer;
-import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichInfo;
 import com.tencent.supersonic.chat.domain.pojo.config.EntityRichInfo;
+import com.tencent.supersonic.chat.domain.utils.ComponentFactory;
 import com.tencent.supersonic.chat.domain.utils.DefaultSemanticInternalUtils;
 import com.tencent.supersonic.chat.domain.utils.SchemaInfoConverter;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.SchemaItem;
+import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
+import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
+import com.tencent.supersonic.semantic.api.core.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 @Service
+@Slf4j
 public class DomainEntityService {
 
-    private final Logger logger = LoggerFactory.getLogger(DomainEntityService.class);
-    @Autowired
-    private SemanticLayer semanticLayer;
+    private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
 
     @Autowired
     private DefaultSemanticInternalUtils defaultSemanticUtils;
 
-    public EntityInfo getEntityInfo(QueryContextReq queryCtx, ChatContext chatCtx, User user) {
-        SemanticParseInfo parseInfo = queryCtx.getParseInfo();
-
+    public EntityInfo getEntityInfo(SemanticParseInfo parseInfo, User user) {
         if (parseInfo != null && parseInfo.getDomainId() > 0) {
             EntityInfo entityInfo = getEntityInfo(parseInfo.getDomainId());
             if (parseInfo.getDimensionFilters().size() <= 0) {
@@ -56,7 +51,8 @@ public class DomainEntityService {
                 String domainInfoPrimaryName = entityInfo.getDomainInfo().getPrimaryEntityBizName();
                 String domainInfoId = "";
                 for (Filter chatFilter : parseInfo.getDimensionFilters()) {
-                    if (chatFilter.getBizName().equals(domainInfoPrimaryName)) {
+                    if (chatFilter != null && chatFilter.getBizName() != null && chatFilter.getBizName()
+                            .equals(domainInfoPrimaryName)) {
                         if (chatFilter.getOperator().equals(FilterOperatorEnum.EQUALS)) {
                             domainInfoId = chatFilter.getValue().toString();
                         }
@@ -72,7 +68,7 @@ public class DomainEntityService {
 
                         return entityInfo;
                     } catch (Exception e) {
-                        logger.error("setMaintDomain error {}", e);
+                        log.error("setMaintDomain error {}", e);
                     }
                 }
             }
@@ -88,7 +84,7 @@ public class DomainEntityService {
     private EntityInfo getEntityInfo(EntityRichInfo entityDesc) {
         EntityInfo entityInfo = new EntityInfo();
 
-        if (entityDesc != null) {
+        if (entityDesc != null && Objects.nonNull(entityDesc.getDomainId())) {
             DomainInfo domainInfo = new DomainInfo();
             domainInfo.setItemId(Integer.valueOf(entityDesc.getDomainId().intValue()));
             domainInfo.setName(entityDesc.getDomainName());
@@ -148,7 +144,7 @@ public class DomainEntityService {
             queryResultWithColumns = semanticLayer.queryByStruct(SchemaInfoConverter.convertTo(semanticParseInfo),
                     user);
         } catch (Exception e) {
-            logger.warn("setMainDomain queryByStruct error, e:", e);
+            log.warn("setMainDomain queryByStruct error, e:", e);
         }
 
         if (queryResultWithColumns != null) {

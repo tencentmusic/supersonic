@@ -32,7 +32,7 @@ public class ViewInfoController {
 
     @PostMapping("/createOrUpdateViewInfo")
     public ViewInfoDO createOrUpdateViewInfo(@RequestBody ViewInfoReq viewInfoReq, HttpServletRequest request,
-                                             HttpServletResponse response) {
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return viewInfoServiceImpl.createOrUpdateViewInfo(viewInfoReq, user);
     }

@@ -3,24 +3,25 @@ package com.tencent.supersonic.semantic.core.application;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.util.mapper.BeanMapper;
 import com.tencent.supersonic.semantic.api.core.request.DomainReq;
 import com.tencent.supersonic.semantic.api.core.request.DomainSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.core.request.DomainUpdateReq;
+import com.tencent.supersonic.semantic.api.core.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.core.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.core.response.DomainResp;
 import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
 import com.tencent.supersonic.semantic.api.core.response.MetricResp;
 import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
-import com.tencent.supersonic.common.util.mapper.BeanMapper;
-import com.tencent.supersonic.semantic.core.domain.dataobject.DomainDO;
-import com.tencent.supersonic.semantic.core.domain.repository.DomainRepository;
-import com.tencent.supersonic.semantic.core.domain.utils.DomainConvert;
+import com.tencent.supersonic.semantic.core.domain.DatasourceService;
 import com.tencent.supersonic.semantic.core.domain.DimensionService;
 import com.tencent.supersonic.semantic.core.domain.DomainService;
 import com.tencent.supersonic.semantic.core.domain.MetricService;
+import com.tencent.supersonic.semantic.core.domain.dataobject.DomainDO;
 import com.tencent.supersonic.semantic.core.domain.pojo.Domain;
-
+import com.tencent.supersonic.semantic.core.domain.repository.DomainRepository;
+import com.tencent.supersonic.semantic.core.domain.utils.DomainConvert;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,14 +43,15 @@ public class DomainServiceImpl implements DomainService {
     private final DomainRepository domainRepository;
     private final MetricService metricService;
     private final DimensionService dimensionService;
+    private final DatasourceService datasourceService;
 
 
-    public DomainServiceImpl(DomainRepository domainRepository,
-            @Lazy MetricService metricService,
-            @Lazy DimensionService dimensionService) {
+    public DomainServiceImpl(DomainRepository domainRepository, @Lazy MetricService metricService,
+            @Lazy DimensionService dimensionService, @Lazy DatasourceService datasourceService) {
         this.domainRepository = domainRepository;
         this.metricService = metricService;
         this.dimensionService = dimensionService;
+        this.datasourceService = datasourceService;
     }
 
 
@@ -80,7 +82,18 @@ public class DomainServiceImpl implements DomainService {
     @Override
 
     public void deleteDomain(Long id) {
+        checkDelete(id);
         domainRepository.deleteDomain(id);
+    }
+
+    private void checkDelete(Long id) {
+        List<MetricResp> metricResps = metricService.getMetrics(id);
+        List<DimensionResp> dimensionResps = dimensionService.getDimensions(id);
+        List<DatasourceResp> datasourceResps = datasourceService.getDatasourceList(id);
+        if (!CollectionUtils.isEmpty(metricResps) || !CollectionUtils.isEmpty(datasourceResps)
+                || !CollectionUtils.isEmpty(dimensionResps)) {
+            throw new RuntimeException("exist datasource, dimension or metric in this domain, please check");
+        }
     }
 
     @Override
@@ -99,7 +112,7 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public List<DomainResp> getDomainList() {
-        return convertList(domainRepository.getDomainList());
+        return convertList(domainRepository.getDomainList(), new HashMap<>(), new HashMap<>());
     }
 
 
@@ -115,7 +128,11 @@ public class DomainServiceImpl implements DomainService {
         List<DomainDO> domainDOS = domainRepository.getDomainList();
         List<String> orgIds = Lists.newArrayList();
         log.info("orgIds:{},userName:{}", orgIds, userName);
-        return convertList(domainDOS).stream()
+        Map<Long, List<MetricResp>> metricDomainMap = metricService.getMetrics().stream()
+                .collect(Collectors.groupingBy(MetricResp::getDomainId));
+        Map<Long, List<DimensionResp>> dimensionDomainMap = dimensionService.getDimensions().stream()
+                .collect(Collectors.groupingBy(DimensionResp::getDomainId));
+        return convertList(domainDOS, metricDomainMap, dimensionDomainMap).stream()
                 .filter(domainDesc -> checkAdminPermission(orgIds, userName, domainDesc))
                 .collect(Collectors.toList());
     }
@@ -125,7 +142,7 @@ public class DomainServiceImpl implements DomainService {
         List<DomainDO> domainDOS = domainRepository.getDomainList();
         List<String> orgIds = Lists.newArrayList();
         log.info("orgIds:{},userName:{}", orgIds, userName);
-        return convertList(domainDOS).stream()
+        return convertList(domainDOS, new HashMap<>(), new HashMap<>()).stream()
                 .filter(domainDesc -> checkViewerPermission(orgIds, userName, domainDesc))
                 .collect(Collectors.toList());
     }
@@ -160,23 +177,23 @@ public class DomainServiceImpl implements DomainService {
     }
 
 
-    private List<DomainResp> convertList(List<DomainDO> domainDOS) {
+    private List<DomainResp> convertList(List<DomainDO> domainDOS, Map<Long, List<MetricResp>> metricDomainMap,
+            Map<Long, List<DimensionResp>> dimensionDomainMap) {
         List<DomainResp> domainDescs = Lists.newArrayList();
         if (CollectionUtils.isEmpty(domainDOS)) {
             return domainDescs;
         }
         Map<Long, String> fullDomainPathMap = getDomainFullPath();
+
         return domainDOS.stream()
-                .map(domainDO -> DomainConvert.convert(domainDO, fullDomainPathMap))
+                .map(domainDO -> DomainConvert.convert(domainDO, fullDomainPathMap, dimensionDomainMap,
+                        metricDomainMap))
                 .collect(Collectors.toList());
     }
 
 
-
-
     @Override
     public Map<Long, DomainResp> getDomainMap() {
-
         return getDomainList().stream().collect(Collectors.toMap(DomainResp::getId, a -> a, (k1, k2) -> k1));
     }
 

@@ -38,18 +38,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
+@Primary
 @Service("SemanticSchemaManager")
 public class SemanticSchemaManagerImpl implements SemanticSchemaManager {
 
-    @Autowired
-    private LoadingCache<String, SemanticModel> loadingCache;
-
     private final DatasourceService datasourceService;
     private final DomainService domainService;
+    @Autowired
+    private LoadingCache<String, SemanticModel> loadingCache;
 
 
     public SemanticSchemaManagerImpl(DatasourceService datasourceService,
@@ -58,61 +59,13 @@ public class SemanticSchemaManagerImpl implements SemanticSchemaManager {
         this.domainService = domainService;
     }
 
-
-    @Override
-    public SemanticModel reload(String rootPath) {
-        SemanticModel semanticModel = new SemanticModel();
-        semanticModel.setRootPath(rootPath);
-        Map<Long, String> domainFullPathMap = domainService.getDomainFullPath();
-        log.info("domainFullPathMap {}", domainFullPathMap);
-        Set<Long> domainIds = domainFullPathMap.entrySet().stream().filter(e -> e.getValue().startsWith(rootPath))
-                .map(e -> e.getKey()).collect(Collectors.toSet());
-        if (domainIds.isEmpty()) {
-            log.error("get domainId empty {}", rootPath);
-            return semanticModel;
-        }
-        Map<String, List<DimensionYamlTpl>> dimensionYamlTpls = new HashMap<>();
-        List<DatasourceYamlTpl> datasourceYamlTpls = new ArrayList<>();
-        List<MetricYamlTpl> metricYamlTpls = new ArrayList<>();
-        datasourceService.getModelYamlTplByDomainIds(domainIds, dimensionYamlTpls, datasourceYamlTpls, metricYamlTpls);
-        if (!datasourceYamlTpls.isEmpty()) {
-            Map<String, DataSource> dataSourceMap = datasourceYamlTpls.stream().map(d -> getDatasource(d))
-                    .collect(Collectors.toMap(DataSource::getName, item -> item));
-            semanticModel.setDatasourceMap(dataSourceMap);
-        }
-        if (!dimensionYamlTpls.isEmpty()) {
-            Map<String, List<Dimension>> dimensionMap = new HashMap<>();
-            for (Map.Entry<String, List<DimensionYamlTpl>> entry : dimensionYamlTpls.entrySet()) {
-                dimensionMap.put(entry.getKey(), getDimensions(entry.getValue()));
-            }
-            semanticModel.setDimensionMap(dimensionMap);
-        }
-        if (!metricYamlTpls.isEmpty()) {
-            semanticModel.setMetrics(getMetrics(metricYamlTpls));
-        }
-        return semanticModel;
-    }
-
-    //private Map<String, SemanticSchema> semanticSchemaMap = new HashMap<>();
-    @Override
-    public SemanticModel get(String rootPath) throws Exception {
-        rootPath = formatKey(rootPath);
-        SemanticModel schema = loadingCache.get(rootPath);
-        if (schema == null) {
-            return null;
-        }
-        return schema;
-    }
-
     public static List<Metric> getMetrics(final List<MetricYamlTpl> t) {
         return getMetricsByMetricYamlTpl(t);
     }
 
-
     public static List<Dimension> getDimensions(final List<DimensionYamlTpl> t) {
         return getDimension(t);
     }
-
 
     public static DataSource getDatasource(final DatasourceYamlTpl d) {
         DataSource datasource = new DataSource();
@@ -197,7 +150,6 @@ public class SemanticSchemaManagerImpl implements SemanticSchemaManager {
         return identifies;
     }
 
-
     public static void update(SemanticSchema schema, List<Metric> metric) throws Exception {
         if (schema != null) {
             updateMetric(metric, schema.getMetrics());
@@ -271,6 +223,51 @@ public class SemanticSchemaManagerImpl implements SemanticSchemaManager {
             key = key.substring(0, key.length() - 1);
         }
         return key;
+    }
+
+    @Override
+    public SemanticModel reload(String rootPath) {
+        SemanticModel semanticModel = new SemanticModel();
+        semanticModel.setRootPath(rootPath);
+        Map<Long, String> domainFullPathMap = domainService.getDomainFullPath();
+        log.info("domainFullPathMap {}", domainFullPathMap);
+        Set<Long> domainIds = domainFullPathMap.entrySet().stream().filter(e -> e.getValue().startsWith(rootPath))
+                .map(e -> e.getKey()).collect(Collectors.toSet());
+        if (domainIds.isEmpty()) {
+            log.error("get domainId empty {}", rootPath);
+            return semanticModel;
+        }
+        Map<String, List<DimensionYamlTpl>> dimensionYamlTpls = new HashMap<>();
+        List<DatasourceYamlTpl> datasourceYamlTpls = new ArrayList<>();
+        List<MetricYamlTpl> metricYamlTpls = new ArrayList<>();
+        datasourceService.getModelYamlTplByDomainIds(domainIds, dimensionYamlTpls, datasourceYamlTpls, metricYamlTpls);
+        if (!datasourceYamlTpls.isEmpty()) {
+            Map<String, DataSource> dataSourceMap = datasourceYamlTpls.stream().map(d -> getDatasource(d))
+                    .collect(Collectors.toMap(DataSource::getName, item -> item));
+            semanticModel.setDatasourceMap(dataSourceMap);
+        }
+        if (!dimensionYamlTpls.isEmpty()) {
+            Map<String, List<Dimension>> dimensionMap = new HashMap<>();
+            for (Map.Entry<String, List<DimensionYamlTpl>> entry : dimensionYamlTpls.entrySet()) {
+                dimensionMap.put(entry.getKey(), getDimensions(entry.getValue()));
+            }
+            semanticModel.setDimensionMap(dimensionMap);
+        }
+        if (!metricYamlTpls.isEmpty()) {
+            semanticModel.setMetrics(getMetrics(metricYamlTpls));
+        }
+        return semanticModel;
+    }
+
+    //private Map<String, SemanticSchema> semanticSchemaMap = new HashMap<>();
+    @Override
+    public SemanticModel get(String rootPath) throws Exception {
+        rootPath = formatKey(rootPath);
+        SemanticModel schema = loadingCache.get(rootPath);
+        if (schema == null) {
+            return null;
+        }
+        return schema;
     }
 
     @Configuration

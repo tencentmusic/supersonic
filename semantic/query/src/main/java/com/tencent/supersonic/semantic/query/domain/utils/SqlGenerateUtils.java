@@ -13,13 +13,6 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class SqlGenerateUtils {
 
-    public String getLimit(QueryStructReq queryStructCmd) {
-        if (queryStructCmd.getLimit() > 0) {
-            return " limit " + String.valueOf(queryStructCmd.getLimit());
-        }
-        return "";
-    }
-
     public static String getUnionSelect(QueryStructReq queryStructCmd) {
         StringBuilder sb = new StringBuilder();
         int locate = 0;
@@ -41,6 +34,12 @@ public class SqlGenerateUtils {
         return selectSql;
     }
 
+    public String getLimit(QueryStructReq queryStructCmd) {
+        if (queryStructCmd.getLimit() > 0) {
+            return " limit " + String.valueOf(queryStructCmd.getLimit());
+        }
+        return "";
+    }
 
     public String getSelect(QueryStructReq queryStructCmd) {
         String aggStr = queryStructCmd.getAggregators().stream().map(this::getSelectField)

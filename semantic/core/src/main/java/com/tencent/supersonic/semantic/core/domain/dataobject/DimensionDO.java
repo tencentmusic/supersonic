@@ -75,6 +75,16 @@ public class DimensionDO {
     private String semanticType;
 
     /**
+     *
+     */
+    private String alias;
+
+    /**
+     * default values of dimension when query
+     */
+    private String defaultValues;
+
+    /**
      * 类型参数
      */
     private String typeParams;
@@ -334,6 +344,38 @@ public class DimensionDO {
      */
     public void setSemanticType(String semanticType) {
         this.semanticType = semanticType == null ? null : semanticType.trim();
+    }
+
+    /**
+     * @return alias
+     */
+    public String getAlias() {
+        return alias;
+    }
+
+    /**
+     * @param alias
+     */
+    public void setAlias(String alias) {
+        this.alias = alias == null ? null : alias.trim();
+    }
+
+    /**
+     * default values of dimension when query
+     *
+     * @return default_values default values of dimension when query
+     */
+    public String getDefaultValues() {
+        return defaultValues;
+    }
+
+    /**
+     * default values of dimension when query
+     *
+     * @param defaultValues default values of dimension when query
+     */
+    public void setDefaultValues(String defaultValues) {
+        this.defaultValues = defaultValues == null ? null : defaultValues.trim();
     }
 
     /**

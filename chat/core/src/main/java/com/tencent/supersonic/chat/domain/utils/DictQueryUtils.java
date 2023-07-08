@@ -6,7 +6,7 @@ import static com.tencent.supersonic.common.constant.Constants.COMMA;
 import static com.tencent.supersonic.common.constant.Constants.UNDERLINE_DOUBLE;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.service.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.semantic.api.core.pojo.QueryColumn;
 import com.tencent.supersonic.semantic.api.core.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
@@ -19,6 +19,7 @@ import com.tencent.supersonic.common.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Order;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,9 +38,8 @@ import org.springframework.util.CollectionUtils;
 @Component
 public class DictQueryUtils {
 
-    private final SemanticLayer semanticLayer;
     Long frequencyMax = 99999999L;
-
+    private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
     @Value("${dimension.multi.value.split:#}")
     private String dimMultiValueSplit;
 
@@ -47,11 +48,6 @@ public class DictQueryUtils {
 
     @Value("${dimension.max.limit:3000000}")
     private Long dimMaxLimit;
-
-    public DictQueryUtils(SemanticLayer semanticLayer) {
-        this.semanticLayer = semanticLayer;
-    }
-
 
     public List<String> fetchDimValueSingle(Long domainId, DefaultMetric defaultMetricDesc, Dim4Dict dim4Dict,
             User user) {

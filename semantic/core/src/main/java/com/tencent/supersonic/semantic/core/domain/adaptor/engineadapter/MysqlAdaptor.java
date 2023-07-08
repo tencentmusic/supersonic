@@ -18,7 +18,7 @@ public class MysqlAdaptor extends EngineAdaptor {
             } else if (TimeDimensionEnum.WEEK.name().equalsIgnoreCase(dateType)) {
                 return "to_monday(from_unixtime(unix_timestamp(%s), 'yyyy-MM-dd'))".replace("%s", column);
             } else {
-                return "from_unixtime(unix_timestamp(%s), 'yyyy-MM-dd')".replace("%s", column);
+                return "date_format(str_to_date(%s, '%Y%m%d'),'%Y-%m-%d')".replace("%s", column);
             }
         } else if (dateFormat.equalsIgnoreCase(Constants.DAY_FORMAT)) {
             if (TimeDimensionEnum.MONTH.name().equalsIgnoreCase(dateType)) {
@@ -30,6 +30,23 @@ public class MysqlAdaptor extends EngineAdaptor {
             }
         }
         return column;
+    }
+
+
+    @Override
+    public String getDbMetaQueryTpl() {
+        return "select distinct TABLE_SCHEMA from information_schema.tables where TABLE_SCHEMA not in ('information_schema','mysql','performance_schema','sys');";
+    }
+
+    @Override
+    public String getTableMetaQueryTpl() {
+        return "select TABLE_NAME from information_schema.tables where TABLE_SCHEMA = '%s';";
+    }
+
+    @Override
+    public String getColumnMetaQueryTpl() {
+        return "SELECT COLUMN_NAME as name, DATA_TYPE as dataType, COLUMN_COMMENT as comment " +
+                "FROM information_schema.columns WHERE table_schema ='%s' AND  table_name = '%s'";
     }
 
 

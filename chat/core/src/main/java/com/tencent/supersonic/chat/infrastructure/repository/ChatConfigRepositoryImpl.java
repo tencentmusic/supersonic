@@ -12,10 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
 @Repository
+@Primary
 public class ChatConfigRepositoryImpl implements ChatConfigRepository {
 
     private final ChatConfigUtils chatConfigUtils;

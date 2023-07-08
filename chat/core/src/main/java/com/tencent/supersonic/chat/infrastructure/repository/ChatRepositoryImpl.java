@@ -37,6 +37,11 @@ public class ChatRepositoryImpl implements ChatRepository {
     }
 
     @Override
+    public Boolean updateLastQuestion(Long chatId, String lastQuestion, String lastTime) {
+        return chatMapper.updateLastQuestion(chatId, lastQuestion, lastTime);
+    }
+
+    @Override
     public Boolean updateConversionIsTop(Long chatId, int isTop) {
         return chatMapper.updateConversionIsTop(chatId, isTop);
     }

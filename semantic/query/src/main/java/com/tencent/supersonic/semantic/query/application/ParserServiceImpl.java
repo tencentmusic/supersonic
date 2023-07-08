@@ -12,6 +12,7 @@ import com.tencent.supersonic.semantic.query.domain.parser.dsl.SemanticModel;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -29,7 +30,6 @@ public class ParserServiceImpl implements ParserService {
         this.semanticSchemaManager = schemaManager;
         this.semanticSqlService = semanticSqlService;
     }
-
 
 
     @Override
@@ -107,6 +107,9 @@ public class ParserServiceImpl implements ParserService {
 
 
     private String formatWhere(String where) {
+        if (StringUtils.isEmpty(where)) {
+            return where;
+        }
         return where.replace("\"", "\\\\\"");
     }
 }

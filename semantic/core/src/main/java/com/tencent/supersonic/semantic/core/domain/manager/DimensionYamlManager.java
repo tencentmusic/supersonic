@@ -21,44 +21,6 @@ import org.springframework.util.CollectionUtils;
 public class DimensionYamlManager {
 
 
-    private YamlManager yamlManager;
-
-    public DimensionYamlManager(YamlManager yamlManager) {
-        this.yamlManager = yamlManager;
-    }
-
-
-    public void generateYamlFile(List<Dimension> dimensions, String fullPath, String datasourceBizName)
-            throws Exception {
-        String yamlStr = convert2YamlStr(dimensions, datasourceBizName);
-        log.info("generate yaml str :{} from metric:{} full path:{}", yamlStr, dimensions, fullPath);
-        yamlManager.generateYamlFile(yamlStr, fullPath, getYamlName(datasourceBizName));
-    }
-
-    public String getYamlName(String name) {
-        return String.format("%s_%s", name, TypeEnums.DIMENSION.getName());
-    }
-
-    public static String convert2YamlStr(List<Dimension> dimensions, String datasourceBizName) {
-        if (CollectionUtils.isEmpty(dimensions)) {
-            return "";
-        }
-        List<DimensionYamlTpl> dimensionYamlTpls = dimensions.stream()
-                .filter(dimension -> !dimension.getType().equalsIgnoreCase("primary"))
-                .map(DimensionConverter::convert2DimensionYamlTpl).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(dimensionYamlTpls)) {
-            return "";
-        }
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put("source", datasourceBizName);
-        dataMap.put("dimensions", dimensionYamlTpls);
-
-        Map<String, Object> rootMap = new HashMap<>();
-        rootMap.put("dimension", dataMap);
-        return YamlUtils.toYamlWithoutNull(rootMap);
-
-    }
-
     public static List<DimensionYamlTpl> convert2DimensionYaml(List<Dimension> dimensions) {
         if (CollectionUtils.isEmpty(dimensions)) {
             return new ArrayList<>();

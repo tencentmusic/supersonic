@@ -26,6 +26,10 @@ public class SemanticSchema extends AbstractSchema {
         this.tableMap = tableMap;
     }
 
+    public static Builder newBuilder(String rootPath) {
+        return new Builder(rootPath);
+    }
+
     public String getRootPath() {
         return rootPath;
     }
@@ -40,25 +44,20 @@ public class SemanticSchema extends AbstractSchema {
         return this;
     }
 
-    public static Builder newBuilder(String rootPath) {
-        return new Builder(rootPath);
+    public Map<String, DataSource> getDatasource() {
+        return semanticModel.getDatasourceMap();
     }
-
 
     public void setDatasource(Map<String, DataSource> datasource) {
         semanticModel.setDatasourceMap(datasource);
     }
 
-    public void setDimension(Map<String, List<Dimension>> dimensions) {
-        semanticModel.setDimensionMap(dimensions);
-    }
-
-    public Map<String, DataSource> getDatasource() {
-        return semanticModel.getDatasourceMap();
-    }
-
     public Map<String, List<Dimension>> getDimension() {
         return semanticModel.getDimensionMap();
+    }
+
+    public void setDimension(Map<String, List<Dimension>> dimensions) {
+        semanticModel.setDimensionMap(dimensions);
     }
 
     public List<Metric> getMetrics() {

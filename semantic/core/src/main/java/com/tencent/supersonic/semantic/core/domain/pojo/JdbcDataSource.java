@@ -29,42 +29,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class JdbcDataSource {
 
-    @Bean(name = "wallConfig")
-    WallConfig wallConfig() {
-        WallConfig config = new WallConfig();
-        config.setDeleteAllow(false);
-        config.setUpdateAllow(false);
-        config.setInsertAllow(false);
-        config.setReplaceAllow(false);
-        config.setMergeAllow(false);
-        config.setTruncateAllow(false);
-        config.setCreateTableAllow(false);
-        config.setAlterTableAllow(false);
-        config.setDropTableAllow(false);
-        config.setCommentAllow(true);
-        config.setUseAllow(false);
-        config.setDescribeAllow(false);
-        config.setShowAllow(false);
-        config.setSelectWhereAlwayTrueCheck(false);
-        config.setSelectHavingAlwayTrueCheck(false);
-        config.setSelectUnionCheck(false);
-        config.setConditionDoubleConstAllow(true);
-        config.setConditionAndAlwayTrueAllow(true);
-        config.setConditionAndAlwayFalseAllow(true);
-        return config;
-    }
-
-    @Bean(name = "wallFilter")
-    @DependsOn("wallConfig")
-    WallFilter wallFilter(WallConfig wallConfig) {
-        WallFilter wfilter = new WallFilter();
-        wfilter.setConfig(wallConfig);
-        return wfilter;
-    }
-
-    @Autowired
-    WallFilter wallFilter;
-
+    private static final Object lockLock = new Object();
+    private static volatile Map<String, DruidDataSource> dataSourceMap = new ConcurrentHashMap<>();
+    private static volatile Map<String, Lock> dataSourceLockMap = new ConcurrentHashMap<>();
     @Value("${source.lock-time:30}")
     @Getter
     protected Long lockTime;
@@ -136,10 +103,41 @@ public class JdbcDataSource {
     @Value("${source.filters:'stat'}")
     @Getter
     protected String filters;
+    @Autowired
+    WallFilter wallFilter;
 
-    private static volatile Map<String, DruidDataSource> dataSourceMap = new ConcurrentHashMap<>();
-    private static volatile Map<String, Lock> dataSourceLockMap = new ConcurrentHashMap<>();
-    private static final Object lockLock = new Object();
+    @Bean(name = "wallConfig")
+    WallConfig wallConfig() {
+        WallConfig config = new WallConfig();
+        config.setDeleteAllow(false);
+        config.setUpdateAllow(false);
+        config.setInsertAllow(false);
+        config.setReplaceAllow(false);
+        config.setMergeAllow(false);
+        config.setTruncateAllow(false);
+        config.setCreateTableAllow(false);
+        config.setAlterTableAllow(false);
+        config.setDropTableAllow(false);
+        config.setCommentAllow(true);
+        config.setUseAllow(false);
+        config.setDescribeAllow(false);
+        config.setShowAllow(false);
+        config.setSelectWhereAlwayTrueCheck(false);
+        config.setSelectHavingAlwayTrueCheck(false);
+        config.setSelectUnionCheck(false);
+        config.setConditionDoubleConstAllow(true);
+        config.setConditionAndAlwayTrueAllow(true);
+        config.setConditionAndAlwayFalseAllow(true);
+        return config;
+    }
+
+    @Bean(name = "wallFilter")
+    @DependsOn("wallConfig")
+    WallFilter wallFilter(WallConfig wallConfig) {
+        WallFilter wfilter = new WallFilter();
+        wfilter.setConfig(wallConfig);
+        return wfilter;
+    }
 
     private Lock getDataSourceLock(String key) {
         if (dataSourceLockMap.containsKey(key)) {

@@ -12,6 +12,8 @@ public interface ChatRepository {
 
     Boolean updateChatName(Long chatId, String chatName, String lastTime, String creator);
 
+    Boolean updateLastQuestion(Long chatId, String lastQuestion, String lastTime);
+
     Boolean updateConversionIsTop(Long chatId, int isTop);
 
     boolean updateFeedback(QueryDO queryDO);

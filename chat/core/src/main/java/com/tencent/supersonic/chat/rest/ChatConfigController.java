@@ -43,16 +43,16 @@ public class ChatConfigController {
 
     @PostMapping
     public Long addChatConfig(@RequestBody ChatConfigBase extendBaseCmd,
-                              HttpServletRequest request,
-                              HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return configService.addConfig(extendBaseCmd, user);
     }
 
     @PutMapping
     public Long editDomainExtend(@RequestBody ChatConfigEditReq extendEditCmd,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return configService.editConfig(extendEditCmd, user);
     }
@@ -60,8 +60,8 @@ public class ChatConfigController {
 
     @PostMapping("/search")
     public List<ChatConfigInfo> search(@RequestBody ChatConfigFilter filter,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return configService.search(filter, user);
     }
@@ -72,6 +72,11 @@ public class ChatConfigController {
         return configService.getConfigRichInfo(domainId);
     }
 
+    @GetMapping("/richDesc/all")
+    public List<ChatConfigRichInfo> getAllChatRichConfig() {
+        return configService.getAllChatRichConfig();
+    }
+
 
     /**
      * get domain list
@@ -79,24 +84,22 @@ public class ChatConfigController {
      * @param
      */
     @GetMapping("/domainList")
-    public List<DomainResp> getDomainList(HttpServletRequest request,
-                                          HttpServletResponse response) {
-        User user = UserHolder.findUser(request, response);
-        return defaultSemanticUtils.getDomainListForUser(user);
+    public List<DomainResp> getDomainList() {
+        return defaultSemanticUtils.getDomainListForAdmin();
     }
 
     @PostMapping("/dimension/page")
     public PageInfo<DimensionResp> queryDimension(@RequestBody PageDimensionReq pageDimensionCmd,
-                                                  HttpServletRequest request,
-                                                  HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return defaultSemanticUtils.queryDimensionPage(pageDimensionCmd, user);
     }
 
     @PostMapping("/metric/page")
     public PageInfo<MetricResp> queryMetric(@RequestBody PageMetricReq pageMetrricCmd,
-                                            HttpServletRequest request,
-                                            HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return defaultSemanticUtils.queryMetricPage(pageMetrricCmd, user);
     }

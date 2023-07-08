@@ -3,6 +3,7 @@ package com.tencent.supersonic.semantic.core.domain.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.semantic.api.core.enums.MetricTypeEnum;
 import com.tencent.supersonic.semantic.api.core.pojo.DatasourceDetail;
 import com.tencent.supersonic.semantic.api.core.pojo.Dim;
 import com.tencent.supersonic.semantic.api.core.pojo.Identify;
@@ -111,16 +112,17 @@ public class DatasourceConverter {
 
     public static MetricReq convert(Measure measure, Datasource datasource) {
         measure.setDatasourceId(datasource.getId());
-        MetricReq exprMetricReq = new MetricReq();
-        exprMetricReq.setName(measure.getName());
-        exprMetricReq.setBizName(measure.getBizName().replace(datasource.getBizName() + "_", ""));
-        exprMetricReq.setDescription(measure.getName());
-        exprMetricReq.setDomainId(datasource.getDomainId());
+        MetricReq metricReq = new MetricReq();
+        metricReq.setName(measure.getName());
+        metricReq.setBizName(measure.getBizName().replace(datasource.getBizName() + "_", ""));
+        metricReq.setDescription(measure.getName());
+        metricReq.setDomainId(datasource.getDomainId());
+        metricReq.setMetricType(MetricTypeEnum.ATOMIC);
         MetricTypeParams exprTypeParams = new MetricTypeParams();
         exprTypeParams.setExpr(measure.getBizName());
         exprTypeParams.setMeasures(Lists.newArrayList(measure));
-        exprMetricReq.setTypeParams(exprTypeParams);
-        return exprMetricReq;
+        metricReq.setTypeParams(exprTypeParams);
+        return metricReq;
     }
 
     public static DimensionReq convert(Identify identify, Datasource datasource) {

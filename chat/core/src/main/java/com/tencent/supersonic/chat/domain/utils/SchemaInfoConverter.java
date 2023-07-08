@@ -20,15 +20,19 @@ import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
 import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
+import com.tencent.supersonic.semantic.api.query.request.QuerySqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
 public class SchemaInfoConverter {
@@ -65,6 +69,23 @@ public class SchemaInfoConverter {
         queryStructCmd.setAggregators(getAggregatorByMetric(parseInfo.getMetrics(), parseInfo.getAggType()));
         return queryStructCmd;
     }
+
+
+    /***
+     * convert to QuerySqlReq
+     * @param parseInfo
+     * @return
+     */
+    public static QuerySqlReq convertToQuerySqlReq(SemanticParseInfo parseInfo) {
+        QuerySqlReq querySqlReq = new QuerySqlReq();
+        Object info = parseInfo.getInfo();
+        if (Objects.nonNull(info)) {
+            querySqlReq.setSql(info.toString());
+        }
+        querySqlReq.setDomainId(parseInfo.getDomainId());
+        return querySqlReq;
+    }
+
 
     private static List<Aggregator> getAggregatorByMetric(Set<SchemaItem> metrics, AggregateTypeEnum aggregateType) {
         List<Aggregator> aggregators = new ArrayList<>();
@@ -131,6 +152,7 @@ public class SchemaInfoConverter {
             domainDO.setName(domainSchemaDesc.getName());
             domainDO.setItemId(domain);
             result.getDomains().add(domainDO);
+            domainDO.setBizName(domainSchemaDesc.getBizName());
             // entity
             List<String> entityNames = domainSchemaDesc.getEntityNames();
             if (!CollectionUtils.isEmpty(entityNames)) {
@@ -149,7 +171,16 @@ public class SchemaInfoConverter {
                 metricDO.setName(metric.getName());
                 metricDO.setItemId(Math.toIntExact(metric.getId()));
                 metricDO.setUseCnt(metric.getUseCnt());
+                metricDO.setBizName(metric.getBizName());
                 result.getMetrics().add(metricDO);
+
+                String metricAlias = metric.getAlias();
+                if (StringUtils.isNotEmpty(metricAlias)) {
+                    ItemDO aliasMetricDO = new ItemDO();
+                    BeanUtils.copyProperties(metricDO, aliasMetricDO);
+                    aliasMetricDO.setName(metricAlias);
+                    result.getMetrics().add(aliasMetricDO);
+                }
             }
             // dimension
             for (DimSchemaResp dimension : domainSchemaDesc.getDimensions()) {
@@ -158,7 +189,16 @@ public class SchemaInfoConverter {
                 dimensionDO.setName(dimension.getName());
                 dimensionDO.setItemId(Math.toIntExact(dimension.getId()));
                 dimensionDO.setUseCnt(dimension.getUseCnt());
+                dimensionDO.setBizName(dimension.getBizName());
                 result.getDimensions().add(dimensionDO);
+
+                String dimensionAlias = dimension.getAlias();
+                if (StringUtils.isNotEmpty(dimensionAlias)) {
+                    ItemDO aliasDimensionDO = new ItemDO();
+                    BeanUtils.copyProperties(dimensionDO, aliasDimensionDO);
+                    aliasDimensionDO.setName(dimensionAlias);
+                    result.getDimensions().add(aliasDimensionDO);
+                }
             }
         }
         return result;

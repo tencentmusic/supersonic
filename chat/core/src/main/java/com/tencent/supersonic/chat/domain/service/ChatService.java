@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.domain.service;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.request.QueryContextReq;
 import com.tencent.supersonic.chat.api.response.QueryResultResp;
 import com.tencent.supersonic.chat.domain.dataobject.ChatDO;
@@ -23,6 +24,8 @@ public interface ChatService {
     public ChatContext getOrCreateContext(int chatId);
 
     public void updateContext(ChatContext chatCtx);
+
+    public void updateContext(ChatContext chatCtx, QueryContextReq queryCtx, SemanticParseInfo semanticParseInfo);
 
     public void switchContext(ChatContext chatCtx);
 

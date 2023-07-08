@@ -12,10 +12,6 @@ public enum QueryTypeEnum {
         this.value = value;
     }
 
-    public String getValue() {
-        return value;
-    }
-
     public static QueryTypeEnum of(String src) {
         for (QueryTypeEnum operatorEnum : QueryTypeEnum.values()) {
             if (src.toUpperCase().contains(operatorEnum.value)) {
@@ -23,6 +19,10 @@ public enum QueryTypeEnum {
             }
         }
         return null;
+    }
+
+    public String getValue() {
+        return value;
     }
 
 

@@ -59,5 +59,24 @@ public class DatabaseController {
         return databaseService.executeSql(sqlExecuteReq.getSql(), sqlExecuteReq.getDomainId());
     }
 
+    @RequestMapping("/getDbNames/{id}")
+    public QueryResultWithSchemaResp getDbNames(@PathVariable("id") Long id) {
+        return databaseService.getDbNames(id);
+    }
+
+    @RequestMapping("/getTables/{id}/{db}")
+    public QueryResultWithSchemaResp getTables(@PathVariable("id") Long id,
+            @PathVariable("db") String db) {
+        return databaseService.getTables(id, db);
+    }
+
+
+    @RequestMapping("/getColumns/{id}/{db}/{table}")
+    public QueryResultWithSchemaResp getColumns(@PathVariable("id") Long id,
+            @PathVariable("db") String db,
+            @PathVariable("table") String table) {
+        return databaseService.getColumns(id, db, table);
+    }
+
 
 }

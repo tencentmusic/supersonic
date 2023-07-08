@@ -2,7 +2,7 @@
 
 sbinDir=$(cd "$(dirname "$0")"; pwd)
 baseDir=$(readlink -f $sbinDir/../)
-runtimeDir=$baseDir/runtime
+runtimeDir=$baseDir/../runtime
 buildDir=$baseDir/build
 
 cd $baseDir

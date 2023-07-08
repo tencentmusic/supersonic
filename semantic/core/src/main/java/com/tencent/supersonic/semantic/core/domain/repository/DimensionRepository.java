@@ -18,6 +18,8 @@ public interface DimensionRepository {
 
     List<DimensionDO> getDimensionListOfDomain(Long domainId);
 
+    List<DimensionDO> getDimensionList();
+
     List<DimensionDO> getDimensionListByIds(List<Long> ids);
 
     DimensionDO getDimensionById(Long id);

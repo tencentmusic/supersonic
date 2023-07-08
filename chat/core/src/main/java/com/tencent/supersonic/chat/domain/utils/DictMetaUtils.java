@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.domain.utils;
 import static com.tencent.supersonic.common.constant.Constants.DAY;
 import static com.tencent.supersonic.common.constant.Constants.UNDERLINE;
 
-import com.tencent.supersonic.chat.api.service.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
 import com.tencent.supersonic.chat.domain.dataobject.DimValueDO;
@@ -32,15 +32,12 @@ import org.springframework.util.CollectionUtils;
 @Component
 public class DictMetaUtils {
 
+    private final DefaultSemanticInternalUtils defaultSemanticUtils;
     @Value("${model.internal.metric.suffix:internal_cnt}")
     private String internalMetricNameSuffix;
+    private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
 
-    private final SemanticLayer semanticLayer;
-    private final DefaultSemanticInternalUtils defaultSemanticUtils;
-
-    public DictMetaUtils(SemanticLayer semanticLayer,
-                         DefaultSemanticInternalUtils defaultSemanticUtils) {
-        this.semanticLayer = semanticLayer;
+    public DictMetaUtils(DefaultSemanticInternalUtils defaultSemanticUtils) {
         this.defaultSemanticUtils = defaultSemanticUtils;
     }
 
@@ -131,7 +128,7 @@ public class DictMetaUtils {
     }
 
     private void fillDimValueDOList(List<DimValueDO> dimValueDOList, Long domainId,
-                                    Map<Long, DimSchemaResp> dimIdAndDescPair) {
+            Map<Long, DimSchemaResp> dimIdAndDescPair) {
         ChatConfigRichInfo chaConfigRichDesc = defaultSemanticUtils.getChatConfigRichInfo(domainId);
         if (Objects.nonNull(chaConfigRichDesc)) {
 

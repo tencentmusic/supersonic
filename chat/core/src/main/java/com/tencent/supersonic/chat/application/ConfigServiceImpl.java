@@ -2,9 +2,7 @@ package com.tencent.supersonic.chat.application;
 
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.service.SemanticLayer;
-import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
+import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.domain.pojo.config.ChatConfig;
 import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigBase;
 import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigEditReq;
@@ -14,14 +12,22 @@ import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichInfo;
 import com.tencent.supersonic.chat.domain.pojo.config.DefaultMetric;
 import com.tencent.supersonic.chat.domain.pojo.config.EntityRichInfo;
 import com.tencent.supersonic.chat.domain.pojo.config.ItemVisibilityInfo;
+import com.tencent.supersonic.chat.domain.pojo.config.KnowledgeInfo;
 import com.tencent.supersonic.chat.domain.repository.ChatConfigRepository;
 import com.tencent.supersonic.chat.domain.service.ConfigService;
 import com.tencent.supersonic.chat.domain.utils.ChatConfigUtils;
+import com.tencent.supersonic.chat.domain.utils.ComponentFactory;
+import com.tencent.supersonic.chat.domain.utils.DefaultSemanticInternalUtils;
 import com.tencent.supersonic.common.util.json.JsonUtil;
+import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
+import com.tencent.supersonic.semantic.api.core.response.DomainResp;
+import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
+import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -35,15 +41,16 @@ import org.springframework.util.CollectionUtils;
 public class ConfigServiceImpl implements ConfigService {
 
     private final ChatConfigRepository chaConfigRepository;
-    private final SemanticLayer semanticLayer;
     private final ChatConfigUtils chatConfigUtils;
+    private final DefaultSemanticInternalUtils defaultSemanticUtils;
+
 
     public ConfigServiceImpl(ChatConfigRepository chaConfigRepository,
-            @Lazy SemanticLayer semanticLayer,
-            ChatConfigUtils chatConfigUtils) {
+            ChatConfigUtils chatConfigUtils,
+            @Lazy DefaultSemanticInternalUtils defaultSemanticUtils) {
         this.chaConfigRepository = chaConfigRepository;
-        this.semanticLayer = semanticLayer;
         this.chatConfigUtils = chatConfigUtils;
+        this.defaultSemanticUtils = defaultSemanticUtils;
     }
 
     @Override
@@ -101,19 +108,19 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     public EntityRichInfo fetchEntityDescByDomainId(Long domainId) {
-
+        SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
         ChatConfigInfo chaConfigDesc = chaConfigRepository.getConfigByDomainId(domainId);
-        return fetchEntityDescByConfig(chaConfigDesc);
+        DomainSchemaResp domainSchemaDesc = semanticLayer.getDomainSchemaInfo(domainId);
+        return fetchEntityDescByConfig(chaConfigDesc, domainSchemaDesc);
     }
 
-    public EntityRichInfo fetchEntityDescByConfig(ChatConfigInfo chatConfigDesc) {
+    public EntityRichInfo fetchEntityDescByConfig(ChatConfigInfo chatConfigDesc, DomainSchemaResp domain) {
         Long domainId = chatConfigDesc.getDomainId();
         EntityRichInfo entityDesc = new EntityRichInfo();
         if (Objects.isNull(chatConfigDesc) || Objects.isNull(chatConfigDesc.getEntity())) {
             log.info("domainId:{}, entityDesc info is null", domainId);
             return entityDesc;
         }
-        DomainSchemaResp domain = semanticLayer.getDomainSchemaInfo(domainId);
 
         entityDesc.setDomainId(domain.getId());
         entityDesc.setDomainBizName(domain.getBizName());
@@ -128,13 +135,14 @@ public class ConfigServiceImpl implements ConfigService {
 
 
     public List<DefaultMetric> fetchDefaultMetricDescByDomainId(Long domainId) {
+        SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
         ChatConfigInfo chatConfigDesc = chaConfigRepository.getConfigByDomainId(domainId);
-        return fetchDefaultMetricDescByConfig(chatConfigDesc);
+        DomainSchemaResp domainSchemaDesc = semanticLayer.getDomainSchemaInfo(domainId);
+        return fetchDefaultMetricDescByConfig(chatConfigDesc, domainSchemaDesc);
     }
 
-    public List<DefaultMetric> fetchDefaultMetricDescByConfig(ChatConfigInfo chatConfigDesc) {
+    public List<DefaultMetric> fetchDefaultMetricDescByConfig(ChatConfigInfo chatConfigDesc, DomainSchemaResp domain) {
         Long domainId = chatConfigDesc.getDomainId();
-        DomainSchemaResp domain = semanticLayer.getDomainSchemaInfo(domainId);
         List<DefaultMetric> defaultMetricDescList = new ArrayList<>();
         if (Objects.isNull(chatConfigDesc) || CollectionUtils.isEmpty(chatConfigDesc.getDefaultMetrics())) {
             log.info("domainId:{}, defaultMetricDescList info is null", domainId);
@@ -158,14 +166,17 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     public ItemVisibilityInfo fetchVisibilityDescByDomainId(Long domainId) {
+        SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
         ChatConfigInfo chatConfigDesc = chaConfigRepository.getConfigByDomainId(domainId);
-        return fetchVisibilityDescByConfig(chatConfigDesc);
+        DomainSchemaResp domainSchemaDesc = semanticLayer.getDomainSchemaInfo(domainId);
+        return fetchVisibilityDescByConfig(chatConfigDesc, domainSchemaDesc);
     }
 
-    private ItemVisibilityInfo fetchVisibilityDescByConfig(ChatConfigInfo chatConfigDesc) {
+    private ItemVisibilityInfo fetchVisibilityDescByConfig(ChatConfigInfo chatConfigDesc,
+            DomainSchemaResp domainSchemaDesc) {
         ItemVisibilityInfo itemVisibilityDesc = new ItemVisibilityInfo();
         Long domainId = chatConfigDesc.getDomainId();
-        DomainSchemaResp domainSchemaDesc = semanticLayer.getDomainSchemaInfo(domainId);
+
         List<Long> dimIdAllList = chatConfigUtils.generateAllDimIdList(domainSchemaDesc);
         List<Long> metricIdAllList = chatConfigUtils.generateAllMetricIdList(domainSchemaDesc);
 
@@ -194,18 +205,65 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public ChatConfigRichInfo getConfigRichInfo(Long domainId) {
+        SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
         ChatConfigRichInfo chaConfigRichDesc = new ChatConfigRichInfo();
         ChatConfigInfo chatConfigDesc = chaConfigRepository.getConfigByDomainId(domainId);
+        if (Objects.isNull(chatConfigDesc)) {
+            log.info("there is no chatConfigDesc for domainId:{}", domainId);
+            return chaConfigRichDesc;
+        }
         BeanUtils.copyProperties(chatConfigDesc, chaConfigRichDesc);
 
-        DomainSchemaResp domainSchemaDesc = semanticLayer.getDomainSchemaInfo(domainId);
-        chaConfigRichDesc.setBizName(domainSchemaDesc.getBizName());
-        chaConfigRichDesc.setName(domainSchemaDesc.getName());
+        DomainSchemaResp domainSchemaInfo = semanticLayer.getDomainSchemaInfo(domainId);
+        chaConfigRichDesc.setBizName(domainSchemaInfo.getBizName());
+        chaConfigRichDesc.setName(domainSchemaInfo.getName());
 
-        chaConfigRichDesc.setDefaultMetrics(fetchDefaultMetricDescByConfig(chatConfigDesc));
-        chaConfigRichDesc.setVisibility(fetchVisibilityDescByConfig(chatConfigDesc));
-        chaConfigRichDesc.setEntity(fetchEntityDescByConfig(chatConfigDesc));
+        chaConfigRichDesc.setKnowledgeInfos(
+                fillKnowledgeBizName(chaConfigRichDesc.getKnowledgeInfos(), domainSchemaInfo));
+        chaConfigRichDesc.setDefaultMetrics(fetchDefaultMetricDescByConfig(chatConfigDesc, domainSchemaInfo));
+        chaConfigRichDesc.setVisibility(fetchVisibilityDescByConfig(chatConfigDesc, domainSchemaInfo));
+        chaConfigRichDesc.setEntity(fetchEntityDescByConfig(chatConfigDesc, domainSchemaInfo));
 
         return chaConfigRichDesc;
+    }
+
+    private List<KnowledgeInfo> fillKnowledgeBizName(List<KnowledgeInfo> knowledgeInfos,
+            DomainSchemaResp domainSchemaInfo) {
+        if (CollectionUtils.isEmpty(knowledgeInfos)) {
+            return new ArrayList<>();
+        }
+        Map<Long, DimSchemaResp> dimIdAndRespPair = domainSchemaInfo.getDimensions().stream()
+                .collect(Collectors.toMap(DimSchemaResp::getId, Function.identity()));
+        knowledgeInfos.stream().forEach(knowledgeInfo -> {
+            if (Objects.nonNull(knowledgeInfo)) {
+                DimSchemaResp dimSchemaResp = dimIdAndRespPair.get(knowledgeInfo.getItemId());
+                if (Objects.nonNull(dimSchemaResp)) {
+                    knowledgeInfo.setBizName(dimSchemaResp.getBizName());
+                }
+                if (CollectionUtils.isEmpty(knowledgeInfo.getBlackList())) {
+                    knowledgeInfo.setBlackList(new ArrayList<>());
+                }
+                if (CollectionUtils.isEmpty(knowledgeInfo.getRuleList())) {
+                    knowledgeInfo.setRuleList(new ArrayList<>());
+                }
+                if (CollectionUtils.isEmpty(knowledgeInfo.getWhiteList())) {
+                    knowledgeInfo.setWhiteList(new ArrayList<>());
+                }
+            }
+        });
+        return knowledgeInfos;
+    }
+
+    @Override
+    public List<ChatConfigRichInfo> getAllChatRichConfig() {
+        List<ChatConfigRichInfo> chatConfigRichInfoList = new ArrayList<>();
+        List<DomainResp> domainRespList = defaultSemanticUtils.getDomainListForAdmin();
+        domainRespList.stream().forEach(domainResp -> {
+            ChatConfigRichInfo chatConfigRichInfo = getConfigRichInfo(domainResp.getId());
+            if (Objects.nonNull(chatConfigRichInfo)) {
+                chatConfigRichInfoList.add(chatConfigRichInfo);
+            }
+        });
+        return chatConfigRichInfoList;
     }
 }

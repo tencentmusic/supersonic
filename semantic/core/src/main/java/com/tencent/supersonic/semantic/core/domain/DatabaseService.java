@@ -24,4 +24,9 @@ public interface DatabaseService {
 
     QueryResultWithSchemaResp queryWithColumns(SqlParserResp sqlParser);
 
+    QueryResultWithSchemaResp getDbNames(Long id);
+
+    QueryResultWithSchemaResp getTables(Long id, String db);
+
+    QueryResultWithSchemaResp getColumns(Long id, String db, String table);
 }

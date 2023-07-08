@@ -13,6 +13,8 @@ public interface DimensionService {
 
     List<DimensionResp> getDimensions(Long domainId);
 
+    List<DimensionResp> getDimensions();
+
     DimensionResp getDimension(String bizName, Long domainId);
 
     void createDimension(DimensionReq dimensionReq, User user) throws Exception;

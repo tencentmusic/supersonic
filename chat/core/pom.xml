@@ -113,6 +113,12 @@
             <artifactId>semantic-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.tencent.supersonic</groupId>-->
+<!--            <artifactId>semantic-query</artifactId>-->
+<!--            <version>${project.version}</version>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
             <artifactId>semantic-query</artifactId>
@@ -122,6 +128,12 @@
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
             <artifactId>chat-api</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tencent.supersonic</groupId>
+            <artifactId>semantic-query</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>

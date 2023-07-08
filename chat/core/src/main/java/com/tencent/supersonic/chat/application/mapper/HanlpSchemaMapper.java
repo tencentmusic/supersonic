@@ -1,17 +1,17 @@
 package com.tencent.supersonic.chat.application.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
+import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.request.QueryContextReq;
-import com.tencent.supersonic.chat.api.service.SchemaMapper;
 import com.tencent.supersonic.chat.application.knowledge.NatureHelper;
+import com.tencent.supersonic.chat.domain.pojo.search.MatchText;
 import com.tencent.supersonic.chat.domain.utils.NatureConverter;
 import com.tencent.supersonic.common.nlp.MapResult;
 import com.tencent.supersonic.common.nlp.NatureType;
 import com.tencent.supersonic.common.util.context.ContextUtils;
-import com.tencent.supersonic.common.util.json.JsonUtil;
 import com.tencent.supersonic.knowledge.application.online.BaseWordNature;
 import com.tencent.supersonic.knowledge.application.online.WordNatureStrategyFactory;
 import com.tencent.supersonic.knowledge.infrastructure.nlp.HanlpHelper;
@@ -19,14 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class HanlpSchemaMapper implements SchemaMapper {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(HanlpSchemaMapper.class);
 
     @Override
     public void map(QueryContextReq queryContext) {
@@ -35,22 +34,37 @@ public class HanlpSchemaMapper implements SchemaMapper {
                 .collect(Collectors.toList());
 
         terms.forEach(
-                item -> LOGGER.info("word:{},nature:{},frequency:{}", item.word, item.nature.toString(),
+                item -> log.info("word:{},nature:{},frequency:{}", item.word, item.nature.toString(),
                         item.getFrequency())
         );
         QueryMatchStrategy matchStrategy = ContextUtils.getBean(QueryMatchStrategy.class);
 
-        List<MapResult> matches = matchStrategy.match(queryContext.getQueryText(), terms, queryContext.getDomainId());
+        Map<MatchText, List<MapResult>> matchResult = matchStrategy.match(queryContext.getQueryText(), terms,
+                queryContext.getDomainId());
+        List<MapResult> matches = new ArrayList<>();
+        if (Objects.nonNull(matchResult)) {
+            Optional<List<MapResult>> first = matchResult.entrySet().stream()
+                    .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
+                    .map(entry -> entry.getValue()).findFirst();
+            if (first.isPresent()) {
+                matches = first.get();
+            }
+        }
         HanlpHelper.transLetterOriginal(matches);
-        LOGGER.info("queryContext:{},matches:{}", queryContext, matches);
+        log.info("queryContext:{},matches:{}", queryContext, matches);
 
-        convertTermsToSchemaMapInfo(matches, queryContext.getMapInfo());
+        convertTermsToSchemaMapInfo(matches, queryContext.getMapInfo(), terms);
     }
 
-    private void convertTermsToSchemaMapInfo(List<MapResult> mapResults, SchemaMapInfo schemaMap) {
+    private void convertTermsToSchemaMapInfo(List<MapResult> mapResults, SchemaMapInfo schemaMap, List<Term> terms) {
         if (CollectionUtils.isEmpty(mapResults)) {
             return;
         }
+
+        Map<String, Long> wordNatureToFrequency = terms.stream().collect(
+                Collectors.toMap(entry -> entry.getWord() + entry.getNature(),
+                        term -> Long.valueOf(term.getFrequency()), (value1, value2) -> value2));
+
         for (MapResult mapResult : mapResults) {
             for (String nature : mapResult.getNatures()) {
                 Integer domain = NatureHelper.getDomain(nature);
@@ -61,17 +75,18 @@ public class HanlpSchemaMapper implements SchemaMapper {
                 if (Objects.isNull(elementType)) {
                     continue;
                 }
-                SchemaElementMatch schemaElementMatch = new SchemaElementMatch();
 
-                schemaElementMatch.setElementType(elementType);
                 BaseWordNature baseWordNature = WordNatureStrategyFactory.get(NatureType.getNatureType(nature));
                 Integer elementID = baseWordNature.getElementID(nature);
-                schemaElementMatch.setElementID(elementID);
-                Long frequency = baseWordNature.getFrequency(nature);
-                schemaElementMatch.setFrequency(frequency);
-                schemaElementMatch.setWord(mapResult.getName());
-                schemaElementMatch.setSimilarity(mapResult.getSimilarity());
-                schemaElementMatch.setDetectWord(mapResult.getDetectWord());
+                Long frequency = wordNatureToFrequency.get(mapResult.getName() + nature);
+                SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
+                        .elementType(elementType)
+                        .elementID(elementID)
+                        .frequency(frequency)
+                        .word(mapResult.getName())
+                        .similarity(mapResult.getSimilarity())
+                        .detectWord(mapResult.getDetectWord())
+                        .build();
 
                 Map<Integer, List<SchemaElementMatch>> domainElementMatches = schemaMap.getDomainElementMatches();
                 List<SchemaElementMatch> schemaElementMatches = domainElementMatches.putIfAbsent(domain,

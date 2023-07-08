@@ -1,14 +1,16 @@
 package com.tencent.supersonic.chat.test.context;
 
+import com.tencent.supersonic.chat.domain.utils.ComponentFactory;
 import com.tencent.supersonic.chat.infrastructure.mapper.ChatContextMapper;
 import com.tencent.supersonic.chat.infrastructure.repository.ChatContextRepositoryImpl;
-import com.tencent.supersonic.chat.infrastructure.semantic.DefaultSemanticLayerImpl;
+import com.tencent.supersonic.chat.infrastructure.semantic.RemoteSemanticLayerImpl;
 import com.tencent.supersonic.chat.test.ChatBizLauncher;
 import com.tencent.supersonic.semantic.core.domain.DimensionService;
 import com.tencent.supersonic.semantic.core.domain.DomainService;
 import com.tencent.supersonic.semantic.core.domain.MetricService;
 import com.tencent.supersonic.semantic.query.domain.QueryService;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +25,8 @@ import org.springframework.web.client.RestTemplate;
 @MockBean(DomainService.class)
 @MockBean(ChatContextMapper.class)
 @MockBean(RestTemplate.class)
-@MockBean(DefaultSemanticLayerImpl.class)
+@MockBean(RemoteSemanticLayerImpl.class)
+@MockBean(ComponentFactory.class)
 //@MybatisTest
 //@AutoConfigureMybatis
 //@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)

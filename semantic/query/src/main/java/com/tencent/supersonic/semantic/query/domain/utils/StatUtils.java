@@ -25,11 +25,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class StatUtils {
 
+    private static final TransmittableThreadLocal<QueryStat> STATS = new TransmittableThreadLocal<>();
     private final StatRepository statRepository;
     private final SqlFilterUtils sqlFilterUtils;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    private static final TransmittableThreadLocal<QueryStat> STATS = new TransmittableThreadLocal<>();
 
     public StatUtils(StatRepository statRepository,
             SqlFilterUtils sqlFilterUtils) {

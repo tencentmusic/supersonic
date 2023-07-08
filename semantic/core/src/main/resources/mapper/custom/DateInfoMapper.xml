@@ -32,16 +32,23 @@
     </insert>
 
     <select id="getDateInfos" resultMap="BaseResultMap">
-        select *
+        select e.*
+        from s2_available_date_info e
+        inner join
+        (
+        select item_id, max(created_at) as created_at
         from s2_available_date_info
         where `type` = #{type}
         <if test="itemIds != null and itemIds.size >0">
             and item_id in
             <foreach collection="itemIds" index="index" item="item" open="(" close=")"
-                    separator=",">
+                     separator=",">
                 #{item}
             </foreach>
         </if>
+        group by item_id
+        ) t
+        on e.item_id=t.item_id and e.created_at=t.created_at
     </select>
 </mapper>
 

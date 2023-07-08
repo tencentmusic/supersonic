@@ -4,12 +4,15 @@ package com.tencent.supersonic.semantic.core.domain.utils;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.semantic.api.core.request.DomainReq;
+import com.tencent.supersonic.semantic.api.core.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.core.response.DomainResp;
 import com.tencent.supersonic.common.enums.StatusEnum;
+import com.tencent.supersonic.semantic.api.core.response.MetricResp;
 import com.tencent.supersonic.semantic.core.domain.dataobject.DomainDO;
 import com.tencent.supersonic.semantic.core.domain.pojo.Domain;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -38,18 +41,26 @@ public class DomainConvert {
     }
 
     public static DomainResp convert(DomainDO domainDO, Map<Long, String> domainFullPathMap) {
-        DomainResp domainDesc = new DomainResp();
-        BeanUtils.copyProperties(domainDO, domainDesc);
-        domainDesc.setFullPath(domainFullPathMap.get(domainDO.getId()));
-        domainDesc.setAdmins(StringUtils.isBlank(domainDO.getAdmin())
+        DomainResp domainResp = new DomainResp();
+        BeanUtils.copyProperties(domainDO, domainResp);
+        domainResp.setFullPath(domainFullPathMap.get(domainDO.getId()));
+        domainResp.setAdmins(StringUtils.isBlank(domainDO.getAdmin())
                 ? Lists.newArrayList() : Arrays.asList(domainDO.getAdmin().split(",")));
-        domainDesc.setAdminOrgs(StringUtils.isBlank(domainDO.getAdminOrg())
+        domainResp.setAdminOrgs(StringUtils.isBlank(domainDO.getAdminOrg())
                 ? Lists.newArrayList() : Arrays.asList(domainDO.getAdminOrg().split(",")));
-        domainDesc.setViewers(StringUtils.isBlank(domainDO.getViewer())
+        domainResp.setViewers(StringUtils.isBlank(domainDO.getViewer())
                 ? Lists.newArrayList() : Arrays.asList(domainDO.getViewer().split(",")));
-        domainDesc.setViewOrgs(StringUtils.isBlank(domainDO.getViewOrg())
+        domainResp.setViewOrgs(StringUtils.isBlank(domainDO.getViewOrg())
                 ? Lists.newArrayList() : Arrays.asList(domainDO.getViewOrg().split(",")));
-        return domainDesc;
+        return domainResp;
+    }
+
+    public static DomainResp convert(DomainDO domainDO, Map<Long, String> domainFullPathMap,
+            Map<Long, List<DimensionResp>> dimensionMap, Map<Long, List<MetricResp>> metricMap) {
+        DomainResp domainResp = convert(domainDO, domainFullPathMap);
+        domainResp.setDimensionCnt(dimensionMap.getOrDefault(domainResp.getId(), Lists.newArrayList()).size());
+        domainResp.setMetricCnt(metricMap.getOrDefault(domainResp.getId(), Lists.newArrayList()).size());
+        return domainResp;
     }
 
 

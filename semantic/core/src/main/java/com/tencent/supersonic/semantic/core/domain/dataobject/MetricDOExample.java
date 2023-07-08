@@ -41,13 +41,6 @@ public class MetricDOExample {
     /**
      * @mbg.generated
      */
-    public void setOrderByClause(String orderByClause) {
-        this.orderByClause = orderByClause;
-    }
-
-    /**
-     * @mbg.generated
-     */
     public String getOrderByClause() {
         return orderByClause;
     }
@@ -55,8 +48,8 @@ public class MetricDOExample {
     /**
      * @mbg.generated
      */
-    public void setDistinct(boolean distinct) {
-        this.distinct = distinct;
+    public void setOrderByClause(String orderByClause) {
+        this.orderByClause = orderByClause;
     }
 
     /**
@@ -64,6 +57,13 @@ public class MetricDOExample {
      */
     public boolean isDistinct() {
         return distinct;
+    }
+
+    /**
+     * @mbg.generated
+     */
+    public void setDistinct(boolean distinct) {
+        this.distinct = distinct;
     }
 
     /**
@@ -120,13 +120,6 @@ public class MetricDOExample {
     /**
      * @mbg.generated
      */
-    public void setLimitStart(Integer limitStart) {
-        this.limitStart = limitStart;
-    }
-
-    /**
-     * @mbg.generated
-     */
     public Integer getLimitStart() {
         return limitStart;
     }
@@ -134,8 +127,8 @@ public class MetricDOExample {
     /**
      * @mbg.generated
      */
-    public void setLimitEnd(Integer limitEnd) {
-        this.limitEnd = limitEnd;
+    public void setLimitStart(Integer limitStart) {
+        this.limitStart = limitStart;
     }
 
     /**
@@ -143,6 +136,13 @@ public class MetricDOExample {
      */
     public Integer getLimitEnd() {
         return limitEnd;
+    }
+
+    /**
+     * @mbg.generated
+     */
+    public void setLimitEnd(Integer limitEnd) {
+        this.limitEnd = limitEnd;
     }
 
     /**
@@ -605,6 +605,11 @@ public class MetricDOExample {
             return (Criteria) this;
         }
 
+        public Criteria andSensitiveLevelGreaterThanOrEqualTo(Integer value) {
+            addCriterion("sensitive_level >=", value, "sensitiveLevel");
+            return (Criteria) this;
+        }
+
         public Criteria andSensitiveLevelLessThan(Integer value) {
             addCriterion("sensitive_level <", value, "sensitiveLevel");
             return (Criteria) this;
@@ -990,6 +995,11 @@ public class MetricDOExample {
             return (Criteria) this;
         }
 
+        public Criteria andDataFormatTypeGreaterThanOrEqualTo(String value) {
+            addCriterion("data_format_type >=", value, "dataFormatType");
+            return (Criteria) this;
+        }
+
         public Criteria andDataFormatTypeLessThan(String value) {
             addCriterion("data_format_type <", value, "dataFormatType");
             return (Criteria) this;
@@ -1099,6 +1109,76 @@ public class MetricDOExample {
             addCriterion("data_format not between", value1, value2, "dataFormat");
             return (Criteria) this;
         }
+
+        public Criteria andAliasIsNull() {
+            addCriterion("alias is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasIsNotNull() {
+            addCriterion("alias is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasEqualTo(String value) {
+            addCriterion("alias =", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasNotEqualTo(String value) {
+            addCriterion("alias <>", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasGreaterThan(String value) {
+            addCriterion("alias >", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasGreaterThanOrEqualTo(String value) {
+            addCriterion("alias >=", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasLessThan(String value) {
+            addCriterion("alias <", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasLessThanOrEqualTo(String value) {
+            addCriterion("alias <=", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasLike(String value) {
+            addCriterion("alias like", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasNotLike(String value) {
+            addCriterion("alias not like", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasIn(List<String> values) {
+            addCriterion("alias in", values, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasNotIn(List<String> values) {
+            addCriterion("alias not in", values, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasBetween(String value1, String value2) {
+            addCriterion("alias between", value1, value2, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasNotBetween(String value1, String value2) {
+            addCriterion("alias not between", value1, value2, "alias");
+            return (Criteria) this;
+        }
     }
 
     /**
@@ -1131,38 +1211,6 @@ public class MetricDOExample {
         private boolean listValue;
 
         private String typeHandler;
-
-        public String getCondition() {
-            return condition;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public Object getSecondValue() {
-            return secondValue;
-        }
-
-        public boolean isNoValue() {
-            return noValue;
-        }
-
-        public boolean isSingleValue() {
-            return singleValue;
-        }
-
-        public boolean isBetweenValue() {
-            return betweenValue;
-        }
-
-        public boolean isListValue() {
-            return listValue;
-        }
-
-        public String getTypeHandler() {
-            return typeHandler;
-        }
 
         protected Criterion(String condition) {
             super();
@@ -1198,6 +1246,38 @@ public class MetricDOExample {
 
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
+        }
+
+        public String getCondition() {
+            return condition;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Object getSecondValue() {
+            return secondValue;
+        }
+
+        public boolean isNoValue() {
+            return noValue;
+        }
+
+        public boolean isSingleValue() {
+            return singleValue;
+        }
+
+        public boolean isBetweenValue() {
+            return betweenValue;
+        }
+
+        public boolean isListValue() {
+            return listValue;
+        }
+
+        public String getTypeHandler() {
+            return typeHandler;
         }
     }
 }

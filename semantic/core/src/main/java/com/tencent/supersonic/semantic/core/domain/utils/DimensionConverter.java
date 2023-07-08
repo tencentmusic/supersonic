@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.core.domain.utils;
 
+import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.semantic.api.core.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.semantic.api.core.request.DimensionReq;
 import com.tencent.supersonic.semantic.api.core.response.DatasourceResp;
@@ -22,36 +23,34 @@ public class DimensionConverter {
 
     public static DimensionDO convert(DimensionDO dimensionDO, Dimension dimension) {
         BeanMapper.mapper(dimension, dimensionDO);
+        dimensionDO.setDefaultValues(JSONObject.toJSONString(dimension.getDefaultValues()));
         return dimensionDO;
     }
 
     public static DimensionDO convert2DimensionDO(Dimension dimension) {
         DimensionDO dimensionDO = new DimensionDO();
         BeanUtils.copyProperties(dimension, dimensionDO);
+        dimensionDO.setDefaultValues(JSONObject.toJSONString(dimension.getDefaultValues()));
         return dimensionDO;
     }
 
 
-    public static DimensionResp convert2DimensionDesc(DimensionDO dimensionDO,
+    public static DimensionResp convert2DimensionResp(DimensionDO dimensionDO,
             Map<Long, String> fullPathMap,
-            Map<Long, DatasourceResp> datasourceDescMap
-    ) {
-        DimensionResp dimensionDesc = new DimensionResp();
-        BeanUtils.copyProperties(dimensionDO, dimensionDesc);
-        dimensionDesc.setFullPath(fullPathMap.get(dimensionDO.getDomainId()) + dimensionDO.getBizName());
-        dimensionDesc.setDatasourceId(
-                datasourceDescMap.getOrDefault(dimensionDesc.getDatasourceId(), new DatasourceResp()).getId());
-        dimensionDesc.setDatasourceName(
-                datasourceDescMap.getOrDefault(dimensionDesc.getDatasourceId(), new DatasourceResp()).getName());
-        dimensionDesc.setDatasourceBizName(
-                datasourceDescMap.getOrDefault(dimensionDesc.getDatasourceId(), new DatasourceResp()).getBizName());
-        return dimensionDesc;
-    }
-
-    public static Dimension convert2Dimension(DimensionDO dimensionDO) {
-        Dimension dimension = new Dimension();
-        BeanUtils.copyProperties(dimensionDO, dimension);
-        return dimension;
+            Map<Long, DatasourceResp> datasourceRespMap) {
+        DimensionResp dimensionResp = new DimensionResp();
+        BeanUtils.copyProperties(dimensionDO, dimensionResp);
+        dimensionResp.setFullPath(fullPathMap.get(dimensionDO.getDomainId()) + dimensionDO.getBizName());
+        dimensionResp.setDatasourceId(
+                datasourceRespMap.getOrDefault(dimensionResp.getDatasourceId(), new DatasourceResp()).getId());
+        dimensionResp.setDatasourceName(
+                datasourceRespMap.getOrDefault(dimensionResp.getDatasourceId(), new DatasourceResp()).getName());
+        dimensionResp.setDatasourceBizName(
+                datasourceRespMap.getOrDefault(dimensionResp.getDatasourceId(), new DatasourceResp()).getBizName());
+        if (dimensionDO.getDefaultValues() != null) {
+            dimensionResp.setDefaultValues(JSONObject.parseObject(dimensionDO.getDefaultValues(), List.class));
+        }
+        return dimensionResp;
     }
 
 

@@ -1,14 +1,16 @@
-package com.tencent.supersonic.domain.semantic.query.domain.utils;
+package com.tencent.supersonic.semantic.query.domain.utils;
 
 import static com.tencent.supersonic.common.constant.Constants.APOSTROPHE;
 import static com.tencent.supersonic.common.constant.Constants.COMMA;
 import static com.tencent.supersonic.common.constant.Constants.DAY;
 import static com.tencent.supersonic.common.constant.Constants.DAY_FORMAT;
 import static com.tencent.supersonic.common.constant.Constants.MONTH;
+import static com.tencent.supersonic.common.constant.Constants.MONTH_FORMAT;
+import static com.tencent.supersonic.common.constant.Constants.WEEK;
 
 import com.google.common.base.Strings;
-import com.tencent.supersonic.semantic.api.core.response.ItemDateResp;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.semantic.api.core.response.ItemDateResp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -29,6 +31,10 @@ public class DateUtils {
 
     @Value("${query.parameter.sys.date:sys_imp_date}")
     private String sysDateCol;
+    @Value("${query.parameter.sys.month:sys_imp_month}")
+    private String sysDateMonthCol;
+    @Value("${query.parameter.sys.month:sys_imp_week}")
+    private String sysDateWeekCol;
 
     public Boolean recentMode(DateConf dateInfo) {
         if (Objects.nonNull(dateInfo) && DateConf.DateMode.RECENT_UNITS == dateInfo.getDateMode()
@@ -125,6 +131,29 @@ public class DateUtils {
         return String.format("(%s >= '%s' and %s <= '%s')", sysDateCol, start, sysDateCol, dateDate.getEndDate());
     }
 
+    public String recentMonthStr(ItemDateResp dateDate, DateConf dateInfo) {
+        String dateFormatStr = MONTH_FORMAT;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormatStr);
+        LocalDate end = LocalDate.parse(dateDate.getEndDate(), formatter);
+        String endStr = end.format(formatter);
+        Integer unit = dateInfo.getUnit() - 1;
+        String start = end.minusMonths(unit).format(formatter);
+        return String.format("(%s >= '%s' and %s <= '%s')", sysDateMonthCol, start, sysDateMonthCol, endStr);
+    }
+
+    public String recentWeekStr(ItemDateResp dateDate, DateConf dateInfo) {
+        String dateFormatStr = dateDate.getDateFormat();
+        if (Strings.isNullOrEmpty(dateFormatStr)) {
+            dateFormatStr = DAY_FORMAT;
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormatStr);
+        LocalDate end = LocalDate.parse(dateDate.getEndDate(), formatter);
+        Integer unit = dateInfo.getUnit() - 1;
+        String start = end.minusDays(unit * 7).format(formatter);
+        return String.format("(%s >= '%s' and %s <= '%s')", sysDateWeekCol, start, sysDateWeekCol,
+                dateDate.getEndDate());
+    }
+
     private Long getInterval(String startDate, String endDate, String dateFormat, ChronoUnit chronoUnit) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
         try {
@@ -141,6 +170,12 @@ public class DateUtils {
     public String recentDateStr(ItemDateResp dateDate, DateConf dateInfo) {
         if (DAY.equalsIgnoreCase(dateInfo.getPeriod())) {
             return recentDayStr(dateDate, dateInfo);
+        }
+        if (MONTH.equalsIgnoreCase(dateInfo.getPeriod())) {
+            return recentMonthStr(dateDate, dateInfo);
+        }
+        if (WEEK.equalsIgnoreCase(dateInfo.getPeriod())) {
+            return recentWeekStr(dateDate, dateInfo);
         }
         return "";
     }

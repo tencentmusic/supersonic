@@ -40,6 +40,7 @@ public class Constants {
 
     public static final String DAY = "DAY";
     public static final String DAY_FORMAT = "yyyy-MM-dd";
+    public static final String MONTH_FORMAT = "yyyy-MM";
     public static final String DAY_FORMAT_INT = "YYYYMMDD";
     public static final String MONTH = "MONTH";
     public static final String WEEK = "WEEK";

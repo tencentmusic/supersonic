@@ -26,11 +26,6 @@ public enum FilterOperatorEnum {
         this.value = value;
     }
 
-    @JsonValue
-    public String getValue() {
-        return value;
-    }
-
     @JsonCreator
     public static FilterOperatorEnum getSqlOperator(String type) {
         for (FilterOperatorEnum operatorEnum : FilterOperatorEnum.values()) {
@@ -39,6 +34,11 @@ public enum FilterOperatorEnum {
             }
         }
         return null;
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
     }
 
 

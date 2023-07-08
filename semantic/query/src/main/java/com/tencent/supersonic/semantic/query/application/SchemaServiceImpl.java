@@ -38,9 +38,9 @@ public class SchemaServiceImpl implements SchemaService {
     private final MetricService metricService;
 
     public SchemaServiceImpl(QueryService queryService,
-                             DomainService domainService,
-                             DimensionService dimensionService,
-                             MetricService metricService) {
+            DomainService domainService,
+            DimensionService dimensionService,
+            MetricService metricService) {
         this.queryService = queryService;
         this.domainService = domainService;
         this.dimensionService = dimensionService;
@@ -52,7 +52,7 @@ public class SchemaServiceImpl implements SchemaService {
     public List<DomainSchemaResp> fetchDomainSchema(DomainSchemaFilterReq filter, User user) {
         List<DomainSchemaResp> domainSchemaDescList = domainService.fetchDomainSchema(filter, user);
         List<ItemUseResp> statInfos = queryService.getStatInfo(new ItemUseReq());
-        log.info("statInfos:{}", statInfos);
+        log.debug("statInfos:{}", statInfos);
         fillCnt(domainSchemaDescList, statInfos);
         return domainSchemaDescList;
 
@@ -66,7 +66,7 @@ public class SchemaServiceImpl implements SchemaService {
                         itemUseInfo -> itemUseInfo.getType() + AT_SYMBOL + AT_SYMBOL + itemUseInfo.getBizName(),
                         itemUseInfo -> itemUseInfo,
                         (item1, item2) -> item1));
-        log.info("typeIdAndStatPair:{}", typeIdAndStatPair);
+        log.debug("typeIdAndStatPair:{}", typeIdAndStatPair);
         for (DomainSchemaResp domainSchemaDesc : domainSchemaDescList) {
             fillDimCnt(domainSchemaDesc, typeIdAndStatPair);
             fillMetricCnt(domainSchemaDesc, typeIdAndStatPair);

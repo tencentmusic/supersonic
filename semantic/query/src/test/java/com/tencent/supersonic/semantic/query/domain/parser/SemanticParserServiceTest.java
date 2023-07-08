@@ -47,6 +47,66 @@ class SemanticParserServiceTest {
         return sqlParser;
     }
 
+    private static void addDepartment(SemanticSchema semanticSchema) {
+        DatasourceYamlTpl datasource = new DatasourceYamlTpl();
+        datasource.setName("user_department");
+        datasource.setSourceId(1L);
+        datasource.setSqlQuery("SELECT imp_date,user_name,department FROM s2_user_department");
+
+        MeasureYamlTpl measure = new MeasureYamlTpl();
+        measure.setAgg("count");
+        measure.setName("user_department_internal_cnt");
+        measure.setCreateMetric("true");
+        measure.setExpr("1");
+        List<MeasureYamlTpl> measures = new ArrayList<>();
+        measures.add(measure);
+
+        datasource.setMeasures(measures);
+
+        DimensionYamlTpl dimension = new DimensionYamlTpl();
+        dimension.setName("sys_imp_date");
+        dimension.setExpr("imp_date");
+        dimension.setType("time");
+        DimensionTimeTypeParamsTpl dimensionTimeTypeParams = new DimensionTimeTypeParamsTpl();
+        dimensionTimeTypeParams.setIsPrimary("true");
+        dimensionTimeTypeParams.setTimeGranularity("day");
+        dimension.setTypeParams(dimensionTimeTypeParams);
+        List<DimensionYamlTpl> dimensions = new ArrayList<>();
+        dimensions.add(dimension);
+
+        DimensionYamlTpl dimension3 = new DimensionYamlTpl();
+        dimension3.setName("sys_imp_week");
+        dimension3.setExpr("to_monday(from_unixtime(unix_timestamp(imp_date), 'yyyy-MM-dd'))");
+        dimension3.setType("time");
+        DimensionTimeTypeParamsTpl dimensionTimeTypeParams3 = new DimensionTimeTypeParamsTpl();
+        dimensionTimeTypeParams3.setIsPrimary("true");
+        dimensionTimeTypeParams3.setTimeGranularity("week");
+        dimension3.setTypeParams(dimensionTimeTypeParams3);
+        dimensions.add(dimension3);
+
+        datasource.setDimensions(dimensions);
+
+        List<IdentifyYamlTpl> identifies = new ArrayList<>();
+        IdentifyYamlTpl identify = new IdentifyYamlTpl();
+        identify.setName("user_name");
+        identify.setType("primary");
+        identifies.add(identify);
+        datasource.setIdentifiers(identifies);
+
+        semanticSchema.getDatasource().put("user_department", SemanticSchemaManagerImpl.getDatasource(datasource));
+
+        DimensionYamlTpl dimension1 = new DimensionYamlTpl();
+        dimension1.setExpr("department");
+        dimension1.setName("department");
+        dimension1.setType("categorical");
+        List<DimensionYamlTpl> dimensionYamlTpls = new ArrayList<>();
+        dimensionYamlTpls.add(dimension1);
+
+        semanticSchema.getDimension()
+                .put("user_department", SemanticSchemaManagerImpl.getDimensions(dimensionYamlTpls));
+
+    }
+
     //@Test
     public void test() throws Exception {
 
@@ -187,67 +247,6 @@ class SemanticParserServiceTest {
         metricCommand2.setOrder(orders2);
         System.out.println(parser(semanticSchema, metricCommand2, true));
 
-
-    }
-
-
-    private static void addDepartment(SemanticSchema semanticSchema) {
-        DatasourceYamlTpl datasource = new DatasourceYamlTpl();
-        datasource.setName("user_department");
-        datasource.setSourceId(1L);
-        datasource.setSqlQuery("SELECT imp_date,user_name,department FROM s2_user_department");
-
-        MeasureYamlTpl measure = new MeasureYamlTpl();
-        measure.setAgg("count");
-        measure.setName("user_department_internal_cnt");
-        measure.setCreateMetric("true");
-        measure.setExpr("1");
-        List<MeasureYamlTpl> measures = new ArrayList<>();
-        measures.add(measure);
-
-        datasource.setMeasures(measures);
-
-        DimensionYamlTpl dimension = new DimensionYamlTpl();
-        dimension.setName("sys_imp_date");
-        dimension.setExpr("imp_date");
-        dimension.setType("time");
-        DimensionTimeTypeParamsTpl dimensionTimeTypeParams = new DimensionTimeTypeParamsTpl();
-        dimensionTimeTypeParams.setIsPrimary("true");
-        dimensionTimeTypeParams.setTimeGranularity("day");
-        dimension.setTypeParams(dimensionTimeTypeParams);
-        List<DimensionYamlTpl> dimensions = new ArrayList<>();
-        dimensions.add(dimension);
-
-        DimensionYamlTpl dimension3 = new DimensionYamlTpl();
-        dimension3.setName("sys_imp_week");
-        dimension3.setExpr("to_monday(from_unixtime(unix_timestamp(imp_date), 'yyyy-MM-dd'))");
-        dimension3.setType("time");
-        DimensionTimeTypeParamsTpl dimensionTimeTypeParams3 = new DimensionTimeTypeParamsTpl();
-        dimensionTimeTypeParams3.setIsPrimary("true");
-        dimensionTimeTypeParams3.setTimeGranularity("week");
-        dimension3.setTypeParams(dimensionTimeTypeParams3);
-        dimensions.add(dimension3);
-
-        datasource.setDimensions(dimensions);
-
-        List<IdentifyYamlTpl> identifies = new ArrayList<>();
-        IdentifyYamlTpl identify = new IdentifyYamlTpl();
-        identify.setName("user_name");
-        identify.setType("primary");
-        identifies.add(identify);
-        datasource.setIdentifiers(identifies);
-
-        semanticSchema.getDatasource().put("user_department", SemanticSchemaManagerImpl.getDatasource(datasource));
-
-        DimensionYamlTpl dimension1 = new DimensionYamlTpl();
-        dimension1.setExpr("department");
-        dimension1.setName("department");
-        dimension1.setType("categorical");
-        List<DimensionYamlTpl> dimensionYamlTpls = new ArrayList<>();
-        dimensionYamlTpls.add(dimension1);
-
-        semanticSchema.getDimension()
-                .put("user_department", SemanticSchemaManagerImpl.getDimensions(dimensionYamlTpls));
 
     }
 }

@@ -11,13 +11,13 @@ import lombok.Data;
 @Data
 public class QueryResultResp {
 
+    public EntityInfo entityInfo;
     private Long queryId;
     private String queryMode;
     private String querySql;
     private int queryState;
     private List<QueryColumn> queryColumns;
     private QueryAuthorization queryAuthorization;
-    public EntityInfo entityInfo;
     private SemanticParseInfo chatContext;
     private Object response;
     private List<Map<String, Object>> queryResults;

@@ -1,0 +1,23 @@
+com.tencent.supersonic.chat.api.component.SchemaMapper=\
+    com.tencent.supersonic.chat.application.mapper.HanlpSchemaMapper, \
+    com.tencent.supersonic.chat.application.mapper.DatabaseSchemaMapper, \
+    com.tencent.supersonic.chat.application.mapper.QueryFilterMapper
+
+com.tencent.supersonic.chat.api.component.SemanticParser=\
+    com.tencent.supersonic.chat.application.parser.DomainSemanticParser, \
+    com.tencent.supersonic.chat.application.parser.TimeSemanticParser, \
+    com.tencent.supersonic.chat.application.parser.AggregateSemanticParser
+#    com.tencent.supersonic.chat.application.parser.LLMSemanticParser
+
+
+com.tencent.supersonic.chat.api.component.SemanticLayer=\
+    com.tencent.supersonic.chat.infrastructure.semantic.LocalSemanticLayerImpl
+
+com.tencent.supersonic.chat.application.query.QuerySelector=\
+   com.tencent.supersonic.chat.application.query.HeuristicQuerySelector
+
+com.tencent.supersonic.chat.application.parser.DomainResolver=\
+  com.tencent.supersonic.chat.application.parser.HeuristicDomainResolver
+
+com.tencent.supersonic.auth.authentication.domain.interceptor.AuthenticationInterceptor=\
+    com.tencent.supersonic.auth.authentication.domain.interceptor.DefaultAuthenticationInterceptor

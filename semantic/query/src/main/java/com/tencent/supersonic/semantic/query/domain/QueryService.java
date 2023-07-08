@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 public interface QueryService {
 
 
-    Object queryBySql(QuerySqlReq querySqlCmd) throws Exception;
+    Object queryBySql(QuerySqlReq querySqlCmd, User user) throws Exception;
 
     QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructCmd, User user) throws Exception;
 

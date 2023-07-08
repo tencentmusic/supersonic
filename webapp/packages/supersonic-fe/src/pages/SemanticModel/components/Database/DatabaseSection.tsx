@@ -11,8 +11,8 @@ type Props = {
   domainManger: StateType;
 };
 
-const DatabaseSection: React.FC<Props> = ({ domainManger }) => {
-  const { selectDomainId } = domainManger;
+const DatabaseSection: React.FC<Props> = ({ domainManger, dispatch }) => {
+  const { selectDomainId, dataBaseConfig } = domainManger;
 
   const entityCreateRef = useRef<any>({});
 
@@ -22,8 +22,16 @@ const DatabaseSection: React.FC<Props> = ({ domainManger }) => {
         <ProCard title="数据库设置" bordered>
           <DatabaseCreateForm
             ref={entityCreateRef}
+            dataBaseConfig={dataBaseConfig}
             domainId={Number(selectDomainId)}
-            onSubmit={() => {}}
+            onSubmit={() => {
+              dispatch({
+                type: 'domainManger/queryDatabaseByDomainId',
+                payload: {
+                  domainId: selectDomainId,
+                },
+              });
+            }}
           />
         </ProCard>
       </Space>

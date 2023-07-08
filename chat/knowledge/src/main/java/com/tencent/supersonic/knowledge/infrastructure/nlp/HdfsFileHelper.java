@@ -53,6 +53,7 @@ public class HdfsFileHelper {
 
     /**
      * reset path
+     *
      * @param customDictionary
      * @throws IOException
      */

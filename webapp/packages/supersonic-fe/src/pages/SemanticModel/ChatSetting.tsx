@@ -1,13 +1,11 @@
-import { Tabs } from 'antd';
+import { Tabs, Popover } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { connect, Helmet } from 'umi';
 import ProjectListTree from './components/ProjectList';
-import EntitySection from './components/Entity/EntitySection';
 import styles from './components/style.less';
 import type { StateType } from './model';
-import { RightOutlined, LeftOutlined } from '@ant-design/icons';
-import SplitPane from 'react-split-pane';
-import Pane from 'react-split-pane/lib/Pane';
+import { DownOutlined } from '@ant-design/icons';
+import EntitySection from './components/Entity/EntitySection';
 import type { Dispatch } from 'umi';
 
 const { TabPane } = Tabs;
@@ -17,21 +15,14 @@ type Props = {
   dispatch: Dispatch;
 };
 
-const DEFAULT_LEFT_SIZE = '300px';
-
 const ChatSetting: React.FC<Props> = ({ domainManger, dispatch }) => {
   window.RUNNING_ENV = 'chat';
-  const [collapsed, setCollapsed] = useState(false);
-  const [leftSize, setLeftSize] = useState('');
   const { selectDomainId, selectDomainName } = domainManger;
-  useEffect(() => {
-    const semanticLeftCollapsed = localStorage.getItem('semanticLeftCollapsed');
-    const semanticLeftSize =
-      semanticLeftCollapsed === 'true' ? '0px' : localStorage.getItem('semanticLeftSize');
-    setCollapsed(semanticLeftCollapsed === 'true');
-    setLeftSize(semanticLeftSize || DEFAULT_LEFT_SIZE);
-  }, []);
+  const [open, setOpen] = useState(false);
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+  };
   useEffect(() => {
     if (selectDomainId) {
       dispatch({
@@ -49,64 +40,54 @@ const ChatSetting: React.FC<Props> = ({ domainManger, dispatch }) => {
     }
   }, [selectDomainId]);
 
-  const onCollapse = () => {
-    const collapsedValue = !collapsed;
-    setCollapsed(collapsedValue);
-    localStorage.setItem('semanticLeftCollapsed', String(collapsedValue));
-    const semanticLeftSize = collapsedValue ? '0px' : localStorage.getItem('semanticLeftSize');
-    const sizeValue = parseInt(semanticLeftSize || '0');
-    if (!collapsedValue && sizeValue <= 10) {
-      setLeftSize(DEFAULT_LEFT_SIZE);
-      localStorage.setItem('semanticLeftSize', DEFAULT_LEFT_SIZE);
-    } else {
-      setLeftSize(semanticLeftSize || DEFAULT_LEFT_SIZE);
-    }
-  };
-
-  useEffect(() => {
-    const width = document.getElementById('tab');
-    const switchWarpper: any = document.getElementById('switch');
-    if (width && switchWarpper) {
-      switchWarpper.style.width = width.offsetWidth * 0.77 + 'px';
-    }
-  });
-
   return (
     <div className={styles.projectBody}>
       <Helmet title={'问答设置-超音数'} />
-      <SplitPane
-        split="vertical"
-        onChange={(size) => {
-          localStorage.setItem('semanticLeftSize', size[0]);
-          setLeftSize(size[0]);
-        }}
-      >
-        <Pane initialSize={leftSize || DEFAULT_LEFT_SIZE}>
-          <div className={styles.menu}>
-            <ProjectListTree createDomainBtnVisible={false} queryService="chat" />
-          </div>
-        </Pane>
-
-        <div className={styles.projectManger}>
-          <div className={styles.collapseLeftBtn} onClick={onCollapse}>
-            {collapsed ? <RightOutlined /> : <LeftOutlined />}
-          </div>
-          <h2 className={styles.title}>
-            {selectDomainName ? `选择的主题域：${selectDomainName}` : '主题域信息'}
-          </h2>
-          {selectDomainId ? (
-            <>
-              <Tabs className={styles.tab} defaultActiveKey="chatSetting" destroyInactiveTabPane>
-                <TabPane className={styles.tabPane} tab="问答设置" key="chatSetting">
-                  <EntitySection />
-                </TabPane>
-              </Tabs>
-            </>
-          ) : (
-            <h2 className={styles.mainTip}>请选择项目</h2>
-          )}
-        </div>
-      </SplitPane>
+      {/* 页面改版取消侧边栏转换为popover形式后，因为popover不触发则组件不加载，需要保留原本页面初始化需要ProjectListTree向model中写入首个主题域数据逻辑，在此引入但并不显示 */}
+      <div style={{ display: 'none' }}>
+        <ProjectListTree />
+      </div>
+      <div className={styles.projectManger}>
+        <h2 className={styles.title}>
+          <Popover
+            zIndex={1000}
+            overlayInnerStyle={{
+              overflow: 'scroll',
+              maxHeight: '800px',
+            }}
+            content={
+              <ProjectListTree
+                onTreeSelected={() => {
+                  setOpen(false);
+                }}
+              />
+            }
+            trigger="click"
+            open={open}
+            onOpenChange={handleOpenChange}
+          >
+            <div className={styles.domainSelector}>
+              <span className={styles.domainTitle}>
+                {selectDomainName ? `选择的主题域：${selectDomainName}` : '主题域信息'}
+              </span>
+              <span className={styles.downIcon}>
+                <DownOutlined />
+              </span>
+            </div>
+          </Popover>
+        </h2>
+        {selectDomainId ? (
+          <>
+            <Tabs className={styles.tab} defaultActiveKey="chatSetting" destroyInactiveTabPane>
+              <TabPane className={styles.tabPane} tab="问答设置" key="chatSetting">
+                <EntitySection />
+              </TabPane>
+            </Tabs>
+          </>
+        ) : (
+          <h2 className={styles.mainTip}>请选择项目</h2>
+        )}
+      </div>
     </div>
   );
 };

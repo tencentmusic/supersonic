@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.SchemaItem;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -27,4 +28,7 @@ public class SemanticParseInfo {
     private DateConf dateInfo;
     private Long limit;
     private Boolean nativeQuery = false;
+    private Double bonus = 0d;
+    private List<SchemaElementMatch> elementMatches = new ArrayList<>();
+    private Object info;
 }

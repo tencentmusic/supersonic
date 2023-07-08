@@ -8,6 +8,7 @@ import lombok.Data;
 
 @Data
 public class SemanticModel {
+
     private String rootPath;
     private List<Metric> metrics = new ArrayList<>();
     private Map<String, DataSource> datasourceMap = new HashMap<>();

@@ -88,7 +88,7 @@ public class ChatConfigUtils {
     }
 
     public EntityInternalDetail generateEntityDetailData(EntityDetailData detailData,
-                                                         DomainSchemaResp domainSchemaDesc) {
+            DomainSchemaResp domainSchemaDesc) {
         EntityInternalDetail entityInternalDetailDesc = new EntityInternalDetail();
         if (Objects.isNull(detailData)) {
             return entityInternalDetailDesc;
@@ -100,7 +100,7 @@ public class ChatConfigUtils {
     }
 
     public Map<Long, MetricSchemaResp> generateMetricIdAndDescPair(List<Long> metricIds,
-                                                                   DomainSchemaResp domainSchemaDesc) {
+            DomainSchemaResp domainSchemaDesc) {
         Map<Long, MetricSchemaResp> metricIdAndDescPair = new HashMap<>();
         List<MetricSchemaResp> metricDescList = generateMetricDesc(metricIds, domainSchemaDesc);
 
@@ -118,6 +118,9 @@ public class ChatConfigUtils {
     }
 
     public List<Long> generateAllMetricIdList(DomainSchemaResp domainSchemaDesc) {
+        if (Objects.isNull(domainSchemaDesc) || CollectionUtils.isEmpty(domainSchemaDesc.getMetrics())) {
+            return new ArrayList<>();
+        }
         Map<Long, List<MetricSchemaResp>> metricIdAndDescPair = domainSchemaDesc.getMetrics()
                 .stream().collect(Collectors.groupingBy(MetricSchemaResp::getId));
         return new ArrayList<>(metricIdAndDescPair.keySet());

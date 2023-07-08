@@ -5,6 +5,9 @@ import lombok.Data;
 @Data
 public class QueryDO {
 
+    public String aggregator = "trend";
+    public String startTime;
+    public String endTime;
     private long id;
     private long questionId;
     private String createTime;
@@ -19,10 +22,7 @@ public class QueryDO {
     private int isDeleted;
     private String module;
     private long chatId;
-    public String aggregator = "trend";
     private int topNum;
-    public String startTime;
-    public String endTime;
     private String querySql;
     private Object queryColumn;
     private Object entityInfo;

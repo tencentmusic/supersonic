@@ -42,6 +42,23 @@ import org.springframework.util.CollectionUtils;
 public class QueryUtils {
 
     private final Set<Pattern> patterns = new HashSet<>();
+    private final MetricService metricService;
+    private final DimensionService dimensionService;
+    private final ParserCommandConverter parserCommandConverter;
+    public QueryUtils(MetricService metricService,
+            DimensionService dimensionService,
+            @Lazy ParserCommandConverter parserCommandConverter) {
+        this.metricService = metricService;
+        this.dimensionService = dimensionService;
+        this.parserCommandConverter = parserCommandConverter;
+    }
+
+    private static void addSysTimeDimension(Map<String, String> namePair, Map<String, String> nameTypePair) {
+        for (TimeDimensionEnum timeDimensionEnum : TimeDimensionEnum.values()) {
+            namePair.put(timeDimensionEnum.getName(), "date");
+            nameTypePair.put(timeDimensionEnum.getName(), "DATE");
+        }
+    }
 
     @PostConstruct
     public void fillPattern() {
@@ -52,19 +69,6 @@ public class QueryUtils {
         }
     }
 
-    private final MetricService metricService;
-    private final DimensionService dimensionService;
-    private final ParserCommandConverter parserCommandConverter;
-
-    public QueryUtils(MetricService metricService,
-            DimensionService dimensionService,
-            @Lazy ParserCommandConverter parserCommandConverter) {
-        this.metricService = metricService;
-        this.dimensionService = dimensionService;
-        this.parserCommandConverter = parserCommandConverter;
-    }
-
-
     public void checkSqlParse(SqlParserResp sqlParser) {
         if (Strings.isNullOrEmpty(sqlParser.getSql()) || Strings.isNullOrEmpty(sqlParser.getSourceId())) {
             throw new RuntimeException("parse Exception: " + sqlParser.getErrMsg());
@@ -74,6 +78,23 @@ public class QueryUtils {
     public boolean isDetailQuery(QueryStructReq queryStructCmd) {
         return Objects.nonNull(queryStructCmd) && queryStructCmd.getNativeQuery() && CollectionUtils.isEmpty(
                 queryStructCmd.getMetrics());
+    }
+
+    public SqlParserResp handleNoMetric(QueryStructReq queryStructCmd, SqlParserResp sqlParser) {
+        String sqlRaw = sqlParser.getSql().trim();
+        if (Strings.isNullOrEmpty(sqlRaw)) {
+            throw new RuntimeException("sql is empty or null");
+        }
+        log.info("before handleNoMetric, sql:{}", sqlRaw);
+        if (isDetailQuery(queryStructCmd)) {
+            if (queryStructCmd.getMetrics().size() == 0) {
+                String sql = String.format("select %s from ( %s ) src_no_metric",
+                        queryStructCmd.getGroups().stream().collect(Collectors.joining(",")), sqlRaw);
+                sqlParser.setSql(sql);
+            }
+        }
+        log.info("after handleNoMetric, sql:{}", sqlParser.getSql());
+        return sqlParser;
     }
 
     public SqlParserResp handleDetail(QueryStructReq queryStructCmd, SqlParserResp sqlParser) {
@@ -222,12 +243,5 @@ public class QueryUtils {
             map.put("value" + (i + 1), aggregator.getNameCh());
         }
         return map;
-    }
-
-    private static void addSysTimeDimension(Map<String, String> namePair, Map<String, String> nameTypePair) {
-        for (TimeDimensionEnum timeDimensionEnum : TimeDimensionEnum.values()) {
-            namePair.put(timeDimensionEnum.getName(), "date");
-            nameTypePair.put(timeDimensionEnum.getName(), "DATE");
-        }
     }
 }

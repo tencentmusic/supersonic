@@ -3,6 +3,7 @@ package com.tencent.supersonic.semantic.api.core.request;
 import com.tencent.supersonic.common.pojo.SchemaItem;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class DimensionReq extends SchemaItem {
@@ -19,6 +20,10 @@ public class DimensionReq extends SchemaItem {
 
     //DATE ID CATEGORY
     private String semanticType = "CATEGORY";
+
+    private String alias;
+
+    private List<String> defaultValues;
 
 
 }

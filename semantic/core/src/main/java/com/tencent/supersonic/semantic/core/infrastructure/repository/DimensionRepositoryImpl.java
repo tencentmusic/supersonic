@@ -57,6 +57,12 @@ public class DimensionRepositoryImpl implements DimensionRepository {
     }
 
     @Override
+    public List<DimensionDO> getDimensionList() {
+        DimensionDOExample dimensionDOExample = new DimensionDOExample();
+        return dimensionDOMapper.selectByExampleWithBLOBs(dimensionDOExample);
+    }
+
+    @Override
     public List<DimensionDO> getDimensionListByIds(List<Long> ids) {
         DimensionDOExample dimensionDOExample = new DimensionDOExample();
         dimensionDOExample.createCriteria().andIdIn(ids);
@@ -86,13 +92,16 @@ public class DimensionRepositoryImpl implements DimensionRepository {
             dimensionDOExample.getOredCriteria().get(0).andNameLike("%" + dimensionFilter.getName() + "%");
         }
         if (dimensionFilter.getBizName() != null) {
-            dimensionDOExample.getOredCriteria().get(0).andBizNameEqualTo("%" + dimensionFilter.getBizName() + "%");
+            dimensionDOExample.getOredCriteria().get(0).andBizNameLike("%" + dimensionFilter.getBizName() + "%");
         }
         if (dimensionFilter.getCreatedBy() != null) {
             dimensionDOExample.getOredCriteria().get(0).andCreatedByEqualTo(dimensionFilter.getCreatedBy());
         }
         if (dimensionFilter.getDomainId() != null) {
             dimensionDOExample.getOredCriteria().get(0).andDomainIdEqualTo(dimensionFilter.getDomainId());
+        }
+        if (dimensionFilter.getSensitiveLevel() != null) {
+            dimensionDOExample.getOredCriteria().get(0).andSensitiveLevelEqualTo(dimensionFilter.getSensitiveLevel());
         }
         return dimensionDOMapper.selectByExampleWithBLOBs(dimensionDOExample);
     }

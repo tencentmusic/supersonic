@@ -75,6 +75,11 @@ public class MetricDO {
     private String dataFormat;
 
     /**
+     *
+     */
+    private String alias;
+
+    /**
      * 类型参数
      */
     private String typeParams;
@@ -325,6 +330,20 @@ public class MetricDO {
      */
     public void setDataFormat(String dataFormat) {
         this.dataFormat = dataFormat == null ? null : dataFormat.trim();
+    }
+
+    /**
+     * @return alias
+     */
+    public String getAlias() {
+        return alias;
+    }
+
+    /**
+     * @param alias
+     */
+    public void setAlias(String alias) {
+        this.alias = alias == null ? null : alias.trim();
     }
 
     /**

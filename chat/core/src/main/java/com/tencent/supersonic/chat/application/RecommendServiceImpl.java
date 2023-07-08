@@ -2,14 +2,15 @@ package com.tencent.supersonic.chat.application;
 
 
 import com.tencent.supersonic.chat.api.request.QueryContextReq;
-import com.tencent.supersonic.chat.api.service.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.domain.utils.ComponentFactory;
 import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
 import com.tencent.supersonic.chat.domain.pojo.chat.RecommendResponse;
 import com.tencent.supersonic.chat.domain.service.RecommendService;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
 /***
@@ -18,8 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class RecommendServiceImpl implements RecommendService {
 
-    @Autowired
-    private SemanticLayer semanticLayer;
+    private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
 
     @Override
     public RecommendResponse recommend(QueryContextReq queryCtx) {

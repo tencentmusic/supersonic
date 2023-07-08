@@ -215,7 +215,7 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
               okText="是"
               cancelText="否"
               onConfirm={async () => {
-                const { code } = await removeGroupAuth({
+                const { code, msg } = await removeGroupAuth({
                   domainId: record.domainId,
                   groupId: record.groupId,
                 });
@@ -223,7 +223,7 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
                   setPermissonData({});
                   queryListData();
                 } else {
-                  message.error('删除失败');
+                  message.error(msg);
                 }
               }}
             >

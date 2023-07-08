@@ -49,11 +49,4 @@ public abstract class BaseWordNature {
         return 0;
     }
 
-    public Long getFrequency(String nature) {
-        String[] split = nature.split(NatureType.NATURE_SPILT);
-        if (split.length >= 3) {
-            return Long.valueOf(split[2]);
-        }
-        return 0L;
-    }
 }

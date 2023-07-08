@@ -15,20 +15,20 @@ public class PageQueryInfoReq {
         return pageSize;
     }
 
-    public int getCurrent() {
-        return current;
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
     }
 
-    public String getUserName() {
-        return userName;
+    public int getCurrent() {
+        return current;
     }
 
     public void setCurrent(int current) {
         this.current = current;
     }
 
-    public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
+    public String getUserName() {
+        return userName;
     }
 
     public void setUserName(String userName) {

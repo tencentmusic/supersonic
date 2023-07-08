@@ -63,8 +63,6 @@ public class DatasourceServiceImpl implements DatasourceService {
 
     private DatasourceRepository datasourceRepository;
 
-    private DatasourceYamlManager datasourceYamlManager;
-
     private DatabaseService databaseService;
 
     private DimensionService dimensionService;
@@ -73,19 +71,13 @@ public class DatasourceServiceImpl implements DatasourceService {
 
     private DateInfoRepository dateInfoRepository;
 
-    private DomainService domainService;
-
 
     public DatasourceServiceImpl(DatasourceRepository datasourceRepository,
-            DatasourceYamlManager datasourceYamlManager,
-            DomainService domainService,
             DatabaseService databaseService,
             @Lazy DimensionService dimensionService,
             @Lazy MetricService metricService,
             DateInfoRepository dateInfoRepository) {
-        this.domainService = domainService;
         this.datasourceRepository = datasourceRepository;
-        this.datasourceYamlManager = datasourceYamlManager;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
         this.metricService = metricService;
@@ -107,10 +99,6 @@ public class DatasourceServiceImpl implements DatasourceService {
         datasource.setId(datasourceDesc.getId());
         batchCreateDimension(datasource, user);
         batchCreateMetric(datasource, user);
-        List<DimensionResp> dimensionDescsExist = dimensionService.getDimensionsByDatasource(datasource.getId());
-        DatabaseResp databaseResp = databaseService.getDatabase(datasource.getDatabaseId());
-        datasourceYamlManager.generateYamlFile(datasource, databaseResp,
-                domainService.getDomainFullPath(datasource.getDomainId()), dimensionDescsExist);
         return datasourceDesc;
     }
 
@@ -124,10 +112,6 @@ public class DatasourceServiceImpl implements DatasourceService {
 
         batchCreateDimension(datasource, user);
         batchCreateMetric(datasource, user);
-        List<DimensionResp> dimensionDescsExist = dimensionService.getDimensionsByDatasource(datasource.getId());
-        DatabaseResp databaseResp = databaseService.getDatabase(datasource.getDatabaseId());
-        datasourceYamlManager.generateYamlFile(datasource, databaseResp,
-                domainService.getDomainFullPath(datasource.getDomainId()), dimensionDescsExist);
         DatasourceDO datasourceDO = updateDatasource(datasource, user);
         return DatasourceConverter.convert(datasourceDO);
     }
@@ -207,8 +191,6 @@ public class DatasourceServiceImpl implements DatasourceService {
     }
 
 
-
-
     private void preCheck(DatasourceReq datasourceReq) {
         List<Dim> dims = datasourceReq.getDimensions();
         if (CollectionUtils.isEmpty(dims)) {
@@ -245,8 +227,6 @@ public class DatasourceServiceImpl implements DatasourceService {
     }
 
 
-
-
     @Override
     public Map<Long, DatasourceResp> getDatasourceMap() {
         Map<Long, DatasourceResp> map = new HashMap<>();
@@ -264,9 +244,16 @@ public class DatasourceServiceImpl implements DatasourceService {
         if (datasourceDO == null) {
             return;
         }
+        checkDelete(datasourceDO.getDomainId(), id);
         datasourceRepository.deleteDatasource(id);
-        datasourceYamlManager.deleteYamlFile(datasourceDO.getBizName(),
-                domainService.getDomainFullPath(datasourceDO.getDomainId()));
+    }
+
+    private void checkDelete(Long domainId, Long datasourceId) {
+        List<MetricResp> metricResps = metricService.getMetrics(domainId, datasourceId);
+        List<DimensionResp> dimensionResps = dimensionService.getDimensionsByDatasource(datasourceId);
+        if (!CollectionUtils.isEmpty(metricResps) || !CollectionUtils.isEmpty(dimensionResps)) {
+            throw new RuntimeException("exist dimension or metric on this datasource, please check");
+        }
     }
 
 
@@ -315,6 +302,7 @@ public class DatasourceServiceImpl implements DatasourceService {
     }
 
 
+    @Override
     public ItemDateResp getDateDate(ItemDateFilter dimension, ItemDateFilter metric) {
         List<DateInfoReq> itemDates = new ArrayList<>();
         List<DateInfoDO> dimensions = dateInfoRepository.getDateInfos(dimension);
@@ -355,10 +343,10 @@ public class DatasourceServiceImpl implements DatasourceService {
             String startDate1 = item.getStartDate();
             String endDate1 = item.getEndDate();
             List<String> unavailableDateList1 = item.getUnavailableDateList();
-            if (Strings.isNotEmpty(startDate1) && startDate1.compareTo(startDate) < 0) {
+            if (Strings.isNotEmpty(startDate1) && startDate1.compareTo(startDate) > 0) {
                 startDate = startDate1;
             }
-            if (Strings.isNotEmpty(endDate1) && startDate1.compareTo(endDate1) > 0) {
+            if (Strings.isNotEmpty(endDate1) && endDate1.compareTo(endDate) < 0) {
                 endDate = endDate1;
             }
             if (!CollectionUtils.isEmpty(unavailableDateList1)) {

@@ -159,6 +159,9 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
         >
           <Input placeholder="名称不可重复" disabled={isEdit} />
         </FormItem>
+        <FormItem name="alias" label="别名">
+          <Input placeholder="多个别名用英文逗号隔开" />
+        </FormItem>
         <FormItem
           name="sensitiveLevel"
           label="敏感度"

@@ -28,7 +28,7 @@ public class ChatController {
     }
 
     @PostMapping("/save")
-    public Boolean save(@RequestParam(value = "chatName", required = true) String chatName,
+    public Boolean save(@RequestParam(value = "chatName") String chatName,
             HttpServletRequest request, HttpServletResponse response) {
         return chatService.addChat(UserHolder.findUser(request, response), chatName);
     }
@@ -40,36 +40,36 @@ public class ChatController {
     }
 
     @PostMapping("/delete")
-    public Boolean deleteConversion(@RequestParam(value = "chatId", required = true) long chatId,
+    public Boolean deleteConversion(@RequestParam(value = "chatId") long chatId,
             HttpServletRequest request, HttpServletResponse response) {
         String userName = UserHolder.findUser(request, response).getName();
         return chatService.deleteChat(chatId, userName);
     }
 
     @PostMapping("/updateChatName")
-    public Boolean updateConversionName(@RequestParam(value = "chatId", required = true) Long chatId,
-            @RequestParam(value = "chatName", required = true) String chatName,
+    public Boolean updateConversionName(@RequestParam(value = "chatId") Long chatId,
+            @RequestParam(value = "chatName") String chatName,
             HttpServletRequest request, HttpServletResponse response) {
         String userName = UserHolder.findUser(request, response).getName();
         return chatService.updateChatName(chatId, chatName, userName);
     }
 
     @PostMapping("/updateQAFeedback")
-    public Boolean updateQAFeedback(@RequestParam(value = "id", required = true) Integer id,
-            @RequestParam(value = "score", required = true) Integer score,
-            @RequestParam(value = "feedback", required = true) String feedback) {
+    public Boolean updateQAFeedback(@RequestParam(value = "id") Integer id,
+            @RequestParam(value = "score") Integer score,
+            @RequestParam(value = "feedback", required = false) String feedback) {
         return chatService.updateFeedback(id, score, feedback);
     }
 
     @PostMapping("/updateChatIsTop")
-    public Boolean updateConversionIsTop(@RequestParam(value = "chatId", required = true) Long chatId,
-            @RequestParam(value = "isTop", required = true) int isTop) {
+    public Boolean updateConversionIsTop(@RequestParam(value = "chatId") Long chatId,
+            @RequestParam(value = "isTop") int isTop) {
         return chatService.updateChatIsTop(chatId, isTop);
     }
 
     @PostMapping("/pageQueryInfo")
     public PageInfo<ChatQueryVO> pageQueryInfo(@RequestBody PageQueryInfoReq pageQueryInfoCommend,
-            @RequestParam(value = "chatId", required = true) long chatId,
+            @RequestParam(value = "chatId") long chatId,
             HttpServletRequest request,
             HttpServletResponse response) {
         pageQueryInfoCommend.setUserName(UserHolder.findUser(request, response).getName());

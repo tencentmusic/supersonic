@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -21,13 +22,13 @@ import org.springframework.util.ResourceUtils;
  */
 public class HanlpHelper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HanlpHelper.class);
     public static final String FILE_SPILT = "/";
     public static final String SPACE_SPILT = "#";
-    private static volatile Segment segment;
-    public static volatile DynamicCustomDictionary CustomDictionary;
     public static final String DICT_MAIN_FILE_NAME = "CustomDictionary.txt";
     public static final String DICT_CLASS = "classes";
+    private static final Logger LOGGER = LoggerFactory.getLogger(HanlpHelper.class);
+    public static volatile DynamicCustomDictionary CustomDictionary;
+    private static volatile Segment segment;
 
     static {
         // reset hanlp config
@@ -152,11 +153,14 @@ public class HanlpHelper {
     }
 
     public static boolean addToCustomDictionary(WordNature wordNature) {
-        LOGGER.debug("wordNature:{}", wordNature);
+        LOGGER.info("wordNature:{}", wordNature);
         return getDynamicCustomDictionary().insert(wordNature.getWord(), wordNature.getNatureWithFrequency());
     }
 
     public static void transLetterOriginal(List<MapResult> mapResults) {
+        if (CollectionUtils.isEmpty(mapResults)) {
+            return;
+        }
         for (MapResult mapResult : mapResults) {
             if (MultiCustomDictionary.isLowerLetter(mapResult.getName())) {
                 if (CustomDictionary.contains(mapResult.getName())) {

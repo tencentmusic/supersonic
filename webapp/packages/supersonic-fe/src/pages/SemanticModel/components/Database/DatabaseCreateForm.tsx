@@ -7,29 +7,39 @@ import { formLayout } from '@/components/FormHelper/utils';
 import styles from '../style.less';
 type Props = {
   domainId: number;
+  dataBaseConfig: any;
   onSubmit: (params?: any) => void;
 };
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
 
-const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = ({ domainId }, ref) => {
+const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
+  { domainId, dataBaseConfig, onSubmit },
+  ref,
+) => {
   const [form] = Form.useForm();
   const [selectedDbType, setSelectedDbType] = useState<string>('h2');
-  const queryDatabaseConfig = async () => {
-    const { code, data } = await getDatabaseByDomainId(domainId);
-    if (code === 200) {
-      form.setFieldsValue({ ...data });
-      setSelectedDbType(data?.type);
-      return;
-    }
-    message.error('数据库配置获取错误');
-  };
+  // const queryDatabaseConfig = async () => {
+  //   const { code, data } = await getDatabaseByDomainId(domainId);
+  //   if (code === 200) {
+  //     form.setFieldsValue({ ...data });
+  //     setSelectedDbType(data?.type);
+  //     return;
+  //   }
+  //   message.error('数据库配置获取错误');
+  // };
 
   useEffect(() => {
     form.resetFields();
-    queryDatabaseConfig();
-  }, [domainId]);
+    form.setFieldsValue({ ...dataBaseConfig });
+    setSelectedDbType(dataBaseConfig?.type);
+  }, [dataBaseConfig]);
+
+  // useEffect(() => {
+  //   form.resetFields();
+  //   // queryDatabaseConfig();
+  // }, [domainId]);
 
   const getFormValidateFields = async () => {
     return await form.validateFields();
@@ -48,6 +58,7 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = ({ domainId }, 
 
     if (code === 200) {
       message.success('保存成功');
+      onSubmit?.();
       return;
     }
     message.error(msg);

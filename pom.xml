@@ -61,7 +61,7 @@
         <spring.version>2.5.1</spring.version>
         <calcite.version>1.34.0</calcite.version>
         <calcite.avatica.version>1.23.0</calcite.avatica.version>
-        <revision>0.5-SNAPSHOT</revision>
+        <revision>0.6-SNAPSHOT</revision>
     </properties>
 
     <dependencyManagement>
