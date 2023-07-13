@@ -2,6 +2,8 @@
 
 **超音数是一个开箱即用且易于扩展的数据问答对话框架**。通过超音数的问答对话界面，用户能够使用自然语言查询数据，系统会选择合适的可视化图表呈现结果。超音数不需要修改或复制数据，只需要在物理数据库之上构建逻辑语义模型（定义指标、维度、相互间关系等），即可开启数据问答体验。与此同时，超音数被设计为可插拔式框架，允许以插件形式来扩展新功能，或者将核心组件与其他系统集成。
 
+<img src="./docs/images/supersonic_demo.gif" align="center"/>
+
 ## 项目动机
 
 大型语言模型（LLMs）如ChatGPT的出现正在重塑信息检索的方式。在数据分析领域，学术界和工业界主要关注利用深度学习模型将自然语言查询转换为SQL查询。虽然一些工作显示出有前景的结果，但它们还并不适用于实际场景。
@@ -22,9 +24,13 @@
 
 ## 易于扩展的组件
 
-超音数包含四个核心组件，每个都易于扩展或被集成：
+超音数主要分为两层：supersonic-chat and supersonic-semantic。问答层负责将自然语言查询转换为语义查询（也称为DSL查询），而语义层负责将DSL查询转换为SQL查询。超音数的整体架构和主流程如下图所示：
 
-<img src="./docs/images/supersonic_components.png" height="50%" width="50%" align="center"/> 
+<img src="./docs/images/supersonic_components.png" height="80%" width="80%" align="center"/> 
+
+### 问答层
+
+问答层包含以下4个核心组件：
 
 - **问答对话界面(chat interface)**：接受用户查询并选择合适的可视化图表呈现结果，支持输入联想和多轮对话。
 
@@ -32,17 +38,28 @@
 
 - **语义解析器链(semantic parser chain)**：识别查询模式并选择最匹配的语义模型，其由一组基于规则或模型的解析器组成，每个解析器可用于应对不同的特定场景。
 
-- **语义模型层(semantic model layer)**：建模阶段，负责构建与管理语义模型；查询阶段，依据给定的语义模型来生成SQL语句。
+- **语义查询(semantic query)**: 根据语义解析的结果执行查询，默认的语义查询会将DSL提交给语义组件，但可以扩展新类型的查询。 
+
+### 语义层
+
+语义层包含以下4个核心组件：
+
+- **语义建模界面(modeling interface)**：使分析工程师能够通过可视化方式定义和维护语义模型，与访问权限和聊天对话相关的配置也可以在用户界面上设置。
+
+- **DSL解析器(DSL parser)**：将DSL表达式转换为中间结构。为了使其易于与分析应用程序集成，使用SQL（不含join和计算公式）来作为DSL。
+
+- **查询计划器(query planner)**：根据各种规则来构建和优化查询计划。
+
+- **SQL生成器(SQL genenrator)**：基于查询计划来生成最终的SQL语句（（含join和计算公式））。
 
 ## 快速体验
 
 超音数自带样例的语义模型和问答对话，只需以下三步即可快速体验：
 
-- 从release page下载预先构建好的发行包
-- 运行 "bin/start-all.sh"启动前后端服务
-- 在浏览器访问http://localhost:9080 开启数据问答探索
-- 在浏览器访问http://localhost:9081 开启语义建模探索
+- 从[release page](https://github.com/tencentmusic/supersonic/releases)下载预先构建好的发行包
+- 运行 "bin/start-standalone.sh"启动服务
+- 在浏览器访问http://localhost:9080 开启探索
 
 ## 如何构建
 
-下载源码包，运行脚本"assembly/bin/build-all.sh"，会将前后端一起编译打包
+下载源码包，运行脚本"assembly/bin/build-standalone.sh"，将所有服务一起编译打包
