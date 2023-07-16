@@ -4,7 +4,8 @@ English | [中文](README_CN.md)
 
 **SuperSonic is an out-of-the-box yet highly extensible framework for building a data chatbot**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to define logical semantic models (metrics, dimensions, relationships, etc) on top of physical data models, and no data modification or copying is required. Meanwhile SuperSonic is designed to be plugable, allowing new functionalities to be added through plugins and core components to be integrated into other systems.
 
-<img src="./docs/images/supersonic_demo.gif" height="70%" width="70%" align="center"/>
+
+<img src="./docs/images/supersonic_demo.gif" align="center"/>
 
 ## Motivation
 
@@ -28,7 +29,9 @@ With these ideas in mind, we developed SuperSonic as a reference implementation 
 
 SuperSonic is composed of two layers: supersonic-chat and supersonic-semantic. The chat layer is responsible for converting **natural language query** into semantic query (also known as DSL query), whereas the semantic layer is responsible for converting DSL query into **SQL query**. The high-level architecture and main process flow is shown in below diagram:
 
-<img src="./docs/images/supersonic_components.png" height="70%" width="70%" align="center"/> 
+
+<img src="./docs/images/supersonic_components.png" height="80%" width="80%" align="center"/> 
+
 
 ### Chat Layer
 

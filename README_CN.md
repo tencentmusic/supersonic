@@ -2,7 +2,7 @@
 
 **超音数是一个开箱即用且易于扩展的数据问答对话框架**。通过超音数的问答对话界面，用户能够使用自然语言查询数据，系统会选择合适的可视化图表呈现结果。超音数不需要修改或复制数据，只需要在物理数据库之上构建逻辑语义模型（定义指标、维度、相互间关系等），即可开启数据问答体验。与此同时，超音数被设计为可插拔式框架，允许以插件形式来扩展新功能，或者将核心组件与其他系统集成。
 
-<img src="./docs/images/supersonic_demo.gif" height="70%" width="70%" align="center"/>
+<img src="./docs/images/supersonic_demo.gif" align="center"/>
 
 ## 项目动机
 
@@ -26,7 +26,7 @@
 
 超音数主要分为两层：supersonic-chat and supersonic-semantic。问答层负责将自然语言查询转换为语义查询（也称为DSL查询），而语义层负责将DSL查询转换为SQL查询。超音数的整体架构和主流程如下图所示：
 
-<img src="./docs/images/supersonic_components.png" height="70%" width="70%" align="center"/> 
+<img src="./docs/images/supersonic_components.png" height="80%" width="80%" align="center"/> 
 
 ### 问答层
 
