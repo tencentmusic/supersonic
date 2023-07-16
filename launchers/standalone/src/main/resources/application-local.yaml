@@ -16,7 +16,7 @@ server:
   port: 9080
 
 authentication:
-  enable: false
+  enable: true
   exclude:
     path: /api/auth/user/register,/api/auth/user/login
 

@@ -37,21 +37,21 @@ const DataSourceRelationFormDrawer: React.FC<DataSourceRelationFormDrawerProps> 
     const dataSourceFromIdentifiers = sourceData?.datasourceDetail?.identifiers || [];
     const dataSourceToIdentifiers = targetData?.datasourceDetail?.identifiers || [];
     const dataSourceToIdentifiersNames = dataSourceToIdentifiers.map((item) => {
-      return item.name;
+      return item.bizName;
     });
     const keyOptions = dataSourceFromIdentifiers.reduce((options: any[], item: any) => {
-      const { name } = item;
-      if (dataSourceToIdentifiersNames.includes(name)) {
+      const { bizName } = item;
+      if (dataSourceToIdentifiersNames.includes(bizName)) {
         options.push(item);
       }
       return options;
     }, []);
     setDataSourceOptions(
       keyOptions.map((item: any) => {
-        const { name } = item;
+        const { name, bizName } = item;
         return {
           label: name,
-          value: name,
+          value: bizName,
         };
       }),
     );

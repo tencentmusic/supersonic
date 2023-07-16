@@ -15,7 +15,7 @@ public class DateConf {
     private static final long serialVersionUID = 3074129990945004340L;
 
 
-    private DateMode dateMode;
+    private DateMode dateMode = DateMode.RECENT_UNITS;
 
     /**
      * like 2021-10-22, dateMode=1

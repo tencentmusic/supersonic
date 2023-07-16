@@ -24,15 +24,8 @@ export function getAllConversations() {
   return request<Result<any>>(`${prefix}/chat/manage/getAll`);
 }
 
-export function getMiniProgramList(id: string, type: string) {
-  return request<Result<any>>(`/openapi/bd-bi/api/polaris/sql/getInterpretList/${id}/${type}`, {
-    method: 'GET',
-    skipErrorHandler: true,
-  });
-}
-
 export function getDomainList() {
-  return request<Result<DomainType[]>>(`${prefix}/semantic/domain/getDomainList`, {
+  return request<Result<DomainType[]>>(`${prefix}/chat/conf/domainList/view`, {
     method: 'GET',
     skipErrorHandler: true,
   });

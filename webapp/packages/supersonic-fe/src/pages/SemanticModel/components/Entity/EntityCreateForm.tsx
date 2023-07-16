@@ -4,27 +4,24 @@ import { message, Form, Input, Select, Button } from 'antd';
 import { addDomainExtend, editDomainExtend } from '../../service';
 import type { ISemantic, IChatConfig } from '../../data';
 import { formLayout } from '@/components/FormHelper/utils';
-import { exChangeRichEntityListToIds } from './utils';
+import { formatRichEntityDataListToIds } from './utils';
 import styles from '../style.less';
 
 type Props = {
-  entityData: IChatConfig.IEntity;
-  metricList: ISemantic.IMetricList;
+  entityData: IChatConfig.IChatRichConfig;
   dimensionList: ISemantic.IDimensionList;
   domainId: number;
   onSubmit: () => void;
 };
 
 const FormItem = Form.Item;
-const TextArea = Input.TextArea;
 
 const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
-  { entityData, metricList, dimensionList, domainId, onSubmit },
+  { entityData, dimensionList, domainId, onSubmit },
   ref,
 ) => {
   const [form] = Form.useForm();
-
-  const [metricListOptions, setMetricListOptions] = useState<any>([]);
+  const formatEntityData = formatRichEntityDataListToIds(entityData);
   const [dimensionListOptions, setDimensionListOptions] = useState<any>([]);
 
   const getFormValidateFields = async () => {
@@ -33,29 +30,19 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
 
   useEffect(() => {
     form.resetFields();
-    if (Object.keys(entityData).length === 0) {
+    if (!entityData?.entity) {
       return;
     }
-    const names = entityData.names || [];
-    const formatEntityData = exChangeRichEntityListToIds(entityData);
+
     form.setFieldsValue({
-      ...formatEntityData,
-      name: names.join(','),
+      ...formatEntityData.entity,
+      id: formatEntityData.id,
     });
   }, [entityData]);
 
   useImperativeHandle(ref, () => ({
     getFormValidateFields,
   }));
-  useEffect(() => {
-    const metricOption = metricList.map((item: ISemantic.IMetricItem) => {
-      return {
-        label: item.name,
-        value: item.id,
-      };
-    });
-    setMetricListOptions(metricOption);
-  }, [metricList]);
 
   useEffect(() => {
     const dimensionEnum = dimensionList.map((item: ISemantic.IDimensionItem) => {
@@ -75,10 +62,14 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
       saveDomainExtendQuery = editDomainExtend;
     }
     const { code, msg, data } = await saveDomainExtendQuery({
-      entity: {
-        ...values,
-        names: name.split(','),
+      chatDetailConfig: {
+        ...formatEntityData,
+        entity: {
+          ...values,
+          names: name.split(','),
+        },
       },
+      id,
       domainId,
     });
 
@@ -99,64 +90,29 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
         </FormItem>
         <FormItem
           name="name"
-          label="实体名称"
-          rules={[{ required: true, message: '请输入实体名称' }]}
+          label="实体别名"
+          // rules={[{ required: true, message: '请输入实体别名' }]}
         >
-          <TextArea
-            placeholder="请输入实体名称,多个实体名称以英文逗号分隔"
-            style={{ height: 100 }}
-          />
+          <Input placeholder="请输入实体别名,多个名称以英文逗号分隔" />
         </FormItem>
         <FormItem
-          name="entityIds"
+          name="entityId"
           label="唯一标识"
-          rules={[{ required: true, message: '请选择实体标识' }]}
+          // rules={[{ required: true, message: '请选择实体标识' }]}
         >
           <Select
-            mode="multiple"
+            // mode="multiple"
             allowClear
             style={{ width: '100%' }}
-            filterOption={(inputValue: string, item: any) => {
-              const { label } = item;
-              if (label.includes(inputValue)) {
-                return true;
-              }
-              return false;
-            }}
+            // filterOption={(inputValue: string, item: any) => {
+            //   const { label } = item;
+            //   if (label.includes(inputValue)) {
+            //     return true;
+            //   }
+            //   return false;
+            // }}
             placeholder="请选择主体标识"
             options={dimensionListOptions}
-          />
-        </FormItem>
-        <FormItem name={['detailData', 'dimensionIds']} label="维度信息">
-          <Select
-            mode="multiple"
-            allowClear
-            style={{ width: '100%' }}
-            filterOption={(inputValue: string, item: any) => {
-              const { label } = item;
-              if (label.includes(inputValue)) {
-                return true;
-              }
-              return false;
-            }}
-            placeholder="请选择展示维度信息"
-            options={dimensionListOptions}
-          />
-        </FormItem>
-        <FormItem name={['detailData', 'metricIds']} label="指标信息">
-          <Select
-            mode="multiple"
-            allowClear
-            style={{ width: '100%' }}
-            filterOption={(inputValue: string, item: any) => {
-              const { label } = item;
-              if (label.includes(inputValue)) {
-                return true;
-              }
-              return false;
-            }}
-            placeholder="请选择展示指标信息"
-            options={metricListOptions}
           />
         </FormItem>
         <FormItem>

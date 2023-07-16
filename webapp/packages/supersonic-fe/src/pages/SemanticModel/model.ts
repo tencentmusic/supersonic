@@ -1,18 +1,20 @@
 import type { Reducer, Effect } from 'umi';
 import { message } from 'antd';
+import { ISemantic } from './data';
 import { getDimensionList, queryMetric, excuteSql, getDatabaseByDomainId } from './service';
 
 export type StateType = {
   current: number;
   pageSize: number;
-  selectDomainId: any;
+  selectDomainId: number;
   selectDomainName: string;
-  dimensionList: any[];
-  metricList: any[];
+  dimensionList: ISemantic.IDimensionList;
+  metricList: ISemantic.IMetricList;
   searchParams: Record<string, any>;
-  domainData: any;
   dataBaseResultColsMap: any;
   dataBaseConfig: any;
+  domainData?: ISemantic.IDomainItem;
+  domainList: ISemantic.IDomainItem[];
 };
 
 export type ModelType = {
@@ -26,6 +28,7 @@ export type ModelType = {
   };
   reducers: {
     setSelectDomain: Reducer<StateType>;
+    setDomainList: Reducer<StateType>;
     setPagination: Reducer<StateType>;
     setDimensionList: Reducer<StateType>;
     setDataBaseScriptColumn: Reducer<StateType>;
@@ -38,14 +41,15 @@ export type ModelType = {
 export const defaultState: StateType = {
   current: 1,
   pageSize: 20,
-  selectDomainId: undefined,
+  selectDomainId: 0,
   selectDomainName: '',
   searchParams: {},
   dimensionList: [],
   metricList: [],
-  domainData: {},
+  domainData: undefined,
   dataBaseResultColsMap: {},
   dataBaseConfig: {},
+  domainList: [],
 };
 
 const Model: ModelType = {
@@ -117,6 +121,12 @@ const Model: ModelType = {
         selectDomainId: action.selectDomainId,
         selectDomainName: action.selectDomainName,
         domainData: action.domainData,
+      };
+    },
+    setDomainList(state = defaultState, action) {
+      return {
+        ...state,
+        ...action.payload,
       };
     },
     setPagination(state = defaultState, action) {

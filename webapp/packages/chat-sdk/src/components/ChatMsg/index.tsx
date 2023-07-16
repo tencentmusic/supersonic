@@ -38,7 +38,8 @@ const ChatMsg: React.FC<Props> = ({
     if (
       categoryField.length > 1 ||
       queryMode === 'ENTITY_DETAIL' ||
-      queryMode === 'ENTITY_DIMENSION'
+      queryMode === 'ENTITY_DIMENSION' ||
+      (categoryField.length === 1 && metricFields.length === 0)
     ) {
       return <Table data={data} />;
     }

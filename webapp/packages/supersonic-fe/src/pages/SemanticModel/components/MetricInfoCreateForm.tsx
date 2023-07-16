@@ -88,6 +88,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       typeParams: typeParams,
       dataFormat,
       dataFormatType,
+      alias,
     } = metricItem as any;
     const isPercent = dataFormatType === 'percent';
     const initValue = {
@@ -97,6 +98,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       sensitiveLevel,
       description,
       isPercent,
+      alias,
       dataFormat: dataFormat || {
         decimalPlaces: 2,
         needMultiply100: false,

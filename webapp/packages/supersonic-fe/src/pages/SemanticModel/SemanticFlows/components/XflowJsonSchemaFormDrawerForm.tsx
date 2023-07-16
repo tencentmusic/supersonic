@@ -156,6 +156,10 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
       {
         <ClassDataSourceTypeModal
           open={createDataSourceModalOpen}
+          onCancel={() => {
+            resetSelectedNode();
+            setCreateDataSourceModalOpen(false);
+          }}
           onTypeChange={(type) => {
             if (type === 'fast') {
               setDataSourceModalVisible(true);

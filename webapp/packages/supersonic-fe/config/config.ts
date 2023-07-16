@@ -1,6 +1,6 @@
 // https://umijs.org/config/
 import { defineConfig } from 'umi';
-import defaultSettings from './defaultSettings';
+import defaultSettings, { publicPath } from './defaultSettings';
 import themeSettings from './themeSettings';
 import proxy from './proxy';
 import routes from './routes';
@@ -8,8 +8,6 @@ import moment from 'moment';
 import ENV_CONFIG from './envConfig';
 
 const { REACT_APP_ENV, RUN_TYPE } = process.env;
-
-const publicPath = '/webapp/';
 
 export default defineConfig({
   define: {
@@ -71,14 +69,6 @@ export default defineConfig({
   base: publicPath,
   publicPath,
   outputPath: RUN_TYPE === 'local' ? 'supersonic-webapp' : 'dist',
-  // https://github.com/zthxxx/react-dev-inspector
-  plugins: ['react-dev-inspector/plugins/umi/react-inspector'],
-  inspectorConfig: {
-    // loader options type and docs see below
-    exclude: [],
-    babelPlugins: [],
-    babelOptions: {},
-  },
   resolve: {
     includes: ['src/components'],
   },

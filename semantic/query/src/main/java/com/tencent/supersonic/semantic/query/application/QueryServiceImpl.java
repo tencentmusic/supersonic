@@ -8,25 +8,27 @@ import com.tencent.supersonic.semantic.api.core.pojo.QueryStat;
 import com.tencent.supersonic.semantic.api.core.request.DomainSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
 import com.tencent.supersonic.semantic.api.core.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.SqlParserResp;
 import com.tencent.supersonic.semantic.api.query.pojo.Cache;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QuerySqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
-import com.tencent.supersonic.semantic.core.domain.DatabaseService;
-import com.tencent.supersonic.semantic.query.domain.ParserService;
+import com.tencent.supersonic.semantic.query.application.executor.QueryExecutor;
 import com.tencent.supersonic.semantic.query.domain.QueryService;
 import com.tencent.supersonic.semantic.query.domain.SchemaService;
+import com.tencent.supersonic.semantic.query.domain.SemanticQueryEngine;
 import com.tencent.supersonic.semantic.query.domain.annotation.DataPermission;
+import com.tencent.supersonic.semantic.query.domain.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.domain.utils.QueryReqConverter;
-import com.tencent.supersonic.semantic.query.domain.utils.QueryStructUtils;
+import com.tencent.supersonic.semantic.query.domain.utils.QueryUtils;
 import com.tencent.supersonic.semantic.query.domain.utils.StatUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -35,28 +37,28 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class QueryServiceImpl implements QueryService {
 
-    private final ParserService parserService;
-    private final DatabaseService databaseService;
-    private final QueryStructUtils queryStructUtils;
+
     private final StatUtils statUtils;
     private final CacheUtils cacheUtils;
+    private final QueryUtils queryUtils;
     private final QueryReqConverter queryReqConverter;
 
     @Value("${query.cache.enable:true}")
     private Boolean cacheEnable;
 
-    public QueryServiceImpl(ParserService parserService,
-            DatabaseService databaseService,
-            QueryStructUtils queryStructUtils,
+    private final SemanticQueryEngine semanticQueryEngine;
+
+    public QueryServiceImpl(
             StatUtils statUtils,
             CacheUtils cacheUtils,
-            QueryReqConverter queryReqConverter) {
-        this.parserService = parserService;
-        this.databaseService = databaseService;
-        this.queryStructUtils = queryStructUtils;
+            QueryUtils queryUtils,
+            QueryReqConverter queryReqConverter,
+            SemanticQueryEngine semanticQueryEngine) {
         this.statUtils = statUtils;
         this.cacheUtils = cacheUtils;
+        this.queryUtils = queryUtils;
         this.queryReqConverter = queryReqConverter;
+        this.semanticQueryEngine = semanticQueryEngine;
     }
 
     @Override
@@ -69,35 +71,45 @@ public class QueryServiceImpl implements QueryService {
         SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
         List<DomainSchemaResp> domainSchemas = schemaService.fetchDomainSchema(filter, user);
 
-        SqlParserResp sqlParser = queryReqConverter.convert(querySqlCmd, domainSchemas);
-
-        return databaseService.executeSql(sqlParser.getSql(), querySqlCmd.getDomainId());
+        QueryStatement queryStatement = queryReqConverter.convert(querySqlCmd, domainSchemas);
+        queryStatement.setDomainId(querySqlCmd.getDomainId());
+        return semanticQueryEngine.execute(queryStatement);
     }
 
     @Override
     public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructCmd, User user) throws Exception {
-        QueryResultWithSchemaResp queryResultWithColumns;
+        QueryResultWithSchemaResp queryResultWithColumns = null;
         log.info("[queryStructCmd:{}]", queryStructCmd);
         try {
             statUtils.initStatInfo(queryStructCmd, user);
             String cacheKey = cacheUtils.generateCacheKey(queryStructCmd.getDomainId().toString(),
                     queryStructCmd.generateCommandMd5());
             handleGlobalCacheDisable(queryStructCmd);
-
-            if (queryStructUtils.queryCache(queryStructCmd.getCacheInfo())) {
-                queryResultWithColumns = queryStructUtils.queryByStructByCache(queryStructCmd, cacheKey);
-            } else {
-                queryResultWithColumns = queryStructUtils.queryByStructWithoutCache(queryStructCmd, cacheKey);
+            boolean isCache = isCache(queryStructCmd);
+            if (isCache) {
+                queryResultWithColumns = queryByCache(cacheKey, queryStructCmd);
+                if (queryResultWithColumns != null) {
+                    statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
+                    return queryResultWithColumns;
+                }
+            }
+            StatUtils.get().setUseResultCache(false);
+            QueryStatement queryStatement = semanticQueryEngine.plan(queryStructCmd);
+            QueryExecutor queryExecutor = semanticQueryEngine.route(queryStatement);
+            if (queryExecutor != null) {
+                queryResultWithColumns = semanticQueryEngine.execute(queryStatement);
+                if (isCache) {
+                    // if queryResultWithColumns is not null, update cache data
+                    queryUtils.cacheResultLogic(cacheKey, queryResultWithColumns);
+                }
             }
             statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
-
+            return queryResultWithColumns;
         } catch (Exception e) {
             log.warn("exception in queryByStruct, e: ", e);
             statUtils.statInfo2DbAsync(TaskStatusEnum.ERROR);
             throw e;
         }
-
-        return queryResultWithColumns;
     }
 
     @Override
@@ -115,7 +127,38 @@ public class QueryServiceImpl implements QueryService {
         String cacheKey = cacheUtils.generateCacheKey(
                 queryMultiStructCmd.getQueryStructCmds().get(0).getDomainId().toString(),
                 queryMultiStructCmd.generateCommandMd5());
-        return queryStructUtils.queryByMultiStructWithoutCache(queryMultiStructCmd, cacheKey);
+        boolean isCache = isCache(queryMultiStructCmd);
+        QueryResultWithSchemaResp queryResultWithColumns;
+        if (isCache) {
+            queryResultWithColumns = queryByCache(cacheKey, queryMultiStructCmd);
+            if (queryResultWithColumns != null) {
+                statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
+                return queryResultWithColumns;
+            }
+        }
+        log.info("stat queryByStructWithoutCache, queryMultiStructCmd:{}", queryMultiStructCmd);
+        try {
+            List<QueryStatement> sqlParsers = new ArrayList<>();
+            for (QueryStructReq queryStructCmd : queryMultiStructCmd.getQueryStructCmds()) {
+                QueryStatement queryStatement = semanticQueryEngine.plan(queryStructCmd);
+                queryUtils.checkSqlParse(queryStatement);
+                sqlParsers.add(queryStatement);
+            }
+            log.info("multi sqlParser:{}", sqlParsers);
+
+            QueryStatement sqlParser = queryUtils.sqlParserUnion(queryMultiStructCmd, sqlParsers);
+            queryResultWithColumns = semanticQueryEngine.execute(sqlParser);
+            if (queryResultWithColumns != null) {
+                statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
+                queryUtils.fillItemNameInfo(queryResultWithColumns, queryMultiStructCmd);
+            }
+            queryUtils.cacheResultLogic(cacheKey, queryResultWithColumns);
+            return queryResultWithColumns;
+        } catch (Exception e) {
+            log.warn("exception in queryByMultiStruct, e: ", e);
+            statUtils.statInfo2DbAsync(TaskStatusEnum.ERROR);
+            throw e;
+        }
     }
 
 
@@ -137,6 +180,38 @@ public class QueryServiceImpl implements QueryService {
     @Override
     public List<QueryStat> getQueryStatInfoWithoutCache(ItemUseReq itemUseCommend) {
         return statUtils.getQueryStatInfoWithoutCache(itemUseCommend);
+    }
+
+    private boolean isCache(QueryStructReq queryStructCmd) {
+        if (!cacheEnable) {
+            return false;
+        }
+        if (queryStructCmd.getCacheInfo() != null) {
+            return queryStructCmd.getCacheInfo().getCache();
+        }
+        return false;
+    }
+
+    private boolean isCache(QueryMultiStructReq queryStructCmd) {
+        if (!cacheEnable) {
+            return false;
+        }
+        if (!CollectionUtils.isEmpty(queryStructCmd.getQueryStructCmds())
+                && queryStructCmd.getQueryStructCmds().get(0).getCacheInfo() != null) {
+            return queryStructCmd.getQueryStructCmds().get(0).getCacheInfo().getCache();
+        }
+        return false;
+    }
+
+    private QueryResultWithSchemaResp queryByCache(String key, Object queryCmd) {
+
+        Object resultObject = cacheUtils.get(key);
+        if (Objects.nonNull(resultObject)) {
+            log.info("queryByStructWithCache, key:{}, queryCmd:{}", key, queryCmd.toString());
+            statUtils.updateResultCacheKey(key);
+            return (QueryResultWithSchemaResp) resultObject;
+        }
+        return null;
     }
 
 

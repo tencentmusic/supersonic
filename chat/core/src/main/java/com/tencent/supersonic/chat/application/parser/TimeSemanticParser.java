@@ -66,19 +66,18 @@ public class TimeSemanticParser implements SemanticParser {
                 DateConf info = new DateConf();
                 String zhPeriod = m.group("zhPeriod");
                 int days;
-                info.setPeriod(Constants.DAY);
                 switch (zhPeriod) {
                     case "周":
                         days = 7;
-                        //info.setPeriod(Constants.WEEK);
+                        info.setPeriod(Constants.WEEK);
                         break;
                     case "月":
                         days = 30;
-                        //info.setPeriod(Constants.MONTH);
+                        info.setPeriod(Constants.MONTH);
                         break;
                     case "年":
                         days = 365;
-                        //info.setPeriod(Constants.YEAR);
+                        info.setPeriod(Constants.YEAR);
                         break;
                     default:
                         days = 1;
@@ -92,7 +91,7 @@ public class TimeSemanticParser implements SemanticParser {
                 }
                 info.setText(text);
                 info.setStartDate(LocalDate.now().minusDays(days).toString());
-                info.setUnit(days);
+                info.setUnit(num);
                 //queryContext.getParseInfo().setDateInfo(info);
                 for (SemanticQuery query : queryContext.getCandidateQueries()) {
                     if (query instanceof MetricSemanticQuery) {

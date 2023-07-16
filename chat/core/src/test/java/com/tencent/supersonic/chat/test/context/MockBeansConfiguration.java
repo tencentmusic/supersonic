@@ -13,8 +13,8 @@ import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
 import com.tencent.supersonic.semantic.api.core.response.MetricResp;
 import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
 import com.tencent.supersonic.chat.application.ConfigServiceImpl;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigInfo;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichInfo;
+import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigResp;
+import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichResp;
 import com.tencent.supersonic.chat.domain.pojo.config.DefaultMetric;
 import com.tencent.supersonic.chat.domain.pojo.config.DefaultMetricInfo;
 import com.tencent.supersonic.chat.domain.pojo.config.EntityInternalDetail;
@@ -47,17 +47,17 @@ public class MockBeansConfiguration {
 
     public static void buildHttpSemanticServiceImpl(SemanticLayer httpSemanticLayer, List<DimSchemaResp> dimensionDescs,
             List<MetricSchemaResp> metricDescs) {
-        ChatConfigRichInfo chaConfigRichDesc = new ChatConfigRichInfo();
+        ChatConfigRichResp chaConfigRichDesc = new ChatConfigRichResp();
         DefaultMetric defaultMetricDesc = new DefaultMetric();
         defaultMetricDesc.setUnit(3);
         defaultMetricDesc.setPeriod(Constants.DAY);
-        chaConfigRichDesc.setDefaultMetrics(new ArrayList<>(Arrays.asList(defaultMetricDesc)));
+//        chaConfigRichDesc.setDefaultMetrics(new ArrayList<>(Arrays.asList(defaultMetricDesc)));
         EntityRichInfo entityDesc = new EntityRichInfo();
         List<DimSchemaResp> dimensionDescs1 = new ArrayList<>();
         DimSchemaResp dimensionDesc = new DimSchemaResp();
         dimensionDesc.setId(162L);
         dimensionDescs1.add(dimensionDesc);
-        entityDesc.setEntityIds(dimensionDescs1);
+//        entityDesc.setEntityIds(dimensionDescs1);
 
         DimSchemaResp dimensionDesc2 = new DimSchemaResp();
         dimensionDesc2.setId(163L);
@@ -71,14 +71,14 @@ public class MockBeansConfiguration {
         metricDesc.setBizName("js_play_cnt");
         metricDesc.setName("结算播放量");
         entityInternalDetailDesc.setMetricList(new ArrayList<>(Arrays.asList(metricDesc)));
-        entityDesc.setEntityInternalDetailDesc(entityInternalDetailDesc);
+//        entityDesc.setEntityInternalDetailDesc(entityInternalDetailDesc);
 
-        chaConfigRichDesc.setEntity(entityDesc);
+//        chaConfigRichDesc.setEntity(entityDesc);
 //        when(httpSemanticLayer.getChatConfigRichInfo(anyLong())).thenReturn(chaConfigRichDesc);
         DomainSchemaResp domainSchemaDesc = new DomainSchemaResp();
         domainSchemaDesc.setDimensions(dimensionDescs);
         domainSchemaDesc.setMetrics(metricDescs);
-        when(httpSemanticLayer.getDomainSchemaInfo(anyLong())).thenReturn(domainSchemaDesc);
+//        when(httpSemanticLayer.getDomainSchemaInfo(anyLong())).thenReturn(domainSchemaDesc);
 
         DomainInfos domainInfos = new DomainInfos();
         when(SchemaInfoConverter.convert(httpSemanticLayer.getDomainSchemaInfo(anyList()))).thenReturn(domainInfos);
@@ -92,8 +92,8 @@ public class MockBeansConfiguration {
         List<DefaultMetricInfo> defaultMetricInfos = new ArrayList<>();
         defaultMetricInfos.add(defaultMetricInfo);
 
-        ChatConfigInfo chaConfigDesc = new ChatConfigInfo();
-        chaConfigDesc.setDefaultMetrics(defaultMetricInfos);
+        ChatConfigResp chaConfigDesc = new ChatConfigResp();
+//        chaConfigDesc.setDefaultMetrics(defaultMetricInfos);
         when(configService.fetchConfigByDomainId(anyLong())).thenReturn(chaConfigDesc);
     }
 

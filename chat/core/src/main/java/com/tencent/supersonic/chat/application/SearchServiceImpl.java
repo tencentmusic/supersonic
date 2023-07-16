@@ -2,6 +2,8 @@ package com.tencent.supersonic.chat.application;
 
 import com.google.common.collect.Lists;
 import com.hankcs.hanlp.seg.common.Term;
+import com.tencent.supersonic.chat.api.pojo.Filter;
+import com.tencent.supersonic.chat.api.pojo.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.request.QueryContextReq;
 import com.tencent.supersonic.chat.application.knowledge.NatureHelper;
@@ -64,8 +66,7 @@ public class SearchServiceImpl implements SearchService {
         List<ItemDO> metricsDb = domainInfosDb.getMetrics();
         final Map<Integer, String> domainToName = domainInfosDb.getDomainToName();
         // 2.detect by segment
-        List<Term> originals = HanlpHelper.getSegment().seg(queryText.toLowerCase()).stream()
-                .collect(Collectors.toList());
+        List<Term> originals = HanlpHelper.getTerms(queryText);
         Map<MatchText, List<MapResult>> regTextMap = searchMatchStrategy.match(queryText, originals,
                 queryCtx.getDomainId());
         regTextMap.entrySet().stream().forEach(m -> HanlpHelper.transLetterOriginal(m.getValue()));
@@ -101,7 +102,7 @@ public class SearchServiceImpl implements SearchService {
 
         for (Map.Entry<String, String> natureToNameEntry : natureToNameMap.entrySet()) {
             searchDimensionValue(metricsDb, domainToName, domainStat.getMetricDomainCount(), searchResults,
-                    existMetricAndDimension, matchText, natureToNameMap, natureToNameEntry);
+                    existMetricAndDimension, matchText, natureToNameMap, natureToNameEntry, queryCtx.getQueryFilter());
         }
         return searchResults.stream().limit(RESULT_SIZE).collect(Collectors.toList());
     }
@@ -140,13 +141,14 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private void searchDimensionValue(List<ItemDO> metricsDb,
-            Map<Integer, String> domainToName,
-            long metricDomainCount,
-            Set<SearchResult> searchResults,
-            boolean existMetricAndDimension,
-            MatchText matchText,
-            Map<String, String> natureToNameMap,
-            Map.Entry<String, String> natureToNameEntry) {
+                                      Map<Integer, String> domainToName,
+                                      long metricDomainCount,
+                                      Set<SearchResult> searchResults,
+                                      boolean existMetricAndDimension,
+                                      MatchText matchText,
+                                      Map<String, String> natureToNameMap,
+                                      Map.Entry<String, String> natureToNameEntry,
+                                      QueryFilter queryFilter) {
         String nature = natureToNameEntry.getKey();
         String wordName = natureToNameEntry.getValue();
 
@@ -158,6 +160,9 @@ public class SearchServiceImpl implements SearchService {
         }
         // If there are no metric/dimension, complete the  metric information
         if (metricDomainCount <= 0 && !existMetricAndDimension) {
+            if (filterByQueryFilter(matchText.getRegText(), queryFilter)) {
+                return;
+            }
             searchResults.add(
                     new SearchResult(matchText.getRegText() + wordName, wordName, domainToName.get(domain), domain,
                             schemaElementType));
@@ -167,7 +172,6 @@ public class SearchServiceImpl implements SearchService {
             }
             List<String> metrics = filerMetricsByDomain(metricsDb, domain).stream().limit(metricSize).collect(
                     Collectors.toList());
-            ;
             for (String metric : metrics) {
                 String subRecommend = matchText.getRegText() + wordName + NatureType.SPACE + metric;
                 searchResults.add(
@@ -179,6 +183,19 @@ public class SearchServiceImpl implements SearchService {
                     new SearchResult(matchText.getRegText() + wordName, wordName, domainToName.get(domain), domain,
                             schemaElementType));
         }
+    }
+
+    private boolean filterByQueryFilter(String regText, QueryFilter queryFilter) {
+        if (queryFilter == null || CollectionUtils.isEmpty(queryFilter.getFilters())) {
+            return false;
+        }
+        List<Filter> filters = queryFilter.getFilters();
+        for (Filter filter : filters) {
+            if (regText.equalsIgnoreCase(String.valueOf(filter.getValue()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     protected List<String> filerMetricsByDomain(List<ItemDO> metricsDb, Integer domain) {

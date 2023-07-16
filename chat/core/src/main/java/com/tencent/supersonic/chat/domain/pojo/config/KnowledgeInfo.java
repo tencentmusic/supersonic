@@ -27,9 +27,12 @@ public class KnowledgeInfo {
     @NotNull
     private TypeEnums type = TypeEnums.DIMENSION;
 
-    private List<String> blackList;
-    private List<String> whiteList;
-    private List<String> ruleList;
-    private Boolean isDictInfo;
+    private Boolean searchEnable = false;
+
+    /**
+     * advanced knowledge config for single item
+     */
+    private KnowledgeAdvancedConfig knowledgeAdvancedConfig;
+
 
 }

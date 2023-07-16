@@ -1,2 +1,2 @@
 export APP_NAME=chat-service
-export MAIN_CLASS=com.tencent.supersonic.Launcher
+export MAIN_CLASS=com.tencent.supersonic.StandaloneLauncher

@@ -31,8 +31,7 @@ public class DatabaseSchemaMapper implements SchemaMapper {
 
         log.debug("before db mapper,mapInfo:{}", queryContext.getMapInfo());
 
-        List<Term> terms = HanlpHelper.getSegment().seg(queryContext.getQueryText().toLowerCase()).stream()
-                .collect(Collectors.toList());
+        List<Term> terms = HanlpHelper.getTerms(queryContext.getQueryText());
 
         WordNatureService wordNatureService = ContextUtils.getBean(WordNatureService.class);
 

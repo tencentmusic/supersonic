@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" class="design-iconfont">
+  <path opacity=".3" d="M13.4913 12.3006C13.8051 12.1152 14.1949 12.1152 14.5087 12.3006L23.543 17.6391C24.1981 18.0261 24.1981 18.9739 23.543 19.3609L14.5087 24.6994C14.1949 24.8848 13.8051 24.8848 13.4913 24.6994L4.45695 19.3609C3.80192 18.9739 3.80193 18.0261 4.45695 17.6391L13.4913 12.3006Z" fill="#0052D9"></path>
+  <g filter="url(#91lpbu3w7__filter0_b_1_7)">
+    <path d="M13.4913 7.30061C13.8051 7.11518 14.1949 7.11518 14.5087 7.30061L23.543 12.6391C24.1981 13.0261 24.1981 13.9739 23.543 14.3609L14.5087 19.6994C14.1949 19.8848 13.8051 19.8848 13.4913 19.6994L4.45695 14.3609C3.80192 13.9739 3.80193 13.0261 4.45695 12.6391L13.4913 7.30061Z" fill="#166CE4" fill-opacity=".6"></path>
+  </g>
+  <path d="M13.4913 2.30061C13.8051 2.11518 14.1949 2.11518 14.5087 2.30061L23.543 7.63907C24.1981 8.02614 24.1981 8.97386 23.543 9.36093L14.5087 14.6994C14.1949 14.8848 13.8051 14.8848 13.4913 14.6994L4.45695 9.36093C3.80192 8.97386 3.80193 8.02614 4.45695 7.63907L13.4913 2.30061Z" fill="#0052D9"></path>
+  <defs>
+    <filter id="91lpbu3w7__filter0_b_1_7" x="1.96568" y="5.16154" width="24.0686" height="16.6769" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0"></feFlood>
+      <feGaussianBlur in="BackgroundImage" stdDeviation="1"></feGaussianBlur>
+      <feComposite in2="SourceAlpha" operator="in"></feComposite>
+      <feBlend in="SourceGraphic" in2="effect1_backgroundBlur_1_7"></feBlend>
+    </filter>
+  </defs>
+</svg>

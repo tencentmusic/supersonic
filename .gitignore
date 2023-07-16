@@ -14,4 +14,4 @@ assembly/runtime/*
 *.umi/
 /assembly/deploy
 /runtime
-.flattened-pom.xml
+**/.flattened-pom.xml

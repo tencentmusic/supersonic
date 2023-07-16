@@ -1,14 +1,17 @@
-import { Tabs, Popover } from 'antd';
+import { Tabs, Popover, message } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { connect, Helmet } from 'umi';
+import { connect, Helmet, useParams, history } from 'umi';
 import ProjectListTree from './components/ProjectList';
 import styles from './components/style.less';
 import type { StateType } from './model';
 import { DownOutlined } from '@ant-design/icons';
 import EntitySection from './components/Entity/EntitySection';
+import { ISemantic } from './data';
+import { getDomainList } from './service';
+import OverView from './components/OverView';
+import { findLeafNodesFromDomainList } from './utils';
+import { ChatConfigType } from './enum';
 import type { Dispatch } from 'umi';
-
-const { TabPane } = Tabs;
 
 type Props = {
   domainManger: StateType;
@@ -17,8 +20,15 @@ type Props = {
 
 const ChatSetting: React.FC<Props> = ({ domainManger, dispatch }) => {
   window.RUNNING_ENV = 'chat';
-  const { selectDomainId, selectDomainName } = domainManger;
+  const defaultTabKey = 'metric';
+  const params: any = useParams();
+  const menuKey = params.menuKey ? params.menuKey : defaultTabKey;
+  const modelId = params.modelId;
+  const { selectDomainId, selectDomainName, domainList } = domainManger;
+  const [modelList, setModelList] = useState<ISemantic.IDomainItem[]>([]);
   const [open, setOpen] = useState(false);
+  const [isModel, setIsModel] = useState<boolean>(false);
+  const [activeKey, setActiveKey] = useState<string>(menuKey);
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
@@ -37,16 +47,103 @@ const ChatSetting: React.FC<Props> = ({ domainManger, dispatch }) => {
           domainId: selectDomainId,
         },
       });
+      pushUrlMenu(selectDomainId, menuKey);
     }
   }, [selectDomainId]);
+
+  useEffect(() => {
+    if (!selectDomainId) {
+      return;
+    }
+    const list = findLeafNodesFromDomainList(domainList, selectDomainId);
+    setModelList(list);
+    if (Array.isArray(list) && list.length > 0) {
+      setIsModel(false);
+      pushUrlMenu(selectDomainId, 'overview');
+      setActiveKey('overview');
+    } else {
+      setIsModel(true);
+      const currentMenuKey = menuKey === 'overview' ? defaultTabKey : menuKey;
+      pushUrlMenu(selectDomainId, currentMenuKey);
+      setActiveKey(currentMenuKey);
+    }
+  }, [domainList, selectDomainId]);
+
+  const initSelectedDomain = (domainList: ISemantic.IDomainItem[]) => {
+    const targetNode = domainList.filter((item: any) => {
+      return `${item.id}` === modelId;
+    })[0];
+    if (!targetNode) {
+      const firstRootNode = domainList.filter((item: any) => {
+        return item.parentId === 0;
+      })[0];
+      if (firstRootNode) {
+        const { id, name } = firstRootNode;
+        dispatch({
+          type: 'domainManger/setSelectDomain',
+          selectDomainId: id,
+          selectDomainName: name,
+          domainData: firstRootNode,
+        });
+      }
+    } else {
+      const { id, name } = targetNode;
+      dispatch({
+        type: 'domainManger/setSelectDomain',
+        selectDomainId: id,
+        selectDomainName: name,
+        domainData: targetNode,
+      });
+    }
+  };
+
+  const initProjectTree = async () => {
+    const { code, data, msg } = await getDomainList();
+    if (code === 200) {
+      if (!selectDomainId) {
+        initSelectedDomain(data);
+      }
+      dispatch({
+        type: 'domainManger/setDomainList',
+        payload: { domainList: data },
+      });
+    } else {
+      message.error(msg);
+    }
+  };
+
+  useEffect(() => {
+    initProjectTree();
+  }, []);
+
+  const pushUrlMenu = (domainId: number, menuKey: string) => {
+    history.push(`/chatSetting/${domainId}/${menuKey}`);
+  };
+
+  const tabItem = [
+    {
+      label: '子主题域',
+      key: 'overview',
+      children: <OverView modelList={modelList} />,
+    },
+  ];
+
+  const isModelItem = [
+    {
+      label: '指标场景',
+      key: 'metric',
+      children: <EntitySection chatConfigType={ChatConfigType.AGG} />,
+    },
+    {
+      label: '明细场景',
+      key: 'dimenstion',
+      children: <EntitySection chatConfigType={ChatConfigType.DETAIL} />,
+    },
+  ];
 
   return (
     <div className={styles.projectBody}>
       <Helmet title={'问答设置-超音数'} />
-      {/* 页面改版取消侧边栏转换为popover形式后，因为popover不触发则组件不加载，需要保留原本页面初始化需要ProjectListTree向model中写入首个主题域数据逻辑，在此引入但并不显示 */}
-      <div style={{ display: 'none' }}>
-        <ProjectListTree />
-      </div>
       <div className={styles.projectManger}>
         <h2 className={styles.title}>
           <Popover
@@ -57,6 +154,7 @@ const ChatSetting: React.FC<Props> = ({ domainManger, dispatch }) => {
             }}
             content={
               <ProjectListTree
+                createDomainBtnVisible={false}
                 onTreeSelected={() => {
                   setOpen(false);
                 }}
@@ -78,11 +176,16 @@ const ChatSetting: React.FC<Props> = ({ domainManger, dispatch }) => {
         </h2>
         {selectDomainId ? (
           <>
-            <Tabs className={styles.tab} defaultActiveKey="chatSetting" destroyInactiveTabPane>
-              <TabPane className={styles.tabPane} tab="问答设置" key="chatSetting">
-                <EntitySection />
-              </TabPane>
-            </Tabs>
+            <Tabs
+              className={styles.tab}
+              activeKey={activeKey}
+              destroyInactiveTabPane
+              onChange={(menuKey: string) => {
+                setActiveKey(menuKey);
+                pushUrlMenu(selectDomainId, menuKey);
+              }}
+              items={!isModel ? tabItem : isModelItem}
+            />
           </>
         ) : (
           <h2 className={styles.mainTip}>请选择项目</h2>

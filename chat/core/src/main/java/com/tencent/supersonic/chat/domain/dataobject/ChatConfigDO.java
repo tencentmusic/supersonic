@@ -15,29 +15,11 @@ public class ChatConfigDO {
     private Long id;
 
     private Long domainId;
-    /**
-     * default metrics information about the domain
-     */
-    private String defaultMetrics;
 
-    /**
-     * invisible dimensions/metrics
-     */
-    private String visibility;
+    private String chatDetailConfig;
 
-    /**
-     * the entity info about the domain
-     */
-    private String entity;
+    private String chatAggConfig;
 
-    /**
-     * information about dictionary about the domain
-     */
-    private String knowledgeInfo;
-
-    /**
-     * available status
-     */
     private Integer status;
 
     /**

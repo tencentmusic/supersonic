@@ -4,9 +4,12 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.pojo.*;
 import com.tencent.supersonic.chat.api.request.QueryContextReq;
+import com.tencent.supersonic.common.constant.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -25,6 +28,7 @@ public class QueryFilterMapper implements SchemaMapper {
         QueryFilter queryFilter = queryContext.getQueryFilter();
         SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
         List<SchemaElementMatch> schemaElementMatches = schemaMapInfo.getMatchedElements(domainId);
+        clearOtherSchemaElementMatch(domainId, schemaMapInfo);
         convertFilterToSchemaMapInfo(queryFilter.getFilters(), schemaElementMatches);
     }
 
@@ -33,6 +37,7 @@ public class QueryFilterMapper implements SchemaMapper {
         if (CollectionUtils.isEmpty(schemaElementMatches)) {
             schemaElementMatches = Lists.newArrayList();
         }
+        List<String> words = schemaElementMatches.stream().map(SchemaElementMatch::getWord).collect(Collectors.toList());
         for (Filter filter : filters) {
             SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
                     .elementType(SchemaElementType.VALUE)
@@ -40,11 +45,22 @@ public class QueryFilterMapper implements SchemaMapper {
                     .frequency(FREQUENCY)
                     .word(String.valueOf(filter.getValue()))
                     .similarity(SIMILARITY)
-                    .detectWord(filter.getName())
+                    .detectWord(Constants.EMPTY)
                     .build();
+            if (words.contains(schemaElementMatch.getWord())) {
+                continue;
+            }
             schemaElementMatches.add(schemaElementMatch);
         }
         log.info("schemaElementMatches after queryFilerMapper:{}", schemaElementMatches);
+    }
+
+    private void clearOtherSchemaElementMatch(Integer domainId,  SchemaMapInfo schemaMapInfo) {
+        for (Map.Entry<Integer, List<SchemaElementMatch>> entry : schemaMapInfo.getDomainElementMatches().entrySet()) {
+            if (!entry.getKey().equals(domainId)) {
+                entry.getValue().clear();
+            }
+        }
     }
 
 }

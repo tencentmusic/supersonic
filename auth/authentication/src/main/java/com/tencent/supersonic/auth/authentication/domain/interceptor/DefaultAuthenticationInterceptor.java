@@ -2,6 +2,7 @@ package com.tencent.supersonic.auth.authentication.domain.interceptor;
 
 
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
 import com.tencent.supersonic.auth.authentication.application.UserServiceImpl;
 import com.tencent.supersonic.auth.authentication.domain.utils.UserTokenUtils;
@@ -27,11 +28,12 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
         userTokenUtils = ContextUtils.getBean(UserTokenUtils.class);
         s2ThreadContext = ContextUtils.getBean(S2ThreadContext.class);
         if (!authenticationConfig.isEnabled()) {
+            setFakerUser(request);
             return true;
         }
         if (isInternalRequest(request)) {
-            String token = userTokenUtils.generateAdminToken();
-            reflectSetparam(request, authenticationConfig.getTokenHttpHeaderKey(), token);
+            setFakerUser(request);
+            return true;
         }
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         Method method = handlerMethod.getMethod();
@@ -47,14 +49,24 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
 
         UserWithPassword user = userTokenUtils.getUserWithPassword(request);
         if (StringUtils.isNotBlank(user.getName())) {
-            ThreadContext threadContext = ThreadContext.builder()
-                    .token(request.getHeader(authenticationConfig.getTokenHttpHeaderKey()))
-                    .userName(user.getName())
-                    .build();
-            s2ThreadContext.set(threadContext);
+            setContext(user.getName(), request);
             return true;
         }
         throw new AccessException("authentication failed, please login");
+    }
+
+    private void setFakerUser(HttpServletRequest request) {
+        String token = userTokenUtils.generateAdminToken();
+        reflectSetparam(request, authenticationConfig.getTokenHttpHeaderKey(), token);
+        setContext(User.getFakeUser().getName(), request);
+    }
+
+    private void setContext(String userName, HttpServletRequest request) {
+        ThreadContext threadContext = ThreadContext.builder()
+                .token(request.getHeader(authenticationConfig.getTokenHttpHeaderKey()))
+                .userName(userName)
+                .build();
+        s2ThreadContext.set(threadContext);
     }
 
 

@@ -15,11 +15,11 @@ import com.tencent.supersonic.semantic.core.domain.adaptor.engineadapter.EngineA
 import com.tencent.supersonic.semantic.core.domain.adaptor.engineadapter.EngineAdaptorFactory;
 import com.tencent.supersonic.semantic.core.domain.pojo.Datasource;
 import com.tencent.supersonic.semantic.core.domain.pojo.DatasourceQueryEnum;
-import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 
 @Service
@@ -30,7 +30,7 @@ public class DatasourceYamlManager {
         DatasourceDetail datasourceDetail = datasource.getDatasourceDetail();
         EngineAdaptor engineAdaptor = EngineAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         SysTimeDimensionBuilder.addSysTimeDimension(datasourceDetail.getDimensions(), engineAdaptor);
-        addInterCntMetric(datasource.getBizName(), datasourceDetail.getMeasures());
+        addInterCntMetric(datasource.getBizName(), datasourceDetail);
         DatasourceYamlTpl datasourceYamlTpl = new DatasourceYamlTpl();
         BeanUtils.copyProperties(datasourceDetail, datasourceYamlTpl);
         datasourceYamlTpl.setIdentifiers(datasourceDetail.getIdentifiers().stream().map(DatasourceYamlManager::convert)
@@ -77,13 +77,16 @@ public class DatasourceYamlManager {
     }
 
 
-    private static void addInterCntMetric(String datasourceEnName, List<Measure> measures) {
+    private static void addInterCntMetric(String datasourceEnName, DatasourceDetail datasourceDetail) {
         Measure measure = new Measure();
         measure.setExpr("1");
+        if (!CollectionUtils.isEmpty(datasourceDetail.getIdentifiers())) {
+            measure.setExpr(datasourceDetail.getIdentifiers().get(0).getBizName());
+        }
         measure.setAgg("count");
         measure.setBizName(String.format("%s_%s", datasourceEnName, "internal_cnt"));
         measure.setCreateMetric("true");
-        measures.add(measure);
+        datasourceDetail.getMeasures().add(measure);
     }
 
 

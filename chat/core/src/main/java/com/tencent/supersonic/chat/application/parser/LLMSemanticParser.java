@@ -20,6 +20,7 @@ import com.tencent.supersonic.chat.domain.utils.SemanticSatisfactionChecker;
 import com.tencent.supersonic.common.nlp.ItemDO;
 import com.tencent.supersonic.common.util.context.ContextUtils;
 import com.tencent.supersonic.common.util.json.JsonUtil;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.http.HttpEntity;
@@ -40,90 +42,100 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class LLMSemanticParser implements SemanticParser {
 
+    private DslToSemanticInfo dslToSemanticInfo = new DslToSemanticInfo();
+
     @Override
     public void parse(QueryContextReq queryContext, ChatContext chatCtx) {
+        String queryText = queryContext.getQueryText();
+
         if (SemanticSatisfactionChecker.check(queryContext)) {
-            log.info("There is no need parse by llm , queryText:{}", queryContext.getQueryText());
+            log.info("There is no need parse by llm , queryText:{}", queryText);
             return;
         }
 
-        Integer domainId = getDomainId(queryContext, chatCtx);
-        LLMResp llmResp = requestLLM(queryContext, domainId);
-        if (Objects.isNull(llmResp)) {
+        try {
+            Integer domainId = getDomainId(queryContext, chatCtx);
+            LLMResp llmResp = requestLLM(queryContext, domainId);
+            if (Objects.isNull(llmResp)) {
+                return;
+            }
+            LLMSemanticQuery semanticQuery = new LLMSemanticQuery();
+            SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
+            String sql = convertToSql(llmResp, parseInfo, domainId);
+
+            parseInfo.setInfo(sql);
+            parseInfo.setDomainId(Long.valueOf(domainId));
+            parseInfo.setBonus(queryText.length() * 1.0);
+            parseInfo.setQueryMode(LLMSemanticQuery.QUERY_MODE);
+            queryContext.getCandidateQueries().add(semanticQuery);
             return;
+        } catch (Exception e) {
+            log.error("llm parse error , skip the parser. error:", e);
         }
-        LLMSemanticQuery semanticQuery = new LLMSemanticQuery();
-        SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
-        String sql = convertToSql(llmResp, parseInfo);
-        parseInfo.setDomainId(Long.valueOf(domainId));
-        parseInfo.setBonus(queryContext.getQueryText().length() * 1.0);
-        parseInfo.setQueryMode(LLMSemanticQuery.QUERY_MODE);
-        parseInfo.setInfo(sql);
-        queryContext.getCandidateQueries().add(semanticQuery);
-        return;
     }
 
-    protected String convertToSql(LLMResp llmResp, SemanticParseInfo parseInfo) {
-        return DslToSemanticInfo.convert(parseInfo, llmResp);
+    protected String convertToSql(LLMResp llmResp, SemanticParseInfo parseInfo, Integer domainId)
+            throws SqlParseException {
+        return dslToSemanticInfo.convert(parseInfo, llmResp, domainId);
     }
 
     protected LLMResp requestLLM(QueryContextReq queryContext, Integer domainId) {
-        try {
-            final LLMConfig llmConfig = ContextUtils.getBean(LLMConfig.class);
+        final LLMConfig llmConfig = ContextUtils.getBean(LLMConfig.class);
 
-            DomainInfos domainInfos = ContextUtils.getBean(WordNatureService.class).getCache().getUnchecked("");
-
-            Map<Integer, String> domainIdToName = domainInfos.getDomains().stream()
-                    .collect(Collectors.toMap(ItemDO::getDomain, a -> a.getName(), (k1, k2) -> k1));
-
-            Map<Integer, String> itemIdToName = domainInfos.getDimensions().stream()
-                    .filter(entry -> domainId.equals(entry.getDomain()))
-                    .collect(Collectors.toMap(ItemDO::getItemId, ItemDO::getName, (value1, value2) -> value2));
-
-            String domainName = domainIdToName.get(domainId);
-            LLMReq llmReq = new LLMReq();
-            llmReq.setQueryText(queryContext.getQueryText());
-
-            List<SchemaElementMatch> matchedElements = queryContext.getMapInfo().getMatchedElements(domainId);
-
-            List<String> fieldNameList = matchedElements.stream()
-                    .filter(schemaElementMatch ->
-                            SchemaElementType.METRIC.equals(schemaElementMatch.getElementType()) ||
-                                    SchemaElementType.DIMENSION.equals(schemaElementMatch.getElementType()) ||
-                                    SchemaElementType.VALUE.equals(schemaElementMatch.getElementType()))
-                    .map(schemaElementMatch -> {
-                        if (!SchemaElementType.VALUE.equals(schemaElementMatch.getElementType())) {
-                            return schemaElementMatch.getWord();
-                        }
-                        return itemIdToName.get(schemaElementMatch.getElementID());
-                    })
-                    .filter(name -> StringUtils.isNotEmpty(name) && !name.contains("%"))
-                    .collect(Collectors.toList());
-
-            LLMSchema llmSchema = new LLMSchema();
-            llmSchema.setDomainName(domainName);
-            llmSchema.setFieldNameList(fieldNameList);
-            llmReq.setSchema(llmSchema);
-
-            log.info("domainId:{},llmReq:{}", domainId, llmReq);
-            String questUrl = llmConfig.getUrl() + llmConfig.getQueryToSqlPath();
-
-            RestTemplate restTemplate = ContextUtils.getBean(RestTemplate.class);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<String> entity = new HttpEntity<>(JsonUtil.toString(llmReq), headers);
-
-            log.info("requestLLM request:{},entity:{}", questUrl, entity);
-            ResponseEntity<LLMResp> responseEntity = restTemplate.exchange(questUrl, HttpMethod.POST, entity,
-                    LLMResp.class);
-
-            log.info("requestLLM result:{}", responseEntity);
-            return responseEntity.getBody();
-        } catch (Exception e) {
-            log.error("requestLLM error", e);
+        if (StringUtils.isEmpty(llmConfig.getUrl())) {
+            log.warn("llmConfig url is null, skip llm parser");
+            return null;
         }
-        return null;
+
+        DomainInfos domainInfos = ContextUtils.getBean(WordNatureService.class).getCache().getUnchecked("");
+
+        Map<Integer, String> domainIdToName = domainInfos.getDomains().stream()
+                .collect(Collectors.toMap(ItemDO::getDomain, a -> a.getName(), (k1, k2) -> k1));
+
+        Map<Integer, String> itemIdToName = domainInfos.getDimensions().stream()
+                .filter(entry -> domainId.equals(entry.getDomain()))
+                .collect(Collectors.toMap(ItemDO::getItemId, ItemDO::getName, (value1, value2) -> value2));
+
+        String domainName = domainIdToName.get(domainId);
+        LLMReq llmReq = new LLMReq();
+        llmReq.setQueryText(queryContext.getQueryText());
+
+        List<SchemaElementMatch> matchedElements = queryContext.getMapInfo().getMatchedElements(domainId);
+
+        Set<String> fieldNameList = matchedElements.stream()
+                .filter(schemaElementMatch ->
+                        SchemaElementType.METRIC.equals(schemaElementMatch.getElementType()) ||
+                                SchemaElementType.DIMENSION.equals(schemaElementMatch.getElementType()) ||
+                                SchemaElementType.VALUE.equals(schemaElementMatch.getElementType()))
+                .map(schemaElementMatch -> {
+                    if (!SchemaElementType.VALUE.equals(schemaElementMatch.getElementType())) {
+                        return schemaElementMatch.getWord();
+                    }
+                    return itemIdToName.get(schemaElementMatch.getElementID());
+                })
+                .filter(name -> StringUtils.isNotEmpty(name) && !name.contains("%"))
+                .collect(Collectors.toSet());
+
+        LLMSchema llmSchema = new LLMSchema();
+        llmSchema.setDomainName(domainName);
+        llmSchema.setFieldNameList(new ArrayList<>(fieldNameList));
+        llmReq.setSchema(llmSchema);
+
+        log.info("requestLLM request, domainId:{},llmReq:{}", domainId, llmReq);
+        String questUrl = llmConfig.getUrl() + llmConfig.getQueryToSqlPath();
+
+        RestTemplate restTemplate = ContextUtils.getBean(RestTemplate.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(JsonUtil.toString(llmReq), headers);
+
+        ResponseEntity<LLMResp> responseEntity = restTemplate.exchange(questUrl, HttpMethod.POST, entity,
+                LLMResp.class);
+
+        log.info("requestLLM response, questUrl:{} \n entity:{} \n body:{}", questUrl, entity,
+                responseEntity.getBody());
+        return responseEntity.getBody();
     }
 
     protected Integer getDomainId(QueryContextReq queryContext, ChatContext chatCtx) {

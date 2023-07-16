@@ -8,3 +8,14 @@ davinci 0.3.0 change log
 7) optimize css style
 8) optimize filter
 9) delete view module
+
+
+supersonic 0.6.0 change log
+1) add llm parser and llm api server
+2) support fuzzy mapping
+3) support query filter and domain filter in query and search
+4) support standalone mode
+5) add dsl query in semantic
+6) code architecture adjustment in semantic and chat
+7) add unit testing and integration testing
+8) support dimension and metric alias

@@ -26,5 +26,7 @@ cp -fr  ${buildDir}/supersonic-webapp/* ${runtimeDir}/supersonic-standalone/weba
 rm -fr  ${buildDir}/supersonic-webapp
 
 #3. start service
+#start standalone service
 sh ${runtimeDir}/supersonic-standalone/bin/service.sh restart
-
+#start llm service
+sh ${runtimeDir}/supersonic-standalone/llm/bin/service.sh restart

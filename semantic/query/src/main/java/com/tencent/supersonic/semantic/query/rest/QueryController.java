@@ -5,12 +5,14 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.semantic.api.core.response.SqlParserResp;
 import com.tencent.supersonic.semantic.api.query.request.*;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
-import com.tencent.supersonic.semantic.query.domain.ParserService;
+import com.tencent.supersonic.semantic.query.domain.SemanticQueryEngine;
 import com.tencent.supersonic.semantic.query.domain.QueryService;
+import com.tencent.supersonic.semantic.query.domain.pojo.QueryStatement;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,7 +28,7 @@ public class QueryController {
     @Autowired
     private QueryService queryService;
     @Autowired
-    private ParserService parserService;
+    private SemanticQueryEngine semanticQueryEngine;
 
 
     @PostMapping("/sql")
@@ -52,7 +54,10 @@ public class QueryController {
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        return parserService.physicalSql(parseSqlReq);
+        QueryStatement queryStatement = semanticQueryEngine.physicalSql(parseSqlReq);
+        SqlParserResp sqlParserResp = new SqlParserResp();
+        BeanUtils.copyProperties(queryStatement, sqlParserResp);
+        return sqlParserResp;
     }
 
     /**

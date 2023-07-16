@@ -6,12 +6,15 @@ import com.hankcs.hanlp.HanLP;
 import com.hankcs.hanlp.dictionary.CoreDictionary;
 import com.hankcs.hanlp.dictionary.DynamicCustomDictionary;
 import com.hankcs.hanlp.seg.Segment;
+import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.common.nlp.MapResult;
+import com.tencent.supersonic.common.nlp.NatureType;
 import com.tencent.supersonic.common.nlp.WordNature;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -173,5 +176,10 @@ public class HanlpHelper {
         }
     }
 
+    public static List<Term> getTerms(String text) {
+        return getSegment().seg(text.toLowerCase()).stream()
+                .filter(term -> term.getNature().startsWith(NatureType.NATURE_SPILT))
+                .collect(Collectors.toList());
+    }
 
 }

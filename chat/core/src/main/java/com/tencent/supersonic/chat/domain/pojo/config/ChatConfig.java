@@ -16,25 +16,16 @@ public class ChatConfig {
     private Long id;
 
     private Long domainId;
-    /**
-     * default metrics information about the domain
-     */
-    private List<DefaultMetricInfo> defaultMetrics;
 
     /**
-     * invisible dimensions/metrics
+     * the chatDetailConfig about the domain
      */
-    private ItemVisibility visibility;
+    private ChatDetailConfig chatDetailConfig;
 
     /**
-     * the entity info about the domain
+     * the chatAggConfig about the domain
      */
-    private Entity entity;
-
-    /**
-     * information about dictionary about the domain
-     */
-    private List<KnowledgeInfo> knowledgeInfos;
+    private ChatAggConfig chatAggConfig;
 
     /**
      * available status

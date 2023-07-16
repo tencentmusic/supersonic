@@ -7,6 +7,7 @@ import { message, Row, Col, Radio } from 'antd';
 import { getDatasourceList, getDomainSchemaRela } from '../service';
 import initToolBar from './components/ToolBar';
 import initTooltips from './components/ToolTips';
+import initContextMenu from './components/ContextMenu';
 import G6 from '@antv/g6';
 
 type Props = {
@@ -209,6 +210,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, domainId }) => {
 
     const toolbar = initToolBar();
     const tooltip = initTooltips();
+    const contextMenu = initContextMenu();
     const legend = new G6.Legend({
       // container: 'legendContainer',
       data: {
@@ -303,30 +305,30 @@ const DomainManger: React.FC<Props> = ({ domainManger, domainId }) => {
         // },
       },
       layout: {
-        type: 'mindmap',
-        direction: 'H',
-        getId: function getId(d) {
-          return d.id;
-        },
-        getHeight: function getHeight() {
-          return 16;
-        },
-        getWidth: function getWidth() {
-          return 16;
-        },
-        getVGap: function getVGap() {
-          return 30;
-        },
-        getHGap: function getHGap() {
-          return 100;
-        },
-        // type: 'dendrogram',
-        // direction: 'LR',
-        // nodeSep: 200,
-        // rankSep: 300,
-        // radial: true,
+        // type: 'mindmap',
+        // direction: 'H',
+        // getId: function getId(d) {
+        //   return d.id;
+        // },
+        // getHeight: function getHeight() {
+        //   return 16;
+        // },
+        // getWidth: function getWidth() {
+        //   return 16;
+        // },
+        // getVGap: function getVGap() {
+        //   return 30;
+        // },
+        // getHGap: function getHGap() {
+        //   return 100;
+        // },
+        type: 'dendrogram',
+        direction: 'LR',
+        nodeSep: 200,
+        rankSep: 300,
+        radial: true,
       },
-      plugins: [legend, tooltip, toolbar],
+      plugins: [legend, tooltip, toolbar, contextMenu],
     });
 
     const legendCanvas = legend._cfgs.legendCanvas;

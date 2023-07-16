@@ -3,6 +3,7 @@ package com.tencent.supersonic.semantic.core.application;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.util.json.JsonUtil;
 import com.tencent.supersonic.semantic.api.core.pojo.DatasourceDetail;
 import com.tencent.supersonic.semantic.api.core.pojo.Dim;
 import com.tencent.supersonic.semantic.api.core.pojo.ItemDateFilter;
@@ -22,25 +23,22 @@ import com.tencent.supersonic.semantic.api.core.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.core.response.ItemDateResp;
 import com.tencent.supersonic.semantic.api.core.response.MeasureResp;
 import com.tencent.supersonic.semantic.api.core.response.MetricResp;
-import com.tencent.supersonic.common.util.json.JsonUtil;
+import com.tencent.supersonic.semantic.core.domain.DatabaseService;
+import com.tencent.supersonic.semantic.core.domain.DatasourceService;
+import com.tencent.supersonic.semantic.core.domain.DimensionService;
+import com.tencent.supersonic.semantic.core.domain.MetricService;
 import com.tencent.supersonic.semantic.core.domain.dataobject.DatasourceDO;
 import com.tencent.supersonic.semantic.core.domain.dataobject.DatasourceRelaDO;
 import com.tencent.supersonic.semantic.core.domain.dataobject.DateInfoDO;
 import com.tencent.supersonic.semantic.core.domain.manager.DatasourceYamlManager;
 import com.tencent.supersonic.semantic.core.domain.manager.DimensionYamlManager;
 import com.tencent.supersonic.semantic.core.domain.manager.MetricYamlManager;
+import com.tencent.supersonic.semantic.core.domain.pojo.Datasource;
 import com.tencent.supersonic.semantic.core.domain.repository.DatasourceRepository;
 import com.tencent.supersonic.semantic.core.domain.repository.DateInfoRepository;
 import com.tencent.supersonic.semantic.core.domain.utils.DatasourceConverter;
 import com.tencent.supersonic.semantic.core.domain.utils.DimensionConverter;
 import com.tencent.supersonic.semantic.core.domain.utils.MetricConverter;
-import com.tencent.supersonic.semantic.core.domain.DatabaseService;
-import com.tencent.supersonic.semantic.core.domain.DatasourceService;
-import com.tencent.supersonic.semantic.core.domain.DimensionService;
-import com.tencent.supersonic.semantic.core.domain.DomainService;
-import com.tencent.supersonic.semantic.core.domain.MetricService;
-import com.tencent.supersonic.semantic.core.domain.pojo.Datasource;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -338,6 +336,7 @@ public class DatasourceServiceImpl implements DatasourceService {
         String dateFormat = itemDates.get(0).getDateFormat();
         String startDate = itemDates.get(0).getStartDate();
         String endDate = itemDates.get(0).getEndDate();
+        String datePeriod = itemDates.get(0).getDatePeriod();
         List<String> unavailableDateList = itemDates.get(0).getUnavailableDateList();
         for (DateInfoReq item : itemDates) {
             String startDate1 = item.getStartDate();
@@ -354,7 +353,7 @@ public class DatasourceServiceImpl implements DatasourceService {
             }
         }
 
-        return new ItemDateResp(dateFormat, startDate, endDate, unavailableDateList);
+        return new ItemDateResp(dateFormat, startDate, endDate, datePeriod, unavailableDateList);
 
     }
 

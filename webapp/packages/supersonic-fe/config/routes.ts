@@ -1,27 +1,34 @@
-export const ROUTE_AUTH_CODES = {
+export const ROUTE_AUTH_CODES = {};
+
+const ENV_KEY = {
   CHAT: 'chat',
-  CHAT_SETTING: 'chatSetting',
   SEMANTIC: 'semantic',
 };
 
+const { APP_TARGET } = process.env;
+
 const ROUTES = [
+  ...(APP_TARGET !== 'inner'
+    ? [
+        {
+          path: '/chat',
+          name: 'chat',
+          component: './Chat',
+          envEnableList: [ENV_KEY.CHAT],
+        },
+      ]
+    : []),
   {
-    path: '/chat',
-    name: 'chat',
-    component: './Chat',
-    access: ROUTE_AUTH_CODES.CHAT,
-  },
-  {
-    path: '/chatSetting',
+    path: '/chatSetting/:modelId?/:menuKey?',
     name: 'chatSetting',
     component: './SemanticModel/ChatSetting',
-    access: ROUTE_AUTH_CODES.CHAT_SETTING,
+    envEnableList: [ENV_KEY.CHAT],
   },
   {
-    path: '/semanticModel',
+    path: '/semanticModel/:modelId?/:menuKey?',
     name: 'semanticModel',
     component: './SemanticModel/ProjectManager',
-    access: ROUTE_AUTH_CODES.SEMANTIC,
+    envEnableList: [ENV_KEY.SEMANTIC],
   },
   {
     path: '/login',
@@ -32,7 +39,11 @@ const ROUTES = [
   },
   {
     path: '/',
-    redirect: '/chat',
+    redirect: APP_TARGET === 'inner' ? '/semanticModel' : '/chat',
+    envRedirect: {
+      [ENV_KEY.CHAT]: '/chat',
+      [ENV_KEY.SEMANTIC]: '/semanticModel',
+    },
   },
   {
     path: '/401',

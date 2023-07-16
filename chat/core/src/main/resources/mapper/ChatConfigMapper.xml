@@ -9,10 +9,8 @@
                type="com.tencent.supersonic.chat.domain.dataobject.ChatConfigDO">
         <id column="id" property="id"/>
         <result column="domain_id" property="domainId"/>
-        <result column="default_metrics" property="defaultMetrics"/>
-        <result column="visibility" property="visibility"/>
-        <result column="entity_info" property="entity"/>
-        <result column="dictionary_info" property="knowledgeInfo"/>
+        <result column="chat_detail_config" property="chatDetailConfig"/>
+        <result column="chat_agg_config" property="chatAggConfig"/>
         <result column="status" property="status"/>
         <result column="created_by" property="createdBy"/>
         <result column="updated_by" property="updatedBy"/>
@@ -25,11 +23,11 @@
             useGeneratedKeys="true" keyProperty="id">
     insert into s2_chat_config
     (
-        domain_id, `default_metrics`, visibility, entity_info, dictionary_info, status, created_by, updated_by, created_at, updated_at
+        domain_id, `chat_detail_config`, chat_agg_config, status, created_by, updated_by, created_at, updated_at
     )
     values
     (
-        #{domainId}, #{defaultMetrics}, #{visibility}, #{entity}, #{knowledgeInfo}, #{status}, #{createdBy}, #{updatedBy}, #{createdAt}, #{updatedAt}
+        #{domainId}, #{chatDetailConfig}, #{chatAggConfig}, #{status}, #{createdBy}, #{updatedBy}, #{createdAt}, #{updatedAt}
     )
     </insert>
 
@@ -38,18 +36,11 @@
         update s2_chat_config
         <set>
             `updated_at` = #{updatedAt} ,
-
-            <if test="defaultMetrics != null and defaultMetrics != ''">
-                `default_metrics` = #{defaultMetrics} ,
+            <if test="chatDetailConfig != null and chatDetailConfig != ''">
+                `chat_detail_config` = #{chatDetailConfig} ,
             </if>
-            <if test="visibility != null and visibility != ''">
-                visibility = #{visibility} ,
-            </if>
-            <if test="entity != null and entity != ''">
-                entity_info = #{entity} ,
-            </if>
-            <if test="knowledgeInfo != null and knowledgeInfo != ''">
-                `dictionary_info` = #{knowledgeInfo} ,
+            <if test="chatAggConfig != null and chatAggConfig != ''">
+                chat_agg_config = #{chatAggConfig} ,
             </if>
             <if test="status != null and status != ''">
                 status = #{status} ,
@@ -90,7 +81,8 @@
         select *
         from s2_chat_config
         where domain_id = #{domainId}
-        order by status
+        and status != 3
+        order by updated_at desc
         limit 1
     </select>
 

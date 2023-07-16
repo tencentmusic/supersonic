@@ -18,6 +18,7 @@ public class DateInfoReq {
     private String dateFormat;
     private String startDate;
     private String endDate;
+    private String datePeriod;
     private List<String> unavailableDateList = new ArrayList<>();
 
     public DateInfoReq(String type, Long itemId, String dateFormat, String startDate, String endDate) {
@@ -27,4 +28,15 @@ public class DateInfoReq {
         this.startDate = startDate;
         this.endDate = endDate;
     }
+
+    public DateInfoReq(String type, Long itemId, String dateFormat, String startDate, String endDate,
+            List<String> unavailableDateList) {
+        this.type = type;
+        this.itemId = itemId;
+        this.dateFormat = dateFormat;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.unavailableDateList = unavailableDateList;
+    }
+
 }

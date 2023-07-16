@@ -72,7 +72,7 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
       dataIndex: 'constraint',
       title: '限定条件',
       tooltip:
-        '所用于过滤的维度需要存在于"维度"列表，不需要加where关键字。比如：维度A="值1" and 维度B="值2"',
+        '该限定条件用于在计算指标时限定口径，作用于度量，所用于过滤的维度必须在创建数据源的时候被标记为日期或者维度，不需要加where关键字。比如：维度A="值1" and 维度B="值2"',
       render: (_: any, record: any) => {
         const { constraint, name } = record;
         const { measures } = measuresParams;
@@ -128,7 +128,7 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
         <ProTable
           actionRef={actionRef}
           headerTitle="度量列表"
-          tooltip="一般用于在“指标”列表已有指标的基础上加工新指标，比如：指标NEW1=指标A/100，指标NEW2=指标B/指标C。（若需用到多个已有指标，可以点击右上角“增加度量”）"
+          tooltip="基于本主题域下所有数据源的度量来创建指标，且该列表的度量为了加以区分，均已加上数据源名称作为前缀，选中度量后，可基于这几个度量来写表达式，若是选中的度量来自不同的数据源，系统将会自动join来计算该指标"
           rowKey="name"
           columns={columns}
           dataSource={measuresParams?.measures || []}
@@ -150,7 +150,7 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
         />
         <ProCard
           title={'度量表达式'}
-          tooltip="若为指标NEW1，则填写：指标A/100。若为指标NEW2，则填写：指标B/指标C"
+          tooltip="度量表达式由上面选择的度量组成，如选择了度量A和B，则可将表达式写成A+B"
         >
           <SqlEditor
             value={exprString}

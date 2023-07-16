@@ -3,11 +3,13 @@ package com.tencent.supersonic.chat.domain.pojo.config;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
 @AllArgsConstructor
 @ToString
+@NoArgsConstructor
 public class Dim4Dict {
 
     private Long dimId;

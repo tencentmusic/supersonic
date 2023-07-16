@@ -329,8 +329,8 @@ export const getFormattedValueData = (value: number | string, remainZero?: boole
     value >= 100000000
       ? NumericUnit.OneHundredMillion
       : value >= 10000
-        ? NumericUnit.EnTenThousand
-        : NumericUnit.None;
+      ? NumericUnit.EnTenThousand
+      : NumericUnit.None;
 
   let formattedValue = formatByUnit(value, unit);
   formattedValue = formatByDecimalPlaces(
@@ -387,4 +387,38 @@ export function getLeafList(flatNodes: any[]): any[] {
   const treeNodes = buildTree(flatNodes);
   const leafNodes = getLeafNodes(treeNodes);
   return leafNodes;
+}
+
+export function traverseRoutes(routes, env: string, result: any[] = []) {
+  if (!Array.isArray(routes)) {
+    return result;
+  }
+
+  for (let i = 0; i < routes.length; i++) {
+    const route = routes[i];
+
+    if (
+      (route.envEnableList &&
+        (route.envEnableList.includes(env) || route.envEnableList.length === 0)) ||
+      !route.envEnableList
+    ) {
+      result.push(route);
+    }
+
+    if (route.envRedirect) {
+      route.redirect = route.envRedirect[env];
+    }
+
+    if (route.routes) {
+      const filteredRoutes = traverseRoutes(route.routes, env);
+
+      if (Array.isArray(filteredRoutes) && filteredRoutes.length > 0) {
+        result.push({
+          ...route,
+          routes: filteredRoutes,
+        });
+      }
+    }
+  }
+  return result;
 }

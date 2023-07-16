@@ -6,23 +6,26 @@ import type { FC, Key } from 'react';
 import { connect } from 'umi';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../model';
-import { getDomainList, createDomain, updateDomain, deleteDomain } from '../service';
+import { createDomain, updateDomain, deleteDomain } from '../service';
 import { treeParentKeyLists } from '../utils';
 import ProjectInfoFormProps from './ProjectInfoForm';
 import { constructorClassTreeFromList, addPathInTreeData } from '../utils';
 import { PlusCircleOutlined } from '@ant-design/icons';
 
 import styles from './style.less';
+import { ISemantic } from '../data';
 
 const { Search } = Input;
 
 type ProjectListProps = {
-  selectDomainId: string;
+  selectDomainId: number;
   selectDomainName: string;
+  domainList: ISemantic.IDomainItem[];
   createDomainBtnVisible?: boolean;
   dispatch: Dispatch;
   onCreateDomainBtnClick?: () => void;
   onTreeSelected?: () => void;
+  onTreeDataUpdate?: () => void;
 };
 
 const projectTreeFlat = (projectTree: DataNode[], filterValue: string): DataNode[] => {
@@ -42,9 +45,11 @@ const projectTreeFlat = (projectTree: DataNode[], filterValue: string): DataNode
 
 const ProjectListTree: FC<ProjectListProps> = ({
   selectDomainId,
+  domainList,
   createDomainBtnVisible = true,
   onCreateDomainBtnClick,
   onTreeSelected,
+  onTreeDataUpdate,
   dispatch,
 }) => {
   const [projectTree, setProjectTree] = useState<DataNode[]>([]);
@@ -54,40 +59,19 @@ const ProjectListTree: FC<ProjectListProps> = ({
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [classList, setClassList] = useState<any[]>([]);
 
+  useEffect(() => {
+    const treeData = addPathInTreeData(constructorClassTreeFromList(domainList));
+    setProjectTree(treeData);
+    setClassList(domainList);
+    setExpandedKeys(treeParentKeyLists(treeData));
+  }, [domainList]);
+
   const onSearch = (value: any) => {
     setFliterValue(value);
   };
 
-  const initProjectTree = async () => {
-    const { code, data, msg } = await getDomainList();
-    if (code === 200) {
-      const treeData = addPathInTreeData(constructorClassTreeFromList(data));
-      setProjectTree(treeData);
-      setClassList(data);
-      setExpandedKeys(treeParentKeyLists(treeData));
-      const firstRootNode = data.filter((item: any) => {
-        return item.parentId === 0;
-      })[0];
-      if (firstRootNode) {
-        const { id, name } = firstRootNode;
-        dispatch({
-          type: 'domainManger/setSelectDomain',
-          selectDomainId: id,
-          selectDomainName: name,
-          domainData: firstRootNode,
-        });
-      }
-    } else {
-      message.error(msg);
-    }
-  };
-
-  useEffect(() => {
-    initProjectTree();
-  }, []);
-
   const handleSelect = (selectedKeys: string, projectName: string) => {
-    if (selectedKeys === selectDomainId) {
+    if (`${selectedKeys}` === `${selectDomainId}`) {
       return;
     }
     const targetNodeData = classList.filter((item: any) => {
@@ -108,7 +92,7 @@ const ProjectListTree: FC<ProjectListProps> = ({
     if (res.code === 200) {
       message.success('编辑分类成功');
       setProjectInfoModalVisible(false);
-      initProjectTree();
+      onTreeDataUpdate?.();
     } else {
       message.error(res.msg);
     }
@@ -120,7 +104,7 @@ const ProjectListTree: FC<ProjectListProps> = ({
     } else if (values.modelType === 'edit') {
       await editProject(values);
     }
-    initProjectTree();
+    onTreeDataUpdate?.();
     setProjectInfoModalVisible(false);
   };
 
@@ -130,7 +114,7 @@ const ProjectListTree: FC<ProjectListProps> = ({
     if (res.code === 200) {
       message.success('编辑项目成功');
       setProjectInfoModalVisible(false);
-      initProjectTree();
+      onTreeDataUpdate?.();
     } else {
       message.error(res.msg);
     }
@@ -210,18 +194,20 @@ const ProjectListTree: FC<ProjectListProps> = ({
             onSearch={onSearch}
           />
         </Col>
-        <Col flex="0 1 50px">
-          <Tooltip title="新增顶级域">
-            <PlusCircleOutlined
-              onClick={() => {
-                setProjectInfoParams({ type: 'top', modelType: 'add' });
-                setProjectInfoModalVisible(true);
-                onCreateDomainBtnClick?.();
-              }}
-              className={styles.addBtn}
-            />
-          </Tooltip>
-        </Col>
+        {createDomainBtnVisible && (
+          <Col flex="0 1 50px">
+            <Tooltip title="新增顶级域">
+              <PlusCircleOutlined
+                onClick={() => {
+                  setProjectInfoParams({ type: 'top', modelType: 'add' });
+                  setProjectInfoModalVisible(true);
+                  onCreateDomainBtnClick?.();
+                }}
+                className={styles.addBtn}
+              />
+            </Tooltip>
+          </Col>
+        )}
       </Row>
 
       <Tree
@@ -249,8 +235,13 @@ const ProjectListTree: FC<ProjectListProps> = ({
 };
 
 export default connect(
-  ({ domainManger: { selectDomainId, selectDomainName } }: { domainManger: StateType }) => ({
+  ({
+    domainManger: { selectDomainId, selectDomainName, domainList },
+  }: {
+    domainManger: StateType;
+  }) => ({
     selectDomainId,
     selectDomainName,
+    domainList,
   }),
 )(ProjectListTree);
