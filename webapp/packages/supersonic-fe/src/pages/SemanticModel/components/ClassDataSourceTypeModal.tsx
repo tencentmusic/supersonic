@@ -5,9 +5,10 @@ const { Meta } = Card;
 type Props = {
   open: boolean;
   onTypeChange: (type: 'fast' | 'normal') => void;
+  onCancel?: () => void;
 };
 
-const ClassDataSourceTypeModal: React.FC<Props> = ({ open, onTypeChange }) => {
+const ClassDataSourceTypeModal: React.FC<Props> = ({ open, onTypeChange, onCancel }) => {
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
   useEffect(() => {
     setCreateDataSourceModalOpen(open);
@@ -19,6 +20,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({ open, onTypeChange }) => {
         open={createDataSourceModalOpen}
         onCancel={() => {
           setCreateDataSourceModalOpen(false);
+          onCancel?.();
         }}
         footer={null}
         centered

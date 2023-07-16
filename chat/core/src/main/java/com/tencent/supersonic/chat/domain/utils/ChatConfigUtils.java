@@ -3,20 +3,11 @@ package com.tencent.supersonic.chat.domain.utils;
 import static com.tencent.supersonic.common.constant.Constants.ADMIN_LOWER;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.chat.domain.pojo.config.*;
 import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
 import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
 import com.tencent.supersonic.chat.domain.dataobject.ChatConfigDO;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfig;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigBase;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigEditReq;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigInfo;
-import com.tencent.supersonic.chat.domain.pojo.config.DefaultMetricInfo;
-import com.tencent.supersonic.chat.domain.pojo.config.Entity;
-import com.tencent.supersonic.chat.domain.pojo.config.EntityDetailData;
-import com.tencent.supersonic.chat.domain.pojo.config.EntityInternalDetail;
-import com.tencent.supersonic.chat.domain.pojo.config.ItemVisibility;
-import com.tencent.supersonic.chat.domain.pojo.config.KnowledgeInfo;
 import com.tencent.supersonic.common.enums.StatusEnum;
 import com.tencent.supersonic.common.util.RecordInfo;
 import com.tencent.supersonic.common.util.json.JsonUtil;
@@ -39,31 +30,28 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class ChatConfigUtils {
 
-    public ChatConfig newChatConfig(ChatConfigBase extendBaseCmd, User user) {
-        ChatConfig chaConfig = new ChatConfig();
-
-        BeanUtils.copyProperties(extendBaseCmd, chaConfig);
-
+    public ChatConfig newChatConfig(ChatConfigBaseReq extendBaseCmd, User user) {
+        ChatConfig chatConfig = new ChatConfig();
+        BeanUtils.copyProperties(extendBaseCmd, chatConfig);
         RecordInfo recordInfo = new RecordInfo();
         String creator = (Objects.isNull(user) || Strings.isEmpty(user.getName())) ? ADMIN_LOWER : user.getName();
         recordInfo.createdBy(creator);
-        chaConfig.setRecordInfo(recordInfo);
-        chaConfig.setStatus(StatusEnum.ONLINE);
-        return chaConfig;
+        chatConfig.setRecordInfo(recordInfo);
+        chatConfig.setStatus(StatusEnum.ONLINE);
+        return chatConfig;
     }
 
 
-    public ChatConfig editChaConfig(ChatConfigEditReq extendEditCmd, User facadeUser) {
-        ChatConfig chaConfig = new ChatConfig();
+    public ChatConfig editChatConfig(ChatConfigEditReqReq extendEditCmd, User facadeUser) {
+        ChatConfig chatConfig = new ChatConfig();
 
-        BeanUtils.copyProperties(extendEditCmd, chaConfig);
-
+        BeanUtils.copyProperties(extendEditCmd, chatConfig);
         RecordInfo recordInfo = new RecordInfo();
         String user = (Objects.isNull(facadeUser) || Strings.isEmpty(facadeUser.getName()))
                 ? ADMIN_LOWER : facadeUser.getName();
         recordInfo.updatedBy(user);
-        chaConfig.setRecordInfo(recordInfo);
-        return chaConfig;
+        chatConfig.setRecordInfo(recordInfo);
+        return chatConfig;
     }
 
 
@@ -126,45 +114,76 @@ public class ChatConfigUtils {
         return new ArrayList<>(metricIdAndDescPair.keySet());
     }
 
-    public ChatConfigDO chatConfig2DO(ChatConfig chaConfig) {
-        ChatConfigDO chaConfigDO = new ChatConfigDO();
-        BeanUtils.copyProperties(chaConfig, chaConfigDO);
+    public ChatConfigDO chatConfig2DO(ChatConfig chatConfig) {
+        ChatConfigDO chatConfigDO = new ChatConfigDO();
+        BeanUtils.copyProperties(chatConfig, chatConfigDO);
 
-        chaConfigDO.setDefaultMetrics(JsonUtil.toString(chaConfig.getDefaultMetrics()));
-        chaConfigDO.setVisibility(JsonUtil.toString(chaConfig.getVisibility()));
-        chaConfigDO.setEntity(JsonUtil.toString(chaConfig.getEntity()));
-        chaConfigDO.setKnowledgeInfo(JsonUtil.toString(chaConfig.getKnowledgeInfos()));
+        chatConfigDO.setChatAggConfig(JsonUtil.toString(chatConfig.getChatAggConfig()));
+        chatConfigDO.setChatDetailConfig(JsonUtil.toString(chatConfig.getChatDetailConfig()));
 
-        if (Objects.isNull(chaConfig.getStatus())) {
-            chaConfigDO.setStatus(null);
+        if (Objects.isNull(chatConfig.getStatus())) {
+            chatConfigDO.setStatus(null);
         } else {
-            chaConfigDO.setStatus(chaConfig.getStatus().getCode());
+            chatConfigDO.setStatus(chatConfig.getStatus().getCode());
         }
 
-        chaConfigDO.setCreatedBy(chaConfig.getRecordInfo().getCreatedBy());
-        chaConfigDO.setCreatedAt(chaConfig.getRecordInfo().getCreatedAt());
-        chaConfigDO.setUpdatedBy(chaConfig.getRecordInfo().getUpdatedBy());
-        chaConfigDO.setUpdatedAt(chaConfig.getRecordInfo().getUpdatedAt());
+        chatConfigDO.setCreatedBy(chatConfig.getRecordInfo().getCreatedBy());
+        chatConfigDO.setCreatedAt(chatConfig.getRecordInfo().getCreatedAt());
+        chatConfigDO.setUpdatedBy(chatConfig.getRecordInfo().getUpdatedBy());
+        chatConfigDO.setUpdatedAt(chatConfig.getRecordInfo().getUpdatedAt());
 
-        return chaConfigDO;
+        return chatConfigDO;
     }
 
-    public ChatConfigInfo chatConfigDO2Descriptor(ChatConfigDO chaConfigDO) {
-        ChatConfigInfo chaConfigDescriptor = new ChatConfigInfo();
-        BeanUtils.copyProperties(chaConfigDO, chaConfigDescriptor);
+    public ChatConfigResp chatConfigDO2Descriptor(Long domainId, ChatConfigDO chatConfigDO) {
+        ChatConfigResp chatConfigDescriptor = new ChatConfigResp();
 
-        chaConfigDescriptor.setDefaultMetrics(
-                JsonUtil.toList(chaConfigDO.getDefaultMetrics(), DefaultMetricInfo.class));
-        chaConfigDescriptor.setVisibility(JsonUtil.toObject(chaConfigDO.getVisibility(), ItemVisibility.class));
-        chaConfigDescriptor.setEntity(JsonUtil.toObject(chaConfigDO.getEntity(), Entity.class));
-        chaConfigDescriptor.setKnowledgeInfos(JsonUtil.toList(chaConfigDO.getKnowledgeInfo(), KnowledgeInfo.class));
-        chaConfigDescriptor.setStatusEnum(StatusEnum.of(chaConfigDO.getStatus()));
+        if (Objects.isNull(chatConfigDO)) {
+            // deal empty chatConfigDO
+            return generateEmptyChatConfigResp(domainId);
+        }
 
-        chaConfigDescriptor.setCreatedBy(chaConfigDO.getCreatedBy());
-        chaConfigDescriptor.setCreatedAt(chaConfigDO.getCreatedAt());
-        chaConfigDescriptor.setUpdatedBy(chaConfigDO.getUpdatedBy());
-        chaConfigDescriptor.setUpdatedAt(chaConfigDO.getUpdatedAt());
+        BeanUtils.copyProperties(chatConfigDO, chatConfigDescriptor);
 
-        return chaConfigDescriptor;
+        chatConfigDescriptor.setChatDetailConfig(JsonUtil.toObject(chatConfigDO.getChatDetailConfig(), ChatDetailConfig.class));
+        chatConfigDescriptor.setChatAggConfig(JsonUtil.toObject(chatConfigDO.getChatAggConfig(), ChatAggConfig.class));
+        chatConfigDescriptor.setStatusEnum(StatusEnum.of(chatConfigDO.getStatus()));
+
+        chatConfigDescriptor.setCreatedBy(chatConfigDO.getCreatedBy());
+        chatConfigDescriptor.setCreatedAt(chatConfigDO.getCreatedAt());
+        chatConfigDescriptor.setUpdatedBy(chatConfigDO.getUpdatedBy());
+        chatConfigDescriptor.setUpdatedAt(chatConfigDO.getUpdatedAt());
+
+
+        if (Strings.isEmpty(chatConfigDO.getChatAggConfig())) {
+            chatConfigDescriptor.setChatAggConfig(generateEmptyChatAggConfigResp());
+        }
+
+        if (Strings.isEmpty(chatConfigDO.getChatDetailConfig())) {
+            chatConfigDescriptor.setChatDetailConfig(generateEmptyChatDetailConfigResp());
+        }
+        return chatConfigDescriptor;
+    }
+
+    private ChatConfigResp generateEmptyChatConfigResp(Long domainId) {
+        ChatConfigResp chatConfigResp = new ChatConfigResp();
+        chatConfigResp.setDomainId(domainId);
+        chatConfigResp.setChatDetailConfig(generateEmptyChatDetailConfigResp());
+        chatConfigResp.setChatAggConfig(generateEmptyChatAggConfigResp());
+        return chatConfigResp;
+    }
+
+    private ChatDetailConfig generateEmptyChatDetailConfigResp() {
+        ChatDetailConfig chatDetailConfig = new ChatDetailConfig();
+        ItemVisibility visibility = new ItemVisibility();
+        chatDetailConfig.setVisibility(visibility);
+        return chatDetailConfig;
+    }
+
+    private ChatAggConfig generateEmptyChatAggConfigResp() {
+        ChatAggConfig chatAggConfig = new ChatAggConfig();
+        ItemVisibility visibility = new ItemVisibility();
+        chatAggConfig.setVisibility(visibility);
+        return chatAggConfig;
     }
 }

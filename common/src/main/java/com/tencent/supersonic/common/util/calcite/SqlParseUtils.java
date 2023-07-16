@@ -1,16 +1,24 @@
 package com.tencent.supersonic.common.util.calcite;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.calcite.sql.SqlBasicCall;
+import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlOrderBy;
 import org.apache.calcite.sql.SqlSelect;
+import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.parser.SqlParserPos;
+import org.apache.calcite.sql.util.SqlString;
+import org.apache.commons.collections.CollectionUtils;
 
 /**
  * sql parse utils
@@ -28,11 +36,14 @@ public class SqlParseUtils {
             SqlParser parser = SqlParser.create(sql);
             SqlNode sqlNode = parser.parseQuery();
             SqlParserInfo sqlParserInfo = new SqlParserInfo();
+
             handlerSQL(sqlNode, sqlParserInfo);
 
-            List<String> collect = sqlParserInfo.getAllFields().stream().distinct().collect(Collectors.toList());
+            sqlParserInfo.setAllFields(sqlParserInfo.getAllFields().stream().distinct().collect(Collectors.toList()));
 
-            sqlParserInfo.setAllFields(collect);
+            sqlParserInfo.setSelectFields(
+                    sqlParserInfo.getSelectFields().stream().distinct().collect(Collectors.toList()));
+
             return sqlParserInfo;
         } catch (SqlParseException e) {
             throw new RuntimeException("getSqlParseInfo", e);
@@ -69,7 +80,8 @@ public class SqlParseUtils {
         SqlNode query = sqlOrderBy.query;
         handlerSQL(query, sqlParserInfo);
         SqlNodeList orderList = sqlOrderBy.orderList;
-        handlerField(orderList, sqlParserInfo);
+        Set<String> orderFields = handlerField(orderList);
+        sqlParserInfo.getAllFields().addAll(orderFields);
     }
 
     /**
@@ -82,22 +94,26 @@ public class SqlParseUtils {
         SqlSelect sqlSelect = (SqlSelect) select;
         SqlNodeList selectList = sqlSelect.getSelectList();
 
+        List<String> allFields = sqlParserInfo.getAllFields();
+
         selectList.getList().forEach(list -> {
-            handlerField(list, sqlParserInfo);
+            Set<String> selectFields = handlerField(list);
+            sqlParserInfo.getSelectFields().addAll(selectFields);
+            allFields.addAll(selectFields);
         });
         String tableName = handlerFrom(sqlSelect.getFrom());
         sqlParserInfo.setTableName(tableName);
 
         if (sqlSelect.hasWhere()) {
-            handlerField(sqlSelect.getWhere(), sqlParserInfo);
+            allFields.addAll(handlerField(sqlSelect.getWhere()));
         }
         if (sqlSelect.hasOrderBy()) {
-            handlerField(sqlSelect.getOrderList(), sqlParserInfo);
+            allFields.addAll(handlerField(sqlSelect.getOrderList()));
         }
         SqlNodeList group = sqlSelect.getGroup();
         if (group != null) {
             group.forEach(groupField -> {
-                handlerField(groupField, sqlParserInfo);
+                allFields.addAll(handlerField(groupField));
             });
         }
     }
@@ -115,7 +131,7 @@ public class SqlParseUtils {
                 SqlIdentifier sqlIdentifier = (SqlIdentifier) from;
                 return sqlIdentifier.getSimple();
             case AS:
-                SqlBasicCall sqlBasicCall =  (SqlBasicCall) from;
+                SqlBasicCall sqlBasicCall = (SqlBasicCall) from;
                 SqlNode sqlNode = sqlBasicCall.getOperandList().get(0);
                 SqlSelect sqlSelect = (SqlSelect) sqlNode;
                 return handlerFrom(sqlSelect.getFrom());
@@ -127,34 +143,120 @@ public class SqlParseUtils {
      * handler field
      *
      * @param field
-     * @param sqlParserInfo
      */
-    private static void handlerField(SqlNode field, SqlParserInfo sqlParserInfo) {
+    private static Set<String> handlerField(SqlNode field) {
+        Set<String> fields = new HashSet<>();
         SqlKind kind = field.getKind();
         switch (kind) {
             case AS:
                 List<SqlNode> operandList1 = ((SqlBasicCall) field).getOperandList();
-                SqlNode left_as = operandList1.get(0);
-                handlerField(left_as, sqlParserInfo);
+                SqlNode leftAs = operandList1.get(0);
+                fields.addAll(handlerField(leftAs));
                 break;
             case IDENTIFIER:
                 SqlIdentifier sqlIdentifier = (SqlIdentifier) field;
-                sqlParserInfo.getAllFields().add(sqlIdentifier.getSimple());
+                fields.add(sqlIdentifier.getSimple());
                 break;
             default:
                 if (field instanceof SqlBasicCall) {
                     List<SqlNode> operandList2 = ((SqlBasicCall) field).getOperandList();
                     for (int i = 0; i < operandList2.size(); i++) {
-                        handlerField(operandList2.get(i), sqlParserInfo);
+                        fields.addAll(handlerField(operandList2.get(i)));
                     }
                 }
                 if (field instanceof SqlNodeList) {
                     ((SqlNodeList) field).getList().forEach(node -> {
-                        handlerField(node, sqlParserInfo);
+                        fields.addAll(handlerField(node));
                     });
                 }
                 break;
         }
+        return fields;
     }
+
+    public static String addAliasToSql(String sql) throws SqlParseException {
+        SqlParser parser = SqlParser.create(sql);
+        SqlNode sqlNode = parser.parseStmt();
+
+        if (!(sqlNode instanceof SqlSelect)) {
+            return sql;
+        }
+
+        SqlNodeList selectList = ((SqlSelect) sqlNode).getSelectList();
+        for (SqlNode node : selectList) {
+            if (node instanceof SqlBasicCall) {
+                SqlBasicCall sqlBasicCall = (SqlBasicCall) node;
+
+                List<SqlNode> operandList = sqlBasicCall.getOperandList();
+                if (CollectionUtils.isNotEmpty(operandList) && operandList.size() == 1) {
+                    SqlIdentifier sqlIdentifier = (SqlIdentifier) operandList.get(0);
+                    String simple = sqlIdentifier.getSimple();
+                    SqlBasicCall aliasedNode = new SqlBasicCall(
+                            SqlStdOperatorTable.AS,
+                            new SqlNode[]{sqlBasicCall, new SqlIdentifier(simple.toLowerCase(), SqlParserPos.ZERO)},
+                            SqlParserPos.ZERO);
+                    selectList.set(selectList.indexOf(node), aliasedNode);
+                }
+            }
+        }
+        SqlDialect dialect = new S2MysqlSqlDialect(S2MysqlSqlDialect.DEFAULT_CONTEXT);
+        SqlString newSql = sqlNode.toSqlString(dialect);
+        return newSql.getSql().replaceAll("`", "");
+    }
+
+    public static String addFieldsToSql(String sql, List<String> addFields) throws SqlParseException {
+        if (CollectionUtils.isEmpty(addFields)) {
+            return sql;
+        }
+        SqlParser parser = SqlParser.create(sql);
+        SqlNode sqlNode = parser.parseStmt();
+        SqlNodeList selectList = getSelectList(sqlNode);
+
+        // agg to field not allow to add field
+        if (Objects.isNull(selectList)) {
+            return sql;
+        }
+        for (SqlNode node : selectList) {
+            if (node instanceof SqlBasicCall) {
+                return sql;
+            }
+        }
+        Set<String> existFields = new HashSet<>();
+        for (SqlNode node : selectList.getList()) {
+            if (node instanceof SqlIdentifier) {
+                String fieldName = ((SqlIdentifier) node).getSimple();
+                existFields.add(fieldName.toLowerCase());
+            }
+        }
+
+        for (String addField : addFields) {
+            if (existFields.contains(addField.toLowerCase())) {
+                continue;
+            }
+            SqlIdentifier newField = new SqlIdentifier(addField, SqlParserPos.ZERO);
+            selectList.add(newField);
+            existFields.add(addField.toLowerCase());
+        }
+        SqlDialect dialect = new S2MysqlSqlDialect(S2MysqlSqlDialect.DEFAULT_CONTEXT);
+        SqlString newSql = sqlNode.toSqlString(dialect);
+
+        return newSql.getSql().replaceAll("`", "");
+    }
+
+    private static SqlNodeList getSelectList(SqlNode sqlNode) {
+        SqlKind kind = sqlNode.getKind();
+
+        switch (kind) {
+            case SELECT:
+                SqlSelect sqlSelect = (SqlSelect) sqlNode;
+                return sqlSelect.getSelectList();
+            case ORDER_BY:
+                SqlOrderBy sqlOrderBy = (SqlOrderBy) sqlNode;
+                SqlSelect query = (SqlSelect) sqlOrderBy.query;
+                return query.getSelectList();
+        }
+        return null;
+    }
+
 }
 

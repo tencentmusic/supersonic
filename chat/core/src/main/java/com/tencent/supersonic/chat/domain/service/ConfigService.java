@@ -2,22 +2,25 @@ package com.tencent.supersonic.chat.domain.service;
 
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigBase;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigEditReq;
+import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigBaseReq;
+import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigEditReqReq;
 import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigFilter;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigInfo;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichInfo;
+import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigResp;
+import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichResp;
+
 import java.util.List;
 
 public interface ConfigService {
 
-    Long addConfig(ChatConfigBase extendBaseCmd, User user);
+    Long addConfig(ChatConfigBaseReq extendBaseCmd, User user);
 
-    Long editConfig(ChatConfigEditReq extendEditCmd, User user);
+    Long editConfig(ChatConfigEditReqReq extendEditCmd, User user);
 
-    List<ChatConfigInfo> search(ChatConfigFilter filter, User user);
+    List<ChatConfigResp> search(ChatConfigFilter filter, User user);
 
-    ChatConfigRichInfo getConfigRichInfo(Long domainId);
+    ChatConfigRichResp getConfigRichInfo(Long domainId);
 
-    List<ChatConfigRichInfo> getAllChatRichConfig();
+    ChatConfigResp fetchConfigByDomainId(Long domainId);
+
+    List<ChatConfigRichResp> getAllChatRichConfig();
 }

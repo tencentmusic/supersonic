@@ -7,14 +7,14 @@ import lombok.Data;
 @Data
 public class EntityRichInfo {
 
-    private Long domainId;
-    private String domainName;
-    private String domainBizName;
+//    private Long domainId;
+//    private String domainName;
+//    private String domainBizName;
 
+    /**
+     *  entity alias
+     */
     private List<String> names;
 
-    private List<DimSchemaResp> entityIds;
-
-    private EntityInternalDetail entityInternalDetailDesc;
-
+    private DimSchemaResp dimItem;
 }

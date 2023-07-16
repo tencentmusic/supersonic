@@ -18,16 +18,12 @@ public class Entity {
     /**
      * uniquely identifies an entity
      */
-    private List<Long> entityIds;
+    private Long entityId;
 
     /**
      * entity name list
      */
     private List<String> names;
 
-    /**
-     * query entity default information
-     */
-    private EntityDetailData detailData;
 
 }

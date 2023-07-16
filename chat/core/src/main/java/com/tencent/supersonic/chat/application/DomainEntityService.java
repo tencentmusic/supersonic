@@ -8,15 +8,14 @@ import com.tencent.supersonic.chat.api.pojo.DomainInfo;
 import com.tencent.supersonic.chat.api.pojo.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.Filter;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichInfo;
+import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichResp;
+import com.tencent.supersonic.chat.domain.pojo.config.ChatDefaultRichConfig;
 import com.tencent.supersonic.chat.domain.pojo.config.EntityRichInfo;
 import com.tencent.supersonic.chat.domain.utils.ComponentFactory;
-import com.tencent.supersonic.chat.domain.utils.DefaultSemanticInternalUtils;
 import com.tencent.supersonic.chat.domain.utils.SchemaInfoConverter;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.SchemaItem;
-import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.core.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class DomainEntityService {
     private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
 
     @Autowired
-    private DefaultSemanticInternalUtils defaultSemanticUtils;
+    private ConfigServiceImpl configService;
 
     public EntityInfo getEntityInfo(SemanticParseInfo parseInfo, User user) {
         if (parseInfo != null && parseInfo.getDomainId() > 0) {
@@ -77,42 +76,55 @@ public class DomainEntityService {
     }
 
     public EntityInfo getEntityInfo(Long domain) {
-        ChatConfigRichInfo chaConfigRichDesc = defaultSemanticUtils.getChatConfigRichInfo(domain);
-        return getEntityInfo(chaConfigRichDesc.getEntity());
+        ChatConfigRichResp chaConfigRichDesc = configService.getConfigRichInfo(domain);
+        if (Objects.isNull(chaConfigRichDesc) || Objects.isNull(chaConfigRichDesc.getChatDetailRichConfig())) {
+            return new EntityInfo();
+        }
+        return getEntityInfo(chaConfigRichDesc);
     }
 
-    private EntityInfo getEntityInfo(EntityRichInfo entityDesc) {
-        EntityInfo entityInfo = new EntityInfo();
+    private EntityInfo getEntityInfo(ChatConfigRichResp chaConfigRichDesc) {
 
-        if (entityDesc != null && Objects.nonNull(entityDesc.getDomainId())) {
+        EntityInfo entityInfo = new EntityInfo();
+        EntityRichInfo entityDesc = chaConfigRichDesc.getChatDetailRichConfig().getEntity();
+        if (entityDesc != null && Objects.nonNull(chaConfigRichDesc.getDomainId())) {
             DomainInfo domainInfo = new DomainInfo();
-            domainInfo.setItemId(Integer.valueOf(entityDesc.getDomainId().intValue()));
-            domainInfo.setName(entityDesc.getDomainName());
+            domainInfo.setItemId(Integer.valueOf(chaConfigRichDesc.getDomainId().intValue()));
+            domainInfo.setName(chaConfigRichDesc.getDomainName());
             domainInfo.setWords(entityDesc.getNames());
-            domainInfo.setBizName(entityDesc.getDomainBizName());
-            if (entityDesc.getEntityIds().size() > 0) {
-                domainInfo.setPrimaryEntityBizName(entityDesc.getEntityIds().get(0).getBizName());
+            domainInfo.setBizName(chaConfigRichDesc.getBizName());
+            if (Objects.nonNull(entityDesc.getDimItem())) {
+                domainInfo.setPrimaryEntityBizName(entityDesc.getDimItem().getBizName());
             }
+
             entityInfo.setDomainInfo(domainInfo);
             List<DataInfo> dimensions = new ArrayList<>();
             List<DataInfo> metrics = new ArrayList<>();
-            if (entityDesc.getEntityInternalDetailDesc() != null) {
-                for (DimSchemaResp dimensionDesc : entityDesc.getEntityInternalDetailDesc().getDimensionList()) {
-                    DataInfo mainEntityDimension = new DataInfo();
-                    mainEntityDimension.setItemId(dimensionDesc.getId().intValue());
-                    mainEntityDimension.setName(dimensionDesc.getName());
-                    mainEntityDimension.setBizName(dimensionDesc.getBizName());
-                    dimensions.add(mainEntityDimension);
+
+            if (Objects.nonNull(chaConfigRichDesc) && Objects.nonNull(chaConfigRichDesc.getChatDetailRichConfig())
+                    && Objects.nonNull(chaConfigRichDesc.getChatDetailRichConfig().getChatDefaultConfig())) {
+                ChatDefaultRichConfig chatDefaultConfig = chaConfigRichDesc.getChatDetailRichConfig().getChatDefaultConfig();
+                if(!CollectionUtils.isEmpty(chatDefaultConfig.getDimensions())){
+                    for (SchemaItem dimensionDesc : chatDefaultConfig.getDimensions()) {
+                        DataInfo mainEntityDimension = new DataInfo();
+                        mainEntityDimension.setItemId(dimensionDesc.getId().intValue());
+                        mainEntityDimension.setName(dimensionDesc.getName());
+                        mainEntityDimension.setBizName(dimensionDesc.getBizName());
+                        dimensions.add(mainEntityDimension);
+                    }
+                    entityInfo.setDimensions(dimensions);
                 }
-                entityInfo.setDimensions(dimensions);
-                for (MetricSchemaResp metricDesc : entityDesc.getEntityInternalDetailDesc().getMetricList()) {
-                    DataInfo dataInfo = new DataInfo();
-                    dataInfo.setName(metricDesc.getName());
-                    dataInfo.setBizName(metricDesc.getBizName());
-                    dataInfo.setItemId(metricDesc.getId().intValue());
-                    metrics.add(dataInfo);
+
+                if(!CollectionUtils.isEmpty(chatDefaultConfig.getMetrics())){
+                    for (SchemaItem metricDesc : chatDefaultConfig.getMetrics()) {
+                        DataInfo dataInfo = new DataInfo();
+                        dataInfo.setName(metricDesc.getName());
+                        dataInfo.setBizName(metricDesc.getBizName());
+                        dataInfo.setItemId(metricDesc.getId().intValue());
+                        metrics.add(dataInfo);
+                    }
+                    entityInfo.setMetrics(metrics);
                 }
-                entityInfo.setMetrics(metrics);
             }
         }
         return entityInfo;

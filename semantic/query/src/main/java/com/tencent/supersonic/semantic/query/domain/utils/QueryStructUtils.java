@@ -1,27 +1,15 @@
 package com.tencent.supersonic.semantic.query.domain.utils;
 
-import static com.tencent.supersonic.common.constant.Constants.UNIONALL;
-
-import com.tencent.supersonic.semantic.api.core.pojo.ItemDateFilter;
-import com.tencent.supersonic.semantic.api.core.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.core.response.ItemDateResp;
-import com.tencent.supersonic.semantic.api.core.response.MetricResp;
-import com.tencent.supersonic.semantic.api.core.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.SqlParserResp;
-import com.tencent.supersonic.semantic.api.query.pojo.Cache;
-import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-import com.tencent.supersonic.common.constant.Constants;
 import com.tencent.supersonic.common.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.SchemaItem;
-import com.tencent.supersonic.common.util.cache.CacheUtils;
-import com.tencent.supersonic.semantic.core.domain.DatabaseService;
-import com.tencent.supersonic.semantic.core.domain.DatasourceService;
-import com.tencent.supersonic.semantic.core.domain.DimensionService;
-import com.tencent.supersonic.semantic.core.domain.MetricService;
-import com.tencent.supersonic.semantic.query.domain.ParserService;
+import com.tencent.supersonic.semantic.api.core.pojo.ItemDateFilter;
+import com.tencent.supersonic.semantic.api.core.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.core.response.ItemDateResp;
+import com.tencent.supersonic.semantic.api.core.response.MetricResp;
+import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import com.tencent.supersonic.semantic.core.domain.Catalog;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -29,172 +17,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 
 @Slf4j
 @Component
 public class QueryStructUtils {
 
-    public static Set<String> internalCols = new HashSet<>(
-            Arrays.asList("dayno", "plat_sys_var", "sys_imp_date", "sys_imp_week", "sys_imp_month"));
-    private final DatabaseService databaseService;
-    private final QueryUtils queryUtils;
-    private final ParserService parserService;
-    private final SqlParserUtils sqlParserUtils;
-    private final StatUtils statUtils;
-    private final DimensionService dimensionService;
-    private final MetricService metricService;
-    private final DatasourceService datasourceService;
     private final DateUtils dateUtils;
     private final SqlFilterUtils sqlFilterUtils;
-    private final CacheUtils cacheUtils;
-    @Value("${query.cache.enable:true}")
-    private Boolean cacheEnable;
+    private final Catalog catalog;
 
-    public QueryStructUtils(DatabaseService databaseService,
-            QueryUtils queryUtils,
-            ParserService parserService,
-            SqlParserUtils sqlParserUtils,
-            StatUtils statUtils,
-            DimensionService dimensionService,
-            MetricService metricService,
-            DatasourceService datasourceService,
+
+    public static Set<String> internalCols = new HashSet<>(
+            Arrays.asList("dayno", "plat_sys_var", "sys_imp_date", "sys_imp_week", "sys_imp_month"));
+
+    public QueryStructUtils(
             DateUtils dateUtils,
-            SqlFilterUtils sqlFilterUtils,
-            CacheUtils cacheUtils) {
-        this.databaseService = databaseService;
-        this.queryUtils = queryUtils;
-        this.parserService = parserService;
-        this.sqlParserUtils = sqlParserUtils;
-        this.statUtils = statUtils;
-        this.dimensionService = dimensionService;
-        this.metricService = metricService;
-        this.datasourceService = datasourceService;
+            SqlFilterUtils sqlFilterUtils, Catalog catalog) {
+
         this.dateUtils = dateUtils;
         this.sqlFilterUtils = sqlFilterUtils;
-        this.cacheUtils = cacheUtils;
+        this.catalog = catalog;
     }
 
-
-    public QueryResultWithSchemaResp queryByStructByCache(QueryStructReq queryStructCmd, String key) throws Exception {
-
-        QueryResultWithSchemaResp queryResultWithColumns;
-        Object resultObject = cacheUtils.get(key);
-        if (Objects.nonNull(resultObject)) {
-            log.info("queryByStructWithCache, key:{}, queryStructCmd:{}", key, queryStructCmd.toString());
-            statUtils.updateResultCacheKey(key);
-            return (QueryResultWithSchemaResp) resultObject;
-        }
-
-        // if cache data is null, query database
-        queryResultWithColumns = queryByStructWithoutCache(queryStructCmd, key);
-        return queryResultWithColumns;
-    }
-
-    public boolean queryCache(Cache cacheInfo) {
-        if (Objects.isNull(cacheInfo)) {
-            return true;
-        }
-        return Objects.nonNull(cacheInfo)
-                && cacheInfo.getCache();
-    }
-
-
-    public QueryResultWithSchemaResp queryByStructWithoutCache(QueryStructReq queryStructCmd, String key)
-            throws Exception {
-
-        log.info("stat queryByStructWithoutCache, queryStructCmd:{}", queryStructCmd);
-        StatUtils.get().setUseResultCache(false);
-        SqlParserResp sqlParser = getSqlParser(queryStructCmd);
-        queryUtils.checkSqlParse(sqlParser);
-        log.info("sqlParser:{}", sqlParser);
-
-        // todo tmp delete
-        //queryUtils.handleDetail(queryStructCmd, sqlParser);
-        queryUtils.handleNoMetric(queryStructCmd, sqlParser);
-
-        QueryResultWithSchemaResp queryResultWithColumns = databaseService.queryWithColumns(sqlParser);
-
-        queryUtils.fillItemNameInfo(queryResultWithColumns, queryStructCmd.getDomainId());
-        queryResultWithColumns.setSql(sqlParser.getSql());
-
-        // if queryResultWithColumns is not null, update cache data
-        cacheResultLogic(key, queryResultWithColumns);
-
-        return queryResultWithColumns;
-    }
-
-    private void cacheResultLogic(String key, QueryResultWithSchemaResp queryResultWithColumns) {
-        if (cacheEnable && Objects.nonNull(queryResultWithColumns) && !CollectionUtils.isEmpty(
-                queryResultWithColumns.getResultList())) {
-            QueryResultWithSchemaResp finalQueryResultWithColumns = queryResultWithColumns;
-            CompletableFuture.supplyAsync(() -> cacheUtils.put(key, finalQueryResultWithColumns))
-                    .exceptionally(exception -> {
-                        log.warn("exception:", exception);
-                        return null;
-                    });
-            statUtils.updateResultCacheKey(key);
-            log.info("add record to cache, key:{}", key);
-        }
-
-    }
-
-    public QueryResultWithSchemaResp queryByMultiStructWithoutCache(QueryMultiStructReq queryMultiStructCmd, String key)
-            throws Exception {
-
-        log.info("stat queryByStructWithoutCache, queryMultiStructCmd:{}", queryMultiStructCmd);
-        QueryResultWithSchemaResp queryResultWithColumns;
-
-        List<SqlParserResp> sqlParsers = new ArrayList<>();
-        for (QueryStructReq queryStructCmd : queryMultiStructCmd.getQueryStructCmds()) {
-            SqlParserResp sqlParser = getSqlParser(queryStructCmd);
-            queryUtils.checkSqlParse(sqlParser);
-            queryUtils.handleDetail(queryStructCmd, sqlParser);
-            sqlParsers.add(sqlParser);
-        }
-        log.info("multi sqlParser:{}", sqlParsers);
-
-        SqlParserResp sqlParser = sqlParserUnion(queryMultiStructCmd, sqlParsers);
-        queryResultWithColumns = databaseService.queryWithColumns(sqlParser);
-        queryUtils.fillItemNameInfo(queryResultWithColumns, queryMultiStructCmd);
-        queryResultWithColumns.setSql(sqlParser.getSql());
-
-        cacheResultLogic(key, queryResultWithColumns);
-        return queryResultWithColumns;
-    }
-
-    private SqlParserResp sqlParserUnion(QueryMultiStructReq queryMultiStructCmd, List<SqlParserResp> sqlParsers) {
-        SqlParserResp sqlParser = new SqlParserResp();
-        StringBuilder unionSqlBuilder = new StringBuilder();
-        for (int i = 0; i < sqlParsers.size(); i++) {
-            String selectStr = SqlGenerateUtils.getUnionSelect(queryMultiStructCmd.getQueryStructCmds().get(i));
-            unionSqlBuilder.append(String.format("select %s from ( %s ) sub_sql_%s",
-                    selectStr,
-                    sqlParsers.get(i).getSql(), i));
-            unionSqlBuilder.append(UNIONALL);
-        }
-        String unionSql = unionSqlBuilder.substring(0, unionSqlBuilder.length() - Constants.UNIONALL.length());
-        sqlParser.setSql(unionSql);
-        sqlParser.setSourceId(sqlParsers.get(0).getSourceId());
-        log.info("union sql parser:{}", sqlParser);
-        return sqlParser;
-    }
-
-
-    private SqlParserResp getSqlParser(QueryStructReq queryStructCmd) throws Exception {
-        return sqlParserUtils.getSqlParserWithoutCache(queryStructCmd);
-    }
 
     private List<Long> getDimensionIds(QueryStructReq queryStructCmd) {
         List<Long> dimensionIds = new ArrayList<>();
-        List<DimensionResp> dimensions = dimensionService.getDimensions(queryStructCmd.getDomainId());
+        List<DimensionResp> dimensions = catalog.getDimensions(queryStructCmd.getDomainId());
         Map<String, List<DimensionResp>> pair = dimensions.stream()
                 .collect(Collectors.groupingBy(DimensionResp::getBizName));
         for (String group : queryStructCmd.getGroups()) {
@@ -215,7 +68,7 @@ public class QueryStructUtils {
 
     private List<Long> getMetricIds(QueryStructReq queryStructCmd) {
         List<Long> metricIds = new ArrayList<>();
-        List<MetricResp> metrics = metricService.getMetrics(queryStructCmd.getDomainId());
+        List<MetricResp> metrics = catalog.getMetrics(queryStructCmd.getDomainId());
         Map<String, List<MetricResp>> pair = metrics.stream().collect(Collectors.groupingBy(SchemaItem::getBizName));
         for (Aggregator agg : queryStructCmd.getAggregators()) {
             if (pair.containsKey(agg.getColumn())) {
@@ -239,7 +92,7 @@ public class QueryStructUtils {
         List<Long> dimensionIds = getDimensionIds(queryStructCmd);
         List<Long> metricIds = getMetricIds(queryStructCmd);
 
-        ItemDateResp dateDate = datasourceService.getDateDate(
+        ItemDateResp dateDate = catalog.getDateDate(
                 new ItemDateFilter(dimensionIds, TypeEnums.DIMENSION.getName()),
                 new ItemDateFilter(metricIds, TypeEnums.METRIC.getName()));
         if (Objects.isNull(dateDate)

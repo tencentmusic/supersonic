@@ -174,7 +174,7 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
                     [isCreateName]: 1,
                   });
                 }}
-                placeholder="请输入中文名"
+                placeholder="请填写名称"
               />
             </Checkbox>
           );

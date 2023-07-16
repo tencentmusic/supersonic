@@ -14,21 +14,23 @@
         <result column="unavailable_date" jdbcType="INTEGER" property="unavailableDateList"/>
         <result column="created_by" jdbcType="TIMESTAMP" property="createdBy"/>
         <result column="updated_by" jdbcType="VARCHAR" property="updatedBy"/>
+        <result column="date_period" jdbcType="VARCHAR" property="datePeriod"/>
     </resultMap>
 
     <insert id="upsertDateInfo">
         insert into s2_available_date_info
         (`type`, item_id, date_format, start_date, end_date, unavailable_date, created_by,
-         updated_by)
+         updated_by,date_period)
         values (#{type}, #{itemId}, #{dateFormat}, #{startDate}, #{endDate}, #{unavailableDateList},
-                #{createdBy}, #{updatedBy}) ON DUPLICATE KEY
+                #{createdBy}, #{updatedBy}, #{datePeriod}) ON DUPLICATE KEY
         UPDATE
             date_format = #{dateFormat},
             start_date = #{startDate},
             end_date = #{endDate},
             unavailable_date = #{unavailableDateList},
             created_by = #{createdBy},
-            updated_by = #{updatedBy}
+            updated_by = #{updatedBy},
+            date_period = #{datePeriod}
     </insert>
 
     <select id="getDateInfos" resultMap="BaseResultMap">

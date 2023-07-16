@@ -37,15 +37,11 @@ CREATE TABLE `s2_chat_query`
     PRIMARY KEY (`question_id`)
 );
 
-
-
 CREATE TABLE IF NOT EXISTS `s2_chat_config` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `domain_id` INT DEFAULT NULL ,
-    `default_metrics` varchar(655) DEFAULT NULL,
-    `visibility` varchar(655)    , -- invisible dimension metric information
-    `entity_info` varchar(655)    ,
-    `dictionary_info` varchar(655)    , -- dictionary-related dimension setting information
+    `chat_detail_config` varchar(655) ,
+    `chat_agg_config` varchar(655)    ,
     `created_at` TIMESTAMP  NOT NULL   ,
     `updated_at` TIMESTAMP  NOT NULL   ,
     `created_by` varchar(100) NOT NULL   ,
@@ -53,6 +49,22 @@ CREATE TABLE IF NOT EXISTS `s2_chat_config` (
     `status` INT NOT NULL  DEFAULT '0' , -- domain extension information status : 0 is normal, 1 is off the shelf, 2 is deleted
     PRIMARY KEY (`id`)
 ) ;
+
+
+-- CREATE TABLE IF NOT EXISTS `s2_chat_config` (
+--     `id` INT NOT NULL AUTO_INCREMENT,
+--     `domain_id` INT DEFAULT NULL ,
+--     `default_metrics` varchar(655) DEFAULT NULL,
+--     `visibility` varchar(655)    , -- invisible dimension metric information
+--     `entity_info` varchar(655)    ,
+--     `dictionary_info` varchar(655)    , -- dictionary-related dimension setting information
+--     `created_at` TIMESTAMP  NOT NULL   ,
+--     `updated_at` TIMESTAMP  NOT NULL   ,
+--     `created_by` varchar(100) NOT NULL   ,
+--     `updated_by` varchar(100) NOT NULL   ,
+--     `status` INT NOT NULL  DEFAULT '0' , -- domain extension information status : 0 is normal, 1 is off the shelf, 2 is deleted
+--     PRIMARY KEY (`id`)
+-- ) ;
 COMMENT ON TABLE s2_chat_config IS 'chat config information table ';
 
 

@@ -21,5 +21,6 @@ const Settings: LayoutSettings & {
     ignoreFlatMenu: true,
   },
 };
+export const publicPath = '/webapp/';
 
 export default Settings;

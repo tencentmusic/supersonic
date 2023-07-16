@@ -1,19 +1,19 @@
-import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
-import { Spin, Space } from 'antd';
-import ScaleLoader from 'react-spinners/ScaleLoader';
-import { history } from 'umi';
-import type { RunTimeLayoutConfig } from 'umi';
+import { AUTH_TOKEN_KEY, FROM_URL_KEY } from '@/common/constants';
 import RightContent from '@/components/RightContent';
 import S2Icon, { ICON } from '@/components/S2Icon';
+import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
+import { Space, Spin } from 'antd';
 import qs from 'qs';
-import { queryCurrentUser } from './services/user';
-import { queryToken } from './services/login';
+import ScaleLoader from 'react-spinners/ScaleLoader';
+import type { RunTimeLayoutConfig } from 'umi';
+import { history } from 'umi';
 import defaultSettings from '../config/defaultSettings';
 import settings from '../config/themeSettings';
-import { deleteUrlQuery } from './utils/utils';
-import { AUTH_TOKEN_KEY, FROM_URL_KEY } from '@/common/constants';
+import { queryToken } from './services/login';
+import { queryCurrentUser } from './services/user';
+import { traverseRoutes, deleteUrlQuery } from './utils/utils';
+import { publicPath } from '../config/defaultSettings';
 export { request } from './services/request';
-import { ROUTE_AUTH_CODES } from '../config/routes';
 
 const TOKEN_KEY = AUTH_TOKEN_KEY;
 
@@ -21,8 +21,9 @@ const replaceRoute = '/';
 
 const getRuningEnv = async () => {
   try {
-    // const response = await fetch(`supersonic.config.json`);
-    // const config = await response.json();
+    const response = await fetch(`${publicPath}supersonic.config.json`);
+    const config = await response.json();
+    return config;
   } catch (error) {
     console.warn('无法获取配置文件: 运行时环境将以semantic启动');
   }
@@ -60,16 +61,7 @@ const getToken = async () => {
 };
 
 const getAuthCodes = () => {
-  const { RUN_TYPE, APP_TARGET } = process.env;
-  if (RUN_TYPE === 'local') {
-    return location.host.includes('9080')
-      ? [ROUTE_AUTH_CODES.CHAT, ROUTE_AUTH_CODES.CHAT_SETTING]
-      : [ROUTE_AUTH_CODES.SEMANTIC];
-  }
-  if (APP_TARGET === 'inner') {
-    return [ROUTE_AUTH_CODES.CHAT_SETTING, ROUTE_AUTH_CODES.SEMANTIC];
-  }
-  return [ROUTE_AUTH_CODES.CHAT, ROUTE_AUTH_CODES.CHAT_SETTING, ROUTE_AUTH_CODES.SEMANTIC];
+  return [];
 };
 
 export async function getInitialState(): Promise<{
@@ -79,7 +71,7 @@ export async function getInitialState(): Promise<{
   codeList?: string[];
   authCodes?: string[];
 }> {
-  await getRuningEnv();
+  // await getRuningEnv();
   const fetchUserInfo = async () => {
     try {
       const { code, data } = await queryCurrentUser();
@@ -115,6 +107,21 @@ export async function getInitialState(): Promise<{
   };
 }
 
+export async function patchRoutes({ routes }) {
+  const config = await getRuningEnv();
+  if (config && config.env) {
+    const { env } = config;
+    const target = routes[0].routes;
+    if (env) {
+      const envRoutes = traverseRoutes(target, env);
+      // 清空原本route;
+      target.splice(0, 99);
+      // 写入根据环境转换过的的route
+      target.push(...envRoutes);
+    }
+  }
+}
+
 export const layout: RunTimeLayoutConfig = (params) => {
   const { initialState } = params as any;
   return {
@@ -136,16 +143,6 @@ export const layout: RunTimeLayoutConfig = (params) => {
     contentStyle: { ...(initialState?.contentStyle || {}) },
     rightContentRender: () => <RightContent />,
     disableContentMargin: true,
-    onPageChange: (location: any) => {
-      const { pathname } = location;
-      const { RUN_TYPE, APP_TARGET } = process.env;
-      if (
-        (RUN_TYPE === 'local' && !window.location.host.includes('9080') && pathname === '/chat') ||
-        (APP_TARGET === 'inner' && pathname === '/chat')
-      ) {
-        history.push('/semanticModel');
-      }
-    },
     menuHeaderRender: undefined,
     childrenRender: (dom) => {
       return dom;

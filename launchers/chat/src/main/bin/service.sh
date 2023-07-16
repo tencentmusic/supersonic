@@ -5,7 +5,7 @@ baseDir=$(readlink -f $binDir/../)
 confDir=$baseDir/conf
 source ${baseDir}/bin/env.sh
 
-commond=$1
+command=$1
 
 function start()
 {
@@ -33,7 +33,7 @@ function stop()
   fi
 }
 
-case "$commond" in
+case "$command" in
   start)
         echo -e "Starting $APP_NAME"
         start

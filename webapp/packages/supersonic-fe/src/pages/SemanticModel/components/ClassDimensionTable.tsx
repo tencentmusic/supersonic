@@ -91,6 +91,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'alias',
       title: '别名',
+      search: false,
     },
     {
       dataIndex: 'bizName',

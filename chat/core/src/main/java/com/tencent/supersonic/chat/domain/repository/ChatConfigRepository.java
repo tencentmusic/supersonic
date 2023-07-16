@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.domain.repository;
 
 import com.tencent.supersonic.chat.domain.pojo.config.ChatConfig;
 import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigFilter;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigInfo;
+import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigResp;
 import java.util.List;
 
 
@@ -13,7 +13,7 @@ public interface ChatConfigRepository {
 
     Long updateConfig(ChatConfig chaConfig);
 
-    List<ChatConfigInfo> getChatConfig(ChatConfigFilter filter);
+    List<ChatConfigResp> getChatConfig(ChatConfigFilter filter);
 
-    ChatConfigInfo getConfigByDomainId(Long domainId);
+    ChatConfigResp getConfigByDomainId(Long domainId);
 }

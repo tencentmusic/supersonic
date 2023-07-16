@@ -1,24 +1,24 @@
 package com.tencent.supersonic.chat.domain.utils;
 
+import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.Filter;
 import com.tencent.supersonic.chat.api.pojo.QueryMatchInfo;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.component.SemanticQuery;
-import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichInfo;
+import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichResp;
 import com.tencent.supersonic.common.pojo.SchemaItem;
-import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
-
+import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
+import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 public class ContextHelper {
 
@@ -137,16 +137,17 @@ public class ContextHelper {
         return difference;
     }
 
-    public static void setEntityId(Long dimensionId, String value, ChatConfigRichInfo chaConfigRichDesc,
-            SemanticParseInfo semanticParseInfo) {
-        if (chaConfigRichDesc != null && chaConfigRichDesc.getEntity() != null) {
-            Optional<DimSchemaResp> dimensionDesc = chaConfigRichDesc.getEntity().getEntityIds().stream()
-                    .filter(i -> i.getId().equals(dimensionId)).findFirst();
-            if (dimensionDesc.isPresent() && StringUtils.isNumeric(value)) {
+    public static void setEntityId(Long dimensionId, String value, ChatConfigRichResp chaConfigRichDesc,
+                                   SemanticParseInfo semanticParseInfo) {
+        if (chaConfigRichDesc != null && chaConfigRichDesc.getChatDetailRichConfig() != null
+                && chaConfigRichDesc.getChatDetailRichConfig().getEntity() != null) {
+            DimSchemaResp dimSchemaResp = chaConfigRichDesc.getChatDetailRichConfig().getEntity().getDimItem();
+            if (Objects.nonNull(dimSchemaResp) && StringUtils.isNumeric(value)) {
                 semanticParseInfo.setEntity(Long.valueOf(value));
             }
         }
     }
+
 
     public static boolean hasEntityId(ChatContext chatCtx) {
         if (chatCtx != null && chatCtx.getParseInfo() != null) {
@@ -198,9 +199,17 @@ public class ContextHelper {
                         for (Filter chatFilter : contextSemanticParse.getDimensionFilters()) {
                             if (!isInSchemaElementMatchList(elementMatches, SchemaElementType.VALUE,
                                     chatFilter.getValue().toString())) {
-                                toSchemaElementMatch.add(
-                                        getSchemaElementMatchByContext(chatFilter.getElementID().intValue(),
-                                                chatFilter.getValue().toString(), SchemaElementType.VALUE));
+                                List<String> values = new ArrayList<>();
+                                if (chatFilter.getOperator().equals(FilterOperatorEnum.IN)) {
+                                    values.addAll((List<String>) chatFilter.getValue());
+                                } else {
+                                    values.add(chatFilter.getValue().toString());
+                                }
+                                for (String value : values) {
+                                    toSchemaElementMatch.add(
+                                            getSchemaElementMatchByContext(chatFilter.getElementID().intValue(),
+                                                    value, SchemaElementType.VALUE));
+                                }
                             }
                         }
                     }
@@ -224,8 +233,7 @@ public class ContextHelper {
             return false;
         }
         Long num = elementMatches.stream()
-                .filter(element -> element != null && element.getWord() != null && element.getWord()
-                        .equalsIgnoreCase(word) && element.getElementType().equals(schemaElementType)).count();
+                .filter(element -> element != null && element.getElementType().equals(schemaElementType)).count();
         return num > 0;
     }
 
@@ -247,6 +255,7 @@ public class ContextHelper {
                 .elementID(id)
                 .elementType(schemaElementType)
                 .word(word)
+                .detectWord(word)
                 .similarity(0.5)
                 .build();
     }

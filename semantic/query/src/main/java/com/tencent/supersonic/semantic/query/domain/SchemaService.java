@@ -18,6 +18,8 @@ public interface SchemaService {
 
     List<DomainResp> getDomainListForAdmin(User user);
 
+    List<DomainResp> getDomainListForViewer(User user);
+
     PageInfo<DimensionResp> queryDimension(PageDimensionReq pageDimensionReq, User user);
 
     PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user);

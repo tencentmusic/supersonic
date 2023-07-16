@@ -8,7 +8,8 @@ import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QuerySqlReq;
 import com.tencent.supersonic.semantic.core.domain.DomainService;
-import com.tencent.supersonic.semantic.query.domain.ParserService;
+import com.tencent.supersonic.semantic.query.domain.SemanticQueryEngine;
+import com.tencent.supersonic.semantic.query.domain.pojo.QueryStatement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -25,9 +26,9 @@ public class QueryReqConverter {
     private DomainService domainService;
 
     @Autowired
-    private ParserService parserService;
+    private SemanticQueryEngine parserService;
 
-    public SqlParserResp convert(QuerySqlReq databaseReq, List<DomainSchemaResp> domainSchemas) throws Exception {
+    public QueryStatement convert(QuerySqlReq databaseReq, List<DomainSchemaResp> domainSchemas) throws Exception {
 
         List<MetricTable> tables = new ArrayList<>();
         MetricTable metricTable = new MetricTable();
@@ -37,7 +38,7 @@ public class QueryReqConverter {
         List<String> allFields = sqlParseInfo.getAllFields();
 
         if (CollectionUtils.isEmpty(domainSchemas)) {
-            return new SqlParserResp();
+            return new QueryStatement();
         }
 
         Set<String> dimensions = domainSchemas.get(0).getDimensions().stream()

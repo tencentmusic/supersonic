@@ -16,8 +16,4 @@ public class LLMConfig {
     @Value("${query2sql.path:query2sql}")
     private String queryToSqlPath;
 
-
-    @Value("${query2sql.endpoint:}")
-    private String endpoint;
-
 }

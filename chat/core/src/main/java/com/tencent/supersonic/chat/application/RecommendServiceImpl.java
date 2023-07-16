@@ -29,7 +29,7 @@ public class RecommendServiceImpl implements RecommendService {
         }
 
         DomainSchemaResp domainSchemaDesc = semanticLayer.getDomainSchemaInfo(
-                Long.valueOf(domainId));
+                Long.valueOf(domainId), true);
 
         List<RecommendResponse.Item> dimensions = domainSchemaDesc.getDimensions().stream().map(dimSchemaDesc -> {
             RecommendResponse.Item item = new RecommendResponse.Item();

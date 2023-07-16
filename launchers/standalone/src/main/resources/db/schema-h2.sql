@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_context`
     `semantic_parse` LONGVARCHAR DEFAULT NULL , -- parse data
     `ext_data`       LONGVARCHAR DEFAULT NULL , -- extend data
     PRIMARY KEY (`chat_id`)
-);
+    );
 
 CREATE TABLE IF NOT EXISTS `s2_chat`
 (
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat`
     `is_delete`     INT DEFAULT '0' COMMENT 'is deleted',
     `is_top`        INT DEFAULT '0' COMMENT 'is top',
     PRIMARY KEY (`chat_id`)
-) ;
+    ) ;
 
 
 CREATE TABLE `s2_chat_query`
@@ -39,33 +39,30 @@ CREATE TABLE `s2_chat_query`
 );
 
 
-
 CREATE TABLE IF NOT EXISTS `s2_chat_config` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `domain_id` INT DEFAULT NULL ,
-    `default_metrics` varchar(655) DEFAULT NULL,
-    `visibility` varchar(655)    , -- invisible dimension metric information
-    `entity_info` varchar(655)    ,
-    `dictionary_info` varchar(655)    , -- dictionary-related dimension setting information
+                                                `id` INT NOT NULL AUTO_INCREMENT,
+                                                `domain_id` INT DEFAULT NULL ,
+                                                `chat_detail_config` varchar(655) ,
+    `chat_agg_config` varchar(655)    ,
     `created_at` TIMESTAMP  NOT NULL   ,
     `updated_at` TIMESTAMP  NOT NULL   ,
     `created_by` varchar(100) NOT NULL   ,
     `updated_by` varchar(100) NOT NULL   ,
     `status` INT NOT NULL  DEFAULT '0' , -- domain extension information status : 0 is normal, 1 is off the shelf, 2 is deleted
     PRIMARY KEY (`id`)
-) ;
+    ) ;
 COMMENT ON TABLE s2_chat_config IS 'chat config information table ';
 
 
 
 
 CREATE TABLE IF NOT EXISTS `s2_dictionary` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `domain_id` INT NOT NULL ,
-    `dim_value_infos` LONGVARCHAR , -- dimension value setting information
-    `created_at` TIMESTAMP  NOT NULL ,
-    `updated_at` TIMESTAMP  NOT NULL ,
-    `created_by` varchar(100) NOT NULL ,
+                                               `id` INT NOT NULL AUTO_INCREMENT,
+                                               `domain_id` INT NOT NULL ,
+                                               `dim_value_infos` LONGVARCHAR , -- dimension value setting information
+                                               `created_at` TIMESTAMP  NOT NULL ,
+                                               `updated_at` TIMESTAMP  NOT NULL ,
+                                               `created_by` varchar(100) NOT NULL ,
     `updated_by` varchar(100) DEFAULT NULL ,
     `status` INT NOT NULL  DEFAULT '0' , -- domain extension information status : 0 is normal, 1 is off the shelf, 2 is deleted
     PRIMARY KEY (`id`),
@@ -75,19 +72,19 @@ COMMENT ON TABLE s2_dictionary IS 'dictionary configuration information table';
 
 
 CREATE TABLE IF NOT EXISTS `s2_dictionary_task` (
-   `id` INT NOT NULL AUTO_INCREMENT,
-   `name` varchar(255) NOT NULL , -- task name
-   `description` varchar(255) ,
-   `command`LONGVARCHAR  NOT NULL , -- task Request Parameters
-   `command_md5` varchar(255)  NOT NULL , -- task Request Parameters md5
-   `status` INT NOT NULL , -- the final status of the task
-   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
-   `created_by` varchar(100) NOT NULL ,
-   `progress` DOUBLE default 0.00  ,  -- task real-time progress
-   `elapsed_ms` bigINT DEFAULT NULL , -- the task takes time in milliseconds
-   `message` LONGVARCHAR  , -- remark related information
-   PRIMARY KEY (`id`)
-);
+                                                    `id` INT NOT NULL AUTO_INCREMENT,
+                                                    `name` varchar(255) NOT NULL , -- task name
+    `description` varchar(255) ,
+    `command`LONGVARCHAR  NOT NULL , -- task Request Parameters
+    `command_md5` varchar(255)  NOT NULL , -- task Request Parameters md5
+    `status` INT NOT NULL , -- the final status of the task
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
+    `created_by` varchar(100) NOT NULL ,
+    `progress` DOUBLE default 0.00  ,  -- task real-time progress
+    `elapsed_ms` bigINT DEFAULT NULL , -- the task takes time in milliseconds
+    `message` LONGVARCHAR  , -- remark related information
+    PRIMARY KEY (`id`)
+    );
 COMMENT ON TABLE s2_dictionary_task IS 'dictionary task information table';
 
 
@@ -306,6 +303,7 @@ CREATE TABLE IF NOT EXISTS `s2_available_date_info` (
     `created_by` varchar(100)  NOT NULL ,
     `updated_at` TIMESTAMP  NOT NULL ,
     `updated_by` varchar(100)  NOT NULL ,
+    `date_period` varchar(100)  DEFAULT NULL ,
     `status` INT  DEFAULT '0', -- 1-in use  0 is normal, 1 is off the shelf, 2 is deleted
     PRIMARY KEY (`id`)
     );
@@ -333,6 +331,18 @@ CREATE TABLE IF NOT EXISTS `s2_stay_time_statis` (
     `page` varchar(200) NOT NULL
     );
 COMMENT ON TABLE s2_stay_time_statis IS 's2_stay_time_statis_info';
+
+CREATE TABLE IF NOT EXISTS `singer` (
+    `imp_date` varchar(200) NOT NULL,
+    `singer_name` varchar(200) NOT NULL,
+    `act_area` varchar(200) NOT NULL,
+    `song_name` varchar(200) NOT NULL,
+    `genre` varchar(200) NOT NULL,
+    `js_play_cnt` bigINT DEFAULT NULL,
+    `down_cnt` bigINT DEFAULT NULL,
+    `favor_cnt` bigINT DEFAULT NULL
+    );
+COMMENT ON TABLE singer IS 'singer_info';
 
 
 

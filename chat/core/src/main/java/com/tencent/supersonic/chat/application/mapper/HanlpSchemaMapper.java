@@ -30,8 +30,7 @@ public class HanlpSchemaMapper implements SchemaMapper {
     @Override
     public void map(QueryContextReq queryContext) {
 
-        List<Term> terms = HanlpHelper.getSegment().seg(queryContext.getQueryText().toLowerCase()).stream()
-                .collect(Collectors.toList());
+        List<Term> terms = HanlpHelper.getTerms(queryContext.getQueryText());
 
         terms.forEach(
                 item -> log.info("word:{},nature:{},frequency:{}", item.word, item.nature.toString(),
@@ -55,6 +54,8 @@ public class HanlpSchemaMapper implements SchemaMapper {
 
         convertTermsToSchemaMapInfo(matches, queryContext.getMapInfo(), terms);
     }
+
+
 
     private void convertTermsToSchemaMapInfo(List<MapResult> mapResults, SchemaMapInfo schemaMap, List<Term> terms) {
         if (CollectionUtils.isEmpty(mapResults)) {

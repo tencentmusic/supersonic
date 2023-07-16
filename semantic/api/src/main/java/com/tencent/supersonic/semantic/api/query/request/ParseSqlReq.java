@@ -4,7 +4,6 @@ import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import lombok.Data;
 
 @Data
@@ -12,7 +11,7 @@ public class ParseSqlReq {
 
     private String rootPath = "";
     private Map<String, String> variables;
-    private String sql;
+    private String sql = "";
     private List<MetricTable> tables;
 
     public Map<String, String> getVariables() {

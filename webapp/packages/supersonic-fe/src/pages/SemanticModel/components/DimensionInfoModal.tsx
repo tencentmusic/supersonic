@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Modal, Select } from 'antd';
+import { Button, Form, Input, Modal, Select, List } from 'antd';
 import { SENSITIVE_LEVEL_OPTIONS } from '../constant';
 import { formLayout } from '@/components/FormHelper/utils';
 import SqlEditor from '@/components/SqlEditor';
+import InfoTagList from './InfoTagList';
 import { message } from 'antd';
 
 export type CreateFormProps = {
@@ -31,6 +32,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
     users: [],
     effectiveTime: 1,
   });
+
   const [form] = Form.useForm();
   const { setFieldsValue } = form;
 
@@ -45,6 +47,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
   };
 
   const setFormVal = () => {
+    console.log(dimensionItem, 'dimensionItem');
     setFieldsValue(dimensionItem);
   };
 
@@ -127,6 +130,9 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
               </Option>
             ))}
           </Select>
+        </FormItem>
+        <FormItem name="defaultValues" label="默认值">
+          <InfoTagList />
         </FormItem>
         <FormItem
           name="description"

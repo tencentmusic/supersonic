@@ -18,5 +18,6 @@ public class ItemDateResp {
     private String dateFormat;
     private String startDate;
     private String endDate;
+    private String datePeriod;
     private List<String> unavailableDateList = new ArrayList<>();
 }

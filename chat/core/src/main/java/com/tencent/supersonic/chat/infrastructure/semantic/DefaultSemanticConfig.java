@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.infrastructure.semantic;
 
 import com.tencent.supersonic.chat.application.ConfigServiceImpl;
-import com.tencent.supersonic.chat.domain.utils.DefaultSemanticInternalUtils;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,12 +23,21 @@ public class DefaultSemanticConfig {
     @Value("${fetchDomainSchemaPath.path:/api/semantic/schema}")
     private String fetchDomainSchemaPath;
 
-    @Autowired
-    private DefaultSemanticInternalUtils defaultSemanticInternalUtils;
+    @Value("${fetchDomainList.path:/api/semantic/schema/dimension/page}")
+    private String fetchDimensionPagePath;
+
+    @Value("${fetchDomainList.path:/api/semantic/schema/metric/page}")
+    private String fetchMetricPagePath;
+
+    @Value("${fetchDomainList.path:/api/semantic/schema/domain/list}")
+    private String fetchDomainListPath;
+
+    @Value("${fetchDomainList.path:/api/semantic/schema/domain/view/list}")
+    private String fetchDomainViewListPath;
 
     @Autowired
     private RestTemplate restTemplate;
 
     @Autowired
-    private ConfigServiceImpl chaConfigService;
+    private ConfigServiceImpl configService;
 }

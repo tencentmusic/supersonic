@@ -1,19 +1,22 @@
-import { Tabs, Popover } from 'antd';
+import { Tabs, Popover, message } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { connect, Helmet } from 'umi';
+import { connect, Helmet, history, useParams } from 'umi';
 import ProjectListTree from './components/ProjectList';
 import ClassDataSourceTable from './components/ClassDataSourceTable';
 import ClassDimensionTable from './components/ClassDimensionTable';
 import ClassMetricTable from './components/ClassMetricTable';
 import PermissionSection from './components/Permission/PermissionSection';
 import DatabaseSection from './components/Database/DatabaseSection';
+import OverView from './components/OverView';
 import styles from './components/style.less';
 import type { StateType } from './model';
 import { DownOutlined } from '@ant-design/icons';
 import SemanticFlow from './SemanticFlows';
+import { ISemantic } from './data';
+import { findLeafNodesFromDomainList } from './utils';
+import SemanticGraph from './SemanticGraph';
+import { getDomainList } from './service';
 import type { Dispatch } from 'umi';
-
-const { TabPane } = Tabs;
 
 type Props = {
   domainManger: StateType;
@@ -22,12 +25,87 @@ type Props = {
 
 const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
   window.RUNNING_ENV = 'semantic';
-  const { selectDomainId, selectDomainName } = domainManger;
-
+  const defaultTabKey = 'xflow';
+  const params: any = useParams();
+  const menuKey = params.menuKey ? params.menuKey : defaultTabKey;
+  const modelId = params.modelId;
+  const { selectDomainId, selectDomainName, domainList } = domainManger;
+  const [modelList, setModelList] = useState<ISemantic.IDomainItem[]>([]);
+  const [isModel, setIsModel] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
+  const [activeKey, setActiveKey] = useState<string>(menuKey);
+
+  const initSelectedDomain = (domainList: ISemantic.IDomainItem[]) => {
+    const targetNode = domainList.filter((item: any) => {
+      return `${item.id}` === modelId;
+    })[0];
+    if (!targetNode) {
+      const firstRootNode = domainList.filter((item: any) => {
+        return item.parentId === 0;
+      })[0];
+      if (firstRootNode) {
+        const { id, name } = firstRootNode;
+        dispatch({
+          type: 'domainManger/setSelectDomain',
+          selectDomainId: id,
+          selectDomainName: name,
+          domainData: firstRootNode,
+        });
+      }
+    } else {
+      const { id, name } = targetNode;
+      dispatch({
+        type: 'domainManger/setSelectDomain',
+        selectDomainId: id,
+        selectDomainName: name,
+        domainData: targetNode,
+      });
+    }
+  };
+
+  const initProjectTree = async () => {
+    const { code, data, msg } = await getDomainList();
+    if (code === 200) {
+      if (!selectDomainId) {
+        initSelectedDomain(data);
+      }
+      dispatch({
+        type: 'domainManger/setDomainList',
+        payload: { domainList: data },
+      });
+    } else {
+      message.error(msg);
+    }
+  };
+
+  useEffect(() => {
+    initProjectTree();
+  }, []);
+
+  useEffect(() => {
+    if (!selectDomainId) {
+      return;
+    }
+    const list = findLeafNodesFromDomainList(domainList, selectDomainId);
+    setModelList(list);
+    if (Array.isArray(list) && list.length > 0) {
+      setIsModel(false);
+      pushUrlMenu(selectDomainId, 'overview');
+      setActiveKey('overview');
+    } else {
+      setIsModel(true);
+      const currentMenuKey = menuKey === 'overview' ? defaultTabKey : menuKey;
+      pushUrlMenu(selectDomainId, currentMenuKey);
+      setActiveKey(currentMenuKey);
+    }
+  }, [domainList, selectDomainId]);
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
+  };
+
+  const pushUrlMenu = (domainId: number, menuKey: string) => {
+    history.push(`/semanticModel/${domainId}/${menuKey}`);
   };
 
   useEffect(() => {
@@ -53,21 +131,68 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
     }
   }, [selectDomainId]);
 
-  useEffect(() => {
-    const width = document.getElementById('tab');
-    const switchWarpper: any = document.getElementById('switch');
-    if (width && switchWarpper) {
-      switchWarpper.style.width = width.offsetWidth * 0.77 + 'px';
-    }
-  });
+  const tabItem = [
+    {
+      label: '子主题域',
+      key: 'overview',
+      children: <OverView modelList={modelList} />,
+    },
+    {
+      label: '权限管理',
+      key: 'permissonSetting',
+      children: <PermissionSection />,
+    },
+  ];
+
+  const isModelItem = [
+    // {
+    //   label: '关系可视化',
+    //   key: 'graph',
+    //   children: (
+    //     <div style={{ width: '100%', height: 'calc(100vh - 200px)' }}>
+    //       <SemanticGraph domainId={selectDomainId} />
+    //     </div>
+    //   ),
+    // },
+    {
+      label: '可视化建模',
+      key: 'xflow',
+      children: (
+        <div style={{ width: '100%', height: 'calc(100vh - 200px)' }}>
+          <SemanticFlow />
+        </div>
+      ),
+    },
+    {
+      label: '数据库',
+      key: 'dataBase',
+      children: <DatabaseSection />,
+    },
+    {
+      label: '数据源',
+      key: 'dataSource',
+      children: <ClassDataSourceTable />,
+    },
+    {
+      label: '维度',
+      key: 'dimenstion',
+      children: <ClassDimensionTable key={selectDomainId} />,
+    },
+    {
+      label: '指标',
+      key: 'metric',
+      children: <ClassMetricTable />,
+    },
+    {
+      label: '权限管理',
+      key: 'permissonSetting',
+      children: <PermissionSection />,
+    },
+  ];
 
   return (
     <div className={styles.projectBody}>
       <Helmet title={'语义建模-超音数'} />
-      {/* 页面改版取消侧边栏转换为popover形式后，因为popover不触发则组件不加载，需要保留原本页面初始化需要ProjectListTree向model中写入首个主题域数据逻辑，在此引入但并不显示 */}
-      <div style={{ display: 'none' }}>
-        <ProjectListTree />
-      </div>
       <div className={styles.projectManger}>
         <h2 className={styles.title}>
           <Popover
@@ -81,6 +206,9 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
                 onTreeSelected={() => {
                   setOpen(false);
                 }}
+                onTreeDataUpdate={() => {
+                  initProjectTree();
+                }}
               />
             }
             trigger="click"
@@ -89,7 +217,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
           >
             <div className={styles.domainSelector}>
               <span className={styles.domainTitle}>
-                {selectDomainName ? `选择的主题域：${selectDomainName}` : '主题域信息'}
+                {selectDomainName ? `当前主题域：${selectDomainName}` : '主题域信息'}
               </span>
               <span className={styles.downIcon}>
                 <DownOutlined />
@@ -99,33 +227,16 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
         </h2>
         {selectDomainId ? (
           <>
-            <Tabs className={styles.tab} defaultActiveKey="xflow" destroyInactiveTabPane>
-              {/* <TabPane className={styles.tabPane} tab="关系可视化" key="graph">
-                  <div style={{ width: '100%', height: 'calc(100vh - 200px)' }}>
-                    <SemanticGraph domainId={selectDomainId} />
-                  </div>
-                </TabPane> */}
-              <TabPane className={styles.tabPane} tab="可视化建模" key="xflow">
-                <div style={{ width: '100%', height: 'calc(100vh - 200px)' }}>
-                  <SemanticFlow />
-                </div>
-              </TabPane>
-              <TabPane className={styles.tabPane} tab="数据库" key="dataBase">
-                <DatabaseSection />
-              </TabPane>
-              <TabPane className={styles.tabPane} tab="数据源" key="dataSource">
-                <ClassDataSourceTable />
-              </TabPane>
-              <TabPane className={styles.tabPane} tab="维度" key="dimenstion">
-                <ClassDimensionTable key={selectDomainId} />
-              </TabPane>
-              <TabPane className={styles.tabPane} tab="指标" key="metric">
-                <ClassMetricTable />
-              </TabPane>
-              <TabPane className={styles.tabPane} tab="权限管理" key="permissonSetting">
-                <PermissionSection />
-              </TabPane>
-            </Tabs>
+            <Tabs
+              className={styles.tab}
+              items={!isModel ? tabItem : isModelItem}
+              activeKey={activeKey}
+              destroyInactiveTabPane
+              onChange={(menuKey: string) => {
+                setActiveKey(menuKey);
+                pushUrlMenu(selectDomainId, menuKey);
+              }}
+            />
           </>
         ) : (
           <h2 className={styles.mainTip}>请选择项目</h2>

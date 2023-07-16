@@ -64,6 +64,29 @@ export declare namespace IDataSource {
 }
 
 export declare namespace ISemantic {
+  interface IDomainItem {
+    createdBy?: string;
+    updatedBy?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    id: number;
+    name: string;
+    bizName: string;
+    description: any;
+    status?: number;
+    typeEnum?: any;
+    sensitiveLevel?: number;
+    parentId: number;
+    fullPath?: string;
+    viewers?: any[];
+    viewOrgs?: any[];
+    admins?: string[];
+    adminOrgs?: any[];
+    isOpen?: number;
+    dimensionCnt?: number;
+    metricCnt?: number;
+  }
+
   interface IDimensionItem {
     createdBy: string;
     updatedBy: string;
@@ -141,6 +164,58 @@ export declare namespace IChatConfig {
     entityInternalDetailDesc: {
       dimensionList: ISemantic.IDimensionList;
       metricList: ISemantic.IMetricList;
+    };
+  }
+
+  interface IConfig {
+    id: any;
+    domainId: number;
+    domainName: string;
+    chatAggRichConfig: IChatRichConfig;
+    chatDetailRichConfig: IChatRichConfig;
+    bizName: string;
+    statusEnum: string;
+    createdBy: string;
+    updatedBy: string;
+    createdAt: string;
+    updatedAt: string;
+  }
+
+  interface IKnowledgeInfosItem {
+    itemId: number;
+    bizName: string;
+    type?: string;
+    searchEnable?: boolean;
+    knowledgeAdvancedConfig?: IKnowledgeConfig;
+  }
+
+  type IKnowledgeInfosItemMap = Record<IKnowledgeInfosItem.bizName, IKnowledgeInfosItem>;
+
+  interface IKnowledgeConfig {
+    blackList: string[];
+    whiteList: string[];
+    ruleList: string[];
+  }
+
+  interface IChatRichConfig {
+    id?: number;
+    visibility: {
+      blackDimIdList: number[];
+      blackMetricIdList: number[];
+      whiteDimIdList: number[];
+      whiteMetricIdList: number[];
+    };
+    entity: {
+      names: string[];
+      dimItem: ISemantic.IDimensionItem;
+    };
+    knowledgeInfos: IKnowledgeInfosItem[];
+    globalKnowledgeConfig: IKnowledgeConfig;
+    chatDefaultConfig: {
+      dimensions: ISemantic.IDimensionList;
+      metrics: ISemantic.IMetricList;
+      unit: number;
+      period: string;
     };
   }
 }

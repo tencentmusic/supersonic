@@ -71,6 +71,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'alias',
       title: '别名',
+      search: false,
     },
     {
       dataIndex: 'bizName',
@@ -90,6 +91,25 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'description',
       title: '描述',
       search: false,
+    },
+    {
+      dataIndex: 'type',
+      title: '指标类型',
+      // search: false,
+      valueEnum: {
+        ATOMIC: '原子指标',
+        DERIVED: '衍生指标',
+      },
+      // render: (type: any) => {
+      //   switch (type) {
+      //     case 'ATOMIC':
+      //       return '原子指标';
+      //     case 'DERIVED':
+      //       return '衍生指标';
+      //     default:
+      //       return '未知';
+      //   }
+      // },
     },
 
     {

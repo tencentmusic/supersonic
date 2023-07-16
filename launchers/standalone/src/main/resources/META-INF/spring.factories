@@ -6,8 +6,8 @@ com.tencent.supersonic.chat.api.component.SchemaMapper=\
 com.tencent.supersonic.chat.api.component.SemanticParser=\
     com.tencent.supersonic.chat.application.parser.DomainSemanticParser, \
     com.tencent.supersonic.chat.application.parser.TimeSemanticParser, \
-    com.tencent.supersonic.chat.application.parser.AggregateSemanticParser
-#    com.tencent.supersonic.chat.application.parser.LLMSemanticParser
+    com.tencent.supersonic.chat.application.parser.AggregateSemanticParser, \
+    com.tencent.supersonic.chat.application.parser.LLMSemanticParser
 
 
 com.tencent.supersonic.chat.api.component.SemanticLayer=\

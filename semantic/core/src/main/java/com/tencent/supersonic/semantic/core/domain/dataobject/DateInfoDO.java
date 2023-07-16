@@ -14,6 +14,7 @@ public class DateInfoDO {
     private String unavailableDateList;
     private String createdBy;
     private String updatedBy;
+    private String datePeriod;
 
 
 }

@@ -2,7 +2,6 @@ package com.tencent.supersonic.chat.application.query;
 
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.domain.pojo.chat.SchemaElementOption;
 import com.tencent.supersonic.common.enums.AggregateTypeEnum;
 
@@ -12,10 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import com.tencent.supersonic.common.pojo.SchemaItem;
-import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
 import lombok.Data;
 import lombok.ToString;
 

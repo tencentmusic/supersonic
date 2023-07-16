@@ -112,6 +112,11 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
+    public List<DomainResp> getDomainListForViewer(User user) {
+        return domainService.getDomainListForViewer(user.getName());
+    }
+
+    @Override
     public PageInfo<DimensionResp> queryDimension(PageDimensionReq pageDimensionCmd, User user) {
         return dimensionService.queryDimension(pageDimensionCmd);
     }

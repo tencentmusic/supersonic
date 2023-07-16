@@ -2,7 +2,9 @@ English | [中文](README_CN.md)
 
 # SuperSonic (超音数)
 
-**SuperSonic is an out-of-the-box yet highly extensible framework for building a data chatbot**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to build a logical semantic model (definition of metrics, dimensions, relationships, etc) on top of the physical data stores, and no data modification or copying is required. Meanwhile SuperSonic is designed to be plug-and-play, allowing new functionalities to be added through plugins and core components to be integrated into other systems.
+**SuperSonic is an out-of-the-box yet highly extensible framework for building a data chatbot**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to define logical semantic models (metrics, dimensions, relationships, etc) on top of physical data models, and no data modification or copying is required. Meanwhile SuperSonic is designed to be plugable, allowing new functionalities to be added through plugins and core components to be integrated into other systems.
+
+<img src="./docs/images/supersonic_demo.gif" height="70%" width="70%" align="center"/>
 
 ## Motivation
 
@@ -19,32 +21,47 @@ With these ideas in mind, we developed SuperSonic as a reference implementation 
 - Built-in graphical interface for business users to enter data queries 
 - Built-in graphical interface for analytics engineers to manage semantic models
 - Support input auto-completion as well as query recommendation
-- Support multi-turn conversation and switch context automatically 
+- Support multi-turn conversation and history context management 
 - Support three-level permission control: domain-level, column-level and row-level 
 
 ## Extensible Components
 
-SuperSonic contains four core components, each of which can be extended or integrated: 
+SuperSonic is composed of two layers: supersonic-chat and supersonic-semantic. The chat layer is responsible for converting **natural language query** into semantic query (also known as DSL query), whereas the semantic layer is responsible for converting DSL query into **SQL query**. The high-level architecture and main process flow is shown in below diagram:
 
-<img src="./docs/images/supersonic_components.png" height="50%" width="50%" align="center"/> 
+<img src="./docs/images/supersonic_components.png" height="70%" width="70%" align="center"/> 
 
-- **Chat interface:** accepts user queries and answer results with approriate visualization charts. It supports input auto-completion as well as multi-turn conversation.
+### Chat Layer
 
-- **Schema mapper:** identifies references to schema elements in natural language queries. It matches queries against the knowledage base which is constructed using the schema of semantic models.
+The chat layer contains four core components:
 
-- **Semantic parser chain:** resolves query mode and choose the most suitable semantic model. It is composed of a group of rule-based and model-based parsers, each of which deals with specific scenarios.
+- **Chat Interface:** accepts user queries and answer results with appropriate visualization charts. It supports input auto-completion as well as multi-turn conversation.
 
-- **Semantic model layer:** manages semantic models and generate SQL statement given specific semantic model and related semantic items. It encapsulates technical concepts, calculation formulas and entity relationships of the underlying data.
+- **Schema Mapper Chain:** identifies references to semantic schema elements in user queries. It matches queries against the knowledage base which is constructed using the schema of semantic models.
+
+- **Semantic Parser Chain:** resolves query mode based on mapped semantic models. It is composed of a group of rule-based and model-based parsers, each of which deals with specific scenarios.
+
+- **Semantic Query:** performs execution according to the results of semantic parsing. The default semantic query would submit DSL to the semantic component, but new types of semantic query can be extended.
+
+### Semantic Layer
+
+The semantic layer contains four core components:
+
+- **Modeling Interface:** empowers analytics engineers to visually define and maintain semantic models. The configurations related to access permission and chat conversation can also be set on the UI.
+
+- **DSL Parser:** converts DSL expression to intermediate structures. To make it easily integratable with analytics applications, SQL (without joins and calculation formulas) is used as the DSL.
+
+- **Query Planner:** builds and optimizes query plans according to various rules. 
+
+- **SQL Generator:** generates final SQL expression (with joins and calculation formulas) based on the query plan.
 
 ## Quick Demo
 
-SuperSonic comes with a sample semantic data model as well as sample chat that can be used as a starting point. Please follow the steps: 
+SuperSonic comes with sample semantic models as well as chat conversations that can be used as a starting point. Please follow the steps: 
 
-- Download the latest prebuilt binary from the release page
-- Run script "bin/start-all.sh" to start services
-- Visit http://localhost:9080 in browser to explore chat interface
-- Visit http://localhost:9081 in browser to explore modeling interface
+- Download the latest prebuilt binary from the [release page](https://github.com/tencentmusic/supersonic/releases)
+- Run script "bin/start-standalone.sh" to start a standalone server
+- Visit http://localhost:9080 in browser to start exploration
 
 ## How to Build
 
-Download the source code and run script "assembly/bin/build-all.sh" to build both front-end webapp and back-end services
+Pull the source code and run script "assembly/bin/build-standalone.sh" to build packages in the standalone mode.

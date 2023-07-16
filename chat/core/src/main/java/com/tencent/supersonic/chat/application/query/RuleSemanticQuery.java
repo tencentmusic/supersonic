@@ -1,3 +1,4 @@
+
 package com.tencent.supersonic.chat.application.query;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -24,7 +25,6 @@ import java.util.*;
 public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
 
     protected SemanticParseInfo parseInfo = new SemanticParseInfo();
-    protected List<SchemaElementMatch> schemaElementMatches = new ArrayList<>();
     protected QueryMatcher queryMatcher = new QueryMatcher();
     protected SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
 
@@ -32,7 +32,8 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         RuleSemanticQueryManager.register(this);
     }
 
-    public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches, QueryContextReq queryCtx) {
+    public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
+                                   QueryContextReq queryCtx) {
         return queryMatcher.match(candidateElementMatches);
     }
 
@@ -56,6 +57,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         QueryResultResp queryResponse = new QueryResultResp();
         QueryResultWithSchemaResp queryResult = semanticLayer.queryByStruct(
                 SchemaInfoConverter.convertTo(parseInfo), user);
+
 
         if (queryResult != null) {
             queryResponse.setQueryAuthorization(queryResult.getQueryAuthorization());

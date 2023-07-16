@@ -16,6 +16,7 @@ import com.tencent.supersonic.chat.domain.utils.ContextHelper;
 import com.tencent.supersonic.common.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -95,7 +96,7 @@ public class MetricCompare extends MetricSemanticQuery {
                     if (toAdd.isPresent()) {
                         if (FilterOperatorEnum.EQUALS.equals(toAdd.get().getOperator()) || FilterOperatorEnum.IN.equals(
                                 toAdd.get().getOperator())) {
-                            List<Object> vals = new ArrayList<>();
+                            Set<Object> vals = new HashSet<>();
                             if (toAdd.get().getOperator().equals(FilterOperatorEnum.IN)) {
                                 vals.addAll((List<Object>) (toAdd.get().getValue()));
                             } else {
@@ -106,7 +107,7 @@ public class MetricCompare extends MetricSemanticQuery {
                             } else {
                                 vals.add(filter.getValue());
                             }
-                            toAdd.get().setValue(vals);
+                            toAdd.get().setValue(new ArrayList<>(vals));
                             toAdd.get().setOperator(FilterOperatorEnum.IN);
                             continue;
                         }

@@ -50,6 +50,13 @@ public class SchemaController {
         return schemaService.getDomainListForAdmin(user);
     }
 
+    @GetMapping("/domain/view/list")
+    public List<DomainResp> getDomainListForViewer(HttpServletRequest request,
+                                          HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return schemaService.getDomainListForViewer(user);
+    }
+
     @PostMapping("/dimension/page")
     public PageInfo<DimensionResp> queryDimension(@RequestBody PageDimensionReq pageDimensionCmd,
             HttpServletRequest request,

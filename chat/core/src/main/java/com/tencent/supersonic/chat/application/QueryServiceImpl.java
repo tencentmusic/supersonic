@@ -14,6 +14,7 @@ import com.tencent.supersonic.chat.domain.service.QueryService;
 import com.tencent.supersonic.chat.domain.service.ChatService;
 import com.tencent.supersonic.chat.domain.utils.ComponentFactory;
 import com.tencent.supersonic.chat.domain.utils.SchemaInfoConverter;
+import com.tencent.supersonic.common.util.json.JsonUtil;
 import com.tencent.supersonic.semantic.api.core.response.QueryResultWithSchemaResp;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,7 +51,6 @@ public class QueryServiceImpl implements QueryService {
             log.info("semanticParser processing:[{}]", semanticParser.getClass().getName());
             semanticParser.parse(queryCtx, chatCtx);
         }
-
         if (queryCtx.getCandidateQueries().size() > 0) {
             log.info("pick before [{}]", queryCtx.getCandidateQueries().stream().collect(
                     Collectors.toList()));

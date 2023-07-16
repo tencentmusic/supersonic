@@ -1,5 +1,7 @@
-import { Transfer, Tag } from 'antd';
+import { Tag } from 'antd';
 import React, { useEffect, useState } from 'react';
+import { IChatConfig } from '../../data';
+import DimensionMetricVisibleTableTransfer from './DimensionMetricVisibleTableTransfer';
 
 interface RecordType {
   key: string;
@@ -8,14 +10,18 @@ interface RecordType {
 }
 
 type Props = {
+  knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap;
   sourceList: any[];
   targetList: string[];
   titles?: string[];
+  onKnowledgeInfosMapChange: (knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap) => void;
   onChange?: (params?: any) => void;
   transferProps?: Record<string, any>;
 };
 
 const DimensionMetricVisibleTransfer: React.FC<Props> = ({
+  knowledgeInfosMap,
+  onKnowledgeInfosMapChange,
   sourceList = [],
   targetList = [],
   titles,
@@ -27,11 +33,13 @@ const DimensionMetricVisibleTransfer: React.FC<Props> = ({
 
   useEffect(() => {
     setTransferData(
-      sourceList.map(({ id, name, type }: any) => {
+      sourceList.map(({ key, id, name, bizName, transType }) => {
         return {
-          key: id,
+          key,
           name,
-          type,
+          bizName,
+          id,
+          type: transType,
         };
       }),
     );
@@ -48,13 +56,15 @@ const DimensionMetricVisibleTransfer: React.FC<Props> = ({
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center' }}>
-      <Transfer
+      <DimensionMetricVisibleTableTransfer
+        knowledgeInfosMap={knowledgeInfosMap}
+        onKnowledgeInfosMapChange={onKnowledgeInfosMapChange}
         dataSource={transferData}
         showSearch
         titles={titles || ['不可见维度', '可见维度']}
         listStyle={{
-          width: 430,
-          height: 500,
+          width: 500,
+          height: 600,
         }}
         filterOption={(inputValue: string, item: any) => {
           const { name } = item;

@@ -1,8 +1,10 @@
 package com.tencent.supersonic.chat.api.component;
 
+import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.core.request.PageDimensionReq;
+import com.tencent.supersonic.semantic.api.core.request.PageMetricReq;
+import com.tencent.supersonic.semantic.api.core.response.*;
 import com.tencent.supersonic.semantic.api.query.request.QuerySqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 
@@ -26,8 +28,24 @@ public interface SemanticLayer {
 
     QueryResultWithSchemaResp queryBySql(QuerySqlReq querySqlReq, User user);
 
-    DomainSchemaResp getDomainSchemaInfo(Long domain);
+    DomainSchemaResp getDomainSchemaInfo(Long domain, Boolean cacheEnable);
 
     List<DomainSchemaResp> getDomainSchemaInfo(List<Long> ids);
+
+    List<DomainResp> getDomainListForViewer();
+
+    List<DomainResp> getDomainListForAdmin();
+
+    PageInfo<DimensionResp> queryDimensionPage(PageDimensionReq pageDimensionCmd);
+
+    PageInfo<MetricResp> queryMetricPage(PageMetricReq pageMetricCmd);
+
+//    PageInfo<MetricResp> queryMetricPage(PageMetricReq pageMetricCmd);
+//
+//    PageInfo<DimensionResp> queryDimensionPage(PageDimensionReq pageDimensionCmd);
+//
+//    List<DomainResp> getDomainListForAdmin();
+//
+//    List<DomainResp> getDomainListForViewer();
 
 }

@@ -2,24 +2,28 @@ package com.tencent.supersonic.chat.application.parser;
 
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
-import com.tencent.supersonic.chat.api.component.SemanticQuery;
-import com.tencent.supersonic.chat.api.pojo.*;
+import com.tencent.supersonic.chat.api.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.request.QueryContextReq;
-import com.tencent.supersonic.chat.application.query.*;
+import com.tencent.supersonic.chat.application.query.EntitySemanticQuery;
+import com.tencent.supersonic.chat.application.query.MetricSemanticQuery;
+import com.tencent.supersonic.chat.application.query.RuleSemanticQuery;
+import com.tencent.supersonic.chat.application.query.RuleSemanticQueryManager;
 import com.tencent.supersonic.chat.domain.pojo.chat.DomainInfos;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichInfo;
-import com.tencent.supersonic.chat.domain.utils.*;
-import com.tencent.supersonic.common.pojo.SchemaItem;
+import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigResp;
+import com.tencent.supersonic.chat.domain.service.ConfigService;
+import com.tencent.supersonic.chat.domain.utils.ComponentFactory;
+import com.tencent.supersonic.chat.domain.utils.ContextHelper;
+import com.tencent.supersonic.chat.domain.utils.DefaultMetricUtils;
+import com.tencent.supersonic.chat.domain.utils.SchemaInfoConverter;
 import com.tencent.supersonic.common.util.context.ContextUtils;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
@@ -37,10 +41,15 @@ public class DomainSemanticParser implements SemanticParser {
         // iterate all schemaElementMatches to resolve semantic query
         for (Integer domainId : mapInfo.getMatchedDomains()) {
             List<SchemaElementMatch> elementMatches = mapInfo.getMatchedElements(domainId);
-            Map<RuleSemanticQuery, List<SchemaElementMatch>> queryMatches = resolveQuery(elementMatches, queryContext);
-            for (Map.Entry<RuleSemanticQuery, List<SchemaElementMatch>> match : queryMatches.entrySet()) {
+            List<RuleSemanticQuery> queries = resolveQuery(elementMatches, queryContext);
+            for (RuleSemanticQuery query : queries) {
+
+                if (useBlackItem(query, domainId)) {
+                    log.info("useBlackItem, skip query:{}", query);
+                    continue;
+                }
                 addCandidateQuery(queryContext, chatContext, domainId.longValue(),
-                        domainToName.get(domainId), match.getKey(), match.getValue());
+                        domainToName.get(domainId), query);
             }
         }
 
@@ -50,27 +59,95 @@ public class DomainSemanticParser implements SemanticParser {
                 Integer chatDomainId = Integer.valueOf(chatContext.getParseInfo().getDomainId().intValue());
                 if (mapInfo.getMatchedDomains().contains(chatDomainId)) {
                     List<SchemaElementMatch> elementMatches = mapInfo.getMatchedElements(chatDomainId);
-                    detectionContext(chatContext);
-                    Map<RuleSemanticQuery, List<SchemaElementMatch>> queryMatches = tryParseByContext(elementMatches,
-                            chatContext, queryContext);
-                    for (Map.Entry<RuleSemanticQuery, List<SchemaElementMatch>> match : queryMatches.entrySet()) {
+
+                    List<RuleSemanticQuery> queries = tryParseByContext(elementMatches, chatContext, queryContext);
+                    for (RuleSemanticQuery query : queries) {
                         addCandidateQuery(queryContext, chatContext, chatDomainId.longValue(),
-                                domainToName.get(chatDomainId), match.getKey(), match.getValue());
+                                domainToName.get(chatDomainId), query);
                     }
                 }
             }
         }
     }
 
+    private boolean useBlackItem(RuleSemanticQuery query, Integer domainId) {
+        if (Objects.isNull(domainId)) {
+            return false;
+        }
+        ConfigService configService = ContextUtils.getBean(ConfigService.class);
+        ChatConfigResp chatConfigResp = configService.fetchConfigByDomainId(domainId.longValue());
+        if (Objects.nonNull(chatConfigResp) && Objects.nonNull(query) && Objects.nonNull(query.getParseInfo())) {
+            List<SchemaElementMatch> elementMatches = query.getParseInfo().getElementMatches();
+            if (!CollectionUtils.isEmpty(elementMatches)) {
+                return useBlackItemInternal(elementMatches, chatConfigResp, query);
+
+            }
+        }
+        return false;
+    }
+
+    private boolean useBlackItemInternal(List<SchemaElementMatch> elementMatches, ChatConfigResp chatConfigResp, RuleSemanticQuery query) {
+        if (Objects.isNull(chatConfigResp)) {
+            return false;
+        }
+        List<Long> blackDimIdList = new ArrayList<>();
+        List<Long> blackMetricIdList = new ArrayList<>();
+        if (query instanceof EntitySemanticQuery
+                && Objects.nonNull(chatConfigResp.getChatDetailConfig())
+                && Objects.nonNull(chatConfigResp.getChatDetailConfig().getVisibility())) {
+            log.info("useBlackItem, handle EntitySemanticQuery blackList logic");
+            blackDimIdList = chatConfigResp.getChatDetailConfig().getVisibility().getBlackDimIdList();
+            blackMetricIdList = chatConfigResp.getChatDetailConfig().getVisibility().getBlackMetricIdList();
+        }
+
+        if (query instanceof MetricSemanticQuery
+                && Objects.nonNull(chatConfigResp.getChatAggConfig())
+                && Objects.nonNull(chatConfigResp.getChatAggConfig().getVisibility())) {
+            log.info("useBlackItem, handle MetricSemanticQuery blackList logic");
+            blackDimIdList = chatConfigResp.getChatAggConfig().getVisibility().getBlackDimIdList();
+            blackMetricIdList = chatConfigResp.getChatAggConfig().getVisibility().getBlackMetricIdList();
+        }
+        return useBlackItemWithElementMatches(elementMatches, blackDimIdList, blackMetricIdList);
+    }
+
+    private boolean useBlackItemWithElementMatches(List<SchemaElementMatch> elementMatches, List<Long> blackDimIdList, List<Long> blackMetricIdList) {
+
+        Set<Long> dimIds = elementMatches.stream()
+                .filter(element -> SchemaElementType.VALUE.equals(element.getElementType()) || SchemaElementType.DIMENSION.equals(element.getElementType()))
+                .map(element -> Long.valueOf(element.getElementID())).collect(Collectors.toSet());
+
+        Set<Long> metricIds = elementMatches.stream()
+                .filter(element -> SchemaElementType.METRIC.equals(element.getElementType()))
+                .map(element -> Long.valueOf(element.getElementID())).collect(Collectors.toSet());
+
+
+        return useBlackItemWithIds(dimIds, metricIds, blackDimIdList, blackMetricIdList);
+    }
+
+    private boolean useBlackItemWithIds(Set<Long> dimIds, Set<Long> metricIds, List<Long> blackDimIdList, List<Long> blackMetricIdList) {
+
+        if (!CollectionUtils.isEmpty(blackDimIdList) && !CollectionUtils.isEmpty(dimIds)) {
+            if (blackDimIdList.stream().anyMatch(dimIds::contains)) {
+                log.info("useBlackItem, blackDimIdList:{}", blackDimIdList.stream().filter(dimIds::contains).collect(Collectors.toList()));
+                return true;
+            }
+        }
+        if (!CollectionUtils.isEmpty(blackMetricIdList) && !CollectionUtils.isEmpty(metricIds)) {
+            if (blackMetricIdList.stream().anyMatch(metricIds::contains)) {
+                log.info("useBlackItem, blackMetricIdList:{}", blackMetricIdList.stream().filter(metricIds::contains).collect(Collectors.toList()));
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void addCandidateQuery(QueryContextReq queryContext, ChatContext chatContext,
-            Long domainId, String domainName,
-            RuleSemanticQuery semanticQuery, List<SchemaElementMatch> elementMatches) {
+                                   Long domainId, String domainName, RuleSemanticQuery semanticQuery) {
         if (semanticQuery != null) {
-            fillParseInfo(semanticQuery, domainId, domainName, elementMatches);
-            // inherit from context
+            DefaultMetricUtils defaultMetricUtils = ContextUtils.getBean(DefaultMetricUtils.class);
+            defaultMetricUtils.fillParseInfo(semanticQuery, domainId, domainName);
             inheritContext(semanticQuery, chatContext);
-            // default metric, date, dimension
-            injectDefaultMetric(semanticQuery, queryContext, chatContext);
+            defaultMetricUtils.fillDefaultMetric(semanticQuery.getParseInfo(), queryContext, chatContext);
             queryContext.getCandidateQueries().add(semanticQuery);
         }
     }
@@ -84,38 +161,15 @@ public class DomainSemanticParser implements SemanticParser {
         }
     }
 
-    protected void injectDefaultMetric(RuleSemanticQuery semanticQuery, QueryContextReq queryContext,
-            ChatContext chatContext) {
-        DefaultMetricUtils defaultMetricUtils = ContextUtils.getBean(DefaultMetricUtils.class);
-        defaultMetricUtils.injectDefaultMetric(semanticQuery.getParseInfo(), queryContext, chatContext);
-    }
-
     /**
-     * get the chatContext for the tryParseByContext
-     *
-     * @param chatContext
-     */
-    protected void detectionContext(ChatContext chatContext) {
-        if (chatContext.getParseInfo() != null) {
-            SemanticParseInfo semanticParseInfo = chatContext.getParseInfo();
-            if (semanticParseInfo.getQueryMode().equals(EntityDetail.QUERY_MODE)) {
-                // EntityDetail model will unset some items
-                semanticParseInfo.setDateInfo(null);
-                semanticParseInfo.setMetrics(new HashSet<>());
-                semanticParseInfo.setDimensions(new HashSet<>());
-            }
-        }
-    }
-
-    /**
-     * try to add ChatContext to  SchemaElementMatch and look if match QueryMode
+     * try to add ChatContext to  SchemaMatch and look if match QueryMode
      *
      * @param elementMatches
      * @param chatCtx
      * @return
      */
-    private Map<RuleSemanticQuery, List<SchemaElementMatch>> tryParseByContext(List<SchemaElementMatch> elementMatches,
-            ChatContext chatCtx, QueryContextReq queryCtx) {
+    private List<RuleSemanticQuery> tryParseByContext(List<SchemaElementMatch> elementMatches,
+                                                      ChatContext chatCtx, QueryContextReq queryCtx) {
         if (chatCtx.getParseInfo() != null && chatCtx.getParseInfo().getEntity() > 0) {
             Long entityCount = elementMatches.stream().filter(i -> SchemaElementType.ENTITY.equals(i.getElementType()))
                     .count();
@@ -125,15 +179,14 @@ public class DomainSemanticParser implements SemanticParser {
                 // try entity parse
                 SchemaElementMatch entityElementMatch = SchemaElementMatch.builder()
                         .elementType(SchemaElementType.ENTITY).build();
-                List<SchemaElementMatch> newSchemaElementMatch = new ArrayList<>();
+                List<SchemaElementMatch> newSchemaMatches = new ArrayList<>();
                 if (!CollectionUtils.isEmpty(elementMatches)) {
-                    newSchemaElementMatch.addAll(elementMatches);
+                    newSchemaMatches.addAll(elementMatches);
                 }
-                newSchemaElementMatch.add(entityElementMatch);
-                Map<RuleSemanticQuery, List<SchemaElementMatch>> queryMatches = doParseByContext(newSchemaElementMatch,
-                        chatCtx, queryCtx);
-                if (queryMatches.size() > 0) {
-                    return queryMatches;
+                newSchemaMatches.add(entityElementMatch);
+                List<RuleSemanticQuery> queries = doParseByContext(newSchemaMatches, chatCtx, queryCtx);
+                if (queries.size() > 0) {
+                    return queries;
                 }
             }
         }
@@ -141,8 +194,8 @@ public class DomainSemanticParser implements SemanticParser {
     }
 
 
-    private Map<RuleSemanticQuery, List<SchemaElementMatch>> doParseByContext(List<SchemaElementMatch> elementMatches,
-            ChatContext chatCtx, QueryContextReq queryCtx) {
+    private List<RuleSemanticQuery> doParseByContext(List<SchemaElementMatch> elementMatches,
+                                                     ChatContext chatCtx, QueryContextReq queryContext) {
         SemanticParseInfo contextSemanticParse = chatCtx.getParseInfo();
         if (contextSemanticParse != null) {
             List<SchemaElementMatch> newElementMatches = new ArrayList<>();
@@ -162,123 +215,36 @@ public class DomainSemanticParser implements SemanticParser {
             trySchemaElementTypes.add(new ArrayList<>(Arrays.asList(SchemaElementType.VALUE)));
             trySchemaElementTypes.add(new ArrayList<>(Arrays.asList(SchemaElementType.DIMENSION)));
 
-            for (List<SchemaElementType> schemaElementTypes : trySchemaElementTypes) {
+            for (List<SchemaElementType> schemaTypes : trySchemaElementTypes) {
                 newElementMatches.clear();
                 if (!CollectionUtils.isEmpty(elementMatches)) {
                     newElementMatches.addAll(elementMatches);
                 }
-                ContextHelper.mergeContextSchemaElementMatch(newElementMatches, elementMatches, schemaElementTypes,
+                ContextHelper.mergeContextSchemaElementMatch(newElementMatches, elementMatches, schemaTypes,
                         contextSemanticParse);
-                Map<RuleSemanticQuery, List<SchemaElementMatch>> queryMatches = resolveQuery(newElementMatches,
-                        queryCtx);
-                if (queryMatches.size() > 0) {
-                    return queryMatches;
+                List<RuleSemanticQuery> queries = resolveQuery(newElementMatches, queryContext);
+                if (queries.size() > 0) {
+                    return queries;
                 }
             }
         }
-        return new HashMap<>();
+        return new ArrayList<>();
     }
 
-    private Map<RuleSemanticQuery, List<SchemaElementMatch>> resolveQuery(List<SchemaElementMatch> elementMatches,
-            QueryContextReq queryCtx) {
-        Map<RuleSemanticQuery, List<SchemaElementMatch>> matchMap = new HashMap<>();
-
+    private List<RuleSemanticQuery> resolveQuery(List<SchemaElementMatch> candidateElementMatches,
+                                                 QueryContextReq queryContext) {
+        List<RuleSemanticQuery> matchedQueries = new ArrayList<>();
         for (RuleSemanticQuery semanticQuery : RuleSemanticQueryManager.getSemanticQueries()) {
-            List<SchemaElementMatch> matches = semanticQuery.match(elementMatches, queryCtx);
+            List<SchemaElementMatch> matches = semanticQuery.match(candidateElementMatches, queryContext);
 
             if (matches.size() > 0) {
                 log.info("resolve match [{}:{}] ", semanticQuery.getQueryMode(), matches.size());
-                matchMap.put(RuleSemanticQueryManager.create(semanticQuery.getQueryMode()), matches);
+                RuleSemanticQuery query = RuleSemanticQueryManager.create(semanticQuery.getQueryMode());
+                query.getParseInfo().getElementMatches().addAll(matches);
+                matchedQueries.add(query);
             }
         }
 
-        return matchMap;
-    }
-
-    public void fillParseInfo(SemanticQuery query, Long domainId, String domainName,
-            List<SchemaElementMatch> elementMatches) {
-        SemanticParseInfo parseInfo = query.getParseInfo();
-        parseInfo.setDomainId(domainId);
-        parseInfo.setDomainName(domainName);
-        parseInfo.setQueryMode(query.getQueryMode());
-        parseInfo.getElementMatches().addAll(elementMatches);
-
-        DefaultSemanticInternalUtils defaultSemanticUtils = ContextUtils.getBean(DefaultSemanticInternalUtils.class);
-        SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
-
-        DomainSchemaResp domainSchemaDesc = semanticLayer.getDomainSchemaInfo(parseInfo.getDomainId());
-        ChatConfigRichInfo chaConfigRichDesc = defaultSemanticUtils.getChatConfigRichInfo(parseInfo.getDomainId());
-        Map<Long, DimSchemaResp> dimensionDescMap = domainSchemaDesc.getDimensions().stream()
-                .collect(Collectors.toMap(DimSchemaResp::getId, Function.identity()));
-        Map<Long, MetricSchemaResp> metricDescMap = domainSchemaDesc.getMetrics().stream()
-                .collect(Collectors.toMap(MetricSchemaResp::getId, Function.identity()));
-        Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
-
-        for (SchemaElementMatch schemaElementMatch : elementMatches) {
-            Long elementID = Long.valueOf(schemaElementMatch.getElementID());
-            switch (schemaElementMatch.getElementType()) {
-                case ID:
-                case VALUE:
-                    if (dimensionDescMap.containsKey(elementID)) {
-                        if (dim2Values.containsKey(elementID)) {
-                            dim2Values.get(elementID).add(schemaElementMatch);
-                        } else {
-                            dim2Values.put(elementID, new ArrayList<>(Arrays.asList(schemaElementMatch)));
-                        }
-                    }
-                    break;
-                case DIMENSION:
-                    DimSchemaResp dimensionDesc = dimensionDescMap.get(elementID);
-                    if (dimensionDesc != null) {
-                        SchemaItem dimensionParseInfo = new SchemaItem();
-                        dimensionParseInfo.setBizName(dimensionDesc.getBizName());
-                        dimensionParseInfo.setName(dimensionDesc.getName());
-                        dimensionParseInfo.setId(dimensionDesc.getId());
-                        parseInfo.getDimensions().add(dimensionParseInfo);
-                    }
-                    break;
-                case METRIC:
-                    MetricSchemaResp metricDesc = metricDescMap.get(elementID);
-                    if (metricDesc != null) {
-                        SchemaItem metricItem = new SchemaItem();
-                        metricItem.setBizName(metricDesc.getBizName());
-                        metricItem.setName(metricDesc.getName());
-                        metricItem.setId(metricDesc.getId());
-                        metricItem.setCreatedAt(null);
-                        metricItem.setUpdatedAt(null);
-                        parseInfo.getMetrics().add(metricItem);
-                    }
-                    break;
-                default:
-            }
-        }
-
-        if (!dim2Values.isEmpty()) {
-            for (Map.Entry<Long, List<SchemaElementMatch>> entry : dim2Values.entrySet()) {
-                DimSchemaResp dimensionDesc = dimensionDescMap.get(entry.getKey());
-                if (entry.getValue().size() == 1) {
-                    SchemaElementMatch schemaElementMatch = entry.getValue().get(0);
-                    Filter dimensionFilter = new Filter();
-                    dimensionFilter.setValue(schemaElementMatch.getWord());
-                    dimensionFilter.setBizName(dimensionDesc.getBizName());
-                    dimensionFilter.setName(dimensionDesc.getName());
-                    dimensionFilter.setOperator(FilterOperatorEnum.EQUALS);
-                    dimensionFilter.setElementID(Long.valueOf(schemaElementMatch.getElementID()));
-                    parseInfo.getDimensionFilters().add(dimensionFilter);
-                    ContextHelper.setEntityId(entry.getKey(), schemaElementMatch.getWord(), chaConfigRichDesc,
-                            parseInfo);
-                } else {
-                    Filter dimensionFilter = new Filter();
-                    List<String> vals = new ArrayList<>();
-                    entry.getValue().stream().forEach(i -> vals.add(i.getWord()));
-                    dimensionFilter.setValue(vals);
-                    dimensionFilter.setBizName(dimensionDesc.getBizName());
-                    dimensionFilter.setName(dimensionDesc.getName());
-                    dimensionFilter.setOperator(FilterOperatorEnum.IN);
-                    dimensionFilter.setElementID(entry.getKey());
-                    parseInfo.getDimensionFilters().add(dimensionFilter);
-                }
-            }
-        }
+        return matchedQueries;
     }
 }
