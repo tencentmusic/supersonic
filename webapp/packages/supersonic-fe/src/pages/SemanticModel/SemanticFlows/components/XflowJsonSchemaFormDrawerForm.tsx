@@ -9,6 +9,7 @@ import DataSourceRelationFormDrawer from './DataSourceRelationFormDrawer';
 import DataSourceCreateForm from '../../Datasource/components/DataSourceCreateForm';
 import ClassDataSourceTypeModal from '../../components/ClassDataSourceTypeModal';
 import { GraphApi } from '../service';
+import { SemanticNodeType } from '../../enum';
 import type { StateType } from '../../model';
 import DataSource from '../../Datasource';
 
@@ -112,7 +113,7 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
               ...targetData,
               label: dataSourceInfo.name,
               payload: dataSourceInfo,
-              id: `dataSource-${dataSourceInfo.id}`,
+              id: `${SemanticNodeType.DATASOURCE}-${dataSourceInfo.id}`,
             });
             setDataSourceItem(undefined);
             commandService.executeCommand(XFlowGraphCommands.SAVE_GRAPH_DATA.id, {
@@ -144,7 +145,7 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
               ...targetData,
               label: dataSourceInfo.name,
               payload: dataSourceInfo,
-              id: `dataSource-${dataSourceInfo.id}`,
+              id: `${SemanticNodeType.DATASOURCE}-${dataSourceInfo.id}`,
             });
             setDataSourceItem(undefined);
             commandService.executeCommand(XFlowGraphCommands.SAVE_GRAPH_DATA.id, {

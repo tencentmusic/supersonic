@@ -91,6 +91,7 @@
     "react-ace": "^9.4.1",
     "react-dev-inspector": "^1.8.4",
     "react-dom": "^17.0.2",
+    "react-fast-marquee": "^1.6.0",
     "react-helmet-async": "^1.0.4",
     "react-spinners": "^0.10.6",
     "react-split-pane": "^2.0.3",

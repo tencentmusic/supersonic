@@ -7,6 +7,7 @@ import type { NsDeployDagCmd } from './CmdExtensions/CmdDeploy';
 import { getRelationConfigInfo, addClassInfoAsDataSourceParents } from './utils';
 import { cloneDeep } from 'lodash';
 import type { IDataSource } from '../data';
+import { SemanticNodeType } from '../enum';
 import {
   getDatasourceList,
   deleteDatasource,
@@ -57,7 +58,7 @@ export namespace GraphApi {
 
   export const createDataSourceNode = (dataSourceItem: IDataSource.IDataSourceItem) => {
     const { id, name } = dataSourceItem;
-    const nodeId = `dataSource-${id}`;
+    const nodeId = `${SemanticNodeType.DATASOURCE}-${id}`;
     return {
       ...NODE_COMMON_PROPS,
       id: nodeId,
@@ -89,7 +90,7 @@ export namespace GraphApi {
     const dataSourceMap = data.reduce(
       (itemMap: Record<string, IDataSource.IDataSourceItem>, item: IDataSource.IDataSourceItem) => {
         const { id, name } = item;
-        itemMap[`dataSource-${id}`] = item;
+        itemMap[`${SemanticNodeType.DATASOURCE}-${id}`] = item;
 
         itemMap[name] = item;
         return itemMap;
@@ -114,7 +115,7 @@ export namespace GraphApi {
           mergeNodes = data.reduce(
             (mergeNodeList: NsGraph.INodeConfig[], item: IDataSource.IDataSourceItem) => {
               const { id } = item;
-              const targetDataSourceItem = nodesMap[`dataSource-${id}`];
+              const targetDataSourceItem = nodesMap[`${SemanticNodeType.DATASOURCE}-${id}`];
               if (targetDataSourceItem) {
                 mergeNodeList.push({
                   ...targetDataSourceItem,
@@ -166,7 +167,7 @@ export namespace GraphApi {
       const { list } = data;
       const nodes: NsGraph.INodeConfig[] = list.map((item: any) => {
         const { id, name } = item;
-        const nodeId = `dimension-${id}`;
+        const nodeId = `${SemanticNodeType.DIMENSION}-${id}`;
         return {
           ...NODE_COMMON_PROPS,
           id: nodeId,

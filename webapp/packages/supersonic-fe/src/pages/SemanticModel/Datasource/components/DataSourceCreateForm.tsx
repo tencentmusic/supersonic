@@ -10,6 +10,7 @@ import { createDatasource, updateDatasource, getColumns } from '../../service';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
 import { connect } from 'umi';
+import { isUndefined } from 'lodash';
 
 export type CreateFormProps = {
   domainManger: StateType;
@@ -47,12 +48,24 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const [fields, setFields] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [hasEmptyNameField, setHasEmptyNameField] = useState<boolean>(false);
   const formValRef = useRef(initFormVal as any);
   const [form] = Form.useForm();
   const { dataBaseConfig } = domainManger;
   const updateFormVal = (val: any) => {
     formValRef.current = val;
   };
+
+  useEffect(() => {
+    const hasEmpty = fields.some((item) => {
+      const { name, isCreateDimension, isCreateMetric } = item;
+      if ((isCreateMetric || isCreateDimension) && !name) {
+        return true;
+      }
+      return false;
+    });
+    setHasEmptyNameField(hasEmpty);
+  }, [fields]);
 
   const [fieldColumns, setFieldColumns] = useState(scriptColumns || []);
   useEffect(() => {
@@ -310,7 +323,12 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
             上一步
           </Button>
           <Button onClick={onCancel}>取消</Button>
-          <Button type="primary" loading={saveLoading} onClick={handleNext}>
+          <Button
+            type="primary"
+            loading={saveLoading}
+            onClick={handleNext}
+            disabled={hasEmptyNameField}
+          >
             完成
           </Button>
         </>

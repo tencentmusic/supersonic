@@ -26,7 +26,6 @@ const InfoTagList: React.FC<Props> = ({ value, createBtnString = '新增', onCha
   }, [value]);
 
   const handleTagChange = (tagList: string[]) => {
-    console.log(tagList, 'tagList');
     onChange?.(tagList);
   };
 

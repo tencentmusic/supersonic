@@ -4,17 +4,21 @@ import ProTable from '@ant-design/pro-table';
 import ProCard from '@ant-design/pro-card';
 import SqlEditor from '@/components/SqlEditor';
 import BindMeasuresTable from './BindMeasuresTable';
+import FormLabelRequire from './FormLabelRequire';
+import { ISemantic } from '../data';
 
 type Props = {
-  typeParams: any;
-  measuresList: any[];
-  onFieldChange: (measures: any[]) => void;
+  datasourceId?: number;
+  typeParams: ISemantic.ITypeParams;
+  measuresList: ISemantic.IMeasure[];
+  onFieldChange: (measures: ISemantic.IMeasure[]) => void;
   onSqlChange: (sql: string) => void;
 };
 
 const { TextArea } = Input;
 
 const MetricMeasuresFormTable: React.FC<Props> = ({
+  datasourceId,
   typeParams,
   measuresList,
   onFieldChange,
@@ -127,7 +131,7 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
       <Space direction="vertical" style={{ width: '100%' }}>
         <ProTable
           actionRef={actionRef}
-          headerTitle="度量列表"
+          headerTitle={<FormLabelRequire title="度量列表" />}
           tooltip="基于本主题域下所有数据源的度量来创建指标，且该列表的度量为了加以区分，均已加上数据源名称作为前缀，选中度量后，可基于这几个度量来写表达式，若是选中的度量来自不同的数据源，系统将会自动join来计算该指标"
           rowKey="name"
           columns={columns}
@@ -149,7 +153,7 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
           ]}
         />
         <ProCard
-          title={'度量表达式'}
+          title={<FormLabelRequire title="度量表达式" />}
           tooltip="度量表达式由上面选择的度量组成，如选择了度量A和B，则可将表达式写成A+B"
         >
           <SqlEditor
@@ -165,7 +169,11 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
       </Space>
       {measuresModalVisible && (
         <BindMeasuresTable
-          measuresList={measuresList}
+          measuresList={
+            datasourceId && Array.isArray(measuresList)
+              ? measuresList.filter((item) => item.datasourceId === datasourceId)
+              : measuresList
+          }
           selectedMeasuresList={measuresParams?.measures || []}
           onSubmit={async (values: any[]) => {
             const measures = values.map(({ bizName, name, expr, datasourceId }) => {

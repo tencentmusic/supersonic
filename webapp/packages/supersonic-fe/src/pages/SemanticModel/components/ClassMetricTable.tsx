@@ -6,7 +6,7 @@ import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../model';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
-import { creatExprMetric, updateExprMetric, queryMetric, deleteMetric } from '../service';
+import { queryMetric, deleteMetric } from '../service';
 
 import MetricInfoCreateForm from './MetricInfoCreateForm';
 
@@ -39,7 +39,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     let resData: any = {};
     if (code === 200) {
       setPagination({
-        pageSize,
+        pageSize: Math.min(pageSize, 100),
         current,
         total,
       });
@@ -166,36 +166,36 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
   ];
 
-  const saveMetric = async (fieldsValue: any, reloadState: boolean = true) => {
-    const queryParams = {
-      domainId: selectDomainId,
-      ...fieldsValue,
-    };
-    if (queryParams.typeParams && !queryParams.typeParams.expr) {
-      message.error('度量表达式不能为空');
-      return;
-    }
-    let saveMetricQuery = creatExprMetric;
-    if (queryParams.id) {
-      saveMetricQuery = updateExprMetric;
-    }
-    const { code, msg } = await saveMetricQuery(queryParams);
-    if (code === 200) {
-      message.success('编辑指标成功');
-      setCreateModalVisible(false);
-      if (reloadState) {
-        actionRef?.current?.reload();
-      }
-      dispatch({
-        type: 'domainManger/queryMetricList',
-        payload: {
-          domainId: selectDomainId,
-        },
-      });
-      return;
-    }
-    message.error(msg);
-  };
+  // const saveMetric = async (fieldsValue: any, reloadState: boolean = true) => {
+  //   const queryParams = {
+  //     domainId: selectDomainId,
+  //     ...fieldsValue,
+  //   };
+  //   if (queryParams.typeParams && !queryParams.typeParams.expr) {
+  //     message.error('度量表达式不能为空');
+  //     return;
+  //   }
+  //   let saveMetricQuery = creatExprMetric;
+  //   if (queryParams.id) {
+  //     saveMetricQuery = updateExprMetric;
+  //   }
+  //   const { code, msg } = await saveMetricQuery(queryParams);
+  //   if (code === 200) {
+  //     message.success('编辑指标成功');
+  //     setCreateModalVisible(false);
+  //     if (reloadState) {
+  //       actionRef?.current?.reload();
+  //     }
+  //     dispatch({
+  //       type: 'domainManger/queryMetricList',
+  //       payload: {
+  //         domainId: selectDomainId,
+  //       },
+  //     });
+  //     return;
+  //   }
+  //   message.error(msg);
+  // };
 
   return (
     <>
@@ -246,8 +246,15 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           domainId={Number(selectDomainId)}
           createModalVisible={createModalVisible}
           metricItem={metricItem}
-          onSubmit={(values) => {
-            saveMetric(values);
+          onSubmit={() => {
+            setCreateModalVisible(false);
+            actionRef?.current?.reload();
+            dispatch({
+              type: 'domainManger/queryMetricList',
+              payload: {
+                domainId: selectDomainId,
+              },
+            });
           }}
           onCancel={() => {
             setCreateModalVisible(false);

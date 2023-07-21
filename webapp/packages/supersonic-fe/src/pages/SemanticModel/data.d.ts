@@ -1,3 +1,5 @@
+import { TreeGraphData } from '@antv/g6-core';
+
 export type ISODateString =
   `${number}-${number}-${number}T${number}:${number}:${number}.${number}+${number}:${number}`;
 
@@ -5,6 +7,8 @@ export type GraphConfigType = 'datasource' | 'dimension' | 'metric';
 export type UserName = string;
 
 export type SensitiveLevel = 0 | 1 | 2 | null;
+
+export type RefreshGraphData = (graphRootData: TreeGraphData) => void;
 
 export declare namespace IDataSource {
   interface IIdentifiersItem {
@@ -113,13 +117,13 @@ export declare namespace ISemantic {
 
   interface IMeasure {
     name: string;
-    agg: string;
+    agg?: string;
     expr: string;
-    constraint: string;
-    alias: string;
-    createMetric: string;
+    constraint?: string;
+    alias?: string;
+    createMetric?: string;
     bizName: string;
-    isCreateMetric: number;
+    isCreateMetric?: number;
     datasourceId: number;
   }
   interface ITypeParams {
@@ -142,7 +146,7 @@ export declare namespace ISemantic {
     domainId: number;
     domainName: string;
     type: string;
-    typeParams: TypeParams;
+    typeParams: ITypeParams;
     fullPath: string;
     dataFormatType: string;
     dataFormat: string;
