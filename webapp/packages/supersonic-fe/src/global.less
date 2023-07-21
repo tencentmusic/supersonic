@@ -216,20 +216,30 @@ ol {
   right: 240px !important;
 }
 
+
 .g6ContextMenuContainer {
   font-size: 12px;
   color: #545454;
-}
-.g6ContextMenuContainer li {
-  cursor: pointer;
-  list-style-type:none;
-  list-style: none;
-  margin-left: 0;
-}
-.g6ContextMenuContainer ul {
-  width: 100%;
-  padding: 0;
-}
-.g6ContextMenuContainer li:hover {
-  color: #aaa;
-}
+  min-width: 100px;
+  h3 {
+    padding-bottom: 5px;
+    border-bottom: 1px solid #4E86F5;
+  }
+  li {
+    cursor: pointer;
+    list-style-type:none;
+    // list-style: none;
+    margin-left: 0;
+    &:hover {
+      color: #4E86F5;
+    }
+  }
+  ul {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+  .ant-tag {
+    transition: none;
+  }
+} 

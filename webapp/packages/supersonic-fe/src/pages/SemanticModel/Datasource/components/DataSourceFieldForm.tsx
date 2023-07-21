@@ -1,8 +1,21 @@
 import React from 'react';
-import { Table, Select, Checkbox, Input } from 'antd';
-import type { FieldItem } from '../data';
+import { Table, Select, Checkbox, Input, Alert, Space, Tooltip } from 'antd';
+import TableTitleTooltips from '../../components/TableTitleTooltips';
 import { isUndefined } from 'lodash';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import Marquee from 'react-fast-marquee';
 import { TYPE_OPTIONS, DATE_FORMATTER, AGG_OPTIONS, EnumDataSourceType } from '../constants';
+import styles from '../style.less';
+
+type FieldItem = {
+  bizName: string;
+  sqlType: string;
+  name: string;
+  type: EnumDataSourceType;
+  agg?: string;
+  checked?: number;
+  dateFormat?: string;
+};
 
 type Props = {
   fields: FieldItem[];
@@ -10,6 +23,16 @@ type Props = {
 };
 
 const { Option } = Select;
+
+const getCreateFieldName = (type: EnumDataSourceType) => {
+  const isCreateName = [EnumDataSourceType.CATEGORICAL, EnumDataSourceType.TIME].includes(
+    type as EnumDataSourceType,
+  )
+    ? 'isCreateDimension'
+    : 'isCreateMetric';
+  return isCreateName;
+  // const editState = !isUndefined(record[isCreateName]) ? !!record[isCreateName] : true;
+};
 
 const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
   const handleFieldChange = (record: FieldItem, fieldName: string, value: any) => {
@@ -58,10 +81,14 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
                   timeGranularity: undefined,
                 };
               }
+              const isCreateName = getCreateFieldName(value);
+              const editState = !isUndefined(record[isCreateName]) ? !!record[isCreateName] : true;
               // handleFieldChange(record, 'type', value);
               onFieldChange(record.bizName, {
                 ...record,
                 type: value,
+                name: '',
+                [isCreateName]: editState,
                 ...defaultParams,
               });
             }}
@@ -105,28 +132,38 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
         if (type === EnumDataSourceType.TIME) {
           const dateFormat = fields.find((field) => field.bizName === record.bizName)?.dateFormat;
           return (
-            <Select
-              placeholder="时间格式"
-              value={dateFormat}
-              onChange={(value) => {
-                handleFieldChange(record, 'dateFormat', value);
-              }}
-              defaultValue={DATE_FORMATTER[0]}
-              style={{ width: '100%' }}
-            >
-              {DATE_FORMATTER.map((item) => (
-                <Option key={item} value={item}>
-                  {item}
-                </Option>
-              ))}
-            </Select>
+            <Space>
+              <Select
+                placeholder="时间格式"
+                value={dateFormat}
+                onChange={(value) => {
+                  handleFieldChange(record, 'dateFormat', value);
+                }}
+                defaultValue={DATE_FORMATTER[0]}
+                style={{ minWidth: 180 }}
+              >
+                {DATE_FORMATTER.map((item) => (
+                  <Option key={item} value={item}>
+                    {item}
+                  </Option>
+                ))}
+              </Select>
+              <Tooltip title="请选择数据库中时间字段对应格式">
+                <ExclamationCircleOutlined />
+              </Tooltip>
+            </Space>
           );
         }
         return <></>;
       },
     },
     {
-      title: '快速创建',
+      title: (
+        <TableTitleTooltips
+          title="快速创建"
+          tooltips="若勾选快速创建并填写名称，将会把该维度/指标直接创建到维度/指标列表"
+        />
+      ),
       dataIndex: 'fastCreate',
       width: 100,
       render: (_: any, record: FieldItem) => {
@@ -140,11 +177,7 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
             EnumDataSourceType.MEASURES,
           ].includes(type as EnumDataSourceType)
         ) {
-          const isCreateName = [EnumDataSourceType.CATEGORICAL, EnumDataSourceType.TIME].includes(
-            type as EnumDataSourceType,
-          )
-            ? 'isCreateDimension'
-            : 'isCreateMetric';
+          const isCreateName = getCreateFieldName(type);
           const editState = !isUndefined(record[isCreateName]) ? !!record[isCreateName] : true;
           return (
             <Checkbox
@@ -155,14 +188,21 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
                   onFieldChange(record.bizName, {
                     ...record,
                     name: '',
+                    checked: value,
                     [isCreateName]: value,
                   });
                 } else {
-                  handleFieldChange(record, isCreateName, value);
+                  // handleFieldChange(record, isCreateName, value);
+                  onFieldChange(record.bizName, {
+                    ...record,
+                    checked: value,
+                    [isCreateName]: value,
+                  });
                 }
               }}
             >
               <Input
+                className={!name && styles.dataSourceFieldsName}
                 value={name}
                 disabled={!editState}
                 onChange={(e) => {
@@ -186,10 +226,18 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
 
   return (
     <>
+      <Alert
+        style={{ marginBottom: '10px' }}
+        banner
+        message={
+          <Marquee pauseOnHover gradient={false}>
+            为了保障同一个主题域下维度/指标列表唯一，消除歧义，若本主题域下的多个数据源存在相同的字段名并且都勾选了快速创建，系统默认这些相同字段的指标维度是同一个，同时列表中将只显示最后一次创建的指标/维度。
+          </Marquee>
+        }
+      />
       <Table<FieldItem>
         dataSource={fields}
         columns={columns}
-        className="fields-table"
         rowKey="bizName"
         pagination={false}
         scroll={{ y: 500 }}

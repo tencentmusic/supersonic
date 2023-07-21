@@ -7,3 +7,9 @@ export enum TransType {
   DIMENSION = 'dimension',
   METRIC = 'metric',
 }
+
+export enum SemanticNodeType {
+  DATASOURCE = 'datasource',
+  DIMENSION = 'dimension',
+  METRIC = 'metric',
+}

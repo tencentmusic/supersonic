@@ -1,17 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Modal, Select, List } from 'antd';
+import React, { useEffect } from 'react';
+import { Button, Form, Input, Modal, Select } from 'antd';
 import { SENSITIVE_LEVEL_OPTIONS } from '../constant';
 import { formLayout } from '@/components/FormHelper/utils';
 import SqlEditor from '@/components/SqlEditor';
 import InfoTagList from './InfoTagList';
+import { ISemantic } from '../data';
+import { createDimension, updateDimension } from '../service';
 import { message } from 'antd';
 
 export type CreateFormProps = {
-  dimensionItem: any;
+  domainId: number;
+  dimensionItem?: ISemantic.IDimensionItem;
   onCancel: () => void;
   bindModalVisible: boolean;
   dataSourceList: any[];
-  onSubmit: (values: any) => Promise<any>;
+  onSubmit: (values?: any) => void;
 };
 
 const FormItem = Form.Item;
@@ -20,42 +23,56 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 const DimensionInfoModal: React.FC<CreateFormProps> = ({
+  domainId,
   onCancel,
   bindModalVisible,
   dimensionItem,
   dataSourceList,
   onSubmit: handleUpdate,
 }) => {
-  const isEdit = dimensionItem?.id;
-  const [formVals, setFormVals] = useState<any>({
-    roleCode: '',
-    users: [],
-    effectiveTime: 1,
-  });
+  const isEdit = !!dimensionItem?.id;
 
   const [form] = Form.useForm();
-  const { setFieldsValue } = form;
+  const { setFieldsValue, resetFields } = form;
 
   const handleSubmit = async () => {
     const fieldsValue = await form.validateFields();
-    setFormVals({ ...fieldsValue });
-    try {
-      await handleUpdate(fieldsValue);
-    } catch (error) {
-      message.error('保存失败，接口调用出错');
+    await saveDimension(fieldsValue);
+  };
+
+  const saveDimension = async (fieldsValue: any) => {
+    const queryParams = {
+      domainId,
+      type: 'categorical',
+      ...fieldsValue,
+    };
+    let saveDimensionQuery = createDimension;
+    if (queryParams.id) {
+      saveDimensionQuery = updateDimension;
     }
+    const { code, msg } = await saveDimensionQuery(queryParams);
+    if (code === 200) {
+      message.success('编辑维度成功');
+      handleUpdate(fieldsValue);
+      return;
+    }
+    message.error(msg);
   };
 
   const setFormVal = () => {
-    console.log(dimensionItem, 'dimensionItem');
     setFieldsValue(dimensionItem);
   };
 
   useEffect(() => {
     if (dimensionItem) {
       setFormVal();
+    } else {
+      resetFields();
     }
-  }, [dimensionItem]);
+    if (!isEdit && Array.isArray(dataSourceList) && dataSourceList[0]?.id) {
+      setFieldsValue({ datasourceId: dataSourceList[0].id });
+    }
+  }, [dimensionItem, dataSourceList]);
 
   const renderFooter = () => {
     return (
@@ -141,7 +158,12 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
         >
           <TextArea placeholder="请输入维度描述" />
         </FormItem>
-        <FormItem name="expr" label="表达式" rules={[{ required: true, message: '请输入表达式' }]}>
+        <FormItem
+          name="expr"
+          label="表达式"
+          tooltip="表达式中的字段必须在创建数据源的时候被标记为日期或者维度"
+          rules={[{ required: true, message: '请输入表达式' }]}
+        >
           <SqlEditor height={'150px'} />
         </FormItem>
       </>
@@ -162,9 +184,11 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
       <Form
         {...formLayout}
         form={form}
-        initialValues={{
-          ...formVals,
-        }}
+        initialValues={
+          {
+            // ...formVals,
+          }
+        }
       >
         {renderContent()}
       </Form>

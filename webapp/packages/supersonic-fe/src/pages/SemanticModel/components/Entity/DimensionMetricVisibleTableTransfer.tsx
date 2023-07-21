@@ -1,14 +1,14 @@
-import { Space, Table, Transfer, Checkbox, Tooltip, Button } from 'antd';
+import { Table, Transfer, Checkbox, Button } from 'antd';
 import type { ColumnsType, TableRowSelection } from 'antd/es/table/interface';
 import type { TransferItem } from 'antd/es/transfer';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
 import difference from 'lodash/difference';
 import React, { useState } from 'react';
 import type { IChatConfig } from '../../data';
 import DimensionValueSettingModal from './DimensionValueSettingModal';
 import TransTypeTag from '../TransTypeTag';
 import { TransType } from '../../enum';
+import TableTitleTooltips from '../../components/TableTitleTooltips';
 
 interface RecordType {
   id: number;
@@ -72,12 +72,10 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
     {
       dataIndex: 'y',
       title: (
-        <Space>
-          <span>维度值可见</span>
-          <Tooltip title="勾选可见后，维度值将在搜索时可以被联想出来">
-            <ExclamationCircleOutlined />
-          </Tooltip>
-        </Space>
+        <TableTitleTooltips
+          title="维度值可见"
+          tooltips="勾选可见后，维度值将在搜索时可以被联想出来"
+        />
       ),
       width: 120,
       render: (_, record) => {

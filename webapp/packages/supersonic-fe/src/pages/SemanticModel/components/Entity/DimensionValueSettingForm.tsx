@@ -5,7 +5,7 @@ import { Form, Input } from 'antd';
 import { formLayout } from '@/components/FormHelper/utils';
 import { isString } from 'lodash';
 import styles from '../style.less';
-
+import CommonEditList from '../../components/CommonEditList/index';
 import SqlEditor from '@/components/SqlEditor';
 type Props = {
   initialValues: any;
@@ -17,7 +17,7 @@ const FormItem = Form.Item;
 const EntityCreateForm: ForwardRefRenderFunction<any, Props> = ({ initialValues }, ref) => {
   const [form] = Form.useForm();
 
-  const exchangeFields = ['blackList', 'whiteList', 'ruleList'];
+  const exchangeFields = ['blackList', 'whiteList'];
 
   const getFormValidateFields = async () => {
     const fields = await form.validateFields();
@@ -69,8 +69,9 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = ({ initialValues 
           <Input placeholder="多个维度值用英文逗号隔开" />
         </FormItem>
 
-        <FormItem name="ruleList" label="过滤规则">
-          <SqlEditor height={'150px'} />
+        <FormItem name="ruleList">
+          {/* <SqlEditor height={'150px'} /> */}
+          <CommonEditList title="过滤规则" />
         </FormItem>
       </Form>
     </>

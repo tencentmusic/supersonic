@@ -7,7 +7,7 @@ export default {
   'menu.exception.not-permission': '403',
   'menu.exception.not-find': '404',
   'menu.exception.server-error': '500',
-  'menu.semanticModel': '语义建模',
+  'menu.semanticModel': '模型管理',
   'menu.chatSetting': '问答设置',
   'menu.login': '登录',
   'menu.chat': '问答对话',

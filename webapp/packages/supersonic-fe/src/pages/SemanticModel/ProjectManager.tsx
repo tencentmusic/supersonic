@@ -11,10 +11,9 @@ import OverView from './components/OverView';
 import styles from './components/style.less';
 import type { StateType } from './model';
 import { DownOutlined } from '@ant-design/icons';
-import SemanticFlow from './SemanticFlows';
 import { ISemantic } from './data';
 import { findLeafNodesFromDomainList } from './utils';
-import SemanticGraph from './SemanticGraph';
+import SemanticGraphCanvas from './SemanticGraphCanvas';
 import { getDomainList } from './service';
 import type { Dispatch } from 'umi';
 
@@ -34,6 +33,10 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
   const [isModel, setIsModel] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
   const [activeKey, setActiveKey] = useState<string>(menuKey);
+
+  useEffect(() => {
+    setActiveKey(menuKey);
+  }, [menuKey]);
 
   const initSelectedDomain = (domainList: ISemantic.IDomainItem[]) => {
     const targetNode = domainList.filter((item: any) => {
@@ -145,21 +148,13 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
   ];
 
   const isModelItem = [
-    // {
-    //   label: '关系可视化',
-    //   key: 'graph',
-    //   children: (
-    //     <div style={{ width: '100%', height: 'calc(100vh - 200px)' }}>
-    //       <SemanticGraph domainId={selectDomainId} />
-    //     </div>
-    //   ),
-    // },
     {
       label: '可视化建模',
       key: 'xflow',
       children: (
         <div style={{ width: '100%', height: 'calc(100vh - 200px)' }}>
-          <SemanticFlow />
+          {/* <SemanticFlow /> */}
+          <SemanticGraphCanvas />
         </div>
       ),
     },
@@ -192,7 +187,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   return (
     <div className={styles.projectBody}>
-      <Helmet title={'语义建模-超音数'} />
+      <Helmet title={'模型管理-超音数'} />
       <div className={styles.projectManger}>
         <h2 className={styles.title}>
           <Popover

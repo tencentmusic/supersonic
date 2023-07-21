@@ -1,52 +1,46 @@
 import G6 from '@antv/g6';
 import '../style.less';
-// define the CSS with the id of your menu
+import { Item } from '@antv/g6-core';
+import { presetsTagDomString } from '../../components/AntdComponentDom/Tag';
+import { SemanticNodeType } from '../../enum';
+import { SEMANTIC_NODE_TYPE_CONFIG } from '../../constant';
 
-// insertCss(`
-//   #contextMenu {
-//     position: absolute;
-//     list-style-type: none;
-//     padding: 10px 8px;
-//     left: -150px;
-//     background-color: rgba(255, 255, 255, 0.9);
-//     border: 1px solid #e2e2e2;
-//     border-radius: 4px;
-//     font-size: 12px;
-//     color: #545454;
-//   }
-//   #contextMenu li {
-//     cursor: pointer;
-// 		list-style-type:none;
-//     list-style: none;
-//     margin-left: 0px;
-//   }
-//   #contextMenu li:hover {
-//     color: #aaa;
-//   }
-// `);
+type InitContextMenuProps = {
+  graphShowType: string;
+  onMenuClick?: (key: string, item: Item) => void;
+};
 
-const initContextMenu = () => {
-  const contextMenu = new G6.Menu({
+export const getMenuConfig = (props?: InitContextMenuProps) => {
+  const { graphShowType, onMenuClick } = props || {};
+  return {
     getContent(evt) {
-      const itemType = evt!.item!.getType();
-      console.log(this, evt?.item?._cfg, 333);
       const nodeData = evt?.item?._cfg?.model;
-      const { name } = nodeData as any;
+      const { name, nodeType } = nodeData as any;
       if (nodeData) {
+        const nodeTypeConfig = SEMANTIC_NODE_TYPE_CONFIG[nodeType] || {};
+        let ulNode = `<ul>
+        <li title='编辑' key='edit' >编辑</li>
+        <li title='删除' key='delete' >删除</li>
+      </ul>`;
+        if (nodeType === SemanticNodeType.DATASOURCE) {
+          if (graphShowType) {
+            const typeString = graphShowType === SemanticNodeType.DIMENSION ? '维度' : '指标';
+            ulNode = `<ul>
+              <li title='新增${typeString}' key='create' >新增${typeString}</li>
+            </ul>`;
+          }
+        }
         const header = `${name}`;
         return `<div class="g6ContextMenuContainer">
-          <h3>${header}</h3>
-          <ul>
-            <li title='2'>编辑</li>
-            <li title='1'>删除</li>
-          </ul>
+          <h3>${presetsTagDomString(nodeTypeConfig.label, nodeTypeConfig.color)}${header}</h3>
+        ${ulNode}
         </div>`;
       }
       return `<div>当前节点信息获取失败</div>`;
     },
     handleMenuClick(target, item) {
-      console.log(contextMenu, target, item);
-      const graph = contextMenu._cfgs.graph;
+      const targetKey = target.getAttribute('key') || '';
+      onMenuClick?.(targetKey, item);
     },
     // offsetX and offsetY include the padding of the parent container
     // 需要加上父级容器的 padding-left 16 与自身偏移量 10
@@ -56,7 +50,12 @@ const initContextMenu = () => {
     // the types of items that allow the menu show up
     // 在哪些类型的元素上响应
     itemTypes: ['node'],
-  });
+  };
+};
+
+const initContextMenu = (props?: InitContextMenuProps) => {
+  const config = getMenuConfig(props);
+  const contextMenu = new G6.Menu(config);
 
   return contextMenu;
 };

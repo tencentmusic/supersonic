@@ -176,6 +176,9 @@ const ClassDataSourceTable: React.FC<Props> = ({ dispatch, domainManger }) => {
       {
         <ClassDataSourceTypeModal
           open={createDataSourceModalOpen}
+          onCancel={() => {
+            setCreateDataSourceModalOpen(false);
+          }}
           onTypeChange={(type) => {
             if (type === 'fast') {
               setDataSourceModalVisible(true);
