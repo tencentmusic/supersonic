@@ -19,6 +19,7 @@ import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.util.SqlString;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * sql parse utils
@@ -66,6 +67,8 @@ public class SqlParseUtils {
             case ORDER_BY:
                 handlerOrderBy(sqlNode, sqlParserInfo);
                 break;
+            default:
+                break;
         }
     }
 
@@ -91,31 +94,50 @@ public class SqlParseUtils {
      * @param sqlParserInfo
      */
     private static void handlerSelect(SqlNode select, SqlParserInfo sqlParserInfo) {
+        List<String> allFields = sqlParserInfo.getAllFields();
         SqlSelect sqlSelect = (SqlSelect) select;
         SqlNodeList selectList = sqlSelect.getSelectList();
-
-        List<String> allFields = sqlParserInfo.getAllFields();
 
         selectList.getList().forEach(list -> {
             Set<String> selectFields = handlerField(list);
             sqlParserInfo.getSelectFields().addAll(selectFields);
-            allFields.addAll(selectFields);
         });
         String tableName = handlerFrom(sqlSelect.getFrom());
         sqlParserInfo.setTableName(tableName);
 
+        Set<String> selectFields = handlerSelectField(sqlSelect);
+        allFields.addAll(selectFields);
+    }
+
+    private static Set<String> handlerSelectField(SqlSelect sqlSelect) {
+        Set<String> results = new HashSet<>();
+        if (sqlSelect.getFrom() instanceof SqlBasicCall) {
+            Set<String> formFields = handlerField(sqlSelect.getFrom());
+            results.addAll(formFields);
+        }
+
+        sqlSelect.getSelectList().getList().forEach(list -> {
+            Set<String> selectFields = handlerField(list);
+            results.addAll(selectFields);
+        });
+
         if (sqlSelect.hasWhere()) {
-            allFields.addAll(handlerField(sqlSelect.getWhere()));
+            Set<String> whereFields = handlerField(sqlSelect.getWhere());
+            results.addAll(whereFields);
         }
         if (sqlSelect.hasOrderBy()) {
-            allFields.addAll(handlerField(sqlSelect.getOrderList()));
+            Set<String> orderByFields = handlerField(sqlSelect.getOrderList());
+            results.addAll(orderByFields);
         }
         SqlNodeList group = sqlSelect.getGroup();
         if (group != null) {
             group.forEach(groupField -> {
-                allFields.addAll(handlerField(groupField));
+                Set<String> groupByFields = handlerField(groupField);
+                results.addAll(groupByFields);
+
             });
         }
+        return results;
     }
 
     /**
@@ -135,6 +157,8 @@ public class SqlParseUtils {
                 SqlNode sqlNode = sqlBasicCall.getOperandList().get(0);
                 SqlSelect sqlSelect = (SqlSelect) sqlNode;
                 return handlerFrom(sqlSelect.getFrom());
+            default:
+                break;
         }
         return "";
     }
@@ -155,7 +179,14 @@ public class SqlParseUtils {
                 break;
             case IDENTIFIER:
                 SqlIdentifier sqlIdentifier = (SqlIdentifier) field;
-                fields.add(sqlIdentifier.getSimple());
+                String simpleName = sqlIdentifier.getSimple();
+                if (StringUtils.isNotEmpty(simpleName)) {
+                    fields.add(simpleName);
+                }
+                break;
+            case SELECT:
+                SqlSelect sqlSelect = (SqlSelect) field;
+                fields.addAll(handlerSelectField(sqlSelect));
                 break;
             default:
                 if (field instanceof SqlBasicCall) {
@@ -254,6 +285,8 @@ public class SqlParseUtils {
                 SqlOrderBy sqlOrderBy = (SqlOrderBy) sqlNode;
                 SqlSelect query = (SqlSelect) sqlOrderBy.query;
                 return query.getSelectList();
+            default:
+                break;
         }
         return null;
     }

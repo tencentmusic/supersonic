@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>api</module>
-        <module>core</module>
+        <module>model</module>
         <module>query</module>
     </modules>
 

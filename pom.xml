@@ -50,7 +50,7 @@
         <mysql.connector.java.version>5.1.46</mysql.connector.java.version>
         <mybatis.test.version>2.3.1</mybatis.test.version>
         <mybatis-spring.version>1.3.2</mybatis-spring.version>
-        <clickhouse.jdbc.version>0.3.2</clickhouse.jdbc.version>
+        <clickhouse.jdbc.version>0.4.6</clickhouse.jdbc.version>
         <h2.version>1.4.200</h2.version>
         <fastjson.version>2.0.24</fastjson.version>
         <dozer.verson>6.5.0</dozer.verson>
@@ -61,6 +61,7 @@
         <spring.version>2.5.1</spring.version>
         <calcite.version>1.34.0</calcite.version>
         <calcite.avatica.version>1.23.0</calcite.avatica.version>
+        <xk.time.version>3.2.4</xk.time.version>
         <revision>0.6-SNAPSHOT</revision>
     </properties>
 
@@ -140,6 +141,10 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.1.0</version>
             </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-checkstyle-plugin</artifactId>-->
+<!--            </plugin>-->
         </plugins>
         <pluginManagement>
             <plugins>
@@ -147,6 +152,35 @@
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
                     <version>3.6.0.1398</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.1.2</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>9.3</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <configLocation>checkstyle/checkstyle.xml</configLocation>
+                        <encoding>UTF-8</encoding>
+                        <consoleOutput>true</consoleOutput>
+                        <failsOnError>true</failsOnError>
+                        <linkXRef>false</linkXRef>
+                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

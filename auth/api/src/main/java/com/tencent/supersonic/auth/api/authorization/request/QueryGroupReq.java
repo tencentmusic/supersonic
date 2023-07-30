@@ -1,7 +1,7 @@
 package com.tencent.supersonic.auth.api.authorization.request;
 
 
-import com.tencent.supersonic.common.request.PageBaseReq;
+import com.tencent.supersonic.common.pojo.PageBaseReq;
 import java.util.List;
 import lombok.Data;
 

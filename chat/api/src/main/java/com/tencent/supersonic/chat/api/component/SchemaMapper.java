@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.api.component;
 
-import com.tencent.supersonic.chat.api.request.QueryContextReq;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 
 /**
  * This interface defines the contract for a schema mapper that identifies references to schema
@@ -11,5 +11,5 @@ import com.tencent.supersonic.chat.api.request.QueryContextReq;
  */
 public interface SchemaMapper {
 
-    void map(QueryContextReq queryContext);
+    void map(QueryContext queryContext);
 }

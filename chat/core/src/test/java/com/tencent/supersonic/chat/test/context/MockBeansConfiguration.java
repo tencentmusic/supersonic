@@ -6,28 +6,21 @@ import static org.mockito.Mockito.when;
 
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
-import com.tencent.supersonic.chat.domain.service.QueryService;
-import com.tencent.supersonic.semantic.api.core.response.DimSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.MetricResp;
-import com.tencent.supersonic.semantic.api.core.response.MetricSchemaResp;
-import com.tencent.supersonic.chat.application.ConfigServiceImpl;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigResp;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichResp;
-import com.tencent.supersonic.chat.domain.pojo.config.DefaultMetric;
-import com.tencent.supersonic.chat.domain.pojo.config.DefaultMetricInfo;
-import com.tencent.supersonic.chat.domain.pojo.config.EntityInternalDetail;
-import com.tencent.supersonic.chat.domain.pojo.config.EntityRichInfo;
-import com.tencent.supersonic.chat.domain.pojo.chat.DomainInfos;
-import com.tencent.supersonic.chat.domain.service.ChatService;
-import com.tencent.supersonic.chat.domain.utils.SchemaInfoConverter;
-import com.tencent.supersonic.chat.infrastructure.mapper.ChatContextMapper;
-import com.tencent.supersonic.chat.infrastructure.repository.ChatContextRepositoryImpl;
-import com.tencent.supersonic.common.constant.Constants;
-import com.tencent.supersonic.semantic.core.domain.DimensionService;
-import com.tencent.supersonic.semantic.core.domain.DomainService;
-import com.tencent.supersonic.semantic.core.domain.MetricService;
+import com.tencent.supersonic.chat.config.*;
+import com.tencent.supersonic.chat.persistence.repository.impl.ChatContextRepositoryImpl;
+import com.tencent.supersonic.chat.service.QueryService;
+import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
+import com.tencent.supersonic.chat.service.impl.ConfigServiceImpl;
+import com.tencent.supersonic.chat.service.ChatService;
+import com.tencent.supersonic.chat.persistence.mapper.ChatContextMapper;
+import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.semantic.model.domain.DimensionService;
+import com.tencent.supersonic.semantic.model.domain.DomainService;
+import com.tencent.supersonic.semantic.model.domain.MetricService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +40,7 @@ public class MockBeansConfiguration {
 
     public static void buildHttpSemanticServiceImpl(SemanticLayer httpSemanticLayer, List<DimSchemaResp> dimensionDescs,
             List<MetricSchemaResp> metricDescs) {
-        ChatConfigRichResp chaConfigRichDesc = new ChatConfigRichResp();
+        ChatConfigRich chaConfigRichDesc = new ChatConfigRich();
         DefaultMetric defaultMetricDesc = new DefaultMetric();
         defaultMetricDesc.setUnit(3);
         defaultMetricDesc.setPeriod(Constants.DAY);
@@ -79,10 +72,6 @@ public class MockBeansConfiguration {
         domainSchemaDesc.setDimensions(dimensionDescs);
         domainSchemaDesc.setMetrics(metricDescs);
 //        when(httpSemanticLayer.getDomainSchemaInfo(anyLong())).thenReturn(domainSchemaDesc);
-
-        DomainInfos domainInfos = new DomainInfos();
-        when(SchemaInfoConverter.convert(httpSemanticLayer.getDomainSchemaInfo(anyList()))).thenReturn(domainInfos);
-
     }
 
     public static void getDomainExtendMock(ConfigServiceImpl configService) {
@@ -125,10 +114,6 @@ public class MockBeansConfiguration {
     public ChatContextRepositoryImpl getChatContextRepository() {
         return Mockito.mock(ChatContextRepositoryImpl.class);
     }
-//    @Bean
-//    public SemanticLayer getSemanticService() {
-//        return Mockito.mock(HttpSemanticServiceImpl.class);
-//    }
 
     @Bean
     public QueryService getQueryService() {

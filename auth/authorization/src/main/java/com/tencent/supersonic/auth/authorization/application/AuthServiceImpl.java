@@ -124,8 +124,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private List<AuthGroup> getAuthGroups(QueryAuthResReq req) {
-        List<AuthGroup> groups = load().stream().
-                filter(group -> {
+        List<AuthGroup> groups = load().stream()
+                .filter(group -> {
                     if (!Objects.equals(group.getDomainId(), req.getDomainId())) {
                         return false;
                     }

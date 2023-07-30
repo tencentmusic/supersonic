@@ -36,7 +36,7 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
      */
     protected V value;
 
-    public String prefix = null;
+    protected String prefix = null;
 
     public BaseNode<V> transition(String path, int begin) {
         BaseNode<V> cur = this;

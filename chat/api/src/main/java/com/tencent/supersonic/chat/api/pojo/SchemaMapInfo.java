@@ -7,26 +7,21 @@ import java.util.Set;
 
 public class SchemaMapInfo {
 
-    private Map<Integer, List<SchemaElementMatch>> domainElementMatches = new HashMap<>();
+    private Map<Long, List<SchemaElementMatch>> domainElementMatches = new HashMap<>();
 
-    public Set<Integer> getMatchedDomains() {
+    public Set<Long> getMatchedDomains() {
         return domainElementMatches.keySet();
     }
 
-    public List<SchemaElementMatch> getMatchedElements(Integer domain) {
+    public List<SchemaElementMatch> getMatchedElements(Long domain) {
         return domainElementMatches.get(domain);
     }
 
-    public Map<Integer, List<SchemaElementMatch>> getDomainElementMatches() {
+    public Map<Long, List<SchemaElementMatch>> getDomainElementMatches() {
         return domainElementMatches;
     }
 
-    public void setDomainElementMatches(
-            Map<Integer, List<SchemaElementMatch>> domainElementMatches) {
-        this.domainElementMatches = domainElementMatches;
-    }
-
-    public void setMatchedElements(Integer domain, List<SchemaElementMatch> elementMatches) {
+    public void setMatchedElements(Long domain, List<SchemaElementMatch> elementMatches) {
         domainElementMatches.put(domain, elementMatches);
     }
 }

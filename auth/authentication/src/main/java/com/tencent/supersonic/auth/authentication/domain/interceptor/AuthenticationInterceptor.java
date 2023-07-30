@@ -4,7 +4,7 @@ import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfi
 import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.authentication.application.UserServiceImpl;
 import com.tencent.supersonic.auth.authentication.domain.utils.UserTokenUtils;
-import com.tencent.supersonic.common.util.context.S2ThreadContext;
+import com.tencent.supersonic.common.util.S2ThreadContext;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
