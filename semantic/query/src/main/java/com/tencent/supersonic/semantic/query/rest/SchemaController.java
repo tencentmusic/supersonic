@@ -3,14 +3,14 @@ package com.tencent.supersonic.semantic.query.rest;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.semantic.api.core.request.DomainSchemaFilterReq;
-import com.tencent.supersonic.semantic.api.core.request.PageDimensionReq;
-import com.tencent.supersonic.semantic.api.core.request.PageMetricReq;
-import com.tencent.supersonic.semantic.api.core.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.core.response.DomainResp;
-import com.tencent.supersonic.semantic.api.core.response.DomainSchemaResp;
-import com.tencent.supersonic.semantic.api.core.response.MetricResp;
-import com.tencent.supersonic.semantic.query.domain.SchemaService;
+import com.tencent.supersonic.semantic.api.model.request.DomainSchemaFilterReq;
+import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
+import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.query.service.SchemaService;
 
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -32,8 +32,8 @@ public class SchemaController {
 
     @PostMapping
     public List<DomainSchemaResp> fetchDomainSchema(@RequestBody DomainSchemaFilterReq filter,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return schemaService.fetchDomainSchema(filter, user);
     }
@@ -45,23 +45,30 @@ public class SchemaController {
      */
     @GetMapping("/domain/list")
     public List<DomainResp> getDomainList(HttpServletRequest request,
-                                          HttpServletResponse response) {
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return schemaService.getDomainListForAdmin(user);
     }
 
+    @GetMapping("/domain/view/list")
+    public List<DomainResp> getDomainListForViewer(HttpServletRequest request,
+                                          HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return schemaService.getDomainListForViewer(user);
+    }
+
     @PostMapping("/dimension/page")
     public PageInfo<DimensionResp> queryDimension(@RequestBody PageDimensionReq pageDimensionCmd,
-                                                  HttpServletRequest request,
-                                                  HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return schemaService.queryDimension(pageDimensionCmd, user);
     }
 
     @PostMapping("/metric/page")
     public PageInfo<MetricResp> queryMetric(@RequestBody PageMetricReq pageMetricCmd,
-                                            HttpServletRequest request,
-                                            HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return schemaService.queryMetric(pageMetricCmd, user);
     }

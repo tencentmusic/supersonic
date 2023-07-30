@@ -125,6 +125,18 @@
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.tencent.supersonic</groupId>
+            <artifactId>semantic-query</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.xkzhangsan</groupId>
+            <artifactId>xk-time</artifactId>
+            <version>${xk.time.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

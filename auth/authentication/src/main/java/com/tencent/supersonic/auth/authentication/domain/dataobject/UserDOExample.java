@@ -40,13 +40,6 @@ public class UserDOExample {
     /**
      * @mbg.generated
      */
-    public void setOrderByClause(String orderByClause) {
-        this.orderByClause = orderByClause;
-    }
-
-    /**
-     * @mbg.generated
-     */
     public String getOrderByClause() {
         return orderByClause;
     }
@@ -54,8 +47,8 @@ public class UserDOExample {
     /**
      * @mbg.generated
      */
-    public void setDistinct(boolean distinct) {
-        this.distinct = distinct;
+    public void setOrderByClause(String orderByClause) {
+        this.orderByClause = orderByClause;
     }
 
     /**
@@ -63,6 +56,13 @@ public class UserDOExample {
      */
     public boolean isDistinct() {
         return distinct;
+    }
+
+    /**
+     * @mbg.generated
+     */
+    public void setDistinct(boolean distinct) {
+        this.distinct = distinct;
     }
 
     /**
@@ -119,13 +119,6 @@ public class UserDOExample {
     /**
      * @mbg.generated
      */
-    public void setLimitStart(Integer limitStart) {
-        this.limitStart = limitStart;
-    }
-
-    /**
-     * @mbg.generated
-     */
     public Integer getLimitStart() {
         return limitStart;
     }
@@ -133,8 +126,8 @@ public class UserDOExample {
     /**
      * @mbg.generated
      */
-    public void setLimitEnd(Integer limitEnd) {
-        this.limitEnd = limitEnd;
+    public void setLimitStart(Integer limitStart) {
+        this.limitStart = limitStart;
     }
 
     /**
@@ -142,6 +135,13 @@ public class UserDOExample {
      */
     public Integer getLimitEnd() {
         return limitEnd;
+    }
+
+    /**
+     * @mbg.generated
+     */
+    public void setLimitEnd(Integer limitEnd) {
+        this.limitEnd = limitEnd;
     }
 
     /**
@@ -561,38 +561,6 @@ public class UserDOExample {
 
         private String typeHandler;
 
-        public String getCondition() {
-            return condition;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public Object getSecondValue() {
-            return secondValue;
-        }
-
-        public boolean isNoValue() {
-            return noValue;
-        }
-
-        public boolean isSingleValue() {
-            return singleValue;
-        }
-
-        public boolean isBetweenValue() {
-            return betweenValue;
-        }
-
-        public boolean isListValue() {
-            return listValue;
-        }
-
-        public String getTypeHandler() {
-            return typeHandler;
-        }
-
         protected Criterion(String condition) {
             super();
             this.condition = condition;
@@ -627,6 +595,38 @@ public class UserDOExample {
 
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
+        }
+
+        public String getCondition() {
+            return condition;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Object getSecondValue() {
+            return secondValue;
+        }
+
+        public boolean isNoValue() {
+            return noValue;
+        }
+
+        public boolean isSingleValue() {
+            return singleValue;
+        }
+
+        public boolean isBetweenValue() {
+            return betweenValue;
+        }
+
+        public boolean isListValue() {
+            return listValue;
+        }
+
+        public String getTypeHandler() {
+            return typeHandler;
         }
     }
 }

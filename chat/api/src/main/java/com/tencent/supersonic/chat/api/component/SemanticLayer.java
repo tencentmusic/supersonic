@@ -1,0 +1,45 @@
+package com.tencent.supersonic.chat.api.component;
+
+import com.github.pagehelper.PageInfo;
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.chat.api.pojo.DomainSchema;
+import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
+import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+
+import java.util.List;
+
+/**
+ * This interface defines the contract for a semantic layer that provides a simplified and
+ * consistent view of data from multiple sources.
+ * The semantic layer abstracts away the complexity of the underlying data sources and provides
+ * a unified view of the data that is easier to understand and use.
+ * <p>
+ * The interface defines methods for getting metadata as well as querying data in the semantic layer.
+ * Implementations of this interface should provide concrete implementations that interact with the
+ * underlying data sources and return results in a consistent format. Or it can be implemented
+ * as proxy to a remote semantic service.
+ * </p>
+ */
+public interface SemanticLayer {
+
+    QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user);
+    QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user);
+    QueryResultWithSchemaResp queryByDsl(QueryDslReq queryDslReq, User user);
+
+    List<DomainSchema> getDomainSchema();
+    List<DomainSchema> getDomainSchema(List<Long> ids);
+    DomainSchema getDomainSchema(Long domain, Boolean cacheEnable);
+    PageInfo<DimensionResp> getDimensionPage(PageDimensionReq pageDimensionCmd);
+    PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricCmd);
+
+    List<DomainResp> getDomainListForViewer();
+    List<DomainResp> getDomainListForAdmin();
+
+}

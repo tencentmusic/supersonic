@@ -12,10 +12,17 @@
     <artifactId>semantic-api</artifactId>
 
     <dependencies>
+<!--        <dependency>-->
+<!--            <groupId>ru.yandex.clickhouse</groupId>-->
+<!--            <artifactId>clickhouse-jdbc</artifactId>-->
+<!--            <version>${clickhouse.jdbc.version}</version>-->
+<!--        </dependency>-->
         <dependency>
-            <groupId>ru.yandex.clickhouse</groupId>
+            <groupId>com.clickhouse</groupId>
             <artifactId>clickhouse-jdbc</artifactId>
             <version>${clickhouse.jdbc.version}</version>
+            <!-- use uber jar with all dependencies included, change classifier to http for smaller jar -->
+            <classifier>all</classifier>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

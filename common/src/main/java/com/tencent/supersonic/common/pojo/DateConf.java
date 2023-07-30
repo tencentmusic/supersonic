@@ -2,8 +2,6 @@ package com.tencent.supersonic.common.pojo;
 
 import static java.time.LocalDate.now;
 
-import com.tencent.supersonic.common.constant.Constants;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +13,7 @@ public class DateConf {
     private static final long serialVersionUID = 3074129990945004340L;
 
 
-    private DateMode dateMode;
+    private DateMode dateMode = DateMode.RECENT_UNITS;
 
     /**
      * like 2021-10-22, dateMode=1
@@ -47,10 +45,10 @@ public class DateConf {
     public enum DateMode {
         /**
          * date mode
-         * 1 - between, continuous value,
-         * 2 - list discrete value,
-         * 3 - recent time units,
-         * 4 - advance time until data is available
+         * 1 - BETWEEN_CONTINUOUS, continuous static value, [startDate, endDate]
+         * 2 - LIST_DISCRETE, discrete static value, [dateList]
+         * 3 - RECENT_UNITS, dynamic time related to the actual available time of the element, [unit, period]
+         * 4 - AVAILABLE_TIME, dynamic time which guaranteed to query some data, [startDate, endDate]
          */
         BETWEEN_CONTINUOUS, LIST_DISCRETE, RECENT_UNITS, AVAILABLE_TIME
     }

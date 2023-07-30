@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS `s2_domain` (
     `is_open` TINYINT DEFAULT NULL  , -- whether the domain is public
     `viewer` varchar(3000) DEFAULT NULL  , -- domain available users
     `view_org` varchar(3000) DEFAULT NULL  , -- domain available organization
+    `entity` varchar(500) DEFAULT NULL  , -- domain entity info
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_domain IS 'domain basic information';
@@ -24,6 +25,7 @@ CREATE TABLE `s2_database` (
     `domain_id` INT NOT  NULL ,
     `name` varchar(255) NOT  NULL ,
     `description` varchar(500) DEFAULT  NULL ,
+    `version` varchar(64) DEFAULT  NULL ,
     `type` varchar(20) NOT  NULL , -- type: mysql,clickhouse,tdw
     `config` varchar(655) NOT  NULL ,
     `created_at` TIMESTAMP NOT  NULL ,
@@ -84,6 +86,7 @@ CREATE TABLE IF NOT EXISTS `s2_metric` (
     `updated_by` varchar(100) NOT NULL ,
     `data_format_type` varchar(50) DEFAULT NULL ,
     `data_format` varchar(500) DEFAULT NULL,
+    `alias` varchar(500) DEFAULT NULL,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_metric IS 'metric information table';
@@ -106,6 +109,9 @@ CREATE TABLE IF NOT EXISTS `s2_dimension` (
     `updated_at` TIMESTAMP  NOT NULL ,
     `updated_by` varchar(100)  NOT NULL ,
     `semantic_type` varchar(20)  NOT NULL,  -- semantic type: DATE, ID, CATEGORY
+    `alias` varchar(500) DEFAULT NULL,
+    `default_values` varchar(500) DEFAULT NULL,
+    `dim_value_maps` varchar(500) DEFAULT NULL,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_dimension IS 'dimension information table';
@@ -208,6 +214,7 @@ CREATE TABLE IF NOT EXISTS `s2_available_date_info` (
     `created_by` varchar(100)  NOT NULL ,
     `updated_at` TIMESTAMP  NOT NULL ,
     `updated_by` varchar(100)  NOT NULL ,
+    `date_period` varchar(100)  DEFAULT NULL ,
     `status` INT  DEFAULT '0', -- 1-in use  0 is normal, 1 is off the shelf, 2 is deleted
     PRIMARY KEY (`id`)
     );
@@ -235,5 +242,17 @@ CREATE TABLE IF NOT EXISTS `s2_stay_time_statis` (
     `page` varchar(200) NOT NULL
     );
 COMMENT ON TABLE s2_stay_time_statis IS 's2_stay_time_statis_info';
+
+CREATE TABLE IF NOT EXISTS `singer` (
+    `imp_date` varchar(200) NOT NULL,
+    `singer_name` varchar(200) NOT NULL,
+    `act_area` varchar(200) NOT NULL,
+    `song_name` varchar(200) NOT NULL,
+    `genre` varchar(200) NOT NULL,
+    `js_play_cnt` bigINT DEFAULT NULL,
+    `down_cnt` bigINT DEFAULT NULL,
+    `favor_cnt` bigINT DEFAULT NULL
+    );
+COMMENT ON TABLE singer IS 'singer_info';
 
 

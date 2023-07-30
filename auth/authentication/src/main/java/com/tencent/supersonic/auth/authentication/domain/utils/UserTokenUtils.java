@@ -13,7 +13,7 @@ import static com.tencent.supersonic.auth.api.authentication.constant.UserConsta
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
-import com.tencent.supersonic.common.exception.AccessException;
+import com.tencent.supersonic.common.pojo.exception.AccessException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

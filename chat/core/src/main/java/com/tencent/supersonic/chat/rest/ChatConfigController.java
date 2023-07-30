@@ -3,18 +3,15 @@ package com.tencent.supersonic.chat.rest;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.semantic.api.core.request.PageDimensionReq;
-import com.tencent.supersonic.semantic.api.core.request.PageMetricReq;
-import com.tencent.supersonic.semantic.api.core.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.core.response.DomainResp;
-import com.tencent.supersonic.semantic.api.core.response.MetricResp;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigBase;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigEditReq;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigFilter;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigInfo;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichInfo;
-import com.tencent.supersonic.chat.domain.service.ConfigService;
-import com.tencent.supersonic.chat.domain.utils.DefaultSemanticInternalUtils;
+import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.config.*;
+import com.tencent.supersonic.chat.utils.ComponentFactory;
+import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
+import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.chat.service.ConfigService;
 
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -37,12 +34,12 @@ public class ChatConfigController {
     @Autowired
     private ConfigService configService;
 
-    @Autowired
-    private DefaultSemanticInternalUtils defaultSemanticUtils;
+
+    private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
 
 
     @PostMapping
-    public Long addChatConfig(@RequestBody ChatConfigBase extendBaseCmd,
+    public Long addChatConfig(@RequestBody ChatConfigBaseReq extendBaseCmd,
                               HttpServletRequest request,
                               HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
@@ -50,7 +47,7 @@ public class ChatConfigController {
     }
 
     @PutMapping
-    public Long editDomainExtend(@RequestBody ChatConfigEditReq extendEditCmd,
+    public Long editDomainExtend(@RequestBody ChatConfigEditReqReq extendEditCmd,
                                  HttpServletRequest request,
                                  HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
@@ -59,7 +56,7 @@ public class ChatConfigController {
 
 
     @PostMapping("/search")
-    public List<ChatConfigInfo> search(@RequestBody ChatConfigFilter filter,
+    public List<ChatConfigResp> search(@RequestBody ChatConfigFilter filter,
                                        HttpServletRequest request,
                                        HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
@@ -68,8 +65,13 @@ public class ChatConfigController {
 
 
     @GetMapping("/richDesc/{domainId}")
-    public ChatConfigRichInfo getDomainExtendRichInfo(@PathVariable("domainId") Long domainId) {
+    public ChatConfigRich getDomainExtendRichInfo(@PathVariable("domainId") Long domainId) {
         return configService.getConfigRichInfo(domainId);
+    }
+
+    @GetMapping("/richDesc/all")
+    public List<ChatConfigRich> getAllChatRichConfig() {
+        return configService.getAllChatRichConfig();
     }
 
 
@@ -79,26 +81,28 @@ public class ChatConfigController {
      * @param
      */
     @GetMapping("/domainList")
-    public List<DomainResp> getDomainList(HttpServletRequest request,
-                                          HttpServletResponse response) {
-        User user = UserHolder.findUser(request, response);
-        return defaultSemanticUtils.getDomainListForUser(user);
+    public List<DomainResp> getDomainList() {
+
+        return semanticLayer.getDomainListForAdmin();
+    }
+
+    @GetMapping("/domainList/view")
+    public List<DomainResp> getDomainListForViewer() {
+        return semanticLayer.getDomainListForViewer();
     }
 
     @PostMapping("/dimension/page")
-    public PageInfo<DimensionResp> queryDimension(@RequestBody PageDimensionReq pageDimensionCmd,
-                                                  HttpServletRequest request,
-                                                  HttpServletResponse response) {
-        User user = UserHolder.findUser(request, response);
-        return defaultSemanticUtils.queryDimensionPage(pageDimensionCmd, user);
+    public PageInfo<DimensionResp> getDimension(@RequestBody PageDimensionReq pageDimensionCmd,
+                                                HttpServletRequest request,
+                                                HttpServletResponse response) {
+        return semanticLayer.getDimensionPage(pageDimensionCmd);
     }
 
     @PostMapping("/metric/page")
-    public PageInfo<MetricResp> queryMetric(@RequestBody PageMetricReq pageMetrricCmd,
-                                            HttpServletRequest request,
-                                            HttpServletResponse response) {
-        User user = UserHolder.findUser(request, response);
-        return defaultSemanticUtils.queryMetricPage(pageMetrricCmd, user);
+    public PageInfo<MetricResp> getMetric(@RequestBody PageMetricReq pageMetrricCmd,
+                                          HttpServletRequest request,
+                                          HttpServletResponse response) {
+        return semanticLayer.getMetricPage(pageMetrricCmd);
     }
 
 

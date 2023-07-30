@@ -1,12 +1,13 @@
 package com.tencent.supersonic.chat.test.context;
 
 import com.google.gson.Gson;
-import com.tencent.supersonic.chat.api.pojo.Filter;
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.enums.AggregateTypeEnum;
+import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.SchemaItem;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,9 +32,9 @@ public class SemanticParseObjectHelper {
 
     private static SemanticParseInfo getSemanticParseInfo(SemanticParseJson semanticParseJson) {
         Long domain = semanticParseJson.getDomain();
-        Set<SchemaItem> dimensionList = new LinkedHashSet();
-        Set<SchemaItem> metricList = new LinkedHashSet();
-        Set<Filter> chatFilters = new LinkedHashSet();
+        Set<SchemaElement> dimensionList = new LinkedHashSet();
+        Set<SchemaElement> metricList = new LinkedHashSet();
+        Set<QueryFilter> chatFilters = new LinkedHashSet();
 
         if (semanticParseJson.getFilter() != null && semanticParseJson.getFilter().size() > 0) {
             for (List<String> filter : semanticParseJson.getFilter()) {
@@ -52,7 +53,6 @@ public class SemanticParseObjectHelper {
 
         semanticParseInfo.setDimensionFilters(chatFilters);
         semanticParseInfo.setAggType(semanticParseJson.getAggregateType());
-        semanticParseInfo.setDomainId(domain);
         semanticParseInfo.setQueryMode(semanticParseJson.getQueryMode());
         semanticParseInfo.setMetrics(metricList);
         semanticParseInfo.setDimensions(dimensionList);
@@ -72,9 +72,9 @@ public class SemanticParseObjectHelper {
         return null;
     }
 
-    private static Filter getChatFilter(List<String> filters) {
+    private static QueryFilter getChatFilter(List<String> filters) {
         if (filters.size() > 1) {
-            Filter chatFilter = new Filter();
+            QueryFilter chatFilter = new QueryFilter();
 
             chatFilter.setBizName(filters.get(1));
             chatFilter.setOperator(FilterOperatorEnum.getSqlOperator(filters.get(2)));
@@ -91,18 +91,15 @@ public class SemanticParseObjectHelper {
         return null;
     }
 
-
-    private static SchemaItem getMetric(String bizName, Long domainId) {
-        SchemaItem metric = new SchemaItem();
+    private static SchemaElement getMetric(String bizName, Long domainId) {
+        SchemaElement metric = new SchemaElement();
         metric.setBizName(bizName);
-        //metric.set(domainId);
         return metric;
     }
 
-    private static SchemaItem getDimension(String bizName, Long domainId) {
-        SchemaItem dimension = new SchemaItem();
+    private static SchemaElement getDimension(String bizName, Long domainId) {
+        SchemaElement dimension = new SchemaElement();
         dimension.setBizName(bizName);
-        //dimension.setDomainId(domainId);
         return dimension;
     }
 

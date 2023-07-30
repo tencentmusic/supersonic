@@ -37,15 +37,12 @@ CREATE TABLE `s2_chat_query`
     PRIMARY KEY (`question_id`)
 );
 
-
-
 CREATE TABLE IF NOT EXISTS `s2_chat_config` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `domain_id` INT DEFAULT NULL ,
-    `default_metrics` varchar(655) DEFAULT NULL,
-    `visibility` varchar(655)    , -- invisible dimension metric information
-    `entity_info` varchar(655)    ,
-    `dictionary_info` varchar(655)    , -- dictionary-related dimension setting information
+    `chat_detail_config` varchar(655) ,
+    `chat_agg_config` varchar(655)    ,
+    `recommended_questions` varchar(1500)    ,
     `created_at` TIMESTAMP  NOT NULL   ,
     `updated_at` TIMESTAMP  NOT NULL   ,
     `created_by` varchar(100) NOT NULL   ,
@@ -101,5 +98,19 @@ create table s2_user
 );
 COMMENT ON TABLE s2_user IS 'user information table';
 
-
+CREATE TABLE IF NOT EXISTS `s2_plugin`
+(
+    `id`         INT AUTO_INCREMENT,
+    `type`      varchar(50)   NULL,
+    `domain`     varchar(100)  NULL,
+    `pattern`    varchar(500)  NULL,
+    `parse_mode` varchar(100)  NULL,
+    `name`       varchar(100)  NULL,
+    `created_at` TIMESTAMP   NULL,
+    `created_by` varchar(100) null,
+    `updated_at` TIMESTAMP    NULL,
+    `updated_by` varchar(100) NULL,
+    `config`     LONGVARCHAR  NULL,
+    PRIMARY KEY (`id`)
+); COMMENT ON TABLE s2_plugin IS 'plugin information table';
 

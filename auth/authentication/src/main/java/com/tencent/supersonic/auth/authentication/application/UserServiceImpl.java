@@ -33,14 +33,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.getUser(name);
     }
 
-    public boolean checkExist(UserWithPassword user) {
-        UserDO userDO = getUser(user.getName());
-        if (userDO == null) {
-            return false;
-        }
-        return userDO.getPassword().equals(user.getPassword());
-    }
-
     @Override
     public List<String> getUserNames() {
         return getUserDOList().stream().map(UserDO::getName).collect(Collectors.toList());

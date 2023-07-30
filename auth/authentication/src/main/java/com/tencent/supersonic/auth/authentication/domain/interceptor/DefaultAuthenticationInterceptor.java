@@ -2,25 +2,23 @@ package com.tencent.supersonic.auth.authentication.domain.interceptor;
 
 
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
 import com.tencent.supersonic.auth.authentication.application.UserServiceImpl;
 import com.tencent.supersonic.auth.authentication.domain.utils.UserTokenUtils;
-import com.tencent.supersonic.common.exception.AccessException;
-import com.tencent.supersonic.common.util.context.ContextUtils;
-import com.tencent.supersonic.common.util.context.S2ThreadContext;
-import com.tencent.supersonic.common.util.context.ThreadContext;
+import com.tencent.supersonic.common.pojo.exception.AccessException;
+import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.S2ThreadContext;
+import com.tencent.supersonic.common.util.ThreadContext;
 import java.lang.reflect.Method;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 
-@Component
 @Slf4j
 public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor {
-
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -30,11 +28,12 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
         userTokenUtils = ContextUtils.getBean(UserTokenUtils.class);
         s2ThreadContext = ContextUtils.getBean(S2ThreadContext.class);
         if (!authenticationConfig.isEnabled()) {
+            setFakerUser(request);
             return true;
         }
         if (isInternalRequest(request)) {
-            String token = userTokenUtils.generateAdminToken();
-            reflectSetparam(request, authenticationConfig.getTokenHttpHeaderKey(), token);
+            setFakerUser(request);
+            return true;
         }
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         Method method = handlerMethod.getMethod();
@@ -50,14 +49,24 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
 
         UserWithPassword user = userTokenUtils.getUserWithPassword(request);
         if (StringUtils.isNotBlank(user.getName())) {
-            ThreadContext threadContext = ThreadContext.builder()
-                    .token(request.getHeader(authenticationConfig.getTokenHttpHeaderKey()))
-                    .userName(user.getName())
-                    .build();
-            s2ThreadContext.set(threadContext);
+            setContext(user.getName(), request);
             return true;
         }
         throw new AccessException("authentication failed, please login");
+    }
+
+    private void setFakerUser(HttpServletRequest request) {
+        String token = userTokenUtils.generateAdminToken();
+        reflectSetparam(request, authenticationConfig.getTokenHttpHeaderKey(), token);
+        setContext(User.getFakeUser().getName(), request);
+    }
+
+    private void setContext(String userName, HttpServletRequest request) {
+        ThreadContext threadContext = ThreadContext.builder()
+                .token(request.getHeader(authenticationConfig.getTokenHttpHeaderKey()))
+                .userName(userName)
+                .build();
+        s2ThreadContext.set(threadContext);
     }
 
 

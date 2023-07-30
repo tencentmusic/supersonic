@@ -22,7 +22,7 @@ public class InterceptorFactory implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         for (AuthenticationInterceptor authenticationInterceptor : authenticationInterceptors) {
             registry.addInterceptor(authenticationInterceptor).addPathPatterns("/**")
-                    .excludePathPatterns("/", "/webapp/**","/error");
+                    .excludePathPatterns("/", "/webapp/**", "/error");
         }
     }
 
