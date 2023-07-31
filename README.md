@@ -2,19 +2,19 @@ English | [中文](README_CN.md)
 
 # SuperSonic (超音数)
 
-**SuperSonic is an out-of-the-box yet highly extensible framework for building a data chatbot**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to define logical semantic models (metrics, dimensions, aliases, relationships, etc) on top of physical data models, and no data modification or copying is required. Meanwhile SuperSonic is designed to be plugable, allowing new functionalities to be added through plugins and core components to be integrated into other systems.
+**SuperSonic is an out-of-the-box yet highly extensible framework for building a data chatbot**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to build logical semantic models (definition of metrics/dimensions/entities, along with their meaning, context and relationships) on top of physical data models, and no data modification or copying is required. Meanwhile, SuperSonic is designed to be pluggable, allowing new functionalities to be added through plugins and core components to be integrated with other systems.
 
-<img src="./docs/images/supersonic_demo.gif" height="70%" width="70%" align="center"/>
+<img src="./docs/images/supersonic_demo.gif" height="100%" width="100%" align="center"/>
 
 ## Motivation
 
-The emergence of Large Language Models (LLMs) like ChatGPT is reshaping the way information is retrieved. In the field of data analytics, both academia and industry are primarily focused on leveraging deep learning models to convert natural language queries into SQL queries. While some works show promising results, they are not applicable to real-world scenarios. 
+The emergence of Large Language Model (LLM) like ChatGPT is reshaping the way information is retrieved. In the field of data analytics, both academia and industry are primarily focused on leveraging LLM to convert natural language queries into SQL queries. While some works show promising results, they are still not applicable to real-world scenarios.
 
 From our perspective, the key to filling the real-world gap lies in two aspects: 
-1. Utilize a combination of rule-based and model-based semantic parsers to deal with different scenarios
-2. Introduce a semantic model layer to encapsulate underlying complexity thus simplify the semantic parsers
+1. Utilize a combination of rule-based and model-based semantic parsers to deal with different scenarios.
+2. Introduce a semantic model layer encapsulating the underlying data complexity(joins, formulas, etc) to simplify semantic parsing.
 
-With these ideas in mind, we developed SuperSonic as a practical reference implementation and used it to power our real-world products. Additionally, to encourage further development of data chatbots, we decided to open source SuperSonic as an extensible framework.
+With these ideas in mind, we develop SuperSonic as a practical reference implementation and use it to power our real-world products. Additionally, to facilitate further development of data chatbot, we decide to open source SuperSonic as an extensible framework.
 
 ## Out-of-the-box Features
 
@@ -26,33 +26,19 @@ With these ideas in mind, we developed SuperSonic as a practical reference imple
 
 ## Extensible Components
 
-SuperSonic is composed of two layers: supersonic-chat and supersonic-semantic. The chat layer is responsible for converting **natural language query** into semantic query (also known as DSL query), whereas the semantic layer is responsible for converting DSL query into **SQL query**. The high-level architecture and main process flow is shown in below diagram:
+The high-level architecture and main process flow is shown in below diagram:
 
-<img src="./docs/images/supersonic_components.png" height="70%" width="70%" align="center"/> 
+<img src="./docs/images/supersonic_components.png" height="100%" width="100%" align="center"/> 
 
-### Chat Layer
-
-The chat layer contains four core components:
-
-- **Chat Interface:** accepts user queries and answer results with appropriate visualization charts. It supports input auto-completion as well as multi-turn conversation.
-
-- **Schema Mapper Chain:** identifies references to semantic schema elements in user queries. It matches queries against the knowledage base which is constructed using the schema of semantic models.
-
-- **Semantic Parser Chain:** resolves query mode based on mapped semantic models. It is composed of a group of rule-based and model-based parsers, each of which deals with specific scenarios.
-
-- **Semantic Query:** performs execution according to the results of semantic parsing. The default semantic query would submit DSL to the semantic component, but new types of semantic query can be extended.
-
-### Semantic Layer
-
-The semantic layer contains four core components:
+- **Chat Interface:** accepts natural language queries and answer results with appropriate visualization charts. It supports input auto-completion as well as multi-turn conversation.
 
 - **Modeling Interface:** empowers analytics engineers to visually define and maintain semantic models. The configurations related to access permission and chat conversation can also be set on the UI.
 
-- **DSL Parser:** converts DSL expression to intermediate structures. To make it easily integratable with analytics applications, SQL (without joins and calculation formulas) is used as the DSL.
+- **Schema Mapper Chain:** identifies references to schema elements(metrics/dimensions/entities/values) in user queries. It matches the query text against a knowledge base constructed from the semantic models.
 
-- **Query Planner:** builds and optimizes query plans according to various rules. 
+- **Semantic Parser Chain:** understands user queries and extract semantic information. It consists of a combination of rule-based and model-based parsers, each of which deals with specific scenarios.
 
-- **SQL Generator:** generates final SQL expression (with joins and calculation formulas) based on the query plan.
+- **Semantic Query:** performs execution according to extracted semantic information. It generates SQL queries and executes them against physical data models.
 
 ## Quick Demo
 
