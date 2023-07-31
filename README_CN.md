@@ -26,7 +26,7 @@
 
 超音数的整体架构和主流程如下图所示：
 
-<img src="./docs/images/supersonic_components.png" height="100%" width="100%" align="center"/> 
+<img src="./docs/images/supersonic_components.png" height="70%" width="70%" align="center"/> 
 
 - **问答对话界面(chat interface)**：接受用户查询并选择合适的可视化图表呈现结果，支持输入联想和多轮对话。
 

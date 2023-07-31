@@ -28,7 +28,7 @@ With these ideas in mind, we develop SuperSonic as a practical reference impleme
 
 The high-level architecture and main process flow is shown in below diagram:
 
-<img src="./docs/images/supersonic_components.png" height="100%" width="100%" align="center"/> 
+<img src="./docs/images/supersonic_components.png" height="70%" width="70%" align="center"/> 
 
 - **Chat Interface:** accepts natural language queries and answer results with appropriate visualization charts. It supports input auto-completion as well as multi-turn conversation.
 
