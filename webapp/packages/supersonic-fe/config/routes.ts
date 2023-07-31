@@ -31,12 +31,6 @@ const ROUTES = [
     envEnableList: [ENV_KEY.SEMANTIC],
   },
   {
-    path: '/Metric',
-    name: 'metric',
-    component: './SemanticModel/Metric',
-    envEnableList: [ENV_KEY.SEMANTIC],
-  },
-  {
     path: '/login',
     name: 'login',
     layout: false,
