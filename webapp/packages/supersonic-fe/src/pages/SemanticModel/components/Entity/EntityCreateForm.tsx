@@ -1,14 +1,13 @@
 import { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import type { ForwardRefRenderFunction } from 'react';
 import { message, Form, Input, Select, Button } from 'antd';
-import { addDomainExtend, editDomainExtend } from '../../service';
-import type { ISemantic, IChatConfig } from '../../data';
+import { updateDomain } from '../../service';
+import type { ISemantic } from '../../data';
 import { formLayout } from '@/components/FormHelper/utils';
-import { formatRichEntityDataListToIds } from './utils';
 import styles from '../style.less';
 
 type Props = {
-  entityData: IChatConfig.IChatRichConfig;
+  entityData?: { id: number; names: string[] };
   dimensionList: ISemantic.IDimensionList;
   domainId: number;
   onSubmit: () => void;
@@ -21,22 +20,20 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
   ref,
 ) => {
   const [form] = Form.useForm();
-  const formatEntityData = formatRichEntityDataListToIds(entityData);
   const [dimensionListOptions, setDimensionListOptions] = useState<any>([]);
-
   const getFormValidateFields = async () => {
     return await form.validateFields();
   };
 
   useEffect(() => {
     form.resetFields();
-    if (!entityData?.entity) {
+    if (!entityData) {
       return;
     }
 
     form.setFieldsValue({
-      ...formatEntityData.entity,
-      id: formatEntityData.id,
+      ...entityData,
+      name: entityData.names.join(','),
     });
   }, [entityData]);
 
@@ -56,20 +53,14 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
 
   const saveEntity = async () => {
     const values = await form.validateFields();
-    const { id, name } = values;
-    let saveDomainExtendQuery = addDomainExtend;
-    if (id) {
-      saveDomainExtendQuery = editDomainExtend;
-    }
-    const { code, msg, data } = await saveDomainExtendQuery({
-      chatDetailConfig: {
-        ...formatEntityData,
-        entity: {
-          ...values,
-          names: name.split(','),
-        },
+    const { name } = values;
+
+    const { code, msg, data } = await updateDomain({
+      entity: {
+        ...values,
+        names: name.split(','),
       },
-      id,
+      id: domainId,
       domainId,
     });
 

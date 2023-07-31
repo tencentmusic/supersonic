@@ -111,7 +111,7 @@ export function deleteDomain(id: any): Promise<any> {
   });
 }
 
-export function getGroupAuthInfo(id: string): Promise<any> {
+export function getGroupAuthInfo(id: number): Promise<any> {
   return request(`${process.env.AUTH_API_BASE_URL}queryGroup`, {
     method: 'GET',
     params: {

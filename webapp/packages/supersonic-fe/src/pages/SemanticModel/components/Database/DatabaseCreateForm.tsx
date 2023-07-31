@@ -20,26 +20,14 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
 ) => {
   const [form] = Form.useForm();
   const [selectedDbType, setSelectedDbType] = useState<string>('h2');
-  // const queryDatabaseConfig = async () => {
-  //   const { code, data } = await getDatabaseByDomainId(domainId);
-  //   if (code === 200) {
-  //     form.setFieldsValue({ ...data });
-  //     setSelectedDbType(data?.type);
-  //     return;
-  //   }
-  //   message.error('数据库配置获取错误');
-  // };
+
+  const [testLoading, setTestLoading] = useState<boolean>(false);
 
   useEffect(() => {
     form.resetFields();
     form.setFieldsValue({ ...dataBaseConfig });
     setSelectedDbType(dataBaseConfig?.type);
   }, [dataBaseConfig]);
-
-  // useEffect(() => {
-  //   form.resetFields();
-  //   // queryDatabaseConfig();
-  // }, [domainId]);
 
   const getFormValidateFields = async () => {
     return await form.validateFields();
@@ -65,10 +53,12 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
   };
   const testDatabaseConnection = async () => {
     const values = await form.validateFields();
+    setTestLoading(true);
     const { code, data } = await testDatabaseConnect({
       ...values,
       domainId,
     });
+    setTestLoading(false);
     if (code === 200 && data) {
       message.success('连接测试通过');
       return;
@@ -138,7 +128,9 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
         <FormItem name="database" label="数据库名称">
           <Input placeholder="请输入数据库名称" />
         </FormItem>
-
+        <FormItem name="version" label="数据库版本">
+          <Input placeholder="请输入数据库版本" />
+        </FormItem>
         <FormItem name="description" label="描述">
           <TextArea placeholder="请输入数据库描述" style={{ height: 100 }} />
         </FormItem>
@@ -146,6 +138,7 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
           <Space>
             <Button
               type="primary"
+              loading={testLoading}
               onClick={() => {
                 testDatabaseConnection();
               }}

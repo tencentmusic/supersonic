@@ -1,28 +1,69 @@
-import { Modal, Card, Row, Col, Result, Button } from 'antd';
+import { Button, Drawer, Result, Modal, Card, Row, Col } from 'antd';
 import { ConsoleSqlOutlined, CoffeeOutlined } from '@ant-design/icons';
 import React, { useState, useEffect } from 'react';
-import { history, connect } from 'umi';
 import type { Dispatch } from 'umi';
+import { history, connect } from 'umi';
+import DataSourceCreateForm from '../Datasource/components/DataSourceCreateForm';
 import type { StateType } from '../model';
+import DataSource from '../Datasource';
+import { IDataSource } from '../data';
+
 const { Meta } = Card;
 type Props = {
   open: boolean;
-  domainManger: StateType;
-  onTypeChange: (type: 'fast' | 'normal') => void;
+  dataSourceItem: IDataSource.IDataSourceItem;
+  onTypeChange?: (type: 'fast' | 'normal') => void;
+  onSubmit?: () => void;
   onCancel?: () => void;
+  dispatch: Dispatch;
+  domainManger: StateType;
 };
 
 const ClassDataSourceTypeModal: React.FC<Props> = ({
   open,
   onTypeChange,
+  onSubmit,
+  dataSourceItem,
   domainManger,
   onCancel,
+  dispatch,
 }) => {
   const { selectDomainId, dataBaseConfig } = domainManger;
+  const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
+
+  const [dataSourceModalVisible, setDataSourceModalVisible] = useState(false);
+  const [fastModeSql, setFastModeSql] = useState<string>('');
+
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
+
   useEffect(() => {
-    setCreateDataSourceModalOpen(open);
-  }, [open]);
+    if (!dataSourceItem || !open) {
+      setCreateDataSourceModalOpen(open);
+      return;
+    }
+    if (dataSourceItem?.datasourceDetail?.queryType === 'table_query') {
+      setDataSourceModalVisible(true);
+    } else {
+      setCreateModalVisible(true);
+    }
+  }, [dataSourceItem, open]);
+
+  const queryDataBaseExcuteSql = (tableName: string) => {
+    const sql = `select * from ${tableName}`;
+    setFastModeSql(sql);
+
+    dispatch({
+      type: 'domainManger/queryDataBaseExcuteSql',
+      payload: {
+        sql,
+        domainId: selectDomainId,
+        tableName,
+      },
+    });
+  };
+  const handleCancel = () => {
+    onCancel?.();
+  };
 
   return (
     <>
@@ -30,7 +71,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
         open={createDataSourceModalOpen}
         onCancel={() => {
           setCreateDataSourceModalOpen(false);
-          onCancel?.();
+          handleCancel();
         }}
         footer={null}
         centered
@@ -43,8 +84,10 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
                 hoverable
                 style={{ height: 220 }}
                 onClick={() => {
-                  onTypeChange('fast');
+                  onTypeChange?.('fast');
                   setCreateDataSourceModalOpen(false);
+
+                  setDataSourceModalVisible(true);
                 }}
                 cover={
                   <CoffeeOutlined
@@ -59,8 +102,10 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
             <Col span={12}>
               <Card
                 onClick={() => {
-                  onTypeChange('normal');
+                  onTypeChange?.('normal');
                   setCreateDataSourceModalOpen(false);
+
+                  setCreateModalVisible(true);
                 }}
                 hoverable
                 style={{ height: 220 }}
@@ -93,10 +138,52 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
           />
         )}
       </Modal>
+
+      {dataSourceModalVisible && (
+        <DataSourceCreateForm
+          sql={fastModeSql}
+          basicInfoFormMode="fast"
+          domainId={Number(selectDomainId)}
+          dataSourceItem={dataSourceItem}
+          onCancel={() => {
+            setDataSourceModalVisible(false);
+            handleCancel();
+          }}
+          onDataBaseTableChange={(tableName: string) => {
+            queryDataBaseExcuteSql(tableName);
+          }}
+          onSubmit={() => {
+            setDataSourceModalVisible(false);
+            onSubmit?.();
+          }}
+          createModalVisible={dataSourceModalVisible}
+        />
+      )}
+      {createModalVisible && (
+        <Drawer
+          width={'100%'}
+          destroyOnClose
+          title="数据源编辑"
+          open={true}
+          onClose={() => {
+            setCreateModalVisible(false);
+            handleCancel();
+          }}
+          footer={null}
+        >
+          <DataSource
+            initialValues={dataSourceItem}
+            domainId={Number(selectDomainId)}
+            onSubmitSuccess={() => {
+              setCreateModalVisible(false);
+              onSubmit?.();
+            }}
+          />
+        </Drawer>
+      )}
     </>
   );
 };
-
 export default connect(({ domainManger }: { domainManger: StateType }) => ({
   domainManger,
 }))(ClassDataSourceTypeModal);

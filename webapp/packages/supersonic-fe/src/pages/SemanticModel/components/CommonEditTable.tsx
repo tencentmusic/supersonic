@@ -9,7 +9,7 @@ type Props = {
   title?: string;
   tableDataSource: any[];
   columnList: any[];
-  rowKey: string;
+  rowKey?: string;
   editableProTableProps?: any;
   onDataSourceChange?: (dataSource: any) => void;
   extenderCtrlColumn?: (text, record, _, action) => ReactNode[];
@@ -35,6 +35,7 @@ const CommonEditTable: React.FC<Props> = forwardRef(
     }: Props,
     ref: Ref<any>,
   ) => {
+    const defaultRowKey = rowKey || 'editRowId';
     const [dataSource, setDataSource] = useState<any[]>(tableDataSource);
     const actionRef = useRef<ActionType>();
 
@@ -50,7 +51,7 @@ const CommonEditTable: React.FC<Props> = forwardRef(
         tableDataSource.map((item: any) => {
           return {
             ...item,
-            editRowId: item[rowKey] || (Math.random() * 1000000).toFixed(0),
+            editRowId: item[defaultRowKey] || (Math.random() * 1000000).toFixed(0),
           };
         }),
       );
@@ -82,7 +83,9 @@ const CommonEditTable: React.FC<Props> = forwardRef(
               <a
                 key="deleteBtn"
                 onClick={() => {
-                  const data = [...dataSource].filter((item) => item[rowKey] !== record[rowKey]);
+                  const data = [...dataSource].filter(
+                    (item) => item[defaultRowKey] !== record[defaultRowKey],
+                  );
                   setDataSource(data);
                   handleDataSourceChange(data);
                 }}
@@ -111,7 +114,7 @@ const CommonEditTable: React.FC<Props> = forwardRef(
           key={title}
           actionRef={actionRef}
           headerTitle={title}
-          rowKey={'editRowId'}
+          rowKey={defaultRowKey}
           columns={columns}
           value={dataSource}
           tableAlertRender={() => {
@@ -133,9 +136,9 @@ const CommonEditTable: React.FC<Props> = forwardRef(
           }}
           editable={{
             onSave: (_, row) => {
-              const rowKeyValue = row[rowKey];
+              const rowKeyValue = row[defaultRowKey];
               const isSame = dataSource.filter((item: any, index: number) => {
-                return index !== row.index && item[rowKey] === rowKeyValue;
+                return index !== row.index && item[defaultRowKey] === rowKeyValue;
               });
               if (isSame[0]) {
                 message.error('存在重复值');
