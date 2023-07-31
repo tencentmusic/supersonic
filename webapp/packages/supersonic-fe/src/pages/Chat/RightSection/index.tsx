@@ -6,7 +6,7 @@ import type { MsgDataType } from 'supersonic-chat-sdk';
 import Domains from './Domains';
 import { ConversationDetailType, DomainType } from '../type';
 import DomainInfo from './Context/DomainInfo';
-import Conversation from './Conversation';
+import Conversation from '../Conversation';
 
 type Props = {
   domains: DomainType[];

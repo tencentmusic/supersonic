@@ -16,9 +16,9 @@
   .chatApp {
     display: flex;
     flex-direction: column;
-    width: calc(100vw - 225px);
+    width: calc(100vw - 260px);
     height: calc(100vh - 48px);
-    padding-left: 20px;
+    padding-left: 10px;
     color: rgba(0, 0, 0, 0.87);
 
     .emptyHolder {
@@ -230,6 +230,12 @@
     }
   }
 
+  &.conversationCollapsed {
+    .chatApp {
+      width: 100% !important;
+    }
+  }
+
   &.mobile {
     height: 100% !important;
 
@@ -243,7 +249,7 @@
     }
 
     .chatApp {
-      width: calc(100% - 225px) !important;
+      width: 100% !important;
       height: 100% !important;
       margin-top: 0 !important;
     }

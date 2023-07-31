@@ -4,7 +4,9 @@ import Message from './Message';
 import MetricCard from './MetricCard';
 import MetricTrend from './MetricTrend';
 import Table from './Table';
-import { MsgDataType } from '../../common/type';
+import { ColumnType, DrillDownDimensionType, MsgDataType } from '../../common/type';
+import { useState } from 'react';
+import { queryData } from '../../service';
 
 type Props = {
   question: string;
@@ -12,7 +14,6 @@ type Props = {
   data: MsgDataType;
   isMobileMode?: boolean;
   triggerResize?: boolean;
-  onCheckMetricInfo?: (data: any) => void;
 };
 
 const ChatMsg: React.FC<Props> = ({
@@ -21,48 +22,95 @@ const ChatMsg: React.FC<Props> = ({
   data,
   isMobileMode,
   triggerResize,
-  onCheckMetricInfo,
 }) => {
   const { queryColumns, queryResults, chatContext, entityInfo, queryMode } = data;
+
+  const [columns, setColumns] = useState<ColumnType[]>(queryColumns);
+  const [dataSource, setDataSource] = useState<any[]>(queryResults);
+
+  const [drillDownDimension, setDrillDownDimension] = useState<DrillDownDimensionType>();
+  const [loading, setLoading] = useState(false);
 
   if (!queryColumns || !queryResults) {
     return null;
   }
 
-  const singleData = queryResults.length === 1;
-  const dateField = queryColumns.find(item => item.showType === 'DATE' || item.type === 'DATE');
-  const categoryField = queryColumns.filter(item => item.showType === 'CATEGORY');
-  const metricFields = queryColumns.filter(item => item.showType === 'NUMBER');
+  const singleData = dataSource.length === 1;
+  const dateField = columns.find(item => item.showType === 'DATE' || item.type === 'DATE');
+  const categoryField = columns.filter(item => item.showType === 'CATEGORY');
+  const metricFields = columns.filter(item => item.showType === 'NUMBER');
+
+  const isMetricCard =
+    (queryMode === 'METRIC_DOMAIN' || queryMode === 'METRIC_FILTER') && singleData;
+
+  const onLoadData = async (value: any) => {
+    setLoading(true);
+    const { data } = await queryData({
+      ...chatContext,
+      ...value,
+    });
+    setLoading(false);
+    if (data.code === 200) {
+      setColumns(data.data?.queryColumns || []);
+      setDataSource(data.data?.queryResults || []);
+    }
+  };
+
+  const onSelectDimension = (dimension?: DrillDownDimensionType) => {
+    setDrillDownDimension(dimension);
+    onLoadData({
+      dimensions:
+        dimension === undefined ? undefined : [...(chatContext.dimensions || []), dimension],
+    });
+  };
 
   const getMsgContent = () => {
+    if (isMetricCard) {
+      return (
+        <MetricCard
+          data={{ ...data, queryColumns: columns, queryResults: dataSource }}
+          loading={loading}
+          drillDownDimension={drillDownDimension}
+          onSelectDimension={onSelectDimension}
+        />
+      );
+    }
     if (
       categoryField.length > 1 ||
       queryMode === 'ENTITY_DETAIL' ||
       queryMode === 'ENTITY_DIMENSION' ||
       (categoryField.length === 1 && metricFields.length === 0)
     ) {
-      return <Table data={data} />;
+      return <Table data={{ ...data, queryColumns: columns, queryResults: dataSource }} />;
     }
     if (dateField && metricFields.length > 0) {
-      return (
-        <MetricTrend
-          data={data}
-          triggerResize={triggerResize}
-          onCheckMetricInfo={onCheckMetricInfo}
-        />
-      );
+      if (!dataSource.every(item => item[dateField.nameEn] === dataSource[0][dateField.nameEn])) {
+        return (
+          <MetricTrend
+            data={{ ...data, queryColumns: columns, queryResults: dataSource }}
+            triggerResize={triggerResize}
+          />
+        );
+      }
     }
-    if (singleData) {
-      return <MetricCard data={data} />;
-    }
-    return <Bar data={data} triggerResize={triggerResize} />;
+    return (
+      <Bar
+        data={{ ...data, queryColumns: columns, queryResults: dataSource }}
+        triggerResize={triggerResize}
+        loading={loading}
+        drillDownDimension={drillDownDimension}
+        onSelectDimension={onSelectDimension}
+      />
+    );
   };
 
   let width = '100%';
-  if (categoryField.length > 1 && !isMobile && !isMobileMode) {
-    if (queryColumns.length === 1) {
+  if (isMetricCard) {
+    width = '370px';
+  } else if (categoryField.length > 1 && !isMobile && !isMobileMode) {
+    if (columns.length === 1) {
       width = '600px';
-    } else if (queryColumns.length === 2) {
+    } else if (columns.length === 2) {
       width = '1000px';
     }
   }

@@ -1,0 +1,33 @@
+@import '../../../styles/index.less';
+
+@filter-section-prefix-cls: ~'@{supersonic-chat-prefix}-filter-section';
+
+.@{filter-section-prefix-cls} {
+  display: flex;
+  align-items: center;
+  color: var(--text-color-secondary);
+  font-weight: normal;
+  font-size: 13px;
+
+  &-filter-values {
+    display: flex;
+    align-items: center;
+    column-gap: 6px;
+  }
+
+  &-filter-item {
+    padding: 2px 12px;
+    color: var(--text-color-third);
+    background-color: #edf2f2;
+    border-radius: 13px;
+    max-width: 200px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  &-filter-value {
+    color: var(--text-color);
+    font-weight: 500;
+  }
+}

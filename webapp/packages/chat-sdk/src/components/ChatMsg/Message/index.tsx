@@ -65,7 +65,14 @@ const Message: React.FC<Props> = ({
 
   return (
     <div className={prefixCls}>
-      {domainName && <div className={`${prefixCls}-domain-name`}>{domainName}</div>}
+      <div className={`${prefixCls}-title-bar`}>
+        {domainName && <div className={`${prefixCls}-domain-name`}>{domainName}</div>}
+        {position === 'left' && leftTitle && (
+          <div className={`${prefixCls}-top-bar`} title={leftTitle}>
+            ({leftTitle})
+          </div>
+        )}
+      </div>
       <div className={`${prefixCls}-content`}>
         <div className={`${prefixCls}-body`}>
           <div
@@ -75,14 +82,9 @@ const Message: React.FC<Props> = ({
               e.stopPropagation();
             }}
           >
-            {position === 'left' && title && (
-              <div className={`${prefixCls}-top-bar`} title={leftTitle}>
-                {leftTitle}
-              </div>
-            )}
-            {(entityInfoList.length > 0 || hasFilterSection) && (
+            {entityInfoList.length > 0 && (
               <div className={`${prefixCls}-info-bar`}>
-                {filterSection}
+                {/* {filterSection} */}
                 {entityInfoList.length > 0 && (
                   <div className={`${prefixCls}-main-entity-info`}>
                     {entityInfoList.slice(0, 4).map(dimension => {

@@ -80,9 +80,21 @@ export type InstructionResonseType = {
   name: string;
 }
 
+export type MetricInfoType = {
+  date: string;
+  name: string;
+  statistics: any;
+  value: string;
+}
+
+export type AggregateInfoType = {
+  metricInfos: MetricInfoType[]
+}
+
 export type MsgDataType = {
   id: number;
   question: string;
+  aggregateInfo: AggregateInfoType;
   chatContext: ChatContextType;
   entityInfo: EntityInfoType;
   queryAuthorization: any;
@@ -90,7 +102,7 @@ export type MsgDataType = {
   queryResults: any[];
   queryId: number;
   queryMode: string;
-  queryState: MsgValidTypeEnum;
+  queryState: string;
   response: InstructionResonseType;
 };
 
@@ -147,7 +159,7 @@ export type SuggestionDataType = {
 export type HistoryMsgItemType = {
   questionId: number;
   queryText: string;
-  queryResponse: MsgDataType;
+  queryResult: MsgDataType;
   chatId: number;
   createTime: string;
   feedback: string;
@@ -158,3 +170,10 @@ export type HistoryType = {
   hasNextPage: boolean;
   list: HistoryMsgItemType[];
 };
+
+export type DrillDownDimensionType = {
+  id: number;
+  domain: number;
+  name: string;
+  bizName: string;
+}
