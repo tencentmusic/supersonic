@@ -1,2 +1,2 @@
-com.tencent.supersonic.knowledge.domain.FileHandler=\
-    com.tencent.supersonic.knowledge.domain.LocalFileHandler
+com.tencent.supersonic.knowledge.dictionary.FileHandler=\
+    com.tencent.supersonic.knowledge.dictionary.LocalFileHandler

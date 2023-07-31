@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_config` (
                                                 `domain_id` INT DEFAULT NULL ,
                                                 `chat_detail_config` varchar(655) ,
     `chat_agg_config` varchar(655)    ,
+    `recommended_questions`  varchar(1500)    ,
     `created_at` TIMESTAMP  NOT NULL   ,
     `updated_at` TIMESTAMP  NOT NULL   ,
     `created_by` varchar(100) NOT NULL   ,
@@ -117,6 +118,7 @@ CREATE TABLE IF NOT EXISTS `s2_domain` (
     `is_open` TINYINT DEFAULT NULL  , -- whether the domain is public
     `viewer` varchar(3000) DEFAULT NULL  , -- domain available users
     `view_org` varchar(3000) DEFAULT NULL  , -- domain available organization
+    `entity` varchar(500) DEFAULT NULL  , -- domain entity info
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_domain IS 'domain basic information';
@@ -127,6 +129,7 @@ CREATE TABLE `s2_database` (
                                `domain_id` INT NOT  NULL ,
                                `name` varchar(255) NOT  NULL ,
                                `description` varchar(500) DEFAULT  NULL ,
+                               `version` varchar(64) DEFAULT  NULL ,
                                `type` varchar(20) NOT  NULL , -- type: mysql,clickhouse,tdw
                                `config` varchar(655) NOT  NULL ,
                                `created_at` TIMESTAMP NOT  NULL ,
@@ -201,6 +204,7 @@ CREATE TABLE IF NOT EXISTS `s2_dimension` (
     `semantic_type` varchar(20)  NOT NULL,  -- semantic type: DATE, ID, CATEGORY
     `alias` varchar(500) DEFAULT NULL,
     `default_values` varchar(500) DEFAULT NULL,
+    `dim_value_maps` varchar(500) DEFAULT NULL,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_dimension IS 'dimension information table';
@@ -308,6 +312,23 @@ CREATE TABLE IF NOT EXISTS `s2_available_date_info` (
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_dimension IS 'dimension information table';
+
+
+CREATE TABLE IF NOT EXISTS `s2_plugin`
+(
+    `id`         INT AUTO_INCREMENT,
+    `type`      varchar(50)   NULL,
+    `domain`     varchar(100)  NULL,
+    `pattern`    varchar(500)  NULL,
+    `parse_mode` varchar(100)  NULL,
+    `name`       varchar(100)  NULL,
+    `created_at` TIMESTAMP   NULL,
+    `created_by` varchar(100) null,
+    `updated_at` TIMESTAMP    NULL,
+    `updated_by` varchar(100) NULL,
+    `config`     LONGVARCHAR  NULL,
+    PRIMARY KEY (`id`)
+); COMMENT ON TABLE s2_plugin IS 'plugin information table';
 
 
 -------demo for semantic and chat

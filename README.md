@@ -2,10 +2,9 @@ English | [中文](README_CN.md)
 
 # SuperSonic (超音数)
 
-**SuperSonic is an out-of-the-box yet highly extensible framework for building a data chatbot**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to define logical semantic models (metrics, dimensions, relationships, etc) on top of physical data models, and no data modification or copying is required. Meanwhile SuperSonic is designed to be plugable, allowing new functionalities to be added through plugins and core components to be integrated into other systems.
+**SuperSonic is an out-of-the-box yet highly extensible framework for building a data chatbot**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to define logical semantic models (metrics, dimensions, aliases, relationships, etc) on top of physical data models, and no data modification or copying is required. Meanwhile SuperSonic is designed to be plugable, allowing new functionalities to be added through plugins and core components to be integrated into other systems.
 
-
-<img src="./docs/images/supersonic_demo.gif" align="center"/>
+<img src="./docs/images/supersonic_demo.gif" height="70%" width="70%" align="center"/>
 
 ## Motivation
 
@@ -13,9 +12,9 @@ The emergence of Large Language Models (LLMs) like ChatGPT is reshaping the way 
 
 From our perspective, the key to filling the real-world gap lies in two aspects: 
 1. Utilize a combination of rule-based and model-based semantic parsers to deal with different scenarios
-2. Introduce a semantic model layer to encapsulate underlying complexity thus simplify the semantic parsers
+2. Introduce a semantic model layer to encapsulate underlying complexity thus simplify the semantic parsers
 
-With these ideas in mind, we developed SuperSonic as a reference implementation and used it to power our real-world products. Additionally, to encourage further development of data chatbots, we decided to open source SuperSonic as an extensible framework.
+With these ideas in mind, we developed SuperSonic as a practical reference implementation and used it to power our real-world products. Additionally, to encourage further development of data chatbots, we decided to open source SuperSonic as an extensible framework.
 
 ## Out-of-the-box Features
 
@@ -29,9 +28,7 @@ With these ideas in mind, we developed SuperSonic as a reference implementation 
 
 SuperSonic is composed of two layers: supersonic-chat and supersonic-semantic. The chat layer is responsible for converting **natural language query** into semantic query (also known as DSL query), whereas the semantic layer is responsible for converting DSL query into **SQL query**. The high-level architecture and main process flow is shown in below diagram:
 
-
-<img src="./docs/images/supersonic_components.png" height="80%" width="80%" align="center"/> 
-
+<img src="./docs/images/supersonic_components.png" height="70%" width="70%" align="center"/> 
 
 ### Chat Layer
 
@@ -67,4 +64,12 @@ SuperSonic comes with sample semantic models as well as chat conversations that 
 
 ## How to Build
 
-Pull the source code and run script "assembly/bin/build-standalone.sh" to build packages in the standalone mode.
+SuperSonic can be deployed in two modes: standalone (intended for quick demo) and distributed (intended for production). 
+
+### Build for Standalone Mode 
+ 
+Pull the source code and run script "assembly/bin/build-standalone.sh" to build a single packages.
+
+### Build for Distributed Mode 
+
+Pull the source code and run scripts "assembly/bin/build-chat.sh" and "assembly/bin/build-semantic.sh" separately to build packages.

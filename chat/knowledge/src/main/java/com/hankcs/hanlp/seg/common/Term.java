@@ -3,7 +3,7 @@ package com.hankcs.hanlp.seg.common;
 import com.hankcs.hanlp.corpus.tag.Nature;
 import com.hankcs.hanlp.dictionary.CoreDictionary;
 import com.hankcs.hanlp.dictionary.CustomDictionary;
-import com.tencent.supersonic.knowledge.infrastructure.nlp.HanlpHelper;
+import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import lombok.Data;
 import lombok.ToString;
 

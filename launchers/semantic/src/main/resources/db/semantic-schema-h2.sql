@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS `s2_domain` (
     `is_open` TINYINT DEFAULT NULL  , -- whether the domain is public
     `viewer` varchar(3000) DEFAULT NULL  , -- domain available users
     `view_org` varchar(3000) DEFAULT NULL  , -- domain available organization
+    `entity` varchar(500) DEFAULT NULL  , -- domain entity info
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_domain IS 'domain basic information';
@@ -24,6 +25,7 @@ CREATE TABLE `s2_database` (
     `domain_id` INT NOT  NULL ,
     `name` varchar(255) NOT  NULL ,
     `description` varchar(500) DEFAULT  NULL ,
+    `version` varchar(64) DEFAULT  NULL ,
     `type` varchar(20) NOT  NULL , -- type: mysql,clickhouse,tdw
     `config` varchar(655) NOT  NULL ,
     `created_at` TIMESTAMP NOT  NULL ,
@@ -109,6 +111,7 @@ CREATE TABLE IF NOT EXISTS `s2_dimension` (
     `semantic_type` varchar(20)  NOT NULL,  -- semantic type: DATE, ID, CATEGORY
     `alias` varchar(500) DEFAULT NULL,
     `default_values` varchar(500) DEFAULT NULL,
+    `dim_value_maps` varchar(500) DEFAULT NULL,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_dimension IS 'dimension information table';

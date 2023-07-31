@@ -1,15 +1,18 @@
 package com.tencent.supersonic.chat.rest;
 
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.chat.api.request.QueryContextReq;
-import com.tencent.supersonic.chat.domain.service.RecommendService;
+import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
+import com.tencent.supersonic.chat.api.pojo.response.RecommendQuestion;
+import com.tencent.supersonic.chat.api.pojo.response.RecommendResponse;
+import com.tencent.supersonic.chat.service.RecommendService;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * recommend controller
@@ -22,11 +25,31 @@ public class RecommendController {
     private RecommendService recommendService;
 
     @GetMapping("recommend/{domainId}")
-    public Object recommend(@PathVariable("domainId") Integer domainId, HttpServletRequest request,
-            HttpServletResponse response) {
-        QueryContextReq queryCtx = new QueryContextReq();
+    public RecommendResponse recommend(@PathVariable("domainId") Long domainId,
+                                       @RequestParam(value = "limit", required = false) Long limit,
+                                       HttpServletRequest request,
+                                       HttpServletResponse response) {
+        QueryRequest queryCtx = new QueryRequest();
         queryCtx.setUser(UserHolder.findUser(request, response));
         queryCtx.setDomainId(domainId);
-        return recommendService.recommend(queryCtx);
+        return recommendService.recommend(queryCtx, limit);
+    }
+
+    @GetMapping("recommend/metric/{domainId}")
+    public RecommendResponse recommendMetricMode(@PathVariable("domainId") Long domainId,
+                                                 @RequestParam(value = "limit", required = false) Long limit,
+                                                 HttpServletRequest request,
+                                                 HttpServletResponse response) {
+        QueryRequest queryCtx = new QueryRequest();
+        queryCtx.setUser(UserHolder.findUser(request, response));
+        queryCtx.setDomainId(domainId);
+        return recommendService.recommendMetricMode(queryCtx, limit);
+    }
+
+    @GetMapping("recommend/question")
+    public List<RecommendQuestion> recommendQuestion(@RequestParam(value = "domainId", required = false) Long domainId,
+                                                     HttpServletRequest request,
+                                                     HttpServletResponse response) {
+        return recommendService.recommendQuestion(domainId);
     }
 }

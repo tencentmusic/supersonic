@@ -1,35 +1,56 @@
 package com.tencent.supersonic.util;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.Filter;
-import com.tencent.supersonic.chat.api.request.QueryContextReq;
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
+import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 
 import java.util.Set;
 
 public class DataUtils {
 
-    public static QueryContextReq getQueryContextReq(Integer id,String query) {
-        QueryContextReq queryContextReq = new QueryContextReq();
+    public static QueryRequest getQueryContextReq(Integer id, String query) {
+        QueryRequest queryContextReq = new QueryRequest();
         queryContextReq.setQueryText(query);//"alice的访问次数"
         queryContextReq.setChatId(id);
         queryContextReq.setUser(new User(1L, "admin", "admin", "admin@email"));
         return queryContextReq;
     }
 
-    public static SchemaItem getSchemaItem(Long id, String name, String bizName) {
-        SchemaItem schemaItem = new SchemaItem();
-        schemaItem.setId(id);
-        schemaItem.setName(name);
-        schemaItem.setBizName(bizName);
-        return schemaItem;
+    public static SchemaElement getSchemaElement(String name) {
+        return SchemaElement.builder()
+                .name(name)
+                .build();
     }
 
-    public static Filter getFilter(String bizName, FilterOperatorEnum filterOperatorEnum, Object value, String name,
-                                   Long elementId) {
-        Filter filter = new Filter();
+    public static SchemaElement getMetric(Long domainId, Long id, String name, String bizName) {
+        return SchemaElement.builder()
+                .domain(domainId)
+                .id(id)
+                .name(name)
+                .bizName(bizName)
+                .useCnt(0L)
+                .type(SchemaElementType.METRIC)
+                .build();
+    }
+
+    public static SchemaElement getDimension(Long domainId, Long id, String name, String bizName) {
+        return SchemaElement.builder()
+                .domain(domainId)
+                .id(id)
+                .name(name)
+                .bizName(bizName)
+                .useCnt(null)
+                .type(SchemaElementType.DIMENSION)
+                .build();
+    }
+
+    public static QueryFilter getFilter(String bizName, FilterOperatorEnum filterOperatorEnum, Object value, String name,
+                                        Long elementId) {
+        QueryFilter filter = new QueryFilter();
         filter.setBizName(bizName);
         filter.setOperator(filterOperatorEnum);
         filter.setValue(value);
@@ -46,6 +67,13 @@ public class DataUtils {
         return dateInfo;
     }
 
+    public static DateConf getDateConf(DateConf.DateMode dateMode, String startDate, String endDate) {
+        DateConf dateInfo = new DateConf();
+        dateInfo.setDateMode(dateMode);
+        dateInfo.setStartDate(startDate);
+        dateInfo.setEndDate(endDate);
+        return dateInfo;
+    }
 
     public static Boolean compareDate(DateConf dateInfo1, DateConf dateInfo2) {
         Boolean timeFilterExist = dateInfo1.getUnit().equals(dateInfo2.getUnit()) &&
@@ -54,23 +82,11 @@ public class DataUtils {
         return timeFilterExist;
     }
 
-    public static Boolean compareSchemaItem(Set<SchemaItem> metrics, SchemaItem schemaItemMetric) {
-        Boolean metricExist = false;
-        for (SchemaItem schemaItem : metrics) {
-            if(schemaItem.getBizName().equals(schemaItemMetric.getBizName()))
-            if (schemaItem.getId()!=null&&schemaItem.getId().equals(schemaItemMetric.getId()) &&
-                    schemaItem.getName()!=null&&schemaItem.getName().equals(schemaItemMetric.getName()) ) {
-                metricExist = true;
-            }
-        }
-        return metricExist;
-    }
-
-    public static Boolean compareDateDimension(Set<SchemaItem> dimensions) {
-        SchemaItem schemaItemDimension = new SchemaItem();
+    public static Boolean compareDateDimension(Set<SchemaElement> dimensions) {
+        SchemaElement schemaItemDimension = new SchemaElement();
         schemaItemDimension.setBizName("sys_imp_date");
         Boolean dimensionExist = false;
-        for (SchemaItem schemaItem : dimensions) {
+        for (SchemaElement schemaItem : dimensions) {
             if (schemaItem.getBizName().equals(schemaItemDimension.getBizName())) {
                 dimensionExist = true;
             }
@@ -78,9 +94,9 @@ public class DataUtils {
         return dimensionExist;
     }
 
-    public static Boolean compareDimensionFilter(Set<Filter> dimensionFilters, Filter dimensionFilter) {
+    public static Boolean compareDimensionFilter(Set<QueryFilter> dimensionFilters, QueryFilter dimensionFilter) {
         Boolean dimensionFilterExist = false;
-        for (Filter filter : dimensionFilters) {
+        for (QueryFilter filter : dimensionFilters) {
             if (filter.getBizName().equals(dimensionFilter.getBizName()) &&
                     filter.getOperator().equals(dimensionFilter.getOperator()) &&
                     filter.getValue().toString().equals(dimensionFilter.getValue().toString()) &&

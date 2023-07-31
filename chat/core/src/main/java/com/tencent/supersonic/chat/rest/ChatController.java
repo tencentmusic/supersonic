@@ -3,10 +3,10 @@ package com.tencent.supersonic.chat.rest;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.chat.domain.dataobject.ChatDO;
-import com.tencent.supersonic.chat.domain.pojo.chat.ChatQueryVO;
-import com.tencent.supersonic.chat.domain.pojo.chat.PageQueryInfoReq;
-import com.tencent.supersonic.chat.domain.service.ChatService;
+import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResponse;
+import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
+import com.tencent.supersonic.chat.service.ChatService;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,13 +68,12 @@ public class ChatController {
     }
 
     @PostMapping("/pageQueryInfo")
-    public PageInfo<ChatQueryVO> pageQueryInfo(@RequestBody PageQueryInfoReq pageQueryInfoCommend,
-            @RequestParam(value = "chatId") long chatId,
-            HttpServletRequest request,
-            HttpServletResponse response) {
-        pageQueryInfoCommend.setUserName(UserHolder.findUser(request, response).getName());
-        return chatService.queryInfo(pageQueryInfoCommend, chatId);
+    public PageInfo<QueryResponse> pageQueryInfo(@RequestBody PageQueryInfoReq pageQueryInfoCommand,
+                                                 @RequestParam(value = "chatId") long chatId,
+                                                 HttpServletRequest request,
+                                                 HttpServletResponse response) {
+        pageQueryInfoCommand.setUserName(UserHolder.findUser(request, response).getName());
+        return chatService.queryInfo(pageQueryInfoCommand, chatId);
     }
-
 
 }

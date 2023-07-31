@@ -2,10 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.tencent.supersonic.knowledge.infrastructure.custom.DictTaskMapper">
+<mapper namespace="com.tencent.supersonic.knowledge.persistence.mapper.DictTaskMapper">
 
     <resultMap id="DimValueDictTaskPO"
-               type="com.tencent.supersonic.knowledge.domain.dataobject.DimValueDictTaskPO">
+               type="com.tencent.supersonic.knowledge.persistence.dataobject.DictTaskDO">
         <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="description" property="description"/>

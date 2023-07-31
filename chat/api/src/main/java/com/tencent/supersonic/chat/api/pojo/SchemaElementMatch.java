@@ -13,15 +13,9 @@ import lombok.ToString;
 @NoArgsConstructor
 public class SchemaElementMatch {
 
-    SchemaElementType elementType;
-
-    int elementID;
-
+    SchemaElement element;
     double similarity;
-
     String detectWord;
-
     String word;
-
     Long frequency;
 }

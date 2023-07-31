@@ -2,10 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.tencent.supersonic.semantic.query.infrastructure.mapper.StatMapper">
+<mapper namespace="com.tencent.supersonic.semantic.query.persistence.mapper.StatMapper">
 
     <resultMap id="QueryStatDO"
-               type="com.tencent.supersonic.semantic.api.core.pojo.QueryStat">
+               type="com.tencent.supersonic.semantic.api.model.pojo.QueryStat">
         <id column="id" property="id"/>
         <result column="trace_id" property="traceId"/>
         <result column="domain_id" property="domainId"/>
@@ -54,7 +54,7 @@
     </insert>
 
     <select id="getStatInfo"
-            resultType="com.tencent.supersonic.semantic.api.core.pojo.QueryStat">
+            resultType="com.tencent.supersonic.semantic.api.model.pojo.QueryStat">
         select *
         from s2_query_stat_info
         <where>

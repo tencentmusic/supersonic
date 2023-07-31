@@ -4,18 +4,14 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
-import com.tencent.supersonic.chat.domain.utils.ComponentFactory;
-import com.tencent.supersonic.semantic.api.core.request.PageDimensionReq;
-import com.tencent.supersonic.semantic.api.core.request.PageMetricReq;
-import com.tencent.supersonic.semantic.api.core.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.core.response.DomainResp;
-import com.tencent.supersonic.semantic.api.core.response.MetricResp;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigBaseReq;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigEditReqReq;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigFilter;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigResp;
-import com.tencent.supersonic.chat.domain.pojo.config.ChatConfigRichResp;
-import com.tencent.supersonic.chat.domain.service.ConfigService;
+import com.tencent.supersonic.chat.config.*;
+import com.tencent.supersonic.chat.utils.ComponentFactory;
+import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
+import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.chat.service.ConfigService;
 
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -69,12 +65,12 @@ public class ChatConfigController {
 
 
     @GetMapping("/richDesc/{domainId}")
-    public ChatConfigRichResp getDomainExtendRichInfo(@PathVariable("domainId") Long domainId) {
+    public ChatConfigRich getDomainExtendRichInfo(@PathVariable("domainId") Long domainId) {
         return configService.getConfigRichInfo(domainId);
     }
 
     @GetMapping("/richDesc/all")
-    public List<ChatConfigRichResp> getAllChatRichConfig() {
+    public List<ChatConfigRich> getAllChatRichConfig() {
         return configService.getAllChatRichConfig();
     }
 
@@ -88,27 +84,25 @@ public class ChatConfigController {
     public List<DomainResp> getDomainList() {
 
         return semanticLayer.getDomainListForAdmin();
-        //return defaultSemanticUtils.getDomainListForAdmin();
     }
 
     @GetMapping("/domainList/view")
     public List<DomainResp> getDomainListForViewer() {
         return semanticLayer.getDomainListForViewer();
-        //return defaultSemanticUtils.getDomainListForViewer();
     }
 
     @PostMapping("/dimension/page")
-    public PageInfo<DimensionResp> queryDimension(@RequestBody PageDimensionReq pageDimensionCmd,
-            HttpServletRequest request,
-            HttpServletResponse response) {
-        return semanticLayer.queryDimensionPage(pageDimensionCmd);
+    public PageInfo<DimensionResp> getDimension(@RequestBody PageDimensionReq pageDimensionCmd,
+                                                HttpServletRequest request,
+                                                HttpServletResponse response) {
+        return semanticLayer.getDimensionPage(pageDimensionCmd);
     }
 
     @PostMapping("/metric/page")
-    public PageInfo<MetricResp> queryMetric(@RequestBody PageMetricReq pageMetrricCmd,
-            HttpServletRequest request,
-            HttpServletResponse response) {
-        return semanticLayer.queryMetricPage(pageMetrricCmd);
+    public PageInfo<MetricResp> getMetric(@RequestBody PageMetricReq pageMetrricCmd,
+                                          HttpServletRequest request,
+                                          HttpServletResponse response) {
+        return semanticLayer.getMetricPage(pageMetrricCmd);
     }
 
 

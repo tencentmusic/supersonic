@@ -2,10 +2,15 @@ package com.tencent.supersonic.chat.api.component;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.semantic.api.core.request.PageDimensionReq;
-import com.tencent.supersonic.semantic.api.core.request.PageMetricReq;
-import com.tencent.supersonic.semantic.api.core.response.*;
-import com.tencent.supersonic.semantic.api.query.request.QuerySqlReq;
+import com.tencent.supersonic.chat.api.pojo.DomainSchema;
+import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
+import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 
 import java.util.List;
@@ -25,27 +30,16 @@ import java.util.List;
 public interface SemanticLayer {
 
     QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user);
+    QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user);
+    QueryResultWithSchemaResp queryByDsl(QueryDslReq queryDslReq, User user);
 
-    QueryResultWithSchemaResp queryBySql(QuerySqlReq querySqlReq, User user);
-
-    DomainSchemaResp getDomainSchemaInfo(Long domain, Boolean cacheEnable);
-
-    List<DomainSchemaResp> getDomainSchemaInfo(List<Long> ids);
+    List<DomainSchema> getDomainSchema();
+    List<DomainSchema> getDomainSchema(List<Long> ids);
+    DomainSchema getDomainSchema(Long domain, Boolean cacheEnable);
+    PageInfo<DimensionResp> getDimensionPage(PageDimensionReq pageDimensionCmd);
+    PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricCmd);
 
     List<DomainResp> getDomainListForViewer();
-
     List<DomainResp> getDomainListForAdmin();
-
-    PageInfo<DimensionResp> queryDimensionPage(PageDimensionReq pageDimensionCmd);
-
-    PageInfo<MetricResp> queryMetricPage(PageMetricReq pageMetricCmd);
-
-//    PageInfo<MetricResp> queryMetricPage(PageMetricReq pageMetricCmd);
-//
-//    PageInfo<DimensionResp> queryDimensionPage(PageDimensionReq pageDimensionCmd);
-//
-//    List<DomainResp> getDomainListForAdmin();
-//
-//    List<DomainResp> getDomainListForViewer();
 
 }

@@ -2,10 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.tencent.supersonic.knowledge.infrastructure.custom.DictConfMapper">
+<mapper namespace="com.tencent.supersonic.knowledge.persistence.mapper.DictConfMapper">
 
     <resultMap id="DictConfPO"
-               type="com.tencent.supersonic.knowledge.domain.dataobject.DictConfPO">
+               type="com.tencent.supersonic.knowledge.persistence.dataobject.DictConfDO">
         <id column="id" property="id"/>
         <result column="domain_id" property="domainId"/>
         <result column="dim_value_infos" property="dimValueInfos"/>
