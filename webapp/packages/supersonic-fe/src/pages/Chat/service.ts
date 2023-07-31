@@ -30,3 +30,24 @@ export function getDomainList() {
     skipErrorHandler: true,
   });
 }
+
+export function updateQAFeedback(questionId: number, score: number) {
+  return request<Result<any>>(
+    `${prefix}/chat/manage/updateQAFeedback?id=${questionId}&score=${score}&feedback=`,
+    {
+      method: 'POST',
+    },
+  );
+}
+
+export function querySuggestion(domainId: number) {
+  return request<Result<any>>(`${prefix}/chat/recommend/${domainId}`, {
+    method: 'GET',
+  });
+}
+
+export function queryRecommendQuestions() {
+  return request<Result<any>>(`${prefix}/chat/recommend/question`, {
+    method: 'GET',
+  });
+}

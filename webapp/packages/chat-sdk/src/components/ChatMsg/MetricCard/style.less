@@ -3,34 +3,78 @@
 @metric-card-prefix-cls: ~'@{supersonic-chat-prefix}-metric-card';
 
 .@{metric-card-prefix-cls} {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   width: 100%;
-  height: 150px;
+  height: 130px;
   row-gap: 4px;
+
+  &-indicator-name {
+    font-size: 14px;
+    color: var(--text-color);
+    font-weight: 500;
+    margin-top: 2px;
+  }
 
   &-indicator {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  &-indicator-period-compare {
     align-items: flex-start;
-    justify-content: center;
   }
 
   &-date-range {
     color: var(--text-color-fourth);
-    font-size: 14px;
+    font-size: 12px;
+    margin-top: 8px;
   }
 
   &-indicator-value {
     color: var(--text-color);
-    font-weight: 600;
-    font-size: 30px;
+    font-weight: 700;
+    font-size: 40px;
+    color: var(--chat-blue);
   }
 
-  &-indicator-name {
+  &-period-compare {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    column-gap: 40px;
+    font-size: 13px;
+    overflow-x: auto;
+  }
+
+  &-period-compare-item {
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+  }
+
+  &-period-compare-item-title {
     color: var(--text-color-fourth);
-    font-size: 14px;
+  }
+
+  &-period-compare-item-value {
+    display: flex;
+    align-items: center;
+    column-gap: 4px;
+    font-weight: 500;
+  }
+
+  &-period-compare-item-value-up {
+    color: rgb(252, 103, 114);
+  }
+
+  &-period-compare-item-value-down {
+    color: rgb(45, 202, 147);
+  }
+
+  &-drill-down-dimensions {
+    position: absolute;
+    bottom: -38px;
+    left: 0;
   }
 }

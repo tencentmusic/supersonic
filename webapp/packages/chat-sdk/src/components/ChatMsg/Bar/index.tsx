@@ -1,22 +1,38 @@
 import { CHART_BLUE_COLOR, CHART_SECONDARY_COLOR, PREFIX_CLS } from '../../../common/constants';
-import { MsgDataType } from '../../../common/type';
+import { DrillDownDimensionType, MsgDataType } from '../../../common/type';
 import { getChartLightenColor, getFormattedValue } from '../../../utils/utils';
 import type { ECharts } from 'echarts';
 import * as echarts from 'echarts';
 import React, { useEffect, useRef, useState } from 'react';
 import NoPermissionChart from '../NoPermissionChart';
+import DrillDownDimensions from '../../DrillDownDimensions';
+import { Spin } from 'antd';
+import FilterSection from '../FilterSection';
 
 type Props = {
   data: MsgDataType;
   triggerResize?: boolean;
+  drillDownDimension?: DrillDownDimensionType;
+  loading: boolean;
+  onSelectDimension: (dimension?: DrillDownDimensionType) => void;
   onApplyAuth?: (domain: string) => void;
 };
 
-const BarChart: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
+const BarChart: React.FC<Props> = ({
+  data,
+  triggerResize,
+  drillDownDimension,
+  loading,
+  onSelectDimension,
+  onApplyAuth,
+}) => {
   const chartRef = useRef<any>();
   const [instance, setInstance] = useState<ECharts>();
 
-  const { queryColumns, queryResults, entityInfo } = data;
+  const { queryColumns, queryResults, entityInfo, chatContext, queryMode } = data;
+
+  const { dateInfo } = chatContext || {};
+
   const categoryColumnName =
     queryColumns?.find(column => column.showType === 'CATEGORY')?.nameEn || '';
   const metricColumn = queryColumns?.find(column => column.showType === 'NUMBER');
@@ -35,13 +51,13 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
     );
     const xData = data.map(item => item[categoryColumnName]);
     instanceObj.setOption({
-      legend: {
-        left: 0,
-        top: 0,
-        icon: 'rect',
-        itemWidth: 15,
-        itemHeight: 5,
-      },
+      // legend: {
+      //   left: 0,
+      //   top: 0,
+      //   icon: 'rect',
+      //   itemWidth: 15,
+      //   itemHeight: 5,
+      // },
       xAxis: {
         type: 'category',
         axisTick: {
@@ -99,7 +115,7 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
         left: '2%',
         right: '1%',
         bottom: '3%',
-        top: 50,
+        top: 20,
         containLabel: true,
       },
       series: {
@@ -150,7 +166,30 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
     );
   }
 
-  return <div className={`${PREFIX_CLS}-bar`} ref={chartRef} />;
+  return (
+    <div>
+      <div className={`${PREFIX_CLS}-bar-metric-name`}>{metricColumn?.name}</div>
+      <FilterSection chatContext={chatContext} />
+      {dateInfo && (
+        <div className={`${PREFIX_CLS}-bar-date-range`}>
+          {dateInfo.startDate === dateInfo.endDate
+            ? dateInfo.startDate
+            : `${dateInfo.startDate} ~ ${dateInfo.endDate}`}
+        </div>
+      )}
+      <Spin spinning={loading}>
+        <div className={`${PREFIX_CLS}-bar-chart`} ref={chartRef} />
+      </Spin>
+      {(queryMode === 'METRIC_DOMAIN' || queryMode === 'METRIC_FILTER') && (
+        <DrillDownDimensions
+          domainId={chatContext.domainId}
+          drillDownDimension={drillDownDimension}
+          dimensionFilters={chatContext.dimensionFilters}
+          onSelectDimension={onSelectDimension}
+        />
+      )}
+    </div>
+  );
 };
 
 export default BarChart;

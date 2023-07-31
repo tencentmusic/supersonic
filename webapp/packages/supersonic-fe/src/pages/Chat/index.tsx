@@ -15,6 +15,7 @@ import { HistoryMsgItemType, MsgDataType, getHistoryMsg } from 'supersonic-chat-
 import 'supersonic-chat-sdk/dist/index.css';
 import { setToken as setChatSdkToken } from 'supersonic-chat-sdk';
 import { TOKEN_KEY } from '@/services/request';
+import Conversation from './Conversation';
 
 type Props = {
   isCopilotMode?: boolean;
@@ -35,6 +36,7 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
   const [miniProgramLoading, setMiniProgramLoading] = useState(false);
   const [domains, setDomains] = useState<DomainType[]>([]);
   const [currentDomain, setCurrentDomain] = useState<DomainType>();
+  const [conversationCollapsed, setConversationCollapsed] = useState(false);
   const conversationRef = useRef<any>();
   const chatFooterRef = useRef<any>();
 
@@ -42,14 +44,14 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
     setMessageList([
       {
         id: uuid(),
-        type: MessageTypeEnum.TEXT,
-        msg: '您好，请问有什么我能帮您吗？',
+        type: MessageTypeEnum.RECOMMEND_QUESTIONS,
+        // msg: '您好，请问有什么我能帮您吗？',
       },
     ]);
   };
 
   const existInstuctionMsg = (list: HistoryMsgItemType[]) => {
-    return list.some((msg) => msg.queryResponse.queryMode === MessageTypeEnum.INSTRUCTION);
+    return list.some((msg) => msg.queryResult?.queryMode === MessageTypeEnum.INSTRUCTION);
   };
 
   const updateScroll = (list: HistoryMsgItemType[]) => {
@@ -71,11 +73,11 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
       ...list.map((item: HistoryMsgItemType) => ({
         id: item.questionId,
         type:
-          item.queryResponse?.queryMode === MessageTypeEnum.INSTRUCTION
+          item.queryResult?.queryMode === MessageTypeEnum.INSTRUCTION
             ? MessageTypeEnum.INSTRUCTION
             : MessageTypeEnum.QUESTION,
         msg: item.queryText,
-        msgData: item.queryResponse,
+        msgData: item.queryResult,
         isHistory: true,
       })),
       ...(page === 1 ? [] : messageList),
@@ -85,7 +87,7 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
       if (list.length === 0) {
         sendHelloRsp();
       } else {
-        setCurrentEntity(list[list.length - 1].queryResponse);
+        setCurrentEntity(list[list.length - 1].queryResult);
       }
       updateScroll(list);
       setHistoryInited(true);
@@ -203,6 +205,10 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
     modifyConversationName(currentMsg);
   };
 
+  const onToggleCollapseBtn = () => {
+    setConversationCollapsed(!conversationCollapsed);
+  };
+
   const onInputMsgChange = (value: string) => {
     const inputMsgValue = value || '';
     setInputMsg(inputMsgValue);
@@ -295,6 +301,7 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
   const chatClass = classNames(styles.chat, {
     [styles.mobile]: isMobileMode,
     [styles.copilot]: isCopilotMode,
+    [styles.conversationCollapsed]: conversationCollapsed,
   });
 
   return (
@@ -302,6 +309,12 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
       {!isMobileMode && <Helmet title={WEB_TITLE} />}
       <div className={styles.topSection} />
       <div className={styles.chatSection}>
+        <Conversation
+          currentConversation={currentConversation}
+          collapsed={conversationCollapsed}
+          onSelectConversation={onSelectConversation}
+          ref={conversationRef}
+        />
         <div className={styles.chatApp}>
           {currentConversation && (
             <div className={styles.chatBody}>
@@ -310,22 +323,23 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
                   id="messageContainer"
                   messageList={messageList}
                   chatId={currentConversation?.chatId}
-                  miniProgramLoading={miniProgramLoading}
                   isMobileMode={isMobileMode}
+                  conversationCollapsed={conversationCollapsed}
                   onClickMessageContainer={() => {
                     inputFocus();
                   }}
                   onMsgDataLoaded={onMsgDataLoaded}
                   onSelectSuggestion={onSendMsg}
                   onCheckMore={onCheckMore}
-                  onUpdateMessageScroll={updateMessageContainerScroll}
                 />
                 <ChatFooter
                   inputMsg={inputMsg}
                   chatId={currentConversation?.chatId}
                   domains={domains}
                   currentDomain={currentDomain}
+                  collapsed={conversationCollapsed}
                   isMobileMode={isMobileMode}
+                  onToggleCollapseBtn={onToggleCollapseBtn}
                   onInputMsgChange={onInputMsgChange}
                   onSendMsg={(msg: string, domainId?: number) => {
                     onSendMsg(msg, messageList, domainId);
@@ -343,7 +357,7 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
             </div>
           )}
         </div>
-        {!isMobileMode && (
+        {/* {!isMobileMode && (
           <RightSection
             domains={domains}
             currentEntity={currentEntity}
@@ -353,7 +367,7 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
             onSelectConversation={onSelectConversation}
             conversationRef={conversationRef}
           />
-        )}
+        )} */}
       </div>
     </div>
   );

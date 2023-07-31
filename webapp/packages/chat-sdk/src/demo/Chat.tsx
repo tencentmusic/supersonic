@@ -54,7 +54,7 @@ const Chat = () => {
       <div className={styles.chatItem}>
         <ChatItem
           msg={msg}
-          msgData={data}
+          // msgData={data}
           onMsgDataLoaded={onMsgDataLoaded}
           followQuestions={followQuestions}
           isLastMessage

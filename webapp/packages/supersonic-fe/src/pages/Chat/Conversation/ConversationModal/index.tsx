@@ -1,8 +1,8 @@
 import { Form, Input, Modal } from 'antd';
 import { useEffect, useRef, useState } from 'react';
-import { updateConversationName } from '../../../service';
-import type { ConversationDetailType } from '../../../type';
-import { CHAT_TITLE } from '../../../constants';
+import { updateConversationName } from '../../service';
+import type { ConversationDetailType } from '../../type';
+import { CHAT_TITLE } from '../../constants';
 
 const FormItem = Form.Item;
 

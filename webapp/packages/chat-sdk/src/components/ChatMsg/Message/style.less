@@ -3,11 +3,28 @@
 @msg-prefix-cls: ~'@{supersonic-chat-prefix}-message';
 
 .@{msg-prefix-cls} {
+  &-title-bar {
+    display: flex;
+    align-items: baseline;
+    column-gap: 10px;
+    margin-bottom: 6px;
+  }
+
   &-domain-name {
     color: var(--text-color);
-    margin-bottom: 2px;
     margin-left: 4px;
     font-weight: 500;
+    font-size: 15px;
+  }
+
+  &-top-bar {
+    position: relative;
+    max-width: 80%;
+    color: var(--text-color-third);
+    font-size: 13px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   &-content {
@@ -20,6 +37,7 @@
   }
 
   &-bubble {
+    position: relative;
     box-sizing: border-box;
     min-width: 1px;
     max-width: 100%;
@@ -28,18 +46,6 @@
     border: 1px solid transparent;
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
-  }
-
-  &-top-bar {
-    position: relative;
-    max-width: 100%;
-    padding: 4px 0 8px;
-    color: var(--text-color-third);
-    font-size: 13px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
   }
 
   &-filter-section {
@@ -77,7 +83,7 @@
     align-items: center;
     row-gap: 12px;
     flex-wrap: wrap;
-    margin-top: 20px;
+    margin-top: 4px;
     column-gap: 20px;
     color: var(--text-color-secondary);
     background: rgba(133, 156, 241, 0.1);

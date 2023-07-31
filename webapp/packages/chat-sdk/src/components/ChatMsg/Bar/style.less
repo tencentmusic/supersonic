@@ -3,6 +3,20 @@
 @bar-cls: ~'@{supersonic-chat-prefix}-bar';
 
 .@{bar-cls} {
-  height: 270px;
-  margin-top: 16px;
+
+  &-chart {
+    height: 260px;
+    margin-top: 16px;
+  }
+
+  &-metric-name {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  &-date-range {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-color-third);
+  }
 }

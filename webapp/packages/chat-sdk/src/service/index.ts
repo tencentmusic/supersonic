@@ -1,8 +1,8 @@
 import axios from './axiosInstance';
-import { ChatContextType, HistoryType, MsgDataType, SearchRecommendItem } from '../common/type';
+import { ChatContextType, DrillDownDimensionType, HistoryType, MsgDataType, SearchRecommendItem } from '../common/type';
 import { QueryDataType } from '../common/type';
 
-const DEFAULT_CHAT_ID = 0;
+const DEFAULT_CHAT_ID = 999;
 
 const prefix = '/api';
 
@@ -74,4 +74,8 @@ export function queryEntities(entityId: string | number, domainId: number) {
     entityId,
     domainId,
   });
+}
+
+export function queryDrillDownDimensions(domainId: number) {
+  return axios.get<Result<{ dimensions: DrillDownDimensionType[] }>>(`${prefix}/chat/recommend/metric/${domainId}`);
 }

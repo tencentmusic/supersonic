@@ -1,12 +1,11 @@
-import { MsgDataType, MsgValidTypeEnum } from '../../common/type';
+import { MsgDataType } from '../../common/type';
 import { useEffect, useState } from 'react';
 import Typing from './Typing';
 import ChatMsg from '../ChatMsg';
 import { chatQuery } from '../../service';
-import { MSG_VALID_TIP, PARSE_ERROR_TIP, PREFIX_CLS } from '../../common/constants';
+import { PARSE_ERROR_TIP, PREFIX_CLS } from '../../common/constants';
 import Text from './Text';
 import Tools from '../Tools';
-import SemanticDetail from '../SemanticDetail';
 import IconFont from '../IconFont';
 
 type Props = {
@@ -19,8 +18,6 @@ type Props = {
   isMobileMode?: boolean;
   triggerResize?: boolean;
   onMsgDataLoaded?: (data: MsgDataType) => void;
-  onSelectSuggestion?: (value: string) => void;
-  onUpdateMessageScroll?: () => void;
 };
 
 const ChatItem: React.FC<Props> = ({
@@ -33,12 +30,9 @@ const ChatItem: React.FC<Props> = ({
   triggerResize,
   msgData,
   onMsgDataLoaded,
-  onSelectSuggestion,
-  onUpdateMessageScroll,
 }) => {
   const [data, setData] = useState<MsgDataType>();
   const [loading, setLoading] = useState(false);
-  const [metricInfoList, setMetricInfoList] = useState<any[]>([]);
   const [tip, setTip] = useState('');
 
   const updateData = (res: Result<MsgDataType>) => {
@@ -51,8 +45,8 @@ const ChatItem: React.FC<Props> = ({
       return false;
     }
     const { queryColumns, queryResults, queryState, queryMode } = res.data || {};
-    if (queryState !== MsgValidTypeEnum.NORMAL && queryState !== MsgValidTypeEnum.EMPTY) {
-      setTip(MSG_VALID_TIP[queryState || MsgValidTypeEnum.INVALID]);
+    if (queryState !== 'SUCCESS') {
+      setTip(PARSE_ERROR_TIP);
       return false;
     }
     if ((queryColumns && queryColumns.length > 0 && queryResults) || queryMode === 'INSTRUCTION') {
@@ -109,12 +103,9 @@ const ChatItem: React.FC<Props> = ({
     return null;
   }
 
-  const onCheckMetricInfo = (data: any) => {
-    setMetricInfoList([...metricInfoList, data]);
-    if (onUpdateMessageScroll) {
-      onUpdateMessageScroll();
-    }
-  };
+  const isMetricCard =
+    (data.queryMode === 'METRIC_DOMAIN' || data.queryMode === 'METRIC_FILTER') &&
+    data.queryResults?.length === 1;
 
   return (
     <div className={prefixCls}>
@@ -126,22 +117,9 @@ const ChatItem: React.FC<Props> = ({
           data={data}
           isMobileMode={isMobileMode}
           triggerResize={triggerResize}
-          onCheckMetricInfo={onCheckMetricInfo}
         />
-        <Tools data={data} isLastMessage={isLastMessage} isMobileMode={isMobileMode} />
-        {metricInfoList.length > 0 && (
-          <div className={`${prefixCls}-metric-info-list`}>
-            {metricInfoList.map(item => (
-              <SemanticDetail
-                dataSource={item}
-                onDimensionSelect={(value: string) => {
-                  if (onSelectSuggestion) {
-                    onSelectSuggestion(value);
-                  }
-                }}
-              />
-            ))}
-          </div>
+        {!isMetricCard && (
+          <Tools data={data} isLastMessage={isLastMessage} isMobileMode={isMobileMode} />
         )}
       </div>
     </div>

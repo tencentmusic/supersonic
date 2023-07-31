@@ -2,12 +2,14 @@
 
 @metric-trend-prefix-cls: ~'@{supersonic-chat-prefix}-metric-trend';
 
+@metric-info-prefix-cls: ~'@{supersonic-chat-prefix}-metric-info';
+
 .@{metric-trend-prefix-cls} {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-top: 16px;
+  margin-top: 4px;
   width: 100%;
   row-gap: 4px;
 
@@ -35,14 +37,15 @@
   }
 
   &-flow-trend-chart {
-    height: 270px;
+    margin-top: 4px;
+    height: 230px;
   }
 
   &-charts {
     display: flex;
     flex-direction: column;
     width: 100%;
-    row-gap: 16px;
+    row-gap: 12px;
   }
 
   &-metric-fields {
@@ -50,6 +53,8 @@
     flex-wrap: wrap;
     align-items: center;
     row-gap: 12px;
+    color: var(--text-color);
+    font-size: 15px;
   }
 
   &-metric-field {
@@ -85,10 +90,11 @@
     padding-left: 0;
     font-weight: 500;
     cursor: default;
-    color: var(--text-color-secondary);
+    font-size: 15px;
+    color: var(--text-color);
 
     &:hover {
-      color: var(--text-color-secondary);
+      color: var(--text-color);
     }
   }
 
@@ -130,6 +136,39 @@
     width: 1px;
     height: 16px;
     background-color: var(--text-color-fifth);
+  }
+}
+
+.@{metric-info-prefix-cls} {
+  &-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  &-date {
+    color: var(--text-color-fourth);
+    font-size: 12px;
+  }
+
+  &-indicator-value {
+    color: var(--text-color);
+    font-weight: 500;
+    font-size: 36px;
+    line-height: 40px;
+    margin-top: 2px;
+    color: var(--text-color-secondary);
+  }
+
+  &-period-compare {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    column-gap: 20px;
+    margin-top: 2px;
+    font-size: 13px;
+    overflow-x: auto;
   }
 }
 

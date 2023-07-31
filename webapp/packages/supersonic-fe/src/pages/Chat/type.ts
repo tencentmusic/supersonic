@@ -6,6 +6,8 @@ export enum MessageTypeEnum {
   NO_PERMISSION = 'no_permission', // 无权限
   SEMANTIC_DETAIL = 'semantic_detail', // 语义指标/维度等信息详情
   INSTRUCTION = 'INSTRUCTION', // 插件
+  SUGGESTION = 'SUGGESTION',
+  RECOMMEND_QUESTIONS = 'RECOMMEND_QUESTIONS' // 推荐问题
 }
 
 export type MessageItem = {
@@ -40,4 +42,16 @@ export type DomainType = {
   parentId: number;
   name: string;
   bizName: string;
+};
+
+export type SuggestionItemType = {
+  id: number;
+  domain: number;
+  name: string;
+  bizName: string;
+};
+
+export type SuggestionType = {
+  dimensions: SuggestionItemType[];
+  metrics: SuggestionItemType[];
 };

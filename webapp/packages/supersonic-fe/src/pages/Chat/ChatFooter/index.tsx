@@ -10,6 +10,7 @@ import { SemanticTypeEnum, SEMANTIC_TYPE_MAP } from '../constants';
 import styles from './style.less';
 import { PLACE_HOLDER } from '../constants';
 import { DomainType } from '../type';
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 
 type Props = {
   inputMsg: string;
@@ -17,6 +18,8 @@ type Props = {
   currentDomain?: DomainType;
   domains: DomainType[];
   isMobileMode?: boolean;
+  collapsed: boolean;
+  onToggleCollapseBtn: () => void;
   onInputMsgChange: (value: string) => void;
   onSendMsg: (msg: string, domainId?: number) => void;
   onAddConversation: () => void;
@@ -41,6 +44,8 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     currentDomain,
     domains,
     isMobileMode,
+    collapsed,
+    onToggleCollapseBtn,
     onInputMsgChange,
     onSendMsg,
     onAddConversation,
@@ -239,6 +244,9 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   return (
     <div className={chatFooterClass}>
       <div className={styles.composer}>
+        <div className={styles.collapseBtn} onClick={onToggleCollapseBtn}>
+          {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+        </div>
         <Tooltip title="新建对话">
           <IconFont
             type="icon-icon-add-conversation-line"
