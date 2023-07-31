@@ -7,6 +7,7 @@ import ClassDimensionTable from './components/ClassDimensionTable';
 import ClassMetricTable from './components/ClassMetricTable';
 import PermissionSection from './components/Permission/PermissionSection';
 import DatabaseSection from './components/Database/DatabaseSection';
+import EntitySettingSection from './components/Entity/EntitySettingSection';
 import OverView from './components/OverView';
 import styles from './components/style.less';
 import type { StateType } from './model';
@@ -149,11 +150,10 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   const isModelItem = [
     {
-      label: '可视化建模',
+      label: '画布',
       key: 'xflow',
       children: (
-        <div style={{ width: '100%', height: 'calc(100vh - 200px)' }}>
-          {/* <SemanticFlow /> */}
+        <div style={{ width: '100%', marginTop: -20 }}>
           <SemanticGraphCanvas />
         </div>
       ),
@@ -178,6 +178,12 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
       key: 'metric',
       children: <ClassMetricTable />,
     },
+    {
+      label: '实体',
+      key: 'entity',
+      children: <EntitySettingSection />,
+    },
+
     {
       label: '权限管理',
       key: 'permissonSetting',

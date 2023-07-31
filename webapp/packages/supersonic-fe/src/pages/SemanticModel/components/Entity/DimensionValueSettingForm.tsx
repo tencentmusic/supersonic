@@ -5,8 +5,7 @@ import { Form, Input } from 'antd';
 import { formLayout } from '@/components/FormHelper/utils';
 import { isString } from 'lodash';
 import styles from '../style.less';
-import CommonEditList from '../../components/CommonEditList/index';
-import SqlEditor from '@/components/SqlEditor';
+import CommonEditList from '../../components/CommonEditList';
 type Props = {
   initialValues: any;
   onSubmit?: () => void;

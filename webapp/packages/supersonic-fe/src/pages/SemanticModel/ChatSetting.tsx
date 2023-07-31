@@ -6,6 +6,7 @@ import styles from './components/style.less';
 import type { StateType } from './model';
 import { DownOutlined } from '@ant-design/icons';
 import EntitySection from './components/Entity/EntitySection';
+import RecommendedQuestionsSection from './components/Entity/RecommendedQuestionsSection';
 import { ISemantic } from './data';
 import { getDomainList } from './service';
 import OverView from './components/OverView';
@@ -130,14 +131,19 @@ const ChatSetting: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   const isModelItem = [
     {
-      label: '指标场景',
+      label: '指标模式',
       key: 'metric',
       children: <EntitySection chatConfigType={ChatConfigType.AGG} />,
     },
     {
-      label: '明细场景',
+      label: '实体模式',
       key: 'dimenstion',
       children: <EntitySection chatConfigType={ChatConfigType.DETAIL} />,
+    },
+    {
+      label: '推荐问题',
+      key: 'recommendedQuestions',
+      children: <RecommendedQuestionsSection />,
     },
   ];
 

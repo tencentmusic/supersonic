@@ -166,43 +166,12 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
   ];
 
-  // const saveMetric = async (fieldsValue: any, reloadState: boolean = true) => {
-  //   const queryParams = {
-  //     domainId: selectDomainId,
-  //     ...fieldsValue,
-  //   };
-  //   if (queryParams.typeParams && !queryParams.typeParams.expr) {
-  //     message.error('度量表达式不能为空');
-  //     return;
-  //   }
-  //   let saveMetricQuery = creatExprMetric;
-  //   if (queryParams.id) {
-  //     saveMetricQuery = updateExprMetric;
-  //   }
-  //   const { code, msg } = await saveMetricQuery(queryParams);
-  //   if (code === 200) {
-  //     message.success('编辑指标成功');
-  //     setCreateModalVisible(false);
-  //     if (reloadState) {
-  //       actionRef?.current?.reload();
-  //     }
-  //     dispatch({
-  //       type: 'domainManger/queryMetricList',
-  //       payload: {
-  //         domainId: selectDomainId,
-  //       },
-  //     });
-  //     return;
-  //   }
-  //   message.error(msg);
-  // };
-
   return (
     <>
       <ProTable
         className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft}`}
         actionRef={actionRef}
-        headerTitle="指标列表"
+        // headerTitle="指标列表"
         rowKey="id"
         search={{
           span: 4,

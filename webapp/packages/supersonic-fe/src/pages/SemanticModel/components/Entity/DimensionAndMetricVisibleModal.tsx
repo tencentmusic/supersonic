@@ -15,7 +15,7 @@ type Props = {
   settingSourceList: any[];
   onCancel: () => void;
   visible: boolean;
-  onSubmit: (params?: any) => void;
+  onSubmit: (params?: { isSilenceSubmit?: boolean }) => void;
 };
 
 const dimensionConfig = {
@@ -72,7 +72,8 @@ const DimensionAndMetricVisibleModal: React.FC<Props> = ({
     }
   }, [entityData, settingSourceList]);
 
-  const saveEntity = async () => {
+  const saveEntity = async (submitData: any, isSilenceSubmit = false) => {
+    const { selectedKeyList, knowledgeInfosMap } = submitData;
     const globalKnowledgeConfigFormFields = await formRef?.current?.getFormValidateFields?.();
     let globalKnowledgeConfig = entityData.globalKnowledgeConfig;
     if (globalKnowledgeConfigFormFields) {
@@ -127,8 +128,10 @@ const DimensionAndMetricVisibleModal: React.FC<Props> = ({
       id,
     });
     if (code === 200) {
-      onSubmit?.();
-      message.success('保存成功');
+      if (!isSilenceSubmit) {
+        message.success('保存成功');
+      }
+      onSubmit?.({ isSilenceSubmit });
       return;
     }
     message.error(msg);
@@ -145,7 +148,7 @@ const DimensionAndMetricVisibleModal: React.FC<Props> = ({
         <Button
           type="primary"
           onClick={() => {
-            saveEntity();
+            saveEntity({ selectedKeyList, knowledgeInfosMap });
           }}
         >
           完成
@@ -160,8 +163,9 @@ const DimensionAndMetricVisibleModal: React.FC<Props> = ({
       key: 'visibleSetting',
       children: (
         <DimensionMetricVisibleTransfer
-          onKnowledgeInfosMapChange={(knowledgeInfosMap) => {
-            setKnowledgeInfosMap(knowledgeInfosMap);
+          onKnowledgeInfosMapChange={(knowledgeInfos) => {
+            setKnowledgeInfosMap(knowledgeInfos);
+            saveEntity({ selectedKeyList, knowledgeInfosMap: knowledgeInfos }, true);
           }}
           knowledgeInfosMap={knowledgeInfosMap}
           titles={settingTypeConfig.titles}
@@ -169,6 +173,7 @@ const DimensionAndMetricVisibleModal: React.FC<Props> = ({
           targetList={selectedKeyList}
           onChange={(newTargetKeys) => {
             handleTransferChange(newTargetKeys);
+            saveEntity({ selectedKeyList: newTargetKeys, knowledgeInfosMap }, true);
           }}
         />
       ),
@@ -177,10 +182,12 @@ const DimensionAndMetricVisibleModal: React.FC<Props> = ({
       label: '全局维度值过滤',
       key: 'dimensionValueFilter',
       children: (
-        <DimensionValueSettingForm
-          initialValues={globalKnowledgeConfigInitialValues}
-          ref={formRef}
-        />
+        <div style={{ margin: '0 auto', width: '975px' }}>
+          <DimensionValueSettingForm
+            initialValues={globalKnowledgeConfigInitialValues}
+            ref={formRef}
+          />
+        </div>
       ),
     },
   ];

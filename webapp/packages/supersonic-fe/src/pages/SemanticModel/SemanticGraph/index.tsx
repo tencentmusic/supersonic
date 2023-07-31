@@ -20,15 +20,17 @@ import initLegend from './components/Legend';
 import { SemanticNodeType } from '../enum';
 import G6 from '@antv/g6';
 import { ISemantic, IDataSource } from '../data';
-
+import NodeInfoDrawer from './components/NodeInfoDrawer';
 import DimensionInfoModal from '../components/DimensionInfoModal';
 import MetricInfoCreateForm from '../components/MetricInfoCreateForm';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
+import ClassDataSourceTypeModal from '../components/ClassDataSourceTypeModal';
+import GraphToolBar from './components/GraphToolBar';
 import { cloneDeep } from 'lodash';
 
 type Props = {
   domainId: number;
-  graphShowType: SemanticNodeType;
+  graphShowType?: SemanticNodeType;
   domainManger: StateType;
   dispatch: Dispatch;
 };
@@ -36,13 +38,18 @@ type Props = {
 const DomainManger: React.FC<Props> = ({
   domainManger,
   domainId,
-  graphShowType = SemanticNodeType.DIMENSION,
+  // graphShowType = SemanticNodeType.DIMENSION,
+  graphShowType,
   dispatch,
 }) => {
   const ref = useRef(null);
+  const dataSourceRef = useRef<ISemantic.IDomainSchemaRelaList>([]);
   const [graphData, setGraphData] = useState<TreeGraphData>();
   const [createDimensionModalVisible, setCreateDimensionModalVisible] = useState<boolean>(false);
   const [createMetricModalVisible, setCreateMetricModalVisible] = useState<boolean>(false);
+  const [infoDrawerVisible, setInfoDrawerVisible] = useState<boolean>(false);
+
+  const [currentNodeData, setCurrentNodeData] = useState<any>();
 
   const legendDataRef = useRef<any[]>([]);
   const graphRef = useRef<any>(null);
@@ -53,12 +60,15 @@ const DomainManger: React.FC<Props> = ({
 
   const [nodeDataSource, setNodeDataSource] = useState<any>();
 
+  const [dataSourceInfoList, setDataSourceInfoList] = useState<IDataSource.IDataSourceItem[]>([]);
+
   const { dimensionList, metricList } = domainManger;
 
   const dimensionListRef = useRef<ISemantic.IDimensionItem[]>([]);
   const metricListRef = useRef<ISemantic.IMetricItem[]>([]);
 
   const [confirmModalOpenState, setConfirmModalOpenState] = useState<boolean>(false);
+  const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
 
   // const toggleNodeVisibility = (graph: Graph, node: Item, visible: boolean) => {
   //   if (visible) {
@@ -84,8 +94,34 @@ const DomainManger: React.FC<Props> = ({
   //   }
   // };
 
-  const changeGraphData = (data: IDataSource.IDataSourceItem[], type: SemanticNodeType) => {
-    const relationData = formatterRelationData(data, type);
+  const handleSeachNode = (text: string) => {
+    const filterData = dataSourceRef.current.reduce(
+      (data: ISemantic.IDomainSchemaRelaList, item: ISemantic.IDomainSchemaRelaItem) => {
+        const { dimensions, metrics } = item;
+        const dimensionsList = dimensions.filter((dimension) => {
+          return dimension.name.includes(text);
+        });
+        const metricsList = metrics.filter((metric) => {
+          return metric.name.includes(text);
+        });
+        data.push({
+          ...item,
+          dimensions: dimensionsList,
+          metrics: metricsList,
+        });
+        return data;
+      },
+      [],
+    );
+    const rootGraphData = changeGraphData(filterData);
+    refreshGraphData(rootGraphData);
+  };
+
+  const changeGraphData = (
+    dataSourceList: ISemantic.IDomainSchemaRelaList,
+    type?: SemanticNodeType,
+  ): TreeGraphData => {
+    const relationData = formatterRelationData({ dataSourceList, type, limit: 20 });
     const legendList = relationData.map((item: any) => {
       const { id, name } = item;
       return {
@@ -101,7 +137,6 @@ const DomainManger: React.FC<Props> = ({
       name: domainManger.selectDomainName,
       children: relationData,
     };
-    //
     return graphRootData;
   };
 
@@ -112,8 +147,14 @@ const DomainManger: React.FC<Props> = ({
     const { code, data } = await getDomainSchemaRela(params.domainId);
     if (code === 200) {
       if (data) {
-        const graphRootData = changeGraphData(data, params.graphShowType || graphShowType);
+        setDataSourceInfoList(
+          data.map((item: ISemantic.IDomainSchemaRelaItem) => {
+            return item.datasource;
+          }),
+        );
+        const graphRootData = changeGraphData(data);
         setGraphData(graphRootData);
+        dataSourceRef.current = data;
         return graphRootData;
       }
       return false;
@@ -164,13 +205,16 @@ const DomainManger: React.FC<Props> = ({
     if (!targetData) {
       return;
     }
-
     const datasource = loopNodeFindDataSource(item);
     if (datasource) {
       setNodeDataSource({
+        ...datasource,
         id: datasource.uid,
-        name: datasource.name,
       });
+    }
+    if (targetData.nodeType === SemanticNodeType.DATASOURCE) {
+      setCreateDataSourceModalOpen(true);
+      return;
     }
     if (targetData.nodeType === SemanticNodeType.DIMENSION) {
       const targetItem = dimensionListRef.current.find((item) => item.id === targetData.uid);
@@ -180,6 +224,7 @@ const DomainManger: React.FC<Props> = ({
       } else {
         message.error('获取维度初始化数据失败');
       }
+      return;
     }
     if (targetData.nodeType === SemanticNodeType.METRIC) {
       const targetItem = metricListRef.current.find((item) => item.id === targetData.uid);
@@ -189,22 +234,23 @@ const DomainManger: React.FC<Props> = ({
       } else {
         message.error('获取指标初始化数据失败');
       }
+      return;
     }
   };
 
-  const handleContextMenuClickCreate = (item: IItemBaseConfig) => {
+  const handleContextMenuClickCreate = (item: IItemBaseConfig, key: string) => {
     const datasource = item.model;
     if (!datasource) {
       return;
     }
     setNodeDataSource({
+      ...datasource,
       id: datasource.uid,
-      name: datasource.name,
     });
-    if (graphShowType === SemanticNodeType.DIMENSION) {
+    if (key === 'createDimension') {
       setCreateDimensionModalVisible(true);
     }
-    if (graphShowType === SemanticNodeType.METRIC) {
+    if (key === 'createMetric') {
       setCreateMetricModalVisible(true);
     }
     setDimensionItem(undefined);
@@ -216,10 +262,19 @@ const DomainManger: React.FC<Props> = ({
     if (!targetData) {
       return;
     }
+    if (targetData.nodeType === SemanticNodeType.DATASOURCE) {
+      setCurrentNodeData({
+        ...targetData,
+        id: targetData.uid,
+      });
+      setConfirmModalOpenState(true);
+      return;
+    }
     if (targetData.nodeType === SemanticNodeType.DIMENSION) {
       const targetItem = dimensionListRef.current.find((item) => item.id === targetData.uid);
       if (targetItem) {
-        setDimensionItem({ ...targetItem });
+        // setDimensionItem({ ...targetItem });
+        setCurrentNodeData(targetItem);
         setConfirmModalOpenState(true);
       } else {
         message.error('获取维度初始化数据失败');
@@ -228,7 +283,8 @@ const DomainManger: React.FC<Props> = ({
     if (targetData.nodeType === SemanticNodeType.METRIC) {
       const targetItem = metricListRef.current.find((item) => item.id === targetData.uid);
       if (targetItem) {
-        setMetricItem({ ...targetItem });
+        // setMetricItem({ ...targetItem });
+        setCurrentNodeData(targetItem);
         setConfirmModalOpenState(true);
       } else {
         message.error('获取指标初始化数据失败');
@@ -242,17 +298,25 @@ const DomainManger: React.FC<Props> = ({
     }
     switch (key) {
       case 'edit':
+      case 'editDatasource':
         handleContextMenuClickEdit(item._cfg);
         break;
       case 'delete':
+      case 'deleteDatasource':
         handleContextMenuClickDelete(item._cfg);
         break;
-      case 'create':
-        handleContextMenuClickCreate(item._cfg);
+      case 'createDimension':
+      case 'createMetric':
+        handleContextMenuClickCreate(item._cfg, key);
         break;
       default:
         break;
     }
+  };
+
+  const handleNodeTypeClick = (nodeData: any) => {
+    setCurrentNodeData(nodeData);
+    setInfoDrawerVisible(true);
   };
 
   const graphConfigMap = {
@@ -308,7 +372,7 @@ const DomainManger: React.FC<Props> = ({
       const graphConfigKey = graphNodeList.length > 20 ? 'dendrogram' : 'mindmap';
 
       getLegendDataFilterFunctions();
-      const toolbar = initToolBar({ refreshGraphData });
+      const toolbar = initToolBar({ onSearch: handleSeachNode });
       const tooltip = initTooltips();
       const contextMenu = initContextMenu({
         graphShowType,
@@ -325,14 +389,14 @@ const DomainManger: React.FC<Props> = ({
         height,
         modes: {
           default: [
-            {
-              type: 'collapse-expand',
-              onChange: function onChange(item, collapsed) {
-                const data = item!.get('model');
-                data.collapsed = collapsed;
-                return true;
-              },
-            },
+            // {
+            //   type: 'collapse-expand',
+            //   onChange: function onChange(item, collapsed) {
+            //     const data = item!.get('model');
+            //     data.collapsed = collapsed;
+            //     return true;
+            //   },
+            // },
             'drag-node',
             'drag-canvas',
             // 'activate-relations',
@@ -368,6 +432,8 @@ const DomainManger: React.FC<Props> = ({
         plugins: [legend, tooltip, toolbar, contextMenu],
       });
       graphRef.current.set('initGraphData', graphData);
+      graphRef.current.set('initDataSource', dataSourceRef.current);
+
       const legendCanvas = legend._cfgs.legendCanvas;
 
       // legend模式事件方法bindEvents会有点击图例空白清空选中的逻辑，在注册click事件前，先将click事件队列清空；
@@ -408,12 +474,33 @@ const DomainManger: React.FC<Props> = ({
           label: node.name,
         });
       });
-
       graphRef.current.data(graphData);
       graphRef.current.render();
       graphRef.current.fitView([80, 80]);
 
       setAllActiveLegend(legend);
+
+      graphRef.current.on('node:click', (evt: any) => {
+        const item = evt.item; // 被操作的节点 item
+        const itemData = item?._cfg?.model;
+        if (itemData) {
+          const { nodeType } = itemData;
+          if (
+            [
+              SemanticNodeType.DIMENSION,
+              SemanticNodeType.METRIC,
+              SemanticNodeType.DATASOURCE,
+            ].includes(nodeType)
+          ) {
+            handleNodeTypeClick(itemData);
+            return;
+          }
+        }
+      });
+
+      graphRef.current.on('canvas:click', () => {
+        setInfoDrawerVisible(false);
+      });
 
       const rootNode = graphRef.current.findById('root');
       graphRef.current.hideItem(rootNode);
@@ -442,18 +529,69 @@ const DomainManger: React.FC<Props> = ({
 
   return (
     <>
+      <GraphToolBar
+        onClick={({ eventName }: { eventName: string }) => {
+          setNodeDataSource(undefined);
+          if (eventName === 'createDatabase') {
+            setCreateDataSourceModalOpen(true);
+          }
+          if (eventName === 'createDimension') {
+            setCreateDimensionModalVisible(true);
+            setDimensionItem(undefined);
+          }
+          if (eventName === 'createMetric') {
+            setCreateMetricModalVisible(true);
+            setMetricItem(undefined);
+          }
+        }}
+      />
       <div
         ref={ref}
         key={`${domainId}-${graphShowType}`}
         id="semanticGraph"
-        style={{ width: '100%', height: '100%' }}
+        style={{ width: '100%', height: 'calc(100vh - 175px)', position: 'relative' }}
       />
+      <NodeInfoDrawer
+        nodeData={currentNodeData}
+        placement="right"
+        onClose={() => {
+          setInfoDrawerVisible(false);
+        }}
+        open={infoDrawerVisible}
+        mask={false}
+        getContainer={false}
+        onEditBtnClick={(nodeData: any) => {
+          handleContextMenuClickEdit({ model: nodeData });
+          setInfoDrawerVisible(false);
+        }}
+        onNodeChange={({ eventName }: { eventName: string }) => {
+          updateGraphData();
+          setInfoDrawerVisible(false);
+          if (eventName === SemanticNodeType.METRIC) {
+            dispatch({
+              type: 'domainManger/queryMetricList',
+              payload: {
+                domainId,
+              },
+            });
+          }
+          if (eventName === SemanticNodeType.DIMENSION) {
+            dispatch({
+              type: 'domainManger/queryDimensionList',
+              payload: {
+                domainId,
+              },
+            });
+          }
+        }}
+      />
+
       {createDimensionModalVisible && (
         <DimensionInfoModal
           domainId={domainId}
           bindModalVisible={createDimensionModalVisible}
           dimensionItem={dimensionItem}
-          dataSourceList={nodeDataSource ? [nodeDataSource] : []}
+          dataSourceList={nodeDataSource ? [nodeDataSource] : dataSourceInfoList}
           onSubmit={() => {
             setCreateDimensionModalVisible(false);
             updateGraphData();
@@ -473,7 +611,7 @@ const DomainManger: React.FC<Props> = ({
         <MetricInfoCreateForm
           domainId={domainId}
           key={metricItem?.id}
-          datasourceId={nodeDataSource.id}
+          datasourceId={nodeDataSource?.id}
           createModalVisible={createMetricModalVisible}
           metricItem={metricItem}
           onSubmit={() => {
@@ -491,6 +629,19 @@ const DomainManger: React.FC<Props> = ({
           }}
         />
       )}
+      {
+        <ClassDataSourceTypeModal
+          open={createDataSourceModalOpen}
+          onCancel={() => {
+            setNodeDataSource(undefined);
+            setCreateDataSourceModalOpen(false);
+          }}
+          dataSourceItem={nodeDataSource}
+          onSubmit={() => {
+            updateGraphData();
+          }}
+        />
+      }
       {
         <DeleteConfirmModal
           open={confirmModalOpenState}
@@ -514,8 +665,7 @@ const DomainManger: React.FC<Props> = ({
           onCancelClick={() => {
             setConfirmModalOpenState(false);
           }}
-          nodeType={graphShowType}
-          nodeData={graphShowType === SemanticNodeType.DIMENSION ? dimensionItem : metricItem}
+          nodeData={currentNodeData}
         />
       }
     </>

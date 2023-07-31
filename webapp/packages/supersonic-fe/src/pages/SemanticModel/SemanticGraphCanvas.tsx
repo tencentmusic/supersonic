@@ -12,11 +12,11 @@ type Props = {
 };
 
 const SemanticGraphCanvas: React.FC<Props> = ({ domainManger }) => {
-  const [graphShowType, setGraphShowType] = useState<SemanticNodeType>(SemanticNodeType.DATASOURCE);
+  const [graphShowType, setGraphShowType] = useState<SemanticNodeType>(SemanticNodeType.DIMENSION);
   const { selectDomainId } = domainManger;
   return (
     <div className={styles.semanticGraphCanvas}>
-      <div className={styles.toolbar}>
+      {/* <div className={styles.toolbar}>
         <Radio.Group
           buttonStyle="solid"
           value={graphShowType}
@@ -29,7 +29,7 @@ const SemanticGraphCanvas: React.FC<Props> = ({ domainManger }) => {
           <Radio.Button value={SemanticNodeType.DIMENSION}>维度</Radio.Button>
           <Radio.Button value={SemanticNodeType.METRIC}>指标</Radio.Button>
         </Radio.Group>
-      </div>
+      </div> */}
 
       <div className={styles.canvasContainer}>
         {graphShowType === SemanticNodeType.DATASOURCE ? (
@@ -37,8 +37,8 @@ const SemanticGraphCanvas: React.FC<Props> = ({ domainManger }) => {
             <SemanticFlow />
           </div>
         ) : (
-          <div style={{ width: '100%', height: 'calc(100vh - 220px)' }}>
-            <SemanticGraph domainId={selectDomainId} graphShowType={graphShowType} />
+          <div style={{ width: '100%' }}>
+            <SemanticGraph domainId={selectDomainId} />
           </div>
         )}
       </div>

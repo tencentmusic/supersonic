@@ -8,7 +8,9 @@ export type UserName = string;
 
 export type SensitiveLevel = 0 | 1 | 2 | null;
 
-export type RefreshGraphData = (graphRootData: TreeGraphData) => void;
+// export type RefreshGraphData = (graphRootData: TreeGraphData) => void;
+
+export type ToolBarSearchCallBack = (text: string) => void;
 
 export declare namespace IDataSource {
   interface IIdentifiersItem {
@@ -113,8 +115,14 @@ export declare namespace ISemantic {
     semanticType: string;
     alias: string;
     useCnt: number;
+    dimValueMaps: IDimensionValueSettingItem[];
   }
 
+  interface IDimensionValueSettingItem {
+    techName: string;
+    bizName: string;
+    alias?: string[];
+  }
   interface IMeasure {
     name: string;
     agg?: string;
@@ -156,6 +164,14 @@ export declare namespace ISemantic {
 
   type IDimensionList = IDimensionItem[];
   type IMetricList = IMetricItem[];
+
+  interface IDomainSchemaRelaItem {
+    domainId: number;
+    dimensions: IDimensionList;
+    metrics: IMetricList;
+    datasource: IDataSourceItem;
+  }
+  type IDomainSchemaRelaList = IDomainSchemaRelaItem[];
 }
 
 export declare namespace IChatConfig {
@@ -218,6 +234,7 @@ export declare namespace IChatConfig {
     chatDefaultConfig: {
       dimensions: ISemantic.IDimensionList;
       metrics: ISemantic.IMetricList;
+      ratioMetrics: ISemantic.IMetricList;
       unit: number;
       period: string;
     };
