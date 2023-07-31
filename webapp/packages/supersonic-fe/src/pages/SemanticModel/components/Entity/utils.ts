@@ -18,8 +18,9 @@ export const formatRichEntityDataListToIds = (
   const detailData: {
     dimensionIds: number[];
     metricIds: number[];
-  } = { dimensionIds: [], metricIds: [] };
-  const { dimensions, metrics } = chatDefaultConfig || {};
+    ratioMetricIds: number[];
+  } = { dimensionIds: [], metricIds: [], ratioMetricIds: [] };
+  const { dimensions, metrics, ratioMetrics } = chatDefaultConfig || {};
   if (Array.isArray(dimensions)) {
     detailData.dimensionIds = dimensions.map((item: ISemantic.IDimensionItem) => {
       return item.id;
@@ -30,6 +31,12 @@ export const formatRichEntityDataListToIds = (
       return item.id;
     });
   }
+  if (Array.isArray(ratioMetrics)) {
+    detailData.ratioMetricIds = ratioMetrics.map((item: ISemantic.IMetricItem) => {
+      return item.id;
+    });
+  }
+
   let entitySetting = {};
   if (entity) {
     const entityItem = entity.dimItem;

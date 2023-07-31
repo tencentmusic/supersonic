@@ -6,34 +6,36 @@ import { SemanticNodeType } from '../../enum';
 import { SEMANTIC_NODE_TYPE_CONFIG } from '../../constant';
 
 type InitContextMenuProps = {
-  graphShowType: string;
+  graphShowType?: string;
   onMenuClick?: (key: string, item: Item) => void;
 };
 
 export const getMenuConfig = (props?: InitContextMenuProps) => {
-  const { graphShowType, onMenuClick } = props || {};
+  const { onMenuClick } = props || {};
   return {
     getContent(evt) {
       const nodeData = evt?.item?._cfg?.model;
       const { name, nodeType } = nodeData as any;
       if (nodeData) {
         const nodeTypeConfig = SEMANTIC_NODE_TYPE_CONFIG[nodeType] || {};
-        let ulNode = `<ul>
+        let ulNode = `
         <li title='编辑' key='edit' >编辑</li>
         <li title='删除' key='delete' >删除</li>
-      </ul>`;
+     `;
         if (nodeType === SemanticNodeType.DATASOURCE) {
-          if (graphShowType) {
-            const typeString = graphShowType === SemanticNodeType.DIMENSION ? '维度' : '指标';
-            ulNode = `<ul>
-              <li title='新增${typeString}' key='create' >新增${typeString}</li>
-            </ul>`;
-          }
+          ulNode = `
+              <li title='新增维度' key='createDimension' >新增维度</li>
+              <li title='新增指标' key='createMetric' >新增指标</li>
+              <li title='编辑' key='editDatasource' >编辑</li>
+              <li title='删除' key='deleteDatasource' >删除</li>
+            `;
         }
         const header = `${name}`;
         return `<div class="g6ContextMenuContainer">
           <h3>${presetsTagDomString(nodeTypeConfig.label, nodeTypeConfig.color)}${header}</h3>
+          <ul>
         ${ulNode}
+        </ul>
         </div>`;
       }
       return `<div>当前节点信息获取失败</div>`;

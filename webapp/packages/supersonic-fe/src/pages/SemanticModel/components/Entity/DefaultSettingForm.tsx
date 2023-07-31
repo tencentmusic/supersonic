@@ -11,7 +11,7 @@ import {
 } from './utils';
 import styles from '../style.less';
 import { ISemantic } from '../../data';
-import { ChatConfigType, TransType } from '../../enum';
+import { ChatConfigType, TransType, SemanticNodeType } from '../../enum';
 import TransTypeTag from '../TransTypeTag';
 
 type Props = {
@@ -99,7 +99,7 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
           name,
           label: (
             <>
-              <TransTypeTag type={TransType.DIMENSION} />
+              <TransTypeTag type={SemanticNodeType.DIMENSION} />
               {name}
             </>
           ),
@@ -115,7 +115,7 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
           name,
           label: (
             <>
-              <TransTypeTag type={TransType.METRIC} />
+              <TransTypeTag type={SemanticNodeType.METRIC} />
               {name}
             </>
           ),
@@ -198,30 +198,56 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
           </FormItem>
         )}
         {chatConfigType === ChatConfigType.AGG && (
-          <FormItem
-            name="metricIds"
-            label={
-              <FormItemTitle
-                title={'指标'}
-                subTitle={'问答搜索结果选择中，如果没有指定指标，将会采用默认指标进行展示'}
+          <>
+            {/* <FormItem
+              name="metricIds"
+              label={
+                <FormItemTitle
+                  title={'指标'}
+                  subTitle={'问答搜索结果选择中，如果没有指定指标，将会采用默认指标进行展示'}
+                />
+              }
+            >
+              <Select
+                mode="multiple"
+                allowClear
+                style={{ width: '100%' }}
+                filterOption={(inputValue: string, item: any) => {
+                  const { label } = item;
+                  if (label.includes(inputValue)) {
+                    return true;
+                  }
+                  return false;
+                }}
+                placeholder="请选择展示指标信息"
+                options={metricListOptions}
               />
-            }
-          >
-            <Select
-              mode="multiple"
-              allowClear
-              style={{ width: '100%' }}
-              filterOption={(inputValue: string, item: any) => {
-                const { label } = item;
-                if (label.includes(inputValue)) {
-                  return true;
-                }
-                return false;
-              }}
-              placeholder="请选择展示指标信息"
-              options={metricListOptions}
-            />
-          </FormItem>
+            </FormItem>
+            <FormItem
+              name="ratioMetricIds"
+              label={
+                <FormItemTitle
+                  title={'同环比指标'}
+                  subTitle={'问答搜索含有指定的指标，将会同时计算该指标最后一天的同环比'}
+                />
+              }
+            >
+              <Select
+                mode="multiple"
+                allowClear
+                style={{ width: '100%' }}
+                filterOption={(inputValue: string, item: any) => {
+                  const { label } = item;
+                  if (label.includes(inputValue)) {
+                    return true;
+                  }
+                  return false;
+                }}
+                placeholder="请选择同环比指标"
+                options={metricListOptions}
+              />
+            </FormItem> */}
+          </>
         )}
 
         <FormItem

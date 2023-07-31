@@ -5,7 +5,7 @@ import { connect } from 'umi';
 import type { StateType } from '../../model';
 import { getDomainExtendDetailConfig } from '../../service';
 import ProCard from '@ant-design/pro-card';
-import EntityCreateForm from './EntityCreateForm';
+
 import DefaultSettingForm from './DefaultSettingForm';
 import type { IChatConfig } from '../../data';
 import DimensionMetricVisibleForm from './DimensionMetricVisibleForm';
@@ -25,8 +25,6 @@ const EntitySection: React.FC<Props> = ({
   const { selectDomainId, dimensionList, metricList } = domainManger;
 
   const [entityData, setentityData] = useState<IChatConfig.IChatRichConfig>();
-
-  const entityCreateRef = useRef<any>({});
 
   const queryThemeListData: any = async () => {
     const { code, data } = await getDomainExtendDetailConfig({
@@ -58,25 +56,6 @@ const EntitySection: React.FC<Props> = ({
   return (
     <div style={{ width: 800, margin: '0 auto' }}>
       <Space direction="vertical" style={{ width: '100%' }} size={20}>
-        {chatConfigType === 'detail' && entityData && (
-          <ProCard title="实体" bordered>
-            <EntityCreateForm
-              ref={entityCreateRef}
-              domainId={Number(selectDomainId)}
-              entityData={entityData}
-              dimensionList={dimensionList.filter((item) => {
-                const blackDimensionList = entityData?.visibility?.blackDimIdList;
-                if (Array.isArray(blackDimensionList)) {
-                  return !blackDimensionList.includes(item.id);
-                }
-                return false;
-              })}
-              onSubmit={() => {
-                queryThemeListData();
-              }}
-            />
-          </ProCard>
-        )}
         <ProCard bordered title="问答可见">
           <DimensionMetricVisibleForm
             chatConfigKey={

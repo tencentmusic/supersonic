@@ -199,15 +199,15 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
         </FormItem>
         <FormItem
           name="name"
-          label="指标中文名"
-          rules={[{ required: true, message: '请输入指标中文名' }]}
+          label="指标名称"
+          rules={[{ required: true, message: '请输入指标名称' }]}
         >
           <Input placeholder="名称不可重复" />
         </FormItem>
         <FormItem
           name="bizName"
-          label="指标英文名"
-          rules={[{ required: true, message: '请输入指标英文名' }]}
+          label="字段名称"
+          rules={[{ required: true, message: '请输入字段名称' }]}
         >
           <Input placeholder="名称不可重复" disabled={isEdit} />
         </FormItem>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, Modal, Select } from 'antd';
 import { SENSITIVE_LEVEL_OPTIONS } from '../constant';
 import { formLayout } from '@/components/FormHelper/utils';
@@ -6,6 +6,7 @@ import SqlEditor from '@/components/SqlEditor';
 import InfoTagList from './InfoTagList';
 import { ISemantic } from '../data';
 import { createDimension, updateDimension } from '../service';
+// import DimensionValueSettingModal from './DimensionValueSettingModal';
 import { message } from 'antd';
 
 export type CreateFormProps = {
@@ -31,16 +32,28 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
   onSubmit: handleUpdate,
 }) => {
   const isEdit = !!dimensionItem?.id;
-
+  const [dimensionValueSettingList, setDimensionValueSettingList] = useState<
+    ISemantic.IDimensionValueSettingItem[]
+  >([]);
   const [form] = Form.useForm();
   const { setFieldsValue, resetFields } = form;
-
-  const handleSubmit = async () => {
+  // const [dimensionValueSettingModalVisible, setDimensionValueSettingModalVisible] =
+  //   useState<boolean>(false);
+  const handleSubmit = async (
+    isSilenceSubmit = false,
+    dimValueMaps?: ISemantic.IDimensionValueSettingItem[],
+  ) => {
     const fieldsValue = await form.validateFields();
-    await saveDimension(fieldsValue);
+    await saveDimension(
+      {
+        ...fieldsValue,
+        dimValueMaps: dimValueMaps || dimensionValueSettingList,
+      },
+      isSilenceSubmit,
+    );
   };
 
-  const saveDimension = async (fieldsValue: any) => {
+  const saveDimension = async (fieldsValue: any, isSilenceSubmit = false) => {
     const queryParams = {
       domainId,
       type: 'categorical',
@@ -52,8 +65,10 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
     }
     const { code, msg } = await saveDimensionQuery(queryParams);
     if (code === 200) {
-      message.success('编辑维度成功');
-      handleUpdate(fieldsValue);
+      if (!isSilenceSubmit) {
+        message.success('编辑维度成功');
+        handleUpdate(fieldsValue);
+      }
       return;
     }
     message.error(msg);
@@ -66,6 +81,11 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
   useEffect(() => {
     if (dimensionItem) {
       setFormVal();
+      if (Array.isArray(dimensionItem.dimValueMaps)) {
+        setDimensionValueSettingList(dimensionItem.dimValueMaps);
+      } else {
+        setDimensionValueSettingList([]);
+      }
     } else {
       resetFields();
     }
@@ -78,7 +98,12 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
     return (
       <>
         <Button onClick={onCancel}>取消</Button>
-        <Button type="primary" onClick={handleSubmit}>
+        <Button
+          type="primary"
+          onClick={() => {
+            handleSubmit();
+          }}
+        >
           完成
         </Button>
       </>
@@ -93,20 +118,22 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
         </FormItem>
         <FormItem
           name="name"
-          label="维度中文名"
-          rules={[{ required: true, message: '请输入维度中文名' }]}
+          label="维度名称"
+          rules={[{ required: true, message: '请输入维度名称' }]}
         >
           <Input placeholder="名称不可重复" />
         </FormItem>
         <FormItem
+          hidden={isEdit}
           name="bizName"
-          label="维度英文名"
-          rules={[{ required: true, message: '请输入维度英文名' }]}
+          label="字段名称"
+          rules={[{ required: true, message: '请输入字段名称' }]}
         >
           <Input placeholder="名称不可重复" disabled={isEdit} />
         </FormItem>
 
         <FormItem
+          hidden={isEdit}
           name="datasourceId"
           label="所属数据源"
           rules={[{ required: true, message: '请选择所属数据源' }]}
@@ -158,6 +185,16 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
         >
           <TextArea placeholder="请输入维度描述" />
         </FormItem>
+        {/* <FormItem name="dimValueMaps" label="维度值设置">
+          <Button
+            type="primary"
+            onClick={() => {
+              setDimensionValueSettingModalVisible(true);
+            }}
+          >
+            设置
+          </Button>
+        </FormItem> */}
         <FormItem
           name="expr"
           label="表达式"
@@ -171,28 +208,38 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
   };
 
   return (
-    <Modal
-      width={800}
-      destroyOnClose
-      title="维度信息"
-      style={{ top: 48 }}
-      maskClosable={false}
-      open={bindModalVisible}
-      footer={renderFooter()}
-      onCancel={onCancel}
-    >
-      <Form
-        {...formLayout}
-        form={form}
-        initialValues={
-          {
-            // ...formVals,
-          }
-        }
+    <>
+      <Modal
+        width={800}
+        destroyOnClose
+        title="维度信息"
+        style={{ top: 48 }}
+        maskClosable={false}
+        open={bindModalVisible}
+        footer={renderFooter()}
+        onCancel={onCancel}
       >
-        {renderContent()}
-      </Form>
-    </Modal>
+        <Form {...formLayout} form={form}>
+          {renderContent()}
+        </Form>
+      </Modal>
+      {/* {dimensionValueSettingModalVisible && (
+        <DimensionValueSettingModal
+          dimensionValueSettingList={dimensionValueSettingList}
+          open={dimensionValueSettingModalVisible}
+          onCancel={() => {
+            setDimensionValueSettingModalVisible(false);
+          }}
+          onSubmit={(dimValueMaps) => {
+            if (isEdit) {
+              handleSubmit(true, dimValueMaps);
+            }
+            setDimensionValueSettingList(dimValueMaps);
+            setDimensionValueSettingModalVisible(false);
+          }}
+        />
+      )} */}
+    </>
   );
 };
 

@@ -74,9 +74,11 @@ const DimensionMetricVisibleForm: ForwardRefRenderFunction<any, Props> = ({
           onCancel={() => {
             setDimensionModalVisible(false);
           }}
-          onSubmit={() => {
+          onSubmit={(params) => {
             onSubmit?.();
-            setDimensionModalVisible(false);
+            if (!params?.isSilenceSubmit) {
+              setDimensionModalVisible(false);
+            }
           }}
         />
       )}

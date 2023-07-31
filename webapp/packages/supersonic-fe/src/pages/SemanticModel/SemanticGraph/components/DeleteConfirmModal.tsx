@@ -1,11 +1,10 @@
-import { Button, Modal, message } from 'antd';
+import { Modal, message } from 'antd';
 import React, { useState } from 'react';
 import { SemanticNodeType } from '../../enum';
-import { deleteDimension, deleteMetric } from '../../service';
+import { deleteDimension, deleteMetric, deleteDatasource } from '../../service';
 
 type Props = {
   nodeData: any;
-  nodeType: SemanticNodeType;
   onOkClick: () => void;
   onCancelClick: () => void;
   open: boolean;
@@ -13,7 +12,6 @@ type Props = {
 
 const DeleteConfirmModal: React.FC<Props> = ({
   nodeData,
-  nodeType,
   onOkClick,
   onCancelClick,
   open = false,
@@ -21,10 +19,20 @@ const DeleteConfirmModal: React.FC<Props> = ({
   const [confirmLoading, setConfirmLoading] = useState(false);
   const deleteNode = async () => {
     setConfirmLoading(true);
-    const { id } = nodeData;
-    let deleteQuery = deleteDimension;
+    const { id, nodeType } = nodeData;
+    let deleteQuery;
+    if (nodeType === SemanticNodeType.DIMENSION) {
+      deleteQuery = deleteDimension;
+    }
     if (nodeType === SemanticNodeType.METRIC) {
       deleteQuery = deleteMetric;
+    }
+    if (nodeType === SemanticNodeType.DATASOURCE) {
+      deleteQuery = deleteDatasource;
+    }
+    if (!deleteQuery) {
+      message.error('当前节点类型不是维度，指标，数据源中的一种，请确认节点数据');
+      return;
     }
     const { code, msg } = await deleteQuery(id);
     setConfirmLoading(false);

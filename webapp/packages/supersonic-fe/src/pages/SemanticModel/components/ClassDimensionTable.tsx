@@ -8,6 +8,7 @@ import type { StateType } from '../model';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
 import { getDatasourceList, getDimensionList, deleteDimension } from '../service';
 import DimensionInfoModal from './DimensionInfoModal';
+import DimensionValueSettingModal from './DimensionValueSettingModal';
 import { ISemantic } from '../data';
 import moment from 'moment';
 import styles from './style.less';
@@ -22,6 +23,11 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [dimensionItem, setDimensionItem] = useState<ISemantic.IDimensionItem>();
   const [dataSourceList, setDataSourceList] = useState<any[]>([]);
+  const [dimensionValueSettingList, setDimensionValueSettingList] = useState<
+    ISemantic.IDimensionValueSettingItem[]
+  >([]);
+  const [dimensionValueSettingModalVisible, setDimensionValueSettingModalVisible] =
+    useState<boolean>(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 20,
@@ -141,6 +147,20 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             >
               编辑
             </a>
+            <a
+              key="classEditBtn"
+              onClick={() => {
+                setDimensionItem(record);
+                setDimensionValueSettingModalVisible(true);
+                if (Array.isArray(record.dimValueMaps)) {
+                  setDimensionValueSettingList(record.dimValueMaps);
+                } else {
+                  setDimensionValueSettingList([]);
+                }
+              }}
+            >
+              维度值设置
+            </a>
             <Popconfirm
               title="确认删除？"
               okText="是"
@@ -175,7 +195,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       <ProTable
         className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft}`}
         actionRef={actionRef}
-        headerTitle="维度列表"
+        // headerTitle="维度列表"
         rowKey="id"
         columns={columns}
         request={queryDimensionList}
@@ -233,6 +253,26 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           }}
           onCancel={() => {
             setCreateModalVisible(false);
+          }}
+        />
+      )}
+      {dimensionValueSettingModalVisible && (
+        <DimensionValueSettingModal
+          dimensionValueSettingList={dimensionValueSettingList}
+          open={dimensionValueSettingModalVisible}
+          dimensionItem={dimensionItem}
+          onCancel={() => {
+            setDimensionValueSettingModalVisible(false);
+          }}
+          onSubmit={() => {
+            actionRef?.current?.reload();
+            dispatch({
+              type: 'domainManger/queryDimensionList',
+              payload: {
+                domainId: selectDomainId,
+              },
+            });
+            setDimensionValueSettingModalVisible(false);
           }}
         />
       )}
