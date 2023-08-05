@@ -1,9 +1,25 @@
 .message {
-  .domainName {
-    margin-bottom: 2px;
-    margin-left: 4px;
-    color: var(--text-color);
-    font-weight: 500;
+  .messageTitleBar {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: 6px;
+    column-gap: 10px;
+
+    .domainName {
+      margin-left: 4px;
+      color: var(--text-color);
+      font-weight: 500;
+    }
+
+    .messageTopBar {
+      position: relative;
+      max-width: 80%;
+      overflow: hidden;
+      color: var(--text-color-third);
+      font-size: 13px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
   }
   .messageContent {
     display: flex;
@@ -11,18 +27,6 @@
 
     .messageBody {
       width: 100%;
-
-      .messageTopBar {
-        max-width: 90%;
-        margin: 0 16px;
-        padding: 12px 0 8px;
-        overflow: hidden;
-        color: var(--text-color-third);
-        font-size: 13px;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        background-color: #fff;
-      }
     }
 
     .avatar {
@@ -88,7 +92,7 @@
         box-sizing: border-box;
         padding: 8px 16px;
         color: #fff;
-        font-size: 16px;
+        font-size: 14px;
         background: linear-gradient(81.62deg, #2870ea 8.72%, var(--chat-blue) 85.01%);
         border: 1px solid transparent;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
@@ -229,7 +233,6 @@
 
 .typingBubble {
   width: fit-content;
-  padding: 16px !important;
 }
 
 .quote {

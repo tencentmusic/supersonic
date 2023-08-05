@@ -1,8 +1,8 @@
 import IconFont from '@/components/IconFont';
 import styles from './style.less';
 
-const LeftAvatar = () => {
+const CopilotAvatar = () => {
   return <IconFont type="icon-zhinengsuanfa" className={styles.leftAvatar} />;
 };
 
-export default LeftAvatar;
+export default CopilotAvatar;

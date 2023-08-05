@@ -1,11 +1,12 @@
 import { PREFIX_CLS } from '../../../common/constants';
-import { formatByThousandSeperator } from '../../../utils/utils';
+import { formatMetric } from '../../../utils/utils';
 import ApplyAuth from '../ApplyAuth';
 import { DrillDownDimensionType, MsgDataType } from '../../../common/type';
 import PeriodCompareItem from './PeriodCompareItem';
 import DrillDownDimensions from '../../DrillDownDimensions';
 import { Spin } from 'antd';
 import classNames from 'classnames';
+import FilterSection from '../FilterSection';
 
 type Props = {
   data: MsgDataType;
@@ -25,8 +26,8 @@ const MetricCard: React.FC<Props> = ({
   const { queryMode, queryColumns, queryResults, entityInfo, aggregateInfo, chatContext } = data;
 
   const { metricInfos } = aggregateInfo || {};
-  const { dateInfo } = chatContext || {};
-  const { startDate, endDate } = dateInfo || {};
+  const { dateInfo, dimensionFilters } = chatContext || {};
+  const { startDate } = dateInfo || {};
 
   const indicatorColumn = queryColumns?.find(column => column.showType === 'NUMBER');
   const indicatorColumnName = indicatorColumn?.nameEn || '';
@@ -37,19 +38,36 @@ const MetricCard: React.FC<Props> = ({
     [`${prefixCls}-indicator-period-compare`]: metricInfos?.length > 0,
   });
 
+  const hasFilterSection = dimensionFilters?.length > 0;
+
   return (
     <div className={prefixCls}>
-      <div className={`${prefixCls}-indicator-name`}>{indicatorColumn?.name}</div>
+      <div className={`${prefixCls}-top-bar`}>
+        <div className={`${prefixCls}-indicator-name`}>{indicatorColumn?.name}</div>
+        {(hasFilterSection || drillDownDimension) && (
+          <div className={`${prefixCls}-filter-section-wrapper`}>
+            (
+            <div className={`${prefixCls}-filter-section`}>
+              <FilterSection chatContext={chatContext} entityInfo={entityInfo} />
+              {drillDownDimension && (
+                <div className={`${prefixCls}-filter-item`}>
+                  <div className={`${prefixCls}-filter-item-label`}>下钻维度：</div>
+                  <div className={`${prefixCls}-filter-item-value`}>{drillDownDimension.name}</div>
+                </div>
+              )}
+            </div>
+            )
+          </div>
+        )}
+      </div>
       <Spin spinning={loading}>
         <div className={indicatorClass}>
-          <div className={`${prefixCls}-date-range`}>
-            {startDate === endDate ? startDate : `${startDate} ~ ${endDate}`}
-          </div>
+          <div className={`${prefixCls}-date-range`}>{startDate}</div>
           {indicatorColumn && !indicatorColumn?.authorized ? (
             <ApplyAuth domain={entityInfo?.domainInfo.name || ''} onApplyAuth={onApplyAuth} />
           ) : (
             <div className={`${prefixCls}-indicator-value`}>
-              {formatByThousandSeperator(queryResults?.[0]?.[indicatorColumnName])}
+              {formatMetric(queryResults?.[0]?.[indicatorColumnName]) || '-'}
             </div>
           )}
           {metricInfos?.length > 0 && (

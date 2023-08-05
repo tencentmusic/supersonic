@@ -7,6 +7,10 @@
   margin-right: 20px;
   margin-bottom: 40px;
 
+  &.defaultCopilotMode {
+    margin-bottom: 30px;
+  }
+
   .composer {
     display: flex;
     height: 46px;
@@ -38,7 +42,52 @@
     }
 
     .composerInputWrapper {
+      position: relative;
       flex: 1;
+
+      .currentDomain {
+        position: absolute;
+        top: -30px;
+        left: 15px;
+        display: flex;
+        align-items: center;
+        width: calc(100% - 30px);
+        height: 30px;
+        padding: 0 12px;
+        overflow-x: auto;
+        color: var(--text-color-third);
+        white-space: nowrap;
+        background: #f4f6f5;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+
+        .currentDomainName {
+          margin-right: 12px;
+          font-size: 14px;
+
+          .entityName {
+            display: inline-block;
+            max-width: 100px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            vertical-align: top;
+          }
+        }
+
+        .cancelDomain {
+          padding: 0 6px;
+          font-size: 13px;
+          border: 1px solid var(--text-color-fourth);
+          border-radius: 4px;
+          cursor: pointer;
+
+          &:hover {
+            color: var(--text-color-fourth);
+            border-color: var(--text-color-fifth);
+          }
+        }
+      }
 
       .composerInput {
         width: 100%;
@@ -190,4 +239,8 @@
 
 .semanticType {
   margin-right: 10px;
+}
+
+.quoteText {
+  color: var(--chat-blue);
 }

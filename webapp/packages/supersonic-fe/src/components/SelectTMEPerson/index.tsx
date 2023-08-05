@@ -30,15 +30,7 @@ const SelectTMEPerson: FC<Props> = ({ placeholder, value, isMultiple = true, onC
         }
       },
       updater: (list) => {
-        const users = list.map((item: UserItem) => {
-          const { enName, chName, name } = item;
-          return {
-            ...item,
-            enName: enName || name,
-            chName: chName || name,
-          };
-        });
-        setUserList(users);
+        setUserList(list);
       },
       cleanup: () => {
         setUserList([]);
@@ -58,8 +50,8 @@ const SelectTMEPerson: FC<Props> = ({ placeholder, value, isMultiple = true, onC
     >
       {userList.map((item) => {
         return (
-          <Select.Option key={item.enName} value={item.enName}>
-            <TMEAvatar size="small" staffName={item.enName} />
+          <Select.Option key={item.name} value={item.name}>
+            <TMEAvatar size="small" staffName={item.name} />
             <span className={styles.userText}>{item.displayName}</span>
           </Select.Option>
         );

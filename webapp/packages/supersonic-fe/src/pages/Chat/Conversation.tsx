@@ -9,17 +9,22 @@ import {
   useImperativeHandle,
 } from 'react';
 import { useLocation } from 'umi';
-import ConversationModal from './ConversationModal';
-import { deleteConversation, getAllConversations, saveConversation } from '../service';
+import ConversationModal from './components/ConversationModal';
+import { deleteConversation, getAllConversations, saveConversation } from './service';
 import styles from './style.less';
-import { ConversationDetailType } from '../type';
+import { ConversationDetailType, DefaultEntityType } from './type';
+import { DEFAULT_CONVERSATION_NAME } from './constants';
 import moment from 'moment';
 import { SearchOutlined } from '@ant-design/icons';
-import { DEFAULT_CONVERSATION_NAME } from '@/common/constants';
 
 type Props = {
   currentConversation?: ConversationDetailType;
   collapsed?: boolean;
+  isCopilotMode?: boolean;
+  defaultDomainName?: string;
+  defaultEntityFilter?: DefaultEntityType;
+  triggerNewConversation?: boolean;
+  onNewConversationTriggered?: () => void;
   onSelectConversation: (
     conversation: ConversationDetailType,
     name?: string,
@@ -29,7 +34,16 @@ type Props = {
 };
 
 const Conversation: ForwardRefRenderFunction<any, Props> = (
-  { currentConversation, collapsed, onSelectConversation },
+  {
+    currentConversation,
+    collapsed,
+    isCopilotMode,
+    defaultDomainName,
+    defaultEntityFilter,
+    triggerNewConversation,
+    onNewConversationTriggered,
+    onSelectConversation,
+  },
   ref,
 ) => {
   const location = useLocation();
@@ -47,7 +61,7 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
   const updateData = async () => {
     const { data } = await getAllConversations();
     const conversationList = data || [];
-    setConversations(conversationList);
+    setConversations(conversationList.slice(0, 500));
     return conversationList;
   };
 
@@ -71,6 +85,20 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
   };
 
   useEffect(() => {
+    if (triggerNewConversation) {
+      const conversationName =
+        defaultEntityFilter?.entityName && window.location.pathname.includes('detail')
+          ? defaultEntityFilter.entityName
+          : defaultDomainName;
+      onAddConversation({ name: conversationName, type: 'CUSTOMIZE' });
+      onNewConversationTriggered?.();
+    }
+  }, [triggerNewConversation]);
+
+  useEffect(() => {
+    if (triggerNewConversation) {
+      return;
+    }
     if (q && cid === undefined && window.location.href.includes('/workbench/chat')) {
       onAddConversation({ name: q, domainId: domainId ? +domainId : undefined, entityId });
     } else {
@@ -114,6 +142,7 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
 
   const conversationClass = classNames(styles.conversation, {
     [styles.collapsed]: collapsed,
+    [styles.copilotMode]: isCopilotMode,
   });
 
   const convertTime = (date: string) => {

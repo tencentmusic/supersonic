@@ -3,13 +3,15 @@ import { Table as AntTable } from 'antd';
 import { MsgDataType } from '../../../common/type';
 import { CLS_PREFIX } from '../../../common/constants';
 import ApplyAuth from '../ApplyAuth';
+import { SizeType } from 'antd/es/config-provider/SizeContext';
 
 type Props = {
   data: MsgDataType;
+  size?: SizeType;
   onApplyAuth?: (domain: string) => void;
 };
 
-const Table: React.FC<Props> = ({ data, onApplyAuth }) => {
+const Table: React.FC<Props> = ({ data, size, onApplyAuth }) => {
   const { entityInfo, queryColumns, queryResults } = data;
 
   const prefixCls = `${CLS_PREFIX}-table`;
@@ -19,7 +21,7 @@ const Table: React.FC<Props> = ({ data, onApplyAuth }) => {
       return {
         dataIndex: nameEn,
         key: nameEn,
-        title: name,
+        title: name || nameEn,
         render: (value: string | number) => {
           if (!authorized) {
             return (
@@ -30,7 +32,7 @@ const Table: React.FC<Props> = ({ data, onApplyAuth }) => {
             return (
               <div className={`${prefixCls}-formatted-value`}>
                 {`${formatByDecimalPlaces(
-                  dataFormat?.needmultiply100 ? +value * 100 : value,
+                  dataFormat?.needMultiply100 ? +value * 100 : value,
                   dataFormat?.decimalPlaces || 2
                 )}%`}
               </div>
@@ -71,6 +73,7 @@ const Table: React.FC<Props> = ({ data, onApplyAuth }) => {
         style={{ width: '100%' }}
         scroll={{ x: 'max-content' }}
         rowClassName={getRowClassName}
+        size={size}
       />
     </div>
   );

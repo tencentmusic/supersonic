@@ -4,8 +4,9 @@ import { isEqual } from 'lodash';
 import { ChatItem } from 'supersonic-chat-sdk';
 import type { MsgDataType } from 'supersonic-chat-sdk';
 import { MessageItem, MessageTypeEnum } from './type';
+import Plugin from './components/Plugin';
+import { updateMessageContainerScroll } from '@/utils/utils';
 import styles from './style.less';
-import RecommendQuestions from './components/RecommendQuestions';
 
 type Props = {
   id: string;
@@ -13,10 +14,16 @@ type Props = {
   messageList: MessageItem[];
   isMobileMode?: boolean;
   conversationCollapsed: boolean;
+  copilotFullscreen?: boolean;
   onClickMessageContainer: () => void;
-  onMsgDataLoaded: (data: MsgDataType, questionId: string | number) => void;
-  onSelectSuggestion: (value: string) => void;
+  onMsgDataLoaded: (
+    data: MsgDataType,
+    questionId: string | number,
+    question: string,
+    valid: boolean,
+  ) => void;
   onCheckMore: (data: MsgDataType) => void;
+  onApplyAuth: (domain: string) => void;
 };
 
 const MessageContainer: React.FC<Props> = ({
@@ -25,9 +32,11 @@ const MessageContainer: React.FC<Props> = ({
   messageList,
   isMobileMode,
   conversationCollapsed,
+  copilotFullscreen,
   onClickMessageContainer,
   onMsgDataLoaded,
-  onSelectSuggestion,
+  onCheckMore,
+  onApplyAuth,
 }) => {
   const [triggerResize, setTriggerResize] = useState(false);
 
@@ -39,15 +48,20 @@ const MessageContainer: React.FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    onResize();
-  }, [conversationCollapsed]);
-
-  useEffect(() => {
     window.addEventListener('resize', onResize);
     return () => {
       window.removeEventListener('resize', onResize);
     };
   }, []);
+
+  useEffect(() => {
+    onResize();
+  }, [conversationCollapsed]);
+
+  useEffect(() => {
+    onResize();
+    updateMessageContainerScroll();
+  }, [copilotFullscreen]);
 
   const getFollowQuestions = (index: number) => {
     const followQuestions: string[] = [];
@@ -63,7 +77,7 @@ const MessageContainer: React.FC<Props> = ({
       const currentMsgEntityId = currentMsgData?.entityInfo?.entityId;
 
       if (
-        (msg.type === MessageTypeEnum.QUESTION || msg.type === MessageTypeEnum.INSTRUCTION) &&
+        (msg.type === MessageTypeEnum.QUESTION || msg.type === MessageTypeEnum.PLUGIN) &&
         !!currentMsgDomainId &&
         msgDomainId === currentMsgDomainId &&
         msgEntityId === currentMsgEntityId &&
@@ -77,19 +91,38 @@ const MessageContainer: React.FC<Props> = ({
     return followQuestions;
   };
 
+  const getFilters = (domainId?: number, entityId?: string) => {
+    if (!domainId || !entityId) {
+      return undefined;
+    }
+    return [
+      {
+        value: entityId,
+      },
+    ];
+  };
+
   return (
     <div id={id} className={styles.messageContainer} onClick={onClickMessageContainer}>
       <div className={styles.messageList}>
         {messageList.map((msgItem: MessageItem, index: number) => {
-          const { id: msgId, domainId, type, msg, msgValue, identityMsg, msgData } = msgItem;
+          const {
+            id: msgId,
+            domainId,
+            entityId,
+            type,
+            msg,
+            msgValue,
+            identityMsg,
+            msgData,
+            score,
+            isHistory,
+          } = msgItem;
 
           const followQuestions = getFollowQuestions(index);
 
           return (
             <div key={msgId} id={`${msgId}`} className={styles.messageItem}>
-              {type === MessageTypeEnum.RECOMMEND_QUESTIONS && (
-                <RecommendQuestions onSelectQuestion={onSelectSuggestion} />
-              )}
               {type === MessageTypeEnum.TEXT && <Text position="left" data={msg} />}
               {type === MessageTypeEnum.QUESTION && (
                 <>
@@ -97,16 +130,35 @@ const MessageContainer: React.FC<Props> = ({
                   {identityMsg && <Text position="left" data={identityMsg} />}
                   <ChatItem
                     msg={msgValue || msg || ''}
-                    followQuestions={followQuestions}
                     msgData={msgData}
                     conversationId={chatId}
                     domainId={domainId}
+                    filter={getFilters(domainId, entityId)}
                     isLastMessage={index === messageList.length - 1}
                     isMobileMode={isMobileMode}
                     triggerResize={triggerResize}
-                    onMsgDataLoaded={(data: MsgDataType) => {
-                      onMsgDataLoaded(data, msgId);
+                    onMsgDataLoaded={(data: MsgDataType, valid: boolean) => {
+                      onMsgDataLoaded(data, msgId, msgValue || msg || '', valid);
                     }}
+                    onUpdateMessageScroll={updateMessageContainerScroll}
+                  />
+                </>
+              )}
+              {type === MessageTypeEnum.PLUGIN && (
+                <>
+                  <Plugin
+                    id={msgId}
+                    followQuestions={followQuestions}
+                    data={msgData!}
+                    scoreValue={score}
+                    msg={msgValue || msg || ''}
+                    isHistory={isHistory}
+                    isLastMessage={index === messageList.length - 1}
+                    isMobileMode={isMobileMode}
+                    onReportLoaded={(height: number) => {
+                      updateMessageContainerScroll(true, height);
+                    }}
+                    onCheckMore={onCheckMore}
                   />
                 </>
               )}
@@ -122,7 +174,8 @@ function areEqual(prevProps: Props, nextProps: Props) {
   if (
     prevProps.id === nextProps.id &&
     isEqual(prevProps.messageList, nextProps.messageList) &&
-    prevProps.conversationCollapsed === nextProps.conversationCollapsed
+    prevProps.conversationCollapsed === nextProps.conversationCollapsed &&
+    prevProps.copilotFullscreen === nextProps.copilotFullscreen
   ) {
     return true;
   }

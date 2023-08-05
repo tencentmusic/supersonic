@@ -17,8 +17,8 @@
     display: flex;
     flex-direction: column;
     width: calc(100vw - 260px);
-    height: calc(100vh - 48px);
-    padding-left: 10px;
+    height: calc(100vh - 48px) !important;
+    padding-left: 6px;
     color: rgba(0, 0, 0, 0.87);
 
     .emptyHolder {
@@ -100,7 +100,7 @@
           .messageList {
             display: flex;
             flex-direction: column;
-            padding: 20px 20px 90px 4px;
+            padding: 20px 20px 60px 4px;
             row-gap: 10px;
 
             .messageItem {
@@ -109,6 +109,16 @@
               row-gap: 10px;
 
               :global {
+                .ant-table-small {
+                  .ant-table-tbody {
+                    .ant-table-cell {
+                      padding: 6px 0 !important;
+                    }
+                  }
+                  .ss-chat-table-formatted-value {
+                    font-size: 15px !important;
+                  }
+                }
                 .ant-table-row {
                   background-color: #fff;
                 }
@@ -218,12 +228,6 @@
                 }
               }
             }
-
-            &.miniProgramLoading {
-              position: absolute;
-              bottom: 10000px;
-              width: 100%;
-            }
           }
         }
       }
@@ -232,7 +236,7 @@
 
   &.conversationCollapsed {
     .chatApp {
-      width: 100% !important;
+      width: 100vw !important;
     }
   }
 
@@ -246,19 +250,193 @@
 
     .conversation {
       height: 100% !important;
+
+      .conversationList {
+        height: calc(100% - 50px) !important;
+      }
     }
 
     .chatApp {
-      width: 100% !important;
+      width: calc(100% - 260px) !important;
+      width: 100%;
       height: 100% !important;
       margin-top: 0 !important;
+      padding-left: 0 !important;
+    }
+
+    &.copilotFullscreen {
+      .chatApp {
+        width: calc(100% - 260px) !important;
+      }
+    }
+
+    &.conversationCollapsed {
+      .chatApp {
+        width: 100% !important;
+      }
+    }
+  }
+}
+
+.conversation {
+  position: relative;
+  width: 260px;
+  height: calc(100vh - 48px) !important;
+  background-color: #fff;
+  border-right: 1px solid var(--border-color-base);
+
+  .leftSection {
+    width: 100%;
+    height: 100%;
+
+    .searchConversation {
+      display: flex;
+      align-items: center;
+      padding: 12px 9px 10px;
+
+      .searchIcon {
+        color: #999 !important;
+      }
+
+      .searchTask {
+        font-size: 13px;
+        background-color: #f5f5f5;
+        border: 0;
+        border-radius: 4px;
+        box-shadow: none !important;
+
+        :global {
+          .ant-input {
+            font-size: 13px !important;
+            background-color: transparent !important;
+          }
+        }
+      }
+    }
+
+    .conversationList {
+      height: calc(calc(100vh - 48px) - 50px);
+      padding: 2px 8px 0;
+      overflow-y: auto;
+      .conversationItem {
+        display: flex;
+        align-items: center;
+        margin-top: 2px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        cursor: pointer;
+
+        .conversationIcon {
+          margin-right: 10px;
+          color: var(--text-color-fourth);
+          font-size: 20px;
+        }
+
+        .conversationContent {
+          width: 100%;
+
+          .topTitleBar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+
+            .conversationName {
+              width: 150px;
+              margin-right: 2px;
+              overflow: hidden;
+              color: var(--text-color);
+              font-size: 14px;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            }
+
+            .conversationTime {
+              color: var(--text-color-six);
+              font-size: 12px;
+            }
+          }
+
+          .subTitle {
+            width: 180px;
+            overflow: hidden;
+            color: var(--text-color-six);
+            font-size: 12px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+        }
+
+        &.activeConversationItem {
+          background-color: var(--light-blue-background);
+        }
+
+        &:hover {
+          background-color: var(--light-background);
+        }
+      }
+    }
+
+    .operateSection {
+      margin-top: 20px;
+      padding-left: 15px;
+    }
+
+    .operateItem {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      cursor: pointer;
+
+      .operateIcon {
+        margin-right: 10px;
+        color: var(--text-color-fourth);
+        font-size: 20px;
+      }
+
+      .operateLabel {
+        color: var(--text-color-third);
+        font-size: 14px;
+      }
+
+      &:hover {
+        .operateLabel {
+          color: var(--chat-blue);
+        }
+      }
+    }
+  }
+
+  &.collapsed {
+    width: 0;
+    padding: 0;
+    border-right: 0;
+
+    .leftSection {
+      .searchConversation {
+        display: none;
+      }
+
+      .conversationList {
+        display: none;
+      }
+
+      .operateSection {
+        display: none;
+      }
+    }
+  }
+
+  &.copilotMode {
+    &.collapsed {
+      width: 0 !important;
     }
   }
 }
 
 .mobile {
   .messageList {
-    padding: 20px 12px 20px !important;
+    padding: 20px 12px 60px !important;
   }
 }
 
@@ -326,7 +504,6 @@
 
   .example {
     margin-right: 4px;
-    // margin-left: 16px;
     color: var(--text-color-secondary);
     font-size: 13px;
   }
@@ -409,7 +586,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  // width: 530px;
 
   &.recentSearchBar {
     padding-top: 2px;
@@ -607,4 +783,14 @@
       border-bottom: 1px solid #f0f0f0;
     }
   }
+
+  .ss-chat-item-typing-bubble {
+    padding: 16px !important;
+  }
+
+  ss-chat-metric-card-drill-down-dimensions {
+    bottom: -38px !important;
+    left: 0 !important;
+  }
 }
+

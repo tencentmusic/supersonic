@@ -1,5 +1,5 @@
 import IconFont from '@/components/IconFont';
-import { getTextWidth, groupByColumn } from '@/utils/utils';
+import { getTextWidth, groupByColumn, isMobile } from '@/utils/utils';
 import { AutoComplete, Select, Tag, Tooltip } from 'antd';
 import classNames from 'classnames';
 import { debounce } from 'lodash';
@@ -9,20 +9,23 @@ import { searchRecommend } from 'supersonic-chat-sdk';
 import { SemanticTypeEnum, SEMANTIC_TYPE_MAP } from '../constants';
 import styles from './style.less';
 import { PLACE_HOLDER } from '../constants';
-import { DomainType } from '../type';
+import { DefaultEntityType, DomainType } from '../type';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 
 type Props = {
   inputMsg: string;
   chatId?: number;
   currentDomain?: DomainType;
+  defaultEntity?: DefaultEntityType;
+  isCopilotMode?: boolean;
+  copilotFullscreen?: boolean;
   domains: DomainType[];
-  isMobileMode?: boolean;
   collapsed: boolean;
   onToggleCollapseBtn: () => void;
   onInputMsgChange: (value: string) => void;
   onSendMsg: (msg: string, domainId?: number) => void;
   onAddConversation: () => void;
+  onCancelDefaultFilter: () => void;
 };
 
 const { OptGroup, Option } = Select;
@@ -42,13 +45,16 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     inputMsg,
     chatId,
     currentDomain,
+    defaultEntity,
     domains,
-    isMobileMode,
     collapsed,
+    isCopilotMode,
+    copilotFullscreen,
     onToggleCollapseBtn,
     onInputMsgChange,
     onSendMsg,
     onAddConversation,
+    onCancelDefaultFilter,
   },
   ref,
 ) => {
@@ -95,7 +101,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
 
   const getStepOptions = (recommends: any[]) => {
     const data = groupByColumn(recommends, 'domainName');
-    return isMobileMode && recommends.length > 6
+    return isMobile && recommends.length > 6
       ? Object.keys(data)
           .slice(0, 4)
           .reduce((result, key) => {
@@ -135,7 +141,8 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       fetchRef.current += 1;
       const fetchId = fetchRef.current;
       const { msgValue, domainId } = processMsg(msg, domains);
-      const res = await searchRecommend(msgValue.trim(), chatId, domainId || domain?.id);
+      const domainIdValue = domainId || domain?.id;
+      const res = await searchRecommend(msgValue.trim(), chatId, domainIdValue);
       if (fetchId !== fetchRef.current) {
         return;
       }
@@ -150,7 +157,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       }
       setOpen(recommends.length > 0);
     };
-    return debounce(getAssociateWords, 20);
+    return debounce(getAssociateWords, 200);
   }, []);
 
   const [debounceGetWords] = useState<any>(debounceGetWordsFunc);
@@ -222,7 +229,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   };
 
   const autoCompleteDropdownClass = classNames(styles.autoCompleteDropdown, {
-    [styles.mobile]: isMobileMode,
+    [styles.mobile]: isMobile,
     [styles.domainOptions]: domainOptions.length > 0,
   });
 
@@ -238,7 +245,8 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   };
 
   const chatFooterClass = classNames(styles.chatFooter, {
-    [styles.mobile]: isMobileMode,
+    [styles.mobile]: isMobile,
+    [styles.defaultCopilotMode]: isCopilotMode && !copilotFullscreen,
   });
 
   return (
@@ -255,6 +263,33 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
           />
         </Tooltip>
         <div className={styles.composerInputWrapper}>
+          {currentDomain && (
+            <div className={styles.currentDomain}>
+              <div className={styles.currentDomainName}>
+                输入联想与问题回复将限定于：“
+                <span className={styles.quoteText}>
+                  主题域【{currentDomain.name}】
+                  {defaultEntity && (
+                    <>
+                      <span>，</span>
+                      <span>{`${currentDomain.name.slice(
+                        0,
+                        currentDomain.name.length - 1,
+                      )}【`}</span>
+                      <span className={styles.entityName} title={defaultEntity.entityName}>
+                        {defaultEntity.entityName}
+                      </span>
+                      <span>】</span>
+                    </>
+                  )}
+                </span>
+                ”
+              </div>
+              <div className={styles.cancelDomain} onClick={onCancelDefaultFilter}>
+                取消限定
+              </div>
+            </div>
+          )}
           <AutoComplete
             className={styles.composerInput}
             placeholder={
@@ -265,7 +300,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
             value={inputMsg}
             onChange={onInputMsgChange}
             onSelect={onSelect}
-            autoFocus={!isMobileMode}
+            autoFocus={!isMobile}
             backfill
             ref={inputRef}
             id="chatInput"
@@ -332,7 +367,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
                                       ? 'blue'
                                       : option.schemaElementType === SemanticTypeEnum.VALUE
                                       ? 'geekblue'
-                                      : 'orange'
+                                      : 'cyan'
                                   }
                                 >
                                   {SEMANTIC_TYPE_MAP[option.schemaElementType] ||

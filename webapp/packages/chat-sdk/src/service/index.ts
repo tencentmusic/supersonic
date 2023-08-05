@@ -1,8 +1,8 @@
 import axios from './axiosInstance';
-import { ChatContextType, DrillDownDimensionType, HistoryType, MsgDataType, SearchRecommendItem } from '../common/type';
+import { ChatContextType, DrillDownDimensionType, HistoryType, MsgDataType, ParseDataType, SearchRecommendItem } from '../common/type';
 import { QueryDataType } from '../common/type';
 
-const DEFAULT_CHAT_ID = 999;
+const DEFAULT_CHAT_ID = 0;
 
 const prefix = '/api';
 
@@ -14,12 +14,41 @@ export function searchRecommend(queryText: string, chatId?: number, domainId?: n
   });
 }
 
-export function chatQuery(queryText: string, chatId?: number, domainId?: number, isSaveQuestionAnswer?: boolean) {
+export function chatQuery(queryText: string, chatId?: number, domainId?: number, filters?: any[]) {
   return axios.post<Result<MsgDataType>>(`${prefix}/chat/query/query`, {
     queryText,
     chatId: chatId || DEFAULT_CHAT_ID,
     domainId,
-    isSaveQuestionAnswer
+    queryFilters: filters ? {
+      filters
+    } : undefined,
+  });
+}
+
+export function chatParse(queryText: string, chatId?: number, domainId?: number, filters?: any[]) {
+  return axios.post<Result<ParseDataType>>(`${prefix}/chat/query/parse`, {
+    queryText,
+    chatId: chatId || DEFAULT_CHAT_ID,
+    domainId,
+    queryFilters: filters ? {
+      filters
+    } : undefined,
+  });
+}
+
+export function chatExecute(queryText: string,  chatId: number, parseInfo: ChatContextType ) {
+  return axios.post<Result<MsgDataType>>(`${prefix}/chat/query/execute`, {
+    queryText,
+    chatId: chatId || DEFAULT_CHAT_ID,
+    parseInfo,
+  });
+}
+
+export function switchEntity(entityId: string, domainId?: number, chatId?: number) {
+  return axios.post<Result<any>>(`${prefix}/chat/query/switchQuery`, {
+    queryText: entityId,
+    domainId,
+    chatId: chatId || DEFAULT_CHAT_ID,
   });
 }
 
@@ -74,6 +103,10 @@ export function queryEntities(entityId: string | number, domainId: number) {
     entityId,
     domainId,
   });
+}
+
+export function updateQAFeedback(questionId: number, score: number) {
+  return axios.post<Result<any>>(`${prefix}/chat/manage/updateQAFeedback?id=${questionId}&score=${score}&feedback=`);
 }
 
 export function queryDrillDownDimensions(domainId: number) {

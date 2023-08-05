@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import LeftAvatar from './LeftAvatar';
+import LeftAvatar from './CopilotAvatar';
 import Message from './Message';
 import styles from './style.less';
 

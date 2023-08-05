@@ -24,6 +24,10 @@ export function formatByThousandSeperator(value: number | string) {
   return partValues.join('.');
 }
 
+export function formatMetric(value: number | string) {
+  return formatByThousandSeperator(formatByDecimalPlaces(value, 4));
+}
+
 export function formatByUnit(value: number | string, unit: NumericUnit) {
   const numericValue = +value;
   if (isNaN(numericValue) || unit === NumericUnit.None) {
@@ -158,6 +162,11 @@ export function getChartLightenColor(col) {
 }
 
 export const isMobile = window.navigator.userAgent.match(/(iPhone|iPod|Android|ios)/i);
+
+
+export function isProd() {
+  return process.env.NODE_ENV === 'production';
+}
 
 export function setToken(token: string) {
   localStorage.setItem('SUPERSONIC_CHAT_TOKEN', token);

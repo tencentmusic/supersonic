@@ -12,67 +12,28 @@ type Props = {
   entityInfo?: EntityInfoType;
   children?: React.ReactNode;
   isMobileMode?: boolean;
+  queryMode?: string;
 };
 
 const Message: React.FC<Props> = ({
-  position,
   width,
   height,
-  title,
-  followQuestions,
   children,
   bubbleClassName,
-  chatContext,
   entityInfo,
-  isMobileMode,
+  queryMode,
+  chatContext,
 }) => {
-  const { dimensionFilters, domainName } = chatContext || {};
-
   const prefixCls = `${PREFIX_CLS}-message`;
+
+  const { domainName, dateInfo, dimensionFilters } = chatContext || {};
+  const { startDate, endDate } = dateInfo || {};
 
   const entityInfoList =
     entityInfo?.dimensions?.filter(dimension => !dimension.bizName.includes('photo')) || [];
 
-  const hasFilterSection =
-    dimensionFilters && dimensionFilters.length > 0 && entityInfoList.length === 0;
-
-  const filterSection = hasFilterSection && (
-    <div className={`${prefixCls}-filter-section`}>
-      <div className={`${prefixCls}-field-name`}>筛选条件：</div>
-      <div className={`${prefixCls}-filter-values`}>
-        {dimensionFilters.map(filterItem => {
-          const filterValue =
-            typeof filterItem.value === 'string' ? [filterItem.value] : filterItem.value || [];
-          return (
-            <div
-              className={`${prefixCls}-filter-item`}
-              key={filterItem.name}
-              title={filterValue.join('、')}
-            >
-              {filterItem.name}：{filterValue.join('、')}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-
-  const leftTitle = title
-    ? followQuestions && followQuestions.length > 0
-      ? `多轮对话：${[title, ...followQuestions].join(' ← ')}`
-      : `单轮对话：${title}`
-    : '';
-
   return (
     <div className={prefixCls}>
-      <div className={`${prefixCls}-title-bar`}>
-        {domainName && <div className={`${prefixCls}-domain-name`}>{domainName}</div>}
-        {position === 'left' && leftTitle && (
-          <div className={`${prefixCls}-top-bar`} title={leftTitle}>
-            ({leftTitle})
-          </div>
-        )}
-      </div>
       <div className={`${prefixCls}-content`}>
         <div className={`${prefixCls}-body`}>
           <div
@@ -82,10 +43,9 @@ const Message: React.FC<Props> = ({
               e.stopPropagation();
             }}
           >
-            {entityInfoList.length > 0 && (
-              <div className={`${prefixCls}-info-bar`}>
-                {/* {filterSection} */}
-                {entityInfoList.length > 0 && (
+            {(queryMode === 'METRIC_ENTITY' || queryMode === 'ENTITY_DETAIL') &&
+              entityInfoList.length > 0 && (
+                <div className={`${prefixCls}-info-bar`}>
                   <div className={`${prefixCls}-main-entity-info`}>
                     {entityInfoList.slice(0, 4).map(dimension => {
                       return (
@@ -100,7 +60,36 @@ const Message: React.FC<Props> = ({
                       );
                     })}
                   </div>
-                )}
+                </div>
+              )}
+            {queryMode === 'ENTITY_LIST_FILTER' && (
+              <div className={`${prefixCls}-info-bar`}>
+                <div className={`${prefixCls}-main-entity-info`}>
+                  <div className={`${prefixCls}-info-item`}>
+                    <div className={`${prefixCls}-info-name`}>主题域：</div>
+                    <div className={`${prefixCls}-info-value`}>{domainName}</div>
+                  </div>
+                  <div className={`${prefixCls}-info-item`}>
+                    <div className={`${prefixCls}-info-name`}>时间：</div>
+                    <div className={`${prefixCls}-info-value`}>
+                      {startDate === endDate ? startDate : `${startDate} ~ ${endDate}`}
+                    </div>
+                  </div>
+                  {dimensionFilters && dimensionFilters?.length > 0 && (
+                    <div className={`${prefixCls}-info-item`}>
+                      <div className={`${prefixCls}-info-name`}>筛选条件：</div>
+                      {dimensionFilters.map((filter, index) => (
+                        <div className={`${prefixCls}-info-value`}>
+                          <span>{filter.name}：</span>
+                          <span>
+                            {Array.isArray(filter.value) ? filter.value.join('、') : filter.value}
+                          </span>
+                          {index !== dimensionFilters.length - 1 && <span>、</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             <div className={`${prefixCls}-children`}>{children}</div>

@@ -46,8 +46,17 @@ const MetricTrendChart: React.FC<Props> = ({
     }
 
     const valueColumnName = metricField.nameEn;
-    const groupDataValue = groupByColumn(resultList, categoryColumnName);
-    const [startDate, endDate] = getMinMaxDate(resultList, dateColumnName);
+    const dataSource = resultList.map((item: any) => {
+      return {
+        ...item,
+        [dateColumnName]: Array.isArray(item[dateColumnName])
+          ? moment(item[dateColumnName].join('')).format('MM-DD')
+          : item[dateColumnName],
+      };
+    });
+
+    const groupDataValue = groupByColumn(dataSource, categoryColumnName);
+    const [startDate, endDate] = getMinMaxDate(dataSource, dateColumnName);
     const groupData = Object.keys(groupDataValue).reduce((result: any, key) => {
       result[key] =
         startDate &&
@@ -61,7 +70,7 @@ const MetricTrendChart: React.FC<Props> = ({
               endDate,
               dateColumnName.includes('month') ? 'months' : 'days'
             )
-          : groupDataValue[key].reverse();
+          : groupDataValue[key];
       return result;
     }, {});
 
@@ -167,7 +176,7 @@ const MetricTrendChart: React.FC<Props> = ({
           data: data.map((item: any) => {
             const value = item[valueColumnName];
             return metricField.dataFormatType === 'percent' &&
-              metricField.dataFormat?.needmultiply100
+              metricField.dataFormat?.needMultiply100
               ? value * 100
               : value;
           }),

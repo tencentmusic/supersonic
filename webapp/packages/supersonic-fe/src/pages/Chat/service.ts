@@ -24,10 +24,19 @@ export function getAllConversations() {
   return request<Result<any>>(`${prefix}/chat/manage/getAll`);
 }
 
+export function getMiniProgramList(entityId: string, domainId: number) {
+  return request<Result<any>>(
+    `${prefix}/chat/plugin/extend/getAvailablePlugin/${entityId}/${domainId}`,
+    {
+      method: 'GET',
+      skipErrorHandler: true,
+    },
+  );
+}
+
 export function getDomainList() {
   return request<Result<DomainType[]>>(`${prefix}/chat/conf/domainList/view`, {
     method: 'GET',
-    skipErrorHandler: true,
   });
 }
 
@@ -38,6 +47,12 @@ export function updateQAFeedback(questionId: number, score: number) {
       method: 'POST',
     },
   );
+}
+
+export function queryMetricSuggestion(domainId: number) {
+  return request<Result<any>>(`${prefix}/chat/recommend/metric/${domainId}`, {
+    method: 'GET',
+  });
 }
 
 export function querySuggestion(domainId: number) {

@@ -8,7 +8,9 @@ export default {
   'menu.exception.not-find': '404',
   'menu.exception.server-error': '500',
   'menu.semanticModel': '模型管理',
+  'menu.metric': '指标市场',
   'menu.chatSetting': '问答设置',
+  'menu.chatPlugin': '问答插件',
   'menu.login': '登录',
   'menu.chat': '问答对话',
 };

@@ -13,6 +13,41 @@
   width: 100%;
   row-gap: 4px;
 
+  &-top-bar {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+
+  &-filter-section-wrapper {
+    display: flex;
+    align-items: center;
+    color: var(--text-color-third);
+  }
+
+  &-filter-section {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    column-gap: 12px;
+    color: var(--text-color-third);
+  }
+
+  &-filter-item {
+    display: flex;
+    align-items: center;
+  }
+
+  &-filter-item-label {
+    color: var(--text-color-third);
+  }
+
+  &-filter-item-value {
+    color: var(--text-color);
+    font-weight: 500;
+  }
+
   &-indicator {
     display: flex;
     flex-direction: column;
@@ -171,4 +206,3 @@
     overflow-x: auto;
   }
 }
-

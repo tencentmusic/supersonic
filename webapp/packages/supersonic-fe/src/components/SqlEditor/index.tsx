@@ -49,11 +49,13 @@ export interface ISqlEditorProps {
   isRightTheme?: boolean;
   editorConfig?: IAceEditorProps;
   sizeChanged?: number;
+  isFullScreen?: boolean;
   fullScreenBtnVisible?: boolean;
   onSqlChange?: (sql: string) => void;
   onChange?: (sql: string) => void;
   onSelect?: (sql: string) => void;
   onCmdEnter?: () => void;
+  triggerBackToNormal?: () => void;
 }
 
 /**
@@ -71,10 +73,12 @@ function SqlEditor(props: ISqlEditorProps) {
     sizeChanged,
     editorConfig,
     fullScreenBtnVisible = true,
+    isFullScreen = false,
     onSqlChange,
     onChange,
     onSelect,
     onCmdEnter,
+    triggerBackToNormal,
   } = props;
   const resize = useCallback(
     debounce(() => {
@@ -118,11 +122,15 @@ function SqlEditor(props: ISqlEditorProps) {
     setHintsPopover(hints);
   }, [hints]);
 
-  const [isSqlIdeFullScreen, setIsSqlIdeFullScreen] = useState<boolean>(false);
+  const [isSqlIdeFullScreen, setIsSqlIdeFullScreen] = useState<boolean>(isFullScreen);
+
+  useEffect(() => {
+    setIsSqlIdeFullScreen(isFullScreen);
+  }, [isFullScreen]);
 
   const handleNormalScreenSqlIde = () => {
     setIsSqlIdeFullScreen(false);
-    // setSqlEditorHeight(getDefaultSqlEditorHeight(screenSize));
+    triggerBackToNormal?.();
   };
   return (
     <div className={styles.sqlEditor} style={{ height }}>

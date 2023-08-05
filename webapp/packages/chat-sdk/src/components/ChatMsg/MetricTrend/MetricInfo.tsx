@@ -1,5 +1,5 @@
 import { PREFIX_CLS } from '../../../common/constants';
-import { formatByThousandSeperator } from '../../../utils/utils';
+import { formatMetric } from '../../../utils/utils';
 import { AggregateInfoType } from '../../../common/type';
 import PeriodCompareItem from '../MetricCard/PeriodCompareItem';
 
@@ -18,7 +18,7 @@ const MetricInfo: React.FC<Props> = ({ aggregateInfo }) => {
     <div className={prefixCls}>
       <div className={`${prefixCls}-indicator`}>
         <div className={`${prefixCls}-date`}>{date}</div>
-        <div className={`${prefixCls}-indicator-value`}>{formatByThousandSeperator(value)}</div>
+        <div className={`${prefixCls}-indicator-value`}>{formatMetric(value)}</div>
         {metricInfos?.length > 0 && (
           <div className={`${prefixCls}-period-compare`}>
             {Object.keys(statistics).map((key: any) => (

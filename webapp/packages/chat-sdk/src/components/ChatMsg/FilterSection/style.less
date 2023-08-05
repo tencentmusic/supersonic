@@ -5,21 +5,25 @@
 .@{filter-section-prefix-cls} {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  row-gap: 12px;
   color: var(--text-color-secondary);
   font-weight: normal;
   font-size: 13px;
 
+  &-field-label {
+    color: var(--text-color-fourth);
+  }
+
   &-filter-values {
     display: flex;
     align-items: center;
-    column-gap: 6px;
+    flex-wrap: wrap;
+    column-gap: 12px;
   }
 
   &-filter-item {
-    padding: 2px 12px;
     color: var(--text-color-third);
-    background-color: #edf2f2;
-    border-radius: 13px;
     max-width: 200px;
     text-overflow: ellipsis;
     white-space: nowrap;

@@ -10,29 +10,33 @@ import Table from '../Table';
 import DrillDownDimensions from '../../DrillDownDimensions';
 import MetricInfo from './MetricInfo';
 import FilterSection from '../FilterSection';
-import moment from 'moment';
 
 type Props = {
   data: MsgDataType;
+  chartIndex: number;
   triggerResize?: boolean;
   onApplyAuth?: (domain: string) => void;
 };
 
-const MetricTrend: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
+const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApplyAuth }) => {
   const { queryColumns, queryResults, entityInfo, chatContext, queryMode, aggregateInfo } = data;
 
-  const dateOptions = DATE_TYPES[chatContext?.dateInfo?.period] || DATE_TYPES.DAY;
-  const initialDateOption = dateOptions.find(
-    (option: any) => option.value === chatContext?.dateInfo?.unit
-  )?.value;
+  const { dateMode, unit } = chatContext?.dateInfo || {};
 
-  const [columns, setColumns] = useState<ColumnType[]>(queryColumns);
+  const dateOptions = DATE_TYPES[chatContext?.dateInfo?.period] || DATE_TYPES.DAY;
+  const initialDateOption = dateOptions.find((option: any) => {
+    return dateMode === 'RECENT' && option.value === unit;
+  })?.value;
+
+  const [columns, setColumns] = useState<ColumnType[]>(queryColumns || []);
   const currentMetricField = columns.find((column: any) => column.showType === 'NUMBER');
 
   const [activeMetricField, setActiveMetricField] = useState<FieldType>(chatContext.metrics?.[0]);
   const [dataSource, setDataSource] = useState<any[]>(queryResults);
   const [currentDateOption, setCurrentDateOption] = useState<number>(initialDateOption);
+  const [dimensions, setDimensions] = useState<FieldType[]>(chatContext?.dimensions);
   const [drillDownDimension, setDrillDownDimension] = useState<DrillDownDimensionType>();
+  const [dateModeValue, setDateModeValue] = useState(dateMode);
   const [loading, setLoading] = useState(false);
 
   const dateField: any = columns.find(
@@ -45,6 +49,18 @@ const MetricTrend: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
   useEffect(() => {
     setDataSource(queryResults);
   }, [queryResults]);
+
+  useEffect(() => {
+    if (queryMode === 'METRIC_GROUPBY') {
+      const dimensionValue = chatContext?.dimensions?.find(
+        dimension => dimension.type === 'DIMENSION'
+      );
+      setDrillDownDimension(dimensionValue);
+      setDimensions(
+        chatContext?.dimensions?.filter(dimension => dimension.id !== dimensionValue?.id)
+      );
+    }
+  }, []);
 
   const onLoadData = async (value: any) => {
     setLoading(true);
@@ -61,19 +77,13 @@ const MetricTrend: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
 
   const selectDateOption = (dateOption: number) => {
     setCurrentDateOption(dateOption);
-    const endDate = moment().subtract(1, 'days').format('YYYY-MM-DD');
-    const startDate = moment(endDate)
-      .subtract(dateOption - 1, 'days')
-      .format('YYYY-MM-DD');
+    setDateModeValue('RECENT');
     onLoadData({
       metrics: [activeMetricField],
-      dimensions: drillDownDimension
-        ? [...(chatContext.dimensions || []), drillDownDimension]
-        : undefined,
+      dimensions: drillDownDimension ? [...(dimensions || []), drillDownDimension] : undefined,
       dateInfo: {
         ...chatContext?.dateInfo,
-        startDate,
-        endDate,
+        dateMode: 'RECENT',
         unit: dateOption,
       },
     });
@@ -82,10 +92,12 @@ const MetricTrend: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
   const onSwitchMetric = (metricField: FieldType) => {
     setActiveMetricField(metricField);
     onLoadData({
-      dateInfo: { ...chatContext.dateInfo, unit: currentDateOption || chatContext.dateInfo.unit },
-      dimensions: drillDownDimension
-        ? [...(chatContext.dimensions || []), drillDownDimension]
-        : undefined,
+      dateInfo: {
+        ...chatContext.dateInfo,
+        dateMode: dateModeValue,
+        unit: currentDateOption || chatContext.dateInfo.unit,
+      },
+      dimensions: drillDownDimension ? [...(dimensions || []), drillDownDimension] : undefined,
       metrics: [metricField],
     });
   };
@@ -93,10 +105,13 @@ const MetricTrend: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
   const onSelectDimension = (dimension?: DrillDownDimensionType) => {
     setDrillDownDimension(dimension);
     onLoadData({
-      dateInfo: { ...chatContext.dateInfo, unit: currentDateOption || chatContext.dateInfo.unit },
+      dateInfo: {
+        ...chatContext.dateInfo,
+        dateMode: dateModeValue,
+        unit: currentDateOption || chatContext.dateInfo.unit,
+      },
       metrics: [activeMetricField],
-      dimensions:
-        dimension === undefined ? undefined : [...(chatContext.dimensions || []), dimension],
+      dimensions: dimension === undefined ? undefined : [...(dimensions || []), dimension],
     });
   };
 
@@ -106,36 +121,58 @@ const MetricTrend: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
 
   const prefixCls = `${CLS_PREFIX}-metric-trend`;
 
+  const { dimensionFilters } = chatContext || {};
+
+  const hasFilterSection = dimensionFilters?.length > 0;
+
   return (
     <div className={prefixCls}>
       <div className={`${prefixCls}-charts`}>
-        {chatContext.metrics.length > 0 && (
-          <div className={`${prefixCls}-metric-fields`}>
-            {chatContext.metrics.map((metricField: FieldType) => {
-              const metricFieldClass = classNames(`${prefixCls}-metric-field`, {
-                [`${prefixCls}-metric-field-active`]:
-                  activeMetricField?.bizName === metricField.bizName &&
-                  chatContext.metrics.length > 1,
-                [`${prefixCls}-metric-field-single`]: chatContext.metrics.length === 1,
-              });
-              return (
-                <div
-                  className={metricFieldClass}
-                  key={metricField.bizName}
-                  onClick={() => {
-                    if (chatContext.metrics.length > 1) {
-                      onSwitchMetric(metricField);
-                    }
-                  }}
-                >
-                  {metricField.name}
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <div className={`${prefixCls}-top-bar`}>
+          {chatContext.metrics.length > 0 && (
+            <div className={`${prefixCls}-metric-fields`}>
+              {chatContext.metrics.slice(0, 5).map((metricField: FieldType) => {
+                const metricFieldClass = classNames(`${prefixCls}-metric-field`, {
+                  [`${prefixCls}-metric-field-active`]:
+                    activeMetricField?.bizName === metricField.bizName &&
+                    chatContext.metrics.length > 1,
+                  [`${prefixCls}-metric-field-single`]: chatContext.metrics.length === 1,
+                });
+                return (
+                  <div
+                    className={metricFieldClass}
+                    key={metricField.bizName}
+                    onClick={() => {
+                      if (chatContext.metrics.length > 1) {
+                        onSwitchMetric(metricField);
+                      }
+                    }}
+                  >
+                    {metricField.name}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {(hasFilterSection || drillDownDimension) && (
+            <div className={`${prefixCls}-filter-section-wrapper`}>
+              (
+              <div className={`${prefixCls}-filter-section`}>
+                <FilterSection chatContext={chatContext} />
+                {drillDownDimension && (
+                  <div className={`${prefixCls}-filter-item`}>
+                    <div className={`${prefixCls}-filter-item-label`}>下钻维度：</div>
+                    <div className={`${prefixCls}-filter-item-value`}>
+                      {drillDownDimension.name}
+                    </div>
+                  </div>
+                )}
+              </div>
+              )
+            </div>
+          )}
+        </div>
         {aggregateInfo?.metricInfos?.length > 0 && <MetricInfo aggregateInfo={aggregateInfo} />}
-        <FilterSection chatContext={chatContext} />
         <div className={`${prefixCls}-date-options`}>
           {dateOptions.map((dateOption: { label: string; value: number }, index: number) => {
             const dateOptionClass = classNames(`${prefixCls}-date-option`, {
@@ -164,7 +201,7 @@ const MetricTrend: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
           })}
         </div>
         <Spin spinning={loading}>
-          {dataSource?.length === 1 ? (
+          {dataSource?.length === 1 || chartIndex % 2 === 1 ? (
             <Table data={{ ...data, queryResults: dataSource }} onApplyAuth={onApplyAuth} />
           ) : (
             <MetricTrendChart
@@ -178,7 +215,9 @@ const MetricTrend: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
             />
           )}
         </Spin>
-        {(queryMode === 'METRIC_DOMAIN' || queryMode === 'METRIC_FILTER') && (
+        {(queryMode === 'METRIC_DOMAIN' ||
+          queryMode === 'METRIC_FILTER' ||
+          queryMode === 'METRIC_GROUPBY') && (
           <DrillDownDimensions
             domainId={chatContext.domainId}
             drillDownDimension={drillDownDimension}

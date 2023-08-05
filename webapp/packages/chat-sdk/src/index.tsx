@@ -25,7 +25,7 @@ export type {
   ChatContextType,
   MsgValidTypeEnum,
   MsgDataType,
-  InstructionResonseType,
+  PluginResonseType,
   ColumnType,
   SuggestionItemType,
   SuggestionType,

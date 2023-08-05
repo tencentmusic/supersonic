@@ -12,6 +12,8 @@ export type FieldType = {
   id: number;
   name: string;
   status: number;
+  domain: number;
+  type: string;
   value: string;
 };
 
@@ -33,7 +35,7 @@ export type EntityInfoType = {
 
 export type DateInfoType = {
   dateList: any[];
-  dateMode: number;
+  dateMode: string;
   period: string; 
   startDate: string;
   endDate: string;
@@ -56,8 +58,11 @@ export type ChatContextType = {
   dateInfo: DateInfoType;
   dimensions: FieldType[];
   metrics: FieldType[];
-  entity: number;
+  entity: { alias: string[] };
+  elementMatches: any[];
+  queryMode: string;
   dimensionFilters: FilterItemType[];
+  properties: any;
 };
 
 export enum MsgValidTypeEnum {
@@ -67,16 +72,11 @@ export enum MsgValidTypeEnum {
   INVALID = 3,
 };
 
-export type InstructionResonseType = {
+export type PluginResonseType = {
   description: string;
-  instructionConfig: {
-    showElements: { elementId: string, params: any }[];
-    showType: string;
-    relaShowElements: { elementId: string, params: any }[];
-    relaShowType: string;
-  };
-  instructionId: number;
-  instructionType: string;
+  webPage: { url: string, paramOptions: any, params: any, valueParams: any };
+  pluginId: number;
+  pluginType: string;
   name: string;
 }
 
@@ -103,8 +103,22 @@ export type MsgDataType = {
   queryId: number;
   queryMode: string;
   queryState: string;
-  response: InstructionResonseType;
+  response: PluginResonseType;
 };
+
+export enum ParseStateEnum {
+  COMPLETED = 'COMPLETED',
+  PENDING = 'PENDING',
+  FAILED = 'FAILED',
+}
+
+export type ParseDataType = {
+  chatId: number;
+  queryText: string;
+  state: ParseStateEnum;
+  selectedParses: ChatContextType[];
+  candidateParses: ChatContextType[];
+}
 
 export type QueryDataType = {
   queryColumns: ColumnType[];
@@ -120,7 +134,7 @@ export type ColumnType = {
   dataFormatType: string;
   dataFormat: {
     decimalPlaces: number;
-    needmultiply100: boolean;
+    needMultiply100: boolean;
   };
 };
 

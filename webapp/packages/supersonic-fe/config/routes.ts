@@ -8,16 +8,12 @@ const ENV_KEY = {
 const { APP_TARGET } = process.env;
 
 const ROUTES = [
-  ...(APP_TARGET !== 'inner'
-    ? [
-        {
-          path: '/chat',
-          name: 'chat',
-          component: './Chat',
-          envEnableList: [ENV_KEY.CHAT],
-        },
-      ]
-    : []),
+  {
+    path: '/chat',
+    name: 'chat',
+    component: './Chat',
+    envEnableList: [ENV_KEY.CHAT],
+  },
   {
     path: '/chatSetting/:modelId?/:menuKey?',
     name: 'chatSetting',
@@ -25,9 +21,21 @@ const ROUTES = [
     envEnableList: [ENV_KEY.CHAT],
   },
   {
+    path: '/chatPlugin',
+    name: 'chatPlugin',
+    component: './ChatPlugin',
+    envEnableList: [ENV_KEY.CHAT],
+  },
+  {
     path: '/semanticModel/:modelId?/:menuKey?',
     name: 'semanticModel',
     component: './SemanticModel/ProjectManager',
+    envEnableList: [ENV_KEY.SEMANTIC],
+  },
+  {
+    path: '/Metric',
+    name: 'metric',
+    component: './SemanticModel/Metric',
     envEnableList: [ENV_KEY.SEMANTIC],
   },
   {
