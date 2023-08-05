@@ -1,0 +1,24 @@
+@import '../../styles/index.less';
+
+@recommend-options-prefix-cls: ~'@{supersonic-chat-prefix}-recommend-options';
+
+.@{recommend-options-prefix-cls} {
+  padding: 8px 0 12px;
+
+  &-item-name-column {
+    display: flex;
+    align-items: center;
+    column-gap: 6px;
+  }
+
+  &-entity-name {
+    &:hover {
+      color: var(--primary-color);
+    }
+  }
+
+  &-table-row {
+    cursor: pointer;
+  }
+}
+

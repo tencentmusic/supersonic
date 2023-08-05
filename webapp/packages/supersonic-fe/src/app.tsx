@@ -88,7 +88,10 @@ export async function getInitialState(): Promise<{
     await getToken();
   }
 
-  const currentUser = await fetchUserInfo();
+  let currentUser: any;
+  if (!window.location.pathname.includes('login')) {
+    currentUser = await fetchUserInfo();
+  }
 
   if (currentUser) {
     localStorage.setItem('user', currentUser.staffName);

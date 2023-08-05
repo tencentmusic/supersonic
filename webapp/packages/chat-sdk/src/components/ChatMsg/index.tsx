@@ -10,19 +10,13 @@ import { queryData } from '../../service';
 
 type Props = {
   question: string;
-  followQuestions?: string[];
   data: MsgDataType;
+  chartIndex: number;
   isMobileMode?: boolean;
   triggerResize?: boolean;
 };
 
-const ChatMsg: React.FC<Props> = ({
-  question,
-  followQuestions,
-  data,
-  isMobileMode,
-  triggerResize,
-}) => {
+const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, triggerResize }) => {
   const { queryColumns, queryResults, chatContext, entityInfo, queryMode } = data;
 
   const [columns, setColumns] = useState<ColumnType[]>(queryColumns);
@@ -41,7 +35,10 @@ const ChatMsg: React.FC<Props> = ({
   const metricFields = columns.filter(item => item.showType === 'NUMBER');
 
   const isMetricCard =
-    (queryMode === 'METRIC_DOMAIN' || queryMode === 'METRIC_FILTER') && singleData;
+    (queryMode === 'METRIC_DOMAIN' || queryMode === 'METRIC_FILTER') &&
+    (singleData || chatContext?.dateInfo?.startDate === chatContext?.dateInfo?.endDate);
+
+  const isText = columns.length === 1 && columns[0].showType === 'CATEGORY' && singleData;
 
   const onLoadData = async (value: any) => {
     setLoading(true);
@@ -65,6 +62,13 @@ const ChatMsg: React.FC<Props> = ({
   };
 
   const getMsgContent = () => {
+    if (isText) {
+      return (
+        <div style={{ lineHeight: '24px', width: 'fit-content' }}>
+          {dataSource[0][columns[0].nameEn]}
+        </div>
+      );
+    }
     if (isMetricCard) {
       return (
         <MetricCard
@@ -88,6 +92,7 @@ const ChatMsg: React.FC<Props> = ({
         return (
           <MetricTrend
             data={{ ...data, queryColumns: columns, queryResults: dataSource }}
+            chartIndex={chartIndex}
             triggerResize={triggerResize}
           />
         );
@@ -105,7 +110,9 @@ const ChatMsg: React.FC<Props> = ({
   };
 
   let width = '100%';
-  if (isMetricCard) {
+  if (isText) {
+    width = 'fit-content';
+  } else if (isMetricCard) {
     width = '370px';
   } else if (categoryField.length > 1 && !isMobile && !isMobileMode) {
     if (columns.length === 1) {
@@ -121,9 +128,9 @@ const ChatMsg: React.FC<Props> = ({
       chatContext={chatContext}
       entityInfo={entityInfo}
       title={question}
-      followQuestions={followQuestions}
       isMobileMode={isMobileMode}
       width={width}
+      queryMode={queryMode}
     >
       {getMsgContent()}
     </Message>

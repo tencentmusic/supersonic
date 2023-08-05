@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import LeftAvatar from '../LeftAvatar';
+import LeftAvatar from '../CopilotAvatar';
 import Message from '../Message';
 import styles from './style.less';
 import { queryRecommendQuestions } from '../../service';

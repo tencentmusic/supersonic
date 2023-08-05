@@ -34,7 +34,14 @@ const Message: React.FC<Props> = ({
 
   return (
     <div className={messageClass} style={{ width }}>
-      {!!domainName && <div className={styles.domainName}>{domainName}</div>}
+      {/* <div className={styles.messageTitleBar}>
+        {!!domainName && <div className={styles.domainName}>{domainName}</div>}
+        {position === 'left' && leftTitle && (
+          <div className={styles.messageTopBar} title={leftTitle}>
+            ({leftTitle})
+          </div>
+        )}
+      </div> */}
       <div className={styles.messageContent}>
         <div className={styles.messageBody}>
           <div
@@ -44,11 +51,11 @@ const Message: React.FC<Props> = ({
               e.stopPropagation();
             }}
           >
-            {position === 'left' && question && (
+            {/* {position === 'left' && question && (
               <div className={styles.messageTopBar} title={leftTitle}>
                 {leftTitle}
               </div>
-            )}
+            )} */}
             {children}
           </div>
         </div>

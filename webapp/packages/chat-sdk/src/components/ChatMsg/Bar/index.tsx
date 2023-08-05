@@ -31,7 +31,7 @@ const BarChart: React.FC<Props> = ({
 
   const { queryColumns, queryResults, entityInfo, chatContext, queryMode } = data;
 
-  const { dateInfo } = chatContext || {};
+  const { dateInfo, dimensionFilters } = chatContext || {};
 
   const categoryColumnName =
     queryColumns?.find(column => column.showType === 'CATEGORY')?.nameEn || '';
@@ -51,13 +51,6 @@ const BarChart: React.FC<Props> = ({
     );
     const xData = data.map(item => item[categoryColumnName]);
     instanceObj.setOption({
-      // legend: {
-      //   left: 0,
-      //   top: 0,
-      //   icon: 'rect',
-      //   itemWidth: 15,
-      //   itemHeight: 5,
-      // },
       xAxis: {
         type: 'category',
         axisTick: {
@@ -166,21 +159,43 @@ const BarChart: React.FC<Props> = ({
     );
   }
 
+  const hasFilterSection = dimensionFilters?.length > 0;
+
+  const prefixCls = `${PREFIX_CLS}-bar`;
+
   return (
     <div>
-      <div className={`${PREFIX_CLS}-bar-metric-name`}>{metricColumn?.name}</div>
-      <FilterSection chatContext={chatContext} />
+      <div className={`${prefixCls}-top-bar`}>
+        <div className={`${prefixCls}-indicator-name`}>{metricColumn?.name}</div>
+        {(hasFilterSection || drillDownDimension) && (
+          <div className={`${prefixCls}-filter-section-wrapper`}>
+            (
+            <div className={`${prefixCls}-filter-section`}>
+              <FilterSection chatContext={chatContext} entityInfo={entityInfo} />
+              {drillDownDimension && (
+                <div className={`${prefixCls}-filter-item`}>
+                  <div className={`${prefixCls}-filter-item-label`}>下钻维度：</div>
+                  <div className={`${prefixCls}-filter-item-value`}>{drillDownDimension.name}</div>
+                </div>
+              )}
+            </div>
+            )
+          </div>
+        )}
+      </div>
       {dateInfo && (
-        <div className={`${PREFIX_CLS}-bar-date-range`}>
+        <div className={`${prefixCls}-date-range`}>
           {dateInfo.startDate === dateInfo.endDate
             ? dateInfo.startDate
             : `${dateInfo.startDate} ~ ${dateInfo.endDate}`}
         </div>
       )}
       <Spin spinning={loading}>
-        <div className={`${PREFIX_CLS}-bar-chart`} ref={chartRef} />
+        <div className={`${prefixCls}-chart`} ref={chartRef} />
       </Spin>
-      {(queryMode === 'METRIC_DOMAIN' || queryMode === 'METRIC_FILTER') && (
+      {(queryMode === 'METRIC_DOMAIN' ||
+        queryMode === 'METRIC_FILTER' ||
+        queryMode === 'METRIC_GROUPBY') && (
         <DrillDownDimensions
           domainId={chatContext.domainId}
           drillDownDimension={drillDownDimension}

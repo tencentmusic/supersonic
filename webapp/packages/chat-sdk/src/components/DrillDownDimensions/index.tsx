@@ -14,7 +14,6 @@ type Props = {
   onSelectDimension: (dimension?: DrillDownDimensionType) => void;
 };
 
-const DEFAULT_DIMENSION_COUNT = 5;
 const MAX_DIMENSION_COUNT = 20;
 
 const DrillDownDimensions: React.FC<Props> = ({
@@ -25,6 +24,8 @@ const DrillDownDimensions: React.FC<Props> = ({
   onSelectDimension,
 }) => {
   const [dimensions, setDimensions] = useState<DrillDownDimensionType[]>([]);
+
+  const DEFAULT_DIMENSION_COUNT = isMetricCard ? 3 : 5;
 
   const prefixCls = `${CLS_PREFIX}-drill-down-dimensions`;
 

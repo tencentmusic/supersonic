@@ -10,6 +10,8 @@ import ENV_CONFIG from './envConfig';
 const { REACT_APP_ENV, RUN_TYPE } = process.env;
 
 export default defineConfig({
+  webpack5: {},
+  mfsu: {},
   define: {
     // 添加这个自定义的环境变量
     // 'process.env.REACT_APP_ENV': process.env.REACT_APP_ENV, // * REACT_APP_ENV 本地开发环境：dev，测试服：test，正式服：prod

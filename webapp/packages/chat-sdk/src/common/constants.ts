@@ -42,9 +42,18 @@ export const THEME_COLOR_LIST = [
 
 export const PARSE_ERROR_TIP = '小Q不太懂您说什么呐，回去一定补充知识';
 
+export const SEARCH_EXCEPTION_TIP = '查询出错啦，智能小Q还不够聪明，请您换个表达再试试';
+
 export const MSG_VALID_TIP = {
   [MsgValidTypeEnum.SEARCH_EXCEPTION]: '数据查询异常',
   [MsgValidTypeEnum.INVALID]: '小Q不太懂您说什么呐，回去一定补充知识',
 };
 
 export const PREFIX_CLS = 'ss-chat';
+
+export const AGG_TYPE_MAP = {
+  SUM: '总计',
+  AVG: '平均值',
+  MAX: '最大值',
+  MIN: '最小值',
+}

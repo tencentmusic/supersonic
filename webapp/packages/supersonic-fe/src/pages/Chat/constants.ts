@@ -27,10 +27,12 @@ export const SEMANTIC_TYPE_MAP = {
   [SemanticTypeEnum.VALUE]: '维度值',
 };
 
-export const DEFAULT_CONVERSATION_NAME = '新问答对话'
+export const CHAT_TITLE = '';
 
-export const WEB_TITLE = '问答对话'
+export const DEFAULT_CONVERSATION_NAME = '新问答对话';
 
-export const CHAT_TITLE = '问答'
+export const PAGE_TITLE = '问答对话';
 
-export const PLACE_HOLDER = '请输入您的问题'
+export const WEB_TITLE = '问答对话';
+
+export const PLACE_HOLDER = '请输入您的问题';

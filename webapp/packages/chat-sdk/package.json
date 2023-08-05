@@ -1,11 +1,12 @@
 {
   "name": "supersonic-chat-sdk",
-  "version": "0.0.0",
+  "version": "0.3.0",
   "main": "dist/index.es.js",
   "module": "dist/index.es.js",
   "unpkg": "dist/index.umd.js",
   "types": "dist/index.d.ts",
   "dependencies": {
+    "@uiw/react-watermark": "^0.0.5",
     "antd": "^5.5.2",
     "axios": "^1.4.0",
     "classnames": "^2.3.2",

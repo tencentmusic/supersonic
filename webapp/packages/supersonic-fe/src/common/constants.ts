@@ -17,11 +17,3 @@ export enum NumericUnit {
   Million = 'M',
   Giga = 'G',
 }
-
-export const DEFAULT_CONVERSATION_NAME = '新问答对话';
-
-export const PAGE_TITLE = '问答对话';
-
-export const WEB_TITLE = '问答对话 - 超音数';
-
-export const PLACE_HOLDER = '请输入您的问题';
