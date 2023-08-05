@@ -54,7 +54,7 @@ public class MetricTopNQuery extends MetricSemanticQuery {
         super.fillParseInfo(domainId, chatContext);
 
         parseInfo.setLimit(ORDERBY_MAX_RESULTS);
-        parseInfo.setBonus(2.0);
+        parseInfo.setScore(2.0);
         parseInfo.setAggType(AggregateTypeEnum.SUM);
 
         SchemaElement metric = parseInfo.getMetrics().iterator().next();

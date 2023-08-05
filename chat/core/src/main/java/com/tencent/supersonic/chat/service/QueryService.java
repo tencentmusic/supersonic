@@ -2,9 +2,11 @@ package com.tencent.supersonic.chat.service;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
+import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.api.pojo.request.QueryDataRequest;
+import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
 import org.apache.calcite.sql.parser.SqlParseException;
 
 /***
@@ -12,9 +14,14 @@ import org.apache.calcite.sql.parser.SqlParseException;
  */
 public interface QueryService {
 
-    QueryResult executeQuery(QueryRequest queryCtx) throws Exception;
+    ParseResp performParsing(QueryReq queryReq);
 
-    SemanticParseInfo queryContext(QueryRequest queryCtx);
+    QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception;
 
-    QueryResult executeDirectQuery(QueryDataRequest queryData, User user) throws SqlParseException;
+    QueryResult executeQuery(QueryReq queryReq) throws Exception;
+
+    SemanticParseInfo queryContext(QueryReq queryReq);
+
+    QueryResult executeDirectQuery(QueryDataReq queryData, User user) throws SqlParseException;
+
 }

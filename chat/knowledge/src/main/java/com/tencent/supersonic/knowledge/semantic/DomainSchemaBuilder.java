@@ -4,6 +4,7 @@ import com.tencent.supersonic.chat.api.pojo.DomainSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
+import com.tencent.supersonic.semantic.api.model.pojo.Entity;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
@@ -13,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DomainSchemaBuilder {
 
@@ -100,18 +102,21 @@ public class DomainSchemaBuilder {
         domainSchema.getDimensions().addAll(dimensions);
         domainSchema.getDimensionValues().addAll(dimensionValues);
 
-        if (!CollectionUtils.isEmpty(resp.getEntityNames())) {
-            Set<SchemaElement> entities = new HashSet<>();
-            for (String entity : resp.getEntityNames()) {
-                entities.add(SchemaElement.builder()
-                        .domain(resp.getId())
-                        .id(resp.getId())
-                        .name(entity)
-                        .bizName(entity)
-                        .type(SchemaElementType.ENTITY)
-                        .build());
+
+        Entity entity = resp.getEntity();
+        if (Objects.nonNull(entity)) {
+            SchemaElement entityElement = new SchemaElement();
+
+            if (!CollectionUtils.isEmpty(entity.getNames()) && Objects.nonNull(entity.getEntityId())) {
+                Map<Long, SchemaElement> idAndDimPair = dimensions.stream()
+                        .collect(Collectors.toMap(SchemaElement::getId, schemaElement -> schemaElement,(k1,k2)->k2));
+                if (idAndDimPair.containsKey(entity.getEntityId())) {
+                    entityElement = idAndDimPair.get(entity.getEntityId());
+                    entityElement.setType(SchemaElementType.ENTITY);
+                }
+                entityElement.setAlias(entity.getNames());
+                domainSchema.setEntity(entityElement);
             }
-            domainSchema.getEntities().addAll(entities);
         }
 
         return domainSchema;

@@ -20,5 +20,5 @@ com.tencent.supersonic.chat.query.QuerySelector=\
 com.tencent.supersonic.chat.application.query.DomainResolver=\
   com.tencent.supersonic.chat.application.query.HeuristicDomainResolver
 
-com.tencent.supersonic.auth.authentication.domain.interceptor.AuthenticationInterceptor=\
-    com.tencent.supersonic.auth.authentication.domain.interceptor.DefaultAuthenticationInterceptor
+com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\
+    com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor

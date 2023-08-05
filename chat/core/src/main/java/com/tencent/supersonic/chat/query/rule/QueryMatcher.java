@@ -26,8 +26,6 @@ public class QueryMatcher {
     private boolean supportOrderBy;
     private List<AggregateTypeEnum> orderByTypes = Arrays.asList(AggregateTypeEnum.MAX, AggregateTypeEnum.MIN,
             AggregateTypeEnum.TOPN);
-    private Long FREQUENCY = 9999999L;
-    private double SIMILARITY = 1.0;
 
     public QueryMatcher() {
         for (SchemaElementType type : SchemaElementType.values()) {
@@ -52,11 +50,10 @@ public class QueryMatcher {
      * @return a list of all matched schema elements,
      *         empty list if no matches can be found
      */
-    public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches, QueryFilters queryFilters) {
+    public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches) {
         List<SchemaElementMatch> elementMatches = new ArrayList<>();
-        List<SchemaElementMatch> schemaElementMatchWithQueryFilter = addSchemaElementMatch(candidateElementMatches, queryFilters);
         HashMap<SchemaElementType, Integer> schemaElementTypeCount = new HashMap<>();
-        for (SchemaElementMatch schemaElementMatch : schemaElementMatchWithQueryFilter) {
+        for (SchemaElementMatch schemaElementMatch : candidateElementMatches) {
             SchemaElementType schemaElementType = schemaElementMatch.getElement().getType();
             if (schemaElementTypeCount.containsKey(schemaElementType)) {
                 schemaElementTypeCount.put(schemaElementType, schemaElementTypeCount.get(schemaElementType) + 1);
@@ -75,7 +72,7 @@ public class QueryMatcher {
         }
 
         // add element match if its element type is not declared as unused
-        for (SchemaElementMatch elementMatch : schemaElementMatchWithQueryFilter) {
+        for (SchemaElementMatch elementMatch : candidateElementMatches) {
             QueryMatchOption elementOption = elementOptionMap.get(elementMatch.getElement().getType());
             if (Objects.nonNull(elementOption) && !elementOption.getSchemaElementOption()
                     .equals(QueryMatchOption.OptionType.UNUSED)) {
@@ -84,32 +81,6 @@ public class QueryMatcher {
         }
 
         return elementMatches;
-    }
-
-    private List<SchemaElementMatch> addSchemaElementMatch(List<SchemaElementMatch> candidateElementMatches, QueryFilters queryFilter) {
-        List<SchemaElementMatch> schemaElementMatchWithQueryFilter = new ArrayList<>(candidateElementMatches);
-        if (queryFilter == null || CollectionUtils.isEmpty(queryFilter.getFilters())) {
-            return schemaElementMatchWithQueryFilter;
-        }
-        QueryMatchOption queryMatchOption = elementOptionMap.get(SchemaElementType.VALUE);
-        if (queryMatchOption != null && QueryMatchOption.OptionType.REQUIRED.equals(queryMatchOption.getSchemaElementOption())) {
-            for (QueryFilter filter : queryFilter.getFilters()) {
-                SchemaElement element = SchemaElement.builder()
-                        .id(filter.getElementID())
-                        .name(String.valueOf(filter.getValue()))
-                        .type(SchemaElementType.VALUE)
-                        .build();
-                SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
-                        .element(element)
-                        .frequency(FREQUENCY)
-                        .word(String.valueOf(filter.getValue()))
-                        .similarity(SIMILARITY)
-                        .detectWord(Constants.EMPTY)
-                        .build();
-                schemaElementMatchWithQueryFilter.add(schemaElementMatch);
-            }
-        }
-        return schemaElementMatchWithQueryFilter;
     }
 
     private int getCount(HashMap<SchemaElementType, Integer> schemaElementTypeCount,

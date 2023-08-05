@@ -3,13 +3,16 @@ package com.tencent.supersonic.chat.parser;
 
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.*;
+import com.tencent.supersonic.chat.plugin.PluginParseResult;
+import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
+import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,31 +28,36 @@ import java.util.stream.Collectors;
 public class SatisfactionChecker {
 
     private static final double LONG_TEXT_THRESHOLD = 0.8;
-    private static final double SHORT_TEXT_THRESHOLD = 0.6;
+    private static final double SHORT_TEXT_THRESHOLD = 0.5;
     private static final int QUERY_TEXT_LENGTH_THRESHOLD = 10;
-
-    public static final double BONUS_THRESHOLD = 100;
+    public static final double EMBEDDING_THRESHOLD = 0.2;
 
     // check all the parse info in candidate
     public static boolean check(QueryContext queryCtx) {
         for (SemanticQuery query : queryCtx.getCandidateQueries()) {
-            SemanticParseInfo semanticParseInfo = query.getParseInfo();
-            Long domainId = semanticParseInfo.getDomainId();
-            List<SchemaElementMatch> schemaElementMatches = queryCtx.getMapInfo()
-                    .getMatchedElements(domainId);
-            if (check(queryCtx.getRequest().getQueryText(), semanticParseInfo, schemaElementMatches)) {
-                return true;
+            if (query instanceof RuleSemanticQuery) {
+                if (checkRuleThreshHold(queryCtx.getRequest().getQueryText(), query.getParseInfo())) {
+                    return true;
+                }
+            } else if (query instanceof PluginSemanticQuery) {
+                if (checkEmbeddingThreshold(query.getParseInfo())) {
+                    log.info("query mode :{} satisfy check", query.getQueryMode());
+                    return true;
+                }
             }
         }
         return false;
     }
 
+    private static boolean checkEmbeddingThreshold(SemanticParseInfo semanticParseInfo) {
+        Object object = semanticParseInfo.getProperties().get(Constants.CONTEXT);
+        PluginParseResult pluginParseResult = JsonUtil.toObject(JsonUtil.toString(object), PluginParseResult.class);
+        return EMBEDDING_THRESHOLD > pluginParseResult.getDistance();
+    }
+
     //check single parse info
-    private static boolean check(String text, SemanticParseInfo semanticParseInfo,
-            List<SchemaElementMatch> schemaElementMatches) {
-        if (semanticParseInfo.getBonus() != null && semanticParseInfo.getBonus() >= BONUS_THRESHOLD) {
-            return true;
-        }
+    private static boolean checkRuleThreshHold(String text, SemanticParseInfo semanticParseInfo) {
+        List<SchemaElementMatch> schemaElementMatches = semanticParseInfo.getElementMatches();
         if (CollectionUtils.isEmpty(schemaElementMatches)) {
             return false;
         }
@@ -71,6 +79,11 @@ public class SatisfactionChecker {
                 detectWords.add(schemaElementMatch.getDetectWord());
             }
         }
+        for (SchemaElementMatch schemaElementMatch : schemaElementMatches) {
+            if (SchemaElementType.ID.equals(schemaElementMatch.getElement().getType())) {
+                detectWords.add(schemaElementMatch.getDetectWord());
+            }
+        }
         for (SchemaElement schemaItem : semanticParseInfo.getMetrics()) {
             detectWords.add(
                     detectWordMap.getOrDefault(Optional.ofNullable(schemaItem.getId()).orElse(0L), ""));
@@ -87,7 +100,7 @@ public class SatisfactionChecker {
         if (StringUtils.isNotBlank(dateText) && !dateText.equalsIgnoreCase(Constants.NULL)) {
             detectWords.add(dateText);
         }
-        detectWords.removeIf(word -> !text.contains(word));
+        detectWords.removeIf(word -> !text.contains(word) && !text.contains(StringUtils.reverse(word)));
         //compare the length between detect words and query text
         return checkThreshold(text, detectWords, semanticParseInfo);
     }

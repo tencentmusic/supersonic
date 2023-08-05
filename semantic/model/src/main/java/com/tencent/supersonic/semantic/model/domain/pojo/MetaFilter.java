@@ -1,6 +1,7 @@
 package com.tencent.supersonic.semantic.model.domain.pojo;
 
 import lombok.Data;
+import java.util.List;
 
 
 @Data
@@ -14,7 +15,7 @@ public class MetaFilter {
 
     private String createdBy;
 
-    private Long domainId;
+    private List<Long> domainIds;
 
     private Integer sensitiveLevel;
 

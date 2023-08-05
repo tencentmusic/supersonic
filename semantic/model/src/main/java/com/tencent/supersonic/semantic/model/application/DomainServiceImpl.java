@@ -2,7 +2,9 @@ package com.tencent.supersonic.semantic.model.application;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.request.DomainReq;
@@ -24,12 +26,7 @@ import com.tencent.supersonic.semantic.model.domain.pojo.Domain;
 import com.tencent.supersonic.semantic.model.domain.repository.DomainRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.DomainConvert;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -47,14 +44,17 @@ public class DomainServiceImpl implements DomainService {
     private final MetricService metricService;
     private final DimensionService dimensionService;
     private final DatasourceService datasourceService;
+    private final UserService userService;
 
 
     public DomainServiceImpl(DomainRepository domainRepository, @Lazy MetricService metricService,
-                             @Lazy DimensionService dimensionService, @Lazy DatasourceService datasourceService) {
+                             @Lazy DimensionService dimensionService, @Lazy DatasourceService datasourceService,
+                             UserService userService) {
         this.domainRepository = domainRepository;
         this.metricService = metricService;
         this.dimensionService = dimensionService;
         this.datasourceService = datasourceService;
+        this.userService = userService;
     }
 
 
@@ -130,7 +130,7 @@ public class DomainServiceImpl implements DomainService {
     @Override
     public List<DomainResp> getDomainListForAdmin(String userName) {
         List<DomainDO> domainDOS = domainRepository.getDomainList();
-        List<String> orgIds = Lists.newArrayList();
+        Set<String> orgIds = Sets.newHashSet();
         log.info("orgIds:{},userName:{}", orgIds, userName);
         Map<Long, List<MetricResp>> metricDomainMap = metricService.getMetrics().stream()
                 .collect(Collectors.groupingBy(MetricResp::getDomainId));
@@ -144,7 +144,7 @@ public class DomainServiceImpl implements DomainService {
     @Override
     public List<DomainResp> getDomainListForViewer(String userName) {
         List<DomainDO> domainDOS = domainRepository.getDomainList();
-        List<String> orgIds = Lists.newArrayList();
+        Set<String> orgIds = Sets.newHashSet();
         log.info("orgIds:{},userName:{}", orgIds, userName);
         return convertList(domainDOS, new HashMap<>(), new HashMap<>()).stream()
                 .filter(domainDesc -> checkViewerPermission(orgIds, userName, domainDesc))
@@ -165,7 +165,7 @@ public class DomainServiceImpl implements DomainService {
             return "";
         }
         Map<Long, String> map = getDomainFullPathMap();
-        return map.containsKey(domainId) ? map.get(domainId) : "";
+        return map.getOrDefault(domainId, "");
     }
 
     @Override
@@ -201,6 +201,32 @@ public class DomainServiceImpl implements DomainService {
         return getDomainList().stream().collect(Collectors.toMap(DomainResp::getId, a -> a, (k1, k2) -> k1));
     }
 
+    @Override
+    public Set<DomainResp> getDomainChildren(List<Long> domainIds) {
+        Set<DomainResp> childDomains = new HashSet<>();
+        if (CollectionUtils.isEmpty(domainIds)) {
+            return childDomains;
+        }
+        Map<Long, DomainResp> allDomainMap = getDomainMap();
+        for (Long domainId : domainIds) {
+            DomainResp domain = allDomainMap.get(domainId);
+            if (domain != null) {
+                childDomains.add(domain);
+                Queue<DomainResp> queue = new LinkedList<>();
+                queue.add(domain);
+                while (!queue.isEmpty()) {
+                    DomainResp currentDomain = queue.poll();
+                    for (DomainResp child : allDomainMap.values()) {
+                        if (Objects.equals(child.getParentId(), currentDomain.getId())) {
+                            childDomains.add(child);
+                            queue.add(child);
+                        }
+                    }
+                }
+            }
+        }
+        return childDomains;
+    }
 
     public Map<Long, String> getDomainFullPathMap() {
         Map<Long, String> domainFullPathMap = new HashMap<>();
@@ -286,12 +312,15 @@ public class DomainServiceImpl implements DomainService {
     }
 
 
-    private boolean checkAdminPermission(List<String> orgIds, String userName, DomainResp domainDesc) {
+    private boolean checkAdminPermission(Set<String> orgIds, String userName, DomainResp domainDesc) {
 
         List<String> admins = domainDesc.getAdmins();
         List<String> adminOrgs = domainDesc.getAdminOrgs();
         if (admins.contains(userName) || domainDesc.getCreatedBy().equals(userName)) {
             return true;
+        }
+        if (CollectionUtils.isEmpty(adminOrgs)) {
+            return false;
         }
         for (String orgId : orgIds) {
             if (adminOrgs.contains(orgId)) {
@@ -301,7 +330,7 @@ public class DomainServiceImpl implements DomainService {
         return false;
     }
 
-    private boolean checkViewerPermission(List<String> orgIds, String userName, DomainResp domainDesc) {
+    private boolean checkViewerPermission(Set<String> orgIds, String userName, DomainResp domainDesc) {
         if (domainDesc.getIsOpen() == 1) {
             return true;
         }
@@ -311,6 +340,9 @@ public class DomainServiceImpl implements DomainService {
         List<String> viewOrgs = domainDesc.getViewOrgs();
         if (admins.contains(userName) || viewers.contains(userName) || domainDesc.getCreatedBy().equals(userName)) {
             return true;
+        }
+        if (CollectionUtils.isEmpty(adminOrgs) && CollectionUtils.isEmpty(viewOrgs)) {
+            return false;
         }
         for (String orgId : orgIds) {
             if (adminOrgs.contains(orgId)) {

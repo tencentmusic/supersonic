@@ -91,7 +91,7 @@ public class DictQueryHelper {
     }
 
     private List<String> generateFileData(List<Map<String, Object>> resultList, String nature, String dimName,
-            String metricName) {
+                                          String metricName) {
         List<String> data = new ArrayList<>();
         if (CollectionUtils.isEmpty(resultList)) {
             return data;
@@ -160,7 +160,7 @@ public class DictQueryHelper {
         queryStructCmd.setOrders(orders);
 
         DateConf dateInfo = new DateConf();
-        dateInfo.setDateMode(DateConf.DateMode.RECENT_UNITS);
+        dateInfo.setDateMode(DateConf.DateMode.RECENT);
         dateInfo.setUnit(defaultMetricDesc.getUnit());
         queryStructCmd.setDateInfo(dateInfo);
 

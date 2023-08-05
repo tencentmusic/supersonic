@@ -101,10 +101,10 @@ public class QueryStructUtils {
         if (Objects.isNull(dateDate)
                 || Strings.isEmpty(dateDate.getStartDate())
                 && Strings.isEmpty(dateDate.getEndDate())) {
-            if (dateInfo.getDateMode().equals(DateMode.LIST_DISCRETE)) {
+            if (dateInfo.getDateMode().equals(DateMode.LIST)) {
                 return dateUtils.listDateStr(dateDate, dateInfo);
             }
-            if (dateInfo.getDateMode().equals(DateMode.BETWEEN_CONTINUOUS)) {
+            if (dateInfo.getDateMode().equals(DateMode.BETWEEN)) {
                 return dateUtils.betweenDateStr(dateDate, dateInfo);
             }
             if (dateUtils.hasAvailableDataMode(dateInfo)) {

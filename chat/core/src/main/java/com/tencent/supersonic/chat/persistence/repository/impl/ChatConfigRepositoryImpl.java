@@ -1,9 +1,9 @@
 package com.tencent.supersonic.chat.persistence.repository.impl;
 
 import com.tencent.supersonic.chat.config.ChatConfig;
-import com.tencent.supersonic.chat.config.ChatConfigFilter;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.config.ChatConfigFilterInternal;
-import com.tencent.supersonic.chat.config.ChatConfigResp;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatConfigDO;
 import com.tencent.supersonic.chat.persistence.repository.ChatConfigRepository;
 import com.tencent.supersonic.chat.utils.ChatConfigHelper;

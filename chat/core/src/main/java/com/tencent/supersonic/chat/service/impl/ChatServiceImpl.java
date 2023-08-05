@@ -9,7 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.QueryDO;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResponse;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.persistence.repository.ChatContextRepository;
 import com.tencent.supersonic.chat.persistence.repository.ChatQueryRepository;
@@ -69,14 +69,6 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void updateContext(ChatContext chatCtx, QueryContext queryCtx,
-                              SemanticParseInfo semanticParseInfo) {
-        chatCtx.setParseInfo(semanticParseInfo);
-        chatCtx.setQueryText(queryCtx.getRequest().getQueryText());
-        updateContext(chatCtx);
-    }
-
-    @Override
     public void switchContext(ChatContext chatCtx) {
         log.debug("switchContext ChatContext {}", chatCtx);
         chatCtx.setParseInfo(new SemanticParseInfo());
@@ -126,15 +118,15 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public PageInfo<QueryResponse> queryInfo(PageQueryInfoReq pageQueryInfoCommend, long chatId) {
+    public PageInfo<QueryResp> queryInfo(PageQueryInfoReq pageQueryInfoCommend, long chatId) {
         return chatQueryRepository.getChatQuery(pageQueryInfoCommend, chatId);
     }
 
     @Override
-    public void addQuery(QueryResult queryResult, QueryContext queryContext, ChatContext chatCtx) {
-        chatQueryRepository.createChatQuery(queryResult, queryContext.getRequest(), chatCtx);
+    public void addQuery(QueryResult queryResult, ChatContext chatCtx) {
+        chatQueryRepository.createChatQuery(queryResult, chatCtx);
         chatRepository.updateLastQuestion(chatCtx.getChatId().longValue(),
-                queryContext.getRequest().getQueryText(), getCurrentTime());
+                chatCtx.getQueryText(), getCurrentTime());
     }
 
     @Override

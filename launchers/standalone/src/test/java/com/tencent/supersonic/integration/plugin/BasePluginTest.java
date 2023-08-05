@@ -3,7 +3,7 @@ package com.tencent.supersonic.integration.plugin;
 import com.tencent.supersonic.StandaloneLauncher;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
-import com.tencent.supersonic.chat.query.plugin.WebBase;
+import com.tencent.supersonic.chat.query.plugin.WebBaseResult;
 import com.tencent.supersonic.chat.query.plugin.webpage.WebPageQuery;
 import com.tencent.supersonic.chat.query.plugin.webpage.WebPageResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +25,10 @@ public class BasePluginTest {
         Assert.assertEquals(queryResult.getQueryState(), QueryState.SUCCESS);
         Assert.assertEquals(queryResult.getQueryMode(), WebPageQuery.QUERY_MODE);
         WebPageResponse webPageResponse = (WebPageResponse) queryResult.getResponse();
-        WebBase webPage = webPageResponse.getWebPage();
+        WebBaseResult webPage = webPageResponse.getWebPage();
         Assert.assertEquals(webPage.getUrl(), "www.test.com");
-        Map<String, Object> valueParams = webPage.getValueParams();
-        Assert.assertEquals(valueParams.get("name"), "alice");
+        Assert.assertEquals(1, webPage.getParams().size());
+        Assert.assertEquals("alice", webPage.getParams().get(0).getValue());
     }
 
 }

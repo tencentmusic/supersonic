@@ -16,19 +16,20 @@ import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.pojo.DomainSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatDetailConfigReq;
+import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.AggregateInfo;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
+import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.DataInfo;
 import com.tencent.supersonic.chat.api.pojo.response.DomainInfo;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.MetricInfo;
-import com.tencent.supersonic.chat.config.ChatAggConfig;
-import com.tencent.supersonic.chat.config.ChatConfigResp;
-import com.tencent.supersonic.chat.config.ChatConfigRich;
-import com.tencent.supersonic.chat.config.ChatDefaultRichConfig;
-import com.tencent.supersonic.chat.config.ChatDetailConfig;
-import com.tencent.supersonic.chat.config.EntityRichInfo;
-import com.tencent.supersonic.chat.config.ItemVisibility;
+import com.tencent.supersonic.chat.config.AggregatorConfig;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.DateConf;
@@ -36,11 +37,13 @@ import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.RatioOverType;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import java.text.DecimalFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -56,6 +59,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +74,8 @@ public class SemanticService {
     private SchemaService schemaService;
     @Autowired
     private ConfigService configService;
+    @Autowired
+    private AggregatorConfig aggregatorConfig;
 
     private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
 
@@ -122,25 +128,30 @@ public class SemanticService {
     }
 
     public EntityInfo getEntityInfo(Long domain) {
-        ChatConfigRich chaConfigRichDesc = configService.getConfigRichInfo(domain);
+        ChatConfigRichResp chaConfigRichDesc = configService.getConfigRichInfo(domain);
         if (Objects.isNull(chaConfigRichDesc) || Objects.isNull(chaConfigRichDesc.getChatDetailRichConfig())) {
             return new EntityInfo();
         }
         return getEntityInfo(chaConfigRichDesc);
     }
 
-    private EntityInfo getEntityInfo(ChatConfigRich chaConfigRichDesc) {
+    private EntityInfo getEntityInfo(ChatConfigRichResp chaConfigRichDesc) {
 
         EntityInfo entityInfo = new EntityInfo();
-        EntityRichInfo entityDesc = chaConfigRichDesc.getChatDetailRichConfig().getEntity();
-        if (entityDesc != null && Objects.nonNull(chaConfigRichDesc.getDomainId())) {
+        Long domainId = chaConfigRichDesc.getDomainId();
+        if (Objects.nonNull(chaConfigRichDesc) && Objects.nonNull(domainId)) {
+            SemanticService schemaService = ContextUtils.getBean(SemanticService.class);
+            DomainSchema domainSchema = schemaService.getDomainSchema(domainId);
+            if (Objects.isNull(domainSchema) || Objects.isNull(domainSchema.getEntity())) {
+                return entityInfo;
+            }
             DomainInfo domainInfo = new DomainInfo();
-            domainInfo.setItemId(chaConfigRichDesc.getDomainId().intValue());
-            domainInfo.setName(chaConfigRichDesc.getDomainName());
-            domainInfo.setWords(entityDesc.getNames());
-            domainInfo.setBizName(chaConfigRichDesc.getBizName());
-            if (Objects.nonNull(entityDesc.getDimItem())) {
-                domainInfo.setPrimaryEntityBizName(entityDesc.getDimItem().getBizName());
+            domainInfo.setItemId(domainId.intValue());
+            domainInfo.setName(domainSchema.getDomain().getName());
+            domainInfo.setWords(domainSchema.getDomain().getAlias());
+            domainInfo.setBizName(domainSchema.getDomain().getBizName());
+            if (Objects.nonNull(domainSchema.getEntity())) {
+                domainInfo.setPrimaryEntityBizName(domainSchema.getEntity().getBizName());
             }
 
             entityInfo.setDomainInfo(domainInfo);
@@ -149,7 +160,7 @@ public class SemanticService {
 
             if (Objects.nonNull(chaConfigRichDesc) && Objects.nonNull(chaConfigRichDesc.getChatDetailRichConfig())
                     && Objects.nonNull(chaConfigRichDesc.getChatDetailRichConfig().getChatDefaultConfig())) {
-                ChatDefaultRichConfig chatDefaultConfig = chaConfigRichDesc.getChatDetailRichConfig()
+                ChatDefaultRichConfigResp chatDefaultConfig = chaConfigRichDesc.getChatDetailRichConfig()
                         .getChatDefaultConfig();
                 if (!CollectionUtils.isEmpty(chatDefaultConfig.getDimensions())) {
                     for (SchemaElement dimensionDesc : chatDefaultConfig.getDimensions()) {
@@ -187,8 +198,21 @@ public class SemanticService {
         semanticParseInfo.setMetrics(getMetrics(domainInfo));
         semanticParseInfo.setDimensions(getDimensions(domainInfo));
         DateConf dateInfo = new DateConf();
-        dateInfo.setUnit(1);
-        dateInfo.setDateMode(DateConf.DateMode.RECENT_UNITS);
+        int unit = 1;
+        ChatConfigResp chatConfigInfo =
+                configService.fetchConfigByDomainId(domainSchema.getDomain().getId());
+        if (Objects.nonNull(chatConfigInfo) && Objects.nonNull(chatConfigInfo.getChatDetailConfig())
+                && Objects.nonNull(chatConfigInfo.getChatDetailConfig().getChatDefaultConfig())) {
+            ChatDefaultConfigReq chatDefaultConfig = chatConfigInfo.getChatDetailConfig().getChatDefaultConfig();
+            unit = chatDefaultConfig.getUnit();
+            String date = LocalDate.now().plusDays(-unit).toString();
+            dateInfo.setDateMode(DateMode.BETWEEN);
+            dateInfo.setStartDate(date);
+            dateInfo.setEndDate(date);
+        } else {
+            dateInfo.setUnit(unit);
+            dateInfo.setDateMode(DateMode.RECENT);
+        }
         semanticParseInfo.setDateInfo(dateInfo);
 
         // add filter
@@ -286,8 +310,8 @@ public class SemanticService {
     private ItemVisibility generateFinalVisibility(ChatConfigResp chatConfigInfo) {
         ItemVisibility visibility = new ItemVisibility();
 
-        ChatAggConfig chatAggConfig = chatConfigInfo.getChatAggConfig();
-        ChatDetailConfig chatDetailConfig = chatConfigInfo.getChatDetailConfig();
+        ChatAggConfigReq chatAggConfig = chatConfigInfo.getChatAggConfig();
+        ChatDetailConfigReq chatDetailConfig = chatConfigInfo.getChatDetailConfig();
 
         // both black is exist
         if (Objects.nonNull(chatAggConfig) && Objects.nonNull(chatAggConfig.getVisibility())
@@ -307,8 +331,8 @@ public class SemanticService {
     }
 
     public AggregateInfo getAggregateInfo(User user, SemanticParseInfo semanticParseInfo,
-            QueryResultWithSchemaResp result) {
-        if (CollectionUtils.isEmpty(semanticParseInfo.getMetrics())) {
+                                          QueryResultWithSchemaResp result) {
+        if (CollectionUtils.isEmpty(semanticParseInfo.getMetrics()) || !aggregatorConfig.getEnableRatio()) {
             return new AggregateInfo();
         }
         List<String> resultMetricNames = result.getColumns().stream().map(c -> c.getNameEn())
@@ -319,24 +343,36 @@ public class SemanticService {
             AggregateInfo aggregateInfo = new AggregateInfo();
             MetricInfo metricInfo = new MetricInfo();
             metricInfo.setStatistics(new HashMap<>());
-            String dateField = QueryReqBuilder.getDateField(semanticParseInfo.getDateInfo());
-
-            Optional<String> lastDayOp = result.getResultList().stream()
-                    .map(r -> r.get(dateField).toString())
-                    .sorted(Comparator.reverseOrder()).findFirst();
-            if (lastDayOp.isPresent()) {
-                Optional<Map<String, Object>> lastValue = result.getResultList().stream()
-                        .filter(r -> r.get(dateField).toString().equals(lastDayOp.get())).findFirst();
-                if (lastValue.isPresent()) {
-                    metricInfo.setValue(lastValue.get().get(ratioMetric.get().getBizName()).toString());
-                }
-                metricInfo.setDate(lastValue.get().get(dateField).toString());
-            }
             try {
-                queryRatio(user, semanticParseInfo, ratioMetric.get(), AggOperatorEnum.RATIO_ROLL,
-                        result, metricInfo);
-                queryRatio(user, semanticParseInfo, ratioMetric.get(), AggOperatorEnum.RATIO_OVER,
-                        result, metricInfo);
+                String dateField = QueryReqBuilder.getDateField(semanticParseInfo.getDateInfo());
+
+                Optional<String> lastDayOp = result.getResultList().stream().filter(r -> r.containsKey(dateField))
+                        .map(r -> r.get(dateField).toString())
+                        .sorted(Comparator.reverseOrder()).findFirst();
+                if (lastDayOp.isPresent()) {
+                    Optional<Map<String, Object>> lastValue = result.getResultList().stream()
+                            .filter(r -> r.get(dateField).toString().equals(lastDayOp.get())).findFirst();
+                    if (lastValue.isPresent() && lastValue.get().containsKey(ratioMetric.get().getBizName())) {
+                        DecimalFormat df = new DecimalFormat("#.####");
+                        metricInfo.setValue(df.format(lastValue.get().get(ratioMetric.get().getBizName())));
+                    }
+                    metricInfo.setDate(lastValue.get().get(dateField).toString());
+                }
+                CompletableFuture<MetricInfo> metricInfoRoll = CompletableFuture
+                        .supplyAsync(() -> {
+                            return queryRatio(user, semanticParseInfo, ratioMetric.get(), AggOperatorEnum.RATIO_ROLL,
+                                    result);
+                        });
+                CompletableFuture<MetricInfo> metricInfoOver = CompletableFuture
+                        .supplyAsync(() -> {
+                            return queryRatio(user, semanticParseInfo, ratioMetric.get(), AggOperatorEnum.RATIO_OVER,
+                                    result);
+                        });
+                CompletableFuture.allOf(metricInfoRoll, metricInfoOver);
+                metricInfo.setName(metricInfoRoll.get().getName());
+                metricInfo.setValue(metricInfoRoll.get().getValue());
+                metricInfo.getStatistics().putAll(metricInfoRoll.get().getStatistics());
+                metricInfo.getStatistics().putAll(metricInfoOver.get().getStatistics());
                 aggregateInfo.getMetricInfos().add(metricInfo);
             } catch (Exception e) {
                 log.error("queryRatio error {}", e);
@@ -346,8 +382,10 @@ public class SemanticService {
         return new AggregateInfo();
     }
 
-    private void queryRatio(User user, SemanticParseInfo semanticParseInfo, SchemaElement metric,
-            AggOperatorEnum aggOperatorEnum, QueryResultWithSchemaResp results, MetricInfo metricInfo) {
+    private MetricInfo queryRatio(User user, SemanticParseInfo semanticParseInfo, SchemaElement metric,
+                                  AggOperatorEnum aggOperatorEnum, QueryResultWithSchemaResp results) {
+        MetricInfo metricInfo = new MetricInfo();
+        metricInfo.setStatistics(new HashMap<>());
         QueryStructReq queryStructReq = QueryReqBuilder.buildStructRatioReq(semanticParseInfo, metric, aggOperatorEnum);
         DateConf dateInfo = semanticParseInfo.getDateInfo();
         String dateField = QueryReqBuilder.getDateField(dateInfo);
@@ -360,12 +398,18 @@ public class SemanticService {
             Map<String, Object> result = queryResp.getResultList().get(0);
             Optional<QueryColumn> valueColumn = queryResp.getColumns().stream()
                     .filter(c -> c.getNameEn().equals(metric.getBizName())).findFirst();
-
             if (valueColumn.isPresent()) {
+
+                String valueField = String.format("%s_%s", valueColumn.get().getNameEn(),
+                        aggOperatorEnum.getOperator());
+                if (result.containsKey(valueColumn.get().getNameEn())) {
+                    DecimalFormat df = new DecimalFormat("#.####");
+                    metricInfo.setValue(df.format(result.get(valueColumn.get().getNameEn())));
+                }
                 String ratio = "";
-                if (Objects.nonNull(result.get(valueColumn.get().getNameEn()))) {
+                if (Objects.nonNull(result.get(valueField))) {
                     ratio = String.format("%.2f",
-                            (Double.valueOf(result.get(valueColumn.get().getNameEn()).toString()) * 100)) + "%";
+                            (Double.valueOf(result.get(valueField).toString()) * 100)) + "%";
                 }
                 String statisticsRollName = RatioOverType.DAY_ON_DAY.getShowName();
                 String statisticsOverName = RatioOverType.WEEK_ON_DAY.getShowName();
@@ -383,10 +427,11 @@ public class SemanticService {
             }
             metricInfo.setName(metric.getName());
         }
+        return metricInfo;
     }
 
     private DateConf getRatioDateConf(AggOperatorEnum aggOperatorEnum, SemanticParseInfo semanticParseInfo,
-            QueryResultWithSchemaResp results) {
+                                      QueryResultWithSchemaResp results) {
         String dateField = QueryReqBuilder.getDateField(semanticParseInfo.getDateInfo());
         Optional<String> lastDayOp = results.getResultList().stream()
                 .map(r -> r.get(dateField).toString())
@@ -395,7 +440,7 @@ public class SemanticService {
             String lastDay = lastDayOp.get();
             DateConf dateConf = new DateConf();
             dateConf.setPeriod(semanticParseInfo.getDateInfo().getPeriod());
-            dateConf.setDateMode(DateMode.LIST_DISCRETE);
+            dateConf.setDateMode(DateMode.LIST);
             List<String> dayList = new ArrayList<>();
             dayList.add(lastDay);
             String start = "";

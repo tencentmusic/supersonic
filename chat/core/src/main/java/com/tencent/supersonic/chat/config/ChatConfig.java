@@ -1,6 +1,8 @@
 package com.tencent.supersonic.chat.config;
 
-import com.tencent.supersonic.chat.api.pojo.request.RecommendedQuestion;
+import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatDetailConfigReq;
+import com.tencent.supersonic.chat.api.pojo.request.RecommendedQuestionReq;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
@@ -22,14 +24,14 @@ public class ChatConfig {
     /**
      * the chatDetailConfig about the domain
      */
-    private ChatDetailConfig chatDetailConfig;
+    private ChatDetailConfigReq chatDetailConfig;
 
     /**
      * the chatAggConfig about the domain
      */
-    private ChatAggConfig chatAggConfig;
+    private ChatAggConfigReq chatAggConfig;
 
-    private List<RecommendedQuestion> recommendedQuestions;
+    private List<RecommendedQuestionReq> recommendedQuestions;
 
     /**
      * available status

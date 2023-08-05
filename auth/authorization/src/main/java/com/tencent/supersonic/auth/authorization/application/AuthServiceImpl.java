@@ -2,6 +2,7 @@ package com.tencent.supersonic.auth.authorization.application;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
+import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthResGrp;
 import com.tencent.supersonic.auth.api.authorization.pojo.DimensionFilter;
@@ -18,10 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,8 +28,12 @@ public class AuthServiceImpl implements AuthService {
 
     private JdbcTemplate jdbcTemplate;
 
-    public AuthServiceImpl(JdbcTemplate jdbcTemplate) {
+    private UserService userService;
+
+    public AuthServiceImpl(JdbcTemplate jdbcTemplate,
+                           UserService userService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userService = userService;
     }
 
     private List<AuthGroup> load() {
@@ -75,6 +77,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthorizedResourceResp queryAuthorizedResources(QueryAuthResReq req, HttpServletRequest request) {
+        Set<String> userOrgIds = userService.getUserAllOrgId(req.getUser());
+        if (!CollectionUtils.isEmpty(userOrgIds)) {
+            req.setDepartmentIds(new ArrayList<>(userOrgIds));
+        }
         List<AuthGroup> groups = getAuthGroups(req);
         AuthorizedResourceResp resource = new AuthorizedResourceResp();
         Map<String, List<AuthGroup>> authGroupsByDomainId = groups.stream()
@@ -119,7 +125,6 @@ public class AuthServiceImpl implements AuthService {
                 }
             }
         }
-
         return resource;
     }
 
@@ -133,9 +138,9 @@ public class AuthServiceImpl implements AuthService {
                             .contains(req.getUser())) {
                         return true;
                     }
-                    for (String deparmentId : req.getDepartmentIds()) {
+                    for (String departmentId : req.getDepartmentIds()) {
                         if (!CollectionUtils.isEmpty(group.getAuthorizedDepartmentIds())
-                                && group.getAuthorizedDepartmentIds().contains(deparmentId)) {
+                                && group.getAuthorizedDepartmentIds().contains(departmentId)) {
                             return true;
                         }
                     }

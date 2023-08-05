@@ -6,15 +6,19 @@ import com.tencent.supersonic.chat.api.component.*;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
+import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
 import com.tencent.supersonic.chat.query.QuerySelector;
-import com.tencent.supersonic.chat.api.pojo.request.QueryDataRequest;
+import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,7 +45,82 @@ public class QueryServiceImpl implements QueryService {
     private QuerySelector querySelector = ComponentFactory.getQuerySelector();
 
     @Override
-    public QueryResult executeQuery(QueryRequest queryReq) throws Exception {
+    public ParseResp performParsing(QueryReq queryReq) {
+        QueryContext queryCtx = new QueryContext(queryReq);
+        // in order to support multi-turn conversation, chat context is needed
+        ChatContext chatCtx = chatService.getOrCreateContext(queryReq.getChatId());
+
+        schemaMappers.stream().forEach(mapper -> {
+            mapper.map(queryCtx);
+            log.info("{} result:{}", mapper.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
+        });
+
+        semanticParsers.stream().forEach(parser -> {
+            parser.parse(queryCtx, chatCtx);
+            log.info("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
+        });
+
+        ParseResp parseResult;
+        if (queryCtx.getCandidateQueries().size() > 0) {
+            log.debug("pick before [{}]", queryCtx.getCandidateQueries().stream().collect(
+                    Collectors.toList()));
+            List<SemanticQuery> selectedQueries = querySelector.select(queryCtx.getCandidateQueries());
+            log.debug("pick after [{}]", selectedQueries.stream().collect(
+                    Collectors.toList()));
+
+            List<SemanticParseInfo> selectedParses = selectedQueries.stream()
+                    .map(q -> q.getParseInfo()).collect(Collectors.toList());
+            List<SemanticParseInfo> candidateParses = queryCtx.getCandidateQueries().stream()
+                    .map(q -> q.getParseInfo()).collect(Collectors.toList());
+
+            parseResult = ParseResp.builder()
+                    .chatId(queryReq.getChatId())
+                    .queryText(queryReq.getQueryText())
+                    .state(selectedParses.size() > 1 ? ParseResp.ParseState.PENDING : ParseResp.ParseState.COMPLETED)
+                    .selectedParses(selectedParses)
+                    .candidateParses(candidateParses)
+                    .build();
+        } else {
+            parseResult = ParseResp.builder()
+                    .chatId(queryReq.getChatId())
+                    .queryText(queryReq.getQueryText())
+                    .state(ParseResp.ParseState.FAILED)
+                    .build();
+        }
+
+        return parseResult;
+    }
+
+    @Override
+    public QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception {
+        SemanticParseInfo parseInfo = queryReq.getParseInfo();
+        SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
+        if (semanticQuery == null) {
+            return null;
+        }
+        semanticQuery.setParseInfo(parseInfo);
+
+        // in order to support multi-turn conversation, chat context is needed
+        ChatContext chatCtx = chatService.getOrCreateContext(queryReq.getChatId());
+
+        QueryResult queryResult = semanticQuery.execute(queryReq.getUser());
+        if (queryResult != null) {
+            queryResult.setChatContext(parseInfo);
+            // update chat context after a successful semantic query
+            if (queryReq.isSaveAnswer() && QueryState.SUCCESS.equals(queryResult.getQueryState())) {
+                chatCtx.setParseInfo(parseInfo);
+                chatService.updateContext(chatCtx);
+            }
+            chatCtx.setQueryText(queryReq.getQueryText());
+            chatCtx.setUser(queryReq.getUser().getName());
+            chatService.addQuery(queryResult, chatCtx);
+        }
+
+        return queryResult;
+    }
+
+    @Override
+    public QueryResult executeQuery(QueryReq queryReq) throws Exception {
         QueryContext queryCtx = new QueryContext(queryReq);
         // in order to support multi-turn conversation, chat context is needed
         ChatContext chatCtx = chatService.getOrCreateContext(queryReq.getChatId());
@@ -60,17 +139,21 @@ public class QueryServiceImpl implements QueryService {
         if (queryCtx.getCandidateQueries().size() > 0) {
             log.info("pick before [{}]", queryCtx.getCandidateQueries().stream().collect(
                     Collectors.toList()));
-            SemanticQuery semanticQuery = querySelector.select(queryCtx.getCandidateQueries());
-            log.info("pick after [{}]", semanticQuery);
+            List<SemanticQuery> selectedQueries = querySelector.select(queryCtx.getCandidateQueries());
+            log.info("pick after [{}]", selectedQueries.stream().collect(
+                    Collectors.toList()));
 
+            SemanticQuery semanticQuery = selectedQueries.get(0);
             queryResult = semanticQuery.execute(queryReq.getUser());
             if (queryResult != null) {
+                chatCtx.setQueryText(queryReq.getQueryText());
                 // update chat context after a successful semantic query
                 if (queryReq.isSaveAnswer() && QueryState.SUCCESS.equals(queryResult.getQueryState())) {
-                    chatService.updateContext(chatCtx, queryCtx, semanticQuery.getParseInfo());
+                    chatCtx.setParseInfo(semanticQuery.getParseInfo());
+                    chatService.updateContext(chatCtx);
                 }
                 queryResult.setChatContext(chatCtx.getParseInfo());
-                chatService.addQuery(queryResult, queryCtx, chatCtx);
+                chatService.addQuery(queryResult, chatCtx);
             }
         }
 
@@ -78,13 +161,13 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public SemanticParseInfo queryContext(QueryRequest queryCtx) {
+    public SemanticParseInfo queryContext(QueryReq queryCtx) {
         ChatContext context = chatService.getOrCreateContext(queryCtx.getChatId());
         return context.getParseInfo();
     }
 
     @Override
-    public QueryResult executeDirectQuery(QueryDataRequest queryData, User user) throws SqlParseException {
+    public QueryResult executeDirectQuery(QueryDataReq queryData, User user) throws SqlParseException {
         SemanticQuery semanticQuery = QueryManager.createRuleQuery(queryData.getQueryMode());
         BeanUtils.copyProperties(queryData, semanticQuery.getParseInfo());
         return semanticQuery.execute(user);

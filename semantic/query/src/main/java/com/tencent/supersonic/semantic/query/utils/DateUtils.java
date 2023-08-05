@@ -39,7 +39,7 @@ public class DateUtils {
     private String sysDateWeekCol;
 
     public Boolean recentMode(DateConf dateInfo) {
-        if (Objects.nonNull(dateInfo) && DateConf.DateMode.RECENT_UNITS == dateInfo.getDateMode()
+        if (Objects.nonNull(dateInfo) && DateConf.DateMode.RECENT == dateInfo.getDateMode()
                 && DAY.equalsIgnoreCase(dateInfo.getPeriod()) && Objects.nonNull(dateInfo.getUnit())) {
             return true;
         }
@@ -47,7 +47,7 @@ public class DateUtils {
     }
 
     public boolean hasAvailableDataMode(DateConf dateInfo) {
-        if (Objects.nonNull(dateInfo) && DateConf.DateMode.AVAILABLE_TIME == dateInfo.getDateMode()) {
+        if (Objects.nonNull(dateInfo) && DateConf.DateMode.AVAILABLE == dateInfo.getDateMode()) {
             return true;
         }
         return false;
@@ -263,16 +263,16 @@ public class DateUtils {
     public String getDateWhereStr(DateConf dateInfo, ItemDateResp dateDate) {
         String dateStr = "";
         switch (dateInfo.getDateMode()) {
-            case BETWEEN_CONTINUOUS:
+            case BETWEEN:
                 dateStr = betweenDateStr(dateDate, dateInfo);
                 break;
-            case LIST_DISCRETE:
+            case LIST:
                 dateStr = listDateStr(dateDate, dateInfo);
                 break;
-            case RECENT_UNITS:
+            case RECENT:
                 dateStr = recentDateStr(dateDate, dateInfo);
                 break;
-            case AVAILABLE_TIME:
+            case AVAILABLE:
                 dateStr = hasDataModeStr(dateDate, dateInfo);
                 break;
             default:

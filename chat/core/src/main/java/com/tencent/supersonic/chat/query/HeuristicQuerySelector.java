@@ -5,39 +5,46 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.common.pojo.Constants;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
+import java.util.*;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 
 @Slf4j
 public class HeuristicQuerySelector implements QuerySelector {
 
-    @Override
-    public SemanticQuery select(List<SemanticQuery> candidateQueries) {
-        double maxScore = 0;
-        SemanticQuery pickedQuery = null;
-        if (CollectionUtils.isNotEmpty(candidateQueries) && candidateQueries.size() == 1) {
-            return candidateQueries.get(0);
-        }
-        for (SemanticQuery query : candidateQueries) {
-            SemanticParseInfo semanticParse = query.getParseInfo();
-            double score = computeScore(semanticParse);
-            if (score > maxScore) {
-                maxScore = score;
-                pickedQuery = query;
-            }
-            log.info("candidate query (domain={}, queryMode={}) with score={}",
-                    semanticParse.getDomainName(), semanticParse.getQueryMode(), score);
-        }
+    private static final double MATCH_INHERIT_PENALTY = 0.5;
+    private static final double MATCH_CURRENT_REWORD = 2;
+    private static final double CANDIDATE_THRESHOLD = 0.2;
 
-        return pickedQuery;
+    @Override
+    public List<SemanticQuery> select(List<SemanticQuery> candidateQueries) {
+        List<SemanticQuery> selectedQueries = new ArrayList<>();
+
+        if (CollectionUtils.isNotEmpty(candidateQueries) && candidateQueries.size() == 1) {
+            selectedQueries.addAll(candidateQueries);
+        } else {
+            OptionalDouble maxScoreOp = candidateQueries.stream().mapToDouble(
+                    q -> computeScore(q.getParseInfo())).max();
+            if (maxScoreOp.isPresent()) {
+                double maxScore = maxScoreOp.getAsDouble();
+
+                candidateQueries.stream().forEach(query -> {
+                    SemanticParseInfo semanticParse = query.getParseInfo();
+                    if ((maxScore - semanticParse.getScore()) / maxScore <= CANDIDATE_THRESHOLD) {
+                        selectedQueries.add(query);
+                    }
+                    log.info("candidate query (domain={}, queryMode={}) with score={}",
+                            semanticParse.getDomainName(), semanticParse.getQueryMode(), semanticParse.getScore());
+                });
+            }
+        }
+        return selectedQueries;
     }
 
     private double computeScore(SemanticParseInfo semanticParse) {
-        double score = 0;
+        double totalScore = 0;
 
         Map<SchemaElementType, SchemaElementMatch> maxSimilarityMatch = new HashMap<>();
         for (SchemaElementMatch match : semanticParse.getElementMatches()) {
@@ -49,13 +56,19 @@ public class HeuristicQuerySelector implements QuerySelector {
         }
 
         for (SchemaElementMatch match : maxSimilarityMatch.values()) {
-            score +=
-                    Optional.ofNullable(match.getDetectWord()).orElse(Constants.EMPTY).length() * match.getSimilarity();
+            double matchScore = Optional.ofNullable(match.getDetectWord()).orElse(Constants.EMPTY).length() * match.getSimilarity();
+            if (match.equals(SchemaElementMatch.MatchMode.INHERIT)) {
+                matchScore *= MATCH_INHERIT_PENALTY;
+            } else {
+                matchScore *= MATCH_CURRENT_REWORD;
+            }
+            totalScore += matchScore;
         }
 
-        // bonus is a special construct to control the final score
-        score += semanticParse.getBonus();
+        // original score in parse info acts like an extra bonus
+        totalScore += semanticParse.getScore();
+        semanticParse.setScore(totalScore);
 
-        return score;
+        return totalScore;
     }
 }

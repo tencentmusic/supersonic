@@ -18,4 +18,10 @@ public class SchemaElementMatch {
     String detectWord;
     String word;
     Long frequency;
+    MatchMode mode = MatchMode.CURRENT;
+
+    public enum MatchMode {
+        CURRENT,
+        INHERIT
+    }
 }

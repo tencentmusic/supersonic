@@ -55,40 +55,6 @@ CREATE TABLE IF NOT EXISTS `s2_chat_config` (
 COMMENT ON TABLE s2_chat_config IS 'chat config information table ';
 
 
-
-
-CREATE TABLE IF NOT EXISTS `s2_dictionary` (
-                                               `id` INT NOT NULL AUTO_INCREMENT,
-                                               `domain_id` INT NOT NULL ,
-                                               `dim_value_infos` LONGVARCHAR , -- dimension value setting information
-                                               `created_at` TIMESTAMP  NOT NULL ,
-                                               `updated_at` TIMESTAMP  NOT NULL ,
-                                               `created_by` varchar(100) NOT NULL ,
-    `updated_by` varchar(100) DEFAULT NULL ,
-    `status` INT NOT NULL  DEFAULT '0' , -- domain extension information status : 0 is normal, 1 is off the shelf, 2 is deleted
-    PRIMARY KEY (`id`),
-    UNIQUE (domain_id)
-    );
-COMMENT ON TABLE s2_dictionary IS 'dictionary configuration information table';
-
-
-CREATE TABLE IF NOT EXISTS `s2_dictionary_task` (
-                                                    `id` INT NOT NULL AUTO_INCREMENT,
-                                                    `name` varchar(255) NOT NULL , -- task name
-    `description` varchar(255) ,
-    `command`LONGVARCHAR  NOT NULL , -- task Request Parameters
-    `command_md5` varchar(255)  NOT NULL , -- task Request Parameters md5
-    `status` INT NOT NULL , -- the final status of the task
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
-    `created_by` varchar(100) NOT NULL ,
-    `progress` DOUBLE default 0.00  ,  -- task real-time progress
-    `elapsed_ms` bigINT DEFAULT NULL , -- the task takes time in milliseconds
-    `message` LONGVARCHAR  , -- remark related information
-    PRIMARY KEY (`id`)
-    );
-COMMENT ON TABLE s2_dictionary_task IS 'dictionary task information table';
-
-
 create table s2_user
 (
     id       INT AUTO_INCREMENT,
@@ -321,12 +287,14 @@ CREATE TABLE IF NOT EXISTS `s2_plugin`
     `domain`     varchar(100)  NULL,
     `pattern`    varchar(500)  NULL,
     `parse_mode` varchar(100)  NULL,
+    `parse_mode_config` LONGVARCHAR  NULL,
     `name`       varchar(100)  NULL,
     `created_at` TIMESTAMP   NULL,
     `created_by` varchar(100) null,
     `updated_at` TIMESTAMP    NULL,
     `updated_by` varchar(100) NULL,
     `config`     LONGVARCHAR  NULL,
+    `comment`     LONGVARCHAR  NULL,
     PRIMARY KEY (`id`)
 ); COMMENT ON TABLE s2_plugin IS 'plugin information table';
 

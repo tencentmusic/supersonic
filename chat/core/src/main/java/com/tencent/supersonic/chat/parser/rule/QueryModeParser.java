@@ -6,7 +6,6 @@ import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 
 import java.util.*;
 
-import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

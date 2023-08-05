@@ -1,6 +1,8 @@
 package com.tencent.supersonic.chat.parser.function;
 
 import java.util.List;
+
+import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,6 +12,6 @@ public class FunctionReq {
 
     private String queryText;
 
-    private List<String> functionNames;
+    private List<PluginParseConfig> pluginConfigs;
 
 }

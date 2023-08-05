@@ -1,23 +1,22 @@
 package com.tencent.supersonic.chat.query.rule.metric;
 
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.VALUE;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.response.AggregateInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.service.SemanticService;
-import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import java.util.*;
-import java.util.stream.Collectors;
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.*;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.*;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.OPTIONAL;
 
 @Slf4j
 @Component
@@ -27,8 +26,7 @@ public class MetricFilterQuery extends MetricSemanticQuery {
 
     public MetricFilterQuery() {
         super();
-        queryMatcher.addOption(VALUE, REQUIRED, AT_LEAST, 1)
-                .addOption(ENTITY, OPTIONAL, AT_MOST, 1);
+        queryMatcher.addOption(VALUE, REQUIRED, AT_LEAST, 1);
     }
 
     @Override
@@ -40,14 +38,7 @@ public class MetricFilterQuery extends MetricSemanticQuery {
     public QueryResult execute(User user) {
         if (!isMultiStructQuery()) {
             QueryResult queryResult = super.execute(user);
-            if (Objects.nonNull(queryResult)) {
-                QueryResultWithSchemaResp queryResp = new QueryResultWithSchemaResp();
-                queryResp.setColumns(queryResult.getQueryColumns());
-                queryResp.setResultList(queryResult.getQueryResults());
-                AggregateInfo aggregateInfo = ContextUtils.getBean(SemanticService.class)
-                        .getAggregateInfo(user,parseInfo,queryResp);
-                queryResult.setAggregateInfo(aggregateInfo);
-            }
+            fillAggregateInfo(user, queryResult);
             return queryResult;
         }
         return super.multiStructExecute(user);

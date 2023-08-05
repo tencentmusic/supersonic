@@ -2,13 +2,9 @@ package com.tencent.supersonic.chat.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
+import com.tencent.supersonic.chat.api.pojo.*;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
-import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.knowledge.service.SchemaService;
-import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import java.util.ArrayList;
@@ -44,7 +40,7 @@ public class FuzzyNameMapper implements SchemaMapper {
     }
 
     private void detectAndAddToSchema(QueryContext queryContext, List<Term> terms, List<SchemaElement> domains,
-            SchemaElementType schemaElementType) {
+                                      SchemaElementType schemaElementType) {
         try {
 
             Map<String, Set<SchemaElement>> domainResultSet = getResultSet(queryContext, terms, domains);
@@ -57,7 +53,7 @@ public class FuzzyNameMapper implements SchemaMapper {
     }
 
     private Map<String, Set<SchemaElement>> getResultSet(QueryContext queryContext, List<Term> terms,
-            List<SchemaElement> domains) {
+                                                         List<SchemaElement> domains) {
 
         String queryText = queryContext.getRequest().getQueryText();
 

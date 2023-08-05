@@ -2,7 +2,11 @@ package com.tencent.supersonic.chat.service;
 
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.config.*;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 
 import java.util.List;
 
@@ -14,9 +18,9 @@ public interface ConfigService {
 
     List<ChatConfigResp> search(ChatConfigFilter filter, User user);
 
-    ChatConfigRich getConfigRichInfo(Long domainId);
+    ChatConfigRichResp getConfigRichInfo(Long domainId);
 
     ChatConfigResp fetchConfigByDomainId(Long domainId);
 
-    List<ChatConfigRich> getAllChatRichConfig();
+    List<ChatConfigRichResp> getAllChatRichConfig();
 }

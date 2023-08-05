@@ -3,6 +3,9 @@ package com.tencent.supersonic.chat.query;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
+import com.tencent.supersonic.chat.query.rule.entity.EntitySemanticQuery;
+import com.tencent.supersonic.chat.query.rule.metric.MetricSemanticQuery;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +22,14 @@ public class QueryManager {
             ruleQueryMap.put(query.getQueryMode(), (RuleSemanticQuery) query);
         } else if (query instanceof PluginSemanticQuery) {
             pluginQueryMap.put(query.getQueryMode(), (PluginSemanticQuery) query);
+        }
+    }
+
+    public static SemanticQuery createQuery(String queryMode) {
+        if (containsRuleQuery(queryMode)) {
+            return createRuleQuery(queryMode);
+        } else {
+            return createPluginQuery(queryMode);
         }
     }
 
@@ -45,12 +56,32 @@ public class QueryManager {
             throw new RuntimeException("no supported queryMode :" + queryMode);
         }
     }
-
     public static boolean containsRuleQuery(String queryMode) {
         if (queryMode == null) {
             return false;
         }
         return ruleQueryMap.containsKey(queryMode);
+    }
+
+    public static boolean isMetricQuery(String queryMode) {
+        if (queryMode == null || !ruleQueryMap.containsKey(queryMode)) {
+            return false;
+        }
+        return ruleQueryMap.get(queryMode) instanceof MetricSemanticQuery;
+    }
+
+    public static boolean isEntityQuery(String queryMode) {
+        if (queryMode == null || !ruleQueryMap.containsKey(queryMode)) {
+            return false;
+        }
+        return ruleQueryMap.get(queryMode) instanceof EntitySemanticQuery;
+    }
+
+    public static RuleSemanticQuery getRuleQuery(String queryMode) {
+        if (queryMode == null) {
+            return null;
+        }
+        return ruleQueryMap.get(queryMode);
     }
 
     public static List<RuleSemanticQuery> getRuleQueries() {

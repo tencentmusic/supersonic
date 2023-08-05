@@ -1,9 +1,9 @@
 package com.tencent.supersonic.chat.service;
 
 
-import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
-import com.tencent.supersonic.chat.api.pojo.response.RecommendQuestion;
-import com.tencent.supersonic.chat.api.pojo.response.RecommendResponse;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.response.RecommendQuestionResp;
+import com.tencent.supersonic.chat.api.pojo.response.RecommendResp;
 
 import java.util.List;
 
@@ -12,9 +12,9 @@ import java.util.List;
  */
 public interface RecommendService {
 
-    RecommendResponse recommend(QueryRequest queryCtx, Long limit);
+    RecommendResp recommend(QueryReq queryCtx, Long limit);
 
-    RecommendResponse recommendMetricMode(QueryRequest queryCtx, Long limit);
+    RecommendResp recommendMetricMode(QueryReq queryCtx, Long limit);
 
-    List<RecommendQuestion> recommendQuestion(Long domainId);
+    List<RecommendQuestionResp> recommendQuestion(Long domainId);
 }

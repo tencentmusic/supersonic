@@ -36,8 +36,6 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
 
     @Override
     public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user) {
-        deletionDuplicated(queryStructReq);
-        onlyQueryFirstMetric(queryStructReq);
         try {
             QueryService queryService = ContextUtils.getBean(QueryService.class);
             QueryResultWithSchemaResp queryResultWithSchemaResp = queryService.queryByStruct(queryStructReq, user);
@@ -50,10 +48,6 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
 
     @Override
     public QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user) {
-        for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
-            deletionDuplicated(queryStructReq);
-            onlyQueryFirstMetric(queryStructReq);
-        }
         try {
             QueryService queryService = ContextUtils.getBean(QueryService.class);
             return queryService.queryByMultiStruct(queryMultiStructReq, user);

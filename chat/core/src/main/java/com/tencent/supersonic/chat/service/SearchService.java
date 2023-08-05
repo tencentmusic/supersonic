@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.service;
 
-import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SearchResult;
 import java.util.List;
 
@@ -9,6 +9,6 @@ import java.util.List;
  */
 public interface SearchService {
 
-    List<SearchResult> search(QueryRequest queryCtx);
+    List<SearchResult> search(QueryReq queryCtx);
 
 }

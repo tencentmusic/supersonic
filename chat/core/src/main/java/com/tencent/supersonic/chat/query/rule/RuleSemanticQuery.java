@@ -9,9 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
-import com.tencent.supersonic.chat.config.ChatConfigRich;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
@@ -24,6 +22,7 @@ import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 
 import java.io.Serializable;
 import java.util.*;
@@ -42,33 +41,51 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
 
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
                                           QueryContext queryCtx) {
-        return queryMatcher.match(candidateElementMatches, queryCtx.getRequest().getQueryFilters());
+        return queryMatcher.match(candidateElementMatches);
     }
 
-    public void fillParseInfo(Long domainId, ChatContext chatContext){
+    public void fillParseInfo(Long domainId, ChatContext chatContext) {
         parseInfo.setQueryMode(getQueryMode());
-
-        ConfigService configService = ContextUtils.getBean(ConfigService.class);
-        ChatConfigRich chatConfig = configService.getConfigRichInfo(domainId);
 
         SemanticService schemaService = ContextUtils.getBean(SemanticService.class);
         DomainSchema domainSchema = schemaService.getDomainSchema(domainId);
 
-        fillSchemaElement(parseInfo, domainSchema, chatConfig);
+        fillSchemaElement(parseInfo, domainSchema);
         // inherit date info from context
-        if (parseInfo.getDateInfo() == null && chatContext.getParseInfo().getDateInfo() != null) {
+        if (parseInfo.getDateInfo() == null && chatContext.getParseInfo().getDateInfo() != null
+                && isSameQueryMode(getQueryMode(), chatContext.getParseInfo().getQueryMode())) {
+            log.info("inherit date info from context");
             parseInfo.setDateInfo(chatContext.getParseInfo().getDateInfo());
         }
     }
 
-    private void fillSchemaElement(SemanticParseInfo parseInfo, DomainSchema domainSchema, ChatConfigRich chaConfigRich) {
+    public boolean isSameQueryMode(String queryModeQuery, String queryModeChat) {
+        if (Strings.isNotEmpty(queryModeQuery) && Strings.isNotEmpty(queryModeChat)) {
+            return QueryManager.isEntityQuery(queryModeQuery) && QueryManager.isEntityQuery(queryModeChat)
+                    || QueryManager.isMetricQuery(queryModeQuery) && QueryManager.isMetricQuery(queryModeChat);
+        }
+        return true;
+    }
+
+    private void fillSchemaElement(SemanticParseInfo parseInfo, DomainSchema domainSchema) {
         parseInfo.setDomain(domainSchema.getDomain());
 
         Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
+        Map<Long, List<SchemaElementMatch>> id2Values = new HashMap<>();
+
         for (SchemaElementMatch schemaMatch : parseInfo.getElementMatches()) {
             SchemaElement element = schemaMatch.getElement();
             switch (element.getType()) {
                 case ID:
+                    SchemaElement entityElement = domainSchema.getElement(SchemaElementType.ENTITY, element.getId());
+                    if (entityElement != null) {
+                        if (id2Values.containsKey(element.getId())) {
+                            id2Values.get(element.getId()).add(schemaMatch);
+                        } else {
+                            id2Values.put(element.getId(), new ArrayList<>(Arrays.asList(schemaMatch)));
+                        }
+                    }
+                    break;
                 case VALUE:
                     SchemaElement dimElement = domainSchema.getElement(SchemaElementType.DIMENSION, element.getId());
                     if (dimElement != null) {
@@ -85,7 +102,38 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
                 case METRIC:
                     parseInfo.getMetrics().add(element);
                     break;
+                case ENTITY:
+                    parseInfo.setEntity(element);
+                    break;
                 default:
+            }
+        }
+
+        if (!id2Values.isEmpty()) {
+            for (Map.Entry<Long, List<SchemaElementMatch>> entry : id2Values.entrySet()) {
+                SchemaElement entity = domainSchema.getElement(SchemaElementType.ENTITY, entry.getKey());
+
+                if (entry.getValue().size() == 1) {
+                    SchemaElementMatch schemaMatch = entry.getValue().get(0);
+                    QueryFilter dimensionFilter = new QueryFilter();
+                    dimensionFilter.setValue(schemaMatch.getWord());
+                    dimensionFilter.setBizName(entity.getBizName());
+                    dimensionFilter.setName(entity.getName());
+                    dimensionFilter.setOperator(FilterOperatorEnum.EQUALS);
+                    dimensionFilter.setElementID(schemaMatch.getElement().getId());
+                    parseInfo.getDimensionFilters().add(dimensionFilter);
+                    parseInfo.setEntity(domainSchema.getEntity());
+                } else {
+                    QueryFilter dimensionFilter = new QueryFilter();
+                    List<String> vals = new ArrayList<>();
+                    entry.getValue().stream().forEach(i -> vals.add(i.getWord()));
+                    dimensionFilter.setValue(vals);
+                    dimensionFilter.setBizName(entity.getBizName());
+                    dimensionFilter.setName(entity.getName());
+                    dimensionFilter.setOperator(FilterOperatorEnum.IN);
+                    dimensionFilter.setElementID(entry.getKey());
+                    parseInfo.getDimensionFilters().add(dimensionFilter);
+                }
             }
         }
 
@@ -102,7 +150,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
                     dimensionFilter.setOperator(FilterOperatorEnum.EQUALS);
                     dimensionFilter.setElementID(schemaMatch.getElement().getId());
                     parseInfo.getDimensionFilters().add(dimensionFilter);
-                    setEntityId(schemaMatch.getWord(), chaConfigRich, parseInfo);
+                    parseInfo.setEntity(domainSchema.getEntity());
                 } else {
                     QueryFilter dimensionFilter = new QueryFilter();
                     List<String> vals = new ArrayList<>();
@@ -118,16 +166,6 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         }
     }
 
-    public void setEntityId(String value, ChatConfigRich chaConfigRichDesc,
-                                   SemanticParseInfo semanticParseInfo) {
-        if (chaConfigRichDesc != null && chaConfigRichDesc.getChatDetailRichConfig() != null
-                && chaConfigRichDesc.getChatDetailRichConfig().getEntity() != null) {
-            SchemaElement dimSchemaResp = chaConfigRichDesc.getChatDetailRichConfig().getEntity().getDimItem();
-            if (Objects.nonNull(dimSchemaResp) && StringUtils.isNumeric(value)) {
-                semanticParseInfo.setEntity(Long.valueOf(value));
-            }
-        }
-    }
 
     @Override
     public QueryResult execute(User user) {
@@ -202,12 +240,13 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         return parseInfo;
     }
 
+    @Override
     public void setParseInfo(SemanticParseInfo parseInfo) {
         this.parseInfo = parseInfo;
     }
 
     public static List<RuleSemanticQuery> resolve(List<SchemaElementMatch> candidateElementMatches,
-                                                       QueryContext queryContext) {
+                                                  QueryContext queryContext) {
         List<RuleSemanticQuery> matchedQueries = new ArrayList<>();
         for (RuleSemanticQuery semanticQuery : QueryManager.getRuleQueries()) {
             List<SchemaElementMatch> matches = semanticQuery.match(candidateElementMatches, queryContext);

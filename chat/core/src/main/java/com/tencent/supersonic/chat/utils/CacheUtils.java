@@ -14,11 +14,11 @@ public class CacheUtils {
             .maximumSize(1000)
             .build();
     public static void put(QueryContext queryContext, ChatContext chatCtx, Object v){
-        String key=chatCtx.getUser()+"_"+chatCtx.getChatId()+"_"+queryContext.getRequest().getQueryText();
+        String key=chatCtx.getUser()+"_"+chatCtx.getChatId()+"_"+ queryContext.getRequest().getQueryText();
         cache.put(key,v);
     }
-    public static Object get(QueryContext queryContext,ChatContext chatCtx){
-        String key=chatCtx.getUser()+"_"+chatCtx.getChatId()+"_"+queryContext.getRequest().getQueryText();
+    public static Object get(QueryContext queryContext, ChatContext chatCtx){
+        String key=chatCtx.getUser()+"_"+chatCtx.getChatId()+"_"+ queryContext.getRequest().getQueryText();
         return cache.getIfPresent(key);
     }
 }

@@ -56,7 +56,17 @@ public class PluginDO {
     /**
      * 
      */
+    private String parseModeConfig;
+
+    /**
+     * 
+     */
     private String config;
+
+    /**
+     * 
+     */
+    private String comment;
 
     /**
      * 
@@ -220,6 +230,22 @@ public class PluginDO {
 
     /**
      * 
+     * @return parse_mode_config 
+     */
+    public String getParseModeConfig() {
+        return parseModeConfig;
+    }
+
+    /**
+     * 
+     * @param parseModeConfig 
+     */
+    public void setParseModeConfig(String parseModeConfig) {
+        this.parseModeConfig = parseModeConfig == null ? null : parseModeConfig.trim();
+    }
+
+    /**
+     * 
      * @return config 
      */
     public String getConfig() {
@@ -232,5 +258,21 @@ public class PluginDO {
      */
     public void setConfig(String config) {
         this.config = config == null ? null : config.trim();
+    }
+
+    /**
+     * 
+     * @return comment 
+     */
+    public String getComment() {
+        return comment;
+    }
+
+    /**
+     * 
+     * @param comment 
+     */
+    public void setComment(String comment) {
+        this.comment = comment == null ? null : comment.trim();
     }
 }

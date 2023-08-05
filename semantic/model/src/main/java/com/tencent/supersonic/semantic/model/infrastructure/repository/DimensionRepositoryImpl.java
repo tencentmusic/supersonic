@@ -7,6 +7,7 @@ import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOCustomMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOMapper;
 import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 
@@ -97,8 +98,8 @@ public class DimensionRepositoryImpl implements DimensionRepository {
         if (dimensionFilter.getCreatedBy() != null) {
             dimensionDOExample.getOredCriteria().get(0).andCreatedByEqualTo(dimensionFilter.getCreatedBy());
         }
-        if (dimensionFilter.getDomainId() != null) {
-            dimensionDOExample.getOredCriteria().get(0).andDomainIdEqualTo(dimensionFilter.getDomainId());
+        if (CollectionUtils.isNotEmpty(dimensionFilter.getDomainIds())) {
+            dimensionDOExample.getOredCriteria().get(0).andDomainIdIn(dimensionFilter.getDomainIds());
         }
         if (dimensionFilter.getSensitiveLevel() != null) {
             dimensionDOExample.getOredCriteria().get(0).andSensitiveLevelEqualTo(dimensionFilter.getSensitiveLevel());

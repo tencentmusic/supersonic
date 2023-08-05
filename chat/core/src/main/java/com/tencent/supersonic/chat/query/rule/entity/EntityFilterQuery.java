@@ -1,8 +1,8 @@
 package com.tencent.supersonic.chat.query.rule.entity;
 
 import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.*;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.OPTIONAL;
 import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.*;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,8 @@ public class EntityFilterQuery extends EntityListQuery {
 
     public EntityFilterQuery() {
         super();
-        queryMatcher.addOption(VALUE, REQUIRED, AT_LEAST, 1);
+        queryMatcher.addOption(VALUE, OPTIONAL, AT_LEAST, 0);
+        queryMatcher.addOption(ID, OPTIONAL, AT_LEAST, 0);
     }
 
     @Override

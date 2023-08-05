@@ -109,6 +109,7 @@ public class DimensionServiceImpl implements DimensionService {
     public PageInfo<DimensionResp> queryDimension(PageDimensionReq pageDimensionReq) {
         DimensionFilter dimensionFilter = new DimensionFilter();
         BeanUtils.copyProperties(pageDimensionReq, dimensionFilter);
+        dimensionFilter.setDomainIds(pageDimensionReq.getDomainIds());
         PageInfo<DimensionDO> dimensionDOPageInfo = PageHelper.startPage(pageDimensionReq.getCurrent(),
                         pageDimensionReq.getPageSize())
                 .doSelectPageInfo(() -> queryDimension(dimensionFilter));

@@ -16,4 +16,6 @@ public interface SemanticQuery {
     QueryResult execute(User user) throws SqlParseException;
 
     SemanticParseInfo getParseInfo();
+
+    void setParseInfo(SemanticParseInfo parseInfo);
 }

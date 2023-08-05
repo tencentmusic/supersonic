@@ -58,8 +58,6 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
 
     @Override
     public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user) {
-        deletionDuplicated(queryStructReq);
-        onlyQueryFirstMetric(queryStructReq);
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         return searchByRestTemplate(
                 defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getSearchByStructPath(),
@@ -68,10 +66,6 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
 
     @Override
     public QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user) {
-        for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
-            deletionDuplicated(queryStructReq);
-            onlyQueryFirstMetric(queryStructReq);
-        }
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         return searchByRestTemplate(
                 defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getSearchByMultiStructPath(),

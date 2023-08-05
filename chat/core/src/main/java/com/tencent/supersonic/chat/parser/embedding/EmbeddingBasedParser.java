@@ -5,19 +5,21 @@ import com.google.common.collect.Sets;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.*;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.chat.config.ChatConfigRich;
-import com.tencent.supersonic.chat.config.EntityRichInfo;
+import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.chat.plugin.Plugin;
 import com.tencent.supersonic.chat.plugin.PluginManager;
+import com.tencent.supersonic.chat.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
-import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.PluginService;
+import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.ContextUtils;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -30,28 +32,41 @@ public class EmbeddingBasedParser implements SemanticParser {
     @Override
     public void parse(QueryContext queryContext, ChatContext chatContext) {
         EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
-        if (SatisfactionChecker.check(queryContext) || StringUtils.isBlank(embeddingConfig.getUrl())) {
+        if (StringUtils.isBlank(embeddingConfig.getUrl())) {
             return;
         }
         log.info("EmbeddingBasedParser parser query ctx: {}, chat ctx: {}", queryContext, chatContext);
-        for (Long domainId : getDomainMatched(queryContext)) {
-            String text = replaceText(queryContext, domainId);
-            List<RecallRetrieval> embeddingRetrievals = recallResult(text, hasCandidateQuery(queryContext));
-            Optional<Plugin> pluginOptional = choosePlugin(embeddingRetrievals, domainId);
-            if (pluginOptional.isPresent()) {
-                Map<String, RecallRetrieval> embeddingRetrievalMap = embeddingRetrievals.stream()
-                        .collect(Collectors.toMap(RecallRetrieval::getId, e -> e, (value1, value2) -> value1));
-                Plugin plugin  = pluginOptional.get();
-                log.info("EmbeddingBasedParser text: {} domain: {} choose plugin: [{} {}]",
-                        text, domainId, plugin.getId(), plugin.getName());
-                PluginSemanticQuery pluginQuery = QueryManager.createPluginQuery(plugin.getType());
-                SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(queryContext, domainId,
-                        plugin, embeddingRetrievalMap);
-                semanticParseInfo.setQueryMode(pluginQuery.getQueryMode());
-                pluginQuery.setParseInfo(semanticParseInfo);
-                queryContext.getCandidateQueries().add(pluginQuery);
+        Set<Long> domainIds = getDomainMatched(queryContext);
+        String text = queryContext.getRequest().getQueryText();
+        if (!CollectionUtils.isEmpty(domainIds)) {
+            for (Long domainId : domainIds) {
+                List<SchemaElementMatch> schemaElementMatches = getMatchedElements(queryContext, domainId);
+                String textReplaced = replaceText(text, schemaElementMatches);
+                List<RecallRetrieval> embeddingRetrievals = recallResult(textReplaced, hasCandidateQuery(queryContext));
+                Optional<Plugin> pluginOptional = choosePlugin(embeddingRetrievals, domainId);
+                log.info("domain id :{} embedding result, text:{} embeddingResp:{} ",domainId, textReplaced, embeddingRetrievals);
+                pluginOptional.ifPresent(plugin -> buildQuery(plugin, embeddingRetrievals, domainId, textReplaced, queryContext, schemaElementMatches));
             }
+        } else {
+            List<RecallRetrieval> embeddingRetrievals = recallResult(text, hasCandidateQuery(queryContext));
+            Optional<Plugin> pluginOptional = choosePlugin(embeddingRetrievals, null);
+            pluginOptional.ifPresent(plugin -> buildQuery(plugin, embeddingRetrievals, null, text, queryContext, Lists.newArrayList()));
         }
+    }
+
+    private void buildQuery(Plugin plugin, List<RecallRetrieval> embeddingRetrievals,
+                            Long domainId, String text,
+                            QueryContext queryContext, List<SchemaElementMatch> schemaElementMatches) {
+        Map<String, RecallRetrieval> embeddingRetrievalMap = embeddingRetrievals.stream()
+                .collect(Collectors.toMap(RecallRetrieval::getId, e -> e, (value1, value2) -> value1));
+        log.info("EmbeddingBasedParser text: {} domain: {} choose plugin: [{} {}]",
+                text, domainId, plugin.getId(), plugin.getName());
+        PluginSemanticQuery pluginQuery = QueryManager.createPluginQuery(plugin.getType());
+        SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(domainId, plugin, text,
+                queryContext.getRequest(), embeddingRetrievalMap, schemaElementMatches);
+        semanticParseInfo.setQueryMode(pluginQuery.getQueryMode());
+        pluginQuery.setParseInfo(semanticParseInfo);
+        queryContext.getCandidateQueries().add(pluginQuery);
     }
 
     private Set<Long> getDomainMatched(QueryContext queryContext) {
@@ -62,51 +77,61 @@ public class EmbeddingBasedParser implements SemanticParser {
         return queryContext.getMapInfo().getMatchedDomains();
     }
 
-    private SemanticParseInfo buildSemanticParseInfo(QueryContext queryContext, Long domainId, Plugin plugin,
-                                                     Map<String, RecallRetrieval> embeddingRetrievalMap) {
+    private SemanticParseInfo buildSemanticParseInfo(Long domainId, Plugin plugin, String text, QueryReq queryReq,
+                                                     Map<String, RecallRetrieval> embeddingRetrievalMap,
+                                                     List<SchemaElementMatch> schemaElementMatches) {
         SchemaElement schemaElement = new SchemaElement();
         schemaElement.setDomain(domainId);
         schemaElement.setId(domainId);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
+        semanticParseInfo.setElementMatches(schemaElementMatches);
         semanticParseInfo.setDomain(schemaElement);
-        SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
-        if (Double.parseDouble(embeddingRetrievalMap.get(plugin.getId().toString()).getDistance()) < THRESHOLD) {
-            semanticParseInfo.setBonus(SatisfactionChecker.BONUS_THRESHOLD);
-        }
+        double distance = Double.parseDouble(embeddingRetrievalMap.get(plugin.getId().toString()).getDistance());
+        double score = text.length() * (1 - distance);
         Map<String, Object> properties = new HashMap<>();
-        properties.put(Constants.CONTEXT, plugin);
+        PluginParseResult pluginParseResult = new PluginParseResult();
+        pluginParseResult.setPlugin(plugin);
+        pluginParseResult.setRequest(queryReq);
+        pluginParseResult.setDistance(distance);
+        properties.put(Constants.CONTEXT, pluginParseResult);
         semanticParseInfo.setProperties(properties);
-        semanticParseInfo.setElementMatches(schemaMapInfo.getMatchedElements(domainId));
-        fillSemanticParseInfo(queryContext, semanticParseInfo);
-        setEntityId(domainId, semanticParseInfo);
+        semanticParseInfo.setScore(score);
+        fillSemanticParseInfo(semanticParseInfo);
+        setEntity(domainId, semanticParseInfo);
         return semanticParseInfo;
     }
 
-    private Optional<Long> getEntityElementId(Long domainId) {
-        ConfigService configService = ContextUtils.getBean(ConfigService.class);
-        ChatConfigRich chatConfigRich = configService.getConfigRichInfo(domainId);
-        EntityRichInfo entityRichInfo = chatConfigRich.getChatDetailRichConfig().getEntity();
-        if (entityRichInfo != null) {
-            SchemaElement schemaElement = entityRichInfo.getDimItem();
-            if (schemaElement != null) {
-                return Optional.of(schemaElement.getId());
-            }
+    private List<SchemaElementMatch> getMatchedElements(QueryContext queryContext, Long domainId) {
+        SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
+        List<SchemaElementMatch> schemaElementMatches = schemaMapInfo.getMatchedElements(domainId);
+        if (schemaElementMatches == null) {
+            return Lists.newArrayList();
         }
-        return Optional.empty();
+        QueryReq queryReq = queryContext.getRequest();
+        QueryFilters queryFilters = queryReq.getQueryFilters();
+        if (queryFilters == null || CollectionUtils.isEmpty(queryFilters.getFilters())) {
+            return schemaElementMatches;
+        }
+        Map<Long, Object> element = queryFilters.getFilters().stream()
+                .collect(Collectors.toMap(QueryFilter::getElementID, QueryFilter::getValue, (v1, v2) -> v1));
+        return schemaElementMatches.stream().filter(schemaElementMatch ->
+                        SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType())
+                || SchemaElementType.ID.equals(schemaElementMatch.getElement().getType())
+                || SchemaElementType.ENTITY.equals(schemaElementMatch.getElement().getType()))
+                .filter(schemaElementMatch ->
+                !element.containsKey(schemaElementMatch.getElement().getId()) || (
+                        element.containsKey(schemaElementMatch.getElement().getId()) &&
+                                element.get(schemaElementMatch.getElement().getId()).toString()
+                                        .equalsIgnoreCase(schemaElementMatch.getWord())
+                        ))
+                .collect(Collectors.toList());
     }
 
-    private void setEntityId(Long domainId, SemanticParseInfo semanticParseInfo) {
-        Optional<Long> entityElementIdOptional = getEntityElementId(domainId);
-        if (entityElementIdOptional.isPresent()) {
-            Long entityElementId = entityElementIdOptional.get();
-            for (QueryFilter filter : semanticParseInfo.getDimensionFilters()) {
-                if (entityElementId.equals(filter.getElementID())) {
-                    String value = String.valueOf(filter.getValue());
-                    if (StringUtils.isNumeric(value)) {
-                        semanticParseInfo.setEntity(Long.parseLong(value));
-                    }
-                }
-            }
+    private void setEntity(Long domainId, SemanticParseInfo semanticParseInfo) {
+        SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
+        DomainSchema domainSchema = semanticService.getDomainSchema(domainId);
+        if (domainSchema != null && domainSchema.getEntity() != null) {
+            semanticParseInfo.setEntity(domainSchema.getEntity());
         }
     }
 
@@ -120,6 +145,12 @@ public class EmbeddingBasedParser implements SemanticParser {
         Map<Long, Plugin> pluginMap = plugins.stream().collect(Collectors.toMap(Plugin::getId, p -> p));
         for (RecallRetrieval embeddingRetrieval : embeddingRetrievals) {
             Plugin plugin = pluginMap.get(Long.parseLong(embeddingRetrieval.getId()));
+            if (plugin == null) {
+                continue;
+            }
+            if (domainId == null) {
+                return Optional.of(plugin);
+            }
             if (!CollectionUtils.isEmpty(plugin.getDomainList()) && plugin.getDomainList().contains(domainId)) {
                 return Optional.of(plugin);
             }
@@ -131,7 +162,6 @@ public class EmbeddingBasedParser implements SemanticParser {
         try {
             PluginManager pluginManager = ContextUtils.getBean(PluginManager.class);
             EmbeddingResp embeddingResp = pluginManager.recognize(embeddingText);
-            log.info("embedding result, text:{} embeddingResp:{}", embeddingText, embeddingResp);
             List<RecallRetrieval> embeddingRetrievals = embeddingResp.getRetrieval();
             if(!CollectionUtils.isEmpty(embeddingRetrievals)){
                 if (hasCandidateQuery) {
@@ -154,25 +184,38 @@ public class EmbeddingBasedParser implements SemanticParser {
         return !CollectionUtils.isEmpty(queryContext.getCandidateQueries());
     }
 
-    private void fillSemanticParseInfo(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        if (queryContext.getRequest().getQueryFilters() != null) {
-            semanticParseInfo.getDimensionFilters()
-                    .addAll(queryContext.getRequest().getQueryFilters().getFilters());
+    private void fillSemanticParseInfo(SemanticParseInfo semanticParseInfo) {
+        List<SchemaElementMatch> schemaElementMatches = semanticParseInfo.getElementMatches();
+        if (!CollectionUtils.isEmpty(schemaElementMatches)) {
+            schemaElementMatches.stream().filter(schemaElementMatch ->
+                    SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType())
+                            || SchemaElementType.ID.equals(schemaElementMatch.getElement().getType()))
+                    .forEach(schemaElementMatch -> {
+                       QueryFilter queryFilter = new QueryFilter();
+                       queryFilter.setValue(schemaElementMatch.getWord());
+                       queryFilter.setElementID(schemaElementMatch.getElement().getId());
+                       queryFilter.setName(schemaElementMatch.getElement().getName());
+                       queryFilter.setOperator(FilterOperatorEnum.EQUALS);
+                       queryFilter.setBizName(schemaElementMatch.getElement().getBizName());
+                       semanticParseInfo.getDimensionFilters().add(queryFilter);
+                    });
         }
     }
 
-    protected String replaceText(QueryContext queryContext, Long domainId) {
-        String text = queryContext.getRequest().getQueryText();
-        List<SchemaElementMatch> schemaElementMatches = queryContext.getMapInfo().getMatchedElements(domainId);
+    protected String replaceText(String text, List<SchemaElementMatch> schemaElementMatches) {
         if (CollectionUtils.isEmpty(schemaElementMatches)) {
             return text;
         }
         List<SchemaElementMatch> valueSchemaElementMatches = schemaElementMatches.stream()
                 .filter(schemaElementMatch ->
-                        SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType()))
+                        SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType())
+                || SchemaElementType.ID.equals(schemaElementMatch.getElement().getType()))
                 .collect(Collectors.toList());
         for (SchemaElementMatch schemaElementMatch : valueSchemaElementMatches) {
             String detectWord = schemaElementMatch.getDetectWord();
+            if (StringUtils.isBlank(detectWord)) {
+                continue;
+            }
             text = text.replace(detectWord, "");
         }
         return text;

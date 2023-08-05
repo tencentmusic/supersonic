@@ -97,4 +97,29 @@
         </foreach>
     </update>
 
+    <select id="query" resultMap="ResultMapWithBLOBs">
+         select *
+         from s2_metric
+         where 1=1
+        <if test="type != null and type != ''">
+            and type = #{type}
+        </if>
+        <if test="name != null and name != ''">
+            and ( id like CONCAT('%',#{name , jdbcType=VARCHAR},'%') or
+            name like CONCAT('%',#{name , jdbcType=VARCHAR},'%') or
+            biz_name like CONCAT('%',#{name , jdbcType=VARCHAR},'%') or
+            description like CONCAT('%',#{name , jdbcType=VARCHAR},'%') )
+        </if>
+        <if test="sensitiveLevel != null">
+            and sensitive_level = #{sensitiveLevel}
+        </if>
+        <if test="domainIds != null and domainIds.size >0">
+            and domain_id in
+            <foreach collection="domainIds" index="index" item="domain" open="(" close=")"
+                     separator=",">
+                #{domain}
+            </foreach>
+        </if>
+    </select>
+
 </mapper>

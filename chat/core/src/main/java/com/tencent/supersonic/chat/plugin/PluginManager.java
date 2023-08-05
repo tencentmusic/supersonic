@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -40,7 +41,8 @@ public class PluginManager {
 
     public static List<Plugin> getPlugins() {
         PluginService pluginService = ContextUtils.getBean(PluginService.class);
-        List<Plugin> pluginList = pluginService.getPluginList();
+        List<Plugin> pluginList = pluginService.getPluginList().stream().filter(plugin ->
+                CollectionUtils.isNotEmpty(plugin.getDomainList())).collect(Collectors.toList());
         pluginList.addAll(internalPluginMap.values());
         return new ArrayList<>(pluginList);
     }
@@ -48,7 +50,7 @@ public class PluginManager {
     @EventListener
     public void addPlugin(PluginAddEvent pluginAddEvent) {
         Plugin plugin = pluginAddEvent.getPlugin();
-        if (ParseMode.EMBEDDING_RECALL.equals(plugin.getParseMode())) {
+        if (CollectionUtils.isNotEmpty(plugin.getExampleQuestionList())) {
             requestEmbeddingPluginAdd(convert(Lists.newArrayList(plugin)));
         }
     }
@@ -57,10 +59,10 @@ public class PluginManager {
     public void updatePlugin(PluginUpdateEvent pluginUpdateEvent) {
         Plugin oldPlugin = pluginUpdateEvent.getOldPlugin();
         Plugin newPlugin = pluginUpdateEvent.getNewPlugin();
-        if (ParseMode.EMBEDDING_RECALL.equals(oldPlugin.getParseMode())) {
+        if (CollectionUtils.isNotEmpty(oldPlugin.getExampleQuestionList())) {
             requestEmbeddingPluginDelete(getEmbeddingId(Lists.newArrayList(oldPlugin)));
         }
-        if (ParseMode.EMBEDDING_RECALL.equals(newPlugin.getParseMode())) {
+        if (CollectionUtils.isNotEmpty(newPlugin.getExampleQuestionList())) {
             requestEmbeddingPluginAdd(convert(Lists.newArrayList(newPlugin)));
         }
     }
@@ -68,29 +70,30 @@ public class PluginManager {
     @EventListener
     public void delPlugin(PluginAddEvent pluginAddEvent) {
         Plugin plugin = pluginAddEvent.getPlugin();
-        if (ParseMode.EMBEDDING_RECALL.equals(plugin.getParseMode())) {
+        if (CollectionUtils.isNotEmpty(plugin.getExampleQuestionList())) {
             requestEmbeddingPluginDelete(getEmbeddingId(Lists.newArrayList(plugin)));
         }
-
     }
 
     public void requestEmbeddingPluginDelete(Set<String> ids) {
-        if(CollectionUtils.isEmpty(ids)){
+        if (CollectionUtils.isEmpty(ids)) {
             return;
         }
         doRequest(embeddingConfig.getDeletePath(), JSONObject.toJSONString(ids));
     }
 
-
-    public void requestEmbeddingPluginAdd(List<Map<String,String>> maps) {
-        if(CollectionUtils.isEmpty(maps)){
+    public void requestEmbeddingPluginAdd(List<Map<String, String>> maps) {
+        if (CollectionUtils.isEmpty(maps)) {
             return;
         }
-       doRequest(embeddingConfig.getAddPath(), JSONObject.toJSONString(maps));
+        doRequest(embeddingConfig.getAddPath(), JSONObject.toJSONString(maps));
     }
 
     public void doRequest(String path, String jsonBody) {
-        String url = embeddingConfig.getUrl()+ path;
+        if (Strings.isEmpty(embeddingConfig.getUrl())) {
+            return;
+        }
+        String url = embeddingConfig.getUrl() + path;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setLocation(URI.create(url));
@@ -99,7 +102,8 @@ public class PluginManager {
         HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
         log.info("[embedding] equest body :{}, url:{}", jsonBody, url);
         ResponseEntity<String> responseEntity =
-                restTemplate.exchange(requestUrl, HttpMethod.POST, entity, new ParameterizedTypeReference<String>() {});
+                restTemplate.exchange(requestUrl, HttpMethod.POST, entity, new ParameterizedTypeReference<String>() {
+                });
         log.info("[embedding] result body:{}", responseEntity);
     }
 
@@ -111,7 +115,7 @@ public class PluginManager {
     }
 
     public EmbeddingResp recognize(String embeddingText) {
-        String url = embeddingConfig.getUrl()+ embeddingConfig.getRecognizePath() + "?n_results=" + embeddingConfig.getNResult();
+        String url = embeddingConfig.getUrl() + embeddingConfig.getRecognizePath() + "?n_results=" + embeddingConfig.getNResult();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setLocation(URI.create(url));
@@ -121,10 +125,11 @@ public class PluginManager {
         HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
         log.info("[embedding] request body:{}, url:{}", jsonBody, url);
         ResponseEntity<List<EmbeddingResp>> embeddingResponseEntity =
-                restTemplate.exchange(requestUrl, HttpMethod.POST, entity, new ParameterizedTypeReference<List<EmbeddingResp>>() {});
-        log.info("[embedding] recognize result body:{}",embeddingResponseEntity);
+                restTemplate.exchange(requestUrl, HttpMethod.POST, entity, new ParameterizedTypeReference<List<EmbeddingResp>>() {
+                });
+        log.info("[embedding] recognize result body:{}", embeddingResponseEntity);
         List<EmbeddingResp> embeddingResps = embeddingResponseEntity.getBody();
-        if(CollectionUtils.isNotEmpty(embeddingResps)){
+        if (CollectionUtils.isNotEmpty(embeddingResps)) {
             for (EmbeddingResp embeddingResp : embeddingResps) {
                 List<RecallRetrieval> embeddingRetrievals = embeddingResp.getRetrieval();
                 for (RecallRetrieval embeddingRetrieval : embeddingRetrievals) {
@@ -136,13 +141,13 @@ public class PluginManager {
         throw new RuntimeException("get embedding result failed");
     }
 
-    public List<Map<String, String>> convert(List<Plugin> plugins){
+    public List<Map<String, String>> convert(List<Plugin> plugins) {
         List<Map<String, String>> maps = Lists.newArrayList();
-        for(Plugin plugin : plugins){
-            List<String> patterns = plugin.getPatterns();
+        for (Plugin plugin : plugins) {
+            List<String> exampleQuestions = plugin.getExampleQuestionList();
             int num = 0;
-            for(String pattern : patterns){
-                Map<String,String> map = new HashMap<>();
+            for (String pattern : exampleQuestions) {
+                Map<String, String> map = new HashMap<>();
                 map.put("preset_query_id", generateUniqueEmbeddingId(num, plugin.getId()));
                 map.put("preset_query", pattern);
                 maps.add(map);
@@ -155,7 +160,7 @@ public class PluginManager {
     private Set<String> getEmbeddingId(List<Plugin> plugins) {
         Set<String> embeddingIdSet = new HashSet<>();
         for (Map<String, String> map : convert(plugins)) {
-            embeddingIdSet.addAll(map.keySet());
+            embeddingIdSet.add(map.get("preset_query_id"));
         }
         return embeddingIdSet;
     }
