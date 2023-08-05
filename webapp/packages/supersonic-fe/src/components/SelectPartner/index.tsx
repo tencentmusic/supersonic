@@ -1,6 +1,6 @@
-import { TreeSelect, Tag } from 'antd';
+import { Avatar, TreeSelect, Tag } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { getUserByDeptid, getOrganizationTree } from './service';
+import { getDepartmentTree, getUserByDeptid } from './service';
 import TMEAvatar from '@/components/TMEAvatar';
 
 type Props = {
@@ -11,9 +11,6 @@ type Props = {
 };
 
 const isDisableCheckbox = (name: string, type: string) => {
-  if (!name) {
-    return false;
-  }
   const isPersonNode = name.includes('(');
   if (type === 'selectedPerson') {
     return !isPersonNode;
@@ -28,18 +25,18 @@ const isDisableCheckbox = (name: string, type: string) => {
 };
 
 // 转化树结构
-export function changeTreeData(treeData: any = [], type: string, keyName = 'id') {
+export function changeTreeData(treeData: any = [], type: string) {
   return treeData.map((item: any) => {
     return {
       title: item.name,
-      value: item[keyName],
-      key: item[keyName],
-      isLeaf: !item.subOrganizations,
-      children: item.subOrganizations ? changeTreeData(item.subOrganizations, type, keyName) : [],
-      disableCheckbox: isDisableCheckbox(item.displayName, type),
-      checkable: !isDisableCheckbox(item.displayName, type),
-      icon: (item.displayName || '').includes('(') && (
-        <TMEAvatar size="small" staffName={item.name} />
+      value: item.key,
+      key: item.key,
+      isLeaf: !!item.emplid,
+      children: item?.subDepartments ? changeTreeData(item.subDepartments, type) : [],
+      disableCheckbox: isDisableCheckbox(item.name, type),
+      checkable: !isDisableCheckbox(item.name, type),
+      icon: item.name.includes('(') && (
+        <Avatar size={18} shape="square" src={`${item.avatarImg}`} alt="avatar" />
       ),
     };
   });
@@ -54,12 +51,9 @@ const SelectPartner: React.FC<Props> = ({
   const [treeData, setTreeData] = useState([]);
 
   const getDetpartment = async () => {
-    const { code, data } = await getOrganizationTree();
-    if (code === 200) {
-      const changeData = changeTreeData(data, type);
-      setTreeData(changeData);
-      return;
-    }
+    const res = await getDepartmentTree();
+    const data = changeTreeData(res.data, type);
+    setTreeData(data);
   };
 
   useEffect(() => {
@@ -84,21 +78,13 @@ const SelectPartner: React.FC<Props> = ({
   const onLoadData = (target: any) => {
     const { key } = target;
     const loadData = async () => {
-      const { code, data } = await getUserByDeptid(key);
-      if (code === 200) {
-        const list = data.reduce((userList: any[], item: any) => {
-          const { name, displayName } = item;
-          if (name && displayName) {
-            userList.push({ key: `${key}-${item.id}`, ...item });
-          }
-          return userList;
-        }, []);
-        setTimeout(() => {
-          setTreeData((origin) => {
-            return updateTreeData(origin, key, changeTreeData(list, type, 'key'));
-          });
-        }, 300);
+      const childData = await getUserByDeptid(key);
+      if (childData.data.length === 0) {
+        return;
       }
+      setTimeout(() => {
+        setTreeData((origin) => updateTreeData(origin, key, changeTreeData(childData.data, type)));
+      }, 300);
     };
     return new Promise<void>((resolve) => {
       loadData().then(() => {

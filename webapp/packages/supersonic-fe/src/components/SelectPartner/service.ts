@@ -1,12 +1,13 @@
 import { request } from 'umi';
 
-export async function getUserByDeptid(id: any) {
-  return request<any>(`${process.env.AUTH_API_BASE_URL}user/getUserByOrg/${id}`, {
+export async function getDepartmentTree() {
+  return request<any>('/api/tpp/getDetpartmentTree', {
     method: 'GET',
   });
 }
-export async function getOrganizationTree() {
-  return request<any>(`${process.env.AUTH_API_BASE_URL}user/getOrganizationTree`, {
+
+export async function getUserByDeptid(id: any) {
+  return request<any>(`/api/tpp/getUserByDeptid/${id}`, {
     method: 'GET',
   });
 }
