@@ -8,6 +8,7 @@ import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainSchemaResp;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface DomainService {
 
@@ -35,6 +36,8 @@ public interface DomainService {
     List<DomainResp> getDomainListForAdmin(String userName);
 
     List<DomainResp> getDomainListForViewer(String userName);
+
+    Set<DomainResp> getDomainChildren(List<Long> domainId);
 
     List<DomainSchemaResp> fetchDomainSchema(DomainSchemaFilterReq filter, User user);
 

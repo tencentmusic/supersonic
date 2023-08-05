@@ -1,17 +1,25 @@
 package com.tencent.supersonic.chat.parser.rule;
 
 import com.tencent.supersonic.chat.api.component.SemanticParser;
-import com.tencent.supersonic.chat.api.pojo.*;
-import com.tencent.supersonic.chat.query.rule.metric.MetricDomainQuery;
+import com.tencent.supersonic.chat.api.component.SemanticQuery;
+import com.tencent.supersonic.chat.api.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.common.util.JsonUtil;
-
-import java.util.*;
+import com.tencent.supersonic.chat.query.rule.metric.MetricDomainQuery;
+import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
+import com.tencent.supersonic.chat.query.rule.metric.MetricSemanticQuery;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 
 import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.*;
 
@@ -23,7 +31,8 @@ public class ContextInheritParser implements SemanticParser {
             new AbstractMap.SimpleEntry<>(DIMENSION, Arrays.asList(DIMENSION, VALUE)),
             new AbstractMap.SimpleEntry<>(VALUE, Arrays.asList(VALUE, DIMENSION)),
             new AbstractMap.SimpleEntry<>(ENTITY, Arrays.asList(ENTITY)),
-            new AbstractMap.SimpleEntry<>(DOMAIN, Arrays.asList(DOMAIN))
+            new AbstractMap.SimpleEntry<>(DOMAIN, Arrays.asList(DOMAIN)),
+            new AbstractMap.SimpleEntry<>(ID, Arrays.asList(ID))
     ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     @Override
@@ -40,7 +49,9 @@ public class ContextInheritParser implements SemanticParser {
         for (SchemaElementMatch match : chatContext.getParseInfo().getElementMatches()) {
             SchemaElementType matchType = match.getElement().getType();
             // mutual exclusive element types should not be inherited
-            if (!containsTypes(elementMatches, MUTUAL_EXCLUSIVE_MAP.get(matchType))) {
+            RuleSemanticQuery ruleQuery = QueryManager.getRuleQuery(chatContext.getParseInfo().getQueryMode());
+            if (!containsTypes(elementMatches, matchType, ruleQuery)) {
+                match.setMode(SchemaElementMatch.MatchMode.INHERIT);
                 matchesToInherit.add(match);
             }
         }
@@ -53,22 +64,31 @@ public class ContextInheritParser implements SemanticParser {
         }
     }
 
-    private boolean containsTypes(List<SchemaElementMatch> matches, List<SchemaElementType> types) {
-        return matches.stream().anyMatch(m -> types.contains(m.getElement().getType()));
+    private boolean containsTypes(List<SchemaElementMatch> matches, SchemaElementType matchType,
+            RuleSemanticQuery ruleQuery) {
+        List<SchemaElementType> types = MUTUAL_EXCLUSIVE_MAP.get(matchType);
+
+        return matches.stream().anyMatch(m -> {
+            SchemaElementType type = m.getElement().getType();
+            if (Objects.nonNull(ruleQuery) && ruleQuery instanceof MetricSemanticQuery
+                    && !(ruleQuery instanceof MetricEntityQuery)) {
+                return types.contains(type);
+            }
+            return type.equals(matchType);
+        });
     }
 
     protected boolean shouldInherit(QueryContext queryContext, ChatContext chatContext) {
-        if (queryContext.getMapInfo().getMatchedElements(
-                chatContext.getParseInfo().getDomainId()) == null) {
+        Long contextDomainId = chatContext.getParseInfo().getDomainId();
+        if (queryContext.getMapInfo().getMatchedElements(contextDomainId) == null) {
             return false;
         }
 
         // if candidates have only one MetricDomain mode and context has value filter , count in context
-        if (queryContext.getCandidateQueries().size() == 1 && (queryContext.getCandidateQueries()
-                .get(0) instanceof MetricDomainQuery)
-                && queryContext.getCandidateQueries().get(0).getParseInfo().getDomainId()
-                .equals(chatContext.getParseInfo().getDomainId())
-                && !CollectionUtils.isEmpty(chatContext.getParseInfo().getDimensionFilters())) {
+        List<SemanticQuery> candidateQueries = queryContext.getCandidateQueries().stream()
+                .filter(semanticQuery -> semanticQuery.getParseInfo().getDomainId().equals(contextDomainId)).collect(
+                        Collectors.toList());
+        if (candidateQueries.size() == 1 && (candidateQueries.get(0) instanceof MetricDomainQuery)) {
             return true;
         } else {
             return queryContext.getCandidateQueries().size() == 0;

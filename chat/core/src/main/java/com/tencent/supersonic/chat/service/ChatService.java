@@ -8,7 +8,7 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResponse;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import java.util.List;
 
@@ -25,8 +25,6 @@ public interface ChatService {
 
     public void updateContext(ChatContext chatCtx);
 
-    public void updateContext(ChatContext chatCtx, QueryContext queryCtx, SemanticParseInfo semanticParseInfo);
-
     public void switchContext(ChatContext chatCtx);
 
     public Boolean addChat(User user, String chatName);
@@ -41,9 +39,9 @@ public interface ChatService {
 
     Boolean deleteChat(Long chatId, String userName);
 
-    PageInfo<QueryResponse> queryInfo(PageQueryInfoReq pageQueryInfoCommend, long chatId);
+    PageInfo<QueryResp> queryInfo(PageQueryInfoReq pageQueryInfoCommend, long chatId);
 
-    public void addQuery(QueryResult queryResult, QueryContext queryContext, ChatContext chatCtx);
+    public void addQuery(QueryResult queryResult, ChatContext chatCtx);
 
     public ChatQueryDO getLastQuery(long chatId);
 

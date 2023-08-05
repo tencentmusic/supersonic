@@ -102,6 +102,9 @@ public class MetricServiceImpl implements MetricService {
     public PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq) {
         MetricFilter metricFilter = new MetricFilter();
         BeanUtils.copyProperties(pageMetricReq, metricFilter);
+        Set<DomainResp> domainResps = domainService.getDomainChildren(pageMetricReq.getDomainIds());
+        List<Long> domainIds = domainResps.stream().map(DomainResp::getId).collect(Collectors.toList());
+        metricFilter.setDomainIds(domainIds);
         PageInfo<MetricDO> metricDOPageInfo = PageHelper.startPage(pageMetricReq.getCurrent(),
                         pageMetricReq.getPageSize())
                 .doSelectPageInfo(() -> queryMetric(metricFilter));

@@ -14,7 +14,9 @@
     <result column="updated_by" jdbcType="VARCHAR" property="updatedBy" />
   </resultMap>
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.tencent.supersonic.chat.persistence.dataobject.PluginDO">
+    <result column="parse_mode_config" jdbcType="LONGVARCHAR" property="parseModeConfig" />
     <result column="config" jdbcType="LONGVARCHAR" property="config" />
+    <result column="comment" jdbcType="LONGVARCHAR" property="comment" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
@@ -50,7 +52,7 @@
     updated_by
   </sql>
   <sql id="Blob_Column_List">
-    config
+    parse_mode_config, config, comment
   </sql>
   <select id="selectByExampleWithBLOBs" parameterType="com.tencent.supersonic.chat.persistence.dataobject.PluginDOExample" resultMap="ResultMapWithBLOBs">
     select
@@ -101,11 +103,13 @@
     insert into s2_plugin (id, type, domain, 
       pattern, parse_mode, name, 
       created_at, created_by, updated_at, 
-      updated_by, config)
+      updated_by, parse_mode_config, config, 
+      comment)
     values (#{id,jdbcType=BIGINT}, #{type,jdbcType=VARCHAR}, #{domain,jdbcType=VARCHAR}, 
       #{pattern,jdbcType=VARCHAR}, #{parseMode,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
       #{createdAt,jdbcType=TIMESTAMP}, #{createdBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP}, 
-      #{updatedBy,jdbcType=VARCHAR}, #{config,jdbcType=LONGVARCHAR})
+      #{updatedBy,jdbcType=VARCHAR}, #{parseModeConfig,jdbcType=LONGVARCHAR}, #{config,jdbcType=LONGVARCHAR}, 
+      #{comment,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.tencent.supersonic.chat.persistence.dataobject.PluginDO">
     insert into s2_plugin
@@ -140,8 +144,14 @@
       <if test="updatedBy != null">
         updated_by,
       </if>
+      <if test="parseModeConfig != null">
+        parse_mode_config,
+      </if>
       <if test="config != null">
         config,
+      </if>
+      <if test="comment != null">
+        comment,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -175,8 +185,14 @@
       <if test="updatedBy != null">
         #{updatedBy,jdbcType=VARCHAR},
       </if>
+      <if test="parseModeConfig != null">
+        #{parseModeConfig,jdbcType=LONGVARCHAR},
+      </if>
       <if test="config != null">
         #{config,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="comment != null">
+        #{comment,jdbcType=LONGVARCHAR},
       </if>
     </trim>
   </insert>
@@ -216,8 +232,14 @@
       <if test="updatedBy != null">
         updated_by = #{updatedBy,jdbcType=VARCHAR},
       </if>
+      <if test="parseModeConfig != null">
+        parse_mode_config = #{parseModeConfig,jdbcType=LONGVARCHAR},
+      </if>
       <if test="config != null">
         config = #{config,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="comment != null">
+        comment = #{comment,jdbcType=LONGVARCHAR},
       </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
@@ -233,7 +255,9 @@
       created_by = #{createdBy,jdbcType=VARCHAR},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP},
       updated_by = #{updatedBy,jdbcType=VARCHAR},
-      config = #{config,jdbcType=LONGVARCHAR}
+      parse_mode_config = #{parseModeConfig,jdbcType=LONGVARCHAR},
+      config = #{config,jdbcType=LONGVARCHAR},
+      comment = #{comment,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.tencent.supersonic.chat.persistence.dataobject.PluginDO">

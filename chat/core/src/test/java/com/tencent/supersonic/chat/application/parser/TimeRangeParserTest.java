@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.application.parser;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
-import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.parser.rule.TimeRangeParser;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +27,7 @@ class TimeRangeParserTest {
     void parse() {
         TimeRangeParser timeRangeParser = new TimeRangeParser();
 
-        QueryRequest queryRequest = new QueryRequest();
+        QueryReq queryRequest = new QueryReq();
         ChatContext chatCtx = new ChatContext();
         SchemaMapInfo schemaMap = new SchemaMapInfo();
 

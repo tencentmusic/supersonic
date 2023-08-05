@@ -74,6 +74,10 @@ public class HanlpDictMapper implements SchemaMapper {
                 Long frequency = wordNatureToFrequency.get(mapResult.getName() + nature);
 
                 SchemaElement element = domainSchema.getElement(elementType, elementID);
+                if(Objects.isNull(element)){
+                    log.info("element is null, elementType:{},elementID:{}", elementType, elementID);
+                    continue;
+                }
                 if (element.getType().equals(SchemaElementType.VALUE)) {
                     element.setName(mapResult.getName());
                 }

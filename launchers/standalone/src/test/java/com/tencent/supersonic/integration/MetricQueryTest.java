@@ -4,9 +4,9 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.config.ChatConfigEditReqReq;
-import com.tencent.supersonic.chat.config.ChatConfigResp;
-import com.tencent.supersonic.chat.config.ItemVisibility;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
+import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
 import com.tencent.supersonic.chat.query.rule.metric.MetricDomainQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricFilterQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricGroupByQuery;
@@ -42,7 +42,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
                 FilterOperatorEnum.EQUALS, "alice", "用户名", 2L));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN_CONTINUOUS, startDay, endDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);
@@ -61,7 +61,7 @@ public class MetricQueryTest extends BaseQueryTest {
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN_CONTINUOUS, startDay, endDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);
@@ -81,7 +81,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN_CONTINUOUS, startDay, endDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);
@@ -106,7 +106,7 @@ public class MetricQueryTest extends BaseQueryTest {
         QueryFilter dimensionFilter = DataUtils.getFilter("user_name", FilterOperatorEnum.IN, list, "用户名", 2L);
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN_CONTINUOUS, startDay, endDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);
@@ -126,7 +126,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户名"));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(3, DateConf.DateMode.RECENT_UNITS, "DAY"));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(3, DateConf.DateMode.RECENT, "DAY"));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);
@@ -145,7 +145,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN_CONTINUOUS, startDay, endDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);
@@ -157,7 +157,7 @@ public class MetricQueryTest extends BaseQueryTest {
         DateFormat textFormat = new SimpleDateFormat("yyyy年mm月dd日");
         String dateStr = textFormat.format(format.parse(startDay));
 
-        QueryResult actualResult = submitNewChat(String.format("想知道{}alice的访问次数", dateStr));
+        QueryResult actualResult = submitNewChat(String.format("想知道%salice的访问次数", dateStr));
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -171,7 +171,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
                 FilterOperatorEnum.EQUALS, "alice", "用户名", 2L));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN_CONTINUOUS, startDay, startDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, 1, period, startDay, startDay));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);
@@ -198,7 +198,7 @@ public class MetricQueryTest extends BaseQueryTest {
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN_CONTINUOUS, startDay, endDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);

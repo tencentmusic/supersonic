@@ -5,11 +5,13 @@ import com.google.common.base.Objects;
 import java.io.Serializable;
 import java.util.List;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 @Data
+@Getter
 @Builder
+@NoArgsConstructor
+//@AllArgsConstructor
 public class SchemaElement implements Serializable {
 
     private Long domain;
@@ -20,8 +22,8 @@ public class SchemaElement implements Serializable {
     private SchemaElementType type;
     private List<String> alias;
 
-    public SchemaElement() {
-    }
+//    public SchemaElement() {
+//    }
 
     public SchemaElement(Long domain, Long id, String name, String bizName,
                          Long useCnt, SchemaElementType type, List<String> alias) {

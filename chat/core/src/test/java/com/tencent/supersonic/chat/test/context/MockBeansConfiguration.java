@@ -6,6 +6,9 @@ import static org.mockito.Mockito.when;
 
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
+import com.tencent.supersonic.chat.api.pojo.response.EntityRichInfoResp;
 import com.tencent.supersonic.chat.config.*;
 import com.tencent.supersonic.chat.persistence.repository.impl.ChatContextRepositoryImpl;
 import com.tencent.supersonic.chat.service.QueryService;
@@ -40,12 +43,12 @@ public class MockBeansConfiguration {
 
     public static void buildHttpSemanticServiceImpl(SemanticLayer httpSemanticLayer, List<DimSchemaResp> dimensionDescs,
             List<MetricSchemaResp> metricDescs) {
-        ChatConfigRich chaConfigRichDesc = new ChatConfigRich();
+        ChatConfigRichResp chaConfigRichDesc = new ChatConfigRichResp();
         DefaultMetric defaultMetricDesc = new DefaultMetric();
         defaultMetricDesc.setUnit(3);
         defaultMetricDesc.setPeriod(Constants.DAY);
 //        chaConfigRichDesc.setDefaultMetrics(new ArrayList<>(Arrays.asList(defaultMetricDesc)));
-        EntityRichInfo entityDesc = new EntityRichInfo();
+        EntityRichInfoResp entityDesc = new EntityRichInfoResp();
         List<DimSchemaResp> dimensionDescs1 = new ArrayList<>();
         DimSchemaResp dimensionDesc = new DimSchemaResp();
         dimensionDesc.setId(162L);

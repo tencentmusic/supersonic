@@ -6,6 +6,10 @@ import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.pojo.DomainSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.request.KnowledgeAdvancedConfig;
+import com.tencent.supersonic.chat.api.pojo.request.KnowledgeInfoReq;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
+import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
 import com.tencent.supersonic.chat.config.*;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.persistence.dataobject.DimValueDO;
@@ -124,13 +128,13 @@ public class DictMetaHelper {
 
     private void fillDimValueDOList(List<DimValueDO> dimValueDOList, Long domainId,
                                     Map<Long, SchemaElement> dimIdAndDescPair) {
-        ChatConfigRich chaConfigRichDesc = configService.getConfigRichInfo(domainId);
+        ChatConfigRichResp chaConfigRichDesc = configService.getConfigRichInfo(domainId);
         if (Objects.nonNull(chaConfigRichDesc) && Objects.nonNull(chaConfigRichDesc.getChatAggRichConfig())) {
 
-            ChatDefaultRichConfig chatDefaultConfig = chaConfigRichDesc.getChatAggRichConfig().getChatDefaultConfig();
-            List<KnowledgeInfo> knowledgeAggInfo = chaConfigRichDesc.getChatAggRichConfig().getKnowledgeInfos();
+            ChatDefaultRichConfigResp chatDefaultConfig = chaConfigRichDesc.getChatAggRichConfig().getChatDefaultConfig();
+            List<KnowledgeInfoReq> knowledgeAggInfo = chaConfigRichDesc.getChatAggRichConfig().getKnowledgeInfos();
 
-            List<KnowledgeInfo> knowledgeDetailInfo = chaConfigRichDesc.getChatDetailRichConfig().getKnowledgeInfos();
+            List<KnowledgeInfoReq> knowledgeDetailInfo = chaConfigRichDesc.getChatDetailRichConfig().getKnowledgeInfos();
 
             fillKnowledgeDimValue(knowledgeDetailInfo, chatDefaultConfig, dimValueDOList, dimIdAndDescPair, domainId);
             fillKnowledgeDimValue(knowledgeAggInfo, chatDefaultConfig, dimValueDOList, dimIdAndDescPair, domainId);
@@ -139,7 +143,7 @@ public class DictMetaHelper {
         }
     }
 
-    private void fillKnowledgeDimValue(List<KnowledgeInfo> knowledgeInfos, ChatDefaultRichConfig chatDefaultConfig,
+    private void fillKnowledgeDimValue(List<KnowledgeInfoReq> knowledgeInfos, ChatDefaultRichConfigResp chatDefaultConfig,
                                        List<DimValueDO> dimValueDOList, Map<Long, SchemaElement> dimIdAndDescPair, Long domainId) {
         if (!CollectionUtils.isEmpty(knowledgeInfos)) {
             List<Dim4Dict> dimensions = new ArrayList<>();

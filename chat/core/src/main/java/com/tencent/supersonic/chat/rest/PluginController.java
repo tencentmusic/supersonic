@@ -50,7 +50,7 @@ public class PluginController {
     }
 
     @PostMapping("/query")
-    List<Plugin> query(PluginQueryReq pluginQueryReq) {
+    List<Plugin> query(@RequestBody PluginQueryReq pluginQueryReq) {
         return pluginService.queryWithAuthCheck(pluginQueryReq);
     }
 

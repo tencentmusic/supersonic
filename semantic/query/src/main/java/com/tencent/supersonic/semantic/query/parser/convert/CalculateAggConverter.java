@@ -197,9 +197,9 @@ public class CalculateAggConverter implements SemanticConverter {
         public String getOverSelect(QueryStructReq queryStructCmd, boolean isOver) {
             String aggStr = queryStructCmd.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER) || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
-                    return String.format("( (%s-%s_roll)/cast(%s_roll as DOUBLE) ) as %s",
+                    return String.format("( (%s-%s_roll)/cast(%s_roll as DOUBLE) ) as %s_%s,%s",
                             f.getColumn(), f.getColumn(), f.getColumn(), f.getColumn(),
-                            f.getColumn());
+                            f.getFunc().getOperator(),f.getColumn());
                 } else {
                     return f.getColumn();
                 }
@@ -335,9 +335,9 @@ public class CalculateAggConverter implements SemanticConverter {
             String aggStr = queryStructCmd.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER) || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
                     return String.format(
-                            "if(%s_roll!=0,  (%s-%s_roll)/%s_roll , 0) as %s",
+                            "if(%s_roll!=0,  (%s-%s_roll)/%s_roll , 0) as %s_%s,%s",
                              f.getColumn(), f.getColumn(), f.getColumn(), f.getColumn(),
-                            f.getColumn());
+                            f.getColumn(),f.getFunc().getOperator(),f.getColumn());
                 } else {
                     return f.getColumn();
                 }

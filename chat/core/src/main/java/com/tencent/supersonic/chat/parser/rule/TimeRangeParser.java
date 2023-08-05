@@ -46,7 +46,7 @@ public class TimeRangeParser implements SemanticParser {
                 for (SemanticQuery query : queryContext.getCandidateQueries()) {
                     query.getParseInfo().setDateInfo(dateConf);
                 }
-            } else if(QueryManager.containsRuleQuery(chatContext.getParseInfo().getQueryMode())) {
+            } else if (QueryManager.containsRuleQuery(chatContext.getParseInfo().getQueryMode())) {
                 RuleSemanticQuery semanticQuery = QueryManager.createRuleQuery(
                         chatContext.getParseInfo().getQueryMode());
                 // inherit parse info from context
@@ -64,7 +64,7 @@ public class TimeRangeParser implements SemanticParser {
         List<TimeNLP> times = TimeNLPUtil.parse(queryText);
         if (times.size() > 0) {
             startDate = times.get(0).getTime();
-        }else {
+        } else {
             return null;
         }
 
@@ -133,7 +133,7 @@ public class TimeRangeParser implements SemanticParser {
                         info.setPeriod(Constants.DAY);
                 }
                 days = days * num;
-                info.setDateMode(DateConf.DateMode.RECENT_UNITS);
+                info.setDateMode(DateConf.DateMode.RECENT);
                 String text = "近" + num + zhPeriod;
                 if (Strings.isNotEmpty(m.group("periodStr"))) {
                     text = m.group("periodStr");
@@ -175,11 +175,11 @@ public class TimeRangeParser implements SemanticParser {
 
     private DateConf getDateConf(Date startDate, Date endDate) {
         if (startDate == null || endDate == null) {
-            return  null;
+            return null;
         }
 
         DateConf info = new DateConf();
-        info.setDateMode(DateConf.DateMode.BETWEEN_CONTINUOUS);
+        info.setDateMode(DateConf.DateMode.BETWEEN);
         info.setStartDate(DATE_FORMAT.format(startDate));
         info.setEndDate(DATE_FORMAT.format(endDate));
         return info;

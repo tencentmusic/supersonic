@@ -3,12 +3,12 @@ package com.tencent.supersonic.chat.persistence.repository.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDOExample;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDOExample.Criteria;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResponse;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.persistence.mapper.ChatQueryDOMapper;
 import com.tencent.supersonic.chat.persistence.repository.ChatQueryRepository;
@@ -35,7 +35,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     }
 
     @Override
-    public PageInfo<QueryResponse> getChatQuery(PageQueryInfoReq pageQueryInfoCommend, long chatId) {
+    public PageInfo<QueryResp> getChatQuery(PageQueryInfoReq pageQueryInfoCommend, long chatId) {
         ChatQueryDOExample example = new ChatQueryDOExample();
         example.setOrderByClause("question_id desc");
         Criteria criteria = example.createCriteria();
@@ -46,7 +46,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
                         pageQueryInfoCommend.getPageSize())
                 .doSelectPageInfo(() -> chatQueryDOMapper.selectByExampleWithBLOBs(example));
 
-        PageInfo<QueryResponse> chatQueryVOPageInfo = PageUtils.pageInfo2PageInfoVo(pageInfo);
+        PageInfo<QueryResp> chatQueryVOPageInfo = PageUtils.pageInfo2PageInfoVo(pageInfo);
         chatQueryVOPageInfo.setList(
                 pageInfo.getList().stream().map(this::convertTo)
                         .sorted(Comparator.comparingInt(o -> o.getQuestionId().intValue()))
@@ -54,8 +54,8 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         return chatQueryVOPageInfo;
     }
 
-    private QueryResponse convertTo(ChatQueryDO chatQueryDO) {
-        QueryResponse queryResponse = new QueryResponse();
+    private QueryResp convertTo(ChatQueryDO chatQueryDO) {
+        QueryResp queryResponse = new QueryResp();
         BeanUtils.copyProperties(chatQueryDO, queryResponse);
         QueryResult queryResult = JsonUtil.toObject(chatQueryDO.getQueryResult(), QueryResult.class);
         queryResult.setQueryId(chatQueryDO.getQuestionId());
@@ -64,16 +64,16 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     }
 
     @Override
-    public void createChatQuery(QueryResult queryResult, QueryRequest queryRequest, ChatContext chatCtx) {
+    public void createChatQuery(QueryResult queryResult, ChatContext chatCtx) {
         ChatQueryDO chatQueryDO = new ChatQueryDO();
-        chatQueryDO.setChatId(Long.valueOf(queryRequest.getChatId()));
+        chatQueryDO.setChatId(Long.valueOf(chatCtx.getChatId()));
         chatQueryDO.setCreateTime(new java.util.Date());
-        chatQueryDO.setUserName(queryRequest.getUser().getName());
+        chatQueryDO.setUserName(chatCtx.getUser());
         chatQueryDO.setQueryState(queryResult.getQueryState().ordinal());
-        chatQueryDO.setQueryText(queryRequest.getQueryText());
+        chatQueryDO.setQueryText(chatCtx.getQueryText());
         chatQueryDO.setQueryResult(JsonUtil.toString(queryResult));
         chatQueryDOMapper.insert(chatQueryDO);
-        ChatQueryDO lastChatQuery = getLastChatQuery(queryRequest.getChatId());
+        ChatQueryDO lastChatQuery = getLastChatQuery(chatCtx.getChatId());
         Long queryId = lastChatQuery.getQuestionId();
         queryResult.setQueryId(queryId);
     }

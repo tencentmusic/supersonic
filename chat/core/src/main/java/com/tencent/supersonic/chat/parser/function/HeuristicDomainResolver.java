@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.parser.function;
 
 import com.tencent.supersonic.chat.api.pojo.*;
-import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,10 +25,10 @@ public class HeuristicDomainResolver implements DomainResolver {
             Map.Entry<Long, DomainMatchResult> maxDomain = domainTypeMap.entrySet().stream()
                     .filter(entry -> domainQueryModes.containsKey(entry.getKey()))
                     .sorted((o1, o2) -> {
-                        int difference = o1.getValue().getCount() - o2.getValue().getCount();
+                        int difference = o2.getValue().getCount() - o1.getValue().getCount();
                         if (difference == 0) {
-                            return (int) ((o1.getValue().getMaxSimilarity()
-                                    - o2.getValue().getMaxSimilarity()) * 100);
+                            return (int) ((o2.getValue().getMaxSimilarity()
+                                    - o1.getValue().getMaxSimilarity()) * 100);
                         }
                         return difference;
                     }).findFirst().orElse(null);
@@ -46,7 +46,7 @@ public class HeuristicDomainResolver implements DomainResolver {
      * @return false will use context domain, true will use other domain , maybe include context domain
      */
     protected static boolean isAllowSwitch(Map<Long, SemanticQuery> domainQueryModes, SchemaMapInfo schemaMap,
-            ChatContext chatCtx, QueryRequest searchCtx, Long domainId) {
+            ChatContext chatCtx, QueryReq searchCtx, Long domainId, List<Long> restrictiveDomains) {
         if (!Objects.nonNull(domainId) || domainId <= 0) {
             return true;
         }
@@ -81,6 +81,9 @@ public class HeuristicDomainResolver implements DomainResolver {
             }
         }
 
+        if (CollectionUtils.isNotEmpty(restrictiveDomains) && !restrictiveDomains.contains(domainId)) {
+            return true;
+        }
         // if context domain not  in schemaMap , will switch
         if (schemaMap.getMatchedElements(domainId) == null || schemaMap.getMatchedElements(domainId).size() <= 0) {
             log.info("domainId not in schemaMap ");
@@ -118,24 +121,36 @@ public class HeuristicDomainResolver implements DomainResolver {
     }
 
 
-    public Long resolve(QueryContext queryContext, ChatContext chatCtx) {
+    public Long resolve(QueryContext queryContext, ChatContext chatCtx, List<Long> restrictiveDomains) {
         Long domainId = queryContext.getRequest().getDomainId();
         if (Objects.nonNull(domainId) && domainId > 0) {
-            return domainId;
+            if (CollectionUtils.isNotEmpty(restrictiveDomains) && restrictiveDomains.contains(domainId)) {
+                return domainId;
+            } else {
+                return null;
+            }
         }
         SchemaMapInfo mapInfo = queryContext.getMapInfo();
         Set<Long> matchedDomains = mapInfo.getMatchedDomains();
+        if (CollectionUtils.isNotEmpty(restrictiveDomains)) {
+            matchedDomains = matchedDomains.stream()
+                    .filter(matchedDomain -> restrictiveDomains.contains(matchedDomain))
+                    .collect(Collectors.toSet());
+        }
         Map<Long, SemanticQuery> domainQueryModes = new HashMap<>();
         for (Long matchedDomain : matchedDomains) {
             domainQueryModes.put(matchedDomain, null);
         }
+        if(domainQueryModes.size()==1){
+            return domainQueryModes.keySet().stream().findFirst().get();
+        }
         return resolve(domainQueryModes, queryContext, chatCtx,
-                queryContext.getMapInfo());
+                queryContext.getMapInfo(),restrictiveDomains);
     }
 
     public Long resolve(Map<Long, SemanticQuery> domainQueryModes, QueryContext queryContext,
-            ChatContext chatCtx, SchemaMapInfo schemaMap) {
-        Long selectDomain = selectDomain(domainQueryModes, queryContext.getRequest(), chatCtx, schemaMap);
+            ChatContext chatCtx, SchemaMapInfo schemaMap, List<Long> restrictiveDomains) {
+        Long selectDomain = selectDomain(domainQueryModes, queryContext.getRequest(), chatCtx, schemaMap,restrictiveDomains);
         if (selectDomain > 0) {
             log.info("selectDomain {} ", selectDomain);
             return selectDomain;
@@ -144,9 +159,9 @@ public class HeuristicDomainResolver implements DomainResolver {
         return selectDomainBySchemaElementCount(domainQueryModes, schemaMap);
     }
 
-    public Long selectDomain(Map<Long, SemanticQuery> domainQueryModes, QueryRequest queryContext,
+    public Long selectDomain(Map<Long, SemanticQuery> domainQueryModes, QueryReq queryContext,
             ChatContext chatCtx,
-            SchemaMapInfo schemaMap) {
+            SchemaMapInfo schemaMap, List<Long> restrictiveDomains) {
         // if QueryContext has domainId and in domainQueryModes
         if (domainQueryModes.containsKey(queryContext.getDomainId())) {
             log.info("selectDomain from QueryContext [{}]", queryContext.getDomainId());
@@ -155,7 +170,7 @@ public class HeuristicDomainResolver implements DomainResolver {
         // if ChatContext has domainId and in domainQueryModes
         if (chatCtx.getParseInfo().getDomainId() > 0) {
             Long domainId = chatCtx.getParseInfo().getDomainId();
-            if (!isAllowSwitch(domainQueryModes, schemaMap, chatCtx, queryContext, domainId)) {
+            if (!isAllowSwitch(domainQueryModes, schemaMap, chatCtx, queryContext, domainId,restrictiveDomains)) {
                 log.info("selectDomain from ChatContext [{}]", domainId);
                 return domainId;
             }

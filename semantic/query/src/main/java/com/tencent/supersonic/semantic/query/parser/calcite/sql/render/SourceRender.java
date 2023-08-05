@@ -2,12 +2,6 @@ package com.tencent.supersonic.semantic.query.parser.calcite.sql.render;
 
 
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.Renderer;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.DataSourceNode;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.DimensionNode;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.FilterNode;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.MetricNode;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.TableView;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Constants;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Dimension;
@@ -15,7 +9,13 @@ import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Identify;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Measure;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Metric;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.Renderer;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.TableView;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.DataSourceNode;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.DimensionNode;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.FilterNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.IdentifyNode;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.MetricNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.SemanticNode;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,7 +33,7 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class SourceRender extends Renderer {
 
-    public static TableView renderOne(String alias, List<String> fieldWhere,
+    public static TableView renderOne(String alias, List<String> fieldWheres,
             List<String> reqMetrics, List<String> reqDimensions, String queryWhere, DataSource datasource,
             SqlValidatorScope scope, SemanticSchema schema, boolean nonAgg) throws Exception {
 
@@ -41,11 +41,8 @@ public class SourceRender extends Renderer {
         TableView output = new TableView();
         List<String> queryMetrics = new ArrayList<>(reqMetrics);
         List<String> queryDimensions = new ArrayList<>(reqDimensions);
+        List<String> fieldWhere = new ArrayList<>(fieldWheres);
         if (!fieldWhere.isEmpty()) {
-//            SqlNode sqlNode = SemanticNode.parse(queryWhere, scope);
-//            if (addWhere) {
-//                output.getFilter().add(sqlNode);
-//            }
             Set<String> dimensions = new HashSet<>();
             Set<String> metrics = new HashSet<>();
             whereDimMetric(fieldWhere, queryMetrics, queryDimensions, datasource, schema, dimensions, metrics);
@@ -69,7 +66,8 @@ public class SourceRender extends Renderer {
             }
         }
         for (String dimension : queryDimensions) {
-            if(dimension.contains(Constants.DIMENSION_IDENTIFY) && queryDimensions.contains(dimension.split(Constants.DIMENSION_IDENTIFY)[1])){
+            if (dimension.contains(Constants.DIMENSION_IDENTIFY) && queryDimensions.contains(
+                    dimension.split(Constants.DIMENSION_IDENTIFY)[1])) {
                 continue;
             }
             buildDimension(dimension.contains(Constants.DIMENSION_IDENTIFY) ? dimension : "",
@@ -213,14 +211,15 @@ public class SourceRender extends Renderer {
                 continue;
             }
             String filterField = field;
-            if(field.contains(Constants.DIMENSION_IDENTIFY)) {
+            if (field.contains(Constants.DIMENSION_IDENTIFY)) {
                 filterField = field.split(Constants.DIMENSION_IDENTIFY)[1];
             }
-            addField(filterField,field,datasource,schema,dimensions,metrics);
+            addField(filterField, field, datasource, schema, dimensions, metrics);
         }
     }
 
-    private static void addField(String field,String oriField,DataSource datasource, SemanticSchema schema, Set<String> dimensions,
+    private static void addField(String field, String oriField, DataSource datasource, SemanticSchema schema,
+            Set<String> dimensions,
             Set<String> metrics) {
         Optional<Dimension> dimension = datasource.getDimensions().stream()
                 .filter(d -> d.getName().equalsIgnoreCase(field)).findFirst();
@@ -251,9 +250,11 @@ public class SourceRender extends Renderer {
         Optional<Metric> datasourceMetric = schema.getMetrics()
                 .stream().filter(m -> m.getName().equalsIgnoreCase(field)).findFirst();
         if (datasourceMetric.isPresent()) {
-            Set<String> measures = datasourceMetric.get().getMetricTypeParams().getMeasures().stream().map(m->m.getName()).collect(
-                    Collectors.toSet());
-            if(datasource.getMeasures().stream().map(m->m.getName()).collect(Collectors.toSet()).containsAll(measures)){
+            Set<String> measures = datasourceMetric.get().getMetricTypeParams().getMeasures().stream()
+                    .map(m -> m.getName()).collect(
+                            Collectors.toSet());
+            if (datasource.getMeasures().stream().map(m -> m.getName()).collect(Collectors.toSet())
+                    .containsAll(measures)) {
                 metrics.add(oriField);
                 return;
             }

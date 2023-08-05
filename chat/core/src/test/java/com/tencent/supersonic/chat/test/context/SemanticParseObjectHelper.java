@@ -66,7 +66,7 @@ public class SemanticParseObjectHelper {
         if (dayAgo > 0) {
             DateConf dateInfo = new DateConf();
             dateInfo.setUnit(dayAgo);
-            dateInfo.setDateMode(DateConf.DateMode.RECENT_UNITS);
+            dateInfo.setDateMode(DateConf.DateMode.RECENT);
             return dateInfo;
         }
         return null;

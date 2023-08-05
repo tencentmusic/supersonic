@@ -5,7 +5,8 @@ import static com.tencent.supersonic.common.pojo.Constants.ADMIN_LOWER;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.DomainSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.request.RecommendedQuestion;
+import com.tencent.supersonic.chat.api.pojo.request.*;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.config.*;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatConfigDO;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
@@ -103,9 +104,9 @@ public class ChatConfigHelper {
 
         BeanUtils.copyProperties(chatConfigDO, chatConfigDescriptor);
 
-        chatConfigDescriptor.setChatDetailConfig(JsonUtil.toObject(chatConfigDO.getChatDetailConfig(), ChatDetailConfig.class));
-        chatConfigDescriptor.setChatAggConfig(JsonUtil.toObject(chatConfigDO.getChatAggConfig(), ChatAggConfig.class));
-        chatConfigDescriptor.setRecommendedQuestions(JsonUtil.toList(chatConfigDO.getRecommendedQuestions(), RecommendedQuestion.class));
+        chatConfigDescriptor.setChatDetailConfig(JsonUtil.toObject(chatConfigDO.getChatDetailConfig(), ChatDetailConfigReq.class));
+        chatConfigDescriptor.setChatAggConfig(JsonUtil.toObject(chatConfigDO.getChatAggConfig(), ChatAggConfigReq.class));
+        chatConfigDescriptor.setRecommendedQuestions(JsonUtil.toList(chatConfigDO.getRecommendedQuestions(), RecommendedQuestionReq.class));
         chatConfigDescriptor.setStatusEnum(StatusEnum.of(chatConfigDO.getStatus()));
 
         chatConfigDescriptor.setCreatedBy(chatConfigDO.getCreatedBy());
@@ -132,15 +133,15 @@ public class ChatConfigHelper {
         return chatConfigResp;
     }
 
-    private ChatDetailConfig generateEmptyChatDetailConfigResp() {
-        ChatDetailConfig chatDetailConfig = new ChatDetailConfig();
+    private ChatDetailConfigReq generateEmptyChatDetailConfigResp() {
+        ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
         ItemVisibility visibility = new ItemVisibility();
         chatDetailConfig.setVisibility(visibility);
         return chatDetailConfig;
     }
 
-    private ChatAggConfig generateEmptyChatAggConfigResp() {
-        ChatAggConfig chatAggConfig = new ChatAggConfig();
+    private ChatAggConfigReq generateEmptyChatAggConfigResp() {
+        ChatAggConfigReq chatAggConfig = new ChatAggConfigReq();
         ItemVisibility visibility = new ItemVisibility();
         chatAggConfig.setVisibility(visibility);
         return chatAggConfig;

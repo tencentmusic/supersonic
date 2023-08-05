@@ -34,7 +34,7 @@ public class MultiTurnsTest extends BaseQueryTest {
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
                 FilterOperatorEnum.EQUALS, "alice", "用户名", 2L));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN_CONTINUOUS, startDay, endDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);
@@ -57,7 +57,7 @@ public class MultiTurnsTest extends BaseQueryTest {
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
                 FilterOperatorEnum.EQUALS, "alice", "用户名", 2L));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN_CONTINUOUS, startDay, endDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);
@@ -80,7 +80,7 @@ public class MultiTurnsTest extends BaseQueryTest {
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
                 FilterOperatorEnum.EQUALS, "lucy", "用户名", 2L));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN_CONTINUOUS, startDay, endDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);
@@ -101,7 +101,7 @@ public class MultiTurnsTest extends BaseQueryTest {
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("停留时长"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN_CONTINUOUS, startDay, endDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);
@@ -124,7 +124,7 @@ public class MultiTurnsTest extends BaseQueryTest {
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("停留时长"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN_CONTINUOUS, startDay, startDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, 1, period, startDay, startDay));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);
@@ -145,7 +145,7 @@ public class MultiTurnsTest extends BaseQueryTest {
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("停留时长"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(30, DateConf.DateMode.RECENT_UNITS, "DAY"));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(30, DateConf.DateMode.RECENT, "DAY"));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);

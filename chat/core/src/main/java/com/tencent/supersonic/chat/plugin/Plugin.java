@@ -1,37 +1,58 @@
 package com.tencent.supersonic.chat.plugin;
 
 
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.parser.ParseMode;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
-
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Data
 public class Plugin extends RecordInfo {
 
     private Long id;
 
-    //plugin type WEB_PAGE WEB_SERVICE
+    /***
+     * plugin type WEB_PAGE WEB_SERVICE
+     */
     private String type;
 
-    private List<Long> domainList;
+    private List<Long> domainList = Lists.newArrayList();
 
-    //description, for parsing
+    /**
+     * description, for parsing
+     */
     private String pattern;
 
-    //parse
+    /**
+     * parse
+     */
     private ParseMode parseMode;
+
+    private String parseModeConfig;
 
     private String name;
 
-    //config for different plugin type
+    /**
+     * config for different plugin type
+     */
     private String config;
 
-    public List<String> getPatterns() {
-        return Stream.of(getPattern().split("\\|")).collect(Collectors.toList());
+    private String comment;
+
+    public List<String> getExampleQuestionList() {
+        if (StringUtils.isNotBlank(parseModeConfig)) {
+            PluginParseConfig pluginParseConfig = JSONObject.parseObject(parseModeConfig, PluginParseConfig.class);
+            return pluginParseConfig.getExamples();
+        }
+        return Lists.newArrayList();
+    }
+
+    public boolean isContainsAllDomain() {
+        return CollectionUtils.isNotEmpty(domainList) && domainList.contains(-1L);
     }
 
 }

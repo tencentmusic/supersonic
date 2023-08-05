@@ -14,7 +14,7 @@ public class EntityDetailQuery extends EntitySemanticQuery {
     public EntityDetailQuery() {
         super();
         queryMatcher.addOption(DIMENSION, REQUIRED, AT_LEAST, 1)
-                .addOption(VALUE, REQUIRED, AT_LEAST, 1);
+                .addOption(ID, REQUIRED, AT_LEAST, 1);
     }
 
     @Override

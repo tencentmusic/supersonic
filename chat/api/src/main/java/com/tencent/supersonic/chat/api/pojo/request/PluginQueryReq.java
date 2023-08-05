@@ -7,10 +7,9 @@ import lombok.Data;
 public class PluginQueryReq {
 
 
-    private String showElementId;
+    private String name;
 
-    //DASHBOARD WIDGET
-    private String showType;
+    private String parseMode;
 
     private String type;
 
@@ -18,5 +17,5 @@ public class PluginQueryReq {
 
     private String pattern;
 
-
+    private String createdBy;
 }

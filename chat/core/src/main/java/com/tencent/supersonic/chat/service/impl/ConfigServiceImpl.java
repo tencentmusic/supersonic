@@ -5,6 +5,8 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.pojo.DomainSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.request.*;
+import com.tencent.supersonic.chat.api.pojo.response.*;
 import com.tencent.supersonic.chat.config.*;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.SemanticService;
@@ -135,8 +137,8 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public ChatConfigRich getConfigRichInfo(Long domainId) {
-        ChatConfigRich chatConfigRich = new ChatConfigRich();
+    public ChatConfigRichResp getConfigRichInfo(Long domainId) {
+        ChatConfigRichResp chatConfigRich = new ChatConfigRichResp();
         ChatConfigResp chatConfigResp = chatConfigRepository.getConfigByDomainId(domainId);
         if (Objects.isNull(chatConfigResp)) {
             log.info("there is no chatConfigDesc for domainId:{}", domainId);
@@ -154,24 +156,23 @@ public class ConfigServiceImpl implements ConfigService {
         return chatConfigRich;
     }
 
-    private ChatDetailRichConfig fillChatDetailRichConfig(DomainSchema domainSchema, ChatConfigRich chatConfigRich, ChatConfigResp chatConfigResp) {
+    private ChatDetailRichConfigResp fillChatDetailRichConfig(DomainSchema domainSchema, ChatConfigRichResp chatConfigRich, ChatConfigResp chatConfigResp) {
         if (Objects.isNull(chatConfigResp) || Objects.isNull(chatConfigResp.getChatDetailConfig())) {
             return null;
         }
-        ChatDetailRichConfig detailRichConfig = new ChatDetailRichConfig();
-        ChatDetailConfig chatDetailConfig = chatConfigResp.getChatDetailConfig();
+        ChatDetailRichConfigResp detailRichConfig = new ChatDetailRichConfigResp();
+        ChatDetailConfigReq chatDetailConfig = chatConfigResp.getChatDetailConfig();
         ItemVisibilityInfo itemVisibilityInfo = fetchVisibilityDescByConfig(chatDetailConfig.getVisibility(), domainSchema);
         detailRichConfig.setVisibility(itemVisibilityInfo);
         detailRichConfig.setKnowledgeInfos(fillKnowledgeBizName(chatDetailConfig.getKnowledgeInfos(), domainSchema));
         detailRichConfig.setGlobalKnowledgeConfig(chatDetailConfig.getGlobalKnowledgeConfig());
         detailRichConfig.setChatDefaultConfig(fetchDefaultConfig(chatDetailConfig.getChatDefaultConfig(), domainSchema, itemVisibilityInfo));
 
-        detailRichConfig.setEntity(generateRichEntity(chatDetailConfig.getEntity(), domainSchema));
         return detailRichConfig;
     }
 
-    private EntityRichInfo generateRichEntity(Entity entity, DomainSchema domainSchema) {
-        EntityRichInfo entityRichInfo = new EntityRichInfo();
+    private EntityRichInfoResp generateRichEntity(Entity entity, DomainSchema domainSchema) {
+        EntityRichInfoResp entityRichInfo = new EntityRichInfoResp();
         if (Objects.isNull(entity) || Objects.isNull(entity.getEntityId())) {
             return entityRichInfo;
         }
@@ -183,12 +184,12 @@ public class ConfigServiceImpl implements ConfigService {
         return entityRichInfo;
     }
 
-    private ChatAggRichConfig fillChatAggRichConfig(DomainSchema domainSchema, ChatConfigResp chatConfigResp) {
+    private ChatAggRichConfigResp fillChatAggRichConfig(DomainSchema domainSchema, ChatConfigResp chatConfigResp) {
         if (Objects.isNull(chatConfigResp) || Objects.isNull(chatConfigResp.getChatAggConfig())) {
             return null;
         }
-        ChatAggConfig chatAggConfig = chatConfigResp.getChatAggConfig();
-        ChatAggRichConfig chatAggRichConfig = new ChatAggRichConfig();
+        ChatAggConfigReq chatAggConfig = chatConfigResp.getChatAggConfig();
+        ChatAggRichConfigResp chatAggRichConfig = new ChatAggRichConfigResp();
         ItemVisibilityInfo itemVisibilityInfo = fetchVisibilityDescByConfig(chatAggConfig.getVisibility(), domainSchema);
         chatAggRichConfig.setVisibility(itemVisibilityInfo);
         chatAggRichConfig.setKnowledgeInfos(fillKnowledgeBizName(chatAggConfig.getKnowledgeInfos(), domainSchema));
@@ -198,8 +199,8 @@ public class ConfigServiceImpl implements ConfigService {
         return chatAggRichConfig;
     }
 
-    private ChatDefaultRichConfig fetchDefaultConfig(ChatDefaultConfig chatDefaultConfig, DomainSchema domainSchema, ItemVisibilityInfo itemVisibilityInfo) {
-        ChatDefaultRichConfig defaultRichConfig = new ChatDefaultRichConfig();
+    private ChatDefaultRichConfigResp fetchDefaultConfig(ChatDefaultConfigReq chatDefaultConfig, DomainSchema domainSchema, ItemVisibilityInfo itemVisibilityInfo) {
+        ChatDefaultRichConfigResp defaultRichConfig = new ChatDefaultRichConfigResp();
         if (Objects.isNull(chatDefaultConfig)) {
             return defaultRichConfig;
         }
@@ -245,8 +246,8 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
 
-    private List<KnowledgeInfo> fillKnowledgeBizName(List<KnowledgeInfo> knowledgeInfos,
-                                                     DomainSchema domainSchema) {
+    private List<KnowledgeInfoReq> fillKnowledgeBizName(List<KnowledgeInfoReq> knowledgeInfos,
+                                                        DomainSchema domainSchema) {
         if (CollectionUtils.isEmpty(knowledgeInfos)) {
             return new ArrayList<>();
         }
@@ -264,11 +265,11 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public List<ChatConfigRich> getAllChatRichConfig() {
-        List<ChatConfigRich> chatConfigRichInfoList = new ArrayList<>();
+    public List<ChatConfigRichResp> getAllChatRichConfig() {
+        List<ChatConfigRichResp> chatConfigRichInfoList = new ArrayList<>();
         List<DomainResp> domainRespList = semanticLayer.getDomainListForAdmin();
         domainRespList.stream().forEach(domainResp -> {
-            ChatConfigRich chatConfigRichInfo = getConfigRichInfo(domainResp.getId());
+            ChatConfigRichResp chatConfigRichInfo = getConfigRichInfo(domainResp.getId());
             if (Objects.nonNull(chatConfigRichInfo)) {
                 chatConfigRichInfoList.add(chatConfigRichInfo);
             }

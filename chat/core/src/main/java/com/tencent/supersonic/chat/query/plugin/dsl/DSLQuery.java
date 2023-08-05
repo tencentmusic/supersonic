@@ -62,8 +62,7 @@ public class DSLQuery extends PluginSemanticQuery {
 
     @Override
     public QueryResult execute(User user) {
-        PluginParseResult functionCallParseResult = (PluginParseResult) parseInfo.getProperties()
-                .get(Constants.CONTEXT);
+        PluginParseResult functionCallParseResult =JsonUtil.toObject(JsonUtil.toString(parseInfo.getProperties().get(Constants.CONTEXT)),PluginParseResult.class);
         Long domainId = parseInfo.getDomainId();
         LLMResp llmResp = requestLLM(functionCallParseResult, domainId);
         if (Objects.isNull(llmResp)) {

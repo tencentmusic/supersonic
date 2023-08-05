@@ -4,7 +4,7 @@ package com.tencent.supersonic.chat.rest;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResponse;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.service.ChatService;
 import java.util.List;
@@ -68,10 +68,10 @@ public class ChatController {
     }
 
     @PostMapping("/pageQueryInfo")
-    public PageInfo<QueryResponse> pageQueryInfo(@RequestBody PageQueryInfoReq pageQueryInfoCommand,
-                                                 @RequestParam(value = "chatId") long chatId,
-                                                 HttpServletRequest request,
-                                                 HttpServletResponse response) {
+    public PageInfo<QueryResp> pageQueryInfo(@RequestBody PageQueryInfoReq pageQueryInfoCommand,
+                                             @RequestParam(value = "chatId") long chatId,
+                                             HttpServletRequest request,
+                                             HttpServletResponse response) {
         pageQueryInfoCommand.setUserName(UserHolder.findUser(request, response).getName());
         return chatService.queryInfo(pageQueryInfoCommand, chatId);
     }

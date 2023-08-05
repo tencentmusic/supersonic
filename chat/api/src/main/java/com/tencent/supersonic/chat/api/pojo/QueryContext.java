@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.api.pojo;
 
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
-import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -10,11 +10,11 @@ import java.util.List;
 @Data
 public class QueryContext {
 
-    private QueryRequest request;
+    private QueryReq request;
     private List<SemanticQuery> candidateQueries = new ArrayList<>();
     private SchemaMapInfo mapInfo = new SchemaMapInfo();
 
-    public QueryContext(QueryRequest request) {
+    public QueryContext(QueryReq request) {
         this.request = request;
     }
 }

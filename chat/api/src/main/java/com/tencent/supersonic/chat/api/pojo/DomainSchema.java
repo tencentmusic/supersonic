@@ -13,11 +13,15 @@ public class DomainSchema {
     private Set<SchemaElement> metrics = new HashSet<>();
     private Set<SchemaElement> dimensions = new HashSet<>();
     private Set<SchemaElement> dimensionValues = new HashSet<>();
-    private Set<SchemaElement> entities = new HashSet<>();
+    private SchemaElement entity = new SchemaElement();
 
     public SchemaElement getElement(SchemaElementType elementType, long elementID) {
         Optional<SchemaElement> element = Optional.empty();
+
         switch (elementType) {
+            case ENTITY:
+                element = Optional.ofNullable(entity);
+                break;
             case DOMAIN:
                 element = Optional.of(domain);
                 break;
@@ -26,9 +30,6 @@ public class DomainSchema {
                 break;
             case DIMENSION:
                 element = dimensions.stream().filter(e -> e.getId() == elementID).findFirst();
-                break;
-            case ENTITY:
-                element = entities.stream().filter(e -> e.getId() == elementID).findFirst();
                 break;
             case VALUE:
                 element = dimensionValues.stream().filter(e -> e.getId() == elementID).findFirst();

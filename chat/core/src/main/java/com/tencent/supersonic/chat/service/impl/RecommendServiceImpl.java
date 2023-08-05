@@ -3,12 +3,12 @@ package com.tencent.supersonic.chat.service.impl;
 
 import com.tencent.supersonic.chat.api.pojo.DomainSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
-import com.tencent.supersonic.chat.api.pojo.response.RecommendQuestion;
-import com.tencent.supersonic.chat.config.ChatConfigFilter;
-import com.tencent.supersonic.chat.config.ChatConfigResp;
-import com.tencent.supersonic.chat.config.ChatConfigRich;
-import com.tencent.supersonic.chat.api.pojo.response.RecommendResponse;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.response.RecommendQuestionResp;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
+import com.tencent.supersonic.chat.api.pojo.response.RecommendResp;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,14 +37,14 @@ public class RecommendServiceImpl implements RecommendService {
     private SemanticService semanticService;
 
     @Override
-    public RecommendResponse recommend(QueryRequest queryCtx, Long limit) {
+    public RecommendResp recommend(QueryReq queryCtx, Long limit) {
         if (Objects.isNull(limit) || limit <= 0) {
             limit = Long.MAX_VALUE;
         }
         log.debug("limit:{}", limit);
         Long domainId = queryCtx.getDomainId();
         if (Objects.isNull(domainId)) {
-            return new RecommendResponse();
+            return new RecommendResp();
         }
 
         DomainSchema domainSchema = semanticService.getDomainSchema(domainId);
@@ -75,21 +75,21 @@ public class RecommendServiceImpl implements RecommendService {
                     return item;
                 }).collect(Collectors.toList());
 
-        RecommendResponse response = new RecommendResponse();
+        RecommendResp response = new RecommendResp();
         response.setDimensions(dimensions);
         response.setMetrics(metrics);
         return response;
     }
 
     @Override
-    public RecommendResponse recommendMetricMode(QueryRequest queryCtx, Long limit) {
-        RecommendResponse recommendResponse = recommend(queryCtx, limit);
+    public RecommendResp recommendMetricMode(QueryReq queryCtx, Long limit) {
+        RecommendResp recommendResponse = recommend(queryCtx, limit);
         // filter black Item
         if (Objects.isNull(recommendResponse)) {
             return recommendResponse;
         }
 
-        ChatConfigRich chatConfigRich = configService.getConfigRichInfo(Long.valueOf(queryCtx.getDomainId()));
+        ChatConfigRichResp chatConfigRich = configService.getConfigRichInfo(Long.valueOf(queryCtx.getDomainId()));
         if (Objects.nonNull(chatConfigRich) && Objects.nonNull(chatConfigRich.getChatAggRichConfig())
                 && Objects.nonNull(chatConfigRich.getChatAggRichConfig().getVisibility())) {
             List<Long> blackMetricIdList = chatConfigRich.getChatAggRichConfig().getVisibility().getBlackMetricIdList();
@@ -105,15 +105,15 @@ public class RecommendServiceImpl implements RecommendService {
     }
 
     @Override
-    public List<RecommendQuestion> recommendQuestion(Long domainId) {
-        List<RecommendQuestion> recommendQuestions = new ArrayList<>();
+    public List<RecommendQuestionResp> recommendQuestion(Long domainId) {
+        List<RecommendQuestionResp> recommendQuestions = new ArrayList<>();
         ChatConfigFilter chatConfigFilter = new ChatConfigFilter();
         chatConfigFilter.setDomainId(domainId);
         List<ChatConfigResp> chatConfigRespList = configService.search(chatConfigFilter, null);
         if (!CollectionUtils.isEmpty(chatConfigRespList)) {
             chatConfigRespList.stream().forEach(chatConfigResp -> {
                 if (Objects.nonNull(chatConfigResp) && !CollectionUtils.isEmpty(chatConfigResp.getRecommendedQuestions())) {
-                    recommendQuestions.add(new RecommendQuestion(chatConfigResp.getDomainId(), chatConfigResp.getRecommendedQuestions()));
+                    recommendQuestions.add(new RecommendQuestionResp(chatConfigResp.getDomainId(), chatConfigResp.getRecommendedQuestions()));
                 }
             });
             return recommendQuestions;

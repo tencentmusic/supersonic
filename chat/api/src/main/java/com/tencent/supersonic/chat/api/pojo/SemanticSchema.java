@@ -48,7 +48,7 @@ public class SemanticSchema implements Serializable {
 
     public List<SchemaElement> getEntities() {
         List<SchemaElement> entities = new ArrayList<>();
-        domainSchemaList.stream().forEach(d -> entities.addAll(d.getEntities()));
+        domainSchemaList.stream().forEach(d -> entities.add(d.getEntity()));
         return entities;
     }
 }

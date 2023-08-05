@@ -7,7 +7,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SearchResult;
 import com.tencent.supersonic.chat.mapper.DomainInfoStat;
 import com.tencent.supersonic.chat.mapper.DomainWithSemanticType;
@@ -55,7 +55,7 @@ public class SearchServiceImpl implements SearchService {
     private SearchMatchStrategy searchMatchStrategy;
 
     @Override
-    public List<SearchResult> search(QueryRequest queryCtx) {
+    public List<SearchResult> search(QueryReq queryCtx) {
         String queryText = queryCtx.getQueryText();
         // 1.get meta info
         SemanticSchema semanticSchemaDb = schemaService.getSemanticSchema();
@@ -109,8 +109,8 @@ public class SearchServiceImpl implements SearchService {
         return searchResults.stream().limit(RESULT_SIZE).collect(Collectors.toList());
     }
 
-    private List<Long> getPossibleDomains(QueryRequest queryCtx, List<Term> originals,
-            DomainInfoStat domainStat, Long webDomainId) {
+    private List<Long> getPossibleDomains(QueryReq queryCtx, List<Term> originals,
+                                          DomainInfoStat domainStat, Long webDomainId) {
 
         if (Objects.nonNull(webDomainId) && webDomainId > 0) {
             List<Long> result = new ArrayList<>();

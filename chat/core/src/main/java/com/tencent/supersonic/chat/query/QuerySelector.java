@@ -9,5 +9,5 @@ import java.util.List;
  **/
 public interface QuerySelector {
 
-    SemanticQuery select(List<SemanticQuery> candidateQueries);
+    List<SemanticQuery> select(List<SemanticQuery> candidateQueries);
 }

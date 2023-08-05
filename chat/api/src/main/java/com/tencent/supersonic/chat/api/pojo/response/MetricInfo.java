@@ -7,6 +7,7 @@ import lombok.Data;
 public class MetricInfo {
 
     private String name;
+    private String dimension;
     private String value;
     private String date;
     private Map<String, String> statistics;

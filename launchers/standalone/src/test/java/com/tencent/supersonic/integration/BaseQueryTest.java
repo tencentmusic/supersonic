@@ -1,19 +1,18 @@
 package com.tencent.supersonic.integration;
 
 import com.tencent.supersonic.StandaloneLauncher;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
+import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.QueryService;
-import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.util.DataUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,13 +21,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = StandaloneLauncher.class)
@@ -38,6 +34,7 @@ public class BaseQueryTest {
     protected final int unit = 7;
     protected final String startDay = LocalDate.now().plusDays(-unit).toString();
     protected final String endDay = LocalDate.now().plusDays(-1).toString();
+    protected final String period = "DAY";
 
     @Autowired
     @Qualifier("chatQueryService")
@@ -47,29 +44,39 @@ public class BaseQueryTest {
     @Autowired
     protected ConfigService configService;
 
-    protected Integer getNewChat(String chatName) {
-        chatService.addChat(User.getFakeUser(), chatName);
-        Optional<Long> chatId = chatService.getAll(User.getFakeUser().getName()).stream().map(c -> c.getChatId()).sorted(Comparator.reverseOrder()).findFirst();
-        if (chatId.isPresent()) {
-            return chatId.get().intValue();
-        }
-        return 1;
-    }
-
     protected QueryResult submitMultiTurnChat(String queryText) throws Exception {
-        QueryRequest queryContextReq = DataUtils.getQueryContextReq(20, queryText);
-        return queryService.executeQuery(queryContextReq);
+        ParseResp parseResp = submitParse(queryText);
+
+        ExecuteQueryReq request = new ExecuteQueryReq();
+        request.setChatId(parseResp.getChatId());
+        request.setQueryText(parseResp.getQueryText());
+        request.setUser(DataUtils.getUser());
+        request.setParseInfo(parseResp.getSelectedParses().get(0));
+
+        return queryService.performExecution(request);
     }
 
     protected QueryResult submitNewChat(String queryText) throws Exception {
-        chatService.addChat(User.getFakeUser(), RandomStringUtils.random(5));
+        ParseResp parseResp = submitParse(queryText);
 
-        ChatContext chatContext = chatService.getOrCreateContext(10);
+        ExecuteQueryReq request = new ExecuteQueryReq();
+        request.setChatId(parseResp.getChatId());
+        request.setQueryText(parseResp.getQueryText());
+        request.setUser(DataUtils.getUser());
+        request.setParseInfo(parseResp.getSelectedParses().get(0));
+
+        QueryResult result = queryService.performExecution(request);
+
+        ChatContext chatContext = chatService.getOrCreateContext(parseResp.getChatId());
         chatContext.setParseInfo(new SemanticParseInfo());
         chatService.updateContext(chatContext);
 
-        QueryRequest queryContextReq = DataUtils.getQueryContextReq(10, queryText);
-        return queryService.executeQuery(queryContextReq);
+        return result;
+    }
+
+    protected ParseResp submitParse(String queryText) {
+        QueryReq queryContextReq = DataUtils.getQueryContextReq(10, queryText);
+        return queryService.performParsing(queryContextReq);
     }
 
     protected void assertSchemaElements(Set<SchemaElement> expected, Set<SchemaElement> actual) {
@@ -79,17 +86,6 @@ public class BaseQueryTest {
                 .filter(s -> s != null).collect(Collectors.toSet());
 
         assertEquals(expectedNames, actualNames);
-    }
-
-    protected void assertDateConf(DateConf expected, DateConf actual) {
-        Boolean timeFilterExist = expected.getStartDate().equals(actual.getStartDate())
-                && expected.getEndDate().equals(actual.getEndDate())
-                && expected.getDateMode().equals(actual.getDateMode())
-                || expected.getUnit().equals(actual.getUnit()) &&
-                expected.getDateMode().equals(actual.getDateMode()) &&
-                expected.getPeriod().equals(actual.getPeriod());
-
-        assertTrue(timeFilterExist);
     }
 
     protected void assertQueryResult(QueryResult expected, QueryResult actual) {
@@ -106,7 +102,7 @@ public class BaseQueryTest {
         assertEquals(expectedParseInfo.getDimensionFilters(), actualParseInfo.getDimensionFilters());
         assertEquals(expectedParseInfo.getMetricFilters(), actualParseInfo.getMetricFilters());
 
-        assertDateConf(expectedParseInfo.getDateInfo(), actualParseInfo.getDateInfo());
+        assertEquals(expectedParseInfo.getDateInfo(), actualParseInfo.getDateInfo());
     }
 
 }

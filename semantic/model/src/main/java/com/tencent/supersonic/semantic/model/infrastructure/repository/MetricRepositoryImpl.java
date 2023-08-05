@@ -74,33 +74,7 @@ public class MetricRepositoryImpl implements MetricRepository {
 
     @Override
     public List<MetricDO> getMetric(MetricFilter metricFilter) {
-        MetricDOExample metricDOExample = new MetricDOExample();
-        metricDOExample.createCriteria();
-        if (metricFilter.getId() != null) {
-            metricDOExample.getOredCriteria().get(0).andIdEqualTo(metricFilter.getId());
-        }
-        if (metricFilter.getName() != null) {
-            metricDOExample.getOredCriteria().get(0).andNameLike("%" + metricFilter.getName() + "%");
-        }
-        if (metricFilter.getBizName() != null) {
-            metricDOExample.getOredCriteria().get(0).andBizNameLike("%" + metricFilter.getBizName() + "%");
-        }
-        if (metricFilter.getCreatedBy() != null) {
-            metricDOExample.getOredCriteria().get(0).andCreatedByEqualTo(metricFilter.getCreatedBy());
-        }
-        if (metricFilter.getDomainId() != null) {
-            metricDOExample.getOredCriteria().get(0).andDomainIdEqualTo(metricFilter.getDomainId());
-        }
-        if (metricFilter.getSensitiveLevel() != null) {
-            metricDOExample.getOredCriteria().get(0).andSensitiveLevelEqualTo(metricFilter.getSensitiveLevel());
-        }
-        if (metricFilter.getStatus() != null) {
-            metricDOExample.getOredCriteria().get(0).andStatusEqualTo(metricFilter.getStatus());
-        }
-        if (StringUtils.isNotBlank(metricFilter.getType())) {
-            metricDOExample.getOredCriteria().get(0).andTypeEqualTo(metricFilter.getType());
-        }
-        return metricDOMapper.selectByExampleWithBLOBs(metricDOExample);
+        return metricDOCustomMapper.query(metricFilter);
     }
 
     @Override

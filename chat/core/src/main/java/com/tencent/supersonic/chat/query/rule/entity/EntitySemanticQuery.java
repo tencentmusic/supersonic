@@ -4,9 +4,9 @@ import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
-import com.tencent.supersonic.chat.config.ChatConfigResp;
-import com.tencent.supersonic.chat.config.ChatConfigRich;
-import com.tencent.supersonic.chat.config.ChatDefaultRichConfig;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
+import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.common.pojo.DateConf;
@@ -85,8 +85,8 @@ public abstract class EntitySemanticQuery extends RuleSemanticQuery {
         parseInfo.setLimit(ENTITY_MAX_RESULTS);
         if (parseInfo.getDateInfo() == null) {
             ConfigService configService = ContextUtils.getBean(ConfigService.class);
-            ChatConfigRich chatConfig = configService.getConfigRichInfo(parseInfo.getDomainId());
-            ChatDefaultRichConfig defaultConfig = chatConfig.getChatDetailRichConfig().getChatDefaultConfig();
+            ChatConfigRichResp chatConfig = configService.getConfigRichInfo(parseInfo.getDomainId());
+            ChatDefaultRichConfigResp defaultConfig = chatConfig.getChatDetailRichConfig().getChatDefaultConfig();
 
             int unit = 1;
             if (Objects.nonNull(defaultConfig) && Objects.nonNull(defaultConfig.getUnit())) {
@@ -94,7 +94,7 @@ public abstract class EntitySemanticQuery extends RuleSemanticQuery {
             }
             String date = LocalDate.now().plusDays(-unit).toString();
             DateConf dateInfo = new DateConf();
-            dateInfo.setDateMode(DateConf.DateMode.BETWEEN_CONTINUOUS);
+            dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
             dateInfo.setStartDate(date);
             dateInfo.setEndDate(date);
 

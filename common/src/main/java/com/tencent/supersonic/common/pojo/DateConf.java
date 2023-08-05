@@ -4,6 +4,7 @@ import static java.time.LocalDate.now;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import lombok.Data;
 
@@ -13,7 +14,7 @@ public class DateConf {
     private static final long serialVersionUID = 3074129990945004340L;
 
 
-    private DateMode dateMode = DateMode.RECENT_UNITS;
+    private DateMode dateMode = DateMode.RECENT;
 
     /**
      * like 2021-10-22, dateMode=1
@@ -42,15 +43,32 @@ public class DateConf {
      */
     private String text;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DateConf dateConf = (DateConf) o;
+        return dateMode == dateConf.dateMode &&
+                Objects.equals(startDate, dateConf.startDate) &&
+                Objects.equals(endDate, dateConf.endDate) &&
+                Objects.equals(unit, dateConf.unit) &&
+                Objects.equals(period, dateConf.period);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dateMode, startDate, endDate, unit, period);
+    }
+
     public enum DateMode {
         /**
          * date mode
-         * 1 - BETWEEN_CONTINUOUS, continuous static value, [startDate, endDate]
-         * 2 - LIST_DISCRETE, discrete static value, [dateList]
-         * 3 - RECENT_UNITS, dynamic time related to the actual available time of the element, [unit, period]
-         * 4 - AVAILABLE_TIME, dynamic time which guaranteed to query some data, [startDate, endDate]
+         * 1 - BETWEEN, continuous static value, [startDate, endDate]
+         * 2 - LIST, discrete static value, [dateList]
+         * 3 - RECENT, dynamic time related to the actual available time of the element, [unit, period]
+         * 4 - AVAILABLE, dynamic time which guaranteed to query some data, [startDate, endDate]
          */
-        BETWEEN_CONTINUOUS, LIST_DISCRETE, RECENT_UNITS, AVAILABLE_TIME
+        BETWEEN, LIST, RECENT, AVAILABLE
     }
 
     @Override

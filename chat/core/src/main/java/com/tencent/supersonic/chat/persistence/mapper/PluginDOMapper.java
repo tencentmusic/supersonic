@@ -1,6 +1,5 @@
 package com.tencent.supersonic.chat.persistence.mapper;
 
-
 import com.tencent.supersonic.chat.persistence.dataobject.PluginDO;
 import com.tencent.supersonic.chat.persistence.dataobject.PluginDOExample;
 import org.apache.ibatis.annotations.Mapper;

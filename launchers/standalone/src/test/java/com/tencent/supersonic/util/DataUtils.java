@@ -4,19 +4,27 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.chat.api.pojo.request.QueryRequest;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 
 import java.util.Set;
 
+import static java.time.LocalDate.now;
+
 public class DataUtils {
 
-    public static QueryRequest getQueryContextReq(Integer id, String query) {
-        QueryRequest queryContextReq = new QueryRequest();
+    private static final User user_test = new User(1L, "admin", "admin", "admin@email");
+
+    public static User getUser() {
+        return user_test;
+    }
+
+    public static QueryReq getQueryContextReq(Integer id, String query) {
+        QueryReq queryContextReq = new QueryReq();
         queryContextReq.setQueryText(query);//"alice的访问次数"
         queryContextReq.setChatId(id);
-        queryContextReq.setUser(new User(1L, "admin", "admin", "admin@email"));
+        queryContextReq.setUser(user_test);
         return queryContextReq;
     }
 
@@ -64,6 +72,18 @@ public class DataUtils {
         dateInfo.setUnit(unit);
         dateInfo.setDateMode(dateMode);
         dateInfo.setPeriod(period);
+        dateInfo.setStartDate(now().plusDays(-unit).toString());
+        dateInfo.setEndDate(now().toString());
+        return dateInfo;
+    }
+
+    public static DateConf getDateConf(DateConf.DateMode dateMode, Integer unit, String period, String startDate, String endDate) {
+        DateConf dateInfo = new DateConf();
+        dateInfo.setUnit(unit);
+        dateInfo.setDateMode(dateMode);
+        dateInfo.setPeriod(period);
+        dateInfo.setStartDate(startDate);
+        dateInfo.setEndDate(endDate);
         return dateInfo;
     }
 

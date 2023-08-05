@@ -1,21 +1,27 @@
 package com.tencent.supersonic.chat.parser.rule;
 
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.AVG;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.COUNT;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.DISTINCT;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.MAX;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.MIN;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.TOPN;
+
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
-
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
-
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.*;
 
 @Slf4j
 public class AggregateTypeParser implements SemanticParser {
@@ -29,7 +35,7 @@ public class AggregateTypeParser implements SemanticParser {
             new AbstractMap.SimpleEntry<>(DISTINCT, Pattern.compile("(?i)(uv)")),
             new AbstractMap.SimpleEntry<>(COUNT, Pattern.compile("(?i)(总数|pv)")),
             new AbstractMap.SimpleEntry<>(NONE, Pattern.compile("(?i)(明细)"))
-    ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,(k1,k2)->k2));
 
     @Override
     public void parse(QueryContext queryContext, ChatContext chatContext) {

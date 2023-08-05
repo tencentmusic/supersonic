@@ -320,12 +320,14 @@ CREATE TABLE IF NOT EXISTS `s2_plugin`
     `domain`     varchar(100)  NULL,
     `pattern`    varchar(500)  NULL,
     `parse_mode` varchar(100)  NULL,
+    `parse_mode_config` LONGVARCHAR  NULL,
     `name`       varchar(100)  NULL,
     `created_at` TIMESTAMP   NULL,
     `created_by` varchar(100) null,
     `updated_at` TIMESTAMP    NULL,
     `updated_by` varchar(100) NULL,
     `config`     LONGVARCHAR  NULL,
+    `comment`     LONGVARCHAR  NULL,
     PRIMARY KEY (`id`)
 ); COMMENT ON TABLE s2_plugin IS 'plugin information table';
 

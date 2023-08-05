@@ -4,7 +4,11 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
-import com.tencent.supersonic.chat.config.*;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
@@ -65,12 +69,12 @@ public class ChatConfigController {
 
 
     @GetMapping("/richDesc/{domainId}")
-    public ChatConfigRich getDomainExtendRichInfo(@PathVariable("domainId") Long domainId) {
+    public ChatConfigRichResp getDomainExtendRichInfo(@PathVariable("domainId") Long domainId) {
         return configService.getConfigRichInfo(domainId);
     }
 
     @GetMapping("/richDesc/all")
-    public List<ChatConfigRich> getAllChatRichConfig() {
+    public List<ChatConfigRichResp> getAllChatRichConfig() {
         return configService.getAllChatRichConfig();
     }
 
