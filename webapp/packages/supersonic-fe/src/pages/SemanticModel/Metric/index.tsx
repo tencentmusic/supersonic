@@ -1,6 +1,6 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Space } from 'antd';
+import { message } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
@@ -23,6 +23,7 @@ type QueryMetricListParams = {
   bizName?: string;
   sensitiveLevel?: string;
   type?: string;
+  [key: string]: any;
 };
 
 const ClassMetricTable: React.FC<Props> = () => {
@@ -31,8 +32,9 @@ const ClassMetricTable: React.FC<Props> = () => {
     pageSize: 20,
     total: 0,
   });
-
+  const [loading, setLoading] = useState<boolean>(false);
   const [dataSource, setDataSource] = useState<any[]>([]);
+  const [filterParams, setFilterParams] = useState<Record<string, any>>({});
   const actionRef = useRef<ActionType>();
 
   useEffect(() => {
@@ -40,11 +42,13 @@ const ClassMetricTable: React.FC<Props> = () => {
   }, []);
 
   const queryMetricList = async (params: QueryMetricListParams = {}) => {
+    setLoading(true);
     const { code, data, msg } = await queryMetric({
-      ...params,
       ...pagination,
+      ...params,
     });
-    const { list, pageSize, current, total } = data;
+    setLoading(false);
+    const { list, pageSize, current, total } = data || {};
     let resData: any = {};
     if (code === 200) {
       setPagination({
@@ -88,6 +92,10 @@ const ClassMetricTable: React.FC<Props> = () => {
       title: '字段名称',
     },
     {
+      dataIndex: 'domainName',
+      title: '主题域',
+    },
+    {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',
       valueEnum: SENSITIVE_LEVEL_ENUM,
@@ -105,7 +113,6 @@ const ClassMetricTable: React.FC<Props> = () => {
     {
       dataIndex: 'type',
       title: '指标类型',
-      // search: false,
       valueEnum: {
         ATOMIC: '原子指标',
         DERIVED: '衍生指标',
@@ -123,25 +130,18 @@ const ClassMetricTable: React.FC<Props> = () => {
   ];
 
   const handleFilterChange = async (filterParams: {
-    keywordsType: string;
-    keywords: string;
+    name: string;
     sensitiveLevel: string;
     type: string;
   }) => {
-    const params: QueryMetricListParams = {};
-    const { keywordsType, keywords, sensitiveLevel, type } = filterParams;
-    if (keywordsType && keywords) {
-      params[keywordsType] = keywords;
-    }
+    const { sensitiveLevel, type } = filterParams;
+    const params: QueryMetricListParams = { ...filterParams };
     const sensitiveLevelValue = sensitiveLevel?.[0];
     const typeValue = type?.[0];
-    if (sensitiveLevelValue) {
-      params.sensitiveLevel = sensitiveLevelValue;
-    }
-    if (type) {
-      params.type = typeValue;
-    }
 
+    params.sensitiveLevel = sensitiveLevelValue;
+    params.type = typeValue;
+    setFilterParams(params);
     await queryMetricList(params);
   };
 
@@ -157,7 +157,6 @@ const ClassMetricTable: React.FC<Props> = () => {
       <ProTable
         className={`${styles.metricTable}`}
         actionRef={actionRef}
-        // headerTitle="指标列表"
         rowKey="id"
         search={false}
         dataSource={dataSource}
@@ -166,27 +165,19 @@ const ClassMetricTable: React.FC<Props> = () => {
         tableAlertRender={() => {
           return false;
         }}
+        loading={loading}
         onChange={(data: any) => {
           const { current, pageSize, total } = data;
-          setPagination({
+          const pagin = {
             current,
             pageSize,
             total,
-          });
+          };
+          setPagination(pagin);
+          queryMetricList({ ...pagin, ...filterParams });
         }}
         size="small"
         options={{ reload: false, density: false, fullScreen: false }}
-        // toolBarRender={() => [
-        //   <Button
-        //     key="create"
-        //     type="primary"
-        //     onClick={() => {
-        //       setMetricItem(undefined);
-        //     }}
-        //   >
-        //     创建指标
-        //   </Button>,
-        // ]}
       />
     </>
   );

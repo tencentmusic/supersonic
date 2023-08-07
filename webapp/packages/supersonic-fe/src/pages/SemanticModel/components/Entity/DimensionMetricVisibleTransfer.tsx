@@ -1,4 +1,3 @@
-import { Tag } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { IChatConfig } from '../../data';
 import DimensionMetricVisibleTableTransfer from './DimensionMetricVisibleTableTransfer';
@@ -10,11 +9,11 @@ interface RecordType {
 }
 
 type Props = {
-  knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap;
+  knowledgeInfosMap?: IChatConfig.IKnowledgeInfosItemMap;
   sourceList: any[];
   targetList: string[];
   titles?: string[];
-  onKnowledgeInfosMapChange: (knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap) => void;
+  onKnowledgeInfosMapChange?: (knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap) => void;
   onChange?: (params?: any) => void;
   transferProps?: Record<string, any>;
 };
@@ -75,20 +74,6 @@ const DimensionMetricVisibleTransfer: React.FC<Props> = ({
         }}
         targetKeys={targetKeys}
         onChange={handleChange}
-        render={(item) => (
-          <div style={{ display: 'flex' }}>
-            <span style={{ flex: '1' }}>{item.name}</span>
-            <span style={{ flex: '0 1 40px' }}>
-              {item.type === 'dimension' ? (
-                <Tag color="blue">{'维度'}</Tag>
-              ) : item.type === 'metric' ? (
-                <Tag color="orange">{'指标'}</Tag>
-              ) : (
-                <></>
-              )}
-            </span>
-          </div>
-        )}
         {...transferProps}
       />
     </div>

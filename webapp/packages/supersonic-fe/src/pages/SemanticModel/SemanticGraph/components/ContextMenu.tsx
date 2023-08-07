@@ -6,7 +6,6 @@ import { SemanticNodeType } from '../../enum';
 import { SEMANTIC_NODE_TYPE_CONFIG } from '../../constant';
 
 type InitContextMenuProps = {
-  graphShowType?: string;
   onMenuClick?: (key: string, item: Item) => void;
 };
 

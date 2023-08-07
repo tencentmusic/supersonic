@@ -1,7 +1,7 @@
 import { Tabs, Popover, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { connect, Helmet, history, useParams } from 'umi';
-import ProjectListTree from './components/ProjectList';
+import DomainListTree from './components/DomainList';
 import ClassDataSourceTable from './components/ClassDataSourceTable';
 import ClassDimensionTable from './components/ClassDimensionTable';
 import ClassMetricTable from './components/ClassMetricTable';
@@ -24,7 +24,6 @@ type Props = {
 };
 
 const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
-  window.RUNNING_ENV = 'semantic';
   const defaultTabKey = 'xflow';
   const params: any = useParams();
   const menuKey = params.menuKey ? params.menuKey : defaultTabKey;
@@ -203,7 +202,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
               maxHeight: '800px',
             }}
             content={
-              <ProjectListTree
+              <DomainListTree
                 onTreeSelected={() => {
                   setOpen(false);
                 }}

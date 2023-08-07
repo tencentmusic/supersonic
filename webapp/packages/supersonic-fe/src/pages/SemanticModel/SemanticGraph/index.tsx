@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { connect } from 'umi';
 import type { StateType } from '../model';
-import { IGroup } from '@antv/g-base';
+// import { IGroup } from '@antv/g-base';
 import type { Dispatch } from 'umi';
 import {
   typeConfigs,
@@ -16,7 +16,7 @@ import { Item, TreeGraphData, NodeConfig, IItemBaseConfig } from '@antv/g6-core'
 import initToolBar from './components/ToolBar';
 import initTooltips from './components/ToolTips';
 import initContextMenu from './components/ContextMenu';
-import initLegend from './components/Legend';
+// import initLegend from './components/Legend';
 import { SemanticNodeType } from '../enum';
 import G6 from '@antv/g6';
 import { ISemantic, IDataSource } from '../data';
@@ -26,11 +26,14 @@ import MetricInfoCreateForm from '../components/MetricInfoCreateForm';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 import ClassDataSourceTypeModal from '../components/ClassDataSourceTypeModal';
 import GraphToolBar from './components/GraphToolBar';
-import { cloneDeep } from 'lodash';
+import GraphLegend from './components/GraphLegend';
+import GraphLegendVisibleModeItem from './components/GraphLegendVisibleModeItem';
+
+// import { cloneDeep } from 'lodash';
 
 type Props = {
   domainId: number;
-  graphShowType?: SemanticNodeType;
+  // graphShowType?: SemanticNodeType;
   domainManger: StateType;
   dispatch: Dispatch;
 };
@@ -39,7 +42,7 @@ const DomainManger: React.FC<Props> = ({
   domainManger,
   domainId,
   // graphShowType = SemanticNodeType.DIMENSION,
-  graphShowType,
+  // graphShowType,
   dispatch,
 }) => {
   const ref = useRef(null);
@@ -53,7 +56,7 @@ const DomainManger: React.FC<Props> = ({
 
   const legendDataRef = useRef<any[]>([]);
   const graphRef = useRef<any>(null);
-  const legendDataFilterFunctions = useRef<any>({});
+  // const legendDataFilterFunctions = useRef<any>({});
   const [dimensionItem, setDimensionItem] = useState<ISemantic.IDimensionItem>();
 
   const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
@@ -70,29 +73,18 @@ const DomainManger: React.FC<Props> = ({
   const [confirmModalOpenState, setConfirmModalOpenState] = useState<boolean>(false);
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
 
-  // const toggleNodeVisibility = (graph: Graph, node: Item, visible: boolean) => {
-  //   if (visible) {
-  //     graph.showItem(node);
-  //   } else {
-  //     graph.hideItem(node);
-  //   }
-  // };
+  const visibleModeOpenRef = useRef<boolean>(false);
+  const [visibleModeOpen, setVisibleModeOpen] = useState<boolean>(false);
+
+  const graphShowTypeRef = useRef<SemanticNodeType>();
+  const [graphShowTypeState, setGraphShowTypeState] = useState<SemanticNodeType>();
+
+  const graphLegendDataSourceIds = useRef<string[]>();
 
   useEffect(() => {
     dimensionListRef.current = dimensionList;
     metricListRef.current = metricList;
   }, [dimensionList, metricList]);
-
-  // const toggleChildrenVisibility = (graph: Graph, node: Item, visible: boolean) => {
-  //   const model = node.getModel();
-  //   if (Array.isArray(model.children)) {
-  //     model.children.forEach((child) => {
-  //       const childNode = graph.findById(child.id);
-  //       toggleNodeVisibility(graph, childNode, visible);
-  //       toggleChildrenVisibility(graph, childNode, visible);
-  //     });
-  //   }
-  // };
 
   const handleSeachNode = (text: string) => {
     const filterData = dataSourceRef.current.reduce(
@@ -117,12 +109,24 @@ const DomainManger: React.FC<Props> = ({
     refreshGraphData(rootGraphData);
   };
 
-  const changeGraphData = (
-    dataSourceList: ISemantic.IDomainSchemaRelaList,
-    type?: SemanticNodeType,
-  ): TreeGraphData => {
-    const relationData = formatterRelationData({ dataSourceList, type, limit: 20 });
-    const legendList = relationData.map((item: any) => {
+  const changeGraphData = (dataSourceList: ISemantic.IDomainSchemaRelaList): TreeGraphData => {
+    const relationData = formatterRelationData({
+      dataSourceList,
+      type: graphShowTypeRef.current,
+      limit: 20,
+      showDataSourceId: graphLegendDataSourceIds.current,
+    });
+
+    const graphRootData = {
+      id: 'root',
+      name: domainManger.selectDomainName,
+      children: relationData,
+    };
+    return graphRootData;
+  };
+
+  const initLegendData = (graphRootData: TreeGraphData) => {
+    const legendList = graphRootData?.children?.map((item: any) => {
       const { id, name } = item;
       return {
         id,
@@ -131,13 +135,7 @@ const DomainManger: React.FC<Props> = ({
         ...typeConfigs.datasource,
       };
     });
-    legendDataRef.current = legendList;
-    const graphRootData = {
-      id: 'root',
-      name: domainManger.selectDomainName,
-      children: relationData,
-    };
-    return graphRootData;
+    legendDataRef.current = legendList as any;
   };
 
   const queryDataSourceList = async (params: {
@@ -153,8 +151,9 @@ const DomainManger: React.FC<Props> = ({
           }),
         );
         const graphRootData = changeGraphData(data);
-        setGraphData(graphRootData);
         dataSourceRef.current = data;
+        initLegendData(graphRootData);
+        setGraphData(graphRootData);
         return graphRootData;
       }
       return false;
@@ -164,41 +163,42 @@ const DomainManger: React.FC<Props> = ({
   };
 
   useEffect(() => {
+    graphLegendDataSourceIds.current = undefined;
     graphRef.current = null;
     queryDataSourceList({ domainId });
-  }, [domainId, graphShowType]);
+  }, [domainId]);
 
-  const getLegendDataFilterFunctions = () => {
-    legendDataRef.current.map((item: any) => {
-      const { id } = item;
-      legendDataFilterFunctions.current = {
-        ...legendDataFilterFunctions.current,
-        [id]: (d: any) => {
-          if (d.legendType === id) {
-            return true;
-          }
-          return false;
-        },
-      };
-    });
-  };
+  // const getLegendDataFilterFunctions = () => {
+  //   legendDataRef.current.map((item: any) => {
+  //     const { id } = item;
+  //     legendDataFilterFunctions.current = {
+  //       ...legendDataFilterFunctions.current,
+  //       [id]: (d: any) => {
+  //         if (d.legendType === id) {
+  //           return true;
+  //         }
+  //         return false;
+  //       },
+  //     };
+  //   });
+  // };
 
-  const setAllActiveLegend = (legend: any) => {
-    const legendCanvas = legend._cfgs.legendCanvas;
-    if (!legendCanvas) {
-      return;
-    }
-    // 从图例中找出node-group节点;
-    const group = legendCanvas.find((e: any) => e.get('name') === 'node-group');
-    // 数据源的图例节点在node-group中的children中；
-    const groups = group.get('children');
-    groups.forEach((itemGroup: any) => {
-      const labelText = itemGroup.find((e: any) => e.get('name') === 'circle-node-text');
-      // legend中activateLegend事件触发在图例节点的Text上，方法中存在向上溯源的逻辑：const shapeGroup = shape.get('parent');
-      // 因此复用实例方法时，在这里不能直接将图例节点传入，需要在节点的children中找任意一个元素作为入参；
-      legend.activateLegend(labelText);
-    });
-  };
+  // const setAllActiveLegend = (legend: any) => {
+  //   const legendCanvas = legend._cfgs.legendCanvas;
+  //   if (!legendCanvas) {
+  //     return;
+  //   }
+  //   // 从图例中找出node-group节点;
+  //   const group = legendCanvas.find((e: any) => e.get('name') === 'node-group');
+  //   // 数据源的图例节点在node-group中的children中；
+  //   const groups = group.get('children');
+  //   groups.forEach((itemGroup: any) => {
+  //     const labelText = itemGroup.find((e: any) => e.get('name') === 'circle-node-text');
+  //     // legend中activateLegend事件触发在图例节点的Text上，方法中存在向上溯源的逻辑：const shapeGroup = shape.get('parent');
+  //     // 因此复用实例方法时，在这里不能直接将图例节点传入，需要在节点的children中找任意一个元素作为入参；
+  //     legend.activateLegend(labelText);
+  //   });
+  // };
 
   const handleContextMenuClickEdit = (item: IItemBaseConfig) => {
     const targetData = item.model;
@@ -273,7 +273,6 @@ const DomainManger: React.FC<Props> = ({
     if (targetData.nodeType === SemanticNodeType.DIMENSION) {
       const targetItem = dimensionListRef.current.find((item) => item.id === targetData.uid);
       if (targetItem) {
-        // setDimensionItem({ ...targetItem });
         setCurrentNodeData(targetItem);
         setConfirmModalOpenState(true);
       } else {
@@ -283,7 +282,6 @@ const DomainManger: React.FC<Props> = ({
     if (targetData.nodeType === SemanticNodeType.METRIC) {
       const targetItem = metricListRef.current.find((item) => item.id === targetData.uid);
       if (targetItem) {
-        // setMetricItem({ ...targetItem });
         setCurrentNodeData(targetItem);
         setConfirmModalOpenState(true);
       } else {
@@ -357,6 +355,16 @@ const DomainManger: React.FC<Props> = ({
     },
   };
 
+  function handleToolBarClick(code: string) {
+    if (code === 'visibleMode') {
+      visibleModeOpenRef.current = !visibleModeOpenRef.current;
+      setVisibleModeOpen(visibleModeOpenRef.current);
+      return;
+    }
+    visibleModeOpenRef.current = false;
+    setVisibleModeOpen(false);
+  }
+
   useEffect(() => {
     if (!Array.isArray(graphData?.children)) {
       return;
@@ -371,17 +379,16 @@ const DomainManger: React.FC<Props> = ({
       const graphNodeList = flatGraphDataNode(graphData.children);
       const graphConfigKey = graphNodeList.length > 20 ? 'dendrogram' : 'mindmap';
 
-      getLegendDataFilterFunctions();
-      const toolbar = initToolBar({ onSearch: handleSeachNode });
+      // getLegendDataFilterFunctions();
+      const toolbar = initToolBar({ onSearch: handleSeachNode, onClick: handleToolBarClick });
       const tooltip = initTooltips();
       const contextMenu = initContextMenu({
-        graphShowType,
         onMenuClick: handleContextMenuClick,
       });
-      const legend = initLegend({
-        nodeData: legendDataRef.current,
-        filterFunctions: { ...legendDataFilterFunctions.current },
-      });
+      // const legend = initLegend({
+      //   nodeData: legendDataRef.current,
+      //   filterFunctions: { ...legendDataFilterFunctions.current },
+      // });
 
       graphRef.current = new G6.TreeGraph({
         container: 'semanticGraph',
@@ -400,7 +407,10 @@ const DomainManger: React.FC<Props> = ({
             'drag-node',
             'drag-canvas',
             // 'activate-relations',
-            'zoom-canvas',
+            {
+              type: 'zoom-canvas',
+              sensitivity: 0.3, // 设置缩放灵敏度，值越小，缩放越不敏感，默认值为 1
+            },
             {
               type: 'activate-relations',
               trigger: 'mouseenter', // 触发方式，可以是 'mouseenter' 或 'click'
@@ -429,45 +439,35 @@ const DomainManger: React.FC<Props> = ({
         layout: {
           ...graphConfigMap[graphConfigKey].layout,
         },
-        plugins: [legend, tooltip, toolbar, contextMenu],
+        plugins: [tooltip, toolbar, contextMenu],
+        // plugins: [legend, tooltip, toolbar, contextMenu],
       });
       graphRef.current.set('initGraphData', graphData);
       graphRef.current.set('initDataSource', dataSourceRef.current);
 
-      const legendCanvas = legend._cfgs.legendCanvas;
+      // const legendCanvas = legend._cfgs.legendCanvas;
 
       // legend模式事件方法bindEvents会有点击图例空白清空选中的逻辑，在注册click事件前，先将click事件队列清空；
-      legend._cfgs.legendCanvas._events.click = [];
-      // legendCanvas.on('click', (e) => {
-      //   const shape = e.target;
-      //   const shapeGroup = shape.get('parent');
-      //   const shapeGroupId = shapeGroup?.cfg?.id;
-      //   if (shapeGroupId) {
-      //     const isActive = shapeGroup.get('active');
-      //     const targetNode = graphRef.current.findById(shapeGroupId);
-      //     toggleNodeVisibility(graphRef.current, targetNode, isActive);
-      //     toggleChildrenVisibility(graphRef.current, targetNode, isActive);
-      //   }
+      // legend._cfgs.legendCanvas._events.click = [];
+      // legendCanvas.on('click', () => {
+      //   // @ts-ignore findLegendItemsByState为Legend的 private方法，忽略ts校验
+      //   const activedNodeList = legend.findLegendItemsByState('active');
+      //   // 获取当前所有激活节点后进行数据遍历筛选；
+      //   const activedNodeIds = activedNodeList.map((item: IGroup) => {
+      //     return item.cfg.id;
+      //   });
+      //   const graphDataClone = cloneDeep(graphData);
+      //   const filterGraphDataChildren = Array.isArray(graphDataClone?.children)
+      //     ? graphDataClone.children.reduce((children: TreeGraphData[], item: TreeGraphData) => {
+      //         if (activedNodeIds.includes(item.id)) {
+      //           children.push(item);
+      //         }
+      //         return children;
+      //       }, [])
+      //     : [];
+      //   graphDataClone.children = filterGraphDataChildren;
+      //   refreshGraphData(graphDataClone);
       // });
-      legendCanvas.on('click', () => {
-        // @ts-ignore findLegendItemsByState为Legend的 private方法，忽略ts校验
-        const activedNodeList = legend.findLegendItemsByState('active');
-        // 获取当前所有激活节点后进行数据遍历筛选；
-        const activedNodeIds = activedNodeList.map((item: IGroup) => {
-          return item.cfg.id;
-        });
-        const graphDataClone = cloneDeep(graphData);
-        const filterGraphDataChildren = Array.isArray(graphDataClone?.children)
-          ? graphDataClone.children.reduce((children: TreeGraphData[], item: TreeGraphData) => {
-              if (activedNodeIds.includes(item.id)) {
-                children.push(item);
-              }
-              return children;
-            }, [])
-          : [];
-        graphDataClone.children = filterGraphDataChildren;
-        refreshGraphData(graphDataClone);
-      });
 
       graphRef.current.node(function (node: NodeConfig) {
         return getNodeConfigByType(node, {
@@ -478,7 +478,7 @@ const DomainManger: React.FC<Props> = ({
       graphRef.current.render();
       graphRef.current.fitView([80, 80]);
 
-      setAllActiveLegend(legend);
+      // setAllActiveLegend(legend);
 
       graphRef.current.on('node:click', (evt: any) => {
         const item = evt.item; // 被操作的节点 item
@@ -513,8 +513,11 @@ const DomainManger: React.FC<Props> = ({
     }
   }, [graphData]);
 
-  const updateGraphData = async () => {
-    const graphRootData = await queryDataSourceList({ domainId });
+  const updateGraphData = async (params?: { graphShowType?: SemanticNodeType }) => {
+    const graphRootData = await queryDataSourceList({
+      domainId,
+      graphShowType: params?.graphShowType,
+    });
     if (graphRootData) {
       refreshGraphData(graphRootData);
     }
@@ -529,6 +532,27 @@ const DomainManger: React.FC<Props> = ({
 
   return (
     <>
+      <GraphLegend
+        legendOptions={legendDataRef.current}
+        defaultCheckAll={true}
+        onChange={(nodeIds: string[]) => {
+          graphLegendDataSourceIds.current = nodeIds;
+          const rootGraphData = changeGraphData(dataSourceRef.current);
+          refreshGraphData(rootGraphData);
+        }}
+      />
+      {visibleModeOpen && (
+        <GraphLegendVisibleModeItem
+          value={graphShowTypeState}
+          onChange={(showType) => {
+            graphShowTypeRef.current = showType;
+            setGraphShowTypeState(showType);
+            const rootGraphData = changeGraphData(dataSourceRef.current);
+            refreshGraphData(rootGraphData);
+          }}
+        />
+      )}
+
       <GraphToolBar
         onClick={({ eventName }: { eventName: string }) => {
           setNodeDataSource(undefined);
@@ -547,7 +571,7 @@ const DomainManger: React.FC<Props> = ({
       />
       <div
         ref={ref}
-        key={`${domainId}-${graphShowType}`}
+        key={`${domainId}`}
         id="semanticGraph"
         style={{ width: '100%', height: 'calc(100vh - 175px)', position: 'relative' }}
       />
@@ -648,7 +672,7 @@ const DomainManger: React.FC<Props> = ({
           onOkClick={() => {
             setConfirmModalOpenState(false);
             updateGraphData();
-            graphShowType === SemanticNodeType.DIMENSION
+            graphShowTypeState === SemanticNodeType.DIMENSION
               ? dispatch({
                   type: 'domainManger/queryDimensionList',
                   payload: {

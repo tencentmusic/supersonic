@@ -1,7 +1,7 @@
 import { Tabs, Popover, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { connect, Helmet, useParams, history } from 'umi';
-import ProjectListTree from './components/ProjectList';
+import DomainListTree from './components/DomainList';
 import styles from './components/style.less';
 import type { StateType } from './model';
 import { DownOutlined } from '@ant-design/icons';
@@ -20,7 +20,6 @@ type Props = {
 };
 
 const ChatSetting: React.FC<Props> = ({ domainManger, dispatch }) => {
-  window.RUNNING_ENV = 'chat';
   const defaultTabKey = 'metric';
   const params: any = useParams();
   const menuKey = params.menuKey ? params.menuKey : defaultTabKey;
@@ -159,7 +158,7 @@ const ChatSetting: React.FC<Props> = ({ domainManger, dispatch }) => {
               maxHeight: '800px',
             }}
             content={
-              <ProjectListTree
+              <DomainListTree
                 createDomainBtnVisible={false}
                 onTreeSelected={() => {
                   setOpen(false);

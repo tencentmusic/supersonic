@@ -8,3 +8,76 @@
 .metricTable {
     margin: 20px;
 }
+
+
+
+.searchBox {
+    // margin-bottom: 12px;
+    background: #fff;
+    border-radius: 10px;
+    width: 500px;
+    margin: 0 auto;
+    .searchInput {
+        width: 100%;
+        border: 1px solid rgba(35, 104, 184, 0.6);
+        border-radius: 10px;
+    }
+    :global {
+
+        .ant-select-auto-complete {
+            width: 100%;
+        }
+        .ant-input {
+            height: 50px;
+            padding: 0 15px;
+            color: #515a6e;
+            font-size: 14px;
+            line-height: 50px;
+            background: hsla(0, 0%, 100%, 0.2);
+            border: none;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+            caret-color: #296df3;
+  
+            &:focus {
+                border-right-width: 0 !important;
+                box-shadow: none;
+            }
+        }
+  
+        .ant-input-group-addon {
+            left: 0 !important;
+            padding: 0;
+            background: hsla(0, 0%, 100%, 0.2);
+            border: none;
+            border-top-left-radius: 0;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            border-bottom-left-radius: 0;
+  
+            .ant-btn {
+                width: 72px;
+                height: 50px;
+                margin: 0;
+                color: rgba(35, 104, 184, 0.6);
+                font-size: 16px;
+                background-color: transparent;
+                background-color: transparent;
+                border: none;
+                box-shadow: none !important;
+  
+                &::after {
+                    box-shadow: none !important;
+                }
+  
+                .anticon {
+                    font-size: 28px;
+  
+                    &:hover {
+                        color: @primary-color;
+                    }
+                }
+            }
+        }
+    }
+}

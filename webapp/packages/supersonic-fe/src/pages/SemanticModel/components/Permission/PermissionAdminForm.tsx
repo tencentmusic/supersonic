@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Switch, message } from 'antd';
-import SelectPartenr from '@/components/SelectPartner';
+import SelectPartner from '@/components/SelectPartner';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
 import { connect } from 'umi';
 import type { Dispatch } from 'umi';
@@ -110,7 +110,7 @@ const PermissionAdminForm: React.FC<Props> = ({ domainManger, onValuesChange }) 
           <>
             {APP_TARGET === 'inner' && (
               <FormItem name="viewOrgs" label="按组织">
-                <SelectPartenr
+                <SelectPartner
                   type="selectedDepartment"
                   treeSelectProps={{
                     placeholder: '请选择需要授权的部门',

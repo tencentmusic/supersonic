@@ -7,7 +7,7 @@ import { formLayout } from '@/components/FormHelper/utils';
 import styles from '../style.less';
 
 type Props = {
-  entityData?: { id: number; names: string[] };
+  domainData?: ISemantic.IDomainItem;
   dimensionList: ISemantic.IDimensionList;
   domainId: number;
   onSubmit: () => void;
@@ -16,7 +16,7 @@ type Props = {
 const FormItem = Form.Item;
 
 const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
-  { entityData, dimensionList, domainId, onSubmit },
+  { domainData, dimensionList, domainId, onSubmit },
   ref,
 ) => {
   const [form] = Form.useForm();
@@ -27,15 +27,15 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
 
   useEffect(() => {
     form.resetFields();
-    if (!entityData) {
+    if (!domainData?.entity) {
       return;
     }
-
+    const { entity } = domainData;
     form.setFieldsValue({
-      ...entityData,
-      name: entityData.names.join(','),
+      ...entity,
+      name: entity.names.join(','),
     });
-  }, [entityData]);
+  }, [domainData]);
 
   useImperativeHandle(ref, () => ({
     getFormValidateFields,
@@ -54,8 +54,8 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
   const saveEntity = async () => {
     const values = await form.validateFields();
     const { name } = values;
-
     const { code, msg, data } = await updateDomain({
+      ...domainData,
       entity: {
         ...values,
         names: name.split(','),

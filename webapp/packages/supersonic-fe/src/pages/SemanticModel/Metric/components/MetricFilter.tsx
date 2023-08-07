@@ -3,9 +3,11 @@ import StandardFormRow from '@/components/StandardFormRow';
 import TagSelect from '@/components/TagSelect';
 import React, { useEffect } from 'react';
 import { SENSITIVE_LEVEL_OPTIONS } from '../../constant';
+import { SearchOutlined } from '@ant-design/icons';
+import DomainTreeSelect from '../../components/DomainTreeSelect';
+import styles from '../style.less';
 
 const FormItem = Form.Item;
-const { Option } = Select;
 
 type Props = {
   filterValues?: any;
@@ -25,10 +27,7 @@ const MetricFilter: React.FC<Props> = ({ filterValues = {}, onFiltersChange }) =
     onFiltersChange(value, values);
   };
 
-  const onSearch = (value) => {
-    if (!value) {
-      return;
-    }
+  const onSearch = (value: any) => {
     onFiltersChange(value, form.getFieldsValue());
   };
 
@@ -57,34 +56,24 @@ const MetricFilter: React.FC<Props> = ({ filterValues = {}, onFiltersChange }) =
       form={form}
       colon={false}
       onValuesChange={(value, values) => {
-        if (value.keywords || value.keywordsType) {
+        if (value.name) {
           return;
         }
         handleValuesChange(value, values);
       }}
-      initialValues={{
-        keywordsType: 'name',
-      }}
     >
       <StandardFormRow key="search" block>
-        <Input.Group compact>
-          <FormItem name={'keywordsType'} noStyle>
-            <Select>
-              <Option value="name">中文名</Option>
-              <Option value="bizName">英文名</Option>
-              <Option value="id">ID</Option>
-            </Select>
+        <div className={styles.searchBox}>
+          <FormItem name={'name'} noStyle>
+            <div className={styles.searchInput}>
+              <Input.Search
+                placeholder="请输入需要查询指标的ID、指标名称、字段名称"
+                enterButton={<SearchOutlined style={{ marginTop: 5 }} />}
+                onSearch={onSearch}
+              />
+            </div>
           </FormItem>
-          <FormItem name={'keywords'} noStyle>
-            <Input.Search
-              placeholder="请输入需要查询的指标信息"
-              allowClear
-              onSearch={onSearch}
-              style={{ width: 300 }}
-              enterButton
-            />
-          </FormItem>
-        </Input.Group>
+        </div>
       </StandardFormRow>
       {filterList.map((item) => {
         const { title, key, options } = item;
@@ -102,6 +91,11 @@ const MetricFilter: React.FC<Props> = ({ filterValues = {}, onFiltersChange }) =
           </StandardFormRow>
         );
       })}
+      <StandardFormRow key="domainIds" title="所属主题域" block>
+        <FormItem name="domainIds">
+          <DomainTreeSelect />
+        </FormItem>
+      </StandardFormRow>
     </Form>
   );
 };

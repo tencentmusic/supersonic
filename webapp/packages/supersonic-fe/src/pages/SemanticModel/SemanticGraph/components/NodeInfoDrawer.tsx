@@ -95,6 +95,7 @@ const NodeInfoDrawer: React.FC<Props> = ({
           },
           {
             label: '别名',
+            hideItem: !alias,
             value: alias || '-',
           },
           {
@@ -213,7 +214,34 @@ const NodeInfoDrawer: React.FC<Props> = ({
       message.error(msg);
     }
   };
+  const extraNode = (
+    <div className="ant-drawer-extra">
+      <Space>
+        <Button
+          type="primary"
+          key="editBtn"
+          onClick={() => {
+            onEditBtnClick?.(nodeData);
+          }}
+        >
+          编辑
+        </Button>
 
+        <Popconfirm
+          title="确认删除？"
+          okText="是"
+          cancelText="否"
+          onConfirm={() => {
+            handleDeleteConfirm();
+          }}
+        >
+          <Button danger key="deleteBtn">
+            删除
+          </Button>
+        </Popconfirm>
+      </Space>
+    </div>
+  );
   return (
     <>
       <Drawer
@@ -226,34 +254,7 @@ const NodeInfoDrawer: React.FC<Props> = ({
         placement="right"
         mask={false}
         getContainer={false}
-        footer={
-          <div className="ant-drawer-extra">
-            <Space>
-              <Button
-                type="primary"
-                key="editBtn"
-                onClick={() => {
-                  onEditBtnClick?.(nodeData);
-                }}
-              >
-                编辑
-              </Button>
-
-              <Popconfirm
-                title="确认删除？"
-                okText="是"
-                cancelText="否"
-                onConfirm={() => {
-                  handleDeleteConfirm();
-                }}
-              >
-                <Button danger key="deleteBtn">
-                  删除
-                </Button>
-              </Popconfirm>
-            </Space>
-          </div>
-        }
+        footer={false}
         {...restProps}
       >
         <div key={nodeData?.id} className={styles.nodeInfoDrawerContent}>
@@ -282,6 +283,7 @@ const NodeInfoDrawer: React.FC<Props> = ({
             );
           })}
         </div>
+        {extraNode}
       </Drawer>
     </>
   );

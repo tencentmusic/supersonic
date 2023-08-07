@@ -42,7 +42,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       ...pagination,
       domainId: selectDomainId,
     });
-    const { list, pageSize, current, total } = data;
+    const { list, pageSize, current, total } = data || {};
     let resData: any = {};
     if (code === 200) {
       setPagination({

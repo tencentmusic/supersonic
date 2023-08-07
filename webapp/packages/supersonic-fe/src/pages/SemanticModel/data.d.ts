@@ -89,6 +89,7 @@ export declare namespace ISemantic {
     admins?: string[];
     adminOrgs?: any[];
     isOpen?: number;
+    entity?: { entityId: number; names: string[] };
     dimensionCnt?: number;
     metricCnt?: number;
   }
