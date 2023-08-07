@@ -6,7 +6,7 @@ import type { StateType } from '../../model';
 import { getDomainDetail } from '../../service';
 import ProCard from '@ant-design/pro-card';
 import EntityCreateForm from './EntityCreateForm';
-import type { IChatConfig } from '../../data';
+import type { ISemantic } from '../../data';
 
 type Props = {
   dispatch: Dispatch;
@@ -14,9 +14,9 @@ type Props = {
 };
 
 const EntitySettingSection: React.FC<Props> = ({ domainManger }) => {
-  const { selectDomainId, dimensionList, metricList } = domainManger;
+  const { selectDomainId, dimensionList } = domainManger;
 
-  const [entityData, setEntityData] = useState<IChatConfig.IChatRichConfig>();
+  const [domainData, setDomainData] = useState<ISemantic.IDomainItem>();
 
   const entityCreateRef = useRef<any>({});
 
@@ -26,9 +26,7 @@ const EntitySettingSection: React.FC<Props> = ({ domainManger }) => {
     });
 
     if (code === 200) {
-      const { entity } = data;
-
-      setEntityData(entity);
+      setDomainData(data);
 
       return;
     }
@@ -52,7 +50,7 @@ const EntitySettingSection: React.FC<Props> = ({ domainManger }) => {
             <EntityCreateForm
               ref={entityCreateRef}
               domainId={Number(selectDomainId)}
-              entityData={entityData}
+              domainData={domainData}
               dimensionList={dimensionList}
               onSubmit={() => {
                 queryDomainData();

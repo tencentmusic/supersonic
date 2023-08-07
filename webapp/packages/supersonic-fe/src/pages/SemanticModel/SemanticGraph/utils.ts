@@ -67,8 +67,9 @@ export const formatterRelationData = (params: {
   dataSourceList: ISemantic.IDomainSchemaRelaList;
   limit?: number;
   type?: SemanticNodeType;
+  showDataSourceId?: string[];
 }): TreeGraphData[] => {
-  const { type, dataSourceList, limit } = params;
+  const { type, dataSourceList, limit, showDataSourceId } = params;
   const relationData = dataSourceList.reduce(
     (relationList: TreeGraphData[], item: ISemantic.IDomainSchemaRelaItem) => {
       const { datasource, dimensions, metrics } = item;
@@ -86,20 +87,22 @@ export const formatterRelationData = (params: {
         const metricList = getMetricChildren(metrics, dataSourceNodeId, limit);
         childrenList = [...dimensionList, ...metricList];
       }
-      relationList.push({
-        ...datasource,
-        legendType: dataSourceNodeId,
-        id: dataSourceNodeId,
-        uid: id,
-        nodeType: SemanticNodeType.DATASOURCE,
-        size: 40,
-        children: [...childrenList],
-        style: {
-          lineWidth: 2,
-          fill: '#BDEFDB',
-          stroke: '#5AD8A6',
-        },
-      });
+      if (!showDataSourceId || showDataSourceId.includes(dataSourceNodeId)) {
+        relationList.push({
+          ...datasource,
+          legendType: dataSourceNodeId,
+          id: dataSourceNodeId,
+          uid: id,
+          nodeType: SemanticNodeType.DATASOURCE,
+          size: 40,
+          children: [...childrenList],
+          style: {
+            lineWidth: 2,
+            fill: '#BDEFDB',
+            stroke: '#5AD8A6',
+          },
+        });
+      }
       return relationList;
     },
     [],

@@ -17,7 +17,7 @@ import { ISemantic } from '../data';
 
 const { Search } = Input;
 
-type ProjectListProps = {
+type DomainListProps = {
   selectDomainId: number;
   selectDomainName: string;
   domainList: ISemantic.IDomainItem[];
@@ -43,7 +43,7 @@ const projectTreeFlat = (projectTree: DataNode[], filterValue: string): DataNode
   return newProjectTree;
 };
 
-const ProjectListTree: FC<ProjectListProps> = ({
+const DomainListTree: FC<DomainListProps> = ({
   selectDomainId,
   domainList,
   createDomainBtnVisible = true,
@@ -184,7 +184,7 @@ const ProjectListTree: FC<ProjectListProps> = ({
   };
 
   return (
-    <div className={styles.projectList}>
+    <div className={styles.domainList}>
       <Row>
         <Col flex="1 1 200px">
           <Search
@@ -244,4 +244,4 @@ export default connect(
     selectDomainName,
     domainList,
   }),
-)(ProjectListTree);
+)(DomainListTree);

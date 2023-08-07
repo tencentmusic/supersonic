@@ -1,7 +1,7 @@
 import { useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Form, Input } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
-import SelectPartenr from '@/components/SelectPartner';
+import SelectPartner from '@/components/SelectPartner';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
 import { formLayout } from '@/components/FormHelper/utils';
 import styles from '../style.less';
@@ -54,7 +54,7 @@ const PermissionCreateForm: ForwardRefRenderFunction<any, Props> = (
         </FormItem>
         {APP_TARGET === 'inner' && (
           <FormItem name="authorizedDepartmentIds" label="按组织">
-            <SelectPartenr
+            <SelectPartner
               type="selectedDepartment"
               treeSelectProps={{
                 placeholder: '请选择需要授权的部门',

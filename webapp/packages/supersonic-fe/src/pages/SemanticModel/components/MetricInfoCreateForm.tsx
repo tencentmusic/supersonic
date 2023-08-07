@@ -20,6 +20,7 @@ import { getMeasureListByDomainId } from '../service';
 import { creatExprMetric, updateExprMetric } from '../service';
 import { ISemantic } from '../data';
 import { history } from 'umi';
+import { check } from 'prettier';
 
 export type CreateFormProps = {
   datasourceId?: number;
@@ -97,7 +98,6 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     if (currentStep < 1) {
       forward();
     } else {
-      // onSubmit?.(submitForm);
       await saveMetric(submitForm);
     }
   };
@@ -244,7 +244,11 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
           name="isPercent"
           valuePropName="checked"
         >
-          <Switch />
+          <Switch
+            onChange={(checked) => {
+              form.setFieldValue(['dataFormat', 'needMultiply100'], checked);
+            }}
+          />
         </FormItem>
         {isPercentState && (
           <>
@@ -265,10 +269,6 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
                   title={'原始值是否乘以100'}
                   subTitle={'如 原始值0.001 ->展示值0.1% '}
                 />
-                // <FormItemTitle
-                //   title={'仅添加百分号'}
-                //   subTitle={'开启后，会对原始数值直接加%，如0.02 -> 0.02%'}
-                // />
               }
               name={['dataFormat', 'needMultiply100']}
               valuePropName="checked"

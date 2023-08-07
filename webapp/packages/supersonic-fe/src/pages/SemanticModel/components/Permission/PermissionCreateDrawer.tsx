@@ -6,7 +6,9 @@ import { createGroupAuth, updateGroupAuth } from '../../service';
 import PermissionCreateForm from './PermissionCreateForm';
 import type { StateType } from '../../model';
 import SqlEditor from '@/components/SqlEditor';
+import { TransType } from '../../enum';
 import DimensionMetricVisibleTransfer from '../Entity/DimensionMetricVisibleTransfer';
+import { wrapperTransTypeAndId } from '../Entity/utils';
 import styles from '../style.less';
 
 type Props = {
@@ -30,32 +32,10 @@ const PermissionCreateDrawer: React.FC<Props> = ({
   const { dimensionList, metricList } = domainManger;
   const [form] = Form.useForm();
   const basicInfoFormRef = useRef<any>(null);
-  const [sourceDimensionList, setSourceDimensionList] = useState<any[]>([]);
-  const [sourceMetricList, setSourceMetricList] = useState<any[]>([]);
   const [selectedDimensionKeyList, setSelectedDimensionKeyList] = useState<string[]>([]);
   const [selectedMetricKeyList, setSelectedMetricKeyList] = useState<string[]>([]);
 
-  useEffect(() => {
-    const list = dimensionList.reduce((highList: any[], item: any) => {
-      const { name, bizName, sensitiveLevel } = item;
-      if (sensitiveLevel === 2) {
-        highList.push({ id: bizName, name, type: 'dimension' });
-      }
-      return highList;
-    }, []);
-    setSourceDimensionList(list);
-  }, [dimensionList]);
-
-  useEffect(() => {
-    const list = metricList.reduce((highList: any[], item: any) => {
-      const { name, bizName, sensitiveLevel } = item;
-      if (sensitiveLevel === 2) {
-        highList.push({ id: bizName, name, type: 'metric' });
-      }
-      return highList;
-    }, []);
-    setSourceMetricList(list);
-  }, [metricList]);
+  const [selectedKeyList, setSelectedKeyList] = useState<string[]>([]);
 
   const saveAuth = async () => {
     const basicInfoFormValues = await basicInfoFormRef.current.formRef.validateFields();
@@ -103,9 +83,24 @@ const PermissionCreateDrawer: React.FC<Props> = ({
       dimensionFilterDescription,
       dimensionFilters: Array.isArray(dimensionFilters) ? dimensionFilters[0] || '' : '',
     });
+    const dimensionAuth = permissonData?.authRules?.[0]?.dimensions || [];
+    const metricAuth = permissonData?.authRules?.[0]?.metrics || [];
+    setSelectedDimensionKeyList(dimensionAuth);
+    setSelectedMetricKeyList(metricAuth);
 
-    setSelectedDimensionKeyList(permissonData?.authRules?.[0]?.dimensions || []);
-    setSelectedMetricKeyList(permissonData?.authRules?.[0]?.metrics || []);
+    const dimensionKeys = dimensionList.reduce((dimensionChangeList: string[], item: any) => {
+      if (dimensionAuth.includes(item.bizName)) {
+        dimensionChangeList.push(wrapperTransTypeAndId(TransType.DIMENSION, item.id));
+      }
+      return dimensionChangeList;
+    }, []);
+    const metricKeys = metricList.reduce((metricChangeList: string[], item: any) => {
+      if (metricAuth.includes(item.bizName)) {
+        metricChangeList.push(wrapperTransTypeAndId(TransType.METRIC, item.id));
+      }
+      return metricChangeList;
+    }, []);
+    setSelectedKeyList([...dimensionKeys, ...metricKeys]);
   }, [permissonData]);
 
   const renderFooter = () => {
@@ -138,7 +133,7 @@ const PermissionCreateDrawer: React.FC<Props> = ({
         footer={renderFooter()}
         onClose={onCancel}
       >
-        <div style={{ overflow: 'auto', margin: '0 auto', width: '1000px' }}>
+        <div style={{ overflow: 'auto', margin: '0 auto', width: '1200px' }}>
           <Space direction="vertical" style={{ width: '100%' }} size={20}>
             <ProCard title="基本信息" bordered>
               <PermissionCreateForm
@@ -148,15 +143,37 @@ const PermissionCreateDrawer: React.FC<Props> = ({
               />
             </ProCard>
 
-            <ProCard title="列权限" bordered>
+            <ProCard title="列权限" bordered tooltip="仅对敏感度为高的指标/维度进行授权">
               <DimensionMetricVisibleTransfer
                 titles={['未授权维度/指标', '已授权维度/指标']}
-                sourceList={[...sourceDimensionList, ...sourceMetricList]}
-                targetList={[...selectedDimensionKeyList, ...selectedMetricKeyList]}
-                onChange={(bizNameList: string[]) => {
+                sourceList={[
+                  ...dimensionList.map((item) => {
+                    const transType = TransType.DIMENSION;
+                    const { id } = item;
+                    return {
+                      ...item,
+                      transType,
+                      key: wrapperTransTypeAndId(transType, id),
+                    };
+                  }),
+                  ...metricList.map((item) => {
+                    const transType = TransType.METRIC;
+                    const { id } = item;
+                    return {
+                      ...item,
+                      transType,
+                      key: wrapperTransTypeAndId(transType, id),
+                    };
+                  }),
+                ]}
+                targetList={selectedKeyList}
+                onChange={(newTargetKeys: string[]) => {
+                  setSelectedKeyList(newTargetKeys);
                   const dimensionKeyChangeList = dimensionList.reduce(
                     (dimensionChangeList: string[], item: any) => {
-                      if (bizNameList.includes(item.bizName)) {
+                      if (
+                        newTargetKeys.includes(wrapperTransTypeAndId(TransType.DIMENSION, item.id))
+                      ) {
                         dimensionChangeList.push(item.bizName);
                       }
                       return dimensionChangeList;
@@ -165,7 +182,9 @@ const PermissionCreateDrawer: React.FC<Props> = ({
                   );
                   const metricKeyChangeList = metricList.reduce(
                     (metricChangeList: string[], item: any) => {
-                      if (bizNameList.includes(item.bizName)) {
+                      if (
+                        newTargetKeys.includes(wrapperTransTypeAndId(TransType.METRIC, item.id))
+                      ) {
                         metricChangeList.push(item.bizName);
                       }
                       return metricChangeList;

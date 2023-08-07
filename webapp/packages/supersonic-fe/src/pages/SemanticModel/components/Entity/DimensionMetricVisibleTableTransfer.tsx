@@ -1,4 +1,4 @@
-import { Table, Transfer, Checkbox, Button } from 'antd';
+import { Table, Transfer, Checkbox, Button, Tag } from 'antd';
 import type { ColumnsType, TableRowSelection } from 'antd/es/table/interface';
 import type { TransferItem } from 'antd/es/transfer';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
@@ -9,7 +9,7 @@ import DimensionValueSettingModal from './DimensionValueSettingModal';
 import TransTypeTag from '../TransTypeTag';
 import { TransType } from '../../enum';
 import TableTitleTooltips from '../../components/TableTitleTooltips';
-
+import { SemanticNodeType } from '../../enum';
 interface RecordType {
   id: number;
   key: string;
@@ -19,8 +19,8 @@ interface RecordType {
 }
 
 type Props = {
-  knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap;
-  onKnowledgeInfosMapChange: (knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap) => void;
+  knowledgeInfosMap?: IChatConfig.IKnowledgeInfosItemMap;
+  onKnowledgeInfosMapChange?: (knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap) => void;
   [key: string]: any;
 };
 
@@ -56,7 +56,7 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
     onKnowledgeInfosMapChange?.(knowledgeMap);
   };
 
-  const rightColumns: ColumnsType<RecordType> = [
+  let rightColumns: ColumnsType<RecordType> = [
     {
       dataIndex: 'name',
       title: '名称',
@@ -65,7 +65,7 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
       dataIndex: 'type',
       width: 80,
       title: '类型',
-      render: (type) => {
+      render: (type: SemanticNodeType) => {
         return <TransTypeTag type={type} />;
       },
     },
@@ -78,11 +78,11 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
         />
       ),
       width: 120,
-      render: (_, record) => {
+      render: (_: any, record: RecordType) => {
         const { type, bizName } = record;
         return type === TransType.DIMENSION ? (
           <Checkbox
-            checked={knowledgeInfosMap[bizName]?.searchEnable}
+            checked={knowledgeInfosMap?.[bizName]?.searchEnable}
             onChange={(e: CheckboxChangeEvent) => {
               updateKnowledgeInfosMap(record, { searchEnable: e.target.checked });
             }}
@@ -98,18 +98,18 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
     {
       title: '操作',
       dataIndex: 'x',
-      render: (_, record) => {
+      render: (_: any, record: RecordType) => {
         const { type, bizName } = record;
         return type === TransType.DIMENSION ? (
           <Button
             style={{ padding: 0 }}
             key="editable"
             type="link"
-            disabled={!knowledgeInfosMap[bizName]?.searchEnable}
+            disabled={!knowledgeInfosMap?.[bizName]?.searchEnable}
             onClick={(event) => {
               setCurrentRecord(record);
               setCurrentDimensionSettingFormData(
-                knowledgeInfosMap[bizName]?.knowledgeAdvancedConfig,
+                knowledgeInfosMap?.[bizName]?.knowledgeAdvancedConfig,
               );
               setDimensionValueSettingModalVisible(true);
               event.stopPropagation();
@@ -137,6 +137,9 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
       },
     },
   ];
+  if (!knowledgeInfosMap) {
+    rightColumns = leftColumns;
+  }
   return (
     <>
       <Transfer {...restProps}>

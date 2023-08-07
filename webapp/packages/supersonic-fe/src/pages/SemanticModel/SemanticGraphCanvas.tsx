@@ -1,10 +1,10 @@
-import { Radio } from 'antd';
+// import { Radio } from 'antd';
 import React, { useState } from 'react';
 import { connect } from 'umi';
 import styles from './components/style.less';
 import type { StateType } from './model';
 import { SemanticNodeType } from './enum';
-import SemanticFlow from './SemanticFlows';
+// import SemanticFlow from './SemanticFlows';
 import SemanticGraph from './SemanticGraph';
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
 };
 
 const SemanticGraphCanvas: React.FC<Props> = ({ domainManger }) => {
-  const [graphShowType, setGraphShowType] = useState<SemanticNodeType>(SemanticNodeType.DIMENSION);
+  // const [graphShowType, setGraphShowType] = useState<SemanticNodeType>(SemanticNodeType.DIMENSION);
   const { selectDomainId } = domainManger;
   return (
     <div className={styles.semanticGraphCanvas}>
@@ -32,15 +32,15 @@ const SemanticGraphCanvas: React.FC<Props> = ({ domainManger }) => {
       </div> */}
 
       <div className={styles.canvasContainer}>
-        {graphShowType === SemanticNodeType.DATASOURCE ? (
+        {/* {graphShowType === SemanticNodeType.DATASOURCE ? (
           <div style={{ width: '100%', height: 'calc(100vh - 200px)' }}>
             <SemanticFlow />
           </div>
-        ) : (
-          <div style={{ width: '100%' }}>
-            <SemanticGraph domainId={selectDomainId} />
-          </div>
-        )}
+        ) : ( */}
+        <div style={{ width: '100%' }}>
+          <SemanticGraph domainId={selectDomainId} />
+        </div>
+        {/* )} */}
       </div>
     </div>
   );

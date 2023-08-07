@@ -1,7 +1,11 @@
 import request from 'umi-request';
 
+const getRunningEnv = () => {
+  return window.location.pathname.includes('/chatSetting/') ? 'chat' : 'semantic';
+};
+
 export function getDomainList(): Promise<any> {
-  if (window.RUNNING_ENV === 'chat') {
+  if (getRunningEnv() === 'chat') {
     return request.get(`${process.env.CHAT_API_BASE_URL}conf/domainList`);
   }
   return request.get(`${process.env.API_BASE_URL}domain/getDomainList`);
@@ -40,10 +44,11 @@ export function updateDatasource(data: any): Promise<any> {
 }
 
 export function getDimensionList(data: any): Promise<any> {
+  const { domainId } = data;
   const queryParams = {
-    data: { current: 1, pageSize: 999999, ...data },
+    data: { current: 1, pageSize: 999999, ...data, ...(domainId ? { domainIds: [domainId] } : {}) },
   };
-  if (window.RUNNING_ENV === 'chat') {
+  if (getRunningEnv() === 'chat') {
     return request.post(`${process.env.CHAT_API_BASE_URL}conf/dimension/page`, queryParams);
   }
   return request.post(`${process.env.API_BASE_URL}dimension/queryDimension`, queryParams);
@@ -62,10 +67,11 @@ export function updateDimension(data: any): Promise<any> {
 }
 
 export function queryMetric(data: any): Promise<any> {
+  const { domainId } = data;
   const queryParams = {
-    data: { current: 1, pageSize: 999999, ...data },
+    data: { current: 1, pageSize: 999999, ...data, ...(domainId ? { domainIds: [domainId] } : {}) },
   };
-  if (window.RUNNING_ENV === 'chat') {
+  if (getRunningEnv() === 'chat') {
     return request.post(`${process.env.CHAT_API_BASE_URL}conf/metric/page`, queryParams);
   }
   return request.post(`${process.env.API_BASE_URL}metric/queryMetric`, queryParams);

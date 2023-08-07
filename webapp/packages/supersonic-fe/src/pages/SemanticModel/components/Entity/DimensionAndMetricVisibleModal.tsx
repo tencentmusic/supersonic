@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Modal, message, Tabs } from 'antd';
+import { Modal, message, Tabs, Button } from 'antd';
 
 import { addDomainExtend, editDomainExtend } from '../../service';
 import DimensionMetricVisibleTransfer from './DimensionMetricVisibleTransfer';
@@ -40,6 +40,8 @@ const DimensionAndMetricVisibleModal: React.FC<Props> = ({
   const [knowledgeInfosMap, setKnowledgeInfosMap] = useState<IChatConfig.IKnowledgeInfosItemMap>(
     {},
   );
+
+  const [activeKey, setActiveKey] = useState<string>('visibleSetting');
   const formRef = useRef<any>();
 
   const [globalKnowledgeConfigInitialValues, setGlobalKnowledgeConfigInitialValues] =
@@ -200,10 +202,17 @@ const DimensionAndMetricVisibleModal: React.FC<Props> = ({
         title={settingTypeConfig.modalTitle}
         maskClosable={false}
         open={visible}
-        footer={renderFooter()}
+        footer={activeKey === 'visibleSetting' ? false : renderFooter()}
+        // footer={false}
         onCancel={onCancel}
       >
-        <Tabs items={tabItem} defaultActiveKey="visibleSetting" />
+        <Tabs
+          items={tabItem}
+          defaultActiveKey="visibleSetting"
+          onChange={(key) => {
+            setActiveKey(key);
+          }}
+        />
       </Modal>
     </>
   );

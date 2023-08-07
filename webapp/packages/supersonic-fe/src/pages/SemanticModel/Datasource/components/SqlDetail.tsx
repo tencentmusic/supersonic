@@ -467,21 +467,16 @@ const SqlDetail: React.FC<IProps> = ({
         <Pane initialSize={exploreEditorSize || '500px'}>
           <div className={styles.sqlMain}>
             <div className={styles.sqlEditorWrapper}>
-              <FullScreen
+              <SqlEditor
+                value={sql}
                 isFullScreen={isSqlIdeFullScreen}
-                top={`${DEFAULT_FULLSCREEN_TOP}px`}
                 triggerBackToNormal={handleNormalScreenSqlIde}
-              >
-                <SqlEditor
-                  value={sql}
-                  // height={sqlEditorHeight}
-                  // theme="monokai"
-                  isRightTheme={isRight}
-                  sizeChanged={editorSize}
-                  onSqlChange={onSqlChange}
-                  onSelect={onSelect}
-                />
-              </FullScreen>
+                // theme="monokai"
+                isRightTheme={isRight}
+                sizeChanged={editorSize}
+                onSqlChange={onSqlChange}
+                onSelect={onSelect}
+              />
             </div>
           </div>
         </Pane>

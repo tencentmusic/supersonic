@@ -6,7 +6,7 @@ import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../../model';
 import { getGroupAuthInfo, removeGroupAuth } from '../../service';
-import { getDepartmentTree } from '@/components/SelectPartner/service';
+import { getOrganizationTree } from '@/components/SelectPartner/service';
 import { getAllUser } from '@/components/SelectTMEPerson/service';
 import PermissionCreateDrawer from './PermissionCreateDrawer';
 import { findDepartmentTree } from '@/pages/SemanticModel/utils';
@@ -52,7 +52,7 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
   }, [selectDomainId]);
 
   const queryDepartmentData = async () => {
-    const { code, data } = await getDepartmentTree();
+    const { code, data } = await getOrganizationTree();
     if (code === 200 || code === '0') {
       setDepartmentTreeData(data);
     }
@@ -120,7 +120,7 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
       render: (_, record: any) => {
         const { authorizedUsers = [] } = record;
         const personNameList = tmePerson.reduce((enNames: string[], item: any) => {
-          const hasPerson = authorizedUsers.includes(item.enName);
+          const hasPerson = authorizedUsers.includes(item.name);
           if (hasPerson) {
             enNames.push(item.displayName);
           }

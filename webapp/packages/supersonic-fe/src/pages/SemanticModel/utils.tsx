@@ -2,7 +2,7 @@ import type { API } from '@/services/API';
 import { ISemantic } from './data';
 import type { DataNode } from 'antd/lib/tree';
 
-export const changeTreeData = (treeData: API.ProjectList, auth?: boolean): DataNode[] => {
+export const changeTreeData = (treeData: API.DomainList, auth?: boolean): DataNode[] => {
   return treeData.map((item: any) => {
     const newItem: DataNode = {
       ...item,
@@ -14,7 +14,7 @@ export const changeTreeData = (treeData: API.ProjectList, auth?: boolean): DataN
   });
 };
 
-export const addPathInTreeData = (treeData: API.ProjectList, loopPath: any[] = []): any => {
+export const addPathInTreeData = (treeData: API.DomainList, loopPath: any[] = []): any => {
   return treeData.map((item: any) => {
     const { children, parentId = [] } = item;
     const path = loopPath.slice();
@@ -41,6 +41,7 @@ export const constructorClassTreeFromList = (list: any[], parentId: number = 0) 
         nodeItem.children = children;
       }
       nodeItem.key = nodeItem.id;
+      nodeItem.value = nodeItem.id;
       nodeItem.title = nodeItem.name;
       nodeList.push(nodeItem);
     }
@@ -49,7 +50,7 @@ export const constructorClassTreeFromList = (list: any[], parentId: number = 0) 
   return tree;
 };
 
-export const treeParentKeyLists = (treeData: API.ProjectList): string[] => {
+export const treeParentKeyLists = (treeData: API.DomainList): string[] => {
   let keys: string[] = [];
   treeData.forEach((item: any) => {
     if (item.children && item.children.length > 0) {
@@ -67,10 +68,10 @@ export const findDepartmentTree: any = (treeData: any[], projectId: string) => {
   }
   let newStepList: any[] = [];
   const departmentData = treeData.find((item) => {
-    if (item.subDepartments) {
-      newStepList = newStepList.concat(item.subDepartments);
+    if (item.subOrganizations) {
+      newStepList = newStepList.concat(item.subOrganizations);
     }
-    return item.key === projectId;
+    return item.id === projectId;
   });
   if (departmentData) {
     return departmentData;
