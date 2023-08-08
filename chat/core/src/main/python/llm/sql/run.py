@@ -5,7 +5,6 @@ import logging
 import json
 import os
 import sys
-from langchain.llms import OpenAI
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -13,13 +12,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from sql.prompt_maker import schema_linking_exampler, schema_link_parse, \
   sql_exampler
 
-MODEL_NAME = "gpt-3.5-turbo-16k"
-OPENAI_API_KEY = "YOUR_API_KEY"
-TEMPERATURE = 0.0
-
-llm = OpenAI(openai_api_key=OPENAI_API_KEY, model_name=MODEL_NAME,
-             temperature=TEMPERATURE)
-
+from util.llm_instance import llm
 
 def query2sql(query_text: str, schema: dict):
   print("schema: ", schema)
