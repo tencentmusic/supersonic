@@ -4,7 +4,7 @@ import os
 PROJECT_DIR_PATH = os.path.dirname(os.path.abspath(__file__))
 
 MODEL_NAME = "gpt-3.5-turbo-16k"
-OPENAI_API_KEY = "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" #"YOUR_API_KEY"
+OPENAI_API_KEY = "YOUR_API_KEY"
 TEMPERATURE = 0.0
 
 CHROMA_DB_PERSIST_DIR = 'chm_db'
