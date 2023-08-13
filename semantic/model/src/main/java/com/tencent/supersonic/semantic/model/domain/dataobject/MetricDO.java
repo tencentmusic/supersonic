@@ -12,7 +12,7 @@ public class MetricDO {
     /**
      * 主体域ID
      */
-    private Long domainId;
+    private Long modelId;
 
     /**
      * 指标名称
@@ -101,19 +101,19 @@ public class MetricDO {
     /**
      * 主体域ID
      *
-     * @return domain_id 主体域ID
+     * @return model_id 主体域ID
      */
-    public Long getDomainId() {
-        return domainId;
+    public Long getModelId() {
+        return modelId;
     }
 
     /**
      * 主体域ID
      *
-     * @param domainId 主体域ID
+     * @param modelId 主体域ID
      */
-    public void setDomainId(Long domainId) {
-        this.domainId = domainId;
+    public void setModelId(Long modelId) {
+        this.modelId = modelId;
     }
 
     /**

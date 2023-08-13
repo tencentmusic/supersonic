@@ -9,7 +9,6 @@ import com.alibaba.druid.wall.WallFilter;
 import com.tencent.supersonic.semantic.api.model.enums.DataTypeEnum;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.model.domain.utils.JdbcDataSourceUtils;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;

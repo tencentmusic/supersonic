@@ -52,9 +52,9 @@ public class MetricController {
     }
 
 
-    @GetMapping("/getMetricList/{domainId}")
-    public List<MetricResp> getMetricList(@PathVariable("domainId") Long domainId) {
-        return metricService.getMetrics(domainId);
+    @GetMapping("/getMetricList/{modelId}")
+    public List<MetricResp> getMetricList(@PathVariable("modelId") Long modelId) {
+        return metricService.getMetrics(modelId);
     }
 
 
@@ -63,9 +63,9 @@ public class MetricController {
         return metricService.queryMetric(pageMetrricReq);
     }
 
-    @GetMapping("getMetric/{domainId}/{bizName}")
-    public MetricResp getMetric(@PathVariable("domainId") Long domainId, @PathVariable("bizName") String bizName) {
-        return metricService.getMetric(domainId, bizName);
+    @GetMapping("getMetric/{modelId}/{bizName}")
+    public MetricResp getMetric(@PathVariable("modelId") Long modelId, @PathVariable("bizName") String bizName) {
+        return metricService.getMetric(modelId, bizName);
     }
 
 

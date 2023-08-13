@@ -3,6 +3,7 @@ package com.tencent.supersonic.common.util.calcite;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
  *
  * @date 2023/7/12 12:00
  */
+@Slf4j
 class SqlParseUtilsTest {
 
     @Test

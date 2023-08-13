@@ -5,7 +5,7 @@
     <resultMap id="BaseResultMap"
             type="com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO">
         <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="domain_id" jdbcType="BIGINT" property="domainId"/>
+        <result column="model_id" jdbcType="BIGINT" property="modelId"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="biz_name" jdbcType="VARCHAR" property="bizName"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
@@ -52,7 +52,7 @@
     </sql>
     <sql id="Base_Column_List">
         id
-        , domain_id, name, biz_name, description, type, created_at, created_by, updated_at,
+        , model_id, name, biz_name, description, type, created_at, created_by, updated_at,
     updated_by
     </sql>
     <sql id="Blob_Column_List">
@@ -60,14 +60,14 @@
     </sql>
 
     <insert id="batchInsert" parameterType="java.util.List">
-        insert into s2_metric (domain_id, name,
+        insert into s2_metric (model_id, name,
         biz_name, description, type,status,sensitive_level,
         created_at, created_by, updated_at,
         updated_by, type_params
         )
         values
         <foreach collection="list" item="metric" separator=",">
-            ( #{metric.domainId,jdbcType=BIGINT}, #{metric.name,jdbcType=VARCHAR},
+            ( #{metric.modelId,jdbcType=BIGINT}, #{metric.name,jdbcType=VARCHAR},
             #{metric.bizName,jdbcType=VARCHAR}, #{metric.description,jdbcType=VARCHAR},
             #{metric.type,jdbcType=VARCHAR},
             #{metric.status,jdbcType=VARCHAR},#{metric.sensitiveLevel,jdbcType=VARCHAR},
@@ -81,7 +81,7 @@
     <update id="batchUpdate" parameterType="java.util.List">
         <foreach collection="list" item="metric" separator=";">
             update s2_metric
-            set domain_id = #{metric.domainId,jdbcType=BIGINT},
+            set model_id = #{metric.modelId,jdbcType=BIGINT},
             name = #{metric.name,jdbcType=VARCHAR},
             biz_name = #{metric.bizName,jdbcType=VARCHAR},
             description = #{metric.description,jdbcType=VARCHAR},
@@ -98,26 +98,35 @@
     </update>
 
     <select id="query" resultMap="ResultMapWithBLOBs">
-         select *
-         from s2_metric
-         where 1=1
+        select *
+        from s2_metric
+        where 1=1
         <if test="type != null and type != ''">
             and type = #{type}
         </if>
-        <if test="name != null and name != ''">
-            and ( id like CONCAT('%',#{name , jdbcType=VARCHAR},'%') or
-            name like CONCAT('%',#{name , jdbcType=VARCHAR},'%') or
-            biz_name like CONCAT('%',#{name , jdbcType=VARCHAR},'%') or
-            description like CONCAT('%',#{name , jdbcType=VARCHAR},'%') )
+        <if test="key != null and key != ''">
+            and ( id like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
+            name like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
+            biz_name like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
+            description like CONCAT('%',#{key , jdbcType=VARCHAR},'%') )
         </if>
-        <if test="sensitiveLevel != null">
+        <if test="id != null">
+            and id like CONCAT('%',#{id , jdbcType=VARCHAR},'%')
+        </if>
+        <if test="name != null and name != '' ">
+            and name like CONCAT('%',#{name , jdbcType=VARCHAR},'%')
+        </if>
+        <if test="bizName != null and bizName != ''">
+            and biz_name like CONCAT('%',#{bizName , jdbcType=VARCHAR},'%')
+        </if>
+        <if test="sensitiveLevel != null and sensitiveLevel != ''">
             and sensitive_level = #{sensitiveLevel}
         </if>
-        <if test="domainIds != null and domainIds.size >0">
-            and domain_id in
-            <foreach collection="domainIds" index="index" item="domain" open="(" close=")"
-                     separator=",">
-                #{domain}
+        <if test="modelIds != null and modelIds.size >0">
+            and model_id in
+            <foreach collection="modelIds" index="index" item="model" open="(" close=")"
+                    separator=",">
+                #{model}
             </foreach>
         </if>
     </select>

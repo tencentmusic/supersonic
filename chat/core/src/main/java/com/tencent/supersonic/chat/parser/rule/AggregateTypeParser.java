@@ -21,7 +21,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class AggregateTypeParser implements SemanticParser {
@@ -35,36 +37,60 @@ public class AggregateTypeParser implements SemanticParser {
             new AbstractMap.SimpleEntry<>(DISTINCT, Pattern.compile("(?i)(uv)")),
             new AbstractMap.SimpleEntry<>(COUNT, Pattern.compile("(?i)(总数|pv)")),
             new AbstractMap.SimpleEntry<>(NONE, Pattern.compile("(?i)(明细)"))
-    ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,(k1,k2)->k2));
+    ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k1, k2) -> k2));
 
     @Override
     public void parse(QueryContext queryContext, ChatContext chatContext) {
+        String queryText = queryContext.getRequest().getQueryText();
+        AggregateConf aggregateConf = resolveAggregateConf(queryText);
+
         for (SemanticQuery semanticQuery : queryContext.getCandidateQueries()) {
             if (!AggregateTypeEnum.NONE.equals(semanticQuery.getParseInfo().getAggType())) {
                 continue;
             }
-
-            String queryText = queryContext.getRequest().getQueryText();
-            semanticQuery.getParseInfo().setAggType(resolveAggregateType(queryText));
+            semanticQuery.getParseInfo().setAggType(aggregateConf.type);
+            int detectWordLength = 0;
+            if (StringUtils.isNotEmpty(aggregateConf.detectWord)) {
+                detectWordLength = aggregateConf.detectWord.length();
+            }
+            semanticQuery.getParseInfo().setScore(semanticQuery.getParseInfo().getScore() + detectWordLength);
         }
     }
 
-    public static AggregateTypeEnum resolveAggregateType(String queryText) {
+    public AggregateTypeEnum resolveAggregateType(String queryText) {
+        AggregateConf aggregateConf = resolveAggregateConf(queryText);
+        return aggregateConf.type;
+    }
+
+    private AggregateConf resolveAggregateConf(String queryText) {
         Map<AggregateTypeEnum, Integer> aggregateCount = new HashMap<>(REGX_MAP.size());
+        Map<AggregateTypeEnum, String> aggregateWord = new HashMap<>(REGX_MAP.size());
 
         for (Map.Entry<AggregateTypeEnum, Pattern> entry : REGX_MAP.entrySet()) {
             Matcher matcher = entry.getValue().matcher(queryText);
             int count = 0;
+            String detectWord = null;
             while (matcher.find()) {
                 count++;
+                detectWord = matcher.group();
             }
             if (count > 0) {
                 aggregateCount.put(entry.getKey(), count);
+                aggregateWord.put(entry.getKey(), detectWord);
             }
         }
 
-        return aggregateCount.entrySet().stream().max(Map.Entry.comparingByValue())
+        AggregateTypeEnum type = aggregateCount.entrySet().stream().max(Map.Entry.comparingByValue())
                 .map(entry -> entry.getKey()).orElse(NONE);
+        String detectWord = aggregateWord.get(type);
+        return new AggregateConf(type, detectWord);
+    }
+
+    @AllArgsConstructor
+    class AggregateConf {
+
+        public AggregateTypeEnum type;
+        public String detectWord;
     }
 
 }

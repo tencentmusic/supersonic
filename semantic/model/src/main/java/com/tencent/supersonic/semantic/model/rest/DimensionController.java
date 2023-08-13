@@ -57,16 +57,16 @@ public class DimensionController {
     }
 
 
-    @GetMapping("/getDimensionList/{domainId}")
-    public List<DimensionResp> getDimension(@PathVariable("domainId") Long domainId) {
-        return dimensionService.getDimensions(domainId);
+    @GetMapping("/getDimensionList/{modelId}")
+    public List<DimensionResp> getDimension(@PathVariable("modelId") Long modelId) {
+        return dimensionService.getDimensions(modelId);
     }
 
 
-    @GetMapping("/{domainId}/{dimensionName}")
-    public DimensionResp getDimensionDescByNameAndId(@PathVariable("domainId") Long domainId,
+    @GetMapping("/{modelId}/{dimensionName}")
+    public DimensionResp getDimensionDescByNameAndId(@PathVariable("modelId") Long modelId,
             @PathVariable("dimensionName") String dimensionBizName) {
-        return dimensionService.getDimension(dimensionBizName, domainId);
+        return dimensionService.getDimension(dimensionBizName, modelId);
     }
 
 

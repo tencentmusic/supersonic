@@ -1,9 +1,10 @@
 package com.tencent.supersonic.knowledge;
 
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
-import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.knowledge.service.KnowledgeService;
+import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.knowledge.service.WordService;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,6 @@ import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Slf4j
 @Component

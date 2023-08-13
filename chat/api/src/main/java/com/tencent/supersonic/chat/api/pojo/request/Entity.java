@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
- * the entity info about the domain
+ * the entity info about the model
  */
 @Data
 @AllArgsConstructor

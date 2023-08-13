@@ -4,9 +4,8 @@ package com.tencent.supersonic.chat.api.pojo.response;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
 import com.tencent.supersonic.common.pojo.Constants;
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class ChatDefaultRichConfigResp {

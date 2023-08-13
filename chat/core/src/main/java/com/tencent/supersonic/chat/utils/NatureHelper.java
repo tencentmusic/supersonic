@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.utils;
 import com.hankcs.hanlp.corpus.tag.Nature;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
-import com.tencent.supersonic.chat.mapper.DomainInfoStat;
+import com.tencent.supersonic.chat.mapper.ModelInfoStat;
 import com.tencent.supersonic.knowledge.dictionary.DictWordType;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -35,8 +34,8 @@ public class NatureHelper {
             case ENTITY:
                 result = SchemaElementType.ENTITY;
                 break;
-            case DOMAIN:
-                result = SchemaElementType.DOMAIN;
+            case MODEL:
+                result = SchemaElementType.MODEL;
                 break;
             case VALUE:
                 result = SchemaElementType.VALUE;
@@ -47,12 +46,12 @@ public class NatureHelper {
         return result;
     }
 
-    private static boolean isDomainOrEntity(Term term, Integer domain) {
-        return (DictWordType.NATURE_SPILT + domain).equals(term.nature.toString()) || term.nature.toString()
+    private static boolean isModelOrEntity(Term term, Integer model) {
+        return (DictWordType.NATURE_SPILT + model).equals(term.nature.toString()) || term.nature.toString()
                 .endsWith(DictWordType.ENTITY.getType());
     }
 
-    public static Integer getDomainByNature(Nature nature) {
+    public static Integer getModelByNature(Nature nature) {
         if (nature.startsWith(DictWordType.NATURE_SPILT)) {
             String[] dimensionValues = nature.toString().split(DictWordType.NATURE_SPILT);
             if (StringUtils.isNumeric(dimensionValues[1])) {
@@ -62,7 +61,7 @@ public class NatureHelper {
         return 0;
     }
 
-    public static Long getDomainId(String nature) {
+    public static Long getModelId(String nature) {
         try {
             String[] split = nature.split(DictWordType.NATURE_SPILT);
             if (split.length <= 1) {
@@ -90,18 +89,18 @@ public class NatureHelper {
                 && StringUtils.isNumeric(split[1]);
     }
 
-    public static DomainInfoStat getDomainStat(List<Term> terms) {
-        return DomainInfoStat.builder()
-                .domainCount(getDomainCount(terms))
-                .dimensionDomainCount(getDimensionCount(terms))
-                .metricDomainCount(getMetricCount(terms))
-                .dimensionValueDomainCount(getDimensionValueCount(terms))
+    public static ModelInfoStat getModelStat(List<Term> terms) {
+        return ModelInfoStat.builder()
+                .modelCount(getModelCount(terms))
+                .dimensionModelCount(getDimensionCount(terms))
+                .metricModelCount(getMetricCount(terms))
+                .dimensionValueModelCount(getDimensionValueCount(terms))
                 .build();
     }
 
 
-    private static long getDomainCount(List<Term> terms) {
-        return terms.stream().filter(term -> isDomainOrEntity(term, getDomainByNature(term.nature))).count();
+    private static long getModelCount(List<Term> terms) {
+        return terms.stream().filter(term -> isModelOrEntity(term, getModelByNature(term.nature))).count();
     }
 
     private static long getDimensionValueCount(List<Term> terms) {
@@ -120,25 +119,25 @@ public class NatureHelper {
 
     /**
      * Get the number of types of class parts of speech
-     * domainId -> (nature , natureCount)
+     * modelId -> (nature , natureCount)
      *
      * @param terms
      * @return
      */
-    public static Map<Long, Map<DictWordType, Integer>> getDomainToNatureStat(List<Term> terms) {
-        Map<Long, Map<DictWordType, Integer>> domainToNature = new HashMap<>();
+    public static Map<Long, Map<DictWordType, Integer>> getModelToNatureStat(List<Term> terms) {
+        Map<Long, Map<DictWordType, Integer>> modelToNature = new HashMap<>();
         terms.stream().filter(
                 term -> term.nature.startsWith(DictWordType.NATURE_SPILT)
         ).forEach(term -> {
             DictWordType dictWordType = DictWordType.getNatureType(String.valueOf(term.nature));
-            Long domain = getDomainId(String.valueOf(term.nature));
+            Long model = getModelId(String.valueOf(term.nature));
 
             Map<DictWordType, Integer> natureTypeMap = new HashMap<>();
             natureTypeMap.put(dictWordType, 1);
 
-            Map<DictWordType, Integer> original = domainToNature.get(domain);
+            Map<DictWordType, Integer> original = modelToNature.get(model);
             if (Objects.isNull(original)) {
-                domainToNature.put(domain, natureTypeMap);
+                modelToNature.put(model, natureTypeMap);
             } else {
                 Integer count = original.get(dictWordType);
                 if (Objects.isNull(count)) {
@@ -149,18 +148,18 @@ public class NatureHelper {
                 original.put(dictWordType, count);
             }
         });
-        return domainToNature;
+        return modelToNature;
     }
 
-    public static List<Long> selectPossibleDomains(List<Term> terms) {
-        Map<Long, Map<DictWordType, Integer>> domainToNatureStat = getDomainToNatureStat(terms);
-        Integer maxDomainTypeSize = domainToNatureStat.entrySet().stream()
+    public static List<Long> selectPossibleModels(List<Term> terms) {
+        Map<Long, Map<DictWordType, Integer>> modelToNatureStat = getModelToNatureStat(terms);
+        Integer maxModelTypeSize = modelToNatureStat.entrySet().stream()
                 .max(Comparator.comparingInt(o -> o.getValue().size())).map(entry -> entry.getValue().size())
                 .orElse(null);
-        if (Objects.isNull(maxDomainTypeSize) || maxDomainTypeSize == 0) {
+        if (Objects.isNull(maxModelTypeSize) || maxModelTypeSize == 0) {
             return new ArrayList<>();
         }
-        return domainToNatureStat.entrySet().stream().filter(entry -> entry.getValue().size() == maxDomainTypeSize)
+        return modelToNatureStat.entrySet().stream().filter(entry -> entry.getValue().size() == maxModelTypeSize)
                 .map(entry -> entry.getKey()).collect(Collectors.toList());
     }
 }

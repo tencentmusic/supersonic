@@ -3,19 +3,23 @@ package com.tencent.supersonic.semantic.model.application;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.semantic.api.model.request.DatabaseReq;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.SqlParserResp;
+import com.tencent.supersonic.semantic.model.domain.DatabaseService;
+import com.tencent.supersonic.semantic.model.domain.DomainService;
+import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter.EngineAdaptor;
 import com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter.EngineAdaptorFactory;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatabaseDO;
+import com.tencent.supersonic.semantic.model.domain.pojo.Database;
 import com.tencent.supersonic.semantic.model.domain.repository.DatabaseRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.DatabaseConverter;
 import com.tencent.supersonic.semantic.model.domain.utils.JdbcDataSourceUtils;
 import com.tencent.supersonic.semantic.model.domain.utils.SqlUtils;
-import com.tencent.supersonic.semantic.model.domain.DatabaseService;
-import com.tencent.supersonic.semantic.model.domain.pojo.Database;
-
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -29,9 +33,18 @@ public class DatabaseServiceImpl implements DatabaseService {
     private final SqlUtils sqlUtils;
     private DatabaseRepository databaseRepository;
 
-    public DatabaseServiceImpl(DatabaseRepository databaseRepository, SqlUtils sqlUtils) {
+    private DomainService domainService;
+
+    private ModelService modelService;
+
+    public DatabaseServiceImpl(DatabaseRepository databaseRepository,
+            SqlUtils sqlUtils,
+            DomainService domainService,
+            ModelService modelService) {
         this.databaseRepository = databaseRepository;
         this.sqlUtils = sqlUtils;
+        this.modelService = modelService;
+        this.domainService = domainService;
     }
 
     @Override
@@ -61,16 +74,36 @@ public class DatabaseServiceImpl implements DatabaseService {
         return DatabaseConverter.convert(databaseDO);
     }
 
-    @Override
     // one domain only has one database
+    @Override
     public DatabaseResp getDatabaseByDomainId(Long domainId) {
         Optional<DatabaseDO> databaseDO = getDatabaseDO(domainId);
         return databaseDO.map(DatabaseConverter::convert).orElse(null);
     }
 
     @Override
-    public QueryResultWithSchemaResp executeSql(String sql, Long domainId) {
-        DatabaseResp databaseResp = getDatabaseByDomainId(domainId);
+    public DatabaseResp getDatabaseByModelId(Long modelId) {
+        ModelResp modelResp = modelService.getModel(modelId);
+        Map<Long, DomainResp> domainRespMap = domainService.getDomainMap();
+        Long domainId = modelResp.getDomainId();
+        Optional<DatabaseDO> databaseDO = getDatabaseDO(domainId);
+        while (!databaseDO.isPresent()) {
+            DomainResp domainResp = domainRespMap.get(domainId);
+            if (domainResp == null) {
+                return null;
+            }
+            domainId = domainResp.getParentId();
+            databaseDO = getDatabaseDO(domainId);
+        }
+        return databaseDO.map(DatabaseConverter::convert).orElse(null);
+    }
+
+    @Override
+    public QueryResultWithSchemaResp executeSql(String sql, Long modelId) {
+        DatabaseResp databaseResp = getDatabaseByModelId(modelId);
+        if (databaseResp == null) {
+            return new QueryResultWithSchemaResp();
+        }
         return executeSql(sql, databaseResp);
     }
 

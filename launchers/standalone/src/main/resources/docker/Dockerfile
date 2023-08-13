@@ -1,4 +1,4 @@
-FROM docker-images.music.woa.com/di_base_img/tme_di_base_centos:8_7
+FROM centos:8
 MAINTAINER admin
 ADD ../../../../target/launchers-standalone-*.gz /app/
 RUN ls -l /app/launchers-standalone-*/bin/

@@ -14,7 +14,7 @@ class HanlpDictMapperTest extends ContextTest {
     void map() {
         QueryReq queryRequest = new QueryReq();
         queryRequest.setChatId(1);
-        queryRequest.setDomainId(2L);
+        queryRequest.setModelId(2L);
         queryRequest.setQueryText("supersonic按部门访问次数");
         HanlpDictMapper hanlpDictMapper = new HanlpDictMapper();
         hanlpDictMapper.map(new QueryContext(queryRequest));

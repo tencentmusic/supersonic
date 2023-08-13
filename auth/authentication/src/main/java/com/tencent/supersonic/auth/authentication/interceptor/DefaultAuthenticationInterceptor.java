@@ -35,11 +35,14 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
             setFakerUser(request);
             return true;
         }
-        HandlerMethod handlerMethod = (HandlerMethod) handler;
-        Method method = handlerMethod.getMethod();
-        AuthenticationIgnore ignore = method.getAnnotation(AuthenticationIgnore.class);
-        if (ignore != null) {
-            return true;
+
+        if (handler instanceof HandlerMethod) {
+            HandlerMethod handlerMethod = (HandlerMethod) handler;
+            Method method = handlerMethod.getMethod();
+            AuthenticationIgnore ignore = method.getAnnotation(AuthenticationIgnore.class);
+            if (ignore != null) {
+                return true;
+            }
         }
 
         String uri = request.getServletPath();

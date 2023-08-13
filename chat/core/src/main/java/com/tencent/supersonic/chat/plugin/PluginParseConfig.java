@@ -2,12 +2,19 @@ package com.tencent.supersonic.chat.plugin;
 
 
 import com.tencent.supersonic.chat.parser.function.Parameters;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
+@Builder
+@AllArgsConstructor
+@ToString
+@NoArgsConstructor
 public class PluginParseConfig implements Serializable {
 
     private String name;

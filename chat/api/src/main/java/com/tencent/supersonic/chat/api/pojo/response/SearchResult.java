@@ -17,9 +17,9 @@ public class SearchResult {
 
     private String subRecommend;
 
-    private String domainName;
+    private String modelName;
 
-    private Long domainId;
+    private Long modelId;
 
     private SchemaElementType schemaElementType;
 
@@ -34,12 +34,12 @@ public class SearchResult {
             return false;
         }
         SearchResult searchResult1 = (SearchResult) o;
-        return Objects.equals(recommend, searchResult1.recommend) && Objects.equals(domainName,
-                searchResult1.domainName);
+        return Objects.equals(recommend, searchResult1.recommend) && Objects.equals(modelName,
+                searchResult1.modelName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(recommend, domainName);
+        return Objects.hash(recommend, modelName);
     }
 }

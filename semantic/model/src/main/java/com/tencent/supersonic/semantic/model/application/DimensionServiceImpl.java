@@ -5,19 +5,19 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.semantic.api.model.request.DimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
-import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
-import com.tencent.supersonic.semantic.model.domain.repository.DimensionRepository;
-import com.tencent.supersonic.semantic.model.domain.utils.DimensionConverter;
 import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
+import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Dimension;
 import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
+import com.tencent.supersonic.semantic.model.domain.repository.DimensionRepository;
+import com.tencent.supersonic.semantic.model.domain.utils.DimensionConverter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,8 +63,8 @@ public class DimensionServiceImpl implements DimensionService {
         if (CollectionUtils.isEmpty(dimensionReqs)) {
             return;
         }
-        Long domainId = dimensionReqs.get(0).getDomainId();
-        List<DimensionResp> dimensionResps = getDimensions(domainId);
+        Long modelId = dimensionReqs.get(0).getModelId();
+        List<DimensionResp> dimensionResps = getDimensions(modelId);
         Map<String, DimensionResp> dimensionRespMap = dimensionResps.stream()
                 .collect(Collectors.toMap(DimensionResp::getBizName, a -> a, (k1, k2) -> k1));
         List<Dimension> dimensions = dimensionReqs.stream().map(DimensionConverter::convert)
@@ -92,8 +92,8 @@ public class DimensionServiceImpl implements DimensionService {
 
 
     @Override
-    public DimensionResp getDimension(String bizName, Long domainId) {
-        List<DimensionResp> dimensionResps = getDimensions(domainId);
+    public DimensionResp getDimension(String bizName, Long modelId) {
+        List<DimensionResp> dimensionResps = getDimensions(modelId);
         if (CollectionUtils.isEmpty(dimensionResps)) {
             return null;
         }
@@ -109,7 +109,7 @@ public class DimensionServiceImpl implements DimensionService {
     public PageInfo<DimensionResp> queryDimension(PageDimensionReq pageDimensionReq) {
         DimensionFilter dimensionFilter = new DimensionFilter();
         BeanUtils.copyProperties(pageDimensionReq, dimensionFilter);
-        dimensionFilter.setDomainIds(pageDimensionReq.getDomainIds());
+        dimensionFilter.setModelIds(pageDimensionReq.getModelIds());
         PageInfo<DimensionDO> dimensionDOPageInfo = PageHelper.startPage(pageDimensionReq.getCurrent(),
                         pageDimensionReq.getPageSize())
                 .doSelectPageInfo(() -> queryDimension(dimensionFilter));
@@ -139,8 +139,8 @@ public class DimensionServiceImpl implements DimensionService {
     }
 
     @Override
-    public List<DimensionResp> getDimensions(Long domainId) {
-        return convertList(getDimensionDOS(domainId), datasourceService.getDatasourceMap());
+    public List<DimensionResp> getDimensions(Long modelId) {
+        return convertList(getDimensionDOS(modelId), datasourceService.getDatasourceMap());
     }
 
     @Override
@@ -176,8 +176,8 @@ public class DimensionServiceImpl implements DimensionService {
 
 
     @Override
-    public List<DimensionResp> getHighSensitiveDimension(Long domainId) {
-        List<DimensionResp> dimensionResps = getDimensions(domainId);
+    public List<DimensionResp> getHighSensitiveDimension(Long modelId) {
+        List<DimensionResp> dimensionResps = getDimensions(modelId);
         if (CollectionUtils.isEmpty(dimensionResps)) {
             return dimensionResps;
         }
@@ -187,8 +187,8 @@ public class DimensionServiceImpl implements DimensionService {
     }
 
 
-    protected List<DimensionDO> getDimensionDOS(Long domainId) {
-        return dimensionRepository.getDimensionListOfDomain(domainId);
+    protected List<DimensionDO> getDimensionDOS(Long modelId) {
+        return dimensionRepository.getDimensionListOfDomain(modelId);
     }
 
     protected List<DimensionDO> getDimensionDOS() {
@@ -240,8 +240,8 @@ public class DimensionServiceImpl implements DimensionService {
 
 
     private void checkExist(List<DimensionReq> dimensionReqs) {
-        Long domainId = dimensionReqs.get(0).getDomainId();
-        List<DimensionResp> dimensionResps = getDimensions(domainId);
+        Long modelId = dimensionReqs.get(0).getModelId();
+        List<DimensionResp> dimensionResps = getDimensions(modelId);
         for (DimensionReq dimensionReq : dimensionReqs) {
             for (DimensionResp dimensionResp : dimensionResps) {
                 if (dimensionResp.getName().equalsIgnoreCase(dimensionReq.getBizName())) {

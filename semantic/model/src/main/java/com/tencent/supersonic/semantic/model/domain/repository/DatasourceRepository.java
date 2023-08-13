@@ -3,9 +3,7 @@ package com.tencent.supersonic.semantic.model.domain.repository;
 
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDO;
-
 import java.util.List;
-
 
 public interface DatasourceRepository {
 
@@ -15,7 +13,7 @@ public interface DatasourceRepository {
 
     List<DatasourceDO> getDatasourceList();
 
-    List<DatasourceDO> getDatasourceList(Long domainId);
+    List<DatasourceDO> getDatasourceList(Long modelId);
 
     DatasourceDO getDatasourceById(Long id);
 
@@ -27,7 +25,7 @@ public interface DatasourceRepository {
 
     DatasourceRelaDO getDatasourceRelaById(Long id);
 
-    List<DatasourceRelaDO> getDatasourceRelaList(Long domainId);
+    List<DatasourceRelaDO> getDatasourceRelaList(Long modelId);
 
     void deleteDatasourceRela(Long id);
 }

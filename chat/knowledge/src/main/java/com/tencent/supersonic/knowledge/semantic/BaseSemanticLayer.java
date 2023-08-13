@@ -3,9 +3,9 @@ package com.tencent.supersonic.knowledge.semantic;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
-import com.tencent.supersonic.chat.api.pojo.DomainSchema;
+import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.common.pojo.ResultData;
-import com.tencent.supersonic.semantic.api.model.response.DomainSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public abstract class BaseSemanticLayer implements SemanticLayer {
 
-    protected final Cache<String, List<DomainSchemaResp>> domainSchemaCache =
+    protected final Cache<String, List<ModelSchemaResp>> modelSchemaCache =
             CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
 
     protected ParameterizedTypeReference<ResultData<QueryResultWithSchemaResp>> structTypeRef =
@@ -27,48 +27,48 @@ public abstract class BaseSemanticLayer implements SemanticLayer {
             };
 
     @SneakyThrows
-    public List<DomainSchemaResp> fetchDomainSchema(List<Long> ids, Boolean cacheEnable) {
+    public List<ModelSchemaResp> fetchModelSchema(List<Long> ids, Boolean cacheEnable) {
         if (cacheEnable) {
-            return domainSchemaCache.get(String.valueOf(ids), () -> {
-                List<DomainSchemaResp> data = doFetchDomainSchema(ids);
+            return modelSchemaCache.get(String.valueOf(ids), () -> {
+                List<ModelSchemaResp> data = doFetchModelSchema(ids);
                 return data;
             });
         }
-        List<DomainSchemaResp> data = doFetchDomainSchema(ids);
+        List<ModelSchemaResp> data = doFetchModelSchema(ids);
         return data;
     }
 
     @Override
-    public DomainSchema getDomainSchema(Long domain, Boolean cacheEnable) {
+    public ModelSchema getModelSchema(Long domain, Boolean cacheEnable) {
         List<Long> ids = new ArrayList<>();
         ids.add(domain);
-        List<DomainSchemaResp> domainSchemaResps = fetchDomainSchema(ids, cacheEnable);
-        if (!CollectionUtils.isEmpty(domainSchemaResps)) {
-            Optional<DomainSchemaResp> domainSchemaResp = domainSchemaResps.stream()
+        List<ModelSchemaResp> modelSchemaResps = fetchModelSchema(ids, cacheEnable);
+        if (!CollectionUtils.isEmpty(modelSchemaResps)) {
+            Optional<ModelSchemaResp> modelSchemaResp = modelSchemaResps.stream()
                     .filter(d -> d.getId().equals(domain)).findFirst();
-            if (domainSchemaResp.isPresent()) {
-                DomainSchemaResp domainSchema = domainSchemaResp.get();
-                return DomainSchemaBuilder.build(domainSchema);
+            if (modelSchemaResp.isPresent()) {
+                ModelSchemaResp modelSchema = modelSchemaResp.get();
+                return ModelSchemaBuilder.build(modelSchema);
             }
         }
         return null;
     }
 
     @Override
-    public List<DomainSchema> getDomainSchema() {
-        return getDomainSchema(new ArrayList<>());
+    public List<ModelSchema> getModelSchema() {
+        return getModelSchema(new ArrayList<>());
     }
 
     @Override
-    public List<DomainSchema> getDomainSchema(List<Long> ids) {
-        List<DomainSchema> domainSchemaList = new ArrayList<>();
+    public List<ModelSchema> getModelSchema(List<Long> ids) {
+        List<ModelSchema> domainSchemaList = new ArrayList<>();
 
-        for(DomainSchemaResp resp : fetchDomainSchema(ids, true)) {
-            domainSchemaList.add(DomainSchemaBuilder.build(resp));
+        for (ModelSchemaResp resp : fetchModelSchema(ids, true)) {
+            domainSchemaList.add(ModelSchemaBuilder.build(resp));
         }
 
         return domainSchemaList;
     }
 
-    protected abstract List<DomainSchemaResp> doFetchDomainSchema(List<Long> ids);
+    protected abstract List<ModelSchemaResp> doFetchModelSchema(List<Long> ids);
 }

@@ -1,10 +1,8 @@
 package com.tencent.supersonic.knowledge.semantic;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @Data
@@ -22,19 +20,19 @@ public class DefaultSemanticConfig {
     @Value("${searchByStruct.path:/api/semantic/query/sql}")
     private String searchBySqlPath;
 
-    @Value("${fetchDomainSchemaPath.path:/api/semantic/schema}")
-    private String fetchDomainSchemaPath;
+    @Value("${fetchModelSchemaPath.path:/api/semantic/schema}")
+    private String fetchModelSchemaPath;
 
-    @Value("${fetchDomainList.path:/api/semantic/schema/dimension/page}")
+    @Value("${fetchModelList.path:/api/semantic/schema/dimension/page}")
     private String fetchDimensionPagePath;
 
-    @Value("${fetchDomainList.path:/api/semantic/schema/metric/page}")
+    @Value("${fetchModelList.path:/api/semantic/schema/metric/page}")
     private String fetchMetricPagePath;
 
-    @Value("${fetchDomainList.path:/api/semantic/schema/domain/list}")
+    @Value("${fetchModelList.path:/api/semantic/schema/domain/list}")
     private String fetchDomainListPath;
 
-    @Value("${fetchDomainList.path:/api/semantic/schema/domain/view/list}")
-    private String fetchDomainViewListPath;
+    @Value("${fetchModelList.path:/api/semantic/schema/model/list}")
+    private String fetchModelListPath;
 
 }

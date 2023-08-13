@@ -22,6 +22,13 @@ public class QueryColumn {
         this.nameEn = nameEn;
     }
 
+    public QueryColumn(String name, String type, String nameEn) {
+        this.name = name;
+        this.type = type;
+        this.nameEn = nameEn;
+        this.showType = "CATEGORY";
+    }
+
     public void setType(String type) {
         this.type = type == null ? null : type;
     }

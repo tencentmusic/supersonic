@@ -2,15 +2,20 @@ package com.tencent.supersonic.chat.mapper;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
-import com.tencent.supersonic.chat.api.pojo.*;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
+import com.tencent.supersonic.common.pojo.Constants;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class QueryFilterMapper implements SchemaMapper {
@@ -21,35 +26,35 @@ public class QueryFilterMapper implements SchemaMapper {
     @Override
     public void map(QueryContext queryContext) {
         QueryReq queryReq = queryContext.getRequest();
-        Long domainId = queryReq.getDomainId();
-        if (domainId == null || domainId <= 0) {
+        Long modelId = queryReq.getModelId();
+        if (modelId == null || modelId <= 0) {
             return;
         }
         SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
-        clearOtherSchemaElementMatch(domainId, schemaMapInfo);
-        List<SchemaElementMatch> schemaElementMatches = schemaMapInfo.getMatchedElements(domainId);
+        clearOtherSchemaElementMatch(modelId, schemaMapInfo);
+        List<SchemaElementMatch> schemaElementMatches = schemaMapInfo.getMatchedElements(modelId);
         if (schemaElementMatches == null) {
             schemaElementMatches = Lists.newArrayList();
-            schemaMapInfo.setMatchedElements(domainId, schemaElementMatches);
+            schemaMapInfo.setMatchedElements(modelId, schemaElementMatches);
         }
         addValueSchemaElementMatch(schemaElementMatches, queryReq.getQueryFilters());
     }
 
-    private void clearOtherSchemaElementMatch(Long domainId, SchemaMapInfo schemaMapInfo) {
-        for (Map.Entry<Long, List<SchemaElementMatch>> entry : schemaMapInfo.getDomainElementMatches().entrySet()) {
-            if (!entry.getKey().equals(domainId)) {
+    private void clearOtherSchemaElementMatch(Long modelId, SchemaMapInfo schemaMapInfo) {
+        for (Map.Entry<Long, List<SchemaElementMatch>> entry : schemaMapInfo.getModelElementMatches().entrySet()) {
+            if (!entry.getKey().equals(modelId)) {
                 entry.getValue().clear();
             }
         }
     }
 
     private List<SchemaElementMatch> addValueSchemaElementMatch(List<SchemaElementMatch> candidateElementMatches,
-                                                           QueryFilters queryFilter) {
+            QueryFilters queryFilter) {
         if (queryFilter == null || CollectionUtils.isEmpty(queryFilter.getFilters())) {
             return candidateElementMatches;
         }
         for (QueryFilter filter : queryFilter.getFilters()) {
-           if (checkExistSameValueSchemaElementMatch(filter, candidateElementMatches)) {
+            if (checkExistSameValueSchemaElementMatch(filter, candidateElementMatches)) {
                 continue;
             }
             SchemaElement element = SchemaElement.builder()
@@ -63,7 +68,7 @@ public class QueryFilterMapper implements SchemaMapper {
                     .frequency(FREQUENCY)
                     .word(String.valueOf(filter.getValue()))
                     .similarity(SIMILARITY)
-                    .detectWord(filter.getName())
+                    .detectWord(Constants.EMPTY)
                     .build();
             candidateElementMatches.add(schemaElementMatch);
         }
@@ -71,13 +76,13 @@ public class QueryFilterMapper implements SchemaMapper {
     }
 
     private boolean checkExistSameValueSchemaElementMatch(QueryFilter queryFilter,
-                                                          List<SchemaElementMatch> schemaElementMatches) {
+            List<SchemaElementMatch> schemaElementMatches) {
         List<SchemaElementMatch> valueSchemaElements = schemaElementMatches.stream().filter(schemaElementMatch ->
                         SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType()))
                 .collect(Collectors.toList());
         for (SchemaElementMatch schemaElementMatch : valueSchemaElements) {
             if (schemaElementMatch.getElement().getId().equals(queryFilter.getElementID())
-            && schemaElementMatch.getWord().equals(String.valueOf(queryFilter.getValue()))) {
+                    && schemaElementMatch.getWord().equals(String.valueOf(queryFilter.getValue()))) {
                 return true;
             }
         }

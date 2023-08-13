@@ -12,18 +12,23 @@ import com.tencent.supersonic.auth.api.authorization.pojo.DimensionFilter;
 import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryAuthorization;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
+import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
+import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
-import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
+import com.tencent.supersonic.semantic.model.domain.DimensionService;
+import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.semantic.model.domain.ModelService;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,9 +40,6 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.DomainService;
-import com.tencent.supersonic.semantic.model.domain.MetricService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -66,7 +68,7 @@ public class DataPermissionAOP {
     @Autowired
     private MetricService metricService;
     @Autowired
-    private DomainService domainService;
+    private ModelService modelService;
     @Value("${permission.data.enable:true}")
     private Boolean permissionDataEnable;
 
@@ -77,7 +79,7 @@ public class DataPermissionAOP {
     @Around(value = "dataPermissionAOP()")
     public Object around(ProceedingJoinPoint point) throws Throwable {
         Object[] args = point.getArgs();
-        QueryStructReq queryStructCmd = (QueryStructReq) args[0];
+        QueryStructReq queryStructReq = (QueryStructReq) args[0];
         User user = (User) args[1];
 
         if (!permissionDataEnable) {
@@ -90,29 +92,29 @@ public class DataPermissionAOP {
         }
 
         // 1. determine whether the subject field is visible
-        doDomainVisible(user, queryStructCmd);
+        doDomainVisible(user, queryStructReq);
 
         // 2. fetch data permission meta information
-        Long domainId = queryStructCmd.getDomainId();
-        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(queryStructCmd);
-        log.info("classId:{}, res4Privilege:{}", domainId, res4Privilege);
+        Long modelId = queryStructReq.getModelId();
+        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(queryStructReq);
+        log.info("modelId:{}, res4Privilege:{}", modelId, res4Privilege);
 
-        Set<String> sensitiveResByDomain = getHighSensitiveColsByDomainId(domainId);
+        Set<String> sensitiveResByModel = getHighSensitiveColsByModelId(modelId);
         Set<String> sensitiveResReq = res4Privilege.parallelStream()
-                .filter(res -> sensitiveResByDomain.contains(res)).collect(Collectors.toSet());
-        log.info("this query domainId:{}, sensitiveResReq:{}", domainId, sensitiveResReq);
+                .filter(sensitiveResByModel::contains).collect(Collectors.toSet());
+        log.info("this query domainId:{}, sensitiveResReq:{}", modelId, sensitiveResReq);
 
         // query user privilege info
         HttpServletRequest request = (HttpServletRequest) args[2];
-        AuthorizedResourceResp authorizedResource = getAuthorizedResource(user, request, domainId, sensitiveResReq);
+        AuthorizedResourceResp authorizedResource = getAuthorizedResource(user, request, modelId, sensitiveResReq);
         // get sensitiveRes that user has privilege
-        Set<String> resAuthSet = getAuthResNameSet(authorizedResource, queryStructCmd.getDomainId());
+        Set<String> resAuthSet = getAuthResNameSet(authorizedResource, queryStructReq.getModelId());
 
         // 3.if sensitive fields without permission are involved in filter, thrown an exception
-        doFilterCheckLogic(queryStructCmd, resAuthSet, sensitiveResReq);
+        doFilterCheckLogic(queryStructReq, resAuthSet, sensitiveResReq);
 
         // 4.row permission pre-filter
-        doRowPermission(queryStructCmd, authorizedResource);
+        doRowPermission(queryStructReq, authorizedResource);
 
         // 5.proceed
         QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) point.proceed();
@@ -120,7 +122,7 @@ public class DataPermissionAOP {
         if (CollectionUtils.isEmpty(sensitiveResReq) || allSensitiveResReqIsOk(sensitiveResReq, resAuthSet)) {
             // if sensitiveRes is empty
             log.info("sensitiveResReq is empty");
-            return getQueryResultWithColumns(queryResultWithColumns, domainId, authorizedResource);
+            return getQueryResultWithColumns(queryResultWithColumns, modelId, authorizedResource);
         }
 
         // 6.if the column has no permission, hit *
@@ -128,7 +130,7 @@ public class DataPermissionAOP {
                 .collect(Collectors.toSet());
         QueryResultWithSchemaResp queryResultAfterDesensitization = desensitizationData(queryResultWithColumns,
                 need2Apply);
-        addPromptInfoInfo(domainId, queryResultAfterDesensitization, authorizedResource);
+        addPromptInfoInfo(modelId, queryResultAfterDesensitization, authorizedResource);
 
         return queryResultAfterDesensitization;
 
@@ -136,27 +138,27 @@ public class DataPermissionAOP {
 
     private void doDomainVisible(User user, QueryStructReq queryStructCmd) {
         Boolean visible = true;
-        Long domainId = queryStructCmd.getDomainId();
-        List<DomainResp> classListForViewer = domainService.getDomainListForViewer(user.getName());
-        if (CollectionUtils.isEmpty(classListForViewer)) {
+        Long domainId = queryStructCmd.getModelId();
+        List<ModelResp> modelListVisible = modelService.getModelListWithAuth(user.getName(), null, AuthType.VISIBLE);
+        if (CollectionUtils.isEmpty(modelListVisible)) {
             visible = false;
         } else {
-            Map<Long, List<DomainResp>> id2domainDesc = classListForViewer.stream()
-                    .collect(Collectors.groupingBy(classInfo -> classInfo.getId()));
+            Map<Long, List<ModelResp>> id2domainDesc = modelListVisible.stream()
+                    .collect(Collectors.groupingBy(SchemaItem::getId));
             if (!CollectionUtils.isEmpty(id2domainDesc) && !id2domainDesc.containsKey(domainId)) {
                 visible = false;
             }
         }
 
         if (!visible) {
-            List<Long> domainIds = new ArrayList<>();
-            domainIds.add(domainId);
-            List<DomainResp> classInfos = domainService.getDomainList(domainIds);
-            if (CollectionUtils.isEmpty(classInfos)) {
+            List<Long> modelIds = new ArrayList<>();
+            modelIds.add(domainId);
+            List<ModelResp> modelInfos = modelService.getModelList(modelIds);
+            if (CollectionUtils.isEmpty(modelInfos)) {
                 throw new InvalidArgumentException(
                         "invalid domainId:" + domainId + ", please contact admin for details");
             }
-            String domainName = classInfos.get(0).getName();
+            String domainName = modelInfos.get(0).getName();
             throw new InvalidPermissionException(
                     "You do not have domain:" + domainName + " permission, please contact admin for details");
 
@@ -176,12 +178,12 @@ public class DataPermissionAOP {
         if (!CollectionUtils.isEmpty(filters)) {
             log.debug("dimensionFilters:{}", filters);
 
-            List<Long> domainIds = new ArrayList<>();
-            domainIds.add(domainId);
-            List<DomainResp> classInfos = domainService.getDomainList(domainIds);
-            String classNameCn = "";
-            if (!CollectionUtils.isEmpty(classInfos)) {
-                classNameCn = classInfos.get(0).getName();
+            List<Long> modelIds = new ArrayList<>();
+            modelIds.add(domainId);
+            List<ModelResp> modelInfos = modelService.getModelList(modelIds);
+            String modelNameCn = "";
+            if (!CollectionUtils.isEmpty(modelInfos)) {
+                modelNameCn = modelInfos.get(0).getName();
             }
 
             List<String> exprList = new ArrayList<>();
@@ -196,7 +198,7 @@ public class DataPermissionAOP {
             String message = String.format(promptInfo, CollectionUtils.isEmpty(descList) ? exprList : descList);
 
             queryResultWithColumns.setQueryAuthorization(
-                    new QueryAuthorization(classNameCn, exprList, descList, message));
+                    new QueryAuthorization(modelNameCn, exprList, descList, message));
             log.info("queryResultWithColumns:{}", queryResultWithColumns);
         }
     }
@@ -240,7 +242,7 @@ public class DataPermissionAOP {
         authResGrpList.stream().forEach(authResGrp -> {
             List<AuthRes> cols = authResGrp.getGroup();
             if (!CollectionUtils.isEmpty(cols)) {
-                cols.stream().filter(col -> domainId.equals(Long.parseLong(col.getDomainId())))
+                cols.stream().filter(col -> domainId.equals(Long.parseLong(col.getModelId())))
                         .forEach(col -> resAuthName.add(col.getName()));
             }
 
@@ -256,17 +258,17 @@ public class DataPermissionAOP {
         QueryAuthResReq queryAuthResReq = new QueryAuthResReq();
         queryAuthResReq.setUser(user.getName());
         queryAuthResReq.setResources(resourceReqList);
-        queryAuthResReq.setDomainId(domainId + "");
+        queryAuthResReq.setModelId(domainId + "");
         AuthorizedResourceResp authorizedResource = fetchAuthRes(request, queryAuthResReq);
         log.info("user:{}, domainId:{}, after queryAuthorizedResources:{}", user.getName(), domainId,
                 authorizedResource);
         return authorizedResource;
     }
 
-    private Set<String> getHighSensitiveColsByDomainId(Long domainId) {
+    private Set<String> getHighSensitiveColsByModelId(Long modelId) {
         Set<String> highSensitiveCols = new HashSet<>();
-        List<DimensionResp> highSensitiveDimensions = dimensionService.getHighSensitiveDimension(domainId);
-        List<MetricResp> highSensitiveMetrics = metricService.getHighSensitiveMetric(domainId);
+        List<DimensionResp> highSensitiveDimensions = dimensionService.getHighSensitiveDimension(modelId);
+        List<MetricResp> highSensitiveMetrics = metricService.getHighSensitiveMetric(modelId);
         if (!CollectionUtils.isEmpty(highSensitiveDimensions)) {
             highSensitiveDimensions.stream().forEach(dim -> highSensitiveCols.add(dim.getBizName()));
         }
@@ -373,16 +375,16 @@ public class DataPermissionAOP {
                 .filter(res -> !resAuthName.contains(res) && sensitiveResReq.contains(res)).collect(Collectors.toSet());
         Set<String> nameCnSet = new HashSet<>();
 
-        List<Long> domainIds = new ArrayList<>();
-        domainIds.add(queryStructCmd.getDomainId());
-        List<DomainResp> classInfos = domainService.getDomainList(domainIds);
-        String classNameCn = Constants.EMPTY;
-        if (!CollectionUtils.isEmpty(classInfos)) {
-            classNameCn = classInfos.get(0).getName();
+        List<Long> modelIds = new ArrayList<>();
+        modelIds.add(queryStructCmd.getModelId());
+        List<ModelResp> modelInfos = modelService.getModelList(modelIds);
+        String modelNameCn = Constants.EMPTY;
+        if (!CollectionUtils.isEmpty(modelInfos)) {
+            modelNameCn = modelInfos.get(0).getName();
         }
 
-        List<DimensionResp> dimensionDescList = dimensionService.getDimensions(queryStructCmd.getDomainId());
-        String finalDomainNameCn = classNameCn;
+        List<DimensionResp> dimensionDescList = dimensionService.getDimensions(queryStructCmd.getModelId());
+        String finalDomainNameCn = modelNameCn;
         dimensionDescList.stream().filter(dim -> need2Apply.contains(dim.getBizName()))
                 .forEach(dim -> nameCnSet.add(finalDomainNameCn + MINUS + dim.getName()));
 

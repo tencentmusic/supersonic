@@ -3,9 +3,7 @@ package com.tencent.supersonic.semantic.api.model.response;
 
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
-
 import java.util.List;
-
 import lombok.Data;
 import lombok.ToString;
 
@@ -14,7 +12,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class DimensionResp extends SchemaItem {
 
-    private Long domainId;
+    private Long modelId;
 
     private String type;
 

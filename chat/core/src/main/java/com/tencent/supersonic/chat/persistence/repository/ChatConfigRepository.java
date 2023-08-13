@@ -1,10 +1,9 @@
 package com.tencent.supersonic.chat.persistence.repository;
 
 
-import com.tencent.supersonic.chat.config.ChatConfig;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
-
+import com.tencent.supersonic.chat.config.ChatConfig;
 import java.util.List;
 
 public interface ChatConfigRepository {
@@ -15,5 +14,5 @@ public interface ChatConfigRepository {
 
     List<ChatConfigResp> getChatConfig(ChatConfigFilter filter);
 
-    ChatConfigResp getConfigByDomainId(Long domainId);
+    ChatConfigResp getConfigByModelId(Long modelId);
 }

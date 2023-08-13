@@ -3,7 +3,24 @@
 - All notable changes to this project will be documented in this file.
 - "Breaking Changes" describes any changes that may break existing functionality or cause
   compatibility issues with previous versions.
-  
+
+
+
+## SuperSonic [0.7.2] - 2023-08-12
+
+### Added
+- Support asynchronous query - return parse information to user before executing result
+- Add Model as the basic data structure of the semantic definitions - this will repalce the old conception of subdomain
+
+### Updated
+- improve knowledge word similarity algorithm
+- improve embedding plugin chooser
+- improve DSLQuery field correction and parser
+
+
+### Fixed
+-  Fix mapper error that detectWord text is shorter than word
+-  Fix MetricDomainQuery inherit context
   
 ## SuperSonic [0.7.0] - 2023-07-30
 

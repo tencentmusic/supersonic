@@ -7,6 +7,7 @@ import lombok.Data;
  */
 @Data
 public class ResultData<T> {
+
     private int code;
     private String msg;
     private T data;

@@ -2,10 +2,9 @@ package com.tencent.supersonic.chat.mapper;
 
 import com.google.common.collect.Lists;
 import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.dictionary.DictWordType;
+import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.service.SearchService;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,7 +24,7 @@ public class SearchMatchStrategy implements MatchStrategy {
 
     @Override
     public Map<MatchText, List<MapResult>> match(String text, List<Term> originals,
-            Long detectDomainId) {
+            Long detectModelId) {
 
         Map<Integer, Integer> regOffsetToLength = originals.stream()
                 .filter(entry -> !entry.nature.toString().startsWith(DictWordType.NATURE_SPILT))
@@ -60,10 +59,10 @@ public class SearchMatchStrategy implements MatchStrategy {
                             List<String> natures = entry.getNatures().stream()
                                     .filter(nature -> !nature.endsWith(DictWordType.ENTITY.getType()))
                                     .filter(nature -> {
-                                                if (Objects.isNull(detectDomainId) || detectDomainId <= 0) {
+                                                if (Objects.isNull(detectModelId) || detectModelId <= 0) {
                                                     return true;
                                                 }
-                                                if (nature.startsWith(DictWordType.NATURE_SPILT + detectDomainId)
+                                                if (nature.startsWith(DictWordType.NATURE_SPILT + detectModelId)
                                                         && nature.startsWith(DictWordType.NATURE_SPILT)) {
                                                     return true;
                                                 }

@@ -5,7 +5,7 @@
     <resultMap id="BaseResultMap"
             type="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDO">
         <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="domain_id" jdbcType="BIGINT" property="domainId"/>
+        <result column="model_id" jdbcType="BIGINT" property="modelId"/>
         <result column="datasource_from" jdbcType="BIGINT" property="datasourceFrom"/>
         <result column="datasource_to" jdbcType="BIGINT" property="datasourceTo"/>
         <result column="join_key" jdbcType="VARCHAR" property="joinKey"/>
@@ -47,8 +47,8 @@
     </sql>
     <sql id="Base_Column_List">
         id
-        , domain_id, datasource_from, datasource_to, join_key, created_at, created_by,
-    updated_at, updated_by
+        , model_id, datasource_from, datasource_to, join_key, created_at, created_by, updated_at,
+    updated_by
     </sql>
     <select id="selectByExample"
             parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDOExample"
@@ -82,10 +82,10 @@
     </delete>
     <insert id="insert"
             parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDO">
-        insert into s2_datasource_rela (id, domain_id, datasource_from,
+        insert into s2_datasource_rela (id, model_id, datasource_from,
                                         datasource_to, join_key, created_at,
                                         created_by, updated_at, updated_by)
-        values (#{id,jdbcType=BIGINT}, #{domainId,jdbcType=BIGINT},
+        values (#{id,jdbcType=BIGINT}, #{modelId,jdbcType=BIGINT},
                 #{datasourceFrom,jdbcType=BIGINT},
                 #{datasourceTo,jdbcType=BIGINT}, #{joinKey,jdbcType=VARCHAR},
                 #{createdAt,jdbcType=TIMESTAMP},
@@ -99,8 +99,8 @@
             <if test="id != null">
                 id,
             </if>
-            <if test="domainId != null">
-                domain_id,
+            <if test="modelId != null">
+                model_id,
             </if>
             <if test="datasourceFrom != null">
                 datasource_from,
@@ -128,8 +128,8 @@
             <if test="id != null">
                 #{id,jdbcType=BIGINT},
             </if>
-            <if test="domainId != null">
-                #{domainId,jdbcType=BIGINT},
+            <if test="modelId != null">
+                #{modelId,jdbcType=BIGINT},
             </if>
             <if test="datasourceFrom != null">
                 #{datasourceFrom,jdbcType=BIGINT},
@@ -166,8 +166,8 @@
             parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDO">
         update s2_datasource_rela
         <set>
-            <if test="domainId != null">
-                domain_id = #{domainId,jdbcType=BIGINT},
+            <if test="modelId != null">
+                model_id = #{modelId,jdbcType=BIGINT},
             </if>
             <if test="datasourceFrom != null">
                 datasource_from = #{datasourceFrom,jdbcType=BIGINT},
@@ -196,7 +196,7 @@
     <update id="updateByPrimaryKey"
             parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDO">
         update s2_datasource_rela
-        set domain_id       = #{domainId,jdbcType=BIGINT},
+        set model_id        = #{modelId,jdbcType=BIGINT},
             datasource_from = #{datasourceFrom,jdbcType=BIGINT},
             datasource_to   = #{datasourceTo,jdbcType=BIGINT},
             join_key        = #{joinKey,jdbcType=VARCHAR},

@@ -7,18 +7,20 @@ import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.config.FunctionCallInfoConfig;
+import com.tencent.supersonic.chat.parser.ParseMode;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.chat.plugin.Plugin;
 import com.tencent.supersonic.chat.plugin.PluginManager;
 import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.query.QueryManager;
+import com.tencent.supersonic.chat.query.dsl.DSLQuery;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
-import com.tencent.supersonic.chat.query.plugin.dsl.DSLQuery;
 import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.JsonUtil;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,10 +31,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -55,21 +56,12 @@ public class FunctionBasedParser implements SemanticParser {
         FunctionCallInfoConfig functionCallConfig = ContextUtils.getBean(FunctionCallInfoConfig.class);
         PluginService pluginService = ContextUtils.getBean(PluginService.class);
         String functionUrl = functionCallConfig.getUrl();
-
         if (StringUtils.isBlank(functionUrl) || SatisfactionChecker.check(queryCtx)) {
             log.info("functionUrl:{}, skip function parser, queryText:{}", functionUrl,
                     queryCtx.getRequest().getQueryText());
             return;
         }
-
-        Set<Long> matchedDomains = getMatchDomains(queryCtx);
-        List<String> functionNames = getFunctionNames(matchedDomains);
-        log.info("matchedDomains:{},functionNames:{}", matchedDomains, functionNames);
-
-        if (CollectionUtils.isEmpty(functionNames) || CollectionUtils.isEmpty(matchedDomains)) {
-            return;
-        }
-        List<PluginParseConfig> functionDOList = getFunctionDO(queryCtx.getRequest().getDomainId());
+        List<PluginParseConfig> functionDOList = getFunctionDO(queryCtx.getRequest().getModelId(), queryCtx);
         FunctionReq functionReq = FunctionReq.builder()
                 .queryText(queryCtx.getRequest().getQueryText())
                 .pluginConfigs(functionDOList).build();
@@ -78,7 +70,6 @@ public class FunctionBasedParser implements SemanticParser {
         if (skipFunction(queryCtx, functionResp)) {
             return;
         }
-
         PluginParseResult functionCallParseResult = new PluginParseResult();
         String toolSelection = functionResp.getToolSelection();
         Optional<Plugin> pluginOptional = pluginService.getPluginByName(toolSelection);
@@ -87,24 +78,26 @@ public class FunctionBasedParser implements SemanticParser {
             return;
         }
         Plugin plugin = pluginOptional.get();
+        plugin.setParseMode(ParseMode.FUNCTION_CALL);
         toolSelection = plugin.getType();
         functionCallParseResult.setPlugin(plugin);
         log.info("QueryManager PluginQueryModes:{}", QueryManager.getPluginQueryModes());
         PluginSemanticQuery semanticQuery = QueryManager.createPluginQuery(toolSelection);
-        DomainResolver domainResolver = ComponentFactory.getDomainResolver();
-
-        Long domainId = domainResolver.resolve(queryCtx, chatCtx, plugin.getDomainList());
-        log.info("FunctionBasedParser domainId:{}",domainId);
-        if ((Objects.isNull(domainId) || domainId <= 0) && !plugin.isContainsAllDomain()) {
-            log.info("domain is null, skip the parse, select tool: {}", toolSelection);
+        ModelResolver ModelResolver = ComponentFactory.getModelResolver();
+        log.info("plugin ModelList:{}", plugin.getModelList());
+        Pair<Boolean, List<Long>> pluginResolveResult = PluginManager.resolve(plugin, queryCtx);
+        Long modelId = ModelResolver.resolve(queryCtx, chatCtx, pluginResolveResult.getRight());
+        log.info("FunctionBasedParser modelId:{}", modelId);
+        if ((Objects.isNull(modelId) || modelId <= 0) && !plugin.isContainsAllModel()) {
+            log.info("Model is null, skip the parse, select tool: {}", toolSelection);
             return;
         }
-        if (!plugin.getDomainList().contains(domainId) && !plugin.isContainsAllDomain()) {
+        if (!plugin.getModelList().contains(modelId) && !plugin.isContainsAllModel()) {
             return;
         }
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
-        if (Objects.nonNull(domainId) && domainId > 0){
-            parseInfo.getElementMatches().addAll(queryCtx.getMapInfo().getMatchedElements(domainId));
+        if (Objects.nonNull(modelId) && modelId > 0) {
+            parseInfo.getElementMatches().addAll(queryCtx.getMapInfo().getMatchedElements(modelId));
         }
         functionCallParseResult.setRequest(queryCtx.getRequest());
         Map<String, Object> properties = new HashMap<>();
@@ -112,21 +105,22 @@ public class FunctionBasedParser implements SemanticParser {
         parseInfo.setProperties(properties);
         parseInfo.setScore(FUNCTION_BONUS_THRESHOLD);
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
-        SchemaElement domain = new SchemaElement();
-        domain.setDomain(domainId);
-        domain.setId(domainId);
-        parseInfo.setDomain(domain);
+        SchemaElement Model = new SchemaElement();
+        Model.setModel(modelId);
+        Model.setId(modelId);
+        parseInfo.setModel(Model);
         queryCtx.getCandidateQueries().add(semanticQuery);
     }
 
-    private Set<Long> getMatchDomains(QueryContext queryCtx) {
+
+    private Set<Long> getMatchModels(QueryContext queryCtx) {
         Set<Long> result = new HashSet<>();
-        Long domainId = queryCtx.getRequest().getDomainId();
-        if (Objects.nonNull(domainId) && domainId > 0) {
-            result.add(domainId);
+        Long modelId = queryCtx.getRequest().getModelId();
+        if (Objects.nonNull(modelId) && modelId > 0) {
+            result.add(modelId);
             return result;
         }
-        return queryCtx.getMapInfo().getMatchedDomains();
+        return queryCtx.getMapInfo().getMatchedModels();
     }
 
     private boolean skipFunction(QueryContext queryCtx, FunctionResp functionResp) {
@@ -144,36 +138,46 @@ public class FunctionBasedParser implements SemanticParser {
         return false;
     }
 
-    private List<PluginParseConfig> getFunctionDO(Long domainId) {
-        log.info("user decide domain:{}", domainId);
+    private List<PluginParseConfig> getFunctionDO(Long modelId, QueryContext queryContext) {
+        log.info("user decide Model:{}", modelId);
         List<Plugin> plugins = PluginManager.getPlugins();
-        List<PluginParseConfig> functionDOList = plugins.stream().filter(o -> {
-            if (o.getParseModeConfig() == null) {
+        List<PluginParseConfig> functionDOList = plugins.stream().filter(plugin -> {
+            if (DSLQuery.QUERY_MODE.equalsIgnoreCase(plugin.getType())) {
                 return false;
             }
-            if (!CollectionUtils.isEmpty(o.getDomainList())) {//过滤掉没选主题域的插件
-                return true;
+            if (plugin.getParseModeConfig() == null) {
+                return false;
             }
-            if (domainId == null || domainId <= 0L) {
-                return true;
-            } else {
-                return o.getDomainList().contains(domainId);
-            }
-        }).map(o -> {
-            PluginParseConfig functionCallConfig = JsonUtil.toObject(o.getParseModeConfig(),
+            PluginParseConfig pluginParseConfig = JsonUtil.toObject(plugin.getParseModeConfig(),
                     PluginParseConfig.class);
-            return functionCallConfig;
-        }).collect(Collectors.toList());
+            if (StringUtils.isBlank(pluginParseConfig.getName())) {
+                return false;
+            }
+            Pair<Boolean, List<Long>> pluginResolverResult = PluginManager.resolve(plugin, queryContext);
+            log.info("embedding plugin [{}-{}] resolve: {}", plugin.getId(), plugin.getName(), pluginResolverResult);
+            if (!pluginResolverResult.getLeft()) {
+                return false;
+            } else {
+                List<Long> resolveModel = pluginResolverResult.getRight();
+                if (modelId != null && modelId > 0) {
+                    if (plugin.isContainsAllModel()) {
+                        return true;
+                    }
+                    return resolveModel.contains(modelId);
+                }
+                return true;
+            }
+        }).map(o -> JsonUtil.toObject(o.getParseModeConfig(), PluginParseConfig.class)).collect(Collectors.toList());
         log.info("getFunctionDO:{}", JsonUtil.toString(functionDOList));
         return functionDOList;
     }
 
-    private List<String> getFunctionNames(Set<Long> matchedDomains) {
+    private List<String> getFunctionNames(Set<Long> matchedModels) {
         List<Plugin> plugins = PluginManager.getPlugins();
         Set<String> functionNames = plugins.stream()
                 .filter(entry -> {
-                            if (!CollectionUtils.isEmpty(entry.getDomainList()) && !CollectionUtils.isEmpty(matchedDomains)) {
-                                return entry.getDomainList().stream().anyMatch(matchedDomains::contains);
+                            if (!CollectionUtils.isEmpty(entry.getModelList()) && !CollectionUtils.isEmpty(matchedModels)) {
+                                return entry.getModelList().stream().anyMatch(matchedModels::contains);
                             }
                             return true;
                         }

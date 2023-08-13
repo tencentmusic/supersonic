@@ -43,7 +43,7 @@ public class ComponentFactory {
     }
 
     public static List<QueryOptimizer> getQueryOptimizers() {
-        if(queryOptimizers.isEmpty()){
+        if (queryOptimizers.isEmpty()) {
             initQueryOptimizer();
         }
         return queryOptimizers;
@@ -59,9 +59,11 @@ public class ComponentFactory {
     public static void setSqlParser(SqlParser parser) {
         sqlParser = parser;
     }
+
     private static void initQueryOptimizer() {
         queryOptimizers.add(getBean("DetailQuery", DetailQuery.class));
     }
+
     private static void initSemanticConverter() {
         semanticConverters.add(getBean("DefaultDimValueConverter", DefaultDimValueConverter.class));
         semanticConverters.add(getBean("CalculateAggConverter", CalculateAggConverter.class));

@@ -54,18 +54,18 @@ public class SemanticSchemaManager {
     public SemanticModel reload(String rootPath) {
         SemanticModel semanticModel = new SemanticModel();
         semanticModel.setRootPath(rootPath);
-        Map<Long, String> domainFullPathMap = catalog.getDomainFullPath();
-        log.info("domainFullPathMap {}", domainFullPathMap);
-        Set<Long> domainIds = domainFullPathMap.entrySet().stream().filter(e -> e.getValue().startsWith(rootPath))
-                .map(e -> e.getKey()).collect(Collectors.toSet());
-        if (domainIds.isEmpty()) {
-            log.error("get domainId empty {}", rootPath);
+        Map<Long, String> modelFullPathMap = catalog.getModelFullPath();
+        log.info("modelFullPathMap {}", modelFullPathMap);
+        Set<Long> modelIds = modelFullPathMap.entrySet().stream().filter(e -> e.getValue().startsWith(rootPath))
+                .map(Entry::getKey).collect(Collectors.toSet());
+        if (modelIds.isEmpty()) {
+            log.error("get modelIds empty {}", rootPath);
             return semanticModel;
         }
         Map<String, List<DimensionYamlTpl>> dimensionYamlTpls = new HashMap<>();
         List<DatasourceYamlTpl> datasourceYamlTpls = new ArrayList<>();
         List<MetricYamlTpl> metricYamlTpls = new ArrayList<>();
-        catalog.getModelYamlTplByDomainIds(domainIds, dimensionYamlTpls, datasourceYamlTpls, metricYamlTpls);
+        catalog.getModelYamlTplByMoldelIds(modelIds, dimensionYamlTpls, datasourceYamlTpls, metricYamlTpls);
         if (!datasourceYamlTpls.isEmpty()) {
             Map<String, DataSource> dataSourceMap = datasourceYamlTpls.stream().map(d -> getDatasource(d))
                     .collect(Collectors.toMap(DataSource::getName, item -> item, (k1, k2) -> k1));

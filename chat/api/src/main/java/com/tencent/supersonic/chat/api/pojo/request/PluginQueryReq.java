@@ -13,7 +13,7 @@ public class PluginQueryReq {
 
     private String type;
 
-    private String domain;
+    private String model;
 
     private String pattern;
 

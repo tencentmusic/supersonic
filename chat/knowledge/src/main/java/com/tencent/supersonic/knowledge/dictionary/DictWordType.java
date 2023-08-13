@@ -12,6 +12,7 @@ public enum DictWordType {
     VALUE("value"),
 
     DOMAIN("dm"),
+    MODEL("model"),
     ENTITY("entity"),
 
     NUMBER("m"),
@@ -29,7 +30,6 @@ public enum DictWordType {
     public String getType() {
         return NATURE_SPILT + type;
     }
-
 
 
     public static DictWordType getNatureType(String nature) {

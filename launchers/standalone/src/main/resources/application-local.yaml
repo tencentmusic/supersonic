@@ -1,7 +1,7 @@
 spring:
   h2:
     console:
-      path: /h2-console/chat
+      path: /h2-console/semantic
       # enabled web
       enabled: true
   datasource:
@@ -19,6 +19,10 @@ authentication:
   enable: true
   exclude:
     path: /api/auth/user/register,/api/auth/user/login
+  token:
+    http:
+      header:
+        key: Authorization
 
 semantic:
   url:

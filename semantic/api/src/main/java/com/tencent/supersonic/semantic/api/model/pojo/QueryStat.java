@@ -13,7 +13,7 @@ public class QueryStat {
 
     private Long id;
     private String traceId;
-    private Long domainId;
+    private Long modelId;
     private String user;
     private String createdAt;
     /**
@@ -79,8 +79,8 @@ public class QueryStat {
         return this;
     }
 
-    public QueryStat setClassId(Long domainId) {
-        this.domainId = domainId;
+    public QueryStat setClassId(Long modelId) {
+        this.modelId = modelId;
         return this;
     }
 

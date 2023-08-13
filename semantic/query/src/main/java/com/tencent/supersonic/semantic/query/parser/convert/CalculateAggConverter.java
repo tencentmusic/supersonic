@@ -70,7 +70,7 @@ public class CalculateAggConverter implements SemanticConverter {
             return generateRatioSqlCommand(queryStructCmd, engineTypeEnum, version);
         }
         ParseSqlReq sqlCommand = new ParseSqlReq();
-        sqlCommand.setRootPath(catalog.getDomainFullPath(queryStructCmd.getDomainId()));
+        sqlCommand.setRootPath(catalog.getModelFullPath(queryStructCmd.getModelId()));
         String metricTableName = "v_metric_tb_tmp";
         MetricTable metricTable = new MetricTable();
         metricTable.setAlias(metricTableName);
@@ -107,7 +107,7 @@ public class CalculateAggConverter implements SemanticConverter {
             return false;
         }
         //todo ck类型暂不拼with语句
-        if (queryStructCmd.getDomainId().equals(34L)) {
+        if (queryStructCmd.getModelId().equals(34L)) {
             return false;
         }
         int nonSumFunction = 0;
@@ -130,7 +130,7 @@ public class CalculateAggConverter implements SemanticConverter {
     @Override
     public void converter(Catalog catalog, QueryStructReq queryStructCmd, ParseSqlReq sqlCommend,
             MetricReq metricCommand) throws Exception {
-        DatabaseResp databaseResp = catalog.getDatabaseByDomainId(queryStructCmd.getDomainId());
+        DatabaseResp databaseResp = catalog.getDatabaseByModelId(queryStructCmd.getModelId());
         ParseSqlReq parseSqlReq = generateSqlCommend(queryStructCmd,
                 EngineTypeEnum.valueOf(databaseResp.getType().toUpperCase()), databaseResp.getVersion());
         sqlCommend.setSql(parseSqlReq.getSql());
@@ -160,7 +160,7 @@ public class CalculateAggConverter implements SemanticConverter {
             throws Exception {
         check(queryStructCmd);
         ParseSqlReq sqlCommand = new ParseSqlReq();
-        sqlCommand.setRootPath(catalog.getDomainFullPath(queryStructCmd.getDomainId()));
+        sqlCommand.setRootPath(catalog.getModelFullPath(queryStructCmd.getModelId()));
         String metricTableName = "v_metric_tb_tmp";
         MetricTable metricTable = new MetricTable();
         metricTable.setAlias(metricTableName);
@@ -180,7 +180,7 @@ public class CalculateAggConverter implements SemanticConverter {
             case MYSQL:
                 if (Objects.nonNull(version) && version.startsWith(mysqlLowVersion)) {
                     sqlCommand.setSupportWith(false);
-                    sql =  new MysqlEngineSql().sql(queryStructCmd, isOver, metricTableName);
+                    sql = new MysqlEngineSql().sql(queryStructCmd, isOver, metricTableName);
                     break;
                 }
             case DORIS:
@@ -199,7 +199,7 @@ public class CalculateAggConverter implements SemanticConverter {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER) || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
                     return String.format("( (%s-%s_roll)/cast(%s_roll as DOUBLE) ) as %s_%s,%s",
                             f.getColumn(), f.getColumn(), f.getColumn(), f.getColumn(),
-                            f.getFunc().getOperator(),f.getColumn());
+                            f.getFunc().getOperator(), f.getColumn());
                 } else {
                     return f.getColumn();
                 }
@@ -336,8 +336,8 @@ public class CalculateAggConverter implements SemanticConverter {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER) || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
                     return String.format(
                             "if(%s_roll!=0,  (%s-%s_roll)/%s_roll , 0) as %s_%s,%s",
-                             f.getColumn(), f.getColumn(), f.getColumn(), f.getColumn(),
-                            f.getColumn(),f.getFunc().getOperator(),f.getColumn());
+                            f.getColumn(), f.getColumn(), f.getColumn(), f.getColumn(),
+                            f.getColumn(), f.getFunc().getOperator(), f.getColumn());
                 } else {
                     return f.getColumn();
                 }

@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.api.pojo;
 
 public enum SchemaElementType {
-    DOMAIN,
+    MODEL,
     METRIC,
     DIMENSION,
     VALUE,

@@ -13,5 +13,5 @@ public interface DictConfMapper {
 
     Boolean upsertDictInfo(DictConfDO dictConfDO);
 
-    DictConfDO getDictInfoByDomainId(Long domainId);
+    DictConfDO getDictInfoByModelId(Long modelId);
 }

@@ -9,15 +9,15 @@ import com.tencent.supersonic.chat.utils.DictMetaHelper;
 import com.tencent.supersonic.chat.utils.DictQueryHelper;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
-import com.tencent.supersonic.knowledge.dictionary.FileHandler;
-import com.tencent.supersonic.knowledge.persistence.dataobject.DictTaskDO;
-import com.tencent.supersonic.knowledge.utils.DictTaskConverter;
 import com.tencent.supersonic.knowledge.dictionary.DictConfig;
 import com.tencent.supersonic.knowledge.dictionary.DictTaskFilter;
 import com.tencent.supersonic.knowledge.dictionary.DictUpdateMode;
 import com.tencent.supersonic.knowledge.dictionary.DimValue2DictCommand;
 import com.tencent.supersonic.knowledge.dictionary.DimValueDictInfo;
+import com.tencent.supersonic.knowledge.dictionary.FileHandler;
+import com.tencent.supersonic.knowledge.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.knowledge.persistence.repository.DictRepository;
+import com.tencent.supersonic.knowledge.utils.DictTaskConverter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,9 +41,9 @@ public class DictionaryServiceImpl implements DictionaryService {
     private String dimValue = "DimValue_%d_%d";
 
     public DictionaryServiceImpl(DictMetaHelper metaUtils,
-                                 DictQueryHelper dictQueryHelper,
-                                 FileHandler fileHandler,
-                                 DictRepository dictRepository) {
+            DictQueryHelper dictQueryHelper,
+            FileHandler fileHandler,
+            DictRepository dictRepository) {
         this.metaUtils = metaUtils;
         this.dictQueryHelper = dictQueryHelper;
         this.fileHandler = fileHandler;
@@ -65,12 +65,12 @@ public class DictionaryServiceImpl implements DictionaryService {
             log.info("dimValueDOList:{}", dimValueDOList);
             //2. query dimension value information
             for (DimValueDO dimValueDO : dimValueDOList) {
-                Long domainId = dimValueDO.getDomainId();
+                Long modelId = dimValueDO.getModelId();
                 DefaultMetric defaultMetricDesc = dimValueDO.getDefaultMetricDescList().get(0);
                 for (Dim4Dict dim4Dict : dimValueDO.getDimensions()) {
-                    List<String> data = dictQueryHelper.fetchDimValueSingle(domainId, defaultMetricDesc, dim4Dict, user);
+                    List<String> data = dictQueryHelper.fetchDimValueSingle(modelId, defaultMetricDesc, dim4Dict, user);
                     //3. local file changes
-                    String fileName = String.format(dimValue + Constants.DOT + dictFileType, domainId,
+                    String fileName = String.format(dimValue + Constants.DOT + dictFileType, modelId,
                             dim4Dict.getDimId());
                     fileHandler.writeFile(data, fileName, false);
                 }
@@ -93,16 +93,16 @@ public class DictionaryServiceImpl implements DictionaryService {
                 dimValue2DictCommend.getUpdateMode())) {
             throw new RuntimeException("illegal parameter");
         }
-        Map<Long, List<Long>> domainAndDimPair = dimValue2DictCommend.getDomainAndDimPair();
-        if (CollectionUtils.isEmpty(domainAndDimPair)) {
+        Map<Long, List<Long>> modelAndDimPair = dimValue2DictCommend.getModelAndDimPair();
+        if (CollectionUtils.isEmpty(modelAndDimPair)) {
             return 0L;
         }
-        for (Long domainId : domainAndDimPair.keySet()) {
-            if (CollectionUtils.isEmpty(domainAndDimPair.get(domainId))) {
+        for (Long modelId : modelAndDimPair.keySet()) {
+            if (CollectionUtils.isEmpty(modelAndDimPair.get(modelId))) {
                 continue;
             }
-            for (Long dimId : domainAndDimPair.get(domainId)) {
-                String fileName = String.format(dimValue + Constants.DOT + dictFileType, domainId, dimId);
+            for (Long dimId : modelAndDimPair.get(modelId)) {
+                String fileName = String.format(dimValue + Constants.DOT + dictFileType, modelId, dimId);
                 fileHandler.deleteDictFile(fileName);
             }
         }
@@ -118,7 +118,7 @@ public class DictionaryServiceImpl implements DictionaryService {
         return dictRepository.searchDictTaskList(filter);
     }
 
-    public DictConfig getDictInfoByDomainId(Long domainId) {
-        return dictRepository.getDictInfoByDomainId(domainId);
+    public DictConfig getDictInfoByModelId(Long modelId) {
+        return dictRepository.getDictInfoByModelId(modelId);
     }
 }

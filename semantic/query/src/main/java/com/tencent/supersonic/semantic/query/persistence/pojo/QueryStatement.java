@@ -4,7 +4,8 @@ import lombok.Data;
 
 @Data
 public class QueryStatement {
-    private Long domainId = 0L;
+
+    private Long modelId = 0L;
     private String sql = "";
     private String sourceId = "";
     private String errMsg = "";

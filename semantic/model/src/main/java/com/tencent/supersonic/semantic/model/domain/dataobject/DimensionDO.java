@@ -12,7 +12,7 @@ public class DimensionDO {
     /**
      * 主题域id
      */
-    private Long domainId;
+    private Long modelId;
 
     /**
      * 所属数据源id
@@ -85,6 +85,11 @@ public class DimensionDO {
     private String defaultValues;
 
     /**
+     *
+     */
+    private String dimValueMaps;
+
+    /**
      * 类型参数
      */
     private String typeParams;
@@ -93,11 +98,6 @@ public class DimensionDO {
      * 表达式
      */
     private String expr;
-
-    /**
-     * dimension value map info
-     */
-    private String dimValueMaps;
 
     /**
      * 维度ID
@@ -120,19 +120,19 @@ public class DimensionDO {
     /**
      * 主题域id
      *
-     * @return domain_id 主题域id
+     * @return model_id 主题域id
      */
-    public Long getDomainId() {
-        return domainId;
+    public Long getModelId() {
+        return modelId;
     }
 
     /**
      * 主题域id
      *
-     * @param domainId 主题域id
+     * @param modelId 主题域id
      */
-    public void setDomainId(Long domainId) {
-        this.domainId = domainId;
+    public void setModelId(Long modelId) {
+        this.modelId = modelId;
     }
 
     /**
@@ -384,6 +384,20 @@ public class DimensionDO {
     }
 
     /**
+     * @return dim_value_maps
+     */
+    public String getDimValueMaps() {
+        return dimValueMaps;
+    }
+
+    /**
+     * @param dimValueMaps
+     */
+    public void setDimValueMaps(String dimValueMaps) {
+        this.dimValueMaps = dimValueMaps == null ? null : dimValueMaps.trim();
+    }
+
+    /**
      * 类型参数
      *
      * @return type_params 类型参数
@@ -417,13 +431,5 @@ public class DimensionDO {
      */
     public void setExpr(String expr) {
         this.expr = expr == null ? null : expr.trim();
-    }
-
-    public String getDimValueMaps() {
-        return dimValueMaps;
-    }
-
-    public void setDimValueMaps(String dimValueMaps) {
-        this.dimValueMaps = dimValueMaps;
     }
 }

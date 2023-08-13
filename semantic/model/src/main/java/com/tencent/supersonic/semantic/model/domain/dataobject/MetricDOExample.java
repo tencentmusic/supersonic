@@ -41,13 +41,6 @@ public class MetricDOExample {
     /**
      * @mbg.generated
      */
-    public String getOrderByClause() {
-        return orderByClause;
-    }
-
-    /**
-     * @mbg.generated
-     */
     public void setOrderByClause(String orderByClause) {
         this.orderByClause = orderByClause;
     }
@@ -55,8 +48,8 @@ public class MetricDOExample {
     /**
      * @mbg.generated
      */
-    public boolean isDistinct() {
-        return distinct;
+    public String getOrderByClause() {
+        return orderByClause;
     }
 
     /**
@@ -64,6 +57,13 @@ public class MetricDOExample {
      */
     public void setDistinct(boolean distinct) {
         this.distinct = distinct;
+    }
+
+    /**
+     * @mbg.generated
+     */
+    public boolean isDistinct() {
+        return distinct;
     }
 
     /**
@@ -120,13 +120,6 @@ public class MetricDOExample {
     /**
      * @mbg.generated
      */
-    public Integer getLimitStart() {
-        return limitStart;
-    }
-
-    /**
-     * @mbg.generated
-     */
     public void setLimitStart(Integer limitStart) {
         this.limitStart = limitStart;
     }
@@ -134,8 +127,8 @@ public class MetricDOExample {
     /**
      * @mbg.generated
      */
-    public Integer getLimitEnd() {
-        return limitEnd;
+    public Integer getLimitStart() {
+        return limitStart;
     }
 
     /**
@@ -143,6 +136,13 @@ public class MetricDOExample {
      */
     public void setLimitEnd(Integer limitEnd) {
         this.limitEnd = limitEnd;
+    }
+
+    /**
+     * @mbg.generated
+     */
+    public Integer getLimitEnd() {
+        return limitEnd;
     }
 
     /**
@@ -250,63 +250,63 @@ public class MetricDOExample {
             return (Criteria) this;
         }
 
-        public Criteria andDomainIdIsNull() {
-            addCriterion("domain_id is null");
+        public Criteria andModelIdIsNull() {
+            addCriterion("model_id is null");
             return (Criteria) this;
         }
 
-        public Criteria andDomainIdIsNotNull() {
-            addCriterion("domain_id is not null");
+        public Criteria andModelIdIsNotNull() {
+            addCriterion("model_id is not null");
             return (Criteria) this;
         }
 
-        public Criteria andDomainIdEqualTo(Long value) {
-            addCriterion("domain_id =", value, "domainId");
+        public Criteria andModelIdEqualTo(Long value) {
+            addCriterion("model_id =", value, "modelId");
             return (Criteria) this;
         }
 
-        public Criteria andDomainIdNotEqualTo(Long value) {
-            addCriterion("domain_id <>", value, "domainId");
+        public Criteria andModelIdNotEqualTo(Long value) {
+            addCriterion("model_id <>", value, "modelId");
             return (Criteria) this;
         }
 
-        public Criteria andDomainIdGreaterThan(Long value) {
-            addCriterion("domain_id >", value, "domainId");
+        public Criteria andModelIdGreaterThan(Long value) {
+            addCriterion("model_id >", value, "modelId");
             return (Criteria) this;
         }
 
-        public Criteria andDomainIdGreaterThanOrEqualTo(Long value) {
-            addCriterion("domain_id >=", value, "domainId");
+        public Criteria andModelIdGreaterThanOrEqualTo(Long value) {
+            addCriterion("model_id >=", value, "modelId");
             return (Criteria) this;
         }
 
-        public Criteria andDomainIdLessThan(Long value) {
-            addCriterion("domain_id <", value, "domainId");
+        public Criteria andModelIdLessThan(Long value) {
+            addCriterion("model_id <", value, "modelId");
             return (Criteria) this;
         }
 
-        public Criteria andDomainIdLessThanOrEqualTo(Long value) {
-            addCriterion("domain_id <=", value, "domainId");
+        public Criteria andModelIdLessThanOrEqualTo(Long value) {
+            addCriterion("model_id <=", value, "modelId");
             return (Criteria) this;
         }
 
-        public Criteria andDomainIdIn(List<Long> values) {
-            addCriterion("domain_id in", values, "domainId");
+        public Criteria andModelIdIn(List<Long> values) {
+            addCriterion("model_id in", values, "modelId");
             return (Criteria) this;
         }
 
-        public Criteria andDomainIdNotIn(List<Long> values) {
-            addCriterion("domain_id not in", values, "domainId");
+        public Criteria andModelIdNotIn(List<Long> values) {
+            addCriterion("model_id not in", values, "modelId");
             return (Criteria) this;
         }
 
-        public Criteria andDomainIdBetween(Long value1, Long value2) {
-            addCriterion("domain_id between", value1, value2, "domainId");
+        public Criteria andModelIdBetween(Long value1, Long value2) {
+            addCriterion("model_id between", value1, value2, "modelId");
             return (Criteria) this;
         }
 
-        public Criteria andDomainIdNotBetween(Long value1, Long value2) {
-            addCriterion("domain_id not between", value1, value2, "domainId");
+        public Criteria andModelIdNotBetween(Long value1, Long value2) {
+            addCriterion("model_id not between", value1, value2, "modelId");
             return (Criteria) this;
         }
 
@@ -1212,6 +1212,38 @@ public class MetricDOExample {
 
         private String typeHandler;
 
+        public String getCondition() {
+            return condition;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Object getSecondValue() {
+            return secondValue;
+        }
+
+        public boolean isNoValue() {
+            return noValue;
+        }
+
+        public boolean isSingleValue() {
+            return singleValue;
+        }
+
+        public boolean isBetweenValue() {
+            return betweenValue;
+        }
+
+        public boolean isListValue() {
+            return listValue;
+        }
+
+        public String getTypeHandler() {
+            return typeHandler;
+        }
+
         protected Criterion(String condition) {
             super();
             this.condition = condition;
@@ -1246,38 +1278,6 @@ public class MetricDOExample {
 
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
-        }
-
-        public String getCondition() {
-            return condition;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public Object getSecondValue() {
-            return secondValue;
-        }
-
-        public boolean isNoValue() {
-            return noValue;
-        }
-
-        public boolean isSingleValue() {
-            return singleValue;
-        }
-
-        public boolean isBetweenValue() {
-            return betweenValue;
-        }
-
-        public boolean isListValue() {
-            return listValue;
-        }
-
-        public String getTypeHandler() {
-            return typeHandler;
         }
     }
 }

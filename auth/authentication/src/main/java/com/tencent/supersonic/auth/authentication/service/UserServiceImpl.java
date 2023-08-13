@@ -7,7 +7,6 @@ import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.auth.authentication.utils.ComponentFactory;
 import java.util.List;
 import java.util.Set;
-
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,7 +15,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<String> getUserNames() {
-         return ComponentFactory.getUserAdaptor().getUserNames();
+        return ComponentFactory.getUserAdaptor().getUserNames();
     }
 
     @Override

@@ -3,24 +3,26 @@ package com.tencent.supersonic.auth.authorization.application;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthResGrp;
+import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
 import com.tencent.supersonic.auth.api.authorization.pojo.DimensionFilter;
 import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -31,7 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private UserService userService;
 
     public AuthServiceImpl(JdbcTemplate jdbcTemplate,
-                           UserService userService) {
+            UserService userService) {
         this.jdbcTemplate = jdbcTemplate;
         this.userService = userService;
     }
@@ -43,10 +45,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public List<AuthGroup> queryAuthGroups(String domainId, Integer groupId) {
+    public List<AuthGroup> queryAuthGroups(String modelId, Integer groupId) {
         return load().stream()
                 .filter(group -> (Objects.isNull(groupId) || groupId.equals(group.getGroupId()))
-                        && domainId.equals(group.getDomainId()))
+                        && modelId.equals(group.getModelId()))
                 .collect(Collectors.toList());
     }
 
@@ -83,16 +85,16 @@ public class AuthServiceImpl implements AuthService {
         }
         List<AuthGroup> groups = getAuthGroups(req);
         AuthorizedResourceResp resource = new AuthorizedResourceResp();
-        Map<String, List<AuthGroup>> authGroupsByDomainId = groups.stream()
-                .collect(Collectors.groupingBy(AuthGroup::getDomainId));
+        Map<String, List<AuthGroup>> authGroupsByModelId = groups.stream()
+                .collect(Collectors.groupingBy(AuthGroup::getModelId));
         Map<String, List<AuthRes>> reqAuthRes = req.getResources().stream()
-                .collect(Collectors.groupingBy(AuthRes::getDomainId));
+                .collect(Collectors.groupingBy(AuthRes::getModelId));
 
-        for (String domainId : reqAuthRes.keySet()) {
-            List<AuthRes> reqResourcesList = reqAuthRes.get(domainId);
+        for (String modelId : reqAuthRes.keySet()) {
+            List<AuthRes> reqResourcesList = reqAuthRes.get(modelId);
             AuthResGrp rg = new AuthResGrp();
-            if (authGroupsByDomainId.containsKey(domainId)) {
-                List<AuthGroup> authGroups = authGroupsByDomainId.get(domainId);
+            if (authGroupsByModelId.containsKey(modelId)) {
+                List<AuthGroup> authGroups = authGroupsByModelId.get(modelId);
                 for (AuthRes reqRes : reqResourcesList) {
                     for (AuthGroup authRuleGroup : authGroups) {
                         List<AuthRule> authRules = authRuleGroup.getAuthRules();
@@ -111,8 +113,8 @@ public class AuthServiceImpl implements AuthService {
             }
         }
 
-        if (StringUtils.isNotEmpty(req.getDomainId())) {
-            List<AuthGroup> authGroups = authGroupsByDomainId.get(req.getDomainId());
+        if (StringUtils.isNotEmpty(req.getModelId())) {
+            List<AuthGroup> authGroups = authGroupsByModelId.get(req.getModelId());
             if (!CollectionUtils.isEmpty(authGroups)) {
                 for (AuthGroup group : authGroups) {
                     if (group.getDimensionFilters() != null
@@ -131,7 +133,7 @@ public class AuthServiceImpl implements AuthService {
     private List<AuthGroup> getAuthGroups(QueryAuthResReq req) {
         List<AuthGroup> groups = load().stream()
                 .filter(group -> {
-                    if (!Objects.equals(group.getDomainId(), req.getDomainId())) {
+                    if (!Objects.equals(group.getModelId(), req.getModelId())) {
                         return false;
                     }
                     if (!CollectionUtils.isEmpty(group.getAuthorizedUsers()) && group.getAuthorizedUsers()

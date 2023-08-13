@@ -2,7 +2,6 @@ package com.tencent.supersonic.semantic.model.infrastructure.mapper;
 
 import com.tencent.supersonic.semantic.model.domain.dataobject.ViewInfoDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.ViewInfoDOExample;
-
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 

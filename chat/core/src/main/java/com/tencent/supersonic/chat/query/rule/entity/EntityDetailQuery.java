@@ -1,8 +1,9 @@
 package com.tencent.supersonic.chat.query.rule.entity;
 
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.*;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.DIMENSION;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ID;
 import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
 
 import org.springframework.stereotype.Component;
 

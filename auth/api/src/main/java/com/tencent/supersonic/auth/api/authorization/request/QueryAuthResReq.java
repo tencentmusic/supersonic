@@ -3,7 +3,6 @@ package com.tencent.supersonic.auth.api.authorization.request;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.Data;
 import lombok.ToString;
 
@@ -17,5 +16,5 @@ public class QueryAuthResReq {
 
     private List<AuthRes> resources;
 
-    private String domainId;
+    private String modelId;
 }

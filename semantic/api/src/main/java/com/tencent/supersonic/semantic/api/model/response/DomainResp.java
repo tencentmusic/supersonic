@@ -2,9 +2,7 @@ package com.tencent.supersonic.semantic.api.model.response;
 
 import com.tencent.supersonic.semantic.api.model.pojo.Entity;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
-
 import java.util.List;
-
 import lombok.Data;
 import lombok.ToString;
 

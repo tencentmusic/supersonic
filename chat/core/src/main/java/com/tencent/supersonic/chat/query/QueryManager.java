@@ -5,7 +5,6 @@ import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.query.rule.entity.EntitySemanticQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricSemanticQuery;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +55,7 @@ public class QueryManager {
             throw new RuntimeException("no supported queryMode :" + queryMode);
         }
     }
+
     public static boolean containsRuleQuery(String queryMode) {
         if (queryMode == null) {
             return false;

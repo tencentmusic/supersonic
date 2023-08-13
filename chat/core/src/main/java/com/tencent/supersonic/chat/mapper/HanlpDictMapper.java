@@ -2,13 +2,18 @@ package com.tencent.supersonic.chat.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
-import com.tencent.supersonic.chat.api.pojo.*;
+import com.tencent.supersonic.chat.api.pojo.ModelSchema;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.utils.NatureHelper;
-import com.tencent.supersonic.knowledge.dictionary.builder.BaseWordBuilder;
-import com.tencent.supersonic.knowledge.dictionary.MapResult;
-import com.tencent.supersonic.knowledge.dictionary.DictWordType;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.knowledge.dictionary.DictWordType;
+import com.tencent.supersonic.knowledge.dictionary.MapResult;
+import com.tencent.supersonic.knowledge.dictionary.builder.BaseWordBuilder;
 import com.tencent.supersonic.knowledge.dictionary.builder.WordBuilderFactory;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import java.util.ArrayList;
@@ -32,10 +37,10 @@ public class HanlpDictMapper implements SchemaMapper {
         for (Term term : terms) {
             log.info("word:{},nature:{},frequency:{}", term.word, term.nature.toString(), term.getFrequency());
         }
-        Long domainId = queryContext.getRequest().getDomainId();
+        Long modelId = queryContext.getRequest().getModelId();
 
         QueryMatchStrategy matchStrategy = ContextUtils.getBean(QueryMatchStrategy.class);
-        Map<MatchText, List<MapResult>> matchResult = matchStrategy.match(queryText, terms, domainId);
+        Map<MatchText, List<MapResult>> matchResult = matchStrategy.match(queryText, terms, modelId);
 
         List<MapResult> matches = getMatches(matchResult);
 
@@ -57,8 +62,8 @@ public class HanlpDictMapper implements SchemaMapper {
 
         for (MapResult mapResult : mapResults) {
             for (String nature : mapResult.getNatures()) {
-                Long domainId = NatureHelper.getDomainId(nature);
-                if (Objects.isNull(domainId)) {
+                Long modelId = NatureHelper.getModelId(nature);
+                if (Objects.isNull(modelId)) {
                     continue;
                 }
                 SchemaElementType elementType = NatureHelper.convertToElementType(nature);
@@ -67,14 +72,14 @@ public class HanlpDictMapper implements SchemaMapper {
                 }
 
                 SemanticService schemaService = ContextUtils.getBean(SemanticService.class);
-                DomainSchema domainSchema = schemaService.getDomainSchema(domainId);
+                ModelSchema modelSchema = schemaService.getModelSchema(modelId);
 
                 BaseWordBuilder baseWordBuilder = WordBuilderFactory.get(DictWordType.getNatureType(nature));
                 Long elementID = baseWordBuilder.getElementID(nature);
                 Long frequency = wordNatureToFrequency.get(mapResult.getName() + nature);
 
-                SchemaElement element = domainSchema.getElement(elementType, elementID);
-                if(Objects.isNull(element)){
+                SchemaElement element = modelSchema.getElement(elementType, elementID);
+                if (Objects.isNull(element)) {
                     log.info("element is null, elementType:{},elementID:{}", elementType, elementID);
                     continue;
                 }
@@ -89,11 +94,11 @@ public class HanlpDictMapper implements SchemaMapper {
                         .detectWord(mapResult.getDetectWord())
                         .build();
 
-                Map<Long, List<SchemaElementMatch>> domainElementMatches = schemaMap.getDomainElementMatches();
-                List<SchemaElementMatch> schemaElementMatches = domainElementMatches.putIfAbsent(domainId,
+                Map<Long, List<SchemaElementMatch>> modelElementMatches = schemaMap.getModelElementMatches();
+                List<SchemaElementMatch> schemaElementMatches = modelElementMatches.putIfAbsent(modelId,
                         new ArrayList<>());
                 if (schemaElementMatches == null) {
-                    schemaElementMatches = domainElementMatches.get(domainId);
+                    schemaElementMatches = modelElementMatches.get(modelId);
                 }
                 schemaElementMatches.add(schemaElementMatch);
             }

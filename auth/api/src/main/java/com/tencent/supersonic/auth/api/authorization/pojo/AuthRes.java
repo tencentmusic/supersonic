@@ -7,14 +7,14 @@ import lombok.ToString;
 @ToString
 public class AuthRes {
 
-    private String domainId;
+    private String modelId;
     private String name;
 
     public AuthRes() {
     }
 
-    public AuthRes(String domainId, String name) {
-        this.domainId = domainId;
+    public AuthRes(String modelId, String name) {
+        this.modelId = modelId;
         this.name = name;
     }
 }

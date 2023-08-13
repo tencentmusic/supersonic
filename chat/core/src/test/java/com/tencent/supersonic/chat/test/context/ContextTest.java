@@ -1,13 +1,13 @@
 package com.tencent.supersonic.chat.test.context;
 
-import com.tencent.supersonic.chat.persistence.repository.impl.ChatContextRepositoryImpl;
-import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.persistence.mapper.ChatContextMapper;
-import com.tencent.supersonic.knowledge.semantic.RemoteSemanticLayer;
+import com.tencent.supersonic.chat.persistence.repository.impl.ChatContextRepositoryImpl;
 import com.tencent.supersonic.chat.test.ChatBizLauncher;
+import com.tencent.supersonic.chat.utils.ComponentFactory;
+import com.tencent.supersonic.knowledge.semantic.RemoteSemanticLayer;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.DomainService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.query.service.QueryService;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import org.springframework.web.client.RestTemplate;
 @MockBean(QueryService.class)
 @MockBean(DimensionService.class)
 @MockBean(MetricService.class)
-@MockBean(DomainService.class)
+@MockBean(ModelService.class)
 @MockBean(ChatContextMapper.class)
 @MockBean(RestTemplate.class)
 @MockBean(RemoteSemanticLayer.class)

@@ -1,8 +1,7 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class ChatDetailConfigReq {
@@ -13,7 +12,7 @@ public class ChatDetailConfigReq {
     private ItemVisibility visibility;
 
     /**
-     * information about dictionary about the domain
+     * information about dictionary about the model
      */
     private List<KnowledgeInfoReq> knowledgeInfos;
 

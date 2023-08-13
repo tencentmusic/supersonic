@@ -9,17 +9,16 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.config.DefaultMetric;
 import com.tencent.supersonic.chat.config.Dim4Dict;
+import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
-import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.Order;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,13 +45,13 @@ public class DictQueryHelper {
     @Value("${dimension.max.limit:3000000}")
     private Long dimMaxLimit;
 
-    public List<String> fetchDimValueSingle(Long domainId, DefaultMetric defaultMetricDesc, Dim4Dict dim4Dict,
-                                            User user) {
+    public List<String> fetchDimValueSingle(Long modelId, DefaultMetric defaultMetricDesc, Dim4Dict dim4Dict,
+            User user) {
         List<String> data = new ArrayList<>();
-        QueryStructReq queryStructCmd = generateQueryStructCmd(domainId, defaultMetricDesc, dim4Dict);
+        QueryStructReq queryStructCmd = generateQueryStructCmd(modelId, defaultMetricDesc, dim4Dict);
         try {
             QueryResultWithSchemaResp queryResultWithColumns = semanticLayer.queryByStruct(queryStructCmd, user);
-            String nature = String.format("_%d_%d", domainId, dim4Dict.getDimId());
+            String nature = String.format("_%d_%d", modelId, dim4Dict.getDimId());
             String dimNameRewrite = rewriteDimName(queryResultWithColumns.getColumns(), dim4Dict.getBizName());
             data = generateFileData(queryResultWithColumns.getResultList(), nature, dimNameRewrite,
                     defaultMetricDesc.getBizName());
@@ -91,7 +89,7 @@ public class DictQueryHelper {
     }
 
     private List<String> generateFileData(List<Map<String, Object>> resultList, String nature, String dimName,
-                                          String metricName) {
+            String metricName) {
         List<String> data = new ArrayList<>();
         if (CollectionUtils.isEmpty(resultList)) {
             return data;
@@ -142,10 +140,10 @@ public class DictQueryHelper {
         }
     }
 
-    private QueryStructReq generateQueryStructCmd(Long domainId, DefaultMetric defaultMetricDesc, Dim4Dict dim4Dict) {
+    private QueryStructReq generateQueryStructCmd(Long modelId, DefaultMetric defaultMetricDesc, Dim4Dict dim4Dict) {
         QueryStructReq queryStructCmd = new QueryStructReq();
 
-        queryStructCmd.setDomainId(domainId);
+        queryStructCmd.setModelId(modelId);
         queryStructCmd.setGroups(Arrays.asList(dim4Dict.getBizName()));
 
         List<Filter> filters = generateFilters(dim4Dict, queryStructCmd);

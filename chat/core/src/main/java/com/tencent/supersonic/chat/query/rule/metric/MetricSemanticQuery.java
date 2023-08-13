@@ -40,7 +40,7 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
 
     @Override
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-                                          QueryContext queryCtx) {
+            QueryContext queryCtx) {
         candidateElementMatches = filterElementMatches(candidateElementMatches);
         return super.match(candidateElementMatches, queryCtx);
     }
@@ -48,13 +48,13 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
     private List<SchemaElementMatch> filterElementMatches(List<SchemaElementMatch> candidateElementMatches) {
         List<SchemaElementMatch> filteredMatches = new ArrayList<>();
         if (CollectionUtils.isEmpty(candidateElementMatches)
-                || Objects.isNull(candidateElementMatches.get(0).getElement().getDomain())) {
+                || Objects.isNull(candidateElementMatches.get(0).getElement().getModel())) {
             return candidateElementMatches;
         }
 
-        Long domainId = candidateElementMatches.get(0).getElement().getDomain();
+        Long modelId = candidateElementMatches.get(0).getElement().getModel();
         ConfigService configService = ContextUtils.getBean(ConfigService.class);
-        ChatConfigResp chatConfig = configService.fetchConfigByDomainId(domainId);
+        ChatConfigResp chatConfig = configService.fetchConfigByModelId(modelId);
 
         List<Long> blackDimIdList = new ArrayList<>();
         List<Long> blackMetricIdList = new ArrayList<>();
@@ -83,13 +83,13 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
     }
 
     @Override
-    public void fillParseInfo(Long domainId, ChatContext chatContext) {
-        super.fillParseInfo(domainId, chatContext);
+    public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {
+        super.fillParseInfo(modelId, queryContext, chatContext);
 
         parseInfo.setLimit(METRIC_MAX_RESULTS);
         if (parseInfo.getDateInfo() == null) {
             ConfigService configService = ContextUtils.getBean(ConfigService.class);
-            ChatConfigRichResp chatConfig = configService.getConfigRichInfo(parseInfo.getDomainId());
+            ChatConfigRichResp chatConfig = configService.getConfigRichInfo(parseInfo.getModelId());
             ChatDefaultRichConfigResp defaultConfig = chatConfig.getChatAggRichConfig().getChatDefaultConfig();
             DateConf dateInfo = new DateConf();
             int unit = 1;

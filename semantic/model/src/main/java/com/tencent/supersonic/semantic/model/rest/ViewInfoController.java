@@ -4,10 +4,9 @@ package com.tencent.supersonic.semantic.model.rest;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.semantic.api.model.request.ViewInfoReq;
-import com.tencent.supersonic.semantic.api.model.response.DomainSchemaRelaResp;
-import com.tencent.supersonic.semantic.model.domain.dataobject.ViewInfoDO;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaRelaResp;
 import com.tencent.supersonic.semantic.model.application.ViewInfoServiceImpl;
-
+import com.tencent.supersonic.semantic.model.domain.dataobject.ViewInfoDO;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,9 +36,9 @@ public class ViewInfoController {
         return viewInfoServiceImpl.createOrUpdateViewInfo(viewInfoReq, user);
     }
 
-    @GetMapping("/getViewInfoList/{domainId}")
-    public List<ViewInfoDO> getViewInfoList(@PathVariable("domainId") Long domainId) {
-        return viewInfoServiceImpl.getViewInfoList(domainId);
+    @GetMapping("/getViewInfoList/{modelId}")
+    public List<ViewInfoDO> getViewInfoList(@PathVariable("modelId") Long modelId) {
+        return viewInfoServiceImpl.getViewInfoList(modelId);
     }
 
     @DeleteMapping("/deleteViewInfo/{id}")
@@ -47,9 +46,9 @@ public class ViewInfoController {
         viewInfoServiceImpl.deleteViewInfo(id);
     }
 
-    @GetMapping("/getDomainSchemaRela/{domainId}")
-    public List<DomainSchemaRelaResp> getDomainSchema(@PathVariable("domainId") Long domainId) {
-        return viewInfoServiceImpl.getDomainSchema(domainId);
+    @GetMapping("/getDomainSchemaRela/{modelId}")
+    public List<ModelSchemaRelaResp> getDomainSchema(@PathVariable("modelId") Long modelId) {
+        return viewInfoServiceImpl.getDomainSchema(modelId);
     }
 
 

@@ -3,7 +3,7 @@ package com.tencent.supersonic.knowledge.dictionary;
 public enum DictUpdateMode {
 
     OFFLINE_FULL("OFFLINE_FULL"),
-    OFFLINE_DOMAIN("OFFLINE_DOMAIN"),
+    OFFLINE_MODEL("OFFLINE_MODEL"),
     REALTIME_ADD("REALTIME_ADD"),
     REALTIME_DELETE("REALTIME_DELETE"),
     NOT_SUPPORT("NOT_SUPPORT");

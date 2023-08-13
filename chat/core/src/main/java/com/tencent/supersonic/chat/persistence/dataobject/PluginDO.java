@@ -3,8 +3,9 @@ package com.tencent.supersonic.chat.persistence.dataobject;
 import java.util.Date;
 
 public class PluginDO {
+
     /**
-     * 
+     *
      */
     private Long id;
 
@@ -14,71 +15,69 @@ public class PluginDO {
     private String type;
 
     /**
-     * 
+     *
      */
-    private String domain;
+    private String model;
 
     /**
-     * 
+     *
      */
     private String pattern;
 
     /**
-     * 
+     *
      */
     private String parseMode;
 
     /**
-     * 
+     *
      */
     private String name;
 
     /**
-     * 
+     *
      */
     private Date createdAt;
 
     /**
-     * 
+     *
      */
     private String createdBy;
 
     /**
-     * 
+     *
      */
     private Date updatedAt;
 
     /**
-     * 
+     *
      */
     private String updatedBy;
 
     /**
-     * 
+     *
      */
     private String parseModeConfig;
 
     /**
-     * 
+     *
      */
     private String config;
 
     /**
-     * 
+     *
      */
     private String comment;
 
     /**
-     * 
-     * @return id 
+     * @return id
      */
     public Long getId() {
         return id;
     }
 
     /**
-     * 
-     * @param id 
+     * @param id
      */
     public void setId(Long id) {
         this.id = id;
@@ -86,6 +85,7 @@ public class PluginDO {
 
     /**
      * DASHBOARD,WIDGET,URL
+     *
      * @return type DASHBOARD,WIDGET,URL
      */
     public String getType() {
@@ -94,6 +94,7 @@ public class PluginDO {
 
     /**
      * DASHBOARD,WIDGET,URL
+     *
      * @param type DASHBOARD,WIDGET,URL
      */
     public void setType(String type) {
@@ -101,176 +102,154 @@ public class PluginDO {
     }
 
     /**
-     * 
-     * @return domain 
+     * @return model
      */
-    public String getDomain() {
-        return domain;
+    public String getModel() {
+        return model;
     }
 
     /**
-     * 
-     * @param domain 
+     * @param model
      */
-    public void setDomain(String domain) {
-        this.domain = domain == null ? null : domain.trim();
+    public void setModel(String model) {
+        this.model = model == null ? null : model.trim();
     }
 
     /**
-     * 
-     * @return pattern 
+     * @return pattern
      */
     public String getPattern() {
         return pattern;
     }
 
     /**
-     * 
-     * @param pattern 
+     * @param pattern
      */
     public void setPattern(String pattern) {
         this.pattern = pattern == null ? null : pattern.trim();
     }
 
     /**
-     * 
-     * @return parse_mode 
+     * @return parse_mode
      */
     public String getParseMode() {
         return parseMode;
     }
 
     /**
-     * 
-     * @param parseMode 
+     * @param parseMode
      */
     public void setParseMode(String parseMode) {
         this.parseMode = parseMode == null ? null : parseMode.trim();
     }
 
     /**
-     * 
-     * @return name 
+     * @return name
      */
     public String getName() {
         return name;
     }
 
     /**
-     * 
-     * @param name 
+     * @param name
      */
     public void setName(String name) {
         this.name = name == null ? null : name.trim();
     }
 
     /**
-     * 
-     * @return created_at 
+     * @return created_at
      */
     public Date getCreatedAt() {
         return createdAt;
     }
 
     /**
-     * 
-     * @param createdAt 
+     * @param createdAt
      */
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
     /**
-     * 
-     * @return created_by 
+     * @return created_by
      */
     public String getCreatedBy() {
         return createdBy;
     }
 
     /**
-     * 
-     * @param createdBy 
+     * @param createdBy
      */
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy == null ? null : createdBy.trim();
     }
 
     /**
-     * 
-     * @return updated_at 
+     * @return updated_at
      */
     public Date getUpdatedAt() {
         return updatedAt;
     }
 
     /**
-     * 
-     * @param updatedAt 
+     * @param updatedAt
      */
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
 
     /**
-     * 
-     * @return updated_by 
+     * @return updated_by
      */
     public String getUpdatedBy() {
         return updatedBy;
     }
 
     /**
-     * 
-     * @param updatedBy 
+     * @param updatedBy
      */
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy == null ? null : updatedBy.trim();
     }
 
     /**
-     * 
-     * @return parse_mode_config 
+     * @return parse_mode_config
      */
     public String getParseModeConfig() {
         return parseModeConfig;
     }
 
     /**
-     * 
-     * @param parseModeConfig 
+     * @param parseModeConfig
      */
     public void setParseModeConfig(String parseModeConfig) {
         this.parseModeConfig = parseModeConfig == null ? null : parseModeConfig.trim();
     }
 
     /**
-     * 
-     * @return config 
+     * @return config
      */
     public String getConfig() {
         return config;
     }
 
     /**
-     * 
-     * @param config 
+     * @param config
      */
     public void setConfig(String config) {
         this.config = config == null ? null : config.trim();
     }
 
     /**
-     * 
-     * @return comment 
+     * @return comment
      */
     public String getComment() {
         return comment;
     }
 
     /**
-     * 
-     * @param comment 
+     * @param comment
      */
     public void setComment(String comment) {
         this.comment = comment == null ? null : comment.trim();

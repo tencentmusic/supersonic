@@ -8,5 +8,5 @@ public interface QueryExecutor {
 
     boolean accept(QueryStatement queryStatement);
 
-    QueryResultWithSchemaResp execute(Catalog catalog,QueryStatement queryStatement);
+    QueryResultWithSchemaResp execute(Catalog catalog, QueryStatement queryStatement);
 }

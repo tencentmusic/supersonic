@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class DatasourceResp extends SchemaItem {
 
-    private Long domainId;
+    private Long modelId;
 
     private Long databaseId;
 

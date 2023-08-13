@@ -4,26 +4,28 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 import com.tencent.supersonic.chat.api.pojo.response.EntityRichInfoResp;
-import com.tencent.supersonic.chat.config.*;
+import com.tencent.supersonic.chat.config.DefaultMetric;
+import com.tencent.supersonic.chat.config.DefaultMetricInfo;
+import com.tencent.supersonic.chat.config.EntityInternalDetail;
+import com.tencent.supersonic.chat.persistence.mapper.ChatContextMapper;
 import com.tencent.supersonic.chat.persistence.repository.impl.ChatContextRepositoryImpl;
+import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
+import com.tencent.supersonic.chat.service.impl.ConfigServiceImpl;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.DomainSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
-import com.tencent.supersonic.chat.service.impl.ConfigServiceImpl;
-import com.tencent.supersonic.chat.service.ChatService;
-import com.tencent.supersonic.chat.persistence.mapper.ChatContextMapper;
-import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.DomainService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.semantic.model.domain.ModelService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -71,13 +73,13 @@ public class MockBeansConfiguration {
 
 //        chaConfigRichDesc.setEntity(entityDesc);
 //        when(httpSemanticLayer.getChatConfigRichInfo(anyLong())).thenReturn(chaConfigRichDesc);
-        DomainSchemaResp domainSchemaDesc = new DomainSchemaResp();
-        domainSchemaDesc.setDimensions(dimensionDescs);
-        domainSchemaDesc.setMetrics(metricDescs);
-//        when(httpSemanticLayer.getDomainSchemaInfo(anyLong())).thenReturn(domainSchemaDesc);
+        ModelSchemaResp modelSchemaDesc = new ModelSchemaResp();
+        modelSchemaDesc.setDimensions(dimensionDescs);
+        modelSchemaDesc.setMetrics(metricDescs);
+//        when(httpSemanticLayer.getModelSchemaInfo(anyLong())).thenReturn(modelSchemaDesc);
     }
 
-    public static void getDomainExtendMock(ConfigServiceImpl configService) {
+    public static void getModelExtendMock(ConfigServiceImpl configService) {
         DefaultMetricInfo defaultMetricInfo = new DefaultMetricInfo();
         defaultMetricInfo.setUnit(3);
         defaultMetricInfo.setPeriod(Constants.DAY);
@@ -86,7 +88,7 @@ public class MockBeansConfiguration {
 
         ChatConfigResp chaConfigDesc = new ChatConfigResp();
 //        chaConfigDesc.setDefaultMetrics(defaultMetricInfos);
-        when(configService.fetchConfigByDomainId(anyLong())).thenReturn(chaConfigDesc);
+        when(configService.fetchConfigByModelId(anyLong())).thenReturn(chaConfigDesc);
     }
 
     public static void dimensionDescBuild(DimensionService dimensionService, List<DimensionResp> dimensionDescs) {
@@ -136,8 +138,8 @@ public class MockBeansConfiguration {
     //queryDimensionDescs
 
     @Bean
-    public DomainService getDomainService() {
-        return Mockito.mock(DomainService.class);
+    public ModelService getModelService() {
+        return Mockito.mock(ModelService.class);
     }
 
     @Bean
@@ -146,7 +148,7 @@ public class MockBeansConfiguration {
     }
 
     @Bean
-    public ConfigServiceImpl getDomainExtendService() {
+    public ConfigServiceImpl getModelExtendService() {
         return Mockito.mock(ConfigServiceImpl.class);
     }
 

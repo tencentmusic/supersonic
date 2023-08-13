@@ -8,7 +8,6 @@ import com.tencent.supersonic.semantic.model.domain.repository.MetricRepository;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.MetricDOCustomMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.MetricDOMapper;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 
@@ -45,7 +44,7 @@ public class MetricRepositoryImpl implements MetricRepository {
     @Override
     public List<MetricDO> getMetricList(Long domainId) {
         MetricDOExample metricDOExample = new MetricDOExample();
-        metricDOExample.createCriteria().andDomainIdEqualTo(domainId);
+        metricDOExample.createCriteria().andModelIdEqualTo(domainId);
         return metricDOMapper.selectByExampleWithBLOBs(metricDOExample);
     }
 

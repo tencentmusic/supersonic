@@ -1,12 +1,8 @@
 package com.tencent.supersonic.chat.query.rule;
 
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
-import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,7 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.Data;
 import lombok.ToString;
-import org.springframework.util.CollectionUtils;
 
 @Data
 @ToString
@@ -29,7 +24,7 @@ public class QueryMatcher {
 
     public QueryMatcher() {
         for (SchemaElementType type : SchemaElementType.values()) {
-            if (type.equals(SchemaElementType.DOMAIN)) {
+            if (type.equals(SchemaElementType.MODEL)) {
                 elementOptionMap.put(type, QueryMatchOption.optional());
             } else {
                 elementOptionMap.put(type, QueryMatchOption.unused());

@@ -8,7 +8,7 @@ import lombok.ToString;
 @ToString
 public class QueryDslReq {
 
-    private Long domainId;
+    private Long modelId;
 
     private String sql;
 

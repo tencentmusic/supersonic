@@ -20,7 +20,7 @@ public class ViewInfoRepositoryImpl implements ViewInfoRepository {
     @Override
     public List<ViewInfoDO> getViewInfoList(Long domainId) {
         ViewInfoDOExample viewInfoDOExample = new ViewInfoDOExample();
-        viewInfoDOExample.createCriteria().andDomainIdEqualTo(domainId);
+        viewInfoDOExample.createCriteria().andModelIdEqualTo(domainId);
         return viewInfoDOMapper.selectByExampleWithBLOBs(viewInfoDOExample);
     }
 

@@ -3,15 +3,15 @@ package com.tencent.supersonic.semantic.model.domain.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DataFormat;
+import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
+import com.tencent.supersonic.semantic.api.model.request.MetricReq;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
-import com.tencent.supersonic.semantic.api.model.request.MetricReq;
-import com.tencent.supersonic.semantic.api.model.response.DomainResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Metric;
 import java.util.ArrayList;
@@ -54,15 +54,14 @@ public class MetricConverter {
     }
 
 
-    public static MetricResp convert2MetricDesc(MetricDO metricDO, Map<Long, DomainResp> domainMap) {
+    public static MetricResp convert2MetricDesc(MetricDO metricDO, Map<Long, ModelResp> modelMap) {
         MetricResp metricDesc = new MetricResp();
         BeanUtils.copyProperties(metricDO, metricDesc);
         metricDesc.setTypeParams(JSONObject.parseObject(metricDO.getTypeParams(), MetricTypeParams.class));
         metricDesc.setDataFormat(JSONObject.parseObject(metricDO.getDataFormat(), DataFormat.class));
-        DomainResp domainResp = domainMap.get(metricDO.getDomainId());
-        if (domainResp != null) {
-            metricDesc.setFullPath(domainMap.get(metricDO.getDomainId()).getFullPath() + metricDO.getBizName());
-            metricDesc.setDomainName(domainMap.get(metricDO.getDomainId()).getName());
+        ModelResp modelResp = modelMap.get(metricDO.getModelId());
+        if (modelResp != null) {
+            metricDesc.setModelName(modelResp.getName());
         }
         return metricDesc;
     }

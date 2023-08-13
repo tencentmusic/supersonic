@@ -2,17 +2,18 @@ package com.tencent.supersonic.chat.api.component;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.DomainSchema;
+import com.tencent.supersonic.chat.api.pojo.ModelSchema;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
-import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-
 import java.util.List;
 
 /**
@@ -30,16 +31,22 @@ import java.util.List;
 public interface SemanticLayer {
 
     QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user);
+
     QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user);
+
     QueryResultWithSchemaResp queryByDsl(QueryDslReq queryDslReq, User user);
 
-    List<DomainSchema> getDomainSchema();
-    List<DomainSchema> getDomainSchema(List<Long> ids);
-    DomainSchema getDomainSchema(Long domain, Boolean cacheEnable);
+    List<ModelSchema> getModelSchema();
+
+    List<ModelSchema> getModelSchema(List<Long> ids);
+
+    ModelSchema getModelSchema(Long model, Boolean cacheEnable);
+
     PageInfo<DimensionResp> getDimensionPage(PageDimensionReq pageDimensionCmd);
+
     PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricCmd);
 
-    List<DomainResp> getDomainListForViewer();
-    List<DomainResp> getDomainListForAdmin();
+    List<DomainResp> getDomainList(User user);
 
+    List<ModelResp> getModelList(AuthType authType, Long domainId, User user);
 }

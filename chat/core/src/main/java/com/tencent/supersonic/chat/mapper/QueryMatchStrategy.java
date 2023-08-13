@@ -1,10 +1,10 @@
 package com.tencent.supersonic.chat.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.knowledge.dictionary.MapResult;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.knowledge.dictionary.DictWordType;
+import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.service.SearchService;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -32,7 +32,7 @@ public class QueryMatchStrategy implements MatchStrategy {
     private MapperHelper mapperHelper;
 
     @Override
-    public Map<MatchText, List<MapResult>> match(String text, List<Term> terms, Long detectDomainId) {
+    public Map<MatchText, List<MapResult>> match(String text, List<Term> terms, Long detectmodelId) {
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
         }
@@ -43,10 +43,10 @@ public class QueryMatchStrategy implements MatchStrategy {
         List<Integer> offsetList = terms.stream().sorted(Comparator.comparing(Term::getOffset))
                 .map(term -> term.getOffset()).collect(Collectors.toList());
 
-        log.debug("retryCount:{},terms:{},regOffsetToLength:{},offsetList:{},detectDomainId:{}", terms,
-                regOffsetToLength, offsetList, detectDomainId);
+        log.debug("retryCount:{},terms:{},regOffsetToLength:{},offsetList:{},detectmodelId:{}", terms,
+                regOffsetToLength, offsetList, detectmodelId);
 
-        List<MapResult> detects = detect(text, regOffsetToLength, offsetList, detectDomainId);
+        List<MapResult> detects = detect(text, regOffsetToLength, offsetList, detectmodelId);
         Map<MatchText, List<MapResult>> result = new HashMap<>();
 
         MatchText matchText = MatchText.builder()
@@ -58,7 +58,7 @@ public class QueryMatchStrategy implements MatchStrategy {
     }
 
     private List<MapResult> detect(String text, Map<Integer, Integer> regOffsetToLength, List<Integer> offsetList,
-            Long detectDomainId) {
+            Long detectmodelId) {
         List<MapResult> results = Lists.newArrayList();
 
         for (Integer index = 0; index <= text.length() - 1; ) {
@@ -69,18 +69,44 @@ public class QueryMatchStrategy implements MatchStrategy {
                 int offset = mapperHelper.getStepOffset(offsetList, index);
                 i = mapperHelper.getStepIndex(regOffsetToLength, i);
                 if (i <= text.length()) {
-                    List<MapResult> mapResults = detectByStep(text, detectDomainId, index, i, offset);
-                    mapResultRowSet.addAll(mapResults);
+                    List<MapResult> mapResults = detectByStep(text, detectmodelId, index, i, offset);
+                    selectMapResultInOneRound(mapResultRowSet, mapResults);
                 }
             }
-
             index = mapperHelper.getStepIndex(regOffsetToLength, index);
             results.addAll(mapResultRowSet);
         }
         return results;
     }
 
-    private List<MapResult> detectByStep(String text, Long detectDomainId, Integer index, Integer i, int offset) {
+    private void selectMapResultInOneRound(Set<MapResult> mapResultRowSet, List<MapResult> mapResults) {
+        for (MapResult mapResult : mapResults) {
+            if (mapResultRowSet.contains(mapResult)) {
+                boolean isDeleted = mapResultRowSet.removeIf(
+                        entry -> {
+                            boolean deleted = getMapKey(mapResult).equals(getMapKey(entry))
+                                    && entry.getDetectWord().length() < mapResult.getDetectWord().length();
+                            if (deleted) {
+                                log.info("deleted entry:{}", entry);
+                            }
+                            return deleted;
+                        }
+                );
+                if (isDeleted) {
+                    log.info("deleted, add mapResult:{}", mapResult);
+                    mapResultRowSet.add(mapResult);
+                }
+            } else {
+                mapResultRowSet.add(mapResult);
+            }
+        }
+    }
+
+    private String getMapKey(MapResult a) {
+        return a.getName() + Constants.UNDERLINE + String.join(Constants.UNDERLINE, a.getNatures());
+    }
+
+    private List<MapResult> detectByStep(String text, Long detectmodelId, Integer index, Integer i, int offset) {
         String detectSegment = text.substring(index, i);
         Integer oneDetectionSize = mapperHelper.getOneDetectionSize();
         // step1. pre search
@@ -100,17 +126,17 @@ public class QueryMatchStrategy implements MatchStrategy {
         mapResults = mapResults.stream().sorted((a, b) -> -(b.getName().length() - a.getName().length()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         // step4. filter by classId
-        if (Objects.nonNull(detectDomainId) && detectDomainId > 0) {
-            log.debug("detectDomainId:{}, before parseResults:{}", mapResults);
+        if (Objects.nonNull(detectmodelId) && detectmodelId > 0) {
+            log.debug("detectmodelId:{}, before parseResults:{}", mapResults);
             mapResults = mapResults.stream().map(entry -> {
                 List<String> natures = entry.getNatures().stream().filter(
-                        nature -> nature.startsWith(DictWordType.NATURE_SPILT + detectDomainId) || (nature.startsWith(
+                        nature -> nature.startsWith(DictWordType.NATURE_SPILT + detectmodelId) || (nature.startsWith(
                                 DictWordType.NATURE_SPILT))
                 ).collect(Collectors.toList());
                 entry.setNatures(natures);
                 return entry;
             }).collect(Collectors.toCollection(LinkedHashSet::new));
-            log.info("after domainId parseResults:{}", mapResults);
+            log.info("after modelId parseResults:{}", mapResults);
         }
         // step5. filter by similarity
         mapResults = mapResults.stream()

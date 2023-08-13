@@ -1,17 +1,15 @@
 package com.tencent.supersonic.semantic.api.query.request;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.semantic.api.query.pojo.Cache;
-import com.tencent.supersonic.semantic.api.query.pojo.Filter;
-import com.tencent.supersonic.semantic.api.query.pojo.Param;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Order;
-
+import com.tencent.supersonic.semantic.api.query.pojo.Cache;
+import com.tencent.supersonic.semantic.api.query.pojo.Filter;
+import com.tencent.supersonic.semantic.api.query.pojo.Param;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import lombok.Data;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -21,7 +19,7 @@ import org.springframework.util.CollectionUtils;
 @Data
 public class QueryStructReq {
 
-    private Long domainId;
+    private Long modelId;
 
     private List<String> groups = new ArrayList<>();
     private List<Aggregator> aggregators = new ArrayList<>();
@@ -70,8 +68,8 @@ public class QueryStructReq {
 
     public String toCustomizedString() {
         StringBuilder stringBuilder = new StringBuilder("{");
-        stringBuilder.append("\"domainId\":")
-                .append(domainId);
+        stringBuilder.append("\"modelId\":")
+                .append(modelId);
         stringBuilder.append(",\"groups\":")
                 .append(groups);
         stringBuilder.append(",\"aggregators\":")
@@ -104,8 +102,8 @@ public class QueryStructReq {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
-        sb.append("\"domainId\":")
-                .append(domainId);
+        sb.append("\"modelId\":")
+                .append(modelId);
         sb.append(",\"groups\":")
                 .append(groups);
         sb.append(",\"aggregators\":")

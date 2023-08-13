@@ -2,12 +2,11 @@ package com.tencent.supersonic.chat.test.context;
 
 import com.google.gson.Gson;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
+import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.common.pojo.DateConf;
-
+import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
+import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,7 +30,7 @@ public class SemanticParseObjectHelper {
     }
 
     private static SemanticParseInfo getSemanticParseInfo(SemanticParseJson semanticParseJson) {
-        Long domain = semanticParseJson.getDomain();
+        Long model = semanticParseJson.getModel();
         Set<SchemaElement> dimensionList = new LinkedHashSet();
         Set<SchemaElement> metricList = new LinkedHashSet();
         Set<QueryFilter> chatFilters = new LinkedHashSet();
@@ -43,10 +42,10 @@ public class SemanticParseObjectHelper {
         }
 
         for (String dim : semanticParseJson.getDimensions()) {
-            dimensionList.add(getDimension(dim, domain));
+            dimensionList.add(getDimension(dim, model));
         }
         for (String metric : semanticParseJson.getMetrics()) {
-            metricList.add(getMetric(metric, domain));
+            metricList.add(getMetric(metric, model));
         }
 
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
@@ -91,13 +90,13 @@ public class SemanticParseObjectHelper {
         return null;
     }
 
-    private static SchemaElement getMetric(String bizName, Long domainId) {
+    private static SchemaElement getMetric(String bizName, Long modelId) {
         SchemaElement metric = new SchemaElement();
         metric.setBizName(bizName);
         return metric;
     }
 
-    private static SchemaElement getDimension(String bizName, Long domainId) {
+    private static SchemaElement getDimension(String bizName, Long modelId) {
         SchemaElement dimension = new SchemaElement();
         dimension.setBizName(bizName);
         return dimension;
@@ -106,7 +105,7 @@ public class SemanticParseObjectHelper {
     @Data
     public static class SemanticParseJson {
 
-        private Long domain;
+        private Long model;
         private String queryMode;
         private AggregateTypeEnum aggregateType;
         private Integer day;

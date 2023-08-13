@@ -2,11 +2,11 @@ package com.tencent.supersonic.semantic.query.service;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
-import com.tencent.supersonic.common.util.cache.CacheUtils;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.cache.CacheUtils;
 import com.tencent.supersonic.semantic.api.model.pojo.QueryStat;
-import com.tencent.supersonic.semantic.api.model.request.DomainSchemaFilterReq;
-import com.tencent.supersonic.semantic.api.model.response.DomainSchemaResp;
+import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.pojo.Cache;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
@@ -59,16 +59,16 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public Object queryBySql(QueryDslReq querySqlCmd, User user) throws Exception {
-        DomainSchemaFilterReq filter = new DomainSchemaFilterReq();
-        List<Long> domainIds = new ArrayList<>();
-        domainIds.add(querySqlCmd.getDomainId());
+        ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
+        List<Long> modelIds = new ArrayList<>();
+        modelIds.add(querySqlCmd.getModelId());
 
-        filter.setDomainIds(domainIds);
+        filter.setModelIds(modelIds);
         SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
-        List<DomainSchemaResp> domainSchemas = schemaService.fetchDomainSchema(filter, user);
+        List<ModelSchemaResp> domainSchemas = schemaService.fetchModelSchema(filter, user);
 
         QueryStatement queryStatement = queryReqConverter.convert(querySqlCmd, domainSchemas);
-        queryStatement.setDomainId(querySqlCmd.getDomainId());
+        queryStatement.setModelId(querySqlCmd.getModelId());
         return semanticQueryEngine.execute(queryStatement);
     }
 
@@ -78,7 +78,7 @@ public class QueryServiceImpl implements QueryService {
         log.info("[queryStructCmd:{}]", queryStructCmd);
         try {
             statUtils.initStatInfo(queryStructCmd, user);
-            String cacheKey = cacheUtils.generateCacheKey(queryStructCmd.getDomainId().toString(),
+            String cacheKey = cacheUtils.generateCacheKey(queryStructCmd.getModelId().toString(),
                     queryStructCmd.generateCommandMd5());
             handleGlobalCacheDisable(queryStructCmd);
             boolean isCache = isCache(queryStructCmd);
@@ -121,7 +121,7 @@ public class QueryServiceImpl implements QueryService {
             throws Exception {
         statUtils.initStatInfo(queryMultiStructReq.getQueryStructReqs().get(0), user);
         String cacheKey = cacheUtils.generateCacheKey(
-                queryMultiStructReq.getQueryStructReqs().get(0).getDomainId().toString(),
+                queryMultiStructReq.getQueryStructReqs().get(0).getModelId().toString(),
                 queryMultiStructReq.generateCommandMd5());
         boolean isCache = isCache(queryMultiStructReq);
         QueryResultWithSchemaResp queryResultWithColumns;

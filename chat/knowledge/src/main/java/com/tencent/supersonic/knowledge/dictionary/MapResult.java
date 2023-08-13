@@ -1,8 +1,8 @@
 package com.tencent.supersonic.knowledge.dictionary;
 
+import com.google.common.base.Objects;
 import java.io.Serializable;
 import java.util.List;
-import java.util.Objects;
 import lombok.Data;
 import lombok.ToString;
 
@@ -36,13 +36,13 @@ public class MapResult implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        MapResult that = (MapResult) o;
-        return Objects.equals(name, that.name) && Objects.equals(natures, that.natures);
+        MapResult mapResult = (MapResult) o;
+        return Objects.equal(name, mapResult.name) && Objects.equal(natures, mapResult.natures);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, natures);
+        return Objects.hashCode(name, natures);
     }
 
     public void setOffset(int offset) {

@@ -63,7 +63,7 @@ public class ParserDefaultConverter implements SemanticConverter {
         sqlCommend.setVariables(queryStructCmd.getParams().stream()
                 .collect(Collectors.toMap(Param::getName, Param::getValue, (k1, k2) -> k1)));
         sqlCommend.setLimit(queryStructCmd.getLimit());
-        String rootPath = catalog.getDomainFullPath(queryStructCmd.getDomainId());
+        String rootPath = catalog.getModelFullPath(queryStructCmd.getModelId());
         sqlCommend.setRootPath(rootPath);
 
         // todo tmp delete
@@ -84,7 +84,7 @@ public class ParserDefaultConverter implements SemanticConverter {
         } else {
             String group = queryStructCmd.getGroups().get(0).equalsIgnoreCase("sys_imp_date")
                     ? queryStructCmd.getGroups().get(1) : queryStructCmd.getGroups().get(0);
-            DimensionResp dimension = catalog.getDimension(group, queryStructCmd.getDomainId());
+            DimensionResp dimension = catalog.getDimension(group, queryStructCmd.getModelId());
             String datasourceBizName = dimension.getDatasourceBizName();
             if (Strings.isNotEmpty(datasourceBizName)) {
                 internalMetricNamePrefix = datasourceBizName + UNDERLINE;

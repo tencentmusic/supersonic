@@ -8,7 +8,7 @@ public class DictConfDO {
 
     private Long id;
 
-    private Long domainId;
+    private Long modelId;
 
     private String dimValueInfos;
 

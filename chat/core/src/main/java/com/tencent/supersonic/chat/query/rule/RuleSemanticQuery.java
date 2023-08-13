@@ -1,10 +1,15 @@
-
 package com.tencent.supersonic.chat.query.rule;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
-import com.tencent.supersonic.chat.api.pojo.*;
+import com.tencent.supersonic.chat.api.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.pojo.ModelSchema;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
@@ -13,19 +18,21 @@ import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
-
-import java.io.Serializable;
-import java.util.*;
 
 @Slf4j
 @ToString
@@ -40,35 +47,57 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
     }
 
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-                                          QueryContext queryCtx) {
+            QueryContext queryCtx) {
         return queryMatcher.match(candidateElementMatches);
     }
 
-    public void fillParseInfo(Long domainId, ChatContext chatContext) {
+    public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {
         parseInfo.setQueryMode(getQueryMode());
 
         SemanticService schemaService = ContextUtils.getBean(SemanticService.class);
-        DomainSchema domainSchema = schemaService.getDomainSchema(domainId);
+        ModelSchema ModelSchema = schemaService.getModelSchema(modelId);
 
-        fillSchemaElement(parseInfo, domainSchema);
-        // inherit date info from context
-        if (parseInfo.getDateInfo() == null && chatContext.getParseInfo().getDateInfo() != null
-                && isSameQueryMode(getQueryMode(), chatContext.getParseInfo().getQueryMode())) {
-            log.info("inherit date info from context");
-            parseInfo.setDateInfo(chatContext.getParseInfo().getDateInfo());
+        fillSchemaElement(parseInfo, ModelSchema);
+        fillScore(parseInfo);
+        fillDateConf(parseInfo, chatContext.getParseInfo());
+    }
+
+    private void fillDateConf(SemanticParseInfo queryParseInfo, SemanticParseInfo chatParseInfo) {
+        if (queryParseInfo.getDateInfo() != null || chatParseInfo.getDateInfo() == null) {
+            return;
+        }
+
+        if ((QueryManager.isEntityQuery(queryParseInfo.getQueryMode())
+                && QueryManager.isEntityQuery(chatParseInfo.getQueryMode()))
+                || (QueryManager.isMetricQuery(queryParseInfo.getQueryMode())
+                && QueryManager.isMetricQuery(chatParseInfo.getQueryMode()))) {
+            // inherit date info from context
+            queryParseInfo.setDateInfo(chatParseInfo.getDateInfo());
+            queryParseInfo.getDateInfo().setInherited(true);
         }
     }
 
-    public boolean isSameQueryMode(String queryModeQuery, String queryModeChat) {
-        if (Strings.isNotEmpty(queryModeQuery) && Strings.isNotEmpty(queryModeChat)) {
-            return QueryManager.isEntityQuery(queryModeQuery) && QueryManager.isEntityQuery(queryModeChat)
-                    || QueryManager.isMetricQuery(queryModeQuery) && QueryManager.isMetricQuery(queryModeChat);
+    private void fillScore(SemanticParseInfo parseInfo) {
+        double totalScore = 0;
+
+        Map<SchemaElementType, SchemaElementMatch> maxSimilarityMatch = new HashMap<>();
+        for (SchemaElementMatch match : parseInfo.getElementMatches()) {
+            SchemaElementType type = match.getElement().getType();
+            if (!maxSimilarityMatch.containsKey(type) ||
+                    match.getSimilarity() > maxSimilarityMatch.get(type).getSimilarity()) {
+                maxSimilarityMatch.put(type, match);
+            }
         }
-        return true;
+
+        for (SchemaElementMatch match : maxSimilarityMatch.values()) {
+            totalScore += match.getDetectWord().length() * match.getSimilarity();
+        }
+
+        parseInfo.setScore(parseInfo.getScore() + totalScore);
     }
 
-    private void fillSchemaElement(SemanticParseInfo parseInfo, DomainSchema domainSchema) {
-        parseInfo.setDomain(domainSchema.getDomain());
+    private void fillSchemaElement(SemanticParseInfo parseInfo, ModelSchema ModelSchema) {
+        parseInfo.setModel(ModelSchema.getModel());
 
         Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
         Map<Long, List<SchemaElementMatch>> id2Values = new HashMap<>();
@@ -77,7 +106,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
             SchemaElement element = schemaMatch.getElement();
             switch (element.getType()) {
                 case ID:
-                    SchemaElement entityElement = domainSchema.getElement(SchemaElementType.ENTITY, element.getId());
+                    SchemaElement entityElement = ModelSchema.getElement(SchemaElementType.ENTITY, element.getId());
                     if (entityElement != null) {
                         if (id2Values.containsKey(element.getId())) {
                             id2Values.get(element.getId()).add(schemaMatch);
@@ -87,7 +116,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
                     }
                     break;
                 case VALUE:
-                    SchemaElement dimElement = domainSchema.getElement(SchemaElementType.DIMENSION, element.getId());
+                    SchemaElement dimElement = ModelSchema.getElement(SchemaElementType.DIMENSION, element.getId());
                     if (dimElement != null) {
                         if (dim2Values.containsKey(element.getId())) {
                             dim2Values.get(element.getId()).add(schemaMatch);
@@ -111,7 +140,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
 
         if (!id2Values.isEmpty()) {
             for (Map.Entry<Long, List<SchemaElementMatch>> entry : id2Values.entrySet()) {
-                SchemaElement entity = domainSchema.getElement(SchemaElementType.ENTITY, entry.getKey());
+                SchemaElement entity = ModelSchema.getElement(SchemaElementType.ENTITY, entry.getKey());
 
                 if (entry.getValue().size() == 1) {
                     SchemaElementMatch schemaMatch = entry.getValue().get(0);
@@ -122,7 +151,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
                     dimensionFilter.setOperator(FilterOperatorEnum.EQUALS);
                     dimensionFilter.setElementID(schemaMatch.getElement().getId());
                     parseInfo.getDimensionFilters().add(dimensionFilter);
-                    parseInfo.setEntity(domainSchema.getEntity());
+                    parseInfo.setEntity(ModelSchema.getEntity());
                 } else {
                     QueryFilter dimensionFilter = new QueryFilter();
                     List<String> vals = new ArrayList<>();
@@ -139,7 +168,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
 
         if (!dim2Values.isEmpty()) {
             for (Map.Entry<Long, List<SchemaElementMatch>> entry : dim2Values.entrySet()) {
-                SchemaElement dimension = domainSchema.getElement(SchemaElementType.DIMENSION, entry.getKey());
+                SchemaElement dimension = ModelSchema.getElement(SchemaElementType.DIMENSION, entry.getKey());
 
                 if (entry.getValue().size() == 1) {
                     SchemaElementMatch schemaMatch = entry.getValue().get(0);
@@ -150,7 +179,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
                     dimensionFilter.setOperator(FilterOperatorEnum.EQUALS);
                     dimensionFilter.setElementID(schemaMatch.getElement().getId());
                     parseInfo.getDimensionFilters().add(dimensionFilter);
-                    parseInfo.setEntity(domainSchema.getEntity());
+                    parseInfo.setEntity(ModelSchema.getEntity());
                 } else {
                     QueryFilter dimensionFilter = new QueryFilter();
                     List<String> vals = new ArrayList<>();
@@ -171,7 +200,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
     public QueryResult execute(User user) {
         String queryMode = parseInfo.getQueryMode();
 
-        if (parseInfo.getDomainId() < 0 || StringUtils.isEmpty(queryMode)
+        if (parseInfo.getModelId() < 0 || StringUtils.isEmpty(queryMode)
                 || !QueryManager.containsRuleQuery(queryMode)) {
             // reach here some error may happen
             log.error("not find QueryMode");
@@ -195,7 +224,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         queryResult.setQueryMode(queryMode);
         queryResult.setQueryState(QueryState.SUCCESS);
 
-        // add domain info
+        // add Model info
         EntityInfo entityInfo = ContextUtils.getBean(SemanticService.class)
                 .getEntityInfo(parseInfo, user);
         queryResult.setEntityInfo(entityInfo);
@@ -205,7 +234,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
     public QueryResult multiStructExecute(User user) {
         String queryMode = parseInfo.getQueryMode();
 
-        if (parseInfo.getDomainId() < 0 || StringUtils.isEmpty(queryMode)
+        if (parseInfo.getModelId() < 0 || StringUtils.isEmpty(queryMode)
                 || !QueryManager.containsRuleQuery(queryMode)) {
             // reach here some error may happen
             log.error("not find QueryMode");
@@ -228,7 +257,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         queryResult.setQueryMode(queryMode);
         queryResult.setQueryState(QueryState.SUCCESS);
 
-        // add domain info
+        // add Model info
         EntityInfo entityInfo = ContextUtils.getBean(SemanticService.class)
                 .getEntityInfo(parseInfo, user);
         queryResult.setEntityInfo(entityInfo);
@@ -246,8 +275,9 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
     }
 
     public static List<RuleSemanticQuery> resolve(List<SchemaElementMatch> candidateElementMatches,
-                                                  QueryContext queryContext) {
+            QueryContext queryContext) {
         List<RuleSemanticQuery> matchedQueries = new ArrayList<>();
+
         for (RuleSemanticQuery semanticQuery : QueryManager.getRuleQueries()) {
             List<SchemaElementMatch> matches = semanticQuery.match(candidateElementMatches, queryContext);
 
@@ -260,6 +290,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
 
         return matchedQueries;
     }
+
 
     protected QueryStructReq convertQueryStruct() {
         return QueryReqBuilder.buildStructReq(parseInfo);

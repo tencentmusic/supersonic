@@ -2,7 +2,7 @@ English | [中文](README_CN.md)
 
 # SuperSonic (超音数)
 
-**SuperSonic is an out-of-the-box yet highly extensible framework for building a data chatbot**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to build logical semantic models (definition of metrics/dimensions/entities, along with their meaning, context and relationships) on top of physical data models, and no data modification or copying is required. Meanwhile, SuperSonic is designed to be pluggable, allowing new tools to be added through plugins.
+**SuperSonic is an out-of-the-box yet highly extensible framework for building a data chatbot**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to build logical semantic models (definition of metrics/dimensions/entities, along with their meaning, context and relationships) on top of physical data models, and no data modification or copying is required. Meanwhile, SuperSonic is designed to be pluggable, allowing new functionalities to be added through plugins and core components to be integrated with other systems.
 
 <img src="./docs/images/supersonic_demo.gif" height="100%" width="100%" align="center"/>
 
@@ -10,34 +10,35 @@ English | [中文](README_CN.md)
 
 The emergence of Large Language Model (LLM) like ChatGPT is reshaping the way information is retrieved. In the field of data analytics, both academia and industry are primarily focused on leveraging LLM to convert natural language queries into SQL queries. While some works show promising results, they are still not applicable to real-world scenarios.
 
-From our perspective, the key to filling the real-world gap lies in three aspects: 
-1. Utilize a combination of rule-based and LLM-based semantic parsers to deal with different scenarios.
+From our perspective, the key to filling the real-world gap lies in two aspects: 
+1. Utilize a combination of rule-based and model-based semantic parsers to deal with different scenarios.
 2. Introduce a semantic model layer encapsulating the underlying data complexity(joins, formulas, etc) to simplify semantic parsing.
-3. Integrate third-party plugins to augment semantic parsing capabilities or complement custom functionalities.
 
 With these ideas in mind, we develop SuperSonic as a practical reference implementation and use it to power our real-world products. Additionally, to facilitate further development of data chatbot, we decide to open source SuperSonic as an extensible framework.
 
 ## Out-of-the-box Features
 
-- Built-in chat UI for business users to enter natural language queries and answer results with appropriate visualization charts. 
-- Built-in modelling UI for analytics engineers to manage semantic models. The configurations related to access permission and chat conversation can also be set on the UI.
-- Support input auto-completion as well as query recommendation.
-- Support multi-turn conversation and history context management. 
-- Support four-level permission control: domain-level, model-level, column-level and row-level.
+- Built-in graphical interface for business users to enter data queries 
+- Built-in graphical interface for analytics engineers to manage semantic models
+- Support input auto-completion as well as query recommendation
+- Support multi-turn conversation and history context management 
+- Support three-level permission control: domain-level, column-level and row-level 
 
 ## Extensible Components
 
 The high-level architecture and main process flow is shown in below diagram:
 
-<img src="./docs/images/supersonic_components.png" height="70%" width="70%" align="center"/> 
+<img src="./docs/images/supersonic_components.png" height="80%" width="80%" align="center"/> 
+
+- **Chat Interface:** accepts natural language queries and answer results with appropriate visualization charts. It supports input auto-completion as well as multi-turn conversation.
+
+- **Modeling Interface:** empowers analytics engineers to visually define and maintain semantic models. The configurations related to access permission and chat conversation can also be set on the UI.
 
 - **Schema Mapper Chain:** identifies references to schema elements(metrics/dimensions/entities/values) in user queries. It matches the query text against a knowledge base constructed from the semantic models.
 
-- **Semantic Parser Chain:** understands user queries and extract semantic information. It consists of a combination of rule-based and LLM-based parsers, each of which deals with specific scenarios.
+- **Semantic Parser Chain:** understands user queries and extract semantic information. It consists of a combination of rule-based and model-based parsers, each of which deals with specific scenarios.
 
-- **Semantic Layer:** performs execution according to extracted semantic information. It generates SQL queries and executes them against physical data models.
-
-- **Chat Plugins**: perform custom execution given the results of schema mapping and semantic parsing. It would optionally resort to semantic layer to query semantic models.
+- **Semantic Query:** performs execution according to extracted semantic information. It generates SQL queries and executes them against physical data models.
 
 ## Quick Demo
 

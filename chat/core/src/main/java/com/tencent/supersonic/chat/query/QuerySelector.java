@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.query;
 
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
-
 import java.util.List;
 
 /**

@@ -1,13 +1,11 @@
 package com.tencent.supersonic.knowledge.dictionary.builder;
 
 import com.google.common.collect.Lists;
-
-import java.util.List;
-import java.util.Objects;
-
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
 import com.tencent.supersonic.knowledge.dictionary.DictWordType;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -27,7 +25,7 @@ public class EntityWordBuilder extends BaseWordBuilder {
             return result;
         }
 
-        Long domain = schemaElement.getDomain();
+        Long domain = schemaElement.getModel();
         String nature = DictWordType.NATURE_SPILT + domain + DictWordType.NATURE_SPILT + schemaElement.getId()
                 + DictWordType.ENTITY.getType();
 

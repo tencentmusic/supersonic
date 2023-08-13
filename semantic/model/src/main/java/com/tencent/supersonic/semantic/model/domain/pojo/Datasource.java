@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class Datasource extends SchemaItem {
 
-    private Long domainId;
+    private Long modelId;
 
     private Long databaseId;
 

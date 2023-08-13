@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Data
 public class FunctionCallInfoConfig {
+
     @Value("${functionCall.url:}")
     private String url;
 }

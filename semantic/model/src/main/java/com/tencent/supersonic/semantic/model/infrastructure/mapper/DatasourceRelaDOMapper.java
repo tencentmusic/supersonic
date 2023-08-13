@@ -2,7 +2,6 @@ package com.tencent.supersonic.semantic.model.infrastructure.mapper;
 
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDOExample;
-
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 

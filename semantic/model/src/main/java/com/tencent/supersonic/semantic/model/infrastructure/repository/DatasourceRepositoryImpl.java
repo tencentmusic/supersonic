@@ -43,9 +43,9 @@ public class DatasourceRepositoryImpl implements DatasourceRepository {
     }
 
     @Override
-    public List<DatasourceDO> getDatasourceList(Long domainId) {
+    public List<DatasourceDO> getDatasourceList(Long modelId) {
         DatasourceDOExample datasourceExample = new DatasourceDOExample();
-        datasourceExample.createCriteria().andDomainIdEqualTo(domainId);
+        datasourceExample.createCriteria().andModelIdEqualTo(modelId);
         return datasourceMapper.selectByExampleWithBLOBs(datasourceExample);
     }
 
@@ -76,9 +76,9 @@ public class DatasourceRepositoryImpl implements DatasourceRepository {
 
 
     @Override
-    public List<DatasourceRelaDO> getDatasourceRelaList(Long domainId) {
+    public List<DatasourceRelaDO> getDatasourceRelaList(Long modelId) {
         DatasourceRelaDOExample datasourceRelaDOExample = new DatasourceRelaDOExample();
-        datasourceRelaDOExample.createCriteria().andDomainIdEqualTo(domainId);
+        datasourceRelaDOExample.createCriteria().andModelIdEqualTo(modelId);
         return datasourceRelaDOMapper.selectByExample(datasourceRelaDOExample);
     }
 

@@ -18,7 +18,6 @@
         <result column="is_open" jdbcType="INTEGER" property="isOpen"/>
         <result column="viewer" jdbcType="VARCHAR" property="viewer"/>
         <result column="view_org" jdbcType="VARCHAR" property="viewOrg"/>
-        <result column="entity" jdbcType="VARCHAR" property="entity"/>
     </resultMap>
     <sql id="Example_Where_Clause">
         <where>
@@ -54,7 +53,7 @@
     <sql id="Base_Column_List">
         id
         , name, biz_name, parent_id, status, created_at, created_by, updated_at, updated_by,
-    admin, admin_org, is_open, viewer, view_org, entity
+    admin, admin_org, is_open, viewer, view_org
     </sql>
     <select id="selectByExample"
             parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDOExample"
@@ -92,14 +91,14 @@
                                parent_id, status, created_at,
                                created_by, updated_at, updated_by,
                                admin, admin_org, is_open,
-                               viewer, view_org, entity)
+                               viewer, view_org)
         values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{bizName,jdbcType=VARCHAR},
                 #{parentId,jdbcType=BIGINT}, #{status,jdbcType=INTEGER},
                 #{createdAt,jdbcType=TIMESTAMP},
                 #{createdBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP},
                 #{updatedBy,jdbcType=VARCHAR},
                 #{admin,jdbcType=VARCHAR}, #{adminOrg,jdbcType=VARCHAR}, #{isOpen,jdbcType=INTEGER},
-                #{viewer,jdbcType=VARCHAR}, #{viewOrg,jdbcType=VARCHAR}, #{entity,jdbcType=VARCHAR})
+                #{viewer,jdbcType=VARCHAR}, #{viewOrg,jdbcType=VARCHAR})
     </insert>
     <insert id="insertSelective"
             parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO">
@@ -147,9 +146,6 @@
             <if test="viewOrg != null">
                 view_org,
             </if>
-            <if test="entity != null">
-                entity,
-            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -193,9 +189,6 @@
             </if>
             <if test="viewOrg != null">
                 #{viewOrg,jdbcType=VARCHAR},
-            </if>
-            <if test="entity != null">
-                #{entity,jdbcType=VARCHAR},
             </if>
         </trim>
     </insert>
@@ -250,9 +243,6 @@
             <if test="viewOrg != null">
                 view_org = #{viewOrg,jdbcType=VARCHAR},
             </if>
-            <if test="entity != null">
-                entity = #{entity,jdbcType=VARCHAR},
-            </if>
         </set>
         where id = #{id,jdbcType=BIGINT}
     </update>
@@ -271,8 +261,7 @@
             admin_org  = #{adminOrg,jdbcType=VARCHAR},
             is_open    = #{isOpen,jdbcType=INTEGER},
             viewer     = #{viewer,jdbcType=VARCHAR},
-            view_org   = #{viewOrg,jdbcType=VARCHAR},
-            entity     = #{entity,jdbcType=VARCHAR}
+            view_org   = #{viewOrg,jdbcType=VARCHAR}
         where id = #{id,jdbcType=BIGINT}
     </update>
 </mapper>

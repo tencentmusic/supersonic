@@ -2,9 +2,8 @@ package com.tencent.supersonic.chat.service;
 
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.plugin.Plugin;
 import com.tencent.supersonic.chat.api.pojo.request.PluginQueryReq;
-
+import com.tencent.supersonic.chat.plugin.Plugin;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,5 +23,5 @@ public interface PluginService {
 
     Optional<Plugin> getPluginByName(String name);
 
-    List<Plugin> queryWithAuthCheck(PluginQueryReq pluginQueryReq);
+    List<Plugin> queryWithAuthCheck(PluginQueryReq pluginQueryReq, User user);
 }

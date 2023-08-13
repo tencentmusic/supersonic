@@ -3,22 +3,25 @@ package com.tencent.supersonic.chat.utils;
 import static com.tencent.supersonic.common.pojo.Constants.ADMIN_LOWER;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.DomainSchema;
+import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.request.*;
+import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatDetailConfigReq;
+import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
+import com.tencent.supersonic.chat.api.pojo.request.RecommendedQuestionReq;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
-import com.tencent.supersonic.chat.config.*;
+import com.tencent.supersonic.chat.config.ChatConfig;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatConfigDO;
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.RecordInfo;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.JsonUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
@@ -54,20 +57,20 @@ public class ChatConfigHelper {
         return chatConfig;
     }
 
-    public List<Long> generateAllDimIdList(DomainSchema domainSchema) {
-        if (Objects.isNull(domainSchema) || CollectionUtils.isEmpty(domainSchema.getDimensions())) {
+    public List<Long> generateAllDimIdList(ModelSchema modelSchema) {
+        if (Objects.isNull(modelSchema) || CollectionUtils.isEmpty(modelSchema.getDimensions())) {
             return new ArrayList<>();
         }
-        Map<Long, List<SchemaElement>> dimIdAndDescPair = domainSchema.getDimensions()
+        Map<Long, List<SchemaElement>> dimIdAndDescPair = modelSchema.getDimensions()
                 .stream().collect(Collectors.groupingBy(SchemaElement::getId));
         return new ArrayList<>(dimIdAndDescPair.keySet());
     }
 
-    public List<Long> generateAllMetricIdList(DomainSchema domainSchema) {
-        if (Objects.isNull(domainSchema) || CollectionUtils.isEmpty(domainSchema.getMetrics())) {
+    public List<Long> generateAllMetricIdList(ModelSchema modelSchema) {
+        if (Objects.isNull(modelSchema) || CollectionUtils.isEmpty(modelSchema.getMetrics())) {
             return new ArrayList<>();
         }
-        Map<Long, List<SchemaElement>> metricIdAndDescPair = domainSchema.getMetrics()
+        Map<Long, List<SchemaElement>> metricIdAndDescPair = modelSchema.getMetrics()
                 .stream().collect(Collectors.groupingBy(SchemaElement::getId));
         return new ArrayList<>(metricIdAndDescPair.keySet());
     }
@@ -94,26 +97,28 @@ public class ChatConfigHelper {
         return chatConfigDO;
     }
 
-    public ChatConfigResp chatConfigDO2Descriptor(Long domainId, ChatConfigDO chatConfigDO) {
+    public ChatConfigResp chatConfigDO2Descriptor(Long modelId, ChatConfigDO chatConfigDO) {
         ChatConfigResp chatConfigDescriptor = new ChatConfigResp();
 
         if (Objects.isNull(chatConfigDO)) {
             // deal empty chatConfigDO
-            return generateEmptyChatConfigResp(domainId);
+            return generateEmptyChatConfigResp(modelId);
         }
 
         BeanUtils.copyProperties(chatConfigDO, chatConfigDescriptor);
 
-        chatConfigDescriptor.setChatDetailConfig(JsonUtil.toObject(chatConfigDO.getChatDetailConfig(), ChatDetailConfigReq.class));
-        chatConfigDescriptor.setChatAggConfig(JsonUtil.toObject(chatConfigDO.getChatAggConfig(), ChatAggConfigReq.class));
-        chatConfigDescriptor.setRecommendedQuestions(JsonUtil.toList(chatConfigDO.getRecommendedQuestions(), RecommendedQuestionReq.class));
+        chatConfigDescriptor.setChatDetailConfig(
+                JsonUtil.toObject(chatConfigDO.getChatDetailConfig(), ChatDetailConfigReq.class));
+        chatConfigDescriptor.setChatAggConfig(
+                JsonUtil.toObject(chatConfigDO.getChatAggConfig(), ChatAggConfigReq.class));
+        chatConfigDescriptor.setRecommendedQuestions(
+                JsonUtil.toList(chatConfigDO.getRecommendedQuestions(), RecommendedQuestionReq.class));
         chatConfigDescriptor.setStatusEnum(StatusEnum.of(chatConfigDO.getStatus()));
 
         chatConfigDescriptor.setCreatedBy(chatConfigDO.getCreatedBy());
         chatConfigDescriptor.setCreatedAt(chatConfigDO.getCreatedAt());
         chatConfigDescriptor.setUpdatedBy(chatConfigDO.getUpdatedBy());
         chatConfigDescriptor.setUpdatedAt(chatConfigDO.getUpdatedAt());
-
 
         if (Strings.isEmpty(chatConfigDO.getChatAggConfig())) {
             chatConfigDescriptor.setChatAggConfig(generateEmptyChatAggConfigResp());
@@ -125,9 +130,9 @@ public class ChatConfigHelper {
         return chatConfigDescriptor;
     }
 
-    private ChatConfigResp generateEmptyChatConfigResp(Long domainId) {
+    private ChatConfigResp generateEmptyChatConfigResp(Long modelId) {
         ChatConfigResp chatConfigResp = new ChatConfigResp();
-        chatConfigResp.setDomainId(domainId);
+        chatConfigResp.setModelId(modelId);
         chatConfigResp.setChatDetailConfig(generateEmptyChatDetailConfigResp());
         chatConfigResp.setChatAggConfig(generateEmptyChatAggConfigResp());
         return chatConfigResp;

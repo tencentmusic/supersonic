@@ -1,9 +1,8 @@
 package com.tencent.supersonic.chat.query.plugin.webpage;
 
-import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.chat.query.plugin.WebBaseResult;
-import lombok.Data;
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class WebPageResponse {

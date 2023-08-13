@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class DataSourceNode extends SemanticNode {
@@ -61,16 +60,20 @@ public class DataSourceNode extends SemanticNode {
         metricCommand.getMetrics().stream().filter(m -> !schemaMetricName.contains(m)).forEach(m -> measures.add(m));
 
     }
+
     public static void mergeQueryFilterDimensionMeasure(SemanticSchema schema, MetricReq metricCommand,
-            Set<String> queryDimension, List<String> measures,SqlValidatorScope scope) throws Exception {
-        if(Objects.nonNull(metricCommand.getWhere()) && !metricCommand.getWhere().isEmpty()) {
+            Set<String> queryDimension, List<String> measures, SqlValidatorScope scope) throws Exception {
+        if (Objects.nonNull(metricCommand.getWhere()) && !metricCommand.getWhere().isEmpty()) {
             Set<String> filterConditions = new HashSet<>();
             FilterNode.getFilterField(parse(metricCommand.getWhere(), scope), filterConditions);
-            Set<String> queryMeasures =  new HashSet<>(measures);
-            Set<String> schemaMetricName = schema.getMetrics().stream().map(m -> m.getName()).collect(Collectors.toSet());
-            for(String filterCondition : filterConditions) {
-                if(schemaMetricName.contains(filterCondition)) {
-                    schema.getMetrics().stream().filter(m->m.getName().equalsIgnoreCase(filterCondition)).forEach(m -> m.getMetricTypeParams().getMeasures().stream().forEach(mm -> queryMeasures.add(mm.getName())));
+            Set<String> queryMeasures = new HashSet<>(measures);
+            Set<String> schemaMetricName = schema.getMetrics().stream().map(m -> m.getName())
+                    .collect(Collectors.toSet());
+            for (String filterCondition : filterConditions) {
+                if (schemaMetricName.contains(filterCondition)) {
+                    schema.getMetrics().stream().filter(m -> m.getName().equalsIgnoreCase(filterCondition)).forEach(
+                            m -> m.getMetricTypeParams().getMeasures().stream()
+                                    .forEach(mm -> queryMeasures.add(mm.getName())));
                     continue;
                 }
                 queryDimension.add(filterCondition);
@@ -118,7 +121,7 @@ public class DataSourceNode extends SemanticNode {
             }
             filterMeasure.addAll(sourceMeasure);
             filterMeasure.addAll(dimension);
-            mergeQueryFilterDimensionMeasure(schema,metricCommand,queryDimension,measures,scope);
+            mergeQueryFilterDimensionMeasure(schema, metricCommand, queryDimension, measures, scope);
             boolean isAllMatch = checkMatch(sourceMeasure, queryDimension, measures, dimension, metricCommand, scope);
             if (isAllMatch) {
                 log.info("baseDataSource  match all ");

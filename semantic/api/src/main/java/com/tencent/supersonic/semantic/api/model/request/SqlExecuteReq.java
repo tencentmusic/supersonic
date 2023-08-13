@@ -7,10 +7,11 @@ import lombok.Data;
 
 @Data
 public class SqlExecuteReq {
+
     public static final String LIMIT_WRAPPER = " select * from ( %s ) a limit 1000 ";
 
-    @NotNull(message = "domainId can not be null")
-    private Long domainId;
+    @NotNull(message = "modelId can not be null")
+    private Long modelId;
 
     @NotBlank(message = "sql can not be blank")
     private String sql;

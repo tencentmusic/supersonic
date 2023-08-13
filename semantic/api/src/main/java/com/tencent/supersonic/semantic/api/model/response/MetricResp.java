@@ -12,16 +12,14 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class MetricResp extends SchemaItem {
 
-    private Long domainId;
+    private Long modelId;
 
-    private String domainName;
+    private String modelName;
 
     //ATOMIC DERIVED
     private String type;
 
     private MetricTypeParams typeParams;
-
-    private String fullPath;
 
     private String dataFormatType;
 

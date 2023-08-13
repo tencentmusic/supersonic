@@ -1,19 +1,25 @@
 package com.tencent.supersonic.chat.api.pojo;
 
 
-import java.util.*;
-
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import lombok.Data;
 
 @Data
 public class SemanticParseInfo {
 
     private String queryMode;
-    private SchemaElement domain;
+    private SchemaElement model;
     private Set<SchemaElement> metrics = new TreeSet<>(new SchemaNameLengthComparator());
     private Set<SchemaElement> dimensions = new LinkedHashSet();
     private SchemaElement entity;
@@ -28,15 +34,16 @@ public class SemanticParseInfo {
     private List<SchemaElementMatch> elementMatches = new ArrayList<>();
     private Map<String, Object> properties = new HashMap<>();
 
-    public Long getDomainId() {
-        return domain != null ? domain.getId() : 0L;
+    public Long getModelId() {
+        return model != null ? model.getId() : 0L;
     }
 
-    public String getDomainName() {
-        return domain != null ? domain.getName() : "null";
+    public String getModelName() {
+        return model != null ? model.getName() : "null";
     }
 
     private static class SchemaNameLengthComparator implements Comparator<SchemaElement> {
+
         @Override
         public int compare(SchemaElement o1, SchemaElement o2) {
             int len1 = o1.getName().length();
@@ -47,6 +54,13 @@ public class SemanticParseInfo {
                 return o1.getName().compareTo(o2.getName());
             }
         }
+    }
+
+    public Set<SchemaElement> getMetrics() {
+        Set<SchemaElement> metricSet = new TreeSet<>(new SchemaNameLengthComparator());
+        metricSet.addAll(metrics);
+        metrics = metricSet;
+        return metrics;
     }
 
 }

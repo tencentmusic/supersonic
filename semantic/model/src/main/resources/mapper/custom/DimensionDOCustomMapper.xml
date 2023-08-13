@@ -9,7 +9,7 @@
         <result column="biz_name" jdbcType="VARCHAR" property="bizName"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
         <result column="status" jdbcType="INTEGER" property="status"/>
-        <result column="domain_id" jdbcType="BIGINT" property="domainId"/>
+        <result column="model_id" jdbcType="BIGINT" property="modelId"/>
         <result column="type" jdbcType="VARCHAR" property="type"/>
         <result column="type_params" jdbcType="VARCHAR" property="typeParams"/>
         <result column="expr" jdbcType="VARCHAR" property="expr"/>
@@ -55,13 +55,13 @@
     </sql>
     <sql id="Base_Column_List">
         id
-        , name, biz_name, description, status, domain_id, type, type_params, expr, datasource_id,
+        , name, biz_name, description, status, model_id, type, type_params, expr, datasource_id,
     created_at, created_by, updated_by, updated_at, semantic_type
     </sql>
 
     <insert id="batchInsert" parameterType="java.util.List">
         insert into s2_dimension (name, biz_name,
-        description, status, domain_id,
+        description, status, model_id,
         type, type_params, expr,
         datasource_id, created_at, created_by,
         updated_by, updated_at, semantic_type,sensitive_level)
@@ -69,7 +69,7 @@
         <foreach collection="list" item="dimension" separator=",">
             (#{dimension.name,jdbcType=VARCHAR}, #{dimension.bizName,jdbcType=VARCHAR},
             #{dimension.description,jdbcType=VARCHAR}, #{dimension.status,jdbcType=INTEGER},
-            #{dimension.domainId,jdbcType=BIGINT},
+            #{dimension.modelId,jdbcType=BIGINT},
             #{dimension.type,jdbcType=VARCHAR}, #{dimension.typeParams,jdbcType=VARCHAR},
             #{dimension.expr,jdbcType=VARCHAR},
             #{dimension.datasourceId,jdbcType=BIGINT}, #{dimension.createdAt,jdbcType=TIMESTAMP},
@@ -87,7 +87,7 @@
             biz_name = #{dimension.bizName,jdbcType=VARCHAR},
             description = #{dimension.description,jdbcType=VARCHAR},
             status = #{dimension.status,jdbcType=INTEGER},
-            domain_id = #{dimension.domainId,jdbcType=BIGINT},
+            model_id = #{dimension.modelId,jdbcType=BIGINT},
             type = #{dimension.type,jdbcType=VARCHAR},
             type_params = #{dimension.typeParams,jdbcType=VARCHAR},
             datasource_id = #{dimension.datasourceId,jdbcType=BIGINT},
