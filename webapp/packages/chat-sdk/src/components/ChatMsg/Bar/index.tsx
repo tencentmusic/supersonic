@@ -15,7 +15,7 @@ type Props = {
   drillDownDimension?: DrillDownDimensionType;
   loading: boolean;
   onSelectDimension: (dimension?: DrillDownDimensionType) => void;
-  onApplyAuth?: (domain: string) => void;
+  onApplyAuth?: (model: string) => void;
 };
 
 const BarChart: React.FC<Props> = ({
@@ -152,7 +152,7 @@ const BarChart: React.FC<Props> = ({
   if (metricColumn && !metricColumn?.authorized) {
     return (
       <NoPermissionChart
-        domain={entityInfo?.domainInfo.name || ''}
+        model={entityInfo?.modelInfo.name || ''}
         chartType="barChart"
         onApplyAuth={onApplyAuth}
       />
@@ -193,11 +193,9 @@ const BarChart: React.FC<Props> = ({
       <Spin spinning={loading}>
         <div className={`${prefixCls}-chart`} ref={chartRef} />
       </Spin>
-      {(queryMode === 'METRIC_DOMAIN' ||
-        queryMode === 'METRIC_FILTER' ||
-        queryMode === 'METRIC_GROUPBY') && (
+      {queryMode.includes('METRIC') && (
         <DrillDownDimensions
-          domainId={chatContext.domainId}
+          modelId={chatContext.modelId}
           drillDownDimension={drillDownDimension}
           dimensionFilters={chatContext.dimensionFilters}
           onSelectDimension={onSelectDimension}

@@ -15,7 +15,7 @@ type Props = {
   data: MsgDataType;
   chartIndex: number;
   triggerResize?: boolean;
-  onApplyAuth?: (domain: string) => void;
+  onApplyAuth?: (model: string) => void;
 };
 
 const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApplyAuth }) => {
@@ -36,6 +36,7 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
   const [currentDateOption, setCurrentDateOption] = useState<number>(initialDateOption);
   const [dimensions, setDimensions] = useState<FieldType[]>(chatContext?.dimensions);
   const [drillDownDimension, setDrillDownDimension] = useState<DrillDownDimensionType>();
+  const [aggregateInfoValue, setAggregateInfoValue] = useState<any>(aggregateInfo);
   const [dateModeValue, setDateModeValue] = useState(dateMode);
   const [loading, setLoading] = useState(false);
 
@@ -72,6 +73,7 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
     if (data.code === 200) {
       setColumns(data.data?.queryColumns || []);
       setDataSource(data.data?.queryResults || []);
+      setAggregateInfoValue(data.data?.aggregateInfo);
     }
   };
 
@@ -172,7 +174,9 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
             </div>
           )}
         </div>
-        {aggregateInfo?.metricInfos?.length > 0 && <MetricInfo aggregateInfo={aggregateInfo} />}
+        {aggregateInfoValue?.metricInfos?.length > 0 && (
+          <MetricInfo aggregateInfo={aggregateInfoValue} />
+        )}
         <div className={`${prefixCls}-date-options`}>
           {dateOptions.map((dateOption: { label: string; value: number }, index: number) => {
             const dateOptionClass = classNames(`${prefixCls}-date-option`, {
@@ -205,7 +209,7 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
             <Table data={{ ...data, queryResults: dataSource }} onApplyAuth={onApplyAuth} />
           ) : (
             <MetricTrendChart
-              domain={entityInfo?.domainInfo.name}
+              model={entityInfo?.modelInfo.name}
               dateColumnName={dateColumnName}
               categoryColumnName={categoryColumnName}
               metricField={currentMetricField}
@@ -215,11 +219,9 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
             />
           )}
         </Spin>
-        {(queryMode === 'METRIC_DOMAIN' ||
-          queryMode === 'METRIC_FILTER' ||
-          queryMode === 'METRIC_GROUPBY') && (
+        {queryMode.includes('METRIC') && (
           <DrillDownDimensions
-            domainId={chatContext.domainId}
+            modelId={chatContext.modelId}
             drillDownDimension={drillDownDimension}
             dimensionFilters={chatContext.dimensionFilters}
             onSelectDimension={onSelectDimension}

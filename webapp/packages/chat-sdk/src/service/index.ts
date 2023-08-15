@@ -6,30 +6,30 @@ const DEFAULT_CHAT_ID = 0;
 
 const prefix = '/api';
 
-export function searchRecommend(queryText: string, chatId?: number, domainId?: number) {
+export function searchRecommend(queryText: string, chatId?: number, modelId?: number) {
   return axios.post<Result<SearchRecommendItem[]>>(`${prefix}/chat/query/search`, {
     queryText,
     chatId: chatId || DEFAULT_CHAT_ID,
-    domainId,
+    modelId,
   });
 }
 
-export function chatQuery(queryText: string, chatId?: number, domainId?: number, filters?: any[]) {
+export function chatQuery(queryText: string, chatId?: number, modelId?: number, filters?: any[]) {
   return axios.post<Result<MsgDataType>>(`${prefix}/chat/query/query`, {
     queryText,
     chatId: chatId || DEFAULT_CHAT_ID,
-    domainId,
+    modelId,
     queryFilters: filters ? {
       filters
     } : undefined,
   });
 }
 
-export function chatParse(queryText: string, chatId?: number, domainId?: number, filters?: any[]) {
+export function chatParse(queryText: string, chatId?: number, modelId?: number, filters?: any[]) {
   return axios.post<Result<ParseDataType>>(`${prefix}/chat/query/parse`, {
     queryText,
     chatId: chatId || DEFAULT_CHAT_ID,
-    domainId,
+    modelId,
     queryFilters: filters ? {
       filters
     } : undefined,
@@ -44,10 +44,10 @@ export function chatExecute(queryText: string,  chatId: number, parseInfo: ChatC
   });
 }
 
-export function switchEntity(entityId: string, domainId?: number, chatId?: number) {
+export function switchEntity(entityId: string, modelId?: number, chatId?: number) {
   return axios.post<Result<any>>(`${prefix}/chat/query/switchQuery`, {
     queryText: entityId,
-    domainId,
+    modelId,
     chatId: chatId || DEFAULT_CHAT_ID,
   });
 }
@@ -63,8 +63,8 @@ export function queryContext(queryText: string, chatId?: number) {
   });
 }
 
-export function querySuggestionInfo(domainId: number) {
-  return axios.get<Result<any>>(`${prefix}/chat/recommend/${domainId}`);
+export function querySuggestionInfo(modelId: number) {
+  return axios.get<Result<any>>(`${prefix}/chat/recommend/${modelId}`);
 }
 
 export function getHistoryMsg(current: number, chatId: number = DEFAULT_CHAT_ID, pageSize: number = 10) {
@@ -98,10 +98,10 @@ export function getAllConversations() {
   return axios.get<Result<any>>(`${prefix}/chat/manage/getAll`);
 }
 
-export function queryEntities(entityId: string | number, domainId: number) {
+export function queryEntities(entityId: string | number, modelId: number) {
   return axios.post<Result<any>>(`${prefix}/chat/query/choice`, {
     entityId,
-    domainId,
+    modelId,
   });
 }
 
@@ -109,6 +109,6 @@ export function updateQAFeedback(questionId: number, score: number) {
   return axios.post<Result<any>>(`${prefix}/chat/manage/updateQAFeedback?id=${questionId}&score=${score}&feedback=`);
 }
 
-export function queryDrillDownDimensions(domainId: number) {
-  return axios.get<Result<{ dimensions: DrillDownDimensionType[] }>>(`${prefix}/chat/recommend/metric/${domainId}`);
+export function queryDrillDownDimensions(modelId: number) {
+  return axios.get<Result<{ dimensions: DrillDownDimensionType[] }>>(`${prefix}/chat/recommend/metric/${modelId}`);
 }

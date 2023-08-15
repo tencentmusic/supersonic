@@ -56,7 +56,6 @@ const Chat = () => {
           msg={msg}
           // msgData={data}
           onMsgDataLoaded={onMsgDataLoaded}
-          domainId={37}
           isLastMessage
           isMobileMode
           triggerResize={triggerResize}

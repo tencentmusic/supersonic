@@ -13,6 +13,7 @@ import { queryToken } from './services/login';
 import { queryCurrentUser } from './services/user';
 import { traverseRoutes, deleteUrlQuery } from './utils/utils';
 import { publicPath } from '../config/defaultSettings';
+import Copilot from './pages/Copilot';
 export { request } from './services/request';
 
 const TOKEN_KEY = AUTH_TOKEN_KEY;
@@ -148,7 +149,12 @@ export const layout: RunTimeLayoutConfig = (params) => {
     disableContentMargin: true,
     menuHeaderRender: undefined,
     childrenRender: (dom) => {
-      return dom;
+      return (
+        <>
+          {dom}
+          {history.location.pathname !== '/chat' && <Copilot />}
+        </>
+      );
     },
     openKeys: false,
     ...initialState?.settings,

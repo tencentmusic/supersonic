@@ -7,7 +7,7 @@ import { DownOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
 
 type Props = {
-  domainId: number;
+  modelId: number;
   drillDownDimension?: DrillDownDimensionType;
   isMetricCard?: boolean;
   dimensionFilters?: FilterItemType[];
@@ -17,7 +17,7 @@ type Props = {
 const MAX_DIMENSION_COUNT = 20;
 
 const DrillDownDimensions: React.FC<Props> = ({
-  domainId,
+  modelId,
   drillDownDimension,
   isMetricCard,
   dimensionFilters,
@@ -30,7 +30,7 @@ const DrillDownDimensions: React.FC<Props> = ({
   const prefixCls = `${CLS_PREFIX}-drill-down-dimensions`;
 
   const initData = async () => {
-    const res = await queryDrillDownDimensions(domainId);
+    const res = await queryDrillDownDimensions(modelId);
     setDimensions(
       res.data.data.dimensions
         .filter(dimension => !dimensionFilters?.some(filter => filter.name === dimension.name))

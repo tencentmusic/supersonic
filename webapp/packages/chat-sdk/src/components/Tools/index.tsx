@@ -26,21 +26,22 @@ const Tools: React.FC<Props> = ({
   onChangeChart,
 }) => {
   const [recommendOptionsOpen, setRecommendOptionsOpen] = useState(false);
-  const { queryColumns, queryResults, queryId, chatContext, queryMode } = data || {};
+  const { queryColumns, queryResults, queryId, chatContext, queryMode, entityInfo } = data || {};
   const [score, setScore] = useState(scoreValue || 0);
 
   const prefixCls = `${CLS_PREFIX}-tools`;
+
+  const singleData = queryResults.length === 1;
+  const isMetricCard =
+    queryMode.includes('METRIC') &&
+    (singleData || chatContext?.dateInfo?.startDate === chatContext?.dateInfo?.endDate);
 
   const noDashboard =
     (queryColumns?.length === 1 &&
       queryColumns[0].showType === 'CATEGORY' &&
       queryResults?.length === 1) ||
-    (!queryMode.includes('METRIC') && !queryMode.includes('ENTITY'));
-
-  console.log(
-    'chatContext?.properties?.CONTEXT?.plugin?.name',
-    chatContext?.properties?.CONTEXT?.plugin?.name
-  );
+    (!queryMode.includes('METRIC') && !queryMode.includes('ENTITY')) ||
+    isMetricCard;
 
   const changeChart = () => {
     onChangeChart();
@@ -74,13 +75,13 @@ const Tools: React.FC<Props> = ({
 
   return (
     <div className={prefixCls}>
-      {/* {isLastMessage && chatContext?.domainId && entityInfo?.entityId && (
+      {/* {isLastMessage && chatContext?.modelId && entityInfo?.entityId && (
         <Popover
           content={
             <RecommendOptions
               entityId={entityInfo.entityId}
-              domainId={chatContext.domainId}
-              domainName={chatContext.domainName}
+              modelId={chatContext.modelId}
+              modelName={chatContext.modelName}
               isMobileMode={isMobileMode}
               onSelect={switchEntity}
             />
@@ -105,7 +106,7 @@ const Tools: React.FC<Props> = ({
               加入看板
             </Button>
           )}
-          {isLastMessage && (
+          {isLastMessage && !isMetricCard && (
             <div className={`${prefixCls}-feedback`}>
               <div>这个回答正确吗？</div>
               <LikeOutlined className={likeClass} onClick={like} />

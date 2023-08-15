@@ -5,9 +5,9 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { PARSE_MODE_MAP, PLUGIN_TYPE_MAP } from './constants';
 import DetailModal from './DetailModal';
-import { deletePlugin, getDomainList, getPluginList } from './service';
+import { deletePlugin, getModelList, getPluginList } from './service';
 import styles from './style.less';
-import { DomainType, ParseModeEnum, PluginType, PluginTypeEnum } from './type';
+import { ModelType, ParseModeEnum, PluginType, PluginTypeEnum } from './type';
 
 const { Search } = Input;
 
@@ -15,27 +15,27 @@ const PluginManage = () => {
   const [name, setName] = useState<string>();
   const [type, setType] = useState<PluginTypeEnum>();
   const [pattern, setPattern] = useState<string>();
-  const [domain, setDomain] = useState<string>();
+  const [model, setModel] = useState<string>();
   const [data, setData] = useState<PluginType[]>([]);
-  const [domainList, setDomainList] = useState<DomainType[]>([]);
+  const [modelList, setModelList] = useState<ModelType[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPluginDetail, setCurrentPluginDetail] = useState<PluginType>();
   const [detailModalVisible, setDetailModalVisible] = useState(false);
 
-  const initDomainList = async () => {
-    const res = await getDomainList();
-    setDomainList(getLeafList(res.data));
+  const initModelList = async () => {
+    const res = await getModelList();
+    setModelList(getLeafList(res.data));
   };
 
   const updateData = async (filters?: any) => {
     setLoading(true);
-    const res = await getPluginList({ name, type, pattern, domain, ...(filters || {}) });
+    const res = await getPluginList({ name, type, pattern, model, ...(filters || {}) });
     setLoading(false);
-    setData(res.data.map((item) => ({ ...item, config: JSON.parse(item.config || '{}') })));
+    setData(res.data?.map((item) => ({ ...item, config: JSON.parse(item.config || '{}') })) || []);
   };
 
   useEffect(() => {
-    initDomainList();
+    initModelList();
     updateData();
   }, []);
 
@@ -58,17 +58,17 @@ const PluginManage = () => {
     },
     {
       title: '主题域',
-      dataIndex: 'domainList',
-      key: 'domainList',
+      dataIndex: 'modelList',
+      key: 'modelList',
       width: 200,
       render: (value: number[]) => {
         if (value?.includes(-1)) {
-          return '全部';
+          return '默认';
         }
         return value ? (
-          <div className={styles.domainColumn}>
+          <div className={styles.modelColumn}>
             {value.map((id, index) => {
-              const name = domainList.find((domain) => domain.id === +id)?.name;
+              const name = modelList.find((model) => model.id === +id)?.name;
               return name ? <Tag key={id}>{name}</Tag> : null;
             })}
           </div>
@@ -90,7 +90,7 @@ const PluginManage = () => {
       },
     },
     {
-      title: '插件描述',
+      title: '函数描述',
       dataIndex: 'pattern',
       key: 'pattern',
       width: 450,
@@ -139,9 +139,9 @@ const PluginManage = () => {
     },
   ];
 
-  const onDomainChange = (value: string) => {
-    setDomain(value);
-    updateData({ domain: value });
+  const onModelChange = (value: string) => {
+    setModel(value);
+    updateData({ model: value });
   };
 
   const onTypeChange = (value: PluginTypeEnum) => {
@@ -171,10 +171,10 @@ const PluginManage = () => {
           <Select
             className={styles.filterItemControl}
             placeholder="请选择主题域"
-            options={domainList.map((domain) => ({ label: domain.name, value: domain.id }))}
-            value={domain}
+            options={modelList.map((model) => ({ label: model.name, value: model.id }))}
+            value={model}
             allowClear
-            onChange={onDomainChange}
+            onChange={onModelChange}
           />
         </div>
         <div className={styles.filterItem}>
@@ -190,10 +190,10 @@ const PluginManage = () => {
           />
         </div>
         <div className={styles.filterItem}>
-          <div className={styles.filterItemTitle}>插件描述</div>
+          <div className={styles.filterItemTitle}>函数描述</div>
           <Search
             className={styles.filterItemControl}
-            placeholder="请输入插件描述"
+            placeholder="请输入函数描述"
             value={pattern}
             onChange={(e) => {
               setPattern(e.target.value);

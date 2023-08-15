@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Select, Form, Input, InputNumber, message, Button, Radio } from 'antd';
-import { getDimensionList, getDomainList, savePlugin } from './service';
+import { getDimensionList, getModelList, savePlugin } from './service';
 import {
   DimensionType,
-  DomainType,
+  ModelType,
   ParamTypeEnum,
   ParseModeEnum,
   PluginType,
@@ -26,10 +26,8 @@ type Props = {
 };
 
 const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
-  const [domainList, setDomainList] = useState<DomainType[]>([]);
-  const [domainDimensionList, setDomainDimensionList] = useState<Record<number, DimensionType[]>>(
-    {},
-  );
+  const [modelList, setModelList] = useState<ModelType[]>([]);
+  const [modelDimensionList, setModelDimensionList] = useState<Record<number, DimensionType[]>>({});
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [pluginType, setPluginType] = useState<PluginTypeEnum>();
   const [functionName, setFunctionName] = useState<string>();
@@ -38,28 +36,25 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
   const [filters, setFilters] = useState<any[]>([]);
   const [form] = Form.useForm();
 
-  const initDomainList = async () => {
-    const res = await getDomainList();
-    setDomainList([{ id: -1, name: '全部' }, ...getLeafList(res.data)]);
+  const initModelList = async () => {
+    const res = await getModelList();
+    setModelList([{ id: -1, name: '默认' }, ...getLeafList(res.data)]);
   };
 
   useEffect(() => {
-    initDomainList();
+    initModelList();
   }, []);
 
-  const initDomainDimensions = async (params: any) => {
-    const domainIds = params
-      .filter((param: any) => !!param.domainId)
-      .map((param: any) => param.domainId);
-    const res = await Promise.all(domainIds.map((domainId: number) => getDimensionList(domainId)));
-    setDomainDimensionList(
-      domainIds.reduce(
-        (result: Record<number, DimensionType[]>, domainId: number, index: number) => {
-          result[domainId] = res[index].data.list;
-          return result;
-        },
-        {},
-      ),
+  const initModelDimensions = async (params: any) => {
+    const modelIds = params
+      .filter((param: any) => !!param.modelId)
+      .map((param: any) => param.modelId);
+    const res = await Promise.all(modelIds.map((modelId: number) => getDimensionList(modelId)));
+    setModelDimensionList(
+      modelIds.reduce((result: Record<number, DimensionType[]>, modelId: number, index: number) => {
+        result[modelId] = res[index].data.list;
+        return result;
+      }, {}),
     );
   };
 
@@ -79,7 +74,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
           (option: any) => option.paramType !== ParamTypeEnum.FORWARD,
         );
         setFilters(params);
-        initDomainDimensions(params);
+        initModelDimensions(params);
       }
       setPluginType(detail.type);
       const parseModeObj = JSON.parse(detail.parseModeConfig || '{}');
@@ -159,7 +154,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
     await savePlugin({
       ...values,
       id: detail?.id,
-      domainList: isArray(values.domainList) ? values.domainList : [values.domainList],
+      modelList: isArray(values.modelList) ? values.modelList : [values.modelList],
       config: JSON.stringify(config),
       parseModeConfig: JSON.stringify(getFunctionParam(values.pattern)),
     });
@@ -169,11 +164,11 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
   };
 
   const updateDimensionList = async (value: number) => {
-    if (domainDimensionList[value]) {
+    if (modelDimensionList[value]) {
       return;
     }
     const res = await getDimensionList(value);
-    setDomainDimensionList({ ...domainDimensionList, [value]: res.data.list });
+    setModelDimensionList({ ...modelDimensionList, [value]: res.data.list });
   };
 
   return (
@@ -186,12 +181,12 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
       onCancel={onCancel}
     >
       <Form {...layout} form={form} style={{ maxWidth: 820 }}>
-        <FormItem name="domainList" label="主题域">
+        <FormItem name="modelList" label="主题域">
           <Select
             placeholder="请选择主题域"
-            options={domainList.map((domain) => ({
-              label: domain.name,
-              value: domain.id,
+            options={modelList.map((model) => ({
+              label: model.name,
+              value: model.id,
             }))}
             showSearch
             filterOption={(input, option) =>
@@ -223,7 +218,6 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
               setPluginType(value);
               if (value === PluginTypeEnum.DSL) {
                 form.setFieldsValue({ parseMode: ParseModeEnum.FUNCTION_CALL });
-                // setFunctionName('DSL');
                 setFunctionParams([
                   {
                     id: uuid(),
@@ -236,47 +230,6 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
             }}
           />
         </FormItem>
-        <FormItem
-          name="pattern"
-          label="插件描述"
-          rules={[{ required: true, message: '请输入插件描述' }]}
-        >
-          <TextArea placeholder="请输入插件描述，多个描述换行分隔" allowClear />
-        </FormItem>
-        <FormItem name="exampleQuestions" label="示例问题">
-          <div className={styles.paramsSection}>
-            {examples.map((example) => {
-              const { id, question } = example;
-              return (
-                <div className={styles.filterRow} key={id}>
-                  <Input
-                    placeholder="示例问题"
-                    value={question}
-                    className={styles.questionExample}
-                    onChange={(e) => {
-                      example.question = e.target.value;
-                      setExamples([...examples]);
-                    }}
-                    allowClear
-                  />
-                  <DeleteOutlined
-                    onClick={() => {
-                      setExamples(examples.filter((item) => item.id !== id));
-                    }}
-                  />
-                </div>
-              );
-            })}
-            <Button
-              onClick={() => {
-                setExamples([...examples, { id: uuid() }]);
-              }}
-            >
-              <PlusOutlined />
-              新增示例问题
-            </Button>
-          </div>
-        </FormItem>
         <FormItem label="函数名称">
           <Input
             value={functionName}
@@ -286,6 +239,9 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
             placeholder="请输入函数名称，只能包含因为字母和下划线"
             allowClear
           />
+        </FormItem>
+        <FormItem name="pattern" label="函数描述">
+          <TextArea placeholder="请输入函数描述，多个描述换行分隔" allowClear />
         </FormItem>
         <FormItem name="params" label="函数参数" hidden={pluginType === PluginTypeEnum.DSL}>
           <div className={styles.paramsSection}>
@@ -345,6 +301,40 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
             </Button>
           </div>
         </FormItem>
+        <FormItem name="exampleQuestions" label="示例问题">
+          <div className={styles.paramsSection}>
+            {examples.map((example) => {
+              const { id, question } = example;
+              return (
+                <div className={styles.filterRow} key={id}>
+                  <Input
+                    placeholder="示例问题"
+                    value={question}
+                    className={styles.questionExample}
+                    onChange={(e) => {
+                      example.question = e.target.value;
+                      setExamples([...examples]);
+                    }}
+                    allowClear
+                  />
+                  <DeleteOutlined
+                    onClick={() => {
+                      setExamples(examples.filter((item) => item.id !== id));
+                    }}
+                  />
+                </div>
+              );
+            })}
+            <Button
+              onClick={() => {
+                setExamples([...examples, { id: uuid() }]);
+              }}
+            >
+              <PlusOutlined />
+              新增示例问题
+            </Button>
+          </div>
+        </FormItem>
         {(pluginType === PluginTypeEnum.WEB_PAGE || pluginType === PluginTypeEnum.WEB_SERVICE) && (
           <>
             <FormItem name="url" label="地址" rules={[{ required: true, message: '请输入地址' }]}>
@@ -391,9 +381,9 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
                         <>
                           <Select
                             placeholder="主题域"
-                            options={domainList.map((domain) => ({
-                              label: domain.name,
-                              value: domain.id,
+                            options={modelList.map((model) => ({
+                              label: model.name,
+                              value: model.id,
                             }))}
                             showSearch
                             filterOption={(input, option) =>
@@ -403,16 +393,16 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
                             }
                             className={styles.filterParamName}
                             allowClear
-                            value={filter.domainId}
+                            value={filter.modelId}
                             onChange={(value) => {
-                              filter.domainId = value;
+                              filter.modelId = value;
                               setFilters([...filters]);
                               updateDimensionList(value);
                             }}
                           />
                           <Select
                             placeholder="请选择维度，需先选择主题域"
-                            options={(domainDimensionList[filter.domainId] || []).map(
+                            options={(modelDimensionList[filter.modelId] || []).map(
                               (dimension) => ({
                                 label: dimension.name,
                                 value: `${dimension.id}`,

@@ -14,17 +14,17 @@ import { ColumnType } from '../../../common/type';
 import NoPermissionChart from '../NoPermissionChart';
 
 type Props = {
-  domain?: string;
+  model?: string;
   dateColumnName: string;
   categoryColumnName: string;
   metricField: ColumnType;
   resultList: any[];
   triggerResize?: boolean;
-  onApplyAuth?: (domain: string) => void;
+  onApplyAuth?: (model: string) => void;
 };
 
 const MetricTrendChart: React.FC<Props> = ({
-  domain,
+  model,
   dateColumnName,
   categoryColumnName,
   metricField,
@@ -204,7 +204,7 @@ const MetricTrendChart: React.FC<Props> = ({
   return (
     <div>
       {!metricField.authorized ? (
-        <NoPermissionChart domain={domain || ''} onApplyAuth={onApplyAuth} />
+        <NoPermissionChart model={model || ''} onApplyAuth={onApplyAuth} />
       ) : (
         <div className={`${prefixCls}-flow-trend-chart`} ref={chartRef} />
       )}

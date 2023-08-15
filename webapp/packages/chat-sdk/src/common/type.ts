@@ -1,7 +1,7 @@
 export type SearchRecommendItem = {
   complete: boolean;
-  domainId: number;
-  domainName: string;
+  modelId: number;
+  modelName: string;
   recommend: string;
   subRecommend: string;
   schemaElementType: string;
@@ -12,12 +12,12 @@ export type FieldType = {
   id: number;
   name: string;
   status: number;
-  domain: number;
+  model: number;
   type: string;
   value: string;
 };
 
-export type DomainInfoType = {
+export type ModelInfoType = {
   bizName: string;
   itemId: number;
   name: string;
@@ -27,7 +27,7 @@ export type DomainInfoType = {
 };
 
 export type EntityInfoType = {
-  domainInfo: DomainInfoType;
+  modelInfo: ModelInfoType;
   dimensions: FieldType[];
   metrics: FieldType[];
   entityId: number;
@@ -53,8 +53,8 @@ export type FilterItemType = {
 
 export type ChatContextType = {
   aggType: string;
-  domainId: number;
-  domainName: string;
+  modelId: number;
+  modelName: string;
   dateInfo: DateInfoType;
   dimensions: FieldType[];
   metrics: FieldType[];
@@ -104,6 +104,7 @@ export type MsgDataType = {
   queryMode: string;
   queryState: string;
   response: PluginResonseType;
+  parseOptions?: ChatContextType[];
 };
 
 export enum ParseStateEnum {
@@ -121,6 +122,7 @@ export type ParseDataType = {
 }
 
 export type QueryDataType = {
+  aggregateInfo: AggregateInfoType;
   queryColumns: ColumnType[];
   queryResults: any[];
 };
@@ -153,7 +155,7 @@ export const SEMANTIC_TYPE_MAP = {
 };
 
 export type SuggestionItemType = {
-  domain: number;
+  model: number;
   name: string;
   bizName: string
 };
@@ -187,7 +189,7 @@ export type HistoryType = {
 
 export type DrillDownDimensionType = {
   id: number;
-  domain: number;
+  model: number;
   name: string;
   bizName: string;
 }

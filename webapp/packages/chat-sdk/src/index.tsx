@@ -19,7 +19,7 @@ export { default as ChatItem } from './components/ChatItem';
 export type {
   SearchRecommendItem,
   FieldType,
-  DomainInfoType,
+  ModelInfoType,
   EntityInfoType,
   DateInfoType,
   ChatContextType,

@@ -35,10 +35,15 @@ const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, tr
   const metricFields = columns.filter(item => item.showType === 'NUMBER');
 
   const isMetricCard =
-    (queryMode === 'METRIC_DOMAIN' || queryMode === 'METRIC_FILTER') &&
+    queryMode.includes('METRIC') &&
     (singleData || chatContext?.dateInfo?.startDate === chatContext?.dateInfo?.endDate);
 
-  const isText = columns.length === 1 && columns[0].showType === 'CATEGORY' && singleData;
+  const isText =
+    columns.length === 1 &&
+    columns[0].showType === 'CATEGORY' &&
+    !queryMode.includes('METRIC') &&
+    !queryMode.includes('ENTITY') &&
+    singleData;
 
   const onLoadData = async (value: any) => {
     setLoading(true);

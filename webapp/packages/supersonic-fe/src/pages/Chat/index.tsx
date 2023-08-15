@@ -6,11 +6,11 @@ import styles from './style.less';
 import {
   ConversationDetailType,
   DefaultEntityType,
-  DomainType,
+  ModelType,
   MessageItem,
   MessageTypeEnum,
 } from './type';
-import { getDomainList } from './service';
+import { getModelList } from './service';
 import { useThrottleFn } from 'ahooks';
 import Conversation from './Conversation';
 import ChatFooter from './ChatFooter';
@@ -25,12 +25,12 @@ import { AUTH_TOKEN_KEY } from '@/common/constants';
 type Props = {
   isCopilotMode?: boolean;
   copilotFullscreen?: boolean;
-  defaultDomainName?: string;
+  defaultModelName?: string;
   defaultEntityFilter?: DefaultEntityType;
   copilotSendMsg?: string;
   triggerNewConversation?: boolean;
   onNewConversationTriggered?: () => void;
-  onCurrentDomainChange?: (domain?: DomainType) => void;
+  onCurrentModelChange?: (model?: ModelType) => void;
   onCancelCopilotFilter?: () => void;
   onCheckMoreDetail?: () => void;
 };
@@ -38,17 +38,16 @@ type Props = {
 const Chat: React.FC<Props> = ({
   isCopilotMode,
   copilotFullscreen,
-  defaultDomainName,
+  defaultModelName,
   defaultEntityFilter,
   copilotSendMsg,
   triggerNewConversation,
   onNewConversationTriggered,
-  onCurrentDomainChange,
+  onCurrentModelChange,
   onCancelCopilotFilter,
   onCheckMoreDetail,
 }) => {
   const isMobileMode = isMobile || isCopilotMode;
-  const localConversationCollapsed = localStorage.getItem('CONVERSATION_COLLAPSED');
 
   const [messageList, setMessageList] = useState<MessageItem[]>([]);
   const [inputMsg, setInputMsg] = useState('');
@@ -58,54 +57,52 @@ const Chat: React.FC<Props> = ({
   const [currentConversation, setCurrentConversation] = useState<
     ConversationDetailType | undefined
   >(isMobile ? { chatId: 0, chatName: `${CHAT_TITLE}问答` } : undefined);
-  const [conversationCollapsed, setConversationCollapsed] = useState(
-    !localConversationCollapsed ? true : localConversationCollapsed === 'true',
-  );
-  const [domains, setDomains] = useState<DomainType[]>([]);
-  const [currentDomain, setCurrentDomain] = useState<DomainType>();
+  const [conversationCollapsed, setConversationCollapsed] = useState(isCopilotMode);
+  const [models, setModels] = useState<ModelType[]>([]);
+  const [currentModel, setCurrentModel] = useState<ModelType>();
   const [defaultEntity, setDefaultEntity] = useState<DefaultEntityType>();
   const [applyAuthVisible, setApplyAuthVisible] = useState(false);
-  const [applyAuthDomain, setApplyAuthDomain] = useState('');
-  const [initialDomainName, setInitialDomainName] = useState('');
+  const [applyAuthModel, setApplyAuthModel] = useState('');
+  const [initialModelName, setInitialModelName] = useState('');
   const location = useLocation();
   const dispatch = useDispatch();
-  const { domainName } = (location as any).query;
+  const { modelName } = (location as any).query;
 
   const conversationRef = useRef<any>();
   const chatFooterRef = useRef<any>();
 
   useEffect(() => {
     setChatSdkToken(localStorage.getItem(AUTH_TOKEN_KEY) || '');
-    initDomains();
+    initModels();
   }, []);
 
   useEffect(() => {
-    if (domains.length > 0 && initialDomainName && !currentDomain) {
-      changeDomain(domains.find((domain) => domain.name === initialDomainName));
+    if (models.length > 0 && initialModelName && !currentModel) {
+      changeModel(models.find((model) => model.name === initialModelName));
     }
-  }, [domains]);
+  }, [models]);
 
   useEffect(() => {
-    if (domainName) {
-      setInitialDomainName(domainName);
+    if (modelName) {
+      setInitialModelName(modelName);
     }
-  }, [domainName]);
+  }, [modelName]);
 
   useEffect(() => {
-    if (defaultDomainName !== undefined && domains.length > 0) {
-      changeDomain(domains.find((domain) => domain.name === defaultDomainName));
+    if (defaultModelName !== undefined && models.length > 0) {
+      changeModel(models.find((model) => model.name === defaultModelName));
     }
-  }, [defaultDomainName]);
+  }, [defaultModelName]);
 
   useEffect(() => {
     if (!currentConversation) {
       return;
     }
-    const { initMsg, domainId, entityId } = currentConversation;
+    const { initMsg, modelId, entityId } = currentConversation;
     if (initMsg) {
       inputFocus();
       if (initMsg === 'CUSTOMIZE' && copilotSendMsg) {
-        onSendMsg(copilotSendMsg, [], domainId, entityId);
+        onSendMsg(copilotSendMsg, [], modelId, entityId);
         dispatch({
           type: 'globalState/setCopilotSendMsg',
           payload: '',
@@ -116,7 +113,7 @@ const Chat: React.FC<Props> = ({
         sendHelloRsp();
         return;
       }
-      onSendMsg(initMsg, [], domainId, entityId);
+      onSendMsg(initMsg, [], modelId, entityId);
       return;
     }
     updateHistoryMsg(1);
@@ -147,13 +144,13 @@ const Chat: React.FC<Props> = ({
       {
         id: uuid(),
         type: MessageTypeEnum.TEXT,
-        msg: defaultDomainName
+        msg: defaultModelName
           ? `您好，请输入关于${
               defaultEntityFilter?.entityName
-                ? `${defaultDomainName?.slice(0, defaultDomainName?.length - 1)}【${
+                ? `${defaultModelName?.slice(0, defaultModelName?.length - 1)}【${
                     defaultEntityFilter?.entityName
                   }】`
-                : `【${defaultDomainName}】`
+                : `【${defaultModelName}】`
             }的问题`
           : '您好，请问有什么我能帮您吗？',
       },
@@ -208,19 +205,19 @@ const Chat: React.FC<Props> = ({
     },
   );
 
-  const changeDomain = (domain?: DomainType) => {
-    setCurrentDomain(domain);
-    if (onCurrentDomainChange) {
-      onCurrentDomainChange(domain);
+  const changeModel = (model?: ModelType) => {
+    setCurrentModel(model);
+    if (onCurrentModelChange) {
+      onCurrentModelChange(model);
     }
   };
 
-  const initDomains = async () => {
-    const res = await getDomainList();
-    const domainList = getLeafList(res.data);
-    setDomains([{ id: -1, name: '全部', bizName: 'all', parentId: 0 }, ...domainList].slice(0, 11));
-    if (defaultDomainName !== undefined) {
-      changeDomain(domainList.find((domain) => domain.name === defaultDomainName));
+  const initModels = async () => {
+    const res = await getModelList();
+    const modelList = getLeafList(res.data);
+    setModels([{ id: -1, name: '全部', bizName: 'all', parentId: 0 }, ...modelList].slice(0, 11));
+    if (defaultModelName !== undefined) {
+      changeModel(modelList.find((model) => model.name === defaultModelName));
     }
   };
 
@@ -237,7 +234,7 @@ const Chat: React.FC<Props> = ({
   const onSendMsg = async (
     msg?: string,
     list?: MessageItem[],
-    domainId?: number,
+    modelId?: number,
     entityId?: string,
   ) => {
     const currentMsg = msg || inputMsg;
@@ -245,25 +242,25 @@ const Chat: React.FC<Props> = ({
       setInputMsg('');
       return;
     }
-    const msgDomain = domains.find((item) => currentMsg.includes(item.name));
-    const certainDomain = currentMsg[0] === '@' && msgDomain;
-    let domainChanged = false;
+    const msgModel = models.find((item) => currentMsg.includes(item.name));
+    const certainModel = currentMsg[0] === '@' && msgModel;
+    let modelChanged = false;
 
-    if (certainDomain) {
-      const toDomain = msgDomain.id === -1 ? undefined : msgDomain;
-      changeDomain(toDomain);
-      domainChanged = currentDomain?.id !== toDomain?.id;
+    if (certainModel) {
+      const toModel = msgModel.id === -1 ? undefined : msgModel;
+      changeModel(toModel);
+      modelChanged = currentModel?.id !== toModel?.id;
     }
-    const domainIdValue = domainId || msgDomain?.id || currentDomain?.id;
+    const modelIdValue = modelId || msgModel?.id || currentModel?.id;
     const msgs = [
       ...(list || messageList),
       {
         id: uuid(),
         msg: currentMsg,
-        msgValue: certainDomain ? currentMsg.replace(`@${msgDomain.name}`, '').trim() : currentMsg,
-        domainId: domainIdValue === -1 ? undefined : domainIdValue,
-        entityId: entityId || (domainChanged ? undefined : defaultEntity?.entityId),
-        identityMsg: certainDomain ? getIdentityMsgText(msgDomain) : undefined,
+        msgValue: certainModel ? currentMsg.replace(`@${msgModel.name}`, '').trim() : currentMsg,
+        modelId: modelIdValue === -1 ? undefined : modelIdValue,
+        entityId: entityId || (modelChanged ? undefined : defaultEntity?.entityId),
+        identityMsg: certainModel ? getIdentityMsgText(msgModel) : undefined,
         type: MessageTypeEnum.QUESTION,
       },
     ];
@@ -290,7 +287,7 @@ const Chat: React.FC<Props> = ({
   const onSelectConversation = (
     conversation: ConversationDetailType,
     name?: string,
-    domainId?: number,
+    modelId?: number,
     entityId?: string,
   ) => {
     if (!isMobileMode) {
@@ -299,10 +296,29 @@ const Chat: React.FC<Props> = ({
     setCurrentConversation({
       ...conversation,
       initMsg: name,
-      domainId,
+      modelId,
       entityId,
     });
     saveConversationToLocal(conversation);
+  };
+
+  const updateChatFilter = (data: MsgDataType) => {
+    const { queryMode, dimensionFilters, elementMatches, modelName, model } = data.chatContext;
+    if (queryMode !== 'ENTITY_LIST_FILTER') {
+      return;
+    }
+    const entityId = dimensionFilters?.length > 0 ? dimensionFilters[0].value : undefined;
+    const entityName = elementMatches?.find((item: any) => item.element?.type === 'ID')?.element
+      ?.name;
+
+    if (typeof entityId === 'string' && entityName) {
+      setCurrentModel(model);
+      setDefaultEntity({
+        entityId,
+        entityName,
+        modelName,
+      });
+    }
   };
 
   const onMsgDataLoaded = (data: MsgDataType, questionId: string | number) => {
@@ -311,6 +327,15 @@ const Chat: React.FC<Props> = ({
     }
     if (!data) {
       return;
+    }
+    let parseOptionsItem: any;
+    if (data.parseOptions && data.parseOptions.length > 0) {
+      parseOptionsItem = {
+        id: uuid(),
+        msg: messageList[messageList.length - 1]?.msg,
+        type: MessageTypeEnum.PARSE_OPTIONS,
+        parseOptions: data.parseOptions,
+      };
     }
     if (data.queryMode === 'WEB_PAGE') {
       setMessageList([
@@ -321,16 +346,19 @@ const Chat: React.FC<Props> = ({
           type: MessageTypeEnum.PLUGIN,
           msgData: data,
         },
+        ...(parseOptionsItem ? [parseOptionsItem] : []),
       ]);
     } else {
       const msgs = cloneDeep(messageList);
       const msg = msgs.find((item) => item.id === questionId);
       if (msg) {
         msg.msgData = data;
-        setMessageList(msgs);
+        setMessageList([...msgs, ...(parseOptionsItem ? [parseOptionsItem] : [])]);
       }
       updateMessageContainerScroll();
     }
+
+    updateChatFilter(data);
   };
 
   const onCheckMore = (data: MsgDataType) => {
@@ -354,14 +382,14 @@ const Chat: React.FC<Props> = ({
     localStorage.setItem('CONVERSATION_COLLAPSED', `${!conversationCollapsed}`);
   };
 
-  const getIdentityMsgText = (domain?: DomainType) => {
-    return domain
-      ? `您好，我当前身份是【${domain.name}】主题专家，我将尽力帮您解答相关问题～`
+  const getIdentityMsgText = (model?: ModelType) => {
+    return model
+      ? `您好，我当前身份是【${model.name}】主题专家，我将尽力帮您解答相关问题～`
       : '您好，我将尽力帮您解答所有主题相关问题～';
   };
 
-  const onApplyAuth = (domain: string) => {
-    setApplyAuthDomain(domain);
+  const onApplyAuth = (model: string) => {
+    setApplyAuthModel(model);
     setApplyAuthVisible(true);
   };
 
@@ -385,7 +413,7 @@ const Chat: React.FC<Props> = ({
           currentConversation={currentConversation}
           collapsed={conversationCollapsed}
           isCopilotMode={isCopilotMode}
-          defaultDomainName={defaultDomainName}
+          defaultModelName={defaultModelName}
           defaultEntityFilter={defaultEntityFilter}
           triggerNewConversation={triggerNewConversation}
           onNewConversationTriggered={onNewConversationTriggered}
@@ -411,23 +439,24 @@ const Chat: React.FC<Props> = ({
                 <ChatFooter
                   inputMsg={inputMsg}
                   chatId={currentConversation?.chatId}
-                  domains={domains}
-                  currentDomain={currentDomain}
+                  models={models}
+                  currentModel={currentModel}
                   defaultEntity={defaultEntity}
                   collapsed={conversationCollapsed}
                   isCopilotMode={isCopilotMode}
                   copilotFullscreen={copilotFullscreen}
                   onToggleCollapseBtn={onToggleCollapseBtn}
                   onInputMsgChange={onInputMsgChange}
-                  onSendMsg={(msg: string, domainId?: number) => {
-                    onSendMsg(msg, messageList, domainId);
+                  onSendMsg={(msg: string, modelId?: number) => {
+                    onSendMsg(msg, messageList, modelId);
                     if (isMobile) {
                       inputBlur();
                     }
                   }}
                   onAddConversation={onAddConversation}
                   onCancelDefaultFilter={() => {
-                    changeDomain(undefined);
+                    changeModel(undefined);
+                    setDefaultEntity(undefined);
                     if (onCancelCopilotFilter) {
                       onCancelCopilotFilter();
                     }

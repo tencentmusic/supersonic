@@ -1,11 +1,11 @@
 import { PREFIX_CLS } from '../../../common/constants';
 
 type Props = {
-  domain: string;
-  onApplyAuth?: (domain: string) => void;
+  model: string;
+  onApplyAuth?: (model: string) => void;
 };
 
-const ApplyAuth: React.FC<Props> = ({ domain, onApplyAuth }) => {
+const ApplyAuth: React.FC<Props> = ({ model, onApplyAuth }) => {
   const prefixCls = `${PREFIX_CLS}-apply-auth`;
 
   return (
@@ -15,7 +15,7 @@ const ApplyAuth: React.FC<Props> = ({ domain, onApplyAuth }) => {
         <span
           className={`${prefixCls}-apply`}
           onClick={() => {
-            onApplyAuth(domain);
+            onApplyAuth(model);
           }}
         >
           点击申请

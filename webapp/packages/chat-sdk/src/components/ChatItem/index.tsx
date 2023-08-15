@@ -9,12 +9,13 @@ import ExecuteItem from './ExecuteItem';
 type Props = {
   msg: string;
   conversationId?: number;
-  domainId?: number;
+  modelId?: number;
   filter?: any[];
   isLastMessage?: boolean;
   msgData?: MsgDataType;
   isMobileMode?: boolean;
   triggerResize?: boolean;
+  parseOptions?: ChatContextType[];
   onMsgDataLoaded?: (data: MsgDataType, valid: boolean) => void;
   onUpdateMessageScroll?: () => void;
 };
@@ -22,19 +23,20 @@ type Props = {
 const ChatItem: React.FC<Props> = ({
   msg,
   conversationId,
-  domainId,
+  modelId,
   filter,
   isLastMessage,
   isMobileMode,
   triggerResize,
   msgData,
+  parseOptions,
   onMsgDataLoaded,
   onUpdateMessageScroll,
 }) => {
   const [data, setData] = useState<MsgDataType>();
   const [parseLoading, setParseLoading] = useState(false);
   const [parseInfo, setParseInfo] = useState<ChatContextType>();
-  const [parseInfoOptions, setParseInfoOptions] = useState<ChatContextType[]>([]);
+  const [parseInfoOptions, setParseInfoOptions] = useState<ChatContextType[]>(parseOptions || []);
   const [parseTip, setParseTip] = useState('');
   const [executeLoading, setExecuteLoading] = useState(false);
   const [executeTip, setExecuteTip] = useState('');
@@ -68,20 +70,43 @@ const ChatItem: React.FC<Props> = ({
     return true;
   };
 
-  const onExecute = async (parseInfoValue: ChatContextType, isSwitch?: boolean) => {
+  const onExecute = async (
+    parseInfoValue: ChatContextType,
+    parseInfoOptions?: ChatContextType[]
+  ) => {
     setExecuteMode(true);
     setExecuteLoading(true);
     const { data } = await chatExecute(msg, conversationId!, parseInfoValue);
     setExecuteLoading(false);
     const valid = updateData(data);
-    if (onMsgDataLoaded && !isSwitch) {
-      onMsgDataLoaded({ ...data.data, chatContext: parseInfoValue }, valid);
+    if (onMsgDataLoaded) {
+      let parseOptions: ChatContextType[] = parseInfoOptions || [];
+      if (
+        parseInfoOptions &&
+        parseInfoOptions.length > 1 &&
+        (parseInfoOptions[0].queryMode.includes('METRIC') ||
+          parseInfoOptions[0].queryMode.includes('ENTITY'))
+      ) {
+        parseOptions = parseInfoOptions.filter(
+          (item, index) =>
+            index === 0 ||
+            (!item.queryMode.includes('METRIC') && !item.queryMode.includes('ENTITY'))
+        );
+      }
+      onMsgDataLoaded(
+        {
+          ...data.data,
+          chatContext: parseInfoValue,
+          parseOptions: parseOptions.length > 1 ? parseOptions.slice(1) : undefined,
+        },
+        valid
+      );
     }
   };
 
   const onSendMsg = async () => {
     setParseLoading(true);
-    const { data: parseData } = await chatParse(msg, conversationId, domainId, filter);
+    const { data: parseData } = await chatParse(msg, conversationId, modelId, filter);
     setParseLoading(false);
     const { code, data } = parseData || {};
     const { state, selectedParses } = data || {};
@@ -91,7 +116,7 @@ const ChatItem: React.FC<Props> = ({
       selectedParses == null ||
       selectedParses.length === 0 ||
       (selectedParses.length === 1 &&
-        !selectedParses[0]?.domainName &&
+        !selectedParses[0]?.modelName &&
         !selectedParses[0]?.properties?.CONTEXT?.plugin?.name &&
         selectedParses[0]?.queryMode !== 'WEB_PAGE')
     ) {
@@ -102,15 +127,13 @@ const ChatItem: React.FC<Props> = ({
       onUpdateMessageScroll();
     }
     setParseInfoOptions(selectedParses || []);
-    if (selectedParses.length === 1) {
-      const parseInfoValue = selectedParses[0];
-      setParseInfo(parseInfoValue);
-      onExecute(parseInfoValue);
-    }
+    const parseInfoValue = selectedParses[0];
+    setParseInfo(parseInfoValue);
+    onExecute(parseInfoValue, selectedParses);
   };
 
   useEffect(() => {
-    if (data !== undefined) {
+    if (data !== undefined || parseOptions !== undefined || executeTip !== '') {
       return;
     }
     if (msgData) {
@@ -124,7 +147,7 @@ const ChatItem: React.FC<Props> = ({
 
   const onSwitchEntity = async (entityId: string) => {
     setEntitySwitching(true);
-    const res = await switchEntity(entityId, data?.chatContext?.domainId, conversationId || 0);
+    const res = await switchEntity(entityId, data?.chatContext?.modelId, conversationId || 0);
     setEntitySwitching(false);
     setData(res.data.data);
   };
@@ -135,7 +158,7 @@ const ChatItem: React.FC<Props> = ({
 
   const onSelectParseInfo = async (parseInfoValue: ChatContextType) => {
     setParseInfo(parseInfoValue);
-    onExecute(parseInfoValue, parseInfo !== undefined);
+    onExecute(parseInfoValue);
     if (onUpdateMessageScroll) {
       onUpdateMessageScroll();
     }
@@ -148,9 +171,10 @@ const ChatItem: React.FC<Props> = ({
         <div className={`${prefixCls}-content`}>
           <ParseTip
             parseLoading={parseLoading}
-            parseInfoOptions={parseInfoOptions}
+            parseInfoOptions={parseOptions || parseInfoOptions.slice(0, 1)}
             parseTip={parseTip}
             currentParseInfo={parseInfo}
+            optionMode={parseOptions !== undefined}
             onSelectParseInfo={onSelectParseInfo}
           />
         </div>

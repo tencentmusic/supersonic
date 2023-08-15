@@ -23,7 +23,7 @@ type Props = {
     valid: boolean,
   ) => void;
   onCheckMore: (data: MsgDataType) => void;
-  onApplyAuth: (domain: string) => void;
+  onApplyAuth: (model: string) => void;
 };
 
 const MessageContainer: React.FC<Props> = ({
@@ -71,15 +71,15 @@ const MessageContainer: React.FC<Props> = ({
 
     for (let i = 0; i < msgs.length; i++) {
       const msg = msgs[i];
-      const msgDomainId = msg.msgData?.chatContext?.domainId;
+      const msgModelId = msg.msgData?.chatContext?.modelId;
       const msgEntityId = msg.msgData?.entityInfo?.entityId;
-      const currentMsgDomainId = currentMsgData?.chatContext?.domainId;
+      const currentMsgModelId = currentMsgData?.chatContext?.modelId;
       const currentMsgEntityId = currentMsgData?.entityInfo?.entityId;
 
       if (
         (msg.type === MessageTypeEnum.QUESTION || msg.type === MessageTypeEnum.PLUGIN) &&
-        !!currentMsgDomainId &&
-        msgDomainId === currentMsgDomainId &&
+        !!currentMsgModelId &&
+        msgModelId === currentMsgModelId &&
         msgEntityId === currentMsgEntityId &&
         msg.msg
       ) {
@@ -91,8 +91,8 @@ const MessageContainer: React.FC<Props> = ({
     return followQuestions;
   };
 
-  const getFilters = (domainId?: number, entityId?: string) => {
-    if (!domainId || !entityId) {
+  const getFilters = (modelId?: number, entityId?: string) => {
+    if (!modelId || !entityId) {
       return undefined;
     }
     return [
@@ -108,7 +108,7 @@ const MessageContainer: React.FC<Props> = ({
         {messageList.map((msgItem: MessageItem, index: number) => {
           const {
             id: msgId,
-            domainId,
+            modelId,
             entityId,
             type,
             msg,
@@ -117,6 +117,7 @@ const MessageContainer: React.FC<Props> = ({
             msgData,
             score,
             isHistory,
+            parseOptions,
           } = msgItem;
 
           const followQuestions = getFollowQuestions(index);
@@ -132,8 +133,8 @@ const MessageContainer: React.FC<Props> = ({
                     msg={msgValue || msg || ''}
                     msgData={msgData}
                     conversationId={chatId}
-                    domainId={domainId}
-                    filter={getFilters(domainId, entityId)}
+                    modelId={modelId}
+                    filter={getFilters(modelId, entityId)}
                     isLastMessage={index === messageList.length - 1}
                     isMobileMode={isMobileMode}
                     triggerResize={triggerResize}
@@ -143,6 +144,22 @@ const MessageContainer: React.FC<Props> = ({
                     onUpdateMessageScroll={updateMessageContainerScroll}
                   />
                 </>
+              )}
+              {type === MessageTypeEnum.PARSE_OPTIONS && (
+                <ChatItem
+                  msg={msgValue || msg || ''}
+                  conversationId={chatId}
+                  modelId={modelId}
+                  filter={getFilters(modelId, entityId)}
+                  isLastMessage={index === messageList.length - 1}
+                  isMobileMode={isMobileMode}
+                  triggerResize={triggerResize}
+                  parseOptions={parseOptions}
+                  onMsgDataLoaded={(data: MsgDataType, valid: boolean) => {
+                    onMsgDataLoaded(data, msgId, msgValue || msg || '', valid);
+                  }}
+                  onUpdateMessageScroll={updateMessageContainerScroll}
+                />
               )}
               {type === MessageTypeEnum.PLUGIN && (
                 <>

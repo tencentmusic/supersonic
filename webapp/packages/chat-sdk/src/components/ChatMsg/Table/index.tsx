@@ -8,7 +8,7 @@ import { SizeType } from 'antd/es/config-provider/SizeContext';
 type Props = {
   data: MsgDataType;
   size?: SizeType;
-  onApplyAuth?: (domain: string) => void;
+  onApplyAuth?: (model: string) => void;
 };
 
 const Table: React.FC<Props> = ({ data, size, onApplyAuth }) => {
@@ -24,9 +24,7 @@ const Table: React.FC<Props> = ({ data, size, onApplyAuth }) => {
         title: name || nameEn,
         render: (value: string | number) => {
           if (!authorized) {
-            return (
-              <ApplyAuth domain={entityInfo?.domainInfo.name || ''} onApplyAuth={onApplyAuth} />
-            );
+            return <ApplyAuth model={entityInfo?.modelInfo.name || ''} onApplyAuth={onApplyAuth} />;
           }
           if (dataFormatType === 'percent') {
             return (
@@ -71,7 +69,7 @@ const Table: React.FC<Props> = ({ data, size, onApplyAuth }) => {
         columns={tableColumns}
         dataSource={queryResults}
         style={{ width: '100%' }}
-        scroll={{ x: 'max-content' }}
+        // scroll={{ x: 'max-content' }}
         rowClassName={getRowClassName}
         size={size}
       />

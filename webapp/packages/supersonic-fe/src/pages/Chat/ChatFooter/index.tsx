@@ -9,21 +9,21 @@ import { searchRecommend } from 'supersonic-chat-sdk';
 import { SemanticTypeEnum, SEMANTIC_TYPE_MAP } from '../constants';
 import styles from './style.less';
 import { PLACE_HOLDER } from '../constants';
-import { DefaultEntityType, DomainType } from '../type';
+import { DefaultEntityType, ModelType } from '../type';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 
 type Props = {
   inputMsg: string;
   chatId?: number;
-  currentDomain?: DomainType;
+  currentModel?: ModelType;
   defaultEntity?: DefaultEntityType;
   isCopilotMode?: boolean;
   copilotFullscreen?: boolean;
-  domains: DomainType[];
+  models: ModelType[];
   collapsed: boolean;
   onToggleCollapseBtn: () => void;
   onInputMsgChange: (value: string) => void;
-  onSendMsg: (msg: string, domainId?: number) => void;
+  onSendMsg: (msg: string, modelId?: number) => void;
   onAddConversation: () => void;
   onCancelDefaultFilter: () => void;
 };
@@ -44,9 +44,9 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   {
     inputMsg,
     chatId,
-    currentDomain,
+    currentModel,
     defaultEntity,
-    domains,
+    models,
     collapsed,
     isCopilotMode,
     copilotFullscreen,
@@ -58,7 +58,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   },
   ref,
 ) => {
-  const [domainOptions, setDomainOptions] = useState<DomainType[]>([]);
+  const [modelOptions, setModelOptions] = useState<ModelType[]>([]);
   const [stepOptions, setStepOptions] = useState<Record<string, any[]>>({});
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -100,7 +100,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   }, []);
 
   const getStepOptions = (recommends: any[]) => {
-    const data = groupByColumn(recommends, 'domainName');
+    const data = groupByColumn(recommends, 'modelName');
     return isMobile && recommends.length > 6
       ? Object.keys(data)
           .slice(0, 4)
@@ -114,23 +114,23 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       : data;
   };
 
-  const processMsg = (msg: string, domains: DomainType[]) => {
+  const processMsg = (msg: string, models: ModelType[]) => {
     let msgValue = msg;
-    let domainId: number | undefined;
+    let modelId: number | undefined;
     if (msg?.[0] === '@') {
-      const domain = domains.find((item) => msg.includes(`@${item.name}`));
-      msgValue = domain ? msg.replace(`@${domain.name}`, '') : msg;
-      domainId = domain?.id;
+      const model = models.find((item) => msg.includes(`@${item.name}`));
+      msgValue = model ? msg.replace(`@${model.name}`, '') : msg;
+      modelId = model?.id;
     }
-    return { msgValue, domainId };
+    return { msgValue, modelId };
   };
 
   const debounceGetWordsFunc = useCallback(() => {
     const getAssociateWords = async (
       msg: string,
-      domains: DomainType[],
+      models: ModelType[],
       chatId?: number,
-      domain?: DomainType,
+      model?: ModelType,
     ) => {
       if (isPinyin) {
         return;
@@ -140,9 +140,9 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       }
       fetchRef.current += 1;
       const fetchId = fetchRef.current;
-      const { msgValue, domainId } = processMsg(msg, domains);
-      const domainIdValue = domainId || domain?.id;
-      const res = await searchRecommend(msgValue.trim(), chatId, domainIdValue);
+      const { msgValue, modelId } = processMsg(msg, models);
+      const modelIdValue = modelId || model?.id;
+      const res = await searchRecommend(msgValue.trim(), chatId, modelIdValue);
       if (fetchId !== fetchRef.current) {
         return;
       }
@@ -165,19 +165,19 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   useEffect(() => {
     if (inputMsg.length === 1 && inputMsg[0] === '@') {
       setOpen(true);
-      setDomainOptions(domains);
+      setModelOptions(models);
       setStepOptions({});
       return;
     } else {
       setOpen(false);
-      if (domainOptions.length > 0) {
+      if (modelOptions.length > 0) {
         setTimeout(() => {
-          setDomainOptions([]);
+          setModelOptions([]);
         }, 500);
       }
     }
     if (!isSelect) {
-      debounceGetWords(inputMsg, domains, chatId, currentDomain);
+      debounceGetWords(inputMsg, models, chatId, currentModel);
     } else {
       isSelect = false;
     }
@@ -219,10 +219,10 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       .find((item) =>
         Object.keys(stepOptions).length === 1
           ? item.recommend === value
-          : `${item.domainName || ''}${item.recommend}` === value,
+          : `${item.modelName || ''}${item.recommend}` === value,
       );
     if (option && isSelect) {
-      onSendMsg(option.recommend, option.domainId);
+      onSendMsg(option.recommend, option.modelId);
     } else {
       onSendMsg(value.trim());
     }
@@ -230,12 +230,12 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
 
   const autoCompleteDropdownClass = classNames(styles.autoCompleteDropdown, {
     [styles.mobile]: isMobile,
-    [styles.domainOptions]: domainOptions.length > 0,
+    [styles.modelOptions]: modelOptions.length > 0,
   });
 
   const onSelect = (value: string) => {
     isSelect = true;
-    if (domainOptions.length === 0) {
+    if (modelOptions.length === 0) {
       sendMsg(value);
     }
     setOpen(false);
@@ -263,19 +263,16 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
           />
         </Tooltip>
         <div className={styles.composerInputWrapper}>
-          {currentDomain && (
-            <div className={styles.currentDomain}>
-              <div className={styles.currentDomainName}>
+          {currentModel && (
+            <div className={styles.currentModel}>
+              <div className={styles.currentModelName}>
                 输入联想与问题回复将限定于：“
                 <span className={styles.quoteText}>
-                  主题域【{currentDomain.name}】
+                  主题域【{currentModel.name}】
                   {defaultEntity && (
                     <>
                       <span>，</span>
-                      <span>{`${currentDomain.name.slice(
-                        0,
-                        currentDomain.name.length - 1,
-                      )}【`}</span>
+                      <span>{`${currentModel.name.slice(0, currentModel.name.length - 1)}【`}</span>
                       <span className={styles.entityName} title={defaultEntity.entityName}>
                         {defaultEntity.entityName}
                       </span>
@@ -285,7 +282,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
                 </span>
                 ”
               </div>
-              <div className={styles.cancelDomain} onClick={onCancelDefaultFilter}>
+              <div className={styles.cancelModel} onClick={onCancelDefaultFilter}>
                 取消限定
               </div>
             </div>
@@ -293,8 +290,8 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
           <AutoComplete
             className={styles.composerInput}
             placeholder={
-              currentDomain
-                ? `请输入【${currentDomain.name}】主题的问题，可使用@切换到其他主题`
+              currentModel
+                ? `请输入【${currentModel.name}】主题的问题，可使用@切换到其他主题`
                 : PLACE_HOLDER
             }
             value={inputMsg}
@@ -323,15 +320,15 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
             open={open}
             getPopupContainer={(triggerNode) => triggerNode.parentNode}
           >
-            {domainOptions.length > 0
-              ? domainOptions.map((domain) => {
+            {modelOptions.length > 0
+              ? modelOptions.map((model) => {
                   return (
                     <Option
-                      key={domain.id}
-                      value={`@${domain.name} `}
+                      key={model.id}
+                      value={`@${model.name} `}
                       className={styles.searchOption}
                     >
-                      {domain.name}
+                      {model.name}
                     </Option>
                   );
                 })
@@ -342,17 +339,15 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
                         let optionValue =
                           Object.keys(stepOptions).length === 1
                             ? option.recommend
-                            : `${option.domainName || ''}${option.recommend}`;
+                            : `${option.modelName || ''}${option.recommend}`;
                         if (inputMsg[0] === '@') {
-                          const domain = domains.find((item) => inputMsg.includes(item.name));
-                          optionValue = domain
-                            ? `@${domain.name} ${option.recommend}`
-                            : optionValue;
+                          const model = models.find((item) => inputMsg.includes(item.name));
+                          optionValue = model ? `@${model.name} ${option.recommend}` : optionValue;
                         }
                         return (
                           <Option
                             key={`${option.recommend}${
-                              option.domainName ? `_${option.domainName}` : ''
+                              option.modelName ? `_${option.modelName}` : ''
                             }`}
                             value={optionValue}
                             className={styles.searchOption}
@@ -363,7 +358,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
                                   className={styles.semanticType}
                                   color={
                                     option.schemaElementType === SemanticTypeEnum.DIMENSION ||
-                                    option.schemaElementType === SemanticTypeEnum.DOMAIN
+                                    option.schemaElementType === SemanticTypeEnum.MODEL
                                       ? 'blue'
                                       : option.schemaElementType === SemanticTypeEnum.VALUE
                                       ? 'geekblue'
