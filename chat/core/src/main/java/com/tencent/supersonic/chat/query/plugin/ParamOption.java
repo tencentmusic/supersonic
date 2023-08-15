@@ -15,7 +15,7 @@ public class ParamOption {
 
     private String keyAlias;
 
-    private Long domainId;
+    private Long modelId;
 
     private Long elementId;
 

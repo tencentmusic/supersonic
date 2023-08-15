@@ -12,7 +12,7 @@ public class ViewInfoDO {
     /**
      *
      */
-    private Long domainId;
+    private Long modelId;
 
     /**
      * datasource、dimension、metric
@@ -59,17 +59,17 @@ public class ViewInfoDO {
     }
 
     /**
-     * @return domain_id
+     * @return model_id
      */
-    public Long getDomainId() {
-        return domainId;
+    public Long getModelId() {
+        return modelId;
     }
 
     /**
-     * @param domainId
+     * @param modelId
      */
-    public void setDomainId(Long domainId) {
-        this.domainId = domainId;
+    public void setModelId(Long modelId) {
+        this.modelId = modelId;
     }
 
     /**

@@ -1,7 +1,8 @@
 package com.tencent.supersonic.chat.query.rule.entity;
 
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.DomainSchema;
+import com.tencent.supersonic.chat.api.pojo.ModelSchema;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
@@ -11,7 +12,6 @@ import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.util.ContextUtils;
-
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -19,25 +19,26 @@ import java.util.Set;
 public abstract class EntityListQuery extends EntitySemanticQuery {
 
     @Override
-    public void fillParseInfo(Long domainId, ChatContext chatContext) {
-        super.fillParseInfo(domainId, chatContext);
+    public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {
+        super.fillParseInfo(modelId, queryContext, chatContext);
         this.addEntityDetailAndOrderByMetric(parseInfo);
     }
 
     private void addEntityDetailAndOrderByMetric(SemanticParseInfo parseInfo) {
-        Long domainId = parseInfo.getDomainId();
-        if (Objects.nonNull(domainId) && domainId > 0L) {
+        Long modelId = parseInfo.getModelId();
+        if (Objects.nonNull(modelId) && modelId > 0L) {
             ConfigService configService = ContextUtils.getBean(ConfigService.class);
-            ChatConfigRichResp chaConfigRichDesc = configService.getConfigRichInfo(parseInfo.getDomainId());
+            ChatConfigRichResp chaConfigRichDesc = configService.getConfigRichInfo(parseInfo.getModelId());
             SemanticService schemaService = ContextUtils.getBean(SemanticService.class);
-            DomainSchema domainSchema = schemaService.getDomainSchema(domainId);
+            ModelSchema ModelSchema = schemaService.getModelSchema(modelId);
 
             if (chaConfigRichDesc != null && chaConfigRichDesc.getChatDetailRichConfig() != null
-                    && Objects.nonNull(domainSchema) && Objects.nonNull(domainSchema.getEntity())) {
+                    && Objects.nonNull(ModelSchema) && Objects.nonNull(ModelSchema.getEntity())) {
                 Set<SchemaElement> dimensions = new LinkedHashSet();
                 Set<SchemaElement> metrics = new LinkedHashSet();
                 Set<Order> orders = new LinkedHashSet();
-                ChatDefaultRichConfigResp chatDefaultConfig = chaConfigRichDesc.getChatDetailRichConfig().getChatDefaultConfig();
+                ChatDefaultRichConfigResp chatDefaultConfig = chaConfigRichDesc.getChatDetailRichConfig()
+                        .getChatDefaultConfig();
                 if (chatDefaultConfig != null) {
                     chatDefaultConfig.getMetrics().stream()
                             .forEach(metric -> {

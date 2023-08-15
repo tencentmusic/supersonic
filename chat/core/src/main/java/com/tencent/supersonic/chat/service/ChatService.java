@@ -3,23 +3,21 @@ package com.tencent.supersonic.chat.service;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
-import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import java.util.List;
 
 public interface ChatService {
 
     /***
-     * get the domain from context
+     * get the model from context
      * @param chatId
      * @return
      */
-    public Long getContextDomain(Integer chatId);
+    public Long getContextModel(Integer chatId);
 
     public ChatContext getOrCreateContext(int chatId);
 

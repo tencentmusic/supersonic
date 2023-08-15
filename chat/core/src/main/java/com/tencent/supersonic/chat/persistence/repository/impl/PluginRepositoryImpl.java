@@ -5,13 +5,13 @@ import com.tencent.supersonic.chat.persistence.dataobject.PluginDOExample;
 import com.tencent.supersonic.chat.persistence.mapper.PluginDOMapper;
 import com.tencent.supersonic.chat.persistence.repository.PluginRepository;
 import com.tencent.supersonic.common.util.ContextUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.stereotype.Repository;
 
 @Repository
 @Slf4j
@@ -58,7 +58,7 @@ public class PluginRepositoryImpl implements PluginRepository {
     }
 
     @Override
-    public void updatePlugin(PluginDO pluginDO){
+    public void updatePlugin(PluginDO pluginDO) {
         pluginDOMapper.updateByPrimaryKeyWithBLOBs(pluginDO);
     }
 
@@ -68,12 +68,12 @@ public class PluginRepositoryImpl implements PluginRepository {
     }
 
     @Override
-    public List<PluginDO> query(PluginDOExample pluginDOExample){
+    public List<PluginDO> query(PluginDOExample pluginDOExample) {
         return pluginDOMapper.selectByExampleWithBLOBs(pluginDOExample);
     }
 
     @Override
-    public void deletePlugin(Long id){
+    public void deletePlugin(Long id) {
         pluginDOMapper.deleteByPrimaryKey(id);
     }
 

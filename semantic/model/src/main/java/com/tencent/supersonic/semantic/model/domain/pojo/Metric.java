@@ -10,7 +10,7 @@ import lombok.Data;
 public class Metric extends SchemaItem {
 
 
-    private Long domainId;
+    private Long modelId;
 
     //measure_proxy ratio expr cumulative derived
     private String type;

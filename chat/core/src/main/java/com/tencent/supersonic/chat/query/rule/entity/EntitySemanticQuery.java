@@ -1,5 +1,9 @@
 package com.tencent.supersonic.chat.query.rule.entity;
 
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
@@ -11,17 +15,12 @@ import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.util.ContextUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 
 @Slf4j
 public abstract class EntitySemanticQuery extends RuleSemanticQuery {
@@ -35,7 +34,7 @@ public abstract class EntitySemanticQuery extends RuleSemanticQuery {
 
     @Override
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-                                          QueryContext queryCtx) {
+            QueryContext queryCtx) {
         candidateElementMatches = filterElementMatches(candidateElementMatches);
         return super.match(candidateElementMatches, queryCtx);
     }
@@ -43,13 +42,13 @@ public abstract class EntitySemanticQuery extends RuleSemanticQuery {
     private List<SchemaElementMatch> filterElementMatches(List<SchemaElementMatch> candidateElementMatches) {
         List<SchemaElementMatch> filteredMatches = new ArrayList<>();
         if (CollectionUtils.isEmpty(candidateElementMatches)
-                || Objects.isNull(candidateElementMatches.get(0).getElement().getDomain())) {
+                || Objects.isNull(candidateElementMatches.get(0).getElement().getModel())) {
             return candidateElementMatches;
         }
 
-        Long domainId = candidateElementMatches.get(0).getElement().getDomain();
+        Long modelId = candidateElementMatches.get(0).getElement().getModel();
         ConfigService configService = ContextUtils.getBean(ConfigService.class);
-        ChatConfigResp chatConfig = configService.fetchConfigByDomainId(domainId);
+        ChatConfigResp chatConfig = configService.fetchConfigByModelId(modelId);
 
         List<Long> blackDimIdList = new ArrayList<>();
         List<Long> blackMetricIdList = new ArrayList<>();
@@ -78,14 +77,14 @@ public abstract class EntitySemanticQuery extends RuleSemanticQuery {
     }
 
     @Override
-    public void fillParseInfo(Long domainId, ChatContext chatContext) {
-        super.fillParseInfo(domainId, chatContext);
+    public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {
+        super.fillParseInfo(modelId, queryContext, chatContext);
 
         parseInfo.setNativeQuery(true);
         parseInfo.setLimit(ENTITY_MAX_RESULTS);
         if (parseInfo.getDateInfo() == null) {
             ConfigService configService = ContextUtils.getBean(ConfigService.class);
-            ChatConfigRichResp chatConfig = configService.getConfigRichInfo(parseInfo.getDomainId());
+            ChatConfigRichResp chatConfig = configService.getConfigRichInfo(parseInfo.getModelId());
             ChatDefaultRichConfigResp defaultConfig = chatConfig.getChatDetailRichConfig().getChatDefaultConfig();
 
             int unit = 1;

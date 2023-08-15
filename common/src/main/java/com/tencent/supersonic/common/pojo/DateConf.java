@@ -5,7 +5,6 @@ import static java.time.LocalDate.now;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import lombok.Data;
 
 @Data
@@ -41,12 +40,18 @@ public class DateConf {
     /**
      * the text parse from , example "last 7 days" , "last mouth"
      */
-    private String text;
+    private String detectWord;
+
+    private boolean isInherited;
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         DateConf dateConf = (DateConf) o;
         return dateMode == dateConf.dateMode &&
                 Objects.equals(startDate, dateConf.startDate) &&
@@ -87,7 +92,7 @@ public class DateConf {
         sb.append(",\"period\":\"")
                 .append(period).append('\"');
         sb.append(",\"text\":\"")
-                .append(text).append('\"');
+                .append(detectWord).append('\"');
         sb.append('}');
         return sb.toString();
     }

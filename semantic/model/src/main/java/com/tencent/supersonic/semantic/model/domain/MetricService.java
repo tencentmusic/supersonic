@@ -11,11 +11,11 @@ public interface MetricService {
 
     List<MetricResp> getMetrics(List<Long> ids);
 
-    List<MetricResp> getMetrics(Long domainId);
+    List<MetricResp> getMetrics(Long modelId);
 
     List<MetricResp> getMetrics();
 
-    List<MetricResp> getMetrics(Long domainId, Long datasourceId);
+    List<MetricResp> getMetrics(Long modelId, Long datasourceId);
 
     void creatExprMetric(MetricReq metricReq, User user) throws Exception;
 
@@ -23,9 +23,9 @@ public interface MetricService {
 
     PageInfo<MetricResp> queryMetric(PageMetricReq pageMetrricReq);
 
-    MetricResp getMetric(Long domainId, String bizName);
+    MetricResp getMetric(Long modelId, String bizName);
 
-    List<MetricResp> getHighSensitiveMetric(Long domainId);
+    List<MetricResp> getHighSensitiveMetric(Long modelId);
 
     void updateExprMetric(MetricReq metricReq, User user) throws Exception;
 

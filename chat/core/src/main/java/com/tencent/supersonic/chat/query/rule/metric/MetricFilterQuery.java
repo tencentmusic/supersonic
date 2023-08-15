@@ -79,7 +79,8 @@ public class MetricFilterQuery extends MetricSemanticQuery {
             filters.forEach(d -> {
                 if (!dimensions.contains(d.getBizName())) {
                     dimensions.add(d.getBizName());
-                }});
+                }
+            });
             queryStructReq.setGroups(dimensions);
             log.info("addDimension after [{}]", queryStructReq.getGroups());
         }

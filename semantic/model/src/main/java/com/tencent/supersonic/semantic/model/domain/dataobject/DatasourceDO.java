@@ -12,7 +12,7 @@ public class DatasourceDO {
     /**
      * 主题域ID
      */
-    private Long domainId;
+    private Long modelId;
 
     /**
      * 数据源名称
@@ -76,19 +76,19 @@ public class DatasourceDO {
     /**
      * 主题域ID
      *
-     * @return domain_id 主题域ID
+     * @return model_id 主题域ID
      */
-    public Long getDomainId() {
-        return domainId;
+    public Long getModelId() {
+        return modelId;
     }
 
     /**
      * 主题域ID
      *
-     * @param domainId 主题域ID
+     * @param modelId 主题域ID
      */
-    public void setDomainId(Long domainId) {
-        this.domainId = domainId;
+    public void setModelId(Long modelId) {
+        this.modelId = modelId;
     }
 
     /**

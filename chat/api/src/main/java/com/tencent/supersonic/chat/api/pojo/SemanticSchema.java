@@ -7,48 +7,49 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SemanticSchema implements Serializable {
-    private List<DomainSchema> domainSchemaList;
 
-    public SemanticSchema(List<DomainSchema> domainSchemaList) {
-        this.domainSchemaList = domainSchemaList;
+    private List<ModelSchema> modelSchemaList;
+
+    public SemanticSchema(List<ModelSchema> modelSchemaList) {
+        this.modelSchemaList = modelSchemaList;
     }
 
-    public void add(DomainSchema schema) {
-        domainSchemaList.add(schema);
+    public void add(ModelSchema schema) {
+        modelSchemaList.add(schema);
     }
 
-    public Map<Long, String> getDomainIdToName() {
-        return domainSchemaList.stream()
-                .collect(Collectors.toMap(a -> a.getDomain().getId(), a -> a.getDomain().getName(), (k1, k2) -> k1));
+    public Map<Long, String> getModelIdToName() {
+        return modelSchemaList.stream()
+                .collect(Collectors.toMap(a -> a.getModel().getId(), a -> a.getModel().getName(), (k1, k2) -> k1));
     }
 
     public List<SchemaElement> getDimensionValues() {
         List<SchemaElement> dimensionValues = new ArrayList<>();
-        domainSchemaList.stream().forEach(d -> dimensionValues.addAll(d.getDimensionValues()));
+        modelSchemaList.stream().forEach(d -> dimensionValues.addAll(d.getDimensionValues()));
         return dimensionValues;
     }
 
     public List<SchemaElement> getDimensions() {
         List<SchemaElement> dimensions = new ArrayList<>();
-        domainSchemaList.stream().forEach(d -> dimensions.addAll(d.getDimensions()));
+        modelSchemaList.stream().forEach(d -> dimensions.addAll(d.getDimensions()));
         return dimensions;
     }
 
     public List<SchemaElement> getMetrics() {
         List<SchemaElement> metrics = new ArrayList<>();
-        domainSchemaList.stream().forEach(d -> metrics.addAll(d.getMetrics()));
+        modelSchemaList.stream().forEach(d -> metrics.addAll(d.getMetrics()));
         return metrics;
     }
 
-    public List<SchemaElement> getDomains() {
-        List<SchemaElement> domains = new ArrayList<>();
-        domainSchemaList.stream().forEach(d -> domains.add(d.getDomain()));
-        return domains;
+    public List<SchemaElement> getModels() {
+        List<SchemaElement> models = new ArrayList<>();
+        modelSchemaList.stream().forEach(d -> models.add(d.getModel()));
+        return models;
     }
 
     public List<SchemaElement> getEntities() {
         List<SchemaElement> entities = new ArrayList<>();
-        domainSchemaList.stream().forEach(d -> entities.add(d.getEntity()));
+        modelSchemaList.stream().forEach(d -> entities.add(d.getEntity()));
         return entities;
     }
 }

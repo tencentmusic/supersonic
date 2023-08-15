@@ -3,23 +3,20 @@ package com.tencent.supersonic.chat.service.impl;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.QueryDO;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
-import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.persistence.repository.ChatContextRepository;
 import com.tencent.supersonic.chat.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.persistence.repository.ChatRepository;
-
+import com.tencent.supersonic.chat.service.ChatService;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Objects;
-
-import com.tencent.supersonic.chat.service.ChatService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -41,7 +38,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Long getContextDomain(Integer chatId) {
+    public Long getContextModel(Integer chatId) {
         if (Objects.isNull(chatId)) {
             return null;
         }
@@ -50,8 +47,8 @@ public class ChatServiceImpl implements ChatService {
             return null;
         }
         SemanticParseInfo originalSemanticParse = chatContext.getParseInfo();
-        if (Objects.nonNull(originalSemanticParse) && Objects.nonNull(originalSemanticParse.getDomainId())) {
-            return originalSemanticParse.getDomainId();
+        if (Objects.nonNull(originalSemanticParse) && Objects.nonNull(originalSemanticParse.getModelId())) {
+            return originalSemanticParse.getModelId();
         }
         return null;
     }

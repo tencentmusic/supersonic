@@ -1,34 +1,32 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-
+import java.util.List;
 import lombok.Data;
 import lombok.ToString;
 
-import java.util.List;
-
 /**
- * extended information command about domain
+ * extended information command about model
  */
 @Data
 @ToString
 public class ChatConfigBaseReq {
 
-    private Long domainId;
+    private Long modelId;
 
     /**
-     * the chatDetailConfig about the domain
+     * the chatDetailConfig about the model
      */
     private ChatDetailConfigReq chatDetailConfig;
 
     /**
-     * the chatAggConfig about the domain
+     * the chatAggConfig about the model
      */
     private ChatAggConfigReq chatAggConfig;
 
 
     /**
-     * the recommended questions about the domain
+     * the recommended questions about the model
      */
     private List<RecommendedQuestionReq> recommendedQuestions;
 

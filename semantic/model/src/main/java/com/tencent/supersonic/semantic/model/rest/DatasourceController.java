@@ -49,14 +49,14 @@ public class DatasourceController {
         return datasourceService.updateDatasource(datasourceReq, user);
     }
 
-    @GetMapping("/getDatasourceList/{domainId}")
-    public List<DatasourceResp> getDatasourceList(@PathVariable("domainId") Long domainId) {
-        return datasourceService.getDatasourceListNoMeasurePrefix(domainId);
+    @GetMapping("/getDatasourceList/{modelId}")
+    public List<DatasourceResp> getDatasourceList(@PathVariable("modelId") Long modelId) {
+        return datasourceService.getDatasourceListNoMeasurePrefix(modelId);
     }
 
-    @GetMapping("/getMeasureListOfDomain/{domainId}")
-    public List<MeasureResp> getMeasureListOfDomain(@PathVariable("domainId") Long domainId) {
-        return datasourceService.getMeasureListOfDomain(domainId);
+    @GetMapping("/getMeasureListOfModel/{modelId}")
+    public List<MeasureResp> getMeasureListOfModel(@PathVariable("modelId") Long modelId) {
+        return datasourceService.getMeasureListOfModel(modelId);
     }
 
 
@@ -77,9 +77,9 @@ public class DatasourceController {
         return datasourceService.createOrUpdateDatasourceRela(datasourceRelaReq, user);
     }
 
-    @GetMapping("/getDatasourceRelaList/{domainId}")
-    public List<DatasourceRelaResp> getDatasourceRelaList(@PathVariable("domainId") Long domainId) {
-        return datasourceService.getDatasourceRelaList(domainId);
+    @GetMapping("/getDatasourceRelaList/{modelId}")
+    public List<DatasourceRelaResp> getDatasourceRelaList(@PathVariable("modelId") Long modelId) {
+        return datasourceService.getDatasourceRelaList(modelId);
     }
 
     @DeleteMapping("/deleteDatasourceRela/{id}")

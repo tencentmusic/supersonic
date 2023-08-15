@@ -48,15 +48,15 @@ public class MultiSourceJoin implements SemanticConverter {
         if (CollectionUtils.isEmpty(groups) || CollectionUtils.isEmpty(aggregators)) {
             return;
         }
-        Long domainId = queryStructCmd.getDomainId();
+        Long modelId = queryStructCmd.getModelId();
         List<String> aggs = aggregators.stream().map(Aggregator::getColumn).collect(Collectors.toList());
-        Map<String, DimensionResp> dimensionMap = catalog.getDimensions(domainId).stream()
+        Map<String, DimensionResp> dimensionMap = catalog.getDimensions(modelId).stream()
                 .filter(dimensionDesc -> fields.contains(dimensionDesc.getBizName()))
                 .collect(Collectors.toMap(DimensionResp::getBizName, dimensionDesc -> dimensionDesc));
-        List<MetricResp> metricDescList = catalog.getMetrics(domainId).stream()
+        List<MetricResp> metricDescList = catalog.getMetrics(modelId).stream()
                 .filter(metricDesc -> aggs.contains(metricDesc.getBizName()))
                 .collect(Collectors.toList());
-        Map<Long, DatasourceResp> datasourceMap = catalog.getDatasourceList(domainId)
+        Map<Long, DatasourceResp> datasourceMap = catalog.getDatasourceList(modelId)
                 .stream().collect(Collectors.toMap(DatasourceResp::getId, datasource -> datasource));
         //check groups filters and aggs is in same datasource
         if (!isInSameDatasource(new ArrayList<>(dimensionMap.values()), metricDescList)) {
@@ -133,5 +133,5 @@ public class MultiSourceJoin implements SemanticConverter {
         buildJoinPrefix(queryStructCmd);
     }
 
-  
+
 }

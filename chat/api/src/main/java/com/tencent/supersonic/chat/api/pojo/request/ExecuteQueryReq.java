@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 public class ExecuteQueryReq {
+
     private User user;
     private Integer chatId;
     private String queryText;

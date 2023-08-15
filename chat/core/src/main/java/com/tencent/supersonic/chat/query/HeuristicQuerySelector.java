@@ -2,20 +2,19 @@ package com.tencent.supersonic.chat.query;
 
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.common.pojo.Constants;
-
-import java.util.*;
-
+import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
+import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
+import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.OptionalDouble;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 
 @Slf4j
 public class HeuristicQuerySelector implements QuerySelector {
 
-    private static final double MATCH_INHERIT_PENALTY = 0.5;
-    private static final double MATCH_CURRENT_REWORD = 2;
     private static final double CANDIDATE_THRESHOLD = 0.2;
 
     @Override
@@ -26,49 +25,53 @@ public class HeuristicQuerySelector implements QuerySelector {
             selectedQueries.addAll(candidateQueries);
         } else {
             OptionalDouble maxScoreOp = candidateQueries.stream().mapToDouble(
-                    q -> computeScore(q.getParseInfo())).max();
+                    q -> q.getParseInfo().getScore()).max();
             if (maxScoreOp.isPresent()) {
                 double maxScore = maxScoreOp.getAsDouble();
 
                 candidateQueries.stream().forEach(query -> {
-                    SemanticParseInfo semanticParse = query.getParseInfo();
-                    if ((maxScore - semanticParse.getScore()) / maxScore <= CANDIDATE_THRESHOLD) {
+                    SemanticParseInfo parseInfo = query.getParseInfo();
+                    if (!checkFullyInherited(query)
+                            && (maxScore - parseInfo.getScore()) / maxScore <= CANDIDATE_THRESHOLD
+                            && checkSatisfyOtherRules(query, candidateQueries)) {
                         selectedQueries.add(query);
                     }
-                    log.info("candidate query (domain={}, queryMode={}) with score={}",
-                            semanticParse.getDomainName(), semanticParse.getQueryMode(), semanticParse.getScore());
+                    log.info("candidate query (Model={}, queryMode={}) with score={}",
+                            parseInfo.getModelName(), parseInfo.getQueryMode(), parseInfo.getScore());
                 });
             }
         }
         return selectedQueries;
     }
 
-    private double computeScore(SemanticParseInfo semanticParse) {
-        double totalScore = 0;
-
-        Map<SchemaElementType, SchemaElementMatch> maxSimilarityMatch = new HashMap<>();
-        for (SchemaElementMatch match : semanticParse.getElementMatches()) {
-            SchemaElementType type = match.getElement().getType();
-            if (!maxSimilarityMatch.containsKey(type) ||
-                    match.getSimilarity() > maxSimilarityMatch.get(type).getSimilarity()) {
-                maxSimilarityMatch.put(type, match);
+    private boolean checkSatisfyOtherRules(SemanticQuery semanticQuery, List<SemanticQuery> candidateQueries) {
+        if (!semanticQuery.getQueryMode().equals(MetricModelQuery.QUERY_MODE)) {
+            return true;
+        }
+        for (SemanticQuery candidateQuery : candidateQueries) {
+            if (candidateQuery.getQueryMode().equals(MetricEntityQuery.QUERY_MODE) &&
+                    semanticQuery.getParseInfo().getScore() == candidateQuery.getParseInfo().getScore()) {
+                return false;
             }
         }
+        return true;
+    }
 
-        for (SchemaElementMatch match : maxSimilarityMatch.values()) {
-            double matchScore = Optional.ofNullable(match.getDetectWord()).orElse(Constants.EMPTY).length() * match.getSimilarity();
-            if (match.equals(SchemaElementMatch.MatchMode.INHERIT)) {
-                matchScore *= MATCH_INHERIT_PENALTY;
-            } else {
-                matchScore *= MATCH_CURRENT_REWORD;
-            }
-            totalScore += matchScore;
+    private boolean checkFullyInherited(SemanticQuery query) {
+        SemanticParseInfo parseInfo = query.getParseInfo();
+        if (!(query instanceof RuleSemanticQuery)) {
+            return false;
         }
 
-        // original score in parse info acts like an extra bonus
-        totalScore += semanticParse.getScore();
-        semanticParse.setScore(totalScore);
+        for (SchemaElementMatch match : parseInfo.getElementMatches()) {
+            if (!match.isInherited()) {
+                return false;
+            }
+        }
+        if (parseInfo.getDateInfo() != null && !parseInfo.getDateInfo().isInherited()) {
+            return false;
+        }
 
-        return totalScore;
+        return true;
     }
 }

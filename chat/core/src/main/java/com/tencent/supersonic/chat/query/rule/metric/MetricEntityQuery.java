@@ -1,24 +1,23 @@
 package com.tencent.supersonic.chat.query.rule.metric;
 
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ID;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.*;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.OPTIONAL;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -83,7 +82,8 @@ public class MetricEntityQuery extends MetricSemanticQuery {
             filters.forEach(d -> {
                 if (!dimensions.contains(d.getBizName())) {
                     dimensions.add(d.getBizName());
-                }});
+                }
+            });
             queryStructReq.setGroups(dimensions);
             log.info("addDimension after [{}]", queryStructReq.getGroups());
         }

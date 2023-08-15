@@ -2,27 +2,26 @@ package com.tencent.supersonic.chat.service.impl;
 
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.component.*;
+import com.tencent.supersonic.chat.api.component.SchemaMapper;
+import com.tencent.supersonic.chat.api.component.SemanticParser;
+import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
+import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
-import com.tencent.supersonic.chat.query.QuerySelector;
-import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.chat.query.QueryManager;
+import com.tencent.supersonic.chat.query.QuerySelector;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
-
-import java.util.Arrays;
+import com.tencent.supersonic.common.util.JsonUtil;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.springframework.beans.BeanUtils;
@@ -69,9 +68,9 @@ public class QueryServiceImpl implements QueryService {
                     Collectors.toList()));
 
             List<SemanticParseInfo> selectedParses = selectedQueries.stream()
-                    .map(q -> q.getParseInfo()).collect(Collectors.toList());
+                    .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
             List<SemanticParseInfo> candidateParses = queryCtx.getCandidateQueries().stream()
-                    .map(q -> q.getParseInfo()).collect(Collectors.toList());
+                    .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
 
             parseResult = ParseResp.builder()
                     .chatId(queryReq.getChatId())

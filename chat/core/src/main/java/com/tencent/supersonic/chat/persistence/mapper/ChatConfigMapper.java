@@ -14,5 +14,5 @@ public interface ChatConfigMapper {
 
     List<ChatConfigDO> search(ChatConfigFilterInternal filterInternal);
 
-    ChatConfigDO fetchConfigByDomainId(Long domainId);
+    ChatConfigDO fetchConfigByModelId(Long modelId);
 }

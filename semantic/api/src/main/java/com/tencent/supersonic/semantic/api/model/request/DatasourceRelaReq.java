@@ -8,8 +8,8 @@ public class DatasourceRelaReq {
 
     private Long id;
 
-    @NotNull(message = "class id cat not be null")
-    private Long domainId;
+    @NotNull(message = "model id cat not be null")
+    private Long modelId;
 
     @NotNull(message = "datasource id cat not be null")
     private Long datasourceFrom;

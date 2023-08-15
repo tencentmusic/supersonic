@@ -1,9 +1,9 @@
 package com.tencent.supersonic.auth.authorization.rest;
 
+import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -26,9 +26,9 @@ public class AuthController {
     }
 
     @GetMapping("/queryGroup")
-    public List<AuthGroup> queryAuthGroup(@RequestParam("domainId") String domainId,
+    public List<AuthGroup> queryAuthGroup(@RequestParam("modelId") String modelId,
             @RequestParam(value = "groupId", required = false) Integer groupId) {
-        return authService.queryAuthGroups(domainId, groupId);
+        return authService.queryAuthGroups(modelId, groupId);
     }
 
     /**

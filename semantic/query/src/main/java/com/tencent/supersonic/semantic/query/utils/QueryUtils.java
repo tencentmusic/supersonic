@@ -3,11 +3,11 @@ package com.tencent.supersonic.semantic.query.utils;
 import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
 import static com.tencent.supersonic.common.pojo.Constants.UNIONALL;
 
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.cache.CacheUtils;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
@@ -64,11 +64,11 @@ public class QueryUtils {
     }
 
 
-    public void fillItemNameInfo(QueryResultWithSchemaResp queryResultWithColumns, Long domainId) {
-        List<MetricResp> metricDescList = catalog.getMetrics(domainId);
-        List<DimensionResp> dimensionDescList = catalog.getDimensions(domainId);
-        Map<String,MetricResp> metricRespMap =
-                metricDescList.stream().collect(Collectors.toMap(MetricResp::getBizName, a -> a,(k1, k2)->k1));
+    public void fillItemNameInfo(QueryResultWithSchemaResp queryResultWithColumns, Long modelId) {
+        List<MetricResp> metricDescList = catalog.getMetrics(modelId);
+        List<DimensionResp> dimensionDescList = catalog.getDimensions(modelId);
+        Map<String, MetricResp> metricRespMap =
+                metricDescList.stream().collect(Collectors.toMap(MetricResp::getBizName, a -> a, (k1, k2) -> k1));
         Map<String, String> namePair = new HashMap<>();
         Map<String, String> nameTypePair = new HashMap<>();
         addSysTimeDimension(namePair, nameTypePair);
@@ -82,7 +82,7 @@ public class QueryUtils {
         });
         List<QueryColumn> columns = queryResultWithColumns.getColumns();
         columns.forEach(column -> {
-            String nameEn = column.getNameEn();
+            String nameEn = column.getNameEn().toLowerCase();
             if (nameEn.contains(JOIN_UNDERLINE)) {
                 nameEn = nameEn.split(JOIN_UNDERLINE)[1];
             }
@@ -92,7 +92,7 @@ public class QueryUtils {
             if (nameTypePair.containsKey(nameEn)) {
                 column.setShowType(nameTypePair.get(nameEn));
             }
-            if(metricRespMap.containsKey(nameEn)){
+            if (metricRespMap.containsKey(nameEn)) {
                 column.setDataFormatType(metricRespMap.get(nameEn).getDataFormatType());
                 column.setDataFormat(metricRespMap.get(nameEn).getDataFormat());
             }
@@ -113,7 +113,7 @@ public class QueryUtils {
         namePair.putAll(metricNameFromAgg);
         List<QueryColumn> columns = queryResultWithColumns.getColumns();
         columns.forEach(column -> {
-            String nameEn = column.getNameEn();
+            String nameEn = column.getNameEn().toLowerCase();
             if (nameEn.contains(JOIN_UNDERLINE)) {
                 nameEn = nameEn.split(JOIN_UNDERLINE)[1];
             }

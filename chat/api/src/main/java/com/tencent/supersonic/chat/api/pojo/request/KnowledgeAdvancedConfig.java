@@ -1,9 +1,8 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
-import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Data;
 
 /**
  * advanced knowledge config

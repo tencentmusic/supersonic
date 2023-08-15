@@ -1,10 +1,10 @@
 package com.tencent.supersonic.knowledge.persistence.repository;
 
 
-import com.tencent.supersonic.knowledge.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.knowledge.dictionary.DictConfig;
 import com.tencent.supersonic.knowledge.dictionary.DictTaskFilter;
 import com.tencent.supersonic.knowledge.dictionary.DimValueDictInfo;
+import com.tencent.supersonic.knowledge.persistence.dataobject.DictTaskDO;
 import java.util.List;
 
 public interface DictRepository {
@@ -15,5 +15,5 @@ public interface DictRepository {
 
     List<DimValueDictInfo> searchDictTaskList(DictTaskFilter filter);
 
-    DictConfig getDictInfoByDomainId(Long domainId);
+    DictConfig getDictInfoByModelId(Long modelId);
 }

@@ -6,7 +6,6 @@ import com.tencent.supersonic.semantic.api.model.pojo.Identify;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import java.util.List;
-
 import lombok.Data;
 
 
@@ -21,7 +20,7 @@ public class DatasourceReq extends SchemaItem {
 
     private String tableQuery;
 
-    private Long domainId;
+    private Long modelId;
 
     private List<Identify> identifiers;
 

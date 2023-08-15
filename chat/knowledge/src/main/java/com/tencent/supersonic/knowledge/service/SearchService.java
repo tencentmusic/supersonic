@@ -5,9 +5,9 @@ import com.hankcs.hanlp.collection.trie.bintrie.BinTrie;
 import com.hankcs.hanlp.corpus.tag.Nature;
 import com.hankcs.hanlp.dictionary.CoreDictionary;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
-import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.dictionary.DictWordType;
-
+import com.tencent.supersonic.knowledge.dictionary.DictionaryAttributeUtil;
+import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +15,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
-import com.tencent.supersonic.knowledge.dictionary.DictionaryAttributeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;

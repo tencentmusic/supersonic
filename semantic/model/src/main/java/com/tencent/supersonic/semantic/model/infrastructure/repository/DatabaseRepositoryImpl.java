@@ -40,7 +40,6 @@ public class DatabaseRepositoryImpl implements DatabaseRepository {
         DatabaseDOExample databaseDOExample = new DatabaseDOExample();
         databaseDOExample.createCriteria().andDomainIdEqualTo(domainId);
         return databaseDOMapper.selectByExampleWithBLOBs(databaseDOExample);
-
     }
 
 

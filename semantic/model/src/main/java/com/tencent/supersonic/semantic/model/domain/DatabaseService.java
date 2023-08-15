@@ -11,6 +11,8 @@ public interface DatabaseService {
 
     QueryResultWithSchemaResp executeSql(String sql, DatabaseResp databaseResp);
 
+    DatabaseResp getDatabaseByModelId(Long modelId);
+
     QueryResultWithSchemaResp executeSql(String sql, Long domainId);
 
     boolean testConnect(DatabaseReq databaseReq, User user);

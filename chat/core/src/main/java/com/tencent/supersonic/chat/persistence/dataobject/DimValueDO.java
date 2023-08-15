@@ -1,11 +1,10 @@
 package com.tencent.supersonic.chat.persistence.dataobject;
 
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.tencent.supersonic.chat.config.DefaultMetric;
 import com.tencent.supersonic.chat.config.Dim4Dict;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
 import lombok.ToString;
 
@@ -14,14 +13,14 @@ import lombok.ToString;
 @ToString
 public class DimValueDO {
 
-    private Long domainId;
+    private Long modelId;
 
     private List<DefaultMetric> defaultMetricDescList = new ArrayList<>();
 
     private List<Dim4Dict> dimensions = new ArrayList<>();
 
-    public DimValueDO setDomainId(Long domainId) {
-        this.domainId = domainId;
+    public DimValueDO setModelId(Long modelId) {
+        this.modelId = modelId;
         return this;
     }
 

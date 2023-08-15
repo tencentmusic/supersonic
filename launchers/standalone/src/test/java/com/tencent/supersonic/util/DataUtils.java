@@ -1,5 +1,7 @@
 package com.tencent.supersonic.util;
 
+import static java.time.LocalDate.now;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
@@ -7,10 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
-
 import java.util.Set;
-
-import static java.time.LocalDate.now;
 
 public class DataUtils {
 
@@ -34,9 +33,9 @@ public class DataUtils {
                 .build();
     }
 
-    public static SchemaElement getMetric(Long domainId, Long id, String name, String bizName) {
+    public static SchemaElement getMetric(Long modelId, Long id, String name, String bizName) {
         return SchemaElement.builder()
-                .domain(domainId)
+                .model(modelId)
                 .id(id)
                 .name(name)
                 .bizName(bizName)
@@ -45,9 +44,9 @@ public class DataUtils {
                 .build();
     }
 
-    public static SchemaElement getDimension(Long domainId, Long id, String name, String bizName) {
+    public static SchemaElement getDimension(Long modelId, Long id, String name, String bizName) {
         return SchemaElement.builder()
-                .domain(domainId)
+                .model(modelId)
                 .id(id)
                 .name(name)
                 .bizName(bizName)
@@ -56,8 +55,9 @@ public class DataUtils {
                 .build();
     }
 
-    public static QueryFilter getFilter(String bizName, FilterOperatorEnum filterOperatorEnum, Object value, String name,
-                                        Long elementId) {
+    public static QueryFilter getFilter(String bizName, FilterOperatorEnum filterOperatorEnum, Object value,
+            String name,
+            Long elementId) {
         QueryFilter filter = new QueryFilter();
         filter.setBizName(bizName);
         filter.setOperator(filterOperatorEnum);
@@ -77,7 +77,8 @@ public class DataUtils {
         return dateInfo;
     }
 
-    public static DateConf getDateConf(DateConf.DateMode dateMode, Integer unit, String period, String startDate, String endDate) {
+    public static DateConf getDateConf(DateConf.DateMode dateMode, Integer unit, String period, String startDate,
+            String endDate) {
         DateConf dateInfo = new DateConf();
         dateInfo.setUnit(unit);
         dateInfo.setDateMode(dateMode);

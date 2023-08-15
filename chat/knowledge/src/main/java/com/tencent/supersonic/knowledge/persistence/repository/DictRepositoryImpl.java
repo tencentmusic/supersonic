@@ -1,14 +1,14 @@
 package com.tencent.supersonic.knowledge.persistence.repository;
 
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
-import com.tencent.supersonic.knowledge.persistence.dataobject.DictTaskDO;
-import com.tencent.supersonic.knowledge.utils.DictTaskConverter;
-import com.tencent.supersonic.knowledge.persistence.dataobject.DictConfDO;
 import com.tencent.supersonic.knowledge.dictionary.DictConfig;
 import com.tencent.supersonic.knowledge.dictionary.DictTaskFilter;
 import com.tencent.supersonic.knowledge.dictionary.DimValueDictInfo;
+import com.tencent.supersonic.knowledge.persistence.dataobject.DictConfDO;
+import com.tencent.supersonic.knowledge.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.knowledge.persistence.mapper.DictConfMapper;
 import com.tencent.supersonic.knowledge.persistence.mapper.DictTaskMapper;
+import com.tencent.supersonic.knowledge.utils.DictTaskConverter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -67,8 +67,8 @@ public class DictRepositoryImpl implements DictRepository {
     }
 
     @Override
-    public DictConfig getDictInfoByDomainId(Long domainId) {
-        DictConfDO dictConfDO = dictConfMapper.getDictInfoByDomainId(domainId);
+    public DictConfig getDictInfoByModelId(Long modelId) {
+        DictConfDO dictConfDO = dictConfMapper.getDictInfoByModelId(modelId);
         if (Objects.isNull(dictConfDO)) {
             return null;
         }

@@ -80,10 +80,15 @@ public class SqlParseUtils {
      */
     private static void handlerOrderBy(SqlNode node, SqlParserInfo sqlParserInfo) {
         SqlOrderBy sqlOrderBy = (SqlOrderBy) node;
+
         SqlNode query = sqlOrderBy.query;
+
         handlerSQL(query, sqlParserInfo);
+
         SqlNodeList orderList = sqlOrderBy.orderList;
+
         Set<String> orderFields = handlerField(orderList);
+
         sqlParserInfo.getAllFields().addAll(orderFields);
     }
 
@@ -107,6 +112,7 @@ public class SqlParseUtils {
 
         Set<String> selectFields = handlerSelectField(sqlSelect);
         allFields.addAll(selectFields);
+
     }
 
     private static Set<String> handlerSelectField(SqlSelect sqlSelect) {

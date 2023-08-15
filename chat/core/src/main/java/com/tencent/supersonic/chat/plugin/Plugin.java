@@ -5,10 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.parser.ParseMode;
 import com.tencent.supersonic.common.pojo.RecordInfo;
+import java.util.List;
 import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import java.util.List;
 
 @Data
 public class Plugin extends RecordInfo {
@@ -20,7 +20,7 @@ public class Plugin extends RecordInfo {
      */
     private String type;
 
-    private List<Long> domainList = Lists.newArrayList();
+    private List<Long> modelList = Lists.newArrayList();
 
     /**
      * description, for parsing
@@ -51,8 +51,8 @@ public class Plugin extends RecordInfo {
         return Lists.newArrayList();
     }
 
-    public boolean isContainsAllDomain() {
-        return CollectionUtils.isNotEmpty(domainList) && domainList.contains(-1L);
+    public boolean isContainsAllModel() {
+        return CollectionUtils.isNotEmpty(modelList) && modelList.contains(-1L);
     }
 
 }

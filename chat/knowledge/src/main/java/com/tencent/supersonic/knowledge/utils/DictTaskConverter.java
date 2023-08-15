@@ -9,7 +9,6 @@ import com.tencent.supersonic.knowledge.dictionary.DimValue2DictCommand;
 import com.tencent.supersonic.knowledge.dictionary.DimValueInfo;
 import com.tencent.supersonic.knowledge.persistence.dataobject.DictConfDO;
 import com.tencent.supersonic.knowledge.persistence.dataobject.DictTaskDO;
-
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -39,7 +38,7 @@ public class DictTaskConverter {
 
     public static DictConfig dictConfPO2Config(DictConfDO dictConfDO) {
         DictConfig dictConfig = new DictConfig();
-        dictConfig.setDomainId(dictConfDO.getDomainId());
+        dictConfig.setModelId(dictConfDO.getModelId());
         List<DimValueInfo> dimValueInfos = JsonUtil.toList(dictConfDO.getDimValueInfos(), DimValueInfo.class);
         dictConfig.setDimValueInfoList(dimValueInfos);
         return dictConfig;

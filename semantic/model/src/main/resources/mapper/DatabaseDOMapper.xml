@@ -52,7 +52,8 @@
     </sql>
     <sql id="Base_Column_List">
         id
-        , domain_id, name, description, version, type, created_at, created_by, updated_at, updated_by
+        , domain_id, name, description, version, type, created_at, created_by, updated_at,
+    updated_by
     </sql>
     <sql id="Blob_Column_List">
         config
@@ -110,15 +111,15 @@
     <insert id="insert"
             parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatabaseDO">
         insert into s2_database (id, domain_id, name,
-                                 description, version, type, created_at,
-                                 created_by, updated_at, updated_by,
-                                 config)
+                                 description, version, type,
+                                 created_at, created_by, updated_at,
+                                 updated_by, config)
         values (#{id,jdbcType=BIGINT}, #{domainId,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR},
-                #{description,jdbcType=VARCHAR},#{version,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR},
-                #{createdAt,jdbcType=TIMESTAMP},
-                #{createdBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP},
-                #{updatedBy,jdbcType=VARCHAR},
-                #{config,jdbcType=LONGVARCHAR})
+                #{description,jdbcType=VARCHAR}, #{version,jdbcType=VARCHAR},
+                #{type,jdbcType=VARCHAR},
+                #{createdAt,jdbcType=TIMESTAMP}, #{createdBy,jdbcType=VARCHAR},
+                #{updatedAt,jdbcType=TIMESTAMP},
+                #{updatedBy,jdbcType=VARCHAR}, #{config,jdbcType=LONGVARCHAR})
     </insert>
     <insert id="insertSelective"
             parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatabaseDO">
@@ -245,7 +246,7 @@
         set domain_id   = #{domainId,jdbcType=BIGINT},
             name        = #{name,jdbcType=VARCHAR},
             description = #{description,jdbcType=VARCHAR},
-            version = #{version,jdbcType=VARCHAR},
+            version     = #{version,jdbcType=VARCHAR},
             type        = #{type,jdbcType=VARCHAR},
             created_at  = #{createdAt,jdbcType=TIMESTAMP},
             created_by  = #{createdBy,jdbcType=VARCHAR},
@@ -260,7 +261,7 @@
         set domain_id   = #{domainId,jdbcType=BIGINT},
             name        = #{name,jdbcType=VARCHAR},
             description = #{description,jdbcType=VARCHAR},
-            version = #{version,jdbcType=VARCHAR},
+            version     = #{version,jdbcType=VARCHAR},
             type        = #{type,jdbcType=VARCHAR},
             created_at  = #{createdAt,jdbcType=TIMESTAMP},
             created_by  = #{createdBy,jdbcType=VARCHAR},

@@ -10,12 +10,12 @@ import lombok.ToString;
 public class ItemUseReq {
 
     private String startTime;
-    private Long domainId;
+    private Long modelId;
     private Boolean cacheEnable = true;
     private String metric;
 
-    public ItemUseReq(String startTime, Long domainId) {
+    public ItemUseReq(String startTime, Long modelId) {
         this.startTime = startTime;
-        this.domainId = domainId;
+        this.modelId = modelId;
     }
 }

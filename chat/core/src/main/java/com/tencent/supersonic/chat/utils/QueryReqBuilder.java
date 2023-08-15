@@ -16,7 +16,12 @@ import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -28,7 +33,7 @@ public class QueryReqBuilder {
 
     public static QueryStructReq buildStructReq(SemanticParseInfo parseInfo) {
         QueryStructReq queryStructCmd = new QueryStructReq();
-        queryStructCmd.setDomainId(parseInfo.getDomainId());
+        queryStructCmd.setModelId(parseInfo.getModelId());
         queryStructCmd.setNativeQuery(parseInfo.getNativeQuery());
         queryStructCmd.setDateInfo(rewrite2Between(parseInfo.getDateInfo()));
 
@@ -103,22 +108,22 @@ public class QueryReqBuilder {
      * convert to QueryDslReq
      *
      * @param querySql
-     * @param domainId
+     * @param modelId
      * @return
      */
-    public static QueryDslReq buildDslReq(String querySql, Long domainId) {
+    public static QueryDslReq buildDslReq(String querySql, Long modelId) {
         QueryDslReq queryDslReq = new QueryDslReq();
         if (Objects.nonNull(querySql)) {
             queryDslReq.setSql(querySql);
         }
-        queryDslReq.setDomainId(domainId);
+        queryDslReq.setModelId(modelId);
         return queryDslReq;
     }
 
 
     private static List<Aggregator> getAggregatorByMetric(AggregateTypeEnum aggregateType, SchemaElement metric) {
         List<Aggregator> aggregators = new ArrayList<>();
-        if(metric != null) {
+        if (metric != null) {
             String agg = (aggregateType == null || aggregateType.equals(AggregateTypeEnum.NONE)) ? ""
                     : aggregateType.name();
             aggregators.add(new Aggregator(metric.getBizName(), AggOperatorEnum.of(agg)));
@@ -193,7 +198,8 @@ public class QueryReqBuilder {
         return dateField;
     }
 
-    public static QueryStructReq buildStructRatioReq(SemanticParseInfo parseInfo, SchemaElement metric, AggOperatorEnum aggOperatorEnum) {
+    public static QueryStructReq buildStructRatioReq(SemanticParseInfo parseInfo, SchemaElement metric,
+            AggOperatorEnum aggOperatorEnum) {
         QueryStructReq queryStructCmd = buildStructReq(parseInfo);
         queryStructCmd.setNativeQuery(false);
         queryStructCmd.setOrders(new ArrayList<>());

@@ -25,7 +25,7 @@ public class DatabaseDO {
     private String description;
 
     /**
-     * 版本
+     *
      */
     private String version;
 
@@ -125,6 +125,20 @@ public class DatabaseDO {
      */
     public void setDescription(String description) {
         this.description = description == null ? null : description.trim();
+    }
+
+    /**
+     * @return version
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * @param version
+     */
+    public void setVersion(String version) {
+        this.version = version == null ? null : version.trim();
     }
 
     /**
@@ -233,17 +247,5 @@ public class DatabaseDO {
      */
     public void setConfig(String config) {
         this.config = config == null ? null : config.trim();
-    }
-
-    /**
-     * 版本信息
-     *
-     */
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 }

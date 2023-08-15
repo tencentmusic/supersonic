@@ -9,16 +9,16 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SearchResult;
-import com.tencent.supersonic.chat.mapper.DomainInfoStat;
-import com.tencent.supersonic.chat.mapper.DomainWithSemanticType;
 import com.tencent.supersonic.chat.mapper.MatchText;
+import com.tencent.supersonic.chat.mapper.ModelInfoStat;
+import com.tencent.supersonic.chat.mapper.ModelWithSemanticType;
 import com.tencent.supersonic.chat.mapper.SearchMatchStrategy;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.SearchService;
 import com.tencent.supersonic.chat.utils.NatureHelper;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
-import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.dictionary.DictWordType;
+import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import java.util.ArrayList;
@@ -60,12 +60,12 @@ public class SearchServiceImpl implements SearchService {
         // 1.get meta info
         SemanticSchema semanticSchemaDb = schemaService.getSemanticSchema();
         List<SchemaElement> metricsDb = semanticSchemaDb.getMetrics();
-        final Map<Long, String> domainToName = semanticSchemaDb.getDomainIdToName();
+        final Map<Long, String> modelToName = semanticSchemaDb.getModelIdToName();
 
         // 2.detect by segment
         List<Term> originals = HanlpHelper.getTerms(queryText);
         Map<MatchText, List<MapResult>> regTextMap = searchMatchStrategy.match(queryText, originals,
-                queryCtx.getDomainId());
+                queryCtx.getModelId());
         regTextMap.entrySet().stream().forEach(m -> HanlpHelper.transLetterOriginal(m.getValue()));
 
         // 3.get the most matching data
@@ -85,23 +85,23 @@ public class SearchServiceImpl implements SearchService {
         log.info("searchTextEntry:{},queryCtx:{}", searchTextEntry, queryCtx);
 
         Set<SearchResult> searchResults = new LinkedHashSet();
-        DomainInfoStat domainStat = NatureHelper.getDomainStat(originals);
+        ModelInfoStat modelStat = NatureHelper.getModelStat(originals);
 
-        List<Long> possibleDomains = getPossibleDomains(queryCtx, originals, domainStat, queryCtx.getDomainId());
+        List<Long> possibleModels = getPossibleModels(queryCtx, originals, modelStat, queryCtx.getModelId());
 
         // 4.1 priority dimension metric
-        boolean existMetricAndDimension = searchMetricAndDimension(new HashSet<>(possibleDomains), domainToName,
+        boolean existMetricAndDimension = searchMetricAndDimension(new HashSet<>(possibleModels), modelToName,
                 searchTextEntry, searchResults);
 
         // 4.2 process based on dimension values
         MatchText matchText = searchTextEntry.getKey();
-        Map<String, String> natureToNameMap = getNatureToNameMap(searchTextEntry, new HashSet<>(possibleDomains));
-        log.debug("possibleDomains:{},natureToNameMap:{}", possibleDomains, natureToNameMap);
+        Map<String, String> natureToNameMap = getNatureToNameMap(searchTextEntry, new HashSet<>(possibleModels));
+        log.debug("possibleModels:{},natureToNameMap:{}", possibleModels, natureToNameMap);
 
         for (Map.Entry<String, String> natureToNameEntry : natureToNameMap.entrySet()) {
 
-            Set<SearchResult> searchResultSet = searchDimensionValue(metricsDb, domainToName,
-                    domainStat.getMetricDomainCount(), existMetricAndDimension,
+            Set<SearchResult> searchResultSet = searchDimensionValue(metricsDb, modelToName,
+                    modelStat.getMetricModelCount(), existMetricAndDimension,
                     matchText, natureToNameMap, natureToNameEntry, queryCtx.getQueryFilters());
 
             searchResults.addAll(searchResultSet);
@@ -109,42 +109,42 @@ public class SearchServiceImpl implements SearchService {
         return searchResults.stream().limit(RESULT_SIZE).collect(Collectors.toList());
     }
 
-    private List<Long> getPossibleDomains(QueryReq queryCtx, List<Term> originals,
-                                          DomainInfoStat domainStat, Long webDomainId) {
+    private List<Long> getPossibleModels(QueryReq queryCtx, List<Term> originals,
+            ModelInfoStat modelStat, Long webModelId) {
 
-        if (Objects.nonNull(webDomainId) && webDomainId > 0) {
+        if (Objects.nonNull(webModelId) && webModelId > 0) {
             List<Long> result = new ArrayList<>();
-            result.add(webDomainId);
+            result.add(webModelId);
             return result;
         }
 
-        List<Long> possibleDomains = NatureHelper.selectPossibleDomains(originals);
+        List<Long> possibleModels = NatureHelper.selectPossibleModels(originals);
 
-        Long contextDomain = chatService.getContextDomain(queryCtx.getChatId());
+        Long contextModel = chatService.getContextModel(queryCtx.getChatId());
 
-        log.debug("possibleDomains:{},domainStat:{},contextDomain:{}", possibleDomains, domainStat, contextDomain);
+        log.debug("possibleModels:{},modelStat:{},contextModel:{}", possibleModels, modelStat, contextModel);
 
-        // If nothing is recognized or only metric are present, then add the contextDomain.
-        if (nothingOrOnlyMetric(domainStat) && effectiveDomain(contextDomain)) {
+        // If nothing is recognized or only metric are present, then add the contextModel.
+        if (nothingOrOnlyMetric(modelStat) && effectiveModel(contextModel)) {
             List<Long> result = new ArrayList<>();
-            result.add(contextDomain);
+            result.add(contextModel);
             return result;
         }
-        return possibleDomains;
+        return possibleModels;
     }
 
-    private boolean nothingOrOnlyMetric(DomainInfoStat domainStat) {
-        return domainStat.getMetricDomainCount() >= 0 && domainStat.getDimensionDomainCount() <= 0
-                && domainStat.getDimensionValueDomainCount() <= 0 && domainStat.getDomainCount() <= 0;
+    private boolean nothingOrOnlyMetric(ModelInfoStat modelStat) {
+        return modelStat.getMetricModelCount() >= 0 && modelStat.getDimensionModelCount() <= 0
+                && modelStat.getDimensionValueModelCount() <= 0 && modelStat.getModelCount() <= 0;
     }
 
-    private boolean effectiveDomain(Long contextDomain) {
-        return Objects.nonNull(contextDomain) && contextDomain > 0;
+    private boolean effectiveModel(Long contextModel) {
+        return Objects.nonNull(contextModel) && contextModel > 0;
     }
 
     private Set<SearchResult> searchDimensionValue(List<SchemaElement> metricsDb,
-            Map<Long, String> domainToName,
-            long metricDomainCount,
+            Map<Long, String> modelToName,
+            long metricModelCount,
             boolean existMetricAndDimension,
             MatchText matchText,
             Map<String, String> natureToNameMap,
@@ -155,7 +155,7 @@ public class SearchServiceImpl implements SearchService {
         String nature = natureToNameEntry.getKey();
         String wordName = natureToNameEntry.getValue();
 
-        Long domainId = NatureHelper.getDomainId(nature);
+        Long modelId = NatureHelper.getModelId(nature);
         SchemaElementType schemaElementType = NatureHelper.convertToElementType(nature);
 
         if (SchemaElementType.ENTITY.equals(schemaElementType)) {
@@ -163,24 +163,24 @@ public class SearchServiceImpl implements SearchService {
         }
         // If there are no metric/dimension, complete the  metric information
         SearchResult searchResult = SearchResult.builder()
-                .domainId(domainId)
-                .domainName(domainToName.get(domainId))
+                .modelId(modelId)
+                .modelName(modelToName.get(modelId))
                 .recommend(matchText.getRegText() + wordName)
                 .schemaElementType(schemaElementType)
                 .subRecommend(wordName)
                 .build();
-        if (metricDomainCount <= 0 && !existMetricAndDimension) {
+        if (metricModelCount <= 0 && !existMetricAndDimension) {
             if (filterByQueryFilter(wordName, queryFilters)) {
                 return searchResults;
             }
             searchResults.add(searchResult);
             int metricSize = getMetricSize(natureToNameMap);
-            List<String> metrics = filerMetricsByDomain(metricsDb, domainId, metricSize);
+            List<String> metrics = filerMetricsByModel(metricsDb, modelId, metricSize);
 
             for (String metric : metrics) {
                 SearchResult result = SearchResult.builder()
-                        .domainId(domainId)
-                        .domainName(domainToName.get(domainId))
+                        .modelId(modelId)
+                        .modelName(modelToName.get(modelId))
                         .recommend(matchText.getRegText() + wordName + DictWordType.SPACE + metric)
                         .subRecommend(wordName + DictWordType.SPACE + metric)
                         .isComplete(false)
@@ -214,12 +214,12 @@ public class SearchServiceImpl implements SearchService {
         return true;
     }
 
-    protected List<String> filerMetricsByDomain(List<SchemaElement> metricsDb, Long domain, int metricSize) {
+    protected List<String> filerMetricsByModel(List<SchemaElement> metricsDb, Long model, int metricSize) {
         if (CollectionUtils.isEmpty(metricsDb)) {
             return Lists.newArrayList();
         }
         return metricsDb.stream()
-                .filter(mapDO -> Objects.nonNull(mapDO) && domain.equals(mapDO.getDomain()))
+                .filter(mapDO -> Objects.nonNull(mapDO) && model.equals(mapDO.getModel()))
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                 .flatMap(entry -> {
                     List<String> result = new ArrayList<>();
@@ -235,16 +235,16 @@ public class SearchServiceImpl implements SearchService {
      * @return
      */
     private Map<String, String> getNatureToNameMap(Map.Entry<MatchText, List<MapResult>> recommendTextListEntry,
-            Set<Long> possibleDomains) {
+            Set<Long> possibleModels) {
         List<MapResult> recommendValues = recommendTextListEntry.getValue();
         return recommendValues.stream()
                 .flatMap(entry -> entry.getNatures().stream()
                         .filter(nature -> {
-                            if (CollectionUtils.isEmpty(possibleDomains)) {
+                            if (CollectionUtils.isEmpty(possibleModels)) {
                                 return true;
                             }
-                            Long domain = NatureHelper.getDomainId(nature);
-                            return possibleDomains.contains(domain);
+                            Long model = NatureHelper.getModelId(nature);
+                            return possibleModels.contains(model);
                         })
                         .map(nature -> {
                                     DictWord posDO = new DictWord();
@@ -257,7 +257,7 @@ public class SearchServiceImpl implements SearchService {
                         LinkedHashMap::new));
     }
 
-    private boolean searchMetricAndDimension(Set<Long> possibleDomains, Map<Long, String> domainToName,
+    private boolean searchMetricAndDimension(Set<Long> possibleModels, Map<Long, String> modelToName,
             Map.Entry<MatchText, List<MapResult>> searchTextEntry, Set<SearchResult> searchResults) {
         boolean existMetric = false;
 
@@ -266,22 +266,22 @@ public class SearchServiceImpl implements SearchService {
 
         for (MapResult mapResult : mapResults) {
 
-            List<DomainWithSemanticType> dimensionMetricClassIds = mapResult.getNatures().stream()
-                    .map(nature -> new DomainWithSemanticType(NatureHelper.getDomainId(nature),
+            List<ModelWithSemanticType> dimensionMetricClassIds = mapResult.getNatures().stream()
+                    .map(nature -> new ModelWithSemanticType(NatureHelper.getModelId(nature),
                             NatureHelper.convertToElementType(nature)))
-                    .filter(entry -> matchCondition(entry, possibleDomains)).collect(Collectors.toList());
+                    .filter(entry -> matchCondition(entry, possibleModels)).collect(Collectors.toList());
 
             if (CollectionUtils.isEmpty(dimensionMetricClassIds)) {
                 continue;
             }
-            for (DomainWithSemanticType domainWithSemanticType : dimensionMetricClassIds) {
+            for (ModelWithSemanticType modelWithSemanticType : dimensionMetricClassIds) {
                 existMetric = true;
-                Long domainId = domainWithSemanticType.getDomain();
-                SchemaElementType semanticType = domainWithSemanticType.getSemanticType();
+                Long modelId = modelWithSemanticType.getModel();
+                SchemaElementType semanticType = modelWithSemanticType.getSemanticType();
 
                 SearchResult searchResult = SearchResult.builder()
-                        .domainId(domainId)
-                        .domainName(domainToName.get(domainId))
+                        .modelId(modelId)
+                        .modelName(modelToName.get(modelId))
                         .recommend(matchText.getRegText() + mapResult.getName())
                         .subRecommend(mapResult.getName())
                         .schemaElementType(semanticType)
@@ -289,21 +289,21 @@ public class SearchServiceImpl implements SearchService {
 
                 searchResults.add(searchResult);
             }
-            log.info("parseResult:{},dimensionMetricClassIds:{},possibleDomains:{}", mapResult, dimensionMetricClassIds,
-                    possibleDomains);
+            log.info("parseResult:{},dimensionMetricClassIds:{},possibleModels:{}", mapResult, dimensionMetricClassIds,
+                    possibleModels);
         }
         return existMetric;
     }
 
-    private boolean matchCondition(DomainWithSemanticType entry, Set<Long> possibleDomains) {
+    private boolean matchCondition(ModelWithSemanticType entry, Set<Long> possibleModels) {
         if (!(SchemaElementType.METRIC.equals(entry.getSemanticType()) || SchemaElementType.DIMENSION.equals(
                 entry.getSemanticType()))) {
             return false;
         }
 
-        if (CollectionUtils.isEmpty(possibleDomains)) {
+        if (CollectionUtils.isEmpty(possibleModels)) {
             return true;
         }
-        return possibleDomains.contains(entry.getDomain());
+        return possibleModels.contains(entry.getModel());
     }
 }

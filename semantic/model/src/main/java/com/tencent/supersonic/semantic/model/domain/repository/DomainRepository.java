@@ -2,7 +2,6 @@ package com.tencent.supersonic.semantic.model.domain.repository;
 
 
 import com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO;
-
 import java.util.List;
 
 

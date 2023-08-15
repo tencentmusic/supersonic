@@ -41,13 +41,6 @@ public class DomainDOExample {
     /**
      * @mbg.generated
      */
-    public String getOrderByClause() {
-        return orderByClause;
-    }
-
-    /**
-     * @mbg.generated
-     */
     public void setOrderByClause(String orderByClause) {
         this.orderByClause = orderByClause;
     }
@@ -55,8 +48,8 @@ public class DomainDOExample {
     /**
      * @mbg.generated
      */
-    public boolean isDistinct() {
-        return distinct;
+    public String getOrderByClause() {
+        return orderByClause;
     }
 
     /**
@@ -64,6 +57,13 @@ public class DomainDOExample {
      */
     public void setDistinct(boolean distinct) {
         this.distinct = distinct;
+    }
+
+    /**
+     * @mbg.generated
+     */
+    public boolean isDistinct() {
+        return distinct;
     }
 
     /**
@@ -120,13 +120,6 @@ public class DomainDOExample {
     /**
      * @mbg.generated
      */
-    public Integer getLimitStart() {
-        return limitStart;
-    }
-
-    /**
-     * @mbg.generated
-     */
     public void setLimitStart(Integer limitStart) {
         this.limitStart = limitStart;
     }
@@ -134,8 +127,8 @@ public class DomainDOExample {
     /**
      * @mbg.generated
      */
-    public Integer getLimitEnd() {
-        return limitEnd;
+    public Integer getLimitStart() {
+        return limitStart;
     }
 
     /**
@@ -143,6 +136,13 @@ public class DomainDOExample {
      */
     public void setLimitEnd(Integer limitEnd) {
         this.limitEnd = limitEnd;
+    }
+
+    /**
+     * @mbg.generated
+     */
+    public Integer getLimitEnd() {
+        return limitEnd;
     }
 
     /**
@@ -1142,6 +1142,38 @@ public class DomainDOExample {
 
         private String typeHandler;
 
+        public String getCondition() {
+            return condition;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Object getSecondValue() {
+            return secondValue;
+        }
+
+        public boolean isNoValue() {
+            return noValue;
+        }
+
+        public boolean isSingleValue() {
+            return singleValue;
+        }
+
+        public boolean isBetweenValue() {
+            return betweenValue;
+        }
+
+        public boolean isListValue() {
+            return listValue;
+        }
+
+        public String getTypeHandler() {
+            return typeHandler;
+        }
+
         protected Criterion(String condition) {
             super();
             this.condition = condition;
@@ -1176,38 +1208,6 @@ public class DomainDOExample {
 
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
-        }
-
-        public String getCondition() {
-            return condition;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public Object getSecondValue() {
-            return secondValue;
-        }
-
-        public boolean isNoValue() {
-            return noValue;
-        }
-
-        public boolean isSingleValue() {
-            return singleValue;
-        }
-
-        public boolean isBetweenValue() {
-            return betweenValue;
-        }
-
-        public boolean isListValue() {
-            return listValue;
-        }
-
-        public String getTypeHandler() {
-            return typeHandler;
         }
     }
 }

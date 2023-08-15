@@ -4,7 +4,6 @@ import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
 import java.util.List;
 
-
 public interface DimensionRepository {
 
 

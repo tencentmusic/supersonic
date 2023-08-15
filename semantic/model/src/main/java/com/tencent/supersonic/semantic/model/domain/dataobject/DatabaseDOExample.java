@@ -41,13 +41,6 @@ public class DatabaseDOExample {
     /**
      * @mbg.generated
      */
-    public String getOrderByClause() {
-        return orderByClause;
-    }
-
-    /**
-     * @mbg.generated
-     */
     public void setOrderByClause(String orderByClause) {
         this.orderByClause = orderByClause;
     }
@@ -55,8 +48,8 @@ public class DatabaseDOExample {
     /**
      * @mbg.generated
      */
-    public boolean isDistinct() {
-        return distinct;
+    public String getOrderByClause() {
+        return orderByClause;
     }
 
     /**
@@ -64,6 +57,13 @@ public class DatabaseDOExample {
      */
     public void setDistinct(boolean distinct) {
         this.distinct = distinct;
+    }
+
+    /**
+     * @mbg.generated
+     */
+    public boolean isDistinct() {
+        return distinct;
     }
 
     /**
@@ -120,13 +120,6 @@ public class DatabaseDOExample {
     /**
      * @mbg.generated
      */
-    public Integer getLimitStart() {
-        return limitStart;
-    }
-
-    /**
-     * @mbg.generated
-     */
     public void setLimitStart(Integer limitStart) {
         this.limitStart = limitStart;
     }
@@ -134,8 +127,8 @@ public class DatabaseDOExample {
     /**
      * @mbg.generated
      */
-    public Integer getLimitEnd() {
-        return limitEnd;
+    public Integer getLimitStart() {
+        return limitStart;
     }
 
     /**
@@ -143,6 +136,13 @@ public class DatabaseDOExample {
      */
     public void setLimitEnd(Integer limitEnd) {
         this.limitEnd = limitEnd;
+    }
+
+    /**
+     * @mbg.generated
+     */
+    public Integer getLimitEnd() {
+        return limitEnd;
     }
 
     /**
@@ -447,6 +447,76 @@ public class DatabaseDOExample {
 
         public Criteria andDescriptionNotBetween(String value1, String value2) {
             addCriterion("description not between", value1, value2, "description");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionIsNull() {
+            addCriterion("version is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionIsNotNull() {
+            addCriterion("version is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionEqualTo(String value) {
+            addCriterion("version =", value, "version");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionNotEqualTo(String value) {
+            addCriterion("version <>", value, "version");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionGreaterThan(String value) {
+            addCriterion("version >", value, "version");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionGreaterThanOrEqualTo(String value) {
+            addCriterion("version >=", value, "version");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionLessThan(String value) {
+            addCriterion("version <", value, "version");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionLessThanOrEqualTo(String value) {
+            addCriterion("version <=", value, "version");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionLike(String value) {
+            addCriterion("version like", value, "version");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionNotLike(String value) {
+            addCriterion("version not like", value, "version");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionIn(List<String> values) {
+            addCriterion("version in", values, "version");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionNotIn(List<String> values) {
+            addCriterion("version not in", values, "version");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionBetween(String value1, String value2) {
+            addCriterion("version between", value1, value2, "version");
+            return (Criteria) this;
+        }
+
+        public Criteria andVersionNotBetween(String value1, String value2) {
+            addCriterion("version not between", value1, value2, "version");
             return (Criteria) this;
         }
 
@@ -812,6 +882,38 @@ public class DatabaseDOExample {
 
         private String typeHandler;
 
+        public String getCondition() {
+            return condition;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Object getSecondValue() {
+            return secondValue;
+        }
+
+        public boolean isNoValue() {
+            return noValue;
+        }
+
+        public boolean isSingleValue() {
+            return singleValue;
+        }
+
+        public boolean isBetweenValue() {
+            return betweenValue;
+        }
+
+        public boolean isListValue() {
+            return listValue;
+        }
+
+        public String getTypeHandler() {
+            return typeHandler;
+        }
+
         protected Criterion(String condition) {
             super();
             this.condition = condition;
@@ -846,38 +948,6 @@ public class DatabaseDOExample {
 
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
-        }
-
-        public String getCondition() {
-            return condition;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public Object getSecondValue() {
-            return secondValue;
-        }
-
-        public boolean isNoValue() {
-            return noValue;
-        }
-
-        public boolean isSingleValue() {
-            return singleValue;
-        }
-
-        public boolean isBetweenValue() {
-            return betweenValue;
-        }
-
-        public boolean isListValue() {
-            return listValue;
-        }
-
-        public String getTypeHandler() {
-            return typeHandler;
         }
     }
 }

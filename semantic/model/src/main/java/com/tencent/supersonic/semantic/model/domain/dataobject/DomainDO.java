@@ -74,12 +74,6 @@ public class DomainDO {
      */
     private String viewOrg;
 
-
-    /**
-     * 主题域实体信息
-     */
-    private String entity;
-
     /**
      * 自增ID
      *
@@ -330,13 +324,5 @@ public class DomainDO {
      */
     public void setViewOrg(String viewOrg) {
         this.viewOrg = viewOrg == null ? null : viewOrg.trim();
-    }
-
-    public String getEntity() {
-        return entity;
-    }
-
-    public void setEntity(String entity) {
-        this.entity = entity;
     }
 }

@@ -36,8 +36,8 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
         if (queryExecutor != null) {
             queryResultWithColumns = queryExecutor.execute(catalog, queryStatement);
             queryResultWithColumns.setSql(queryStatement.getSql());
-            if (queryStatement.getDomainId() > 0) {
-                queryUtils.fillItemNameInfo(queryResultWithColumns, queryStatement.getDomainId());
+            if (queryStatement.getModelId() > 0) {
+                queryUtils.fillItemNameInfo(queryResultWithColumns, queryStatement.getModelId());
             }
         }
         return queryResultWithColumns;
@@ -46,7 +46,7 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
     public QueryStatement plan(QueryStructReq queryStructCmd) throws Exception {
         QueryStatement queryStatement = queryParser.logicSql(queryStructCmd);
         queryUtils.checkSqlParse(queryStatement);
-        queryStatement.setDomainId(queryStructCmd.getDomainId());
+        queryStatement.setModelId(queryStructCmd.getModelId());
         log.info("queryStatement:{}", queryStatement);
         for (QueryOptimizer queryOptimizer : ComponentFactory.getQueryOptimizers()) {
             queryOptimizer.rewrite(queryStructCmd, queryStatement);

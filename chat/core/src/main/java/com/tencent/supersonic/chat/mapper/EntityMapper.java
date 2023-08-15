@@ -2,14 +2,19 @@ package com.tencent.supersonic.chat.mapper;
 
 
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
-import com.tencent.supersonic.chat.api.pojo.*;
+import com.tencent.supersonic.chat.api.pojo.ModelSchema;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
-import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -18,20 +23,20 @@ public class EntityMapper implements SchemaMapper {
     @Override
     public void map(QueryContext queryContext) {
         SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
-        for (Long domainId : schemaMapInfo.getMatchedDomains()) {
-            List<SchemaElementMatch> schemaElementMatchList = schemaMapInfo.getMatchedElements(domainId);
+        for (Long modelId : schemaMapInfo.getMatchedModels()) {
+            List<SchemaElementMatch> schemaElementMatchList = schemaMapInfo.getMatchedElements(modelId);
             if (CollectionUtils.isEmpty(schemaElementMatchList)) {
                 continue;
             }
-            SchemaElement entity = getEntity(domainId);
+            SchemaElement entity = getEntity(modelId);
             if (entity == null || entity.getId() == null) {
                 continue;
             }
             List<SchemaElementMatch> valueSchemaElements = schemaElementMatchList.stream().filter(schemaElementMatch ->
-                    SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType()))
+                            SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType()))
                     .collect(Collectors.toList());
             for (SchemaElementMatch schemaElementMatch : valueSchemaElements) {
-                if (!entity.getId().equals(schemaElementMatch.getElement().getId())){
+                if (!entity.getId().equals(schemaElementMatch.getElement().getId())) {
                     continue;
                 }
                 if (!checkExistSameEntitySchemaElements(schemaElementMatch, schemaElementMatchList)) {
@@ -46,7 +51,7 @@ public class EntityMapper implements SchemaMapper {
     }
 
     private boolean checkExistSameEntitySchemaElements(SchemaElementMatch valueSchemaElementMatch,
-                                                  List<SchemaElementMatch> schemaElementMatchList) {
+            List<SchemaElementMatch> schemaElementMatchList) {
         List<SchemaElementMatch> entitySchemaElements = schemaElementMatchList.stream().filter(schemaElementMatch ->
                         SchemaElementType.ENTITY.equals(schemaElementMatch.getElement().getType()))
                 .collect(Collectors.toList());
@@ -58,11 +63,11 @@ public class EntityMapper implements SchemaMapper {
         return false;
     }
 
-    private SchemaElement getEntity(Long domainId) {
+    private SchemaElement getEntity(Long modelId) {
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
-        DomainSchema domainSchema = semanticService.getDomainSchema(domainId);
-        if (domainSchema != null && domainSchema.getEntity() != null) {
-            return domainSchema.getEntity();
+        ModelSchema modelSchema = semanticService.getModelSchema(modelId);
+        if (modelSchema != null && modelSchema.getEntity() != null) {
+            return modelSchema.getEntity();
         }
         return null;
     }

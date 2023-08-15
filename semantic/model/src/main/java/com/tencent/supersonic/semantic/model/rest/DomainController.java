@@ -3,10 +3,8 @@ package com.tencent.supersonic.semantic.model.rest;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.semantic.api.model.request.DomainReq;
-import com.tencent.supersonic.semantic.api.model.request.DomainSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.request.DomainUpdateReq;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
-import com.tencent.supersonic.semantic.api.model.response.DomainSchemaResp;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
 import java.util.Arrays;
 import java.util.List;
@@ -56,26 +54,13 @@ public class DomainController {
         return true;
     }
 
-
-    /**
-     * get domain list
-     *
-     * @param
-     */
     @GetMapping("/getDomainList")
     public List<DomainResp> getDomainList(HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return domainService.getDomainListForAdmin(user.getName());
+        return domainService.getDomainListWithAdminAuth(user);
     }
 
-
-    /**
-     * get domain by id
-     *
-     * @param id
-     * @return
-     */
     @GetMapping("/getDomain/{id}")
     public DomainResp getDomain(@PathVariable("id") Long id) {
         return domainService.getDomain(id);
@@ -86,14 +71,5 @@ public class DomainController {
         return domainService.getDomainList(Arrays.stream(domainIds.split(",")).map(Long::parseLong)
                 .collect(Collectors.toList()));
     }
-
-    @PostMapping("/schema")
-    public List<DomainSchemaResp> fetchDomainSchema(@RequestBody DomainSchemaFilterReq filter,
-            HttpServletRequest request,
-            HttpServletResponse response) {
-        User user = UserHolder.findUser(request, response);
-        return domainService.fetchDomainSchema(filter, user);
-    }
-
 
 }

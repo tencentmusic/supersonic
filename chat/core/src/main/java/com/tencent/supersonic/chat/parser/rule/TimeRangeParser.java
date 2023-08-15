@@ -4,21 +4,21 @@ import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.query.QueryManager;
+import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
-
+import com.xkzhangsan.time.nlp.TimeNLP;
+import com.xkzhangsan.time.nlp.TimeNLPUtil;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.xkzhangsan.time.nlp.TimeNLP;
-import com.xkzhangsan.time.nlp.TimeNLPUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 
@@ -45,12 +45,16 @@ public class TimeRangeParser implements SemanticParser {
             if (queryContext.getCandidateQueries().size() > 0) {
                 for (SemanticQuery query : queryContext.getCandidateQueries()) {
                     query.getParseInfo().setDateInfo(dateConf);
+                    query.getParseInfo().setScore(query.getParseInfo().getScore()
+                            + dateConf.getDetectWord().length());
                 }
             } else if (QueryManager.containsRuleQuery(chatContext.getParseInfo().getQueryMode())) {
                 RuleSemanticQuery semanticQuery = QueryManager.createRuleQuery(
                         chatContext.getParseInfo().getQueryMode());
                 // inherit parse info from context
                 chatContext.getParseInfo().setDateInfo(dateConf);
+                chatContext.getParseInfo().setScore(chatContext.getParseInfo().getScore()
+                        + dateConf.getDetectWord().length());
                 semanticQuery.setParseInfo(chatContext.getParseInfo());
                 queryContext.getCandidateQueries().add(semanticQuery);
             }
@@ -60,41 +64,48 @@ public class TimeRangeParser implements SemanticParser {
     private DateConf parseDateCN(String queryText) {
         Date startDate = null;
         Date endDate;
+        String detectWord = null;
 
         List<TimeNLP> times = TimeNLPUtil.parse(queryText);
         if (times.size() > 0) {
             startDate = times.get(0).getTime();
+            detectWord = times.get(0).getTimeExpression();
         } else {
             return null;
         }
 
         if (times.size() > 1) {
             endDate = times.get(1).getTime();
+            detectWord += "~" + times.get(0).getTimeExpression();
         } else {
             endDate = startDate;
         }
 
-        return getDateConf(startDate, endDate);
+        return getDateConf(startDate, endDate, detectWord);
     }
 
     private DateConf parseDateNumber(String queryText) {
         String startDate;
         String endDate = null;
+        String detectWord = null;
 
         Matcher dateMatcher = DATE_PATTERN_NUMBER.matcher(queryText);
         if (dateMatcher.find()) {
             startDate = dateMatcher.group();
+            detectWord = startDate;
         } else {
             return null;
         }
+
         if (dateMatcher.find()) {
             endDate = dateMatcher.group();
+            detectWord += "~" + endDate;
         }
 
         endDate = endDate != null ? endDate : startDate;
 
         try {
-            return getDateConf(DATE_FORMAT_NUMBER.parse(startDate), DATE_FORMAT_NUMBER.parse(endDate));
+            return getDateConf(DATE_FORMAT_NUMBER.parse(startDate), DATE_FORMAT_NUMBER.parse(endDate), detectWord);
         } catch (ParseException e) {
             return null;
         }
@@ -134,11 +145,11 @@ public class TimeRangeParser implements SemanticParser {
                 }
                 days = days * num;
                 info.setDateMode(DateConf.DateMode.RECENT);
-                String text = "近" + num + zhPeriod;
+                String detectWord = "近" + num + zhPeriod;
                 if (Strings.isNotEmpty(m.group("periodStr"))) {
-                    text = m.group("periodStr");
+                    detectWord = m.group("periodStr");
                 }
-                info.setText(text);
+                info.setDetectWord(detectWord);
                 info.setStartDate(LocalDate.now().minusDays(days).toString());
                 info.setUnit(num);
 
@@ -173,7 +184,7 @@ public class TimeRangeParser implements SemanticParser {
         return stack.stream().mapToInt(s -> s).sum();
     }
 
-    private DateConf getDateConf(Date startDate, Date endDate) {
+    private DateConf getDateConf(Date startDate, Date endDate, String detectWord) {
         if (startDate == null || endDate == null) {
             return null;
         }
@@ -182,6 +193,7 @@ public class TimeRangeParser implements SemanticParser {
         info.setDateMode(DateConf.DateMode.BETWEEN);
         info.setStartDate(DATE_FORMAT.format(startDate));
         info.setEndDate(DATE_FORMAT.format(endDate));
+        info.setDetectWord(detectWord);
         return info;
     }
 

@@ -3,8 +3,8 @@ package com.tencent.supersonic.semantic.model.domain.pojo;
 
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
-import lombok.Data;
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class Dimension extends SchemaItem {
@@ -14,7 +14,7 @@ public class Dimension extends SchemaItem {
 
     private String expr;
 
-    private Long domainId;
+    private Long modelId;
 
     private Long datasourceId;
 

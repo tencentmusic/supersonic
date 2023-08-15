@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 public class PluginDOExample {
+
     /**
      * s2_plugin
      */
@@ -31,7 +32,6 @@ public class PluginDOExample {
     protected Integer limitEnd;
 
     /**
-     *
      * @mbg.generated
      */
     public PluginDOExample() {
@@ -39,7 +39,6 @@ public class PluginDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public void setOrderByClause(String orderByClause) {
@@ -47,7 +46,6 @@ public class PluginDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public String getOrderByClause() {
@@ -55,7 +53,6 @@ public class PluginDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public void setDistinct(boolean distinct) {
@@ -63,7 +60,6 @@ public class PluginDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public boolean isDistinct() {
@@ -71,7 +67,6 @@ public class PluginDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public List<Criteria> getOredCriteria() {
@@ -79,7 +74,6 @@ public class PluginDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public void or(Criteria criteria) {
@@ -87,7 +81,6 @@ public class PluginDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public Criteria or() {
@@ -97,7 +90,6 @@ public class PluginDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public Criteria createCriteria() {
@@ -109,7 +101,6 @@ public class PluginDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     protected Criteria createCriteriaInternal() {
@@ -118,7 +109,6 @@ public class PluginDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public void clear() {
@@ -128,15 +118,13 @@ public class PluginDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public void setLimitStart(Integer limitStart) {
-        this.limitStart=limitStart;
+        this.limitStart = limitStart;
     }
 
     /**
-     *
      * @mbg.generated
      */
     public Integer getLimitStart() {
@@ -144,15 +132,13 @@ public class PluginDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public void setLimitEnd(Integer limitEnd) {
-        this.limitEnd=limitEnd;
+        this.limitEnd = limitEnd;
     }
 
     /**
-     *
      * @mbg.generated
      */
     public Integer getLimitEnd() {
@@ -163,6 +149,7 @@ public class PluginDOExample {
      * s2_plugin null
      */
     protected abstract static class GeneratedCriteria {
+
         protected List<Criterion> criteria;
 
         protected GeneratedCriteria() {
@@ -333,73 +320,73 @@ public class PluginDOExample {
             return (Criteria) this;
         }
 
-        public Criteria andDomainIsNull() {
-            addCriterion("domain is null");
+        public Criteria andModelIsNull() {
+            addCriterion("model is null");
             return (Criteria) this;
         }
 
-        public Criteria andDomainIsNotNull() {
-            addCriterion("domain is not null");
+        public Criteria andModelIsNotNull() {
+            addCriterion("model is not null");
             return (Criteria) this;
         }
 
-        public Criteria andDomainEqualTo(String value) {
-            addCriterion("domain =", value, "domain");
+        public Criteria andModelEqualTo(String value) {
+            addCriterion("model =", value, "model");
             return (Criteria) this;
         }
 
-        public Criteria andDomainNotEqualTo(String value) {
-            addCriterion("domain <>", value, "domain");
+        public Criteria andModelNotEqualTo(String value) {
+            addCriterion("model <>", value, "model");
             return (Criteria) this;
         }
 
-        public Criteria andDomainGreaterThan(String value) {
-            addCriterion("domain >", value, "domain");
+        public Criteria andModelGreaterThan(String value) {
+            addCriterion("model >", value, "model");
             return (Criteria) this;
         }
 
-        public Criteria andDomainGreaterThanOrEqualTo(String value) {
-            addCriterion("domain >=", value, "domain");
+        public Criteria andModelGreaterThanOrEqualTo(String value) {
+            addCriterion("model >=", value, "model");
             return (Criteria) this;
         }
 
-        public Criteria andDomainLessThan(String value) {
-            addCriterion("domain <", value, "domain");
+        public Criteria andModelLessThan(String value) {
+            addCriterion("model <", value, "model");
             return (Criteria) this;
         }
 
-        public Criteria andDomainLessThanOrEqualTo(String value) {
-            addCriterion("domain <=", value, "domain");
+        public Criteria andModelLessThanOrEqualTo(String value) {
+            addCriterion("model <=", value, "model");
             return (Criteria) this;
         }
 
-        public Criteria andDomainLike(String value) {
-            addCriterion("domain like", value, "domain");
+        public Criteria andModelLike(String value) {
+            addCriterion("model like", value, "model");
             return (Criteria) this;
         }
 
-        public Criteria andDomainNotLike(String value) {
-            addCriterion("domain not like", value, "domain");
+        public Criteria andModelNotLike(String value) {
+            addCriterion("model not like", value, "model");
             return (Criteria) this;
         }
 
-        public Criteria andDomainIn(List<String> values) {
-            addCriterion("domain in", values, "domain");
+        public Criteria andModelIn(List<String> values) {
+            addCriterion("model in", values, "model");
             return (Criteria) this;
         }
 
-        public Criteria andDomainNotIn(List<String> values) {
-            addCriterion("domain not in", values, "domain");
+        public Criteria andModelNotIn(List<String> values) {
+            addCriterion("model not in", values, "model");
             return (Criteria) this;
         }
 
-        public Criteria andDomainBetween(String value1, String value2) {
-            addCriterion("domain between", value1, value2, "domain");
+        public Criteria andModelBetween(String value1, String value2) {
+            addCriterion("model between", value1, value2, "model");
             return (Criteria) this;
         }
 
-        public Criteria andDomainNotBetween(String value1, String value2) {
-            addCriterion("domain not between", value1, value2, "domain");
+        public Criteria andModelNotBetween(String value1, String value2) {
+            addCriterion("model not between", value1, value2, "model");
             return (Criteria) this;
         }
 
@@ -888,6 +875,7 @@ public class PluginDOExample {
      * s2_plugin null
      */
     public static class Criterion {
+
         private String condition;
 
         private Object value;

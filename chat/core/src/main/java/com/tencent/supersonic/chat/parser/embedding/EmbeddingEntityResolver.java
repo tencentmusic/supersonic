@@ -1,23 +1,26 @@
 package com.tencent.supersonic.chat.parser.embedding;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tencent.supersonic.chat.api.pojo.*;
+import com.tencent.supersonic.chat.api.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.service.ConfigService;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
 @Slf4j
 @Component("EmbeddingEntityResolver")
 public class EmbeddingEntityResolver {
-    
+
     private ConfigService configService;
 
     public EmbeddingEntityResolver(ConfigService configService) {
@@ -25,18 +28,19 @@ public class EmbeddingEntityResolver {
     }
 
 
-    private Long getEntityValue(Long domainId, Long entityElementId, QueryContext queryCtx, ChatContext chatCtx) {
+    private Long getEntityValue(Long modelId, Long entityElementId, QueryContext queryCtx, ChatContext chatCtx) {
         Long entityId = null;
         QueryFilters queryFilters = queryCtx.getRequest().getQueryFilters();
         if (queryFilters != null) {
             entityId = getEntityValueFromQueryFilter(queryFilters.getFilters());
             if (entityId != null) {
-                log.info("get entity id:{} domain id:{} from  query filter :{} ", entityId, domainId, queryFilters);
+                log.info("get entity id:{} model id:{} from  query filter :{} ", entityId, modelId, queryFilters);
                 return entityId;
             }
         }
-        entityId = getEntityValueFromSchemaMapInfo(domainId, queryCtx.getMapInfo(), entityElementId);
-        log.info("get entity id:{} from  schema map Info :{} ", entityId, JSONObject.toJSONString(queryCtx.getMapInfo()));
+        entityId = getEntityValueFromSchemaMapInfo(modelId, queryCtx.getMapInfo(), entityElementId);
+        log.info("get entity id:{} from  schema map Info :{} ", entityId,
+                JSONObject.toJSONString(queryCtx.getMapInfo()));
         if (entityId == null || entityId == 0) {
             Long entityIdFromChat = getEntityValueFromParseInfo(chatCtx.getParseInfo(), entityElementId);
             if (entityIdFromChat != null && entityIdFromChat > 0) {
@@ -75,8 +79,8 @@ public class EmbeddingEntityResolver {
     }
 
 
-    private Long getEntityValueFromSchemaMapInfo(Long domainId, SchemaMapInfo schemaMapInfo, Long entityElementId) {
-        List<SchemaElementMatch> schemaElementMatchList = schemaMapInfo.getMatchedElements(domainId);
+    private Long getEntityValueFromSchemaMapInfo(Long modelId, SchemaMapInfo schemaMapInfo, Long entityElementId) {
+        List<SchemaElementMatch> schemaElementMatchList = schemaMapInfo.getMatchedElements(modelId);
         if (CollectionUtils.isEmpty(schemaElementMatchList)) {
             return null;
         }

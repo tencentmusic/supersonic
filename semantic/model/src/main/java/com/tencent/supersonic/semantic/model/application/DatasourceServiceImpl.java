@@ -8,9 +8,6 @@ import com.tencent.supersonic.semantic.api.model.pojo.DatasourceDetail;
 import com.tencent.supersonic.semantic.api.model.pojo.Dim;
 import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
-import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
-import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
 import com.tencent.supersonic.semantic.api.model.request.DatasourceRelaReq;
 import com.tencent.supersonic.semantic.api.model.request.DatasourceReq;
 import com.tencent.supersonic.semantic.api.model.request.DateInfoReq;
@@ -23,6 +20,9 @@ import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
+import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
 import com.tencent.supersonic.semantic.model.domain.DatabaseService;
 import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
@@ -88,7 +88,7 @@ public class DatasourceServiceImpl implements DatasourceService {
         Datasource datasource = DatasourceConverter.convert(datasourceReq);
         log.info("[create datasource] object:{}", JSONObject.toJSONString(datasource));
         saveDatasource(datasource, user);
-        Optional<DatasourceResp> datasourceDescOptional = getDatasource(datasourceReq.getDomainId(),
+        Optional<DatasourceResp> datasourceDescOptional = getDatasource(datasourceReq.getModelId(),
                 datasourceReq.getBizName());
         if (!datasourceDescOptional.isPresent()) {
             throw new RuntimeException("create datasource failed");
@@ -122,24 +122,8 @@ public class DatasourceServiceImpl implements DatasourceService {
     }
 
     @Override
-    public String getSourceBizNameById(Long id) {
-        DatasourceDO datasourceDO = getDatasourceById(id);
-        if (datasourceDO == null) {
-            String message = String.format("datasource with id:%s not exsit", id);
-            throw new RuntimeException(message);
-        }
-        return datasourceDO.getBizName();
-    }
-
-
-    private DatasourceDO getDatasourceById(Long id) {
-        return datasourceRepository.getDatasourceById(id);
-    }
-
-
-    @Override
-    public List<MeasureResp> getMeasureListOfDomain(Long domainId) {
-        List<DatasourceResp> datasourceDescs = getDatasourceList(domainId);
+    public List<MeasureResp> getMeasureListOfModel(Long modelId) {
+        List<DatasourceResp> datasourceDescs = getDatasourceList(modelId);
         List<MeasureResp> measureDescs = Lists.newArrayList();
         if (!CollectionUtils.isEmpty(datasourceDescs)) {
             for (DatasourceResp datasourceDesc : datasourceDescs) {
@@ -167,8 +151,8 @@ public class DatasourceServiceImpl implements DatasourceService {
     }
 
 
-    private Optional<DatasourceResp> getDatasource(Long domainId, String bizName) {
-        List<DatasourceResp> datasourceDescs = getDatasourceList(domainId);
+    private Optional<DatasourceResp> getDatasource(Long modelId, String bizName) {
+        List<DatasourceResp> datasourceDescs = getDatasourceList(modelId);
         if (CollectionUtils.isEmpty(datasourceDescs)) {
             return Optional.empty();
         }
@@ -197,8 +181,8 @@ public class DatasourceServiceImpl implements DatasourceService {
     }
 
     @Override
-    public List<DatasourceResp> getDatasourceList(Long domainId) {
-        return DatasourceConverter.convertList(datasourceRepository.getDatasourceList(domainId));
+    public List<DatasourceResp> getDatasourceList(Long modelId) {
+        return DatasourceConverter.convertList(datasourceRepository.getDatasourceList(modelId));
     }
 
     @Override
@@ -207,8 +191,8 @@ public class DatasourceServiceImpl implements DatasourceService {
     }
 
     @Override
-    public List<DatasourceResp> getDatasourceListNoMeasurePrefix(Long domainId) {
-        List<DatasourceResp> datasourceResps = getDatasourceList(domainId);
+    public List<DatasourceResp> getDatasourceListNoMeasurePrefix(Long modelId) {
+        List<DatasourceResp> datasourceResps = getDatasourceList(modelId);
         for (DatasourceResp datasourceResp : datasourceResps) {
             if (!CollectionUtils.isEmpty(datasourceResp.getDatasourceDetail().getMeasures())) {
                 for (Measure measure : datasourceResp.getDatasourceDetail().getMeasures()) {
@@ -237,17 +221,17 @@ public class DatasourceServiceImpl implements DatasourceService {
 
 
     @Override
-    public void deleteDatasource(Long id) throws Exception {
+    public void deleteDatasource(Long id) {
         DatasourceDO datasourceDO = datasourceRepository.getDatasourceById(id);
         if (datasourceDO == null) {
             return;
         }
-        checkDelete(datasourceDO.getDomainId(), id);
+        checkDelete(datasourceDO.getModelId(), id);
         datasourceRepository.deleteDatasource(id);
     }
 
-    private void checkDelete(Long domainId, Long datasourceId) {
-        List<MetricResp> metricResps = metricService.getMetrics(domainId, datasourceId);
+    private void checkDelete(Long modelId, Long datasourceId) {
+        List<MetricResp> metricResps = metricService.getMetrics(modelId, datasourceId);
         List<DimensionResp> dimensionResps = dimensionService.getDimensionsByDatasource(datasourceId);
         if (!CollectionUtils.isEmpty(metricResps) || !CollectionUtils.isEmpty(dimensionResps)) {
             throw new RuntimeException("exist dimension or metric on this datasource, please check");
@@ -261,8 +245,6 @@ public class DatasourceServiceImpl implements DatasourceService {
             return datasourceRelaResps;
         }
         return datasourceRelaDOS.stream().map(DatasourceConverter::convert).collect(Collectors.toList());
-
-
     }
 
 
@@ -289,8 +271,8 @@ public class DatasourceServiceImpl implements DatasourceService {
     }
 
     @Override
-    public List<DatasourceRelaResp> getDatasourceRelaList(Long domainId) {
-        return convertDatasourceRelaList(datasourceRepository.getDatasourceRelaList(domainId));
+    public List<DatasourceRelaResp> getDatasourceRelaList(Long modelId) {
+        return convertDatasourceRelaList(datasourceRepository.getDatasourceRelaList(modelId));
     }
 
 
@@ -358,14 +340,14 @@ public class DatasourceServiceImpl implements DatasourceService {
     }
 
     @Override
-    public void getModelYamlTplByDomainIds(Set<Long> domainIds, Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
+    public void getModelYamlTplByModelIds(Set<Long> modelIds, Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
             List<DatasourceYamlTpl> datasourceYamlTplList, List<MetricYamlTpl> metricYamlTplList) {
-        for (Long domainId : domainIds) {
-            List<DatasourceResp> datasourceResps = getDatasourceList(domainId);
-            List<MetricResp> metricResps = metricService.getMetrics(domainId);
+        for (Long modelId : modelIds) {
+            List<DatasourceResp> datasourceResps = getDatasourceList(modelId);
+            List<MetricResp> metricResps = metricService.getMetrics(modelId);
             metricYamlTplList.addAll(MetricYamlManager.convert2YamlObj(MetricConverter.metricInfo2Metric(metricResps)));
-            DatabaseResp databaseResp = databaseService.getDatabaseByDomainId(domainId);
-            List<DimensionResp> dimensionResps = dimensionService.getDimensions(domainId);
+            DatabaseResp databaseResp = databaseService.getDatabaseByModelId(modelId);
+            List<DimensionResp> dimensionResps = dimensionService.getDimensions(modelId);
             for (DatasourceResp datasourceResp : datasourceResps) {
                 datasourceYamlTplList.add(DatasourceYamlManager.convert2YamlObj(
                         DatasourceConverter.datasourceInfo2Datasource(datasourceResp), databaseResp));

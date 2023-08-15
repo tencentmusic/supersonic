@@ -4,10 +4,10 @@ import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.semantic.api.model.pojo.QueryStat;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
-import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.semantic.query.persistence.mapper.StatMapper;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -44,8 +44,8 @@ public class StatRepositoryImpl implements StatRepository {
         statInfos.stream().forEach(stat -> {
             String dimensions = stat.getDimensions();
             String metrics = stat.getMetrics();
-            updateStatMapInfo(map, dimensions, TypeEnums.DIMENSION.getName(), stat.getDomainId());
-            updateStatMapInfo(map, metrics, TypeEnums.METRIC.getName(), stat.getDomainId());
+            updateStatMapInfo(map, dimensions, TypeEnums.DIMENSION.getName(), stat.getModelId());
+            updateStatMapInfo(map, metrics, TypeEnums.METRIC.getName(), stat.getModelId());
         });
 
         map.forEach((k, v) -> {
@@ -65,13 +65,13 @@ public class StatRepositoryImpl implements StatRepository {
         return statMapper.getStatInfo(itemUseCommend);
     }
 
-    private void updateStatMapInfo(Map<String, Long> map, String dimensions, String type, Long domainId) {
+    private void updateStatMapInfo(Map<String, Long> map, String dimensions, String type, Long modelId) {
         if (Strings.isNotEmpty(dimensions)) {
             try {
                 List<String> dimensionList = mapper.readValue(dimensions, new TypeReference<List<String>>() {
                 });
                 dimensionList.stream().forEach(dimension -> {
-                    String key = domainId + AT_SYMBOL + AT_SYMBOL + type + AT_SYMBOL + AT_SYMBOL + dimension;
+                    String key = modelId + AT_SYMBOL + AT_SYMBOL + type + AT_SYMBOL + AT_SYMBOL + dimension;
                     if (map.containsKey(key)) {
                         map.put(key, map.get(key) + 1);
                     } else {
@@ -84,9 +84,9 @@ public class StatRepositoryImpl implements StatRepository {
         }
     }
 
-    private void updateStatMapInfo(Map<String, Long> map, Long domainId, String type) {
-        if (Objects.nonNull(domainId)) {
-            String key = type + AT_SYMBOL + AT_SYMBOL + domainId;
+    private void updateStatMapInfo(Map<String, Long> map, Long modelId, String type) {
+        if (Objects.nonNull(modelId)) {
+            String key = type + AT_SYMBOL + AT_SYMBOL + modelId;
             if (map.containsKey(key)) {
                 map.put(key, map.get(key) + 1);
             } else {

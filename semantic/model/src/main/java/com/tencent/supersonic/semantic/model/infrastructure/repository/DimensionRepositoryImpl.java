@@ -2,8 +2,8 @@ package com.tencent.supersonic.semantic.model.infrastructure.repository;
 
 import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDOExample;
-import com.tencent.supersonic.semantic.model.domain.repository.DimensionRepository;
 import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
+import com.tencent.supersonic.semantic.model.domain.repository.DimensionRepository;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOCustomMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOMapper;
 import java.util.List;
@@ -28,9 +28,7 @@ public class DimensionRepositoryImpl implements DimensionRepository {
 
     @Override
     public void createDimension(DimensionDO dimensionDO) {
-
         dimensionDOMapper.insert(dimensionDO);
-
     }
 
     @Override
@@ -53,7 +51,7 @@ public class DimensionRepositoryImpl implements DimensionRepository {
     @Override
     public List<DimensionDO> getDimensionListOfDomain(Long domainId) {
         DimensionDOExample dimensionDOExample = new DimensionDOExample();
-        dimensionDOExample.createCriteria().andDomainIdEqualTo(domainId);
+        dimensionDOExample.createCriteria().andModelIdEqualTo(domainId);
         return dimensionDOMapper.selectByExampleWithBLOBs(dimensionDOExample);
     }
 
@@ -98,8 +96,8 @@ public class DimensionRepositoryImpl implements DimensionRepository {
         if (dimensionFilter.getCreatedBy() != null) {
             dimensionDOExample.getOredCriteria().get(0).andCreatedByEqualTo(dimensionFilter.getCreatedBy());
         }
-        if (CollectionUtils.isNotEmpty(dimensionFilter.getDomainIds())) {
-            dimensionDOExample.getOredCriteria().get(0).andDomainIdIn(dimensionFilter.getDomainIds());
+        if (CollectionUtils.isNotEmpty(dimensionFilter.getModelIds())) {
+            dimensionDOExample.getOredCriteria().get(0).andModelIdIn(dimensionFilter.getModelIds());
         }
         if (dimensionFilter.getSensitiveLevel() != null) {
             dimensionDOExample.getOredCriteria().get(0).andSensitiveLevelEqualTo(dimensionFilter.getSensitiveLevel());

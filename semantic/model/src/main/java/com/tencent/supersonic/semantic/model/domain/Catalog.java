@@ -1,14 +1,14 @@
 package com.tencent.supersonic.semantic.model.domain;
 
 import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
-import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
-import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
+import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,21 +16,22 @@ import java.util.Set;
 public interface Catalog {
 
     DatabaseResp getDatabase(Long id);
-    DatabaseResp getDatabaseByDomainId(Long domainId);
 
-    List<DatasourceResp> getDatasourceList(Long domainId);
+    DatabaseResp getDatabaseByModelId(Long modelId);
 
-    String getDomainFullPath(Long domainId);
+    List<DatasourceResp> getDatasourceList(Long modelId);
 
-    Map<Long, String> getDomainFullPath();
+    String getModelFullPath(Long modelId);
 
-    DimensionResp getDimension(String bizName, Long domainId);
+    Map<Long, String> getModelFullPath();
 
-    List<DimensionResp> getDimensions(Long domainId);
+    DimensionResp getDimension(String bizName, Long modelId);
 
-    List<MetricResp> getMetrics(Long domainId);
+    List<DimensionResp> getDimensions(Long modelId);
 
-    void getModelYamlTplByDomainIds(Set<Long> domainIds, Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
+    List<MetricResp> getMetrics(Long modelId);
+
+    void getModelYamlTplByMoldelIds(Set<Long> modelIds, Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
             List<DatasourceYamlTpl> datasourceYamlTplList, List<MetricYamlTpl> metricYamlTplList);
 
 

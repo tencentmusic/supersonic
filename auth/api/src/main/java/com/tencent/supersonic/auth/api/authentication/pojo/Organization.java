@@ -1,9 +1,8 @@
 package com.tencent.supersonic.auth.api.authentication.pojo;
 
 import com.google.common.collect.Lists;
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class Organization {

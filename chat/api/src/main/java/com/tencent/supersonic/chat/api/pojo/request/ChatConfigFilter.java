@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class ChatConfigFilter {
 
     private Long id;
-    private Long domainId;
+    private Long modelId;
     private StatusEnum status = StatusEnum.ONLINE;
 }

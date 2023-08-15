@@ -1,11 +1,12 @@
 package com.tencent.supersonic.chat.parser.rule;
 
 import com.tencent.supersonic.chat.api.component.SemanticParser;
-import com.tencent.supersonic.chat.api.pojo.*;
+import com.tencent.supersonic.chat.api.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
-
-import java.util.*;
-
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -16,12 +17,12 @@ public class QueryModeParser implements SemanticParser {
         SchemaMapInfo mapInfo = queryContext.getMapInfo();
 
         // iterate all schemaElementMatches to resolve semantic query
-        for (Long domainId : mapInfo.getMatchedDomains()) {
-            List<SchemaElementMatch> elementMatches = mapInfo.getMatchedElements(domainId);
+        for (Long modelId : mapInfo.getMatchedModels()) {
+            List<SchemaElementMatch> elementMatches = mapInfo.getMatchedElements(modelId);
             List<RuleSemanticQuery> queries = RuleSemanticQuery.resolve(elementMatches, queryContext);
 
             for (RuleSemanticQuery query : queries) {
-                query.fillParseInfo(domainId, chatContext);
+                query.fillParseInfo(modelId, queryContext, chatContext);
                 queryContext.getCandidateQueries().add(query);
             }
         }

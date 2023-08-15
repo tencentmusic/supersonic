@@ -2,35 +2,33 @@ package com.tencent.supersonic.semantic.model.application;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.util.BeanMapper;
-import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.request.DomainReq;
-import com.tencent.supersonic.semantic.api.model.request.DomainSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.request.DomainUpdateReq;
-import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
-import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
-import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
-import com.tencent.supersonic.semantic.api.model.response.DomainSchemaResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
-import com.tencent.supersonic.semantic.model.domain.DatasourceService;
-import com.tencent.supersonic.semantic.model.domain.DimensionService;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
-import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Domain;
 import com.tencent.supersonic.semantic.model.domain.repository.DomainRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.DomainConvert;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.assertj.core.util.Sets;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -41,32 +39,25 @@ import org.springframework.util.CollectionUtils;
 public class DomainServiceImpl implements DomainService {
 
     private final DomainRepository domainRepository;
-    private final MetricService metricService;
-    private final DimensionService dimensionService;
-    private final DatasourceService datasourceService;
+    private final ModelService modelService;
     private final UserService userService;
 
 
-    public DomainServiceImpl(DomainRepository domainRepository, @Lazy MetricService metricService,
-                             @Lazy DimensionService dimensionService, @Lazy DatasourceService datasourceService,
-                             UserService userService) {
+    public DomainServiceImpl(DomainRepository domainRepository,
+            @Lazy ModelService modelService,
+            UserService userService) {
         this.domainRepository = domainRepository;
-        this.metricService = metricService;
-        this.dimensionService = dimensionService;
-        this.datasourceService = datasourceService;
+        this.modelService = modelService;
         this.userService = userService;
     }
-
 
     @Override
     public void createDomain(DomainReq domainReq, User user) {
         log.info("[create domain] cmd : {}", JSONObject.toJSONString(domainReq));
         Domain domain = DomainConvert.convert(domainReq);
         log.info("[create domain] object:{}", JSONObject.toJSONString(domainReq));
-
         saveDomain(domain, user);
     }
-
 
     @Override
     public void updateDomain(DomainUpdateReq domainUpdateReq, User user) {
@@ -78,47 +69,18 @@ public class DomainServiceImpl implements DomainService {
         domainDO.setAdminOrg(String.join(",", domainUpdateReq.getAdminOrgs()));
         domainDO.setViewer(String.join(",", domainUpdateReq.getViewers()));
         domainDO.setViewOrg(String.join(",", domainUpdateReq.getViewOrgs()));
-        domainDO.setEntity(JsonUtil.toString(domainUpdateReq.getEntity()));
         domainRepository.updateDomain(domainDO);
     }
 
-
     @Override
-
     public void deleteDomain(Long id) {
-        checkDelete(id);
         domainRepository.deleteDomain(id);
     }
 
-    private void checkDelete(Long id) {
-        List<MetricResp> metricResps = metricService.getMetrics(id);
-        List<DimensionResp> dimensionResps = dimensionService.getDimensions(id);
-        List<DatasourceResp> datasourceResps = datasourceService.getDatasourceList(id);
-        if (!CollectionUtils.isEmpty(metricResps) || !CollectionUtils.isEmpty(datasourceResps)
-                || !CollectionUtils.isEmpty(dimensionResps)) {
-            throw new RuntimeException("exist datasource, dimension or metric in this domain, please check");
-        }
-    }
-
-    @Override
-    public String getDomainBizName(Long id) {
-        if (id == null) {
-            return "";
-        }
-        DomainDO domainDO = getDomainDO(id);
-        if (domainDO == null) {
-            String message = String.format("domain with id:%s not exist", id);
-            throw new RuntimeException(message);
-        }
-        return domainDO.getBizName();
-    }
-
-
     @Override
     public List<DomainResp> getDomainList() {
-        return convertList(domainRepository.getDomainList(), new HashMap<>(), new HashMap<>());
+        return convertList(domainRepository.getDomainList());
     }
-
 
     @Override
     public List<DomainResp> getDomainList(List<Long> domainIds) {
@@ -128,27 +90,55 @@ public class DomainServiceImpl implements DomainService {
     }
 
     @Override
-    public List<DomainResp> getDomainListForAdmin(String userName) {
-        List<DomainDO> domainDOS = domainRepository.getDomainList();
-        Set<String> orgIds = Sets.newHashSet();
-        log.info("orgIds:{},userName:{}", orgIds, userName);
-        Map<Long, List<MetricResp>> metricDomainMap = metricService.getMetrics().stream()
-                .collect(Collectors.groupingBy(MetricResp::getDomainId));
-        Map<Long, List<DimensionResp>> dimensionDomainMap = dimensionService.getDimensions().stream()
-                .collect(Collectors.groupingBy(DimensionResp::getDomainId));
-        return convertList(domainDOS, metricDomainMap, dimensionDomainMap).stream()
-                .filter(domainDesc -> checkAdminPermission(orgIds, userName, domainDesc))
-                .collect(Collectors.toList());
+    public List<DomainResp> getDomainListWithAdminAuth(User user) {
+        Set<DomainResp> domainWithAuthAll = getDomainAuthSet(user.getName(), AuthType.VISIBLE);
+        if (!CollectionUtils.isEmpty(domainWithAuthAll)) {
+            List<Long> domainIds = domainWithAuthAll.stream().map(DomainResp::getId).collect(Collectors.toList());
+            domainWithAuthAll.addAll(getParentDomain(domainIds));
+        }
+        List<ModelResp> modelResps = modelService.getModelAuthList(user.getName(), AuthType.VISIBLE);
+        if (!CollectionUtils.isEmpty(modelResps)) {
+            List<Long> domainIds = modelResps.stream().map(ModelResp::getDomainId).collect(Collectors.toList());
+            domainWithAuthAll.addAll(getParentDomain(domainIds));
+        }
+        return new ArrayList<>(domainWithAuthAll);
     }
 
     @Override
-    public List<DomainResp> getDomainListForViewer(String userName) {
-        List<DomainDO> domainDOS = domainRepository.getDomainList();
-        Set<String> orgIds = Sets.newHashSet();
-        log.info("orgIds:{},userName:{}", orgIds, userName);
-        return convertList(domainDOS, new HashMap<>(), new HashMap<>()).stream()
-                .filter(domainDesc -> checkViewerPermission(orgIds, userName, domainDesc))
+    public Set<DomainResp> getDomainAuthSet(String userName, AuthType authTypeEnum) {
+        List<DomainResp> domainResps = getDomainList();
+        Set<String> orgIds = userService.getUserAllOrgId(userName);
+        List<DomainResp> domainWithAuth = Lists.newArrayList();
+        if (authTypeEnum.equals(AuthType.ADMIN)) {
+            domainWithAuth = domainResps.stream()
+                    .filter(domainResp -> checkAdminPermission(orgIds, userName, domainResp))
+                    .collect(Collectors.toList());
+        }
+        if (authTypeEnum.equals(AuthType.VISIBLE)) {
+            domainWithAuth = domainResps.stream()
+                    .filter(domainResp -> checkViewerPermission(orgIds, userName, domainResp))
+                    .collect(Collectors.toList());
+        }
+        List<Long> domainIds = domainWithAuth.stream().map(DomainResp::getId)
                 .collect(Collectors.toList());
+        //get all child domain
+        return getDomainChildren(domainIds);
+    }
+
+    private Set<DomainResp> getParentDomain(List<Long> ids) {
+        Set<DomainResp> domainSet = new HashSet<>();
+        if (CollectionUtils.isEmpty(ids)) {
+            return Sets.newHashSet(domainSet);
+        }
+        Map<Long, DomainResp> domainRespMap = getDomainMap();
+        for (Long domainId : ids) {
+            DomainResp domainResp = domainRespMap.get(domainId);
+            while (domainResp != null) {
+                domainSet.add(domainResp);
+                domainResp = domainRespMap.get(domainResp.getParentId());
+            }
+        }
+        return domainSet;
     }
 
 
@@ -156,16 +146,6 @@ public class DomainServiceImpl implements DomainService {
     public DomainResp getDomain(Long id) {
         Map<Long, String> fullDomainPathMap = getDomainFullPathMap();
         return DomainConvert.convert(getDomainDO(id), fullDomainPathMap);
-    }
-
-
-    @Override
-    public String getDomainFullPath(Long domainId) {
-        if (domainId == null) {
-            return "";
-        }
-        Map<Long, String> map = getDomainFullPathMap();
-        return map.getOrDefault(domainId, "");
     }
 
     @Override
@@ -180,21 +160,16 @@ public class DomainServiceImpl implements DomainService {
         domain.setId(domainDO.getId());
     }
 
-
-    private List<DomainResp> convertList(List<DomainDO> domainDOS, Map<Long, List<MetricResp>> metricDomainMap,
-                                         Map<Long, List<DimensionResp>> dimensionDomainMap) {
+    private List<DomainResp> convertList(List<DomainDO> domainDOS) {
         List<DomainResp> domainDescs = Lists.newArrayList();
         if (CollectionUtils.isEmpty(domainDOS)) {
             return domainDescs;
         }
         Map<Long, String> fullDomainPathMap = getDomainFullPath();
-
         return domainDOS.stream()
-                .map(domainDO -> DomainConvert.convert(domainDO, fullDomainPathMap, dimensionDomainMap,
-                        metricDomainMap))
+                .map(domainDO -> DomainConvert.convert(domainDO, fullDomainPathMap))
                 .collect(Collectors.toList());
     }
-
 
     @Override
     public Map<Long, DomainResp> getDomainMap() {
@@ -251,72 +226,17 @@ public class DomainServiceImpl implements DomainService {
         return domainFullPathMap;
     }
 
-    public List<DomainSchemaResp> fetchDomainSchema(DomainSchemaFilterReq filter, User user) {
-        List<DomainSchemaResp> domainSchemaDescList = new ArrayList<>();
-        List<Long> domainIdsReq = generateDomainIdsReq(filter);
-        List<DomainResp> getDomainListByIds = getDomainList(domainIdsReq);
-        getDomainListByIds.stream().forEach(domainDesc -> {
-            domainSchemaDescList.add(fetchSingleDomainSchema(domainDesc));
-        });
-        return domainSchemaDescList;
-    }
-
 
     protected DomainDO getDomainDO(Long id) {
         return domainRepository.getDomainById(id);
     }
 
 
-    private DomainSchemaResp fetchSingleDomainSchema(DomainResp domainDesc) {
-        Long domainId = domainDesc.getId();
-        DomainSchemaResp domainSchemaDesc = new DomainSchemaResp();
-        BeanUtils.copyProperties(domainDesc, domainSchemaDesc);
+    private boolean checkAdminPermission(Set<String> orgIds, String userName, DomainResp domainResp) {
 
-        domainSchemaDesc.setDimensions(generateDimSchema(domainId));
-        domainSchemaDesc.setMetrics(generateMetricSchema(domainId));
-        return domainSchemaDesc;
-    }
-
-    private List<MetricSchemaResp> generateMetricSchema(Long domainId) {
-        List<MetricSchemaResp> metricSchemaDescList = new ArrayList<>();
-        List<MetricResp> metricDescList = metricService.getMetrics(domainId);
-        metricDescList.stream().forEach(metricDesc -> {
-                    MetricSchemaResp metricSchemaDesc = new MetricSchemaResp();
-                    BeanUtils.copyProperties(metricDesc, metricSchemaDesc);
-                    metricSchemaDesc.setUseCnt(0L);
-                    metricSchemaDescList.add(metricSchemaDesc);
-                }
-        );
-        return metricSchemaDescList;
-
-    }
-
-    private List<DimSchemaResp> generateDimSchema(Long domainId) {
-        List<DimSchemaResp> dimSchemaDescList = new ArrayList<>();
-        List<DimensionResp> dimDescList = dimensionService.getDimensions(domainId);
-        dimDescList.stream().forEach(dimDesc -> {
-                    DimSchemaResp dimSchemaDesc = new DimSchemaResp();
-                    BeanUtils.copyProperties(dimDesc, dimSchemaDesc);
-                    dimSchemaDesc.setUseCnt(0L);
-                    dimSchemaDescList.add(dimSchemaDesc);
-                }
-        );
-        return dimSchemaDescList;
-    }
-
-    private List<Long> generateDomainIdsReq(DomainSchemaFilterReq filter) {
-        if (Objects.nonNull(filter) && !CollectionUtils.isEmpty(filter.getDomainIds())) {
-            return filter.getDomainIds();
-        }
-        return new ArrayList<>(getDomainMap().keySet());
-    }
-
-
-    private boolean checkAdminPermission(Set<String> orgIds, String userName, DomainResp domainDesc) {
-
-        List<String> admins = domainDesc.getAdmins();
-        List<String> adminOrgs = domainDesc.getAdminOrgs();
-        if (admins.contains(userName) || domainDesc.getCreatedBy().equals(userName)) {
+        List<String> admins = domainResp.getAdmins();
+        List<String> adminOrgs = domainResp.getAdminOrgs();
+        if (admins.contains(userName) || domainResp.getCreatedBy().equals(userName)) {
             return true;
         }
         if (CollectionUtils.isEmpty(adminOrgs)) {
@@ -331,9 +251,6 @@ public class DomainServiceImpl implements DomainService {
     }
 
     private boolean checkViewerPermission(Set<String> orgIds, String userName, DomainResp domainDesc) {
-        if (domainDesc.getIsOpen() == 1) {
-            return true;
-        }
         List<String> admins = domainDesc.getAdmins();
         List<String> viewers = domainDesc.getViewers();
         List<String> adminOrgs = domainDesc.getAdminOrgs();

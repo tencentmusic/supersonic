@@ -1,12 +1,10 @@
 package com.tencent.supersonic.knowledge.dictionary.builder;
 
 import com.google.common.collect.Lists;
-
-import java.util.List;
-
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
 import com.tencent.supersonic.knowledge.dictionary.DictWordType;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,11 +34,11 @@ public class MetricWordBuilder extends BaseWordBuilder {
     private DictWord getOnwWordNature(String word, SchemaElement schemaElement, boolean isSuffix) {
         DictWord dictWord = new DictWord();
         dictWord.setWord(word);
-        Long domainId = schemaElement.getDomain();
-        String nature = DictWordType.NATURE_SPILT + domainId + DictWordType.NATURE_SPILT + schemaElement.getId()
+        Long modelId = schemaElement.getModel();
+        String nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
                 + DictWordType.METRIC.getType();
         if (isSuffix) {
-            nature = DictWordType.NATURE_SPILT + domainId + DictWordType.NATURE_SPILT + schemaElement.getId()
+            nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
                     + DictWordType.SUFFIX.getType() + DictWordType.METRIC.getType();
         }
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));

@@ -6,6 +6,6 @@ import lombok.Data;
 public class ChatConfigFilterInternal {
 
     private Long id;
-    private Long domainId;
+    private Long modelId;
     private Integer status;
 }

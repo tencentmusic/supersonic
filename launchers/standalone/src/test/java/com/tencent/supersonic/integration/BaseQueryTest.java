@@ -1,5 +1,7 @@
 package com.tencent.supersonic.integration;
 
+import static org.junit.Assert.assertEquals;
+
 import com.tencent.supersonic.StandaloneLauncher;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
@@ -13,18 +15,15 @@ import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.util.DataUtils;
+import java.time.LocalDate;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.time.LocalDate;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = StandaloneLauncher.class)

@@ -1,17 +1,16 @@
 package com.tencent.supersonic.semantic.query.utils;
 
-import com.tencent.supersonic.common.pojo.DateConf.DateMode;
-import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
+import com.tencent.supersonic.common.pojo.DateConf.DateMode;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
+import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -20,7 +19,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
@@ -50,7 +48,7 @@ public class QueryStructUtils {
 
     private List<Long> getDimensionIds(QueryStructReq queryStructCmd) {
         List<Long> dimensionIds = new ArrayList<>();
-        List<DimensionResp> dimensions = catalog.getDimensions(queryStructCmd.getDomainId());
+        List<DimensionResp> dimensions = catalog.getDimensions(queryStructCmd.getModelId());
         Map<String, List<DimensionResp>> pair = dimensions.stream()
                 .collect(Collectors.groupingBy(DimensionResp::getBizName));
         for (String group : queryStructCmd.getGroups()) {
@@ -71,7 +69,7 @@ public class QueryStructUtils {
 
     private List<Long> getMetricIds(QueryStructReq queryStructCmd) {
         List<Long> metricIds = new ArrayList<>();
-        List<MetricResp> metrics = catalog.getMetrics(queryStructCmd.getDomainId());
+        List<MetricResp> metrics = catalog.getMetrics(queryStructCmd.getModelId());
         Map<String, List<MetricResp>> pair = metrics.stream().collect(Collectors.groupingBy(SchemaItem::getBizName));
         for (Aggregator agg : queryStructCmd.getAggregators()) {
             if (pair.containsKey(agg.getColumn())) {

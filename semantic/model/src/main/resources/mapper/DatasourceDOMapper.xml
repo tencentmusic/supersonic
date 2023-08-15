@@ -5,7 +5,7 @@
     <resultMap id="BaseResultMap"
             type="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO">
         <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="domain_id" jdbcType="BIGINT" property="domainId"/>
+        <result column="model_id" jdbcType="BIGINT" property="modelId"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="biz_name" jdbcType="VARCHAR" property="bizName"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
@@ -52,8 +52,8 @@
     </sql>
     <sql id="Base_Column_List">
         id
-        , domain_id, name, biz_name, description, database_id, created_at, created_by,
-    updated_at, updated_by
+        , model_id, name, biz_name, description, database_id, created_at, created_by, updated_at,
+    updated_by
     </sql>
     <sql id="Blob_Column_List">
         datasource_detail
@@ -110,11 +110,11 @@
     </delete>
     <insert id="insert"
             parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO">
-        insert into s2_datasource (id, domain_id, name,
+        insert into s2_datasource (id, model_id, name,
                                    biz_name, description, database_id,
                                    created_at, created_by, updated_at,
                                    updated_by, datasource_detail)
-        values (#{id,jdbcType=BIGINT}, #{domainId,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR},
+        values (#{id,jdbcType=BIGINT}, #{modelId,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR},
                 #{bizName,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR},
                 #{databaseId,jdbcType=BIGINT},
                 #{createdAt,jdbcType=TIMESTAMP}, #{createdBy,jdbcType=VARCHAR},
@@ -128,8 +128,8 @@
             <if test="id != null">
                 id,
             </if>
-            <if test="domainId != null">
-                domain_id,
+            <if test="modelId != null">
+                model_id,
             </if>
             <if test="name != null">
                 name,
@@ -163,8 +163,8 @@
             <if test="id != null">
                 #{id,jdbcType=BIGINT},
             </if>
-            <if test="domainId != null">
-                #{domainId,jdbcType=BIGINT},
+            <if test="modelId != null">
+                #{modelId,jdbcType=BIGINT},
             </if>
             <if test="name != null">
                 #{name,jdbcType=VARCHAR},
@@ -207,8 +207,8 @@
             parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO">
         update s2_datasource
         <set>
-            <if test="domainId != null">
-                domain_id = #{domainId,jdbcType=BIGINT},
+            <if test="modelId != null">
+                model_id = #{modelId,jdbcType=BIGINT},
             </if>
             <if test="name != null">
                 name = #{name,jdbcType=VARCHAR},
@@ -243,7 +243,7 @@
     <update id="updateByPrimaryKeyWithBLOBs"
             parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO">
         update s2_datasource
-        set domain_id         = #{domainId,jdbcType=BIGINT},
+        set model_id          = #{modelId,jdbcType=BIGINT},
             name              = #{name,jdbcType=VARCHAR},
             biz_name          = #{bizName,jdbcType=VARCHAR},
             description       = #{description,jdbcType=VARCHAR},
@@ -258,7 +258,7 @@
     <update id="updateByPrimaryKey"
             parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO">
         update s2_datasource
-        set domain_id   = #{domainId,jdbcType=BIGINT},
+        set model_id    = #{modelId,jdbcType=BIGINT},
             name        = #{name,jdbcType=VARCHAR},
             biz_name    = #{bizName,jdbcType=VARCHAR},
             description = #{description,jdbcType=VARCHAR},

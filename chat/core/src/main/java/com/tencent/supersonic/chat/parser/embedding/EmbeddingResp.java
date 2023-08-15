@@ -1,9 +1,8 @@
 package com.tencent.supersonic.chat.parser.embedding;
 
 
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class EmbeddingResp {

@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.persistence.dataobject;
 
 import java.util.Date;
-
 import lombok.Data;
 import lombok.ToString;
 
@@ -15,7 +14,7 @@ public class ChatConfigDO {
      */
     private Long id;
 
-    private Long domainId;
+    private Long modelId;
 
     private String chatDetailConfig;
 

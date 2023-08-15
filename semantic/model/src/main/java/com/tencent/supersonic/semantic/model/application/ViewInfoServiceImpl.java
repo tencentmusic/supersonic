@@ -5,14 +5,13 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.semantic.api.model.request.ViewInfoReq;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.DomainSchemaRelaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.model.domain.dataobject.ViewInfoDO;
-import com.tencent.supersonic.semantic.model.domain.repository.ViewInfoRepository;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaRelaResp;
 import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
-
+import com.tencent.supersonic.semantic.model.domain.dataobject.ViewInfoDO;
+import com.tencent.supersonic.semantic.model.domain.repository.ViewInfoRepository;
 import java.util.Date;
 import java.util.List;
 import org.assertj.core.util.Lists;
@@ -38,22 +37,22 @@ public class ViewInfoServiceImpl {
         this.datasourceService = datasourceService;
     }
 
-    public List<ViewInfoDO> getViewInfoList(Long domainId) {
-        return viewInfoRepository.getViewInfoList(domainId);
+    public List<ViewInfoDO> getViewInfoList(Long modelId) {
+        return viewInfoRepository.getViewInfoList(modelId);
     }
 
-    public List<DomainSchemaRelaResp> getDomainSchema(Long domainId) {
-        List<DomainSchemaRelaResp> domainSchemaRelaResps = Lists.newArrayList();
-        List<DatasourceResp> datasourceResps = datasourceService.getDatasourceList(domainId);
+    public List<ModelSchemaRelaResp> getDomainSchema(Long modelId) {
+        List<ModelSchemaRelaResp> domainSchemaRelaResps = Lists.newArrayList();
+        List<DatasourceResp> datasourceResps = datasourceService.getDatasourceList(modelId);
         for (DatasourceResp datasourceResp : datasourceResps) {
-            DomainSchemaRelaResp domainSchemaRelaResp = new DomainSchemaRelaResp();
+            ModelSchemaRelaResp domainSchemaRelaResp = new ModelSchemaRelaResp();
             Long datasourceId = datasourceResp.getId();
-            List<MetricResp> metricResps = metricService.getMetrics(domainId, datasourceId);
+            List<MetricResp> metricResps = metricService.getMetrics(modelId, datasourceId);
             List<DimensionResp> dimensionResps = dimensionService.getDimensionsByDatasource(datasourceId);
             domainSchemaRelaResp.setDatasource(datasourceResp);
             domainSchemaRelaResp.setDimensions(dimensionResps);
             domainSchemaRelaResp.setMetrics(metricResps);
-            domainSchemaRelaResp.setDomainId(domainId);
+            domainSchemaRelaResp.setDomainId(modelId);
             domainSchemaRelaResps.add(domainSchemaRelaResp);
         }
         return domainSchemaRelaResps;

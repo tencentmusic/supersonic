@@ -35,7 +35,6 @@ public class DatabaseController {
         return databaseService.testConnect(databaseReq, user);
     }
 
-
     @PostMapping("/createOrUpdateDatabase")
     public DatabaseResp createOrUpdateDatabase(@RequestBody DatabaseReq databaseReq,
             HttpServletRequest request,
@@ -56,7 +55,7 @@ public class DatabaseController {
 
     @PostMapping("/executeSql")
     public QueryResultWithSchemaResp executeSql(@RequestBody SqlExecuteReq sqlExecuteReq) {
-        return databaseService.executeSql(sqlExecuteReq.getSql(), sqlExecuteReq.getDomainId());
+        return databaseService.executeSql(sqlExecuteReq.getSql(), sqlExecuteReq.getModelId());
     }
 
     @RequestMapping("/getDbNames/{id}")

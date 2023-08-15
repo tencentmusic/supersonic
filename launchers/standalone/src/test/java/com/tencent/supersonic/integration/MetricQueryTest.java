@@ -1,27 +1,29 @@
 package com.tencent.supersonic.integration;
 
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
-import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
-import com.tencent.supersonic.chat.query.rule.metric.MetricDomainQuery;
+import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.query.rule.metric.MetricFilterQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricGroupByQuery;
+import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricTopNQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
-import org.junit.Test;
-import org.springframework.beans.BeanUtils;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
-
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import org.junit.Test;
+import org.springframework.beans.BeanUtils;
 
 
 public class MetricQueryTest extends BaseQueryTest {
@@ -56,7 +58,7 @@ public class MetricQueryTest extends BaseQueryTest {
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
         expectedResult.setChatContext(expectedParseInfo);
 
-        expectedResult.setQueryMode(MetricDomainQuery.QUERY_MODE);
+        expectedResult.setQueryMode(MetricModelQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
@@ -180,7 +182,7 @@ public class MetricQueryTest extends BaseQueryTest {
     @Test
     public void queryTest_CONFIG_VISIBILITY() throws Exception {
         // 1. round_1 use blacklist
-        ChatConfigResp chatConfig = configService.fetchConfigByDomainId(1L);
+        ChatConfigResp chatConfig = configService.fetchConfigByModelId(1L);
         ChatConfigEditReqReq extendEditCmd = new ChatConfigEditReqReq();
         BeanUtils.copyProperties(chatConfig, extendEditCmd);
         // add blacklist
@@ -193,7 +195,7 @@ public class MetricQueryTest extends BaseQueryTest {
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
         expectedResult.setChatContext(expectedParseInfo);
 
-        expectedResult.setQueryMode(MetricDomainQuery.QUERY_MODE);
+        expectedResult.setQueryMode(MetricModelQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));

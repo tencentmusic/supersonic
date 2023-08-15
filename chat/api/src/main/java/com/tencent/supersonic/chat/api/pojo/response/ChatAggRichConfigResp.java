@@ -2,9 +2,8 @@ package com.tencent.supersonic.chat.api.pojo.response;
 
 import com.tencent.supersonic.chat.api.pojo.request.KnowledgeAdvancedConfig;
 import com.tencent.supersonic.chat.api.pojo.request.KnowledgeInfoReq;
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class ChatAggRichConfigResp {
@@ -15,7 +14,7 @@ public class ChatAggRichConfigResp {
     private ItemVisibilityInfo visibility;
 
     /**
-     * information about dictionary about the domain
+     * information about dictionary about the model
      */
     private List<KnowledgeInfoReq> knowledgeInfos;
 

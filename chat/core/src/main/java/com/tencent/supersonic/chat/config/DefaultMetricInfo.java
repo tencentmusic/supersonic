@@ -6,7 +6,7 @@ import lombok.ToString;
 
 
 /**
- * default metrics about the domain
+ * default metrics about the model
  */
 
 @ToString

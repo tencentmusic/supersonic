@@ -2,17 +2,18 @@ package com.tencent.supersonic.knowledge.semantic;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.S2ThreadContext;
-import com.tencent.supersonic.common.util.ThreadContext;
-import com.tencent.supersonic.semantic.api.model.request.DomainSchemaFilterReq;
+import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
-import com.tencent.supersonic.semantic.api.model.response.DomainSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
@@ -20,6 +21,7 @@ import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.query.service.QueryService;
 import com.tencent.supersonic.semantic.query.service.SchemaService;
 import java.util.List;
@@ -31,6 +33,7 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
     private SchemaService schemaService;
     private S2ThreadContext s2ThreadContext;
     private DomainService domainService;
+    private ModelService modelService;
     private DimensionService dimensionService;
     private MetricService metricService;
 
@@ -72,27 +75,23 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
     }
 
     @Override
-    public List<DomainSchemaResp> doFetchDomainSchema(List<Long> ids) {
-        DomainSchemaFilterReq filter = new DomainSchemaFilterReq();
-        filter.setDomainIds(ids);
-        User user = new User(1L, "admin", "admin", "admin@email");
-        schemaService = ContextUtils.getBean(SchemaService.class);
-        return schemaService.fetchDomainSchema(filter, user);
-    }
-    @Override
-    public List<DomainResp> getDomainListForViewer() {
-        s2ThreadContext = ContextUtils.getBean(S2ThreadContext.class);
-        ThreadContext threadContext = s2ThreadContext.get();
-        domainService = ContextUtils.getBean(DomainService.class);
-        return domainService.getDomainListForViewer(threadContext.getUserName());
+    public List<ModelSchemaResp> doFetchModelSchema(List<Long> ids) {
+        ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
+        filter.setModelIds(ids);
+        modelService = ContextUtils.getBean(ModelService.class);
+        return modelService.fetchModelSchema(filter);
     }
 
     @Override
-    public List<DomainResp> getDomainListForAdmin() {
-        domainService = ContextUtils.getBean(DomainService.class);
-        s2ThreadContext = ContextUtils.getBean(S2ThreadContext.class);
-        ThreadContext threadContext = s2ThreadContext.get();
-        return domainService.getDomainListForAdmin(threadContext.getUserName());
+    public List<DomainResp> getDomainList(User user) {
+        schemaService = ContextUtils.getBean(SchemaService.class);
+        return schemaService.getDomainList(user);
+    }
+
+    @Override
+    public List<ModelResp> getModelList(AuthType authType, Long domainId, User user) {
+        schemaService = ContextUtils.getBean(SchemaService.class);
+        return schemaService.getModelList(user, authType, domainId);
     }
 
     @Override
@@ -102,9 +101,9 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
     }
 
     @Override
-    public PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricCmd) {
+    public PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricReq) {
         metricService = ContextUtils.getBean(MetricService.class);
-        return metricService.queryMetric(pageMetricCmd);
+        return metricService.queryMetric(pageMetricReq);
     }
 
 }

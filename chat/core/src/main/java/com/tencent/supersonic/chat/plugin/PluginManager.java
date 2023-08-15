@@ -2,24 +2,44 @@ package com.tencent.supersonic.chat.plugin;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.parser.ParseMode;
 import com.tencent.supersonic.chat.parser.embedding.EmbeddingConfig;
 import com.tencent.supersonic.chat.parser.embedding.EmbeddingResp;
 import com.tencent.supersonic.chat.parser.embedding.RecallRetrieval;
 import com.tencent.supersonic.chat.plugin.event.PluginAddEvent;
 import com.tencent.supersonic.chat.plugin.event.PluginUpdateEvent;
+import com.tencent.supersonic.chat.query.plugin.ParamOption;
+import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -42,7 +62,7 @@ public class PluginManager {
     public static List<Plugin> getPlugins() {
         PluginService pluginService = ContextUtils.getBean(PluginService.class);
         List<Plugin> pluginList = pluginService.getPluginList().stream().filter(plugin ->
-                CollectionUtils.isNotEmpty(plugin.getDomainList())).collect(Collectors.toList());
+                CollectionUtils.isNotEmpty(plugin.getModelList())).collect(Collectors.toList());
         pluginList.addAll(internalPluginMap.values());
         return new ArrayList<>(pluginList);
     }
@@ -89,9 +109,9 @@ public class PluginManager {
         doRequest(embeddingConfig.getAddPath(), JSONObject.toJSONString(maps));
     }
 
-    public void doRequest(String path, String jsonBody) {
+    public ResponseEntity<String> doRequest(String path, String jsonBody) {
         if (Strings.isEmpty(embeddingConfig.getUrl())) {
-            return;
+            return ResponseEntity.of(Optional.empty());
         }
         String url = embeddingConfig.getUrl() + path;
         HttpHeaders headers = new HttpHeaders();
@@ -105,6 +125,7 @@ public class PluginManager {
                 restTemplate.exchange(requestUrl, HttpMethod.POST, entity, new ParameterizedTypeReference<String>() {
                 });
         log.info("[embedding] result body:{}", responseEntity);
+        return responseEntity;
     }
 
     public void requestEmbeddingPluginAddALL(List<Plugin> plugins) {
@@ -115,7 +136,8 @@ public class PluginManager {
     }
 
     public EmbeddingResp recognize(String embeddingText) {
-        String url = embeddingConfig.getUrl() + embeddingConfig.getRecognizePath() + "?n_results=" + embeddingConfig.getNResult();
+        String url = embeddingConfig.getUrl() + embeddingConfig.getRecognizePath() + "?n_results="
+                + embeddingConfig.getNResult();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setLocation(URI.create(url));
@@ -125,8 +147,9 @@ public class PluginManager {
         HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
         log.info("[embedding] request body:{}, url:{}", jsonBody, url);
         ResponseEntity<List<EmbeddingResp>> embeddingResponseEntity =
-                restTemplate.exchange(requestUrl, HttpMethod.POST, entity, new ParameterizedTypeReference<List<EmbeddingResp>>() {
-                });
+                restTemplate.exchange(requestUrl, HttpMethod.POST, entity,
+                        new ParameterizedTypeReference<List<EmbeddingResp>>() {
+                        });
         log.info("[embedding] recognize result body:{}", embeddingResponseEntity);
         List<EmbeddingResp> embeddingResps = embeddingResponseEntity.getBody();
         if (CollectionUtils.isNotEmpty(embeddingResps)) {
@@ -176,6 +199,90 @@ public class PluginManager {
 
     private String getPluginIdFromEmbeddingId(String id) {
         return String.valueOf(Integer.parseInt(id) / 1000);
+    }
+
+    public static Pair<Boolean, List<Long>> resolve(Plugin plugin, QueryContext queryContext) {
+        SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
+        Set<Long> pluginMatchedModel = getPluginMatchedModel(plugin, queryContext);
+        if (CollectionUtils.isEmpty(pluginMatchedModel) && !plugin.isContainsAllModel()) {
+            return Pair.of(false, Lists.newArrayList());
+        }
+        List<ParamOption> paramOptions = getSemanticOption(plugin);
+        if (CollectionUtils.isEmpty(paramOptions)) {
+            return Pair.of(true, new ArrayList<>(pluginMatchedModel));
+        }
+        List<Long> matchedModel = Lists.newArrayList();
+        Map<Long, List<ParamOption>> paramOptionMap = paramOptions.stream().
+                collect(Collectors.groupingBy(ParamOption::getModelId));
+        for (Long modelId : paramOptionMap.keySet()) {
+            List<ParamOption> params = paramOptionMap.get(modelId);
+            if (CollectionUtils.isEmpty(params)) {
+                matchedModel.add(modelId);
+                continue;
+            }
+            boolean matched = true;
+            for (ParamOption paramOption : params) {
+                Set<Long> elementIdSet = getSchemaElementMatch(modelId, schemaMapInfo);
+                if (CollectionUtils.isEmpty(elementIdSet)) {
+                    matched = false;
+                    break;
+                }
+                if (!elementIdSet.contains(paramOption.getElementId())) {
+                    matched = false;
+                    break;
+                }
+            }
+            if (matched) {
+                matchedModel.add(modelId);
+            }
+        }
+        if (CollectionUtils.isEmpty(matchedModel)) {
+            return Pair.of(false, Lists.newArrayList());
+        }
+        return Pair.of(true, matchedModel);
+    }
+
+    private static Set<Long> getSchemaElementMatch(Long modelId, SchemaMapInfo schemaMapInfo) {
+        List<SchemaElementMatch> schemaElementMatches = schemaMapInfo.getMatchedElements(modelId);
+        if (org.springframework.util.CollectionUtils.isEmpty(schemaElementMatches)) {
+            return Sets.newHashSet();
+        }
+        return schemaElementMatches.stream().filter(schemaElementMatch ->
+                        SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType()) ||
+                                SchemaElementType.ID.equals(schemaElementMatch.getElement().getType()))
+                .map(SchemaElementMatch::getElement)
+                .map(SchemaElement::getId)
+                .collect(Collectors.toSet());
+    }
+
+
+    private static List<ParamOption> getSemanticOption(Plugin plugin) {
+        WebBase webBase = JSONObject.parseObject(plugin.getConfig(), WebBase.class);
+        if (Objects.isNull(webBase)) {
+            return null;
+        }
+        List<ParamOption> paramOptions = webBase.getParamOptions();
+        if (org.springframework.util.CollectionUtils.isEmpty(paramOptions)) {
+            return Lists.newArrayList();
+        }
+        return paramOptions.stream()
+                .filter(paramOption -> ParamOption.ParamType.SEMANTIC.equals(paramOption.getParamType()))
+                .collect(Collectors.toList());
+    }
+
+    private static Set<Long> getPluginMatchedModel(Plugin plugin, QueryContext queryContext) {
+        Set<Long> matchedModel = queryContext.getMapInfo().getMatchedModels();
+        if (plugin.isContainsAllModel()) {
+            return matchedModel;
+        }
+        List<Long> modelIds = plugin.getModelList();
+        Set<Long> pluginMatchedModel = Sets.newHashSet();
+        for (Long modelId : modelIds) {
+            if (matchedModel.contains(modelId)) {
+                pluginMatchedModel.add(modelId);
+            }
+        }
+        return pluginMatchedModel;
     }
 
 }

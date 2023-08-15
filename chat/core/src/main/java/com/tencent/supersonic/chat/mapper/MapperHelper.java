@@ -83,4 +83,6 @@ public class MapperHelper {
         return 1 - (double) EditDistance.compute(detectSegmentLower, matchNameLower) / Math.max(matchName.length(),
                 detectSegment.length());
     }
+
+
 }

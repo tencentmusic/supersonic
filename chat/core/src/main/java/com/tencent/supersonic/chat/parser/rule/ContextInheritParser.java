@@ -1,5 +1,12 @@
 package com.tencent.supersonic.chat.parser.rule;
 
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.DIMENSION;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ID;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.METRIC;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.MODEL;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.VALUE;
+
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
@@ -8,8 +15,8 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.chat.query.rule.metric.MetricDomainQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
+import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricSemanticQuery;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -21,8 +28,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.*;
-
 @Slf4j
 public class ContextInheritParser implements SemanticParser {
 
@@ -31,7 +36,7 @@ public class ContextInheritParser implements SemanticParser {
             new AbstractMap.SimpleEntry<>(DIMENSION, Arrays.asList(DIMENSION, VALUE)),
             new AbstractMap.SimpleEntry<>(VALUE, Arrays.asList(VALUE, DIMENSION)),
             new AbstractMap.SimpleEntry<>(ENTITY, Arrays.asList(ENTITY)),
-            new AbstractMap.SimpleEntry<>(DOMAIN, Arrays.asList(DOMAIN)),
+            new AbstractMap.SimpleEntry<>(MODEL, Arrays.asList(MODEL)),
             new AbstractMap.SimpleEntry<>(ID, Arrays.asList(ID))
     ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -41,9 +46,9 @@ public class ContextInheritParser implements SemanticParser {
             return;
         }
 
-        Long domainId = chatContext.getParseInfo().getDomainId();
+        Long modelId = chatContext.getParseInfo().getModelId();
         List<SchemaElementMatch> elementMatches = queryContext.getMapInfo()
-                .getMatchedElements(domainId);
+                .getMatchedElements(modelId);
 
         List<SchemaElementMatch> matchesToInherit = new ArrayList<>();
         for (SchemaElementMatch match : chatContext.getParseInfo().getElementMatches()) {
@@ -51,7 +56,7 @@ public class ContextInheritParser implements SemanticParser {
             // mutual exclusive element types should not be inherited
             RuleSemanticQuery ruleQuery = QueryManager.getRuleQuery(chatContext.getParseInfo().getQueryMode());
             if (!containsTypes(elementMatches, matchType, ruleQuery)) {
-                match.setMode(SchemaElementMatch.MatchMode.INHERIT);
+                match.setInherited(true);
                 matchesToInherit.add(match);
             }
         }
@@ -59,9 +64,22 @@ public class ContextInheritParser implements SemanticParser {
 
         List<RuleSemanticQuery> queries = RuleSemanticQuery.resolve(elementMatches, queryContext);
         for (RuleSemanticQuery query : queries) {
-            query.fillParseInfo(domainId, chatContext);
+            query.fillParseInfo(modelId, queryContext, chatContext);
+            if (existSameQuery(query.getParseInfo().getModelId(), query.getQueryMode(), queryContext)) {
+                continue;
+            }
             queryContext.getCandidateQueries().add(query);
         }
+    }
+
+    private boolean existSameQuery(Long modelId, String queryMode, QueryContext queryContext) {
+        for (SemanticQuery semanticQuery : queryContext.getCandidateQueries()) {
+            if (semanticQuery.getQueryMode().equals(queryMode)
+                    && semanticQuery.getParseInfo().getModelId().equals(modelId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean containsTypes(List<SchemaElementMatch> matches, SchemaElementType matchType,
@@ -79,16 +97,18 @@ public class ContextInheritParser implements SemanticParser {
     }
 
     protected boolean shouldInherit(QueryContext queryContext, ChatContext chatContext) {
-        Long contextDomainId = chatContext.getParseInfo().getDomainId();
-        if (queryContext.getMapInfo().getMatchedElements(contextDomainId) == null) {
+        Long contextmodelId = chatContext.getParseInfo().getModelId();
+        // if map info doesn't contain the same Model of the context,
+        // no inheritance could be done
+        if (queryContext.getMapInfo().getMatchedElements(contextmodelId) == null) {
             return false;
         }
 
-        // if candidates have only one MetricDomain mode and context has value filter , count in context
-        List<SemanticQuery> candidateQueries = queryContext.getCandidateQueries().stream()
-                .filter(semanticQuery -> semanticQuery.getParseInfo().getDomainId().equals(contextDomainId)).collect(
+        // if candidates only have MetricModel mode, count in context
+        List<SemanticQuery> metricModelQueries = queryContext.getCandidateQueries().stream()
+                .filter(query -> query instanceof MetricModelQuery).collect(
                         Collectors.toList());
-        if (candidateQueries.size() == 1 && (candidateQueries.get(0) instanceof MetricDomainQuery)) {
+        if (metricModelQueries.size() == queryContext.getCandidateQueries().size()) {
             return true;
         } else {
             return queryContext.getCandidateQueries().size() == 0;
