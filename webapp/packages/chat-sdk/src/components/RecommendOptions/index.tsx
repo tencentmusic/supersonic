@@ -10,16 +10,16 @@ import classNames from 'classnames';
 
 type Props = {
   entityId: string | number;
-  domainId: number;
-  domainName: string;
+  modelId: number;
+  modelName: string;
   isMobileMode?: boolean;
   onSelect: (option: string) => void;
 };
 
 const RecommendOptions: React.FC<Props> = ({
   entityId,
-  domainId,
-  domainName,
+  modelId,
+  modelName,
   isMobileMode,
   onSelect,
 }) => {
@@ -30,7 +30,7 @@ const RecommendOptions: React.FC<Props> = ({
 
   const initData = async () => {
     setLoading(true);
-    const res = await queryEntities(entityId, domainId);
+    const res = await queryEntities(entityId, modelId);
     setLoading(false);
     setData(res.data.data);
   };
@@ -51,7 +51,7 @@ const RecommendOptions: React.FC<Props> = ({
           <div className={`${prefixCls}-item-name-column`}>
             <Avatar
               shape="square"
-              icon={<IconFont type={domainName === '艺人库' ? 'icon-geshou' : 'icon-zhuanji'} />}
+              icon={<IconFont type={modelName === '艺人库' ? 'icon-geshou' : 'icon-zhuanji'} />}
               src={record.url}
             />
             <div className={`${prefixCls}-entity-name`}>
@@ -64,7 +64,7 @@ const RecommendOptions: React.FC<Props> = ({
       },
     };
 
-    const playCntColumnIdex = domainName.includes('歌曲')
+    const playCntColumnIdex = modelName.includes('歌曲')
       ? 'tme3platAvgLogYyPlayCnt'
       : 'tme3platJsPlayCnt';
 
@@ -72,7 +72,7 @@ const RecommendOptions: React.FC<Props> = ({
       ? [basicColumn]
       : [
           basicColumn,
-          domainName.includes('艺人')
+          modelName.includes('艺人')
             ? {
                 dataIndex: 'onlineSongCnt',
                 key: 'onlineSongCnt',
@@ -95,7 +95,7 @@ const RecommendOptions: React.FC<Props> = ({
             dataIndex: playCntColumnIdex,
             key: playCntColumnIdex,
             align: 'center',
-            title: domainName.includes('歌曲') ? '近7天日均运营播放量' : '昨日结算播放量',
+            title: modelName.includes('歌曲') ? '近7天日均运营播放量' : '昨日结算播放量',
             render: (value: string) => {
               return value ? getFormattedValue(+value) : '-';
             },

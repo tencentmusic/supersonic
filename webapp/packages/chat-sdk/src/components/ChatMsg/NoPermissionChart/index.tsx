@@ -3,12 +3,12 @@ import { CLS_PREFIX } from '../../../common/constants';
 import ApplyAuth from '../ApplyAuth';
 
 type Props = {
-  domain: string;
+  model: string;
   chartType?: string;
-  onApplyAuth?: (domain: string) => void;
+  onApplyAuth?: (model: string) => void;
 };
 
-const NoPermissionChart: React.FC<Props> = ({ domain, chartType, onApplyAuth }) => {
+const NoPermissionChart: React.FC<Props> = ({ model, chartType, onApplyAuth }) => {
   const prefixCls = `${CLS_PREFIX}-no-permission-chart`;
 
   const chartHolderClass = classNames(`${prefixCls}-holder`, {
@@ -19,7 +19,7 @@ const NoPermissionChart: React.FC<Props> = ({ domain, chartType, onApplyAuth }) 
     <div className={prefixCls}>
       <div className={chartHolderClass} />
       <div className={`${prefixCls}-no-permission`}>
-        <ApplyAuth domain={domain} onApplyAuth={onApplyAuth} />
+        <ApplyAuth model={model} onApplyAuth={onApplyAuth} />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { request } from 'umi';
-import { DomainType } from './type';
+import { ModelType } from './type';
 
 const prefix = '/api';
 
@@ -24,9 +24,9 @@ export function getAllConversations() {
   return request<Result<any>>(`${prefix}/chat/manage/getAll`);
 }
 
-export function getMiniProgramList(entityId: string, domainId: number) {
+export function getMiniProgramList(entityId: string, modelId: number) {
   return request<Result<any>>(
-    `${prefix}/chat/plugin/extend/getAvailablePlugin/${entityId}/${domainId}`,
+    `${prefix}/chat/plugin/extend/getAvailablePlugin/${entityId}/${modelId}`,
     {
       method: 'GET',
       skipErrorHandler: true,
@@ -34,8 +34,8 @@ export function getMiniProgramList(entityId: string, domainId: number) {
   );
 }
 
-export function getDomainList() {
-  return request<Result<DomainType[]>>(`${prefix}/chat/conf/domainList/view`, {
+export function getModelList() {
+  return request<Result<ModelType[]>>(`${prefix}/chat/conf/modelList/view`, {
     method: 'GET',
   });
 }
@@ -49,14 +49,14 @@ export function updateQAFeedback(questionId: number, score: number) {
   );
 }
 
-export function queryMetricSuggestion(domainId: number) {
-  return request<Result<any>>(`${prefix}/chat/recommend/metric/${domainId}`, {
+export function queryMetricSuggestion(modelId: number) {
+  return request<Result<any>>(`${prefix}/chat/recommend/metric/${modelId}`, {
     method: 'GET',
   });
 }
 
-export function querySuggestion(domainId: number) {
-  return request<Result<any>>(`${prefix}/chat/recommend/${domainId}`, {
+export function querySuggestion(modelId: number) {
+  return request<Result<any>>(`${prefix}/chat/recommend/${modelId}`, {
     method: 'GET',
   });
 }

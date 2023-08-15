@@ -26,7 +26,7 @@ export enum ParamTypeEnum {
 export type PluginType = {
   id: number;
   type: PluginTypeEnum;
-  domainList: number[];
+  modelList: number[];
   pattern: string;
   parseMode: ParseModeEnum;
   parseModeConfig: string;
@@ -34,7 +34,7 @@ export type PluginType = {
   config: PluginConfigType;
 }
 
-export type DomainType = {
+export type ModelType = {
   id: number | string;
   parentId: number;
   name: string;

@@ -161,15 +161,7 @@ const Plugin: React.FC<Props> = ({
     <div className={reportClass}>
       <LeftAvatar />
       <div className={styles.msgContent}>
-        <Message
-          position="left"
-          width="100%"
-          height={height}
-          bubbleClassName={styles.reportBubble}
-          domainName={data.chatContext?.domainName}
-          question={msg}
-          followQuestions={followQuestions}
-        >
+        <Message position="left" width="100%" height={height} bubbleClassName={styles.reportBubble}>
           <iframe
             id={`reportIframe_${id}`}
             src={pluginUrl}

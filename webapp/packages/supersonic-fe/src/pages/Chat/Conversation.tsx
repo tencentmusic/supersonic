@@ -21,14 +21,14 @@ type Props = {
   currentConversation?: ConversationDetailType;
   collapsed?: boolean;
   isCopilotMode?: boolean;
-  defaultDomainName?: string;
+  defaultModelName?: string;
   defaultEntityFilter?: DefaultEntityType;
   triggerNewConversation?: boolean;
   onNewConversationTriggered?: () => void;
   onSelectConversation: (
     conversation: ConversationDetailType,
     name?: string,
-    domainId?: number,
+    modelId?: number,
     entityId?: string,
   ) => void;
 };
@@ -38,7 +38,7 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
     currentConversation,
     collapsed,
     isCopilotMode,
-    defaultDomainName,
+    defaultModelName,
     defaultEntityFilter,
     triggerNewConversation,
     onNewConversationTriggered,
@@ -47,7 +47,7 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
   ref,
 ) => {
   const location = useLocation();
-  const { q, cid, domainId, entityId } = (location as any).query;
+  const { q, cid, modelId, entityId } = (location as any).query;
   const [conversations, setConversations] = useState<ConversationDetailType[]>([]);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editConversation, setEditConversation] = useState<ConversationDetailType>();
@@ -89,7 +89,7 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
       const conversationName =
         defaultEntityFilter?.entityName && window.location.pathname.includes('detail')
           ? defaultEntityFilter.entityName
-          : defaultDomainName;
+          : defaultModelName;
       onAddConversation({ name: conversationName, type: 'CUSTOMIZE' });
       onNewConversationTriggered?.();
     }
@@ -100,7 +100,7 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
       return;
     }
     if (q && cid === undefined && window.location.href.includes('/workbench/chat')) {
-      onAddConversation({ name: q, domainId: domainId ? +domainId : undefined, entityId });
+      onAddConversation({ name: q, modelId: modelId ? +modelId : undefined, entityId });
     } else {
       initData();
     }
@@ -118,17 +118,17 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
 
   const onAddConversation = async ({
     name,
-    domainId,
+    modelId,
     entityId,
     type,
   }: {
     name?: string;
-    domainId?: number;
+    modelId?: number;
     entityId?: string;
     type?: string;
   } = {}) => {
     const data = await addConversation(name);
-    onSelectConversation(data[0], type || name, domainId, entityId);
+    onSelectConversation(data[0], type || name, modelId, entityId);
   };
 
   const onOperate = (key: string, conversation: ConversationDetailType) => {

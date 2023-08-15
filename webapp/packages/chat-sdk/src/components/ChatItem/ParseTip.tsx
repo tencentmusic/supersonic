@@ -10,6 +10,7 @@ type Props = {
   parseInfoOptions: ChatContextType[];
   parseTip: string;
   currentParseInfo?: ChatContextType;
+  optionMode?: boolean;
   onSelectParseInfo: (parseInfo: ChatContextType) => void;
 };
 
@@ -20,6 +21,7 @@ const ParseTip: React.FC<Props> = ({
   parseInfoOptions,
   parseTip,
   currentParseInfo,
+  optionMode,
   onSelectParseInfo,
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
@@ -38,7 +40,7 @@ const ParseTip: React.FC<Props> = ({
 
   const getTipNode = (parseInfo: ChatContextType, isOptions?: boolean, index?: number) => {
     const {
-      domainName,
+      modelName,
       dateInfo,
       dimensionFilters,
       dimensions,
@@ -70,6 +72,7 @@ const ParseTip: React.FC<Props> = ({
       [`${prefixCls}-tip-item-option`]: isOptions,
     });
 
+    const entityId = dimensionFilters?.length > 0 ? dimensionFilters[0].value : undefined;
     const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
     const entityName = elementMatches?.find(item => item.element?.type === 'ID')?.element.name;
 
@@ -106,7 +109,10 @@ const ParseTip: React.FC<Props> = ({
           </div>
         ) : (
           <>
-            {queryMode === 'METRIC_ENTITY' || queryMode === 'ENTITY_DETAIL' ? (
+            {queryMode.includes('ENTITY') &&
+            typeof entityId === 'string' &&
+            !!entityAlias &&
+            !!entityName ? (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>{entityAlias}：</div>
                 <div className={itemValueClass}>{entityName}</div>
@@ -114,7 +120,7 @@ const ParseTip: React.FC<Props> = ({
             ) : (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>主题域：</div>
-                <div className={itemValueClass}>{domainName}</div>
+                <div className={itemValueClass}>{modelName}</div>
               </div>
             )}
             {modeName === '算指标' && metric && (
@@ -180,10 +186,12 @@ const ParseTip: React.FC<Props> = ({
 
   let tipNode: ReactNode;
 
-  if (parseInfoOptions.length > 1) {
+  if (parseInfoOptions.length > 1 || optionMode) {
     tipNode = (
       <div className={`${prefixCls}-multi-options`}>
-        <div>您的问题解析为以下几项，请您点击确认</div>
+        <div>
+          还有以下的相关问题，<strong>请您点击提交</strong>
+        </div>
         <div className={`${prefixCls}-options`}>
           {parseInfoOptions.map((item, index) => getTipNode(item, true, index))}
         </div>

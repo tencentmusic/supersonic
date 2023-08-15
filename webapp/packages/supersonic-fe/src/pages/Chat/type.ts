@@ -1,4 +1,4 @@
-import { MsgDataType } from 'supersonic-chat-sdk';
+import { ChatContextType, MsgDataType } from 'supersonic-chat-sdk';
 
 export enum MessageTypeEnum {
   TEXT = 'text', // 指标文本
@@ -10,6 +10,7 @@ export enum MessageTypeEnum {
   PLUGIN = 'PLUGIN', // 插件
   WEB_PAGE = 'WEB_PAGE', // 插件
   RECOMMEND_QUESTIONS = 'recommend_questions', // 推荐问题
+  PARSE_OPTIONS = 'parse_options', // 解析选项
 }
 
 export type MessageItem = {
@@ -18,13 +19,14 @@ export type MessageItem = {
   msg?: string;
   msgValue?: string;
   identityMsg?: string;
-  domainId?: number;
+  modelId?: number;
   entityId?: string;
   msgData?: MsgDataType;
   quote?: string;
   score?: number;
   feedback?: string;
   isHistory?: boolean;
+  parseOptions?: ChatContextType[];
 };
 
 export type ConversationDetailType = {
@@ -35,7 +37,7 @@ export type ConversationDetailType = {
   lastQuestion?: string;
   lastTime?: string;
   initMsg?: string;
-  domainId?: number;
+  modelId?: number;
   entityId?: string;
 };
 
@@ -43,7 +45,7 @@ export enum MessageModeEnum {
   INTERPRET = 'interpret',
 }
 
-export type DomainType = {
+export type ModelType = {
   id: number;
   parentId: number;
   name: string;
@@ -66,12 +68,12 @@ export type PluginType = {
 export type DefaultEntityType = {
   entityId: string;
   entityName: string;
-  domainName?: string;
+  modelName?: string;
 };
 
 export type SuggestionItemType = {
   id: number;
-  domain: number;
+  model: number;
   name: string;
   bizName: string;
 };

@@ -14,14 +14,14 @@ export const THEME_COLOR_LIST = [
 ];
 
 export enum SemanticTypeEnum {
-  DOMAIN = 'DOMAIN',
+  MODEL = 'MODEL',
   DIMENSION = 'DIMENSION',
   METRIC = 'METRIC',
   VALUE = 'VALUE',
 }
 
 export const SEMANTIC_TYPE_MAP = {
-  [SemanticTypeEnum.DOMAIN]: '主题域',
+  [SemanticTypeEnum.MODEL]: '主题域',
   [SemanticTypeEnum.DIMENSION]: '维度',
   [SemanticTypeEnum.METRIC]: '指标',
   [SemanticTypeEnum.VALUE]: '维度值',

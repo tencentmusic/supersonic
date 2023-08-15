@@ -13,7 +13,7 @@ type Props = {
   drillDownDimension?: DrillDownDimensionType;
   loading: boolean;
   onSelectDimension: (dimension?: DrillDownDimensionType) => void;
-  onApplyAuth?: (domain: string) => void;
+  onApplyAuth?: (model: string) => void;
 };
 
 const MetricCard: React.FC<Props> = ({
@@ -64,7 +64,7 @@ const MetricCard: React.FC<Props> = ({
         <div className={indicatorClass}>
           <div className={`${prefixCls}-date-range`}>{startDate}</div>
           {indicatorColumn && !indicatorColumn?.authorized ? (
-            <ApplyAuth domain={entityInfo?.domainInfo.name || ''} onApplyAuth={onApplyAuth} />
+            <ApplyAuth model={entityInfo?.modelInfo.name || ''} onApplyAuth={onApplyAuth} />
           ) : (
             <div className={`${prefixCls}-indicator-value`}>
               {formatMetric(queryResults?.[0]?.[indicatorColumnName]) || '-'}
@@ -79,10 +79,10 @@ const MetricCard: React.FC<Props> = ({
           )}
         </div>
       </Spin>
-      {(queryMode === 'METRIC_DOMAIN' || queryMode === 'METRIC_FILTER') && (
+      {queryMode.includes('METRIC') && (
         <div className={`${prefixCls}-drill-down-dimensions`}>
           <DrillDownDimensions
-            domainId={chatContext.domainId}
+            modelId={chatContext.modelId}
             dimensionFilters={chatContext.dimensionFilters}
             drillDownDimension={drillDownDimension}
             onSelectDimension={onSelectDimension}

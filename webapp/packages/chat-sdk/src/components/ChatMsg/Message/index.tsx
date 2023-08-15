@@ -26,7 +26,7 @@ const Message: React.FC<Props> = ({
 }) => {
   const prefixCls = `${PREFIX_CLS}-message`;
 
-  const { domainName, dateInfo, dimensionFilters } = chatContext || {};
+  const { modelName, dateInfo, dimensionFilters } = chatContext || {};
   const { startDate, endDate } = dateInfo || {};
 
   const entityInfoList =
@@ -67,7 +67,7 @@ const Message: React.FC<Props> = ({
                 <div className={`${prefixCls}-main-entity-info`}>
                   <div className={`${prefixCls}-info-item`}>
                     <div className={`${prefixCls}-info-name`}>主题域：</div>
-                    <div className={`${prefixCls}-info-value`}>{domainName}</div>
+                    <div className={`${prefixCls}-info-value`}>{modelName}</div>
                   </div>
                   <div className={`${prefixCls}-info-item`}>
                     <div className={`${prefixCls}-info-name`}>时间：</div>
