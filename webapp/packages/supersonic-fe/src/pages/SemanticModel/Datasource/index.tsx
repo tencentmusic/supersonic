@@ -7,13 +7,12 @@ import { RightOutlined, LeftOutlined } from '@ant-design/icons';
 
 type Props = {
   initialValues: any;
-  domainId: number;
   onSubmitSuccess?: (dataSourceInfo: any) => void;
 };
 
 const DEFAULT_RIGHT_SIZE = '300px';
 
-const DataExploreView: React.FC<Props> = ({ initialValues, domainId, onSubmitSuccess }) => {
+const DataExploreView: React.FC<Props> = ({ initialValues, onSubmitSuccess }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
@@ -51,11 +50,7 @@ const DataExploreView: React.FC<Props> = ({ initialValues, domainId, onSubmitSuc
                 {collapsed ? <LeftOutlined /> : <RightOutlined />}
               </div>
             )}
-            <SqlSide
-              initialValues={initialValues}
-              domainId={domainId}
-              onSubmitSuccess={onSubmitSuccess}
-            />
+            <SqlSide initialValues={initialValues} onSubmitSuccess={onSubmitSuccess} />
           </div>
 
           <Pane initialSize={0} />

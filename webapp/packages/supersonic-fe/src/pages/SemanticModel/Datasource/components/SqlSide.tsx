@@ -22,14 +22,13 @@ type TableRef = {
 
 type Props = {
   initialValues: any;
-  domainId: number;
   onSubmitSuccess?: (dataSourceInfo: any) => void;
 };
 
 const { TabPane } = Tabs;
 const LIST_KEY = 'list';
 
-const SqlSide: React.FC<Props> = ({ initialValues, domainId, onSubmitSuccess }) => {
+const SqlSide: React.FC<Props> = ({ initialValues, onSubmitSuccess }) => {
   const defaultPanes: Panes[] = [
     {
       key: '数据源查询',
@@ -98,8 +97,6 @@ const SqlSide: React.FC<Props> = ({ initialValues, domainId, onSubmitSuccess }) 
                 <SqlDetail
                   onSubmitSuccess={onSubmitSuccess}
                   dataSourceItem={dataSourceItem}
-                  oprType={pane.type}
-                  domainId={domainId}
                   onUpdateSql={(sql: string) => {
                     updateTabSql(sql, pane.key);
                   }}

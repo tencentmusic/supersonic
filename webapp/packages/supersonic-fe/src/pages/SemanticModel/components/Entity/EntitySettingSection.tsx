@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../../model';
-import { getDomainDetail } from '../../service';
+import { getModelDetail } from '../../service';
 import ProCard from '@ant-design/pro-card';
 import EntityCreateForm from './EntityCreateForm';
 import type { ISemantic } from '../../data';
@@ -14,19 +14,19 @@ type Props = {
 };
 
 const EntitySettingSection: React.FC<Props> = ({ domainManger }) => {
-  const { selectDomainId, dimensionList } = domainManger;
+  const { dimensionList, selectModelId: modelId } = domainManger;
 
-  const [domainData, setDomainData] = useState<ISemantic.IDomainItem>();
+  const [modelData, setModelData] = useState<ISemantic.IModelItem>();
 
   const entityCreateRef = useRef<any>({});
 
   const queryDomainData: any = async () => {
-    const { code, data } = await getDomainDetail({
-      domainId: selectDomainId,
+    const { code, data } = await getModelDetail({
+      modelId,
     });
 
     if (code === 200) {
-      setDomainData(data);
+      setModelData(data);
 
       return;
     }
@@ -40,7 +40,7 @@ const EntitySettingSection: React.FC<Props> = ({ domainManger }) => {
 
   useEffect(() => {
     initPage();
-  }, [selectDomainId]);
+  }, [modelId]);
 
   return (
     <div style={{ width: 800, margin: '0 auto' }}>
@@ -49,8 +49,8 @@ const EntitySettingSection: React.FC<Props> = ({ domainManger }) => {
           <ProCard title="实体" bordered>
             <EntityCreateForm
               ref={entityCreateRef}
-              domainId={Number(selectDomainId)}
-              domainData={domainData}
+              modelId={Number(modelId)}
+              modelData={modelData}
               dimensionList={dimensionList}
               onSubmit={() => {
                 queryDomainData();

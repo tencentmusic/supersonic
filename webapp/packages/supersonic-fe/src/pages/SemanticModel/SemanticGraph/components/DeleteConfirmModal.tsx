@@ -18,7 +18,6 @@ const DeleteConfirmModal: React.FC<Props> = ({
 }) => {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const deleteNode = async () => {
-    setConfirmLoading(true);
     const { id, nodeType } = nodeData;
     let deleteQuery;
     if (nodeType === SemanticNodeType.DIMENSION) {
@@ -34,6 +33,7 @@ const DeleteConfirmModal: React.FC<Props> = ({
       message.error('当前节点类型不是维度，指标，数据源中的一种，请确认节点数据');
       return;
     }
+    setConfirmLoading(true);
     const { code, msg } = await deleteQuery(id);
     setConfirmLoading(false);
     if (code === 200) {

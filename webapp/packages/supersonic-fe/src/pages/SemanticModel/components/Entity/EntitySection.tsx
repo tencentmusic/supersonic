@@ -22,22 +22,22 @@ const EntitySection: React.FC<Props> = ({
   dispatch,
   chatConfigType = ChatConfigType.DETAIL,
 }) => {
-  const { selectDomainId, dimensionList, metricList } = domainManger;
+  const { selectDomainId, selectModelId: modelId, dimensionList, metricList } = domainManger;
 
-  const [entityData, setentityData] = useState<IChatConfig.IChatRichConfig>();
+  const [entityData, setEntityData] = useState<IChatConfig.IChatRichConfig>();
 
   const queryThemeListData: any = async () => {
     const { code, data } = await getDomainExtendDetailConfig({
-      domainId: selectDomainId,
+      modelId,
     });
 
     if (code === 200) {
-      const { chatAggRichConfig, chatDetailRichConfig, id, domainId } = data;
+      const { chatAggRichConfig, chatDetailRichConfig, id, domainId, modelId } = data;
       if (chatConfigType === ChatConfigType.DETAIL) {
-        setentityData({ ...chatDetailRichConfig, id, domainId });
+        setEntityData({ ...chatDetailRichConfig, id, domainId, modelId });
       }
       if (chatConfigType === ChatConfigType.AGG) {
-        setentityData({ ...chatAggRichConfig, id, domainId });
+        setEntityData({ ...chatAggRichConfig, id, domainId, modelId });
       }
       return;
     }
@@ -50,8 +50,11 @@ const EntitySection: React.FC<Props> = ({
   };
 
   useEffect(() => {
+    if (!modelId) {
+      return;
+    }
     initPage();
-  }, [selectDomainId]);
+  }, [modelId]);
 
   return (
     <div style={{ width: 800, margin: '0 auto' }}>

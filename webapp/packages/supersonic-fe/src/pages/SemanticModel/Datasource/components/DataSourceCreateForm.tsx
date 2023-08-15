@@ -10,14 +10,12 @@ import { createDatasource, updateDatasource, getColumns } from '../../service';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
 import { connect } from 'umi';
-import { isUndefined } from 'lodash';
 
 export type CreateFormProps = {
   domainManger: StateType;
   dispatch: Dispatch;
   createModalVisible: boolean;
   sql?: string;
-  domainId: number;
   dataSourceItem: DataInstanceItem | any;
   onCancel?: () => void;
   onSubmit?: (dataSourceInfo: any) => void;
@@ -37,7 +35,6 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   domainManger,
   onCancel,
   createModalVisible,
-  domainId,
   scriptColumns,
   sql = '',
   onSubmit,
@@ -51,7 +48,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const [hasEmptyNameField, setHasEmptyNameField] = useState<boolean>(false);
   const formValRef = useRef(initFormVal as any);
   const [form] = Form.useForm();
-  const { dataBaseConfig } = domainManger;
+  const { dataBaseConfig, selectModelId: modelId } = domainManger;
   const updateFormVal = (val: any) => {
     formValRef.current = val;
   };
@@ -163,7 +160,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
         databaseId: dataSourceItem?.databaseId || dataBaseConfig.id,
         queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
         tableQuery: dbName && tableName ? `${dbName}.${tableName}` : '',
-        domainId,
+        modelId,
       };
       const queryDatasource = isEdit ? updateDatasource : createDatasource;
       const { code, msg, data } = await queryDatasource(queryParams);

@@ -19,7 +19,7 @@ type Props = {
 };
 
 const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
-  const { selectDomainId } = domainManger;
+  const { selectModelId: modelId } = domainManger;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [dimensionItem, setDimensionItem] = useState<ISemantic.IDimensionItem>();
   const [dataSourceList, setDataSourceList] = useState<any[]>([]);
@@ -40,7 +40,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     const { code, data, msg } = await getDimensionList({
       ...params,
       ...pagination,
-      domainId: selectDomainId,
+      modelId,
     });
     const { list, pageSize, current, total } = data || {};
     let resData: any = {};
@@ -67,7 +67,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   };
 
   const queryDataSourceList = async () => {
-    const { code, data, msg } = await getDatasourceList({ domainId: selectDomainId });
+    const { code, data, msg } = await getDatasourceList({ modelId });
     if (code === 200) {
       setDataSourceList(data);
     } else {
@@ -77,7 +77,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   useEffect(() => {
     queryDataSourceList();
-  }, [selectDomainId]);
+  }, [modelId]);
 
   const columns: ProColumns[] = [
     {
@@ -139,7 +139,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         return (
           <Space>
             <a
-              key="classEditBtn"
+              key="dimensionEditBtn"
               onClick={() => {
                 setDimensionItem(record);
                 setCreateModalVisible(true);
@@ -148,7 +148,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               编辑
             </a>
             <a
-              key="classEditBtn"
+              key="dimensionValueEditBtn"
               onClick={() => {
                 setDimensionItem(record);
                 setDimensionValueSettingModalVisible(true);
@@ -176,7 +176,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               }}
             >
               <a
-                key="classEditBtn"
+                key="dimensionDeleteEditBtn"
                 onClick={() => {
                   setDimensionItem(record);
                 }}
@@ -195,7 +195,6 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       <ProTable
         className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft}`}
         actionRef={actionRef}
-        // headerTitle="维度列表"
         rowKey="id"
         columns={columns}
         request={queryDimensionList}
@@ -236,7 +235,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
 
       {createModalVisible && (
         <DimensionInfoModal
-          domainId={selectDomainId}
+          modelId={modelId}
           bindModalVisible={createModalVisible}
           dimensionItem={dimensionItem}
           dataSourceList={dataSourceList}
@@ -246,7 +245,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             dispatch({
               type: 'domainManger/queryDimensionList',
               payload: {
-                domainId: selectDomainId,
+                modelId,
               },
             });
             return;
@@ -269,7 +268,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             dispatch({
               type: 'domainManger/queryDimensionList',
               payload: {
-                domainId: selectDomainId,
+                modelId,
               },
             });
             setDimensionValueSettingModalVisible(false);

@@ -1,16 +1,17 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message } from 'antd';
+import { message, Space, Popconfirm } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../model';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
-import { queryMetric } from '../service';
+import { queryMetric, deleteMetric } from '../service';
 import MetricFilter from './components/MetricFilter';
-
+import MetricInfoCreateForm from '../components/MetricInfoCreateForm';
 import moment from 'moment';
 import styles from './style.less';
+import { IDataSource, ISemantic } from '../data';
 
 type Props = {
   dispatch: Dispatch;
@@ -26,14 +27,17 @@ type QueryMetricListParams = {
   [key: string]: any;
 };
 
-const ClassMetricTable: React.FC<Props> = () => {
+const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
+  const { selectDomainId } = domainManger;
+  const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 20,
     total: 0,
   });
   const [loading, setLoading] = useState<boolean>(false);
-  const [dataSource, setDataSource] = useState<any[]>([]);
+  const [dataSource, setDataSource] = useState<IDataSource.IDataSourceItem[]>([]);
+  const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
   const [filterParams, setFilterParams] = useState<Record<string, any>>({});
   const actionRef = useRef<ActionType>();
 
@@ -92,8 +96,8 @@ const ClassMetricTable: React.FC<Props> = () => {
       title: '字段名称',
     },
     {
-      dataIndex: 'domainName',
-      title: '主题域',
+      dataIndex: 'modelName',
+      title: '所属模型',
     },
     {
       dataIndex: 'sensitiveLevel',
@@ -125,6 +129,50 @@ const ClassMetricTable: React.FC<Props> = () => {
       search: false,
       render: (value: any) => {
         return value && value !== '-' ? moment(value).format('YYYY-MM-DD HH:mm:ss') : '-';
+      },
+    },
+    {
+      title: '操作',
+      dataIndex: 'x',
+      valueType: 'option',
+      render: (_, record) => {
+        return (
+          <Space>
+            <a
+              key="metricEditBtn"
+              onClick={() => {
+                setMetricItem(record);
+                setCreateModalVisible(true);
+              }}
+            >
+              编辑
+            </a>
+
+            <Popconfirm
+              title="确认删除？"
+              okText="是"
+              cancelText="否"
+              onConfirm={async () => {
+                const { code, msg } = await deleteMetric(record.id);
+                if (code === 200) {
+                  setMetricItem(undefined);
+                  actionRef.current?.reload();
+                } else {
+                  message.error(msg);
+                }
+              }}
+            >
+              <a
+                key="metricDeleteBtn"
+                onClick={() => {
+                  setMetricItem(record);
+                }}
+              >
+                删除
+              </a>
+            </Popconfirm>
+          </Space>
+        );
       },
     },
   ];
@@ -179,6 +227,26 @@ const ClassMetricTable: React.FC<Props> = () => {
         size="small"
         options={{ reload: false, density: false, fullScreen: false }}
       />
+      {createModalVisible && (
+        <MetricInfoCreateForm
+          domainId={Number(selectDomainId)}
+          createModalVisible={createModalVisible}
+          metricItem={metricItem}
+          onSubmit={() => {
+            setCreateModalVisible(false);
+            actionRef?.current?.reload();
+            dispatch({
+              type: 'domainManger/queryMetricList',
+              payload: {
+                domainId: selectDomainId,
+              },
+            });
+          }}
+          onCancel={() => {
+            setCreateModalVisible(false);
+          }}
+        />
+      )}
     </>
   );
 };

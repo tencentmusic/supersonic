@@ -13,7 +13,6 @@ import {
   deleteDatasource,
   getDimensionList,
   createOrUpdateViewInfo,
-  getViewInfoList,
   deleteDatasourceRela,
 } from '../service';
 import { message } from 'antd';
@@ -85,8 +84,8 @@ export namespace GraphApi {
 
   export const loadDataSourceData = async (args: NsGraph.IGraphMeta) => {
     const { domainManger, graphConfig } = args.meta;
-    const { selectDomainId } = domainManger;
-    const { code, data = [] } = await getDatasourceList({ domainId: selectDomainId });
+    const { selectModelId } = domainManger;
+    const { code, data = [] } = await getDatasourceList({ modelId: selectModelId });
     const dataSourceMap = data.reduce(
       (itemMap: Record<string, IDataSource.IDataSourceItem>, item: IDataSource.IDataSourceItem) => {
         const { id, name } = item;
@@ -161,8 +160,8 @@ export namespace GraphApi {
 
   export const loadDimensionData = async (args: NsGraph.IGraphMeta) => {
     const { domainManger } = args.meta;
-    const { domainId } = domainManger;
-    const { code, data } = await getDimensionList({ domainId });
+    const { selectModelId } = domainManger;
+    const { code, data } = await getDimensionList({ modelId: selectModelId });
     if (code === 200) {
       const { list } = data;
       const nodes: NsGraph.INodeConfig[] = list.map((item: any) => {
@@ -210,7 +209,7 @@ export namespace GraphApi {
     const { domainManger, graphConfig } = graphMeta.meta;
     const { code, msg } = await createOrUpdateViewInfo({
       id: graphConfig?.id,
-      domainId: domainManger.selectDomainId,
+      modelId: domainManger.selectModelId,
       type: 'datasource',
       config: JSON.stringify(tempGraphData),
     });

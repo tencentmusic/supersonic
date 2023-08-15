@@ -14,7 +14,6 @@ import styles from '../style.less';
 type Props = {
   domainManger: StateType;
   permissonData: any;
-  domainId: number;
   onCancel: () => void;
   visible: boolean;
   onSubmit: (params?: any) => void;
@@ -25,11 +24,10 @@ const PermissionCreateDrawer: React.FC<Props> = ({
   domainManger,
   visible,
   permissonData,
-  domainId,
   onCancel,
   onSubmit,
 }) => {
-  const { dimensionList, metricList } = domainManger;
+  const { dimensionList, metricList, selectModelId: modelId } = domainManger;
   const [form] = Form.useForm();
   const basicInfoFormRef = useRef<any>(null);
   const [selectedDimensionKeyList, setSelectedDimensionKeyList] = useState<string[]>([]);
@@ -65,7 +63,7 @@ const PermissionCreateDrawer: React.FC<Props> = ({
           metrics: selectedMetricKeyList,
         },
       ],
-      domainId,
+      modelId,
     });
 
     if (code === 200) {
@@ -136,11 +134,7 @@ const PermissionCreateDrawer: React.FC<Props> = ({
         <div style={{ overflow: 'auto', margin: '0 auto', width: '1200px' }}>
           <Space direction="vertical" style={{ width: '100%' }} size={20}>
             <ProCard title="基本信息" bordered>
-              <PermissionCreateForm
-                ref={basicInfoFormRef}
-                permissonData={permissonData}
-                domainId={domainId}
-              />
+              <PermissionCreateForm ref={basicInfoFormRef} permissonData={permissonData} />
             </ProCard>
 
             <ProCard title="列权限" bordered tooltip="仅对敏感度为高的指标/维度进行授权">

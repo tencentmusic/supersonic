@@ -94,6 +94,30 @@ export declare namespace ISemantic {
     metricCnt?: number;
   }
 
+  interface IModelItem {
+    createdBy?: string;
+    updatedBy?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    id: number;
+    name: string;
+    bizName: string;
+    description: any;
+    status?: number;
+    typeEnum?: any;
+    sensitiveLevel?: number;
+    parentId: number;
+    fullPath?: string;
+    viewers?: any[];
+    viewOrgs?: any[];
+    admins?: string[];
+    adminOrgs?: any[];
+    isOpen?: number;
+    entity?: { entityId: number; names: string[] };
+    dimensionCnt?: number;
+    metricCnt?: number;
+  }
+
   interface IDimensionItem {
     createdBy: string;
     updatedBy: string;

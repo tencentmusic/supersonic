@@ -1,7 +1,7 @@
 import { useEffect, forwardRef, useImperativeHandle, useState } from 'react';
 import type { ForwardRefRenderFunction } from 'react';
 import { message, Form, Input, Select, Button, Space } from 'antd';
-import { saveDatabase, getDatabaseByDomainId, testDatabaseConnect } from '../../service';
+import { saveDatabase, testDatabaseConnect } from '../../service';
 import { formLayout } from '@/components/FormHelper/utils';
 
 import styles from '../style.less';

@@ -28,7 +28,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
   onCancel,
   dispatch,
 }) => {
-  const { selectDomainId, dataBaseConfig } = domainManger;
+  const { selectDomainId, dataBaseConfig, selectModelId } = domainManger;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
 
   const [dataSourceModalVisible, setDataSourceModalVisible] = useState(false);
@@ -128,7 +128,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
                 type="primary"
                 key="console"
                 onClick={() => {
-                  history.replace(`/semanticModel/${selectDomainId}/dataBase`);
+                  history.replace(`/semanticModel/${selectDomainId}/0/dataBase`);
                   onCancel?.();
                 }}
               >
@@ -173,7 +173,6 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
         >
           <DataSource
             initialValues={dataSourceItem}
-            domainId={Number(selectDomainId)}
             onSubmitSuccess={() => {
               setCreateModalVisible(false);
               onSubmit?.();

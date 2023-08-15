@@ -175,12 +175,12 @@ declare namespace API {
     comment: string; // 项目描述
     creator: string; // 项目创建人
     projectType: number; // 项目类别 0-为私有项目 1-为公共项目
-    childProjectList?: ProjectList;
-    children?: ProjectList;
+    childDomainList?: DomainList;
+    children?: DomainList;
     value: string;
   };
 
-  export type ProjectList = ProjectItem[];
+  export type DomainList = ProjectItem[];
 
   // 数据实例详情
   export type DataInstanceDetail = {

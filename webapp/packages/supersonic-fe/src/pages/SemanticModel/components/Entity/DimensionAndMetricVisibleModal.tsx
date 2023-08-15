@@ -126,7 +126,7 @@ const DimensionAndMetricVisibleModal: React.FC<Props> = ({
 
     const { code, msg } = await saveDomainExtendQuery({
       [chatConfigKey]: params,
-      domainId,
+      // domainId,
       id,
     });
     if (code === 200) {

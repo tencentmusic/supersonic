@@ -113,6 +113,7 @@ const BindMeasuresTable: React.FC<CreateFormProps> = ({
         size="small"
         search={false}
         options={false}
+        scroll={{ y: 800 }}
       />
     </Modal>
   );

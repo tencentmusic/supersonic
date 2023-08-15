@@ -19,7 +19,7 @@ type Props = {
 const PermissionTable: React.FC<Props> = ({ domainManger }) => {
   const { APP_TARGET } = process.env;
   const isInner = APP_TARGET === 'inner';
-  const { dimensionList, metricList, selectDomainId } = domainManger;
+  const { dimensionList, metricList, selectModelId: modelId } = domainManger;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
 
   const [permissonData, setPermissonData] = useState<any>({});
@@ -37,7 +37,7 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
   const actionRef = useRef<ActionType>();
 
   const queryListData = async () => {
-    const { code, data } = await getGroupAuthInfo(selectDomainId);
+    const { code, data } = await getGroupAuthInfo(modelId);
     if (code === 200) {
       setIntentionList(data);
       return;
@@ -46,10 +46,10 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
   };
 
   useEffect(() => {
-    if (selectDomainId) {
+    if (modelId) {
       queryListData();
     }
-  }, [selectDomainId]);
+  }, [modelId]);
 
   const queryDepartmentData = async () => {
     const { code, data } = await getOrganizationTree();
@@ -184,7 +184,7 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
         return (
           <Space>
             <a
-              key="classEditBtn"
+              key="permissionEditBtn"
               onClick={() => {
                 setPermissonData(record);
                 setCreateModalVisible(true);
@@ -216,7 +216,7 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
               cancelText="否"
               onConfirm={async () => {
                 const { code, msg } = await removeGroupAuth({
-                  domainId: record.domainId,
+                  modelId: record.modelId,
                   groupId: record.groupId,
                 });
                 if (code === 200) {
@@ -228,7 +228,7 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
               }}
             >
               <a
-                key="classEditBtn"
+                key="permissionDeleteBtn"
                 onClick={() => {
                   setPermissonData(record);
                 }}
@@ -277,7 +277,6 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
       />
       {createModalVisible && (
         <PermissionCreateDrawer
-          domainId={Number(selectDomainId)}
           visible={createModalVisible}
           permissonData={permissonData}
           onSubmit={() => {

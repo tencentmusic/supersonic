@@ -12,6 +12,7 @@ import MetricInfoCreateForm from './MetricInfoCreateForm';
 
 import moment from 'moment';
 import styles from './style.less';
+import { ISemantic } from '../data';
 
 type Props = {
   dispatch: Dispatch;
@@ -19,9 +20,9 @@ type Props = {
 };
 
 const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
-  const { selectDomainId } = domainManger;
+  const { selectModelId: modelId, selectDomainId } = domainManger;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
-  const [metricItem, setMetricItem] = useState<any>();
+  const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 20,
@@ -33,7 +34,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     const { code, data, msg } = await queryMetric({
       ...params,
       ...pagination,
-      domainId: selectDomainId,
+      modelId,
     });
     const { list, pageSize, current, total } = data || {};
     let resData: any = {};
@@ -95,7 +96,6 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'type',
       title: '指标类型',
-      // search: false,
       valueEnum: {
         ATOMIC: '原子指标',
         DERIVED: '衍生指标',
@@ -128,7 +128,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         return (
           <Space>
             <a
-              key="classEditBtn"
+              key="metricEditBtn"
               onClick={() => {
                 setMetricItem(record);
                 setCreateModalVisible(true);
@@ -152,7 +152,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               }}
             >
               <a
-                key="classEditBtn"
+                key="metricDeleteBtn"
                 onClick={() => {
                   setMetricItem(record);
                 }}
@@ -171,7 +171,6 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       <ProTable
         className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft}`}
         actionRef={actionRef}
-        // headerTitle="指标列表"
         rowKey="id"
         search={{
           span: 4,
@@ -181,7 +180,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           },
         }}
         columns={columns}
-        params={{ domainId: selectDomainId }}
+        params={{ modelId }}
         request={queryMetricList}
         pagination={pagination}
         tableAlertRender={() => {
@@ -212,7 +211,8 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       />
       {createModalVisible && (
         <MetricInfoCreateForm
-          domainId={Number(selectDomainId)}
+          domainId={selectDomainId}
+          modelId={Number(modelId)}
           createModalVisible={createModalVisible}
           metricItem={metricItem}
           onSubmit={() => {
@@ -221,7 +221,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             dispatch({
               type: 'domainManger/queryMetricList',
               payload: {
-                domainId: selectDomainId,
+                modelId,
               },
             });
           }}

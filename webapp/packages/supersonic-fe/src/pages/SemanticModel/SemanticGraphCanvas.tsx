@@ -38,7 +38,7 @@ const SemanticGraphCanvas: React.FC<Props> = ({ domainManger }) => {
           </div>
         ) : ( */}
         <div style={{ width: '100%' }}>
-          <SemanticGraph domainId={selectDomainId} />
+          <SemanticGraph />
         </div>
         {/* )} */}
       </div>

@@ -10,7 +10,7 @@ import { createDimension, updateDimension } from '../service';
 import { message } from 'antd';
 
 export type CreateFormProps = {
-  domainId: number;
+  modelId: number;
   dimensionItem?: ISemantic.IDimensionItem;
   onCancel: () => void;
   bindModalVisible: boolean;
@@ -24,7 +24,7 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 const DimensionInfoModal: React.FC<CreateFormProps> = ({
-  domainId,
+  modelId,
   onCancel,
   bindModalVisible,
   dimensionItem,
@@ -55,7 +55,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
 
   const saveDimension = async (fieldsValue: any, isSilenceSubmit = false) => {
     const queryParams = {
-      domainId,
+      modelId,
       type: 'categorical',
       ...fieldsValue,
     };
