@@ -15,9 +15,9 @@ const ROUTES = [
     envEnableList: [ENV_KEY.CHAT],
   },
   {
-    path: '/chatSetting/:modelId?/:menuKey?',
+    path: '/chatSetting/model/:domainId?/:modelId?/:menuKey?',
+    component: './SemanticModel/ChatSetting/ChatSetting',
     name: 'chatSetting',
-    component: './SemanticModel/ChatSetting',
     envEnableList: [ENV_KEY.CHAT],
   },
   {
@@ -27,9 +27,9 @@ const ROUTES = [
     envEnableList: [ENV_KEY.CHAT],
   },
   {
-    path: '/semanticModel/:modelId?/:menuKey?',
+    path: '/semanticModel/model/:domainId?/:modelId?/:menuKey?',
+    component: './SemanticModel/DomainManager',
     name: 'semanticModel',
-    component: './SemanticModel/ProjectManager',
     envEnableList: [ENV_KEY.SEMANTIC],
   },
   {
@@ -47,10 +47,10 @@ const ROUTES = [
   },
   {
     path: '/',
-    redirect: APP_TARGET === 'inner' ? '/semanticModel' : '/chat',
+    redirect: APP_TARGET === 'inner' ? '/semanticModel/model/' : '/chat',
     envRedirect: {
       [ENV_KEY.CHAT]: '/chat',
-      [ENV_KEY.SEMANTIC]: '/semanticModel',
+      [ENV_KEY.SEMANTIC]: '/semanticModel/model',
     },
   },
   {

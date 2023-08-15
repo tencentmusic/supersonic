@@ -143,7 +143,7 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
     };
     const { code, msg, data } = await saveDomainExtendQuery({
       [chatConfigKey]: params,
-      domainId,
+      // domainId,
       id,
     });
     if (code === 200) {

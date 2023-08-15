@@ -24,7 +24,7 @@ type DomainListProps = {
   createDomainBtnVisible?: boolean;
   dispatch: Dispatch;
   onCreateDomainBtnClick?: () => void;
-  onTreeSelected?: () => void;
+  onTreeSelected?: (targetNodeData: ISemantic.IDomainItem) => void;
   onTreeDataUpdate?: () => void;
 };
 
@@ -57,7 +57,7 @@ const DomainListTree: FC<DomainListProps> = ({
   const [projectInfoParams, setProjectInfoParams] = useState<any>({});
   const [filterValue, setFliterValue] = useState<string>('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
-  const [classList, setClassList] = useState<any[]>([]);
+  const [classList, setClassList] = useState<ISemantic.IDomainItem[]>([]);
 
   useEffect(() => {
     const treeData = addPathInTreeData(constructorClassTreeFromList(domainList));
@@ -77,13 +77,7 @@ const DomainListTree: FC<DomainListProps> = ({
     const targetNodeData = classList.filter((item: any) => {
       return item.id === selectedKeys;
     })[0];
-    onTreeSelected?.();
-    dispatch({
-      type: 'domainManger/setSelectDomain',
-      selectDomainId: selectedKeys,
-      selectDomainName: projectName,
-      domainData: targetNodeData,
-    });
+    onTreeSelected?.(targetNodeData);
   };
 
   const editProject = async (values: any) => {
@@ -134,7 +128,7 @@ const DomainListTree: FC<DomainListProps> = ({
         </span>
         {createDomainBtnVisible && (
           <span className={styles.operation}>
-            {Array.isArray(path) && path.length < 3 && (
+            {Array.isArray(path) && path.length < 2 && (
               <PlusOutlined
                 className={styles.icon}
                 onClick={() => {

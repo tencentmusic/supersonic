@@ -25,7 +25,6 @@ const ProjectInfoForm: React.FC<ProjectInfoFormProps> = (props) => {
 
   const handleConfirm = async () => {
     const fieldsValue = await form.validateFields();
-    // const columnsValue = { ...fieldsValue, isUnique: fieldsValue.isUnique === true ? 1 : 0 };
     const columnsValue = { ...fieldsValue, isUnique: 1 };
     setFormVals({ ...formVals, ...columnsValue });
     setSaveLoading(true);
@@ -97,24 +96,11 @@ const ProjectInfoForm: React.FC<ProjectInfoFormProps> = (props) => {
         >
           <Input placeholder="请输入主题域英文名称" />
         </FormItem>
-        <FormItem name="description" label="主题域描述">
+        <FormItem name="description" label="主题域描述" hidden={true}>
           <Input.TextArea placeholder="主题域描述" />
         </FormItem>
         <FormItem name="isUnique" label="是否唯一" hidden={true}>
-          <Switch
-            size="small"
-            checked={true}
-            // onChange={(checked) => {
-            //   setFormVals({ ...formVals, isUnique: checked });
-            // }}
-          />
-          {/* <Switch
-            size="small"
-            checked={formVals.isUnique ? true : false}
-            onChange={(checked) => {
-              setFormVals({ ...formVals, isUnique: checked });
-            }}
-          /> */}
+          <Switch size="small" checked={true} />
         </FormItem>
       </Form>
     </Modal>

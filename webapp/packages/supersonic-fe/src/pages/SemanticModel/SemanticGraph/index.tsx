@@ -32,7 +32,6 @@ import GraphLegendVisibleModeItem from './components/GraphLegendVisibleModeItem'
 // import { cloneDeep } from 'lodash';
 
 type Props = {
-  domainId: number;
   // graphShowType?: SemanticNodeType;
   domainManger: StateType;
   dispatch: Dispatch;
@@ -40,7 +39,6 @@ type Props = {
 
 const DomainManger: React.FC<Props> = ({
   domainManger,
-  domainId,
   // graphShowType = SemanticNodeType.DIMENSION,
   // graphShowType,
   dispatch,
@@ -65,7 +63,7 @@ const DomainManger: React.FC<Props> = ({
 
   const [dataSourceInfoList, setDataSourceInfoList] = useState<IDataSource.IDataSourceItem[]>([]);
 
-  const { dimensionList, metricList } = domainManger;
+  const { dimensionList, metricList, selectModelId: modelId, selectDomainId } = domainManger;
 
   const dimensionListRef = useRef<ISemantic.IDimensionItem[]>([]);
   const metricListRef = useRef<ISemantic.IMetricItem[]>([]);
@@ -139,10 +137,10 @@ const DomainManger: React.FC<Props> = ({
   };
 
   const queryDataSourceList = async (params: {
-    domainId: number;
+    modelId: number;
     graphShowType?: SemanticNodeType;
   }) => {
-    const { code, data } = await getDomainSchemaRela(params.domainId);
+    const { code, data } = await getDomainSchemaRela(params.modelId);
     if (code === 200) {
       if (data) {
         setDataSourceInfoList(
@@ -165,8 +163,8 @@ const DomainManger: React.FC<Props> = ({
   useEffect(() => {
     graphLegendDataSourceIds.current = undefined;
     graphRef.current = null;
-    queryDataSourceList({ domainId });
-  }, [domainId]);
+    queryDataSourceList({ modelId });
+  }, [modelId]);
 
   // const getLegendDataFilterFunctions = () => {
   //   legendDataRef.current.map((item: any) => {
@@ -273,7 +271,7 @@ const DomainManger: React.FC<Props> = ({
     if (targetData.nodeType === SemanticNodeType.DIMENSION) {
       const targetItem = dimensionListRef.current.find((item) => item.id === targetData.uid);
       if (targetItem) {
-        setCurrentNodeData(targetItem);
+        setCurrentNodeData({ ...targetData, ...targetItem });
         setConfirmModalOpenState(true);
       } else {
         message.error('获取维度初始化数据失败');
@@ -282,7 +280,7 @@ const DomainManger: React.FC<Props> = ({
     if (targetData.nodeType === SemanticNodeType.METRIC) {
       const targetItem = metricListRef.current.find((item) => item.id === targetData.uid);
       if (targetItem) {
-        setCurrentNodeData(targetItem);
+        setCurrentNodeData({ ...targetData, ...targetItem });
         setConfirmModalOpenState(true);
       } else {
         message.error('获取指标初始化数据失败');
@@ -515,7 +513,7 @@ const DomainManger: React.FC<Props> = ({
 
   const updateGraphData = async (params?: { graphShowType?: SemanticNodeType }) => {
     const graphRootData = await queryDataSourceList({
-      domainId,
+      modelId,
       graphShowType: params?.graphShowType,
     });
     if (graphRootData) {
@@ -571,7 +569,7 @@ const DomainManger: React.FC<Props> = ({
       />
       <div
         ref={ref}
-        key={`${domainId}`}
+        key={`${modelId}`}
         id="semanticGraph"
         style={{ width: '100%', height: 'calc(100vh - 175px)', position: 'relative' }}
       />
@@ -595,7 +593,7 @@ const DomainManger: React.FC<Props> = ({
             dispatch({
               type: 'domainManger/queryMetricList',
               payload: {
-                domainId,
+                modelId,
               },
             });
           }
@@ -603,7 +601,7 @@ const DomainManger: React.FC<Props> = ({
             dispatch({
               type: 'domainManger/queryDimensionList',
               payload: {
-                domainId,
+                modelId,
               },
             });
           }
@@ -612,7 +610,7 @@ const DomainManger: React.FC<Props> = ({
 
       {createDimensionModalVisible && (
         <DimensionInfoModal
-          domainId={domainId}
+          modelId={modelId}
           bindModalVisible={createDimensionModalVisible}
           dimensionItem={dimensionItem}
           dataSourceList={nodeDataSource ? [nodeDataSource] : dataSourceInfoList}
@@ -622,7 +620,7 @@ const DomainManger: React.FC<Props> = ({
             dispatch({
               type: 'domainManger/queryDimensionList',
               payload: {
-                domainId,
+                modelId,
               },
             });
           }}
@@ -633,7 +631,8 @@ const DomainManger: React.FC<Props> = ({
       )}
       {createMetricModalVisible && (
         <MetricInfoCreateForm
-          domainId={domainId}
+          domainId={selectDomainId}
+          modelId={modelId}
           key={metricItem?.id}
           datasourceId={nodeDataSource?.id}
           createModalVisible={createMetricModalVisible}
@@ -644,7 +643,7 @@ const DomainManger: React.FC<Props> = ({
             dispatch({
               type: 'domainManger/queryMetricList',
               payload: {
-                domainId,
+                modelId,
               },
             });
           }}
@@ -676,13 +675,13 @@ const DomainManger: React.FC<Props> = ({
               ? dispatch({
                   type: 'domainManger/queryDimensionList',
                   payload: {
-                    domainId,
+                    modelId,
                   },
                 })
               : dispatch({
                   type: 'domainManger/queryMetricList',
                   payload: {
-                    domainId,
+                    modelId,
                   },
                 });
           }}

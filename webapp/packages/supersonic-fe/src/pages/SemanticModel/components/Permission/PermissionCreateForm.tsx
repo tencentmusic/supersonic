@@ -6,7 +6,6 @@ import SelectTMEPerson from '@/components/SelectTMEPerson';
 import { formLayout } from '@/components/FormHelper/utils';
 import styles from '../style.less';
 type Props = {
-  domainId: number;
   permissonData: any;
   onSubmit?: (data?: any) => void;
   onValuesChange?: (value, values) => void;

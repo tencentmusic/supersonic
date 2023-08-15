@@ -12,14 +12,14 @@ type Props = {
 };
 
 const RecommendedQuestionsSection: React.FC<Props> = ({ domainManger }) => {
-  const { selectDomainId } = domainManger;
+  const { selectModelId: modelId } = domainManger;
 
   const [questionData, setQuestionData] = useState<string[]>([]);
   const [currentRecordId, setCurrentRecordId] = useState<number>(0);
 
   const queryThemeListData: any = async () => {
     const { code, data } = await getDomainExtendConfig({
-      domainId: selectDomainId,
+      modelId,
     });
 
     if (code === 200) {
@@ -51,7 +51,7 @@ const RecommendedQuestionsSection: React.FC<Props> = ({ domainManger }) => {
         return { question };
       }),
       id: currentRecordId,
-      domainId: selectDomainId,
+      modelId,
     });
 
     if (code === 200) {
@@ -65,8 +65,11 @@ const RecommendedQuestionsSection: React.FC<Props> = ({ domainManger }) => {
   };
 
   useEffect(() => {
+    if (!modelId) {
+      return;
+    }
     initPage();
-  }, [selectDomainId]);
+  }, [modelId]);
 
   return (
     <div style={{ width: 800, margin: '0 auto' }}>

@@ -12,11 +12,11 @@ export function getDomainList(): Promise<any> {
 }
 
 export function getDatasourceList(data: any): Promise<any> {
-  return request.get(`${process.env.API_BASE_URL}datasource/getDatasourceList/${data.domainId}`);
+  return request.get(`${process.env.API_BASE_URL}datasource/getDatasourceList/${data.modelId}`);
 }
 
 export function getDomainDetail(data: any): Promise<any> {
-  return request.get(`${process.env.API_BASE_URL}domain/getDomain/${data.domainId}`);
+  return request.get(`${process.env.API_BASE_URL}domain/getDomain/${data.modelId}`);
 }
 
 export function createDomain(data: any): Promise<any> {
@@ -44,9 +44,15 @@ export function updateDatasource(data: any): Promise<any> {
 }
 
 export function getDimensionList(data: any): Promise<any> {
-  const { domainId } = data;
+  const { domainId, modelId } = data;
   const queryParams = {
-    data: { current: 1, pageSize: 999999, ...data, ...(domainId ? { domainIds: [domainId] } : {}) },
+    data: {
+      current: 1,
+      pageSize: 999999,
+      ...data,
+      ...(domainId ? { domainIds: [domainId] } : {}),
+      ...(modelId ? { modelIds: [modelId] } : {}),
+    },
   };
   if (getRunningEnv() === 'chat') {
     return request.post(`${process.env.CHAT_API_BASE_URL}conf/dimension/page`, queryParams);
@@ -67,9 +73,15 @@ export function updateDimension(data: any): Promise<any> {
 }
 
 export function queryMetric(data: any): Promise<any> {
-  const { domainId } = data;
+  const { domainId, modelId } = data;
   const queryParams = {
-    data: { current: 1, pageSize: 999999, ...data, ...(domainId ? { domainIds: [domainId] } : {}) },
+    data: {
+      current: 1,
+      pageSize: 999999,
+      ...data,
+      ...(domainId ? { domainIds: [domainId] } : {}),
+      ...(modelId ? { modelIds: [modelId] } : {}),
+    },
   };
   if (getRunningEnv() === 'chat') {
     return request.post(`${process.env.CHAT_API_BASE_URL}conf/metric/page`, queryParams);
@@ -89,8 +101,8 @@ export function updateExprMetric(data: any): Promise<any> {
   });
 }
 
-export function getMeasureListByDomainId(domainId: number): Promise<any> {
-  return request.get(`${process.env.API_BASE_URL}datasource/getMeasureListOfDomain/${domainId}`);
+export function getMeasureListByModelId(modelId: number): Promise<any> {
+  return request.get(`${process.env.API_BASE_URL}datasource/getMeasureListOfModel/${modelId}`);
 }
 
 export function deleteDatasource(id: any): Promise<any> {
@@ -117,12 +129,10 @@ export function deleteDomain(id: any): Promise<any> {
   });
 }
 
-export function getGroupAuthInfo(id: number): Promise<any> {
+export function getGroupAuthInfo(modelId: number): Promise<any> {
   return request(`${process.env.AUTH_API_BASE_URL}queryGroup`, {
     method: 'GET',
-    params: {
-      domainId: id,
-    },
+    params: { modelId },
   });
 }
 
@@ -169,7 +179,7 @@ export function getDomainExtendConfig(data: any): Promise<any> {
 }
 
 export function getDomainExtendDetailConfig(data: any): Promise<any> {
-  return request(`${process.env.CHAT_API_BASE_URL}conf/richDesc/${data.domainId}`, {
+  return request(`${process.env.CHAT_API_BASE_URL}conf/richDesc/${data.modelId}`, {
     method: 'GET',
   });
 }
@@ -246,7 +256,7 @@ export function testDatabaseConnect(data: SaveDatabaseParams): Promise<any> {
 
 type ExcuteSqlParams = {
   sql: string;
-  domainId: number;
+  modelId: number;
 };
 
 // 执行脚本
@@ -271,4 +281,38 @@ export function getColumns(dbId: number, dbName: string, tableName: string): Pro
   return request(`${process.env.API_BASE_URL}database/getColumns/${dbId}/${dbName}/${tableName}`, {
     method: 'GET',
   });
+}
+
+export function getModelList(domainId: number): Promise<any> {
+  if (getRunningEnv() === 'chat') {
+    return request(`${process.env.CHAT_API_BASE_URL}conf/modelList/${domainId}`, {
+      method: 'GET',
+    });
+  }
+  return request(`${process.env.API_BASE_URL}model/getModelList/${domainId}`, {
+    method: 'GET',
+  });
+}
+
+export function createModel(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}model/createModel`, {
+    method: 'POST',
+    data,
+  });
+}
+export function updateModel(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}model/updateModel`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function deleteModel(modelId: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}model/deleteModel/${modelId}`, {
+    method: 'DELETE',
+  });
+}
+
+export function getModelDetail(data: any): Promise<any> {
+  return request.get(`${process.env.API_BASE_URL}model/getModel/${data.modelId}`);
 }

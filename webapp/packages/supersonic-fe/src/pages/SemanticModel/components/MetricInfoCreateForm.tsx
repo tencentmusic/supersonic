@@ -16,15 +16,15 @@ import { SENSITIVE_LEVEL_OPTIONS } from '../constant';
 import { formLayout } from '@/components/FormHelper/utils';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import styles from './style.less';
-import { getMeasureListByDomainId } from '../service';
+import { getMeasureListByModelId } from '../service';
 import { creatExprMetric, updateExprMetric } from '../service';
 import { ISemantic } from '../data';
 import { history } from 'umi';
-import { check } from 'prettier';
 
 export type CreateFormProps = {
   datasourceId?: number;
   domainId: number;
+  modelId: number;
   createModalVisible: boolean;
   metricItem: any;
   onCancel?: () => void;
@@ -39,6 +39,7 @@ const { Option } = Select;
 const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   datasourceId,
   domainId,
+  modelId,
   onCancel,
   createModalVisible,
   metricItem,
@@ -65,7 +66,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   const backward = () => setCurrentStep(currentStep - 1);
 
   const queryClassMeasureList = async () => {
-    const { code, data } = await getMeasureListByDomainId(domainId);
+    const { code, data } = await getMeasureListByModelId(modelId);
     if (code === 200) {
       setClassMeasureList(data);
       if (datasourceId) {
@@ -147,7 +148,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
 
   const saveMetric = async (fieldsValue: any) => {
     const queryParams = {
-      domainId,
+      modelId,
       ...fieldsValue,
     };
     const { typeParams } = queryParams;
@@ -351,7 +352,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
               type="primary"
               key="console"
               onClick={() => {
-                history.replace(`/semanticModel/${domainId}/dataSource`);
+                history.replace(`/semanticModel/${domainId}/${modelId}/dataSource`);
                 onCancel?.();
               }}
             >

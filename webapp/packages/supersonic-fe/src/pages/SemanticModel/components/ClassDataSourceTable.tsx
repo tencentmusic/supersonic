@@ -15,7 +15,7 @@ type Props = {
 };
 
 const ClassDataSourceTable: React.FC<Props> = ({ dispatch, domainManger }) => {
-  const { selectDomainId } = domainManger;
+  const { selectModelId } = domainManger;
   const [dataSourceItem, setDataSourceItem] = useState<any>();
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
 
@@ -59,7 +59,7 @@ const ClassDataSourceTable: React.FC<Props> = ({ dispatch, domainManger }) => {
         return (
           <Space>
             <a
-              key="classEditBtn"
+              key="datasourceEditBtn"
               onClick={() => {
                 setDataSourceItem(record);
                 setCreateDataSourceModalOpen(true);
@@ -82,7 +82,7 @@ const ClassDataSourceTable: React.FC<Props> = ({ dispatch, domainManger }) => {
               }}
             >
               <a
-                key="classEditBtn"
+                key="datasourceDeleteBtn"
                 onClick={() => {
                   setDataSourceItem(record);
                 }}
@@ -127,7 +127,7 @@ const ClassDataSourceTable: React.FC<Props> = ({ dispatch, domainManger }) => {
         actionRef={actionRef}
         rowKey="id"
         columns={columns}
-        params={{ domainId: selectDomainId }}
+        params={{ modelId: selectModelId }}
         request={queryDataSourceList}
         pagination={false}
         search={false}

@@ -1,4 +1,4 @@
-import { Form, Select, Input } from 'antd';
+import { Form, Input } from 'antd';
 import StandardFormRow from '@/components/StandardFormRow';
 import TagSelect from '@/components/TagSelect';
 import React, { useEffect } from 'react';
@@ -64,7 +64,7 @@ const MetricFilter: React.FC<Props> = ({ filterValues = {}, onFiltersChange }) =
     >
       <StandardFormRow key="search" block>
         <div className={styles.searchBox}>
-          <FormItem name={'name'} noStyle>
+          <FormItem name={'key'} noStyle>
             <div className={styles.searchInput}>
               <Input.Search
                 placeholder="请输入需要查询指标的ID、指标名称、字段名称"

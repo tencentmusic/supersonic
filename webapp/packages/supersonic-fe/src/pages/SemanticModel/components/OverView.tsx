@@ -1,23 +1,36 @@
 import { CheckCard } from '@ant-design/pro-components';
-import React from 'react';
+import React, { useState } from 'react';
+import { Button, Dropdown, message, Popconfirm } from 'antd';
+import { PlusOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
 import { connect } from 'umi';
 import icon from '../../../assets/icon/cloudEditor.svg';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../model';
 import { formatNumber } from '../../../utils/utils';
+import { deleteModel } from '../service';
+import ModelCreateFormModal from './ModelCreateFormModal';
 import styles from './style.less';
 
 type Props = {
-  modelList: ISemantic.IDomainItem[];
+  disabledEdit?: boolean;
+  modelList: ISemantic.IModelItem[];
+  onModelChange?: (model?: ISemantic.IModelItem) => void;
   domainManger: StateType;
   dispatch: Dispatch;
 };
 
-const OverView: React.FC<Props> = ({ domainManger, dispatch, modelList }) => {
-  const { selectDomainId } = domainManger;
+const OverView: React.FC<Props> = ({
+  modelList,
+  disabledEdit = false,
+  onModelChange,
+  domainManger,
+}) => {
+  const { selectDomainId, selectModelId } = domainManger;
+  const [currentModel, setCurrentModel] = useState<any>({});
+  const [modelCreateFormModalVisible, setModelCreateFormModalVisible] = useState<boolean>(false);
 
-  const extraNode = (model: ISemantic.IDomainItem) => {
+  const descNode = (model: ISemantic.IDomainItem) => {
     const { metricCnt, dimensionCnt } = model;
     return (
       <div className={styles.overviewExtraContainer}>
@@ -40,33 +53,103 @@ const OverView: React.FC<Props> = ({ domainManger, dispatch, modelList }) => {
       </div>
     );
   };
+
+  const extraNode = (model: ISemantic.IDomainItem) => {
+    return (
+      <Dropdown
+        placement="top"
+        menu={{
+          onClick: ({ key, domEvent }) => {
+            domEvent.stopPropagation();
+            if (key === 'edit') {
+              setCurrentModel(model);
+              setModelCreateFormModalVisible(true);
+            }
+          },
+          items: [
+            {
+              label: '编辑',
+              key: 'edit',
+            },
+            {
+              label: (
+                <Popconfirm
+                  title="确认删除？"
+                  okText="是"
+                  cancelText="否"
+                  onConfirm={async () => {
+                    const { code, msg } = await deleteModel(model.id);
+                    if (code === 200) {
+                      onModelChange?.();
+                    } else {
+                      message.error(msg);
+                    }
+                  }}
+                >
+                  <a key="modelDeleteBtn">删除</a>
+                </Popconfirm>
+              ),
+              key: 'delete',
+            },
+          ],
+        }}
+      >
+        <EllipsisOutlined
+          style={{ fontSize: 22, color: 'rgba(0,0,0,0.5)' }}
+          onClick={(e) => e.stopPropagation()}
+        />
+      </Dropdown>
+    );
+  };
+
   return (
-    <>
-      <CheckCard.Group value={selectDomainId} defaultValue={selectDomainId}>
+    <div style={{ padding: '0px 20px 20px' }}>
+      {!disabledEdit && (
+        <div style={{ paddingBottom: '20px' }}>
+          <Button
+            onClick={() => {
+              setModelCreateFormModalVisible(true);
+            }}
+            type="primary"
+          >
+            <PlusOutlined />
+            新增模型
+          </Button>
+        </div>
+      )}
+
+      <CheckCard.Group value={selectModelId} defaultValue={selectModelId}>
         {modelList &&
           modelList.map((model: ISemantic.IDomainItem) => {
             return (
               <CheckCard
                 avatar={icon}
-                title={model.name}
+                title={`${model.name}`}
                 key={model.id}
                 value={model.id}
-                // description={model.description || '模型描述...'}
-                description={extraNode(model)}
+                description={descNode(model)}
+                extra={!disabledEdit && extraNode(model)}
                 onClick={() => {
-                  const { id, name } = model;
-                  dispatch({
-                    type: 'domainManger/setSelectDomain',
-                    selectDomainId: id,
-                    selectDomainName: name,
-                    domainData: model,
-                  });
+                  onModelChange?.(model);
                 }}
               />
             );
           })}
       </CheckCard.Group>
-    </>
+      {modelCreateFormModalVisible && (
+        <ModelCreateFormModal
+          domainId={selectDomainId}
+          basicInfo={currentModel}
+          onSubmit={() => {
+            setModelCreateFormModalVisible(false);
+            onModelChange?.();
+          }}
+          onCancel={() => {
+            setModelCreateFormModalVisible(false);
+          }}
+        />
+      )}
+    </div>
   );
 };
 

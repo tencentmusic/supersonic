@@ -18,7 +18,6 @@ import FullScreen from '@/components/FullScreen';
 import SqlEditor from '@/components/SqlEditor';
 import type { TaskResultItem, DataInstanceItem, TaskResultColumn } from '../data';
 import { excuteSql } from '@/pages/SemanticModel/service';
-// import { getDatabaseByDomainId } from '../../service';
 import DataSourceCreateForm from './DataSourceCreateForm';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
@@ -33,7 +32,6 @@ type IProps = {
   domainManger: StateType;
   dispatch: Dispatch;
   dataSourceItem: DataInstanceItem;
-  domainId: number;
   onUpdateSql?: (sql: string) => void;
   sql?: string;
   onSubmitSuccess?: (dataSourceInfo: any) => void;
@@ -59,12 +57,11 @@ const SqlDetail: React.FC<IProps> = ({
   domainManger,
   dataSourceItem,
   onSubmitSuccess,
-  domainId,
   sql = '',
   onUpdateSql,
   onJdbcSourceChange,
 }) => {
-  const { dataBaseConfig } = domainManger;
+  const { dataBaseConfig, selectModelId: modelId } = domainManger;
   const [resultTable, setResultTable] = useState<ResultTableItem[]>([]);
   const [resultTableLoading, setResultTableLoading] = useState(false);
   const [resultCols, setResultCols] = useState<ResultColItem[]>([]);
@@ -82,8 +79,6 @@ const SqlDetail: React.FC<IProps> = ({
     y: 200,
   });
 
-  // const [dataSourceResult, setDataSourceResult] = useState<any>({});
-
   const [runState, setRunState] = useState<boolean | undefined>();
 
   const [taskLog, setTaskLog] = useState('');
@@ -93,7 +88,6 @@ const SqlDetail: React.FC<IProps> = ({
   const [isSqlIdeFullScreen, setIsSqlIdeFullScreen] = useState<boolean>(false);
   const [isSqlResFullScreen, setIsSqlResFullScreen] = useState<boolean>(false);
 
-  // const [sqlParams, setSqlParams] = useState<SqlParamsItem[]>([]);
   const resultInnerWrap = useRef<HTMLDivElement>();
 
   const [editorSize, setEditorSize] = useState<number>(0);
@@ -104,18 +98,6 @@ const SqlDetail: React.FC<IProps> = ({
   const [isRight, setIsRight] = useState(false);
 
   const [scriptColumns, setScriptColumns] = useState<any[]>([]);
-  // const [jdbcSourceName, setJdbcSourceName] = useState<string>(() => {
-  //   const sourceId = dataSourceItem.databaseId;
-  //   if (sourceId) {
-  //     const target: any = jdbcSourceItems.filter((item: any) => {
-  //       return item.key === Number(sourceId);
-  //     })[0];
-  //     if (target) {
-  //       return target.label;
-  //     }
-  //   }
-  //   return 'ClickHouse';
-  // });
 
   useEffect(() => {
     setJdbcSourceItems([
@@ -126,21 +108,6 @@ const SqlDetail: React.FC<IProps> = ({
     ]);
     onJdbcSourceChange?.(dataBaseConfig?.id && Number(dataBaseConfig?.id));
   }, [dataBaseConfig]);
-
-  // const queryDatabaseConfig = async () => {
-  //   const { code, data } = await getDatabaseByDomainId(domainId);
-  //   if (code === 200) {
-  //     setJdbcSourceItems([
-  //       {
-  //         label: data?.name,
-  //         key: data?.id,
-  //       },
-  //     ]);
-  //     onJdbcSourceChange?.(data?.id && Number(data?.id));
-  //     return;
-  //   }
-  //   message.error('数据库配置获取错误');
-  // };
 
   function creatCalcItem(key: string, data: string) {
     const line = document.createElement('div'); // 需要每条数据一行，这样避免数据换行的时候获得的宽度不准确
@@ -245,7 +212,7 @@ const SqlDetail: React.FC<IProps> = ({
     setResultTableLoading(true);
     const { code, data, msg } = await excuteSql({
       sql: value,
-      domainId,
+      modelId,
     });
     setResultTableLoading(false);
     if (code === 200) {
@@ -521,7 +488,6 @@ const SqlDetail: React.FC<IProps> = ({
       {dataSourceModalVisible && (
         <DataSourceCreateForm
           sql={sql}
-          domainId={domainId}
           dataSourceItem={dataSourceItem}
           scriptColumns={scriptColumns}
           onCancel={() => {
