@@ -32,4 +32,6 @@ public interface MetricService {
     List<MetricResp> getAllHighSensitiveMetric();
 
     void deleteMetric(Long id) throws Exception;
+
+    List<String> mockAlias(MetricReq metricReq,String mockType,User user);
 }

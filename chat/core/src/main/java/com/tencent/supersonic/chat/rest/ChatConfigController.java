@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/api/chat/conf")
+@RequestMapping({"/api/chat/conf", "/openapi/chat/conf"})
 public class ChatConfigController {
 
     @Autowired

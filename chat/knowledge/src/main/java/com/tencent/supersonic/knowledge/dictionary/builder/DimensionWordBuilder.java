@@ -1,13 +1,17 @@
 package com.tencent.supersonic.knowledge.dictionary.builder;
 
 import com.google.common.collect.Lists;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
 import com.tencent.supersonic.knowledge.dictionary.DictWordType;
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /**
  * dimension word nature
@@ -23,6 +27,7 @@ public class DimensionWordBuilder extends BaseWordBuilder {
     public List<DictWord> doGet(String word, SchemaElement schemaElement) {
         List<DictWord> result = Lists.newArrayList();
         result.add(getOnwWordNature(word, schemaElement, false));
+        result.addAll(getOnwWordNatureAlias(schemaElement, false));
         if (nlpDimensionUseSuffix) {
             String reverseWord = StringUtils.reverse(word);
             if (StringUtils.isNotEmpty(word) && !word.equalsIgnoreCase(reverseWord)) {
@@ -44,6 +49,18 @@ public class DimensionWordBuilder extends BaseWordBuilder {
         }
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
         return dictWord;
+    }
+
+    private List<DictWord> getOnwWordNatureAlias(SchemaElement schemaElement, boolean isSuffix) {
+        List<DictWord> dictWords = new ArrayList<>();
+        if (CollectionUtils.isEmpty(schemaElement.getAlias())) {
+            return dictWords;
+        }
+
+        for (String alias : schemaElement.getAlias()) {
+            dictWords.add(getOnwWordNature(alias, schemaElement, false));
+        }
+        return dictWords;
     }
 
 }

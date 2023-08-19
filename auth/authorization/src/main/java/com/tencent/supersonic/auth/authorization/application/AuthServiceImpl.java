@@ -2,27 +2,24 @@ package com.tencent.supersonic.auth.authorization.application;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthResGrp;
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
 import com.tencent.supersonic.auth.api.authorization.pojo.DimensionFilter;
 import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
+import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
+import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
+import com.tencent.supersonic.common.util.S2ThreadContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -33,7 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private UserService userService;
 
     public AuthServiceImpl(JdbcTemplate jdbcTemplate,
-            UserService userService) {
+                           UserService userService) {
         this.jdbcTemplate = jdbcTemplate;
         this.userService = userService;
     }
@@ -78,12 +75,12 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public AuthorizedResourceResp queryAuthorizedResources(QueryAuthResReq req, HttpServletRequest request) {
-        Set<String> userOrgIds = userService.getUserAllOrgId(req.getUser());
+    public AuthorizedResourceResp queryAuthorizedResources(QueryAuthResReq req, User user) {
+        Set<String> userOrgIds = userService.getUserAllOrgId(user.getName());
         if (!CollectionUtils.isEmpty(userOrgIds)) {
             req.setDepartmentIds(new ArrayList<>(userOrgIds));
         }
-        List<AuthGroup> groups = getAuthGroups(req);
+        List<AuthGroup> groups = getAuthGroups(req, user.getName());
         AuthorizedResourceResp resource = new AuthorizedResourceResp();
         Map<String, List<AuthGroup>> authGroupsByModelId = groups.stream()
                 .collect(Collectors.groupingBy(AuthGroup::getModelId));
@@ -130,14 +127,14 @@ public class AuthServiceImpl implements AuthService {
         return resource;
     }
 
-    private List<AuthGroup> getAuthGroups(QueryAuthResReq req) {
+    private List<AuthGroup> getAuthGroups(QueryAuthResReq req, String userName) {
         List<AuthGroup> groups = load().stream()
                 .filter(group -> {
                     if (!Objects.equals(group.getModelId(), req.getModelId())) {
                         return false;
                     }
                     if (!CollectionUtils.isEmpty(group.getAuthorizedUsers()) && group.getAuthorizedUsers()
-                            .contains(req.getUser())) {
+                            .contains(userName)) {
                         return true;
                     }
                     for (String departmentId : req.getDepartmentIds()) {
@@ -148,7 +145,7 @@ public class AuthServiceImpl implements AuthService {
                     }
                     return false;
                 }).collect(Collectors.toList());
-        log.info("user:{} department:{} authGroups:{}", req.getUser(), req.getDepartmentIds(), groups);
+        log.info("user:{} department:{} authGroups:{}", userName, req.getDepartmentIds(), groups);
         return groups;
     }
 

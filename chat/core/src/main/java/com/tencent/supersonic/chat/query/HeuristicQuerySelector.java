@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.query;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
@@ -18,7 +19,7 @@ public class HeuristicQuerySelector implements QuerySelector {
     private static final double CANDIDATE_THRESHOLD = 0.2;
 
     @Override
-    public List<SemanticQuery> select(List<SemanticQuery> candidateQueries) {
+    public List<SemanticQuery> select(List<SemanticQuery> candidateQueries, QueryReq queryReq) {
         List<SemanticQuery> selectedQueries = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(candidateQueries) && candidateQueries.size() == 1) {

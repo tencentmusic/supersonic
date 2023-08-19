@@ -10,6 +10,7 @@ import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,6 +28,9 @@ public class QueryReqConverter {
 
     @Autowired
     private SemanticQueryEngine parserService;
+
+    @Autowired
+    private QueryStructUtils queryStructUtils;
 
     public QueryStatement convert(QueryDslReq databaseReq, List<ModelSchemaResp> domainSchemas) throws Exception {
 
@@ -60,6 +64,12 @@ public class QueryReqConverter {
         }
         metricTable.setDimensions(new ArrayList<>(collect));
         metricTable.setAlias(tableName.toLowerCase());
+        // if metric empty , fill model default
+        if (CollectionUtils.isEmpty(metricTable.getMetrics())) {
+            metricTable.setMetrics(new ArrayList<>(Arrays.asList(
+                    queryStructUtils.generateInternalMetricName(databaseReq.getModelId(),
+                            metricTable.getDimensions()))));
+        }
         tables.add(metricTable);
 
         ParseSqlReq result = new ParseSqlReq();

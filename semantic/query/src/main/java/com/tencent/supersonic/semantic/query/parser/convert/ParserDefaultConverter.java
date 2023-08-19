@@ -23,8 +23,7 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class ParserDefaultConverter implements SemanticConverter {
 
-    @Value("${internal.metric.cnt.suffix:internal_cnt}")
-    private String internalMetricNameSuffix;
+
 
     private final CalculateAggConverter calculateCoverterAgg;
     private final QueryStructUtils queryStructUtils;
@@ -69,7 +68,7 @@ public class ParserDefaultConverter implements SemanticConverter {
         // todo tmp delete
         // support detail query
         if (queryStructCmd.getNativeQuery() && CollectionUtils.isEmpty(sqlCommend.getMetrics())) {
-            String internalMetricName = generateInternalMetricName(catalog, queryStructCmd);
+            String internalMetricName = queryStructUtils.generateInternalMetricName(queryStructCmd.getModelId(), queryStructCmd.getGroups());
             sqlCommend.getMetrics().add(internalMetricName);
         }
 
@@ -77,21 +76,5 @@ public class ParserDefaultConverter implements SemanticConverter {
     }
 
 
-    public String generateInternalMetricName(Catalog catalog, QueryStructReq queryStructCmd) {
-        String internalMetricNamePrefix = "";
-        if (CollectionUtils.isEmpty(queryStructCmd.getGroups())) {
-            log.warn("group is empty!");
-        } else {
-            String group = queryStructCmd.getGroups().get(0).equalsIgnoreCase("sys_imp_date")
-                    ? queryStructCmd.getGroups().get(1) : queryStructCmd.getGroups().get(0);
-            DimensionResp dimension = catalog.getDimension(group, queryStructCmd.getModelId());
-            String datasourceBizName = dimension.getDatasourceBizName();
-            if (Strings.isNotEmpty(datasourceBizName)) {
-                internalMetricNamePrefix = datasourceBizName + UNDERLINE;
-            }
 
-        }
-        String internalMetricName = internalMetricNamePrefix + internalMetricNameSuffix;
-        return internalMetricName;
-    }
 }

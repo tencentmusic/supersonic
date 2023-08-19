@@ -8,20 +8,16 @@ import com.tencent.supersonic.semantic.api.model.pojo.Entity;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class ModelSchemaBuilder {
+
+    private static String aliasSplit = ",";
 
     public static ModelSchema build(ModelSchemaResp resp) {
         ModelSchema domainSchema = new ModelSchema();
@@ -37,6 +33,13 @@ public class ModelSchemaBuilder {
 
         Set<SchemaElement> metrics = new HashSet<>();
         for (MetricSchemaResp metric : resp.getMetrics()) {
+
+            List<String> alias = new ArrayList<>();
+            String aliasStr = metric.getAlias();
+            if (Strings.isNotEmpty(aliasStr)) {
+                alias = Arrays.asList(aliasStr.split(aliasSplit));
+            }
+
             SchemaElement metricToAdd = SchemaElement.builder()
                     .model(resp.getId())
                     .id(metric.getId())
@@ -44,16 +47,10 @@ public class ModelSchemaBuilder {
                     .bizName(metric.getBizName())
                     .type(SchemaElementType.METRIC)
                     .useCnt(metric.getUseCnt())
+                    .alias(alias)
                     .build();
             metrics.add(metricToAdd);
 
-            String alias = metric.getAlias();
-            if (StringUtils.isNotEmpty(alias)) {
-                SchemaElement alisMetricToAdd = new SchemaElement();
-                BeanUtils.copyProperties(metricToAdd, alisMetricToAdd);
-                alisMetricToAdd.setName(alias);
-                metrics.add(alisMetricToAdd);
-            }
         }
         domainSchema.getMetrics().addAll(metrics);
 
@@ -74,6 +71,11 @@ public class ModelSchemaBuilder {
                 }
             }
 
+            List<String> alias = new ArrayList<>();
+            String aliasStr = dim.getAlias();
+            if (Strings.isNotEmpty(aliasStr)) {
+                alias = Arrays.asList(aliasStr.split(aliasSplit));
+            }
             SchemaElement dimToAdd = SchemaElement.builder()
                     .model(resp.getId())
                     .id(dim.getId())
@@ -81,16 +83,9 @@ public class ModelSchemaBuilder {
                     .bizName(dim.getBizName())
                     .type(SchemaElementType.DIMENSION)
                     .useCnt(dim.getUseCnt())
+                    .alias(alias)
                     .build();
             dimensions.add(dimToAdd);
-
-            String alias = dim.getAlias();
-            if (StringUtils.isNotEmpty(alias)) {
-                SchemaElement alisDimToAdd = new SchemaElement();
-                BeanUtils.copyProperties(dimToAdd, alisDimToAdd);
-                alisDimToAdd.setName(alias);
-                dimensions.add(alisDimToAdd);
-            }
 
             SchemaElement dimValueToAdd = SchemaElement.builder()
                     .model(resp.getId())
@@ -115,7 +110,7 @@ public class ModelSchemaBuilder {
                         .collect(
                                 Collectors.toMap(SchemaElement::getId, schemaElement -> schemaElement, (k1, k2) -> k2));
                 if (idAndDimPair.containsKey(entity.getEntityId())) {
-                    entityElement = idAndDimPair.get(entity.getEntityId());
+                    BeanUtils.copyProperties(idAndDimPair.get(entity.getEntityId()), entityElement);
                     entityElement.setType(SchemaElementType.ENTITY);
                 }
                 entityElement.setAlias(entity.getNames());

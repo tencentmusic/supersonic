@@ -7,12 +7,14 @@ import com.tencent.supersonic.chat.persistence.dataobject.ChatContextDO;
 import com.tencent.supersonic.chat.persistence.mapper.ChatContextMapper;
 import com.tencent.supersonic.chat.persistence.repository.ChatContextRepository;
 import com.tencent.supersonic.common.util.JsonUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @Primary
+@Slf4j
 public class ChatContextRepositoryImpl implements ChatContextRepository {
 
     @Autowired(required = false)
@@ -50,8 +52,8 @@ public class ChatContextRepositoryImpl implements ChatContextRepository {
         chatContext.setUser(contextDO.getUser());
         chatContext.setQueryText(contextDO.getQueryText());
         if (contextDO.getSemanticParse() != null && !contextDO.getSemanticParse().isEmpty()) {
-            SemanticParseInfo semanticParseInfo = JsonUtil.toObject(contextDO.getSemanticParse(),
-                    SemanticParseInfo.class);
+            log.info("--->: {}",contextDO.getSemanticParse());
+            SemanticParseInfo semanticParseInfo = JsonUtil.toObject(contextDO.getSemanticParse(), SemanticParseInfo.class);
             chatContext.setParseInfo(semanticParseInfo);
         }
         return chatContext;

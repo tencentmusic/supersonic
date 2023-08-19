@@ -208,8 +208,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         }
 
         QueryResult queryResult = new QueryResult();
-        QueryResultWithSchemaResp queryResp = semanticLayer.queryByStruct(
-                convertQueryStruct(), user);
+        QueryResultWithSchemaResp queryResp = semanticLayer.queryByStruct(convertQueryStruct(), user);
 
         if (queryResp != null) {
             queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());

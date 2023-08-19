@@ -1,5 +1,10 @@
-package com.tencent.supersonic.chat.parser.llm;
+package com.tencent.supersonic.chat.parser.llm.dsl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
+import com.tencent.supersonic.chat.agent.Agent;
+import com.tencent.supersonic.chat.agent.tool.AgentToolType;
+import com.tencent.supersonic.chat.agent.tool.DslTool;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
@@ -11,26 +16,26 @@ import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.config.LLMConfig;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.chat.parser.function.ModelResolver;
-import com.tencent.supersonic.chat.plugin.Plugin;
-import com.tencent.supersonic.chat.plugin.PluginManager;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.query.dsl.DSLBuilder;
 import com.tencent.supersonic.chat.query.dsl.DSLQuery;
 import com.tencent.supersonic.chat.query.dsl.LLMReq;
 import com.tencent.supersonic.chat.query.dsl.LLMReq.ElementValue;
 import com.tencent.supersonic.chat.query.dsl.LLMResp;
+import com.tencent.supersonic.chat.query.dsl.optimizer.BaseDSLOptimizer;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
+import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -56,30 +61,30 @@ public class LLMDSLParser implements SemanticParser {
                     queryCtx.getRequest().getQueryText());
             return;
         }
-        List<Plugin> dslPlugins = PluginManager.getPlugins().stream()
-                .filter(plugin -> DSLQuery.QUERY_MODE.equalsIgnoreCase(plugin.getType()))
-                .collect(Collectors.toList());
 
-        if (CollectionUtils.isEmpty(dslPlugins)) {
-            return;
-        }
-        Plugin plugin = dslPlugins.get(0);
-        List<Long> dslModels = plugin.getModelList();
-
+        List<DslTool> dslTools = getDslTools(queryCtx.getRequest().getAgentId());
+        Set<Long> distinctModelIds = dslTools.stream().map(DslTool::getModelIds)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
         try {
             ModelResolver modelResolver = ComponentFactory.getModelResolver();
-            Long modelId = modelResolver.resolve(queryCtx, chatCtx, dslModels);
-            log.info("resolve modelId:{},dslModels:{}", modelId, dslModels);
+            Long modelId = modelResolver.resolve(queryCtx, chatCtx, distinctModelIds);
+            log.info("resolve modelId:{},dslModels:{}", modelId, distinctModelIds);
 
-            if (Objects.isNull(modelId)) {
+            if (Objects.isNull(modelId) || modelId <= 0) {
                 return;
             }
-
+            Optional<DslTool> dslToolOptional = dslTools.stream().filter(tool ->
+                    tool.getModelIds().contains(modelId)).findFirst();
+            if (!dslToolOptional.isPresent()) {
+                log.info("no dsl tool in this agent, skip dsl parser");
+                return;
+            }
+            DslTool dslTool = dslToolOptional.get();
             LLMResp llmResp = requestLLM(queryCtx, modelId);
             if (Objects.isNull(llmResp)) {
                 return;
             }
-
             PluginSemanticQuery semanticQuery = QueryManager.createPluginQuery(DSLQuery.QUERY_MODE);
 
             SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
@@ -89,10 +94,12 @@ public class LLMDSLParser implements SemanticParser {
             DSLParseResult dslParseResult = new DSLParseResult();
             dslParseResult.setRequest(queryCtx.getRequest());
             dslParseResult.setLlmResp(llmResp);
-            dslParseResult.setPlugin(plugin);
+            dslParseResult.setDslTool(dslToolOptional.get());
 
             Map<String, Object> properties = new HashMap<>();
             properties.put(Constants.CONTEXT, dslParseResult);
+            properties.put("type", "internal");
+            properties.put("name", dslTool.getName());
             parseInfo.setProperties(properties);
             parseInfo.setScore(FUNCTION_BONUS_THRESHOLD);
             parseInfo.setQueryMode(semanticQuery.getQueryMode());
@@ -126,13 +133,13 @@ public class LLMDSLParser implements SemanticParser {
         llmSchema.setModelName(modelIdToName.get(modelId));
         llmSchema.setDomainName(modelIdToName.get(modelId));
         List<String> fieldNameList = getFieldNameList(queryCtx, modelId, semanticSchema);
-        fieldNameList.add(DSLBuilder.DATA_Field);
+        fieldNameList.add(BaseDSLOptimizer.DATE_FIELD);
         llmSchema.setFieldNameList(fieldNameList);
         llmReq.setSchema(llmSchema);
         List<ElementValue> linking = new ArrayList<>();
         linking.addAll(getValueList(queryCtx, modelId, semanticSchema));
         llmReq.setLinking(linking);
-        String currentDate = getCurrentDate(modelId);
+        String currentDate = DSLDateHelper.getCurrentDate(modelId);
         llmReq.setCurrentDate(currentDate);
 
         log.info("requestLLM request, modelId:{},llmReq:{}", modelId, llmReq);
@@ -154,21 +161,6 @@ public class LLMDSLParser implements SemanticParser {
             log.error("requestLLM error", e);
         }
         return null;
-    }
-
-
-    private String getCurrentDate(Long modelId) {
-        return DateUtils.getBeforeDate(4);
-//        ChatConfigFilter filter = new ChatConfigFilter();
-//        filter.setModelId(modelId);
-//
-//        List<ChatConfigResp> configResps = ContextUtils.getBean(ConfigService.class).search(filter, null);
-//        if (CollectionUtils.isEmpty(configResps)) {
-//            return
-//        }
-//        ChatConfigResp chatConfigResp = configResps.get(0);
-//        chatConfigResp.getChatDetailConfig().getChatDefaultConfig().get
-
     }
 
     private List<ElementValue> getValueList(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema) {
@@ -226,6 +218,20 @@ public class LLMDSLParser implements SemanticParser {
         return semanticSchema.getDimensions().stream()
                 .filter(entry -> modelId.equals(entry.getModel()))
                 .collect(Collectors.toMap(SchemaElement::getId, SchemaElement::getName, (value1, value2) -> value2));
+    }
+
+    private List<DslTool> getDslTools(Integer agentId) {
+        AgentService agentService = ContextUtils.getBean(AgentService.class);
+        Agent agent = agentService.getAgent(agentId);
+        if (agent == null) {
+            return Lists.newArrayList();
+        }
+        List<String> tools = agent.getTools(AgentToolType.DSL);
+        if (CollectionUtils.isEmpty(tools)) {
+            return Lists.newArrayList();
+        }
+        return tools.stream().map(tool -> JSONObject.parseObject(tool, DslTool.class))
+                .collect(Collectors.toList());
     }
 
 }

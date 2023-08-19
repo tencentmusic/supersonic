@@ -11,13 +11,9 @@ import com.tencent.supersonic.semantic.model.domain.MetricService;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -51,6 +47,14 @@ public class MetricController {
         return true;
     }
 
+
+    @PostMapping("/mockMetricAlias")
+    public List<String> mockMetricAlias(@RequestBody MetricReq metricReq,
+                                        HttpServletRequest request,
+                                        HttpServletResponse response){
+        User user = UserHolder.findUser(request, response);
+        return  metricService.mockAlias(metricReq,"indicator",user);
+    }
 
     @GetMapping("/getMetricList/{modelId}")
     public List<MetricResp> getMetricList(@PathVariable("modelId") Long modelId) {

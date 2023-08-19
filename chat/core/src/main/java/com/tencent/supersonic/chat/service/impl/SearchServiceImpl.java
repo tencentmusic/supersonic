@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.service.impl;
 
 import com.google.common.collect.Lists;
 import com.hankcs.hanlp.seg.common.Term;
+import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
@@ -13,6 +14,7 @@ import com.tencent.supersonic.chat.mapper.MatchText;
 import com.tencent.supersonic.chat.mapper.ModelInfoStat;
 import com.tencent.supersonic.chat.mapper.ModelWithSemanticType;
 import com.tencent.supersonic.chat.mapper.SearchMatchStrategy;
+import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.SearchService;
 import com.tencent.supersonic.chat.utils.NatureHelper;
@@ -53,22 +55,34 @@ public class SearchServiceImpl implements SearchService {
     private ChatService chatService;
     @Autowired
     private SearchMatchStrategy searchMatchStrategy;
+    @Autowired
+    private AgentService agentService;
 
     @Override
     public List<SearchResult> search(QueryReq queryCtx) {
+
+        // 1. check search enable
+        Integer agentId = queryCtx.getAgentId();
+        if (agentId != null) {
+            Agent agent = agentService.getAgent(agentId);
+            if (!agent.enableSearch()) {
+                return Lists.newArrayList();
+            }
+        }
+
         String queryText = queryCtx.getQueryText();
-        // 1.get meta info
+        // 2.get meta info
         SemanticSchema semanticSchemaDb = schemaService.getSemanticSchema();
         List<SchemaElement> metricsDb = semanticSchemaDb.getMetrics();
         final Map<Long, String> modelToName = semanticSchemaDb.getModelIdToName();
 
-        // 2.detect by segment
+        // 3.detect by segment
         List<Term> originals = HanlpHelper.getTerms(queryText);
         Map<MatchText, List<MapResult>> regTextMap = searchMatchStrategy.match(queryText, originals,
                 queryCtx.getModelId());
         regTextMap.entrySet().stream().forEach(m -> HanlpHelper.transLetterOriginal(m.getValue()));
 
-        // 3.get the most matching data
+        // 4.get the most matching data
         Optional<Entry<MatchText, List<MapResult>>> mostSimilarSearchResult = regTextMap.entrySet()
                 .stream()
                 .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
@@ -77,7 +91,7 @@ public class SearchServiceImpl implements SearchService {
                                 ? entry1 : entry2);
         log.debug("mostSimilarSearchResult:{}", mostSimilarSearchResult);
 
-        // 4.optimize the results after the query
+        // 5.optimize the results after the query
         if (!mostSimilarSearchResult.isPresent()) {
             return Lists.newArrayList();
         }
@@ -89,11 +103,11 @@ public class SearchServiceImpl implements SearchService {
 
         List<Long> possibleModels = getPossibleModels(queryCtx, originals, modelStat, queryCtx.getModelId());
 
-        // 4.1 priority dimension metric
+        // 5.1 priority dimension metric
         boolean existMetricAndDimension = searchMetricAndDimension(new HashSet<>(possibleModels), modelToName,
                 searchTextEntry, searchResults);
 
-        // 4.2 process based on dimension values
+        // 5.2 process based on dimension values
         MatchText matchText = searchTextEntry.getKey();
         Map<String, String> natureToNameMap = getNatureToNameMap(searchTextEntry, new HashSet<>(possibleModels));
         log.debug("possibleModels:{},natureToNameMap:{}", possibleModels, natureToNameMap);

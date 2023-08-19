@@ -2,8 +2,8 @@ package com.tencent.supersonic.chat.parser;
 
 
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
-import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.*;
+import com.tencent.supersonic.chat.query.dsl.DSLQuery;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,6 +21,9 @@ public class SatisfactionChecker {
     // check all the parse info in candidate
     public static boolean check(QueryContext queryContext) {
         for (SemanticQuery query : queryContext.getCandidateQueries()) {
+            if (query.getQueryMode().equals(DSLQuery.QUERY_MODE)) {
+                continue;
+            }
             if (checkThreshold(queryContext.getRequest().getQueryText(), query.getParseInfo())) {
                 return true;
             }

@@ -1,11 +1,13 @@
 package com.tencent.supersonic.common.util;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -56,30 +58,37 @@ public class DateUtils {
         return dateFormat.format(calendar.getTime());
     }
 
-
     public static String getBeforeDate(String date, int intervalDay, DatePeriodEnum datePeriodEnum) {
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_DOT);
-        try {
-            calendar.setTime(dateFormat.parse(date));
-        } catch (ParseException e) {
-            log.error("parse error");
-        }
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_DOT);
+        LocalDate currentDate = LocalDate.parse(date, dateTimeFormatter);
+        LocalDate result = null;
         switch (datePeriodEnum) {
             case DAY:
-                calendar.set(Calendar.DATE, calendar.get(Calendar.DATE) - intervalDay);
+                result = currentDate.minusDays(intervalDay);
                 break;
             case WEEK:
-                calendar.set(Calendar.DATE, calendar.get(Calendar.DATE) - intervalDay * 7);
+                result = currentDate.minusWeeks(intervalDay);
+                if (intervalDay == 0) {
+                    result = result.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+                }
                 break;
             case MONTH:
-                calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - intervalDay);
+                result = currentDate.minusMonths(intervalDay);
+                if (intervalDay == 0) {
+                    result = result.with(TemporalAdjusters.firstDayOfMonth());
+                }
                 break;
             case YEAR:
-                calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR) - intervalDay);
+                result = currentDate.minusYears(intervalDay);
+                if (intervalDay == 0) {
+                    result = result.with(TemporalAdjusters.firstDayOfYear());
+                }
                 break;
             default:
         }
-        return dateFormat.format(calendar.getTime());
+        if (Objects.nonNull(result)) {
+            return result.format(DateTimeFormatter.ofPattern(DATE_FORMAT_DOT));
+        }
+        return null;
     }
 }

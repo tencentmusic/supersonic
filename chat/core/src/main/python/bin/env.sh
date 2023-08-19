@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # python path
 export python_path="/usr/local/bin/python3.9"
 # pip path

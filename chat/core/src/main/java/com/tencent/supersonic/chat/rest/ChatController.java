@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/chat/manage")
+@RequestMapping({"/api/chat/manage", "/openapi/chat/manage"})
 public class ChatController {
 
     private final ChatService chatService;

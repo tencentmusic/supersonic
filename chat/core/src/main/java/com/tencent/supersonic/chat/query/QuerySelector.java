@@ -1,6 +1,8 @@
 package com.tencent.supersonic.chat.query;
 
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+
 import java.util.List;
 
 /**
@@ -8,5 +10,5 @@ import java.util.List;
  **/
 public interface QuerySelector {
 
-    List<SemanticQuery> select(List<SemanticQuery> candidateQueries);
+    List<SemanticQuery> select(List<SemanticQuery> candidateQueries, QueryReq queryReq);
 }

@@ -1,26 +1,29 @@
 package com.tencent.supersonic.semantic.model.application;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import com.plexpt.chatgpt.ChatGPT;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
+import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
-import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
-import com.tencent.supersonic.semantic.model.domain.pojo.Metric;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.MetricRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.MetricConverter;
+import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.semantic.model.domain.pojo.Metric;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,12 +45,16 @@ public class MetricServiceImpl implements MetricService {
 
     private DomainService domainService;
 
+    private ChatGptHelper chatGptHelper;
+
     public MetricServiceImpl(MetricRepository metricRepository,
-            ModelService modelService,
-            DomainService domainService) {
+                             ModelService modelService,
+                             DomainService domainService,
+                             ChatGptHelper chatGptHelper) {
         this.domainService = domainService;
         this.metricRepository = metricRepository;
         this.modelService = modelService;
+        this.chatGptHelper = chatGptHelper;
     }
 
     @Override
@@ -74,7 +81,7 @@ public class MetricServiceImpl implements MetricService {
         log.info("[insert metric] object:{}", JSONObject.toJSONString(metricToInsert));
         saveMetricBatch(metricToInsert, user);
     }
-
+    
     @Override
     public List<MetricResp> getMetrics(Long modelId) {
         return convertList(metricRepository.getMetricList(modelId));
@@ -200,6 +207,14 @@ public class MetricServiceImpl implements MetricService {
         }
         metricRepository.deleteMetric(id);
     }
+
+    @Override
+    public List<String> mockAlias(MetricReq metricReq,String mockType,User user) {
+
+        String mockAlias = chatGptHelper.mockAlias(mockType,metricReq.getName(), metricReq.getBizName(), "", metricReq.getDescription() ,!"".equals(metricReq.getDataFormatType()));
+        return JSONObject.parseObject(mockAlias, new TypeReference<List<String>>() {});
+    }
+
 
 
     private void saveMetricBatch(List<Metric> metrics, User user) {

@@ -60,3 +60,17 @@ CREATE TABLE `chat_query`
     KEY                 `common1` (`user_name`),
     KEY                 `common2` (`chat_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `chat`
+(
+    `chat_id`       bigint(8) NOT NULL AUTO_INCREMENT,
+    `chat_name`     varchar(100) DEFAULT NULL,
+    `create_time`   datetime     DEFAULT NULL,
+    `last_time`     datetime     DEFAULT NULL,
+    `creator`       varchar(30)  DEFAULT NULL,
+    `last_question` varchar(200) DEFAULT NULL,
+    `is_delete`     int(2) DEFAULT '0' COMMENT 'is deleted',
+    `is_top`        int(2) DEFAULT '0' COMMENT 'is top',
+    PRIMARY KEY (`chat_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

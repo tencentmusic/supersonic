@@ -2,15 +2,14 @@ package com.tencent.supersonic.chat.query.plugin.webpage;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.*;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 import com.tencent.supersonic.chat.plugin.Plugin;
 import com.tencent.supersonic.chat.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.query.QueryManager;
@@ -18,17 +17,17 @@ import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.chat.query.plugin.WebBaseResult;
+import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -107,17 +106,15 @@ public class WebPageQuery extends PluginSemanticQuery {
                     .filter(schemaElementMatch ->
                             SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType())
                                     || SchemaElementType.ID.equals(schemaElementMatch.getElement().getType()))
-                    .sorted(Comparator.comparingDouble(SchemaElementMatch::getSimilarity))
+                    .filter(schemaElementMatch -> schemaElementMatch.getSimilarity() == 1.0)
                     .forEach(schemaElementMatch -> {
                         Object queryFilterValue = filterValueMap.get(schemaElementMatch.getElement().getId());
                         if (queryFilterValue != null) {
                             if (String.valueOf(queryFilterValue).equals(String.valueOf(schemaElementMatch.getWord()))) {
-                                elementValueMap.put(String.valueOf(schemaElementMatch.getElement().getId()),
-                                        schemaElementMatch.getWord());
+                                elementValueMap.put(String.valueOf(schemaElementMatch.getElement().getId()), schemaElementMatch.getWord());
                             }
                         } else {
-                            elementValueMap.put(String.valueOf(schemaElementMatch.getElement().getId()),
-                                    schemaElementMatch.getWord());
+                            elementValueMap.computeIfAbsent(String.valueOf(schemaElementMatch.getElement().getId()), k -> schemaElementMatch.getWord());
                         }
                     });
         }
