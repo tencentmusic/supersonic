@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * query controller
  */
 @RestController
-@RequestMapping("/api/chat/query")
+@RequestMapping({"/api/chat/query", "/openapi/chat/query"})
 public class ChatQueryController {
 
     @Autowired

@@ -1,29 +1,30 @@
 package com.tencent.supersonic.integration;
 
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
-import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
+import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
+import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
+import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricFilterQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricGroupByQuery;
-import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricTopNQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.BeanUtils;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.*;
 
 
 public class MetricQueryTest extends BaseQueryTest {
@@ -51,6 +52,17 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
+    public void queryTest_METRIC_FILTER_with_agent() {
+        //agent only support METRIC_ENTITY, METRIC_FILTER
+        MockConfiguration.mockAgent(agentService);
+        ParseResp parseResp = submitParseWithAgent("alice的访问次数", DataUtils.getAgent().getId());
+        Assert.assertNotNull(parseResp.getSelectedParses());
+        List<String> queryModes = parseResp.getSelectedParses().stream()
+                .map(SemanticParseInfo::getQueryMode).collect(Collectors.toList());
+        Assert.assertTrue(queryModes.contains("METRIC_FILTER"));
+    }
+
+    @Test
     public void queryTest_METRIC_DOMAIN() throws Exception {
         QueryResult actualResult = submitNewChat("超音数的访问次数");
 
@@ -67,6 +79,16 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);
+    }
+
+    @Test
+    public void queryTest_METRIC_MODEL_with_agent() {
+        //agent only support METRIC_ENTITY, METRIC_FILTER
+        MockConfiguration.mockAgent(agentService);
+        ParseResp parseResp = submitParseWithAgent("超音数的访问次数", DataUtils.getAgent().getId());
+        List<String> queryModes = parseResp.getSelectedParses().stream()
+                .map(SemanticParseInfo::getQueryMode).collect(Collectors.toList());
+        Assert.assertTrue(queryModes.contains("METRIC_MODEL"));
     }
 
     @Test

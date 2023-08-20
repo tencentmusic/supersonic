@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  * recommend controller
  */
 @RestController
-@RequestMapping("/api/chat/")
+@RequestMapping({"/api/chat/", "/openapi/chat/"})
 public class RecommendController {
 
     @Autowired

@@ -2,7 +2,9 @@ package com.tencent.supersonic.semantic.model.domain;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.request.DimensionReq;
+import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import java.util.List;
@@ -32,4 +34,8 @@ public interface DimensionService {
     List<DimensionResp> getAllHighSensitiveDimension();
 
     void deleteDimension(Long id) throws Exception;
+
+    List<String> mockAlias(DimensionReq dimensionReq, String mockType, User user);
+
+    List<DimValueMap> mockDimensionValueAlias(DimensionReq dimensionReq, User user);
 }

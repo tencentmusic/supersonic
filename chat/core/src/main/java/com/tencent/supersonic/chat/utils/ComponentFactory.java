@@ -3,11 +3,14 @@ package com.tencent.supersonic.chat.utils;
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
-import com.tencent.supersonic.chat.parser.function.ModelResolver;
-import com.tencent.supersonic.chat.query.QuerySelector;
+
+import com.tencent.supersonic.chat.api.component.DSLOptimizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import com.tencent.supersonic.chat.parser.function.ModelResolver;
+import com.tencent.supersonic.chat.query.QuerySelector;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 
@@ -15,10 +18,11 @@ public class ComponentFactory {
 
     private static List<SchemaMapper> schemaMappers = new ArrayList<>();
     private static List<SemanticParser> semanticParsers = new ArrayList<>();
+
+    private static List<DSLOptimizer> dslCorrections = new ArrayList<>();
     private static SemanticLayer semanticLayer;
     private static QuerySelector querySelector;
     private static ModelResolver modelResolver;
-
     public static List<SchemaMapper> getSchemaMappers() {
         return CollectionUtils.isEmpty(schemaMappers) ? init(SchemaMapper.class, schemaMappers) : schemaMappers;
     }
@@ -26,6 +30,11 @@ public class ComponentFactory {
     public static List<SemanticParser> getSemanticParsers() {
         return CollectionUtils.isEmpty(semanticParsers) ? init(SemanticParser.class, semanticParsers) : semanticParsers;
     }
+
+    public static List<DSLOptimizer> getSqlCorrections() {
+        return CollectionUtils.isEmpty(dslCorrections) ? init(DSLOptimizer.class, dslCorrections) : dslCorrections;
+    }
+
 
     public static SemanticLayer getSemanticLayer() {
         if (Objects.isNull(semanticLayer)) {

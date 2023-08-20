@@ -30,6 +30,8 @@ public class DimensionConverter {
         dimensionDO.setDefaultValues(JSONObject.toJSONString(dimension.getDefaultValues()));
         if (!CollectionUtils.isEmpty(dimension.getDimValueMaps())) {
             dimensionDO.setDimValueMaps(JSONObject.toJSONString(dimension.getDimValueMaps()));
+        } else {
+            dimensionDO.setDimValueMaps(JSONObject.toJSONString(new ArrayList<>()));
         }
         return dimensionDO;
     }

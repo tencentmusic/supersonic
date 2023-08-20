@@ -22,7 +22,7 @@ import com.tencent.supersonic.semantic.query.utils.StatUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import javax.servlet.http.HttpServletRequest;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -110,8 +110,8 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     @DataPermission
-    public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructCmd, User user, HttpServletRequest request)
-            throws Exception {
+    @SneakyThrows
+    public QueryResultWithSchemaResp queryByStructWithAuth(QueryStructReq queryStructCmd, User user) {
         return queryByStruct(queryStructCmd, user);
     }
 
@@ -169,12 +169,6 @@ public class QueryServiceImpl implements QueryService {
     public List<ItemUseResp> getStatInfo(ItemUseReq itemUseCommend) {
         List<ItemUseResp> statInfos = statUtils.getStatInfo(itemUseCommend);
         return statInfos;
-    }
-
-
-    @Override
-    public List<QueryStat> getQueryStatInfoWithoutCache(ItemUseReq itemUseCommend) {
-        return statUtils.getQueryStatInfoWithoutCache(itemUseCommend);
     }
 
     private boolean isCache(QueryStructReq queryStructCmd) {

@@ -1,26 +1,13 @@
 package com.tencent.supersonic.semantic.model.application;
 
 import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
-import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
-import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
-import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.api.model.response.*;
 import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
-import com.tencent.supersonic.semantic.model.domain.Catalog;
-import com.tencent.supersonic.semantic.model.domain.DatasourceService;
-import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.MetricService;
-import com.tencent.supersonic.semantic.model.domain.ModelService;
-import com.tencent.supersonic.semantic.model.domain.dataobject.DatabaseDO;
-import com.tencent.supersonic.semantic.model.domain.repository.DatabaseRepository;
-import com.tencent.supersonic.semantic.model.domain.utils.DatabaseConverter;
+import com.tencent.supersonic.semantic.model.domain.*;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -29,17 +16,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class CatalogImpl implements Catalog {
 
-    private final DatabaseRepository databaseRepository;
+    private final DatabaseService databaseService;
     private final ModelService modelService;
     private final DimensionService dimensionService;
     private final DatasourceService datasourceService;
     private final MetricService metricService;
 
-    public CatalogImpl(DatabaseRepository databaseRepository,
+    public CatalogImpl(DatabaseService databaseService,
             ModelService modelService, DimensionService dimensionService,
             DatasourceService datasourceService,
             MetricService metricService) {
-        this.databaseRepository = databaseRepository;
+        this.databaseService = databaseService;
         this.modelService = modelService;
         this.dimensionService = dimensionService;
         this.datasourceService = datasourceService;
@@ -47,14 +34,11 @@ public class CatalogImpl implements Catalog {
     }
 
     public DatabaseResp getDatabase(Long id) {
-        DatabaseDO databaseDO = databaseRepository.getDatabase(id);
-        return DatabaseConverter.convert(databaseDO);
+        return databaseService.getDatabase(id);
     }
 
     public DatabaseResp getDatabaseByModelId(Long modelId) {
-        List<DatabaseDO> databaseDOS = databaseRepository.getDatabaseByDomainId(modelId);
-        Optional<DatabaseDO> databaseDO = databaseDOS.stream().findFirst();
-        return databaseDO.map(DatabaseConverter::convert).orElse(null);
+        return databaseService.getDatabaseByModelId(modelId);
     }
 
     @Override

@@ -2,14 +2,7 @@ package com.tencent.supersonic.chat.parser.embedding;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
-import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
-import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
-import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.*;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.parser.ParseMode;
@@ -17,17 +10,14 @@ import com.tencent.supersonic.chat.plugin.Plugin;
 import com.tencent.supersonic.chat.plugin.PluginManager;
 import com.tencent.supersonic.chat.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.query.QueryManager;
+import com.tencent.supersonic.chat.query.dsl.DSLQuery;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
-import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -53,46 +43,30 @@ public class EmbeddingBasedParser implements SemanticParser {
         if (CollectionUtils.isEmpty(embeddingRetrievals)) {
             return;
         }
-        PluginService pluginService = ContextUtils.getBean(PluginService.class);
-        List<Plugin> plugins = pluginService.getPluginList();
+        List<Plugin> plugins = getPluginList(queryContext);
         Map<Long, Plugin> pluginMap = plugins.stream().collect(Collectors.toMap(Plugin::getId, p -> p));
         for (RecallRetrieval embeddingRetrieval : embeddingRetrievals) {
             Plugin plugin = pluginMap.get(Long.parseLong(embeddingRetrieval.getId()));
-            if (plugin == null) {
+            if (plugin == null || DSLQuery.QUERY_MODE.equalsIgnoreCase(plugin.getType())) {
                 continue;
             }
-            Pair<Boolean, List<Long>> pair = PluginManager.resolve(plugin, queryContext);
+            Pair<Boolean, Set<Long>> pair = PluginManager.resolve(plugin, queryContext);
             log.info("embedding plugin resolve: {}", pair);
             if (pair.getLeft()) {
-                List<Long> modelList = pair.getRight();
+                Set<Long> modelList = pair.getRight();
                 if (CollectionUtils.isEmpty(modelList)) {
                     return;
                 }
-                modelList = distinctModelList(plugin, queryContext.getMapInfo(), modelList);
                 for (Long modelId : modelList) {
                     buildQuery(plugin, Double.parseDouble(embeddingRetrieval.getDistance()), modelId, queryContext,
                             queryContext.getMapInfo().getMatchedElements(modelId));
+                    if (plugin.isContainsAllModel()) {
+                        break;
+                    }
                 }
                 return;
             }
         }
-    }
-
-    public List<Long> distinctModelList(Plugin plugin, SchemaMapInfo schemaMapInfo, List<Long> modelList) {
-        if (!plugin.isContainsAllModel()) {
-            return modelList;
-        }
-        boolean noElementMatch = true;
-        for (Long model : modelList) {
-            List<SchemaElementMatch> schemaElementMatches = schemaMapInfo.getMatchedElements(model);
-            if (!CollectionUtils.isEmpty(schemaElementMatches)) {
-                noElementMatch = false;
-            }
-        }
-        if (noElementMatch) {
-            return modelList.subList(0, 1);
-        }
-        return modelList;
     }
 
     private void buildQuery(Plugin plugin, double distance, Long modelId,
@@ -126,6 +100,8 @@ public class EmbeddingBasedParser implements SemanticParser {
         pluginParseResult.setRequest(queryReq);
         pluginParseResult.setDistance(distance);
         properties.put(Constants.CONTEXT, pluginParseResult);
+        properties.put("type", "plugin");
+        properties.put("name", plugin.getName());
         semanticParseInfo.setProperties(properties);
         semanticParseInfo.setScore(distance);
         fillSemanticParseInfo(semanticParseInfo);
@@ -174,6 +150,10 @@ public class EmbeddingBasedParser implements SemanticParser {
                         semanticParseInfo.getDimensionFilters().add(queryFilter);
                     });
         }
+    }
+
+    protected List<Plugin> getPluginList(QueryContext queryContext) {
+        return PluginManager.getPluginAgentCanSupport(queryContext.getRequest().getAgentId());
     }
 
 }

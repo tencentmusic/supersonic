@@ -416,7 +416,7 @@ public class CalculateAggConverter implements SemanticConverter {
     }
 
     private static String getLimit(QueryStructReq queryStructCmd) {
-        if (queryStructCmd.getLimit() > 0) {
+        if (queryStructCmd != null && queryStructCmd.getLimit() > 0) {
             return " limit " + String.valueOf(queryStructCmd.getLimit());
         }
         return "";

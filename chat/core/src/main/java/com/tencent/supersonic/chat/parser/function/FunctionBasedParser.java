@@ -14,23 +14,16 @@ import com.tencent.supersonic.chat.plugin.PluginManager;
 import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.query.dsl.DSLQuery;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
+import com.tencent.supersonic.chat.query.dsl.DSLQuery;
 import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.JsonUtil;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -62,6 +55,10 @@ public class FunctionBasedParser implements SemanticParser {
             return;
         }
         List<PluginParseConfig> functionDOList = getFunctionDO(queryCtx.getRequest().getModelId(), queryCtx);
+        if (CollectionUtils.isEmpty(functionDOList)) {
+            log.info("function call parser, plugin is empty, skip");
+            return;
+        }
         FunctionReq functionReq = FunctionReq.builder()
                 .queryText(queryCtx.getRequest().getQueryText())
                 .pluginConfigs(functionDOList).build();
@@ -85,7 +82,7 @@ public class FunctionBasedParser implements SemanticParser {
         PluginSemanticQuery semanticQuery = QueryManager.createPluginQuery(toolSelection);
         ModelResolver ModelResolver = ComponentFactory.getModelResolver();
         log.info("plugin ModelList:{}", plugin.getModelList());
-        Pair<Boolean, List<Long>> pluginResolveResult = PluginManager.resolve(plugin, queryCtx);
+        Pair<Boolean, Set<Long>> pluginResolveResult = PluginManager.resolve(plugin, queryCtx);
         Long modelId = ModelResolver.resolve(queryCtx, chatCtx, pluginResolveResult.getRight());
         log.info("FunctionBasedParser modelId:{}", modelId);
         if ((Objects.isNull(modelId) || modelId <= 0) && !plugin.isContainsAllModel()) {
@@ -102,6 +99,8 @@ public class FunctionBasedParser implements SemanticParser {
         functionCallParseResult.setRequest(queryCtx.getRequest());
         Map<String, Object> properties = new HashMap<>();
         properties.put(Constants.CONTEXT, functionCallParseResult);
+        properties.put("type", "plugin");
+        properties.put("name", plugin.getName());
         parseInfo.setProperties(properties);
         parseInfo.setScore(FUNCTION_BONUS_THRESHOLD);
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
@@ -110,17 +109,6 @@ public class FunctionBasedParser implements SemanticParser {
         Model.setId(modelId);
         parseInfo.setModel(Model);
         queryCtx.getCandidateQueries().add(semanticQuery);
-    }
-
-
-    private Set<Long> getMatchModels(QueryContext queryCtx) {
-        Set<Long> result = new HashSet<>();
-        Long modelId = queryCtx.getRequest().getModelId();
-        if (Objects.nonNull(modelId) && modelId > 0) {
-            result.add(modelId);
-            return result;
-        }
-        return queryCtx.getMapInfo().getMatchedModels();
     }
 
     private boolean skipFunction(QueryContext queryCtx, FunctionResp functionResp) {
@@ -140,7 +128,7 @@ public class FunctionBasedParser implements SemanticParser {
 
     private List<PluginParseConfig> getFunctionDO(Long modelId, QueryContext queryContext) {
         log.info("user decide Model:{}", modelId);
-        List<Plugin> plugins = PluginManager.getPlugins();
+        List<Plugin> plugins = getPluginList(queryContext);
         List<PluginParseConfig> functionDOList = plugins.stream().filter(plugin -> {
             if (DSLQuery.QUERY_MODE.equalsIgnoreCase(plugin.getType())) {
                 return false;
@@ -153,12 +141,12 @@ public class FunctionBasedParser implements SemanticParser {
             if (StringUtils.isBlank(pluginParseConfig.getName())) {
                 return false;
             }
-            Pair<Boolean, List<Long>> pluginResolverResult = PluginManager.resolve(plugin, queryContext);
-            log.info("embedding plugin [{}-{}] resolve: {}", plugin.getId(), plugin.getName(), pluginResolverResult);
+            Pair<Boolean, Set<Long>> pluginResolverResult = PluginManager.resolve(plugin, queryContext);
+            log.info("plugin [{}-{}] resolve: {}", plugin.getId(), plugin.getName(), pluginResolverResult);
             if (!pluginResolverResult.getLeft()) {
                 return false;
             } else {
-                List<Long> resolveModel = pluginResolverResult.getRight();
+                Set<Long> resolveModel = pluginResolverResult.getRight();
                 if (modelId != null && modelId > 0) {
                     if (plugin.isContainsAllModel()) {
                         return true;
@@ -170,20 +158,6 @@ public class FunctionBasedParser implements SemanticParser {
         }).map(o -> JsonUtil.toObject(o.getParseModeConfig(), PluginParseConfig.class)).collect(Collectors.toList());
         log.info("getFunctionDO:{}", JsonUtil.toString(functionDOList));
         return functionDOList;
-    }
-
-    private List<String> getFunctionNames(Set<Long> matchedModels) {
-        List<Plugin> plugins = PluginManager.getPlugins();
-        Set<String> functionNames = plugins.stream()
-                .filter(entry -> {
-                            if (!CollectionUtils.isEmpty(entry.getModelList()) && !CollectionUtils.isEmpty(matchedModels)) {
-                                return entry.getModelList().stream().anyMatch(matchedModels::contains);
-                            }
-                            return true;
-                        }
-                ).map(Plugin::getName).collect(Collectors.toSet());
-        functionNames.add(DSLQuery.QUERY_MODE);
-        return new ArrayList<>(functionNames);
     }
 
     public FunctionResp requestFunction(String url, FunctionReq functionReq) {
@@ -204,5 +178,9 @@ public class FunctionBasedParser implements SemanticParser {
             log.error("requestFunction error", e);
         }
         return null;
+    }
+
+    protected List<Plugin> getPluginList(QueryContext queryContext) {
+        return PluginManager.getPluginAgentCanSupport(queryContext.getRequest().getAgentId());
     }
 }

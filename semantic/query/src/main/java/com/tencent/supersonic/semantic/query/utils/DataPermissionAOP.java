@@ -90,11 +90,15 @@ public class DataPermissionAOP {
         if (Objects.isNull(user) || Strings.isNullOrEmpty(user.getName())) {
             throw new RuntimeException("lease provide user information");
         }
+        //1. determine whether admin of the model
+        if (doModelAdmin(user, queryStructReq)) {
+            return point.proceed();
+        }
 
-        // 1. determine whether the subject field is visible
-        doDomainVisible(user, queryStructReq);
+        // 2. determine whether the subject field is visible
+        doModelVisible(user, queryStructReq);
 
-        // 2. fetch data permission meta information
+        // 3. fetch data permission meta information
         Long modelId = queryStructReq.getModelId();
         Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(queryStructReq);
         log.info("modelId:{}, res4Privilege:{}", modelId, res4Privilege);
@@ -105,18 +109,17 @@ public class DataPermissionAOP {
         log.info("this query domainId:{}, sensitiveResReq:{}", modelId, sensitiveResReq);
 
         // query user privilege info
-        HttpServletRequest request = (HttpServletRequest) args[2];
-        AuthorizedResourceResp authorizedResource = getAuthorizedResource(user, request, modelId, sensitiveResReq);
+        AuthorizedResourceResp authorizedResource = getAuthorizedResource(user, modelId, sensitiveResReq);
         // get sensitiveRes that user has privilege
         Set<String> resAuthSet = getAuthResNameSet(authorizedResource, queryStructReq.getModelId());
 
-        // 3.if sensitive fields without permission are involved in filter, thrown an exception
+        // 4.if sensitive fields without permission are involved in filter, thrown an exception
         doFilterCheckLogic(queryStructReq, resAuthSet, sensitiveResReq);
 
-        // 4.row permission pre-filter
+        // 5.row permission pre-filter
         doRowPermission(queryStructReq, authorizedResource);
 
-        // 5.proceed
+        // 6.proceed
         QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) point.proceed();
 
         if (CollectionUtils.isEmpty(sensitiveResReq) || allSensitiveResReqIsOk(sensitiveResReq, resAuthSet)) {
@@ -136,7 +139,19 @@ public class DataPermissionAOP {
 
     }
 
-    private void doDomainVisible(User user, QueryStructReq queryStructCmd) {
+    private boolean doModelAdmin(User user, QueryStructReq queryStructCmd) {
+        Long modelId = queryStructCmd.getModelId();
+        List<ModelResp> modelListAdmin = modelService.getModelListWithAuth(user.getName(), null, AuthType.ADMIN);
+        if (CollectionUtils.isEmpty(modelListAdmin)) {
+            return false;
+        } else {
+            Map<Long, List<ModelResp>> id2modelResp = modelListAdmin.stream()
+                    .collect(Collectors.groupingBy(SchemaItem::getId));
+            return !CollectionUtils.isEmpty(id2modelResp) && id2modelResp.containsKey(modelId);
+        }
+    }
+
+    private void doModelVisible(User user, QueryStructReq queryStructCmd) {
         Boolean visible = true;
         Long domainId = queryStructCmd.getModelId();
         List<ModelResp> modelListVisible = modelService.getModelListWithAuth(user.getName(), null, AuthType.VISIBLE);
@@ -251,15 +266,14 @@ public class DataPermissionAOP {
         return resAuthName;
     }
 
-    private AuthorizedResourceResp getAuthorizedResource(User user, HttpServletRequest request, Long domainId,
+    private AuthorizedResourceResp getAuthorizedResource(User user, Long domainId,
             Set<String> sensitiveResReq) {
         List<AuthRes> resourceReqList = new ArrayList<>();
-        sensitiveResReq.stream().forEach(res -> resourceReqList.add(new AuthRes(domainId.toString(), res)));
+        sensitiveResReq.forEach(res -> resourceReqList.add(new AuthRes(domainId.toString(), res)));
         QueryAuthResReq queryAuthResReq = new QueryAuthResReq();
-        queryAuthResReq.setUser(user.getName());
         queryAuthResReq.setResources(resourceReqList);
         queryAuthResReq.setModelId(domainId + "");
-        AuthorizedResourceResp authorizedResource = fetchAuthRes(request, queryAuthResReq);
+        AuthorizedResourceResp authorizedResource = fetchAuthRes(queryAuthResReq, user);
         log.info("user:{}, domainId:{}, after queryAuthorizedResources:{}", user.getName(), domainId,
                 authorizedResource);
         return authorizedResource;
@@ -396,10 +410,9 @@ public class DataPermissionAOP {
     }
 
 
-    private AuthorizedResourceResp fetchAuthRes(HttpServletRequest request, QueryAuthResReq queryAuthResReq) {
-        log.info("Authorization:{}", request.getHeader("Authorization"));
+    private AuthorizedResourceResp fetchAuthRes(QueryAuthResReq queryAuthResReq, User user) {
         log.info("queryAuthResReq:{}", queryAuthResReq);
-        return authService.queryAuthorizedResources(queryAuthResReq, request);
+        return authService.queryAuthorizedResources(queryAuthResReq, user);
     }
 
 }

@@ -50,7 +50,7 @@ public class QueryController {
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        return queryService.queryByStruct(queryStructReq, user, request);
+        return queryService.queryByStructWithAuth(queryStructReq, user);
     }
 
     @PostMapping("/struct/parse")

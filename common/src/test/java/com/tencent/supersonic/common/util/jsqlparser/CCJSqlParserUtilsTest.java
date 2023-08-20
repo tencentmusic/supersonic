@@ -22,37 +22,104 @@ class CCJSqlParserUtilsTest {
         String replaceSql = "select 歌曲名 from 歌曲库 where datediff('day', 发布日期, '2023-08-09') <= 1 and 歌手名 = '邓紫棋' and 数据日期 = '2023-08-09' and 歌曲发布时 = '2023-08-01' order by 播放量 desc limit 11";
 
         replaceSql = CCJSqlParserUtils.replaceFields(replaceSql, fieldToBizName);
+        replaceSql = CCJSqlParserUtils.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT song_name FROM 歌曲库 WHERE publish_date <= '2023-08-09' AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' AND song_publis_date = '2023-08-01' AND publish_date >= '2023-08-08' ORDER BY play_count DESC LIMIT 11"
+                , replaceSql);
+
+        replaceSql = "select YEAR(发行日期), count(歌曲名) from 歌曲库 where YEAR(发行日期) in (2022, 2023) and 数据日期 = '2023-08-14' group by YEAR(发行日期)";
+
+        replaceSql = CCJSqlParserUtils.replaceFields(replaceSql, fieldToBizName);
+        replaceSql = CCJSqlParserUtils.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT YEAR(publish_date), count(song_name) FROM 歌曲库 WHERE YEAR(publish_date) IN (2022, 2023) AND sys_imp_date = '2023-08-14' GROUP BY YEAR(publish_date)",
+                replaceSql);
+
+        replaceSql = "select YEAR(发行日期), count(歌曲名) from 歌曲库 where YEAR(发行日期) in (2022, 2023) and 数据日期 = '2023-08-14' group by 发行日期";
+
+        replaceSql = CCJSqlParserUtils.replaceFields(replaceSql, fieldToBizName);
+        replaceSql = CCJSqlParserUtils.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT YEAR(publish_date), count(song_name) FROM 歌曲库 WHERE YEAR(publish_date) IN (2022, 2023) AND sys_imp_date = '2023-08-14' GROUP BY publish_date",
+                replaceSql);
+
+        replaceSql = CCJSqlParserUtils.replaceFields(
+                "select 歌曲名 from 歌曲库 where datediff('year', 发布日期, '2023-08-11') <= 1 and 结算播放量 > 1000000 and datediff('day', 数据日期, '2023-08-11') <= 30",
+                fieldToBizName);
+        replaceSql = CCJSqlParserUtils.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT song_name FROM 歌曲库 WHERE publish_date <= '2023-08-11' AND play_count > 1000000 AND sys_imp_date <= '2023-08-11' AND publish_date >= '2022-08-11' AND sys_imp_date >= '2023-07-12'"
+                , replaceSql);
 
         replaceSql = CCJSqlParserUtils.replaceFields(
                 "select 歌曲名 from 歌曲库 where datediff('day', 发布日期, '2023-08-09') <= 1 and 歌手名 = '邓紫棋' and 数据日期 = '2023-08-09' order by 播放量 desc limit 11",
                 fieldToBizName);
+        replaceSql = CCJSqlParserUtils.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT song_name FROM 歌曲库 WHERE publish_date <= '2023-08-09' AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' AND publish_date >= '2023-08-08' ORDER BY play_count DESC LIMIT 11"
+                , replaceSql);
+
+        replaceSql = CCJSqlParserUtils.replaceFields(
+                "select 歌曲名 from 歌曲库 where datediff('year', 发布日期, '2023-08-09') = 0 and 歌手名 = '邓紫棋' and 数据日期 = '2023-08-09' order by 播放量 desc limit 11",
+                fieldToBizName);
+        replaceSql = CCJSqlParserUtils.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT song_name FROM 歌曲库 WHERE 1 = 1 AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' AND publish_date <= '2023-08-09' AND publish_date >= '2023-01-01' ORDER BY play_count DESC LIMIT 11"
+                , replaceSql);
 
         replaceSql = CCJSqlParserUtils.replaceFields(
                 "select 歌曲名 from 歌曲库 where datediff('year', 发布日期, '2023-08-09') <= 0.5 and 歌手名 = '邓紫棋' and 数据日期 = '2023-08-09' order by 播放量 desc limit 11",
                 fieldToBizName);
+        replaceSql = CCJSqlParserUtils.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT song_name FROM 歌曲库 WHERE publish_date <= '2023-08-09' AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' AND publish_date >= '2023-02-09' ORDER BY play_count DESC LIMIT 11"
+                , replaceSql);
 
         replaceSql = CCJSqlParserUtils.replaceFields(
                 "select 歌曲名 from 歌曲库 where datediff('year', 发布日期, '2023-08-09') >= 0.5 and 歌手名 = '邓紫棋' and 数据日期 = '2023-08-09' order by 播放量 desc limit 11",
                 fieldToBizName);
+        replaceSql = CCJSqlParserUtils.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT song_name FROM 歌曲库 WHERE publish_date >= '2023-08-09' AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' AND publish_date <= '2023-02-09' ORDER BY play_count DESC LIMIT 11"
+                , replaceSql);
 
         replaceSql = CCJSqlParserUtils.replaceFields(
-                "select 部门,用户 from 超音数 where 数据日期 = '2023-08-08' and 用户 =alice and 发布日期 ='11' order by 访问次数 desc limit 1",
+                "select 部门,用户 from 超音数 where 数据日期 = '2023-08-08' and 用户 ='alice' and 发布日期 ='11' order by 访问次数 desc limit 1",
                 fieldToBizName);
+        replaceSql = CCJSqlParserUtils.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT department, user_id FROM 超音数 WHERE sys_imp_date = '2023-08-08' AND user_id = 'alice' AND publish_date = '11' ORDER BY pv DESC LIMIT 1"
+                , replaceSql);
 
         replaceSql = CCJSqlParserUtils.replaceTable(replaceSql, "s2");
 
         replaceSql = CCJSqlParserUtils.addFieldsToSelect(replaceSql, Collections.singletonList("field_a"));
 
         replaceSql = CCJSqlParserUtils.replaceFields(
-                "select 部门,sum (访问次数) from 超音数 where 数据日期 = '2023-08-08' and 用户 =alice and 发布日期 ='11' group by 部门 limit 1",
+                "select 部门,sum (访问次数) from 超音数 where 数据日期 = '2023-08-08' and 用户 ='alice' and 发布日期 ='11' group by 部门 limit 1",
                 fieldToBizName);
-        Assert.assertEquals(replaceSql,
-                "SELECT department, sum(pv) FROM 超音数 WHERE sys_imp_date = '2023-08-08' AND user_id = user_id AND publish_date = '11' GROUP BY department LIMIT 1");
+        replaceSql = CCJSqlParserUtils.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT department, sum(pv) FROM 超音数 WHERE sys_imp_date = '2023-08-08' AND user_id = 'alice' AND publish_date = '11' GROUP BY department LIMIT 1",
+                replaceSql);
 
         replaceSql = "select sum(访问次数) from 超音数 where 数据日期 >= '2023-08-06' and 数据日期 <= '2023-08-06' and 部门 = 'hr'";
         replaceSql = CCJSqlParserUtils.replaceFields(replaceSql, fieldToBizName);
+        replaceSql = CCJSqlParserUtils.replaceFunction(replaceSql);
 
-        System.out.println(replaceSql);
+        Assert.assertEquals(
+                "SELECT sum(pv) FROM 超音数 WHERE sys_imp_date >= '2023-08-06' AND sys_imp_date <= '2023-08-06' AND department = 'hr'",
+                replaceSql);
     }
 
 

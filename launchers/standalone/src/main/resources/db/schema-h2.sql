@@ -648,6 +648,22 @@ CREATE TABLE IF NOT EXISTS `s2_plugin`
 COMMENT
 ON TABLE s2_plugin IS 'plugin information table';
 
+CREATE TABLE IF NOT EXISTS s2_agent
+(
+    id          int AUTO_INCREMENT,
+    name        varchar(100)  null,
+    description varchar(500) null,
+    status       int null,
+    examples    varchar(500) null,
+    config      varchar(2000)  null,
+    created_by  varchar(100) null,
+    created_at  TIMESTAMP  null,
+    updated_by  varchar(100) null,
+    updated_at  TIMESTAMP null,
+    enable_search  int null,
+    PRIMARY KEY (`id`)
+); COMMENT ON TABLE s2_agent IS 'assistant information table';
+
 
 -------demo for semantic and chat
 CREATE TABLE IF NOT EXISTS `s2_user_department`

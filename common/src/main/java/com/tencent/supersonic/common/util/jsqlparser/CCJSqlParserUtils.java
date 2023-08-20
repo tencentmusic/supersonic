@@ -41,7 +41,9 @@ public class CCJSqlParserUtils {
         }
         Set<String> result = new HashSet<>();
         Expression where = plainSelect.getWhere();
-        where.accept(new FieldAcquireVisitor(result));
+        if (Objects.nonNull(where)) {
+            where.accept(new FieldAcquireVisitor(result));
+        }
         return new ArrayList<>(result);
     }
 
@@ -166,7 +168,24 @@ public class CCJSqlParserUtils {
         if (Objects.nonNull(groupByElement)) {
             groupByElement.accept(new GroupByReplaceVisitor(fieldToBizName));
         }
-        //5. add Waiting Expression
+        return selectStatement.toString();
+    }
+
+
+    public static String replaceFunction(String sql) {
+        Select selectStatement = getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+        //1. replace where dataDiff function
+        Expression where = plainSelect.getWhere();
+        FunctionReplaceVisitor visitor = new FunctionReplaceVisitor();
+        if (Objects.nonNull(where)) {
+            where.accept(visitor);
+        }
+        //2. add Waiting Expression
         List<Expression> waitingForAdds = visitor.getWaitingForAdds();
         addWaitingExpression(plainSelect, where, waitingForAdds);
         return selectStatement.toString();
@@ -181,9 +200,10 @@ public class CCJSqlParserUtils {
             if (where == null) {
                 plainSelect.setWhere(expression);
             } else {
-                plainSelect.setWhere(new AndExpression(where, expression));
+                where = new AndExpression(where, expression);
             }
         }
+        plainSelect.setWhere(where);
     }
 
 

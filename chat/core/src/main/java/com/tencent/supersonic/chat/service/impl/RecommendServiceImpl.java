@@ -57,6 +57,7 @@ public class RecommendServiceImpl implements RecommendService {
                     item.setName(dimSchemaDesc.getName());
                     item.setBizName(dimSchemaDesc.getBizName());
                     item.setId(dimSchemaDesc.getId());
+                    item.setAlias(dimSchemaDesc.getAlias());
                     return item;
                 }).collect(Collectors.toList());
 
@@ -70,6 +71,7 @@ public class RecommendServiceImpl implements RecommendService {
                     item.setName(metricSchemaDesc.getName());
                     item.setBizName(metricSchemaDesc.getBizName());
                     item.setId(metricSchemaDesc.getId());
+                    item.setAlias(metricSchemaDesc.getAlias());
                     return item;
                 }).collect(Collectors.toList());
 

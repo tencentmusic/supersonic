@@ -74,7 +74,7 @@ public class NatureHelper {
         return null;
     }
 
-    public static boolean isDimensionValueClassId(String nature) {
+    public static boolean isDimensionValueModelId(String nature) {
         if (StringUtils.isEmpty(nature)) {
             return false;
         }
@@ -104,7 +104,7 @@ public class NatureHelper {
     }
 
     private static long getDimensionValueCount(List<Term> terms) {
-        return terms.stream().filter(term -> isDimensionValueClassId(term.nature.toString())).count();
+        return terms.stream().filter(term -> isDimensionValueModelId(term.nature.toString())).count();
     }
 
     private static long getDimensionCount(List<Term> terms) {

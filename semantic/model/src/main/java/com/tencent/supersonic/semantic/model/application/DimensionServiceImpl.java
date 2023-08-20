@@ -1,27 +1,37 @@
 package com.tencent.supersonic.semantic.model.application;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
+import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.util.ChatGptHelper;
+import com.tencent.supersonic.semantic.api.model.pojo.DatasourceDetail;
+import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.request.DimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
+import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
+import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.model.domain.DatabaseService;
+import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
+import com.tencent.supersonic.semantic.model.domain.repository.DimensionRepository;
+import com.tencent.supersonic.semantic.model.domain.utils.DimensionConverter;
 import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
-import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Dimension;
 import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
-import com.tencent.supersonic.semantic.model.domain.repository.DimensionRepository;
-import com.tencent.supersonic.semantic.model.domain.utils.DimensionConverter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -39,13 +49,22 @@ public class DimensionServiceImpl implements DimensionService {
 
     private DomainService domainService;
 
+    private ChatGptHelper chatGptHelper;
+
+    private DatabaseService databaseService;
+
 
     public DimensionServiceImpl(DimensionRepository dimensionRepository,
             DomainService domainService,
-            DatasourceService datasourceService) {
+            DatasourceService datasourceService,
+                                ChatGptHelper chatGptHelper,
+                                DatabaseService databaseService) {
         this.domainService = domainService;
         this.dimensionRepository = dimensionRepository;
         this.datasourceService = datasourceService;
+        this.chatGptHelper  = chatGptHelper;
+        this.databaseService = databaseService;
+
     }
 
     @Override
@@ -236,6 +255,53 @@ public class DimensionServiceImpl implements DimensionService {
             throw new RuntimeException(String.format("the dimension %s not exist", id));
         }
         dimensionRepository.deleteDimension(id);
+    }
+
+    @Override
+    public List<String> mockAlias(DimensionReq dimensionReq, String mockType, User user) {
+        String mockAlias = chatGptHelper.mockAlias(mockType,dimensionReq.getName(), dimensionReq.getBizName(), "", dimensionReq.getDescription() ,false);
+        return JSONObject.parseObject(mockAlias, new TypeReference<List<String>>() {});
+    }
+
+    @Override
+    public List<DimValueMap> mockDimensionValueAlias(DimensionReq dimensionReq, User user) {
+
+        List<DatasourceResp> datasourceList = datasourceService.getDatasourceList();
+        List<DatasourceResp> collect = datasourceList.stream().filter(datasourceResp -> datasourceResp.getId().equals(dimensionReq.getDatasourceId())).collect(Collectors.toList());
+
+        if (collect.isEmpty()){
+            return null;
+        }
+        DatasourceResp datasourceResp = collect.get(0);
+        DatasourceDetail datasourceDetail = datasourceResp.getDatasourceDetail();
+        String sqlQuery = datasourceDetail.getSqlQuery();
+
+        DatabaseResp database = databaseService.getDatabase(datasourceResp.getDatabaseId());
+
+        String sql = "select ai_talk."+dimensionReq.getBizName()+" from ("+sqlQuery +") as ai_talk group by ai_talk."+dimensionReq.getBizName();
+        QueryResultWithSchemaResp queryResultWithSchemaResp = databaseService.executeSql(sql, database);
+        List<Map<String, Object>> resultList = queryResultWithSchemaResp.getResultList();
+        List<String> valueList = new ArrayList<>();
+        for (Map<String, Object> stringObjectMap : resultList) {
+            String value = (String) stringObjectMap.get(dimensionReq.getBizName());
+            valueList.add(value);
+        }
+        String json = chatGptHelper.mockDimensionValueAlias(JSON.toJSONString(valueList));
+        log.info("return llm res is :{}",json);
+
+        JSONObject jsonObject = JSON.parseObject(json);
+
+        List<DimValueMap> dimValueMapsResp = new ArrayList<>();
+        int i = 0;
+        for (Map<String, Object> stringObjectMap : resultList) {
+            DimValueMap dimValueMap = new DimValueMap();
+            dimValueMap.setTechName((String) stringObjectMap.get(dimensionReq.getBizName()));
+            dimValueMap.setBizName(jsonObject.getJSONArray("tran").getString(i));
+            dimValueMap. setAlias(jsonObject.getJSONObject("alias").getJSONArray((String) stringObjectMap.get(dimensionReq.getBizName())).toJavaList(String.class));
+            dimValueMapsResp.add(dimValueMap);
+            i ++ ;
+        }
+        return dimValueMapsResp;
     }
 
 

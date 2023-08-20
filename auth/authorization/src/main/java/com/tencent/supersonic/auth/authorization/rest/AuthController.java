@@ -1,11 +1,14 @@
 package com.tencent.supersonic.auth.authorization.rest;
 
-import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
+import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -62,12 +65,13 @@ public class AuthController {
      * 查询有权限访问的受限资源id
      *
      * @param req
-     * @param request
      * @return
      */
     @PostMapping("/queryAuthorizedRes")
     public AuthorizedResourceResp queryAuthorizedResources(@RequestBody QueryAuthResReq req,
-            HttpServletRequest request) {
-        return authService.queryAuthorizedResources(req, request);
+                                                           HttpServletRequest request,
+                                                           HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return authService.queryAuthorizedResources(req, user);
     }
 }

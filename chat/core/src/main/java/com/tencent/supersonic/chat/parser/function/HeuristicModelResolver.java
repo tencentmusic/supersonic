@@ -1,21 +1,12 @@
 package com.tencent.supersonic.chat.parser.function;
 
-import com.tencent.supersonic.chat.api.component.SemanticQuery;
-import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
-import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.*;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 
 @Slf4j
@@ -55,7 +46,7 @@ public class HeuristicModelResolver implements ModelResolver {
      * @return false will use context Model, true will use other Model , maybe include context Model
      */
     protected static boolean isAllowSwitch(Map<Long, SemanticQuery> ModelQueryModes, SchemaMapInfo schemaMap,
-            ChatContext chatCtx, QueryReq searchCtx, Long modelId, List<Long> restrictiveModels) {
+            ChatContext chatCtx, QueryReq searchCtx, Long modelId, Set<Long> restrictiveModels) {
         if (!Objects.nonNull(modelId) || modelId <= 0) {
             return true;
         }
@@ -80,8 +71,7 @@ public class HeuristicModelResolver implements ModelResolver {
                 }
                 if (searchCtx.getQueryText() != null && semanticParseInfo.getDateInfo() != null) {
                     if (semanticParseInfo.getDateInfo().getDetectWord() != null) {
-                        if (semanticParseInfo.getDateInfo().getDetectWord()
-                                .equalsIgnoreCase(searchCtx.getQueryText())) {
+                        if (semanticParseInfo.getDateInfo().getDetectWord().equalsIgnoreCase(searchCtx.getQueryText())) {
                             log.info("timeParseResults is not null , can not switch context , timeParseResults:{},",
                                     semanticParseInfo.getDateInfo());
                             return false;
@@ -131,7 +121,7 @@ public class HeuristicModelResolver implements ModelResolver {
     }
 
 
-    public Long resolve(QueryContext queryContext, ChatContext chatCtx, List<Long> restrictiveModels) {
+    public Long resolve(QueryContext queryContext, ChatContext chatCtx, Set<Long> restrictiveModels) {
         Long modelId = queryContext.getRequest().getModelId();
         if (Objects.nonNull(modelId) && modelId > 0) {
             if (CollectionUtils.isNotEmpty(restrictiveModels) && restrictiveModels.contains(modelId)) {
@@ -151,17 +141,16 @@ public class HeuristicModelResolver implements ModelResolver {
         for (Long matchedModel : matchedModels) {
             ModelQueryModes.put(matchedModel, null);
         }
-        if (ModelQueryModes.size() == 1) {
+        if(ModelQueryModes.size()==1){
             return ModelQueryModes.keySet().stream().findFirst().get();
         }
         return resolve(ModelQueryModes, queryContext, chatCtx,
-                queryContext.getMapInfo(), restrictiveModels);
+                queryContext.getMapInfo(),restrictiveModels);
     }
 
     public Long resolve(Map<Long, SemanticQuery> ModelQueryModes, QueryContext queryContext,
-            ChatContext chatCtx, SchemaMapInfo schemaMap, List<Long> restrictiveModels) {
-        Long selectModel = selectModel(ModelQueryModes, queryContext.getRequest(), chatCtx, schemaMap,
-                restrictiveModels);
+            ChatContext chatCtx, SchemaMapInfo schemaMap, Set<Long> restrictiveModels) {
+        Long selectModel = selectModel(ModelQueryModes, queryContext.getRequest(), chatCtx, schemaMap,restrictiveModels);
         if (selectModel > 0) {
             log.info("selectModel {} ", selectModel);
             return selectModel;
@@ -172,7 +161,7 @@ public class HeuristicModelResolver implements ModelResolver {
 
     public Long selectModel(Map<Long, SemanticQuery> ModelQueryModes, QueryReq queryContext,
             ChatContext chatCtx,
-            SchemaMapInfo schemaMap, List<Long> restrictiveModels) {
+            SchemaMapInfo schemaMap, Set<Long> restrictiveModels) {
         // if QueryContext has modelId and in ModelQueryModes
         if (ModelQueryModes.containsKey(queryContext.getModelId())) {
             log.info("selectModel from QueryContext [{}]", queryContext.getModelId());
@@ -181,7 +170,7 @@ public class HeuristicModelResolver implements ModelResolver {
         // if ChatContext has modelId and in ModelQueryModes
         if (chatCtx.getParseInfo().getModelId() > 0) {
             Long modelId = chatCtx.getParseInfo().getModelId();
-            if (!isAllowSwitch(ModelQueryModes, schemaMap, chatCtx, queryContext, modelId, restrictiveModels)) {
+            if (!isAllowSwitch(ModelQueryModes, schemaMap, chatCtx, queryContext, modelId,restrictiveModels)) {
                 log.info("selectModel from ChatContext [{}]", modelId);
                 return modelId;
             }

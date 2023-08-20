@@ -32,7 +32,7 @@ public class QueryMatchStrategy implements MatchStrategy {
     private MapperHelper mapperHelper;
 
     @Override
-    public Map<MatchText, List<MapResult>> match(String text, List<Term> terms, Long detectmodelId) {
+    public Map<MatchText, List<MapResult>> match(String text, List<Term> terms, Long detectModelId) {
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
         }
@@ -43,22 +43,18 @@ public class QueryMatchStrategy implements MatchStrategy {
         List<Integer> offsetList = terms.stream().sorted(Comparator.comparing(Term::getOffset))
                 .map(term -> term.getOffset()).collect(Collectors.toList());
 
-        log.debug("retryCount:{},terms:{},regOffsetToLength:{},offsetList:{},detectmodelId:{}", terms,
-                regOffsetToLength, offsetList, detectmodelId);
+        log.debug("retryCount:{},terms:{},regOffsetToLength:{},offsetList:{},detectModelId:{}", terms,
+                regOffsetToLength, offsetList, detectModelId);
 
-        List<MapResult> detects = detect(text, regOffsetToLength, offsetList, detectmodelId);
+        List<MapResult> detects = detect(text, regOffsetToLength, offsetList, detectModelId);
         Map<MatchText, List<MapResult>> result = new HashMap<>();
 
-        MatchText matchText = MatchText.builder()
-                .regText(text)
-                .detectSegment(text)
-                .build();
-        result.put(matchText, detects);
+        result.put(MatchText.builder().regText(text).detectSegment(text).build(), detects);
         return result;
     }
 
     private List<MapResult> detect(String text, Map<Integer, Integer> regOffsetToLength, List<Integer> offsetList,
-            Long detectmodelId) {
+            Long detectModelId) {
         List<MapResult> results = Lists.newArrayList();
 
         for (Integer index = 0; index <= text.length() - 1; ) {
@@ -69,7 +65,7 @@ public class QueryMatchStrategy implements MatchStrategy {
                 int offset = mapperHelper.getStepOffset(offsetList, index);
                 i = mapperHelper.getStepIndex(regOffsetToLength, i);
                 if (i <= text.length()) {
-                    List<MapResult> mapResults = detectByStep(text, detectmodelId, index, i, offset);
+                    List<MapResult> mapResults = detectByStep(text, detectModelId, index, i, offset);
                     selectMapResultInOneRound(mapResultRowSet, mapResults);
                 }
             }
@@ -106,15 +102,15 @@ public class QueryMatchStrategy implements MatchStrategy {
         return a.getName() + Constants.UNDERLINE + String.join(Constants.UNDERLINE, a.getNatures());
     }
 
-    private List<MapResult> detectByStep(String text, Long detectmodelId, Integer index, Integer i, int offset) {
+    private List<MapResult> detectByStep(String text, Long detectModelId, Integer index, Integer i, int offset) {
         String detectSegment = text.substring(index, i);
-        Integer oneDetectionSize = mapperHelper.getOneDetectionSize();
+
         // step1. pre search
-        LinkedHashSet<MapResult> mapResults = SearchService.prefixSearch(detectSegment,
-                        mapperHelper.getOneDetectionMaxSize())
+        Integer oneDetectionMaxSize = mapperHelper.getOneDetectionMaxSize();
+        LinkedHashSet<MapResult> mapResults = SearchService.prefixSearch(detectSegment, oneDetectionMaxSize)
                 .stream().collect(Collectors.toCollection(LinkedHashSet::new));
         // step2. suffix search
-        LinkedHashSet<MapResult> suffixMapResults = SearchService.suffixSearch(detectSegment, oneDetectionSize)
+        LinkedHashSet<MapResult> suffixMapResults = SearchService.suffixSearch(detectSegment, oneDetectionMaxSize)
                 .stream().collect(Collectors.toCollection(LinkedHashSet::new));
 
         mapResults.addAll(suffixMapResults);
@@ -126,11 +122,11 @@ public class QueryMatchStrategy implements MatchStrategy {
         mapResults = mapResults.stream().sorted((a, b) -> -(b.getName().length() - a.getName().length()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         // step4. filter by classId
-        if (Objects.nonNull(detectmodelId) && detectmodelId > 0) {
-            log.debug("detectmodelId:{}, before parseResults:{}", mapResults);
+        if (Objects.nonNull(detectModelId) && detectModelId > 0) {
+            log.debug("detectModelId:{}, before parseResults:{}", mapResults);
             mapResults = mapResults.stream().map(entry -> {
                 List<String> natures = entry.getNatures().stream().filter(
-                        nature -> nature.startsWith(DictWordType.NATURE_SPILT + detectmodelId) || (nature.startsWith(
+                        nature -> nature.startsWith(DictWordType.NATURE_SPILT + detectModelId) || (nature.startsWith(
                                 DictWordType.NATURE_SPILT))
                 ).collect(Collectors.toList());
                 entry.setNatures(natures);
@@ -145,8 +141,7 @@ public class QueryMatchStrategy implements MatchStrategy {
                 .filter(term -> CollectionUtils.isNotEmpty(term.getNatures()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        log.debug("metricDimensionThreshold:{},dimensionValueThreshold:{},after isSimilarity  parseResults:{}",
-                mapResults);
+        log.debug("after isSimilarity parseResults:{}", mapResults);
 
         mapResults = mapResults.stream().map(parseResult -> {
             parseResult.setOffset(offset);
@@ -165,7 +160,7 @@ public class QueryMatchStrategy implements MatchStrategy {
         if (CollectionUtils.isNotEmpty(dimensionMetrics)) {
             return dimensionMetrics;
         } else {
-            return mapResults.stream().limit(oneDetectionSize).collect(Collectors.toList());
+            return mapResults.stream().limit(mapperHelper.getOneDetectionSize()).collect(Collectors.toList());
         }
     }
 }

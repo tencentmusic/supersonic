@@ -6,9 +6,10 @@ com.tencent.supersonic.chat.api.component.SchemaMapper=\
 com.tencent.supersonic.chat.api.component.SemanticParser=\
     com.tencent.supersonic.chat.parser.rule.QueryModeParser, \
     com.tencent.supersonic.chat.parser.rule.ContextInheritParser, \
+    com.tencent.supersonic.chat.parser.rule.AgentCheckParser, \
     com.tencent.supersonic.chat.parser.rule.TimeRangeParser, \
     com.tencent.supersonic.chat.parser.rule.AggregateTypeParser, \
-    com.tencent.supersonic.chat.parser.llm.LLMDSLParser, \
+    com.tencent.supersonic.chat.parser.llm.dsl.LLMDSLParser, \
     com.tencent.supersonic.chat.parser.embedding.EmbeddingBasedParser, \
     com.tencent.supersonic.chat.parser.function.FunctionBasedParser
 com.tencent.supersonic.chat.api.component.SemanticLayer=\
@@ -21,3 +22,11 @@ com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor
     com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor
 com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
+
+com.tencent.supersonic.chat.api.component.DSLOptimizer=\
+    com.tencent.supersonic.chat.query.dsl.optimizer.DateFieldCorrector, \
+    com.tencent.supersonic.chat.query.dsl.optimizer.FieldCorrector, \
+    com.tencent.supersonic.chat.query.dsl.optimizer.FunctionCorrector, \
+    com.tencent.supersonic.chat.query.dsl.optimizer.TableNameCorrector, \
+    com.tencent.supersonic.chat.query.dsl.optimizer.QueryFilterAppend, \
+    com.tencent.supersonic.chat.query.dsl.optimizer.SelectFieldAppendCorrector

@@ -3,11 +3,11 @@ package com.tencent.supersonic.chat.plugin;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
-import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.chat.agent.tool.DslTool;
+import com.tencent.supersonic.chat.api.pojo.*;
+import com.tencent.supersonic.chat.agent.Agent;
+import com.tencent.supersonic.chat.agent.tool.AgentToolType;
+import com.tencent.supersonic.chat.agent.tool.PluginTool;
 import com.tencent.supersonic.chat.parser.ParseMode;
 import com.tencent.supersonic.chat.parser.embedding.EmbeddingConfig;
 import com.tencent.supersonic.chat.parser.embedding.EmbeddingResp;
@@ -16,30 +16,22 @@ import com.tencent.supersonic.chat.plugin.event.PluginAddEvent;
 import com.tencent.supersonic.chat.plugin.event.PluginUpdateEvent;
 import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
+import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -59,12 +51,40 @@ public class PluginManager {
         this.restTemplate = restTemplate;
     }
 
-    public static List<Plugin> getPlugins() {
+    public static List<Plugin> getPluginAgentCanSupport(Integer agentId) {
         PluginService pluginService = ContextUtils.getBean(PluginService.class);
-        List<Plugin> pluginList = pluginService.getPluginList().stream().filter(plugin ->
-                CollectionUtils.isNotEmpty(plugin.getModelList())).collect(Collectors.toList());
-        pluginList.addAll(internalPluginMap.values());
-        return new ArrayList<>(pluginList);
+        List<Plugin> plugins = pluginService.getPluginList();
+        if (agentId == null) {
+            return plugins;
+        }
+        Agent agent = ContextUtils.getBean(AgentService.class).getAgent(agentId);
+        if (agent == null) {
+            return plugins;
+        }
+        List<Long> pluginIds = getPluginTools(agentId).stream().map(PluginTool::getPlugins)
+                .flatMap(Collection::stream).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(pluginIds)) {
+            return Lists.newArrayList();
+        }
+        plugins = plugins.stream().filter(plugin -> pluginIds.contains(plugin.getId()))
+                .collect(Collectors.toList());
+        log.info("plugins witch can be supported by cur agent :{} {}", agent.getName(),
+                plugins.stream().map(Plugin::getName).collect(Collectors.toList()));
+        return plugins;
+    }
+
+    private static List<PluginTool> getPluginTools(Integer agentId) {
+        AgentService agentService = ContextUtils.getBean(AgentService.class);
+        Agent agent = agentService.getAgent(agentId);
+        if (agent == null) {
+            return Lists.newArrayList();
+        }
+        List<String> tools = agent.getTools(AgentToolType.PLUGIN);
+        if (CollectionUtils.isEmpty(tools)) {
+            return Lists.newArrayList();
+        }
+        return tools.stream().map(tool -> JSONObject.parseObject(tool, PluginTool.class))
+                .collect(Collectors.toList());
     }
 
     @EventListener
@@ -201,17 +221,17 @@ public class PluginManager {
         return String.valueOf(Integer.parseInt(id) / 1000);
     }
 
-    public static Pair<Boolean, List<Long>> resolve(Plugin plugin, QueryContext queryContext) {
+    public static Pair<Boolean, Set<Long>> resolve(Plugin plugin, QueryContext queryContext) {
         SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
         Set<Long> pluginMatchedModel = getPluginMatchedModel(plugin, queryContext);
         if (CollectionUtils.isEmpty(pluginMatchedModel) && !plugin.isContainsAllModel()) {
-            return Pair.of(false, Lists.newArrayList());
+            return Pair.of(false, Sets.newHashSet());
         }
         List<ParamOption> paramOptions = getSemanticOption(plugin);
         if (CollectionUtils.isEmpty(paramOptions)) {
-            return Pair.of(true, new ArrayList<>(pluginMatchedModel));
+            return Pair.of(true, Sets.newHashSet());
         }
-        List<Long> matchedModel = Lists.newArrayList();
+        Set<Long> matchedModel = Sets.newHashSet();
         Map<Long, List<ParamOption>> paramOptionMap = paramOptions.stream().
                 collect(Collectors.groupingBy(ParamOption::getModelId));
         for (Long modelId : paramOptionMap.keySet()) {
@@ -237,7 +257,7 @@ public class PluginManager {
             }
         }
         if (CollectionUtils.isEmpty(matchedModel)) {
-            return Pair.of(false, Lists.newArrayList());
+            return Pair.of(false, Sets.newHashSet());
         }
         return Pair.of(true, matchedModel);
     }

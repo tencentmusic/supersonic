@@ -11,6 +11,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
+import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.QueryService;
@@ -22,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -42,6 +44,8 @@ public class BaseQueryTest {
     protected ChatService chatService;
     @Autowired
     protected ConfigService configService;
+    @MockBean
+    protected AgentService agentService;
 
     protected QueryResult submitMultiTurnChat(String queryText) throws Exception {
         ParseResp parseResp = submitParse(queryText);
@@ -75,6 +79,11 @@ public class BaseQueryTest {
 
     protected ParseResp submitParse(String queryText) {
         QueryReq queryContextReq = DataUtils.getQueryContextReq(10, queryText);
+        return queryService.performParsing(queryContextReq);
+    }
+
+    protected ParseResp submitParseWithAgent(String queryText, Integer agentId) {
+        QueryReq queryContextReq = DataUtils.getQueryReqWithAgent(10, queryText, agentId);
         return queryService.performParsing(queryContextReq);
     }
 

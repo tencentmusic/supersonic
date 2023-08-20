@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class MapperHelper {
 
-    @Value("${one.detection.size:6}")
+    @Value("${one.detection.size:8}")
     private Integer oneDetectionSize;
     @Value("${one.detection.max.size:20}")
     private Integer oneDetectionMaxSize;
@@ -64,7 +64,7 @@ public class MapperHelper {
      */
     public boolean existDimensionValues(List<String> natures) {
         for (String nature : natures) {
-            if (NatureHelper.isDimensionValueClassId(nature)) {
+            if (NatureHelper.isDimensionValueModelId(nature)) {
                 return true;
             }
         }

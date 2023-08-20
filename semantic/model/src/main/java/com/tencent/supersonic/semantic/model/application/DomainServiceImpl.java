@@ -16,16 +16,8 @@ import com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Domain;
 import com.tencent.supersonic.semantic.model.domain.repository.DomainRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.DomainConvert;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Sets;
@@ -101,7 +93,8 @@ public class DomainServiceImpl implements DomainService {
             List<Long> domainIds = modelResps.stream().map(ModelResp::getDomainId).collect(Collectors.toList());
             domainWithAuthAll.addAll(getParentDomain(domainIds));
         }
-        return new ArrayList<>(domainWithAuthAll);
+        return new ArrayList<>(domainWithAuthAll).stream()
+                .sorted(Comparator.comparingLong(DomainResp::getId)).collect(Collectors.toList());
     }
 
     @Override

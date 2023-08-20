@@ -2,14 +2,14 @@ package com.tencent.supersonic.chat.query.dsl;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
-import com.tencent.supersonic.chat.parser.llm.DSLParseResult;
+import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
 import com.tencent.supersonic.chat.query.QueryManager;
+import com.tencent.supersonic.chat.api.pojo.CorrectionInfo;
+import com.tencent.supersonic.chat.api.component.DSLOptimizer;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
@@ -32,7 +32,6 @@ import org.springframework.stereotype.Component;
 public class DSLQuery extends PluginSemanticQuery {
 
     public static final String QUERY_MODE = "DSL";
-    private DSLBuilder dslBuilder = new DSLBuilder();
     protected SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
 
     public DSLQuery() {
@@ -51,12 +50,26 @@ public class DSLQuery extends PluginSemanticQuery {
         LLMResp llmResp = dslParseResult.getLlmResp();
         QueryReq queryReq = dslParseResult.getRequest();
 
-        Long modelId = parseInfo.getModelId();
-        String querySql = convertToSql(queryReq.getQueryFilters(), llmResp, parseInfo, modelId);
+        CorrectionInfo correctionInfo = CorrectionInfo.builder()
+                .queryFilters(queryReq.getQueryFilters())
+                .sql(llmResp.getSqlOutput())
+                .parseInfo(parseInfo)
+                .build();
+
+        List<DSLOptimizer> DSLCorrections = ComponentFactory.getSqlCorrections();
+
+        DSLCorrections.forEach(DSLCorrection -> {
+            try {
+                DSLCorrection.rewriter(correctionInfo);
+                log.info("sqlCorrection:{} sql:{}", DSLCorrection.getClass().getSimpleName(), correctionInfo.getSql());
+            } catch (Exception e) {
+                log.error("sqlCorrection:{} execute error,correctionInfo:{}", DSLCorrection, correctionInfo, e);
+            }
+        });
+        String querySql = correctionInfo.getSql();
 
         long startTime = System.currentTimeMillis();
-
-        QueryDslReq queryDslReq = QueryReqBuilder.buildDslReq(querySql, modelId);
+        QueryDslReq queryDslReq = QueryReqBuilder.buildDslReq(querySql, parseInfo.getModelId());
         QueryResultWithSchemaResp queryResp = semanticLayer.queryByDsl(queryDslReq, user);
 
         log.info("queryByDsl cost:{},querySql:{}", System.currentTimeMillis() - startTime, querySql);
@@ -80,17 +93,4 @@ public class DSLQuery extends PluginSemanticQuery {
         parseInfo.setProperties(null);
         return queryResult;
     }
-
-
-    protected String convertToSql(QueryFilters queryFilters, LLMResp llmResp, SemanticParseInfo parseInfo,
-            Long modelId) {
-        try {
-            return dslBuilder.build(parseInfo, queryFilters, llmResp, modelId);
-        } catch (Exception e) {
-            log.error("convertToSql error", e);
-        }
-        return null;
-    }
-
-
 }

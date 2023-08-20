@@ -1,6 +1,12 @@
 package com.tencent.supersonic;
 
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.chat.agent.Agent;
+import com.tencent.supersonic.chat.agent.AgentConfig;
+import com.tencent.supersonic.chat.agent.tool.AgentToolType;
+import com.tencent.supersonic.chat.agent.tool.RuleQueryTool;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
@@ -14,16 +20,14 @@ import com.tencent.supersonic.chat.plugin.Plugin;
 import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
-import com.tencent.supersonic.chat.service.ChatService;
-import com.tencent.supersonic.chat.service.ConfigService;
-import com.tencent.supersonic.chat.service.PluginService;
-import com.tencent.supersonic.chat.service.QueryService;
+import com.tencent.supersonic.chat.service.*;
 import com.tencent.supersonic.common.util.JsonUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -32,6 +36,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent> {
 
+    @Qualifier("chatQueryService")
     @Autowired
     private QueryService queryService;
     @Autowired
@@ -40,6 +45,8 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
     protected ConfigService configService;
     @Autowired
     private PluginService pluginService;
+    @Autowired
+    private AgentService agentService;
 
     private User user = User.getFakeUser();
 
@@ -175,43 +182,25 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         pluginService.createPlugin(plugin_1, user);
     }
 
-    private void addPlugin_2() {
-        Plugin plugin_2 = new Plugin();
-        plugin_2.setType("DSL");
-        plugin_2.setModelList(Arrays.asList(1L, 2L));
-        plugin_2.setPattern("");
-        plugin_2.setParseModeConfig(null);
-        plugin_2.setName("大模型语义解析");
-        List<String> examples = new ArrayList<>();
-        examples.add("超音数访问次数最高的部门是哪个");
-        examples.add("超音数访问人数最高的部门是哪个");
 
-        PluginParseConfig parseConfig = PluginParseConfig.builder()
-                .name("DSL")
-                .description("这个工具能够将用户的自然语言查询转化为SQL语句，从而从数据库中的查询具体的数据。用于处理数据查询的问题，提供基于事实的数据")
-                .examples(examples)
-                .build();
-        plugin_2.setParseModeConfig(JsonUtil.toString(parseConfig));
-        pluginService.createPlugin(plugin_2, user);
-    }
-
-    private void addPlugin_3() {
-        Plugin plugin_2 = new Plugin();
-        plugin_2.setType("CONTENT_INTERPRET");
-        plugin_2.setModelList(Arrays.asList(1L));
-        plugin_2.setPattern("超音数最近访问情况怎么样");
-        plugin_2.setParseModeConfig(null);
-        plugin_2.setName("内容解读");
-        List<String> examples = new ArrayList<>();
-        examples.add("超音数最近访问情况怎么样");
-        examples.add("超音数最近访问情况如何");
-        PluginParseConfig parseConfig = PluginParseConfig.builder()
-                .name("supersonic_content_interpret")
-                .description("这个工具能够先查询到相关的数据并交给大模型进行解读, 最后返回解读结果")
-                .examples(examples)
-                .build();
-        plugin_2.setParseModeConfig(JsonUtil.toString(parseConfig));
-        pluginService.createPlugin(plugin_2, user);
+    private void addAgent() {
+        Agent agent = new Agent();
+        agent.setId(1);
+        agent.setName("查信息");
+        agent.setDescription("查信息");
+        agent.setStatus(1);
+        agent.setEnableSearch(1);
+        agent.setExamples(Lists.newArrayList("超音数访问次数", "超音数访问人数", "alice 停留时长"));
+        AgentConfig agentConfig = new AgentConfig();
+        RuleQueryTool ruleQueryTool = new RuleQueryTool();
+        ruleQueryTool.setType(AgentToolType.RULE);
+        ruleQueryTool.setQueryModes(Lists.newArrayList(
+                "ENTITY_DETAIL", "ENTITY_LIST_FILTER", "ENTITY_ID", "METRIC_ENTITY",
+                "METRIC_FILTER", "METRIC_GROUPBY", "METRIC_MODEL", "METRIC_ORDERBY"
+        ));
+        agentConfig.getTools().add(ruleQueryTool);
+        agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        agentService.createAgent(agent, User.getFakeUser());
     }
 
     @Override
@@ -220,8 +209,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             addDemoChatConfig_1();
             addDemoChatConfig_2();
             addPlugin_1();
-            addPlugin_2();
-            addPlugin_3();
+            addAgent();
             addSampleChats();
             addSampleChats2();
         } catch (Exception e) {

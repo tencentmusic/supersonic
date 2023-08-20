@@ -3,8 +3,10 @@ com.tencent.supersonic.chat.api.component.SchemaMapper=\
 com.tencent.supersonic.chat.api.component.SemanticParser=\
     com.tencent.supersonic.chat.parser.rule.QueryModeParser, \
     com.tencent.supersonic.chat.parser.rule.ContextInheritParser, \
+    com.tencent.supersonic.chat.parser.rule.AgentCheckParser, \
     com.tencent.supersonic.chat.parser.rule.TimeRangeParser, \
-    com.tencent.supersonic.chat.parser.rule.AggregateTypeParser
+    com.tencent.supersonic.chat.parser.rule.AggregateTypeParser, \
+    com.tencent.supersonic.chat.parser.llm.interpret.MetricInterpretParser
 #    com.tencent.supersonic.chat.parser.llm.DSLQueryFunction
 com.tencent.supersonic.chat.api.component.QueryProcessor=\
     com.tencent.supersonic.chat.application.processor.SemanticQueryProcessor

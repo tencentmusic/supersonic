@@ -35,7 +35,8 @@ public class DimValueAspect {
     private DimensionService dimensionService;
 
     @Around("execution(* com.tencent.supersonic.semantic.query.rest.QueryController.queryByStruct(..))" +
-            " || execution(* com.tencent.supersonic.semantic.query.service.QueryService.queryByStruct(..))")
+            " || execution(* com.tencent.supersonic.semantic.query.service.QueryService.queryByStruct(..))" +
+            " || execution(* com.tencent.supersonic.semantic.query.service.QueryService.queryByStructWithAuth(..))")
     public Object handleDimValue(ProceedingJoinPoint joinPoint) throws Throwable {
 
         if (!dimensionValueMapEnable) {

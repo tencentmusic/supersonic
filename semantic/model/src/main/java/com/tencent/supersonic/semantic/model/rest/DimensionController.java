@@ -3,13 +3,17 @@ package com.tencent.supersonic.semantic.model.rest;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.request.DimensionReq;
+import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.tencent.supersonic.semantic.model.domain.MetricService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +31,10 @@ public class DimensionController {
     private DimensionService dimensionService;
 
 
-    public DimensionController(DimensionService dimensionService) {
+    private MetricService metricService;
+
+    public DimensionController(DimensionService dimensionService,MetricService metricService) {
+        this.metricService = metricService;
         this.dimensionService = dimensionService;
     }
 
@@ -56,6 +63,22 @@ public class DimensionController {
         return true;
     }
 
+    @PostMapping("/mockDimensionAlias")
+    public List<String> mockMetricAlias(@RequestBody DimensionReq dimensionReq,
+                                        HttpServletRequest request,
+                                        HttpServletResponse response){
+        User user = UserHolder.findUser(request, response);
+        return  dimensionService.mockAlias(dimensionReq,"dimension",user);
+    }
+
+
+    @PostMapping("/mockDimensionValuesAlias")
+    public List<DimValueMap> mockDimensionValuesAlias(@RequestBody DimensionReq dimensionReq,
+                                                      HttpServletRequest request,
+                                                      HttpServletResponse response){
+        User user = UserHolder.findUser(request, response);
+        return  dimensionService.mockDimensionValueAlias(dimensionReq,user);
+    }
 
     @GetMapping("/getDimensionList/{modelId}")
     public List<DimensionResp> getDimension(@PathVariable("modelId") Long modelId) {

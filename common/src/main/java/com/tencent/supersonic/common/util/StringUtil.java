@@ -9,7 +9,6 @@ public class StringUtil {
     public static final String COMMA_WRAPPER = "'%s'";
     public static final String SPACE_WRAPPER = " %s ";
 
-
     public static String getCommaWrap(String value) {
         return String.format(COMMA_WRAPPER, value);
     }

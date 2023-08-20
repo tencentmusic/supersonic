@@ -1,16 +1,19 @@
 package com.tencent.supersonic.semantic.query.utils;
 
-import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.common.pojo.DateConf;
+import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
+
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
-import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
+import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
+import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -19,9 +22,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 
 @Slf4j
@@ -32,6 +38,8 @@ public class QueryStructUtils {
     private final SqlFilterUtils sqlFilterUtils;
     private final Catalog catalog;
 
+    @Value("${internal.metric.cnt.suffix:internal_cnt}")
+    private String internalMetricNameSuffix;
 
     public static Set<String> internalCols = new HashSet<>(
             Arrays.asList("dayno", "plat_sys_var", "sys_imp_date", "sys_imp_week", "sys_imp_month"));
@@ -155,6 +163,24 @@ public class QueryStructUtils {
     public Set<String> getFilterResNameEnExceptInternalCol(QueryStructReq queryStructCmd) {
         Set<String> resNameEnSet = getFilterResNameEn(queryStructCmd);
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
+    }
+
+    public String generateInternalMetricName(Long modelId, List<String> groups) {
+        String internalMetricNamePrefix = "";
+        if (CollectionUtils.isEmpty(groups)) {
+            log.warn("group is empty!");
+        } else {
+            String group = groups.get(0).equalsIgnoreCase("sys_imp_date")
+                    ? groups.get(1) : groups.get(0);
+            DimensionResp dimension = catalog.getDimension(group, modelId);
+            String datasourceBizName = dimension.getDatasourceBizName();
+            if (Strings.isNotEmpty(datasourceBizName)) {
+                internalMetricNamePrefix = datasourceBizName + UNDERLINE;
+            }
+
+        }
+        String internalMetricName = internalMetricNamePrefix + internalMetricNameSuffix;
+        return internalMetricName;
     }
 
 }

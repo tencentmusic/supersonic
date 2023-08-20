@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.query.ContentInterpret;
+package com.tencent.supersonic.chat.query.metricInterpret;
 
 
 import lombok.Data;

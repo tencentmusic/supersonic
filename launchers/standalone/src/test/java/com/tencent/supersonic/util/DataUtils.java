@@ -1,15 +1,25 @@
 package com.tencent.supersonic.util;
 
-import static java.time.LocalDate.now;
-
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.chat.agent.Agent;
+import com.tencent.supersonic.chat.agent.AgentConfig;
+import com.tencent.supersonic.chat.agent.tool.AgentToolType;
+import com.tencent.supersonic.chat.agent.tool.MetricInterpretTool;
+import com.tencent.supersonic.chat.agent.tool.PluginTool;
+import com.tencent.supersonic.chat.agent.tool.RuleQueryTool;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.parser.llm.interpret.MetricOption;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+
 import java.util.Set;
+
+import static java.time.LocalDate.now;
 
 public class DataUtils {
 
@@ -25,6 +35,15 @@ public class DataUtils {
         queryContextReq.setChatId(id);
         queryContextReq.setUser(user_test);
         return queryContextReq;
+    }
+
+    public static QueryReq getQueryReqWithAgent(Integer id, String query, Integer agentId) {
+        QueryReq queryReq = new QueryReq();
+        queryReq.setQueryText(query);//"alice的访问次数"
+        queryReq.setChatId(id);
+        queryReq.setUser(user_test);
+        queryReq.setAgentId(agentId);
+        return queryReq;
     }
 
     public static SchemaElement getSchemaElement(String name) {
@@ -55,9 +74,8 @@ public class DataUtils {
                 .build();
     }
 
-    public static QueryFilter getFilter(String bizName, FilterOperatorEnum filterOperatorEnum, Object value,
-            String name,
-            Long elementId) {
+    public static QueryFilter getFilter(String bizName, FilterOperatorEnum filterOperatorEnum, Object value, String name,
+                                        Long elementId) {
         QueryFilter filter = new QueryFilter();
         filter.setBizName(bizName);
         filter.setOperator(filterOperatorEnum);
@@ -77,8 +95,7 @@ public class DataUtils {
         return dateInfo;
     }
 
-    public static DateConf getDateConf(DateConf.DateMode dateMode, Integer unit, String period, String startDate,
-            String endDate) {
+    public static DateConf getDateConf(DateConf.DateMode dateMode, Integer unit, String period, String startDate, String endDate) {
         DateConf dateInfo = new DateConf();
         dateInfo.setUnit(unit);
         dateInfo.setDateMode(dateMode);
@@ -127,6 +144,45 @@ public class DataUtils {
             }
         }
         return dimensionFilterExist;
+    }
+
+
+    public static Agent getAgent() {
+        Agent agent = new Agent();
+        agent.setId(1);
+        agent.setName("查信息");
+        agent.setDescription("查信息");
+        AgentConfig agentConfig = new AgentConfig();
+        agentConfig.getTools().add(getRuleQueryTool());
+        agentConfig.getTools().add(getPluginTool());
+        agentConfig.getTools().add(getMetricInterpretTool());
+        agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        return agent;
+    }
+
+    private static RuleQueryTool getRuleQueryTool() {
+        RuleQueryTool ruleQueryTool = new RuleQueryTool();
+        ruleQueryTool.setType(AgentToolType.RULE);
+        ruleQueryTool.setQueryModes(Lists.newArrayList("METRIC_ENTITY", "METRIC_FILTER", "METRIC_MODEL"));
+        return ruleQueryTool;
+    }
+
+    private static PluginTool getPluginTool() {
+        PluginTool pluginTool = new PluginTool();
+        pluginTool.setType(AgentToolType.PLUGIN);
+        pluginTool.setPlugins(Lists.newArrayList(1L));
+        return pluginTool;
+    }
+
+    private static MetricInterpretTool getMetricInterpretTool() {
+        MetricInterpretTool metricInterpretTool = new MetricInterpretTool();
+        metricInterpretTool.setModelId(1L);
+        metricInterpretTool.setType(AgentToolType.INTERPRET);
+        metricInterpretTool.setMetricOptions(Lists.newArrayList(
+                new MetricOption(1L),
+                new MetricOption(2L),
+                new MetricOption(3L)));
+        return metricInterpretTool;
     }
 
 }
