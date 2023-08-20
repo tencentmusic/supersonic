@@ -29,6 +29,15 @@ const Tools: React.FC<Props> = ({
   const { queryColumns, queryResults, queryId, chatContext, queryMode, entityInfo } = data || {};
   const [score, setScore] = useState(scoreValue || 0);
 
+  const { dimensionFilters, elementMatches } = data.chatContext;
+
+  const entityId = dimensionFilters?.length > 0 ? dimensionFilters[0].value : undefined;
+  const entityName = elementMatches?.find((item: any) => item.element?.type === 'ID')?.element
+    ?.name;
+
+  const isEntityMode =
+    queryMode === 'ENTITY_LIST_FILTER' && typeof entityId === 'string' && entityName !== undefined;
+
   const prefixCls = `${CLS_PREFIX}-tools`;
 
   const singleData = queryResults.length === 1;
@@ -41,7 +50,8 @@ const Tools: React.FC<Props> = ({
       queryColumns[0].showType === 'CATEGORY' &&
       queryResults?.length === 1) ||
     (!queryMode.includes('METRIC') && !queryMode.includes('ENTITY')) ||
-    isMetricCard;
+    isMetricCard ||
+    isEntityMode;
 
   const changeChart = () => {
     onChangeChart();
@@ -75,7 +85,7 @@ const Tools: React.FC<Props> = ({
 
   return (
     <div className={prefixCls}>
-      {/* {isLastMessage && chatContext?.modelId && entityInfo?.entityId && (
+      {isLastMessage && chatContext?.modelId && entityInfo?.entityId && (
         <Popover
           content={
             <RecommendOptions
@@ -93,7 +103,7 @@ const Tools: React.FC<Props> = ({
         >
           <Button shape="round">切换其他匹配内容</Button>
         </Popover>
-      )} */}
+      )}
       {!isMobile && (
         <>
           {queryMode === 'METRIC_FILTER' && (

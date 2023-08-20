@@ -1,5 +1,5 @@
 import { request } from 'umi';
-import { ModelType } from './type';
+import { AgentType, ModelType } from './type';
 
 const prefix = '/api';
 
@@ -63,6 +63,12 @@ export function querySuggestion(modelId: number) {
 
 export function queryRecommendQuestions() {
   return request<Result<any>>(`${prefix}/chat/recommend/question`, {
+    method: 'GET',
+  });
+}
+
+export function queryAgentList() {
+  return request<Result<AgentType[]>>(`${prefix}/chat/agent/getAgentList`, {
     method: 'GET',
   });
 }

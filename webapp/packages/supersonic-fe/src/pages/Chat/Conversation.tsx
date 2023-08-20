@@ -90,7 +90,12 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
         defaultEntityFilter?.entityName && window.location.pathname.includes('detail')
           ? defaultEntityFilter.entityName
           : defaultModelName;
-      onAddConversation({ name: conversationName, type: 'CUSTOMIZE' });
+      onAddConversation({
+        name: conversationName,
+        type: 'CUSTOMIZE',
+        modelId: defaultEntityFilter?.modelId,
+        entityId: defaultEntityFilter?.entityId,
+      });
       onNewConversationTriggered?.();
     }
   }, [triggerNewConversation]);

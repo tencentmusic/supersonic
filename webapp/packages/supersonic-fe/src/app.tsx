@@ -20,7 +20,7 @@ const TOKEN_KEY = AUTH_TOKEN_KEY;
 
 const replaceRoute = '/';
 
-const getRuningEnv = async () => {
+const getRunningEnv = async () => {
   try {
     const response = await fetch(`${publicPath}supersonic.config.json`);
     const config = await response.json();
@@ -72,7 +72,6 @@ export async function getInitialState(): Promise<{
   codeList?: string[];
   authCodes?: string[];
 }> {
-  // await getRuningEnv();
   const fetchUserInfo = async () => {
     try {
       const { code, data } = await queryCurrentUser();
@@ -112,8 +111,9 @@ export async function getInitialState(): Promise<{
 }
 
 export async function patchRoutes({ routes }) {
-  const config = await getRuningEnv();
+  const config = await getRunningEnv();
   if (config && config.env) {
+    window.RUNNING_ENV = config.env;
     const { env } = config;
     const target = routes[0].routes;
     if (env) {
@@ -123,6 +123,14 @@ export async function patchRoutes({ routes }) {
       // 写入根据环境转换过的的route
       target.push(...envRoutes);
     }
+  } else {
+    const target = routes[0].routes;
+    // start-standalone模式不存在env，在此模式下不显示chatSetting
+    const envRoutes = target.filter((item: any) => {
+      return !['chatSetting'].includes(item.name);
+    });
+    target.splice(0, 99);
+    target.push(...envRoutes);
   }
 }
 

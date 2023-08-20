@@ -5,7 +5,7 @@ import MetricCard from './MetricCard';
 import MetricTrend from './MetricTrend';
 import Table from './Table';
 import { ColumnType, DrillDownDimensionType, MsgDataType } from '../../common/type';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { queryData } from '../../service';
 
 type Props = {
@@ -25,6 +25,11 @@ const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, tr
   const [drillDownDimension, setDrillDownDimension] = useState<DrillDownDimensionType>();
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    setColumns(queryColumns);
+    setDataSource(queryResults);
+  }, [queryColumns, queryResults]);
+
   if (!queryColumns || !queryResults) {
     return null;
   }
@@ -35,14 +40,15 @@ const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, tr
   const metricFields = columns.filter(item => item.showType === 'NUMBER');
 
   const isMetricCard =
-    queryMode.includes('METRIC') &&
+    (queryMode.includes('METRIC') ||
+      (queryMode === 'DSL' && singleData && metricFields.length === 1 && columns.length === 1)) &&
     (singleData || chatContext?.dateInfo?.startDate === chatContext?.dateInfo?.endDate);
 
   const isText =
     columns.length === 1 &&
     columns[0].showType === 'CATEGORY' &&
-    !queryMode.includes('METRIC') &&
-    !queryMode.includes('ENTITY') &&
+    ((!queryMode.includes('METRIC') && !queryMode.includes('ENTITY')) ||
+      queryMode === 'METRIC_INTERPRET') &&
     singleData;
 
   const onLoadData = async (value: any) => {
@@ -68,9 +74,43 @@ const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, tr
 
   const getMsgContent = () => {
     if (isText) {
+      let text = dataSource[0][columns[0].nameEn];
+      let htmlCode: string;
+      const match = text.match(/```html([\s\S]*?)```/);
+      htmlCode = match && match[1].trim();
+      if (htmlCode) {
+        text = text.replace(/```html([\s\S]*?)```/, '');
+      }
+      let scriptCode: string;
+      let scriptSrc: string;
+      if (htmlCode) {
+        scriptSrc = htmlCode.match(/<script src="([\s\S]*?)"><\/script>/)?.[1] || '';
+        scriptCode =
+          htmlCode.match(/<script type="text\/javascript">([\s\S]*?)<\/script>/)?.[1] || '';
+        if (scriptSrc) {
+          const script = document.createElement('script');
+          script.src = scriptSrc;
+          document.body.appendChild(script);
+        }
+        if (scriptCode) {
+          const script = document.createElement('script');
+          script.innerHTML = scriptCode;
+          setTimeout(() => {
+            document.body.appendChild(script);
+          }, 1500);
+        }
+      }
       return (
-        <div style={{ lineHeight: '24px', width: 'fit-content' }}>
-          {dataSource[0][columns[0].nameEn]}
+        <div
+          style={{
+            lineHeight: '24px',
+            width: 'fit-content',
+            maxWidth: '100%',
+            overflowX: 'hidden',
+          }}
+        >
+          {htmlCode ? <pre>{text}</pre> : text}
+          {!!htmlCode && <div dangerouslySetInnerHTML={{ __html: htmlCode }} />}
         </div>
       );
     }
@@ -103,15 +143,18 @@ const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, tr
         );
       }
     }
-    return (
-      <Bar
-        data={{ ...data, queryColumns: columns, queryResults: dataSource }}
-        triggerResize={triggerResize}
-        loading={loading}
-        drillDownDimension={drillDownDimension}
-        onSelectDimension={onSelectDimension}
-      />
-    );
+    if (categoryField?.length > 0 && metricFields?.length > 0) {
+      return (
+        <Bar
+          data={{ ...data, queryColumns: columns, queryResults: dataSource }}
+          triggerResize={triggerResize}
+          loading={loading}
+          drillDownDimension={drillDownDimension}
+          onSelectDimension={onSelectDimension}
+        />
+      );
+    }
+    return <Table data={{ ...data, queryColumns: columns, queryResults: dataSource }} />;
   };
 
   let width = '100%';
@@ -135,6 +178,7 @@ const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, tr
       title={question}
       isMobileMode={isMobileMode}
       width={width}
+      maxWidth={isText && !isMobile ? '80%' : undefined}
       queryMode={queryMode}
     >
       {getMsgContent()}

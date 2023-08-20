@@ -55,6 +55,7 @@ const Chat = () => {
         <ChatItem
           msg={msg}
           // msgData={data}
+          agentId={6}
           onMsgDataLoaded={onMsgDataLoaded}
           isLastMessage
           isMobileMode

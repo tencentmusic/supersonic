@@ -9,8 +9,9 @@ import {
   ModelType,
   MessageItem,
   MessageTypeEnum,
+  AgentType,
 } from './type';
-import { getModelList } from './service';
+import { getModelList, queryAgentList } from './service';
 import { useThrottleFn } from 'ahooks';
 import Conversation from './Conversation';
 import ChatFooter from './ChatFooter';
@@ -64,6 +65,8 @@ const Chat: React.FC<Props> = ({
   const [applyAuthVisible, setApplyAuthVisible] = useState(false);
   const [applyAuthModel, setApplyAuthModel] = useState('');
   const [initialModelName, setInitialModelName] = useState('');
+  const [agentList, setAgentList] = useState<AgentType[]>([]);
+  const [currentAgent, setCurrentAgent] = useState<AgentType>();
   const location = useLocation();
   const dispatch = useDispatch();
   const { modelName } = (location as any).query;
@@ -71,9 +74,19 @@ const Chat: React.FC<Props> = ({
   const conversationRef = useRef<any>();
   const chatFooterRef = useRef<any>();
 
+  const initAgentList = async () => {
+    const res = await queryAgentList();
+    const agentListValue = (res.data || []).filter((item) => item.status === 1);
+    setAgentList(agentListValue);
+    if (agentListValue.length > 0) {
+      setCurrentAgent(agentListValue[0]);
+    }
+  };
+
   useEffect(() => {
     setChatSdkToken(localStorage.getItem(AUTH_TOKEN_KEY) || '');
     initModels();
+    initAgentList();
   }, []);
 
   useEffect(() => {
@@ -102,7 +115,13 @@ const Chat: React.FC<Props> = ({
     if (initMsg) {
       inputFocus();
       if (initMsg === 'CUSTOMIZE' && copilotSendMsg) {
-        onSendMsg(copilotSendMsg, [], modelId, entityId);
+        onSendMsg(
+          copilotSendMsg,
+          [],
+          modelId,
+          entityId,
+          agentList.find((item) => item.name === '做分析'),
+        );
         dispatch({
           type: 'globalState/setCopilotSendMsg',
           payload: '',
@@ -143,16 +162,9 @@ const Chat: React.FC<Props> = ({
     setMessageList([
       {
         id: uuid(),
-        type: MessageTypeEnum.TEXT,
-        msg: defaultModelName
-          ? `您好，请输入关于${
-              defaultEntityFilter?.entityName
-                ? `${defaultModelName?.slice(0, defaultModelName?.length - 1)}【${
-                    defaultEntityFilter?.entityName
-                  }】`
-                : `【${defaultModelName}】`
-            }的问题`
-          : '您好，请问有什么我能帮您吗？',
+        type: MessageTypeEnum.RECOMMEND_QUESTIONS,
+        // type: MessageTypeEnum.AGENT_LIST,
+        // msg: currentAgent?.name || '查信息',
       },
     ]);
   };
@@ -161,7 +173,6 @@ const Chat: React.FC<Props> = ({
     return list.map((item: HistoryMsgItemType) => ({
       id: item.questionId,
       type:
-        item.queryResult?.queryMode === MessageTypeEnum.PLUGIN ||
         item.queryResult?.queryMode === MessageTypeEnum.WEB_PAGE
           ? MessageTypeEnum.PLUGIN
           : MessageTypeEnum.QUESTION,
@@ -212,6 +223,10 @@ const Chat: React.FC<Props> = ({
     }
   };
 
+  const changeAgent = (agent?: AgentType) => {
+    setCurrentAgent(agent);
+  };
+
   const initModels = async () => {
     const res = await getModelList();
     const modelList = getLeafList(res.data);
@@ -236,6 +251,7 @@ const Chat: React.FC<Props> = ({
     list?: MessageItem[],
     modelId?: number,
     entityId?: string,
+    agent?: AgentType,
   ) => {
     const currentMsg = msg || inputMsg;
     if (currentMsg.trim() === '') {
@@ -252,13 +268,26 @@ const Chat: React.FC<Props> = ({
       modelChanged = currentModel?.id !== toModel?.id;
     }
     const modelIdValue = modelId || msgModel?.id || currentModel?.id;
+
+    const msgAgent = agentList.find((item) => currentMsg.indexOf(item.name) === 1);
+    const certainAgent = currentMsg[0] === '/' && msgAgent;
+    const agentIdValue = certainAgent ? msgAgent.id : undefined;
+    if (agent || certainAgent) {
+      changeAgent(agent || msgAgent);
+    }
+
     const msgs = [
       ...(list || messageList),
       {
         id: uuid(),
         msg: currentMsg,
-        msgValue: certainModel ? currentMsg.replace(`@${msgModel.name}`, '').trim() : currentMsg,
+        msgValue: certainModel
+          ? currentMsg.replace(`@${msgModel.name}`, '').trim()
+          : certainAgent
+          ? currentMsg.replace(`/${certainAgent.name}`, '').trim()
+          : currentMsg,
         modelId: modelIdValue === -1 ? undefined : modelIdValue,
+        agentId: agent?.id || agentIdValue || currentAgent?.id,
         entityId: entityId || (modelChanged ? undefined : defaultEntity?.entityId),
         identityMsg: certainModel ? getIdentityMsgText(msgModel) : undefined,
         type: MessageTypeEnum.QUESTION,
@@ -398,8 +427,22 @@ const Chat: React.FC<Props> = ({
     inputFocus();
   };
 
+  const onSelectAgent = (agent: AgentType) => {
+    setCurrentAgent(agent);
+    setMessageList([
+      ...messageList,
+      {
+        id: uuid(),
+        type: MessageTypeEnum.TEXT,
+        msg: `您好，智能助理【${agent.name}】将与您对话，可输入“/”切换助理`,
+      },
+    ]);
+    updateMessageContainerScroll();
+  };
+
   const chatClass = classNames(styles.chat, {
-    [styles.mobile]: isMobileMode,
+    [styles.mobileMode]: isMobileMode,
+    [styles.mobile]: isMobile,
     [styles.copilotFullscreen]: copilotFullscreen,
     [styles.conversationCollapsed]: conversationCollapsed,
   });
@@ -431,16 +474,21 @@ const Chat: React.FC<Props> = ({
                   isMobileMode={isMobileMode}
                   conversationCollapsed={conversationCollapsed}
                   copilotFullscreen={copilotFullscreen}
+                  agentList={agentList}
                   onClickMessageContainer={inputFocus}
                   onMsgDataLoaded={onMsgDataLoaded}
                   onCheckMore={onCheckMore}
                   onApplyAuth={onApplyAuth}
+                  onSendMsg={onSendMsg}
+                  onSelectAgent={onSelectAgent}
                 />
                 <ChatFooter
                   inputMsg={inputMsg}
                   chatId={currentConversation?.chatId}
                   models={models}
+                  agentList={agentList}
                   currentModel={currentModel}
+                  currentAgent={currentAgent}
                   defaultEntity={defaultEntity}
                   collapsed={conversationCollapsed}
                   isCopilotMode={isCopilotMode}
@@ -461,6 +509,7 @@ const Chat: React.FC<Props> = ({
                       onCancelCopilotFilter();
                     }
                   }}
+                  onSelectAgent={onSelectAgent}
                   ref={chatFooterRef}
                 />
               </div>

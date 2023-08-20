@@ -12,9 +12,9 @@ import {
 } from './type';
 import { getLeafList, uuid } from '@/utils/utils';
 import styles from './style.less';
-import { PARSE_MODE_MAP, PLUGIN_TYPE_MAP } from './constants';
+import { PLUGIN_TYPE_MAP } from './constants';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { isArray, set } from 'lodash';
+import { isArray } from 'lodash';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;

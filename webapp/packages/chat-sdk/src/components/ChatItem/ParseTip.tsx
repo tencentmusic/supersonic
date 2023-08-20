@@ -76,17 +76,7 @@ const ParseTip: React.FC<Props> = ({
     const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
     const entityName = elementMatches?.find(item => item.element?.type === 'ID')?.element.name;
 
-    const pluginName = properties?.CONTEXT?.plugin?.name;
-
-    const modeName = pluginName
-      ? '调插件'
-      : queryMode.includes('METRIC')
-      ? '算指标'
-      : queryMode === 'ENTITY_DETAIL'
-      ? '查明细'
-      : queryMode === 'ENTITY_LIST_FILTER'
-      ? '做圈选'
-      : '';
+    const { type: agentType, name: agentName } = properties || {};
 
     const fields =
       queryMode === 'ENTITY_DETAIL' ? dimensionItems?.concat(metrics || []) : dimensionItems;
@@ -101,11 +91,10 @@ const ParseTip: React.FC<Props> = ({
         }}
       >
         {index !== undefined && <div>{index + 1}.</div>}
-        {!pluginName && isOptions && <div className={`${prefixCls}-mode-name`}>{modeName}：</div>}
-        {!!pluginName ? (
+        {!!agentType ? (
           <div className={`${prefixCls}-tip-item`}>
-            将由问答插件
-            <span className={itemValueClass}>{pluginName}</span>来解答
+            将由{agentType === 'plugin' ? '插件' : '内置'}工具
+            <span className={itemValueClass}>{agentName}</span>来解答
           </div>
         ) : (
           <>
@@ -123,7 +112,7 @@ const ParseTip: React.FC<Props> = ({
                 <div className={itemValueClass}>{modelName}</div>
               </div>
             )}
-            {modeName === '算指标' && metric && (
+            {metric && (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>指标：</div>
                 <div className={itemValueClass}>{metric.name}</div>
@@ -153,9 +142,13 @@ const ParseTip: React.FC<Props> = ({
                   </div>
                 </div>
               )}
-            {['METRIC_FILTER', 'METRIC_ENTITY', 'ENTITY_DETAIL', 'ENTITY_LIST_FILTER'].includes(
-              queryMode
-            ) &&
+            {[
+              'METRIC_FILTER',
+              'METRIC_ENTITY',
+              'ENTITY_DETAIL',
+              'ENTITY_LIST_FILTER',
+              'ENTITY_ID',
+            ].includes(queryMode) &&
               dimensionFilters &&
               dimensionFilters?.length > 0 && (
                 <div className={`${prefixCls}-tip-item`}>
@@ -198,10 +191,10 @@ const ParseTip: React.FC<Props> = ({
       </div>
     );
   } else {
-    const pluginName = parseInfoOptions[0]?.properties?.CONTEXT?.plugin?.name;
+    const agentType = parseInfoOptions[0]?.properties?.type;
     tipNode = (
       <div className={`${prefixCls}-tip`}>
-        <div>{!!pluginName ? '您的问题' : '您的问题解析为：'}</div>
+        <div>{!!agentType ? '您的问题' : '您的问题解析为：'}</div>
         {getTipNode(parseInfoOptions[0])}
       </div>
     );

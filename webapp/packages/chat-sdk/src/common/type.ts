@@ -51,10 +51,21 @@ export type FilterItemType = {
   value: string[];
 };
 
+export type ModelType = {
+  alias: string;
+  bizName: string;
+  id: number;
+  model: number;
+  name: string;
+  type: string;
+  useCnt: number;
+}
+
 export type ChatContextType = {
   aggType: string;
   modelId: number;
   modelName: string;
+  model: ModelType;
   dateInfo: DateInfoType;
   dimensions: FieldType[];
   metrics: FieldType[];

@@ -8,24 +8,26 @@ import type { ForwardRefRenderFunction } from 'react';
 import { searchRecommend } from 'supersonic-chat-sdk';
 import { SemanticTypeEnum, SEMANTIC_TYPE_MAP } from '../constants';
 import styles from './style.less';
-import { PLACE_HOLDER } from '../constants';
-import { DefaultEntityType, ModelType } from '../type';
+import { DefaultEntityType, AgentType, ModelType } from '../type';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 
 type Props = {
   inputMsg: string;
   chatId?: number;
   currentModel?: ModelType;
+  currentAgent?: AgentType;
   defaultEntity?: DefaultEntityType;
   isCopilotMode?: boolean;
   copilotFullscreen?: boolean;
   models: ModelType[];
+  agentList: AgentType[];
   collapsed: boolean;
   onToggleCollapseBtn: () => void;
   onInputMsgChange: (value: string) => void;
   onSendMsg: (msg: string, modelId?: number) => void;
   onAddConversation: () => void;
   onCancelDefaultFilter: () => void;
+  onSelectAgent: (agent: AgentType) => void;
 };
 
 const { OptGroup, Option } = Select;
@@ -45,8 +47,10 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     inputMsg,
     chatId,
     currentModel,
+    currentAgent,
     defaultEntity,
     models,
+    agentList,
     collapsed,
     isCopilotMode,
     copilotFullscreen,
@@ -55,10 +59,11 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     onSendMsg,
     onAddConversation,
     onCancelDefaultFilter,
+    onSelectAgent,
   },
   ref,
 ) => {
-  const [modelOptions, setModelOptions] = useState<ModelType[]>([]);
+  const [modelOptions, setModelOptions] = useState<(ModelType | AgentType)[]>([]);
   const [stepOptions, setStepOptions] = useState<Record<string, any[]>>({});
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -121,6 +126,9 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       const model = models.find((item) => msg.includes(`@${item.name}`));
       msgValue = model ? msg.replace(`@${model.name}`, '') : msg;
       modelId = model?.id;
+    } else if (msg?.[0] === '/') {
+      const agent = agentList.find((item) => msg.includes(`/${item.name}`));
+      msgValue = agent ? msg.replace(`/${agent.name}`, '') : msg;
     }
     return { msgValue, modelId };
   };
@@ -163,9 +171,9 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   const [debounceGetWords] = useState<any>(debounceGetWordsFunc);
 
   useEffect(() => {
-    if (inputMsg.length === 1 && inputMsg[0] === '@') {
+    if (inputMsg.length === 1 && (inputMsg[0] === '@' || inputMsg[0] === '/')) {
       setOpen(true);
-      setModelOptions(models);
+      setModelOptions(inputMsg[0] === '/' ? agentList : models);
       setStepOptions({});
       return;
     } else {
@@ -173,10 +181,10 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       if (modelOptions.length > 0) {
         setTimeout(() => {
           setModelOptions([]);
-        }, 500);
+        }, 50);
       }
     }
-    if (!isSelect) {
+    if (!isSelect && currentAgent?.name !== '问知识') {
       debounceGetWords(inputMsg, models, chatId, currentModel);
     } else {
       isSelect = false;
@@ -237,6 +245,12 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     isSelect = true;
     if (modelOptions.length === 0) {
       sendMsg(value);
+    } else {
+      const agent = agentList.find((item) => value.includes(item.name));
+      if (agent) {
+        onSelectAgent(agent);
+        onInputMsgChange('');
+      }
     }
     setOpen(false);
     setTimeout(() => {
@@ -249,12 +263,98 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     [styles.defaultCopilotMode]: isCopilotMode && !copilotFullscreen,
   });
 
+  const restrictNode = currentModel && !isMobile && (
+    <div className={styles.currentModel}>
+      <div className={styles.currentModelName}>
+        输入联想与问题回复将限定于：“
+        <span className={styles.quoteText}>
+          {!defaultEntity && <>主题域【{currentModel.name}】</>}
+          {defaultEntity && (
+            <>
+              <span>{`${currentModel.name.slice(0, currentModel.name.length - 1)}【`}</span>
+              <span className={styles.entityName} title={defaultEntity.entityName}>
+                {defaultEntity.entityName}
+              </span>
+              <span>】</span>
+            </>
+          )}
+        </span>
+        ”
+      </div>
+      <div className={styles.cancelModel} onClick={onCancelDefaultFilter}>
+        取消限定
+      </div>
+    </div>
+  );
+
+  const modelOptionNodes = modelOptions.map((model) => {
+    return (
+      <Option
+        key={model.id}
+        value={inputMsg[0] === '/' ? `/${model.name} ` : `@${model.name} `}
+        className={styles.searchOption}
+      >
+        {model.name}
+      </Option>
+    );
+  });
+
+  const associateOptionNodes = Object.keys(stepOptions).map((key) => {
+    return (
+      <OptGroup key={key} label={key}>
+        {stepOptions[key].map((option) => {
+          let optionValue =
+            Object.keys(stepOptions).length === 1
+              ? option.recommend
+              : `${option.modelName || ''}${option.recommend}`;
+          if (inputMsg[0] === '@') {
+            const model = models.find((item) => inputMsg.includes(item.name));
+            optionValue = model ? `@${model.name} ${option.recommend}` : optionValue;
+          } else if (inputMsg[0] === '/') {
+            const agent = agentList.find((item) => inputMsg.includes(item.name));
+            optionValue = agent ? `/${agent.name} ${option.recommend}` : optionValue;
+          }
+          return (
+            <Option
+              key={`${option.recommend}${option.modelName ? `_${option.modelName}` : ''}`}
+              value={optionValue}
+              className={styles.searchOption}
+            >
+              <div className={styles.optionContent}>
+                {option.schemaElementType && (
+                  <Tag
+                    className={styles.semanticType}
+                    color={
+                      option.schemaElementType === SemanticTypeEnum.DIMENSION ||
+                      option.schemaElementType === SemanticTypeEnum.MODEL
+                        ? 'blue'
+                        : option.schemaElementType === SemanticTypeEnum.VALUE
+                        ? 'geekblue'
+                        : 'cyan'
+                    }
+                  >
+                    {SEMANTIC_TYPE_MAP[option.schemaElementType] ||
+                      option.schemaElementType ||
+                      '维度'}
+                  </Tag>
+                )}
+                {option.subRecommend}
+              </div>
+            </Option>
+          );
+        })}
+      </OptGroup>
+    );
+  });
+
   return (
     <div className={chatFooterClass}>
       <div className={styles.composer}>
-        <div className={styles.collapseBtn} onClick={onToggleCollapseBtn}>
-          {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-        </div>
+        {!isMobile && (
+          <div className={styles.collapseBtn} onClick={onToggleCollapseBtn}>
+            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          </div>
+        )}
         <Tooltip title="新建对话">
           <IconFont
             type="icon-icon-add-conversation-line"
@@ -263,36 +363,14 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
           />
         </Tooltip>
         <div className={styles.composerInputWrapper}>
-          {currentModel && (
-            <div className={styles.currentModel}>
-              <div className={styles.currentModelName}>
-                输入联想与问题回复将限定于：“
-                <span className={styles.quoteText}>
-                  主题域【{currentModel.name}】
-                  {defaultEntity && (
-                    <>
-                      <span>，</span>
-                      <span>{`${currentModel.name.slice(0, currentModel.name.length - 1)}【`}</span>
-                      <span className={styles.entityName} title={defaultEntity.entityName}>
-                        {defaultEntity.entityName}
-                      </span>
-                      <span>】</span>
-                    </>
-                  )}
-                </span>
-                ”
-              </div>
-              <div className={styles.cancelModel} onClick={onCancelDefaultFilter}>
-                取消限定
-              </div>
-            </div>
-          )}
+          {/* {restrictNode}
+          {currentAgentNode} */}
           <AutoComplete
             className={styles.composerInput}
             placeholder={
-              currentModel
-                ? `请输入【${currentModel.name}】主题的问题，可使用@切换到其他主题`
-                : PLACE_HOLDER
+              currentAgent?.name
+                ? `智能助理【${currentAgent?.name}】将与您对话，可输入“/”切换助理`
+                : '请输入您的问题'
             }
             value={inputMsg}
             onChange={onInputMsgChange}
@@ -302,10 +380,20 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
             ref={inputRef}
             id="chatInput"
             onKeyDown={(e) => {
-              if ((e.code === 'Enter' || e.code === 'NumpadEnter') && !isSelect) {
-                const chatInputEl: any = document.getElementById('chatInput');
-                sendMsg(chatInputEl.value);
-                setOpen(false);
+              if (e.code === 'Enter' || e.code === 'NumpadEnter') {
+                {
+                  const chatInputEl: any = document.getElementById('chatInput');
+                  if (!isSelect) {
+                    sendMsg(chatInputEl.value);
+                    setOpen(false);
+                  } else {
+                    const agent = agentList.find((item) => chatInputEl.value.includes(item.name));
+                    if (agent) {
+                      onSelectAgent(agent);
+                      onInputMsgChange('');
+                    }
+                  }
+                }
               }
             }}
             onFocus={() => {
@@ -320,64 +408,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
             open={open}
             getPopupContainer={(triggerNode) => triggerNode.parentNode}
           >
-            {modelOptions.length > 0
-              ? modelOptions.map((model) => {
-                  return (
-                    <Option
-                      key={model.id}
-                      value={`@${model.name} `}
-                      className={styles.searchOption}
-                    >
-                      {model.name}
-                    </Option>
-                  );
-                })
-              : Object.keys(stepOptions).map((key) => {
-                  return (
-                    <OptGroup key={key} label={key}>
-                      {stepOptions[key].map((option) => {
-                        let optionValue =
-                          Object.keys(stepOptions).length === 1
-                            ? option.recommend
-                            : `${option.modelName || ''}${option.recommend}`;
-                        if (inputMsg[0] === '@') {
-                          const model = models.find((item) => inputMsg.includes(item.name));
-                          optionValue = model ? `@${model.name} ${option.recommend}` : optionValue;
-                        }
-                        return (
-                          <Option
-                            key={`${option.recommend}${
-                              option.modelName ? `_${option.modelName}` : ''
-                            }`}
-                            value={optionValue}
-                            className={styles.searchOption}
-                          >
-                            <div className={styles.optionContent}>
-                              {option.schemaElementType && (
-                                <Tag
-                                  className={styles.semanticType}
-                                  color={
-                                    option.schemaElementType === SemanticTypeEnum.DIMENSION ||
-                                    option.schemaElementType === SemanticTypeEnum.MODEL
-                                      ? 'blue'
-                                      : option.schemaElementType === SemanticTypeEnum.VALUE
-                                      ? 'geekblue'
-                                      : 'cyan'
-                                  }
-                                >
-                                  {SEMANTIC_TYPE_MAP[option.schemaElementType] ||
-                                    option.schemaElementType ||
-                                    '维度'}
-                                </Tag>
-                              )}
-                              {option.subRecommend}
-                            </div>
-                          </Option>
-                        );
-                      })}
-                    </OptGroup>
-                  );
-                })}
+            {modelOptions.length > 0 ? modelOptionNodes : associateOptionNodes}
           </AutoComplete>
           <div
             className={classNames(styles.sendBtn, {
