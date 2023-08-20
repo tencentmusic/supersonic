@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent> {
 
+    @Qualifier("chatQueryService")
     @Autowired
     private QueryService queryService;
     @Autowired
@@ -180,26 +182,6 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         pluginService.createPlugin(plugin_1, user);
     }
 
-    private void addPlugin_2() {
-        Plugin plugin_2 = new Plugin();
-        plugin_2.setType("DSL");
-        plugin_2.setModelList(Arrays.asList(1L, 2L));
-        plugin_2.setPattern("");
-        plugin_2.setParseModeConfig(null);
-        plugin_2.setName("大模型语义解析");
-        List<String> examples = new ArrayList<>();
-        examples.add("超音数访问次数最高的部门是哪个");
-        examples.add("超音数访问人数最高的部门是哪个");
-
-        PluginParseConfig parseConfig = PluginParseConfig.builder()
-                .name("DSL")
-                .description("这个工具能够将用户的自然语言查询转化为SQL语句，从而从数据库中的查询具体的数据。用于处理数据查询的问题，提供基于事实的数据")
-                .examples(examples)
-                .build();
-        plugin_2.setParseModeConfig(JsonUtil.toString(parseConfig));
-        pluginService.createPlugin(plugin_2, user);
-    }
-
 
     private void addAgent() {
         Agent agent = new Agent();
@@ -227,7 +209,6 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             addDemoChatConfig_1();
             addDemoChatConfig_2();
             addPlugin_1();
-            addPlugin_2();
             addAgent();
             addSampleChats();
             addSampleChats2();
