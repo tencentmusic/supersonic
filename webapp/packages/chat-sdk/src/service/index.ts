@@ -25,11 +25,12 @@ export function chatQuery(queryText: string, chatId?: number, modelId?: number, 
   });
 }
 
-export function chatParse(queryText: string, chatId?: number, modelId?: number, filters?: any[]) {
+export function chatParse(queryText: string, chatId?: number, modelId?: number, agentId?: number, filters?: any[]) {
   return axios.post<Result<ParseDataType>>(`${prefix}/chat/query/parse`, {
     queryText,
     chatId: chatId || DEFAULT_CHAT_ID,
     modelId,
+    agentId,
     queryFilters: filters ? {
       filters
     } : undefined,
@@ -63,31 +64,11 @@ export function queryContext(queryText: string, chatId?: number) {
   });
 }
 
-export function querySuggestionInfo(modelId: number) {
-  return axios.get<Result<any>>(`${prefix}/chat/recommend/${modelId}`);
-}
-
 export function getHistoryMsg(current: number, chatId: number = DEFAULT_CHAT_ID, pageSize: number = 10) {
   return axios.post<Result<HistoryType>>(`${prefix}/chat/manage/pageQueryInfo?chatId=${chatId}`, {
     current,
     pageSize,
   });
-}
-
-export function queryMetricInfo(data: any) {
-  return axios.get(`/semantic/metric/getMetric/${data.classId}/${data.uniqueId}`);
-}
-
-export function getRelatedDimensionFromStatInfo(data: any) {
-  return axios.get(
-    `/semantic/metric/getRelatedDimensionFromStatInfo/${data.classId}/${data.uniqueId}`,
-  );
-}
-
-export function getMetricQueryInfo(data: any) {
-  return axios.get<any>(
-    `/openapi/bd-bi/api/polaris/intelligentQuery/getMetricQueryInfo/${data.classId}/${data.metricName}`
-  );
 }
 
 export function saveConversation(chatName: string) {

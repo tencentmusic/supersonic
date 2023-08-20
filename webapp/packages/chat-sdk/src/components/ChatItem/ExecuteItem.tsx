@@ -1,3 +1,4 @@
+import { Spin } from 'antd';
 import { PREFIX_CLS } from '../../common/constants';
 import { MsgDataType } from '../../common/type';
 import ChatMsg from '../ChatMsg';
@@ -8,6 +9,7 @@ import Typing from './Typing';
 type Props = {
   question: string;
   executeLoading: boolean;
+  entitySwitchLoading: boolean;
   chartIndex: number;
   executeTip?: string;
   data?: MsgDataType;
@@ -21,6 +23,7 @@ type Props = {
 const ExecuteItem: React.FC<Props> = ({
   question,
   executeLoading,
+  entitySwitchLoading,
   chartIndex,
   executeTip,
   data,
@@ -50,13 +53,15 @@ const ExecuteItem: React.FC<Props> = ({
 
   return (
     <div className={`${prefixCls}-msg-content`}>
-      <ChatMsg
-        question={question}
-        data={data}
-        chartIndex={chartIndex}
-        isMobileMode={isMobileMode}
-        triggerResize={triggerResize}
-      />
+      <Spin spinning={entitySwitchLoading}>
+        <ChatMsg
+          question={question}
+          data={data}
+          chartIndex={chartIndex}
+          isMobileMode={isMobileMode}
+          triggerResize={triggerResize}
+        />
+      </Spin>
       {!isMetricCard && (
         <Tools
           data={data}

@@ -19,25 +19,19 @@ type Props = {
 };
 
 const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApplyAuth }) => {
-  const { queryColumns, queryResults, entityInfo, chatContext, queryMode, aggregateInfo } = data;
-
-  const { dateMode, unit } = chatContext?.dateInfo || {};
-
+  const { entityInfo, chatContext, queryMode } = data;
+  const { dateInfo, dimensionFilters, elementMatches } = chatContext || {};
+  const { dateMode, unit } = dateInfo || {};
   const dateOptions = DATE_TYPES[chatContext?.dateInfo?.period] || DATE_TYPES.DAY;
-  const initialDateOption = dateOptions.find((option: any) => {
-    return dateMode === 'RECENT' && option.value === unit;
-  })?.value;
 
-  const [columns, setColumns] = useState<ColumnType[]>(queryColumns || []);
-  const currentMetricField = columns.find((column: any) => column.showType === 'NUMBER');
-
-  const [activeMetricField, setActiveMetricField] = useState<FieldType>(chatContext.metrics?.[0]);
-  const [dataSource, setDataSource] = useState<any[]>(queryResults);
-  const [currentDateOption, setCurrentDateOption] = useState<number>(initialDateOption);
-  const [dimensions, setDimensions] = useState<FieldType[]>(chatContext?.dimensions);
+  const [columns, setColumns] = useState<ColumnType[]>([]);
+  const [activeMetricField, setActiveMetricField] = useState<FieldType>();
+  const [dataSource, setDataSource] = useState<any[]>([]);
+  const [currentDateOption, setCurrentDateOption] = useState<number>();
+  const [dimensions, setDimensions] = useState<FieldType[]>();
   const [drillDownDimension, setDrillDownDimension] = useState<DrillDownDimensionType>();
-  const [aggregateInfoValue, setAggregateInfoValue] = useState<any>(aggregateInfo);
-  const [dateModeValue, setDateModeValue] = useState(dateMode);
+  const [aggregateInfoValue, setAggregateInfoValue] = useState<any>();
+  const [dateModeValue, setDateModeValue] = useState<any>();
   const [loading, setLoading] = useState(false);
 
   const dateField: any = columns.find(
@@ -47,9 +41,31 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
   const categoryColumnName =
     columns.find((column: any) => column.showType === 'CATEGORY')?.nameEn || '';
 
+  const entityId = dimensionFilters?.length > 0 ? dimensionFilters[0].value : undefined;
+  const entityName = elementMatches?.find((item: any) => item.element?.type === 'ID')?.element
+    ?.name;
+
+  const isEntityMode =
+    (queryMode === 'ENTITY_LIST_FILTER' || queryMode === 'METRIC_ENTITY') &&
+    typeof entityId === 'string' &&
+    entityName !== undefined;
+
   useEffect(() => {
+    const { queryColumns, queryResults, chatContext, aggregateInfo } = data;
+
+    const initialDateOption = dateOptions.find((option: any) => {
+      return dateMode === 'RECENT' && option.value === unit;
+    })?.value;
+
+    setColumns(queryColumns || []);
+    setActiveMetricField(chatContext?.metrics?.[0]);
     setDataSource(queryResults);
-  }, [queryResults]);
+    setCurrentDateOption(initialDateOption);
+    setDimensions(chatContext?.dimensions);
+    setDrillDownDimension(undefined);
+    setAggregateInfoValue(aggregateInfo);
+    setDateModeValue(chatContext?.dateInfo?.dateMode);
+  }, [data]);
 
   useEffect(() => {
     if (queryMode === 'METRIC_GROUPBY') {
@@ -117,13 +133,13 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
     });
   };
 
+  const currentMetricField = columns.find((column: any) => column.showType === 'NUMBER');
+
   if (!currentMetricField) {
     return null;
   }
 
   const prefixCls = `${CLS_PREFIX}-metric-trend`;
-
-  const { dimensionFilters } = chatContext || {};
 
   const hasFilterSection = dimensionFilters?.length > 0;
 
@@ -174,59 +190,61 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
             </div>
           )}
         </div>
-        {aggregateInfoValue?.metricInfos?.length > 0 && (
-          <MetricInfo aggregateInfo={aggregateInfoValue} />
-        )}
-        <div className={`${prefixCls}-date-options`}>
-          {dateOptions.map((dateOption: { label: string; value: number }, index: number) => {
-            const dateOptionClass = classNames(`${prefixCls}-date-option`, {
-              [`${prefixCls}-date-active`]: dateOption.value === currentDateOption,
-              [`${prefixCls}-date-mobile`]: isMobile,
-            });
-            return (
-              <>
-                <div
-                  key={dateOption.value}
-                  className={dateOptionClass}
-                  onClick={() => {
-                    selectDateOption(dateOption.value);
-                  }}
-                >
-                  {dateOption.label}
-                  {dateOption.value === currentDateOption && (
-                    <div className={`${prefixCls}-active-identifier`} />
-                  )}
-                </div>
-                {index !== dateOptions.length - 1 && (
-                  <div className={`${prefixCls}-date-option-divider`} />
-                )}
-              </>
-            );
-          })}
-        </div>
         <Spin spinning={loading}>
-          {dataSource?.length === 1 || chartIndex % 2 === 1 ? (
-            <Table data={{ ...data, queryResults: dataSource }} onApplyAuth={onApplyAuth} />
-          ) : (
-            <MetricTrendChart
-              model={entityInfo?.modelInfo.name}
-              dateColumnName={dateColumnName}
-              categoryColumnName={categoryColumnName}
-              metricField={currentMetricField}
-              resultList={dataSource}
-              triggerResize={triggerResize}
-              onApplyAuth={onApplyAuth}
+          <div className={`${prefixCls}-content`}>
+            {aggregateInfoValue?.metricInfos?.length > 0 && (
+              <MetricInfo aggregateInfo={aggregateInfoValue} />
+            )}
+            <div className={`${prefixCls}-date-options`}>
+              {dateOptions.map((dateOption: { label: string; value: number }, index: number) => {
+                const dateOptionClass = classNames(`${prefixCls}-date-option`, {
+                  [`${prefixCls}-date-active`]: dateOption.value === currentDateOption,
+                  [`${prefixCls}-date-mobile`]: isMobile,
+                });
+                return (
+                  <>
+                    <div
+                      key={dateOption.value}
+                      className={dateOptionClass}
+                      onClick={() => {
+                        selectDateOption(dateOption.value);
+                      }}
+                    >
+                      {dateOption.label}
+                      {dateOption.value === currentDateOption && (
+                        <div className={`${prefixCls}-active-identifier`} />
+                      )}
+                    </div>
+                    {index !== dateOptions.length - 1 && (
+                      <div className={`${prefixCls}-date-option-divider`} />
+                    )}
+                  </>
+                );
+              })}
+            </div>
+            {dataSource?.length === 1 || chartIndex % 2 === 1 ? (
+              <Table data={{ ...data, queryResults: dataSource }} onApplyAuth={onApplyAuth} />
+            ) : (
+              <MetricTrendChart
+                model={entityInfo?.modelInfo.name}
+                dateColumnName={dateColumnName}
+                categoryColumnName={categoryColumnName}
+                metricField={currentMetricField}
+                resultList={dataSource}
+                triggerResize={triggerResize}
+                onApplyAuth={onApplyAuth}
+              />
+            )}
+          </div>
+          {queryMode.includes('METRIC') && !isEntityMode && (
+            <DrillDownDimensions
+              modelId={chatContext.modelId}
+              drillDownDimension={drillDownDimension}
+              dimensionFilters={chatContext.dimensionFilters}
+              onSelectDimension={onSelectDimension}
             />
           )}
         </Spin>
-        {queryMode.includes('METRIC') && (
-          <DrillDownDimensions
-            modelId={chatContext.modelId}
-            drillDownDimension={drillDownDimension}
-            dimensionFilters={chatContext.dimensionFilters}
-            onSelectDimension={onSelectDimension}
-          />
-        )}
       </div>
     </div>
   );

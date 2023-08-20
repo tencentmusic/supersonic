@@ -11,6 +11,7 @@ export enum MessageTypeEnum {
   WEB_PAGE = 'WEB_PAGE', // 插件
   RECOMMEND_QUESTIONS = 'recommend_questions', // 推荐问题
   PARSE_OPTIONS = 'parse_options', // 解析选项
+  AGENT_LIST = 'agent_list', // 专家列表
 }
 
 export type MessageItem = {
@@ -20,6 +21,7 @@ export type MessageItem = {
   msgValue?: string;
   identityMsg?: string;
   modelId?: number;
+  agentId?: number;
   entityId?: string;
   msgData?: MsgDataType;
   quote?: string;
@@ -47,7 +49,6 @@ export enum MessageModeEnum {
 
 export type ModelType = {
   id: number;
-  parentId: number;
   name: string;
   bizName: string;
 };
@@ -69,6 +70,7 @@ export type DefaultEntityType = {
   entityId: string;
   entityName: string;
   modelName?: string;
+  modelId?: number;
 };
 
 export type SuggestionItemType = {
@@ -81,4 +83,12 @@ export type SuggestionItemType = {
 export type SuggestionType = {
   dimensions: SuggestionItemType[];
   metrics: SuggestionItemType[];
+};
+
+export type AgentType = {
+  id: number;
+  name: string;
+  description: string;
+  examples: string[];
+  status: 0 | 1;
 };

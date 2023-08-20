@@ -43,7 +43,11 @@ const MetricCard: React.FC<Props> = ({
   return (
     <div className={prefixCls}>
       <div className={`${prefixCls}-top-bar`}>
-        <div className={`${prefixCls}-indicator-name`}>{indicatorColumn?.name}</div>
+        {indicatorColumn?.name ? (
+          <div className={`${prefixCls}-indicator-name`}>{indicatorColumn?.name}</div>
+        ) : (
+          <div style={{ height: 32 }} />
+        )}
         {(hasFilterSection || drillDownDimension) && (
           <div className={`${prefixCls}-filter-section-wrapper`}>
             (

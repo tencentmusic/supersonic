@@ -3,10 +3,13 @@ import { memo, useCallback, useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
 import { ChatItem } from 'supersonic-chat-sdk';
 import type { MsgDataType } from 'supersonic-chat-sdk';
-import { MessageItem, MessageTypeEnum } from './type';
+import { AgentType, MessageItem, MessageTypeEnum } from './type';
 import Plugin from './components/Plugin';
 import { updateMessageContainerScroll } from '@/utils/utils';
 import styles from './style.less';
+import { MODEL_MODEL_ENTITY_ID_FILTER_MAP } from './constants';
+import AgentList from './components/AgentList';
+import RecommendQuestions from './components/RecommendQuestions';
 
 type Props = {
   id: string;
@@ -15,6 +18,7 @@ type Props = {
   isMobileMode?: boolean;
   conversationCollapsed: boolean;
   copilotFullscreen?: boolean;
+  agentList: AgentType[];
   onClickMessageContainer: () => void;
   onMsgDataLoaded: (
     data: MsgDataType,
@@ -24,6 +28,8 @@ type Props = {
   ) => void;
   onCheckMore: (data: MsgDataType) => void;
   onApplyAuth: (model: string) => void;
+  onSendMsg: (value: string) => void;
+  onSelectAgent: (agent: AgentType) => void;
 };
 
 const MessageContainer: React.FC<Props> = ({
@@ -33,10 +39,12 @@ const MessageContainer: React.FC<Props> = ({
   isMobileMode,
   conversationCollapsed,
   copilotFullscreen,
+  agentList,
   onClickMessageContainer,
   onMsgDataLoaded,
   onCheckMore,
-  onApplyAuth,
+  onSendMsg,
+  onSelectAgent,
 }) => {
   const [triggerResize, setTriggerResize] = useState(false);
 
@@ -97,6 +105,7 @@ const MessageContainer: React.FC<Props> = ({
     }
     return [
       {
+        ...MODEL_MODEL_ENTITY_ID_FILTER_MAP[modelId],
         value: entityId,
       },
     ];
@@ -109,6 +118,7 @@ const MessageContainer: React.FC<Props> = ({
           const {
             id: msgId,
             modelId,
+            agentId,
             entityId,
             type,
             msg,
@@ -125,6 +135,17 @@ const MessageContainer: React.FC<Props> = ({
           return (
             <div key={msgId} id={`${msgId}`} className={styles.messageItem}>
               {type === MessageTypeEnum.TEXT && <Text position="left" data={msg} />}
+              {type === MessageTypeEnum.RECOMMEND_QUESTIONS && (
+                <RecommendQuestions onSelectQuestion={onSendMsg} />
+              )}
+              {type === MessageTypeEnum.AGENT_LIST && (
+                <AgentList
+                  currentAgentName={msg!}
+                  data={agentList}
+                  copilotFullscreen={copilotFullscreen}
+                  onSelectAgent={onSelectAgent}
+                />
+              )}
               {type === MessageTypeEnum.QUESTION && (
                 <>
                   <Text position="right" data={msg} />
@@ -134,6 +155,7 @@ const MessageContainer: React.FC<Props> = ({
                     msgData={msgData}
                     conversationId={chatId}
                     modelId={modelId}
+                    agentId={agentId}
                     filter={getFilters(modelId, entityId)}
                     isLastMessage={index === messageList.length - 1}
                     isMobileMode={isMobileMode}
@@ -150,6 +172,7 @@ const MessageContainer: React.FC<Props> = ({
                   msg={msgValue || msg || ''}
                   conversationId={chatId}
                   modelId={modelId}
+                  agentId={agentId}
                   filter={getFilters(modelId, entityId)}
                   isLastMessage={index === messageList.length - 1}
                   isMobileMode={isMobileMode}
@@ -192,7 +215,8 @@ function areEqual(prevProps: Props, nextProps: Props) {
     prevProps.id === nextProps.id &&
     isEqual(prevProps.messageList, nextProps.messageList) &&
     prevProps.conversationCollapsed === nextProps.conversationCollapsed &&
-    prevProps.copilotFullscreen === nextProps.copilotFullscreen
+    prevProps.copilotFullscreen === nextProps.copilotFullscreen &&
+    prevProps.agentList === nextProps.agentList
   ) {
     return true;
   }

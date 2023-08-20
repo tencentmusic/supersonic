@@ -7,7 +7,7 @@ const axiosInstance: AxiosInstance = axios.create({
   // 设置基本URL，所有请求都会使用这个URL作为前缀
   baseURL: '',
   // 设置请求超时时间（毫秒）
-  timeout: 60000,
+  timeout: 120000,
   // 设置请求头
   headers: {
     'Content-Type': 'application/json',

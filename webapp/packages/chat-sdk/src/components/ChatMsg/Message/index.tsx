@@ -4,6 +4,7 @@ import { PREFIX_CLS } from '../../../common/constants';
 type Props = {
   position: 'left' | 'right';
   width?: number | string;
+  maxWidth?: number | string;
   height?: number | string;
   title?: string;
   followQuestions?: string[];
@@ -17,6 +18,7 @@ type Props = {
 
 const Message: React.FC<Props> = ({
   width,
+  maxWidth,
   height,
   children,
   bubbleClassName,
@@ -38,7 +40,7 @@ const Message: React.FC<Props> = ({
         <div className={`${prefixCls}-body`}>
           <div
             className={`${prefixCls}-bubble${bubbleClassName ? ` ${bubbleClassName}` : ''}`}
-            style={{ width, height }}
+            style={{ width, height, maxWidth }}
             onClick={e => {
               e.stopPropagation();
             }}

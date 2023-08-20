@@ -1,0 +1,292 @@
+.agent {
+  // background: #fff;
+  height: calc(100vh - 48px);
+}
+
+.agentsSection {
+  padding: 20px 40px;
+  background: #fff;
+  height: calc(100vh - 48px);
+
+  .sectionTitle {
+    font-size: 24px;
+    font-weight: 700;
+    padding-bottom: 30px;
+  }
+}
+
+.content {
+  margin-top: 20px;
+  .searchBar {
+    display: flex;
+    align-items: center;
+    column-gap: 20px;
+    margin-bottom: 40px;
+
+    .searchControl {
+      width: 500px;
+    }
+  }
+
+  .agentsContainer {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .agentItem {
+      display: flex;
+      width: 290px;
+      align-items: center;
+      border-radius: 10px;
+      border: 1px solid #e8e8e8;
+      padding: 12px;
+      cursor: pointer;
+
+      &:hover {
+        border-color: var(--chat-blue);
+      }
+
+      &.agentActive {
+        border-color: var(--chat-blue);
+      }
+
+      .agentIcon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: var(--chat-blue);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e8e8e8;
+      }
+
+      .agentContent {
+        margin-left: 12px;
+        flex: 1;
+
+        .agentNameBar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          .agentName {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-color);
+          }
+
+          .operateIcons {
+            display: flex;
+            align-items: center;
+            column-gap: 12px;
+            .operateIcon {
+              color: var(--text-color-fourth);
+              cursor: pointer;
+
+              &:hover {
+                color: var(--chat-blue);
+              }
+            }
+          }
+        }
+
+        .bottomBar {
+          display: flex;
+          align-items: center;
+          margin-top: 10px;
+          width: 210px;
+
+          .agentDescription {
+            width: 120px;
+            margin-right: 10px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            font-size: 12px;
+            margin-top: 4px;
+            color: var(--text-color-third)
+          }
+        }
+      }
+    }
+  }
+}
+
+.toggleStatus {
+  display: flex;
+  align-items: center;
+  column-gap: 12px;
+  font-size: 12px;
+
+  .online {
+    color: var(--chat-blue);
+  }
+}
+
+.toolsSection {
+  .toolsSectionTitleBar {
+    padding: 20px 30px;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    column-gap: 20px;
+
+    .backIcon {
+      font-size: 20px;
+      color: var(--text-color);
+      cursor: pointer;
+
+      &:hover {
+        color: var(--chat-blue);
+      }
+    }
+
+    .agentTitle {
+      font-size: 24px;
+      font-weight: 700;
+    }
+  }
+}
+
+.paramsSection {
+  display: flex;
+  flex-direction: column;
+  row-gap: 12px;
+  .filterRow {
+    display: flex;
+    align-items: center;
+    column-gap: 12px;
+
+    .filterParamName {
+      width: 120px;
+    }
+
+    .filterParamValueField {
+      width: 230px;
+    }
+
+    .questionExample {
+      width: 100%;
+    }
+  }
+}
+
+.basicInfo {
+  margin: 20px;
+  background: #fff;
+  border-radius: 6px;
+
+  .basicInfoTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    column-gap: 30px;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 14px 20px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+
+  .infoContent {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 12px;
+  }
+}
+
+.toolSection {
+  margin: 20px;
+  background: #fff;
+  border-radius: 6px;
+
+  .toolSectionTitleBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    column-gap: 30px;
+    padding: 14px 20px;
+    border-bottom: 1px solid #e8e8e8;
+
+    .toolSectionTitle {
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
+
+  .emptyHolder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+  }
+
+  .toolsContent {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 20px 20px 30px;
+
+    .toolItem {
+      width: 300px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #e8e8e8;
+      display: flex;
+      align-items: center;
+      column-gap: 12px;
+      cursor: pointer;
+
+      .toolIcon {
+        font-size: 24px;
+        color: var(--chat-blue);
+      }
+
+      .toolContent {
+        flex: 1;
+
+        .toolTopSection {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          .toolType {
+            flex: 1;
+            color: var(--text-color);
+            font-weight: 500;
+            font-size: 16px;
+          }
+
+          .toolOperateIcons {
+            display: flex;
+            align-items: center;
+            column-gap: 10px;
+
+            .toolOperateIcon {
+              color: var(--text-color-third);
+              cursor: pointer;
+
+              &:hover {
+                color: var(--chat-blue);
+              }
+            }
+          }
+        }
+
+        .toolDesc {
+          margin-top: 2px;
+          width: 220px;
+          font-size: 13px;
+          color: var(--text-color-third);
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+        }
+      }
+    }
+  }
+}

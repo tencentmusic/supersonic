@@ -27,6 +27,12 @@ const ROUTES = [
     envEnableList: [ENV_KEY.CHAT],
   },
   {
+    path: '/agent',
+    name: 'agent',
+    component: './Agent',
+    envEnableList: [ENV_KEY.CHAT],
+  },
+  {
     path: '/semanticModel/model/:domainId?/:modelId?/:menuKey?',
     component: './SemanticModel/DomainManager',
     name: 'semanticModel',

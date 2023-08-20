@@ -13,4 +13,5 @@ export default {
   'menu.chatPlugin': '问答插件',
   'menu.login': '登录',
   'menu.chat': '问答对话',
+  'menu.agent': '问答助理'
 };

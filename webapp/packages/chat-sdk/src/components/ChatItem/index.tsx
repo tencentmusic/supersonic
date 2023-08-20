@@ -5,11 +5,14 @@ import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/
 import IconFont from '../IconFont';
 import ParseTip from './ParseTip';
 import ExecuteItem from './ExecuteItem';
+import { isMobile } from '../../utils/utils';
+import classNames from 'classnames';
 
 type Props = {
   msg: string;
   conversationId?: number;
   modelId?: number;
+  agentId?: number;
   filter?: any[];
   isLastMessage?: boolean;
   msgData?: MsgDataType;
@@ -24,6 +27,7 @@ const ChatItem: React.FC<Props> = ({
   msg,
   conversationId,
   modelId,
+  agentId,
   filter,
   isLastMessage,
   isMobileMode,
@@ -41,7 +45,7 @@ const ChatItem: React.FC<Props> = ({
   const [executeLoading, setExecuteLoading] = useState(false);
   const [executeTip, setExecuteTip] = useState('');
   const [executeMode, setExecuteMode] = useState(false);
-  const [entitySwitching, setEntitySwitching] = useState(false);
+  const [entitySwitchLoading, setEntitySwitchLoading] = useState(false);
 
   const [chartIndex, setChartIndex] = useState(0);
 
@@ -76,37 +80,42 @@ const ChatItem: React.FC<Props> = ({
   ) => {
     setExecuteMode(true);
     setExecuteLoading(true);
-    const { data } = await chatExecute(msg, conversationId!, parseInfoValue);
-    setExecuteLoading(false);
-    const valid = updateData(data);
-    if (onMsgDataLoaded) {
-      let parseOptions: ChatContextType[] = parseInfoOptions || [];
-      if (
-        parseInfoOptions &&
-        parseInfoOptions.length > 1 &&
-        (parseInfoOptions[0].queryMode.includes('METRIC') ||
-          parseInfoOptions[0].queryMode.includes('ENTITY'))
-      ) {
-        parseOptions = parseInfoOptions.filter(
-          (item, index) =>
-            index === 0 ||
-            (!item.queryMode.includes('METRIC') && !item.queryMode.includes('ENTITY'))
+    try {
+      const { data } = await chatExecute(msg, conversationId!, parseInfoValue);
+      setExecuteLoading(false);
+      const valid = updateData(data);
+      if (onMsgDataLoaded) {
+        let parseOptions: ChatContextType[] = parseInfoOptions || [];
+        if (
+          parseInfoOptions &&
+          parseInfoOptions.length > 1 &&
+          (parseInfoOptions[0].queryMode.includes('METRIC') ||
+            parseInfoOptions[0].queryMode.includes('ENTITY'))
+        ) {
+          parseOptions = parseInfoOptions.filter(
+            (item, index) =>
+              index === 0 ||
+              (!item.queryMode.includes('METRIC') && !item.queryMode.includes('ENTITY'))
+          );
+        }
+        onMsgDataLoaded(
+          {
+            ...data.data,
+            chatContext: parseInfoValue,
+            parseOptions: parseOptions.length > 1 ? parseOptions.slice(1) : undefined,
+          },
+          valid
         );
       }
-      onMsgDataLoaded(
-        {
-          ...data.data,
-          chatContext: parseInfoValue,
-          parseOptions: parseOptions.length > 1 ? parseOptions.slice(1) : undefined,
-        },
-        valid
-      );
+    } catch (e) {
+      setExecuteLoading(false);
+      setExecuteTip(SEARCH_EXCEPTION_TIP);
     }
   };
 
   const onSendMsg = async () => {
     setParseLoading(true);
-    const { data: parseData } = await chatParse(msg, conversationId, modelId, filter);
+    const { data: parseData } = await chatParse(msg, conversationId, modelId, agentId, filter);
     setParseLoading(false);
     const { code, data } = parseData || {};
     const { state, selectedParses } = data || {};
@@ -115,10 +124,9 @@ const ChatItem: React.FC<Props> = ({
       state === ParseStateEnum.FAILED ||
       selectedParses == null ||
       selectedParses.length === 0 ||
-      (selectedParses.length === 1 &&
-        !selectedParses[0]?.modelName &&
-        !selectedParses[0]?.properties?.CONTEXT?.plugin?.name &&
-        selectedParses[0]?.queryMode !== 'WEB_PAGE')
+      (selectedParses.length > 0 &&
+        !selectedParses[0]?.properties?.type &&
+        !selectedParses[0]?.queryMode)
     ) {
       setParseTip(PARSE_ERROR_TIP);
       return;
@@ -146,9 +154,9 @@ const ChatItem: React.FC<Props> = ({
   }, [msg, msgData]);
 
   const onSwitchEntity = async (entityId: string) => {
-    setEntitySwitching(true);
+    setEntitySwitchLoading(true);
     const res = await switchEntity(entityId, data?.chatContext?.modelId, conversationId || 0);
-    setEntitySwitching(false);
+    setEntitySwitchLoading(false);
     setData(res.data.data);
   };
 
@@ -164,11 +172,15 @@ const ChatItem: React.FC<Props> = ({
     }
   };
 
+  const contentClass = classNames(`${prefixCls}-content`, {
+    [`${prefixCls}-content-mobile`]: isMobile,
+  });
+
   return (
     <div className={prefixCls}>
       <div className={`${prefixCls}-section`}>
-        <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />
-        <div className={`${prefixCls}-content`}>
+        {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
+        <div className={contentClass}>
           <ParseTip
             parseLoading={parseLoading}
             parseInfoOptions={parseOptions || parseInfoOptions.slice(0, 1)}
@@ -181,11 +193,12 @@ const ChatItem: React.FC<Props> = ({
       </div>
       {executeMode && data?.queryMode !== 'WEB_PAGE' && (
         <div className={`${prefixCls}-section`}>
-          <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />
-          <div className={`${prefixCls}-content`}>
+          {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
+          <div className={contentClass}>
             <ExecuteItem
               question={msg}
               executeLoading={executeLoading}
+              entitySwitchLoading={entitySwitchLoading}
               executeTip={executeTip}
               chartIndex={chartIndex}
               data={data}

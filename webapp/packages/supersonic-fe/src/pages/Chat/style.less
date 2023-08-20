@@ -101,12 +101,12 @@
             display: flex;
             flex-direction: column;
             padding: 20px 20px 60px 4px;
-            row-gap: 10px;
+            row-gap: 16px;
 
             .messageItem {
               display: flex;
               flex-direction: column;
-              row-gap: 10px;
+              row-gap: 20px;
 
               :global {
                 .ant-table-small {
@@ -240,9 +240,8 @@
     }
   }
 
-  &.mobile {
+  &.mobileMode {
     height: 100% !important;
-
     .chatSection {
       width: 100% !important;
       height: 100% !important;
@@ -275,6 +274,10 @@
         width: 100% !important;
       }
     }
+  }
+
+  &.mobile {
+    height: 100vh !important;
   }
 }
 
@@ -443,10 +446,6 @@
 .keyword {
   color: var(--primary-color);
 }
-
-// .messageItem {
-//   margin-top: 12px;
-// }
 
 .messageTime {
   display: flex;
