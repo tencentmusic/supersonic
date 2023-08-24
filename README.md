@@ -10,35 +10,37 @@ English | [中文](README_CN.md)
 
 The emergence of Large Language Model (LLM) like ChatGPT is reshaping the way information is retrieved. In the field of data analytics, both academia and industry are primarily focused on leveraging LLM to convert natural language queries into SQL queries. While some works show promising results, they are still not applicable to real-world scenarios.
 
-From our perspective, the key to filling the real-world gap lies in two aspects: 
-1. Utilize a combination of rule-based and model-based semantic parsers to deal with different scenarios.
-2. Introduce a semantic model layer encapsulating the underlying data complexity(joins, formulas, etc) to simplify semantic parsing.
+From our perspective, the key to filling the real-world gap lies in three aspects: 
+1. Complement the LLM-based semantic parser with rule-based semantic parsers to improve **efficiency**(in terms of latency and cost).
+2. Augment semantic parsing with schema mappers(as a kind of preprocessor) and semantic correctors(as a kind of postprocessor) to improve **accuracy** and **stability**.
+3. Introduce a semantic layer encapsulating underlying data context(joins, formulas, etc) to reduce **complexity**.
 
 With these ideas in mind, we develop SuperSonic as a practical reference implementation and use it to power our real-world products. Additionally, to facilitate further development of data chatbot, we decide to open source SuperSonic as an extensible framework.
 
 ## Out-of-the-box Features
 
-- Built-in graphical interface for business users to enter data queries 
-- Built-in graphical interface for analytics engineers to manage semantic models
+- Built-in CUI(Chat User Interface) for *business users* to enter data queries
+- Built-in GUI(Graphical User Interface) for *analytics engineers* to build semantic models
+- Built-in GUI for *system administrators* to manage chat plugins and agents
 - Support input auto-completion as well as query recommendation
 - Support multi-turn conversation and history context management 
-- Support three-level permission control: domain-level, column-level and row-level 
+- Support four-level permission control: domain-level, model-level, column-level and row-level
 
 ## Extensible Components
 
-The high-level architecture and main process flow is shown in below diagram:
+The high-level architecture and main process flow is as follows:
 
-<img src="./docs/images/supersonic_components.png" height="80%" width="80%" align="center"/> 
+<img src="./docs/images/supersonic_components.png" height="65%" width="65%" align="center"/> 
 
-- **Chat Interface:** accepts natural language queries and answer results with appropriate visualization charts. It supports input auto-completion as well as multi-turn conversation.
+- **Schema Mapper:** identifies references to schema elements(metrics/dimensions/entities/values) in user queries. It matches the query text against a knowledge base constructed from the semantic models.
 
-- **Modeling Interface:** empowers analytics engineers to visually define and maintain semantic models. The configurations related to access permission and chat conversation can also be set on the UI.
+- **Semantic Parser:** understands user queries and extract semantic information. It consists of a combination of rule-based and model-based parsers, each of which deals with specific scenarios.
 
-- **Schema Mapper Chain:** identifies references to schema elements(metrics/dimensions/entities/values) in user queries. It matches the query text against a knowledge base constructed from the semantic models.
+- **Semantic Corrector:** checks validity of extracted semantic information and performs correction and optimization if needed.
 
-- **Semantic Parser Chain:** understands user queries and extract semantic information. It consists of a combination of rule-based and model-based parsers, each of which deals with specific scenarios.
+- **Semantic Layer:** performs execution according to extracted semantic information. It generates SQL queries and executes them against physical data models.
 
-- **Semantic Query:** performs execution according to extracted semantic information. It generates SQL queries and executes them against physical data models.
+- **Chat Plugin:** extends functionality with third-party tools. Given all configured plugins with function description and sample questions, the LLM is going to select the most suitable one.  
 
 ## Quick Demo
 
@@ -46,11 +48,11 @@ SuperSonic comes with sample semantic models as well as chat conversations that 
 
 - Download the latest prebuilt binary from the [release page](https://github.com/tencentmusic/supersonic/releases)
 - Run script "bin/start-standalone.sh" to start a standalone server
-- Visit http://localhost:9080 in browser to start exploration
+- Visit http://localhost:9080 in the browser to start exploration
 
 ## How to Build
 
-SuperSonic can be deployed in two modes: standalone (intended for quick demo) and distributed (intended for production). 
+SuperSonic can be deployed in two modes: standalone (for a quick demo) and distributed (for production use). 
 
 ### Build for Standalone Mode 
  
