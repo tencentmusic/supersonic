@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 binDir=$(cd "$(dirname "$0")"; pwd)
-baseDir=$(readlink -f $binDir/../)
+baseDir=$(cd "$sbinDir/.." && pwd -P)
 confDir=$baseDir/conf
 source ${baseDir}/bin/env.sh
 
