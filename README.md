@@ -11,7 +11,7 @@ English | [中文](README_CN.md)
 The emergence of Large Language Model (LLM) like ChatGPT is reshaping the way information is retrieved. In the field of data analytics, both academia and industry are primarily focused on leveraging LLM to convert natural language queries into SQL queries. While some works show promising results, they are still not applicable to real-world scenarios.
 
 From our perspective, the key to filling the real-world gap lies in three aspects: 
-1. Complement the LLM-based semantic parser with rule-based semantic parsers to improve **efficiency**.
+1. Complement the LLM-based semantic parser with rule-based semantic parsers to improve **efficiency**(in terms of latency and cost).
 2. Augment semantic parsing with schema mappers(as a kind of preprocessor) and semantic correctors(as a kind of postprocessor) to improve **accuracy** and **stability**.
 3. Introduce a semantic layer encapsulating underlying data context(joins, formulas, etc) to reduce **complexity**.
 

@@ -15,3 +15,4 @@ assembly/runtime/*
 /assembly/deploy
 /runtime
 **/.flattened-pom.xml
+__pycache__/
