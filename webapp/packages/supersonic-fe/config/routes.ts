@@ -8,26 +8,40 @@ const ENV_KEY = {
 const { APP_TARGET } = process.env;
 
 const ROUTES = [
-  ...(APP_TARGET !== 'inner'
-    ? [
-        {
-          path: '/chat',
-          name: 'chat',
-          component: './Chat',
-          envEnableList: [ENV_KEY.CHAT],
-        },
-      ]
-    : []),
   {
-    path: '/chatSetting/:modelId?/:menuKey?',
-    name: 'chatSetting',
-    component: './SemanticModel/ChatSetting',
+    path: '/chat',
+    name: 'chat',
+    component: './Chat',
     envEnableList: [ENV_KEY.CHAT],
   },
   {
-    path: '/semanticModel/:modelId?/:menuKey?',
+    path: '/chatSetting/model/:domainId?/:modelId?/:menuKey?',
+    component: './SemanticModel/ChatSetting/ChatSetting',
+    name: 'chatSetting',
+    envEnableList: [ENV_KEY.CHAT],
+  },
+  {
+    path: '/chatPlugin',
+    name: 'chatPlugin',
+    component: './ChatPlugin',
+    envEnableList: [ENV_KEY.CHAT],
+  },
+  {
+    path: '/agent',
+    name: 'agent',
+    component: './Agent',
+    envEnableList: [ENV_KEY.CHAT],
+  },
+  {
+    path: '/semanticModel/model/:domainId?/:modelId?/:menuKey?',
+    component: './SemanticModel/DomainManager',
     name: 'semanticModel',
-    component: './SemanticModel/ProjectManager',
+    envEnableList: [ENV_KEY.SEMANTIC],
+  },
+  {
+    path: '/Metric',
+    name: 'metric',
+    component: './SemanticModel/Metric',
     envEnableList: [ENV_KEY.SEMANTIC],
   },
   {
@@ -39,10 +53,10 @@ const ROUTES = [
   },
   {
     path: '/',
-    redirect: APP_TARGET === 'inner' ? '/semanticModel' : '/chat',
+    redirect: APP_TARGET === 'inner' ? '/semanticModel/model/' : '/chat',
     envRedirect: {
       [ENV_KEY.CHAT]: '/chat',
-      [ENV_KEY.SEMANTIC]: '/semanticModel',
+      [ENV_KEY.SEMANTIC]: '/semanticModel/model',
     },
   },
   {

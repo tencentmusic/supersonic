@@ -17,13 +17,13 @@ from few_shot_example.sql_exampler import examplars
 from output_parser import schema_link_parse
 
 
-def schema_linking_prompt_maker(user_query: str, domain_name: str,
+def schema_linking_prompt_maker(user_query: str, model_name: str,
     fields_list: List[str],
     few_shots_example: str):
   instruction = "# 根据数据库的表结构,找出为每个问题生成SQL查询语句的schema_links\n"
 
   schema_linking_prompt = "Table {table_name}, columns = {fields_list}\n问题:{user_query}\n分析: 让我们一步一步地思考。".format(
-    table_name=domain_name,
+    table_name=model_name,
     fields_list=fields_list,
     user_query=user_query)
 
@@ -31,7 +31,7 @@ def schema_linking_prompt_maker(user_query: str, domain_name: str,
 
 
 def schema_linking_exampler(user_query: str,
-    domain_name: str,
+    model_name: str,
     fields_list: List[str]
 ) -> str:
   example_prompt_template = PromptTemplate(
@@ -53,7 +53,7 @@ def schema_linking_exampler(user_query: str,
   )
 
   schema_linking_example_prompt = schema_linking_example_prompt_template.format(
-    table_name=domain_name,
+    table_name=model_name,
     fields_list=fields_list,
     question=user_query)
 
@@ -61,7 +61,7 @@ def schema_linking_exampler(user_query: str,
 
 
 def sql_exampler(user_query: str,
-    domain_name: str,
+    model_name: str,
     schema_link_str: str
 ) -> str:
   instruction = "# 根据schema_links为每个问题生成SQL查询语句"
@@ -82,7 +82,7 @@ def sql_exampler(user_query: str,
   )
 
   sql_example_prompt = sql_example_prompt_template.format(question=user_query,
-                                                          table_name=domain_name,
+                                                          table_name=model_name,
                                                           schema_links=schema_link_str)
 
   return sql_example_prompt

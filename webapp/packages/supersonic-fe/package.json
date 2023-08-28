@@ -65,7 +65,6 @@
     "@antv/layout": "^0.3.20",
     "@antv/xflow": "^1.0.55",
     "@babel/runtime": "^7.22.5",
-    "supersonic-chat-sdk": "^0.0.0",
     "@types/numeral": "^2.0.2",
     "@types/react-draft-wysiwyg": "^1.13.2",
     "@types/react-syntax-highlighter": "^13.5.0",
@@ -91,12 +90,14 @@
     "react-ace": "^9.4.1",
     "react-dev-inspector": "^1.8.4",
     "react-dom": "^17.0.2",
+    "react-fast-marquee": "^1.6.0",
     "react-helmet-async": "^1.0.4",
     "react-spinners": "^0.10.6",
     "react-split-pane": "^2.0.3",
     "react-syntax-highlighter": "^15.4.3",
     "sql-formatter": "^2.3.3",
-    "umi": "^3.2.14",
+    "supersonic-chat-sdk": "^0.4.32",
+    "umi": "3.5",
     "umi-request": "^1.0.8"
   },
   "devDependencies": {

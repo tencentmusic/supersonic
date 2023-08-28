@@ -2,26 +2,23 @@ package com.tencent.supersonic.auth.authorization.application;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthResGrp;
 import com.tencent.supersonic.auth.api.authorization.pojo.DimensionFilter;
 import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
-import javax.servlet.http.HttpServletRequest;
-
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
+import com.tencent.supersonic.common.util.S2ThreadContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,8 +27,12 @@ public class AuthServiceImpl implements AuthService {
 
     private JdbcTemplate jdbcTemplate;
 
-    public AuthServiceImpl(JdbcTemplate jdbcTemplate) {
+    private UserService userService;
+
+    public AuthServiceImpl(JdbcTemplate jdbcTemplate,
+                           UserService userService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userService = userService;
     }
 
     private List<AuthGroup> load() {
@@ -41,10 +42,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public List<AuthGroup> queryAuthGroups(String domainId, Integer groupId) {
+    public List<AuthGroup> queryAuthGroups(String modelId, Integer groupId) {
         return load().stream()
                 .filter(group -> (Objects.isNull(groupId) || groupId.equals(group.getGroupId()))
-                        && domainId.equals(group.getDomainId()))
+                        && modelId.equals(group.getModelId()))
                 .collect(Collectors.toList());
     }
 
@@ -74,19 +75,23 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public AuthorizedResourceResp queryAuthorizedResources(QueryAuthResReq req, HttpServletRequest request) {
-        List<AuthGroup> groups = getAuthGroups(req);
+    public AuthorizedResourceResp queryAuthorizedResources(QueryAuthResReq req, User user) {
+        Set<String> userOrgIds = userService.getUserAllOrgId(user.getName());
+        if (!CollectionUtils.isEmpty(userOrgIds)) {
+            req.setDepartmentIds(new ArrayList<>(userOrgIds));
+        }
+        List<AuthGroup> groups = getAuthGroups(req, user.getName());
         AuthorizedResourceResp resource = new AuthorizedResourceResp();
-        Map<String, List<AuthGroup>> authGroupsByDomainId = groups.stream()
-                .collect(Collectors.groupingBy(AuthGroup::getDomainId));
+        Map<String, List<AuthGroup>> authGroupsByModelId = groups.stream()
+                .collect(Collectors.groupingBy(AuthGroup::getModelId));
         Map<String, List<AuthRes>> reqAuthRes = req.getResources().stream()
-                .collect(Collectors.groupingBy(AuthRes::getDomainId));
+                .collect(Collectors.groupingBy(AuthRes::getModelId));
 
-        for (String domainId : reqAuthRes.keySet()) {
-            List<AuthRes> reqResourcesList = reqAuthRes.get(domainId);
+        for (String modelId : reqAuthRes.keySet()) {
+            List<AuthRes> reqResourcesList = reqAuthRes.get(modelId);
             AuthResGrp rg = new AuthResGrp();
-            if (authGroupsByDomainId.containsKey(domainId)) {
-                List<AuthGroup> authGroups = authGroupsByDomainId.get(domainId);
+            if (authGroupsByModelId.containsKey(modelId)) {
+                List<AuthGroup> authGroups = authGroupsByModelId.get(modelId);
                 for (AuthRes reqRes : reqResourcesList) {
                     for (AuthGroup authRuleGroup : authGroups) {
                         List<AuthRule> authRules = authRuleGroup.getAuthRules();
@@ -105,8 +110,8 @@ public class AuthServiceImpl implements AuthService {
             }
         }
 
-        if (StringUtils.isNotEmpty(req.getDomainId())) {
-            List<AuthGroup> authGroups = authGroupsByDomainId.get(req.getDomainId());
+        if (StringUtils.isNotEmpty(req.getModelId())) {
+            List<AuthGroup> authGroups = authGroupsByModelId.get(req.getModelId());
             if (!CollectionUtils.isEmpty(authGroups)) {
                 for (AuthGroup group : authGroups) {
                     if (group.getDimensionFilters() != null
@@ -119,29 +124,28 @@ public class AuthServiceImpl implements AuthService {
                 }
             }
         }
-
         return resource;
     }
 
-    private List<AuthGroup> getAuthGroups(QueryAuthResReq req) {
-        List<AuthGroup> groups = load().stream().
-                filter(group -> {
-                    if (!Objects.equals(group.getDomainId(), req.getDomainId())) {
+    private List<AuthGroup> getAuthGroups(QueryAuthResReq req, String userName) {
+        List<AuthGroup> groups = load().stream()
+                .filter(group -> {
+                    if (!Objects.equals(group.getModelId(), req.getModelId())) {
                         return false;
                     }
                     if (!CollectionUtils.isEmpty(group.getAuthorizedUsers()) && group.getAuthorizedUsers()
-                            .contains(req.getUser())) {
+                            .contains(userName)) {
                         return true;
                     }
-                    for (String deparmentId : req.getDepartmentIds()) {
+                    for (String departmentId : req.getDepartmentIds()) {
                         if (!CollectionUtils.isEmpty(group.getAuthorizedDepartmentIds())
-                                && group.getAuthorizedDepartmentIds().contains(deparmentId)) {
+                                && group.getAuthorizedDepartmentIds().contains(departmentId)) {
                             return true;
                         }
                     }
                     return false;
                 }).collect(Collectors.toList());
-        log.info("user:{} department:{} authGroups:{}", req.getUser(), req.getDepartmentIds(), groups);
+        log.info("user:{} department:{} authGroups:{}", userName, req.getDepartmentIds(), groups);
         return groups;
     }
 

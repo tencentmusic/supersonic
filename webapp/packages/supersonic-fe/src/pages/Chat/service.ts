@@ -1,5 +1,5 @@
 import { request } from 'umi';
-import { DomainType } from './type';
+import { AgentType, ModelType } from './type';
 
 const prefix = '/api';
 
@@ -24,9 +24,51 @@ export function getAllConversations() {
   return request<Result<any>>(`${prefix}/chat/manage/getAll`);
 }
 
-export function getDomainList() {
-  return request<Result<DomainType[]>>(`${prefix}/chat/conf/domainList/view`, {
+export function getMiniProgramList(entityId: string, modelId: number) {
+  return request<Result<any>>(
+    `${prefix}/chat/plugin/extend/getAvailablePlugin/${entityId}/${modelId}`,
+    {
+      method: 'GET',
+      skipErrorHandler: true,
+    },
+  );
+}
+
+export function getModelList() {
+  return request<Result<ModelType[]>>(`${prefix}/chat/conf/modelList/view`, {
     method: 'GET',
-    skipErrorHandler: true,
+  });
+}
+
+export function updateQAFeedback(questionId: number, score: number) {
+  return request<Result<any>>(
+    `${prefix}/chat/manage/updateQAFeedback?id=${questionId}&score=${score}&feedback=`,
+    {
+      method: 'POST',
+    },
+  );
+}
+
+export function queryMetricSuggestion(modelId: number) {
+  return request<Result<any>>(`${prefix}/chat/recommend/metric/${modelId}`, {
+    method: 'GET',
+  });
+}
+
+export function querySuggestion(modelId: number) {
+  return request<Result<any>>(`${prefix}/chat/recommend/${modelId}`, {
+    method: 'GET',
+  });
+}
+
+export function queryRecommendQuestions() {
+  return request<Result<any>>(`${prefix}/chat/recommend/question`, {
+    method: 'GET',
+  });
+}
+
+export function queryAgentList() {
+  return request<Result<AgentType[]>>(`${prefix}/chat/agent/getAgentList`, {
+    method: 'GET',
   });
 }

@@ -13,13 +13,14 @@ import { queryToken } from './services/login';
 import { queryCurrentUser } from './services/user';
 import { traverseRoutes, deleteUrlQuery } from './utils/utils';
 import { publicPath } from '../config/defaultSettings';
+import Copilot from './pages/Copilot';
 export { request } from './services/request';
 
 const TOKEN_KEY = AUTH_TOKEN_KEY;
 
 const replaceRoute = '/';
 
-const getRuningEnv = async () => {
+const getRunningEnv = async () => {
   try {
     const response = await fetch(`${publicPath}supersonic.config.json`);
     const config = await response.json();
@@ -71,7 +72,6 @@ export async function getInitialState(): Promise<{
   codeList?: string[];
   authCodes?: string[];
 }> {
-  // await getRuningEnv();
   const fetchUserInfo = async () => {
     try {
       const { code, data } = await queryCurrentUser();
@@ -88,7 +88,10 @@ export async function getInitialState(): Promise<{
     await getToken();
   }
 
-  const currentUser = await fetchUserInfo();
+  let currentUser: any;
+  if (!window.location.pathname.includes('login')) {
+    currentUser = await fetchUserInfo();
+  }
 
   if (currentUser) {
     localStorage.setItem('user', currentUser.staffName);
@@ -108,8 +111,9 @@ export async function getInitialState(): Promise<{
 }
 
 export async function patchRoutes({ routes }) {
-  const config = await getRuningEnv();
+  const config = await getRunningEnv();
   if (config && config.env) {
+    window.RUNNING_ENV = config.env;
     const { env } = config;
     const target = routes[0].routes;
     if (env) {
@@ -119,6 +123,14 @@ export async function patchRoutes({ routes }) {
       // 写入根据环境转换过的的route
       target.push(...envRoutes);
     }
+  } else {
+    const target = routes[0].routes;
+    // start-standalone模式不存在env，在此模式下不显示chatSetting
+    const envRoutes = target.filter((item: any) => {
+      return !['chatSetting'].includes(item.name);
+    });
+    target.splice(0, 99);
+    target.push(...envRoutes);
   }
 }
 
@@ -145,7 +157,12 @@ export const layout: RunTimeLayoutConfig = (params) => {
     disableContentMargin: true,
     menuHeaderRender: undefined,
     childrenRender: (dom) => {
-      return dom;
+      return (
+        <>
+          {dom}
+          {history.location.pathname !== '/chat' && <Copilot />}
+        </>
+      );
     },
     openKeys: false,
     ...initialState?.settings,

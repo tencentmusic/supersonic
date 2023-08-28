@@ -1,22 +1,38 @@
 import { CHART_BLUE_COLOR, CHART_SECONDARY_COLOR, PREFIX_CLS } from '../../../common/constants';
-import { MsgDataType } from '../../../common/type';
+import { DrillDownDimensionType, MsgDataType } from '../../../common/type';
 import { getChartLightenColor, getFormattedValue } from '../../../utils/utils';
 import type { ECharts } from 'echarts';
 import * as echarts from 'echarts';
 import React, { useEffect, useRef, useState } from 'react';
 import NoPermissionChart from '../NoPermissionChart';
+import DrillDownDimensions from '../../DrillDownDimensions';
+import { Spin } from 'antd';
+import FilterSection from '../FilterSection';
 
 type Props = {
   data: MsgDataType;
   triggerResize?: boolean;
-  onApplyAuth?: (domain: string) => void;
+  drillDownDimension?: DrillDownDimensionType;
+  loading: boolean;
+  onSelectDimension: (dimension?: DrillDownDimensionType) => void;
+  onApplyAuth?: (model: string) => void;
 };
 
-const BarChart: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
+const BarChart: React.FC<Props> = ({
+  data,
+  triggerResize,
+  drillDownDimension,
+  loading,
+  onSelectDimension,
+  onApplyAuth,
+}) => {
   const chartRef = useRef<any>();
   const [instance, setInstance] = useState<ECharts>();
 
-  const { queryColumns, queryResults, entityInfo } = data;
+  const { queryColumns, queryResults, entityInfo, chatContext, queryMode } = data;
+
+  const { dateInfo, dimensionFilters } = chatContext || {};
+
   const categoryColumnName =
     queryColumns?.find(column => column.showType === 'CATEGORY')?.nameEn || '';
   const metricColumn = queryColumns?.find(column => column.showType === 'NUMBER');
@@ -35,13 +51,6 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
     );
     const xData = data.map(item => item[categoryColumnName]);
     instanceObj.setOption({
-      legend: {
-        left: 0,
-        top: 0,
-        icon: 'rect',
-        itemWidth: 15,
-        itemHeight: 5,
-      },
       xAxis: {
         type: 'category',
         axisTick: {
@@ -99,7 +108,7 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
         left: '2%',
         right: '1%',
         bottom: '3%',
-        top: 50,
+        top: 20,
         containLabel: true,
       },
       series: {
@@ -143,14 +152,57 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, onApplyAuth }) => {
   if (metricColumn && !metricColumn?.authorized) {
     return (
       <NoPermissionChart
-        domain={entityInfo?.domainInfo.name || ''}
+        model={entityInfo?.modelInfo.name || ''}
         chartType="barChart"
         onApplyAuth={onApplyAuth}
       />
     );
   }
 
-  return <div className={`${PREFIX_CLS}-bar`} ref={chartRef} />;
+  const hasFilterSection = dimensionFilters?.length > 0;
+
+  const prefixCls = `${PREFIX_CLS}-bar`;
+
+  return (
+    <div>
+      <div className={`${prefixCls}-top-bar`}>
+        <div className={`${prefixCls}-indicator-name`}>{metricColumn?.name}</div>
+        {(hasFilterSection || drillDownDimension) && (
+          <div className={`${prefixCls}-filter-section-wrapper`}>
+            (
+            <div className={`${prefixCls}-filter-section`}>
+              <FilterSection chatContext={chatContext} entityInfo={entityInfo} />
+              {drillDownDimension && (
+                <div className={`${prefixCls}-filter-item`}>
+                  <div className={`${prefixCls}-filter-item-label`}>下钻维度：</div>
+                  <div className={`${prefixCls}-filter-item-value`}>{drillDownDimension.name}</div>
+                </div>
+              )}
+            </div>
+            )
+          </div>
+        )}
+      </div>
+      {dateInfo && (
+        <div className={`${prefixCls}-date-range`}>
+          {dateInfo.startDate === dateInfo.endDate
+            ? dateInfo.startDate
+            : `${dateInfo.startDate} ~ ${dateInfo.endDate}`}
+        </div>
+      )}
+      <Spin spinning={loading}>
+        <div className={`${prefixCls}-chart`} ref={chartRef} />
+      </Spin>
+      {queryMode.includes('METRIC') && (
+        <DrillDownDimensions
+          modelId={chatContext.modelId}
+          drillDownDimension={drillDownDimension}
+          dimensionFilters={chatContext.dimensionFilters}
+          onSelectDimension={onSelectDimension}
+        />
+      )}
+    </div>
+  );
 };
 
 export default BarChart;

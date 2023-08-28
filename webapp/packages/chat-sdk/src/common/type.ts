@@ -1,7 +1,7 @@
 export type SearchRecommendItem = {
   complete: boolean;
-  domainId: number;
-  domainName: string;
+  modelId: number;
+  modelName: string;
   recommend: string;
   subRecommend: string;
   schemaElementType: string;
@@ -12,10 +12,12 @@ export type FieldType = {
   id: number;
   name: string;
   status: number;
+  model: number;
+  type: string;
   value: string;
 };
 
-export type DomainInfoType = {
+export type ModelInfoType = {
   bizName: string;
   itemId: number;
   name: string;
@@ -25,7 +27,7 @@ export type DomainInfoType = {
 };
 
 export type EntityInfoType = {
-  domainInfo: DomainInfoType;
+  modelInfo: ModelInfoType;
   dimensions: FieldType[];
   metrics: FieldType[];
   entityId: number;
@@ -33,7 +35,7 @@ export type EntityInfoType = {
 
 export type DateInfoType = {
   dateList: any[];
-  dateMode: number;
+  dateMode: string;
   period: string; 
   startDate: string;
   endDate: string;
@@ -49,15 +51,29 @@ export type FilterItemType = {
   value: string[];
 };
 
+export type ModelType = {
+  alias: string;
+  bizName: string;
+  id: number;
+  model: number;
+  name: string;
+  type: string;
+  useCnt: number;
+}
+
 export type ChatContextType = {
   aggType: string;
-  domainId: number;
-  domainName: string;
+  modelId: number;
+  modelName: string;
+  model: ModelType;
   dateInfo: DateInfoType;
   dimensions: FieldType[];
   metrics: FieldType[];
-  entity: number;
+  entity: { alias: string[] };
+  elementMatches: any[];
+  queryMode: string;
   dimensionFilters: FilterItemType[];
+  properties: any;
 };
 
 export enum MsgValidTypeEnum {
@@ -67,22 +83,29 @@ export enum MsgValidTypeEnum {
   INVALID = 3,
 };
 
-export type InstructionResonseType = {
+export type PluginResonseType = {
   description: string;
-  instructionConfig: {
-    showElements: { elementId: string, params: any }[];
-    showType: string;
-    relaShowElements: { elementId: string, params: any }[];
-    relaShowType: string;
-  };
-  instructionId: number;
-  instructionType: string;
+  webPage: { url: string, paramOptions: any, params: any, valueParams: any };
+  pluginId: number;
+  pluginType: string;
   name: string;
+}
+
+export type MetricInfoType = {
+  date: string;
+  name: string;
+  statistics: any;
+  value: string;
+}
+
+export type AggregateInfoType = {
+  metricInfos: MetricInfoType[]
 }
 
 export type MsgDataType = {
   id: number;
   question: string;
+  aggregateInfo: AggregateInfoType;
   chatContext: ChatContextType;
   entityInfo: EntityInfoType;
   queryAuthorization: any;
@@ -90,11 +113,27 @@ export type MsgDataType = {
   queryResults: any[];
   queryId: number;
   queryMode: string;
-  queryState: MsgValidTypeEnum;
-  response: InstructionResonseType;
+  queryState: string;
+  response: PluginResonseType;
+  parseOptions?: ChatContextType[];
 };
 
+export enum ParseStateEnum {
+  COMPLETED = 'COMPLETED',
+  PENDING = 'PENDING',
+  FAILED = 'FAILED',
+}
+
+export type ParseDataType = {
+  chatId: number;
+  queryText: string;
+  state: ParseStateEnum;
+  selectedParses: ChatContextType[];
+  candidateParses: ChatContextType[];
+}
+
 export type QueryDataType = {
+  aggregateInfo: AggregateInfoType;
   queryColumns: ColumnType[];
   queryResults: any[];
 };
@@ -108,7 +147,7 @@ export type ColumnType = {
   dataFormatType: string;
   dataFormat: {
     decimalPlaces: number;
-    needmultiply100: boolean;
+    needMultiply100: boolean;
   };
 };
 
@@ -127,7 +166,7 @@ export const SEMANTIC_TYPE_MAP = {
 };
 
 export type SuggestionItemType = {
-  domain: number;
+  model: number;
   name: string;
   bizName: string
 };
@@ -147,7 +186,7 @@ export type SuggestionDataType = {
 export type HistoryMsgItemType = {
   questionId: number;
   queryText: string;
-  queryResponse: MsgDataType;
+  queryResult: MsgDataType;
   chatId: number;
   createTime: string;
   feedback: string;
@@ -158,3 +197,10 @@ export type HistoryType = {
   hasNextPage: boolean;
   list: HistoryMsgItemType[];
 };
+
+export type DrillDownDimensionType = {
+  id: number;
+  model: number;
+  name: string;
+  bizName: string;
+}

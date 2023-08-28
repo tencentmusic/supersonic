@@ -1,0 +1,45 @@
+package com.tencent.supersonic.chat.config;
+
+import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatDetailConfigReq;
+import com.tencent.supersonic.chat.api.pojo.request.RecommendedQuestionReq;
+import com.tencent.supersonic.common.pojo.RecordInfo;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import java.util.List;
+import lombok.Data;
+import lombok.ToString;
+
+@Data
+@ToString
+public class ChatConfig {
+
+    /**
+     * database auto-increment primary key
+     */
+    private Long id;
+
+    private Long modelId;
+
+    /**
+     * the chatDetailConfig about the model
+     */
+    private ChatDetailConfigReq chatDetailConfig;
+
+    /**
+     * the chatAggConfig about the model
+     */
+    private ChatAggConfigReq chatAggConfig;
+
+    private List<RecommendedQuestionReq> recommendedQuestions;
+
+    /**
+     * available status
+     */
+    private StatusEnum status;
+
+    /**
+     * about createdBy, createdAt, updatedBy, updatedAt
+     */
+    private RecordInfo recordInfo;
+
+}

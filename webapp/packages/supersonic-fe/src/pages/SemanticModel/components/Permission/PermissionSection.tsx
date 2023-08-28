@@ -8,20 +8,20 @@ import PermissionTable from './PermissionTable';
 import PermissionAdminForm from './PermissionAdminForm';
 
 type Props = {
+  permissionTarget: 'model' | 'domain';
   dispatch: Dispatch;
   domainManger: StateType;
 };
 
-const PermissionSection: React.FC<Props> = () => {
+const PermissionSection: React.FC<Props> = ({ permissionTarget }) => {
   return (
     <>
       <div>
         <Space direction="vertical" style={{ width: '100%' }} size={20}>
           <ProCard title="邀请成员" bordered>
-            <PermissionAdminForm />
+            <PermissionAdminForm permissionTarget={permissionTarget} />
           </ProCard>
-
-          <PermissionTable />
+          {permissionTarget === 'model' && <PermissionTable />}
         </Space>
       </div>
     </>

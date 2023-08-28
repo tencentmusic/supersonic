@@ -3,14 +3,15 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 
-<mapper namespace="com.tencent.supersonic.chat.infrastructure.mapper.ChatConfigMapper">
+<mapper namespace="com.tencent.supersonic.chat.persistence.mapper.ChatConfigMapper">
 
     <resultMap id="chaConfigDO"
-               type="com.tencent.supersonic.chat.domain.dataobject.ChatConfigDO">
+            type="com.tencent.supersonic.chat.persistence.dataobject.ChatConfigDO">
         <id column="id" property="id"/>
-        <result column="domain_id" property="domainId"/>
+        <result column="model_id" property="modelId"/>
         <result column="chat_detail_config" property="chatDetailConfig"/>
         <result column="chat_agg_config" property="chatAggConfig"/>
+        <result column="recommended_questions" property="recommendedQuestions"/>
         <result column="status" property="status"/>
         <result column="created_by" property="createdBy"/>
         <result column="updated_by" property="updatedBy"/>
@@ -19,16 +20,13 @@
     </resultMap>
 
     <insert id="addConfig"
-            parameterType="com.tencent.supersonic.chat.domain.dataobject.ChatConfigDO"
+            parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatConfigDO"
             useGeneratedKeys="true" keyProperty="id">
-    insert into s2_chat_config
-    (
-        domain_id, `chat_detail_config`, chat_agg_config, status, created_by, updated_by, created_at, updated_at
-    )
-    values
-    (
-        #{domainId}, #{chatDetailConfig}, #{chatAggConfig}, #{status}, #{createdBy}, #{updatedBy}, #{createdAt}, #{updatedAt}
-    )
+        insert into s2_chat_config
+        (model_id, `chat_detail_config`, chat_agg_config, recommended_questions, status, created_by,
+         updated_by, created_at, updated_at)
+        values (#{modelId}, #{chatDetailConfig}, #{chatAggConfig}, #{recommendedQuestions},
+                #{status}, #{createdBy}, #{updatedBy}, #{createdAt}, #{updatedAt})
     </insert>
 
 
@@ -42,6 +40,9 @@
             <if test="chatAggConfig != null and chatAggConfig != ''">
                 chat_agg_config = #{chatAggConfig} ,
             </if>
+            <if test="recommendedQuestions != null and recommendedQuestions != ''">
+                recommended_questions = #{recommendedQuestions} ,
+            </if>
             <if test="status != null and status != ''">
                 status = #{status} ,
             </if>
@@ -54,8 +55,8 @@
             <if test="id != null and id != ''">
                 id = #{id}
             </if>
-            <if test="domainId != null and domainId != ''">
-                and domain_id = #{domainId}
+            <if test="modelId != null and modelId != ''">
+                and model_id = #{modelId}
             </if>
         </where>
     </update>
@@ -67,8 +68,8 @@
             <if test="id != null and id != ''">
                 id = #{id}
             </if>
-            <if test="domainId != null and domainId != ''">
-                and domain_id = #{domainId}
+            <if test="modelId != null and modelId != ''">
+                and model_id = #{modelId}
             </if>
             <if test="status != null and status != ''">
                 and status = #{status}
@@ -77,13 +78,13 @@
 
     </select>
 
-    <select id="fetchConfigByDomainId" resultMap="chaConfigDO">
+    <select id="fetchConfigByModelId" resultMap="chaConfigDO">
         select *
         from s2_chat_config
-        where domain_id = #{domainId}
-        and status != 3
+        where model_id = #{modelId}
+          and status != 3
         order by updated_at desc
-        limit 1
+            limit 1
     </select>
 
 </mapper>

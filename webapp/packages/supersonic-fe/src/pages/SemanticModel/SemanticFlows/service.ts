@@ -7,12 +7,12 @@ import type { NsDeployDagCmd } from './CmdExtensions/CmdDeploy';
 import { getRelationConfigInfo, addClassInfoAsDataSourceParents } from './utils';
 import { cloneDeep } from 'lodash';
 import type { IDataSource } from '../data';
+import { SemanticNodeType } from '../enum';
 import {
   getDatasourceList,
   deleteDatasource,
   getDimensionList,
   createOrUpdateViewInfo,
-  getViewInfoList,
   deleteDatasourceRela,
 } from '../service';
 import { message } from 'antd';
@@ -57,7 +57,7 @@ export namespace GraphApi {
 
   export const createDataSourceNode = (dataSourceItem: IDataSource.IDataSourceItem) => {
     const { id, name } = dataSourceItem;
-    const nodeId = `dataSource-${id}`;
+    const nodeId = `${SemanticNodeType.DATASOURCE}-${id}`;
     return {
       ...NODE_COMMON_PROPS,
       id: nodeId,
@@ -84,12 +84,12 @@ export namespace GraphApi {
 
   export const loadDataSourceData = async (args: NsGraph.IGraphMeta) => {
     const { domainManger, graphConfig } = args.meta;
-    const { selectDomainId } = domainManger;
-    const { code, data = [] } = await getDatasourceList({ domainId: selectDomainId });
+    const { selectModelId } = domainManger;
+    const { code, data = [] } = await getDatasourceList({ modelId: selectModelId });
     const dataSourceMap = data.reduce(
       (itemMap: Record<string, IDataSource.IDataSourceItem>, item: IDataSource.IDataSourceItem) => {
         const { id, name } = item;
-        itemMap[`dataSource-${id}`] = item;
+        itemMap[`${SemanticNodeType.DATASOURCE}-${id}`] = item;
 
         itemMap[name] = item;
         return itemMap;
@@ -114,7 +114,7 @@ export namespace GraphApi {
           mergeNodes = data.reduce(
             (mergeNodeList: NsGraph.INodeConfig[], item: IDataSource.IDataSourceItem) => {
               const { id } = item;
-              const targetDataSourceItem = nodesMap[`dataSource-${id}`];
+              const targetDataSourceItem = nodesMap[`${SemanticNodeType.DATASOURCE}-${id}`];
               if (targetDataSourceItem) {
                 mergeNodeList.push({
                   ...targetDataSourceItem,
@@ -160,13 +160,13 @@ export namespace GraphApi {
 
   export const loadDimensionData = async (args: NsGraph.IGraphMeta) => {
     const { domainManger } = args.meta;
-    const { domainId } = domainManger;
-    const { code, data } = await getDimensionList({ domainId });
+    const { selectModelId } = domainManger;
+    const { code, data } = await getDimensionList({ modelId: selectModelId });
     if (code === 200) {
       const { list } = data;
       const nodes: NsGraph.INodeConfig[] = list.map((item: any) => {
         const { id, name } = item;
-        const nodeId = `dimension-${id}`;
+        const nodeId = `${SemanticNodeType.DIMENSION}-${id}`;
         return {
           ...NODE_COMMON_PROPS,
           id: nodeId,
@@ -209,7 +209,7 @@ export namespace GraphApi {
     const { domainManger, graphConfig } = graphMeta.meta;
     const { code, msg } = await createOrUpdateViewInfo({
       id: graphConfig?.id,
-      domainId: domainManger.selectDomainId,
+      modelId: domainManger.selectModelId,
       type: 'datasource',
       config: JSON.stringify(tempGraphData),
     });

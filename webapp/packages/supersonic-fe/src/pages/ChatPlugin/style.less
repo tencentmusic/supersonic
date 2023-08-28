@@ -1,0 +1,85 @@
+.pluginManage {
+  .filterSection {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 12px;
+    column-gap: 30px;
+    margin: 12px 24px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+
+    .filterItem {
+      display: flex;
+      align-items: center;
+      column-gap: 12px;
+      width: 22vw;
+
+      .filterItemTitle {
+        width: 60px;
+        margin-right: 6px;
+        text-align: right;
+      }
+
+      .filterItemControl {
+        // width: 20vw;
+        flex: 1;
+      }
+    }
+  }
+
+  .pluginList {
+    margin: 12px 24px;
+    padding: 12px 20px;
+    background: #fff;
+    border-radius: 12px;
+
+    .titleBar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+
+      .title {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text-color);
+      }
+    }
+
+    .modelColumn {
+      display: flex;
+      align-items: center;
+      column-gap: 2px;
+    }
+  }
+}
+
+.operator {
+  display: flex;
+  align-items: center;
+  column-gap: 12px;
+}
+
+.paramsSection {
+  display: flex;
+  flex-direction: column;
+  row-gap: 12px;
+  .filterRow {
+    display: flex;
+    align-items: center;
+    column-gap: 12px;
+
+    .filterParamName {
+      width: 120px;
+    }
+
+    .filterParamValueField {
+      width: 230px;
+    }
+
+    .questionExample {
+      width: 100%;
+    }
+  }
+}

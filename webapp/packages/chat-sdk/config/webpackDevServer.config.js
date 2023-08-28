@@ -22,7 +22,7 @@ module.exports = function (proxy, allowedHost) {
     // https://github.com/webpack/webpack-dev-server/issues/887
     // https://medium.com/webpack/webpack-dev-server-middleware-security-issues-1489d950874a
     // However, it made several existing use cases such as development in cloud
-    // environment or subdomains in development significantly more complicated:
+    // environment or submodels in development significantly more complicated:
     // https://github.com/facebook/create-react-app/issues/2271
     // https://github.com/facebook/create-react-app/issues/2233
     // While we're investigating better solutions, for now we will take a
@@ -33,7 +33,7 @@ module.exports = function (proxy, allowedHost) {
     // So we will disable the host check normally, but enable it if you have
     // specified the `proxy` setting. Finally, we let you override it if you
     // really know what you're doing with a special environment variable.
-    // Note: ["localhost", ".localhost"] will support subdomains - but we might
+    // Note: ["localhost", ".localhost"] will support submodels - but we might
     // want to allow setting the allowedHosts manually for more complex setups
     allowedHosts: disableFirewall ? 'all' : [allowedHost],
     headers: {

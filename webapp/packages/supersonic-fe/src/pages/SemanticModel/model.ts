@@ -6,14 +6,17 @@ import { getDimensionList, queryMetric, excuteSql, getDatabaseByDomainId } from 
 export type StateType = {
   current: number;
   pageSize: number;
+  selectModelId: number;
   selectDomainId: number;
   selectDomainName: string;
+  selectModelName: string;
   dimensionList: ISemantic.IDimensionList;
   metricList: ISemantic.IMetricList;
   searchParams: Record<string, any>;
   dataBaseResultColsMap: any;
   dataBaseConfig: any;
   domainData?: ISemantic.IDomainItem;
+  modelData?: ISemantic.IDomainItem;
   domainList: ISemantic.IDomainItem[];
 };
 
@@ -28,6 +31,7 @@ export type ModelType = {
   };
   reducers: {
     setSelectDomain: Reducer<StateType>;
+    setSelectModel: Reducer<StateType>;
     setDomainList: Reducer<StateType>;
     setPagination: Reducer<StateType>;
     setDimensionList: Reducer<StateType>;
@@ -42,7 +46,10 @@ export const defaultState: StateType = {
   current: 1,
   pageSize: 20,
   selectDomainId: 0,
+  selectModelId: 0,
+  modelData: undefined,
   selectDomainName: '',
+  selectModelName: '',
   searchParams: {},
   dimensionList: [],
   metricList: [],
@@ -121,6 +128,14 @@ const Model: ModelType = {
         selectDomainId: action.selectDomainId,
         selectDomainName: action.selectDomainName,
         domainData: action.domainData,
+      };
+    },
+    setSelectModel(state = defaultState, action) {
+      return {
+        ...state,
+        selectModelId: action.selectModelId,
+        selectModelName: action.selectModelName,
+        modelData: action.modelData,
       };
     },
     setDomainList(state = defaultState, action) {

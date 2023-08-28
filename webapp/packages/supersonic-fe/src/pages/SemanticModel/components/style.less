@@ -8,7 +8,8 @@
   .projectManger {
     width: 100%;
     min-height: calc(100vh - 48px);
-    background: #f8f9fb;
+    // background: #f8f9fb;
+    background-color: #fff;
     position: relative;
 
 
@@ -37,8 +38,17 @@
     }
 
     .tab {
-      padding: 0 20px;
-      line-height: 28px;
+      :global {
+        .ant-tabs-tab-btn {
+          font-size: 16px !important;
+        }
+        .ant-tabs-nav-wrap {
+          padding: 0 20px;
+        }
+        .ant-tabs-nav {
+          margin-bottom: 0;
+        }
+      }
     }
 
     .mainTip {
@@ -50,8 +60,9 @@
         padding: 0 !important;
       }
       .ant-tabs-content-holder {
-        overflow: scroll;
-        height: calc(100vh - 192px);
+        margin-top: 20px;
+        // overflow: scroll;
+        // height: calc(100vh - 175px);
       }
     }
 
@@ -84,7 +95,11 @@
   }
 }
 
-.projectList {
+.domainTreeSelect {
+  width: 300px;
+}
+
+.domainList {
   display: flex;
   flex-direction: column;
   width: 400px;
@@ -296,5 +311,19 @@
   [data-theme="dark"] .siteTagPlus {
     background: transparent;
     border-style: dashed;
+  }
+}
+
+.semanticGraphCanvas {
+  position: relative;
+  .toolbar{
+    position: absolute;
+    width: 200px;
+    z-index: 999;
+    right: 0;
+    top: 5px;
+  }
+  .canvasContainer {
+    width: 100%;
   }
 }

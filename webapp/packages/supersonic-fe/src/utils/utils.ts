@@ -422,3 +422,7 @@ export function traverseRoutes(routes, env: string, result: any[] = []) {
   }
   return result;
 }
+
+export function isProd() {
+  return process.env.NODE_ENV === 'production';
+}

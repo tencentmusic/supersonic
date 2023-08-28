@@ -10,6 +10,6 @@ class SearchServiceImplTest {
     }
 
     @Test
-    void filerMetricsByDomain() {
+    void filerMetricsByModel() {
     }
 }

@@ -6,17 +6,14 @@ const initTooltips = () => {
     offsetX: 10,
     offsetY: 10,
     fixToNode: [1, 0.5],
-    // the types of items that allow the tooltip show up
     // 允许出现 tooltip 的 item 类型
-    // itemTypes: ['node', 'edge'],
     itemTypes: ['node'],
-    // custom the tooltip's content
     // 自定义 tooltip 内容
     getContent: (e) => {
       const outDiv = document.createElement('div');
       outDiv.style.width = 'fit-content';
       outDiv.style.height = 'fit-content';
-      const model = e.item.getModel();
+      const model = e!.item!.getModel();
 
       const { name, bizName, createdBy, updatedAt, description } = model;
       const list = [
@@ -54,16 +51,9 @@ const initTooltips = () => {
       const html = `<div>
       ${listHtml}
     </div>`;
-      if (e.item.getType() === 'node') {
+      if (e!.item!.getType() === 'node') {
         outDiv.innerHTML = html;
       }
-      //  else {
-      // const source = e.item.getSource();
-      // const target = e.item.getTarget();
-      // outDiv.innerHTML = `来源：${source.getModel().name}<br/>去向：${
-      //   target.getModel().name
-      // }`;
-      // }
       return outDiv;
     },
   });

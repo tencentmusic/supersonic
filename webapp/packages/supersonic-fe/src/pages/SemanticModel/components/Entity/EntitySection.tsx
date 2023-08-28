@@ -5,7 +5,7 @@ import { connect } from 'umi';
 import type { StateType } from '../../model';
 import { getDomainExtendDetailConfig } from '../../service';
 import ProCard from '@ant-design/pro-card';
-import EntityCreateForm from './EntityCreateForm';
+
 import DefaultSettingForm from './DefaultSettingForm';
 import type { IChatConfig } from '../../data';
 import DimensionMetricVisibleForm from './DimensionMetricVisibleForm';
@@ -22,24 +22,22 @@ const EntitySection: React.FC<Props> = ({
   dispatch,
   chatConfigType = ChatConfigType.DETAIL,
 }) => {
-  const { selectDomainId, dimensionList, metricList } = domainManger;
+  const { selectDomainId, selectModelId: modelId, dimensionList, metricList } = domainManger;
 
-  const [entityData, setentityData] = useState<IChatConfig.IChatRichConfig>();
-
-  const entityCreateRef = useRef<any>({});
+  const [entityData, setEntityData] = useState<IChatConfig.IChatRichConfig>();
 
   const queryThemeListData: any = async () => {
     const { code, data } = await getDomainExtendDetailConfig({
-      domainId: selectDomainId,
+      modelId,
     });
 
     if (code === 200) {
-      const { chatAggRichConfig, chatDetailRichConfig, id, domainId } = data;
+      const { chatAggRichConfig, chatDetailRichConfig, id, domainId, modelId } = data;
       if (chatConfigType === ChatConfigType.DETAIL) {
-        setentityData({ ...chatDetailRichConfig, id, domainId });
+        setEntityData({ ...chatDetailRichConfig, id, domainId, modelId });
       }
       if (chatConfigType === ChatConfigType.AGG) {
-        setentityData({ ...chatAggRichConfig, id, domainId });
+        setEntityData({ ...chatAggRichConfig, id, domainId, modelId });
       }
       return;
     }
@@ -52,31 +50,15 @@ const EntitySection: React.FC<Props> = ({
   };
 
   useEffect(() => {
+    if (!modelId) {
+      return;
+    }
     initPage();
-  }, [selectDomainId]);
+  }, [modelId]);
 
   return (
     <div style={{ width: 800, margin: '0 auto' }}>
       <Space direction="vertical" style={{ width: '100%' }} size={20}>
-        {chatConfigType === 'detail' && entityData && (
-          <ProCard title="实体" bordered>
-            <EntityCreateForm
-              ref={entityCreateRef}
-              domainId={Number(selectDomainId)}
-              entityData={entityData}
-              dimensionList={dimensionList.filter((item) => {
-                const blackDimensionList = entityData?.visibility?.blackDimIdList;
-                if (Array.isArray(blackDimensionList)) {
-                  return !blackDimensionList.includes(item.id);
-                }
-                return false;
-              })}
-              onSubmit={() => {
-                queryThemeListData();
-              }}
-            />
-          </ProCard>
-        )}
         <ProCard bordered title="问答可见">
           <DimensionMetricVisibleForm
             chatConfigKey={

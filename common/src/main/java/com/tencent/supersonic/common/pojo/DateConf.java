@@ -2,11 +2,9 @@ package com.tencent.supersonic.common.pojo;
 
 import static java.time.LocalDate.now;
 
-import com.tencent.supersonic.common.constant.Constants;
-
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Objects;
 import lombok.Data;
 
 @Data
@@ -15,7 +13,7 @@ public class DateConf {
     private static final long serialVersionUID = 3074129990945004340L;
 
 
-    private DateMode dateMode = DateMode.RECENT_UNITS;
+    private DateMode dateMode = DateMode.RECENT;
 
     /**
      * like 2021-10-22, dateMode=1
@@ -42,17 +40,40 @@ public class DateConf {
     /**
      * the text parse from , example "last 7 days" , "last mouth"
      */
-    private String text;
+    private String detectWord;
+
+    private boolean isInherited;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DateConf dateConf = (DateConf) o;
+        return dateMode == dateConf.dateMode &&
+                Objects.equals(startDate, dateConf.startDate) &&
+                Objects.equals(endDate, dateConf.endDate) &&
+                Objects.equals(unit, dateConf.unit) &&
+                Objects.equals(period, dateConf.period);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dateMode, startDate, endDate, unit, period);
+    }
 
     public enum DateMode {
         /**
          * date mode
-         * 1 - between, continuous value,
-         * 2 - list discrete value,
-         * 3 - recent time units,
-         * 4 - advance time until data is available
+         * 1 - BETWEEN, continuous static value, [startDate, endDate]
+         * 2 - LIST, discrete static value, [dateList]
+         * 3 - RECENT, dynamic time related to the actual available time of the element, [unit, period]
+         * 4 - AVAILABLE, dynamic time which guaranteed to query some data, [startDate, endDate]
          */
-        BETWEEN_CONTINUOUS, LIST_DISCRETE, RECENT_UNITS, AVAILABLE_TIME
+        BETWEEN, LIST, RECENT, AVAILABLE
     }
 
     @Override
@@ -71,7 +92,7 @@ public class DateConf {
         sb.append(",\"period\":\"")
                 .append(period).append('\"');
         sb.append(",\"text\":\"")
-                .append(text).append('\"');
+                .append(detectWord).append('\"');
         sb.append('}');
         return sb.toString();
     }

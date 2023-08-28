@@ -6,9 +6,6 @@ import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfigurat
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-/**
- * StandaloneLauncher
- **/
 @SpringBootApplication(scanBasePackages = {"com.tencent.supersonic"},
         exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 @EnableScheduling

@@ -1,5 +1,5 @@
 import IconFont from '@/components/IconFont';
-import { getTextWidth, groupByColumn } from '@/utils/utils';
+import { getTextWidth, groupByColumn, isMobile } from '@/utils/utils';
 import { AutoComplete, Select, Tag, Tooltip } from 'antd';
 import classNames from 'classnames';
 import { debounce } from 'lodash';
@@ -8,18 +8,26 @@ import type { ForwardRefRenderFunction } from 'react';
 import { searchRecommend } from 'supersonic-chat-sdk';
 import { SemanticTypeEnum, SEMANTIC_TYPE_MAP } from '../constants';
 import styles from './style.less';
-import { PLACE_HOLDER } from '../constants';
-import { DomainType } from '../type';
+import { DefaultEntityType, AgentType, ModelType } from '../type';
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 
 type Props = {
   inputMsg: string;
   chatId?: number;
-  currentDomain?: DomainType;
-  domains: DomainType[];
-  isMobileMode?: boolean;
+  currentModel?: ModelType;
+  currentAgent?: AgentType;
+  defaultEntity?: DefaultEntityType;
+  isCopilotMode?: boolean;
+  copilotFullscreen?: boolean;
+  models: ModelType[];
+  agentList: AgentType[];
+  collapsed: boolean;
+  onToggleCollapseBtn: () => void;
   onInputMsgChange: (value: string) => void;
-  onSendMsg: (msg: string, domainId?: number) => void;
+  onSendMsg: (msg: string, modelId?: number) => void;
   onAddConversation: () => void;
+  onCancelDefaultFilter: () => void;
+  onSelectAgent: (agent: AgentType) => void;
 };
 
 const { OptGroup, Option } = Select;
@@ -38,16 +46,24 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   {
     inputMsg,
     chatId,
-    currentDomain,
-    domains,
-    isMobileMode,
+    currentModel,
+    currentAgent,
+    defaultEntity,
+    models,
+    agentList,
+    collapsed,
+    isCopilotMode,
+    copilotFullscreen,
+    onToggleCollapseBtn,
     onInputMsgChange,
     onSendMsg,
     onAddConversation,
+    onCancelDefaultFilter,
+    onSelectAgent,
   },
   ref,
 ) => {
-  const [domainOptions, setDomainOptions] = useState<DomainType[]>([]);
+  const [modelOptions, setModelOptions] = useState<(ModelType | AgentType)[]>([]);
   const [stepOptions, setStepOptions] = useState<Record<string, any[]>>({});
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -89,8 +105,8 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   }, []);
 
   const getStepOptions = (recommends: any[]) => {
-    const data = groupByColumn(recommends, 'domainName');
-    return isMobileMode && recommends.length > 6
+    const data = groupByColumn(recommends, 'modelName');
+    return isMobile && recommends.length > 6
       ? Object.keys(data)
           .slice(0, 4)
           .reduce((result, key) => {
@@ -103,23 +119,26 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       : data;
   };
 
-  const processMsg = (msg: string, domains: DomainType[]) => {
+  const processMsg = (msg: string, models: ModelType[]) => {
     let msgValue = msg;
-    let domainId: number | undefined;
+    let modelId: number | undefined;
     if (msg?.[0] === '@') {
-      const domain = domains.find((item) => msg.includes(`@${item.name}`));
-      msgValue = domain ? msg.replace(`@${domain.name}`, '') : msg;
-      domainId = domain?.id;
+      const model = models.find((item) => msg.includes(`@${item.name}`));
+      msgValue = model ? msg.replace(`@${model.name}`, '') : msg;
+      modelId = model?.id;
+    } else if (msg?.[0] === '/') {
+      const agent = agentList.find((item) => msg.includes(`/${item.name}`));
+      msgValue = agent ? msg.replace(`/${agent.name}`, '') : msg;
     }
-    return { msgValue, domainId };
+    return { msgValue, modelId };
   };
 
   const debounceGetWordsFunc = useCallback(() => {
     const getAssociateWords = async (
       msg: string,
-      domains: DomainType[],
+      models: ModelType[],
       chatId?: number,
-      domain?: DomainType,
+      model?: ModelType,
     ) => {
       if (isPinyin) {
         return;
@@ -129,8 +148,9 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       }
       fetchRef.current += 1;
       const fetchId = fetchRef.current;
-      const { msgValue, domainId } = processMsg(msg, domains);
-      const res = await searchRecommend(msgValue.trim(), chatId, domainId || domain?.id);
+      const { msgValue, modelId } = processMsg(msg, models);
+      const modelIdValue = modelId || model?.id;
+      const res = await searchRecommend(msgValue.trim(), chatId, modelIdValue);
       if (fetchId !== fetchRef.current) {
         return;
       }
@@ -145,27 +165,27 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       }
       setOpen(recommends.length > 0);
     };
-    return debounce(getAssociateWords, 20);
+    return debounce(getAssociateWords, 200);
   }, []);
 
   const [debounceGetWords] = useState<any>(debounceGetWordsFunc);
 
   useEffect(() => {
-    if (inputMsg.length === 1 && inputMsg[0] === '@') {
+    if (inputMsg.length === 1 && (inputMsg[0] === '@' || inputMsg[0] === '/')) {
       setOpen(true);
-      setDomainOptions(domains);
+      setModelOptions(inputMsg[0] === '/' ? agentList : models);
       setStepOptions({});
       return;
     } else {
       setOpen(false);
-      if (domainOptions.length > 0) {
+      if (modelOptions.length > 0) {
         setTimeout(() => {
-          setDomainOptions([]);
-        }, 500);
+          setModelOptions([]);
+        }, 50);
       }
     }
-    if (!isSelect) {
-      debounceGetWords(inputMsg, domains, chatId, currentDomain);
+    if (!isSelect && currentAgent?.name !== '问知识') {
+      debounceGetWords(inputMsg, models, chatId, currentModel);
     } else {
       isSelect = false;
     }
@@ -207,24 +227,30 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       .find((item) =>
         Object.keys(stepOptions).length === 1
           ? item.recommend === value
-          : `${item.domainName || ''}${item.recommend}` === value,
+          : `${item.modelName || ''}${item.recommend}` === value,
       );
     if (option && isSelect) {
-      onSendMsg(option.recommend, option.domainId);
+      onSendMsg(option.recommend, option.modelId);
     } else {
       onSendMsg(value.trim());
     }
   };
 
   const autoCompleteDropdownClass = classNames(styles.autoCompleteDropdown, {
-    [styles.mobile]: isMobileMode,
-    [styles.domainOptions]: domainOptions.length > 0,
+    [styles.mobile]: isMobile,
+    [styles.modelOptions]: modelOptions.length > 0,
   });
 
   const onSelect = (value: string) => {
     isSelect = true;
-    if (domainOptions.length === 0) {
+    if (modelOptions.length === 0) {
       sendMsg(value);
+    } else {
+      const agent = agentList.find((item) => value.includes(item.name));
+      if (agent) {
+        onSelectAgent(agent);
+        onInputMsgChange('');
+      }
     }
     setOpen(false);
     setTimeout(() => {
@@ -233,12 +259,102 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   };
 
   const chatFooterClass = classNames(styles.chatFooter, {
-    [styles.mobile]: isMobileMode,
+    [styles.mobile]: isMobile,
+    [styles.defaultCopilotMode]: isCopilotMode && !copilotFullscreen,
+  });
+
+  const restrictNode = currentModel && !isMobile && (
+    <div className={styles.currentModel}>
+      <div className={styles.currentModelName}>
+        输入联想与问题回复将限定于：“
+        <span className={styles.quoteText}>
+          {!defaultEntity && <>主题域【{currentModel.name}】</>}
+          {defaultEntity && (
+            <>
+              <span>{`${currentModel.name.slice(0, currentModel.name.length - 1)}【`}</span>
+              <span className={styles.entityName} title={defaultEntity.entityName}>
+                {defaultEntity.entityName}
+              </span>
+              <span>】</span>
+            </>
+          )}
+        </span>
+        ”
+      </div>
+      <div className={styles.cancelModel} onClick={onCancelDefaultFilter}>
+        取消限定
+      </div>
+    </div>
+  );
+
+  const modelOptionNodes = modelOptions.map((model) => {
+    return (
+      <Option
+        key={model.id}
+        value={inputMsg[0] === '/' ? `/${model.name} ` : `@${model.name} `}
+        className={styles.searchOption}
+      >
+        {model.name}
+      </Option>
+    );
+  });
+
+  const associateOptionNodes = Object.keys(stepOptions).map((key) => {
+    return (
+      <OptGroup key={key} label={key}>
+        {stepOptions[key].map((option) => {
+          let optionValue =
+            Object.keys(stepOptions).length === 1
+              ? option.recommend
+              : `${option.modelName || ''}${option.recommend}`;
+          if (inputMsg[0] === '@') {
+            const model = models.find((item) => inputMsg.includes(item.name));
+            optionValue = model ? `@${model.name} ${option.recommend}` : optionValue;
+          } else if (inputMsg[0] === '/') {
+            const agent = agentList.find((item) => inputMsg.includes(item.name));
+            optionValue = agent ? `/${agent.name} ${option.recommend}` : optionValue;
+          }
+          return (
+            <Option
+              key={`${option.recommend}${option.modelName ? `_${option.modelName}` : ''}`}
+              value={optionValue}
+              className={styles.searchOption}
+            >
+              <div className={styles.optionContent}>
+                {option.schemaElementType && (
+                  <Tag
+                    className={styles.semanticType}
+                    color={
+                      option.schemaElementType === SemanticTypeEnum.DIMENSION ||
+                      option.schemaElementType === SemanticTypeEnum.MODEL
+                        ? 'blue'
+                        : option.schemaElementType === SemanticTypeEnum.VALUE
+                        ? 'geekblue'
+                        : 'cyan'
+                    }
+                  >
+                    {SEMANTIC_TYPE_MAP[option.schemaElementType] ||
+                      option.schemaElementType ||
+                      '维度'}
+                  </Tag>
+                )}
+                {option.subRecommend}
+              </div>
+            </Option>
+          );
+        })}
+      </OptGroup>
+    );
   });
 
   return (
     <div className={chatFooterClass}>
       <div className={styles.composer}>
+        {!isMobile && (
+          <div className={styles.collapseBtn} onClick={onToggleCollapseBtn}>
+            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          </div>
+        )}
         <Tooltip title="新建对话">
           <IconFont
             type="icon-icon-add-conversation-line"
@@ -247,25 +363,37 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
           />
         </Tooltip>
         <div className={styles.composerInputWrapper}>
+          {/* {restrictNode}
+          {currentAgentNode} */}
           <AutoComplete
             className={styles.composerInput}
             placeholder={
-              currentDomain
-                ? `请输入【${currentDomain.name}】主题的问题，可使用@切换到其他主题`
-                : PLACE_HOLDER
+              currentAgent?.name
+                ? `智能助理【${currentAgent?.name}】将与您对话，可输入“/”切换助理`
+                : '请输入您的问题'
             }
             value={inputMsg}
             onChange={onInputMsgChange}
             onSelect={onSelect}
-            autoFocus={!isMobileMode}
+            autoFocus={!isMobile}
             backfill
             ref={inputRef}
             id="chatInput"
             onKeyDown={(e) => {
-              if ((e.code === 'Enter' || e.code === 'NumpadEnter') && !isSelect) {
-                const chatInputEl: any = document.getElementById('chatInput');
-                sendMsg(chatInputEl.value);
-                setOpen(false);
+              if (e.code === 'Enter' || e.code === 'NumpadEnter') {
+                {
+                  const chatInputEl: any = document.getElementById('chatInput');
+                  if (!isSelect) {
+                    sendMsg(chatInputEl.value);
+                    setOpen(false);
+                  } else {
+                    const agent = agentList.find((item) => chatInputEl.value.includes(item.name));
+                    if (agent) {
+                      onSelectAgent(agent);
+                      onInputMsgChange('');
+                    }
+                  }
+                }
               }
             }}
             onFocus={() => {
@@ -280,66 +408,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
             open={open}
             getPopupContainer={(triggerNode) => triggerNode.parentNode}
           >
-            {domainOptions.length > 0
-              ? domainOptions.map((domain) => {
-                  return (
-                    <Option
-                      key={domain.id}
-                      value={`@${domain.name} `}
-                      className={styles.searchOption}
-                    >
-                      {domain.name}
-                    </Option>
-                  );
-                })
-              : Object.keys(stepOptions).map((key) => {
-                  return (
-                    <OptGroup key={key} label={key}>
-                      {stepOptions[key].map((option) => {
-                        let optionValue =
-                          Object.keys(stepOptions).length === 1
-                            ? option.recommend
-                            : `${option.domainName || ''}${option.recommend}`;
-                        if (inputMsg[0] === '@') {
-                          const domain = domains.find((item) => inputMsg.includes(item.name));
-                          optionValue = domain
-                            ? `@${domain.name} ${option.recommend}`
-                            : optionValue;
-                        }
-                        return (
-                          <Option
-                            key={`${option.recommend}${
-                              option.domainName ? `_${option.domainName}` : ''
-                            }`}
-                            value={optionValue}
-                            className={styles.searchOption}
-                          >
-                            <div className={styles.optionContent}>
-                              {option.schemaElementType && (
-                                <Tag
-                                  className={styles.semanticType}
-                                  color={
-                                    option.schemaElementType === SemanticTypeEnum.DIMENSION ||
-                                    option.schemaElementType === SemanticTypeEnum.DOMAIN
-                                      ? 'blue'
-                                      : option.schemaElementType === SemanticTypeEnum.VALUE
-                                      ? 'geekblue'
-                                      : 'orange'
-                                  }
-                                >
-                                  {SEMANTIC_TYPE_MAP[option.schemaElementType] ||
-                                    option.schemaElementType ||
-                                    '维度'}
-                                </Tag>
-                              )}
-                              {option.subRecommend}
-                            </div>
-                          </Option>
-                        );
-                      })}
-                    </OptGroup>
-                  );
-                })}
+            {modelOptions.length > 0 ? modelOptionNodes : associateOptionNodes}
           </AutoComplete>
           <div
             className={classNames(styles.sendBtn, {

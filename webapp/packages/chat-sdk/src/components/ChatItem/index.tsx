@@ -1,149 +1,216 @@
-import { MsgDataType, MsgValidTypeEnum } from '../../common/type';
+import { ChatContextType, MsgDataType, ParseStateEnum } from '../../common/type';
 import { useEffect, useState } from 'react';
-import Typing from './Typing';
-import ChatMsg from '../ChatMsg';
-import { chatQuery } from '../../service';
-import { MSG_VALID_TIP, PARSE_ERROR_TIP, PREFIX_CLS } from '../../common/constants';
-import Text from './Text';
-import Tools from '../Tools';
-import SemanticDetail from '../SemanticDetail';
+import { chatExecute, chatParse, switchEntity } from '../../service';
+import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import IconFont from '../IconFont';
+import ParseTip from './ParseTip';
+import ExecuteItem from './ExecuteItem';
+import { isMobile } from '../../utils/utils';
+import classNames from 'classnames';
 
 type Props = {
   msg: string;
-  followQuestions?: string[];
   conversationId?: number;
-  domainId?: number;
+  modelId?: number;
+  agentId?: number;
+  filter?: any[];
   isLastMessage?: boolean;
   msgData?: MsgDataType;
   isMobileMode?: boolean;
   triggerResize?: boolean;
-  onMsgDataLoaded?: (data: MsgDataType) => void;
-  onSelectSuggestion?: (value: string) => void;
+  parseOptions?: ChatContextType[];
+  onMsgDataLoaded?: (data: MsgDataType, valid: boolean) => void;
   onUpdateMessageScroll?: () => void;
 };
 
 const ChatItem: React.FC<Props> = ({
   msg,
-  followQuestions,
   conversationId,
-  domainId,
+  modelId,
+  agentId,
+  filter,
   isLastMessage,
   isMobileMode,
   triggerResize,
   msgData,
+  parseOptions,
   onMsgDataLoaded,
-  onSelectSuggestion,
   onUpdateMessageScroll,
 }) => {
   const [data, setData] = useState<MsgDataType>();
-  const [loading, setLoading] = useState(false);
-  const [metricInfoList, setMetricInfoList] = useState<any[]>([]);
-  const [tip, setTip] = useState('');
+  const [parseLoading, setParseLoading] = useState(false);
+  const [parseInfo, setParseInfo] = useState<ChatContextType>();
+  const [parseInfoOptions, setParseInfoOptions] = useState<ChatContextType[]>(parseOptions || []);
+  const [parseTip, setParseTip] = useState('');
+  const [executeLoading, setExecuteLoading] = useState(false);
+  const [executeTip, setExecuteTip] = useState('');
+  const [executeMode, setExecuteMode] = useState(false);
+  const [entitySwitchLoading, setEntitySwitchLoading] = useState(false);
+
+  const [chartIndex, setChartIndex] = useState(0);
+
+  const prefixCls = `${PREFIX_CLS}-item`;
 
   const updateData = (res: Result<MsgDataType>) => {
     if (res.code === 401 || res.code === 412) {
-      setTip(res.msg);
+      setExecuteTip(res.msg);
       return false;
     }
     if (res.code !== 200) {
-      setTip(PARSE_ERROR_TIP);
+      setExecuteTip(SEARCH_EXCEPTION_TIP);
       return false;
     }
-    const { queryColumns, queryResults, queryState, queryMode } = res.data || {};
-    if (queryState !== MsgValidTypeEnum.NORMAL && queryState !== MsgValidTypeEnum.EMPTY) {
-      setTip(MSG_VALID_TIP[queryState || MsgValidTypeEnum.INVALID]);
+    const { queryColumns, queryResults, queryState, queryMode, response } = res.data || {};
+    if (queryState !== 'SUCCESS') {
+      setExecuteTip(response && typeof response === 'string' ? response : SEARCH_EXCEPTION_TIP);
       return false;
     }
-    if ((queryColumns && queryColumns.length > 0 && queryResults) || queryMode === 'INSTRUCTION') {
+    if ((queryColumns && queryColumns.length > 0 && queryResults) || queryMode === 'WEB_PAGE') {
       setData(res.data);
-      setTip('');
+      setExecuteTip('');
       return true;
     }
-    setTip(PARSE_ERROR_TIP);
-    return false;
+    setExecuteTip(SEARCH_EXCEPTION_TIP);
+    return true;
+  };
+
+  const onExecute = async (
+    parseInfoValue: ChatContextType,
+    parseInfoOptions?: ChatContextType[]
+  ) => {
+    setExecuteMode(true);
+    setExecuteLoading(true);
+    try {
+      const { data } = await chatExecute(msg, conversationId!, parseInfoValue);
+      setExecuteLoading(false);
+      const valid = updateData(data);
+      if (onMsgDataLoaded) {
+        let parseOptions: ChatContextType[] = parseInfoOptions || [];
+        if (
+          parseInfoOptions &&
+          parseInfoOptions.length > 1 &&
+          (parseInfoOptions[0].queryMode.includes('METRIC') ||
+            parseInfoOptions[0].queryMode.includes('ENTITY'))
+        ) {
+          parseOptions = parseInfoOptions.filter(
+            (item, index) =>
+              index === 0 ||
+              (!item.queryMode.includes('METRIC') && !item.queryMode.includes('ENTITY'))
+          );
+        }
+        onMsgDataLoaded(
+          {
+            ...data.data,
+            chatContext: parseInfoValue,
+            parseOptions: parseOptions.length > 1 ? parseOptions.slice(1) : undefined,
+          },
+          valid
+        );
+      }
+    } catch (e) {
+      setExecuteLoading(false);
+      setExecuteTip(SEARCH_EXCEPTION_TIP);
+    }
   };
 
   const onSendMsg = async () => {
-    setLoading(true);
-    const semanticRes = await chatQuery(msg, conversationId, domainId);
-    updateData(semanticRes.data);
-    if (onMsgDataLoaded) {
-      onMsgDataLoaded(semanticRes.data.data);
+    setParseLoading(true);
+    const { data: parseData } = await chatParse(msg, conversationId, modelId, agentId, filter);
+    setParseLoading(false);
+    const { code, data } = parseData || {};
+    const { state, selectedParses } = data || {};
+    if (
+      code !== 200 ||
+      state === ParseStateEnum.FAILED ||
+      selectedParses == null ||
+      selectedParses.length === 0 ||
+      (selectedParses.length > 0 &&
+        !selectedParses[0]?.properties?.type &&
+        !selectedParses[0]?.queryMode)
+    ) {
+      setParseTip(PARSE_ERROR_TIP);
+      return;
     }
-    setLoading(false);
+    if (onUpdateMessageScroll) {
+      onUpdateMessageScroll();
+    }
+    setParseInfoOptions(selectedParses || []);
+    const parseInfoValue = selectedParses[0];
+    setParseInfo(parseInfoValue);
+    onExecute(parseInfoValue, selectedParses);
   };
 
   useEffect(() => {
-    if (data !== undefined) {
+    if (data !== undefined || parseOptions !== undefined || executeTip !== '') {
       return;
     }
     if (msgData) {
+      setParseInfoOptions([msgData.chatContext]);
+      setExecuteMode(true);
       updateData({ code: 200, data: msgData, msg: 'success' });
     } else if (msg) {
       onSendMsg();
     }
   }, [msg, msgData]);
 
-  const prefixCls = `${PREFIX_CLS}-item`;
+  const onSwitchEntity = async (entityId: string) => {
+    setEntitySwitchLoading(true);
+    const res = await switchEntity(entityId, data?.chatContext?.modelId, conversationId || 0);
+    setEntitySwitchLoading(false);
+    setData(res.data.data);
+  };
 
-  if (loading) {
-    return (
-      <div className={prefixCls}>
-        <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />
-        <Typing />
-      </div>
-    );
-  }
+  const onChangeChart = () => {
+    setChartIndex(chartIndex + 1);
+  };
 
-  if (tip) {
-    return (
-      <div className={prefixCls}>
-        <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />
-        <Text data={tip} />
-      </div>
-    );
-  }
-
-  if (!data || data.queryMode === 'INSTRUCTION') {
-    return null;
-  }
-
-  const onCheckMetricInfo = (data: any) => {
-    setMetricInfoList([...metricInfoList, data]);
+  const onSelectParseInfo = async (parseInfoValue: ChatContextType) => {
+    setParseInfo(parseInfoValue);
+    onExecute(parseInfoValue);
     if (onUpdateMessageScroll) {
       onUpdateMessageScroll();
     }
   };
 
+  const contentClass = classNames(`${prefixCls}-content`, {
+    [`${prefixCls}-content-mobile`]: isMobile,
+  });
+
   return (
     <div className={prefixCls}>
-      <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />
-      <div className={`${prefixCls}-content`}>
-        <ChatMsg
-          question={msg}
-          followQuestions={followQuestions}
-          data={data}
-          isMobileMode={isMobileMode}
-          triggerResize={triggerResize}
-          onCheckMetricInfo={onCheckMetricInfo}
-        />
-        <Tools data={data} isLastMessage={isLastMessage} isMobileMode={isMobileMode} />
-        {metricInfoList.length > 0 && (
-          <div className={`${prefixCls}-metric-info-list`}>
-            {metricInfoList.map(item => (
-              <SemanticDetail
-                dataSource={item}
-                onDimensionSelect={(value: string) => {
-                  if (onSelectSuggestion) {
-                    onSelectSuggestion(value);
-                  }
-                }}
-              />
-            ))}
-          </div>
-        )}
+      <div className={`${prefixCls}-section`}>
+        {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
+        <div className={contentClass}>
+          <ParseTip
+            parseLoading={parseLoading}
+            parseInfoOptions={parseOptions || parseInfoOptions.slice(0, 1)}
+            parseTip={parseTip}
+            currentParseInfo={parseInfo}
+            optionMode={parseOptions !== undefined}
+            onSelectParseInfo={onSelectParseInfo}
+          />
+        </div>
       </div>
+      {executeMode && data?.queryMode !== 'WEB_PAGE' && (
+        <div className={`${prefixCls}-section`}>
+          {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
+          <div className={contentClass}>
+            <ExecuteItem
+              question={msg}
+              executeLoading={executeLoading}
+              entitySwitchLoading={entitySwitchLoading}
+              executeTip={executeTip}
+              chartIndex={chartIndex}
+              data={data}
+              isMobileMode={isMobileMode}
+              isLastMessage={isLastMessage}
+              triggerResize={triggerResize}
+              onSwitchEntity={onSwitchEntity}
+              onChangeChart={onChangeChart}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

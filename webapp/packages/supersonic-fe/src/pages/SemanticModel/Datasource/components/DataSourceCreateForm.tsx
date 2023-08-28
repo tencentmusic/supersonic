@@ -16,7 +16,6 @@ export type CreateFormProps = {
   dispatch: Dispatch;
   createModalVisible: boolean;
   sql?: string;
-  domainId: number;
   dataSourceItem: DataInstanceItem | any;
   onCancel?: () => void;
   onSubmit?: (dataSourceInfo: any) => void;
@@ -36,7 +35,6 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   domainManger,
   onCancel,
   createModalVisible,
-  domainId,
   scriptColumns,
   sql = '',
   onSubmit,
@@ -47,12 +45,24 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const [fields, setFields] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [hasEmptyNameField, setHasEmptyNameField] = useState<boolean>(false);
   const formValRef = useRef(initFormVal as any);
   const [form] = Form.useForm();
-  const { dataBaseConfig } = domainManger;
+  const { dataBaseConfig, selectModelId: modelId } = domainManger;
   const updateFormVal = (val: any) => {
     formValRef.current = val;
   };
+
+  useEffect(() => {
+    const hasEmpty = fields.some((item) => {
+      const { name, isCreateDimension, isCreateMetric } = item;
+      if ((isCreateMetric || isCreateDimension) && !name) {
+        return true;
+      }
+      return false;
+    });
+    setHasEmptyNameField(hasEmpty);
+  }, [fields]);
 
   const [fieldColumns, setFieldColumns] = useState(scriptColumns || []);
   useEffect(() => {
@@ -150,7 +160,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
         databaseId: dataSourceItem?.databaseId || dataBaseConfig.id,
         queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
         tableQuery: dbName && tableName ? `${dbName}.${tableName}` : '',
-        domainId,
+        modelId,
       };
       const queryDatasource = isEdit ? updateDatasource : createDatasource;
       const { code, msg, data } = await queryDatasource(queryParams);
@@ -310,7 +320,12 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
             上一步
           </Button>
           <Button onClick={onCancel}>取消</Button>
-          <Button type="primary" loading={saveLoading} onClick={handleNext}>
+          <Button
+            type="primary"
+            loading={saveLoading}
+            onClick={handleNext}
+            disabled={hasEmptyNameField}
+          >
             完成
           </Button>
         </>

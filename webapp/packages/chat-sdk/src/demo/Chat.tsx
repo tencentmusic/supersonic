@@ -54,9 +54,9 @@ const Chat = () => {
       <div className={styles.chatItem}>
         <ChatItem
           msg={msg}
-          msgData={data}
+          // msgData={data}
+          agentId={6}
           onMsgDataLoaded={onMsgDataLoaded}
-          followQuestions={followQuestions}
           isLastMessage
           isMobileMode
           triggerResize={triggerResize}

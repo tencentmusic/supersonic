@@ -1,18 +1,34 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Form, Button, Modal, Steps, Input, Select, Switch, InputNumber } from 'antd';
+import {
+  Form,
+  Button,
+  Modal,
+  Steps,
+  Input,
+  Select,
+  Switch,
+  InputNumber,
+  message,
+  Result,
+} from 'antd';
 import MetricMeasuresFormTable from './MetricMeasuresFormTable';
 import { SENSITIVE_LEVEL_OPTIONS } from '../constant';
 import { formLayout } from '@/components/FormHelper/utils';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import styles from './style.less';
-import { getMeasureListByDomainId } from '../service';
+import { getMeasureListByModelId } from '../service';
+import { creatExprMetric, updateExprMetric } from '../service';
+import { ISemantic } from '../data';
+import { history } from 'umi';
 
 export type CreateFormProps = {
+  datasourceId?: number;
   domainId: number;
+  modelId: number;
   createModalVisible: boolean;
   metricItem: any;
   onCancel?: () => void;
-  onSubmit: (values: any) => void;
+  onSubmit?: (values: any) => void;
 };
 
 const { Step } = Steps;
@@ -21,7 +37,9 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
+  datasourceId,
   domainId,
+  modelId,
   onCancel,
   createModalVisible,
   metricItem,
@@ -31,25 +49,32 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
   const formValRef = useRef({} as any);
   const [form] = Form.useForm();
-  const updateFormVal = (val: SaveDataSetForm) => {
+  const updateFormVal = (val: any) => {
     formValRef.current = val;
   };
 
-  const [classMeasureList, setClassMeasureList] = useState<any[]>([]);
+  const [classMeasureList, setClassMeasureList] = useState<ISemantic.IMeasure[]>([]);
 
-  const [exprTypeParamsState, setExprTypeParamsState] = useState<any>([]);
+  const [exprTypeParamsState, setExprTypeParamsState] = useState<ISemantic.IMeasure[]>([]);
 
   const [exprSql, setExprSql] = useState<string>('');
 
   const [isPercentState, setIsPercentState] = useState<boolean>(false);
+  const [hasMeasuresState, setHasMeasuresState] = useState<boolean>(true);
 
   const forward = () => setCurrentStep(currentStep + 1);
   const backward = () => setCurrentStep(currentStep - 1);
 
   const queryClassMeasureList = async () => {
-    const { code, data } = await getMeasureListByDomainId(domainId);
+    const { code, data } = await getMeasureListByModelId(modelId);
     if (code === 200) {
       setClassMeasureList(data);
+      if (datasourceId) {
+        const hasMeasures = data.some(
+          (item: ISemantic.IMeasure) => item.datasourceId === datasourceId,
+        );
+        setHasMeasuresState(hasMeasures);
+      }
       return;
     }
     setClassMeasureList([]);
@@ -74,7 +99,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     if (currentStep < 1) {
       forward();
     } else {
-      onSubmit?.(submitForm);
+      await saveMetric(submitForm);
     }
   };
 
@@ -118,15 +143,41 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   useEffect(() => {
     if (isEdit) {
       initData();
-    } else {
-      // initFields([]);
     }
   }, [metricItem]);
+
+  const saveMetric = async (fieldsValue: any) => {
+    const queryParams = {
+      modelId,
+      ...fieldsValue,
+    };
+    const { typeParams } = queryParams;
+    if (!typeParams?.expr) {
+      message.error('请输入度量表达式');
+      return;
+    }
+    if (!(Array.isArray(typeParams?.measures) && typeParams.measures.length > 0)) {
+      message.error('请添加一个度量');
+      return;
+    }
+    let saveMetricQuery = creatExprMetric;
+    if (queryParams.id) {
+      saveMetricQuery = updateExprMetric;
+    }
+    const { code, msg } = await saveMetricQuery(queryParams);
+    if (code === 200) {
+      message.success('编辑指标成功');
+      onSubmit?.(queryParams);
+      return;
+    }
+    message.error(msg);
+  };
 
   const renderContent = () => {
     if (currentStep === 1) {
       return (
         <MetricMeasuresFormTable
+          datasourceId={datasourceId}
           typeParams={{
             measures: exprTypeParamsState,
             expr: exprSql,
@@ -149,15 +200,15 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
         </FormItem>
         <FormItem
           name="name"
-          label="指标中文名"
-          rules={[{ required: true, message: '请输入指标中文名' }]}
+          label="指标名称"
+          rules={[{ required: true, message: '请输入指标名称' }]}
         >
           <Input placeholder="名称不可重复" />
         </FormItem>
         <FormItem
           name="bizName"
-          label="指标英文名"
-          rules={[{ required: true, message: '请输入指标英文名' }]}
+          label="字段名称"
+          rules={[{ required: true, message: '请输入字段名称' }]}
         >
           <Input placeholder="名称不可重复" disabled={isEdit} />
         </FormItem>
@@ -194,7 +245,11 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
           name="isPercent"
           valuePropName="checked"
         >
-          <Switch />
+          <Switch
+            onChange={(checked) => {
+              form.setFieldValue(['dataFormat', 'needMultiply100'], checked);
+            }}
+          />
         </FormItem>
         {isPercentState && (
           <>
@@ -215,10 +270,6 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
                   title={'原始值是否乘以100'}
                   subTitle={'如 原始值0.001 ->展示值0.1% '}
                 />
-                // <FormItemTitle
-                //   title={'仅添加百分号'}
-                //   subTitle={'开启后，会对原始数值直接加%，如0.02 -> 0.02%'}
-                // />
               }
               name={['dataFormat', 'needMultiply100']}
               valuePropName="checked"
@@ -231,6 +282,9 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     );
   };
   const renderFooter = () => {
+    if (!hasMeasuresState) {
+      return <Button onClick={onCancel}>取消</Button>;
+    }
     if (currentStep === 1) {
       return (
         <>
@@ -266,26 +320,47 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       footer={renderFooter()}
       onCancel={onCancel}
     >
-      <Steps style={{ marginBottom: 28 }} size="small" current={currentStep}>
-        <Step title="基本信息" />
-        <Step title="度量信息" />
-      </Steps>
-      <Form
-        {...formLayout}
-        form={form}
-        initialValues={{
-          ...formValRef.current,
-        }}
-        onValuesChange={(value) => {
-          const { isPercent } = value;
-          if (isPercent !== undefined) {
-            setIsPercentState(isPercent);
+      {hasMeasuresState ? (
+        <>
+          <Steps style={{ marginBottom: 28 }} size="small" current={currentStep}>
+            <Step title="基本信息" />
+            <Step title="度量信息" />
+          </Steps>
+          <Form
+            {...formLayout}
+            form={form}
+            initialValues={{
+              ...formValRef.current,
+            }}
+            onValuesChange={(value) => {
+              const { isPercent } = value;
+              if (isPercent !== undefined) {
+                setIsPercentState(isPercent);
+              }
+            }}
+            className={styles.form}
+          >
+            {renderContent()}
+          </Form>
+        </>
+      ) : (
+        <Result
+          status="warning"
+          subTitle="当前数据源缺少度量，无法创建指标。请前往数据源配置中，将字段设置为度量"
+          extra={
+            <Button
+              type="primary"
+              key="console"
+              onClick={() => {
+                history.replace(`/semanticModel/${domainId}/${modelId}/dataSource`);
+                onCancel?.();
+              }}
+            >
+              去创建
+            </Button>
           }
-        }}
-        className={styles.form}
-      >
-        {renderContent()}
-      </Form>
+        />
+      )}
     </Modal>
   );
 };

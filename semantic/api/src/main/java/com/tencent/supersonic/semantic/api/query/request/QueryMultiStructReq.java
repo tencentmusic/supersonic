@@ -11,11 +11,11 @@ import org.apache.commons.codec.digest.DigestUtils;
 public class QueryMultiStructReq {
 
 
-    List<QueryStructReq> queryStructCmds;
+    List<QueryStructReq> queryStructReqs;
 
 
     public String toCustomizedString() {
-        return JSONObject.toJSONString(queryStructCmds);
+        return JSONObject.toJSONString(queryStructReqs);
     }
 
     public String generateCommandMd5() {

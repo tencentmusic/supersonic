@@ -1,27 +1,54 @@
 import { updateMessageContainerScroll, isMobile, uuid, getLeafList } from '@/utils/utils';
 import { useEffect, useRef, useState } from 'react';
-import { Helmet } from 'umi';
+import { Helmet, useDispatch, useLocation } from 'umi';
 import MessageContainer from './MessageContainer';
 import styles from './style.less';
-import { ConversationDetailType, DomainType, MessageItem, MessageTypeEnum } from './type';
-import { getDomainList, updateConversationName } from './service';
+import {
+  ConversationDetailType,
+  DefaultEntityType,
+  ModelType,
+  MessageItem,
+  MessageTypeEnum,
+  AgentType,
+} from './type';
+import { getModelList, queryAgentList } from './service';
 import { useThrottleFn } from 'ahooks';
-import RightSection from './RightSection';
+import Conversation from './Conversation';
 import ChatFooter from './ChatFooter';
 import classNames from 'classnames';
 import { CHAT_TITLE, DEFAULT_CONVERSATION_NAME, WEB_TITLE } from './constants';
-import { cloneDeep } from 'lodash';
 import { HistoryMsgItemType, MsgDataType, getHistoryMsg } from 'supersonic-chat-sdk';
+import { cloneDeep } from 'lodash';
 import 'supersonic-chat-sdk/dist/index.css';
 import { setToken as setChatSdkToken } from 'supersonic-chat-sdk';
-import { TOKEN_KEY } from '@/services/request';
+import { AUTH_TOKEN_KEY } from '@/common/constants';
 
 type Props = {
   isCopilotMode?: boolean;
+  copilotFullscreen?: boolean;
+  defaultModelName?: string;
+  defaultEntityFilter?: DefaultEntityType;
+  copilotSendMsg?: string;
+  triggerNewConversation?: boolean;
+  onNewConversationTriggered?: () => void;
+  onCurrentModelChange?: (model?: ModelType) => void;
+  onCancelCopilotFilter?: () => void;
+  onCheckMoreDetail?: () => void;
 };
 
-const Chat: React.FC<Props> = ({ isCopilotMode }) => {
-  const isMobileMode = (isMobile || isCopilotMode) as boolean;
+const Chat: React.FC<Props> = ({
+  isCopilotMode,
+  copilotFullscreen,
+  defaultModelName,
+  defaultEntityFilter,
+  copilotSendMsg,
+  triggerNewConversation,
+  onNewConversationTriggered,
+  onCurrentModelChange,
+  onCancelCopilotFilter,
+  onCheckMoreDetail,
+}) => {
+  const isMobileMode = isMobile || isCopilotMode;
 
   const [messageList, setMessageList] = useState<MessageItem[]>([]);
   const [inputMsg, setInputMsg] = useState('');
@@ -31,67 +58,145 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
   const [currentConversation, setCurrentConversation] = useState<
     ConversationDetailType | undefined
   >(isMobile ? { chatId: 0, chatName: `${CHAT_TITLE}问答` } : undefined);
-  const [currentEntity, setCurrentEntity] = useState<MsgDataType>();
-  const [miniProgramLoading, setMiniProgramLoading] = useState(false);
-  const [domains, setDomains] = useState<DomainType[]>([]);
-  const [currentDomain, setCurrentDomain] = useState<DomainType>();
+  const [conversationCollapsed, setConversationCollapsed] = useState(isCopilotMode);
+  const [models, setModels] = useState<ModelType[]>([]);
+  const [currentModel, setCurrentModel] = useState<ModelType>();
+  const [defaultEntity, setDefaultEntity] = useState<DefaultEntityType>();
+  const [applyAuthVisible, setApplyAuthVisible] = useState(false);
+  const [applyAuthModel, setApplyAuthModel] = useState('');
+  const [initialModelName, setInitialModelName] = useState('');
+  const [agentList, setAgentList] = useState<AgentType[]>([]);
+  const [currentAgent, setCurrentAgent] = useState<AgentType>();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const { modelName } = (location as any).query;
+
   const conversationRef = useRef<any>();
   const chatFooterRef = useRef<any>();
+
+  const initAgentList = async () => {
+    const res = await queryAgentList();
+    const agentListValue = (res.data || []).filter((item) => item.status === 1);
+    setAgentList(agentListValue);
+    if (agentListValue.length > 0) {
+      setCurrentAgent(agentListValue[0]);
+    }
+  };
+
+  useEffect(() => {
+    setChatSdkToken(localStorage.getItem(AUTH_TOKEN_KEY) || '');
+    initModels();
+    initAgentList();
+  }, []);
+
+  useEffect(() => {
+    if (models.length > 0 && initialModelName && !currentModel) {
+      changeModel(models.find((model) => model.name === initialModelName));
+    }
+  }, [models]);
+
+  useEffect(() => {
+    if (modelName) {
+      setInitialModelName(modelName);
+    }
+  }, [modelName]);
+
+  useEffect(() => {
+    if (defaultModelName !== undefined && models.length > 0) {
+      changeModel(models.find((model) => model.name === defaultModelName));
+    }
+  }, [defaultModelName]);
+
+  useEffect(() => {
+    if (!currentConversation) {
+      return;
+    }
+    const { initMsg, modelId, entityId } = currentConversation;
+    if (initMsg) {
+      inputFocus();
+      if (initMsg === 'CUSTOMIZE' && copilotSendMsg) {
+        onSendMsg(
+          copilotSendMsg,
+          [],
+          modelId,
+          entityId,
+          agentList.find((item) => item.name === '做分析'),
+        );
+        dispatch({
+          type: 'globalState/setCopilotSendMsg',
+          payload: '',
+        });
+        return;
+      }
+      if (initMsg === DEFAULT_CONVERSATION_NAME || initMsg.includes('CUSTOMIZE')) {
+        sendHelloRsp();
+        return;
+      }
+      onSendMsg(initMsg, [], modelId, entityId);
+      return;
+    }
+    updateHistoryMsg(1);
+    setPageNo(1);
+  }, [currentConversation]);
+
+  useEffect(() => {
+    setDefaultEntity(defaultEntityFilter);
+  }, [defaultEntityFilter]);
+
+  useEffect(() => {
+    if (historyInited) {
+      const messageContainerEle = document.getElementById('messageContainer');
+      messageContainerEle?.addEventListener('scroll', handleScroll);
+    }
+    return () => {
+      const messageContainerEle = document.getElementById('messageContainer');
+      messageContainerEle?.removeEventListener('scroll', handleScroll);
+    };
+  }, [historyInited]);
+
+  useEffect(() => {
+    inputFocus();
+  }, [copilotFullscreen]);
 
   const sendHelloRsp = () => {
     setMessageList([
       {
         id: uuid(),
-        type: MessageTypeEnum.TEXT,
-        msg: '您好，请问有什么我能帮您吗？',
+        type: MessageTypeEnum.RECOMMEND_QUESTIONS,
+        // type: MessageTypeEnum.AGENT_LIST,
+        // msg: currentAgent?.name || '查信息',
       },
     ]);
   };
 
-  const existInstuctionMsg = (list: HistoryMsgItemType[]) => {
-    return list.some((msg) => msg.queryResponse.queryMode === MessageTypeEnum.INSTRUCTION);
-  };
-
-  const updateScroll = (list: HistoryMsgItemType[]) => {
-    if (existInstuctionMsg(list)) {
-      setMiniProgramLoading(true);
-      setTimeout(() => {
-        setMiniProgramLoading(false);
-        updateMessageContainerScroll();
-      }, 3000);
-    } else {
-      updateMessageContainerScroll();
-    }
+  const convertHistoryMsg = (list: HistoryMsgItemType[]) => {
+    return list.map((item: HistoryMsgItemType) => ({
+      id: item.questionId,
+      type:
+        item.queryResult?.queryMode === MessageTypeEnum.WEB_PAGE
+          ? MessageTypeEnum.PLUGIN
+          : MessageTypeEnum.QUESTION,
+      msg: item.queryText,
+      msgData: item.queryResult,
+      score: item.score,
+      isHistory: true,
+    }));
   };
 
   const updateHistoryMsg = async (page: number) => {
     const res = await getHistoryMsg(page, currentConversation!.chatId, 3);
     const { hasNextPage, list } = res.data?.data || { hasNextPage: false, list: [] };
-    setMessageList([
-      ...list.map((item: HistoryMsgItemType) => ({
-        id: item.questionId,
-        type:
-          item.queryResponse?.queryMode === MessageTypeEnum.INSTRUCTION
-            ? MessageTypeEnum.INSTRUCTION
-            : MessageTypeEnum.QUESTION,
-        msg: item.queryText,
-        msgData: item.queryResponse,
-        isHistory: true,
-      })),
-      ...(page === 1 ? [] : messageList),
-    ]);
+    const msgList = [...convertHistoryMsg(list), ...(page === 1 ? [] : messageList)];
+    setMessageList(msgList);
     setHasNextPage(hasNextPage);
     if (page === 1) {
       if (list.length === 0) {
         sendHelloRsp();
-      } else {
-        setCurrentEntity(list[list.length - 1].queryResponse);
       }
-      updateScroll(list);
+      updateMessageContainerScroll();
       setHistoryInited(true);
       inputFocus();
-    }
-    if (page > 1) {
+    } else {
       const msgEle = document.getElementById(`${messageList[0]?.id}`);
       msgEle?.scrollIntoView();
     }
@@ -111,31 +216,25 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
     },
   );
 
-  const initDomains = async () => {
-    try {
-      const res = await getDomainList();
-      const domainList = getLeafList(res.data);
-      setDomains(
-        [{ id: -1, name: '全部', bizName: 'all', parentId: 0 }, ...domainList].slice(0, 11),
-      );
-    } catch (e) {}
+  const changeModel = (model?: ModelType) => {
+    setCurrentModel(model);
+    if (onCurrentModelChange) {
+      onCurrentModelChange(model);
+    }
   };
 
-  useEffect(() => {
-    setChatSdkToken(localStorage.getItem(TOKEN_KEY) || '');
-    initDomains();
-  }, []);
+  const changeAgent = (agent?: AgentType) => {
+    setCurrentAgent(agent);
+  };
 
-  useEffect(() => {
-    if (historyInited) {
-      const messageContainerEle = document.getElementById('messageContainer');
-      messageContainerEle?.addEventListener('scroll', handleScroll);
+  const initModels = async () => {
+    const res = await getModelList();
+    const modelList = getLeafList(res.data);
+    setModels([{ id: -1, name: '全部', bizName: 'all', parentId: 0 }, ...modelList].slice(0, 11));
+    if (defaultModelName !== undefined) {
+      changeModel(modelList.find((model) => model.name === defaultModelName));
     }
-    return () => {
-      const messageContainerEle = document.getElementById('messageContainer');
-      messageContainerEle?.removeEventListener('scroll', handleScroll);
-    };
-  }, [historyInited]);
+  };
 
   const inputFocus = () => {
     if (!isMobile) {
@@ -147,60 +246,56 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
     chatFooterRef.current?.inputBlur();
   };
 
-  useEffect(() => {
-    if (!currentConversation) {
-      return;
-    }
-    setCurrentEntity(undefined);
-    const { initMsg, domainId } = currentConversation;
-    if (initMsg) {
-      inputFocus();
-      if (initMsg === DEFAULT_CONVERSATION_NAME) {
-        sendHelloRsp();
-        return;
-      }
-      onSendMsg(currentConversation.initMsg, [], domainId);
-      return;
-    }
-    updateHistoryMsg(1);
-    setPageNo(1);
-  }, [currentConversation]);
-
-  const modifyConversationName = async (name: string) => {
-    await updateConversationName(name, currentConversation!.chatId);
-    if (!isMobileMode) {
-      conversationRef?.current?.updateData();
-      window.history.replaceState('', '', `?q=${name}&cid=${currentConversation!.chatId}`);
-    }
-  };
-
-  const onSendMsg = async (msg?: string, list?: MessageItem[], domainId?: number) => {
+  const onSendMsg = async (
+    msg?: string,
+    list?: MessageItem[],
+    modelId?: number,
+    entityId?: string,
+    agent?: AgentType,
+  ) => {
     const currentMsg = msg || inputMsg;
     if (currentMsg.trim() === '') {
       setInputMsg('');
       return;
     }
-    const msgDomain = domains.find((item) => currentMsg.includes(item.name));
-    const certainDomain = currentMsg[0] === '@' && msgDomain;
-    if (certainDomain) {
-      setCurrentDomain(msgDomain.id === -1 ? undefined : msgDomain);
+    const msgModel = models.find((item) => currentMsg.includes(item.name));
+    const certainModel = currentMsg[0] === '@' && msgModel;
+    let modelChanged = false;
+
+    if (certainModel) {
+      const toModel = msgModel.id === -1 ? undefined : msgModel;
+      changeModel(toModel);
+      modelChanged = currentModel?.id !== toModel?.id;
     }
-    const domainIdValue = domainId || msgDomain?.id || currentDomain?.id;
+    const modelIdValue = modelId || msgModel?.id || currentModel?.id;
+
+    const msgAgent = agentList.find((item) => currentMsg.indexOf(item.name) === 1);
+    const certainAgent = currentMsg[0] === '/' && msgAgent;
+    const agentIdValue = certainAgent ? msgAgent.id : undefined;
+    if (agent || certainAgent) {
+      changeAgent(agent || msgAgent);
+    }
+
     const msgs = [
       ...(list || messageList),
       {
         id: uuid(),
         msg: currentMsg,
-        msgValue: certainDomain ? currentMsg.replace(`@${msgDomain.name}`, '').trim() : currentMsg,
-        domainId: domainIdValue === -1 ? undefined : domainIdValue,
-        identityMsg: certainDomain ? getIdentityMsgText(msgDomain) : undefined,
+        msgValue: certainModel
+          ? currentMsg.replace(`@${msgModel.name}`, '').trim()
+          : certainAgent
+          ? currentMsg.replace(`/${certainAgent.name}`, '').trim()
+          : currentMsg,
+        modelId: modelIdValue === -1 ? undefined : modelIdValue,
+        agentId: agent?.id || agentIdValue || currentAgent?.id,
+        entityId: entityId || (modelChanged ? undefined : defaultEntity?.entityId),
+        identityMsg: certainModel ? getIdentityMsgText(msgModel) : undefined,
         type: MessageTypeEnum.QUESTION,
       },
     ];
     setMessageList(msgs);
     updateMessageContainerScroll();
     setInputMsg('');
-    modifyConversationName(currentMsg);
   };
 
   const onInputMsgChange = (value: string) => {
@@ -218,42 +313,81 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
     }
   };
 
-  const onSelectConversation = (conversation: ConversationDetailType, name?: string) => {
+  const onSelectConversation = (
+    conversation: ConversationDetailType,
+    name?: string,
+    modelId?: number,
+    entityId?: string,
+  ) => {
     if (!isMobileMode) {
       window.history.replaceState('', '', `?q=${conversation.chatName}&cid=${conversation.chatId}`);
     }
     setCurrentConversation({
       ...conversation,
       initMsg: name,
+      modelId,
+      entityId,
     });
     saveConversationToLocal(conversation);
-    setCurrentDomain(undefined);
+  };
+
+  const updateChatFilter = (data: MsgDataType) => {
+    const { queryMode, dimensionFilters, elementMatches, modelName, model } = data.chatContext;
+    if (queryMode !== 'ENTITY_LIST_FILTER') {
+      return;
+    }
+    const entityId = dimensionFilters?.length > 0 ? dimensionFilters[0].value : undefined;
+    const entityName = elementMatches?.find((item: any) => item.element?.type === 'ID')?.element
+      ?.name;
+
+    if (typeof entityId === 'string' && entityName) {
+      setCurrentModel(model);
+      setDefaultEntity({
+        entityId,
+        entityName,
+        modelName,
+      });
+    }
   };
 
   const onMsgDataLoaded = (data: MsgDataType, questionId: string | number) => {
+    if (!isMobile) {
+      conversationRef?.current?.updateData();
+    }
     if (!data) {
       return;
     }
-    if (data.queryMode === 'INSTRUCTION') {
+    let parseOptionsItem: any;
+    if (data.parseOptions && data.parseOptions.length > 0) {
+      parseOptionsItem = {
+        id: uuid(),
+        msg: messageList[messageList.length - 1]?.msg,
+        type: MessageTypeEnum.PARSE_OPTIONS,
+        parseOptions: data.parseOptions,
+      };
+    }
+    if (data.queryMode === 'WEB_PAGE') {
       setMessageList([
-        ...messageList.slice(0, messageList.length - 1),
+        ...messageList,
         {
           id: uuid(),
-          msg: data.response.name || messageList[messageList.length - 1]?.msg,
-          type: MessageTypeEnum.INSTRUCTION,
+          msg: messageList[messageList.length - 1]?.msg,
+          type: MessageTypeEnum.PLUGIN,
           msgData: data,
         },
+        ...(parseOptionsItem ? [parseOptionsItem] : []),
       ]);
     } else {
       const msgs = cloneDeep(messageList);
       const msg = msgs.find((item) => item.id === questionId);
       if (msg) {
         msg.msgData = data;
-        setMessageList(msgs);
+        setMessageList([...msgs, ...(parseOptionsItem ? [parseOptionsItem] : [])]);
       }
       updateMessageContainerScroll();
     }
-    setCurrentEntity(data);
+
+    updateChatFilter(data);
   };
 
   const onCheckMore = (data: MsgDataType) => {
@@ -262,39 +396,55 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
       {
         id: uuid(),
         msg: data.response.name,
-        type: MessageTypeEnum.INSTRUCTION,
+        type: MessageTypeEnum.PLUGIN,
         msgData: data,
+      },
+    ]);
+    updateMessageContainerScroll();
+    if (onCheckMoreDetail) {
+      onCheckMoreDetail();
+    }
+  };
+
+  const onToggleCollapseBtn = () => {
+    setConversationCollapsed(!conversationCollapsed);
+    localStorage.setItem('CONVERSATION_COLLAPSED', `${!conversationCollapsed}`);
+  };
+
+  const getIdentityMsgText = (model?: ModelType) => {
+    return model
+      ? `您好，我当前身份是【${model.name}】主题专家，我将尽力帮您解答相关问题～`
+      : '您好，我将尽力帮您解答所有主题相关问题～';
+  };
+
+  const onApplyAuth = (model: string) => {
+    setApplyAuthModel(model);
+    setApplyAuthVisible(true);
+  };
+
+  const onAddConversation = () => {
+    conversationRef.current?.onAddConversation();
+    inputFocus();
+  };
+
+  const onSelectAgent = (agent: AgentType) => {
+    setCurrentAgent(agent);
+    setMessageList([
+      ...messageList,
+      {
+        id: uuid(),
+        type: MessageTypeEnum.TEXT,
+        msg: `您好，智能助理【${agent.name}】将与您对话，可输入“/”切换助理`,
       },
     ]);
     updateMessageContainerScroll();
   };
 
-  const getIdentityMsgText = (domain?: DomainType) => {
-    return domain
-      ? `您好，我当前身份是【${domain.name}】主题专家，我将尽力帮您解答相关问题～`
-      : '您好，我将尽力帮您解答所有主题相关问题～';
-  };
-
-  const getIdentityMsg = (domain?: DomainType) => {
-    return {
-      id: uuid(),
-      type: MessageTypeEnum.TEXT,
-      msg: getIdentityMsgText(domain),
-    };
-  };
-
-  const onSelectDomain = (domain: DomainType) => {
-    const domainValue = currentDomain?.id === domain.id ? undefined : domain;
-    setCurrentDomain(domainValue);
-    setCurrentEntity(undefined);
-    setMessageList([...messageList, getIdentityMsg(domainValue)]);
-    updateMessageContainerScroll();
-    inputFocus();
-  };
-
   const chatClass = classNames(styles.chat, {
-    [styles.mobile]: isMobileMode,
-    [styles.copilot]: isCopilotMode,
+    [styles.mobileMode]: isMobileMode,
+    [styles.mobile]: isMobile,
+    [styles.copilotFullscreen]: copilotFullscreen,
+    [styles.conversationCollapsed]: conversationCollapsed,
   });
 
   return (
@@ -302,6 +452,17 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
       {!isMobileMode && <Helmet title={WEB_TITLE} />}
       <div className={styles.topSection} />
       <div className={styles.chatSection}>
+        <Conversation
+          currentConversation={currentConversation}
+          collapsed={conversationCollapsed}
+          isCopilotMode={isCopilotMode}
+          defaultModelName={defaultModelName}
+          defaultEntityFilter={defaultEntityFilter}
+          triggerNewConversation={triggerNewConversation}
+          onNewConversationTriggered={onNewConversationTriggered}
+          onSelectConversation={onSelectConversation}
+          ref={conversationRef}
+        />
         <div className={styles.chatApp}>
           {currentConversation && (
             <div className={styles.chatBody}>
@@ -310,50 +471,51 @@ const Chat: React.FC<Props> = ({ isCopilotMode }) => {
                   id="messageContainer"
                   messageList={messageList}
                   chatId={currentConversation?.chatId}
-                  miniProgramLoading={miniProgramLoading}
                   isMobileMode={isMobileMode}
-                  onClickMessageContainer={() => {
-                    inputFocus();
-                  }}
+                  conversationCollapsed={conversationCollapsed}
+                  copilotFullscreen={copilotFullscreen}
+                  agentList={agentList}
+                  onClickMessageContainer={inputFocus}
                   onMsgDataLoaded={onMsgDataLoaded}
-                  onSelectSuggestion={onSendMsg}
                   onCheckMore={onCheckMore}
-                  onUpdateMessageScroll={updateMessageContainerScroll}
+                  onApplyAuth={onApplyAuth}
+                  onSendMsg={onSendMsg}
+                  onSelectAgent={onSelectAgent}
                 />
                 <ChatFooter
                   inputMsg={inputMsg}
                   chatId={currentConversation?.chatId}
-                  domains={domains}
-                  currentDomain={currentDomain}
-                  isMobileMode={isMobileMode}
+                  models={models}
+                  agentList={agentList}
+                  currentModel={currentModel}
+                  currentAgent={currentAgent}
+                  defaultEntity={defaultEntity}
+                  collapsed={conversationCollapsed}
+                  isCopilotMode={isCopilotMode}
+                  copilotFullscreen={copilotFullscreen}
+                  onToggleCollapseBtn={onToggleCollapseBtn}
                   onInputMsgChange={onInputMsgChange}
-                  onSendMsg={(msg: string, domainId?: number) => {
-                    onSendMsg(msg, messageList, domainId);
+                  onSendMsg={(msg: string, modelId?: number) => {
+                    onSendMsg(msg, messageList, modelId);
                     if (isMobile) {
                       inputBlur();
                     }
                   }}
-                  onAddConversation={() => {
-                    conversationRef.current?.onAddConversation();
-                    inputFocus();
+                  onAddConversation={onAddConversation}
+                  onCancelDefaultFilter={() => {
+                    changeModel(undefined);
+                    setDefaultEntity(undefined);
+                    if (onCancelCopilotFilter) {
+                      onCancelCopilotFilter();
+                    }
                   }}
+                  onSelectAgent={onSelectAgent}
                   ref={chatFooterRef}
                 />
               </div>
             </div>
           )}
         </div>
-        {!isMobileMode && (
-          <RightSection
-            domains={domains}
-            currentEntity={currentEntity}
-            currentDomain={currentDomain}
-            currentConversation={currentConversation}
-            onSelectDomain={onSelectDomain}
-            onSelectConversation={onSelectConversation}
-            conversationRef={conversationRef}
-          />
-        )}
       </div>
     </div>
   );

@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Switch, message } from 'antd';
-import SelectPartenr from '@/components/SelectPartner';
+import SelectPartner from '@/components/SelectPartner';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
 import { connect } from 'umi';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
-import { updateDomain, getDomainDetail } from '../../service';
+import { updateDomain, updateModel, getDomainDetail, getModelDetail } from '../../service';
 
 import styles from '../style.less';
 type Props = {
+  permissionTarget: 'model' | 'domain';
   dispatch: Dispatch;
   domainManger: StateType;
   onSubmit?: (data?: any) => void;
@@ -18,15 +19,22 @@ type Props = {
 
 const FormItem = Form.Item;
 
-const PermissionAdminForm: React.FC<Props> = ({ domainManger, onValuesChange }) => {
+const PermissionAdminForm: React.FC<Props> = ({
+  permissionTarget,
+  domainManger,
+  onValuesChange,
+}) => {
   const [form] = Form.useForm();
   const [isOpenState, setIsOpenState] = useState<boolean>(true);
   const [classDetail, setClassDetail] = useState<any>({});
-  const { selectDomainId } = domainManger;
+  const { selectModelId: modelId, selectDomainId } = domainManger;
   const { APP_TARGET } = process.env;
 
-  const queryClassDetail = async (domainId: number) => {
-    const { code, msg, data } = await getDomainDetail({ domainId });
+  const queryClassDetail = async () => {
+    const selectId = permissionTarget === 'model' ? modelId : selectDomainId;
+    const { code, msg, data } = await (permissionTarget === 'model'
+      ? getModelDetail
+      : getDomainDetail)({ modelId: selectId });
     if (code === 200) {
       setClassDetail(data);
       const fieldsValue = {
@@ -44,8 +52,8 @@ const PermissionAdminForm: React.FC<Props> = ({ domainManger, onValuesChange }) 
   };
 
   useEffect(() => {
-    queryClassDetail(selectDomainId);
-  }, [selectDomainId]);
+    queryClassDetail();
+  }, [modelId]);
 
   const saveAuth = async () => {
     const values = await form.validateFields();
@@ -57,9 +65,10 @@ const PermissionAdminForm: React.FC<Props> = ({ domainManger, onValuesChange }) 
       viewers,
       isOpen: isOpen ? 1 : 0,
     };
-    const { code, msg } = await updateDomain(queryClassData);
+    const { code, msg } = await (permissionTarget === 'model' ? updateModel : updateDomain)(
+      queryClassData,
+    );
     if (code === 200) {
-      // message.success('保存成功');
       return;
     }
     message.error(msg);
@@ -110,7 +119,7 @@ const PermissionAdminForm: React.FC<Props> = ({ domainManger, onValuesChange }) 
           <>
             {APP_TARGET === 'inner' && (
               <FormItem name="viewOrgs" label="按组织">
-                <SelectPartenr
+                <SelectPartner
                   type="selectedDepartment"
                   treeSelectProps={{
                     placeholder: '请选择需要授权的部门',
@@ -123,16 +132,6 @@ const PermissionAdminForm: React.FC<Props> = ({ domainManger, onValuesChange }) 
             </FormItem>
           </>
         )}
-        {/* <FormItem>
-          <Button
-            type="primary"
-            onClick={() => {
-              saveAuth();
-            }}
-          >
-            保 存
-          </Button>
-        </FormItem> */}
       </Form>
     </>
   );

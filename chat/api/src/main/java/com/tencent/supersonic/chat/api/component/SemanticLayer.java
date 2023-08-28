@@ -2,12 +2,18 @@ package com.tencent.supersonic.chat.api.component;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.semantic.api.core.request.PageDimensionReq;
-import com.tencent.supersonic.semantic.api.core.request.PageMetricReq;
-import com.tencent.supersonic.semantic.api.core.response.*;
-import com.tencent.supersonic.semantic.api.query.request.QuerySqlReq;
+import com.tencent.supersonic.chat.api.pojo.ModelSchema;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
+import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-
 import java.util.List;
 
 /**
@@ -26,26 +32,21 @@ public interface SemanticLayer {
 
     QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user);
 
-    QueryResultWithSchemaResp queryBySql(QuerySqlReq querySqlReq, User user);
+    QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user);
 
-    DomainSchemaResp getDomainSchemaInfo(Long domain, Boolean cacheEnable);
+    QueryResultWithSchemaResp queryByDsl(QueryDslReq queryDslReq, User user);
 
-    List<DomainSchemaResp> getDomainSchemaInfo(List<Long> ids);
+    List<ModelSchema> getModelSchema();
 
-    List<DomainResp> getDomainListForViewer();
+    List<ModelSchema> getModelSchema(List<Long> ids);
 
-    List<DomainResp> getDomainListForAdmin();
+    ModelSchema getModelSchema(Long model, Boolean cacheEnable);
 
-    PageInfo<DimensionResp> queryDimensionPage(PageDimensionReq pageDimensionCmd);
+    PageInfo<DimensionResp> getDimensionPage(PageDimensionReq pageDimensionCmd);
 
-    PageInfo<MetricResp> queryMetricPage(PageMetricReq pageMetricCmd);
+    PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricCmd);
 
-//    PageInfo<MetricResp> queryMetricPage(PageMetricReq pageMetricCmd);
-//
-//    PageInfo<DimensionResp> queryDimensionPage(PageDimensionReq pageDimensionCmd);
-//
-//    List<DomainResp> getDomainListForAdmin();
-//
-//    List<DomainResp> getDomainListForViewer();
+    List<DomainResp> getDomainList(User user);
 
+    List<ModelResp> getModelList(AuthType authType, Long domainId, User user);
 }

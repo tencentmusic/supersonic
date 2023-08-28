@@ -1,0 +1,37 @@
+@import '../../../styles/index.less';
+
+@filter-section-prefix-cls: ~'@{supersonic-chat-prefix}-filter-section';
+
+.@{filter-section-prefix-cls} {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 12px;
+  color: var(--text-color-secondary);
+  font-weight: normal;
+  font-size: 13px;
+
+  &-field-label {
+    color: var(--text-color-fourth);
+  }
+
+  &-filter-values {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 12px;
+  }
+
+  &-filter-item {
+    color: var(--text-color-third);
+    max-width: 200px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  &-filter-value {
+    color: var(--text-color);
+    font-weight: 500;
+  }
+}

@@ -1,3 +1,5 @@
+import { TreeGraphData } from '@antv/g6-core';
+
 export type ISODateString =
   `${number}-${number}-${number}T${number}:${number}:${number}.${number}+${number}:${number}`;
 
@@ -5,6 +7,10 @@ export type GraphConfigType = 'datasource' | 'dimension' | 'metric';
 export type UserName = string;
 
 export type SensitiveLevel = 0 | 1 | 2 | null;
+
+// export type RefreshGraphData = (graphRootData: TreeGraphData) => void;
+
+export type ToolBarSearchCallBack = (text: string) => void;
 
 export declare namespace IDataSource {
   interface IIdentifiersItem {
@@ -83,6 +89,31 @@ export declare namespace ISemantic {
     admins?: string[];
     adminOrgs?: any[];
     isOpen?: number;
+    entity?: { entityId: number; names: string[] };
+    dimensionCnt?: number;
+    metricCnt?: number;
+  }
+
+  interface IModelItem {
+    createdBy?: string;
+    updatedBy?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    id: number;
+    name: string;
+    bizName: string;
+    description: any;
+    status?: number;
+    typeEnum?: any;
+    sensitiveLevel?: number;
+    parentId: number;
+    fullPath?: string;
+    viewers?: any[];
+    viewOrgs?: any[];
+    admins?: string[];
+    adminOrgs?: any[];
+    isOpen?: number;
+    entity?: { entityId: number; names: string[] };
     dimensionCnt?: number;
     metricCnt?: number;
   }
@@ -109,17 +140,23 @@ export declare namespace ISemantic {
     semanticType: string;
     alias: string;
     useCnt: number;
+    dimValueMaps: IDimensionValueSettingItem[];
   }
 
+  interface IDimensionValueSettingItem {
+    techName: string;
+    bizName: string;
+    alias?: string[];
+  }
   interface IMeasure {
     name: string;
-    agg: string;
+    agg?: string;
     expr: string;
-    constraint: string;
-    alias: string;
-    createMetric: string;
+    constraint?: string;
+    alias?: string;
+    createMetric?: string;
     bizName: string;
-    isCreateMetric: number;
+    isCreateMetric?: number;
     datasourceId: number;
   }
   interface ITypeParams {
@@ -142,7 +179,7 @@ export declare namespace ISemantic {
     domainId: number;
     domainName: string;
     type: string;
-    typeParams: TypeParams;
+    typeParams: ITypeParams;
     fullPath: string;
     dataFormatType: string;
     dataFormat: string;
@@ -152,6 +189,14 @@ export declare namespace ISemantic {
 
   type IDimensionList = IDimensionItem[];
   type IMetricList = IMetricItem[];
+
+  interface IDomainSchemaRelaItem {
+    domainId: number;
+    dimensions: IDimensionList;
+    metrics: IMetricList;
+    datasource: IDataSourceItem;
+  }
+  type IDomainSchemaRelaList = IDomainSchemaRelaItem[];
 }
 
 export declare namespace IChatConfig {
@@ -214,6 +259,7 @@ export declare namespace IChatConfig {
     chatDefaultConfig: {
       dimensions: ISemantic.IDimensionList;
       metrics: ISemantic.IMetricList;
+      ratioMetrics: ISemantic.IMetricList;
       unit: number;
       period: string;
     };

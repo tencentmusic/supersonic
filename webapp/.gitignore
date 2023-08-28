@@ -13,6 +13,10 @@
 
 /dist
 
+/supersonic-webapp
+
+supersonic-webapp.tar.gz
+
 package-lock.json
 yarn.lock
 

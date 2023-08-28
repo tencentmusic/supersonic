@@ -1,20 +1,60 @@
 import { isMobile } from '../../utils/utils';
 import { DislikeOutlined, LikeOutlined } from '@ant-design/icons';
-import { Button, message } from 'antd';
+import { Button, Popover, message } from 'antd';
 import { CLS_PREFIX } from '../../common/constants';
 import { MsgDataType } from '../../common/type';
+import RecommendOptions from '../RecommendOptions';
+import { useState } from 'react';
+import classNames from 'classnames';
+import { updateQAFeedback } from '../../service';
 
 type Props = {
   data: MsgDataType;
+  scoreValue?: number;
   isLastMessage?: boolean;
   isMobileMode?: boolean;
+  onSwitchEntity: (entityId: string) => void;
+  onChangeChart: () => void;
 };
 
-const Tools: React.FC<Props> = ({ data, isLastMessage, isMobileMode }) => {
+const Tools: React.FC<Props> = ({
+  data,
+  scoreValue,
+  isLastMessage,
+  isMobileMode,
+  onSwitchEntity,
+  onChangeChart,
+}) => {
+  const [recommendOptionsOpen, setRecommendOptionsOpen] = useState(false);
+  const { queryColumns, queryResults, queryId, chatContext, queryMode, entityInfo } = data || {};
+  const [score, setScore] = useState(scoreValue || 0);
+
+  const { dimensionFilters, elementMatches } = data.chatContext;
+
+  const entityId = dimensionFilters?.length > 0 ? dimensionFilters[0].value : undefined;
+  const entityName = elementMatches?.find((item: any) => item.element?.type === 'ID')?.element
+    ?.name;
+
+  const isEntityMode =
+    queryMode === 'ENTITY_LIST_FILTER' && typeof entityId === 'string' && entityName !== undefined;
+
   const prefixCls = `${CLS_PREFIX}-tools`;
 
+  const singleData = queryResults.length === 1;
+  const isMetricCard =
+    queryMode.includes('METRIC') &&
+    (singleData || chatContext?.dateInfo?.startDate === chatContext?.dateInfo?.endDate);
+
+  const noDashboard =
+    (queryColumns?.length === 1 &&
+      queryColumns[0].showType === 'CATEGORY' &&
+      queryResults?.length === 1) ||
+    (!queryMode.includes('METRIC') && !queryMode.includes('ENTITY')) ||
+    isMetricCard ||
+    isEntityMode;
+
   const changeChart = () => {
-    message.info('正在开发中，敬请期待');
+    onChangeChart();
   };
 
   const addToDashboard = () => {
@@ -22,32 +62,73 @@ const Tools: React.FC<Props> = ({ data, isLastMessage, isMobileMode }) => {
   };
 
   const like = () => {
-    message.info('正在开发中，敬请期待');
+    setScore(5);
+    updateQAFeedback(queryId, 5);
   };
 
   const dislike = () => {
-    message.info('正在开发中，敬请期待');
+    setScore(1);
+    updateQAFeedback(queryId, 1);
   };
 
-  const feedbackSection = isLastMessage && (
-    <div className={`${prefixCls}-feedback`}>
-      <div>这个回答正确吗？</div>
-      <LikeOutlined className={`${prefixCls}-like`} onClick={like} />
-      <DislikeOutlined className={`${prefixCls}-dislike`} onClick={dislike} />
-    </div>
-  );
+  const switchEntity = (option: string) => {
+    setRecommendOptionsOpen(false);
+    onSwitchEntity(option);
+  };
+
+  const likeClass = classNames(`${prefixCls}-like`, {
+    [`${prefixCls}-feedback-active`]: score === 5,
+  });
+  const dislikeClass = classNames(`${prefixCls}-dislike`, {
+    [`${prefixCls}-feedback-active`]: score === 1,
+  });
 
   return (
     <div className={prefixCls}>
-      {!isMobile && !isMobileMode && (
+      {isLastMessage && chatContext?.modelId && entityInfo?.entityId && (
+        <Popover
+          content={
+            <RecommendOptions
+              entityId={entityInfo.entityId}
+              modelId={chatContext.modelId}
+              modelName={chatContext.modelName}
+              isMobileMode={isMobileMode}
+              onSelect={switchEntity}
+            />
+          }
+          placement={isMobileMode ? 'top' : 'right'}
+          trigger="click"
+          open={recommendOptionsOpen}
+          onOpenChange={open => setRecommendOptionsOpen(open)}
+        >
+          <Button shape="round">切换其他匹配内容</Button>
+        </Popover>
+      )}
+      {!isMobile && (
         <>
-          <Button shape="round" onClick={changeChart}>
-            切换图表
-          </Button>
-          <Button shape="round" onClick={addToDashboard}>
-            加入看板
-          </Button>
-          {feedbackSection}
+          {queryMode === 'METRIC_FILTER' && (
+            <Button shape="round" onClick={changeChart}>
+              切换图表
+            </Button>
+          )}
+          {!noDashboard && (
+            <Button shape="round" onClick={addToDashboard}>
+              加入看板
+            </Button>
+          )}
+          {isLastMessage && !isMetricCard && (
+            <div className={`${prefixCls}-feedback`}>
+              <div>这个回答正确吗？</div>
+              <LikeOutlined className={likeClass} onClick={like} />
+              <DislikeOutlined
+                className={dislikeClass}
+                onClick={e => {
+                  e.stopPropagation();
+                  dislike();
+                }}
+              />
+            </div>
+          )}
         </>
       )}
     </div>
