@@ -64,6 +64,10 @@ Pull the source code and run script "assembly/bin/build-standalone.sh" to build 
 
 Pull the source code and run scripts "assembly/bin/build-chat.sh" and "assembly/bin/build-semantic.sh" separately to build packages.
 
+### Build for Local Development
+
+Pull the source code and run script "assembly/bin/build-ide.sh" and run bootstrap class "StandaloneLauncher" in the IDE.
+
 ## WeChat Contact
 
 Please join the chat group to suggest feedbacks or ideas:

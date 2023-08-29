@@ -56,11 +56,15 @@
 
 ### Standalone模式构建
 
-下载源码包，运行脚本"assembly/bin/build-standalone.sh"，将所有服务一起编译打包
+下载源码包，运行脚本"assembly/bin/build-standalone.sh"，将所有服务一起编译打包。
 
 ### Distributed模式构建
 
-下载源码包，分别运行脚本"assembly/bin/build-chat.sh"、"assembly/bin/build-semantic.sh"，为问答层服务和语义层服务编译打包
+下载源码包，分别运行脚本"assembly/bin/build-chat.sh"、"assembly/bin/build-semantic.sh"，为问答层服务和语义层服务编译打包。
+
+### 本地开发构建
+
+下载源码包，运行脚本"assembly/bin/build-ide.sh"，然后在本地IDE运行启动类"StandaloneLauncher"。
 
 ## 微信联系方式
 
