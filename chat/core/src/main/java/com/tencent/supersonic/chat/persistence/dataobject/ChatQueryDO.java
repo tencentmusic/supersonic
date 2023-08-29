@@ -2,175 +2,194 @@ package com.tencent.supersonic.chat.persistence.dataobject;
 
 import java.util.Date;
 
-
 public class ChatQueryDO {
-
     /**
-     * questionId
      */
     private Long questionId;
 
     /**
-     * createTime
+     */
+    private Integer agentId;
+
+    /**
      */
     private Date createTime;
 
     /**
-     * userName
      */
     private String userName;
 
     /**
-     * queryState
      */
     private Integer queryState;
 
     /**
-     * chatId
      */
     private Long chatId;
 
     /**
-     * score
      */
     private Integer score;
 
     /**
-     * feedback
      */
     private String feedback;
 
     /**
-     * queryText
      */
     private String queryText;
 
     /**
-     * queryResponse
      */
     private String queryResult;
 
     /**
-     * return question_id
+     * @return question_id
      */
     public Long getQuestionId() {
         return questionId;
     }
 
     /**
-     * questionId
+     * @param questionId
      */
     public void setQuestionId(Long questionId) {
         this.questionId = questionId;
     }
 
     /**
-     * return create_time
+     * @return agent_id
+     */
+    public Integer getAgentId() {
+        return agentId;
+    }
+
+    /**
+     * @param agentId
+     */
+    public void setAgentId(Integer agentId) {
+        this.agentId = agentId;
+    }
+
+    /**
+     * @return create_time
      */
     public Date getCreateTime() {
         return createTime;
     }
 
     /**
-     * createTime
+     * @param createTime
      */
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
 
     /**
-     * return user_name
+     * @return user_name
      */
     public String getUserName() {
         return userName;
     }
 
     /**
-     * userName
+     * @param userName
      */
     public void setUserName(String userName) {
         this.userName = userName == null ? null : userName.trim();
     }
 
     /**
-     * return query_state
+     *
+     * @return query_state
      */
     public Integer getQueryState() {
         return queryState;
     }
 
     /**
-     * queryState
+     *
+     * @param queryState
      */
     public void setQueryState(Integer queryState) {
         this.queryState = queryState;
     }
 
     /**
-     * return chat_id
+     *
+     * @return chat_id
      */
     public Long getChatId() {
         return chatId;
     }
 
     /**
-     * chatId
+     *
+     * @param chatId
      */
     public void setChatId(Long chatId) {
         this.chatId = chatId;
     }
 
     /**
-     * return score
+     *
+     * @return score
      */
     public Integer getScore() {
         return score;
     }
 
     /**
-     * score
+     *
+     * @param score
      */
     public void setScore(Integer score) {
         this.score = score;
     }
 
     /**
-     * return feedback
+     *
+     * @return feedback
      */
     public String getFeedback() {
         return feedback;
     }
 
     /**
-     * feedback
+     *
+     * @param feedback
      */
     public void setFeedback(String feedback) {
         this.feedback = feedback == null ? null : feedback.trim();
     }
 
     /**
-     * return query_text
+     *
+     * @return query_text
      */
     public String getQueryText() {
         return queryText;
     }
 
     /**
-     * queryText
+     *
+     * @param queryText
      */
     public void setQueryText(String queryText) {
         this.queryText = queryText == null ? null : queryText.trim();
     }
 
     /**
-     * return query_response
+     *
+     * @return query_result
      */
     public String getQueryResult() {
         return queryResult;
     }
 
     /**
-     * queryResponse
+     *
+     * @param queryResult
      */
     public void setQueryResult(String queryResult) {
         this.queryResult = queryResult == null ? null : queryResult.trim();

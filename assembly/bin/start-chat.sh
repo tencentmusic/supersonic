@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 sbinDir=$(cd "$(dirname "$0")"; pwd)
-baseDir=$(cd "$sbinDir/.." && pwd -P)
+baseDir=$(readlink -f $sbinDir/../)
 runtimeDir=$baseDir/../runtime
 buildDir=$baseDir/build
 

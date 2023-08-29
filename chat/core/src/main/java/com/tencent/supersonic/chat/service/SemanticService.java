@@ -81,17 +81,17 @@ public class SemanticService {
     private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
 
     public ModelSchema getModelSchema(Long id) {
-        ModelSchema ModelSchema = schemaService.getModelSchema(id);
-        if (!Objects.isNull(ModelSchema) && !Objects.isNull(ModelSchema.getModel())) {
+        ModelSchema modelSchema = schemaService.getModelSchema(id);
+        if (!Objects.isNull(modelSchema) && !Objects.isNull(modelSchema.getModel())) {
             ChatConfigResp chaConfigInfo =
-                    configService.fetchConfigByModelId(ModelSchema.getModel().getId());
+                    configService.fetchConfigByModelId(modelSchema.getModel().getId());
             // filter dimensions in blacklist
-            filterBlackDim(ModelSchema, chaConfigInfo);
+            filterBlackDim(modelSchema, chaConfigInfo);
             // filter metrics in blacklist
-            filterBlackMetric(ModelSchema, chaConfigInfo);
+            filterBlackMetric(modelSchema, chaConfigInfo);
         }
 
-        return ModelSchema;
+        return modelSchema;
     }
 
     public EntityInfo getEntityInfo(SemanticParseInfo parseInfo, User user) {
@@ -103,20 +103,20 @@ public class SemanticService {
                 return entityInfo;
             }
             if (entityInfo.getModelInfo() != null && entityInfo.getModelInfo().getPrimaryEntityBizName() != null) {
-                String ModelInfoPrimaryName = entityInfo.getModelInfo().getPrimaryEntityBizName();
-                String ModelInfoId = "";
+                String modelInfoPrimaryName = entityInfo.getModelInfo().getPrimaryEntityBizName();
+                String modelInfoId = "";
                 for (QueryFilter chatFilter : parseInfo.getDimensionFilters()) {
                     if (chatFilter != null && chatFilter.getBizName() != null && chatFilter.getBizName()
-                            .equals(ModelInfoPrimaryName)) {
+                            .equals(modelInfoPrimaryName)) {
                         if (chatFilter.getOperator().equals(FilterOperatorEnum.EQUALS)) {
-                            ModelInfoId = chatFilter.getValue().toString();
+                            modelInfoId = chatFilter.getValue().toString();
                         }
                     }
                 }
-                if (!"".equals(ModelInfoId)) {
+                if (!"".equals(modelInfoId)) {
                     try {
                         setMainModel(entityInfo, parseInfo.getModelId(),
-                                ModelInfoId, user);
+                                modelInfoId, user);
 
                         return entityInfo;
                     } catch (Exception e) {
@@ -128,8 +128,8 @@ public class SemanticService {
         return null;
     }
 
-    public EntityInfo getEntityInfo(Long Model) {
-        ChatConfigRichResp chaConfigRichDesc = configService.getConfigRichInfo(Model);
+    public EntityInfo getEntityInfo(Long model) {
+        ChatConfigRichResp chaConfigRichDesc = configService.getConfigRichInfo(model);
         if (Objects.isNull(chaConfigRichDesc) || Objects.isNull(chaConfigRichDesc.getChatDetailRichConfig())) {
             return new EntityInfo();
         }
@@ -142,20 +142,20 @@ public class SemanticService {
         Long modelId = chaConfigRichDesc.getModelId();
         if (Objects.nonNull(chaConfigRichDesc) && Objects.nonNull(modelId)) {
             SemanticService schemaService = ContextUtils.getBean(SemanticService.class);
-            ModelSchema ModelSchema = schemaService.getModelSchema(modelId);
-            if (Objects.isNull(ModelSchema) || Objects.isNull(ModelSchema.getEntity())) {
+            ModelSchema modelSchema = schemaService.getModelSchema(modelId);
+            if (Objects.isNull(modelSchema) || Objects.isNull(modelSchema.getEntity())) {
                 return entityInfo;
             }
-            ModelInfo ModelInfo = new ModelInfo();
-            ModelInfo.setItemId(modelId.intValue());
-            ModelInfo.setName(ModelSchema.getModel().getName());
-            ModelInfo.setWords(ModelSchema.getModel().getAlias());
-            ModelInfo.setBizName(ModelSchema.getModel().getBizName());
-            if (Objects.nonNull(ModelSchema.getEntity())) {
-                ModelInfo.setPrimaryEntityBizName(ModelSchema.getEntity().getBizName());
+            ModelInfo modelInfo = new ModelInfo();
+            modelInfo.setItemId(modelId.intValue());
+            modelInfo.setName(modelSchema.getModel().getName());
+            modelInfo.setWords(modelSchema.getModel().getAlias());
+            modelInfo.setBizName(modelSchema.getModel().getBizName());
+            if (Objects.nonNull(modelSchema.getEntity())) {
+                modelInfo.setPrimaryEntityBizName(modelSchema.getEntity().getBizName());
             }
 
-            entityInfo.setModelInfo(ModelInfo);
+            entityInfo.setModelInfo(modelInfo);
             List<DataInfo> dimensions = new ArrayList<>();
             List<DataInfo> metrics = new ArrayList<>();
 
@@ -189,19 +189,19 @@ public class SemanticService {
         return entityInfo;
     }
 
-    public void setMainModel(EntityInfo ModelInfo, Long Model, String entity, User user) {
-        ModelSchema ModelSchema = schemaService.getModelSchema(Model);
+    public void setMainModel(EntityInfo modelInfo, Long model, String entity, User user) {
+        ModelSchema modelSchema = schemaService.getModelSchema(model);
 
-        ModelInfo.setEntityId(entity);
+        modelInfo.setEntityId(entity);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
-        semanticParseInfo.setModel(ModelSchema.getModel());
+        semanticParseInfo.setModel(modelSchema.getModel());
         semanticParseInfo.setNativeQuery(true);
-        semanticParseInfo.setMetrics(getMetrics(ModelInfo));
-        semanticParseInfo.setDimensions(getDimensions(ModelInfo));
+        semanticParseInfo.setMetrics(getMetrics(modelInfo));
+        semanticParseInfo.setDimensions(getDimensions(modelInfo));
         DateConf dateInfo = new DateConf();
         int unit = 1;
         ChatConfigResp chatConfigInfo =
-                configService.fetchConfigByModelId(ModelSchema.getModel().getId());
+                configService.fetchConfigByModelId(modelSchema.getModel().getId());
         if (Objects.nonNull(chatConfigInfo) && Objects.nonNull(chatConfigInfo.getChatDetailConfig())
                 && Objects.nonNull(chatConfigInfo.getChatDetailConfig().getChatDefaultConfig())) {
             ChatDefaultConfigReq chatDefaultConfig = chatConfigInfo.getChatDetailConfig().getChatDefaultConfig();
@@ -220,7 +220,7 @@ public class SemanticService {
         QueryFilter chatFilter = new QueryFilter();
         chatFilter.setValue(String.valueOf(entity));
         chatFilter.setOperator(FilterOperatorEnum.EQUALS);
-        chatFilter.setBizName(getEntityPrimaryName(ModelInfo));
+        chatFilter.setBizName(getEntityPrimaryName(modelInfo));
         Set<QueryFilter> chatFilters = new LinkedHashSet();
         chatFilters.add(chatFilter);
         semanticParseInfo.setDimensionFilters(chatFilters);
@@ -242,18 +242,18 @@ public class SemanticService {
                     if (entry.getValue() == null || entryKey == null) {
                         continue;
                     }
-                    ModelInfo.getDimensions().stream().filter(i -> entryKey.equals(i.getBizName()))
+                    modelInfo.getDimensions().stream().filter(i -> entryKey.equals(i.getBizName()))
                             .forEach(i -> i.setValue(entry.getValue().toString()));
-                    ModelInfo.getMetrics().stream().filter(i -> entryKey.equals(i.getBizName()))
+                    modelInfo.getMetrics().stream().filter(i -> entryKey.equals(i.getBizName()))
                             .forEach(i -> i.setValue(entry.getValue().toString()));
                 }
             }
         }
     }
 
-    private Set<SchemaElement> getDimensions(EntityInfo ModelInfo) {
+    private Set<SchemaElement> getDimensions(EntityInfo modelInfo) {
         Set<SchemaElement> dimensions = new LinkedHashSet();
-        for (DataInfo mainEntityDimension : ModelInfo.getDimensions()) {
+        for (DataInfo mainEntityDimension : modelInfo.getDimensions()) {
             SchemaElement dimension = new SchemaElement();
             dimension.setBizName(mainEntityDimension.getBizName());
             dimensions.add(dimension);
@@ -270,9 +270,9 @@ public class SemanticService {
         return entryKey;
     }
 
-    private Set<SchemaElement> getMetrics(EntityInfo ModelInfo) {
+    private Set<SchemaElement> getMetrics(EntityInfo modelInfo) {
         Set<SchemaElement> metrics = new LinkedHashSet();
-        for (DataInfo metricValue : ModelInfo.getMetrics()) {
+        for (DataInfo metricValue : modelInfo.getMetrics()) {
             SchemaElement metric = new SchemaElement();
             BeanUtils.copyProperties(metricValue, metric);
             metrics.add(metric);
@@ -280,31 +280,31 @@ public class SemanticService {
         return metrics;
     }
 
-    private String getEntityPrimaryName(EntityInfo ModelInfo) {
-        return ModelInfo.getModelInfo().getPrimaryEntityBizName();
+    private String getEntityPrimaryName(EntityInfo modelInfo) {
+        return modelInfo.getModelInfo().getPrimaryEntityBizName();
     }
 
-    private void filterBlackMetric(ModelSchema ModelSchema, ChatConfigResp chaConfigInfo) {
+    private void filterBlackMetric(ModelSchema modelSchema, ChatConfigResp chaConfigInfo) {
         ItemVisibility visibility = generateFinalVisibility(chaConfigInfo);
         if (Objects.nonNull(chaConfigInfo) && Objects.nonNull(visibility)
                 && !CollectionUtils.isEmpty(visibility.getBlackMetricIdList())
-                && !CollectionUtils.isEmpty(ModelSchema.getMetrics())) {
-            Set<SchemaElement> metric4Chat = ModelSchema.getMetrics().stream()
+                && !CollectionUtils.isEmpty(modelSchema.getMetrics())) {
+            Set<SchemaElement> metric4Chat = modelSchema.getMetrics().stream()
                     .filter(metric -> !visibility.getBlackMetricIdList().contains(metric.getId()))
                     .collect(Collectors.toSet());
-            ModelSchema.setMetrics(metric4Chat);
+            modelSchema.setMetrics(metric4Chat);
         }
     }
 
-    private void filterBlackDim(ModelSchema ModelSchema, ChatConfigResp chatConfigInfo) {
+    private void filterBlackDim(ModelSchema modelSchema, ChatConfigResp chatConfigInfo) {
         ItemVisibility visibility = generateFinalVisibility(chatConfigInfo);
         if (Objects.nonNull(chatConfigInfo) && Objects.nonNull(visibility)
                 && !CollectionUtils.isEmpty(visibility.getBlackDimIdList())
-                && !CollectionUtils.isEmpty(ModelSchema.getDimensions())) {
-            Set<SchemaElement> dim4Chat = ModelSchema.getDimensions().stream()
+                && !CollectionUtils.isEmpty(modelSchema.getDimensions())) {
+            Set<SchemaElement> dim4Chat = modelSchema.getDimensions().stream()
                     .filter(dim -> !visibility.getBlackDimIdList().contains(dim.getId()))
                     .collect(Collectors.toSet());
-            ModelSchema.setDimensions(dim4Chat);
+            modelSchema.setDimensions(dim4Chat);
         }
     }
 

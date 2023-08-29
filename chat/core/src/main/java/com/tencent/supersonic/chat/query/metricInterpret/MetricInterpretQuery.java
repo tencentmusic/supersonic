@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.query.metricInterpret;
+package com.tencent.supersonic.chat.query.metricinterpret;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -26,7 +26,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import java.util.*;
+
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,15 +38,15 @@ import java.util.stream.Collectors;
 public class MetricInterpretQuery extends PluginSemanticQuery {
 
 
-    public final static String QUERY_MODE = "METRIC_INTERPRET";
+    public static final String QUERY_MODE = "METRIC_INTERPRET";
+
+    public MetricInterpretQuery() {
+        QueryManager.register(this);
+    }
 
     @Override
     public String getQueryMode() {
         return QUERY_MODE;
-    }
-
-    public MetricInterpretQuery() {
-        QueryManager.register(this);
     }
 
     @Override
@@ -55,10 +59,11 @@ public class MetricInterpretQuery extends PluginSemanticQuery {
         String text = generateTableText(queryResultWithSchemaResp);
         Map<String, Object> properties = parseInfo.getProperties();
         Map<String, String> replacedMap = new HashMap<>();
-        String textReplaced = replaceText((String) properties.get("queryText"), parseInfo.getElementMatches(), replacedMap);
+        String textReplaced = replaceText((String) properties.get("queryText"),
+                parseInfo.getElementMatches(), replacedMap);
         String answer = replaceAnswer(fetchInterpret(textReplaced, text), replacedMap);
         QueryResult queryResult = new QueryResult();
-        List<QueryColumn> queryColumns = Lists.newArrayList(new QueryColumn("结果","string","answer"));
+        List<QueryColumn> queryColumns = Lists.newArrayList(new QueryColumn("结果", "string", "answer"));
         Map<String, Object> result = new HashMap<>();
         result.put("answer", answer);
         List<Map<String, Object>> resultList = Lists.newArrayList();
@@ -70,7 +75,8 @@ public class MetricInterpretQuery extends PluginSemanticQuery {
         return queryResult;
     }
 
-    private String replaceText(String text, List<SchemaElementMatch> schemaElementMatches, Map<String, String> replacedMap) {
+    private String replaceText(String text, List<SchemaElementMatch> schemaElementMatches,
+                               Map<String, String> replacedMap) {
         if (CollectionUtils.isEmpty(schemaElementMatches)) {
             return text;
         }
@@ -134,7 +140,7 @@ public class MetricInterpretQuery extends PluginSemanticQuery {
                 JSONObject.toJSONString(lLmAnswerReq));
         LLmAnswerResp lLmAnswerResp = JSONObject.parseObject(responseEntity.getBody(), LLmAnswerResp.class);
         if (lLmAnswerResp != null) {
-            return lLmAnswerResp.getAssistant_message();
+            return lLmAnswerResp.getAssistantMessage();
         }
         return null;
     }

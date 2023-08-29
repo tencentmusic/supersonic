@@ -3,17 +3,19 @@ package com.tencent.supersonic.semantic.model.domain.utils;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.semantic.api.model.request.DomainReq;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Domain;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
@@ -56,7 +58,8 @@ public class DomainConvert {
     }
 
     public static DomainResp convert(DomainDO domainDO, Map<Long, String> domainFullPathMap,
-            Map<Long, List<DimensionResp>> dimensionMap, Map<Long, List<MetricResp>> metricMap) {
+                                     Map<Long, List<DimensionResp>> dimensionMap,
+                                     Map<Long, List<MetricResp>> metricMap) {
         DomainResp domainResp = convert(domainDO, domainFullPathMap);
         domainResp.setDimensionCnt(dimensionMap.getOrDefault(domainResp.getId(), Lists.newArrayList()).size());
         domainResp.setMetricCnt(metricMap.getOrDefault(domainResp.getId(), Lists.newArrayList()).size());

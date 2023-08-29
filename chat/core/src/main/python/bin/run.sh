@@ -4,7 +4,7 @@ llm_host=$1
 llm_port=$2
 
 binDir=$(cd "$(dirname "$0")"; pwd)
-baseDir=$(cd "$binDir/.." && pwd -P)
+baseDir=$(readlink -f $binDir/../)
 
 source ${baseDir}/bin/env.sh
 

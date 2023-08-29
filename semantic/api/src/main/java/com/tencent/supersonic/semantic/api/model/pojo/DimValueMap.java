@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 
-/**
- * @author: kanedai
- * @date: 2023/7/24
- */
-
 @Data
 public class DimValueMap {
 

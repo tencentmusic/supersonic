@@ -16,4 +16,8 @@ public class QueryAuthorization {
     private List<String> dimensionFilters;
     private List<String> dimensionFiltersDesc;
     private String message;
+
+    public QueryAuthorization(String message) {
+        this.message = message;
+    }
 }

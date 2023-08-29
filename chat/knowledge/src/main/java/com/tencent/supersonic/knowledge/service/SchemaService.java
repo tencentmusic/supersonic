@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class SchemaService {
 
-    private static final Integer META_CACHE_TIME = 5;
-    public static final String ALL_CACHE = "all";
 
+    public static final String ALL_CACHE = "all";
+    private static final Integer META_CACHE_TIME = 5;
     private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
 
     private LoadingCache<String, SemanticSchema> cache = CacheBuilder.newBuilder()

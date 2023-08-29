@@ -1,4 +1,4 @@
-package com.tencent.supersonic.auth.authentication.persistence.repository.Impl;
+package com.tencent.supersonic.auth.authentication.persistence.repository.impl;
 
 
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;

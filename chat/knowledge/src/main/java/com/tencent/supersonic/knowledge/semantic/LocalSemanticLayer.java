@@ -8,7 +8,12 @@ import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
-import com.tencent.supersonic.semantic.api.model.response.*;
+import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
@@ -31,7 +36,7 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
 
     @SneakyThrows
     @Override
-    public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user){
+    public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user) {
         QueryService queryService = ContextUtils.getBean(QueryService.class);
         return queryService.queryByStructWithAuth(queryStructReq, user);
     }

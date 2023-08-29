@@ -32,6 +32,7 @@ public class ModelSchema {
                 break;
             case VALUE:
                 element = dimensionValues.stream().filter(e -> e.getId() == elementID).findFirst();
+                break;
             default:
         }
 

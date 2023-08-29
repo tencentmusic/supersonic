@@ -5,11 +5,13 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.OptionalDouble;
+
 import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.OptionalDouble;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -50,8 +52,8 @@ public class HeuristicQuerySelector implements QuerySelector {
             return true;
         }
         for (SemanticQuery candidateQuery : candidateQueries) {
-            if (candidateQuery.getQueryMode().equals(MetricEntityQuery.QUERY_MODE) &&
-                    semanticQuery.getParseInfo().getScore() == candidateQuery.getParseInfo().getScore()) {
+            if (candidateQuery.getQueryMode().equals(MetricEntityQuery.QUERY_MODE)
+                    && semanticQuery.getParseInfo().getScore() == candidateQuery.getParseInfo().getScore()) {
                 return false;
             }
         }

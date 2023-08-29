@@ -2,8 +2,9 @@ package com.tencent.supersonic.chat.parser;
 
 
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
-import com.tencent.supersonic.chat.api.pojo.*;
-import com.tencent.supersonic.chat.query.dsl.DSLQuery;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.query.llm.dsl.DslQuery;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,7 +22,7 @@ public class SatisfactionChecker {
     // check all the parse info in candidate
     public static boolean check(QueryContext queryContext) {
         for (SemanticQuery query : queryContext.getCandidateQueries()) {
-            if (query.getQueryMode().equals(DSLQuery.QUERY_MODE)) {
+            if (query.getQueryMode().equals(DslQuery.QUERY_MODE)) {
                 continue;
             }
             if (checkThreshold(queryContext.getRequest().getQueryText(), query.getParseInfo())) {
@@ -32,7 +33,7 @@ public class SatisfactionChecker {
     }
 
     private static boolean checkThreshold(String queryText, SemanticParseInfo semanticParseInfo) {
-        int queryTextLength = queryText.length();
+        int queryTextLength = queryText.replaceAll(" ", "").length();
         double degree = semanticParseInfo.getScore() / queryTextLength;
         if (queryTextLength > QUERY_TEXT_LENGTH_THRESHOLD) {
             if (degree < LONG_TEXT_THRESHOLD) {

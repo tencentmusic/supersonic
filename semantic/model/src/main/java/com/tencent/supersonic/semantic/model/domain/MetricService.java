@@ -5,6 +5,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+
 import java.util.List;
 
 public interface MetricService {
@@ -33,5 +34,5 @@ public interface MetricService {
 
     void deleteMetric(Long id) throws Exception;
 
-    List<String> mockAlias(MetricReq metricReq,String mockType,User user);
+    List<String> mockAlias(MetricReq metricReq, String mockType, User user);
 }

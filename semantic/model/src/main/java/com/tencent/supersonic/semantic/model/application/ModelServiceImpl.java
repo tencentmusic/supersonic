@@ -4,41 +4,42 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
-import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.ModelReq;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
-import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
-import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
-import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.DomainResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-import com.tencent.supersonic.semantic.model.domain.DatasourceService;
-import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.DomainService;
-import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
+import com.tencent.supersonic.semantic.model.domain.DomainService;
+import com.tencent.supersonic.semantic.model.domain.DimensionService;
+import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.semantic.model.domain.DatasourceService;
+
 import com.tencent.supersonic.semantic.model.domain.dataobject.ModelDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Model;
 import com.tencent.supersonic.semantic.model.domain.repository.ModelRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.ModelConvert;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import java.util.List;
+import java.util.Objects;
+import java.util.Date;
+import java.util.Set;
+import java.util.Map;
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -52,8 +53,8 @@ public class ModelServiceImpl implements ModelService {
     private final UserService userService;
 
     public ModelServiceImpl(ModelRepository modelRepository, @Lazy MetricService metricService,
-            @Lazy DimensionService dimensionService, @Lazy DatasourceService datasourceService,
-            @Lazy DomainService domainService, UserService userService) {
+                            @Lazy DimensionService dimensionService, @Lazy DatasourceService datasourceService,
+                            @Lazy DomainService domainService, UserService userService) {
         this.modelRepository = modelRepository;
         this.metricService = metricService;
         this.dimensionService = dimensionService;
@@ -161,7 +162,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public ModelResp getModel(Long id) {
         Map<Long, DomainResp> domainRespMap = domainService.getDomainList().stream()
-                .collect(Collectors.toMap(DomainResp::getId, d -> d));
+                        .collect(Collectors.toMap(DomainResp::getId, d -> d));
         return ModelConvert.convert(getModelDO(id), domainRespMap);
     }
 
@@ -186,8 +187,8 @@ public class ModelServiceImpl implements ModelService {
         if (CollectionUtils.isEmpty(modelDOS)) {
             return modelResps;
         }
-        Map<Long, DomainResp> domainRespMap = domainService.getDomainList().stream()
-                .collect(Collectors.toMap(DomainResp::getId, d -> d));
+        Map<Long, DomainResp> domainRespMap = domainService.getDomainList()
+                        .stream().collect(Collectors.toMap(DomainResp::getId, d -> d));
         return modelDOS.stream()
                 .map(modelDO -> ModelConvert.convert(modelDO, domainRespMap))
                 .collect(Collectors.toList());
@@ -216,8 +217,29 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public Map<Long, String> getModelFullPathMap() {
-        return getModelList().stream()
-                .collect(Collectors.toMap(ModelResp::getId, ModelResp::getFullPath, (k1, k2) -> k1));
+        return getModelList().stream().collect(Collectors.toMap(ModelResp::getId,
+                ModelResp::getFullPath, (k1, k2) -> k1));
+    }
+
+    @Override
+    public List<String> getModelAdmin(Long id) {
+        ModelResp modelResp = getModel(id);
+        if (modelResp == null) {
+            return Lists.newArrayList();
+        }
+        if (!CollectionUtils.isEmpty(modelResp.getAdmins())) {
+            return modelResp.getAdmins();
+        }
+        Long domainId = modelResp.getDomainId();
+        DomainResp domainResp = domainService.getDomain(domainId);
+        while (domainResp != null) {
+            if (!CollectionUtils.isEmpty(domainResp.getAdmins())) {
+                return domainResp.getAdmins();
+            }
+            domainId = domainResp.getParentId();
+            domainResp = domainService.getDomain(domainId);
+        }
+        return Lists.newArrayList();
     }
 
     protected ModelDO getModelDO(Long id) {

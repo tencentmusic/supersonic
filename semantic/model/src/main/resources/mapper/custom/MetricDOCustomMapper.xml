@@ -119,7 +119,7 @@
         <if test="bizName != null and bizName != ''">
             and biz_name like CONCAT('%',#{bizName , jdbcType=VARCHAR},'%')
         </if>
-        <if test="sensitiveLevel != null and sensitiveLevel != ''">
+        <if test="sensitiveLevel != null">
             and sensitive_level = #{sensitiveLevel}
         </if>
         <if test="modelIds != null and modelIds.size >0">

@@ -2,9 +2,9 @@ package com.tencent.supersonic.integration;
 
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.parser.embedding.EmbeddingConfig;
-import com.tencent.supersonic.chat.parser.embedding.EmbeddingResp;
-import com.tencent.supersonic.chat.parser.embedding.RecallRetrieval;
+import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingConfig;
+import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingResp;
+import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrieval;
 import com.tencent.supersonic.chat.plugin.PluginManager;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.util.DataUtils;
@@ -34,7 +34,8 @@ public class MockConfiguration {
         when(embeddingConfig.getUrl()).thenReturn("test");
     }
 
-    public static void mockPluginManagerDoRequest(PluginManager pluginManager, String path, ResponseEntity<String> responseEntity) {
+    public static void mockPluginManagerDoRequest(PluginManager pluginManager, String path,
+                                                  ResponseEntity<String> responseEntity) {
         when(pluginManager.doRequest(eq(path), notNull(String.class))).thenReturn(responseEntity);
     }
 

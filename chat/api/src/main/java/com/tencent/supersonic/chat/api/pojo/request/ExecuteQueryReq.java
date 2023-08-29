@@ -9,8 +9,11 @@ import lombok.Data;
 public class ExecuteQueryReq {
 
     private User user;
+    private Integer agentId;
     private Integer chatId;
     private String queryText;
+    private Long queryId;
+    private Integer parseId;
     private SemanticParseInfo parseInfo;
     private boolean saveAnswer = true;
 }

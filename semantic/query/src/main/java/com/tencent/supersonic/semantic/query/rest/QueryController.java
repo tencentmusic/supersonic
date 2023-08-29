@@ -3,15 +3,15 @@ package com.tencent.supersonic.semantic.query.rest;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.semantic.api.model.response.SqlParserResp;
-import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
-import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
-import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
-import com.tencent.supersonic.semantic.query.service.QueryService;
 import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
+import com.tencent.supersonic.semantic.query.service.QueryService;
+import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -57,7 +57,6 @@ public class QueryController {
     public SqlParserResp parseByStruct(@RequestBody ParseSqlReq parseSqlReq,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
-        User user = UserHolder.findUser(request, response);
         QueryStatement queryStatement = semanticQueryEngine.physicalSql(parseSqlReq);
         SqlParserResp sqlParserResp = new SqlParserResp();
         BeanUtils.copyProperties(queryStatement, sqlParserResp);

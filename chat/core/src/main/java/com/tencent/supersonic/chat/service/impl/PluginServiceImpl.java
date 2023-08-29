@@ -14,15 +14,17 @@ import com.tencent.supersonic.chat.plugin.event.PluginDelEvent;
 import com.tencent.supersonic.chat.plugin.event.PluginUpdateEvent;
 import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
-import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -39,7 +41,7 @@ public class PluginServiceImpl implements PluginService {
     private ApplicationEventPublisher publisher;
 
     public PluginServiceImpl(PluginRepository pluginRepository,
-            ApplicationEventPublisher publisher) {
+                             ApplicationEventPublisher publisher) {
         this.pluginRepository = pluginRepository;
         this.publisher = publisher;
     }
@@ -115,8 +117,9 @@ public class PluginServiceImpl implements PluginService {
         List<PluginDO> pluginDOS = pluginRepository.query(pluginDOExample);
         if (StringUtils.isNotBlank(pluginQueryReq.getPattern())) {
             pluginDOS = pluginDOS.stream().filter(pluginDO ->
-                            pluginDO.getPattern().contains(pluginQueryReq.getPattern()) ||
-                                    (pluginDO.getName() != null && pluginDO.getName().contains(pluginQueryReq.getPattern())))
+                            pluginDO.getPattern().contains(pluginQueryReq.getPattern())
+                                    || (pluginDO.getName() != null
+                                    && pluginDO.getName().contains(pluginQueryReq.getPattern())))
                     .collect(Collectors.toList());
         }
         return convertList(pluginDOS);
@@ -130,8 +133,8 @@ public class PluginServiceImpl implements PluginService {
                     if (StringUtils.isBlank(plugin.getParseModeConfig())) {
                         return false;
                     }
-                    PluginParseConfig functionCallConfig = JsonUtil.toObject(plugin.getParseModeConfig(),
-                            PluginParseConfig.class);
+                    PluginParseConfig functionCallConfig = JsonUtil.toObject(
+                            plugin.getParseModeConfig(), PluginParseConfig.class);
                     if (Objects.isNull(functionCallConfig) || StringUtils.isEmpty(functionCallConfig.getName())) {
                         return false;
                     }

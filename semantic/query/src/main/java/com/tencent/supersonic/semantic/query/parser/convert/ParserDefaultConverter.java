@@ -1,9 +1,6 @@
 package com.tencent.supersonic.semantic.query.parser.convert;
 
-import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
-
 import com.tencent.supersonic.common.pojo.ColumnOrder;
-import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.query.pojo.Param;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
@@ -13,9 +10,7 @@ import com.tencent.supersonic.semantic.query.parser.SemanticConverter;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -68,7 +63,8 @@ public class ParserDefaultConverter implements SemanticConverter {
         // todo tmp delete
         // support detail query
         if (queryStructCmd.getNativeQuery() && CollectionUtils.isEmpty(sqlCommend.getMetrics())) {
-            String internalMetricName = queryStructUtils.generateInternalMetricName(queryStructCmd.getModelId(), queryStructCmd.getGroups());
+            String internalMetricName = queryStructUtils.generateInternalMetricName(
+                    queryStructCmd.getModelId(), queryStructCmd.getGroups());
             sqlCommend.getMetrics().add(internalMetricName);
         }
 

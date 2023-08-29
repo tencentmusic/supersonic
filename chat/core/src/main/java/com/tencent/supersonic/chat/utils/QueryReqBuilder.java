@@ -17,6 +17,7 @@ import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -81,7 +82,24 @@ public class QueryReqBuilder {
         BeanUtils.copyProperties(dateInfo, dateInfoNew);
         if (Objects.nonNull(dateInfo) && DateConf.DateMode.RECENT.equals(dateInfo.getDateMode())) {
             int unit = dateInfo.getUnit();
-            String startDate = LocalDate.now().plusDays(-unit).toString();
+            int days = 1;
+            switch (dateInfo.getPeriod()) {
+                case Constants.DAY:
+                    days = 1;
+                    break;
+                case Constants.WEEK:
+                    days = 7;
+                    break;
+                case Constants.MONTH:
+                    days = 30;
+                    break;
+                case Constants.YEAR:
+                    days = 365;
+                    break;
+                default:
+                    break;
+            }
+            String startDate = LocalDate.now().plusDays(-(unit * days)).toString();
             String endDate = LocalDate.now().plusDays(-1).toString();
             dateInfoNew.setDateMode(DateConf.DateMode.BETWEEN);
             dateInfoNew.setStartDate(startDate);
@@ -159,7 +177,13 @@ public class QueryReqBuilder {
             dimension.setBizName(dateField);
 
             if (QueryManager.isMetricQuery(queryMode)) {
-                parseInfo.getDimensions().add(dimension);
+                List<String> timeDimensions = Arrays.asList(TimeDimensionEnum.DAY.getName(),
+                        TimeDimensionEnum.WEEK.getName(), TimeDimensionEnum.MONTH.getName());
+                Set<SchemaElement> dimensions = parseInfo.getDimensions().stream()
+                        .filter(d -> !timeDimensions.contains(d.getBizName().toLowerCase())).collect(
+                                Collectors.toSet());
+                dimensions.add(dimension);
+                parseInfo.setDimensions(dimensions);
             }
         }
     }

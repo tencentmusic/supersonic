@@ -1,9 +1,9 @@
 package com.tencent.supersonic.chat.query.rule.entity;
 
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
-import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
@@ -12,6 +12,7 @@ import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.util.ContextUtils;
+
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -30,15 +31,15 @@ public abstract class EntityListQuery extends EntitySemanticQuery {
             ConfigService configService = ContextUtils.getBean(ConfigService.class);
             ChatConfigRichResp chaConfigRichDesc = configService.getConfigRichInfo(parseInfo.getModelId());
             SemanticService schemaService = ContextUtils.getBean(SemanticService.class);
-            ModelSchema ModelSchema = schemaService.getModelSchema(modelId);
+            ModelSchema modelSchema = schemaService.getModelSchema(modelId);
 
             if (chaConfigRichDesc != null && chaConfigRichDesc.getChatDetailRichConfig() != null
-                    && Objects.nonNull(ModelSchema) && Objects.nonNull(ModelSchema.getEntity())) {
+                    && Objects.nonNull(modelSchema) && Objects.nonNull(modelSchema.getEntity())) {
                 Set<SchemaElement> dimensions = new LinkedHashSet();
                 Set<SchemaElement> metrics = new LinkedHashSet();
                 Set<Order> orders = new LinkedHashSet();
-                ChatDefaultRichConfigResp chatDefaultConfig = chaConfigRichDesc.getChatDetailRichConfig()
-                        .getChatDefaultConfig();
+                ChatDefaultRichConfigResp chatDefaultConfig = chaConfigRichDesc
+                        .getChatDetailRichConfig().getChatDefaultConfig();
                 if (chatDefaultConfig != null) {
                     chatDefaultConfig.getMetrics().stream()
                             .forEach(metric -> {

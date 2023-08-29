@@ -5,23 +5,25 @@ import static com.tencent.supersonic.common.pojo.Constants.ADMIN_LOWER;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
-import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDetailConfigReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
 import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
 import com.tencent.supersonic.chat.api.pojo.request.RecommendedQuestionReq;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.config.ChatConfig;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatConfigDO;
-import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.util.JsonUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
@@ -119,6 +121,7 @@ public class ChatConfigHelper {
         chatConfigDescriptor.setCreatedAt(chatConfigDO.getCreatedAt());
         chatConfigDescriptor.setUpdatedBy(chatConfigDO.getUpdatedBy());
         chatConfigDescriptor.setUpdatedAt(chatConfigDO.getUpdatedAt());
+
 
         if (Strings.isEmpty(chatConfigDO.getChatAggConfig())) {
             chatConfigDescriptor.setChatAggConfig(generateEmptyChatAggConfigResp());

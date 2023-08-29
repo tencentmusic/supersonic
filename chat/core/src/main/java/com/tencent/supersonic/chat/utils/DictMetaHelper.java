@@ -10,12 +10,13 @@ import com.tencent.supersonic.chat.api.pojo.request.KnowledgeAdvancedConfig;
 import com.tencent.supersonic.chat.api.pojo.request.KnowledgeInfoReq;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
-import com.tencent.supersonic.chat.config.DefaultMetric;
 import com.tencent.supersonic.chat.config.Dim4Dict;
-import com.tencent.supersonic.chat.persistence.dataobject.DimValueDO;
+import com.tencent.supersonic.chat.config.DefaultMetric;
 import com.tencent.supersonic.chat.service.ConfigService;
+import com.tencent.supersonic.chat.persistence.dataobject.DimValueDO;
 import com.tencent.supersonic.knowledge.dictionary.DictUpdateMode;
 import com.tencent.supersonic.knowledge.dictionary.DimValue2DictCommand;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,16 +128,17 @@ public class DictMetaHelper {
     }
 
     private void fillDimValueDOList(List<DimValueDO> dimValueDOList, Long modelId,
-            Map<Long, SchemaElement> dimIdAndDescPair) {
+                                    Map<Long, SchemaElement> dimIdAndDescPair) {
         ChatConfigRichResp chaConfigRichDesc = configService.getConfigRichInfo(modelId);
         if (Objects.nonNull(chaConfigRichDesc) && Objects.nonNull(chaConfigRichDesc.getChatAggRichConfig())) {
 
-            ChatDefaultRichConfigResp chatDefaultConfig = chaConfigRichDesc.getChatAggRichConfig()
-                    .getChatDefaultConfig();
-            List<KnowledgeInfoReq> knowledgeAggInfo = chaConfigRichDesc.getChatAggRichConfig().getKnowledgeInfos();
+            ChatDefaultRichConfigResp chatDefaultConfig =
+                    chaConfigRichDesc.getChatAggRichConfig().getChatDefaultConfig();
+            List<KnowledgeInfoReq> knowledgeAggInfo =
+                    chaConfigRichDesc.getChatAggRichConfig().getKnowledgeInfos();
 
-            List<KnowledgeInfoReq> knowledgeDetailInfo = chaConfigRichDesc.getChatDetailRichConfig()
-                    .getKnowledgeInfos();
+            List<KnowledgeInfoReq> knowledgeDetailInfo =
+                    chaConfigRichDesc.getChatDetailRichConfig().getKnowledgeInfos();
 
             fillKnowledgeDimValue(knowledgeDetailInfo, chatDefaultConfig, dimValueDOList, dimIdAndDescPair, modelId);
             fillKnowledgeDimValue(knowledgeAggInfo, chatDefaultConfig, dimValueDOList, dimIdAndDescPair, modelId);
@@ -145,22 +148,23 @@ public class DictMetaHelper {
     }
 
     private void fillKnowledgeDimValue(List<KnowledgeInfoReq> knowledgeInfos,
-            ChatDefaultRichConfigResp chatDefaultConfig,
-            List<DimValueDO> dimValueDOList, Map<Long, SchemaElement> dimIdAndDescPair, Long modelId) {
+                                       ChatDefaultRichConfigResp chatDefaultConfig,
+                                       List<DimValueDO> dimValueDOList,
+                                       Map<Long, SchemaElement> dimIdAndDescPair, Long modelId) {
         if (!CollectionUtils.isEmpty(knowledgeInfos)) {
             List<Dim4Dict> dimensions = new ArrayList<>();
             List<DefaultMetric> defaultMetricDescList = new ArrayList<>();
             knowledgeInfos.stream()
-                    .filter(knowledgeInfo -> knowledgeInfo.getSearchEnable() && !CollectionUtils.isEmpty(
-                            dimIdAndDescPair)
+                    .filter(knowledgeInfo -> knowledgeInfo.getSearchEnable()
+                            && !CollectionUtils.isEmpty(dimIdAndDescPair)
                             && dimIdAndDescPair.containsKey(knowledgeInfo.getItemId()))
                     .forEach(knowledgeInfo -> {
                         if (dimIdAndDescPair.containsKey(knowledgeInfo.getItemId())) {
                             SchemaElement dimensionDesc = dimIdAndDescPair.get(knowledgeInfo.getItemId());
 
                             //default cnt
-                            if (Objects.isNull(chatDefaultConfig) || CollectionUtils.isEmpty(
-                                    chatDefaultConfig.getMetrics())) {
+                            if (Objects.isNull(chatDefaultConfig)
+                                    || CollectionUtils.isEmpty(chatDefaultConfig.getMetrics())) {
                                 String datasourceBizName = dimensionDesc.getBizName();
                                 if (Strings.isNotEmpty(datasourceBizName)) {
                                     String internalMetricName =
@@ -169,9 +173,8 @@ public class DictMetaHelper {
                                 }
                             } else {
                                 SchemaElement schemaItem = chatDefaultConfig.getMetrics().get(0);
-                                defaultMetricDescList.add(
-                                        new DefaultMetric(schemaItem.getBizName(), chatDefaultConfig.getUnit(),
-                                                chatDefaultConfig.getPeriod()));
+                                defaultMetricDescList.add(new DefaultMetric(schemaItem.getBizName(),
+                                        chatDefaultConfig.getUnit(), chatDefaultConfig.getPeriod()));
 
                             }
 
@@ -180,7 +183,8 @@ public class DictMetaHelper {
                             dim4Dict.setDimId(knowledgeInfo.getItemId());
                             dim4Dict.setBizName(bizName);
                             if (Objects.nonNull(knowledgeInfo.getKnowledgeAdvancedConfig())) {
-                                KnowledgeAdvancedConfig knowledgeAdvancedConfig = knowledgeInfo.getKnowledgeAdvancedConfig();
+                                KnowledgeAdvancedConfig knowledgeAdvancedConfig
+                                        = knowledgeInfo.getKnowledgeAdvancedConfig();
                                 BeanUtils.copyProperties(knowledgeAdvancedConfig, dim4Dict);
                             }
                             dimensions.add(dim4Dict);

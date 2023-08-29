@@ -202,6 +202,19 @@ public class DateUtils {
      * @return
      */
     public String betweenDateStr(ItemDateResp dateDate, DateConf dateInfo) {
+        if (MONTH.equalsIgnoreCase(dateInfo.getPeriod())) {
+            LocalDate endData = LocalDate.parse(dateInfo.getEndDate(),
+                    DateTimeFormatter.ofPattern(DAY_FORMAT));
+            LocalDate startData = LocalDate.parse(dateInfo.getStartDate(),
+                    DateTimeFormatter.ofPattern(DAY_FORMAT));
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(MONTH_FORMAT);
+            return String.format("%s >= '%s' and %s <= '%s'",
+                    sysDateMonthCol, startData.format(formatter), sysDateMonthCol, endData.format(formatter));
+        }
+        if (WEEK.equalsIgnoreCase(dateInfo.getPeriod())) {
+            return String.format("%s >= '%s' and %s <= '%s'",
+                    sysDateWeekCol, dateInfo.getStartDate(), sysDateWeekCol, dateInfo.getEndDate());
+        }
         return String.format("%s >= '%s' and %s <= '%s'",
                 sysDateCol, dateInfo.getStartDate(), sysDateCol, dateInfo.getEndDate());
     }

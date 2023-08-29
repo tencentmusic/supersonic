@@ -2,22 +2,22 @@ package com.tencent.supersonic.semantic.model.application;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.semantic.api.model.request.DatabaseReq;
-import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
-import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
-import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.SqlParserResp;
-import com.tencent.supersonic.semantic.model.domain.DatabaseService;
+import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
+import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter.EngineAdaptor;
 import com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter.EngineAdaptorFactory;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatabaseDO;
-import com.tencent.supersonic.semantic.model.domain.pojo.Database;
 import com.tencent.supersonic.semantic.model.domain.repository.DatabaseRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.DatabaseConverter;
 import com.tencent.supersonic.semantic.model.domain.utils.JdbcDataSourceUtils;
 import com.tencent.supersonic.semantic.model.domain.utils.SqlUtils;
+import com.tencent.supersonic.semantic.model.domain.DatabaseService;
+import com.tencent.supersonic.semantic.model.domain.pojo.Database;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,9 +38,9 @@ public class DatabaseServiceImpl implements DatabaseService {
     private ModelService modelService;
 
     public DatabaseServiceImpl(DatabaseRepository databaseRepository,
-            SqlUtils sqlUtils,
-            DomainService domainService,
-            ModelService modelService) {
+                               SqlUtils sqlUtils,
+                               DomainService domainService,
+                               ModelService modelService) {
         this.databaseRepository = databaseRepository;
         this.sqlUtils = sqlUtils;
         this.modelService = modelService;

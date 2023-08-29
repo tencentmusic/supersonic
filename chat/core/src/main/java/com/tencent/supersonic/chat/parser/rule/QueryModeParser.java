@@ -1,9 +1,12 @@
 package com.tencent.supersonic.chat.parser.rule;
 
 import com.tencent.supersonic.chat.api.component.SemanticParser;
-import com.tencent.supersonic.chat.api.pojo.*;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
-import java.util.*;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

@@ -2,9 +2,8 @@ package com.tencent.supersonic.semantic.query.service;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.cache.CacheUtils;
-import com.tencent.supersonic.semantic.api.model.pojo.QueryStat;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;

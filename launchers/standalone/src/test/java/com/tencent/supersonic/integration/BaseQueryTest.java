@@ -51,6 +51,8 @@ public class BaseQueryTest {
         ParseResp parseResp = submitParse(queryText);
 
         ExecuteQueryReq request = new ExecuteQueryReq();
+        request.setQueryId(parseResp.getQueryId());
+        request.setParseId(parseResp.getSelectedParses().get(0).getId());
         request.setChatId(parseResp.getChatId());
         request.setQueryText(parseResp.getQueryText());
         request.setUser(DataUtils.getUser());
@@ -63,6 +65,8 @@ public class BaseQueryTest {
         ParseResp parseResp = submitParse(queryText);
 
         ExecuteQueryReq request = new ExecuteQueryReq();
+        request.setQueryId(parseResp.getQueryId());
+        request.setParseId(parseResp.getSelectedParses().get(0).getId());
         request.setChatId(parseResp.getChatId());
         request.setQueryText(parseResp.getQueryText());
         request.setUser(DataUtils.getUser());

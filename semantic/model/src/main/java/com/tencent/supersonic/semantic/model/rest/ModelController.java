@@ -6,18 +6,18 @@ import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.ModelReq;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -32,8 +32,8 @@ public class ModelController {
 
     @PostMapping("/createModel")
     public Boolean createModel(@RequestBody ModelReq modelReq,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+                                HttpServletRequest request,
+                                HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         modelService.createModel(modelReq, user);
         return true;
@@ -41,8 +41,8 @@ public class ModelController {
 
     @PostMapping("/updateModel")
     public Boolean updateModel(@RequestBody ModelReq modelReq,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+                                HttpServletRequest request,
+                                HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         modelService.updateModel(modelReq, user);
         return true;
@@ -56,8 +56,8 @@ public class ModelController {
 
     @GetMapping("/getModelList/{domainId}")
     public List<ModelResp> getModelList(@PathVariable("domainId") Long domainId,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+                                         HttpServletRequest request,
+                                          HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return modelService.getModelListWithAuth(user.getName(), domainId, AuthType.ADMIN);
     }

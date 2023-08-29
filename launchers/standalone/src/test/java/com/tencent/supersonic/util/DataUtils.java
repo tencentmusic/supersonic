@@ -31,7 +31,7 @@ public class DataUtils {
 
     public static QueryReq getQueryContextReq(Integer id, String query) {
         QueryReq queryContextReq = new QueryReq();
-        queryContextReq.setQueryText(query);//"alice的访问次数"
+        queryContextReq.setQueryText(query);
         queryContextReq.setChatId(id);
         queryContextReq.setUser(user_test);
         return queryContextReq;
@@ -39,7 +39,7 @@ public class DataUtils {
 
     public static QueryReq getQueryReqWithAgent(Integer id, String query, Integer agentId) {
         QueryReq queryReq = new QueryReq();
-        queryReq.setQueryText(query);//"alice的访问次数"
+        queryReq.setQueryText(query);
         queryReq.setChatId(id);
         queryReq.setUser(user_test);
         queryReq.setAgentId(agentId);
@@ -74,8 +74,8 @@ public class DataUtils {
                 .build();
     }
 
-    public static QueryFilter getFilter(String bizName, FilterOperatorEnum filterOperatorEnum, Object value, String name,
-                                        Long elementId) {
+    public static QueryFilter getFilter(String bizName, FilterOperatorEnum filterOperatorEnum,
+                                        Object value, String name, Long elementId) {
         QueryFilter filter = new QueryFilter();
         filter.setBizName(bizName);
         filter.setOperator(filterOperatorEnum);
@@ -95,7 +95,8 @@ public class DataUtils {
         return dateInfo;
     }
 
-    public static DateConf getDateConf(DateConf.DateMode dateMode, Integer unit, String period, String startDate, String endDate) {
+    public static DateConf getDateConf(DateConf.DateMode dateMode, Integer unit,
+                                       String period, String startDate, String endDate) {
         DateConf dateInfo = new DateConf();
         dateInfo.setUnit(unit);
         dateInfo.setDateMode(dateMode);
@@ -114,9 +115,9 @@ public class DataUtils {
     }
 
     public static Boolean compareDate(DateConf dateInfo1, DateConf dateInfo2) {
-        Boolean timeFilterExist = dateInfo1.getUnit().equals(dateInfo2.getUnit()) &&
-                dateInfo1.getDateMode().equals(dateInfo2.getDateMode()) &&
-                dateInfo1.getPeriod().equals(dateInfo2.getPeriod());
+        Boolean timeFilterExist = dateInfo1.getUnit().equals(dateInfo2.getUnit())
+                && dateInfo1.getDateMode().equals(dateInfo2.getDateMode())
+                && dateInfo1.getPeriod().equals(dateInfo2.getPeriod());
         return timeFilterExist;
     }
 
@@ -135,11 +136,11 @@ public class DataUtils {
     public static Boolean compareDimensionFilter(Set<QueryFilter> dimensionFilters, QueryFilter dimensionFilter) {
         Boolean dimensionFilterExist = false;
         for (QueryFilter filter : dimensionFilters) {
-            if (filter.getBizName().equals(dimensionFilter.getBizName()) &&
-                    filter.getOperator().equals(dimensionFilter.getOperator()) &&
-                    filter.getValue().toString().equals(dimensionFilter.getValue().toString()) &&
-                    filter.getElementID().equals(dimensionFilter.getElementID()) &&
-                    filter.getName().equals(dimensionFilter.getName())) {
+            if (filter.getBizName().equals(dimensionFilter.getBizName())
+                    && filter.getOperator().equals(dimensionFilter.getOperator())
+                    && filter.getValue().toString().equals(dimensionFilter.getValue().toString())
+                    && filter.getElementID().equals(dimensionFilter.getElementID())
+                    && filter.getName().equals(dimensionFilter.getName())) {
                 dimensionFilterExist = true;
             }
         }
@@ -163,6 +164,7 @@ public class DataUtils {
     private static RuleQueryTool getRuleQueryTool() {
         RuleQueryTool ruleQueryTool = new RuleQueryTool();
         ruleQueryTool.setType(AgentToolType.RULE);
+        ruleQueryTool.setModelIds(Lists.newArrayList(1L, 2L));
         ruleQueryTool.setQueryModes(Lists.newArrayList("METRIC_ENTITY", "METRIC_FILTER", "METRIC_MODEL"));
         return ruleQueryTool;
     }

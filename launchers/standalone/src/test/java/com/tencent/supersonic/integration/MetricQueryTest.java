@@ -21,16 +21,18 @@ import org.springframework.beans.BeanUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.*;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
 
 
 public class MetricQueryTest extends BaseQueryTest {
 
     @Test
-    public void queryTest_METRIC_FILTER() throws Exception {
+    public void queryTest_metric_filter() throws Exception {
         QueryResult actualResult = submitNewChat("alice的访问次数");
 
         QueryResult expectedResult = new QueryResult();
@@ -52,7 +54,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_METRIC_FILTER_with_agent() {
+    public void queryTest_metric_filter_with_agent() {
         //agent only support METRIC_ENTITY, METRIC_FILTER
         MockConfiguration.mockAgent(agentService);
         ParseResp parseResp = submitParseWithAgent("alice的访问次数", DataUtils.getAgent().getId());
@@ -63,7 +65,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_METRIC_DOMAIN() throws Exception {
+    public void queryTest_metric_domain() throws Exception {
         QueryResult actualResult = submitNewChat("超音数的访问次数");
 
         QueryResult expectedResult = new QueryResult();
@@ -82,7 +84,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_METRIC_MODEL_with_agent() {
+    public void queryTest_metric_model_with_agent() {
         //agent only support METRIC_ENTITY, METRIC_FILTER
         MockConfiguration.mockAgent(agentService);
         ParseResp parseResp = submitParseWithAgent("超音数的访问次数", DataUtils.getAgent().getId());
@@ -92,7 +94,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_METRIC_GROUPBY() throws Exception {
+    public void queryTest_metric_groupby() throws Exception {
         QueryResult actualResult = submitNewChat("超音数各部门的访问次数");
 
         QueryResult expectedResult = new QueryResult();
@@ -112,7 +114,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_METRIC_FILTER_COMPARE() throws Exception {
+    public void queryTest_metric_filter_compare() throws Exception {
         QueryResult actualResult = submitNewChat("对比alice和lucy的访问次数");
 
         QueryResult expectedResult = new QueryResult();
@@ -137,7 +139,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_METRIC_TOPN() throws Exception {
+    public void queryTest_metric_topn() throws Exception {
         QueryResult actualResult = submitNewChat("近3天访问次数最多的用户");
 
         QueryResult expectedResult = new QueryResult();
@@ -157,7 +159,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_METRIC_GROUPBY_SUM() throws Exception {
+    public void queryTest_metric_groupby_sum() throws Exception {
         QueryResult actualResult = submitNewChat("超音数各部门的访问次数总和");
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -176,7 +178,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_METRIC_FILTER_TIME() throws Exception {
+    public void queryTest_metric_filter_time() throws Exception {
         DateFormat format = new SimpleDateFormat("yyyy-mm-dd");
         DateFormat textFormat = new SimpleDateFormat("yyyy年mm月dd日");
         String dateStr = textFormat.format(format.parse(startDay));
@@ -202,7 +204,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_CONFIG_VISIBILITY() throws Exception {
+    public void queryTest_config_visibility() throws Exception {
         // 1. round_1 use blacklist
         ChatConfigResp chatConfig = configService.fetchConfigByModelId(1L);
         ChatConfigEditReqReq extendEditCmd = new ChatConfigEditReqReq();

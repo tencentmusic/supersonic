@@ -7,12 +7,6 @@ import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaR
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -22,6 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Aspect
 @Component
@@ -34,9 +35,9 @@ public class DimValueAspect {
     @Autowired
     private DimensionService dimensionService;
 
-    @Around("execution(* com.tencent.supersonic.semantic.query.rest.QueryController.queryByStruct(..))" +
-            " || execution(* com.tencent.supersonic.semantic.query.service.QueryService.queryByStruct(..))" +
-            " || execution(* com.tencent.supersonic.semantic.query.service.QueryService.queryByStructWithAuth(..))")
+    @Around("execution(* com.tencent.supersonic.semantic.query.rest.QueryController.queryByStruct(..))"
+            + " || execution(* com.tencent.supersonic.semantic.query.service.QueryService.queryByStruct(..))"
+            + " || execution(* com.tencent.supersonic.semantic.query.service.QueryService.queryByStructWithAuth(..))")
     public Object handleDimValue(ProceedingJoinPoint joinPoint) throws Throwable {
 
         if (!dimensionValueMapEnable) {
@@ -65,15 +66,15 @@ public class DimValueAspect {
     }
 
     private void rewriteDimValue(QueryResultWithSchemaResp queryResultWithColumns,
-            Map<String, Map<String, String>> dimAndTechNameAndBizNamePair) {
+                                 Map<String, Map<String, String>> dimAndTechNameAndBizNamePair) {
         if (!selectDimValueMap(queryResultWithColumns.getColumns(), dimAndTechNameAndBizNamePair)) {
             return;
         }
         log.debug("start rewriteDimValue for resultList");
         for (Map<String, Object> line : queryResultWithColumns.getResultList()) {
             for (String bizName : line.keySet()) {
-                String techName = line.get(bizName).toString();
-                if (dimAndTechNameAndBizNamePair.containsKey(bizName)) {
+                if (dimAndTechNameAndBizNamePair.containsKey(bizName) && Objects.nonNull(line.get(bizName))) {
+                    String techName = line.get(bizName).toString();
                     Map<String, String> techAndBizPair = dimAndTechNameAndBizNamePair.get(bizName);
                     if (!CollectionUtils.isEmpty(techAndBizPair) && techAndBizPair.containsKey(techName)) {
                         String bizValueName = techAndBizPair.get(techName);
@@ -86,10 +87,10 @@ public class DimValueAspect {
         }
     }
 
-    private boolean selectDimValueMap(List<QueryColumn> columns,
-            Map<String, Map<String, String>> dimAndTechNameAndBizNamePair) {
-        if (CollectionUtils.isEmpty(dimAndTechNameAndBizNamePair) || CollectionUtils.isEmpty(
-                dimAndTechNameAndBizNamePair)) {
+    private boolean selectDimValueMap(List<QueryColumn> columns, Map<String,
+            Map<String, String>> dimAndTechNameAndBizNamePair) {
+        if (CollectionUtils.isEmpty(dimAndTechNameAndBizNamePair)
+                || CollectionUtils.isEmpty(dimAndTechNameAndBizNamePair)) {
             return false;
         }
 
@@ -118,9 +119,11 @@ public class DimValueAspect {
                             List<String> values = (List) value;
                             List<String> valuesNew = new ArrayList<>();
                             for (String valueSingle : values) {
-                                boolean f =
-                                        aliasPair.containsKey(valueSingle) ? valuesNew.add(aliasPair.get(valueSingle))
-                                                : valuesNew.add(valueSingle);
+                                if (aliasPair.containsKey(valueSingle)) {
+                                    valuesNew.add(aliasPair.get(valueSingle));
+                                } else {
+                                    valuesNew.add(valueSingle);
+                                }
                             }
                             filter.setValue(valuesNew);
                         }
@@ -138,9 +141,9 @@ public class DimValueAspect {
         }
     }
 
-    private void generateAliasAndTechNamePair(List<DimensionResp> dimensions
-            , Map<String, Map<String, String>> dimAndAliasAndTechNamePair
-            , Map<String, Map<String, String>> dimAndTechNameAndBizNamePair) {
+    private void generateAliasAndTechNamePair(List<DimensionResp> dimensions,
+                                              Map<String, Map<String, String>> dimAndAliasAndTechNamePair,
+                                              Map<String, Map<String, String>> dimAndTechNameAndBizNamePair) {
         if (CollectionUtils.isEmpty(dimensions)) {
             return;
         }

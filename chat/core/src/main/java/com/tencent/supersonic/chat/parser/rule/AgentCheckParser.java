@@ -13,7 +13,6 @@ import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,16 +31,24 @@ public class AgentCheckParser implements SemanticParser {
         if (agent == null) {
             return;
         }
-        List<String> queryModes = getRuleTools(agentId).stream().map(RuleQueryTool::getQueryModes)
-                .flatMap(Collection::stream).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(queries)) {
+        List<RuleQueryTool> queryTools = getRuleTools(agentId);
+        if (CollectionUtils.isEmpty(queryTools)) {
             queries.clear();
             return;
         }
         log.info("queries resolved:{} {}", agent.getName(),
                 queries.stream().map(SemanticQuery::getQueryMode).collect(Collectors.toList()));
-        queries.removeIf(query ->
-                !queryModes.contains(query.getQueryMode()));
+        queries.removeIf(query -> {
+            for (RuleQueryTool tool : queryTools) {
+                if (!tool.getQueryModes().contains(query.getQueryMode())) {
+                    return true;
+                }
+                if (tool.isContainsAllModel() || tool.getModelIds().contains(query.getParseInfo().getModelId())) {
+                    return false;
+                }
+            }
+            return true;
+        });
         log.info("rule queries witch can be supported by agent :{} {}", agent.getName(),
                 queries.stream().map(SemanticQuery::getQueryMode).collect(Collectors.toList()));
     }

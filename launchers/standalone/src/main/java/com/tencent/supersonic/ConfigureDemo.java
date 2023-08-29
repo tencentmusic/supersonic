@@ -17,10 +17,13 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.RecommendedQuestionReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.plugin.Plugin;
-import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
-import com.tencent.supersonic.chat.service.*;
+import com.tencent.supersonic.chat.service.QueryService;
+import com.tencent.supersonic.chat.service.ChatService;
+import com.tencent.supersonic.chat.service.ConfigService;
+import com.tencent.supersonic.chat.service.PluginService;
+import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.common.util.JsonUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,33 +38,35 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent> {
-
+    private User user = User.getFakeUser();
     @Qualifier("chatQueryService")
     @Autowired
     private QueryService queryService;
     @Autowired
     private ChatService chatService;
     @Autowired
-    protected ConfigService configService;
+    private ConfigService configService;
     @Autowired
     private PluginService pluginService;
     @Autowired
     private AgentService agentService;
 
-    private User user = User.getFakeUser();
-
     private void parseAndExecute(int chatId, String queryText) throws Exception {
         QueryReq queryRequest = new QueryReq();
         queryRequest.setQueryText(queryText);
         queryRequest.setChatId(chatId);
+        queryRequest.setAgentId(1);
         queryRequest.setUser(User.getFakeUser());
         ParseResp parseResp = queryService.performParsing(queryRequest);
 
         ExecuteQueryReq executeReq = new ExecuteQueryReq();
+        executeReq.setQueryId(parseResp.getQueryId());
+        executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());
         executeReq.setQueryText(queryRequest.getQueryText());
         executeReq.setParseInfo(parseResp.getSelectedParses().get(0));
         executeReq.setChatId(parseResp.getChatId());
         executeReq.setUser(queryRequest.getUser());
+        executeReq.setAgentId(1);
         queryService.performExecution(executeReq);
     }
 
@@ -87,38 +92,39 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
         ChatDefaultConfigReq chatDefaultConfigDetail = new ChatDefaultConfigReq();
-        List<Long> dimensionIds_0 = Arrays.asList(1L, 2L);
-        List<Long> metricIds_0 = Arrays.asList(1L);
-        chatDefaultConfigDetail.setDimensionIds(dimensionIds_0);
-        chatDefaultConfigDetail.setMetricIds(metricIds_0);
+        List<Long> dimensionIds0 = Arrays.asList(1L, 2L);
+        List<Long> metricIds0 = Arrays.asList(1L);
+        chatDefaultConfigDetail.setDimensionIds(dimensionIds0);
+        chatDefaultConfigDetail.setMetricIds(metricIds0);
         chatDefaultConfigDetail.setUnit(7);
         chatDefaultConfigDetail.setPeriod("DAY");
         chatDetailConfig.setChatDefaultConfig(chatDefaultConfigDetail);
-        ItemVisibility visibility_0 = new ItemVisibility();
-        chatDetailConfig.setVisibility(visibility_0);
+        ItemVisibility visibility0 = new ItemVisibility();
+        chatDetailConfig.setVisibility(visibility0);
         chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
+
 
         ChatAggConfigReq chatAggConfig = new ChatAggConfigReq();
         ChatDefaultConfigReq chatDefaultConfigAgg = new ChatDefaultConfigReq();
-        List<Long> dimensionIds_1 = Arrays.asList(1L, 2L);
-        List<Long> metricIds_1 = Arrays.asList(1L);
-        chatDefaultConfigAgg.setDimensionIds(dimensionIds_1);
-        chatDefaultConfigAgg.setMetricIds(metricIds_1);
+        List<Long> dimensionIds1 = Arrays.asList(1L, 2L);
+        List<Long> metricIds1 = Arrays.asList(1L);
+        chatDefaultConfigAgg.setDimensionIds(dimensionIds1);
+        chatDefaultConfigAgg.setMetricIds(metricIds1);
         chatDefaultConfigAgg.setUnit(7);
         chatDefaultConfigAgg.setPeriod("DAY");
         chatDefaultConfigAgg.setTimeMode(ChatDefaultConfigReq.TimeMode.RECENT);
         chatAggConfig.setChatDefaultConfig(chatDefaultConfigAgg);
-        ItemVisibility visibility_1 = new ItemVisibility();
-        chatAggConfig.setVisibility(visibility_1);
+        ItemVisibility visibility1 = new ItemVisibility();
+        chatAggConfig.setVisibility(visibility1);
         chatConfigBaseReq.setChatAggConfig(chatAggConfig);
 
         List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
-        RecommendedQuestionReq recommendedQuestionReq_0 = new RecommendedQuestionReq("超音数访问次数");
-        RecommendedQuestionReq recommendedQuestionReq_1 = new RecommendedQuestionReq("超音数访问人数");
-        RecommendedQuestionReq recommendedQuestionReq_2 = new RecommendedQuestionReq("超音数按部门访问次数");
-        recommendedQuestions.add(recommendedQuestionReq_0);
-        recommendedQuestions.add(recommendedQuestionReq_1);
-        recommendedQuestions.add(recommendedQuestionReq_2);
+        RecommendedQuestionReq recommendedQuestionReq0 = new RecommendedQuestionReq("超音数访问次数");
+        RecommendedQuestionReq recommendedQuestionReq1 = new RecommendedQuestionReq("超音数访问人数");
+        RecommendedQuestionReq recommendedQuestionReq2 = new RecommendedQuestionReq("超音数按部门访问次数");
+        recommendedQuestions.add(recommendedQuestionReq0);
+        recommendedQuestions.add(recommendedQuestionReq1);
+        recommendedQuestions.add(recommendedQuestionReq2);
         chatConfigBaseReq.setRecommendedQuestions(recommendedQuestions);
 
         configService.addConfig(chatConfigBaseReq, user);
@@ -130,29 +136,30 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
         ChatDefaultConfigReq chatDefaultConfigDetail = new ChatDefaultConfigReq();
-        List<Long> dimensionIds_0 = Arrays.asList(4L, 5L, 6L, 7L);
-        List<Long> metricIds_0 = Arrays.asList(4L);
-        chatDefaultConfigDetail.setDimensionIds(dimensionIds_0);
-        chatDefaultConfigDetail.setMetricIds(metricIds_0);
+        List<Long> dimensionIds0 = Arrays.asList(4L, 5L, 6L, 7L);
+        List<Long> metricIds0 = Arrays.asList(4L);
+        chatDefaultConfigDetail.setDimensionIds(dimensionIds0);
+        chatDefaultConfigDetail.setMetricIds(metricIds0);
         chatDefaultConfigDetail.setUnit(7);
         chatDefaultConfigDetail.setPeriod("DAY");
         chatDetailConfig.setChatDefaultConfig(chatDefaultConfigDetail);
-        ItemVisibility visibility_0 = new ItemVisibility();
-        chatDetailConfig.setVisibility(visibility_0);
+        ItemVisibility visibility0 = new ItemVisibility();
+        chatDetailConfig.setVisibility(visibility0);
         chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
+
 
         ChatAggConfigReq chatAggConfig = new ChatAggConfigReq();
         ChatDefaultConfigReq chatDefaultConfigAgg = new ChatDefaultConfigReq();
-        List<Long> dimensionIds_1 = Arrays.asList(4L, 5L, 6L, 7L);
-        List<Long> metricIds_1 = Arrays.asList(4L);
-        chatDefaultConfigAgg.setDimensionIds(dimensionIds_1);
-        chatDefaultConfigAgg.setMetricIds(metricIds_1);
+        List<Long> dimensionIds1 = Arrays.asList(4L, 5L, 6L, 7L);
+        List<Long> metricIds1 = Arrays.asList(4L);
+        chatDefaultConfigAgg.setDimensionIds(dimensionIds1);
+        chatDefaultConfigAgg.setMetricIds(metricIds1);
         chatDefaultConfigAgg.setUnit(7);
         chatDefaultConfigAgg.setPeriod("DAY");
         chatDefaultConfigAgg.setTimeMode(ChatDefaultConfigReq.TimeMode.RECENT);
         chatAggConfig.setChatDefaultConfig(chatDefaultConfigAgg);
-        ItemVisibility visibility_1 = new ItemVisibility();
-        chatAggConfig.setVisibility(visibility_1);
+        ItemVisibility visibility1 = new ItemVisibility();
+        chatAggConfig.setVisibility(visibility1);
         chatConfigBaseReq.setChatAggConfig(chatAggConfig);
 
         List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
@@ -162,12 +169,12 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
     }
 
     private void addPlugin_1() {
-        Plugin plugin_1 = new Plugin();
-        plugin_1.setType("WEB_PAGE");
-        plugin_1.setModelList(Arrays.asList(1L));
-        plugin_1.setPattern("访问情况");
-        plugin_1.setParseModeConfig(null);
-        plugin_1.setName("访问情况");
+        Plugin plugin1 = new Plugin();
+        plugin1.setType("WEB_PAGE");
+        plugin1.setModelList(Arrays.asList(1L));
+        plugin1.setPattern("访问情况");
+        plugin1.setParseModeConfig(null);
+        plugin1.setName("访问情况");
         WebBase webBase = new WebBase();
         webBase.setUrl("www.test.com");
         ParamOption paramOption = new ParamOption();
@@ -177,23 +184,23 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         paramOption.setModelId(1L);
         List<ParamOption> paramOptions = Arrays.asList(paramOption);
         webBase.setParamOptions(paramOptions);
-        plugin_1.setConfig(JsonUtil.toString(webBase));
+        plugin1.setConfig(JsonUtil.toString(webBase));
 
-        pluginService.createPlugin(plugin_1, user);
+        pluginService.createPlugin(plugin1, user);
     }
-
 
     private void addAgent() {
         Agent agent = new Agent();
         agent.setId(1);
-        agent.setName("查信息");
-        agent.setDescription("查信息");
+        agent.setName("查指标");
+        agent.setDescription("查指标");
         agent.setStatus(1);
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList("超音数访问次数", "超音数访问人数", "alice 停留时长"));
         AgentConfig agentConfig = new AgentConfig();
         RuleQueryTool ruleQueryTool = new RuleQueryTool();
         ruleQueryTool.setType(AgentToolType.RULE);
+        ruleQueryTool.setModelIds(Lists.newArrayList(1L, 2L));
         ruleQueryTool.setQueryModes(Lists.newArrayList(
                 "ENTITY_DETAIL", "ENTITY_LIST_FILTER", "ENTITY_ID", "METRIC_ENTITY",
                 "METRIC_FILTER", "METRIC_GROUPBY", "METRIC_MODEL", "METRIC_ORDERBY"
