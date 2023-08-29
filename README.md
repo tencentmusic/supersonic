@@ -32,15 +32,17 @@ The high-level architecture and main process flow is as follows:
 
 <img src="./docs/images/supersonic_components.png" height="65%" width="65%" align="center"/> 
 
-- **Schema Mapper:** identifies references to schema elements(metrics/dimensions/entities/values) in user queries. It matches the query text against a knowledge base constructed from the semantic models.
+- **Knowledge Base:** extracts schema information periodically from the semantic models and build dictionary and index to facilitate schema mapping.
 
-- **Semantic Parser:** understands user queries and extract semantic information. It consists of a combination of rule-based and model-based parsers, each of which deals with specific scenarios.
+- **Schema Mapper:** identifies references to schema elements(metrics/dimensions/entities/values) in user queries. It matches the query text against the knowledge base.
+
+- **Semantic Parser:** understands user queries and extracts semantic information. It consists of a combination of rule-based and model-based parsers, each of which deals with specific scenarios.
 
 - **Semantic Corrector:** checks validity of extracted semantic information and performs correction and optimization if needed.
 
 - **Semantic Layer:** performs execution according to extracted semantic information. It generates SQL queries and executes them against physical data models.
 
-- **Chat Plugin:** extends functionality with third-party tools. Given all configured plugins with function description and sample questions, the LLM is going to select the most suitable one.  
+- **Chat Plugin:** extends functionality with third-party tools. The LLM is going to select the most suitable one, given all configured plugins with function description and sample questions.
 
 ## Quick Demo
 
@@ -61,3 +63,9 @@ Pull the source code and run script "assembly/bin/build-standalone.sh" to build 
 ### Build for Distributed Mode 
 
 Pull the source code and run scripts "assembly/bin/build-chat.sh" and "assembly/bin/build-semantic.sh" separately to build packages.
+
+## WeChat Contact
+
+Please join the chat group to suggest feedbacks or ideas:
+
+<img src="./docs/images/wechat_contact.jpeg" height="30%" width="30%" align="center"/> 
