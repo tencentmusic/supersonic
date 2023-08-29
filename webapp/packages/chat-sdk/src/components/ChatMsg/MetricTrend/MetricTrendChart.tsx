@@ -12,6 +12,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import { ColumnType } from '../../../common/type';
 import NoPermissionChart from '../NoPermissionChart';
+import classNames from 'classnames';
 
 type Props = {
   model?: string;
@@ -201,12 +202,16 @@ const MetricTrendChart: React.FC<Props> = ({
 
   const prefixCls = `${CLS_PREFIX}-metric-trend`;
 
+  const flowTrendChartClass = classNames(`${prefixCls}-flow-trend-chart`, {
+    [`${prefixCls}-flow-trend-chart-single`]: !categoryColumnName,
+  });
+
   return (
     <div>
       {!metricField.authorized ? (
         <NoPermissionChart model={model || ''} onApplyAuth={onApplyAuth} />
       ) : (
-        <div className={`${prefixCls}-flow-trend-chart`} ref={chartRef} />
+        <div className={flowTrendChartClass} ref={chartRef} />
       )}
     </div>
   );

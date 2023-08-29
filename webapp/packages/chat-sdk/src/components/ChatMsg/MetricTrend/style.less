@@ -24,6 +24,7 @@
     display: flex;
     align-items: center;
     color: var(--text-color-third);
+    margin-left: 4px;
   }
 
   &-filter-section {
@@ -58,7 +59,7 @@
   &-indicator {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: baseline;
     justify-content: center;
   }
 
@@ -83,11 +84,15 @@
     height: 230px;
   }
 
+  &-flow-trend-chart-single {
+    height: 180px;
+  }
+
   &-charts {
     display: flex;
     flex-direction: column;
     width: 100%;
-    row-gap: 12px;
+    row-gap: 4px;
   }
 
   &-metric-fields {
@@ -121,11 +126,6 @@
     &:hover {
       color: var(--chat-blue);
     }
-  }
-
-  &-metric-field-active {
-    color: #fff !important;
-    background-color: var(--chat-blue);
   }
 
   &-metric-field-single {
@@ -165,6 +165,13 @@
     font-size: 12px;
   }
 
+  &-bottom-tools {
+    display: flex;
+    align-items: center;
+    column-gap: 20px;
+    font-size: 14px;
+  }
+
   &-active-identifier {
     position: absolute;
     bottom: -6px;
@@ -184,14 +191,8 @@
 .@{metric-info-prefix-cls} {
   &-indicator {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-  }
-
-  &-date {
-    color: var(--text-color-fourth);
-    font-size: 12px;
+    align-items: baseline;
+    column-gap: 12px;
   }
 
   &-indicator-value {
@@ -203,12 +204,33 @@
     color: var(--text-color-secondary);
   }
 
-  &-period-compare {
-    width: 100%;
+  &-bottom-section {
     display: flex;
     align-items: center;
     column-gap: 20px;
-    margin-top: 2px;
+    margin-top: 4px;
+  }
+
+  &-date {
+    color: var(--text-color-fourth);
+    font-size: 13px;
+  }
+
+  &-date-value {
+    color: var(--chat-blue);
+  }
+
+  &-indicator-switch {
+    color: var(--text-color-fourth);
+    font-size: 18px;
+    margin-left: 6px;
+    margin-bottom: 3px;
+  }
+
+  &-period-compare {
+    display: flex;
+    align-items: center;
+    column-gap: 20px;
     font-size: 13px;
     overflow-x: auto;
   }

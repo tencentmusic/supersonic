@@ -159,7 +159,7 @@ const BarChart: React.FC<Props> = ({
     );
   }
 
-  const hasFilterSection = dimensionFilters?.length > 0;
+  // const hasFilterSection = dimensionFilters?.length > 0;
 
   const prefixCls = `${PREFIX_CLS}-bar`;
 
@@ -167,11 +167,11 @@ const BarChart: React.FC<Props> = ({
     <div>
       <div className={`${prefixCls}-top-bar`}>
         <div className={`${prefixCls}-indicator-name`}>{metricColumn?.name}</div>
-        {(hasFilterSection || drillDownDimension) && (
+        {drillDownDimension && (
           <div className={`${prefixCls}-filter-section-wrapper`}>
             (
             <div className={`${prefixCls}-filter-section`}>
-              <FilterSection chatContext={chatContext} entityInfo={entityInfo} />
+              {/* <FilterSection chatContext={chatContext} entityInfo={entityInfo} /> */}
               {drillDownDimension && (
                 <div className={`${prefixCls}-filter-item`}>
                   <div className={`${prefixCls}-filter-item-label`}>下钻维度：</div>
@@ -183,13 +183,13 @@ const BarChart: React.FC<Props> = ({
           </div>
         )}
       </div>
-      {dateInfo && (
+      {/* {dateInfo && (
         <div className={`${prefixCls}-date-range`}>
           {dateInfo.startDate === dateInfo.endDate
             ? dateInfo.startDate
             : `${dateInfo.startDate} ~ ${dateInfo.endDate}`}
         </div>
-      )}
+      )} */}
       <Spin spinning={loading}>
         <div className={`${prefixCls}-chart`} ref={chartRef} />
       </Spin>

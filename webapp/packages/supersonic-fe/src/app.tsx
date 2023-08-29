@@ -11,7 +11,7 @@ import defaultSettings from '../config/defaultSettings';
 import settings from '../config/themeSettings';
 import { queryToken } from './services/login';
 import { queryCurrentUser } from './services/user';
-import { traverseRoutes, deleteUrlQuery } from './utils/utils';
+import { traverseRoutes, deleteUrlQuery, isMobile } from './utils/utils';
 import { publicPath } from '../config/defaultSettings';
 import Copilot from './pages/Copilot';
 export { request } from './services/request';
@@ -160,7 +160,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
       return (
         <>
           {dom}
-          {history.location.pathname !== '/chat' && <Copilot />}
+          {history.location.pathname !== '/chat' && !isMobile && <Copilot />}
         </>
       );
     },

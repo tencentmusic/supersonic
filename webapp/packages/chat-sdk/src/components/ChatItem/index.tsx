@@ -7,6 +7,7 @@ import ParseTip from './ParseTip';
 import ExecuteItem from './ExecuteItem';
 import { isMobile } from '../../utils/utils';
 import classNames from 'classnames';
+import Tools from '../Tools';
 
 type Props = {
   msg: string;
@@ -17,6 +18,7 @@ type Props = {
   isLastMessage?: boolean;
   msgData?: MsgDataType;
   isMobileMode?: boolean;
+  isHistory?: boolean;
   triggerResize?: boolean;
   parseOptions?: ChatContextType[];
   onMsgDataLoaded?: (data: MsgDataType, valid: boolean) => void;
@@ -31,6 +33,7 @@ const ChatItem: React.FC<Props> = ({
   filter,
   isLastMessage,
   isMobileMode,
+  isHistory,
   triggerResize,
   msgData,
   parseOptions,
@@ -118,15 +121,12 @@ const ChatItem: React.FC<Props> = ({
     const { data: parseData } = await chatParse(msg, conversationId, modelId, agentId, filter);
     setParseLoading(false);
     const { code, data } = parseData || {};
-    const { state, selectedParses } = data || {};
+    const { state, selectedParses, queryId } = data || {};
     if (
       code !== 200 ||
       state === ParseStateEnum.FAILED ||
-      selectedParses == null ||
-      selectedParses.length === 0 ||
-      (selectedParses.length > 0 &&
-        !selectedParses[0]?.properties?.type &&
-        !selectedParses[0]?.queryMode)
+      !selectedParses?.length ||
+      (!selectedParses[0]?.properties?.type && !selectedParses[0]?.queryMode)
     ) {
       setParseTip(PARSE_ERROR_TIP);
       return;
@@ -134,10 +134,14 @@ const ChatItem: React.FC<Props> = ({
     if (onUpdateMessageScroll) {
       onUpdateMessageScroll();
     }
-    setParseInfoOptions(selectedParses || []);
-    const parseInfoValue = selectedParses[0];
+    const parseInfos = selectedParses.map(item => ({
+      ...item,
+      queryId,
+    }));
+    setParseInfoOptions(parseInfos || []);
+    const parseInfoValue = parseInfos[0];
     setParseInfo(parseInfoValue);
-    onExecute(parseInfoValue, selectedParses);
+    onExecute(parseInfoValue, parseInfos);
   };
 
   useEffect(() => {
@@ -158,6 +162,9 @@ const ChatItem: React.FC<Props> = ({
     const res = await switchEntity(entityId, data?.chatContext?.modelId, conversationId || 0);
     setEntitySwitchLoading(false);
     setData(res.data.data);
+    const { chatContext } = res.data.data;
+    setParseInfo(chatContext);
+    setParseInfoOptions([chatContext]);
   };
 
   const onChangeChart = () => {
@@ -176,10 +183,14 @@ const ChatItem: React.FC<Props> = ({
     [`${prefixCls}-content-mobile`]: isMobile,
   });
 
+  const isMetricCard =
+    (data?.queryMode === 'METRIC_DOMAIN' || data?.queryMode === 'METRIC_FILTER') &&
+    data?.queryResults?.length === 1;
+
   return (
     <div className={prefixCls}>
-      <div className={`${prefixCls}-section`}>
-        {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
+      {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
+      <div className={isMobile ? `${prefixCls}-mobile-msg-card` : `${prefixCls}-msg-card`}>
         <div className={contentClass}>
           <ParseTip
             parseLoading={parseLoading}
@@ -188,29 +199,27 @@ const ChatItem: React.FC<Props> = ({
             currentParseInfo={parseInfo}
             optionMode={parseOptions !== undefined}
             onSelectParseInfo={onSelectParseInfo}
+            onSwitchEntity={onSwitchEntity}
           />
-        </div>
-      </div>
-      {executeMode && data?.queryMode !== 'WEB_PAGE' && (
-        <div className={`${prefixCls}-section`}>
-          {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
-          <div className={contentClass}>
+          {executeMode && (
             <ExecuteItem
               question={msg}
+              queryId={parseInfo?.queryId}
               executeLoading={executeLoading}
               entitySwitchLoading={entitySwitchLoading}
               executeTip={executeTip}
               chartIndex={chartIndex}
               data={data}
               isMobileMode={isMobileMode}
-              isLastMessage={isLastMessage}
               triggerResize={triggerResize}
-              onSwitchEntity={onSwitchEntity}
               onChangeChart={onChangeChart}
             />
-          </div>
+          )}
         </div>
-      )}
+        {!isMetricCard && data && (
+          <Tools data={data} scoreValue={undefined} isLastMessage={isLastMessage} />
+        )}
+      </div>
     </div>
   );
 };

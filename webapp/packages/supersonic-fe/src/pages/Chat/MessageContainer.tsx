@@ -4,7 +4,6 @@ import { isEqual } from 'lodash';
 import { ChatItem } from 'supersonic-chat-sdk';
 import type { MsgDataType } from 'supersonic-chat-sdk';
 import { AgentType, MessageItem, MessageTypeEnum } from './type';
-import Plugin from './components/Plugin';
 import { updateMessageContainerScroll } from '@/utils/utils';
 import styles from './style.less';
 import { MODEL_MODEL_ENTITY_ID_FILTER_MAP } from './constants';
@@ -71,34 +70,6 @@ const MessageContainer: React.FC<Props> = ({
     updateMessageContainerScroll();
   }, [copilotFullscreen]);
 
-  const getFollowQuestions = (index: number) => {
-    const followQuestions: string[] = [];
-    const currentMsg = messageList[index];
-    const currentMsgData = currentMsg.msgData;
-    const msgs = messageList.slice(0, index).reverse();
-
-    for (let i = 0; i < msgs.length; i++) {
-      const msg = msgs[i];
-      const msgModelId = msg.msgData?.chatContext?.modelId;
-      const msgEntityId = msg.msgData?.entityInfo?.entityId;
-      const currentMsgModelId = currentMsgData?.chatContext?.modelId;
-      const currentMsgEntityId = currentMsgData?.entityInfo?.entityId;
-
-      if (
-        (msg.type === MessageTypeEnum.QUESTION || msg.type === MessageTypeEnum.PLUGIN) &&
-        !!currentMsgModelId &&
-        msgModelId === currentMsgModelId &&
-        msgEntityId === currentMsgEntityId &&
-        msg.msg
-      ) {
-        followQuestions.push(msg.msg);
-      } else {
-        break;
-      }
-    }
-    return followQuestions;
-  };
-
   const getFilters = (modelId?: number, entityId?: string) => {
     if (!modelId || !entityId) {
       return undefined;
@@ -130,8 +101,6 @@ const MessageContainer: React.FC<Props> = ({
             parseOptions,
           } = msgItem;
 
-          const followQuestions = getFollowQuestions(index);
-
           return (
             <div key={msgId} id={`${msgId}`} className={styles.messageItem}>
               {type === MessageTypeEnum.TEXT && <Text position="left" data={msg} />}
@@ -142,7 +111,7 @@ const MessageContainer: React.FC<Props> = ({
                 <AgentList
                   currentAgentName={msg!}
                   data={agentList}
-                  copilotFullscreen={copilotFullscreen}
+                  copilotFullscreen={copilotFullscreen || !isMobileMode}
                   onSelectAgent={onSelectAgent}
                 />
               )}
@@ -159,6 +128,7 @@ const MessageContainer: React.FC<Props> = ({
                     filter={getFilters(modelId, entityId)}
                     isLastMessage={index === messageList.length - 1}
                     isMobileMode={isMobileMode}
+                    isHistory={isHistory}
                     triggerResize={triggerResize}
                     onMsgDataLoaded={(data: MsgDataType, valid: boolean) => {
                       onMsgDataLoaded(data, msgId, msgValue || msg || '', valid);
@@ -176,6 +146,7 @@ const MessageContainer: React.FC<Props> = ({
                   filter={getFilters(modelId, entityId)}
                   isLastMessage={index === messageList.length - 1}
                   isMobileMode={isMobileMode}
+                  isHistory={isHistory}
                   triggerResize={triggerResize}
                   parseOptions={parseOptions}
                   onMsgDataLoaded={(data: MsgDataType, valid: boolean) => {
@@ -183,24 +154,6 @@ const MessageContainer: React.FC<Props> = ({
                   }}
                   onUpdateMessageScroll={updateMessageContainerScroll}
                 />
-              )}
-              {type === MessageTypeEnum.PLUGIN && (
-                <>
-                  <Plugin
-                    id={msgId}
-                    followQuestions={followQuestions}
-                    data={msgData!}
-                    scoreValue={score}
-                    msg={msgValue || msg || ''}
-                    isHistory={isHistory}
-                    isLastMessage={index === messageList.length - 1}
-                    isMobileMode={isMobileMode}
-                    onReportLoaded={(height: number) => {
-                      updateMessageContainerScroll(true, height);
-                    }}
-                    onCheckMore={onCheckMore}
-                  />
-                </>
               )}
             </div>
           );

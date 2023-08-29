@@ -1,12 +1,13 @@
 import { isMobile } from '../../utils/utils';
 import Bar from './Bar';
-import Message from './Message';
 import MetricCard from './MetricCard';
 import MetricTrend from './MetricTrend';
 import Table from './Table';
 import { ColumnType, DrillDownDimensionType, MsgDataType } from '../../common/type';
 import { useEffect, useState } from 'react';
 import { queryData } from '../../service';
+import classNames from 'classnames';
+import { PREFIX_CLS } from '../../common/constants';
 
 type Props = {
   question: string;
@@ -17,13 +18,15 @@ type Props = {
 };
 
 const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, triggerResize }) => {
-  const { queryColumns, queryResults, chatContext, entityInfo, queryMode } = data;
+  const { queryColumns, queryResults, chatContext, queryMode } = data;
 
   const [columns, setColumns] = useState<ColumnType[]>(queryColumns);
   const [dataSource, setDataSource] = useState<any[]>(queryResults);
 
   const [drillDownDimension, setDrillDownDimension] = useState<DrillDownDimensionType>();
   const [loading, setLoading] = useState(false);
+
+  const prefixCls = `${PREFIX_CLS}-chat-msg`;
 
   useEffect(() => {
     setColumns(queryColumns);
@@ -39,9 +42,11 @@ const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, tr
   const categoryField = columns.filter(item => item.showType === 'CATEGORY');
   const metricFields = columns.filter(item => item.showType === 'NUMBER');
 
+  const isDslMetricCard =
+    queryMode === 'DSL' && singleData && metricFields.length === 1 && columns.length === 1;
+
   const isMetricCard =
-    (queryMode.includes('METRIC') ||
-      (queryMode === 'DSL' && singleData && metricFields.length === 1 && columns.length === 1)) &&
+    (queryMode.includes('METRIC') || isDslMetricCard) &&
     (singleData || chatContext?.dateInfo?.startDate === chatContext?.dateInfo?.endDate);
 
   const isText =
@@ -50,6 +55,14 @@ const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, tr
     ((!queryMode.includes('METRIC') && !queryMode.includes('ENTITY')) ||
       queryMode === 'METRIC_INTERPRET') &&
     singleData;
+
+  const isTable =
+    !isText &&
+    !isMetricCard &&
+    (categoryField.length > 1 ||
+      queryMode === 'ENTITY_DETAIL' ||
+      queryMode === 'ENTITY_DIMENSION' ||
+      (categoryField.length === 1 && metricFields.length === 0));
 
   const onLoadData = async (value: any) => {
     setLoading(true);
@@ -72,47 +85,51 @@ const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, tr
     });
   };
 
+  const getTextContent = () => {
+    let text = dataSource[0][columns[0].nameEn];
+    let htmlCode: string;
+    const match = text.match(/```html([\s\S]*?)```/);
+    htmlCode = match && match[1].trim();
+    if (htmlCode) {
+      text = text.replace(/```html([\s\S]*?)```/, '');
+    }
+    let scriptCode: string;
+    let scriptSrc: string;
+    if (htmlCode) {
+      scriptSrc = htmlCode.match(/<script src="([\s\S]*?)"><\/script>/)?.[1] || '';
+      scriptCode =
+        htmlCode.match(/<script type="text\/javascript">([\s\S]*?)<\/script>/)?.[1] || '';
+      if (scriptSrc) {
+        const script = document.createElement('script');
+        script.src = scriptSrc;
+        document.body.appendChild(script);
+      }
+      if (scriptCode) {
+        const script = document.createElement('script');
+        script.innerHTML = scriptCode;
+        setTimeout(() => {
+          document.body.appendChild(script);
+        }, 1500);
+      }
+    }
+    return (
+      <div
+        style={{
+          lineHeight: '24px',
+          width: 'fit-content',
+          maxWidth: '100%',
+          overflowX: 'hidden',
+        }}
+      >
+        {htmlCode ? <pre>{text}</pre> : text}
+        {!!htmlCode && <div dangerouslySetInnerHTML={{ __html: htmlCode }} />}
+      </div>
+    );
+  };
+
   const getMsgContent = () => {
     if (isText) {
-      let text = dataSource[0][columns[0].nameEn];
-      let htmlCode: string;
-      const match = text.match(/```html([\s\S]*?)```/);
-      htmlCode = match && match[1].trim();
-      if (htmlCode) {
-        text = text.replace(/```html([\s\S]*?)```/, '');
-      }
-      let scriptCode: string;
-      let scriptSrc: string;
-      if (htmlCode) {
-        scriptSrc = htmlCode.match(/<script src="([\s\S]*?)"><\/script>/)?.[1] || '';
-        scriptCode =
-          htmlCode.match(/<script type="text\/javascript">([\s\S]*?)<\/script>/)?.[1] || '';
-        if (scriptSrc) {
-          const script = document.createElement('script');
-          script.src = scriptSrc;
-          document.body.appendChild(script);
-        }
-        if (scriptCode) {
-          const script = document.createElement('script');
-          script.innerHTML = scriptCode;
-          setTimeout(() => {
-            document.body.appendChild(script);
-          }, 1500);
-        }
-      }
-      return (
-        <div
-          style={{
-            lineHeight: '24px',
-            width: 'fit-content',
-            maxWidth: '100%',
-            overflowX: 'hidden',
-          }}
-        >
-          {htmlCode ? <pre>{text}</pre> : text}
-          {!!htmlCode && <div dangerouslySetInnerHTML={{ __html: htmlCode }} />}
-        </div>
-      );
+      return getTextContent();
     }
     if (isMetricCard) {
       return (
@@ -124,12 +141,7 @@ const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, tr
         />
       );
     }
-    if (
-      categoryField.length > 1 ||
-      queryMode === 'ENTITY_DETAIL' ||
-      queryMode === 'ENTITY_DIMENSION' ||
-      (categoryField.length === 1 && metricFields.length === 0)
-    ) {
+    if (isTable) {
       return <Table data={{ ...data, queryColumns: columns, queryResults: dataSource }} />;
     }
     if (dateField && metricFields.length > 0) {
@@ -157,33 +169,22 @@ const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, tr
     return <Table data={{ ...data, queryColumns: columns, queryResults: dataSource }} />;
   };
 
-  let width = '100%';
-  if (isText) {
-    width = 'fit-content';
-  } else if (isMetricCard) {
-    width = '370px';
-  } else if (categoryField.length > 1 && !isMobile && !isMobileMode) {
-    if (columns.length === 1) {
-      width = '600px';
-    } else if (columns.length === 2) {
-      width = '1000px';
-    }
-  }
+  // let width = '100%';
+  // if (isText) {
+  //   width = 'fit-content';
+  // } else if (isMetricCard) {
+  //   width = isDslMetricCard ? '290px' : '370px';
+  // } else if (categoryField.length > 1 && !isMobile && !isMobileMode) {
+  //   if (columns.length === 1) {
+  //     width = '600px';
+  //   } else if (columns.length === 2) {
+  //     width = '1000px';
+  //   }
+  // }
 
-  return (
-    <Message
-      position="left"
-      chatContext={chatContext}
-      entityInfo={entityInfo}
-      title={question}
-      isMobileMode={isMobileMode}
-      width={width}
-      maxWidth={isText && !isMobile ? '80%' : undefined}
-      queryMode={queryMode}
-    >
-      {getMsgContent()}
-    </Message>
-  );
+  const chartMsgClass = classNames({ [prefixCls]: !isTable });
+
+  return <div className={chartMsgClass}>{getMsgContent()}</div>;
 };
 
 export default ChatMsg;

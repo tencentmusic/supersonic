@@ -1,12 +1,13 @@
 import { PREFIX_CLS } from '../../../common/constants';
-import { formatMetric } from '../../../utils/utils';
+import { formatMetric, formatNumberWithCN } from '../../../utils/utils';
 import ApplyAuth from '../ApplyAuth';
 import { DrillDownDimensionType, MsgDataType } from '../../../common/type';
 import PeriodCompareItem from './PeriodCompareItem';
 import DrillDownDimensions from '../../DrillDownDimensions';
 import { Spin } from 'antd';
 import classNames from 'classnames';
-import FilterSection from '../FilterSection';
+import { SwapOutlined } from '@ant-design/icons';
+import { useState } from 'react';
 
 type Props = {
   data: MsgDataType;
@@ -26,7 +27,7 @@ const MetricCard: React.FC<Props> = ({
   const { queryMode, queryColumns, queryResults, entityInfo, aggregateInfo, chatContext } = data;
 
   const { metricInfos } = aggregateInfo || {};
-  const { dateInfo, dimensionFilters } = chatContext || {};
+  const { dateInfo } = chatContext || {};
   const { startDate } = dateInfo || {};
 
   const indicatorColumn = queryColumns?.find(column => column.showType === 'NUMBER');
@@ -34,25 +35,31 @@ const MetricCard: React.FC<Props> = ({
 
   const prefixCls = `${PREFIX_CLS}-metric-card`;
 
+  const matricCardClass = classNames(prefixCls, {
+    [`${PREFIX_CLS}-metric-card-dsl`]: queryMode === 'DSL',
+  });
+
   const indicatorClass = classNames(`${prefixCls}-indicator`, {
     [`${prefixCls}-indicator-period-compare`]: metricInfos?.length > 0,
   });
 
-  const hasFilterSection = dimensionFilters?.length > 0;
+  const [isNumber, setIsNumber] = useState(false);
+  const handleNumberClick = () => {
+    setIsNumber(!isNumber);
+  };
 
   return (
-    <div className={prefixCls}>
+    <div className={matricCardClass}>
       <div className={`${prefixCls}-top-bar`}>
         {indicatorColumn?.name ? (
           <div className={`${prefixCls}-indicator-name`}>{indicatorColumn?.name}</div>
         ) : (
-          <div style={{ height: 32 }} />
+          <div style={{ height: 6 }} />
         )}
-        {(hasFilterSection || drillDownDimension) && (
+        {drillDownDimension && (
           <div className={`${prefixCls}-filter-section-wrapper`}>
             (
             <div className={`${prefixCls}-filter-section`}>
-              <FilterSection chatContext={chatContext} entityInfo={entityInfo} />
               {drillDownDimension && (
                 <div className={`${prefixCls}-filter-item`}>
                   <div className={`${prefixCls}-filter-item-label`}>下钻维度：</div>
@@ -70,8 +77,15 @@ const MetricCard: React.FC<Props> = ({
           {indicatorColumn && !indicatorColumn?.authorized ? (
             <ApplyAuth model={entityInfo?.modelInfo.name || ''} onApplyAuth={onApplyAuth} />
           ) : (
-            <div className={`${prefixCls}-indicator-value`}>
-              {formatMetric(queryResults?.[0]?.[indicatorColumnName]) || '-'}
+            <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+              <div className={`${prefixCls}-indicator-value`}>
+                {isNumber
+                  ? formatMetric(queryResults?.[0]?.[indicatorColumnName]) || '-'
+                  : formatNumberWithCN(+queryResults?.[0]?.[indicatorColumnName])}
+              </div>
+              <div className={`${prefixCls}-indicator-switch`}>
+                <SwapOutlined onClick={handleNumberClick} />
+              </div>
             </div>
           )}
           {metricInfos?.length > 0 && (
@@ -90,7 +104,6 @@ const MetricCard: React.FC<Props> = ({
             dimensionFilters={chatContext.dimensionFilters}
             drillDownDimension={drillDownDimension}
             onSelectDimension={onSelectDimension}
-            isMetricCard
           />
         </div>
       )}

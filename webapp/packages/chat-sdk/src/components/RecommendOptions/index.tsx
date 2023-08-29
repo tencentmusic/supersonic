@@ -12,17 +12,10 @@ type Props = {
   entityId: string | number;
   modelId: number;
   modelName: string;
-  isMobileMode?: boolean;
   onSelect: (option: string) => void;
 };
 
-const RecommendOptions: React.FC<Props> = ({
-  entityId,
-  modelId,
-  modelName,
-  isMobileMode,
-  onSelect,
-}) => {
+const RecommendOptions: React.FC<Props> = ({ entityId, modelId, modelName, onSelect }) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -125,7 +118,7 @@ const RecommendOptions: React.FC<Props> = ({
   };
 
   const recommendOptionsClass = classNames(prefixCls, {
-    [`${prefixCls}-mobile-mode`]: isMobileMode,
+    [`${prefixCls}-mobile-mode`]: isMobile,
   });
 
   return <div className={recommendOptionsClass}>{getSectionOptions()}</div>;

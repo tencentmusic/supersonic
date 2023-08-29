@@ -6,11 +6,12 @@ const DEFAULT_CHAT_ID = 0;
 
 const prefix = '/api';
 
-export function searchRecommend(queryText: string, chatId?: number, modelId?: number) {
+export function searchRecommend(queryText: string, chatId?: number, modelId?: number, agentId?: number) {
   return axios.post<Result<SearchRecommendItem[]>>(`${prefix}/chat/query/search`, {
     queryText,
     chatId: chatId || DEFAULT_CHAT_ID,
     modelId,
+    agentId
   });
 }
 
@@ -41,7 +42,8 @@ export function chatExecute(queryText: string,  chatId: number, parseInfo: ChatC
   return axios.post<Result<MsgDataType>>(`${prefix}/chat/query/execute`, {
     queryText,
     chatId: chatId || DEFAULT_CHAT_ID,
-    parseInfo,
+    queryId: parseInfo.queryId,
+    parseId: parseInfo.id
   });
 }
 

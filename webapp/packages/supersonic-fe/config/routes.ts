@@ -9,6 +9,14 @@ const { APP_TARGET } = process.env;
 
 const ROUTES = [
   {
+    path: '/chat/mobile',
+    name: 'chat',
+    component: './Chat',
+    hideInMenu: true,
+    layout: false,
+    envEnableList: [ENV_KEY.CHAT],
+  },
+  {
     path: '/chat',
     name: 'chat',
     component: './Chat',

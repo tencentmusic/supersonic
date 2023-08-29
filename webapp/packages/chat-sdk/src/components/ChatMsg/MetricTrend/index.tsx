@@ -9,7 +9,7 @@ import { Spin } from 'antd';
 import Table from '../Table';
 import DrillDownDimensions from '../../DrillDownDimensions';
 import MetricInfo from './MetricInfo';
-import FilterSection from '../FilterSection';
+import MetricOptions from '../../MetricOptions';
 
 type Props = {
   data: MsgDataType;
@@ -25,6 +25,7 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
   const dateOptions = DATE_TYPES[chatContext?.dateInfo?.period] || DATE_TYPES.DAY;
 
   const [columns, setColumns] = useState<ColumnType[]>([]);
+  const [defaultMetricField, setDefaultMetricField] = useState<FieldType>();
   const [activeMetricField, setActiveMetricField] = useState<FieldType>();
   const [dataSource, setDataSource] = useState<any[]>([]);
   const [currentDateOption, setCurrentDateOption] = useState<number>();
@@ -58,7 +59,9 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
     })?.value;
 
     setColumns(queryColumns || []);
-    setActiveMetricField(chatContext?.metrics?.[0]);
+    const metricField = chatContext?.metrics?.[0];
+    setDefaultMetricField(metricField);
+    setActiveMetricField(metricField);
     setDataSource(queryResults);
     setCurrentDateOption(initialDateOption);
     setDimensions(chatContext?.dimensions);
@@ -107,7 +110,7 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
     });
   };
 
-  const onSwitchMetric = (metricField: FieldType) => {
+  const onSwitchMetric = (metricField?: FieldType) => {
     setActiveMetricField(metricField);
     onLoadData({
       dateInfo: {
@@ -116,7 +119,7 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
         unit: currentDateOption || chatContext.dateInfo.unit,
       },
       dimensions: drillDownDimension ? [...(dimensions || []), drillDownDimension] : undefined,
-      metrics: [metricField],
+      metrics: [metricField || defaultMetricField],
     });
   };
 
@@ -139,44 +142,25 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
     return null;
   }
 
-  const prefixCls = `${CLS_PREFIX}-metric-trend`;
+  const isMultipleMetric = chatContext?.metrics?.length > 1;
+  const existDrillDownDimension = queryMode.includes('METRIC') && !isEntityMode;
 
-  const hasFilterSection = dimensionFilters?.length > 0;
+  const prefixCls = `${CLS_PREFIX}-metric-trend`;
 
   return (
     <div className={prefixCls}>
       <div className={`${prefixCls}-charts`}>
         <div className={`${prefixCls}-top-bar`}>
-          {chatContext.metrics.length > 0 && (
-            <div className={`${prefixCls}-metric-fields`}>
-              {chatContext.metrics.slice(0, 5).map((metricField: FieldType) => {
-                const metricFieldClass = classNames(`${prefixCls}-metric-field`, {
-                  [`${prefixCls}-metric-field-active`]:
-                    activeMetricField?.bizName === metricField.bizName &&
-                    chatContext.metrics.length > 1,
-                  [`${prefixCls}-metric-field-single`]: chatContext.metrics.length === 1,
-                });
-                return (
-                  <div
-                    className={metricFieldClass}
-                    key={metricField.bizName}
-                    onClick={() => {
-                      if (chatContext.metrics.length > 1) {
-                        onSwitchMetric(metricField);
-                      }
-                    }}
-                  >
-                    {metricField.name}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          {(hasFilterSection || drillDownDimension) && (
+          <div
+            className={`${prefixCls}-metric-fields ${prefixCls}-metric-field-single`}
+            key={activeMetricField?.bizName}
+          >
+            {activeMetricField?.name}
+          </div>
+          {drillDownDimension && (
             <div className={`${prefixCls}-filter-section-wrapper`}>
               (
               <div className={`${prefixCls}-filter-section`}>
-                <FilterSection chatContext={chatContext} />
                 {drillDownDimension && (
                   <div className={`${prefixCls}-filter-item`}>
                     <div className={`${prefixCls}-filter-item-label`}>下钻维度：</div>
@@ -192,7 +176,7 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
         </div>
         <Spin spinning={loading}>
           <div className={`${prefixCls}-content`}>
-            {aggregateInfoValue?.metricInfos?.length > 0 && (
+            {!isMobile && aggregateInfoValue?.metricInfos?.length > 0 && (
               <MetricInfo aggregateInfo={aggregateInfoValue} />
             )}
             <div className={`${prefixCls}-date-options`}>
@@ -236,13 +220,25 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
               />
             )}
           </div>
-          {queryMode.includes('METRIC') && !isEntityMode && (
-            <DrillDownDimensions
-              modelId={chatContext.modelId}
-              drillDownDimension={drillDownDimension}
-              dimensionFilters={chatContext.dimensionFilters}
-              onSelectDimension={onSelectDimension}
-            />
+          {(isMultipleMetric || existDrillDownDimension) && (
+            <div className={`${prefixCls}-bottom-tools`}>
+              {isMultipleMetric && (
+                <MetricOptions
+                  metrics={chatContext.metrics}
+                  defaultMetric={defaultMetricField}
+                  currentMetric={activeMetricField}
+                  onSelectMetric={onSwitchMetric}
+                />
+              )}
+              {existDrillDownDimension && (
+                <DrillDownDimensions
+                  modelId={chatContext.modelId}
+                  drillDownDimension={drillDownDimension}
+                  dimensionFilters={chatContext.dimensionFilters}
+                  onSelectDimension={onSelectDimension}
+                />
+              )}
+            </div>
           )}
         </Spin>
       </div>

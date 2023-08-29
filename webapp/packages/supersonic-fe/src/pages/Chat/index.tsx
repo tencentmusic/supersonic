@@ -58,7 +58,7 @@ const Chat: React.FC<Props> = ({
   const [currentConversation, setCurrentConversation] = useState<
     ConversationDetailType | undefined
   >(isMobile ? { chatId: 0, chatName: `${CHAT_TITLE}问答` } : undefined);
-  const [conversationCollapsed, setConversationCollapsed] = useState(isCopilotMode);
+  const [conversationCollapsed, setConversationCollapsed] = useState(isMobileMode);
   const [models, setModels] = useState<ModelType[]>([]);
   const [currentModel, setCurrentModel] = useState<ModelType>();
   const [defaultEntity, setDefaultEntity] = useState<DefaultEntityType>();
@@ -161,10 +161,10 @@ const Chat: React.FC<Props> = ({
   const sendHelloRsp = () => {
     setMessageList([
       {
-        id: uuid(),
-        type: MessageTypeEnum.RECOMMEND_QUESTIONS,
-        // type: MessageTypeEnum.AGENT_LIST,
-        // msg: currentAgent?.name || '查信息',
+        // id: uuid(),
+        // type: MessageTypeEnum.RECOMMEND_QUESTIONS,
+        type: MessageTypeEnum.AGENT_LIST,
+        msg: currentAgent?.name || '查信息',
       },
     ]);
   };
@@ -172,10 +172,7 @@ const Chat: React.FC<Props> = ({
   const convertHistoryMsg = (list: HistoryMsgItemType[]) => {
     return list.map((item: HistoryMsgItemType) => ({
       id: item.questionId,
-      type:
-        item.queryResult?.queryMode === MessageTypeEnum.WEB_PAGE
-          ? MessageTypeEnum.PLUGIN
-          : MessageTypeEnum.QUESTION,
+      type: MessageTypeEnum.QUESTION,
       msg: item.queryText,
       msgData: item.queryResult,
       score: item.score,
@@ -350,7 +347,12 @@ const Chat: React.FC<Props> = ({
     }
   };
 
-  const onMsgDataLoaded = (data: MsgDataType, questionId: string | number) => {
+  const onMsgDataLoaded = (
+    data: MsgDataType,
+    questionId: string | number,
+    question: string,
+    valid: boolean,
+  ) => {
     if (!isMobile) {
       conversationRef?.current?.updateData();
     }
@@ -366,28 +368,15 @@ const Chat: React.FC<Props> = ({
         parseOptions: data.parseOptions,
       };
     }
-    if (data.queryMode === 'WEB_PAGE') {
-      setMessageList([
-        ...messageList,
-        {
-          id: uuid(),
-          msg: messageList[messageList.length - 1]?.msg,
-          type: MessageTypeEnum.PLUGIN,
-          msgData: data,
-        },
-        ...(parseOptionsItem ? [parseOptionsItem] : []),
-      ]);
-    } else {
-      const msgs = cloneDeep(messageList);
-      const msg = msgs.find((item) => item.id === questionId);
-      if (msg) {
-        msg.msgData = data;
-        setMessageList([...msgs, ...(parseOptionsItem ? [parseOptionsItem] : [])]);
-      }
-      updateMessageContainerScroll();
+    const msgs = cloneDeep(messageList);
+    const msg = msgs.find((item) => item.id === questionId);
+    if (msg) {
+      msg.msgData = data;
+      const msgList = [...msgs, ...(parseOptionsItem ? [parseOptionsItem] : [])];
+      setMessageList(msgList);
+      updateChatFilter(data, msgList);
     }
-
-    updateChatFilter(data);
+    updateMessageContainerScroll(`${questionId}`);
   };
 
   const onCheckMore = (data: MsgDataType) => {
