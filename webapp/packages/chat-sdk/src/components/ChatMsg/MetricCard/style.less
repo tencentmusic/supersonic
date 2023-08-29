@@ -4,8 +4,12 @@
 
 .@{metric-card-prefix-cls} {
   width: 100%;
-  height: 130px;
+  height: 162px;
   row-gap: 4px;
+
+  &-dsl {
+    height: 90px;
+  }
 
   &-top-bar {
     display: flex;
@@ -73,6 +77,13 @@
     color: var(--chat-blue);
   }
 
+  &-indicator-switch {
+    color: var(--text-color-fourth);
+    font-size: 18px;
+    margin-left: 6px;
+    margin-bottom: 3px;
+  }
+
   &-period-compare {
     width: 100%;
     display: flex;
@@ -108,8 +119,6 @@
   }
 
   &-drill-down-dimensions {
-    position: absolute;
-    bottom: -44px;
-    left: -16;
+    margin-top: 2px;
   }
 }

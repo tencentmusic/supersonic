@@ -1,11 +1,10 @@
 @import '../../styles/index.less';
 
-@drill-down-dimensions-prefix-cls: ~'@{supersonic-chat-prefix}-drill-down-dimensions';
+@metric-options-prefix-cls: ~'@{supersonic-chat-prefix}-metric-options';
 
-.@{drill-down-dimensions-prefix-cls} {
+.@{metric-options-prefix-cls} {
   display: flex;
   flex-direction: column;
-  margin-top: 2px;
 
   &-section {
     width: 100%;
@@ -13,8 +12,8 @@
     align-items: center;
     flex-wrap: wrap;
     column-gap: 6px;
-    margin-top: 6px;
-    margin-bottom: 6px;
+    margin-top: 8px;
+    margin-bottom: 4px;
   }
 
   &-metric-card {
@@ -54,12 +53,8 @@
     color: var(--chat-blue);
   }
 
-  &-down-arrow {
-    color: var(--chat-blue);
-  }
-
-  &-cancel-drill-down {
-    margin-left: 20px;
+  &-cancel-select {
+    margin-left: 12px;
     color: var(--text-color-third);
     cursor: pointer;
     padding: 0 4px;

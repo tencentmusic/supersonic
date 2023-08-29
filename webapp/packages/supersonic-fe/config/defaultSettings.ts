@@ -13,7 +13,7 @@ const Settings: LayoutSettings & {
   colorWeak: false,
   title: '',
   pwa: false,
-  iconfontUrl: '//at.alicdn.com/t/c/font_3201979_drwu4z3kkbi.js',
+  iconfontUrl: '//at.alicdn.com/t/c/font_4120566_qiku6b2kol.js',
   splitMenus: true,
   menu: {
     defaultOpenAll: true,

@@ -46,9 +46,10 @@ export type DateInfoType = {
 export type FilterItemType = {
   elementID: number;
   name: string;
+  bizName: string;
   operator: string;
   type: string;
-  value: string[];
+  value: string;
 };
 
 export type ModelType = {
@@ -62,6 +63,8 @@ export type ModelType = {
 }
 
 export type ChatContextType = {
+  id: number;
+  queryId: number;
   aggType: string;
   modelId: number;
   modelName: string;
@@ -69,7 +72,7 @@ export type ChatContextType = {
   dateInfo: DateInfoType;
   dimensions: FieldType[];
   metrics: FieldType[];
-  entity: { alias: string[] };
+  entity: { alias: string[], id: number };
   elementMatches: any[];
   queryMode: string;
   dimensionFilters: FilterItemType[];
@@ -126,6 +129,7 @@ export enum ParseStateEnum {
 
 export type ParseDataType = {
   chatId: number;
+  queryId: number;
   queryText: string;
   state: ParseStateEnum;
   selectedParses: ChatContextType[];

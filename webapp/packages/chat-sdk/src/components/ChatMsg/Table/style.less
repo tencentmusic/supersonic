@@ -3,8 +3,7 @@
 @table-prefix-cls: ~'@{supersonic-chat-prefix}-table';
 
 .@{table-prefix-cls} {
-  margin-top: 16px;
-  margin-bottom: 20px;
+  margin-top: 6px;
 
   &-photo {
     display: flex;
@@ -68,9 +67,13 @@
 
   .ant-table-tbody {
     .ant-table-cell {
-      padding: 15px 0;
-      color: #333;
+      padding: 12px 2px;
+      color: var(--text-color);
       font-size: 14px;
     }
+  }
+
+  .ant-table-pagination.ant-pagination {
+    margin-bottom: 0;
   }
 }

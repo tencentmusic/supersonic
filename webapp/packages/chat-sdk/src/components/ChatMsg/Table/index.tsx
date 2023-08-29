@@ -68,8 +68,7 @@ const Table: React.FC<Props> = ({ data, size, onApplyAuth }) => {
         }
         columns={tableColumns}
         dataSource={queryResults}
-        style={{ width: '100%' }}
-        // scroll={{ x: 'max-content' }}
+        style={{ width: '100%', overflowX: 'auto' }}
         rowClassName={getRowClassName}
         size={size}
       />

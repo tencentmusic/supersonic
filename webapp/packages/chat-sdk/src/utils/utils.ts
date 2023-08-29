@@ -84,6 +84,15 @@ export const getFormattedValue = (value: number | string, remainZero?: boolean) 
   return `${formattedValue}${unit === NumericUnit.None ? '' : unit}`;
 };
 
+export const formatNumberWithCN = (num: number) => {
+  if (isNaN(num)) return '-';
+  if (num >= 10000) {
+    return (num / 10000).toFixed(1) + "万";
+  } else {
+    return num;
+  }
+}
+
 export const groupByColumn = (data: any[], column: string) => {
   return data.reduce((result, item) => {
     const resultData = { ...result };
@@ -152,9 +161,8 @@ export function getLightenDarkenColor(col, amt) {
   } else {
     result = hexToRgbObj(col) || {};
   }
-  return `rgba(${result.r + amt},${result.g + amt},${result.b + amt}${
-    result.a ? `,${result.a}` : ''
-  })`;
+  return `rgba(${result.r + amt},${result.g + amt},${result.b + amt}${result.a ? `,${result.a}` : ''
+    })`;
 }
 
 export function getChartLightenColor(col) {

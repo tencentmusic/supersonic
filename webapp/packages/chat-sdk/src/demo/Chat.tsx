@@ -41,6 +41,8 @@ const Chat = () => {
     setFollowQuestions(['测试1234测试', '测试1234测试', '测试1234测试']);
   };
 
+  // 5: 查信息，6: 智能圈选
+
   return (
     <div className={styles.page}>
       <div className={styles.inputMsg}>
@@ -51,17 +53,19 @@ const Chat = () => {
           onSearch={onSearch}
         />
       </div>
-      <div className={styles.chatItem}>
-        <ChatItem
-          msg={msg}
-          // msgData={data}
-          agentId={6}
-          onMsgDataLoaded={onMsgDataLoaded}
-          isLastMessage
-          isMobileMode
-          triggerResize={triggerResize}
-        />
-      </div>
+      {inputMsg && (
+        <div className={styles.chatItem}>
+          <ChatItem
+            msg={msg}
+            // msgData={data}
+            agentId={6}
+            onMsgDataLoaded={onMsgDataLoaded}
+            isLastMessage
+            isMobileMode
+            triggerResize={triggerResize}
+          />
+        </div>
+      )}
     </div>
   );
 };
