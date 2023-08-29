@@ -1,13 +1,14 @@
 package com.tencent.supersonic.chat.persistence.repository.impl;
 
-import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
-import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.config.ChatConfig;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.config.ChatConfigFilterInternal;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatConfigDO;
-import com.tencent.supersonic.chat.persistence.mapper.ChatConfigMapper;
 import com.tencent.supersonic.chat.persistence.repository.ChatConfigRepository;
 import com.tencent.supersonic.chat.utils.ChatConfigHelper;
+import com.tencent.supersonic.chat.persistence.mapper.ChatConfigMapper;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.BeanUtils;
@@ -23,7 +24,7 @@ public class ChatConfigRepositoryImpl implements ChatConfigRepository {
     private final ChatConfigMapper chatConfigMapper;
 
     public ChatConfigRepositoryImpl(ChatConfigHelper chatConfigHelper,
-            ChatConfigMapper chatConfigMapper) {
+                                    ChatConfigMapper chatConfigMapper) {
         this.chatConfigHelper = chatConfigHelper;
         this.chatConfigMapper = chatConfigMapper;
     }
@@ -52,8 +53,8 @@ public class ChatConfigRepositoryImpl implements ChatConfigRepository {
         List<ChatConfigDO> chaConfigDOList = chatConfigMapper.search(filterInternal);
         if (!CollectionUtils.isEmpty(chaConfigDOList)) {
             chaConfigDOList.stream().forEach(chaConfigDO ->
-                    chaConfigDescriptorList.add(
-                            chatConfigHelper.chatConfigDO2Descriptor(chaConfigDO.getModelId(), chaConfigDO)));
+                    chaConfigDescriptorList.add(chatConfigHelper
+                            .chatConfigDO2Descriptor(chaConfigDO.getModelId(), chaConfigDO)));
         }
         return chaConfigDescriptorList;
     }

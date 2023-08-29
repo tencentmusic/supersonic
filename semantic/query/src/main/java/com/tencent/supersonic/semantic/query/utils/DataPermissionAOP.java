@@ -12,23 +12,20 @@ import com.tencent.supersonic.auth.api.authorization.pojo.DimensionFilter;
 import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryAuthorization;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
-import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
-import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
+import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelResp;
-import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.MetricService;
-import com.tencent.supersonic.semantic.model.domain.ModelService;
+import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
+import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,13 +36,16 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
+import com.tencent.supersonic.semantic.model.domain.DimensionService;
+import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.semantic.model.domain.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.assertj.core.util.Sets;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -133,14 +133,14 @@ public class DataPermissionAOP {
                 .collect(Collectors.toSet());
         QueryResultWithSchemaResp queryResultAfterDesensitization = desensitizationData(queryResultWithColumns,
                 need2Apply);
-        addPromptInfoInfo(modelId, queryResultAfterDesensitization, authorizedResource);
+        addPromptInfoInfo(modelId, queryResultAfterDesensitization, authorizedResource, need2Apply);
 
         return queryResultAfterDesensitization;
 
     }
 
-    private boolean doModelAdmin(User user, QueryStructReq queryStructCmd) {
-        Long modelId = queryStructCmd.getModelId();
+    private boolean doModelAdmin(User user, QueryStructReq queryStructReq) {
+        Long modelId = queryStructReq.getModelId();
         List<ModelResp> modelListAdmin = modelService.getModelListWithAuth(user.getName(), null, AuthType.ADMIN);
         if (CollectionUtils.isEmpty(modelListAdmin)) {
             return false;
@@ -151,69 +151,60 @@ public class DataPermissionAOP {
         }
     }
 
-    private void doModelVisible(User user, QueryStructReq queryStructCmd) {
+    private void doModelVisible(User user, QueryStructReq queryStructReq) {
         Boolean visible = true;
-        Long domainId = queryStructCmd.getModelId();
+        Long modelId = queryStructReq.getModelId();
         List<ModelResp> modelListVisible = modelService.getModelListWithAuth(user.getName(), null, AuthType.VISIBLE);
         if (CollectionUtils.isEmpty(modelListVisible)) {
             visible = false;
         } else {
             Map<Long, List<ModelResp>> id2domainDesc = modelListVisible.stream()
                     .collect(Collectors.groupingBy(SchemaItem::getId));
-            if (!CollectionUtils.isEmpty(id2domainDesc) && !id2domainDesc.containsKey(domainId)) {
+            if (!CollectionUtils.isEmpty(id2domainDesc) && !id2domainDesc.containsKey(modelId)) {
                 visible = false;
             }
         }
-
         if (!visible) {
-            List<Long> modelIds = new ArrayList<>();
-            modelIds.add(domainId);
-            List<ModelResp> modelInfos = modelService.getModelList(modelIds);
-            if (CollectionUtils.isEmpty(modelInfos)) {
-                throw new InvalidArgumentException(
-                        "invalid domainId:" + domainId + ", please contact admin for details");
-            }
-            String domainName = modelInfos.get(0).getName();
-            throw new InvalidPermissionException(
-                    "You do not have domain:" + domainName + " permission, please contact admin for details");
-
+            ModelResp modelResp = modelService.getModel(modelId);
+            String modelName = modelResp.getName();
+            List<String> admins = modelService.getModelAdmin(modelResp.getId());
+            String message = String.format("您没有主题域[%s]权限，请联系管理员%s开通", modelName, admins);
+            throw new InvalidArgumentException(message);
         }
 
     }
 
     private QueryResultWithSchemaResp getQueryResultWithColumns(QueryResultWithSchemaResp resultWithColumns,
             Long domainId, AuthorizedResourceResp authResource) {
-        addPromptInfoInfo(domainId, resultWithColumns, authResource);
+        addPromptInfoInfo(domainId, resultWithColumns, authResource, Sets.newHashSet());
         return resultWithColumns;
     }
 
-    private void addPromptInfoInfo(Long domainId, QueryResultWithSchemaResp queryResultWithColumns,
-            AuthorizedResourceResp authorizedResource) {
+    private void addPromptInfoInfo(Long modelId, QueryResultWithSchemaResp queryResultWithColumns,
+            AuthorizedResourceResp authorizedResource, Set<String> need2Apply) {
         List<DimensionFilter> filters = authorizedResource.getFilters();
+        if (CollectionUtils.isEmpty(need2Apply) && CollectionUtils.isEmpty(filters)) {
+            return;
+        }
+        List<String> admins = modelService.getModelAdmin(modelId);
+        if (!CollectionUtils.isEmpty(need2Apply)) {
+            String promptInfo = String.format("当前结果已经过脱敏处理， 申请权限请联系管理员%s", admins);
+            queryResultWithColumns.setQueryAuthorization(new QueryAuthorization(promptInfo));
+        }
         if (!CollectionUtils.isEmpty(filters)) {
             log.debug("dimensionFilters:{}", filters);
-
-            List<Long> modelIds = new ArrayList<>();
-            modelIds.add(domainId);
-            List<ModelResp> modelInfos = modelService.getModelList(modelIds);
-            String modelNameCn = "";
-            if (!CollectionUtils.isEmpty(modelInfos)) {
-                modelNameCn = modelInfos.get(0).getName();
-            }
-
+            ModelResp modelResp = modelService.getModel(modelId);
             List<String> exprList = new ArrayList<>();
             List<String> descList = new ArrayList<>();
             filters.stream().forEach(filter -> {
                 descList.add(filter.getDescription());
                 exprList.add(filter.getExpressions().toString());
             });
-
-            String promptInfo = "the current data has been controlled by permissions,"
-                    + " related information:%s, please contact admin for details";
-            String message = String.format(promptInfo, CollectionUtils.isEmpty(descList) ? exprList : descList);
+            String promptInfo = "当前结果已经过行权限过滤，详细过滤条件如下:%s, 申请权限请联系管理员%s";
+            String message = String.format(promptInfo, CollectionUtils.isEmpty(descList) ? exprList : descList, admins);
 
             queryResultWithColumns.setQueryAuthorization(
-                    new QueryAuthorization(modelNameCn, exprList, descList, message));
+                    new QueryAuthorization(modelResp.getName(), exprList, descList, message));
             log.info("queryResultWithColumns:{}", queryResultWithColumns);
         }
     }
@@ -292,7 +283,7 @@ public class DataPermissionAOP {
         return highSensitiveCols;
     }
 
-    private void doRowPermission(QueryStructReq queryStructCmd, AuthorizedResourceResp authorizedResource) {
+    private void doRowPermission(QueryStructReq queryStructReq, AuthorizedResourceResp authorizedResource) {
         log.debug("start doRowPermission logic");
         StringJoiner joiner = new StringJoiner(" OR ");
         List<String> dimensionFilters = new ArrayList<>();
@@ -313,13 +304,13 @@ public class DataPermissionAOP {
         });
 
         if (StringUtils.isNotEmpty(joiner.toString())) {
-            log.info("before doRowPermission, queryStructCmd:{}", queryStructCmd);
+            log.info("before doRowPermission, queryStructReq:{}", queryStructReq);
             Filter filter = new Filter("", FilterOperatorEnum.SQL_PART, joiner.toString());
-            List<Filter> filters = Objects.isNull(queryStructCmd.getOriginalFilter()) ? new ArrayList<>()
-                    : queryStructCmd.getOriginalFilter();
+            List<Filter> filters = Objects.isNull(queryStructReq.getOriginalFilter()) ? new ArrayList<>()
+                    : queryStructReq.getOriginalFilter();
             filters.add(filter);
-            queryStructCmd.setDimensionFilters(filters);
-            log.info("after doRowPermission, queryStructCmd:{}", queryStructCmd);
+            queryStructReq.setDimensionFilters(filters);
+            log.info("after doRowPermission, queryStructReq:{}", queryStructReq);
         }
 
     }
@@ -348,7 +339,7 @@ public class DataPermissionAOP {
         try {
             queryResultWithColumns = deepCopyResult(raw);
         } catch (Exception e) {
-            log.warn("deepCopyResult, e:{}", e);
+            log.warn("deepCopyResult: ", e);
         }
         addAuthorizedSchemaInfo(queryResultWithColumns.getColumns(), need2Apply);
         desensitizationInternal(queryResultWithColumns.getResultList(), need2Apply);
@@ -382,30 +373,32 @@ public class DataPermissionAOP {
         }
     }
 
-    private void doFilterCheckLogic(QueryStructReq queryStructCmd, Set<String> resAuthName,
+    private void doFilterCheckLogic(QueryStructReq queryStructReq, Set<String> resAuthName,
             Set<String> sensitiveResReq) {
-        Set<String> resFilterSet = queryStructUtils.getFilterResNameEnExceptInternalCol(queryStructCmd);
+        Set<String> resFilterSet = queryStructUtils.getFilterResNameEnExceptInternalCol(queryStructReq);
         Set<String> need2Apply = resFilterSet.stream()
                 .filter(res -> !resAuthName.contains(res) && sensitiveResReq.contains(res)).collect(Collectors.toSet());
         Set<String> nameCnSet = new HashSet<>();
 
         List<Long> modelIds = new ArrayList<>();
-        modelIds.add(queryStructCmd.getModelId());
+        modelIds.add(queryStructReq.getModelId());
         List<ModelResp> modelInfos = modelService.getModelList(modelIds);
         String modelNameCn = Constants.EMPTY;
         if (!CollectionUtils.isEmpty(modelInfos)) {
             modelNameCn = modelInfos.get(0).getName();
         }
 
-        List<DimensionResp> dimensionDescList = dimensionService.getDimensions(queryStructCmd.getModelId());
+        List<DimensionResp> dimensionDescList = dimensionService.getDimensions(queryStructReq.getModelId());
         String finalDomainNameCn = modelNameCn;
         dimensionDescList.stream().filter(dim -> need2Apply.contains(dim.getBizName()))
                 .forEach(dim -> nameCnSet.add(finalDomainNameCn + MINUS + dim.getName()));
 
         if (!CollectionUtils.isEmpty(need2Apply)) {
-            log.warn("in doFilterLogic, need2Apply:{}", need2Apply);
-            throw new InvalidPermissionException(
-                    "you do not have data permission:" + nameCnSet + ", please contact admin for details");
+            ModelResp modelResp = modelInfos.get(0);
+            List<String> admins = modelService.getModelAdmin(modelResp.getId());
+            log.info("in doFilterLogic, need2Apply:{}", need2Apply);
+            String message = String.format("您没有以下维度%s权限, 请联系管理员%s开通", nameCnSet, admins);
+            throw new InvalidPermissionException(message);
         }
     }
 

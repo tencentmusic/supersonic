@@ -3,15 +3,17 @@ package com.tencent.supersonic.chat.plugin;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.chat.agent.tool.DslTool;
-import com.tencent.supersonic.chat.api.pojo.*;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
 import com.tencent.supersonic.chat.agent.tool.PluginTool;
-import com.tencent.supersonic.chat.parser.ParseMode;
-import com.tencent.supersonic.chat.parser.embedding.EmbeddingConfig;
-import com.tencent.supersonic.chat.parser.embedding.EmbeddingResp;
-import com.tencent.supersonic.chat.parser.embedding.RecallRetrieval;
+import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingConfig;
+import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingResp;
+import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrieval;
 import com.tencent.supersonic.chat.plugin.event.PluginAddEvent;
 import com.tencent.supersonic.chat.plugin.event.PluginUpdateEvent;
 import com.tencent.supersonic.chat.query.plugin.ParamOption;
@@ -20,10 +22,16 @@ import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import java.net.URI;
-import java.util.*;
+import java.util.List;
+import java.util.Collection;
+import java.util.Set;
+import java.util.Optional;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -31,7 +39,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -149,9 +161,6 @@ public class PluginManager {
     }
 
     public void requestEmbeddingPluginAddALL(List<Plugin> plugins) {
-        plugins = plugins.stream()
-                .filter(plugin -> ParseMode.EMBEDDING_RECALL.equals(plugin.getParseMode()))
-                .collect(Collectors.toList());
         requestEmbeddingPluginAdd(convert(plugins));
     }
 
@@ -229,11 +238,11 @@ public class PluginManager {
         }
         List<ParamOption> paramOptions = getSemanticOption(plugin);
         if (CollectionUtils.isEmpty(paramOptions)) {
-            return Pair.of(true, Sets.newHashSet());
+            return Pair.of(true, pluginMatchedModel);
         }
         Set<Long> matchedModel = Sets.newHashSet();
-        Map<Long, List<ParamOption>> paramOptionMap = paramOptions.stream().
-                collect(Collectors.groupingBy(ParamOption::getModelId));
+        Map<Long, List<ParamOption>> paramOptionMap = paramOptions.stream()
+                        .collect(Collectors.groupingBy(ParamOption::getModelId));
         for (Long modelId : paramOptionMap.keySet()) {
             List<ParamOption> params = paramOptionMap.get(modelId);
             if (CollectionUtils.isEmpty(params)) {
@@ -268,8 +277,8 @@ public class PluginManager {
             return Sets.newHashSet();
         }
         return schemaElementMatches.stream().filter(schemaElementMatch ->
-                        SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType()) ||
-                                SchemaElementType.ID.equals(schemaElementMatch.getElement().getType()))
+                        SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType())
+                                || SchemaElementType.ID.equals(schemaElementMatch.getElement().getType()))
                 .map(SchemaElementMatch::getElement)
                 .map(SchemaElement::getId)
                 .collect(Collectors.toSet());

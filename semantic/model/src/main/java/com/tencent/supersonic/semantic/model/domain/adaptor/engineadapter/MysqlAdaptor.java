@@ -35,7 +35,8 @@ public class MysqlAdaptor extends EngineAdaptor {
 
     @Override
     public String getDbMetaQueryTpl() {
-        return "select distinct TABLE_SCHEMA as name from information_schema.tables where TABLE_SCHEMA not in ('information_schema','mysql','performance_schema','sys');";
+        return "select distinct TABLE_SCHEMA as name from information_schema.tables "
+                + "where TABLE_SCHEMA not in ('information_schema','mysql','performance_schema','sys');";
     }
 
     @Override
@@ -45,8 +46,8 @@ public class MysqlAdaptor extends EngineAdaptor {
 
     @Override
     public String getColumnMetaQueryTpl() {
-        return "SELECT COLUMN_NAME as name, DATA_TYPE as dataType, COLUMN_COMMENT as comment " +
-                "FROM information_schema.columns WHERE table_schema ='%s' AND  table_name = '%s'";
+        return "SELECT COLUMN_NAME as name, DATA_TYPE as dataType, COLUMN_COMMENT as comment "
+                + "FROM information_schema.columns WHERE table_schema ='%s' AND  table_name = '%s'";
     }
 
 

@@ -1,10 +1,16 @@
 package com.tencent.supersonic.chat.mapper;
 
 import com.hankcs.hanlp.algorithm.EditDistance;
-import com.tencent.supersonic.chat.utils.NatureHelper;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.service.AgentService;
+import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.knowledge.utils.NatureHelper;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,5 +90,24 @@ public class MapperHelper {
                 detectSegment.length());
     }
 
+    public Set<Long> getModelIds(QueryReq request) {
+
+        Long modelId = request.getModelId();
+
+        AgentService agentService = ContextUtils.getBean(AgentService.class);
+
+        Set<Long> detectModelIds = agentService.getDslToolsModelIds(request.getAgentId(), null);
+        if (Objects.nonNull(detectModelIds)) {
+            detectModelIds = detectModelIds.stream().filter(entry -> entry > 0).collect(Collectors.toSet());
+        }
+        if (Objects.nonNull(modelId) && modelId > 0 && Objects.nonNull(detectModelIds)) {
+            if (detectModelIds.contains(modelId)) {
+                Set<Long> result = new HashSet<>();
+                result.add(modelId);
+                return result;
+            }
+        }
+        return detectModelIds;
+    }
 
 }

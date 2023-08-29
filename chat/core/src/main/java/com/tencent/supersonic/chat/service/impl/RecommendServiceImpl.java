@@ -3,20 +3,22 @@ package com.tencent.supersonic.chat.service.impl;
 
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.response.RecommendQuestionResp;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
-import com.tencent.supersonic.chat.api.pojo.response.RecommendQuestionResp;
 import com.tencent.supersonic.chat.api.pojo.response.RecommendResp;
-import com.tencent.supersonic.chat.service.ConfigService;
-import com.tencent.supersonic.chat.service.RecommendService;
-import com.tencent.supersonic.chat.service.SemanticService;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import com.tencent.supersonic.chat.service.ConfigService;
+import com.tencent.supersonic.chat.service.RecommendService;
+import com.tencent.supersonic.chat.service.SemanticService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -112,10 +114,11 @@ public class RecommendServiceImpl implements RecommendService {
         List<ChatConfigResp> chatConfigRespList = configService.search(chatConfigFilter, null);
         if (!CollectionUtils.isEmpty(chatConfigRespList)) {
             chatConfigRespList.stream().forEach(chatConfigResp -> {
-                if (Objects.nonNull(chatConfigResp) && !CollectionUtils.isEmpty(
-                        chatConfigResp.getRecommendedQuestions())) {
-                    recommendQuestions.add(new RecommendQuestionResp(chatConfigResp.getModelId(),
-                            chatConfigResp.getRecommendedQuestions()));
+                if (Objects.nonNull(chatConfigResp)
+                        && !CollectionUtils.isEmpty(chatConfigResp.getRecommendedQuestions())) {
+                    recommendQuestions.add(
+                            new RecommendQuestionResp(chatConfigResp.getModelId(),
+                                    chatConfigResp.getRecommendedQuestions()));
                 }
             });
             return recommendQuestions;

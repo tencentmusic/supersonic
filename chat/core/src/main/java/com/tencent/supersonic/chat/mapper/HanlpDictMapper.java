@@ -9,7 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.service.SemanticService;
-import com.tencent.supersonic.chat.utils.NatureHelper;
+import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.knowledge.dictionary.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -37,10 +38,13 @@ public class HanlpDictMapper implements SchemaMapper {
         for (Term term : terms) {
             log.info("word:{},nature:{},frequency:{}", term.word, term.nature.toString(), term.getFrequency());
         }
-        Long modelId = queryContext.getRequest().getModelId();
 
         QueryMatchStrategy matchStrategy = ContextUtils.getBean(QueryMatchStrategy.class);
-        Map<MatchText, List<MapResult>> matchResult = matchStrategy.match(queryText, terms, modelId);
+        MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
+        Set<Long> detectModelIds = mapperHelper.getModelIds(queryContext.getRequest());
+
+        Map<MatchText, List<MapResult>> matchResult = matchStrategy.match(queryContext.getRequest(), terms,
+                detectModelIds);
 
         List<MapResult> matches = getMatches(matchResult);
 
@@ -50,6 +54,7 @@ public class HanlpDictMapper implements SchemaMapper {
 
         convertTermsToSchemaMapInfo(matches, queryContext.getMapInfo(), terms);
     }
+
 
     private void convertTermsToSchemaMapInfo(List<MapResult> mapResults, SchemaMapInfo schemaMap, List<Term> terms) {
         if (CollectionUtils.isEmpty(mapResults)) {

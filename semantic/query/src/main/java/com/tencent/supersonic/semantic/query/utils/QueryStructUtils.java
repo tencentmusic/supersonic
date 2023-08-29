@@ -33,16 +33,13 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 @Component
 public class QueryStructUtils {
-
+    public static Set<String> internalCols = new HashSet<>(
+            Arrays.asList("dayno", "plat_sys_var", "sys_imp_date", "sys_imp_week", "sys_imp_month"));
     private final DateUtils dateUtils;
     private final SqlFilterUtils sqlFilterUtils;
     private final Catalog catalog;
-
     @Value("${internal.metric.cnt.suffix:internal_cnt}")
     private String internalMetricNameSuffix;
-
-    public static Set<String> internalCols = new HashSet<>(
-            Arrays.asList("dayno", "plat_sys_var", "sys_imp_date", "sys_imp_week", "sys_imp_month"));
 
     public QueryStructUtils(
             DateUtils dateUtils,

@@ -14,4 +14,5 @@ public interface ChatQueryDOMapper {
 
     int updateByPrimaryKeyWithBLOBs(ChatQueryDO record);
 
+    Boolean deleteByPrimaryKey(Long questionId);
 }

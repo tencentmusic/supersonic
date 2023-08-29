@@ -1,6 +1,6 @@
 package com.tencent.supersonic.semantic.query.utils;
 
-import com.tencent.supersonic.common.util.jsqlparser.CCJSqlParserUtils;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.request.SqlExecuteReq;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
@@ -38,8 +38,8 @@ public class QueryReqConverter {
         MetricTable metricTable = new MetricTable();
         String sql = databaseReq.getSql();
 
-        List<String> allFields = CCJSqlParserUtils.getAllFields(sql);
-        String tableName = CCJSqlParserUtils.getTableName(sql);
+        List<String> allFields = SqlParserSelectHelper.getAllFields(sql);
+        String tableName = SqlParserSelectHelper.getTableName(sql);
 
         if (CollectionUtils.isEmpty(domainSchemas) || StringUtils.isEmpty(tableName)) {
             return new QueryStatement();

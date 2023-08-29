@@ -7,6 +7,7 @@ import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Constants;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParser;
@@ -50,7 +52,7 @@ public class DataSourceNode extends SemanticNode {
     }
 
     public static void getQueryDimensionMeasure(SemanticSchema schema, MetricReq metricCommand,
-            Set<String> queryDimension, List<String> measures) {
+                                                Set<String> queryDimension, List<String> measures) {
         queryDimension.addAll(metricCommand.getDimensions().stream()
                 .map(d -> d.contains(Constants.DIMENSION_IDENTIFY) ? d.split(Constants.DIMENSION_IDENTIFY)[1] : d)
                 .collect(Collectors.toSet()));
@@ -62,17 +64,18 @@ public class DataSourceNode extends SemanticNode {
     }
 
     public static void mergeQueryFilterDimensionMeasure(SemanticSchema schema, MetricReq metricCommand,
-            Set<String> queryDimension, List<String> measures, SqlValidatorScope scope) throws Exception {
+                                                        Set<String> queryDimension, List<String> measures,
+                                                        SqlValidatorScope scope) throws Exception {
         if (Objects.nonNull(metricCommand.getWhere()) && !metricCommand.getWhere().isEmpty()) {
             Set<String> filterConditions = new HashSet<>();
             FilterNode.getFilterField(parse(metricCommand.getWhere(), scope), filterConditions);
             Set<String> queryMeasures = new HashSet<>(measures);
-            Set<String> schemaMetricName = schema.getMetrics().stream().map(m -> m.getName())
-                    .collect(Collectors.toSet());
+            Set<String> schemaMetricName = schema.getMetrics().stream()
+                    .map(m -> m.getName()).collect(Collectors.toSet());
             for (String filterCondition : filterConditions) {
                 if (schemaMetricName.contains(filterCondition)) {
-                    schema.getMetrics().stream().filter(m -> m.getName().equalsIgnoreCase(filterCondition)).forEach(
-                            m -> m.getMetricTypeParams().getMeasures().stream()
+                    schema.getMetrics().stream().filter(m -> m.getName().equalsIgnoreCase(filterCondition))
+                            .forEach(m -> m.getMetricTypeParams().getMeasures().stream()
                                     .forEach(mm -> queryMeasures.add(mm.getName())));
                     continue;
                 }
@@ -84,14 +87,13 @@ public class DataSourceNode extends SemanticNode {
     }
 
     public static List<DataSource> getMatchDataSources(SqlValidatorScope scope, SemanticSchema schema,
-            MetricReq metricCommand) throws Exception {
+                                                       MetricReq metricCommand) throws Exception {
         List<DataSource> dataSources = new ArrayList<>();
 
         // check by metric
         List<String> measures = new ArrayList<>();
         Set<String> queryDimension = new HashSet<>();
         getQueryDimensionMeasure(schema, metricCommand, queryDimension, measures);
-        String sourceName = "";
         DataSource baseDataSource = null;
         // one , match measure count
         Map<String, Integer> dataSourceMeasures = new HashMap<>();
@@ -148,8 +150,12 @@ public class DataSourceNode extends SemanticNode {
         return dataSources;
     }
 
-    private static boolean checkMatch(Set<String> sourceMeasure, Set<String> queryDimension, List<String> measures,
-            Set<String> dimension, MetricReq metricCommand, SqlValidatorScope scope) throws Exception {
+    private static boolean checkMatch(Set<String> sourceMeasure,
+                                      Set<String> queryDimension,
+                                      List<String> measures,
+                                      Set<String> dimension,
+                                      MetricReq metricCommand,
+                                      SqlValidatorScope scope) throws Exception {
         boolean isAllMatch = true;
         sourceMeasure.retainAll(measures);
         if (sourceMeasure.size() < measures.size()) {
@@ -173,8 +179,11 @@ public class DataSourceNode extends SemanticNode {
         return isAllMatch;
     }
 
-    private static List<DataSource> getLinkDataSources(Set<String> baseIdentifiers, Set<String> queryDimension,
-            List<String> measures, DataSource baseDataSource, SemanticSchema schema) {
+    private static List<DataSource> getLinkDataSources(Set<String> baseIdentifiers,
+                                                       Set<String> queryDimension,
+                                                       List<String> measures,
+                                                       DataSource baseDataSource,
+                                                       SemanticSchema schema) {
         Set<String> linkDataSourceName = new HashSet<>();
         List<DataSource> linkDataSources = new ArrayList<>();
         for (Map.Entry<String, DataSource> entry : schema.getDatasource().entrySet()) {
@@ -200,7 +209,6 @@ public class DataSourceNode extends SemanticNode {
                     linkMeasure.retainAll(measures);
                     if (!linkMeasure.isEmpty()) {
                         isMatch = true;
-                        ;
                     }
                 }
                 if (isMatch) {

@@ -18,7 +18,7 @@ import org.junit.Test;
 public class EntityQueryTest extends BaseQueryTest {
 
     @Test
-    public void queryTest_METRIC_ENTITY_QUERY() throws Exception {
+    public void queryTest_metric_entity_query() throws Exception {
         QueryResult actualResult = submitNewChat("艺人周杰伦的播放量");
 
         QueryResult expectedResult = new QueryResult();
@@ -41,7 +41,7 @@ public class EntityQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_ENTITY_LIST_FILTER() throws Exception {
+    public void queryTest_entity_list_filter() throws Exception {
         QueryResult actualResult = submitNewChat("爱情、流行类型的艺人");
 
         QueryResult expectedResult = new QueryResult();

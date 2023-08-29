@@ -33,6 +33,8 @@ public interface ModelService {
 
     Map<Long, String> getModelFullPathMap();
 
+    List<String> getModelAdmin(Long id);
+
     ModelSchemaResp fetchSingleModelSchema(Long modelId);
 
     List<ModelSchemaResp> fetchModelSchema(ModelSchemaFilterReq modelSchemaFilterReq);

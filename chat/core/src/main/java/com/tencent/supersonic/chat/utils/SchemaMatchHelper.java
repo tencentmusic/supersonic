@@ -38,7 +38,7 @@ public class SchemaMatchHelper {
     }
 
     private static boolean isMetricOrDimension(SchemaElementMatch elementMatch) {
-        return SchemaElementType.METRIC.equals(elementMatch.getElement().getType()) ||
-                SchemaElementType.DIMENSION.equals(elementMatch.getElement().getType());
+        return SchemaElementType.METRIC.equals(elementMatch.getElement().getType())
+                || SchemaElementType.DIMENSION.equals(elementMatch.getElement().getType());
     }
 }

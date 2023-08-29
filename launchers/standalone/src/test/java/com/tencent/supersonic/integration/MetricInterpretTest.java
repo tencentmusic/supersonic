@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.StandaloneLauncher;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.parser.embedding.EmbeddingConfig;
+import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingConfig;
 import com.tencent.supersonic.chat.plugin.PluginManager;
-import com.tencent.supersonic.chat.query.metricInterpret.LLmAnswerResp;
+import com.tencent.supersonic.chat.query.metricinterpret.LLmAnswerResp;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.util.DataUtils;
@@ -44,13 +44,13 @@ public class MetricInterpretTest {
         MockConfiguration.mockAgent(agentService);
         MockConfiguration.mockEmbeddingUrl(embeddingConfig);
         LLmAnswerResp lLmAnswerResp = new LLmAnswerResp();
-        lLmAnswerResp.setAssistant_message("alice最近在超音数的访问情况有增多");
+        lLmAnswerResp.setAssistantMessage("alice最近在超音数的访问情况有增多");
         MockConfiguration.mockPluginManagerDoRequest(pluginManager, "answer_with_plugin_call",
                 ResponseEntity.ok(JSONObject.toJSONString(lLmAnswerResp)));
         QueryReq queryReq = DataUtils.getQueryReqWithAgent(1000, "能不能帮我解读分析下最近alice在超音数的访问情况",
                 DataUtils.getAgent().getId());
         QueryResult queryResult = queryService.executeQuery(queryReq);
-        Assert.assertEquals(queryResult.getQueryResults().get(0).get("answer"), lLmAnswerResp.getAssistant_message());
+        Assert.assertEquals(queryResult.getQueryResults().get(0).get("answer"), lLmAnswerResp.getAssistantMessage());
     }
 
 }

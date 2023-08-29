@@ -55,9 +55,9 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         parseInfo.setQueryMode(getQueryMode());
 
         SemanticService schemaService = ContextUtils.getBean(SemanticService.class);
-        ModelSchema ModelSchema = schemaService.getModelSchema(modelId);
+        ModelSchema modelSchema = schemaService.getModelSchema(modelId);
 
-        fillSchemaElement(parseInfo, ModelSchema);
+        fillSchemaElement(parseInfo, modelSchema);
         fillScore(parseInfo);
         fillDateConf(parseInfo, chatContext.getParseInfo());
     }
@@ -83,8 +83,8 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         Map<SchemaElementType, SchemaElementMatch> maxSimilarityMatch = new HashMap<>();
         for (SchemaElementMatch match : parseInfo.getElementMatches()) {
             SchemaElementType type = match.getElement().getType();
-            if (!maxSimilarityMatch.containsKey(type) ||
-                    match.getSimilarity() > maxSimilarityMatch.get(type).getSimilarity()) {
+            if (!maxSimilarityMatch.containsKey(type)
+                    || match.getSimilarity() > maxSimilarityMatch.get(type).getSimilarity()) {
                 maxSimilarityMatch.put(type, match);
             }
         }
@@ -96,8 +96,8 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         parseInfo.setScore(parseInfo.getScore() + totalScore);
     }
 
-    private void fillSchemaElement(SemanticParseInfo parseInfo, ModelSchema ModelSchema) {
-        parseInfo.setModel(ModelSchema.getModel());
+    private void fillSchemaElement(SemanticParseInfo parseInfo, ModelSchema modelSchema) {
+        parseInfo.setModel(modelSchema.getModel());
 
         Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
         Map<Long, List<SchemaElementMatch>> id2Values = new HashMap<>();
@@ -106,7 +106,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
             SchemaElement element = schemaMatch.getElement();
             switch (element.getType()) {
                 case ID:
-                    SchemaElement entityElement = ModelSchema.getElement(SchemaElementType.ENTITY, element.getId());
+                    SchemaElement entityElement = modelSchema.getElement(SchemaElementType.ENTITY, element.getId());
                     if (entityElement != null) {
                         if (id2Values.containsKey(element.getId())) {
                             id2Values.get(element.getId()).add(schemaMatch);
@@ -116,7 +116,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
                     }
                     break;
                 case VALUE:
-                    SchemaElement dimElement = ModelSchema.getElement(SchemaElementType.DIMENSION, element.getId());
+                    SchemaElement dimElement = modelSchema.getElement(SchemaElementType.DIMENSION, element.getId());
                     if (dimElement != null) {
                         if (dim2Values.containsKey(element.getId())) {
                             dim2Values.get(element.getId()).add(schemaMatch);
@@ -140,7 +140,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
 
         if (!id2Values.isEmpty()) {
             for (Map.Entry<Long, List<SchemaElementMatch>> entry : id2Values.entrySet()) {
-                SchemaElement entity = ModelSchema.getElement(SchemaElementType.ENTITY, entry.getKey());
+                SchemaElement entity = modelSchema.getElement(SchemaElementType.ENTITY, entry.getKey());
 
                 if (entry.getValue().size() == 1) {
                     SchemaElementMatch schemaMatch = entry.getValue().get(0);
@@ -151,7 +151,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
                     dimensionFilter.setOperator(FilterOperatorEnum.EQUALS);
                     dimensionFilter.setElementID(schemaMatch.getElement().getId());
                     parseInfo.getDimensionFilters().add(dimensionFilter);
-                    parseInfo.setEntity(ModelSchema.getEntity());
+                    parseInfo.setEntity(modelSchema.getEntity());
                 } else {
                     QueryFilter dimensionFilter = new QueryFilter();
                     List<String> vals = new ArrayList<>();
@@ -168,7 +168,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
 
         if (!dim2Values.isEmpty()) {
             for (Map.Entry<Long, List<SchemaElementMatch>> entry : dim2Values.entrySet()) {
-                SchemaElement dimension = ModelSchema.getElement(SchemaElementType.DIMENSION, entry.getKey());
+                SchemaElement dimension = modelSchema.getElement(SchemaElementType.DIMENSION, entry.getKey());
 
                 if (entry.getValue().size() == 1) {
                     SchemaElementMatch schemaMatch = entry.getValue().get(0);
@@ -179,7 +179,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
                     dimensionFilter.setOperator(FilterOperatorEnum.EQUALS);
                     dimensionFilter.setElementID(schemaMatch.getElement().getId());
                     parseInfo.getDimensionFilters().add(dimensionFilter);
-                    parseInfo.setEntity(ModelSchema.getEntity());
+                    parseInfo.setEntity(modelSchema.getEntity());
                 } else {
                     QueryFilter dimensionFilter = new QueryFilter();
                     List<String> vals = new ArrayList<>();

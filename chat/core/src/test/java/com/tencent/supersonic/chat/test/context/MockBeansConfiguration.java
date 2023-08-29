@@ -4,28 +4,26 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
-import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
-import com.tencent.supersonic.chat.api.pojo.response.EntityRichInfoResp;
 import com.tencent.supersonic.chat.config.DefaultMetric;
 import com.tencent.supersonic.chat.config.DefaultMetricInfo;
 import com.tencent.supersonic.chat.config.EntityInternalDetail;
-import com.tencent.supersonic.chat.persistence.mapper.ChatContextMapper;
 import com.tencent.supersonic.chat.persistence.repository.impl.ChatContextRepositoryImpl;
-import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
-import com.tencent.supersonic.chat.service.impl.ConfigServiceImpl;
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.chat.service.impl.ConfigServiceImpl;
+import com.tencent.supersonic.chat.service.ChatService;
+import com.tencent.supersonic.chat.persistence.mapper.ChatContextMapper;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
+import com.tencent.supersonic.semantic.model.domain.MetricService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,17 +43,13 @@ public class MockBeansConfiguration {
 
     public static void buildHttpSemanticServiceImpl(SemanticLayer httpSemanticLayer, List<DimSchemaResp> dimensionDescs,
             List<MetricSchemaResp> metricDescs) {
-        ChatConfigRichResp chaConfigRichDesc = new ChatConfigRichResp();
         DefaultMetric defaultMetricDesc = new DefaultMetric();
         defaultMetricDesc.setUnit(3);
         defaultMetricDesc.setPeriod(Constants.DAY);
-//        chaConfigRichDesc.setDefaultMetrics(new ArrayList<>(Arrays.asList(defaultMetricDesc)));
-        EntityRichInfoResp entityDesc = new EntityRichInfoResp();
         List<DimSchemaResp> dimensionDescs1 = new ArrayList<>();
         DimSchemaResp dimensionDesc = new DimSchemaResp();
         dimensionDesc.setId(162L);
         dimensionDescs1.add(dimensionDesc);
-//        entityDesc.setEntityIds(dimensionDescs1);
 
         DimSchemaResp dimensionDesc2 = new DimSchemaResp();
         dimensionDesc2.setId(163L);
@@ -69,14 +63,11 @@ public class MockBeansConfiguration {
         metricDesc.setBizName("js_play_cnt");
         metricDesc.setName("结算播放量");
         entityInternalDetailDesc.setMetricList(new ArrayList<>(Arrays.asList(metricDesc)));
-//        entityDesc.setEntityInternalDetailDesc(entityInternalDetailDesc);
 
-//        chaConfigRichDesc.setEntity(entityDesc);
-//        when(httpSemanticLayer.getChatConfigRichInfo(anyLong())).thenReturn(chaConfigRichDesc);
         ModelSchemaResp modelSchemaDesc = new ModelSchemaResp();
         modelSchemaDesc.setDimensions(dimensionDescs);
         modelSchemaDesc.setMetrics(metricDescs);
-//        when(httpSemanticLayer.getModelSchemaInfo(anyLong())).thenReturn(modelSchemaDesc);
+
     }
 
     public static void getModelExtendMock(ConfigServiceImpl configService) {
@@ -87,7 +78,6 @@ public class MockBeansConfiguration {
         defaultMetricInfos.add(defaultMetricInfo);
 
         ChatConfigResp chaConfigDesc = new ChatConfigResp();
-//        chaConfigDesc.setDefaultMetrics(defaultMetricInfos);
         when(configService.fetchConfigByModelId(anyLong())).thenReturn(chaConfigDesc);
     }
 

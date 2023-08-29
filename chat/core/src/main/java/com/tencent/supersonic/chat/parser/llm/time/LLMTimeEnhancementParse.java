@@ -17,7 +17,7 @@ public class LLMTimeEnhancementParse implements SemanticParser {
 
     @Override
     public void parse(QueryContext queryContext, ChatContext chatContext) {
-        log.info("before queryContext:{},chatContext:{}",queryContext,chatContext);
+        log.info("before queryContext:{},chatContext:{}", queryContext, chatContext);
         ChatGptHelper chatGptHelper = ContextUtils.getBean(ChatGptHelper.class);
         try {
             String inferredTime = chatGptHelper.inferredTime(queryContext.getRequest().getQueryText());
@@ -25,12 +25,12 @@ public class LLMTimeEnhancementParse implements SemanticParser {
                 for (SemanticQuery query : queryContext.getCandidateQueries()) {
                     DateConf dateInfo = query.getParseInfo().getDateInfo();
                     JSONObject jsonObject = JSON.parseObject(inferredTime);
-                    if (jsonObject.containsKey("date")){
+                    if (jsonObject.containsKey("date")) {
                         dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
                         dateInfo.setStartDate(jsonObject.getString("date"));
                         dateInfo.setEndDate(jsonObject.getString("date"));
                         query.getParseInfo().setDateInfo(dateInfo);
-                    }else if (jsonObject.containsKey("start")){
+                    } else if (jsonObject.containsKey("start")) {
                         dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
                         dateInfo.setStartDate(jsonObject.getString("start"));
                         dateInfo.setEndDate(jsonObject.getString("end"));
@@ -38,11 +38,13 @@ public class LLMTimeEnhancementParse implements SemanticParser {
                     }
                 }
             }
-        }catch (Exception exception){
-           log.error("{} parse error,this reason is:{}",LLMTimeEnhancementParse.class.getSimpleName(), (Object) exception.getStackTrace());
+        } catch (Exception exception) {
+            log.error("{} parse error,this reason is:{}", LLMTimeEnhancementParse.class.getSimpleName(),
+                    (Object) exception.getStackTrace());
         }
 
-        log.info("{} after queryContext:{},chatContext:{}",LLMTimeEnhancementParse.class.getSimpleName(),queryContext,chatContext);
+        log.info("{} after queryContext:{},chatContext:{}",
+                LLMTimeEnhancementParse.class.getSimpleName(), queryContext, chatContext);
     }
 
 

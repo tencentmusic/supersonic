@@ -6,9 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 
-@SpringBootApplication(scanBasePackages = {"com.tencent.supersonic.chat"}
-        //  , exclude = {DataSourceAutoConfiguration.class}
-)
+@SpringBootApplication(scanBasePackages = {"com.tencent.supersonic.chat"})
 @ComponentScan("com.tencent.supersonic.chat")
 @MapperScan("com.tencent.supersonic.chat")
 public class ChatBizLauncher {

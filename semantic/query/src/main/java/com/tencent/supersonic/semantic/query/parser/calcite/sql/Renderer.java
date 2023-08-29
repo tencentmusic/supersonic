@@ -79,7 +79,6 @@ public abstract class Renderer {
             if (measure.get().getConstraint() != null && !measure.get().getConstraint().isEmpty()) {
                 metricNode.getMeasureFilter()
                         .put(measure.get().getName(), SemanticNode.parse(measure.get().getConstraint(), scope));
-                ;
             }
         }
         return metricNode;

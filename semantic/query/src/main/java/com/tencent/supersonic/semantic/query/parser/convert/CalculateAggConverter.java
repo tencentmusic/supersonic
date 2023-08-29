@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -106,10 +105,7 @@ public class CalculateAggConverter implements SemanticConverter {
         if (CollectionUtils.isEmpty(queryStructCmd.getAggregators())) {
             return false;
         }
-        //todo ck类型暂不拼with语句
-        if (queryStructCmd.getModelId().equals(34L)) {
-            return false;
-        }
+
         int nonSumFunction = 0;
         for (Aggregator agg : queryStructCmd.getAggregators()) {
             if (agg.getFunc() == null || "".equals(agg.getFunc())) {
@@ -118,9 +114,7 @@ public class CalculateAggConverter implements SemanticConverter {
             if (agg.getFunc().equals(AggOperatorEnum.UNKNOWN)) {
                 return false;
             }
-            if (agg.getFunc() != null
-                // && !agg.getFunc().equalsIgnoreCase(MetricAggDefault)
-            ) {
+            if (agg.getFunc() != null) {
                 nonSumFunction++;
             }
         }
@@ -129,7 +123,7 @@ public class CalculateAggConverter implements SemanticConverter {
 
     @Override
     public void converter(Catalog catalog, QueryStructReq queryStructCmd, ParseSqlReq sqlCommend,
-            MetricReq metricCommand) throws Exception {
+                          MetricReq metricCommand) throws Exception {
         DatabaseResp databaseResp = catalog.getDatabaseByModelId(queryStructCmd.getModelId());
         ParseSqlReq parseSqlReq = generateSqlCommend(queryStructCmd,
                 EngineTypeEnum.valueOf(databaseResp.getType().toUpperCase()), databaseResp.getVersion());
@@ -156,7 +150,7 @@ public class CalculateAggConverter implements SemanticConverter {
     }
 
     public ParseSqlReq generateRatioSqlCommand(QueryStructReq queryStructCmd, EngineTypeEnum engineTypeEnum,
-            String version)
+                                               String version)
             throws Exception {
         check(queryStructCmd);
         ParseSqlReq sqlCommand = new ParseSqlReq();
@@ -178,15 +172,17 @@ public class CalculateAggConverter implements SemanticConverter {
                 sql = new H2EngineSql().sql(queryStructCmd, isOver, metricTableName);
                 break;
             case MYSQL:
-                if (Objects.nonNull(version) && version.startsWith(mysqlLowVersion)) {
-                    sqlCommand.setSupportWith(false);
-                    sql = new MysqlEngineSql().sql(queryStructCmd, isOver, metricTableName);
-                    break;
-                }
             case DORIS:
             case CLICKHOUSE:
-                sql = new CkEngineSql().sql(queryStructCmd, isOver, metricTableName);
+                if (engineTypeEnum.equals(EngineTypeEnum.MYSQL) && Objects.nonNull(version) && version.startsWith(
+                        mysqlLowVersion)) {
+                    sqlCommand.setSupportWith(false);
+                    sql = new MysqlEngineSql().sql(queryStructCmd, isOver, metricTableName);
+                } else {
+                    sql = new CkEngineSql().sql(queryStructCmd, isOver, metricTableName);
+                }
                 break;
+            default:
         }
         sqlCommand.setSql(sql);
         return sqlCommand;
@@ -275,7 +271,7 @@ public class CalculateAggConverter implements SemanticConverter {
             String aggStr = queryStructCmd.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER) || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
                     if (queryStructCmd.getDateInfo().getPeriod().equals(Constants.MONTH)) {
-                        return String.format("toDate(CONCAT(%s,'-01')) = date_add(toDate(CONCAT(%s','-01')),%s)  ",
+                        return String.format("toDate(CONCAT(%s,'-01')) = date_add(toDate(CONCAT(%s,'-01')),%s)  ",
                                 aliasLeft + timeDim, aliasRight + timeDim, timeSpan);
                     }
                     if (queryStructCmd.getDateInfo().getPeriod().equals(Constants.WEEK) && isOver) {
@@ -302,7 +298,8 @@ public class CalculateAggConverter implements SemanticConverter {
         @Override
         public String sql(QueryStructReq queryStructCmd, boolean isOver, String metricSql) {
             String sql = String.format(
-                    ",t0 as (select * from %s),t1 as (select * from %s) select %s from ( select %s , %s from  t0 left join t1 on %s ) metric_tb_src %s %s ",
+                    ",t0 as (select * from %s),t1 as (select * from %s) select %s from ( select %s , %s "
+                            + "from  t0 left join t1 on %s ) metric_tb_src %s %s ",
                     metricSql, metricSql, getOverSelect(queryStructCmd, isOver), getAllSelect(queryStructCmd, "t0."),
                     getAllJoinSelect(queryStructCmd, "t1."),
                     getJoinOn(queryStructCmd, isOver, "t0.", "t1."),
@@ -330,8 +327,6 @@ public class CalculateAggConverter implements SemanticConverter {
         }
 
         public String getOverSelect(QueryStructReq queryStructCmd, boolean isOver) {
-            String timeDim = getTimeDim(queryStructCmd);
-            String timeSpan = "INTERVAL  " + getTimeSpan(queryStructCmd, isOver, true);
             String aggStr = queryStructCmd.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER) || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
                     return String.format(
@@ -460,9 +455,6 @@ public class CalculateAggConverter implements SemanticConverter {
     }
 
     private void check(QueryStructReq queryStructCmd) throws Exception {
-        Set<String> aggFunctions = queryStructCmd.getAggregators().stream()
-                .filter(f -> f.getArgs() != null && f.getArgs().get(0) != null)
-                .map(agg -> agg.getArgs().get(0).toLowerCase()).collect(Collectors.toSet());
         Long ratioOverNum = queryStructCmd.getAggregators().stream()
                 .filter(f -> f.getFunc().equals(AggOperatorEnum.RATIO_OVER)).count();
         Long ratioRollNum = queryStructCmd.getAggregators().stream()

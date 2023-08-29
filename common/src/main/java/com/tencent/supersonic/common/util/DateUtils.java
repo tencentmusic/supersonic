@@ -31,6 +31,7 @@ public class DateUtils {
                 dateFormat.parse(date);
                 return DateTimeFormatter.ofPattern(format);
             } catch (Exception e) {
+                log.info("date parse has a exception:{}", e.toString());
             }
         }
         return DateTimeFormatter.ofPattern(formats[0]);
@@ -44,6 +45,7 @@ public class DateUtils {
                 LocalDateTime.parse(date, dateTimeFormatter);
                 return dateTimeFormatter;
             } catch (Exception e) {
+                log.info("date parse has a exception:{}", e.toString());
             }
         }
         return DateTimeFormatter.ofPattern(formats[0]);

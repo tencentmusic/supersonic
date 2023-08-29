@@ -5,7 +5,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.parser.embedding.EmbeddingConfig;
+import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingConfig;
 import com.tencent.supersonic.chat.plugin.PluginManager;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.service.QueryService;
@@ -17,16 +17,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-public class PluginRecognizeTest extends BasePluginTest{
-
-    @MockBean
-    private EmbeddingConfig embeddingConfig;
+public class PluginRecognizeTest extends BasePluginTest {
 
     @MockBean
     protected PluginManager pluginManager;
 
     @MockBean
-    protected AgentService agentService;
+    private EmbeddingConfig embeddingConfig;
+
+    @MockBean
+    private AgentService agentService;
 
     @Autowired
     @Qualifier("chatQueryService")
@@ -34,7 +34,7 @@ public class PluginRecognizeTest extends BasePluginTest{
 
     @Test
     public void webPageRecognize() throws Exception {
-        MockConfiguration.mockEmbeddingRecognize(pluginManager, "alice最近的访问情况怎么样","1");
+        MockConfiguration.mockEmbeddingRecognize(pluginManager, "alice最近的访问情况怎么样", "1");
         MockConfiguration.mockEmbeddingUrl(embeddingConfig);
         QueryReq queryContextReq = DataUtils.getQueryContextReq(1000, "alice最近的访问情况怎么样");
         QueryResult queryResult = queryService.executeQuery(queryContextReq);
@@ -43,7 +43,7 @@ public class PluginRecognizeTest extends BasePluginTest{
 
     @Test
     public void webPageRecognizeWithQueryFilter() throws Exception {
-        MockConfiguration.mockEmbeddingRecognize(pluginManager, "在超音数最近的情况怎么样","1");
+        MockConfiguration.mockEmbeddingRecognize(pluginManager, "在超音数最近的情况怎么样", "1");
         MockConfiguration.mockEmbeddingUrl(embeddingConfig);
         QueryReq queryRequest = DataUtils.getQueryContextReq(1000, "在超音数最近的情况怎么样");
         QueryFilters queryFilters = new QueryFilters();
@@ -59,7 +59,7 @@ public class PluginRecognizeTest extends BasePluginTest{
 
     @Test
     public void pluginRecognizeWithAgent() {
-        MockConfiguration.mockEmbeddingRecognize(pluginManager, "alice最近的访问情况怎么样","1");
+        MockConfiguration.mockEmbeddingRecognize(pluginManager, "alice最近的访问情况怎么样", "1");
         MockConfiguration.mockEmbeddingUrl(embeddingConfig);
         MockConfiguration.mockAgent(agentService);
         QueryReq queryContextReq = DataUtils.getQueryReqWithAgent(1000, "alice最近的访问情况怎么样",

@@ -10,17 +10,19 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SearchResult;
-import com.tencent.supersonic.chat.mapper.MatchText;
-import com.tencent.supersonic.chat.mapper.ModelInfoStat;
+import com.tencent.supersonic.chat.mapper.MapperHelper;
+import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.knowledge.dictionary.ModelInfoStat;
 import com.tencent.supersonic.chat.mapper.ModelWithSemanticType;
+import com.tencent.supersonic.chat.mapper.MatchText;
 import com.tencent.supersonic.chat.mapper.SearchMatchStrategy;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.SearchService;
-import com.tencent.supersonic.chat.utils.NatureHelper;
+import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
-import com.tencent.supersonic.knowledge.dictionary.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
+import com.tencent.supersonic.knowledge.dictionary.DictWordType;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import java.util.ArrayList;
@@ -59,10 +61,10 @@ public class SearchServiceImpl implements SearchService {
     private AgentService agentService;
 
     @Override
-    public List<SearchResult> search(QueryReq queryCtx) {
+    public List<SearchResult> search(QueryReq queryReq) {
 
         // 1. check search enable
-        Integer agentId = queryCtx.getAgentId();
+        Integer agentId = queryReq.getAgentId();
         if (agentId != null) {
             Agent agent = agentService.getAgent(agentId);
             if (!agent.enableSearch()) {
@@ -70,7 +72,7 @@ public class SearchServiceImpl implements SearchService {
             }
         }
 
-        String queryText = queryCtx.getQueryText();
+        String queryText = queryReq.getQueryText();
         // 2.get meta info
         SemanticSchema semanticSchemaDb = schemaService.getSemanticSchema();
         List<SchemaElement> metricsDb = semanticSchemaDb.getMetrics();
@@ -78,8 +80,11 @@ public class SearchServiceImpl implements SearchService {
 
         // 3.detect by segment
         List<Term> originals = HanlpHelper.getTerms(queryText);
-        Map<MatchText, List<MapResult>> regTextMap = searchMatchStrategy.match(queryText, originals,
-                queryCtx.getModelId());
+
+        MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
+        Set<Long> detectModelIds = mapperHelper.getModelIds(queryReq);
+
+        Map<MatchText, List<MapResult>> regTextMap = searchMatchStrategy.match(queryReq, originals, detectModelIds);
         regTextMap.entrySet().stream().forEach(m -> HanlpHelper.transLetterOriginal(m.getValue()));
 
         // 4.get the most matching data
@@ -96,12 +101,12 @@ public class SearchServiceImpl implements SearchService {
             return Lists.newArrayList();
         }
         Map.Entry<MatchText, List<MapResult>> searchTextEntry = mostSimilarSearchResult.get();
-        log.info("searchTextEntry:{},queryCtx:{}", searchTextEntry, queryCtx);
+        log.info("searchTextEntry:{},queryReq:{}", searchTextEntry, queryReq);
 
         Set<SearchResult> searchResults = new LinkedHashSet();
         ModelInfoStat modelStat = NatureHelper.getModelStat(originals);
 
-        List<Long> possibleModels = getPossibleModels(queryCtx, originals, modelStat, queryCtx.getModelId());
+        List<Long> possibleModels = getPossibleModels(queryReq, originals, modelStat, queryReq.getModelId());
 
         // 5.1 priority dimension metric
         boolean existMetricAndDimension = searchMetricAndDimension(new HashSet<>(possibleModels), modelToName,
@@ -116,7 +121,7 @@ public class SearchServiceImpl implements SearchService {
 
             Set<SearchResult> searchResultSet = searchDimensionValue(metricsDb, modelToName,
                     modelStat.getMetricModelCount(), existMetricAndDimension,
-                    matchText, natureToNameMap, natureToNameEntry, queryCtx.getQueryFilters());
+                    matchText, natureToNameMap, natureToNameEntry, queryReq.getQueryFilters());
 
             searchResults.addAll(searchResultSet);
         }
@@ -265,7 +270,7 @@ public class SearchServiceImpl implements SearchService {
                                     posDO.setWord(entry.getName());
                                     posDO.setNature(nature);
                                     return posDO;
-                                }
+                                    }
                         )).sorted(Comparator.comparingInt(a -> a.getWord().length()))
                 .collect(Collectors.toMap(DictWord::getNature, DictWord::getWord, (value1, value2) -> value1,
                         LinkedHashMap::new));

@@ -132,6 +132,4 @@ public class MultiSourceJoin implements SemanticConverter {
             MetricReq metricCommand) throws Exception {
         buildJoinPrefix(queryStructCmd);
     }
-
-
 }

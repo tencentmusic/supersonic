@@ -3,9 +3,10 @@ package com.tencent.supersonic.chat.rest;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
+import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
+import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.service.ChatService;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -69,11 +70,17 @@ public class ChatController {
 
     @PostMapping("/pageQueryInfo")
     public PageInfo<QueryResp> pageQueryInfo(@RequestBody PageQueryInfoReq pageQueryInfoCommand,
-            @RequestParam(value = "chatId") long chatId,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+                                             @RequestParam(value = "chatId") long chatId,
+                                             HttpServletRequest request,
+                                             HttpServletResponse response) {
         pageQueryInfoCommand.setUserName(UserHolder.findUser(request, response).getName());
         return chatService.queryInfo(pageQueryInfoCommand, chatId);
+    }
+
+    @PostMapping("/queryShowCase")
+    public ShowCaseResp queryShowCase(@RequestBody PageQueryInfoReq pageQueryInfoCommand,
+                                      @RequestParam(value = "agentId") int agentId) {
+        return chatService.queryShowCase(pageQueryInfoCommand, agentId);
     }
 
 }

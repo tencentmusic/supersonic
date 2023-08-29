@@ -1,6 +1,8 @@
 package com.hankcs.hanlp.collection.trie.bintrie;
 
 import com.hankcs.hanlp.corpus.io.ByteArray;
+import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.knowledge.service.LoadRemoveService;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -8,9 +10,12 @@ import java.io.ObjectOutput;
 import java.util.AbstractMap;
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public abstract class BaseNode<V> implements Comparable<BaseNode> {
@@ -19,6 +24,8 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
      * 状态数组，方便读取的时候用
      */
     static final Status[] ARRAY_STATUS = Status.values();
+
+    private static final Logger logger = LoggerFactory.getLogger(BaseNode.class);
     /**
      * 子节点
      */
@@ -279,10 +286,14 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
                 + '}';
     }
 
-    public void walkNode(Set<Map.Entry<String, V>> entrySet) {
+    public void walkNode(Set<Map.Entry<String, V>> entrySet, Integer agentId, Set<Long> detectModelIds) {
         if (status == Status.WORD_MIDDLE_2 || status == Status.WORD_END_3) {
+            LoadRemoveService loadRemoveService = ContextUtils.getBean(LoadRemoveService.class);
+            logger.debug("agentId:{},detectModelIds:{},before:{}", agentId, detectModelIds, value.toString());
+            List natures = loadRemoveService.removeNatures((List) value, agentId, detectModelIds);
             String name = this.prefix != null ? this.prefix + c : "" + c;
-            entrySet.add(new TrieEntry(name, value));
+            logger.debug("name:{},after:{},natures:{}", name, (List) value, natures);
+            entrySet.add(new TrieEntry(name, (V) natures));
         }
     }
 
@@ -292,7 +303,8 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
      * @param entrySet
      * @param limit
      */
-    public void walkLimit(StringBuilder sb, Set<Map.Entry<String, V>> entrySet, int limit) {
+    public void walkLimit(StringBuilder sb, Set<Map.Entry<String, V>> entrySet, int limit, Integer agentId,
+            Set<Long> detectModelIds) {
         Queue<BaseNode> queue = new ArrayDeque<>();
         this.prefix = sb.toString();
         queue.add(this);
@@ -304,7 +316,7 @@ public abstract class BaseNode<V> implements Comparable<BaseNode> {
             if (root == null) {
                 continue;
             }
-            root.walkNode(entrySet);
+            root.walkNode(entrySet, agentId, detectModelIds);
             if (root.child == null) {
                 continue;
             }

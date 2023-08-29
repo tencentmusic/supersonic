@@ -4,21 +4,23 @@ import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
+import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.xkzhangsan.time.nlp.TimeNLP;
-import com.xkzhangsan.time.nlp.TimeNLPUtil;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Stack;
 import java.util.Date;
 import java.util.List;
-import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.xkzhangsan.time.nlp.TimeNLP;
+import com.xkzhangsan.time.nlp.TimeNLPUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 

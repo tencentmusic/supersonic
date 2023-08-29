@@ -1,11 +1,9 @@
-package com.tencent.supersonic.chat.query.metricInterpret;
-
+package com.tencent.supersonic.chat.query.metricinterpret;
 
 import lombok.Data;
 
 @Data
 public class LLmAnswerResp {
-
-    private String assistant_message;
+    private String assistantMessage;
 
 }

@@ -31,7 +31,6 @@ public class AgentDOExample {
     protected Integer limitEnd;
 
     /**
-     *
      * @mbg.generated
      */
     public AgentDOExample() {
@@ -39,7 +38,6 @@ public class AgentDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public void setOrderByClause(String orderByClause) {
@@ -47,7 +45,6 @@ public class AgentDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public String getOrderByClause() {
@@ -55,7 +52,6 @@ public class AgentDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public void setDistinct(boolean distinct) {
@@ -63,7 +59,6 @@ public class AgentDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public boolean isDistinct() {
@@ -71,7 +66,6 @@ public class AgentDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public List<Criteria> getOredCriteria() {
@@ -79,7 +73,6 @@ public class AgentDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public void or(Criteria criteria) {
@@ -87,7 +80,6 @@ public class AgentDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public Criteria or() {
@@ -97,7 +89,6 @@ public class AgentDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public Criteria createCriteria() {
@@ -109,7 +100,6 @@ public class AgentDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     protected Criteria createCriteriaInternal() {
@@ -118,7 +108,6 @@ public class AgentDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public void clear() {
@@ -128,15 +117,13 @@ public class AgentDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public void setLimitStart(Integer limitStart) {
-        this.limitStart=limitStart;
+        this.limitStart = limitStart;
     }
 
     /**
-     *
      * @mbg.generated
      */
     public Integer getLimitStart() {
@@ -144,15 +131,13 @@ public class AgentDOExample {
     }
 
     /**
-     *
      * @mbg.generated
      */
     public void setLimitEnd(Integer limitEnd) {
-        this.limitEnd=limitEnd;
+        this.limitEnd = limitEnd;
     }
 
     /**
-     *
      * @mbg.generated
      */
     public Integer getLimitEnd() {
@@ -954,38 +939,6 @@ public class AgentDOExample {
 
         private String typeHandler;
 
-        public String getCondition() {
-            return condition;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public Object getSecondValue() {
-            return secondValue;
-        }
-
-        public boolean isNoValue() {
-            return noValue;
-        }
-
-        public boolean isSingleValue() {
-            return singleValue;
-        }
-
-        public boolean isBetweenValue() {
-            return betweenValue;
-        }
-
-        public boolean isListValue() {
-            return listValue;
-        }
-
-        public String getTypeHandler() {
-            return typeHandler;
-        }
-
         protected Criterion(String condition) {
             super();
             this.condition = condition;
@@ -1020,6 +973,38 @@ public class AgentDOExample {
 
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
+        }
+
+        public String getCondition() {
+            return condition;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Object getSecondValue() {
+            return secondValue;
+        }
+
+        public boolean isNoValue() {
+            return noValue;
+        }
+
+        public boolean isSingleValue() {
+            return singleValue;
+        }
+
+        public boolean isBetweenValue() {
+            return betweenValue;
+        }
+
+        public boolean isListValue() {
+            return listValue;
+        }
+
+        public String getTypeHandler() {
+            return typeHandler;
         }
     }
 }
