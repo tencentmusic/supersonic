@@ -70,4 +70,4 @@
 
 欢迎加入微信群反馈建议：
 
-<img src="./docs/images/wechat_contact.jpeg" height="30%" width="30%" align="center"/> 
+<img src="./docs/images/wechat_contact.jpeg" height="40%" width="40%" align="center"/> 

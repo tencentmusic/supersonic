@@ -72,4 +72,4 @@ Pull the source code and run script "assembly/bin/build-ide.sh" and run bootstra
 
 Please join the chat group to suggest feedbacks or ideas:
 
-<img src="./docs/images/wechat_contact.jpeg" height="30%" width="30%" align="center"/> 
+<img src="./docs/images/wechat_contact.jpeg" height="40%" width="40%" align="center"/> 
