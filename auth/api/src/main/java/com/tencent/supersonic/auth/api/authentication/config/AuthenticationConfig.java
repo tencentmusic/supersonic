@@ -19,7 +19,7 @@ public class AuthenticationConfig {
     @Value("${authentication.token.secret:secret}")
     private String tokenSecret;
 
-    @Value("${authentication.token.http.header.key:Auth}")
+    @Value("${authentication.token.http.header.key:Authorization}")
     private String tokenHttpHeaderKey;
 
 
