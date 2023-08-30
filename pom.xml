@@ -63,7 +63,7 @@
         <calcite.avatica.version>1.23.0</calcite.avatica.version>
         <xk.time.version>3.2.4</xk.time.version>
         <jsqlparser.version>4.5</jsqlparser.version>
-        <revision>0.7.2</revision>
+        <revision>0.7.3</revision>
     </properties>
 
     <dependencyManagement>

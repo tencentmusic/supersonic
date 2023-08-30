@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 binDir=$(cd "$(dirname "$0")"; pwd)
-baseDir=$(readlink -f $binDir/../)
+baseDir=$(cd "$binDir/.." && pwd -P)
 libDir=$baseDir/lib
 confDir=$baseDir/conf
 webDir=$baseDir/webapp
