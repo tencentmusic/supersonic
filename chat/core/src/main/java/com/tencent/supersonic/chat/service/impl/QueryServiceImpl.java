@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
@@ -26,13 +27,23 @@ import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.service.StatisticsService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Comparator;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+//import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.DateConf;
+//import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import com.tencent.supersonic.semantic.api.query.pojo.Filter;
+import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.springframework.beans.BeanUtils;
@@ -237,6 +248,53 @@ public class QueryServiceImpl implements QueryService {
         SemanticQuery semanticQuery = QueryManager.createRuleQuery(queryData.getQueryMode());
         BeanUtils.copyProperties(queryData, semanticQuery.getParseInfo());
         return semanticQuery.execute(user);
+    }
+
+    @Override
+    public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
+        com.tencent.supersonic.semantic.query.service.QueryService queryService =
+                ContextUtils.getBean(com.tencent.supersonic.semantic.query.service.QueryService.class);
+        QueryStructReq queryStructReq = new QueryStructReq();
+
+        DateConf dateConf = new DateConf();
+        dateConf.setDateMode(DateConf.DateMode.RECENT);
+        dateConf.setUnit(1);
+        dateConf.setPeriod("DAY");
+        queryStructReq.setDateInfo(dateConf);
+        queryStructReq.setLimit(20L);
+
+        //        List<Aggregator> aggregators = new ArrayList<>();
+        //        Aggregator aggregator = new Aggregator(dimensionValueReq.getQueryFilter().getBizName(),
+        //                AggOperatorEnum.DISTINCT);
+        //        aggregators.add(aggregator);
+        //        queryStructReq.setAggregators(aggregators);
+
+        queryStructReq.setModelId(dimensionValueReq.getModelId());
+        queryStructReq.setNativeQuery(true);
+        List<String> groups = new ArrayList<>();
+        groups.add(dimensionValueReq.getBizName());
+        queryStructReq.setGroups(groups);
+        if (Objects.isNull(dimensionValueReq.getValue())) {
+            List<Filter> dimensionFilters = new ArrayList<>();
+            Filter dimensionFilter = new Filter();
+            dimensionFilter.setOperator(FilterOperatorEnum.LIKE);
+            dimensionFilter.setRelation(Filter.Relation.FILTER);
+            dimensionFilter.setBizName(dimensionValueReq.getBizName());
+            dimensionFilter.setValue(dimensionValueReq.getValue());
+            dimensionFilters.add(dimensionFilter);
+            queryStructReq.setDimensionFilters(dimensionFilters);
+        }
+        QueryResultWithSchemaResp queryResultWithSchemaResp = queryService.queryByStructWithAuth(queryStructReq, user);
+        Set<String> dimensionValues = new HashSet<>();
+        queryResultWithSchemaResp.getResultList().removeIf(o -> {
+            if (dimensionValues.contains(o.get(dimensionValueReq.getBizName()))) {
+                return true;
+            } else {
+                dimensionValues.add(o.get(dimensionValueReq.getBizName()).toString());
+                return false;
+            }
+        });
+        return queryResultWithSchemaResp;
     }
 
 }

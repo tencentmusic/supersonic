@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SemanticSchema implements Serializable {
-
     private List<ModelSchema> modelSchemaList;
 
     public SemanticSchema(List<ModelSchema> modelSchemaList) {

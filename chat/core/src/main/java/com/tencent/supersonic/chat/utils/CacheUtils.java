@@ -4,10 +4,10 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
+
 import java.util.concurrent.TimeUnit;
 
 public class CacheUtils {
-
     private static final Cache<String, Object> cache = Caffeine.newBuilder()
             .expireAfterWrite(1200, TimeUnit.SECONDS)
             .expireAfterAccess(1200, TimeUnit.SECONDS)

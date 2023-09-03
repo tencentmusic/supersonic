@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 public class PluginDOExample {
-
     /**
      * s2_plugin
      */
@@ -149,7 +148,6 @@ public class PluginDOExample {
      * s2_plugin null
      */
     protected abstract static class GeneratedCriteria {
-
         protected List<Criterion> criteria;
 
         protected GeneratedCriteria() {
@@ -875,7 +873,6 @@ public class PluginDOExample {
      * s2_plugin null
      */
     public static class Criterion {
-
         private String condition;
 
         private Object value;

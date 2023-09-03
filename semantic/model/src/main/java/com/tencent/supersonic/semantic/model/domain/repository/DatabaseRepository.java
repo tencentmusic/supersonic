@@ -12,6 +12,7 @@ public interface DatabaseRepository {
 
     DatabaseDO getDatabase(Long id);
 
-    List<DatabaseDO> getDatabaseByDomainId(Long domainId);
+    List<DatabaseDO> getDatabaseList();
 
+    void deleteDatabase(Long id);
 }

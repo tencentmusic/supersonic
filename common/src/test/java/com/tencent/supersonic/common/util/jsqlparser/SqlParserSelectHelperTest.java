@@ -19,6 +19,29 @@ class SqlParserSelectHelperTest {
     void getWhereFilterExpression() {
 
         List<FilterExpression> filterExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, user_id, field_a FROM s2 WHERE "
+                        + "sys_imp_date = '2023-08-08' AND YEAR(publish_date) = 2023 "
+                        + " AND user_id = 'alice'  ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, user_id, field_a FROM s2 WHERE sys_imp_date = '2023-08-08' "
+                        + " AND YEAR(publish_date) = 2023 "
+                        + " AND MONTH(publish_date) = 8"
+                        + " AND user_id = 'alice'  ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, user_id, field_a FROM s2 WHERE sys_imp_date = '2023-08-08'"
+                        + " AND YEAR(publish_date) = 2023 "
+                        + " AND MONTH(publish_date) = 8 AND DAY(publish_date) =20 "
+                        + " AND user_id = 'alice'  ORDER BY pv DESC LIMIT 1");
+        System.out.println(filterExpression);
+
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, user_id, field_a FROM s2 WHERE sys_imp_date = '2023-08-08' "
                         + " AND user_id = 'alice' AND publish_date = '11' ORDER BY pv DESC LIMIT 1");
 

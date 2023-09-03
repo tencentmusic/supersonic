@@ -1,7 +1,6 @@
-package com.tencent.supersonic.chat.query.llm.dsl.corrector;
+package com.tencent.supersonic.chat.corrector;
 
 import com.tencent.supersonic.chat.api.pojo.CorrectionInfo;
-import com.tencent.supersonic.chat.corrector.SelectFieldAppendCorrector;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 

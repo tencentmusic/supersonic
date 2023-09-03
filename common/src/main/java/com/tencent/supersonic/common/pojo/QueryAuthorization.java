@@ -1,6 +1,7 @@
 package com.tencent.supersonic.common.pojo;
 
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

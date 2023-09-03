@@ -71,7 +71,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
     }
 
     public void addSampleChats() throws Exception {
-        chatService.addChat(user, "样例对话1");
+        chatService.addChat(user, "样例对话1", 1);
 
         parseAndExecute(1, "超音数 访问次数");
         parseAndExecute(1, "按部门统计");
@@ -79,7 +79,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
     }
 
     public void addSampleChats2() throws Exception {
-        chatService.addChat(user, "样例对话2");
+        chatService.addChat(user, "样例对话2", 1);
 
         parseAndExecute(2, "alice 停留时长");
         parseAndExecute(2, "对比alice和lucy的访问次数");

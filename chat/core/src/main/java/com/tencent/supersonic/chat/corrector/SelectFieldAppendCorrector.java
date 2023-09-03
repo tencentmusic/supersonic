@@ -15,24 +15,24 @@ public class SelectFieldAppendCorrector extends BaseSemanticCorrector {
 
     @Override
     public CorrectionInfo corrector(CorrectionInfo correctionInfo) {
-        String sql = correctionInfo.getSql();
-        if (SqlParserSelectHelper.hasAggregateFunction(sql)) {
+        String preSql = correctionInfo.getSql();
+        if (SqlParserSelectHelper.hasAggregateFunction(preSql)) {
             return correctionInfo;
         }
-        Set<String> selectFields = new HashSet<>(SqlParserSelectHelper.getSelectFields(sql));
-        Set<String> whereFields = new HashSet<>(SqlParserSelectHelper.getWhereFields(sql));
+        Set<String> selectFields = new HashSet<>(SqlParserSelectHelper.getSelectFields(preSql));
+        Set<String> whereFields = new HashSet<>(SqlParserSelectHelper.getWhereFields(preSql));
 
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(whereFields)) {
             return correctionInfo;
         }
 
-        whereFields.addAll(SqlParserSelectHelper.getOrderByFields(sql));
+        whereFields.addAll(SqlParserSelectHelper.getOrderByFields(preSql));
         whereFields.removeAll(selectFields);
         whereFields.remove(TimeDimensionEnum.DAY.getName());
         whereFields.remove(TimeDimensionEnum.WEEK.getName());
         whereFields.remove(TimeDimensionEnum.MONTH.getName());
-
-        String replaceFields = SqlParserUpdateHelper.addFieldsToSelect(sql, new ArrayList<>(whereFields));
+        String replaceFields = SqlParserUpdateHelper.addFieldsToSelect(preSql, new ArrayList<>(whereFields));
+        correctionInfo.setPreSql(preSql);
         correctionInfo.setSql(replaceFields);
         return correctionInfo;
     }

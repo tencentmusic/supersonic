@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 public class DatasourceDOExample {
-
     /**
      * s2_datasource
      */
@@ -149,7 +148,6 @@ public class DatasourceDOExample {
      * s2_datasource null
      */
     protected abstract static class GeneratedCriteria {
-
         protected List<Criterion> criteria;
 
         protected GeneratedCriteria() {
@@ -855,7 +853,6 @@ public class DatasourceDOExample {
      * s2_datasource null
      */
     public static class Criterion {
-
         private String condition;
 
         private Object value;

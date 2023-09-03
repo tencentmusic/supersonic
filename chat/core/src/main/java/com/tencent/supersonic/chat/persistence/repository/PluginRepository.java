@@ -2,10 +2,10 @@ package com.tencent.supersonic.chat.persistence.repository;
 
 import com.tencent.supersonic.chat.persistence.dataobject.PluginDO;
 import com.tencent.supersonic.chat.persistence.dataobject.PluginDOExample;
+
 import java.util.List;
 
 public interface PluginRepository {
-
     List<PluginDO> getPlugins();
 
     List<PluginDO> fetchPluginDOs(String queryText, String type);

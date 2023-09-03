@@ -28,16 +28,30 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class SqlParserUpdateHelper {
 
-    public static String replaceValueFields(String sql, Map<String, Set<String>> fieldValueToFieldNames) {
+    public static String replaceValue(String sql, Map<String, Map<String, String>> filedNameToValueMap) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
         if (!(selectBody instanceof PlainSelect)) {
             return sql;
         }
         PlainSelect plainSelect = (PlainSelect) selectBody;
-        //1. replace where fields
         Expression where = plainSelect.getWhere();
-        FiledValueReplaceVisitor visitor = new FiledValueReplaceVisitor(fieldValueToFieldNames);
+        FieldlValueReplaceVisitor visitor = new FieldlValueReplaceVisitor(filedNameToValueMap);
+        if (Objects.nonNull(where)) {
+            where.accept(visitor);
+        }
+        return selectStatement.toString();
+    }
+
+    public static String replaceFieldNameByValue(String sql, Map<String, Set<String>> fieldValueToFieldNames) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+        Expression where = plainSelect.getWhere();
+        FiledNameReplaceVisitor visitor = new FiledNameReplaceVisitor(fieldValueToFieldNames);
         if (Objects.nonNull(where)) {
             where.accept(visitor);
         }

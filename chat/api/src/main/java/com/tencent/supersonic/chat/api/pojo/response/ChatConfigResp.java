@@ -4,8 +4,10 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDetailConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.RecommendedQuestionReq;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+
 import java.util.Date;
 import java.util.List;
+
 import lombok.Data;
 
 @Data

@@ -40,7 +40,7 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
 
     @Override
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-            QueryContext queryCtx) {
+                                          QueryContext queryCtx) {
         candidateElementMatches = filterElementMatches(candidateElementMatches);
         return super.match(candidateElementMatches, queryCtx);
     }

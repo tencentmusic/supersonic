@@ -9,15 +9,15 @@ import com.tencent.supersonic.chat.utils.DictMetaHelper;
 import com.tencent.supersonic.chat.utils.DictQueryHelper;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
+import com.tencent.supersonic.knowledge.dictionary.FileHandler;
+import com.tencent.supersonic.knowledge.persistence.dataobject.DictTaskDO;
+import com.tencent.supersonic.knowledge.utils.DictTaskConverter;
 import com.tencent.supersonic.knowledge.dictionary.DictConfig;
 import com.tencent.supersonic.knowledge.dictionary.DictTaskFilter;
 import com.tencent.supersonic.knowledge.dictionary.DictUpdateMode;
 import com.tencent.supersonic.knowledge.dictionary.DimValue2DictCommand;
 import com.tencent.supersonic.knowledge.dictionary.DimValueDictInfo;
-import com.tencent.supersonic.knowledge.dictionary.FileHandler;
-import com.tencent.supersonic.knowledge.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.knowledge.persistence.repository.DictRepository;
-import com.tencent.supersonic.knowledge.utils.DictTaskConverter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,9 +41,9 @@ public class DictionaryServiceImpl implements DictionaryService {
     private String dimValue = "DimValue_%d_%d";
 
     public DictionaryServiceImpl(DictMetaHelper metaUtils,
-            DictQueryHelper dictQueryHelper,
-            FileHandler fileHandler,
-            DictRepository dictRepository) {
+                                 DictQueryHelper dictQueryHelper,
+                                 FileHandler fileHandler,
+                                 DictRepository dictRepository) {
         this.metaUtils = metaUtils;
         this.dictQueryHelper = dictQueryHelper;
         this.fileHandler = fileHandler;

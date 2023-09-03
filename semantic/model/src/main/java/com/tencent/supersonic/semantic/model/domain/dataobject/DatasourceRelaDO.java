@@ -3,7 +3,6 @@ package com.tencent.supersonic.semantic.model.domain.dataobject;
 import java.util.Date;
 
 public class DatasourceRelaDO {
-
     /**
      *
      */

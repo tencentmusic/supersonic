@@ -9,9 +9,11 @@ public class FieldCorrector extends BaseSemanticCorrector {
 
     @Override
     public CorrectionInfo corrector(CorrectionInfo correctionInfo) {
-        String replaceFields = SqlParserUpdateHelper.replaceFields(correctionInfo.getSql(),
+        String preSql = correctionInfo.getSql();
+        correctionInfo.setPreSql(preSql);
+        String sql = SqlParserUpdateHelper.replaceFields(preSql,
                 getFieldToBizName(correctionInfo.getParseInfo().getModelId()));
-        correctionInfo.setSql(replaceFields);
+        correctionInfo.setSql(sql);
         return correctionInfo;
     }
 }

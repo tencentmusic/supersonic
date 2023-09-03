@@ -2,8 +2,9 @@ package com.tencent.supersonic.chat.api.pojo.response;
 
 import com.tencent.supersonic.chat.api.pojo.request.KnowledgeAdvancedConfig;
 import com.tencent.supersonic.chat.api.pojo.request.KnowledgeInfoReq;
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class ChatAggRichConfigResp {

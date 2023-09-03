@@ -6,7 +6,7 @@
 <mapper namespace="com.tencent.supersonic.chat.persistence.mapper.ChatConfigMapper">
 
     <resultMap id="chaConfigDO"
-            type="com.tencent.supersonic.chat.persistence.dataobject.ChatConfigDO">
+               type="com.tencent.supersonic.chat.persistence.dataobject.ChatConfigDO">
         <id column="id" property="id"/>
         <result column="model_id" property="modelId"/>
         <result column="chat_detail_config" property="chatDetailConfig"/>
@@ -22,11 +22,14 @@
     <insert id="addConfig"
             parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatConfigDO"
             useGeneratedKeys="true" keyProperty="id">
-        insert into s2_chat_config
-        (model_id, `chat_detail_config`, chat_agg_config, recommended_questions, status, created_by,
-         updated_by, created_at, updated_at)
-        values (#{modelId}, #{chatDetailConfig}, #{chatAggConfig}, #{recommendedQuestions},
-                #{status}, #{createdBy}, #{updatedBy}, #{createdAt}, #{updatedAt})
+    insert into s2_chat_config
+    (
+        model_id, `chat_detail_config`, chat_agg_config,  recommended_questions, status, created_by, updated_by, created_at, updated_at
+    )
+    values
+    (
+        #{modelId}, #{chatDetailConfig}, #{chatAggConfig}, #{recommendedQuestions}, #{status}, #{createdBy}, #{updatedBy}, #{createdAt}, #{updatedAt}
+    )
     </insert>
 
 
@@ -82,9 +85,9 @@
         select *
         from s2_chat_config
         where model_id = #{modelId}
-          and status != 3
+        and status != 3
         order by updated_at desc
-            limit 1
+        limit 1
     </select>
 
 </mapper>

@@ -1,10 +1,10 @@
 package com.tencent.supersonic.common.util;
 
 
-import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
+import java.util.Map;
 
 @Builder
 @ToString

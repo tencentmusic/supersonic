@@ -5,9 +5,16 @@ import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
+import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -17,13 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
-
 @Aspect
 @Component
 @Slf4j
@@ -32,8 +32,31 @@ public class DimValueAspect {
     @Value("${dimension.value.map.enable:true}")
     private Boolean dimensionValueMapEnable;
 
+    @Value("${dimension.value.map.sql.enable:true}")
+    private Boolean dimensionValueMapSqlEnable;
     @Autowired
     private DimensionService dimensionService;
+
+    @Around("execution(* com.tencent.supersonic.semantic.query.service.QueryServiceImpl.queryBySql(..))")
+    public Object handleSqlDimValue(ProceedingJoinPoint joinPoint) throws Throwable {
+        if (!dimensionValueMapSqlEnable) {
+            log.debug("sql dimensionValueMapEnable is false, skip dimensionValueMap");
+            QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) joinPoint.proceed();
+            return queryResultWithColumns;
+        }
+        Object[] args = joinPoint.getArgs();
+        QueryDslReq queryDslReq = (QueryDslReq) args[0];
+
+        List<DimensionResp> dimensions = dimensionService.getDimensions(queryDslReq.getModelId());
+        Map<String, Map<String, String>> techNameToBizName = getTechNameToBizName(dimensions);
+
+        QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) joinPoint.proceed();
+        if (Objects.nonNull(queryResultWithColumns)) {
+            rewriteDimValue(queryResultWithColumns, techNameToBizName);
+        }
+        return queryResultWithColumns;
+    }
+
 
     @Around("execution(* com.tencent.supersonic.semantic.query.rest.QueryController.queryByStruct(..))"
             + " || execution(* com.tencent.supersonic.semantic.query.service.QueryService.queryByStruct(..))"
@@ -48,12 +71,11 @@ public class DimValueAspect {
 
         Object[] args = joinPoint.getArgs();
         QueryStructReq queryStructReq = (QueryStructReq) args[0];
-        Long domainId = queryStructReq.getModelId();
+        Long modelId = queryStructReq.getModelId();
 
-        List<DimensionResp> dimensions = dimensionService.getDimensions(domainId);
-        Map<String, Map<String, String>> dimAndAliasAndTechNamePair = new ConcurrentHashMap<>();
-        Map<String, Map<String, String>> dimAndTechNameAndBizNamePair = new ConcurrentHashMap<>();
-        generateAliasAndTechNamePair(dimensions, dimAndAliasAndTechNamePair, dimAndTechNameAndBizNamePair);
+        List<DimensionResp> dimensions = dimensionService.getDimensions(modelId);
+        Map<String, Map<String, String>> dimAndAliasAndTechNamePair = getAliasAndBizNameToTechName(dimensions);
+        Map<String, Map<String, String>> dimAndTechNameAndBizNamePair = getTechNameToBizName(dimensions);
 
         rewriteFilter(queryStructReq.getDimensionFilters(), dimAndAliasAndTechNamePair);
 
@@ -66,7 +88,7 @@ public class DimValueAspect {
     }
 
     private void rewriteDimValue(QueryResultWithSchemaResp queryResultWithColumns,
-                                 Map<String, Map<String, String>> dimAndTechNameAndBizNamePair) {
+            Map<String, Map<String, String>> dimAndTechNameAndBizNamePair) {
         if (!selectDimValueMap(queryResultWithColumns.getColumns(), dimAndTechNameAndBizNamePair)) {
             return;
         }
@@ -141,50 +163,78 @@ public class DimValueAspect {
         }
     }
 
-    private void generateAliasAndTechNamePair(List<DimensionResp> dimensions,
-                                              Map<String, Map<String, String>> dimAndAliasAndTechNamePair,
-                                              Map<String, Map<String, String>> dimAndTechNameAndBizNamePair) {
+    private Map<String, Map<String, String>> getAliasAndBizNameToTechName(List<DimensionResp> dimensions) {
         if (CollectionUtils.isEmpty(dimensions)) {
-            return;
+            return new HashMap<>();
         }
-        dimensions.stream().forEach(dimension -> {
-            if (Objects.nonNull(dimension) && Strings.isNotEmpty(dimension.getBizName())
-                    && !CollectionUtils.isEmpty(dimension.getDimValueMaps())) {
-                String bizName = dimension.getBizName();
+        Map<String, Map<String, String>> result = new HashMap<>();
+        for (DimensionResp dimension : dimensions) {
+            if (needSkipDimension(dimension)) {
+                continue;
+            }
+            String bizName = dimension.getBizName();
+            List<DimValueMap> dimValueMaps = dimension.getDimValueMaps();
+            Map<String, String> aliasAndBizNameToTechName = new HashMap<>();
 
-                List<DimValueMap> dimValueMaps = dimension.getDimValueMaps();
-                Map<String, String> innerPairTech = new HashMap<>();
-                Map<String, String> innerPairBiz = new HashMap<>();
-
-                dimValueMaps.stream().forEach(dimValueMap -> {
-                    if (Objects.nonNull(dimValueMap) && !CollectionUtils.isEmpty(dimValueMap.getAlias())
-                            && Strings.isNotEmpty(dimValueMap.getTechName())) {
-
-                        // add bizName and techName pair
-                        if (Strings.isNotEmpty(dimValueMap.getBizName())) {
-                            innerPairTech.put(dimValueMap.getBizName(), dimValueMap.getTechName());
-                        }
-
-                        dimValueMap.getAlias().stream().forEach(alias -> {
-                            if (Strings.isNotEmpty(alias)) {
-                                innerPairTech.put(alias, dimValueMap.getTechName());
-                            }
-                        });
-                    }
-                    if (Objects.nonNull(dimValueMap) && Strings.isNotEmpty(dimValueMap.getTechName())) {
-                        innerPairBiz.put(dimValueMap.getTechName(), dimValueMap.getBizName());
-                    }
-                });
-
-                if (!CollectionUtils.isEmpty(innerPairTech)) {
-                    dimAndAliasAndTechNamePair.put(bizName, innerPairTech);
+            for (DimValueMap dimValueMap : dimValueMaps) {
+                if (needSkipDimValue(dimValueMap)) {
+                    continue;
                 }
-
-                if (!CollectionUtils.isEmpty(innerPairBiz)) {
-                    dimAndTechNameAndBizNamePair.put(bizName, innerPairBiz);
+                if (Strings.isNotEmpty(dimValueMap.getBizName())) {
+                    aliasAndBizNameToTechName.put(dimValueMap.getBizName(), dimValueMap.getTechName());
+                }
+                if (!CollectionUtils.isEmpty(dimValueMap.getAlias())) {
+                    dimValueMap.getAlias().stream().forEach(alias -> {
+                        if (Strings.isNotEmpty(alias)) {
+                            aliasAndBizNameToTechName.put(alias, dimValueMap.getTechName());
+                        }
+                    });
                 }
             }
-        });
 
+            if (!CollectionUtils.isEmpty(aliasAndBizNameToTechName)) {
+                result.put(bizName, aliasAndBizNameToTechName);
+            }
+        }
+        return result;
+    }
+
+    private boolean needSkipDimValue(DimValueMap dimValueMap) {
+        return Objects.isNull(dimValueMap) || Strings.isEmpty(dimValueMap.getTechName());
+    }
+
+
+    private Map<String, Map<String, String>> getTechNameToBizName(List<DimensionResp> dimensions) {
+        if (CollectionUtils.isEmpty(dimensions)) {
+            return new HashMap<>();
+        }
+        Map<String, Map<String, String>> result = new HashMap<>();
+        for (DimensionResp dimension : dimensions) {
+            if (needSkipDimension(dimension)) {
+                continue;
+            }
+            String bizName = dimension.getBizName();
+            List<DimValueMap> dimValueMaps = dimension.getDimValueMaps();
+            Map<String, String> techNameToBizName = new HashMap<>();
+
+            for (DimValueMap dimValueMap : dimValueMaps) {
+                if (needSkipDimValue(dimValueMap)) {
+                    continue;
+                }
+                if (StringUtils.isNotEmpty(dimValueMap.getBizName())) {
+                    techNameToBizName.put(dimValueMap.getTechName(), dimValueMap.getBizName());
+                }
+            }
+
+            if (!CollectionUtils.isEmpty(techNameToBizName)) {
+                result.put(bizName, techNameToBizName);
+            }
+        }
+        return result;
+    }
+
+    private boolean needSkipDimension(DimensionResp dimension) {
+        return Objects.isNull(dimension) || Strings.isEmpty(dimension.getBizName()) || CollectionUtils.isEmpty(
+                dimension.getDimValueMaps());
     }
 }

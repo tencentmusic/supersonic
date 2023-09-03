@@ -6,7 +6,7 @@
 <mapper namespace="com.tencent.supersonic.chat.persistence.mapper.ChatContextMapper">
 
     <resultMap id="ChatContextDO"
-            type="com.tencent.supersonic.chat.persistence.dataobject.ChatContextDO">
+               type="com.tencent.supersonic.chat.persistence.dataobject.ChatContextDO">
         <id column="chat_id" property="chatId"/>
         <result column="modified_at" property="modifiedAt"/>
         <result column="user" property="user"/>
@@ -15,22 +15,16 @@
         <!--<result column="ext_data" property="extData"/>-->
     </resultMap>
 
-    <select id="getContextByChatId" resultMap="ChatContextDO">
+    <select id="getContextByChatId"  resultMap="ChatContextDO">
         select *
-        from s2_chat_context
-        where chat_id = #{chatId} limit 1
+        from s2_chat_context where chat_id=#{chatId} limit 1
     </select>
 
-    <insert id="addContext"
-            parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatContextDO">
-        insert into s2_chat_context (chat_id, user, query_text, semantic_parse)
-        values (#{chatId}, #{user}, #{queryText}, #{semanticParse})
+    <insert id="addContext" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatContextDO" >
+        insert into s2_chat_context  (chat_id,user,query_text,semantic_parse) values (#{chatId}, #{user},#{queryText}, #{semanticParse})
     </insert>
     <update id="updateContext">
-        update s2_chat_context
-        set query_text=#{queryText},
-            semantic_parse=#{semanticParse}
-        where chat_id = #{chatId}
+        update  s2_chat_context  set query_text=#{queryText},semantic_parse=#{semanticParse} where chat_id=#{chatId}
     </update>
 
 </mapper>

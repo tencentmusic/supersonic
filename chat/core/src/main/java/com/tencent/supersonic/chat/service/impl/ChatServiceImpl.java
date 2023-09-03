@@ -82,21 +82,22 @@ public class ChatServiceImpl implements ChatService {
 
 
     @Override
-    public Boolean addChat(User user, String chatName) {
-        ChatDO intelligentConversionDO = new ChatDO();
-        intelligentConversionDO.setChatName(chatName);
-        intelligentConversionDO.setCreator(user.getName());
-        intelligentConversionDO.setCreateTime(getCurrentTime());
-        intelligentConversionDO.setIsDelete(0);
-        intelligentConversionDO.setLastTime(getCurrentTime());
-        intelligentConversionDO.setLastQuestion("Hello, welcome to using supersonic");
-        intelligentConversionDO.setIsTop(0);
-        return chatRepository.createChat(intelligentConversionDO);
+    public Boolean addChat(User user, String chatName, Integer agentId) {
+        ChatDO chatDO = new ChatDO();
+        chatDO.setChatName(chatName);
+        chatDO.setCreator(user.getName());
+        chatDO.setCreateTime(getCurrentTime());
+        chatDO.setIsDelete(0);
+        chatDO.setLastTime(getCurrentTime());
+        chatDO.setLastQuestion("Hello, welcome to using supersonic");
+        chatDO.setIsTop(0);
+        chatDO.setAgentId(agentId);
+        return chatRepository.createChat(chatDO);
     }
 
     @Override
-    public List<ChatDO> getAll(String userName) {
-        return chatRepository.getAll(userName);
+    public List<ChatDO> getAll(String userName, Integer agentId) {
+        return chatRepository.getAll(userName, agentId);
     }
 
     @Override

@@ -7,7 +7,9 @@ import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDOE
 import com.tencent.supersonic.semantic.model.domain.repository.DatasourceRepository;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DatasourceDOMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DatasourceRelaDOMapper;
+
 import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 
@@ -20,7 +22,7 @@ public class DatasourceRepositoryImpl implements DatasourceRepository {
     private DatasourceRelaDOMapper datasourceRelaDOMapper;
 
     public DatasourceRepositoryImpl(DatasourceDOMapper datasourceMapper,
-            DatasourceRelaDOMapper datasourceRelaDOMapper) {
+                                    DatasourceRelaDOMapper datasourceRelaDOMapper) {
         this.datasourceMapper = datasourceMapper;
         this.datasourceRelaDOMapper = datasourceRelaDOMapper;
     }

@@ -1,10 +1,11 @@
 package com.tencent.supersonic.knowledge.dictionary.builder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
 import com.tencent.supersonic.knowledge.dictionary.DictWordType;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 /**

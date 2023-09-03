@@ -4,8 +4,8 @@ package com.tencent.supersonic.semantic.api.model.request;
 import com.tencent.supersonic.semantic.api.model.enums.MetricTypeEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
-import java.util.List;
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class MetricReq extends MetricBaseReq {

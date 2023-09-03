@@ -1,7 +1,5 @@
 package com.tencent.supersonic.semantic.query.domain.calcite;
 
-import com.tencent.supersonic.common.pojo.ColumnOrder;
-import com.tencent.supersonic.semantic.api.model.response.SqlParserResp;
 import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
@@ -9,7 +7,9 @@ import com.tencent.supersonic.semantic.api.model.yaml.IdentifyYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
+import com.tencent.supersonic.semantic.api.model.response.SqlParserResp;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
+import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.semantic.query.parser.calcite.SemanticSchemaManager;
 import com.tencent.supersonic.semantic.query.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;

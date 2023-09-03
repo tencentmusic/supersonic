@@ -2,11 +2,13 @@ package com.tencent.supersonic.semantic.model.infrastructure.repository;
 
 import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDOExample;
-import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.DimensionRepository;
+import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOCustomMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOMapper;
+
 import java.util.List;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +22,7 @@ public class DimensionRepositoryImpl implements DimensionRepository {
 
 
     public DimensionRepositoryImpl(DimensionDOMapper dimensionDOMapper,
-            DimensionDOCustomMapper dimensionDOCustomMapper) {
+                                   DimensionDOCustomMapper dimensionDOCustomMapper) {
         this.dimensionDOMapper = dimensionDOMapper;
         this.dimensionDOCustomMapper = dimensionDOCustomMapper;
     }

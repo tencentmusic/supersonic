@@ -2,10 +2,10 @@ CREATE TABLE `chat_context`
 (
     `chat_id`        bigint(20) NOT NULL COMMENT 'context chat id',
     `modified_at`    datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'row modify time',
-    `user`           varchar(64)       DEFAULT NULL COMMENT 'row modify user',
-    `query_text`     text              DEFAULT NULL COMMENT 'query text',
-    `semantic_parse` text              DEFAULT NULL COMMENT 'parse data',
-    `ext_data`       text              DEFAULT NULL COMMENT 'extend data',
+    `user`           varchar(64) DEFAULT NULL COMMENT 'row modify user',
+    `query_text`     text DEFAULT NULL COMMENT 'query text',
+    `semantic_parse` text DEFAULT NULL COMMENT 'parse data',
+    `ext_data`       text DEFAULT NULL COMMENT 'extend data',
     PRIMARY KEY (`chat_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -40,7 +40,7 @@ CREATE TABLE `chat_query`
     `is_deleted`        int(1) DEFAULT NULL,
     `module`            varchar(30)   DEFAULT NULL,
     `entity`            mediumtext COMMENT '',
-    `chat_id`           bigint(8) DEFAULT NULL COMMENT 'chat id',
+    `chat_id`     bigint(8) DEFAULT NULL COMMENT 'chat id',
     `recommend`         text,
     `aggregator`        varchar(20)   DEFAULT 'trend',
     `top_num`           int(3) DEFAULT NULL,
@@ -59,18 +59,4 @@ CREATE TABLE `chat_query`
     KEY                 `common` (`question_id`),
     KEY                 `common1` (`user_name`),
     KEY                 `common2` (`chat_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
-
-CREATE TABLE `chat`
-(
-    `chat_id`       bigint(8) NOT NULL AUTO_INCREMENT,
-    `chat_name`     varchar(100) DEFAULT NULL,
-    `create_time`   datetime     DEFAULT NULL,
-    `last_time`     datetime     DEFAULT NULL,
-    `creator`       varchar(30)  DEFAULT NULL,
-    `last_question` varchar(200) DEFAULT NULL,
-    `is_delete`     int(2) DEFAULT '0' COMMENT 'is deleted',
-    `is_top`        int(2) DEFAULT '0' COMMENT 'is top',
-    PRIMARY KEY (`chat_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

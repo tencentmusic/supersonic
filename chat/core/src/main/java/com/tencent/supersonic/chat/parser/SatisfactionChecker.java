@@ -4,7 +4,9 @@ package com.tencent.supersonic.chat.parser;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.query.llm.dsl.DslQuery;
+import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -14,10 +16,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class SatisfactionChecker {
-
-    private static final double LONG_TEXT_THRESHOLD = 0.8;
-    private static final double SHORT_TEXT_THRESHOLD = 0.5;
-    private static final int QUERY_TEXT_LENGTH_THRESHOLD = 10;
 
     // check all the parse info in candidate
     public static boolean check(QueryContext queryContext) {
@@ -35,11 +33,12 @@ public class SatisfactionChecker {
     private static boolean checkThreshold(String queryText, SemanticParseInfo semanticParseInfo) {
         int queryTextLength = queryText.replaceAll(" ", "").length();
         double degree = semanticParseInfo.getScore() / queryTextLength;
-        if (queryTextLength > QUERY_TEXT_LENGTH_THRESHOLD) {
-            if (degree < LONG_TEXT_THRESHOLD) {
+        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
+        if (queryTextLength > optimizationConfig.getQueryTextLengthThreshold()) {
+            if (degree < optimizationConfig.getLongTextThreshold()) {
                 return false;
             }
-        } else if (degree < SHORT_TEXT_THRESHOLD) {
+        } else if (degree < optimizationConfig.getShortTextThreshold()) {
             return false;
         }
         log.info("queryMode:{}, degree:{}, parse info:{}",

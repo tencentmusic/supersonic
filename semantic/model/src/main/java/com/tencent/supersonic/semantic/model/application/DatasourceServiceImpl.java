@@ -8,6 +8,9 @@ import com.tencent.supersonic.semantic.api.model.pojo.DatasourceDetail;
 import com.tencent.supersonic.semantic.api.model.pojo.Dim;
 import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
+import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
+import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
 import com.tencent.supersonic.semantic.api.model.request.DatasourceRelaReq;
 import com.tencent.supersonic.semantic.api.model.request.DatasourceReq;
 import com.tencent.supersonic.semantic.api.model.request.DateInfoReq;
@@ -20,9 +23,6 @@ import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
-import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
 import com.tencent.supersonic.semantic.model.domain.DatabaseService;
 import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
@@ -191,6 +191,13 @@ public class DatasourceServiceImpl implements DatasourceService {
     }
 
     @Override
+    public List<DatasourceResp> getDatasourceListByDatabaseId(Long databaseId) {
+        return getDatasourceList().stream()
+                .filter(datasourceResp -> datasourceResp.getDatabaseId().equals(databaseId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<DatasourceResp> getDatasourceListNoMeasurePrefix(Long modelId) {
         List<DatasourceResp> datasourceResps = getDatasourceList(modelId);
         for (DatasourceResp datasourceResp : datasourceResps) {
@@ -346,7 +353,8 @@ public class DatasourceServiceImpl implements DatasourceService {
             List<DatasourceResp> datasourceResps = getDatasourceList(modelId);
             List<MetricResp> metricResps = metricService.getMetrics(modelId);
             metricYamlTplList.addAll(MetricYamlManager.convert2YamlObj(MetricConverter.metricInfo2Metric(metricResps)));
-            DatabaseResp databaseResp = databaseService.getDatabaseByModelId(modelId);
+            Long databaseId = datasourceResps.iterator().next().getDatabaseId();
+            DatabaseResp databaseResp = databaseService.getDatabase(databaseId);
             List<DimensionResp> dimensionResps = dimensionService.getDimensions(modelId);
             for (DatasourceResp datasourceResp : datasourceResps) {
                 datasourceYamlTplList.add(DatasourceYamlManager.convert2YamlObj(

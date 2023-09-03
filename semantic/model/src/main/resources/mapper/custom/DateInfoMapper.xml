@@ -20,7 +20,7 @@
     <insert id="upsertDateInfo">
         insert into s2_available_date_info
         (`type`, item_id, date_format, start_date, end_date, unavailable_date, created_by,
-         updated_by, date_period)
+         updated_by,date_period)
         values (#{type}, #{itemId}, #{dateFormat}, #{startDate}, #{endDate}, #{unavailableDateList},
                 #{createdBy}, #{updatedBy}, #{datePeriod}) ON DUPLICATE KEY
         UPDATE
@@ -44,7 +44,7 @@
         <if test="itemIds != null and itemIds.size >0">
             and item_id in
             <foreach collection="itemIds" index="index" item="item" open="(" close=")"
-                    separator=",">
+                     separator=",">
                 #{item}
             </foreach>
         </if>

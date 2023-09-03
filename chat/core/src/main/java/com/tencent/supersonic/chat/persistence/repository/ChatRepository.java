@@ -8,7 +8,7 @@ public interface ChatRepository {
 
     boolean createChat(ChatDO chatDO);
 
-    List<ChatDO> getAll(String creator);
+    List<ChatDO> getAll(String creator, Integer agentId);
 
     Boolean updateChatName(Long chatId, String chatName, String lastTime, String creator);
 

@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 public class MetricDOExample {
-
     /**
      * s2_metric
      */
@@ -149,7 +148,6 @@ public class MetricDOExample {
      * s2_metric null
      */
     protected abstract static class GeneratedCriteria {
-
         protected List<Criterion> criteria;
 
         protected GeneratedCriteria() {
@@ -1195,7 +1193,6 @@ public class MetricDOExample {
      * s2_metric null
      */
     public static class Criterion {
-
         private String condition;
 
         private Object value;

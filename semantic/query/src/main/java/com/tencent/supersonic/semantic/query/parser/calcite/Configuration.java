@@ -1,8 +1,8 @@
 package com.tencent.supersonic.semantic.query.parser.calcite;
 
 
-import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSqlDialect;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.DSLSqlValidatorImpl;
+import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSqlDialect;
 import java.util.Properties;
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;

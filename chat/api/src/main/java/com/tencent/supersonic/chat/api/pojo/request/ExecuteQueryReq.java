@@ -7,13 +7,12 @@ import lombok.Data;
 
 @Data
 public class ExecuteQueryReq {
-
     private User user;
     private Integer agentId;
     private Integer chatId;
     private String queryText;
-    private Long queryId;
-    private Integer parseId;
+    private Long queryId = 7L;
+    private Integer parseId = 2;
     private SemanticParseInfo parseInfo;
     private boolean saveAnswer = true;
 }

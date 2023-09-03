@@ -11,10 +11,10 @@ import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
 import com.tencent.supersonic.auth.authentication.persistence.repository.UserRepository;
 import com.tencent.supersonic.auth.authentication.utils.UserTokenUtils;
 import com.tencent.supersonic.common.util.ContextUtils;
+import org.springframework.beans.BeanUtils;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.beans.BeanUtils;
 
 public class DefaultUserAdaptor implements UserAdaptor {
 

@@ -10,9 +10,9 @@ import static com.tencent.supersonic.common.pojo.Constants.PATTERN_JDBC_TYPE;
 import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 
 import com.alibaba.druid.util.StringUtils;
-import com.tencent.supersonic.common.util.MD5Util;
 import com.tencent.supersonic.semantic.api.model.enums.DataTypeEnum;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
+import com.tencent.supersonic.common.util.MD5Util;
 import com.tencent.supersonic.semantic.model.domain.pojo.Database;
 import com.tencent.supersonic.semantic.model.domain.pojo.JdbcDataSource;
 import java.sql.Connection;

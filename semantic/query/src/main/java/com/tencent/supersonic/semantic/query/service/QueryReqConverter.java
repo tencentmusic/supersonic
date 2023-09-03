@@ -1,4 +1,4 @@
-package com.tencent.supersonic.semantic.query.utils;
+package com.tencent.supersonic.semantic.query.service;
 
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.request.SqlExecuteReq;
@@ -8,7 +8,7 @@ import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
-import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
+import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,10 +25,8 @@ public class QueryReqConverter {
 
     @Autowired
     private ModelService domainService;
-
     @Autowired
     private SemanticQueryEngine parserService;
-
     @Autowired
     private QueryStructUtils queryStructUtils;
 
