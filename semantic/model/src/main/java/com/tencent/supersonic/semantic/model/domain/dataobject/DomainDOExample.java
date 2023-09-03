@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 public class DomainDOExample {
-
     /**
      * s2_domain
      */
@@ -149,7 +148,6 @@ public class DomainDOExample {
      * s2_domain null
      */
     protected abstract static class GeneratedCriteria {
-
         protected List<Criterion> criteria;
 
         protected GeneratedCriteria() {
@@ -1125,7 +1123,6 @@ public class DomainDOExample {
      * s2_domain null
      */
     public static class Criterion {
-
         private String condition;
 
         private Object value;

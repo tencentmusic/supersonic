@@ -1,10 +1,10 @@
 package com.tencent.supersonic.semantic.model.domain.pojo;
 
 
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.Entity;
-import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.request.DomainReq;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import java.util.List;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;

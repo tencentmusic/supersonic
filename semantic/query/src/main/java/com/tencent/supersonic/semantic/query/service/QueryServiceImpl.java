@@ -15,7 +15,6 @@ import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
 import com.tencent.supersonic.semantic.query.executor.QueryExecutor;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
-import com.tencent.supersonic.semantic.query.utils.QueryReqConverter;
 import com.tencent.supersonic.semantic.query.utils.QueryUtils;
 import com.tencent.supersonic.semantic.query.utils.StatUtils;
 import java.util.ArrayList;

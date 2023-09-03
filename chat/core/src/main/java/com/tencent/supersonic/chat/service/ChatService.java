@@ -30,9 +30,9 @@ public interface ChatService {
 
     public void switchContext(ChatContext chatCtx);
 
-    public Boolean addChat(User user, String chatName);
+    public Boolean addChat(User user, String chatName, Integer agentId);
 
-    public List<ChatDO> getAll(String userName);
+    public List<ChatDO> getAll(String userName, Integer agentId);
 
     public boolean updateChatName(Long chatId, String chatName, String userName);
 

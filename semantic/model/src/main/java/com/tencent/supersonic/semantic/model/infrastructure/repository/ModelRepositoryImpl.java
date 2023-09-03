@@ -4,8 +4,9 @@ import com.tencent.supersonic.semantic.model.domain.dataobject.ModelDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.ModelDOExample;
 import com.tencent.supersonic.semantic.model.domain.repository.ModelRepository;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.ModelDOMapper;
-import java.util.List;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class ModelRepositoryImpl implements ModelRepository {

@@ -1,8 +1,9 @@
 package com.tencent.supersonic.semantic.model.infrastructure.mapper;
 
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
-import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
+
 import java.util.List;
+import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

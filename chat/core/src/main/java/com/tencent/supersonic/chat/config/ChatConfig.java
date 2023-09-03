@@ -3,11 +3,12 @@ package com.tencent.supersonic.chat.config;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDetailConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.RecommendedQuestionReq;
-import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import java.util.List;
+import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.List;
 
 @Data
 @ToString

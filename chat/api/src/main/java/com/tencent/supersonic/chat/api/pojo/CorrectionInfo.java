@@ -18,4 +18,5 @@ public class CorrectionInfo {
 
     private String sql;
 
+    private String preSql;
 }

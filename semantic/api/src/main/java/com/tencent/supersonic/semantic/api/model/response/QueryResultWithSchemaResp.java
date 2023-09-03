@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.semantic.api.model.pojo.QueryResult;
 import java.util.List;
 import java.util.Map;
+
 import lombok.Data;
 import lombok.ToString;
 

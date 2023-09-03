@@ -12,9 +12,10 @@ public class TableNameCorrector extends BaseSemanticCorrector {
     @Override
     public CorrectionInfo corrector(CorrectionInfo correctionInfo) {
         Long modelId = correctionInfo.getParseInfo().getModelId();
-        String sqlOutput = correctionInfo.getSql();
-        String replaceTable = SqlParserUpdateHelper.replaceTable(sqlOutput, TABLE_PREFIX + modelId);
-        correctionInfo.setSql(replaceTable);
+        String preSql = correctionInfo.getSql();
+        correctionInfo.setPreSql(preSql);
+        String sql = SqlParserUpdateHelper.replaceTable(preSql, TABLE_PREFIX + modelId);
+        correctionInfo.setSql(sql);
         return correctionInfo;
     }
 

@@ -1,7 +1,7 @@
 package com.tencent.supersonic.semantic.api.model.pojo;
 
-import com.google.common.collect.Lists;
 import java.util.List;
+import com.google.common.collect.Lists;
 import lombok.Data;
 
 @Data

@@ -6,9 +6,11 @@ import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
 import com.tencent.supersonic.knowledge.dictionary.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.builder.WordBuilderFactory;
-import com.tencent.supersonic.knowledge.utils.ComponentFactory;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import com.tencent.supersonic.knowledge.utils.ComponentFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

@@ -2,8 +2,8 @@ package com.tencent.supersonic.semantic.model.domain.utils;
 
 import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 
-import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.semantic.api.model.enums.DataTypeEnum;
+import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.model.domain.pojo.JdbcDataSource;

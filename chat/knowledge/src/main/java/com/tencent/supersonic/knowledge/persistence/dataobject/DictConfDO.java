@@ -1,6 +1,7 @@
 package com.tencent.supersonic.knowledge.persistence.dataobject;
 
 import java.util.Date;
+
 import lombok.Data;
 
 @Data

@@ -1,6 +1,7 @@
 package com.tencent.supersonic.semantic.api.query.pojo;
 
 import javax.validation.constraints.NotBlank;
+
 import lombok.Data;
 
 @Data

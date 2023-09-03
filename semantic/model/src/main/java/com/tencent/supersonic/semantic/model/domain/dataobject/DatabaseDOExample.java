@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 public class DatabaseDOExample {
-
     /**
      * s2_database
      */
@@ -32,6 +31,7 @@ public class DatabaseDOExample {
     protected Integer limitEnd;
 
     /**
+     *
      * @mbg.generated
      */
     public DatabaseDOExample() {
@@ -39,6 +39,7 @@ public class DatabaseDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setOrderByClause(String orderByClause) {
@@ -46,6 +47,7 @@ public class DatabaseDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public String getOrderByClause() {
@@ -53,6 +55,7 @@ public class DatabaseDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setDistinct(boolean distinct) {
@@ -60,6 +63,7 @@ public class DatabaseDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public boolean isDistinct() {
@@ -67,6 +71,7 @@ public class DatabaseDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public List<Criteria> getOredCriteria() {
@@ -74,6 +79,7 @@ public class DatabaseDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void or(Criteria criteria) {
@@ -81,6 +87,7 @@ public class DatabaseDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Criteria or() {
@@ -90,6 +97,7 @@ public class DatabaseDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Criteria createCriteria() {
@@ -101,6 +109,7 @@ public class DatabaseDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     protected Criteria createCriteriaInternal() {
@@ -109,6 +118,7 @@ public class DatabaseDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void clear() {
@@ -118,13 +128,15 @@ public class DatabaseDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setLimitStart(Integer limitStart) {
-        this.limitStart = limitStart;
+        this.limitStart=limitStart;
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Integer getLimitStart() {
@@ -132,13 +144,15 @@ public class DatabaseDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setLimitEnd(Integer limitEnd) {
-        this.limitEnd = limitEnd;
+        this.limitEnd=limitEnd;
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Integer getLimitEnd() {
@@ -149,7 +163,6 @@ public class DatabaseDOExample {
      * s2_database null
      */
     protected abstract static class GeneratedCriteria {
-
         protected List<Criterion> criteria;
 
         protected GeneratedCriteria() {
@@ -247,66 +260,6 @@ public class DatabaseDOExample {
 
         public Criteria andIdNotBetween(Long value1, Long value2) {
             addCriterion("id not between", value1, value2, "id");
-            return (Criteria) this;
-        }
-
-        public Criteria andDomainIdIsNull() {
-            addCriterion("domain_id is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andDomainIdIsNotNull() {
-            addCriterion("domain_id is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andDomainIdEqualTo(Long value) {
-            addCriterion("domain_id =", value, "domainId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDomainIdNotEqualTo(Long value) {
-            addCriterion("domain_id <>", value, "domainId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDomainIdGreaterThan(Long value) {
-            addCriterion("domain_id >", value, "domainId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDomainIdGreaterThanOrEqualTo(Long value) {
-            addCriterion("domain_id >=", value, "domainId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDomainIdLessThan(Long value) {
-            addCriterion("domain_id <", value, "domainId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDomainIdLessThanOrEqualTo(Long value) {
-            addCriterion("domain_id <=", value, "domainId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDomainIdIn(List<Long> values) {
-            addCriterion("domain_id in", values, "domainId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDomainIdNotIn(List<Long> values) {
-            addCriterion("domain_id not in", values, "domainId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDomainIdBetween(Long value1, Long value2) {
-            addCriterion("domain_id between", value1, value2, "domainId");
-            return (Criteria) this;
-        }
-
-        public Criteria andDomainIdNotBetween(Long value1, Long value2) {
-            addCriterion("domain_id not between", value1, value2, "domainId");
             return (Criteria) this;
         }
 
@@ -849,6 +802,146 @@ public class DatabaseDOExample {
             addCriterion("updated_by not between", value1, value2, "updatedBy");
             return (Criteria) this;
         }
+
+        public Criteria andAdminIsNull() {
+            addCriterion("admin is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAdminIsNotNull() {
+            addCriterion("admin is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAdminEqualTo(String value) {
+            addCriterion("admin =", value, "admin");
+            return (Criteria) this;
+        }
+
+        public Criteria andAdminNotEqualTo(String value) {
+            addCriterion("admin <>", value, "admin");
+            return (Criteria) this;
+        }
+
+        public Criteria andAdminGreaterThan(String value) {
+            addCriterion("admin >", value, "admin");
+            return (Criteria) this;
+        }
+
+        public Criteria andAdminGreaterThanOrEqualTo(String value) {
+            addCriterion("admin >=", value, "admin");
+            return (Criteria) this;
+        }
+
+        public Criteria andAdminLessThan(String value) {
+            addCriterion("admin <", value, "admin");
+            return (Criteria) this;
+        }
+
+        public Criteria andAdminLessThanOrEqualTo(String value) {
+            addCriterion("admin <=", value, "admin");
+            return (Criteria) this;
+        }
+
+        public Criteria andAdminLike(String value) {
+            addCriterion("admin like", value, "admin");
+            return (Criteria) this;
+        }
+
+        public Criteria andAdminNotLike(String value) {
+            addCriterion("admin not like", value, "admin");
+            return (Criteria) this;
+        }
+
+        public Criteria andAdminIn(List<String> values) {
+            addCriterion("admin in", values, "admin");
+            return (Criteria) this;
+        }
+
+        public Criteria andAdminNotIn(List<String> values) {
+            addCriterion("admin not in", values, "admin");
+            return (Criteria) this;
+        }
+
+        public Criteria andAdminBetween(String value1, String value2) {
+            addCriterion("admin between", value1, value2, "admin");
+            return (Criteria) this;
+        }
+
+        public Criteria andAdminNotBetween(String value1, String value2) {
+            addCriterion("admin not between", value1, value2, "admin");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerIsNull() {
+            addCriterion("viewer is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerIsNotNull() {
+            addCriterion("viewer is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerEqualTo(String value) {
+            addCriterion("viewer =", value, "viewer");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerNotEqualTo(String value) {
+            addCriterion("viewer <>", value, "viewer");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerGreaterThan(String value) {
+            addCriterion("viewer >", value, "viewer");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerGreaterThanOrEqualTo(String value) {
+            addCriterion("viewer >=", value, "viewer");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerLessThan(String value) {
+            addCriterion("viewer <", value, "viewer");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerLessThanOrEqualTo(String value) {
+            addCriterion("viewer <=", value, "viewer");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerLike(String value) {
+            addCriterion("viewer like", value, "viewer");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerNotLike(String value) {
+            addCriterion("viewer not like", value, "viewer");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerIn(List<String> values) {
+            addCriterion("viewer in", values, "viewer");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerNotIn(List<String> values) {
+            addCriterion("viewer not in", values, "viewer");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerBetween(String value1, String value2) {
+            addCriterion("viewer between", value1, value2, "viewer");
+            return (Criteria) this;
+        }
+
+        public Criteria andViewerNotBetween(String value1, String value2) {
+            addCriterion("viewer not between", value1, value2, "viewer");
+            return (Criteria) this;
+        }
     }
 
     /**
@@ -865,7 +958,6 @@ public class DatabaseDOExample {
      * s2_database null
      */
     public static class Criterion {
-
         private String condition;
 
         private Object value;
@@ -881,6 +973,38 @@ public class DatabaseDOExample {
         private boolean listValue;
 
         private String typeHandler;
+
+        public String getCondition() {
+            return condition;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Object getSecondValue() {
+            return secondValue;
+        }
+
+        public boolean isNoValue() {
+            return noValue;
+        }
+
+        public boolean isSingleValue() {
+            return singleValue;
+        }
+
+        public boolean isBetweenValue() {
+            return betweenValue;
+        }
+
+        public boolean isListValue() {
+            return listValue;
+        }
+
+        public String getTypeHandler() {
+            return typeHandler;
+        }
 
         protected Criterion(String condition) {
             super();
@@ -916,38 +1040,6 @@ public class DatabaseDOExample {
 
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
-        }
-
-        public String getCondition() {
-            return condition;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public Object getSecondValue() {
-            return secondValue;
-        }
-
-        public boolean isNoValue() {
-            return noValue;
-        }
-
-        public boolean isSingleValue() {
-            return singleValue;
-        }
-
-        public boolean isBetweenValue() {
-            return betweenValue;
-        }
-
-        public boolean isListValue() {
-            return listValue;
-        }
-
-        public String getTypeHandler() {
-            return typeHandler;
         }
     }
 }

@@ -2,8 +2,8 @@ package com.tencent.supersonic.semantic.api.model.request;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.PageBaseReq;
-import java.util.List;
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class PageSchemaItemReq extends PageBaseReq {

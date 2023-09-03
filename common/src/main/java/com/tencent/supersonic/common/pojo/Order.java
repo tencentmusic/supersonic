@@ -4,6 +4,7 @@ import static com.tencent.supersonic.common.pojo.Constants.ASC_UPPER;
 
 import com.google.common.base.Objects;
 import javax.validation.constraints.NotBlank;
+
 import lombok.Data;
 
 @Data

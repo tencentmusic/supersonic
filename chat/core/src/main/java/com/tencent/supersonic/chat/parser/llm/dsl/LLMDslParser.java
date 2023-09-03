@@ -93,19 +93,23 @@ public class LLMDslParser implements SemanticParser {
 
             SemanticParseInfo parseInfo = getParseInfo(queryCtx, modelId, dslTool, dslParseResult);
 
-            String correctorSql = getCorrectorSql(queryCtx, parseInfo, llmResp.getSqlOutput());
+            CorrectionInfo correctionInfo = getCorrectorSql(queryCtx, parseInfo, llmResp.getSqlOutput());
 
-            llmResp.setCorrectorSql(correctorSql);
+            llmResp.setCorrectorSql(correctionInfo.getSql());
 
-            setFilter(correctorSql, modelId, parseInfo);
+            setFilter(correctionInfo, modelId, parseInfo);
 
         } catch (Exception e) {
             log.error("LLMDSLParser error", e);
         }
     }
 
-    public void setFilter(String correctorSql, Long modelId, SemanticParseInfo parseInfo) {
+    public void setFilter(CorrectionInfo correctionInfo, Long modelId, SemanticParseInfo parseInfo) {
 
+        String correctorSql = correctionInfo.getPreSql();
+        if (StringUtils.isEmpty(correctorSql)) {
+            correctorSql = correctionInfo.getSql();
+        }
         List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctorSql);
         if (CollectionUtils.isEmpty(expressions)) {
             return;
@@ -200,7 +204,7 @@ public class LLMDslParser implements SemanticParser {
         return dateExpressions.size() > 1 && Objects.nonNull(dateExpressions.get(1).getFieldValue());
     }
 
-    private String getCorrectorSql(QueryContext queryCtx, SemanticParseInfo parseInfo, String sql) {
+    private CorrectionInfo getCorrectorSql(QueryContext queryCtx, SemanticParseInfo parseInfo, String sql) {
 
         CorrectionInfo correctionInfo = CorrectionInfo.builder()
                 .queryFilters(queryCtx.getRequest().getQueryFilters()).sql(sql)
@@ -217,7 +221,7 @@ public class LLMDslParser implements SemanticParser {
                 log.error("sqlCorrection:{} execute error,correctionInfo:{}", dslCorrection, correctionInfo, e);
             }
         });
-        return correctionInfo.getSql();
+        return correctionInfo;
     }
 
     private SemanticParseInfo getParseInfo(QueryContext queryCtx, Long modelId, DslTool dslTool,

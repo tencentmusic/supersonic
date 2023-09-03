@@ -5,9 +5,9 @@
 
 <mapper namespace="com.tencent.supersonic.chat.persistence.mapper.ChatMapper">
 
-    <resultMap id="IntelligentConversion"
-            type="com.tencent.supersonic.chat.persistence.dataobject.ChatDO">
+    <resultMap id="IntelligentConversion" type="com.tencent.supersonic.chat.persistence.dataobject.ChatDO">
         <id column="chat_id" property="chatId"/>
+        <result column="agent_id" property="agentId"/>
         <result column="chat_name" property="chatName"/>
         <result column="create_time" property="createTime"/>
         <result column="last_time" property="lastTime"/>
@@ -22,6 +22,9 @@
         from s2_chat
         where creator = #{creator}
           and is_delete = 0
+        <if test="agentId != null">
+            and agent_id = #{agentId}
+        </if>
         order by is_top desc, last_time desc
     </select>
 
@@ -42,16 +45,14 @@
     <update id="updateLastQuestion">
         update s2_chat
         set last_question = #{lastQuestion},
-            last_time     = #{lastTime}
+            last_time = #{lastTime}
         where chat_id = #{chatId}
     </update>
 
-    <insert id="createChat"
-            parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatDO">
+    <insert id="createChat" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatDO">
         insert into s2_chat
-        (chat_name, create_time, last_time, creator, last_question, is_delete, is_top)
-        values (#{chatName}, #{createTime}, #{lastTime}, #{creator}, #{lastQuestion}, #{isDelete},
-                #{isTop})
+        (agent_id, chat_name, create_time, last_time, creator, last_question, is_delete, is_top)
+        values (#{agentId}, #{chatName}, #{createTime}, #{lastTime}, #{creator}, #{lastQuestion}, #{isDelete}, #{isTop})
     </insert>
 
     <update id="deleteChat">
@@ -62,8 +63,7 @@
     </update>
 
 
-    <resultMap id="IntelligentQuery"
-            type="com.tencent.supersonic.chat.persistence.dataobject.QueryDO">
+    <resultMap id="IntelligentQuery" type="com.tencent.supersonic.chat.persistence.dataobject.QueryDO">
         <id column="id" property="id"/>
         <result column="question_id" property="questionId"/>
         <result column="create_time" property="createTime"/>
@@ -87,29 +87,22 @@
         <result column="chat_id" property="chatId"/>
     </resultMap>
 
-    <update id="updateFeedback"
-            parameterType="com.tencent.supersonic.chat.persistence.dataobject.QueryDO">
+    <update id="updateFeedback" parameterType="com.tencent.supersonic.chat.persistence.dataobject.QueryDO">
         update s2_chat_query
         set score=#{score},
             feedback=#{feedback}
         where question_id = #{id}
     </update>
 
-    <insert id="createQuery"
-            parameterType="com.tencent.supersonic.chat.persistence.dataobject.QueryDO"
+    <insert id="createQuery" parameterType="com.tencent.supersonic.chat.persistence.dataobject.QueryDO"
             useGeneratedKeys="true" keyProperty="id">
         insert into s2_chat_query
-        (question_id, create_time, user_name, question, query_result, time, state, data_content,
-         name, query_type,
-         is_deleted, module, chat_id, aggregator, top_num, start_time, end_time, query_sql, columns,
-         main_entity, score,
+        (question_id, create_time, user_name, question, query_result, time, state, data_content, name, query_type,
+         is_deleted, module, chat_id, aggregator, top_num, start_time, end_time, query_sql, columns, main_entity, score,
          feedback)
-        values (#{questionId}, #{createTime}, #{userName}, #{question}, #{queryResults}, #{time},
-                #{state},
-                #{dataContent}, #{name}, #{queryType}, #{isDeleted}, #{module}, #{chatId},
-                #{aggregator}, #{topNum},
-                #{startTime}, #{endTime}, #{querySql}, #{QueryColumn}, #{EntityInfo}, #{score},
-                #{feedback})
+        values (#{questionId}, #{createTime}, #{userName}, #{question}, #{queryResults}, #{time}, #{state},
+                #{dataContent}, #{name}, #{queryType}, #{isDeleted}, #{module}, #{chatId}, #{aggregator}, #{topNum},
+                #{startTime}, #{endTime}, #{querySql}, #{QueryColumn}, #{EntityInfo}, #{score}, #{feedback})
 
     </insert>
 

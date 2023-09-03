@@ -1,8 +1,8 @@
 package com.tencent.supersonic.auth.authentication.utils;
 
 import com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor;
-import java.util.Objects;
 import org.springframework.core.io.support.SpringFactoriesLoader;
+import java.util.Objects;
 
 public class ComponentFactory {
 

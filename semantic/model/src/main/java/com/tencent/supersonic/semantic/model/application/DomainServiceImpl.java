@@ -92,12 +92,12 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public List<DomainResp> getDomainListWithAdminAuth(User user) {
-        Set<DomainResp> domainWithAuthAll = getDomainAuthSet(user.getName(), AuthType.VISIBLE);
+        Set<DomainResp> domainWithAuthAll = getDomainAuthSet(user.getName(), AuthType.ADMIN);
         if (!CollectionUtils.isEmpty(domainWithAuthAll)) {
             List<Long> domainIds = domainWithAuthAll.stream().map(DomainResp::getId).collect(Collectors.toList());
             domainWithAuthAll.addAll(getParentDomain(domainIds));
         }
-        List<ModelResp> modelResps = modelService.getModelAuthList(user.getName(), AuthType.VISIBLE);
+        List<ModelResp> modelResps = modelService.getModelAuthList(user.getName(), AuthType.ADMIN);
         if (!CollectionUtils.isEmpty(modelResps)) {
             List<Long> domainIds = modelResps.stream().map(ModelResp::getDomainId).collect(Collectors.toList());
             domainWithAuthAll.addAll(getParentDomain(domainIds));

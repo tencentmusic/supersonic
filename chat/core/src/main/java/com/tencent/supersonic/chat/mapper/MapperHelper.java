@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.mapper;
 
 import com.hankcs.hanlp.algorithm.EditDistance;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.knowledge.utils.NatureHelper;
@@ -13,7 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,17 +26,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class MapperHelper {
 
-    @Value("${one.detection.size:8}")
-    private Integer oneDetectionSize;
-    @Value("${one.detection.max.size:20}")
-    private Integer oneDetectionMaxSize;
-    @Value("${metric.dimension.threshold:0.3}")
-    private Double metricDimensionThresholdConfig;
-
-    @Value("${metric.dimension.min.threshold:0.3}")
-    private Double metricDimensionMinThresholdConfig;
-    @Value("${dimension.value.threshold:0.5}")
-    private Double dimensionValueThresholdConfig;
+    @Autowired
+    private OptimizationConfig optimizationConfig;
 
     public Integer getStepIndex(Map<Integer, Integer> regOffsetToLength, Integer index) {
         Integer subRegLength = regOffsetToLength.get(index);
@@ -57,10 +49,11 @@ public class MapperHelper {
     }
 
     public double getThresholdMatch(List<String> natures) {
+        log.info("optimizationConfig:{}", optimizationConfig);
         if (existDimensionValues(natures)) {
-            return dimensionValueThresholdConfig;
+            return optimizationConfig.getDimensionValueThresholdConfig();
         }
-        return metricDimensionThresholdConfig;
+        return optimizationConfig.getMetricDimensionThresholdConfig();
     }
 
     /***

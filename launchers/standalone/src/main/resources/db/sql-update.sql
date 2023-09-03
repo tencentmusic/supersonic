@@ -38,3 +38,11 @@ update s2_plugin set config = replace(config, 'domain', 'model');
 --20230823
 alter table s2_chat_query add column agent_id int after question_id;
 alter table s2_chat_query change column query_response query_result mediumtext;
+
+--20230829
+alter table s2_database add column admin varchar(500);
+alter table s2_database add column viewer varchar(500);
+alter table s2_database drop column domain_id;
+
+--20230831
+alter table s2_chat add column agent_id int after chat_id;

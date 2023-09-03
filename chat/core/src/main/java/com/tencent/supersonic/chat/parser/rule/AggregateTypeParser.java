@@ -68,6 +68,7 @@ public class AggregateTypeParser implements SemanticParser {
         Map<AggregateTypeEnum, Integer> aggregateCount = new HashMap<>(REGX_MAP.size());
         Map<AggregateTypeEnum, String> aggregateWord = new HashMap<>(REGX_MAP.size());
 
+
         for (Map.Entry<AggregateTypeEnum, Pattern> entry : REGX_MAP.entrySet()) {
             Matcher matcher = entry.getValue().matcher(queryText);
             int count = 0;
@@ -90,7 +91,6 @@ public class AggregateTypeParser implements SemanticParser {
 
     @AllArgsConstructor
     class AggregateConf {
-
         public AggregateTypeEnum type;
         public String detectWord;
     }

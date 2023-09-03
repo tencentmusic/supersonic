@@ -1,7 +1,5 @@
 package com.tencent.supersonic.integration;
 
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
-
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.query.rule.metric.MetricFilterQuery;
@@ -9,10 +7,13 @@ import com.tencent.supersonic.chat.query.rule.metric.MetricGroupByQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import org.junit.Test;
 import org.junit.jupiter.api.Order;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
 
 public class MultiTurnsTest extends BaseQueryTest {
 

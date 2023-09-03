@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.DomainReq;
 import com.tencent.supersonic.semantic.api.model.request.DomainUpdateReq;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

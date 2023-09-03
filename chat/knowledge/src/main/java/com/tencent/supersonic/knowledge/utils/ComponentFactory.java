@@ -1,9 +1,10 @@
 package com.tencent.supersonic.knowledge.utils;
 
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import org.springframework.core.io.support.SpringFactoriesLoader;
+
 import java.util.List;
 import java.util.Objects;
-import org.springframework.core.io.support.SpringFactoriesLoader;
 
 public class ComponentFactory {
 

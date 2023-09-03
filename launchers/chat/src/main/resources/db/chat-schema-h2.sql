@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_context`
 CREATE TABLE IF NOT EXISTS `s2_chat`
 (
     `chat_id`       BIGINT auto_increment ,-- AUTO_INCREMENT,
+    `agent_id`       INT DEFAULT NULL,
     `chat_name`     varchar(100) DEFAULT NULL,
     `create_time`   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
     `last_time`     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
@@ -64,7 +65,7 @@ CREATE TABLE `s2_chat_statistics`
 
 CREATE TABLE IF NOT EXISTS `s2_chat_config` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `domain_id` INT DEFAULT NULL ,
+    `model_id` INT DEFAULT NULL ,
     `chat_detail_config` varchar(655) ,
     `chat_agg_config` varchar(655)    ,
     `recommended_questions` varchar(1500)    ,
@@ -143,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `s2_plugin`
 (
     `id`         INT AUTO_INCREMENT,
     `type`      varchar(50)   NULL,
-    `domain`     varchar(100)  NULL,
+    `model`     varchar(100)  NULL,
     `pattern`    varchar(500)  NULL,
     `parse_mode` varchar(100)  NULL,
     `parse_mode_config` LONGVARCHAR  NULL,

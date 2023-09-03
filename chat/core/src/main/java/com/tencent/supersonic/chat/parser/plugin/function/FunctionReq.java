@@ -1,7 +1,8 @@
 package com.tencent.supersonic.chat.parser.plugin.function;
 
-import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import java.util.List;
+
+import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import lombok.Builder;
 import lombok.Data;
 

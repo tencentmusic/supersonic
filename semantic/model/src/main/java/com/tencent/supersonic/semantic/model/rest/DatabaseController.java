@@ -7,14 +7,16 @@ import com.tencent.supersonic.semantic.api.model.request.SqlExecuteReq;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.model.domain.DatabaseService;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/semantic/database")
@@ -48,14 +50,25 @@ public class DatabaseController {
         return databaseService.getDatabase(id);
     }
 
-    @GetMapping("/getDatabaseByDomainId/{domainId}")
-    public DatabaseResp getDatabaseByDomainId(@PathVariable("domainId") Long domainId) {
-        return databaseService.getDatabaseByDomainId(domainId);
+    @GetMapping("/getDatabaseList")
+    public List<DatabaseResp> getDatabaseList(HttpServletRequest request,
+                                             HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return databaseService.getDatabaseList(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public boolean deleteDatabase(@PathVariable("id") Long id) {
+        databaseService.deleteDatabase(id);
+        return true;
     }
 
     @PostMapping("/executeSql")
-    public QueryResultWithSchemaResp executeSql(@RequestBody SqlExecuteReq sqlExecuteReq) {
-        return databaseService.executeSql(sqlExecuteReq.getSql(), sqlExecuteReq.getModelId());
+    public QueryResultWithSchemaResp executeSql(@RequestBody SqlExecuteReq sqlExecuteReq,
+                                                HttpServletRequest request,
+                                                HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return databaseService.executeSql(sqlExecuteReq.getSql(), sqlExecuteReq.getId(), user);
     }
 
     @RequestMapping("/getDbNames/{id}")
@@ -69,13 +82,11 @@ public class DatabaseController {
         return databaseService.getTables(id, db);
     }
 
-
     @RequestMapping("/getColumns/{id}/{db}/{table}")
     public QueryResultWithSchemaResp getColumns(@PathVariable("id") Long id,
             @PathVariable("db") String db,
             @PathVariable("table") String table) {
         return databaseService.getColumns(id, db, table);
     }
-
 
 }

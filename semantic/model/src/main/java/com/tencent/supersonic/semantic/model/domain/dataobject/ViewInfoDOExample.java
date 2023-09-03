@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 public class ViewInfoDOExample {
-
     /**
      * s2_view_info
      */
@@ -149,7 +148,6 @@ public class ViewInfoDOExample {
      * s2_view_info null
      */
     protected abstract static class GeneratedCriteria {
-
         protected List<Criterion> criteria;
 
         protected GeneratedCriteria() {
@@ -655,7 +653,6 @@ public class ViewInfoDOExample {
      * s2_view_info null
      */
     public static class Criterion {
-
         private String condition;
 
         private Object value;

@@ -2,8 +2,9 @@ package com.tencent.supersonic.chat.service;
 
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.request.PluginQueryReq;
 import com.tencent.supersonic.chat.plugin.Plugin;
+import com.tencent.supersonic.chat.api.pojo.request.PluginQueryReq;
+
 import java.util.List;
 import java.util.Optional;
 

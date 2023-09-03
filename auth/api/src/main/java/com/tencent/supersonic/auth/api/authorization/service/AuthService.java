@@ -6,7 +6,6 @@ import com.tencent.supersonic.auth.api.authorization.request.QueryAuthResReq;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import java.util.List;
 
-
 public interface AuthService {
 
     List<AuthGroup> queryAuthGroups(String domainId, Integer groupId);

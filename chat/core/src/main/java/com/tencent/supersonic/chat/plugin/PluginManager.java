@@ -30,9 +30,7 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -51,8 +49,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 @Component
 public class PluginManager {
-
-    private static Map<String, Plugin> internalPluginMap = new ConcurrentHashMap<>();
 
     private EmbeddingConfig embeddingConfig;
 

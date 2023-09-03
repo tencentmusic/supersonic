@@ -1,9 +1,5 @@
 package com.tencent.supersonic.chat.query.rule.entity;
 
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
-
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
@@ -15,12 +11,17 @@ import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.util.ContextUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
+
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
 
 @Slf4j
 public abstract class EntitySemanticQuery extends RuleSemanticQuery {
@@ -34,7 +35,7 @@ public abstract class EntitySemanticQuery extends RuleSemanticQuery {
 
     @Override
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-            QueryContext queryCtx) {
+                                          QueryContext queryCtx) {
         candidateElementMatches = filterElementMatches(candidateElementMatches);
         return super.match(candidateElementMatches, queryCtx);
     }

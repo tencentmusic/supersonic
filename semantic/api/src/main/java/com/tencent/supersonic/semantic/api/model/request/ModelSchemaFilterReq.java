@@ -1,7 +1,8 @@
 package com.tencent.supersonic.semantic.api.model.request;
 
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class ModelSchemaFilterReq {
