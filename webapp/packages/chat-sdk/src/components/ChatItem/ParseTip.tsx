@@ -96,7 +96,9 @@ const ParseTip: React.FC<Props> = ({
             <div className={`${prefixCls}-tip-item-option`}>
               <span>
                 <span className={`${prefixCls}-tip-item-filter-name`}>{filter.name}</span>
-                {filter.operator !== '=' ? ` ${filter.operator} ` : '：'}
+                {filter.operator !== '=' && filter.operator !== 'IN'
+                  ? ` ${filter.operator} `
+                  : '：'}
               </span>
               {queryMode !== 'DSL' && !filter.bizName?.includes('_id') ? (
                 <FilterItem

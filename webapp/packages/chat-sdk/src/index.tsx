@@ -1,16 +1,16 @@
 import './styles/index.less';
 
-// import React from 'react';
-// import ReactDOM from 'react-dom/client';
-// import Chat from './demo/Chat';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import Chat from './demo/Chat';
 
-// const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
-// root.render(
-//   <React.StrictMode>
-//     <Chat />
-//   </React.StrictMode>
-// );
+root.render(
+  <React.StrictMode>
+    <Chat />
+  </React.StrictMode>
+);
 
 export { default as ChatMsg } from './components/ChatMsg';
 
