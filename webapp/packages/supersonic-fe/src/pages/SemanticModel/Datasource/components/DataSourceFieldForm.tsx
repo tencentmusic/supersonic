@@ -230,9 +230,12 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
         style={{ marginBottom: '10px' }}
         banner
         message={
-          <Marquee pauseOnHover gradient={false}>
-            为了保障同一个主题域下维度/指标列表唯一，消除歧义，若本主题域下的多个数据源存在相同的字段名并且都勾选了快速创建，系统默认这些相同字段的指标维度是同一个，同时列表中将只显示最后一次创建的指标/维度。
-          </Marquee>
+          <div>
+            为了保障同一个模型下维度/指标列表唯一，消除歧义，若本模型下的多个数据源存在相同的字段名并且都勾选了快速创建，系统默认这些相同字段的指标维度是同一个，同时列表中将只显示最后一次创建的指标/维度。
+          </div>
+          // <Marquee pauseOnHover gradient={false}>
+          //   为了保障同一个主题域下维度/指标列表唯一，消除歧义，若本主题域下的多个数据源存在相同的字段名并且都勾选了快速创建，系统默认这些相同字段的指标维度是同一个，同时列表中将只显示最后一次创建的指标/维度。
+          // </Marquee>
         }
       />
       <Table<FieldItem>

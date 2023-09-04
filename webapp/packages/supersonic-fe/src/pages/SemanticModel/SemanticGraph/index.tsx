@@ -363,6 +363,30 @@ const DomainManger: React.FC<Props> = ({
     setVisibleModeOpen(false);
   }
 
+  const lessNodeZoomRealAndMoveCenter = () => {
+    const bbox = graphRef.current.get('group').getBBox();
+
+    // 计算图形的中心点
+    const centerX = (bbox.minX + bbox.maxX) / 2;
+    const centerY = (bbox.minY + bbox.maxY) / 2;
+
+    // 获取画布的中心点
+    const canvasWidth = graphRef.current.get('width');
+    const canvasHeight = graphRef.current.get('height');
+    const canvasCenterX = canvasWidth / 2;
+    const canvasCenterY = canvasHeight / 2;
+
+    // 计算画布需要移动的距离
+    const dx = canvasCenterX - centerX;
+    const dy = canvasCenterY - centerY;
+
+    // 将画布移动到中心点
+    graphRef.current.translate(dx, dy);
+
+    // 将缩放比例设置为 1，以画布中心点为中心进行缩放
+    graphRef.current.zoomTo(1, { x: canvasCenterX, y: canvasCenterY });
+  };
+
   useEffect(() => {
     if (!Array.isArray(graphData?.children)) {
       return;
@@ -474,9 +498,13 @@ const DomainManger: React.FC<Props> = ({
       });
       graphRef.current.data(graphData);
       graphRef.current.render();
-      graphRef.current.fitView([80, 80]);
 
-      // setAllActiveLegend(legend);
+      const nodeCount = graphRef.current.getNodes().length;
+      if (nodeCount < 10) {
+        lessNodeZoomRealAndMoveCenter();
+      } else {
+        graphRef.current.fitView([80, 80]);
+      }
 
       graphRef.current.on('node:click', (evt: any) => {
         const item = evt.item; // 被操作的节点 item

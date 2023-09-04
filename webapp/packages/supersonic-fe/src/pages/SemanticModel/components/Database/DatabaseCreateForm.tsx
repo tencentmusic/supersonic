@@ -3,19 +3,22 @@ import type { ForwardRefRenderFunction } from 'react';
 import { message, Form, Input, Select, Button, Space } from 'antd';
 import { saveDatabase, testDatabaseConnect } from '../../service';
 import { formLayout } from '@/components/FormHelper/utils';
+import SelectTMEPerson from '@/components/SelectTMEPerson';
+import { ISemantic } from '../../data';
 
 import styles from '../style.less';
 type Props = {
-  domainId: number;
-  dataBaseConfig: any;
-  onSubmit: (params?: any) => void;
+  domainId?: number;
+  dataBaseConfig?: ISemantic.IDatabaseItem;
+  hideSubmitBtn?: boolean;
+  onSubmit?: (params?: any) => void;
 };
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
 
 const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
-  { domainId, dataBaseConfig, onSubmit },
+  { domainId, dataBaseConfig, onSubmit, hideSubmitBtn = false },
   ref,
 ) => {
   const [form] = Form.useForm();
@@ -25,8 +28,10 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
 
   useEffect(() => {
     form.resetFields();
-    form.setFieldsValue({ ...dataBaseConfig });
-    setSelectedDbType(dataBaseConfig?.type);
+    if (dataBaseConfig) {
+      form.setFieldsValue({ ...dataBaseConfig });
+      setSelectedDbType(dataBaseConfig?.type);
+    }
   }, [dataBaseConfig]);
 
   const getFormValidateFields = async () => {
@@ -35,11 +40,14 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
 
   useImperativeHandle(ref, () => ({
     getFormValidateFields,
+    saveDatabaseConfig,
+    testDatabaseConnection,
   }));
 
   const saveDatabaseConfig = async () => {
     const values = await form.validateFields();
     const { code, msg } = await saveDatabase({
+      ...dataBaseConfig,
       ...values,
       domainId,
     });
@@ -115,6 +123,23 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
             </FormItem>
           </>
         )}
+
+        {selectedDbType === 'mysql' && (
+          <FormItem
+            name="version"
+            label="数据库版本"
+            rules={[{ required: true, message: '请选择数据库版本' }]}
+          >
+            <Select
+              style={{ width: '100%' }}
+              placeholder="请选择数据库版本"
+              options={[
+                { value: '5.7', label: '5.7' },
+                { value: '8.0', label: '8.0' },
+              ]}
+            />
+          </FormItem>
+        )}
         <FormItem
           name="username"
           label="用户名"
@@ -128,34 +153,44 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
         <FormItem name="database" label="数据库名称">
           <Input placeholder="请输入数据库名称" />
         </FormItem>
-        <FormItem name="version" label="数据库版本">
-          <Input placeholder="请输入数据库版本" />
+        <FormItem
+          name="admins"
+          label="管理员"
+          // rules={[{ required: true, message: '请设定数据库连接管理者' }]}
+        >
+          <SelectTMEPerson placeholder="请邀请团队成员" />
         </FormItem>
+        <FormItem name="viewers" label="使用者">
+          <SelectTMEPerson placeholder="请邀请团队成员" />
+        </FormItem>
+
         <FormItem name="description" label="描述">
           <TextArea placeholder="请输入数据库描述" style={{ height: 100 }} />
         </FormItem>
-        <FormItem>
-          <Space>
-            <Button
-              type="primary"
-              loading={testLoading}
-              onClick={() => {
-                testDatabaseConnection();
-              }}
-            >
-              连接测试
-            </Button>
+        {!hideSubmitBtn && (
+          <FormItem>
+            <Space>
+              <Button
+                type="primary"
+                loading={testLoading}
+                onClick={() => {
+                  testDatabaseConnection();
+                }}
+              >
+                连接测试
+              </Button>
 
-            <Button
-              type="primary"
-              onClick={() => {
-                saveDatabaseConfig();
-              }}
-            >
-              保 存
-            </Button>
-          </Space>
-        </FormItem>
+              <Button
+                type="primary"
+                onClick={() => {
+                  saveDatabaseConfig();
+                }}
+              >
+                保 存
+              </Button>
+            </Space>
+          </FormItem>
+        )}
       </Form>
     </>
   );

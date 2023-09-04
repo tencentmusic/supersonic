@@ -1,11 +1,11 @@
 import { Popover, message, Space } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { connect, Helmet, history, useParams, useRouteMatch, useLocation } from 'umi';
+import { connect, Helmet, history, useParams } from 'umi';
 import DomainListTree from './components/DomainList';
 
 import styles from './components/style.less';
 import type { StateType } from './model';
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined, LeftOutlined } from '@ant-design/icons';
 import { ISemantic } from './data';
 import { getDomainList, getModelList } from './service';
 import ChatSettingTab from './ChatSetting/ChatSettingTab';
@@ -81,6 +81,23 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
 
   useEffect(() => {
     initProjectTree();
+    dispatch({
+      type: 'domainManger/queryDatabaseList',
+    });
+    return () => {
+      dispatch({
+        type: 'domainManger/setSelectDomain',
+        selectDomainId: 0,
+        selectDomainName: '',
+        domainData: undefined,
+      });
+      dispatch({
+        type: 'domainManger/setSelectModel',
+        selectModelId: 0,
+        selectModelName: '',
+        modelData: undefined,
+      });
+    };
   }, []);
 
   useEffect(() => {
@@ -88,12 +105,6 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
       return;
     }
     queryModelList();
-    dispatch({
-      type: 'domainManger/queryDatabaseByDomainId',
-      payload: {
-        domainId: selectDomainId,
-      },
-    });
   }, [selectDomainId]);
 
   const queryModelList = async () => {
@@ -125,7 +136,6 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
       return;
     }
     setIsModel(false);
-    setActiveKey(menuKey);
   }, [domainList, selectDomainId]);
 
   const initModelConfig = () => {
@@ -155,8 +165,8 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
   }, [selectModelId]);
 
   const pushUrlMenu = (domainId: number, modelId: number, menuKey: string) => {
-    const path = mode === 'domain' ? 'semanticModel' : 'chatSetting';
-    history.push(`/${path}/model/${domainId}/${modelId || 0}/${menuKey}`);
+    const path = mode === 'domain' ? 'model' : 'chatSetting/model';
+    history.push(`/${path}/${domainId}/${modelId || 0}/${menuKey}`);
   };
 
   const handleModelChange = (model?: ISemantic.IModelItem) => {
@@ -190,55 +200,70 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
 
   return (
     <div className={styles.projectBody}>
-      <Helmet title={'模型管理-超音数'} />
+      <Helmet title={'语义模型-超音数'} />
       <div className={styles.projectManger}>
         <h2 className={styles.title}>
-          <Popover
-            zIndex={1000}
-            overlayInnerStyle={{
-              overflow: 'scroll',
-              maxHeight: '800px',
-            }}
-            content={
-              <DomainListTree
-                createDomainBtnVisible={mode === 'domain' ? true : false}
-                onTreeSelected={(domainData) => {
-                  setOpen(false);
-                  const { id, name } = domainData;
-                  cleanModelInfo(id);
-                  dispatch({
-                    type: 'domainManger/setSelectDomain',
-                    selectDomainId: id,
-                    selectDomainName: name,
-                    domainData,
-                  });
-                }}
-                onTreeDataUpdate={() => {
-                  initProjectTree();
-                }}
-              />
-            }
-            trigger="click"
-            open={open}
-            onOpenChange={handleOpenChange}
-          >
-            <div className={styles.domainSelector}>
-              <span className={styles.domainTitle}>
-                <Space>
-                  {selectDomainName ? `当前主题域：${selectDomainName}` : '主题域信息'}
-                  {selectModelName && (
-                    <>
-                      <span style={{ position: 'relative', top: '-2px' }}> | </span>
-                      <span style={{ fontSize: 16, color: '#296DF3' }}>{selectModelName}</span>
-                    </>
-                  )}
-                </Space>
-              </span>
-              <span className={styles.downIcon}>
-                <DownOutlined />
-              </span>
+          {!!selectModelId && (
+            <div
+              className={styles.backBtn}
+              onClick={() => {
+                cleanModelInfo(selectDomainId);
+              }}
+            >
+              <LeftOutlined />
             </div>
-          </Popover>
+          )}
+
+          <div className={styles.navContainer}>
+            <Popover
+              zIndex={1000}
+              overlayInnerStyle={{
+                overflow: 'scroll',
+                maxHeight: '800px',
+              }}
+              content={
+                <DomainListTree
+                  createDomainBtnVisible={mode === 'domain' ? true : false}
+                  onTreeSelected={(domainData) => {
+                    setOpen(false);
+                    const { id, name } = domainData;
+                    cleanModelInfo(id);
+                    dispatch({
+                      type: 'domainManger/setSelectDomain',
+                      selectDomainId: id,
+                      selectDomainName: name,
+                      domainData,
+                    });
+                  }}
+                  onTreeDataUpdate={() => {
+                    initProjectTree();
+                  }}
+                />
+              }
+              trigger="click"
+              open={selectModelId ? false : open}
+              onOpenChange={handleOpenChange}
+            >
+              <div className={styles.domainSelector}>
+                <span className={styles.domainTitle}>
+                  <Space>
+                    {selectDomainName ? `${selectDomainName}` : '主题域信息'}
+                    {selectModelName && (
+                      <>
+                        <span style={{ position: 'relative', top: '-2px' }}> | </span>
+                        <span style={{ fontSize: 16, color: '#296DF3' }}>{selectModelName}</span>
+                      </>
+                    )}
+                  </Space>
+                </span>
+                {!selectModelId && (
+                  <span className={styles.downIcon}>
+                    <DownOutlined />
+                  </span>
+                )}
+              </div>
+            </Popover>
+          </div>
         </h2>
 
         {selectDomainId ? (

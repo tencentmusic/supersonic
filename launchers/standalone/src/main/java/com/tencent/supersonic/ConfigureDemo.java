@@ -119,12 +119,11 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         chatConfigBaseReq.setChatAggConfig(chatAggConfig);
 
         List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
-        RecommendedQuestionReq recommendedQuestionReq0 = new RecommendedQuestionReq("超音数访问次数");
-        RecommendedQuestionReq recommendedQuestionReq1 = new RecommendedQuestionReq("超音数访问人数");
-        RecommendedQuestionReq recommendedQuestionReq2 = new RecommendedQuestionReq("超音数按部门访问次数");
-        recommendedQuestions.add(recommendedQuestionReq0);
-        recommendedQuestions.add(recommendedQuestionReq1);
-        recommendedQuestions.add(recommendedQuestionReq2);
+        recommendedQuestions.add(new RecommendedQuestionReq("超音数访问次数"));
+        recommendedQuestions.add(new RecommendedQuestionReq("近15天超音数访问次数汇总"));
+        recommendedQuestions.add(new RecommendedQuestionReq("按部门统计超音数的访问人数"));
+        recommendedQuestions.add(new RecommendedQuestionReq("对比alice和lucy的停留时长"));
+        recommendedQuestions.add(new RecommendedQuestionReq("超音数访问次数最高的部门"));
         chatConfigBaseReq.setRecommendedQuestions(recommendedQuestions);
 
         configService.addConfig(chatConfigBaseReq, user);
@@ -172,11 +171,11 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         Plugin plugin1 = new Plugin();
         plugin1.setType("WEB_PAGE");
         plugin1.setModelList(Arrays.asList(1L));
-        plugin1.setPattern("访问情况");
+        plugin1.setPattern("用于分析超音数的流量概况，包含UV、PV等核心指标的追踪。P.S. 仅作为示例展示，无实际看板");
         plugin1.setParseModeConfig(null);
-        plugin1.setName("访问情况");
+        plugin1.setName("超音数流量分析看板");
         WebBase webBase = new WebBase();
-        webBase.setUrl("www.test.com");
+        webBase.setUrl("www.yourbi.com");
         ParamOption paramOption = new ParamOption();
         paramOption.setKey("name");
         paramOption.setParamType(ParamOption.ParamType.SEMANTIC);
@@ -193,10 +192,10 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         Agent agent = new Agent();
         agent.setId(1);
         agent.setName("查指标");
-        agent.setDescription("查指标");
+        agent.setDescription("帮助您用自然语言查询指标，支持时间限定、条件筛选、下钻维度以及聚合统计");
         agent.setStatus(1);
         agent.setEnableSearch(1);
-        agent.setExamples(Lists.newArrayList("超音数访问次数", "超音数访问人数", "alice 停留时长"));
+        agent.setExamples(Lists.newArrayList("超音数访问次数", "近15天超音数访问次数汇总", "按部门统计超音数的访问人数", "对比alice和lucy的停留时长", "超音数访问次数最高的部门"));
         AgentConfig agentConfig = new AgentConfig();
         RuleQueryTool ruleQueryTool = new RuleQueryTool();
         ruleQueryTool.setType(AgentToolType.RULE);
