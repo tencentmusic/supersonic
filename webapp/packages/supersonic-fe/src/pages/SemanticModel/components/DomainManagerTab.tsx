@@ -6,14 +6,16 @@ import ClassDataSourceTable from './ClassDataSourceTable';
 import ClassDimensionTable from './ClassDimensionTable';
 import ClassMetricTable from './ClassMetricTable';
 import PermissionSection from './Permission/PermissionSection';
-import DatabaseSection from './Database/DatabaseSection';
+// import DatabaseSection from './Database/DatabaseSection';
 import EntitySettingSection from './Entity/EntitySettingSection';
+import ChatSettingSection from '../ChatSetting/ChatSettingSection';
 import OverView from './OverView';
 import styles from './style.less';
 import type { StateType } from '../model';
 import { LeftOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
 import SemanticGraphCanvas from '../SemanticGraphCanvas';
+import RecommendedQuestionsSection from '../components/Entity/RecommendedQuestionsSection';
 
 import type { Dispatch } from 'umi';
 
@@ -50,11 +52,11 @@ const DomainManagerTab: React.FC<Props> = ({
         />
       ),
     },
-    {
-      label: '数据库',
-      key: 'dataBase',
-      children: <DatabaseSection />,
-    },
+    // {
+    //   label: '数据库',
+    //   key: 'dataBase',
+    //   children: <DatabaseSection />,
+    // },
     {
       label: '权限管理',
       key: 'permissonSetting',
@@ -93,13 +95,27 @@ const DomainManagerTab: React.FC<Props> = ({
       key: 'entity',
       children: <EntitySettingSection />,
     },
-
     {
       label: '权限管理',
       key: 'permissonSetting',
       children: <PermissionSection permissionTarget={'model'} />,
     },
-  ];
+    {
+      label: '问答设置',
+      key: 'chatSetting',
+      children: <ChatSettingSection />,
+    },
+    {
+      label: '推荐问题',
+      key: 'recommendedQuestions',
+      children: <RecommendedQuestionsSection />,
+    },
+  ].filter((item) => {
+    if (window.RUNNING_ENV === 'semantic') {
+      return !['chatSetting', 'recommendedQuestions'].includes(item.key);
+    }
+    return item;
+  });
 
   return (
     <>

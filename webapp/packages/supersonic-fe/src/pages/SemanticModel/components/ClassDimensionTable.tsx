@@ -83,6 +83,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'id',
       title: 'ID',
+      width: 80,
       order: 100,
     },
     {
@@ -92,16 +93,19 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'alias',
       title: '别名',
+      width: 300,
+      ellipsis: true,
       search: false,
     },
     {
       dataIndex: 'bizName',
       title: '字段名称',
-      order: 9,
+      // order: 9,
     },
     {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',
+      width: 80,
       valueEnum: SENSITIVE_LEVEL_ENUM,
     },
 

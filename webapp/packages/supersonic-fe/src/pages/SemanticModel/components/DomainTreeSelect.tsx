@@ -12,6 +12,7 @@ import { ISemantic } from '../data';
 
 type Props = {
   value?: any;
+  width?: number | string;
   onChange?: () => void;
   treeSelectProps?: Record<string, any>;
   domainList: ISemantic.IDomainItem[];
@@ -20,6 +21,7 @@ type Props = {
 
 const DomainTreeSelect: FC<Props> = ({
   value,
+  width = 300,
   onChange,
   treeSelectProps = {},
   domainList,
@@ -51,7 +53,12 @@ const DomainTreeSelect: FC<Props> = ({
   }, [domainList]);
 
   return (
-    <div className={styles.domainTreeSelect}>
+    <div
+      className={styles.domainTreeSelect}
+      style={{
+        width,
+      }}
+    >
       <TreeSelect
         showSearch
         style={{ width: '100%' }}

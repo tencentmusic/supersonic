@@ -53,7 +53,7 @@ const EntityCreateForm: ForwardRefRenderFunction<any, Props> = (
 
   const saveEntity = async () => {
     const values = await form.validateFields();
-    const { name } = values;
+    const { name = '' } = values;
     const { code, msg, data } = await updateModel({
       ...modelData,
       entity: {

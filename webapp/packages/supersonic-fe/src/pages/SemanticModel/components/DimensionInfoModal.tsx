@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Modal, Select } from 'antd';
+import { Button, Form, Input, Modal, Select, Row, Col, Space, Tooltip } from 'antd';
 import { SENSITIVE_LEVEL_OPTIONS } from '../constant';
 import { formLayout } from '@/components/FormHelper/utils';
 import SqlEditor from '@/components/SqlEditor';
 import InfoTagList from './InfoTagList';
 import { ISemantic } from '../data';
-import { createDimension, updateDimension } from '../service';
-// import DimensionValueSettingModal from './DimensionValueSettingModal';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { createDimension, updateDimension, mockDimensionAlias } from '../service';
+
 import { message } from 'antd';
 
 export type CreateFormProps = {
@@ -37,8 +38,8 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
   >([]);
   const [form] = Form.useForm();
   const { setFieldsValue, resetFields } = form;
-  // const [dimensionValueSettingModalVisible, setDimensionValueSettingModalVisible] =
-  //   useState<boolean>(false);
+  const [llmLoading, setLlmLoading] = useState<boolean>(false);
+
   const handleSubmit = async (
     isSilenceSubmit = false,
     dimValueMaps?: ISemantic.IDimensionValueSettingItem[],
@@ -48,6 +49,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
       {
         ...fieldsValue,
         dimValueMaps: dimValueMaps || dimensionValueSettingList,
+        alias: Array.isArray(fieldsValue.alias) ? fieldsValue.alias.join(',') : '',
       },
       isSilenceSubmit,
     );
@@ -75,7 +77,10 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
   };
 
   const setFormVal = () => {
-    setFieldsValue(dimensionItem);
+    if (dimensionItem) {
+      const { alias } = dimensionItem;
+      setFieldsValue({ ...dimensionItem, alias: alias && alias.trim() ? alias.split(',') : [] });
+    }
   };
 
   useEffect(() => {
@@ -110,6 +115,24 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
     );
   };
 
+  const generatorDimensionAlias = async () => {
+    const fieldsValue = await form.validateFields();
+    setLlmLoading(true);
+    const { code, data } = await mockDimensionAlias({
+      ...dimensionItem,
+      ...fieldsValue,
+      alias: fieldsValue.alias?.join(','),
+    });
+    setLlmLoading(false);
+    const formAlias = form.getFieldValue('alias');
+    setLlmLoading(false);
+    if (code === 200) {
+      form.setFieldValue('alias', Array.from(new Set([...formAlias, ...data])));
+    } else {
+      message.error('大语言模型解析异常');
+    }
+  };
+
   const renderContent = () => {
     return (
       <>
@@ -131,7 +154,6 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
         >
           <Input placeholder="名称不可重复" disabled={isEdit} />
         </FormItem>
-
         <FormItem
           hidden={isEdit}
           name="datasourceId"
@@ -146,8 +168,39 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
             ))}
           </Select>
         </FormItem>
-        <FormItem name="alias" label="别名">
-          <Input placeholder="多个别名用英文逗号隔开" />
+        <FormItem label="别名">
+          <Row>
+            <Col flex="1 1 200px">
+              <FormItem name="alias" noStyle>
+                <Select
+                  mode="tags"
+                  placeholder="输入别名后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
+                  tokenSeparators={[',']}
+                  maxTagCount={9}
+                />
+              </FormItem>
+            </Col>
+            {isEdit && (
+              <Col flex="0 1 75px">
+                <Button
+                  type="link"
+                  size="small"
+                  loading={llmLoading}
+                  style={{ top: '2px' }}
+                  onClick={() => {
+                    generatorDimensionAlias();
+                  }}
+                >
+                  <Space>
+                    智能填充
+                    <Tooltip title="智能填充将根据维度相关信息，使用大语言模型获取维度别名">
+                      <InfoCircleOutlined />
+                    </Tooltip>
+                  </Space>
+                </Button>
+              </Col>
+            )}
+          </Row>
         </FormItem>
         <FormItem
           name="semanticType"
@@ -185,16 +238,6 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
         >
           <TextArea placeholder="请输入维度描述" />
         </FormItem>
-        {/* <FormItem name="dimValueMaps" label="维度值设置">
-          <Button
-            type="primary"
-            onClick={() => {
-              setDimensionValueSettingModalVisible(true);
-            }}
-          >
-            设置
-          </Button>
-        </FormItem> */}
         <FormItem
           name="expr"
           label="表达式"
@@ -223,22 +266,6 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
           {renderContent()}
         </Form>
       </Modal>
-      {/* {dimensionValueSettingModalVisible && (
-        <DimensionValueSettingModal
-          dimensionValueSettingList={dimensionValueSettingList}
-          open={dimensionValueSettingModalVisible}
-          onCancel={() => {
-            setDimensionValueSettingModalVisible(false);
-          }}
-          onSubmit={(dimValueMaps) => {
-            if (isEdit) {
-              handleSubmit(true, dimValueMaps);
-            }
-            setDimensionValueSettingList(dimValueMaps);
-            setDimensionValueSettingModalVisible(false);
-          }}
-        />
-      )} */}
     </>
   );
 };
