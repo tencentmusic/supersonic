@@ -13,7 +13,7 @@ export default {
   'menu.metric': '指标市场',
   'menu.database': '数据库连接',
   'menu.chatSetting': '问答设置',
-  'menu.chatPlugin': '第三方插件',
+  'menu.plugin': '插件市场',
   'menu.login': '登录',
   'menu.chat': '问答对话',
   'menu.agent': '智能助理',
