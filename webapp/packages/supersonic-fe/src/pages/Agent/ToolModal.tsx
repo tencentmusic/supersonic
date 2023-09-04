@@ -116,50 +116,50 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
         <FormItem name="name" label="名称">
           <Input placeholder="请输入工具名称" />
         </FormItem>
+        {(toolType === AgentToolTypeEnum.RULE || toolType === AgentToolTypeEnum.DSL) && (
+          <FormItem name="modelIds" label="主题域">
+            <Select
+              options={modelList.map((model) => ({ label: model.name, value: model.id }))}
+              placeholder="请选择主题域"
+              mode="multiple"
+            />
+          </FormItem>
+        )}
         {toolType === AgentToolTypeEnum.DSL && (
-          <>
-            <FormItem name="modelIds" label="主题域">
-              <Select
-                options={modelList.map((model) => ({ label: model.name, value: model.id }))}
-                placeholder="请选择主题域"
-                mode="multiple"
-              />
-            </FormItem>
-            <FormItem name="exampleQuestions" label="示例问题">
-              <div className={styles.paramsSection}>
-                {examples.map((example) => {
-                  const { id, question } = example;
-                  return (
-                    <div className={styles.filterRow} key={id}>
-                      <Input
-                        placeholder="示例问题"
-                        value={question}
-                        className={styles.questionExample}
-                        onChange={(e) => {
-                          example.question = e.target.value;
-                          setExamples([...examples]);
-                        }}
-                        allowClear
-                      />
-                      <DeleteOutlined
-                        onClick={() => {
-                          setExamples(examples.filter((item) => item.id !== id));
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-                <Button
-                  onClick={() => {
-                    setExamples([...examples, { id: uuid() }]);
-                  }}
-                >
-                  <PlusOutlined />
-                  新增示例问题
-                </Button>
-              </div>
-            </FormItem>
-          </>
+          <FormItem name="exampleQuestions" label="示例问题">
+            <div className={styles.paramsSection}>
+              {examples.map((example) => {
+                const { id, question } = example;
+                return (
+                  <div className={styles.filterRow} key={id}>
+                    <Input
+                      placeholder="示例问题"
+                      value={question}
+                      className={styles.questionExample}
+                      onChange={(e) => {
+                        example.question = e.target.value;
+                        setExamples([...examples]);
+                      }}
+                      allowClear
+                    />
+                    <DeleteOutlined
+                      onClick={() => {
+                        setExamples(examples.filter((item) => item.id !== id));
+                      }}
+                    />
+                  </div>
+                );
+              })}
+              <Button
+                onClick={() => {
+                  setExamples([...examples, { id: uuid() }]);
+                }}
+              >
+                <PlusOutlined />
+                新增示例问题
+              </Button>
+            </div>
+          </FormItem>
         )}
         {toolType === AgentToolTypeEnum.INTERPRET && (
           <>

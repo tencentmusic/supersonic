@@ -1,6 +1,6 @@
 import IconFont from '@/components/IconFont';
 import { getTextWidth, groupByColumn, isMobile } from '@/utils/utils';
-import { AutoComplete, Select, Tag, Tooltip } from 'antd';
+import { AutoComplete, Select, Tag } from 'antd';
 import classNames from 'classnames';
 import { debounce } from 'lodash';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
@@ -8,25 +8,17 @@ import type { ForwardRefRenderFunction } from 'react';
 import { searchRecommend } from 'supersonic-chat-sdk';
 import { SemanticTypeEnum, SEMANTIC_TYPE_MAP } from '../constants';
 import styles from './style.less';
-import { DefaultEntityType, AgentType, ModelType } from '../type';
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
+import { AgentType, ModelType } from '../type';
 
 type Props = {
   inputMsg: string;
   chatId?: number;
-  currentModel?: ModelType;
   currentAgent?: AgentType;
-  defaultEntity?: DefaultEntityType;
-  isCopilotMode?: boolean;
-  copilotFullscreen?: boolean;
-  models: ModelType[];
   agentList: AgentType[];
-  collapsed: boolean;
-  onToggleCollapseBtn: () => void;
+  onToggleHistoryVisible: () => void;
   onInputMsgChange: (value: string) => void;
   onSendMsg: (msg: string, modelId?: number) => void;
-  onAddConversation: () => void;
-  onCancelDefaultFilter: () => void;
+  onAddConversation: (agent?: AgentType) => void;
   onSelectAgent: (agent: AgentType) => void;
 };
 
@@ -46,19 +38,12 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   {
     inputMsg,
     chatId,
-    currentModel,
     currentAgent,
-    defaultEntity,
-    models,
     agentList,
-    collapsed,
-    isCopilotMode,
-    copilotFullscreen,
-    onToggleCollapseBtn,
+    onToggleHistoryVisible,
     onInputMsgChange,
     onSendMsg,
     onAddConversation,
-    onCancelDefaultFilter,
     onSelectAgent,
   },
   ref,
@@ -119,14 +104,10 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       : data;
   };
 
-  const processMsg = (msg: string, models: ModelType[]) => {
+  const processMsg = (msg: string) => {
     let msgValue = msg;
     let modelId: number | undefined;
-    if (msg?.[0] === '@') {
-      const model = models.find((item) => msg.includes(`@${item.name}`));
-      msgValue = model ? msg.replace(`@${model.name}`, '') : msg;
-      modelId = model?.id;
-    } else if (msg?.[0] === '/') {
+    if (msg?.[0] === '/') {
       const agent = agentList.find((item) => msg.includes(`/${item.name}`));
       msgValue = agent ? msg.replace(`/${agent.name}`, '') : msg;
     }
@@ -134,12 +115,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   };
 
   const debounceGetWordsFunc = useCallback(() => {
-    const getAssociateWords = async (
-      msg: string,
-      models: ModelType[],
-      chatId?: number,
-      model?: ModelType,
-    ) => {
+    const getAssociateWords = async (msg: string, chatId?: number, currentAgent?: AgentType) => {
       if (isPinyin) {
         return;
       }
@@ -148,9 +124,8 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
       }
       fetchRef.current += 1;
       const fetchId = fetchRef.current;
-      const { msgValue, modelId } = processMsg(msg, models);
-      const modelIdValue = modelId || model?.id;
-      const res = await searchRecommend(msgValue.trim(), chatId, modelIdValue);
+      const { msgValue, modelId } = processMsg(msg);
+      const res = await searchRecommend(msgValue.trim(), chatId, modelId, currentAgent?.id);
       if (fetchId !== fetchRef.current) {
         return;
       }
@@ -171,9 +146,9 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
   const [debounceGetWords] = useState<any>(debounceGetWordsFunc);
 
   useEffect(() => {
-    if (inputMsg.length === 1 && (inputMsg[0] === '@' || inputMsg[0] === '/')) {
+    if (inputMsg.length === 1 && inputMsg[0] === '/') {
       setOpen(true);
-      setModelOptions(inputMsg[0] === '/' ? agentList : models);
+      setModelOptions(agentList);
       setStepOptions({});
       return;
     } else {
@@ -184,8 +159,8 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
         }, 50);
       }
     }
-    if (!isSelect && currentAgent?.name !== '问知识') {
-      debounceGetWords(inputMsg, models, chatId, currentModel);
+    if (!isSelect) {
+      debounceGetWords(inputMsg, chatId, currentAgent);
     } else {
       isSelect = false;
     }
@@ -248,7 +223,9 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     } else {
       const agent = agentList.find((item) => value.includes(item.name));
       if (agent) {
-        onSelectAgent(agent);
+        if (agent.id !== currentAgent?.id) {
+          onSelectAgent(agent);
+        }
         onInputMsgChange('');
       }
     }
@@ -260,40 +237,11 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
 
   const chatFooterClass = classNames(styles.chatFooter, {
     [styles.mobile]: isMobile,
-    [styles.defaultCopilotMode]: isCopilotMode && !copilotFullscreen,
   });
-
-  const restrictNode = currentModel && !isMobile && (
-    <div className={styles.currentModel}>
-      <div className={styles.currentModelName}>
-        输入联想与问题回复将限定于：“
-        <span className={styles.quoteText}>
-          {!defaultEntity && <>主题域【{currentModel.name}】</>}
-          {defaultEntity && (
-            <>
-              <span>{`${currentModel.name.slice(0, currentModel.name.length - 1)}【`}</span>
-              <span className={styles.entityName} title={defaultEntity.entityName}>
-                {defaultEntity.entityName}
-              </span>
-              <span>】</span>
-            </>
-          )}
-        </span>
-        ”
-      </div>
-      <div className={styles.cancelModel} onClick={onCancelDefaultFilter}>
-        取消限定
-      </div>
-    </div>
-  );
 
   const modelOptionNodes = modelOptions.map((model) => {
     return (
-      <Option
-        key={model.id}
-        value={inputMsg[0] === '/' ? `/${model.name} ` : `@${model.name} `}
-        className={styles.searchOption}
-      >
+      <Option key={model.id} value={`/${model.name} `} className={styles.searchOption}>
         {model.name}
       </Option>
     );
@@ -307,10 +255,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
             Object.keys(stepOptions).length === 1
               ? option.recommend
               : `${option.modelName || ''}${option.recommend}`;
-          if (inputMsg[0] === '@') {
-            const model = models.find((item) => inputMsg.includes(item.name));
-            optionValue = model ? `@${model.name} ${option.recommend}` : optionValue;
-          } else if (inputMsg[0] === '/') {
+          if (inputMsg[0] === '/') {
             const agent = agentList.find((item) => inputMsg.includes(item.name));
             optionValue = agent ? `/${agent.name} ${option.recommend}` : optionValue;
           }
@@ -349,31 +294,34 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
 
   return (
     <div className={chatFooterClass}>
-      <div className={styles.composer}>
+      <div className={styles.tools}>
+        <div
+          className={styles.toolItem}
+          onClick={() => {
+            onAddConversation();
+          }}
+        >
+          <IconFont type="icon-c003xiaoxiduihua" className={styles.toolIcon} />
+          <div>新对话</div>
+        </div>
         {!isMobile && (
-          <div className={styles.collapseBtn} onClick={onToggleCollapseBtn}>
-            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          <div className={styles.toolItem} onClick={onToggleHistoryVisible}>
+            <IconFont type="icon-lishi" className={styles.toolIcon} />
+            <div>历史对话</div>
           </div>
         )}
-        <Tooltip title="新建对话">
-          <IconFont
-            type="icon-icon-add-conversation-line"
-            className={styles.addConversation}
-            onClick={onAddConversation}
-          />
-        </Tooltip>
+      </div>
+      <div className={styles.composer}>
         <div className={styles.composerInputWrapper}>
-          {/* {restrictNode}
-          {currentAgentNode} */}
           <AutoComplete
             className={styles.composerInput}
-            placeholder={
-              currentAgent?.name
-                ? `智能助理【${currentAgent?.name}】将与您对话，可输入“/”切换助理`
-                : '请输入您的问题'
-            }
+            placeholder={`智能助理${
+              isMobile ? `[${currentAgent?.name}]` : `【${currentAgent?.name}】`
+            }将与您对话，输入“/”可切换助理`}
             value={inputMsg}
-            onChange={onInputMsgChange}
+            onChange={(value: string) => {
+              onInputMsgChange(value);
+            }}
             onSelect={onSelect}
             autoFocus={!isMobile}
             backfill
@@ -389,7 +337,9 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
                   } else {
                     const agent = agentList.find((item) => chatInputEl.value.includes(item.name));
                     if (agent) {
-                      onSelectAgent(agent);
+                      if (agent.id !== currentAgent?.id) {
+                        onSelectAgent(agent);
+                      }
                       onInputMsgChange('');
                     }
                   }

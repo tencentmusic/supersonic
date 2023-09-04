@@ -1,5 +1,5 @@
 import { PREFIX_CLS } from '../../../common/constants';
-import { formatMetric, formatNumberWithCN } from '../../../utils/utils';
+import { formatByDecimalPlaces, formatMetric, formatNumberWithCN } from '../../../utils/utils';
 import ApplyAuth from '../ApplyAuth';
 import { DrillDownDimensionType, MsgDataType } from '../../../common/type';
 import PeriodCompareItem from './PeriodCompareItem';
@@ -27,11 +27,12 @@ const MetricCard: React.FC<Props> = ({
   const { queryMode, queryColumns, queryResults, entityInfo, aggregateInfo, chatContext } = data;
 
   const { metricInfos } = aggregateInfo || {};
-  const { dateInfo } = chatContext || {};
-  const { startDate } = dateInfo || {};
 
   const indicatorColumn = queryColumns?.find(column => column.showType === 'NUMBER');
   const indicatorColumnName = indicatorColumn?.nameEn || '';
+
+  const { dataFormatType, dataFormat } = indicatorColumn || {};
+  const value = queryResults?.[0]?.[indicatorColumnName] || 0;
 
   const prefixCls = `${PREFIX_CLS}-metric-card`;
 
@@ -54,7 +55,7 @@ const MetricCard: React.FC<Props> = ({
         {indicatorColumn?.name ? (
           <div className={`${prefixCls}-indicator-name`}>{indicatorColumn?.name}</div>
         ) : (
-          <div style={{ height: 6 }} />
+          <div style={{ height: 10 }} />
         )}
         {drillDownDimension && (
           <div className={`${prefixCls}-filter-section-wrapper`}>
@@ -73,19 +74,25 @@ const MetricCard: React.FC<Props> = ({
       </div>
       <Spin spinning={loading}>
         <div className={indicatorClass}>
-          <div className={`${prefixCls}-date-range`}>{startDate}</div>
           {indicatorColumn && !indicatorColumn?.authorized ? (
             <ApplyAuth model={entityInfo?.modelInfo.name || ''} onApplyAuth={onApplyAuth} />
           ) : (
             <div style={{ display: 'flex', alignItems: 'flex-end' }}>
               <div className={`${prefixCls}-indicator-value`}>
-                {isNumber
-                  ? formatMetric(queryResults?.[0]?.[indicatorColumnName]) || '-'
-                  : formatNumberWithCN(+queryResults?.[0]?.[indicatorColumnName])}
+                {dataFormatType === 'percent' || dataFormatType === 'decimal'
+                  ? `${formatByDecimalPlaces(
+                      dataFormat?.needMultiply100 ? +value * 100 : value,
+                      dataFormat?.decimalPlaces || 2
+                    )}${dataFormatType === 'percent' ? '%' : ''}`
+                  : isNumber
+                  ? formatMetric(value) || '-'
+                  : formatNumberWithCN(+value)}
               </div>
-              <div className={`${prefixCls}-indicator-switch`}>
-                <SwapOutlined onClick={handleNumberClick} />
-              </div>
+              {!isNaN(+value) && +value >= 10000 && (
+                <div className={`${prefixCls}-indicator-switch`}>
+                  <SwapOutlined onClick={handleNumberClick} />
+                </div>
+              )}
             </div>
           )}
           {metricInfos?.length > 0 && (
@@ -100,8 +107,8 @@ const MetricCard: React.FC<Props> = ({
       {queryMode.includes('METRIC') && (
         <div className={`${prefixCls}-drill-down-dimensions`}>
           <DrillDownDimensions
-            modelId={chatContext.modelId}
-            dimensionFilters={chatContext.dimensionFilters}
+            modelId={chatContext?.modelId}
+            dimensionFilters={chatContext?.dimensionFilters}
             drillDownDimension={drillDownDimension}
             onSelectDimension={onSelectDimension}
           />

@@ -1,4 +1,3 @@
-import IconFont from '@/components/IconFont';
 import { Dropdown, Input, Menu } from 'antd';
 import classNames from 'classnames';
 import {
@@ -9,19 +8,20 @@ import {
   useImperativeHandle,
 } from 'react';
 import { useLocation } from 'umi';
-import ConversationModal from './components/ConversationModal';
-import { deleteConversation, getAllConversations, saveConversation } from './service';
+import ConversationModal from '../components/ConversationModal';
+import { deleteConversation, getAllConversations, saveConversation } from '../service';
 import styles from './style.less';
-import { ConversationDetailType, DefaultEntityType } from './type';
-import { DEFAULT_CONVERSATION_NAME } from './constants';
+import { AgentType, ConversationDetailType, DefaultEntityType } from '../type';
+import { DEFAULT_CONVERSATION_NAME } from '../constants';
 import moment from 'moment';
-import { SearchOutlined } from '@ant-design/icons';
+import { CloseOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 
 type Props = {
+  agentList?: AgentType[];
+  currentAgent?: AgentType;
   currentConversation?: ConversationDetailType;
-  collapsed?: boolean;
+  historyVisible?: boolean;
   isCopilotMode?: boolean;
-  defaultModelName?: string;
   defaultEntityFilter?: DefaultEntityType;
   triggerNewConversation?: boolean;
   onNewConversationTriggered?: () => void;
@@ -30,19 +30,23 @@ type Props = {
     name?: string,
     modelId?: number,
     entityId?: string,
+    agent?: AgentType,
   ) => void;
+  onCloseConversation: () => void;
 };
 
 const Conversation: ForwardRefRenderFunction<any, Props> = (
   {
+    agentList,
+    currentAgent,
     currentConversation,
-    collapsed,
+    historyVisible,
     isCopilotMode,
-    defaultModelName,
     defaultEntityFilter,
     triggerNewConversation,
     onNewConversationTriggered,
     onSelectConversation,
+    onCloseConversation,
   },
   ref,
 ) => {
@@ -58,24 +62,20 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
     onAddConversation,
   }));
 
-  const updateData = async () => {
-    const { data } = await getAllConversations();
+  const updateData = async (agent?: AgentType) => {
+    const { data } = await getAllConversations(agent?.id || currentAgent?.id);
     const conversationList = data || [];
-    setConversations(conversationList.slice(0, 500));
+    setConversations(conversationList.slice(0, 200));
     return conversationList;
   };
 
   const initData = async () => {
     const data = await updateData();
     if (data.length > 0) {
-      const chatId = localStorage.getItem('CONVERSATION_ID') || cid;
+      const chatId = cid;
       if (chatId) {
         const conversation = data.find((item: any) => item.chatId === +chatId);
-        if (conversation) {
-          onSelectConversation(conversation);
-        } else {
-          onSelectConversation(data[0]);
-        }
+        onSelectConversation(conversation || data[0]);
       } else {
         onSelectConversation(data[0]);
       }
@@ -84,36 +84,30 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
     }
   };
 
-  useEffect(() => {
-    if (triggerNewConversation) {
-      const conversationName =
-        defaultEntityFilter?.entityName && window.location.pathname.includes('detail')
-          ? defaultEntityFilter.entityName
-          : defaultModelName;
-      onAddConversation({
-        name: conversationName,
-        type: 'CUSTOMIZE',
-        modelId: defaultEntityFilter?.modelId,
-        entityId: defaultEntityFilter?.entityId,
-      });
-      onNewConversationTriggered?.();
-    }
-  }, [triggerNewConversation]);
+  // useEffect(() => {
+  //   if (triggerNewConversation) {
+  //     return;
+  //   }
+  //   if (q && cid === undefined && window.location.href.includes('/chat')) {
+  //     onAddConversation({
+  //       name: q,
+  //       modelId: modelId ? +modelId : undefined,
+  //       entityId,
+  //     });
+  //   } else {
+  //     initData();
+  //   }
+  // }, [q]);
 
   useEffect(() => {
-    if (triggerNewConversation) {
-      return;
-    }
-    if (q && cid === undefined && window.location.href.includes('/workbench/chat')) {
-      onAddConversation({ name: q, modelId: modelId ? +modelId : undefined, entityId });
-    } else {
+    if (currentAgent && !triggerNewConversation) {
       initData();
     }
-  }, [q]);
+  }, [currentAgent]);
 
-  const addConversation = async (name?: string) => {
-    await saveConversation(name || DEFAULT_CONVERSATION_NAME);
-    return updateData();
+  const addConversation = async (name?: string, agent?: AgentType) => {
+    await saveConversation(name || DEFAULT_CONVERSATION_NAME, agent?.id || currentAgent!.id);
+    return updateData(agent);
   };
 
   const onDeleteConversation = async (id: number) => {
@@ -126,14 +120,24 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
     modelId,
     entityId,
     type,
+    agent,
   }: {
     name?: string;
     modelId?: number;
     entityId?: string;
     type?: string;
+    agent?: AgentType;
   } = {}) => {
-    const data = await addConversation(name);
-    onSelectConversation(data[0], type || name, modelId, entityId);
+    const data = await addConversation(name, agent);
+    if (data.length > 0) {
+      onSelectConversation(
+        data[0],
+        type || name || DEFAULT_CONVERSATION_NAME,
+        modelId,
+        entityId,
+        agent,
+      );
+    }
   };
 
   const onOperate = (key: string, conversation: ConversationDetailType) => {
@@ -146,7 +150,7 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
   };
 
   const conversationClass = classNames(styles.conversation, {
-    [styles.collapsed]: collapsed,
+    [styles.historyVisible]: historyVisible,
     [styles.copilotMode]: isCopilotMode,
   });
 
@@ -171,7 +175,21 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
 
   return (
     <div className={conversationClass}>
-      <div className={styles.leftSection}>
+      <div className={styles.rightSection}>
+        <div className={styles.titleBar}>
+          <div className={styles.title}>历史对话</div>
+          <div className={styles.rightOperation}>
+            <div
+              className={styles.newConversation}
+              onClick={() => {
+                addConversation();
+              }}
+            >
+              新对话
+            </div>
+            <CloseOutlined className={styles.closeIcon} onClick={onCloseConversation} />
+          </div>
+        </div>
         <div className={styles.searchConversation}>
           <Input
             placeholder="搜索"
@@ -215,15 +233,28 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
                       onSelectConversation(item);
                     }}
                   >
-                    <IconFont type="icon-chat1" className={styles.conversationIcon} />
                     <div className={styles.conversationContent}>
                       <div className={styles.topTitleBar}>
-                        <div className={styles.conversationName}>{item.chatName}</div>
+                        <div className={styles.conversationTitleBar}>
+                          <div className={styles.conversationName}>{item.chatName}</div>
+                          {currentConversation?.chatId === item.chatId && (
+                            <div className={styles.currentConversation}>当前对话</div>
+                          )}
+                        </div>
                         <div className={styles.conversationTime}>
                           {convertTime(item.lastTime || '')}
                         </div>
                       </div>
-                      <div className={styles.subTitle}>{item.lastQuestion}</div>
+                      <div className={styles.bottomSection}>
+                        <div className={styles.subTitle}>{item.lastQuestion}</div>
+                        <DeleteOutlined
+                          className={styles.deleteIcon}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteConversation(item.chatId);
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </Dropdown>

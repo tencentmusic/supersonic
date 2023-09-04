@@ -200,7 +200,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         AgentConfig agentConfig = new AgentConfig();
         RuleQueryTool ruleQueryTool = new RuleQueryTool();
         ruleQueryTool.setType(AgentToolType.RULE);
-        ruleQueryTool.setModelIds(Lists.newArrayList(1L, 2L));
+        ruleQueryTool.setModelIds(Lists.newArrayList(-1L));
         ruleQueryTool.setQueryModes(Lists.newArrayList(
                 "ENTITY_DETAIL", "ENTITY_LIST_FILTER", "ENTITY_ID", "METRIC_ENTITY",
                 "METRIC_FILTER", "METRIC_GROUPBY", "METRIC_MODEL", "METRIC_ORDERBY"

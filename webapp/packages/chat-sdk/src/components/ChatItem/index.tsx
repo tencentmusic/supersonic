@@ -1,6 +1,6 @@
-import { ChatContextType, MsgDataType, ParseStateEnum } from '../../common/type';
+import { ChatContextType, FilterItemType, MsgDataType, ParseStateEnum } from '../../common/type';
 import { useEffect, useState } from 'react';
-import { chatExecute, chatParse, switchEntity } from '../../service';
+import { chatExecute, chatParse, queryData, switchEntity } from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import IconFont from '../IconFont';
 import ParseTip from './ParseTip';
@@ -17,7 +17,6 @@ type Props = {
   filter?: any[];
   isLastMessage?: boolean;
   msgData?: MsgDataType;
-  isMobileMode?: boolean;
   isHistory?: boolean;
   triggerResize?: boolean;
   parseOptions?: ChatContextType[];
@@ -32,7 +31,6 @@ const ChatItem: React.FC<Props> = ({
   agentId,
   filter,
   isLastMessage,
-  isMobileMode,
   isHistory,
   triggerResize,
   msgData,
@@ -77,10 +75,7 @@ const ChatItem: React.FC<Props> = ({
     return true;
   };
 
-  const onExecute = async (
-    parseInfoValue: ChatContextType,
-    parseInfoOptions?: ChatContextType[]
-  ) => {
+  const onExecute = async (parseInfoValue: ChatContextType) => {
     setExecuteMode(true);
     setExecuteLoading(true);
     try {
@@ -88,24 +83,10 @@ const ChatItem: React.FC<Props> = ({
       setExecuteLoading(false);
       const valid = updateData(data);
       if (onMsgDataLoaded) {
-        let parseOptions: ChatContextType[] = parseInfoOptions || [];
-        if (
-          parseInfoOptions &&
-          parseInfoOptions.length > 1 &&
-          (parseInfoOptions[0].queryMode.includes('METRIC') ||
-            parseInfoOptions[0].queryMode.includes('ENTITY'))
-        ) {
-          parseOptions = parseInfoOptions.filter(
-            (item, index) =>
-              index === 0 ||
-              (!item.queryMode.includes('METRIC') && !item.queryMode.includes('ENTITY'))
-          );
-        }
         onMsgDataLoaded(
           {
             ...data.data,
             chatContext: parseInfoValue,
-            parseOptions: parseOptions.length > 1 ? parseOptions.slice(1) : undefined,
           },
           valid
         );
@@ -141,7 +122,7 @@ const ChatItem: React.FC<Props> = ({
     setParseInfoOptions(parseInfos || []);
     const parseInfoValue = parseInfos[0];
     setParseInfo(parseInfoValue);
-    onExecute(parseInfoValue, parseInfos);
+    onExecute(parseInfoValue);
   };
 
   useEffect(() => {
@@ -167,8 +148,15 @@ const ChatItem: React.FC<Props> = ({
     setParseInfoOptions([chatContext]);
   };
 
-  const onChangeChart = () => {
-    setChartIndex(chartIndex + 1);
+  const onFiltersChange = async (dimensionFilters: FilterItemType[]) => {
+    setEntitySwitchLoading(true);
+    const chatContextValue = { ...(parseInfoOptions[0] || {}), dimensionFilters };
+    const res: any = await queryData(chatContextValue);
+    setEntitySwitchLoading(false);
+    const resChatContext = res.data?.data?.chatContext;
+    setData({ ...(res.data?.data || {}), chatContext: resChatContext || chatContextValue });
+    setParseInfo(resChatContext || chatContextValue);
+    setParseInfoOptions([resChatContext || chatContextValue]);
   };
 
   const onSelectParseInfo = async (parseInfoValue: ChatContextType) => {
@@ -197,22 +185,19 @@ const ChatItem: React.FC<Props> = ({
             parseInfoOptions={parseOptions || parseInfoOptions.slice(0, 1)}
             parseTip={parseTip}
             currentParseInfo={parseInfo}
-            optionMode={parseOptions !== undefined}
             onSelectParseInfo={onSelectParseInfo}
             onSwitchEntity={onSwitchEntity}
+            onFiltersChange={onFiltersChange}
           />
           {executeMode && (
             <ExecuteItem
-              question={msg}
               queryId={parseInfo?.queryId}
               executeLoading={executeLoading}
               entitySwitchLoading={entitySwitchLoading}
               executeTip={executeTip}
               chartIndex={chartIndex}
               data={data}
-              isMobileMode={isMobileMode}
               triggerResize={triggerResize}
-              onChangeChart={onChangeChart}
             />
           )}
         </div>

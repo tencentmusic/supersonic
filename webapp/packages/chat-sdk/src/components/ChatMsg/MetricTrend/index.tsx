@@ -177,7 +177,10 @@ const MetricTrend: React.FC<Props> = ({ data, chartIndex, triggerResize, onApply
         <Spin spinning={loading}>
           <div className={`${prefixCls}-content`}>
             {!isMobile && aggregateInfoValue?.metricInfos?.length > 0 && (
-              <MetricInfo aggregateInfo={aggregateInfoValue} />
+              <MetricInfo
+                aggregateInfo={aggregateInfoValue}
+                currentMetricField={currentMetricField}
+              />
             )}
             <div className={`${prefixCls}-date-options`}>
               {dateOptions.map((dateOption: { label: string; value: number }, index: number) => {

@@ -147,11 +147,12 @@ const MetricTrendChart: React.FC<Props> = ({
                 }</span><span style="display: inline-block; width: 90px; text-align: right; font-weight: 500;">${
                   item.value === ''
                     ? '-'
-                    : metricField.dataFormatType === 'percent'
+                    : metricField.dataFormatType === 'percent' ||
+                      metricField.dataFormatType === 'decimal'
                     ? `${formatByDecimalPlaces(
                         item.value,
                         metricField.dataFormat?.decimalPlaces || 2
-                      )}%`
+                      )}${metricField.dataFormatType === 'percent' ? '%' : ''}`
                     : getFormattedValue(item.value)
                 }</span></div>`
             )
@@ -176,7 +177,8 @@ const MetricTrendChart: React.FC<Props> = ({
           smooth: true,
           data: data.map((item: any) => {
             const value = item[valueColumnName];
-            return metricField.dataFormatType === 'percent' &&
+            return (metricField.dataFormatType === 'percent' ||
+              metricField.dataFormatType === 'decimal') &&
               metricField.dataFormat?.needMultiply100
               ? value * 100
               : value;

@@ -1,36 +1,30 @@
 import IconFont from '@/components/IconFont';
-import {
-  CaretRightOutlined,
-  CloseOutlined,
-  FullscreenExitOutlined,
-  FullscreenOutlined,
-} from '@ant-design/icons';
-import classNames from 'classnames';
+import { CaretRightOutlined, CloseOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import Chat from '../Chat';
-import { ModelType } from '../Chat/type';
+import { DefaultEntityType, ModelType } from '../Chat/type';
 import styles from './style.less';
-import { useDispatch } from 'umi';
 
 type Props = {
+  globalCopilotFilter: DefaultEntityType;
   copilotSendMsg: string;
 };
 
-const Copilot: React.FC<Props> = ({ copilotSendMsg }) => {
+const Copilot: React.FC<Props> = ({ globalCopilotFilter, copilotSendMsg }) => {
   const [chatVisible, setChatVisible] = useState(false);
   const [defaultModelName, setDefaultModelName] = useState('');
-  const [fullscreen, setFullscreen] = useState(false);
+  const [defaultEntityFilter, setDefaultEntityFilter] = useState<DefaultEntityType>();
   const [triggerNewConversation, setTriggerNewConversation] = useState(false);
-  const dispatch = useDispatch();
 
   useEffect(() => {
-    const chatVisibleValue = localStorage.getItem('CHAT_VISIBLE') === 'true';
-    if (chatVisibleValue) {
-      setTimeout(() => {
-        setChatVisible(true);
-      }, 500);
+    if (globalCopilotFilter && globalCopilotFilter.entityId !== defaultEntityFilter?.entityId) {
+      setTriggerNewConversation(true);
     }
-  }, []);
+    setDefaultEntityFilter(globalCopilotFilter);
+    if (globalCopilotFilter?.modelName) {
+      setDefaultModelName(globalCopilotFilter.modelName);
+    }
+  }, [globalCopilotFilter]);
 
   useEffect(() => {
     if (copilotSendMsg) {
@@ -41,118 +35,62 @@ const Copilot: React.FC<Props> = ({ copilotSendMsg }) => {
 
   const updateChatVisible = (visible: boolean) => {
     setChatVisible(visible);
-    localStorage.setItem('CHAT_VISIBLE', visible ? 'true' : 'false');
   };
 
   const onToggleChatVisible = () => {
     const chatVisibleValue = !chatVisible;
     updateChatVisible(chatVisibleValue);
-    if (!chatVisibleValue) {
-      document.body.style.overflow = 'auto';
-    } else {
-      if (fullscreen) {
-        document.body.style.overflow = 'hidden';
-      } else {
-        document.body.style.overflow = 'auto';
-      }
-    }
   };
 
   const onCloseChat = () => {
     updateChatVisible(false);
-    document.body.style.overflow = 'auto';
   };
 
   const onTransferChat = () => {
-    window.open(
-      `${window.location.href.includes('webapp') ? '/webapp' : ''}/chat?cid=${localStorage.getItem(
-        'CONVERSATION_ID',
-      )}${defaultModelName ? `&modelName=${defaultModelName}` : ''}`,
-    );
+    window.open('/chat');
   };
 
   const onCurrentModelChange = (model?: ModelType) => {
     setDefaultModelName(model?.name || '');
-    if (model?.name !== defaultModelName) {
-      onCancelCopilotFilter();
-    }
-  };
-
-  const onEnterFullscreen = () => {
-    setFullscreen(true);
-    document.body.style.overflow = 'hidden';
-  };
-
-  const onExitFullscreen = () => {
-    setFullscreen(false);
-    document.body.style.overflow = 'auto';
-  };
-
-  const onCheckMoreDetail = () => {
-    if (!fullscreen) {
-      onEnterFullscreen();
-    }
-  };
-
-  const onCancelCopilotFilter = () => {
-    dispatch({
-      type: 'globalState/setGlobalCopilotFilter',
-      payload: undefined,
-    });
   };
 
   const onNewConversationTriggered = () => {
     setTriggerNewConversation(false);
   };
 
-  const chatPopoverClass = classNames(styles.chatPopover, {
-    [styles.fullscreen]: fullscreen,
-  });
-
   return (
     <>
       <div className={styles.copilot} onClick={onToggleChatVisible}>
         <IconFont type="icon-copilot-fill" />
       </div>
-      {chatVisible && (
-        <div className={styles.copilotContent}>
-          <div className={chatPopoverClass}>
-            <div className={styles.header}>
-              <div className={styles.leftSection}>
-                <CloseOutlined className={styles.close} onClick={onCloseChat} />
-                {fullscreen ? (
-                  <FullscreenExitOutlined
-                    className={styles.fullscreen}
-                    onClick={onExitFullscreen}
-                  />
-                ) : (
-                  <FullscreenOutlined className={styles.fullscreen} onClick={onEnterFullscreen} />
-                )}
-                <IconFont
-                  type="icon-weibiaoti-"
-                  className={styles.transfer}
-                  onClick={onTransferChat}
-                />
-              </div>
-              <div className={styles.title}>Copilot</div>
-            </div>
-            <div className={styles.chat}>
-              <Chat
-                defaultModelName={defaultModelName}
-                copilotSendMsg={copilotSendMsg}
-                isCopilotMode
-                copilotFullscreen={fullscreen}
-                triggerNewConversation={triggerNewConversation}
-                onNewConversationTriggered={onNewConversationTriggered}
-                onCurrentModelChange={onCurrentModelChange}
-                onCancelCopilotFilter={onCancelCopilotFilter}
-                onCheckMoreDetail={onCheckMoreDetail}
+      <div className={styles.copilotContent} style={{ display: chatVisible ? 'block' : 'none' }}>
+        <div className={styles.chatPopover}>
+          <div className={styles.header}>
+            <div className={styles.leftSection}>
+              <CloseOutlined className={styles.close} onClick={onCloseChat} />
+              <IconFont
+                type="icon-weibiaoti-"
+                className={styles.transfer}
+                onClick={onTransferChat}
               />
             </div>
+            <div className={styles.title}>内容库问答</div>
           </div>
-          <CaretRightOutlined className={styles.rightArrow} />
+          <div className={styles.chat}>
+            <Chat
+              copilotSendMsg={copilotSendMsg}
+              defaultModelName={defaultModelName}
+              defaultEntityFilter={defaultEntityFilter}
+              triggerNewConversation={triggerNewConversation}
+              chatVisible={chatVisible}
+              isCopilotMode
+              onNewConversationTriggered={onNewConversationTriggered}
+              onCurrentModelChange={onCurrentModelChange}
+            />
+          </div>
         </div>
-      )}
+        <CaretRightOutlined className={styles.rightArrow} />
+      </div>
     </>
   );
 };
