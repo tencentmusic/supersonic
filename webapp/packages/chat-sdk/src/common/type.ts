@@ -49,7 +49,7 @@ export type FilterItemType = {
   bizName: string;
   operator: string;
   type: string;
-  value: string;
+  value: any;
 };
 
 export type ModelType = {
