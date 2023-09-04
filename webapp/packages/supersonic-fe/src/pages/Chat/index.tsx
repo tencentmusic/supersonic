@@ -16,7 +16,7 @@ import { useThrottleFn } from 'ahooks';
 import Conversation from './Conversation';
 import ChatFooter from './ChatFooter';
 import classNames from 'classnames';
-import { CHAT_TITLE, DEFAULT_CONVERSATION_NAME, MOBILE_TITLE, WEB_TITLE } from './constants';
+import { CHAT_TITLE, DEFAULT_CONVERSATION_NAME, WEB_TITLE } from './constants';
 import { HistoryMsgItemType, MsgDataType, getHistoryMsg } from 'supersonic-chat-sdk';
 import { cloneDeep } from 'lodash';
 import 'supersonic-chat-sdk/dist/index.css';
@@ -364,7 +364,6 @@ const Chat: React.FC<Props> = ({
   return (
     <div className={chatClass}>
       {!isMobileMode && <Helmet title={WEB_TITLE} />}
-      {isMobile && <Helmet title={MOBILE_TITLE} />}
       <div className={styles.chatSection}>
         {!isMobile && (
           <AgentList

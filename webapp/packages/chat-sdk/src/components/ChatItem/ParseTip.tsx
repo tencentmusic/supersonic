@@ -166,7 +166,7 @@ const ParseTip: React.FC<Props> = ({
                 <div className={itemValueClass}>{modelName}</div>
               </div>
             )}
-            {queryMode !== 'ENTITY_ID' && metric && (
+            {!queryMode.includes('ENTITY') && metric && (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>指标：</div>
                 <div className={itemValueClass}>{metric.name}</div>

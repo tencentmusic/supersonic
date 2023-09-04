@@ -6,7 +6,6 @@ import type { MsgDataType } from 'supersonic-chat-sdk';
 import { AgentType, MessageItem, MessageTypeEnum } from '../type';
 import { isMobile, updateMessageContainerScroll } from '@/utils/utils';
 import styles from './style.less';
-import { MODEL_MODEL_ENTITY_ID_FILTER_MAP } from '../constants';
 import AgentTip from '../components/AgentTip';
 import classNames from 'classnames';
 
@@ -63,7 +62,6 @@ const MessageContainer: React.FC<Props> = ({
     }
     return [
       {
-        ...MODEL_MODEL_ENTITY_ID_FILTER_MAP[modelId],
         value: entityId,
       },
     ];

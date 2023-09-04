@@ -42,15 +42,7 @@
       border-radius: 8px;
       cursor: pointer;
 
-      &:hover,
-      &.active {
-        background: #f0f0f0;
-      }
-
       .avatar {
-        // width: 40px;
-        // height: 40px;
-        // border-radius: 8px;
         font-size: 40px;
       }
 
@@ -71,6 +63,18 @@
           font-size: 12px;
           white-space: nowrap;
           text-overflow: ellipsis;
+        }
+      }
+
+      // &:hover {
+      //   background: #f0f0f0;
+      // }
+
+      &:hover, &.active {
+        background: #22a5f7;
+
+        .agentName, .agentDesc {
+          color: #fff;
         }
       }
     }
