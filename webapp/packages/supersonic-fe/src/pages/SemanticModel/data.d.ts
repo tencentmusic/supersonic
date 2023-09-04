@@ -197,6 +197,28 @@ export declare namespace ISemantic {
     datasource: IDataSourceItem;
   }
   type IDomainSchemaRelaList = IDomainSchemaRelaItem[];
+
+  interface IDatabaseItem {
+    createdBy?: string;
+    updatedBy?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    id: number;
+    name: string;
+    admins: string[];
+    type: string;
+    url: string;
+    username: string;
+    password: string;
+    version: string;
+    hasEditPermission: boolean;
+    hasUsePermission: boolean;
+    host: string;
+    port: string;
+    database?: string;
+    description?: string;
+  }
+  type IDatabaseItemList = IDatabaseItem[];
 }
 
 export declare namespace IChatConfig {

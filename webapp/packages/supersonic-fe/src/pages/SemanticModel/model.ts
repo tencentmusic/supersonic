@@ -1,7 +1,7 @@
 import type { Reducer, Effect } from 'umi';
 import { message } from 'antd';
 import { ISemantic } from './data';
-import { getDimensionList, queryMetric, excuteSql, getDatabaseByDomainId } from './service';
+import { getDimensionList, queryMetric, excuteSql, getDatabaseList } from './service';
 
 export type StateType = {
   current: number;
@@ -14,7 +14,7 @@ export type StateType = {
   metricList: ISemantic.IMetricList;
   searchParams: Record<string, any>;
   dataBaseResultColsMap: any;
-  dataBaseConfig: any;
+  databaseConfigList: any[];
   domainData?: ISemantic.IDomainItem;
   modelData?: ISemantic.IDomainItem;
   domainList: ISemantic.IDomainItem[];
@@ -27,7 +27,7 @@ export type ModelType = {
     queryDimensionList: Effect;
     queryMetricList: Effect;
     queryDataBaseExcuteSql: Effect;
-    queryDatabaseByDomainId: Effect;
+    queryDatabaseList: Effect;
   };
   reducers: {
     setSelectDomain: Reducer<StateType>;
@@ -36,7 +36,7 @@ export type ModelType = {
     setPagination: Reducer<StateType>;
     setDimensionList: Reducer<StateType>;
     setDataBaseScriptColumn: Reducer<StateType>;
-    setDataBaseConfig: Reducer<StateType>;
+    setDatabaseConfigList: Reducer<StateType>;
     setMetricList: Reducer<StateType>;
     reset: Reducer<StateType>;
   };
@@ -55,7 +55,8 @@ export const defaultState: StateType = {
   metricList: [],
   domainData: undefined,
   dataBaseResultColsMap: {},
-  dataBaseConfig: {},
+  databaseConfigList: [],
+  // dataBaseConfig: {},
   domainList: [],
 };
 
@@ -108,13 +109,12 @@ const Model: ModelType = {
         message.error(msg);
       }
     },
-    *queryDatabaseByDomainId({ payload }, { call, put }) {
-      const domainId = payload.domainId;
-      const { code, data, msg } = yield call(getDatabaseByDomainId, domainId);
+    *queryDatabaseList({}, { call, put }) {
+      const { code, data, msg } = yield call(getDatabaseList);
       if (code === 200) {
         yield put({
-          type: 'setDataBaseConfig',
-          payload: { dataBaseConfig: data },
+          type: 'setDatabaseConfigList',
+          payload: { databaseConfigList: data },
         });
       } else {
         message.error(msg);
@@ -171,7 +171,7 @@ const Model: ModelType = {
         },
       };
     },
-    setDataBaseConfig(state = defaultState, action) {
+    setDatabaseConfigList(state = defaultState, action) {
       return {
         ...state,
         ...action.payload,

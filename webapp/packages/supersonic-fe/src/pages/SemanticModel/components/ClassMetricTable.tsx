@@ -64,6 +64,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'id',
       title: 'ID',
+      width: 80,
     },
     {
       dataIndex: 'name',
@@ -72,6 +73,8 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'alias',
       title: '别名',
+      width: 300,
+      ellipsis: true,
       search: false,
     },
     {
@@ -81,6 +84,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',
+      width: 80,
       valueEnum: SENSITIVE_LEVEL_ENUM,
     },
     {
@@ -93,24 +97,14 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '描述',
       search: false,
     },
-    {
-      dataIndex: 'type',
-      title: '指标类型',
-      valueEnum: {
-        ATOMIC: '原子指标',
-        DERIVED: '衍生指标',
-      },
-      // render: (type: any) => {
-      //   switch (type) {
-      //     case 'ATOMIC':
-      //       return '原子指标';
-      //     case 'DERIVED':
-      //       return '衍生指标';
-      //     default:
-      //       return '未知';
-      //   }
-      // },
-    },
+    // {
+    //   dataIndex: 'type',
+    //   title: '指标类型',
+    //   valueEnum: {
+    //     ATOMIC: '原子指标',
+    //     DERIVED: '衍生指标',
+    //   },
+    // },
 
     {
       dataIndex: 'updatedAt',

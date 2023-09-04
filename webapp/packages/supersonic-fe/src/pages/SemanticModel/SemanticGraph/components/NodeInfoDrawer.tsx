@@ -126,11 +126,11 @@ const NodeInfoDrawer: React.FC<Props> = ({
             label: '敏感度',
             value: SENSITIVE_LEVEL_ENUM[sensitiveLevel],
           },
-          {
-            label: '指标类型',
-            value: MetricTypeWording[type],
-            hideItem: nodeType !== SemanticNodeType.METRIC,
-          },
+          // {
+          //   label: '指标类型',
+          //   value: MetricTypeWording[type],
+          //   hideItem: nodeType !== SemanticNodeType.METRIC,
+          // },
         ],
       },
       {

@@ -72,6 +72,18 @@ export function updateDimension(data: any): Promise<any> {
   });
 }
 
+export function mockDimensionAlias(data: any): Promise<any> {
+  return request.post(`${process.env.API_BASE_URL}dimension/mockDimensionAlias`, {
+    data,
+  });
+}
+
+export function mockDimensionValuesAlias(data: any): Promise<any> {
+  return request.post(`${process.env.API_BASE_URL}dimension/mockDimensionValuesAlias`, {
+    data,
+  });
+}
+
 export function queryMetric(data: any): Promise<any> {
   const { domainId, modelId } = data;
   const queryParams = {
@@ -97,6 +109,12 @@ export function creatExprMetric(data: any): Promise<any> {
 
 export function updateExprMetric(data: any): Promise<any> {
   return request.post(`${process.env.API_BASE_URL}metric/updateExprMetric`, {
+    data,
+  });
+}
+
+export function mockMetricAlias(data: any): Promise<any> {
+  return request.post(`${process.env.API_BASE_URL}metric/mockMetricAlias`, {
     data,
   });
 }
@@ -216,12 +234,6 @@ export function deleteDatasourceRela(domainId: any): Promise<any> {
   });
 }
 
-export function getDatabaseByDomainId(domainId: number): Promise<any> {
-  return request(`${process.env.API_BASE_URL}database/getDatabaseByDomainId/${domainId}`, {
-    method: 'GET',
-  });
-}
-
 export function getDomainSchemaRela(domainId: number): Promise<any> {
   return request(`${process.env.API_BASE_URL}viewInfo/getDomainSchemaRela/${domainId}`, {
     method: 'GET',
@@ -240,6 +252,18 @@ export type SaveDatabaseParams = {
   description?: string;
 };
 
+export function getDatabaseList(): Promise<any> {
+  return request(`${process.env.API_BASE_URL}database/getDatabaseList`, {
+    method: 'GET',
+  });
+}
+
+export function deleteDatabase(domainId: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}database/${domainId}`, {
+    method: 'DELETE',
+  });
+}
+
 export function saveDatabase(data: SaveDatabaseParams): Promise<any> {
   return request(`${process.env.API_BASE_URL}database/createOrUpdateDatabase`, {
     method: 'POST',
@@ -256,7 +280,7 @@ export function testDatabaseConnect(data: SaveDatabaseParams): Promise<any> {
 
 type ExcuteSqlParams = {
   sql: string;
-  modelId: number;
+  id: number;
 };
 
 // 执行脚本

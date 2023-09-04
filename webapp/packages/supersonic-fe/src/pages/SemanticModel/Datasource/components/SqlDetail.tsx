@@ -27,11 +27,12 @@ import 'ace-builds/src-min-noconflict/ext-searchbox';
 import 'ace-builds/src-min-noconflict/theme-sqlserver';
 import 'ace-builds/src-min-noconflict/theme-monokai';
 import 'ace-builds/src-min-noconflict/mode-sql';
+import { IDataSource, ISemantic } from '../../data';
 
 type IProps = {
   domainManger: StateType;
   dispatch: Dispatch;
-  dataSourceItem: DataInstanceItem;
+  dataSourceItem: IDataSource.IDataSourceItem;
   onUpdateSql?: (sql: string) => void;
   sql?: string;
   onSubmitSuccess?: (dataSourceInfo: any) => void;
@@ -61,7 +62,7 @@ const SqlDetail: React.FC<IProps> = ({
   onUpdateSql,
   onJdbcSourceChange,
 }) => {
-  const { dataBaseConfig, selectModelId: modelId } = domainManger;
+  const { databaseConfigList, selectModelId: modelId } = domainManger;
   const [resultTable, setResultTable] = useState<ResultTableItem[]>([]);
   const [resultTableLoading, setResultTableLoading] = useState(false);
   const [resultCols, setResultCols] = useState<ResultColItem[]>([]);
@@ -71,6 +72,7 @@ const SqlDetail: React.FC<IProps> = ({
     total: 0,
   });
   const [jdbcSourceItems, setJdbcSourceItems] = useState<JdbcSourceItems[]>([]);
+  const [currentJdbcSourceItem, setCurrentJdbcSourceItem] = useState<JdbcSourceItems>();
   const [dataSourceModalVisible, setDataSourceModalVisible] = useState(false);
 
   const [tableScroll, setTableScroll] = useState({
@@ -99,15 +101,40 @@ const SqlDetail: React.FC<IProps> = ({
 
   const [scriptColumns, setScriptColumns] = useState<any[]>([]);
 
+  // useEffect(() => {
+  //   const list = databaseConfigList.map((item: ISemantic.IDatabaseItem) => {
+  //     return {
+  //       label: item.name,
+  //       key: item.id,
+  //       disabled: !item.hasUsePermission,
+  //     };
+  //   });
+  //   setJdbcSourceItems(list);
+  //   const config = list[0];
+  //   setCurrentJdbcSourceItem(config);
+  //   onJdbcSourceChange?.(config?.key && Number(config?.key));
+  // }, [databaseConfigList]);
+
   useEffect(() => {
-    setJdbcSourceItems([
-      {
-        label: dataBaseConfig?.name,
-        key: dataBaseConfig?.id,
-      },
-    ]);
-    onJdbcSourceChange?.(dataBaseConfig?.id && Number(dataBaseConfig?.id));
-  }, [dataBaseConfig]);
+    const list = databaseConfigList.map((item: ISemantic.IDatabaseItem) => {
+      return {
+        label: item.name,
+        key: item.id,
+        disabled: !item.hasUsePermission,
+      };
+    });
+    setJdbcSourceItems(list);
+    let targetDataBase = list[0];
+    if (dataSourceItem?.id) {
+      const { databaseId } = dataSourceItem;
+      const target = list.find((item) => item.key === databaseId);
+      if (target) {
+        targetDataBase = target;
+      }
+    }
+    setCurrentJdbcSourceItem(targetDataBase);
+    // onJdbcSourceChange?.(targetDataBase?.key && Number(targetDataBase?.key));
+  }, [dataSourceItem, databaseConfigList]);
 
   function creatCalcItem(key: string, data: string) {
     const line = document.createElement('div'); // 需要每条数据一行，这样避免数据换行的时候获得的宽度不准确
@@ -209,10 +236,14 @@ const SqlDetail: React.FC<IProps> = ({
   };
 
   const separateSql = async (value: string) => {
+    if (!currentJdbcSourceItem?.key) {
+      return;
+    }
     setResultTableLoading(true);
     const { code, data, msg } = await excuteSql({
       sql: value,
-      modelId,
+      // modelId,
+      id: currentJdbcSourceItem.key,
     });
     setResultTableLoading(false);
     if (code === 200) {
@@ -378,6 +409,7 @@ const SqlDetail: React.FC<IProps> = ({
                   })[0];
                   if (target) {
                     // setJdbcSourceName(target.label);
+                    setCurrentJdbcSourceItem(target);
                     onJdbcSourceChange?.(Number(value));
                   }
                 },
@@ -387,7 +419,7 @@ const SqlDetail: React.FC<IProps> = ({
               <Button style={{ marginRight: '15px', minWidth: '140px' }}>
                 <Space>
                   <CloudServerOutlined className={styles.sqlOprIcon} style={{ marginRight: 0 }} />
-                  <span>{jdbcSourceItems[0]?.label}</span>
+                  <span>{currentJdbcSourceItem?.label}</span>
                 </Space>
               </Button>
             </Dropdown>

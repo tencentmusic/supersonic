@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Form, Button, Modal, Steps, message } from 'antd';
-import BasicInfoForm from './DataSourceBasicForm';
+import DataSourceBasicForm from './DataSourceBasicForm';
 import FieldForm from './DataSourceFieldForm';
 import { formLayout } from '@/components/FormHelper/utils';
 import { EnumDataSourceType } from '../constants';
@@ -46,9 +46,10 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [saveLoading, setSaveLoading] = useState(false);
   const [hasEmptyNameField, setHasEmptyNameField] = useState<boolean>(false);
+  const [formDatabaseId, setFormDatabaseId] = useState<number>();
   const formValRef = useRef(initFormVal as any);
   const [form] = Form.useForm();
-  const { dataBaseConfig, selectModelId: modelId } = domainManger;
+  const { databaseConfigList, selectModelId: modelId } = domainManger;
   const updateFormVal = (val: any) => {
     formValRef.current = val;
   };
@@ -82,11 +83,13 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           bizName,
           timeGranularity,
           agg,
-          isCreateDimension,
+          isCreateDimension: createDimension,
           name,
-          isCreateMetric,
+          isCreateMetric: createMetric,
           dateFormat,
         } = item;
+        const isCreateDimension = createDimension ? 1 : 0;
+        const isCreateMetric = createMetric ? 1 : 0;
         switch (type) {
           case EnumDataSourceType.CATEGORICAL:
             fieldsClassify.dimensions.push({
@@ -157,7 +160,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       const queryParams = {
         ...submitForm,
         sqlQuery: sql,
-        databaseId: dataSourceItem?.databaseId || dataBaseConfig.id,
+        databaseId: dataSourceItem?.databaseId || formDatabaseId,
         queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
         tableQuery: dbName && tableName ? `${dbName}.${tableName}` : '',
         modelId,
@@ -217,7 +220,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     if (queryType === 'table_query') {
       const tableQueryString = tableQuery || '';
       const [dbName, tableName] = tableQueryString.split('.');
-      columns = await queryTableColumnList(dbName, tableName);
+      columns = await queryTableColumnList(dataSourceItem.databaseId, dbName, tableName);
       tableQueryInitValue = {
         dbName,
         tableName,
@@ -227,13 +230,14 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const formatterInitData = (columns: any[], extendParams: Record<string, any> = {}) => {
-    const { id, name, bizName, description, datasourceDetail } = dataSourceItem as any;
+    const { id, name, bizName, description, datasourceDetail, databaseId } = dataSourceItem as any;
     const { dimensions, identifiers, measures } = datasourceDetail;
     const initValue = {
       id,
       name,
       bizName,
       description,
+      databaseId,
       ...extendParams,
       // ...tableQueryInitValue,
     };
@@ -274,11 +278,8 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     setFields(result);
   };
 
-  const queryTableColumnList = async (dbName: string, tableName: string) => {
-    if (!dataBaseConfig?.id) {
-      return;
-    }
-    const { code, data, msg } = await getColumns(dataBaseConfig.id, dbName, tableName);
+  const queryTableColumnList = async (databaseId: number, dbName: string, tableName: string) => {
+    const { code, data, msg } = await getColumns(databaseId, dbName, tableName);
     if (code === 200) {
       const list = data?.resultList || [];
       // setTableNameList(list);
@@ -299,16 +300,20 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const renderContent = () => {
-    if (currentStep === 1) {
-      return <FieldForm fields={fields} onFieldChange={handleFieldChange} />;
-    }
     return (
-      <BasicInfoForm
-        form={form}
-        isEdit={isEdit}
-        mode={basicInfoFormMode}
-        dataBaseConfig={dataBaseConfig}
-      />
+      <>
+        <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
+          <FieldForm fields={fields} onFieldChange={handleFieldChange} />;
+        </div>
+        <div style={{ display: currentStep !== 1 ? 'block' : 'none' }}>
+          <DataSourceBasicForm
+            form={form}
+            isEdit={isEdit}
+            mode={basicInfoFormMode}
+            databaseConfigList={databaseConfigList}
+          />
+        </div>
+      </>
     );
   };
 
@@ -365,9 +370,10 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
         }}
         onValuesChange={(value, values) => {
           const { tableName } = value;
-          const { dbName } = values;
+          const { dbName, databaseId } = values;
+          setFormDatabaseId(databaseId);
           if (tableName) {
-            queryTableColumnList(dbName, tableName);
+            queryTableColumnList(databaseId, dbName, tableName);
           }
         }}
         className={styles.form}
