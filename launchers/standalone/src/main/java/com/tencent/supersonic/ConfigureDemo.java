@@ -195,7 +195,8 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         agent.setDescription("帮助您用自然语言查询指标，支持时间限定、条件筛选、下钻维度以及聚合统计");
         agent.setStatus(1);
         agent.setEnableSearch(1);
-        agent.setExamples(Lists.newArrayList("超音数访问次数", "近15天超音数访问次数汇总", "按部门统计超音数的访问人数", "对比alice和lucy的停留时长", "超音数访问次数最高的部门"));
+        agent.setExamples(Lists.newArrayList("超音数访问次数", "近15天超音数访问次数汇总",
+                "按部门统计超音数的访问人数", "对比alice和lucy的停留时长", "超音数访问次数最高的部门"));
         AgentConfig agentConfig = new AgentConfig();
         RuleQueryTool ruleQueryTool = new RuleQueryTool();
         ruleQueryTool.setType(AgentToolType.RULE);
