@@ -1,6 +1,5 @@
 import axios from './axiosInstance';
 import { ChatContextType, DrillDownDimensionType, HistoryType, MsgDataType, ParseDataType, SearchRecommendItem } from '../common/type';
-import { QueryDataType } from '../common/type';
 
 const DEFAULT_CHAT_ID = 0;
 

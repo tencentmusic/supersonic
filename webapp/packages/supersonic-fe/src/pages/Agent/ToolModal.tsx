@@ -83,15 +83,12 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
       ...values,
       exampleQuestions: examples.map((item) => item.question).filter((item) => item),
       plugins: values.plugins ? [values.plugins] : undefined,
-      metricOptions: metricOptions.map((item) => ({ modelId: values.modelId, ...item })),
+      metricOptions: metricOptions.map((item) => ({ ...item, modelId: values.modelId })),
     });
     setSaveLoading(false);
   };
 
   const updateMetricList = async (value: number) => {
-    if (modelMetricList[value]) {
-      return;
-    }
     const res = await getMetricList(value);
     setModelMetricList(res.data.list);
   };
