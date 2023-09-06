@@ -3,9 +3,10 @@ package com.tencent.supersonic.semantic.api.model.request;
 
 import com.tencent.supersonic.semantic.api.model.pojo.Entity;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Data;
 
 
 @Data

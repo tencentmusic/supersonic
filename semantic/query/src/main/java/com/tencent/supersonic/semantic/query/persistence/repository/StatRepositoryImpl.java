@@ -4,10 +4,10 @@ import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.semantic.api.model.pojo.QueryStat;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.semantic.query.persistence.mapper.StatMapper;
 import java.util.ArrayList;
 import java.util.Comparator;

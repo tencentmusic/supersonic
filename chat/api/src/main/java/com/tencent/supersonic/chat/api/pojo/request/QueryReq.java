@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class QueryReq {
-
     private String queryText;
     private Integer chatId;
     private Long modelId = 0L;

@@ -98,9 +98,9 @@
     </update>
 
     <select id="query" resultMap="ResultMapWithBLOBs">
-        select *
-        from s2_metric
-        where 1=1
+         select *
+         from s2_metric
+         where 1=1
         <if test="type != null and type != ''">
             and type = #{type}
         </if>
@@ -125,7 +125,7 @@
         <if test="modelIds != null and modelIds.size >0">
             and model_id in
             <foreach collection="modelIds" index="index" item="model" open="(" close=")"
-                    separator=",">
+                     separator=",">
                 #{model}
             </foreach>
         </if>

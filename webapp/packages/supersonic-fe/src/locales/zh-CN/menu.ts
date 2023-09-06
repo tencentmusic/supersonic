@@ -7,11 +7,14 @@ export default {
   'menu.exception.not-permission': '403',
   'menu.exception.not-find': '404',
   'menu.exception.server-error': '500',
-  'menu.semanticModel': '模型管理',
+  'menu.semanticModel': '语义模型',
+  'menu.semanticModel.model': '模型管理',
+  'menu.semanticModel.database': '数据库连接',
   'menu.metric': '指标市场',
+  'menu.database': '数据库连接',
   'menu.chatSetting': '问答设置',
-  'menu.chatPlugin': '问答插件',
+  'menu.plugin': '插件市场',
   'menu.login': '登录',
   'menu.chat': '问答对话',
-  'menu.agent': '问答助理'
+  'menu.agent': '智能助理',
 };

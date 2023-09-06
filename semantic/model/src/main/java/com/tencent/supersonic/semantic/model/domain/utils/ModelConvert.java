@@ -11,11 +11,11 @@ import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.model.domain.dataobject.ModelDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Model;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 
 public class ModelConvert {
 
@@ -57,7 +57,7 @@ public class ModelConvert {
     }
 
     public static ModelResp convert(ModelDO modelDO,
-            Map<Long, DomainResp> domainRespMap) {
+                                    Map<Long, DomainResp> domainRespMap) {
         ModelResp modelResp = convert(modelDO);
         DomainResp domainResp = domainRespMap.get(modelResp.getDomainId());
         if (domainResp != null) {

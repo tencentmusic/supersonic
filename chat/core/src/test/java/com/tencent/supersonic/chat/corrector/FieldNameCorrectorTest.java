@@ -1,8 +1,7 @@
-package com.tencent.supersonic.chat.query.llm.dsl.corrector;
+package com.tencent.supersonic.chat.corrector;
 
 import com.tencent.supersonic.chat.api.pojo.CorrectionInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.corrector.FieldValueCorrector;
 import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMReq;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMReq.ElementValue;
@@ -14,12 +13,12 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-class FieldValueCorrectorTest {
+class FieldNameCorrectorTest {
 
     @Test
     void rewriter() {
 
-        FieldValueCorrector corrector = new FieldValueCorrector();
+        FieldNameCorrector corrector = new FieldNameCorrector();
         CorrectionInfo correctionInfo = CorrectionInfo.builder()
                 .sql("select 歌曲名 from 歌曲库 where 专辑照片 = '七里香' and 专辑名 = '流行' and 数据日期 = '2023-08-19'")
                 .build();

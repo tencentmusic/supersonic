@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.persistence.dataobject;
 
 import java.util.Date;
+
 import lombok.Data;
 import lombok.ToString;
 

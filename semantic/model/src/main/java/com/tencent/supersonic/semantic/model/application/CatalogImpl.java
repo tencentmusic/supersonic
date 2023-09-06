@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Component
@@ -48,7 +49,12 @@ public class CatalogImpl implements Catalog {
     }
 
     public DatabaseResp getDatabaseByModelId(Long modelId) {
-        return databaseService.getDatabaseByModelId(modelId);
+        List<DatasourceResp> datasourceResps = datasourceService.getDatasourceList(modelId);
+        if (!CollectionUtils.isEmpty(datasourceResps)) {
+            Long databaseId = datasourceResps.iterator().next().getDatabaseId();
+            return databaseService.getDatabase(databaseId);
+        }
+        return null;
     }
 
     @Override

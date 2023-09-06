@@ -5,10 +5,10 @@ import static com.tencent.supersonic.common.pojo.Constants.PARENTHESES_START;
 import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 import static com.tencent.supersonic.common.pojo.Constants.SYS_VAR;
 
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Criterion;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
+import com.tencent.supersonic.common.pojo.Constants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

@@ -5,7 +5,7 @@
 <mapper namespace="com.tencent.supersonic.knowledge.persistence.mapper.DictTaskMapper">
 
     <resultMap id="DimValueDictTaskPO"
-            type="com.tencent.supersonic.knowledge.persistence.dataobject.DictTaskDO">
+               type="com.tencent.supersonic.knowledge.persistence.dataobject.DictTaskDO">
         <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="description" property="description"/>
@@ -21,8 +21,8 @@
     <insert id="createDimValueTask">
         insert into s2_dictionary_task
         (`name`, description, command, command_md5, status, created_by, progress, elapsed_ms)
-        values (#{name}, #{description}, #{command}, #{commandMd5}, #{status}, #{createdBy},
-                #{progress}, #{elapsedMs})
+        values
+        (#{name}, #{description}, #{command}, #{commandMd5}, #{status}, #{createdBy}, #{progress}, #{elapsedMs})
     </insert>
 
     <update id="updateTaskStatus">
@@ -54,7 +54,7 @@
                 and id >= #{id}
             </if>
             <if test="name != null and name !=''">
-                and `name` like "%"#{name}"%"
+                and `name` like  "%"#{name}"%"
             </if>
             <if test="createdBy != null and createdBy !=''">
                 and created_by = #{createdBy}

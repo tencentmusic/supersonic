@@ -21,7 +21,7 @@ With these ideas in mind, we develop SuperSonic as a practical reference impleme
 
 - Built-in CUI(Chat User Interface) for *business users* to enter data queries
 - Built-in GUI(Graphical User Interface) for *analytics engineers* to build semantic models
-- Built-in GUI for *system administrators* to manage chat plugins and agents
+- Built-in GUI for *system administrators* to manage chat agents and third-party plugins
 - Support input auto-completion as well as query recommendation
 - Support multi-turn conversation and history context management 
 - Support four-level permission control: domain-level, model-level, column-level and row-level

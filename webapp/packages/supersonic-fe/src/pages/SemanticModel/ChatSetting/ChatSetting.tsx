@@ -11,7 +11,7 @@ type Props = {
 const ChatSetting: React.FC<Props> = () => {
   return (
     <>
-      <Helmet title={'模型管理-超音数'} />
+      <Helmet title={'语义模型-超音数'} />
       <OverviewContainer mode={'chatSetting'} />
     </>
   );

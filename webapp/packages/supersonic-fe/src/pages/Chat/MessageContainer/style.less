@@ -1,0 +1,148 @@
+.messageContainer {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  .messageList {
+    display: flex;
+    flex-direction: column;
+    padding: 70px 20px 60px 14px;
+    row-gap: 16px;
+
+    .messageItem {
+      display: flex;
+      flex-direction: column;
+      row-gap: 20px;
+
+      :global {
+        .ant-table-small {
+          .ant-table-tbody {
+            .ant-table-cell {
+              padding: 6px 0 !important;
+            }
+          }
+          .ss-chat-table-formatted-value {
+            font-size: 15px !important;
+          }
+        }
+        .ant-table-row {
+          background-color: #fff;
+        }
+
+        .ant-table-tbody > tr > td {
+          border-bottom: 1px solid #f0f0f0;
+          transition: background 0.2s, border-color 0.2s;
+        }
+
+        .ss-chat-table-even-row {
+          background-color: #fbfbfb;
+        }
+
+        .ant-table-wrapper .ant-table-pagination {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          margin: 16px 0 0;
+          row-gap: 8px;
+        }
+
+        .ant-pagination .ant-pagination-prev,
+        .ant-pagination .ant-pagination-next {
+          display: inline-block;
+          min-width: 32px;
+          height: 32px;
+          color: rgba(0, 0, 0, 0.88);
+          line-height: 32px;
+          text-align: center;
+          vertical-align: middle;
+          list-style: none;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 0.2s;
+
+          .ant-pagination-item-link {
+            display: block;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            font-size: 12px;
+            text-align: center;
+            background-color: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            outline: none;
+            transition: border 0.2s;
+          }
+        }
+
+        .ant-pagination-jump-prev,
+        .ant-pagination-jump-next {
+          .ant-pagination-item-link {
+            display: inline-block;
+            min-width: 32px;
+            height: 32px;
+            color: rgba(0, 0, 0, 0.25);
+            line-height: 32px;
+            text-align: center;
+            vertical-align: middle;
+            list-style: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+        }
+
+        .ant-pagination-options {
+          display: inline-block;
+          margin-left: 16px;
+          vertical-align: middle;
+        }
+
+        .ant-pagination .ant-pagination-item {
+          display: inline-block;
+          min-width: 32px;
+          height: 32px;
+          line-height: 30px;
+          text-align: center;
+          vertical-align: middle;
+          list-style: none;
+          background-color: transparent;
+          border: 1px solid transparent;
+          border-radius: 6px;
+          outline: 0;
+          cursor: pointer;
+          user-select: none;
+          margin-inline-end: 8px;
+        }
+
+        .ant-pagination .ant-pagination-item-active {
+          font-weight: 600;
+          background-color: #ffffff;
+          border-color: var(--primary-color);
+        }
+
+        .ant-pagination {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+          color: #606266;
+          font-size: 14px;
+          font-variant: tabular-nums;
+          line-height: 1.5715;
+          list-style: none;
+          font-feature-settings: 'tnum', 'tnum';
+        }
+      }
+    }
+  }
+
+  &.mobile {
+    .messageList {
+      padding: 20px 10px 30px;
+    }
+  }
+}

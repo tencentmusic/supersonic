@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.service.SearchService;
@@ -30,6 +31,9 @@ public class QueryMatchStrategy implements MatchStrategy {
 
     @Autowired
     private MapperHelper mapperHelper;
+
+    @Autowired
+    private OptimizationConfig optimizationConfig;
 
     @Override
     public Map<MatchText, List<MapResult>> match(QueryReq queryReq, List<Term> terms, Set<Long> detectModelIds) {
@@ -111,7 +115,7 @@ public class QueryMatchStrategy implements MatchStrategy {
         String detectSegment = text.substring(index, i);
 
         // step1. pre search
-        Integer oneDetectionMaxSize = mapperHelper.getOneDetectionMaxSize();
+        Integer oneDetectionMaxSize = optimizationConfig.getOneDetectionMaxSize();
         LinkedHashSet<MapResult> mapResults = SearchService.prefixSearch(detectSegment, oneDetectionMaxSize, agentId,
                 detectModelIds).stream().collect(Collectors.toCollection(LinkedHashSet::new));
         // step2. suffix search
@@ -153,7 +157,7 @@ public class QueryMatchStrategy implements MatchStrategy {
         if (CollectionUtils.isNotEmpty(dimensionMetrics)) {
             return dimensionMetrics;
         } else {
-            return mapResults.stream().limit(mapperHelper.getOneDetectionSize()).collect(Collectors.toList());
+            return mapResults.stream().limit(optimizationConfig.getOneDetectionSize()).collect(Collectors.toList());
         }
     }
 }

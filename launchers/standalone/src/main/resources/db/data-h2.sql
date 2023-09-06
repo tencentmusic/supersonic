@@ -9,7 +9,7 @@ insert into s2_user (id, `name`, password, display_name, email) values (5, 'alic
 insert into s2_domain (id, `name`, biz_name, parent_id, status, created_at, created_by, updated_at, updated_by, `admin`, admin_org, viewer, view_org) VALUES(1, '超音数', 'supersonic', 0, 1, '2023-05-24 00:00:00', 'admin', '2023-05-24 00:00:00', 'admin', 'admin', '', 'admin,tom,jack', 'admin' );
 insert into s2_model (id, `name`, biz_name, domain_id, created_at, created_by, updated_at, updated_by, `admin`, admin_org, is_open, viewer, view_org, entity) VALUES(1, '超音数', 'supersonic', 1, '2023-05-24 00:00:00', 'admin', '2023-05-24 00:00:00', 'admin', 'admin', '', 0, 'admin,tom,jack', 'admin','' );
 insert into s2_model (id, `name`, biz_name, domain_id, created_at, created_by, updated_at, updated_by, `admin`, admin_org, is_open, viewer, view_org, entity) VALUES(2, '艺人库', 'singer', 1, '2023-05-24 00:00:00', 'admin', '2023-05-24 00:00:00', 'admin', 'admin', '', 0, 'admin,tom,jack', 'admin','{"entityId": 7, "names": ["歌手", "艺人"]}' );
-insert into s2_database (id, domain_id , `name`, description, `type` ,config ,created_at ,created_by ,updated_at ,updated_by) VALUES(1, 1, 'H2数据实例', '', 'h2', '{"password":"semantic","url":"jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false","userName":"root"}', '2023-05-24 00:00:00', 'admin', '2023-05-24 00:00:00', 'admin');
+insert into s2_database (id, `name`, description, `type` ,config ,created_at ,created_by ,updated_at ,updated_by, `admin`) VALUES(1, 'H2数据实例', '', 'h2', '{"password":"semantic","url":"jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false","userName":"root"}', '2023-05-24 00:00:00', 'admin', '2023-05-24 00:00:00', 'admin', 'admin');
 insert into s2_datasource (id ,  model_id,  `name`, biz_name,  description,  database_id ,datasource_detail, created_at, created_by, updated_at, updated_by ) VALUES(1, 1, '停留时长统计', 's2_stay_time_statis', '停留时长统计', 1, 	'{"dimensions":[{"bizName":"imp_date","dateFormat":"yyyy-MM-dd","expr":"imp_date","isCreateDimension":0,"type":"time","typeParams":{"isPrimary":"true","timeGranularity":"day"}},{"bizName":"page","dateFormat":"yyyy-MM-dd","expr":"page","isCreateDimension":0,"type":"categorical"}],"identifiers":[{"bizName":"user_name","name":"用户名","type":"primary"}],"measures":[{"agg":"sum","bizName":"s2_stay_time_statis_stay_hours","expr":"stay_hours","isCreateMetric":1,"name":"停留时长"}],"queryType":"sql_query","sqlQuery":"SELECT imp_date, page,user_name,stay_hours FROM s2_stay_time_statis"}', '2023-05-25 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin');
 insert into s2_datasource (id ,  model_id,  `name`, biz_name,  description,  database_id ,datasource_detail, created_at, created_by, updated_at, updated_by ) VALUES(2, 1, 'PVUV统计', 's2_pv_uv_statis', 'PVUV统计', 1, 	'{"dimensions":[{"bizName":"imp_date","dateFormat":"yyyy-MM-dd","expr":"imp_date","isCreateDimension":0,"type":"time","typeParams":{"isPrimary":"true","timeGranularity":"day"}},{"bizName":"page","dateFormat":"yyyy-MM-dd","expr":"page","isCreateDimension":0,"type":"categorical"}],"identifiers":[{"bizName":"user_name","name":"用户名","type":"primary"}],"measures":[{"agg":"sum","bizName":"s2_pv_uv_statis_pv","expr":"pv","isCreateMetric":1,"name":"访问次数"},{"agg":"count_distinct","bizName":"s2_pv_uv_statis_uv","expr":"uv","isCreateMetric":1,"name":"访问人数"}],"queryType":"sql_query","sqlQuery":"SELECT imp_date, user_name,page,1 as pv, user_name as uv FROM s2_pv_uv_statis"}', '2023-05-25 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin');
 insert into s2_datasource (id ,  model_id,  `name`, biz_name,  description,  database_id ,datasource_detail, created_at, created_by, updated_at, updated_by ) VALUES(3, 1, '用户部门', 'user_department', '用户部门', 1, 	'{"dimensions":[{"bizName":"department","dateFormat":"yyyy-MM-dd","expr":"department","isCreateDimension":1,"name":"部门","type":"categorical"}],"identifiers":[{"bizName":"user_name","name":"用户名","type":"primary"}],"measures":[],"queryType":"sql_query","sqlQuery":"SELECT user_name,department FROM s2_user_department"}', '2023-05-25 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin');
@@ -44,60 +44,53 @@ insert into s2_auth_groups (group_id, config)
 values (2, '{"modelId":"1","name":"tom_sales_permission","groupId":2,"authRules":[{"metrics":["stay_hours"],"dimensions":["page"]}],"dimensionFilters":["department in (''sales'')"],"dimensionFilterDescription":"部门 in [sales]", "authorizedUsers":["tom"],"authorizedDepartmentIds":[]}');
 
 -- sample data
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '周杰伦', '港台','青花瓷','国风',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '周杰伦', '港台','青花瓷','国风',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '周杰伦', '港台','青花瓷','国风',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '周杰伦', '港台','青花瓷','国风',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '周杰伦', '港台','青花瓷','国风',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '周杰伦', '港台','青花瓷','国风',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '周杰伦', '港台','青花瓷','国风',1000000,1000000,1000000);
 
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '陈奕迅', '港台','爱情转移','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '陈奕迅', '港台','爱情转移','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '陈奕迅', '港台','爱情转移','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '陈奕迅', '港台','爱情转移','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '陈奕迅', '港台','爱情转移','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '陈奕迅', '港台','爱情转移','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '陈奕迅', '港台','爱情转移','流行',1000000,1000000,1000000);
 
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '林俊杰', '港台','美人鱼','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '林俊杰', '港台','美人鱼','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '林俊杰', '港台','美人鱼','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '林俊杰', '港台','美人鱼','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '林俊杰', '港台','美人鱼','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '林俊杰', '港台','美人鱼','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '林俊杰', '港台','美人鱼','流行',1000000,1000000,1000000);
 
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '张碧晨', '内地','光的方向','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '张碧晨', '内地','光的方向','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '张碧晨', '内地','光的方向','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '张碧晨', '内地','光的方向','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '张碧晨', '内地','光的方向','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '张碧晨', '内地','光的方向','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '张碧晨', '内地','光的方向','流行',1000000,1000000,1000000);
 
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '程响', '内地','人间烟火','国风',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '程响', '内地','人间烟火','国风',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '程响', '内地','人间烟火','国风',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '程响', '内地','人间烟火','国风',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '程响', '内地','人间烟火','国风',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '程响', '内地','人间烟火','国风',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '程响', '内地','人间烟火','国风',1000000,1000000,1000000);
 
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), 'Taylor Swift', '欧美','Love Story','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), 'Taylor Swift', '欧美','Love Story','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), 'Taylor Swift', '欧美','Love Story','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), 'Taylor Swift', '欧美','Love Story','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), 'Taylor Swift', '欧美','Love Story','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), 'Taylor Swift', '欧美','Love Story','流行',1000000,1000000,1000000);
+INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), 'Taylor Swift', '欧美','Love Story','流行',1000000,1000000,1000000);
 
 ---demo data for semantic and chat
 insert into s2_user_department (user_name, department) values ('jack','HR');

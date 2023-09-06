@@ -3,15 +3,14 @@ package com.tencent.supersonic.semantic.query.parser.calcite;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.query.parser.SqlParser;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.SemanticModel;
 import com.tencent.supersonic.semantic.query.parser.calcite.planner.AggPlanner;
+import com.tencent.supersonic.semantic.query.parser.calcite.dsl.SemanticModel;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import org.springframework.stereotype.Component;
 
 @Component("CalciteSqlParser")
 public class CalciteSqlParser implements SqlParser {
-
     private final SemanticSchemaManager semanticSchemaManager;
 
     public CalciteSqlParser(

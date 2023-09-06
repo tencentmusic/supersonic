@@ -40,6 +40,7 @@ public class SqlParseUtils {
 
             handlerSQL(sqlNode, sqlParserInfo);
 
+
             sqlParserInfo.setAllFields(sqlParserInfo.getAllFields().stream().distinct().collect(Collectors.toList()));
 
             sqlParserInfo.setSelectFields(

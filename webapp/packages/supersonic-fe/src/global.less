@@ -141,7 +141,58 @@ ol {
   backdrop-filter: blur(10px) !important;
 }
 
+.ant-menu.ant-menu-dark {
+  color: #fff;
+}
 
+.ant-menu-submenu-selected {
+  background-color: #296DF3 !important;
+}
+
+.ant-menu.ant-menu-dark .ant-menu-sub {
+  background-color: #fff;
+  .ant-menu-item-selected {
+    background-color: #296DF3;
+    .ant-pro-menu-item-title {
+      color: #fff;
+    }
+  }
+  .ant-menu-item {
+    &:hover {
+      background-color: #e3e3e3;
+
+      .ant-menu-item-selected {
+        background-color: #e3e3e3;
+        .ant-pro-menu-item-title {
+          color: #181a1a !important;
+        }
+      }
+      .ant-pro-menu-item-title {
+        color: #181a1a !important;
+      }
+    }
+    & > span > a {
+      color: #181a1a;
+      &:hover {
+        color: #181a1a;
+      }
+    }
+  }
+}
+.ant-menu-item:active {
+  background: inherit
+}
+// .ant-menu-dark .ant-menu-item > span > a {
+//   color: #181a1a;
+//   &:hover {
+//     color: #fff;
+//   }
+// }
+// .ant-menu-dark.ant-menu-dark:not(.ant-menu-horizontal) .ant-menu-item-selected  {
+//   // color: #fff;
+//   background-color: #1b4aef;
+
+// }
 
 .customizeHeader {
   background-color: rgba(0, 0, 0, 0.2);

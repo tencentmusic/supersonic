@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_context`
 CREATE TABLE IF NOT EXISTS `s2_chat`
 (
     `chat_id`       BIGINT auto_increment ,-- AUTO_INCREMENT,
+    `agent_id`       INT DEFAULT NULL,
     `chat_name`     varchar(100) DEFAULT NULL,
     `create_time`   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
     `last_time`     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
@@ -133,7 +134,6 @@ COMMENT ON TABLE s2_model IS 'model information';
 
 CREATE TABLE `s2_database` (
                                `id` INT NOT NULL AUTO_INCREMENT,
-                               `domain_id` INT NOT  NULL ,
                                `name` varchar(255) NOT  NULL ,
                                `description` varchar(500) DEFAULT  NULL ,
                                `version` varchar(64) DEFAULT  NULL ,
@@ -143,6 +143,8 @@ CREATE TABLE `s2_database` (
                                `created_by` varchar(100) NOT  NULL ,
                                `updated_at` TIMESTAMP NOT  NULL ,
                                `updated_by` varchar(100) NOT  NULL,
+                               `admin` varchar(500) NOT  NULL,
+                               `viewer` varchar(500) DEFAULT  NULL,
                                PRIMARY KEY (`id`)
 );
 COMMENT ON TABLE s2_database IS 'database instance table';

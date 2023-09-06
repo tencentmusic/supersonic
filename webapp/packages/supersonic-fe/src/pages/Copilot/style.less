@@ -34,10 +34,11 @@
   z-index: 999;
   display: flex;
   flex-direction: column;
-  width: 50vw;
+  width: 70vw;
+  min-width: 1100px;
   height: 90vh;
   overflow: hidden;
-  box-shadow: 8px 8px 20px rgba(55, 99, 170, 0.1), -2px -2px 16px rgba(55, 99, 170, 0.1);
+  box-shadow: 4px 4px 10px rgba(55, 99, 170, 0.3), -2px -2px 16px rgba(55, 99, 170, 0.3);
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out,
     -webkit-transform 0.3s ease-in-out;
 
@@ -47,16 +48,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 50px;
+    height: 40px;
     padding-right: 16px;
     padding-left: 16px;
-    background: linear-gradient(90deg, #4692ff 0%, #1877ff 98%);
+    background: linear-gradient(81.62deg, #2870ea 8.72%, var(--chat-blue) 85.01%);
     box-shadow: 1px 1px 8px #1b4aef5c;
 
     .title {
       color: #fff;
       font-weight: 700;
-      font-size: 18px;
+      font-size: 16px;
     }
 
     .leftSection {
@@ -85,13 +86,13 @@
   }
 
   .chat {
-    height: calc(90vh - 50px);
+    height: calc(90vh - 40px);
   }
 
   &.fullscreen {
     bottom: 0;
-    left: 0;
-    width: calc(100vw - 90px);
+    left: 60px;
+    width: calc(100vw - 150px);
     height: 100vh;
 
     .chat {

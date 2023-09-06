@@ -9,8 +9,10 @@ public class FunctionCorrector extends BaseSemanticCorrector {
 
     @Override
     public CorrectionInfo corrector(CorrectionInfo correctionInfo) {
-        String replaceFunction = SqlParserUpdateHelper.replaceFunction(correctionInfo.getSql());
-        correctionInfo.setSql(replaceFunction);
+        String preSql = correctionInfo.getSql();
+        correctionInfo.setPreSql(preSql);
+        String sql = SqlParserUpdateHelper.replaceFunction(preSql);
+        correctionInfo.setSql(sql);
         return correctionInfo;
     }
 }

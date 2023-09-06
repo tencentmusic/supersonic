@@ -4,19 +4,18 @@ const Settings: LayoutSettings & {
   pwa?: boolean;
   logo?: string;
 } = {
-  navTheme: 'light',
+  navTheme: 'dark',
   primaryColor: '#296DF3',
-  layout: 'mix',
+  layout: 'top',
   contentWidth: 'Fluid',
   fixedHeader: false,
   fixSiderbar: true,
   colorWeak: false,
   title: '',
   pwa: false,
-  iconfontUrl: '//at.alicdn.com/t/c/font_4120566_qiku6b2kol.js',
+  iconfontUrl: '//at.alicdn.com/t/c/font_4120566_x5c4www9bqm.js',
   splitMenus: true,
   menu: {
-    defaultOpenAll: true,
     autoClose: false,
     ignoreFlatMenu: true,
   },

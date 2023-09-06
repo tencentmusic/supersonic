@@ -4,6 +4,7 @@ import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 
 import java.util.List;
@@ -12,18 +13,18 @@ import java.util.OptionalDouble;
 
 import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
+import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 
 @Slf4j
 public class HeuristicQuerySelector implements QuerySelector {
 
-    private static final double CANDIDATE_THRESHOLD = 0.2;
-
     @Override
     public List<SemanticQuery> select(List<SemanticQuery> candidateQueries, QueryReq queryReq) {
         List<SemanticQuery> selectedQueries = new ArrayList<>();
-
+        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
+        Double candidateThreshold = optimizationConfig.getCandidateThreshold();
         if (CollectionUtils.isNotEmpty(candidateQueries) && candidateQueries.size() == 1) {
             selectedQueries.addAll(candidateQueries);
         } else {
@@ -35,7 +36,7 @@ public class HeuristicQuerySelector implements QuerySelector {
                 candidateQueries.stream().forEach(query -> {
                     SemanticParseInfo parseInfo = query.getParseInfo();
                     if (!checkFullyInherited(query)
-                            && (maxScore - parseInfo.getScore()) / maxScore <= CANDIDATE_THRESHOLD
+                            && (maxScore - parseInfo.getScore()) / maxScore <= candidateThreshold
                             && checkSatisfyOtherRules(query, candidateQueries)) {
                         selectedQueries.add(query);
                     }

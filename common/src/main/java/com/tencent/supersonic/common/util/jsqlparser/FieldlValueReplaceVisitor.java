@@ -2,20 +2,20 @@ package com.tencent.supersonic.common.util.jsqlparser;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
-public class FiledValueReplaceVisitor extends ExpressionVisitorAdapter {
+public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
 
-    private Map<String, Set<String>> fieldValueToFieldNames;
+    private Map<String, Map<String, String>> filedNameToValueMap;
 
-    public FiledValueReplaceVisitor(Map<String, Set<String>> fieldValueToFieldNames) {
-        this.fieldValueToFieldNames = fieldValueToFieldNames;
+    public FieldlValueReplaceVisitor(Map<String, Map<String, String>> filedNameToValueMap) {
+        this.filedNameToValueMap = filedNameToValueMap;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class FiledValueReplaceVisitor extends ExpressionVisitorAdapter {
         if (!(leftExpression instanceof Column)) {
             return;
         }
-        if (CollectionUtils.isEmpty(fieldValueToFieldNames)) {
+        if (CollectionUtils.isEmpty(filedNameToValueMap)) {
             return;
         }
         if (Objects.isNull(rightExpression) || Objects.isNull(leftExpression)) {
@@ -37,9 +37,17 @@ public class FiledValueReplaceVisitor extends ExpressionVisitorAdapter {
         Column leftColumnName = (Column) leftExpression;
         StringValue rightStringValue = (StringValue) rightExpression;
 
-        Set<String> fieldNames = fieldValueToFieldNames.get(rightStringValue.getValue());
-        if (!CollectionUtils.isEmpty(fieldNames) && !fieldNames.contains(leftColumnName.getColumnName())) {
-            leftColumnName.setColumnName(fieldNames.stream().findFirst().get());
+        String columnName = leftColumnName.getColumnName();
+        if (StringUtils.isEmpty(columnName)) {
+            return;
+        }
+        Map<String, String> valueMap = filedNameToValueMap.get(columnName);
+        if (Objects.isNull(valueMap) || valueMap.isEmpty()) {
+            return;
+        }
+        String replaceValue = valueMap.get(rightStringValue.getValue());
+        if (StringUtils.isNotEmpty(replaceValue)) {
+            rightStringValue.setValue(replaceValue);
         }
     }
 

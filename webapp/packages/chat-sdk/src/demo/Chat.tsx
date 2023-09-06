@@ -61,7 +61,6 @@ const Chat = () => {
             agentId={6}
             onMsgDataLoaded={onMsgDataLoaded}
             isLastMessage
-            isMobileMode
             triggerResize={triggerResize}
           />
         </div>

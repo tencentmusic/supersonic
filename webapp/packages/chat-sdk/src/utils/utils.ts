@@ -69,7 +69,7 @@ export const getFormattedValue = (value: number | string, remainZero?: boolean) 
     +value >= 100000000
       ? NumericUnit.OneHundredMillion
       : +value >= 10000
-        ? NumericUnit.EnTenThousand
+        ? NumericUnit.TenThousand
         : NumericUnit.None;
 
   let formattedValue = formatByUnit(value, unit);
@@ -127,7 +127,7 @@ export const normalizeTrendData = (
 ) => {
   const dateList = enumerateDaysBetweenDates(moment(startDate), moment(endDate), dateType);
   const result = dateList.map((date) => {
-    const item = resultList.find((result) => result[dateColumnName] === date);
+    const item = resultList.find((result) => moment(result[dateColumnName]).format(dateType === 'months' ? 'YYYY-MM' : 'YYYY-MM-DD') === date);
     return {
       ...(item || {}),
       [dateColumnName]: date,
@@ -161,8 +161,9 @@ export function getLightenDarkenColor(col, amt) {
   } else {
     result = hexToRgbObj(col) || {};
   }
-  return `rgba(${result.r + amt},${result.g + amt},${result.b + amt}${result.a ? `,${result.a}` : ''
-    })`;
+  return `rgba(${result.r + amt},${result.g + amt},${result.b + amt}${
+    result.a ? `,${result.a}` : ''
+  })`;
 }
 
 export function getChartLightenColor(col) {

@@ -1,232 +1,60 @@
 @import '~antd/es/style/themes/default.less';
 
 .chat {
-  height: calc(100vh - 48px) !important;
+  height: 100%;
   overflow: hidden;
   background: linear-gradient(180deg, rgba(23, 74, 228, 0) 29.44%, rgba(23, 74, 228, 0.06) 100%),
     linear-gradient(90deg, #f3f3f7 0%, #f3f3f7 20%, #ebf0f9 60%, #f3f3f7 80%, #f3f3f7 100%);
 
   .chatSection {
     display: flex;
-    width: 100vw !important;
-    height: calc(100vh - 48px) !important;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-  }
 
-  .chatApp {
-    display: flex;
-    flex-direction: column;
-    width: calc(100vw - 260px);
-    height: calc(100vh - 48px) !important;
-    padding-left: 6px;
-    color: rgba(0, 0, 0, 0.87);
-
-    .emptyHolder {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-    }
-
-    .navBar {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      height: 40px;
-      padding: 0 10px;
-      background: rgb(243 243 243);
-      border-bottom: 1px solid rgb(228, 228, 228);
-
-      .conversationNameWrapper {
-        display: flex;
-        align-items: center;
-
-        .conversationName {
-          padding: 4px 12px;
-          color: var(--text-color-third) !important;
-          font-size: 14px !important;
-          border-radius: 4px;
-          cursor: pointer;
-
-          .editIcon {
-            margin-left: 10px;
-            color: var(--text-color-fourth);
-            font-size: 14px;
-          }
-
-          &:hover {
-            background-color: rgba(0, 0, 0, 0.03);
-          }
-        }
-
-        .divider {
-          width: 1px;
-          height: 16px;
-          margin-right: 4px;
-          margin-left: 12px;
-          background-color: var(--text-color-fourth);
-        }
-      }
-
-      .conversationInput {
-        width: 300px;
-        color: var(--text-color-third) !important;
-        font-size: 14px !important;
-        cursor: default !important;
-      }
-    }
-
-    .chatBody {
+    .chatApp {
       display: flex;
       flex: 1;
+      flex-direction: column;
       height: 100%;
+      color: rgba(0, 0, 0, 0.87);
 
-      .chatContent {
+      .chatBody {
         display: flex;
-        flex-direction: column;
-        width: 100%;
+        flex: 1;
+        height: 100%;
 
-        .messageContainer {
+        .chatContent {
           position: relative;
           display: flex;
-          flex: 1;
           flex-direction: column;
-          min-height: 0;
-          overflow-x: hidden;
-          overflow-y: scroll;
+          width: 100%;
 
-          .messageList {
+          .chatHeader {
+            position: absolute;
+            top: 0;
+            z-index: 999;
             display: flex;
-            flex-direction: column;
-            padding: 20px 20px 60px 4px;
-            row-gap: 16px;
+            align-items: baseline;
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(243, 243, 247, 0.85);
+            backdrop-filter: blur(2px);
 
-            .messageItem {
-              display: flex;
-              flex-direction: column;
-              row-gap: 20px;
+            .chatHeaderTitle {
+              color: var(--text-color);
+              font-weight: 500;
+              font-size: 15px;
+            }
 
-              :global {
-                .ant-table-small {
-                  .ant-table-tbody {
-                    .ant-table-cell {
-                      padding: 6px 0 !important;
-                    }
-                  }
-                  .ss-chat-table-formatted-value {
-                    font-size: 15px !important;
-                  }
-                }
-                .ant-table-row {
-                  background-color: #fff;
-                }
-
-                .ant-table-tbody > tr > td {
-                  border-bottom: 1px solid #f0f0f0;
-                  transition: background 0.2s, border-color 0.2s;
-                }
-
-                .ss-chat-table-even-row {
-                  background-color: #fbfbfb;
-                }
-
-                .ant-table-wrapper .ant-table-pagination {
-                  display: flex;
-                  flex-wrap: wrap;
-                  justify-content: center;
-                  margin: 16px 0 0;
-                  row-gap: 8px;
-                }
-
-                .ant-pagination .ant-pagination-prev,
-                .ant-pagination .ant-pagination-next {
-                  display: inline-block;
-                  min-width: 32px;
-                  height: 32px;
-                  color: rgba(0, 0, 0, 0.88);
-                  line-height: 32px;
-                  text-align: center;
-                  vertical-align: middle;
-                  list-style: none;
-                  border-radius: 6px;
-                  cursor: pointer;
-                  transition: all 0.2s;
-
-                  .ant-pagination-item-link {
-                    display: block;
-                    width: 100%;
-                    height: 100%;
-                    padding: 0;
-                    font-size: 12px;
-                    text-align: center;
-                    background-color: transparent;
-                    border: 1px solid transparent;
-                    border-radius: 6px;
-                    outline: none;
-                    transition: border 0.2s;
-                  }
-                }
-
-                .ant-pagination-jump-prev,
-                .ant-pagination-jump-next {
-                  .ant-pagination-item-link {
-                    display: inline-block;
-                    min-width: 32px;
-                    height: 32px;
-                    color: rgba(0, 0, 0, 0.25);
-                    line-height: 32px;
-                    text-align: center;
-                    vertical-align: middle;
-                    list-style: none;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                  }
-                }
-
-                .ant-pagination-options {
-                  display: inline-block;
-                  margin-left: 16px;
-                  vertical-align: middle;
-                }
-
-                .ant-pagination .ant-pagination-item {
-                  display: inline-block;
-                  min-width: 32px;
-                  height: 32px;
-                  line-height: 30px;
-                  text-align: center;
-                  vertical-align: middle;
-                  list-style: none;
-                  background-color: transparent;
-                  border: 1px solid transparent;
-                  border-radius: 6px;
-                  outline: 0;
-                  cursor: pointer;
-                  user-select: none;
-                  margin-inline-end: 8px;
-                }
-
-                .ant-pagination .ant-pagination-item-active {
-                  font-weight: 600;
-                  background-color: #ffffff;
-                  border-color: var(--primary-color);
-                }
-
-                .ant-pagination {
-                  box-sizing: border-box;
-                  margin: 0;
-                  padding: 0;
-                  color: #606266;
-                  font-size: 14px;
-                  font-variant: tabular-nums;
-                  line-height: 1.5715;
-                  list-style: none;
-                  font-feature-settings: 'tnum', 'tnum';
-                }
-              }
+            .chatHeaderTip {
+              width: 600px;
+              margin-left: 16px;
+              overflow: hidden;
+              color: var(--text-color-fourth);
+              font-size: 12px;
+              white-space: nowrap;
+              text-overflow: ellipsis;
             }
           }
         }
@@ -234,541 +62,21 @@
     }
   }
 
-  &.conversationCollapsed {
-    .chatApp {
-      width: 100vw !important;
-    }
-  }
-
-  &.mobileMode {
-    height: 100% !important;
+  &.historyVisible {
     .chatSection {
-      width: 100% !important;
-      height: 100% !important;
-    }
-
-    .conversation {
-      height: 100% !important;
-
-      .conversationList {
-        height: calc(100% - 50px) !important;
-      }
-    }
-
-    .chatApp {
-      width: calc(100% - 260px) !important;
-      width: 100%;
-      height: 100% !important;
-      margin-top: 0 !important;
-      padding-left: 0 !important;
-    }
-
-    &.copilotFullscreen {
       .chatApp {
-        width: calc(100% - 260px) !important;
-      }
-    }
-
-    &.conversationCollapsed {
-      .chatApp {
-        width: 100% !important;
+        width: calc(100% - 707px);
       }
     }
   }
 
   &.mobile {
-    height: 100vh !important;
-  }
-}
-
-.conversation {
-  position: relative;
-  width: 260px;
-  height: calc(100vh - 48px) !important;
-  background-color: #fff;
-  border-right: 1px solid var(--border-color-base);
-
-  .leftSection {
-    width: 100%;
-    height: 100%;
-
-    .searchConversation {
-      display: flex;
-      align-items: center;
-      padding: 12px 9px 10px;
-
-      .searchIcon {
-        color: #999 !important;
-      }
-
-      .searchTask {
-        font-size: 13px;
-        background-color: #f5f5f5;
-        border: 0;
-        border-radius: 4px;
-        box-shadow: none !important;
-
-        :global {
-          .ant-input {
-            font-size: 13px !important;
-            background-color: transparent !important;
-          }
-        }
-      }
-    }
-
-    .conversationList {
-      height: calc(calc(100vh - 48px) - 50px);
-      padding: 2px 8px 0;
-      overflow-y: auto;
-      .conversationItem {
-        display: flex;
-        align-items: center;
-        margin-top: 2px;
-        padding: 6px 8px;
-        border-radius: 8px;
-        cursor: pointer;
-
-        .conversationIcon {
-          margin-right: 10px;
-          color: var(--text-color-fourth);
-          font-size: 20px;
-        }
-
-        .conversationContent {
-          width: 100%;
-
-          .topTitleBar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-
-            .conversationName {
-              width: 150px;
-              margin-right: 2px;
-              overflow: hidden;
-              color: var(--text-color);
-              font-size: 14px;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-            }
-
-            .conversationTime {
-              color: var(--text-color-six);
-              font-size: 12px;
-            }
-          }
-
-          .subTitle {
-            width: 180px;
-            overflow: hidden;
-            color: var(--text-color-six);
-            font-size: 12px;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-          }
-        }
-
-        &.activeConversationItem {
-          background-color: var(--light-blue-background);
-        }
-
-        &:hover {
-          background-color: var(--light-background);
-        }
-      }
-    }
-
-    .operateSection {
-      margin-top: 20px;
-      padding-left: 15px;
-    }
-
-    .operateItem {
-      display: flex;
-      align-items: center;
-      padding: 10px 0;
-      cursor: pointer;
-
-      .operateIcon {
-        margin-right: 10px;
-        color: var(--text-color-fourth);
-        font-size: 20px;
-      }
-
-      .operateLabel {
-        color: var(--text-color-third);
-        font-size: 14px;
-      }
-
-      &:hover {
-        .operateLabel {
-          color: var(--chat-blue);
-        }
+    .chatSection {
+      .chatApp {
+        width: 100%;
       }
     }
   }
-
-  &.collapsed {
-    width: 0;
-    padding: 0;
-    border-right: 0;
-
-    .leftSection {
-      .searchConversation {
-        display: none;
-      }
-
-      .conversationList {
-        display: none;
-      }
-
-      .operateSection {
-        display: none;
-      }
-    }
-  }
-
-  &.copilotMode {
-    &.collapsed {
-      width: 0 !important;
-    }
-  }
-}
-
-.mobileMode {
-  .messageList {
-    padding: 20px 12px 60px !important;
-  }
-}
-
-.keyword {
-  color: var(--primary-color);
-}
-
-.messageTime {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 20px;
-  color: #999;
-}
-
-.modules {
-  display: flex;
-  align-items: center;
-  height: 40px;
-  padding: 8px 12px;
-  overflow: hidden;
-  background: rgb(243, 243, 243);
-  border-top: 1px solid rgb(228, 228, 228);
-
-  .moduleType {
-    width: 80px;
-    margin-right: 12px;
-
-    :global {
-      .ant-select-selection-item {
-        font-size: 13px !important;
-      }
-      .ant-select-selection-item,
-      .ant-select-single:not(.ant-select-customize-input) .ant-select-selector::after {
-        line-height: 28px !important;
-      }
-    }
-
-    .moduleSelect {
-      box-sizing: border-box;
-      width: 100%;
-      height: 100%;
-      color: rgba(0, 0, 0, 0.87);
-      word-break: break-all;
-      border: 0;
-      border-radius: 20px;
-
-      :global {
-        .ant-select-selector {
-          height: 30px !important;
-          border: 1px solid var(--primary-color) !important;
-          border-radius: 20px !important;
-        }
-
-        .ant-select-arrow {
-          margin-top: -4px !important;
-        }
-      }
-    }
-  }
-
-  .example {
-    margin-right: 4px;
-    color: var(--text-color-secondary);
-    font-size: 13px;
-  }
-
-  :global {
-    button[ant-click-animating-without-extra-node]:after {
-      border: 0 none;
-      opacity: 0;
-      animation: none 0 ease 0 1 normal;
-    }
-
-    .iconBtn {
-      color: rgba(0, 0, 0, 0.4) !important;
-      background: transparent !important;
-      border: 0 !important;
-      box-shadow: none !important;
-
-      .scrollerControlIcon {
-        font-size: 12px;
-      }
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.05) !important;
-      }
-    }
-  }
-
-  .modulesInner {
-    display: flex;
-    flex: 1;
-    overflow-x: scroll;
-    overflow-y: hidden;
-    scroll-behavior: smooth;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-
-    .moduleItem {
-      position: relative;
-      display: flex;
-      align-items: center;
-      margin-left: 8px;
-      padding: 4px 11px;
-      color: var(--text-color);
-      font-weight: 500;
-      font-size: 14px;
-      line-height: 1.43;
-      white-space: nowrap;
-      background: #fff;
-      border: 1px solid #fff;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: 0.15s ease-in-out;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.05);
-        background-clip: padding-box;
-        border-color: rgba(0, 0, 0, 0.05);
-      }
-
-      &:first-child {
-        margin-left: 0 !important;
-      }
-
-      &.activeModuleItem {
-        color: var(--primary-color) !important;
-        border-color: var(--primary-color) !important;
-      }
-
-      &.cmdItem {
-        font-weight: normal;
-        font-size: 13px;
-      }
-    }
-  }
-}
-
-.optGroupBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  &.recentSearchBar {
-    padding-top: 2px;
-    padding-bottom: 5px;
-  }
-
-  .optGroupTitle {
-    color: #333;
-    font-weight: 500;
-    font-size: 14px;
-  }
-
-  .recentSearch {
-    color: #999;
-    font-weight: normal;
-  }
-
-  .clearSearch {
-    color: #666;
-    font-size: 14px;
-    cursor: pointer;
-  }
-}
-
-.recentSearchOption {
-  padding-left: 12px !important;
-
-  .optionItem {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 483px;
-
-    .removeRecentMsg {
-      display: none;
-      cursor: pointer;
-    }
-  }
-  &:hover {
-    .removeRecentMsg {
-      display: block;
-    }
-  }
-}
-
-.addConversation {
-  display: flex;
-  align-items: center;
-  margin-left: 12px;
-  color: var(--text-color-third);
-  column-gap: 4px;
-  cursor: pointer;
-
-  &:hover {
-    color: var(--primary-color);
-  }
-}
-
-.loadingWords {
-  padding: 40px 1px;
-}
-
-.associateWordsOption {
-  display: flex;
-  align-items: center;
-  column-gap: 10px;
-
-  .optionContent {
-    display: flex;
-    align-items: center;
-    min-width: 450px;
-    column-gap: 10px;
-  }
-
-  .indicatorItem {
-    min-width: 180px;
-    .indicatorLabel {
-      color: var(--text-color-fourth);
-      font-size: 12px;
-    }
-
-    .indicatorValue {
-      margin-left: 4px;
-      font-size: 13px;
-    }
-  }
-}
-
-.autoCompleteDropdown {
-  width: 650px !important;
-  min-width: 650px !important;
-  border-radius: 10px;
-
-  :global {
-    .ant-select-item {
-      min-height: 36px !important;
-      line-height: 26px !important;
-
-      &:not(:first-child):hover {
-        background: #f5f5f5 !important;
-      }
-    }
-  }
-}
-
-.recommendItemTitle {
-  margin-right: 14px;
-  padding: 4px 12px;
-  background-color: var(--deep-background);
-  border-radius: 2px;
-}
-
-.refeshQuestions {
-  cursor: pointer;
-
-  .reloadIcon {
-    margin-right: 4px;
-  }
-}
-
-.recommendQuestions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 54px;
-  height: 100%;
-  color: var(--text-color-fourth);
-  font-size: 18px;
-  background: rgba(255, 255, 255, 0.2);
-  cursor: pointer;
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-}
-
-.currentTool {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 24px 0 2px;
-  color: var(--chat-blue);
-  font-weight: 500;
-  font-size: 16px;
-  background: rgba(255, 255, 255, 0.2);
-
-  .removeTool {
-    position: absolute;
-    top: 14px;
-    right: 6px;
-    color: var(--text-color-fifth);
-    font-size: 14px;
-    cursor: pointer;
-
-    &:hover {
-      color: var(--chat-blue);
-    }
-  }
-}
-
-.associateOption {
-  display: flex;
-  align-items: center;
-}
-
-.associateOptionAvatar {
-  width: 32px;
-  margin-right: 10px;
-}
-
-.optionContent {
-  min-width: 330px;
-}
-
-.optionIndicator {
-  min-width: 120px;
-  margin-left: 4px;
-  color: var(--text-color-fourth);
-  font-size: 12px;
-}
-
-.messageLoading {
-  margin-top: 30px;
-  padding: 0 20px;
 }
 
 :global {
@@ -782,9 +90,4 @@
       border-bottom: 1px solid #f0f0f0;
     }
   }
-
-  .ss-chat-item-typing-bubble {
-    padding: 16px !important;
-  }
 }
-

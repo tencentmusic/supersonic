@@ -30,14 +30,16 @@ public class ChatController {
 
     @PostMapping("/save")
     public Boolean save(@RequestParam(value = "chatName") String chatName,
+                        @RequestParam(value = "agentId", required = false) Integer agentId,
             HttpServletRequest request, HttpServletResponse response) {
-        return chatService.addChat(UserHolder.findUser(request, response), chatName);
+        return chatService.addChat(UserHolder.findUser(request, response), chatName, agentId);
     }
 
     @GetMapping("/getAll")
-    public List<ChatDO> getAllConversions(HttpServletRequest request, HttpServletResponse response) {
+    public List<ChatDO> getAllConversions(@RequestParam(value = "agentId", required = false) Integer agentId,
+                                          HttpServletRequest request, HttpServletResponse response) {
         String userName = UserHolder.findUser(request, response).getName();
-        return chatService.getAll(userName);
+        return chatService.getAll(userName, agentId);
     }
 
     @PostMapping("/delete")

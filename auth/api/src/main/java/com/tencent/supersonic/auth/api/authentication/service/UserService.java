@@ -3,6 +3,7 @@ package com.tencent.supersonic.auth.api.authentication.service;
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
+
 import java.util.List;
 import java.util.Set;
 

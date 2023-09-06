@@ -7,7 +7,9 @@ import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatabaseDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.ConnectInfo;
 import com.tencent.supersonic.semantic.model.domain.pojo.Database;
+import java.util.Arrays;
 import java.util.Date;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
 public class DatabaseConverter {
@@ -33,6 +35,8 @@ public class DatabaseConverter {
         database.setId(databaseDO.getId());
         BeanUtils.copyProperties(database, databaseDO);
         databaseDO.setConfig(JSONObject.toJSONString(database.getConnectInfo()));
+        databaseDO.setAdmin(String.join(",", database.getAdmins()));
+        databaseDO.setViewer(String.join(",", database.getViewers()));
         return databaseDO;
     }
 
@@ -41,6 +45,8 @@ public class DatabaseConverter {
         DatabaseDO databaseDO = new DatabaseDO();
         BeanUtils.copyProperties(database, databaseDO);
         databaseDO.setConfig(JSONObject.toJSONString(database.getConnectInfo()));
+        databaseDO.setAdmin(String.join(",", database.getAdmins()));
+        databaseDO.setViewer(String.join(",", database.getViewers()));
         return databaseDO;
     }
 
@@ -52,6 +58,12 @@ public class DatabaseConverter {
         databaseResp.setUrl(connectInfo.getUrl());
         databaseResp.setPassword(connectInfo.getPassword());
         databaseResp.setUsername(connectInfo.getUserName());
+        if (StringUtils.isNotBlank(databaseDO.getAdmin())) {
+            databaseResp.setAdmins(Arrays.asList(databaseDO.getAdmin().split(",")));
+        }
+        if (StringUtils.isNotBlank(databaseDO.getViewer())) {
+            databaseResp.setViewers(Arrays.asList(databaseDO.getViewer().split(",")));
+        }
         return databaseResp;
     }
 

@@ -1,4 +1,3 @@
-import { isMobile } from '../../utils/utils';
 import Bar from './Bar';
 import MetricCard from './MetricCard';
 import MetricTrend from './MetricTrend';
@@ -10,14 +9,12 @@ import classNames from 'classnames';
 import { PREFIX_CLS } from '../../common/constants';
 
 type Props = {
-  question: string;
   data: MsgDataType;
   chartIndex: number;
-  isMobileMode?: boolean;
   triggerResize?: boolean;
 };
 
-const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, triggerResize }) => {
+const ChatMsg: React.FC<Props> = ({ data, chartIndex, triggerResize }) => {
   const { queryColumns, queryResults, chatContext, queryMode } = data;
 
   const [columns, setColumns] = useState<ColumnType[]>(queryColumns);
@@ -168,19 +165,6 @@ const ChatMsg: React.FC<Props> = ({ question, data, chartIndex, isMobileMode, tr
     }
     return <Table data={{ ...data, queryColumns: columns, queryResults: dataSource }} />;
   };
-
-  // let width = '100%';
-  // if (isText) {
-  //   width = 'fit-content';
-  // } else if (isMetricCard) {
-  //   width = isDslMetricCard ? '290px' : '370px';
-  // } else if (categoryField.length > 1 && !isMobile && !isMobileMode) {
-  //   if (columns.length === 1) {
-  //     width = '600px';
-  //   } else if (columns.length === 2) {
-  //     width = '1000px';
-  //   }
-  // }
 
   const chartMsgClass = classNames({ [prefixCls]: !isTable });
 

@@ -26,9 +26,9 @@ import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.DataInfo;
+import com.tencent.supersonic.chat.api.pojo.response.ModelInfo;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.MetricInfo;
-import com.tencent.supersonic.chat.api.pojo.response.ModelInfo;
 import com.tencent.supersonic.chat.config.AggregatorConfig;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
@@ -332,7 +332,7 @@ public class SemanticService {
     }
 
     public AggregateInfo getAggregateInfo(User user, SemanticParseInfo semanticParseInfo,
-            QueryResultWithSchemaResp result) {
+                                          QueryResultWithSchemaResp result) {
         if (CollectionUtils.isEmpty(semanticParseInfo.getMetrics()) || !aggregatorConfig.getEnableRatio()) {
             return new AggregateInfo();
         }
@@ -384,7 +384,7 @@ public class SemanticService {
     }
 
     private MetricInfo queryRatio(User user, SemanticParseInfo semanticParseInfo, SchemaElement metric,
-            AggOperatorEnum aggOperatorEnum, QueryResultWithSchemaResp results) {
+                                  AggOperatorEnum aggOperatorEnum, QueryResultWithSchemaResp results) {
         MetricInfo metricInfo = new MetricInfo();
         metricInfo.setStatistics(new HashMap<>());
         QueryStructReq queryStructReq = QueryReqBuilder.buildStructRatioReq(semanticParseInfo, metric, aggOperatorEnum);
@@ -432,7 +432,7 @@ public class SemanticService {
     }
 
     private DateConf getRatioDateConf(AggOperatorEnum aggOperatorEnum, SemanticParseInfo semanticParseInfo,
-            QueryResultWithSchemaResp results) {
+                                      QueryResultWithSchemaResp results) {
         String dateField = QueryReqBuilder.getDateField(semanticParseInfo.getDateInfo());
         Optional<String> lastDayOp = results.getResultList().stream()
                 .map(r -> r.get(dateField).toString())

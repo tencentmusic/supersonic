@@ -6,6 +6,7 @@ import lombok.Data;
 public class ChatDO {
 
     private long chatId;
+    private Integer agentId;
     private String chatName;
     private String createTime;
     private String lastTime;

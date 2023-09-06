@@ -20,6 +20,7 @@ public class DateFieldCorrector extends BaseSemanticCorrector {
             String currentDate = DSLDateHelper.getCurrentDate(correctionInfo.getParseInfo().getModelId());
             sql = SqlParserUpdateHelper.addWhere(sql, DATE_FIELD, currentDate);
         }
+        correctionInfo.setPreSql(correctionInfo.getSql());
         correctionInfo.setSql(sql);
         return correctionInfo;
     }

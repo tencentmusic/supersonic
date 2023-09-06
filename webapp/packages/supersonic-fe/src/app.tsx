@@ -158,13 +158,14 @@ export const layout: RunTimeLayoutConfig = (params) => {
     menuHeaderRender: undefined,
     childrenRender: (dom) => {
       return (
-        <>
+        <div
+          style={{ height: location.pathname.includes('chat') ? 'calc(100vh - 48px)' : undefined }}
+        >
           {dom}
           {history.location.pathname !== '/chat' && !isMobile && <Copilot />}
-        </>
+        </div>
       );
     },
-    openKeys: false,
     ...initialState?.settings,
   };
 };

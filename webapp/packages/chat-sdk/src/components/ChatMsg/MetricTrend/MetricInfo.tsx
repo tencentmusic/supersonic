@@ -1,18 +1,20 @@
 import { PREFIX_CLS } from '../../../common/constants';
-import { formatMetric, formatNumberWithCN } from '../../../utils/utils';
-import { AggregateInfoType } from '../../../common/type';
+import { formatByDecimalPlaces, formatMetric, formatNumberWithCN } from '../../../utils/utils';
+import { AggregateInfoType, ColumnType } from '../../../common/type';
 import PeriodCompareItem from '../MetricCard/PeriodCompareItem';
 import { SwapOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 
 type Props = {
   aggregateInfo: AggregateInfoType;
+  currentMetricField: ColumnType;
 };
 
-const MetricInfo: React.FC<Props> = ({ aggregateInfo }) => {
+const MetricInfo: React.FC<Props> = ({ aggregateInfo, currentMetricField }) => {
   const { metricInfos } = aggregateInfo || {};
   const metricInfo = metricInfos?.[0] || {};
   const { date, value, statistics } = metricInfo || {};
+  const { dataFormatType, dataFormat } = currentMetricField;
 
   const prefixCls = `${PREFIX_CLS}-metric-info`;
 
@@ -26,11 +28,20 @@ const MetricInfo: React.FC<Props> = ({ aggregateInfo }) => {
       <div className={`${prefixCls}-indicator`}>
         <div style={{ display: 'flex', alignItems: 'flex-end' }}>
           <div className={`${prefixCls}-indicator-value`}>
-            {isNumber ? formatMetric(value) : formatNumberWithCN(+value)}
+            {dataFormatType === 'percent' || dataFormatType === 'decimal'
+              ? `${formatByDecimalPlaces(
+                  dataFormat?.needMultiply100 ? +value * 100 : value,
+                  dataFormat?.decimalPlaces || 2
+                )}${dataFormatType === 'percent' ? '%' : ''}`
+              : isNumber
+              ? formatMetric(value)
+              : formatNumberWithCN(+value)}
           </div>
-          <div className={`${prefixCls}-indicator-switch`}>
-            <SwapOutlined onClick={handleNumberClick} />
-          </div>
+          {!isNaN(+value) && +value >= 10000 && (
+            <div className={`${prefixCls}-indicator-switch`}>
+              <SwapOutlined onClick={handleNumberClick} />
+            </div>
+          )}
         </div>
         <div className={`${prefixCls}-bottom-section`}>
           <div className={`${prefixCls}-date`}>

@@ -4,7 +4,9 @@ import com.tencent.supersonic.semantic.model.domain.dataobject.ViewInfoDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.ViewInfoDOExample;
 import com.tencent.supersonic.semantic.model.domain.repository.ViewInfoRepository;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.ViewInfoDOMapper;
+
 import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 @Component

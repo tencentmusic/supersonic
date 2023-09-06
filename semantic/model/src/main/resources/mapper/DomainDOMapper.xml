@@ -1,267 +1,251 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tencent.supersonic.semantic.model.infrastructure.mapper.DomainDOMapper">
-    <resultMap id="BaseResultMap"
-            type="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="biz_name" jdbcType="VARCHAR" property="bizName"/>
-        <result column="parent_id" jdbcType="BIGINT" property="parentId"/>
-        <result column="status" jdbcType="INTEGER" property="status"/>
-        <result column="created_at" jdbcType="TIMESTAMP" property="createdAt"/>
-        <result column="created_by" jdbcType="VARCHAR" property="createdBy"/>
-        <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt"/>
-        <result column="updated_by" jdbcType="VARCHAR" property="updatedBy"/>
-        <result column="admin" jdbcType="VARCHAR" property="admin"/>
-        <result column="admin_org" jdbcType="VARCHAR" property="adminOrg"/>
-        <result column="is_open" jdbcType="INTEGER" property="isOpen"/>
-        <result column="viewer" jdbcType="VARCHAR" property="viewer"/>
-        <result column="view_org" jdbcType="VARCHAR" property="viewOrg"/>
-    </resultMap>
-    <sql id="Example_Where_Clause">
-        <where>
-            <foreach collection="oredCriteria" item="criteria" separator="or">
-                <if test="criteria.valid">
-                    <trim prefix="(" prefixOverrides="and" suffix=")">
-                        <foreach collection="criteria.criteria" item="criterion">
-                            <choose>
-                                <when test="criterion.noValue">
-                                    and ${criterion.condition}
-                                </when>
-                                <when test="criterion.singleValue">
-                                    and ${criterion.condition} #{criterion.value}
-                                </when>
-                                <when test="criterion.betweenValue">
-                                    and ${criterion.condition} #{criterion.value} and
-                                    #{criterion.secondValue}
-                                </when>
-                                <when test="criterion.listValue">
-                                    and ${criterion.condition}
-                                    <foreach close=")" collection="criterion.value" item="listItem"
-                                            open="(" separator=",">
-                                        #{listItem}
-                                    </foreach>
-                                </when>
-                            </choose>
-                        </foreach>
-                    </trim>
-                </if>
+  <resultMap id="BaseResultMap" type="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="biz_name" jdbcType="VARCHAR" property="bizName" />
+    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="created_by" jdbcType="VARCHAR" property="createdBy" />
+    <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="updated_by" jdbcType="VARCHAR" property="updatedBy" />
+    <result column="admin" jdbcType="VARCHAR" property="admin" />
+    <result column="admin_org" jdbcType="VARCHAR" property="adminOrg" />
+    <result column="is_open" jdbcType="INTEGER" property="isOpen" />
+    <result column="viewer" jdbcType="VARCHAR" property="viewer" />
+    <result column="view_org" jdbcType="VARCHAR" property="viewOrg" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
             </foreach>
-        </where>
-    </sql>
-    <sql id="Base_Column_List">
-        id
-        , name, biz_name, parent_id, status, created_at, created_by, updated_at, updated_by,
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, name, biz_name, parent_id, status, created_at, created_by, updated_at, updated_by, 
     admin, admin_org, is_open, viewer, view_org
-    </sql>
-    <select id="selectByExample"
-            parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDOExample"
-            resultMap="BaseResultMap">
-        select
-        <if test="distinct">
-            distinct
-        </if>
-        <include refid="Base_Column_List"/>
-        from s2_domain
-        <if test="_parameter != null">
-            <include refid="Example_Where_Clause"/>
-        </if>
-        <if test="orderByClause != null">
-            order by ${orderByClause}
-        </if>
-        <if test="limitStart != null and limitStart>=0">
-            limit #{limitStart} , #{limitEnd}
-        </if>
-    </select>
-    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from s2_domain
-        where id = #{id,jdbcType=BIGINT}
-    </select>
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-        delete
-        from s2_domain
-        where id = #{id,jdbcType=BIGINT}
-    </delete>
-    <insert id="insert"
-            parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO">
-        insert into s2_domain (id, name, biz_name,
-                               parent_id, status, created_at,
-                               created_by, updated_at, updated_by,
-                               admin, admin_org, is_open,
-                               viewer, view_org)
-        values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{bizName,jdbcType=VARCHAR},
-                #{parentId,jdbcType=BIGINT}, #{status,jdbcType=INTEGER},
-                #{createdAt,jdbcType=TIMESTAMP},
-                #{createdBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP},
-                #{updatedBy,jdbcType=VARCHAR},
-                #{admin,jdbcType=VARCHAR}, #{adminOrg,jdbcType=VARCHAR}, #{isOpen,jdbcType=INTEGER},
-                #{viewer,jdbcType=VARCHAR}, #{viewOrg,jdbcType=VARCHAR})
-    </insert>
-    <insert id="insertSelective"
-            parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO">
-        insert into s2_domain
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                id,
-            </if>
-            <if test="name != null">
-                name,
-            </if>
-            <if test="bizName != null">
-                biz_name,
-            </if>
-            <if test="parentId != null">
-                parent_id,
-            </if>
-            <if test="status != null">
-                status,
-            </if>
-            <if test="createdAt != null">
-                created_at,
-            </if>
-            <if test="createdBy != null">
-                created_by,
-            </if>
-            <if test="updatedAt != null">
-                updated_at,
-            </if>
-            <if test="updatedBy != null">
-                updated_by,
-            </if>
-            <if test="admin != null">
-                admin,
-            </if>
-            <if test="adminOrg != null">
-                admin_org,
-            </if>
-            <if test="isOpen != null">
-                is_open,
-            </if>
-            <if test="viewer != null">
-                viewer,
-            </if>
-            <if test="viewOrg != null">
-                view_org,
-            </if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                #{id,jdbcType=BIGINT},
-            </if>
-            <if test="name != null">
-                #{name,jdbcType=VARCHAR},
-            </if>
-            <if test="bizName != null">
-                #{bizName,jdbcType=VARCHAR},
-            </if>
-            <if test="parentId != null">
-                #{parentId,jdbcType=BIGINT},
-            </if>
-            <if test="status != null">
-                #{status,jdbcType=INTEGER},
-            </if>
-            <if test="createdAt != null">
-                #{createdAt,jdbcType=TIMESTAMP},
-            </if>
-            <if test="createdBy != null">
-                #{createdBy,jdbcType=VARCHAR},
-            </if>
-            <if test="updatedAt != null">
-                #{updatedAt,jdbcType=TIMESTAMP},
-            </if>
-            <if test="updatedBy != null">
-                #{updatedBy,jdbcType=VARCHAR},
-            </if>
-            <if test="admin != null">
-                #{admin,jdbcType=VARCHAR},
-            </if>
-            <if test="adminOrg != null">
-                #{adminOrg,jdbcType=VARCHAR},
-            </if>
-            <if test="isOpen != null">
-                #{isOpen,jdbcType=INTEGER},
-            </if>
-            <if test="viewer != null">
-                #{viewer,jdbcType=VARCHAR},
-            </if>
-            <if test="viewOrg != null">
-                #{viewOrg,jdbcType=VARCHAR},
-            </if>
-        </trim>
-    </insert>
-    <select id="countByExample"
-            parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDOExample"
-            resultType="java.lang.Long">
-        select count(*) from s2_domain
-        <if test="_parameter != null">
-            <include refid="Example_Where_Clause"/>
-        </if>
-    </select>
-    <update id="updateByPrimaryKeySelective"
-            parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO">
-        update s2_domain
-        <set>
-            <if test="name != null">
-                name = #{name,jdbcType=VARCHAR},
-            </if>
-            <if test="bizName != null">
-                biz_name = #{bizName,jdbcType=VARCHAR},
-            </if>
-            <if test="parentId != null">
-                parent_id = #{parentId,jdbcType=BIGINT},
-            </if>
-            <if test="status != null">
-                status = #{status,jdbcType=INTEGER},
-            </if>
-            <if test="createdAt != null">
-                created_at = #{createdAt,jdbcType=TIMESTAMP},
-            </if>
-            <if test="createdBy != null">
-                created_by = #{createdBy,jdbcType=VARCHAR},
-            </if>
-            <if test="updatedAt != null">
-                updated_at = #{updatedAt,jdbcType=TIMESTAMP},
-            </if>
-            <if test="updatedBy != null">
-                updated_by = #{updatedBy,jdbcType=VARCHAR},
-            </if>
-            <if test="admin != null">
-                admin = #{admin,jdbcType=VARCHAR},
-            </if>
-            <if test="adminOrg != null">
-                admin_org = #{adminOrg,jdbcType=VARCHAR},
-            </if>
-            <if test="isOpen != null">
-                is_open = #{isOpen,jdbcType=INTEGER},
-            </if>
-            <if test="viewer != null">
-                viewer = #{viewer,jdbcType=VARCHAR},
-            </if>
-            <if test="viewOrg != null">
-                view_org = #{viewOrg,jdbcType=VARCHAR},
-            </if>
-        </set>
-        where id = #{id,jdbcType=BIGINT}
-    </update>
-    <update id="updateByPrimaryKey"
-            parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO">
-        update s2_domain
-        set name       = #{name,jdbcType=VARCHAR},
-            biz_name   = #{bizName,jdbcType=VARCHAR},
-            parent_id  = #{parentId,jdbcType=BIGINT},
-            status     = #{status,jdbcType=INTEGER},
-            created_at = #{createdAt,jdbcType=TIMESTAMP},
-            created_by = #{createdBy,jdbcType=VARCHAR},
-            updated_at = #{updatedAt,jdbcType=TIMESTAMP},
-            updated_by = #{updatedBy,jdbcType=VARCHAR},
-            admin      = #{admin,jdbcType=VARCHAR},
-            admin_org  = #{adminOrg,jdbcType=VARCHAR},
-            is_open    = #{isOpen,jdbcType=INTEGER},
-            viewer     = #{viewer,jdbcType=VARCHAR},
-            view_org   = #{viewOrg,jdbcType=VARCHAR}
-        where id = #{id,jdbcType=BIGINT}
-    </update>
+  </sql>
+  <select id="selectByExample" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDOExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from s2_domain
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limitStart != null and limitStart>=0">
+      limit #{limitStart} , #{limitEnd}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from s2_domain
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from s2_domain
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO">
+    insert into s2_domain (id, name, biz_name, 
+      parent_id, status, created_at, 
+      created_by, updated_at, updated_by, 
+      admin, admin_org, is_open, 
+      viewer, view_org)
+    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{bizName,jdbcType=VARCHAR}, 
+      #{parentId,jdbcType=BIGINT}, #{status,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP}, 
+      #{createdBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP}, #{updatedBy,jdbcType=VARCHAR}, 
+      #{admin,jdbcType=VARCHAR}, #{adminOrg,jdbcType=VARCHAR}, #{isOpen,jdbcType=INTEGER}, 
+      #{viewer,jdbcType=VARCHAR}, #{viewOrg,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO">
+    insert into s2_domain
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="bizName != null">
+        biz_name,
+      </if>
+      <if test="parentId != null">
+        parent_id,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="createdAt != null">
+        created_at,
+      </if>
+      <if test="createdBy != null">
+        created_by,
+      </if>
+      <if test="updatedAt != null">
+        updated_at,
+      </if>
+      <if test="updatedBy != null">
+        updated_by,
+      </if>
+      <if test="admin != null">
+        admin,
+      </if>
+      <if test="adminOrg != null">
+        admin_org,
+      </if>
+      <if test="isOpen != null">
+        is_open,
+      </if>
+      <if test="viewer != null">
+        viewer,
+      </if>
+      <if test="viewOrg != null">
+        view_org,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="bizName != null">
+        #{bizName,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null">
+        #{parentId,jdbcType=BIGINT},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createdAt != null">
+        #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createdBy != null">
+        #{createdBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updatedAt != null">
+        #{updatedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatedBy != null">
+        #{updatedBy,jdbcType=VARCHAR},
+      </if>
+      <if test="admin != null">
+        #{admin,jdbcType=VARCHAR},
+      </if>
+      <if test="adminOrg != null">
+        #{adminOrg,jdbcType=VARCHAR},
+      </if>
+      <if test="isOpen != null">
+        #{isOpen,jdbcType=INTEGER},
+      </if>
+      <if test="viewer != null">
+        #{viewer,jdbcType=VARCHAR},
+      </if>
+      <if test="viewOrg != null">
+        #{viewOrg,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDOExample" resultType="java.lang.Long">
+    select count(*) from s2_domain
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO">
+    update s2_domain
+    <set>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="bizName != null">
+        biz_name = #{bizName,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null">
+        parent_id = #{parentId,jdbcType=BIGINT},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createdAt != null">
+        created_at = #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createdBy != null">
+        created_by = #{createdBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updatedAt != null">
+        updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatedBy != null">
+        updated_by = #{updatedBy,jdbcType=VARCHAR},
+      </if>
+      <if test="admin != null">
+        admin = #{admin,jdbcType=VARCHAR},
+      </if>
+      <if test="adminOrg != null">
+        admin_org = #{adminOrg,jdbcType=VARCHAR},
+      </if>
+      <if test="isOpen != null">
+        is_open = #{isOpen,jdbcType=INTEGER},
+      </if>
+      <if test="viewer != null">
+        viewer = #{viewer,jdbcType=VARCHAR},
+      </if>
+      <if test="viewOrg != null">
+        view_org = #{viewOrg,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO">
+    update s2_domain
+    set name = #{name,jdbcType=VARCHAR},
+      biz_name = #{bizName,jdbcType=VARCHAR},
+      parent_id = #{parentId,jdbcType=BIGINT},
+      status = #{status,jdbcType=INTEGER},
+      created_at = #{createdAt,jdbcType=TIMESTAMP},
+      created_by = #{createdBy,jdbcType=VARCHAR},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+      updated_by = #{updatedBy,jdbcType=VARCHAR},
+      admin = #{admin,jdbcType=VARCHAR},
+      admin_org = #{adminOrg,jdbcType=VARCHAR},
+      is_open = #{isOpen,jdbcType=INTEGER},
+      viewer = #{viewer,jdbcType=VARCHAR},
+      view_org = #{viewOrg,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
 </mapper>

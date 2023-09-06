@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 public class DatasourceRelaDOExample {
-
     /**
      * s2_datasource_rela
      */
@@ -149,7 +148,6 @@ public class DatasourceRelaDOExample {
      * s2_datasource_rela null
      */
     protected abstract static class GeneratedCriteria {
-
         protected List<Criterion> criteria;
 
         protected GeneratedCriteria() {
@@ -775,7 +773,6 @@ public class DatasourceRelaDOExample {
      * s2_datasource_rela null
      */
     public static class Criterion {
-
         private String condition;
 
         private Object value;

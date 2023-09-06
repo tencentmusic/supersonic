@@ -83,15 +83,12 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
       ...values,
       exampleQuestions: examples.map((item) => item.question).filter((item) => item),
       plugins: values.plugins ? [values.plugins] : undefined,
-      metricOptions: metricOptions.map((item) => ({ modelId: values.modelId, ...item })),
+      metricOptions: metricOptions.map((item) => ({ ...item, modelId: values.modelId })),
     });
     setSaveLoading(false);
   };
 
   const updateMetricList = async (value: number) => {
-    if (modelMetricList[value]) {
-      return;
-    }
     const res = await getMetricList(value);
     setModelMetricList(res.data.list);
   };
@@ -116,50 +113,50 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
         <FormItem name="name" label="名称">
           <Input placeholder="请输入工具名称" />
         </FormItem>
+        {(toolType === AgentToolTypeEnum.RULE || toolType === AgentToolTypeEnum.DSL) && (
+          <FormItem name="modelIds" label="主题域">
+            <Select
+              options={modelList.map((model) => ({ label: model.name, value: model.id }))}
+              placeholder="请选择主题域"
+              mode="multiple"
+            />
+          </FormItem>
+        )}
         {toolType === AgentToolTypeEnum.DSL && (
-          <>
-            <FormItem name="modelIds" label="主题域">
-              <Select
-                options={modelList.map((model) => ({ label: model.name, value: model.id }))}
-                placeholder="请选择主题域"
-                mode="multiple"
-              />
-            </FormItem>
-            <FormItem name="exampleQuestions" label="示例问题">
-              <div className={styles.paramsSection}>
-                {examples.map((example) => {
-                  const { id, question } = example;
-                  return (
-                    <div className={styles.filterRow} key={id}>
-                      <Input
-                        placeholder="示例问题"
-                        value={question}
-                        className={styles.questionExample}
-                        onChange={(e) => {
-                          example.question = e.target.value;
-                          setExamples([...examples]);
-                        }}
-                        allowClear
-                      />
-                      <DeleteOutlined
-                        onClick={() => {
-                          setExamples(examples.filter((item) => item.id !== id));
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-                <Button
-                  onClick={() => {
-                    setExamples([...examples, { id: uuid() }]);
-                  }}
-                >
-                  <PlusOutlined />
-                  新增示例问题
-                </Button>
-              </div>
-            </FormItem>
-          </>
+          <FormItem name="exampleQuestions" label="示例问题">
+            <div className={styles.paramsSection}>
+              {examples.map((example) => {
+                const { id, question } = example;
+                return (
+                  <div className={styles.filterRow} key={id}>
+                    <Input
+                      placeholder="示例问题"
+                      value={question}
+                      className={styles.questionExample}
+                      onChange={(e) => {
+                        example.question = e.target.value;
+                        setExamples([...examples]);
+                      }}
+                      allowClear
+                    />
+                    <DeleteOutlined
+                      onClick={() => {
+                        setExamples(examples.filter((item) => item.id !== id));
+                      }}
+                    />
+                  </div>
+                );
+              })}
+              <Button
+                onClick={() => {
+                  setExamples([...examples, { id: uuid() }]);
+                }}
+              >
+                <PlusOutlined />
+                新增示例问题
+              </Button>
+            </div>
+          </FormItem>
         )}
         {toolType === AgentToolTypeEnum.INTERPRET && (
           <>

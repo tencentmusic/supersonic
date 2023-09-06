@@ -5,6 +5,7 @@ import com.tencent.supersonic.semantic.model.domain.dataobject.DomainDOExample;
 import com.tencent.supersonic.semantic.model.domain.repository.DomainRepository;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DomainDOMapper;
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

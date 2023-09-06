@@ -1,8 +1,8 @@
 package com.tencent.supersonic.chat.parser.plugin.function;
 
+import lombok.Data;
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
 
 @Data
 public class Parameters {

@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 public class DimensionDOExample {
-
     /**
      * s2_dimension
      */
@@ -149,7 +148,6 @@ public class DimensionDOExample {
      * s2_dimension null
      */
     protected abstract static class GeneratedCriteria {
-
         protected List<Criterion> criteria;
 
         protected GeneratedCriteria() {
@@ -1325,7 +1323,6 @@ public class DimensionDOExample {
      * s2_dimension null
      */
     public static class Criterion {
-
         private String condition;
 
         private Object value;

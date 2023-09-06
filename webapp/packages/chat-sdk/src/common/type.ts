@@ -49,7 +49,7 @@ export type FilterItemType = {
   bizName: string;
   operator: string;
   type: string;
-  value: string;
+  value: any;
 };
 
 export type ModelType = {
@@ -60,6 +60,13 @@ export type ModelType = {
   name: string;
   type: string;
   useCnt: number;
+}
+
+export type EntityDimensionType = {
+  bizName: string;
+  itemId: number;
+  name: string;
+  value: string;
 }
 
 export type ChatContextType = {
@@ -73,6 +80,7 @@ export type ChatContextType = {
   dimensions: FieldType[];
   metrics: FieldType[];
   entity: { alias: string[], id: number };
+  entityInfo: { dimensions: EntityDimensionType[] };
   elementMatches: any[];
   queryMode: string;
   dimensionFilters: FilterItemType[];
@@ -137,6 +145,7 @@ export type ParseDataType = {
 }
 
 export type QueryDataType = {
+  chatContext: ChatContextType;
   aggregateInfo: AggregateInfoType;
   queryColumns: ColumnType[];
   queryResults: any[];

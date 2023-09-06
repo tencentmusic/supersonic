@@ -18,6 +18,10 @@ spring:
     data: classpath:db/semantic-data-h2.sql
 
 authentication:
-  enable: false
+  enable: true
   exclude:
     path: /api/auth/user/register,/api/auth/user/login
+  token:
+    http:
+      header:
+        key: Authorization

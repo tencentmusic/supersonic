@@ -1,3 +1,4 @@
+
 package com.tencent.supersonic.chat.query.rule;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -289,6 +290,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
 
         return matchedQueries;
     }
+
 
 
     protected QueryStructReq convertQueryStruct() {

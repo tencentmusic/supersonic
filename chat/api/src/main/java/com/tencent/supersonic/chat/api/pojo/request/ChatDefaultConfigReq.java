@@ -2,9 +2,10 @@ package com.tencent.supersonic.chat.api.pojo.request;
 
 
 import com.tencent.supersonic.common.pojo.Constants;
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Data;
 
 @Data
 public class ChatDefaultConfigReq {

@@ -20,14 +20,15 @@ public class QueryFilterAppend extends BaseSemanticCorrector {
     @Override
     public CorrectionInfo corrector(CorrectionInfo correctionInfo) throws JSQLParserException {
         String queryFilter = getQueryFilter(correctionInfo.getQueryFilters());
-        String sql = correctionInfo.getSql();
+        String preSql = correctionInfo.getSql();
 
         if (StringUtils.isNotEmpty(queryFilter)) {
-            log.info("add queryFilter to sql :{}", queryFilter);
+            log.info("add queryFilter to preSql :{}", queryFilter);
             Expression expression = CCJSqlParserUtil.parseCondExpression(queryFilter);
-            sql = SqlParserUpdateHelper.addWhere(sql, expression);
+            String sql = SqlParserUpdateHelper.addWhere(preSql, expression);
+            correctionInfo.setPreSql(preSql);
+            correctionInfo.setSql(sql);
         }
-        correctionInfo.setSql(sql);
         return correctionInfo;
     }
 

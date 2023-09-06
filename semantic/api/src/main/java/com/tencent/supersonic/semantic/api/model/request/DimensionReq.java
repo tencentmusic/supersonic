@@ -2,9 +2,12 @@ package com.tencent.supersonic.semantic.api.model.request;
 
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
-import java.util.List;
+
 import javax.validation.constraints.NotNull;
+
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class DimensionReq extends SchemaItem {

@@ -1,18 +1,19 @@
 package com.tencent.supersonic.chat.corrector;
 
 import com.tencent.supersonic.chat.api.pojo.CorrectionInfo;
-import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
-import com.tencent.supersonic.chat.query.llm.dsl.LLMReq;
-import com.tencent.supersonic.chat.query.llm.dsl.LLMReq.ElementValue;
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
+import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
+import com.tencent.supersonic.knowledge.service.SchemaService;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
@@ -20,29 +21,61 @@ public class FieldValueCorrector extends BaseSemanticCorrector {
 
     @Override
     public CorrectionInfo corrector(CorrectionInfo correctionInfo) {
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+        Long modelId = correctionInfo.getParseInfo().getModel().getId();
+        List<SchemaElement> dimensions = semanticSchema.getDimensions().stream()
+                .filter(schemaElement -> modelId.equals(schemaElement.getModel()))
+                .collect(Collectors.toList());
 
-        Object context = correctionInfo.getParseInfo().getProperties().get(Constants.CONTEXT);
-        if (Objects.isNull(context)) {
+        if (CollectionUtils.isEmpty(dimensions)) {
             return correctionInfo;
         }
 
-        DSLParseResult dslParseResult = JsonUtil.toObject(JsonUtil.toString(context), DSLParseResult.class);
-        if (Objects.isNull(dslParseResult) || Objects.isNull(dslParseResult.getLlmReq())) {
-            return correctionInfo;
-        }
-        LLMReq llmReq = dslParseResult.getLlmReq();
-        List<ElementValue> linking = llmReq.getLinking();
-        if (CollectionUtils.isEmpty(linking)) {
-            return correctionInfo;
-        }
-
-        Map<String, Set<String>> fieldValueToFieldNames = linking.stream().collect(
-                Collectors.groupingBy(ElementValue::getFieldValue,
-                        Collectors.mapping(ElementValue::getFieldName, Collectors.toSet())));
-
-        String sql = SqlParserUpdateHelper.replaceValueFields(correctionInfo.getSql(), fieldValueToFieldNames);
+        Map<String, Map<String, String>> aliasAndBizNameToTechName = getAliasAndBizNameToTechName(dimensions);
+        String preSql = correctionInfo.getSql();
+        correctionInfo.setPreSql(preSql);
+        String sql = SqlParserUpdateHelper.replaceValue(preSql, aliasAndBizNameToTechName);
         correctionInfo.setSql(sql);
         return correctionInfo;
     }
 
+
+    private Map<String, Map<String, String>> getAliasAndBizNameToTechName(List<SchemaElement> dimensions) {
+        if (CollectionUtils.isEmpty(dimensions)) {
+            return new HashMap<>();
+        }
+
+        Map<String, Map<String, String>> result = new HashMap<>();
+
+        for (SchemaElement dimension : dimensions) {
+            if (Objects.isNull(dimension)
+                    || Strings.isEmpty(dimension.getBizName())
+                    || CollectionUtils.isEmpty(dimension.getSchemaValueMaps())) {
+                continue;
+            }
+            String bizName = dimension.getBizName();
+
+            Map<String, String> aliasAndBizNameToTechName = new HashMap<>();
+
+            for (SchemaValueMap valueMap : dimension.getSchemaValueMaps()) {
+                if (Objects.isNull(valueMap) || Strings.isEmpty(valueMap.getTechName())) {
+                    continue;
+                }
+                if (Strings.isNotEmpty(valueMap.getBizName())) {
+                    aliasAndBizNameToTechName.put(valueMap.getBizName(), valueMap.getTechName());
+                }
+                if (!CollectionUtils.isEmpty(valueMap.getAlias())) {
+                    valueMap.getAlias().stream().forEach(alias -> {
+                        if (Strings.isNotEmpty(alias)) {
+                            aliasAndBizNameToTechName.put(alias, valueMap.getTechName());
+                        }
+                    });
+                }
+            }
+            if (!CollectionUtils.isEmpty(aliasAndBizNameToTechName)) {
+                result.put(bizName, aliasAndBizNameToTechName);
+            }
+        }
+        return result;
+    }
 }

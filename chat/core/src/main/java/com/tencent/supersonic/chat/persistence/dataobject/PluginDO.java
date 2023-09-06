@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.persistence.dataobject;
 import java.util.Date;
 
 public class PluginDO {
-
     /**
      *
      */

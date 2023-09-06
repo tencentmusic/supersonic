@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
@@ -105,8 +106,9 @@ public class FuzzyNameMapper implements SchemaMapper {
 
     private Double getThreshold(QueryContext queryContext, MapperHelper mapperHelper) {
 
-        Double metricDimensionThresholdConfig = mapperHelper.getMetricDimensionThresholdConfig();
-        Double metricDimensionMinThresholdConfig = mapperHelper.getMetricDimensionMinThresholdConfig();
+        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
+        Double metricDimensionThresholdConfig = optimizationConfig.getMetricDimensionThresholdConfig();
+        Double metricDimensionMinThresholdConfig = optimizationConfig.getMetricDimensionMinThresholdConfig();
 
         Map<Long, List<SchemaElementMatch>> modelElementMatches = queryContext.getMapInfo()
                 .getModelElementMatches();

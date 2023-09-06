@@ -29,28 +29,55 @@ const ROUTES = [
     envEnableList: [ENV_KEY.CHAT],
   },
   {
-    path: '/chatPlugin',
-    name: 'chatPlugin',
-    component: './ChatPlugin',
-    envEnableList: [ENV_KEY.CHAT],
-  },
-  {
     path: '/agent',
     name: 'agent',
     component: './Agent',
     envEnableList: [ENV_KEY.CHAT],
   },
-  {
-    path: '/semanticModel/model/:domainId?/:modelId?/:menuKey?',
-    component: './SemanticModel/DomainManager',
+ {
+    path: '/model',
     name: 'semanticModel',
+    component: './SemanticModel/DomainManager',
     envEnableList: [ENV_KEY.SEMANTIC],
+    routes: [
+      {
+        path: '/model',
+        redirect: '/model/:domainId?/:modelId?/:menuKey?',
+      },
+
+      {
+        path: '/model/:domainId?/:modelId?/:menuKey?',
+        component: './SemanticModel/DomainManager',
+        name: 'model',
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+      {
+        path: '/database',
+        name: 'database',
+        component: './SemanticModel/components/Database/DatabaseTable',
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+    ],
   },
   {
-    path: '/Metric',
+    path: '/database',
+    name: 'database',
+    hideInMenu: true,
+    component: './SemanticModel/components/Database/DatabaseTable',
+    envEnableList: [ENV_KEY.SEMANTIC],
+  },
+
+  {
+    path: '/metric',
     name: 'metric',
     component: './SemanticModel/Metric',
     envEnableList: [ENV_KEY.SEMANTIC],
+  },
+  {
+    path: '/plugin',
+    name: 'plugin',
+    component: './ChatPlugin',
+    envEnableList: [ENV_KEY.CHAT],
   },
   {
     path: '/login',
@@ -61,10 +88,10 @@ const ROUTES = [
   },
   {
     path: '/',
-    redirect: APP_TARGET === 'inner' ? '/semanticModel/model/' : '/chat',
+    redirect: APP_TARGET === 'inner' ? '/model' : '/chat',
     envRedirect: {
       [ENV_KEY.CHAT]: '/chat',
-      [ENV_KEY.SEMANTIC]: '/semanticModel/model',
+      [ENV_KEY.SEMANTIC]: '/model',
     },
   },
   {
