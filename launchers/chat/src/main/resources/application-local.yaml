@@ -27,3 +27,6 @@ authentication:
 semantic:
   url:
     prefix: http://127.0.0.1:9081
+
+llm:
+  url: http://127.0.0.1:9092
