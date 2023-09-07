@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { queryData } from '../../service';
 import classNames from 'classnames';
 import { PREFIX_CLS } from '../../common/constants';
+import Text from './Text';
 
 type Props = {
   data: MsgDataType;
@@ -17,7 +18,8 @@ type Props = {
 const ChatMsg: React.FC<Props> = ({ data, chartIndex, triggerResize }) => {
   const { queryColumns, queryResults, chatContext, queryMode } = data;
 
-  const [columns, setColumns] = useState<ColumnType[]>(queryColumns);
+  const [columns, setColumns] = useState<ColumnType[]>();
+  const [referenceColumn, setReferenceColumn] = useState<ColumnType>();
   const [dataSource, setDataSource] = useState<any[]>(queryResults);
 
   const [drillDownDimension, setDrillDownDimension] = useState<DrillDownDimensionType>();
@@ -25,12 +27,18 @@ const ChatMsg: React.FC<Props> = ({ data, chartIndex, triggerResize }) => {
 
   const prefixCls = `${PREFIX_CLS}-chat-msg`;
 
+  const updateColummns = (queryColumnsValue: ColumnType[]) => {
+    const referenceColumn = queryColumnsValue.find(item => item.showType === 'more');
+    setReferenceColumn(referenceColumn);
+    setColumns(queryColumnsValue.filter(item => item.showType !== 'more'));
+  };
+
   useEffect(() => {
-    setColumns(queryColumns);
+    updateColummns(queryColumns);
     setDataSource(queryResults);
   }, [queryColumns, queryResults]);
 
-  if (!queryColumns || !queryResults) {
+  if (!queryColumns || !queryResults || !columns) {
     return null;
   }
 
@@ -69,7 +77,7 @@ const ChatMsg: React.FC<Props> = ({ data, chartIndex, triggerResize }) => {
     });
     setLoading(false);
     if (data.code === 200) {
-      setColumns(data.data?.queryColumns || []);
+      updateColummns(data.data?.queryColumns || []);
       setDataSource(data.data?.queryResults || []);
     }
   };
@@ -82,51 +90,9 @@ const ChatMsg: React.FC<Props> = ({ data, chartIndex, triggerResize }) => {
     });
   };
 
-  const getTextContent = () => {
-    let text = dataSource[0][columns[0].nameEn];
-    let htmlCode: string;
-    const match = text.match(/```html([\s\S]*?)```/);
-    htmlCode = match && match[1].trim();
-    if (htmlCode) {
-      text = text.replace(/```html([\s\S]*?)```/, '');
-    }
-    let scriptCode: string;
-    let scriptSrc: string;
-    if (htmlCode) {
-      scriptSrc = htmlCode.match(/<script src="([\s\S]*?)"><\/script>/)?.[1] || '';
-      scriptCode =
-        htmlCode.match(/<script type="text\/javascript">([\s\S]*?)<\/script>/)?.[1] || '';
-      if (scriptSrc) {
-        const script = document.createElement('script');
-        script.src = scriptSrc;
-        document.body.appendChild(script);
-      }
-      if (scriptCode) {
-        const script = document.createElement('script');
-        script.innerHTML = scriptCode;
-        setTimeout(() => {
-          document.body.appendChild(script);
-        }, 1500);
-      }
-    }
-    return (
-      <div
-        style={{
-          lineHeight: '24px',
-          width: 'fit-content',
-          maxWidth: '100%',
-          overflowX: 'hidden',
-        }}
-      >
-        {htmlCode ? <pre>{text}</pre> : text}
-        {!!htmlCode && <div dangerouslySetInnerHTML={{ __html: htmlCode }} />}
-      </div>
-    );
-  };
-
   const getMsgContent = () => {
     if (isText) {
-      return getTextContent();
+      return <Text columns={columns} referenceColumn={referenceColumn} dataSource={dataSource} />;
     }
     if (isMetricCard) {
       return (
@@ -168,7 +134,11 @@ const ChatMsg: React.FC<Props> = ({ data, chartIndex, triggerResize }) => {
 
   const chartMsgClass = classNames({ [prefixCls]: !isTable });
 
-  return <div className={chartMsgClass}>{getMsgContent()}</div>;
+  return (
+    <div className={chartMsgClass}>
+      {dataSource?.length === 0 ? <div>暂无数据，如有疑问请联系管理员</div> : getMsgContent()}
+    </div>
+  );
 };
 
 export default ChatMsg;

@@ -20,7 +20,8 @@
     "strict": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@@/*": ["./src/.umi/*"]
+      "@@/*": ["./src/.umi/*"],
+      "react": [ "./node_modules/@types/react" ]
     }
   },
   "include": [

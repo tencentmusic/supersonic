@@ -31,7 +31,7 @@ const FilterItem: React.FC<Props> = ({ modelId, filters, filter, onFiltersChange
   };
 
   useEffect(() => {
-    if (typeof filter.value === 'string' && options.length === 0) {
+    if ((typeof filter.value === 'string' || isArray(filter.value)) && options.length === 0) {
       initData();
     }
   }, []);

@@ -6,10 +6,10 @@
   "scripts": {
     "analyze": "cross-env ANALYZE=1 umi build",
     "build": "npm run build:os",
-    "build:os": "node .writeVersion.js && cross-env REACT_APP_ENV=prod APP_TARGET=opensource umi build",
-    "build:os-local": "node .writeVersion.js && cross-env REACT_APP_ENV=prod APP_TARGET=opensource RUN_TYPE=local umi build",
-    "build:inner": "node .writeVersion.js && cross-env REACT_APP_ENV=prod APP_TARGET=inner umi build",
-    "build:test": "node .writeVersion.js && cross-env REACT_APP_ENV=test umi build",
+    "build:os": "cross-env REACT_APP_ENV=prod APP_TARGET=opensource umi build",
+    "build:os-local": "cross-env REACT_APP_ENV=prod APP_TARGET=opensource RUN_TYPE=local umi build",
+    "build:inner": "cross-env REACT_APP_ENV=prod APP_TARGET=inner umi build",
+    "build:test": "cross-env REACT_APP_ENV=test umi build",
     "deploy": "npm run site && npm run gh-pages",
     "dev": "npm run start:osdev",
     "dev:os": "npm run start:osdev",
@@ -61,7 +61,9 @@
     "@ant-design/pro-form": "^1.23.0",
     "@ant-design/pro-layout": "^6.38.22",
     "@ant-design/pro-table": "^2.80.6",
+    "@antv/dom-util": "^2.0.4",
     "@antv/g6": "^4.8.14",
+    "@antv/g6-core": "^0.8.21",
     "@antv/layout": "^0.3.20",
     "@antv/xflow": "^1.0.55",
     "@babel/runtime": "^7.22.5",
@@ -96,7 +98,7 @@
     "react-split-pane": "^2.0.3",
     "react-syntax-highlighter": "^15.4.3",
     "sql-formatter": "^2.3.3",
-    "supersonic-chat-sdk": "^0.5.28",
+    "supersonic-chat-sdk": "^0.5.29",
     "umi": "3.5",
     "umi-request": "^1.0.8"
   },
@@ -139,7 +141,7 @@
     "typescript": "^4.0.3"
   },
   "engines": {
-    "node": ">=10.0.0 <17.0.0"
+    "node": ">=16.0.0 <20.0.0"
   },
   "resolutions": {
     "@types/react": "17.0.0"
