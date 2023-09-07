@@ -228,10 +228,14 @@ const ParseTip: React.FC<Props> = ({
 
   const entityDimensions = entityInfo?.dimensions?.filter(
     item =>
-      !['zyqk_song_id', 'song_name', 'singer_id'].includes(item.bizName) &&
+      !['zyqk_song_id', 'song_name', 'singer_id', 'zyqk_cmpny_id'].includes(item.bizName) &&
       !(
         entityInfo?.dimensions?.some(dimension => dimension.bizName === 'singer_id') &&
         item.bizName === 'singer_name'
+      ) &&
+      !(
+        entityInfo?.dimensions?.some(dimension => dimension.bizName === 'zyqk_cmpny_id') &&
+        item.bizName === 'cmpny_name'
       )
   );
 

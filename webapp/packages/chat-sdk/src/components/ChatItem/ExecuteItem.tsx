@@ -62,6 +62,9 @@ const ExecuteItem: React.FC<Props> = ({
       </div>
       <div className={`${prefixCls}-content-container ${prefixCls}-last-node`}>
         <Spin spinning={entitySwitchLoading}>
+          {data.queryAuthorization?.message && (
+            <div className={`${prefixCls}-auth-tip`}>提示：{data.queryAuthorization.message}</div>
+          )}
           {data?.queryMode === 'WEB_PAGE' ? (
             <WebPage id={queryId!} data={data} />
           ) : (

@@ -1,0 +1,38 @@
+@import '../../../styles/index.less';
+
+@text-prefix-cls: ~'@{supersonic-chat-prefix}-text';
+
+.@{text-prefix-cls} {
+  &-check-more {
+    margin-left: 12px;
+    font-size: 13px;
+    color: var(--chat-blue);
+    cursor: pointer;
+  }
+
+  &-arrow-icon {
+    margin-left: 2px;
+    font-size: 12px;
+  }
+
+  &-reference-data {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+    margin-top: 10px;
+  }
+
+  &-reference-item {
+    font-size: 13px;
+  }
+
+  &-reference-item-title {
+    color: var(--text-color);
+    font-weight: 500;
+  }
+
+  &-reference-item-value {
+    color: var(--text-color-secondary);
+    margin-top: 4px;
+  }
+}

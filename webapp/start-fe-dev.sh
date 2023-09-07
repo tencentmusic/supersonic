@@ -1,11 +1,31 @@
+#!/bin/bash
+
+node_version=$(node -v)
+
+major_version=$(echo $node_version | cut -d'.' -f1 | tr -d 'v')
+
+if [ $major_version -ge 17 ]; then
+  export NODE_OPTIONS=--openssl-legacy-provider
+fi
+
+if ! command -v pnpm >/dev/null 2>&1; then
+  npm i -g pnpm
+fi
+
 rm -rf ./packages/supersonic-fe/src/.umi ./packages/supersonic-fe/src/.umi-production
 
-npm i
+cd ./packages/chat-sdk
 
-npx lerna add supersonic-chat-sdk --scope supersonic-fe
+pnpm i
 
-npx lerna bootstrap
+pnpm run build
 
-npx lerna exec --scope supersonic-chat-sdk npm run build
+pnpm link --global
 
-npx lerna exec --scope supersonic-fe npm start
+cd ../supersonic-fe
+
+pnpm link ../chat-sdk
+
+pnpm i
+
+pnpm start
