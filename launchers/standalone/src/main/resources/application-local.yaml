@@ -33,3 +33,6 @@ time:
 
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
+
+llm:
+  url: http://127.0.0.1:9092

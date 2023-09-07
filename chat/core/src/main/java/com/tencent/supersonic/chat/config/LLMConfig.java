@@ -13,7 +13,7 @@ public class LLMConfig {
     @Value("${llm.url:}")
     private String url;
 
-    @Value("${query2sql.path:query2sql}")
+    @Value("${query2sql.path:/query2sql}")
     private String queryToSqlPath;
 
 }
