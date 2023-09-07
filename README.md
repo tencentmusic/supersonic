@@ -1,4 +1,4 @@
-English | [中文](README_CN.md)
+[中文介绍](README_CN.md) | [文档中心](https://github.com/tencentmusic/supersonic/wiki)
 
 # SuperSonic (超音数)
 
