@@ -31,6 +31,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -50,6 +51,8 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
     private PluginService pluginService;
     @Autowired
     private AgentService agentService;
+    @Value("${spring.h2.demo.enabled:false}")
+    private boolean demoEnable;
 
     private void parseAndExecute(int chatId, String queryText) throws Exception {
         QueryReq queryRequest = new QueryReq();
@@ -231,6 +234,9 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
+        if (!demoEnable) {
+            return;
+        }
         try {
             addDemoChatConfig_1();
             addDemoChatConfig_2();
