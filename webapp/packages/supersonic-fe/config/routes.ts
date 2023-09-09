@@ -34,17 +34,11 @@ const ROUTES = [
     component: './Agent',
     envEnableList: [ENV_KEY.CHAT],
   },
- {
+  {
     path: '/model',
     name: 'semanticModel',
-    component: './SemanticModel/DomainManager',
     envEnableList: [ENV_KEY.SEMANTIC],
     routes: [
-      {
-        path: '/model',
-        redirect: '/model/:domainId?/:modelId?/:menuKey?',
-      },
-
       {
         path: '/model/:domainId?/:modelId?/:menuKey?',
         component: './SemanticModel/DomainManager',
@@ -59,6 +53,7 @@ const ROUTES = [
       },
     ],
   },
+
   {
     path: '/database',
     name: 'database',
@@ -66,7 +61,6 @@ const ROUTES = [
     component: './SemanticModel/components/Database/DatabaseTable',
     envEnableList: [ENV_KEY.SEMANTIC],
   },
-
   {
     path: '/metric',
     name: 'metric',

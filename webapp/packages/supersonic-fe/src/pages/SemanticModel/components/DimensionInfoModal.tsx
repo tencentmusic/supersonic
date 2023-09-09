@@ -57,7 +57,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
 
   const saveDimension = async (fieldsValue: any, isSilenceSubmit = false) => {
     const queryParams = {
-      modelId,
+      modelId: isEdit ? dimensionItem.modelId : modelId,
       type: 'categorical',
       ...fieldsValue,
     };

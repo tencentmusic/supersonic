@@ -33,12 +33,13 @@ const DomainManagerTab: React.FC<Props> = ({
   isModel,
   activeKey,
   modelList,
+  domainManger,
   handleModelChange,
   onBackDomainBtnClick,
   onMenuChange,
 }) => {
   const defaultTabKey = 'xflow';
-
+  const { selectDomainId, domainList } = domainManger;
   const tabItem = [
     {
       label: '模型',
@@ -62,7 +63,13 @@ const DomainManagerTab: React.FC<Props> = ({
       key: 'permissonSetting',
       children: <PermissionSection permissionTarget={'domain'} />,
     },
-  ];
+  ].filter((item) => {
+    const target = domainList.find((domain) => domain.id === selectDomainId);
+    if (target?.hasEditPermission) {
+      return true;
+    }
+    return item.key !== 'permissonSetting';
+  });
 
   const isModelItem = [
     {

@@ -101,7 +101,6 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
       {dataSourceModalVisible && (
         <DataSourceCreateForm
           basicInfoFormMode="fast"
-          domainId={Number(selectDomainId)}
           dataSourceItem={dataSourceItem}
           onCancel={() => {
             setDataSourceModalVisible(false);

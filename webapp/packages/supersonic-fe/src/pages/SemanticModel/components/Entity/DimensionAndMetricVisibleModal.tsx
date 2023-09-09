@@ -81,7 +81,7 @@ const DimensionAndMetricVisibleModal: React.FC<Props> = ({
     if (globalKnowledgeConfigFormFields) {
       globalKnowledgeConfig = globalKnowledgeConfigFormFields;
     }
-    const { id } = entityData;
+    const { id, modelId } = entityData;
     let saveDomainExtendQuery = addDomainExtend;
     if (id) {
       saveDomainExtendQuery = editDomainExtend;
@@ -126,8 +126,8 @@ const DimensionAndMetricVisibleModal: React.FC<Props> = ({
 
     const { code, msg } = await saveDomainExtendQuery({
       [chatConfigKey]: params,
-      // domainId,
       id,
+      modelId,
     });
     if (code === 200) {
       if (!isSilenceSubmit) {

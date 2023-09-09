@@ -8,7 +8,7 @@ type Props = {
 const FormLabelRequire: React.FC<Props> = ({ title, labelStyles = {} }) => {
   return (
     <>
-      <div className="ant-col ant-form-item-label">
+      <div className="ant-col ant-form-item-label" style={{ padding: 0 }}>
         <label
           htmlFor="description"
           className="ant-form-item-required"
