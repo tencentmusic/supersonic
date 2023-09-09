@@ -113,15 +113,15 @@ const NodeInfoDrawer: React.FC<Props> = ({
       {
         title: '应用信息',
         children: [
-          {
-            label: '全路径',
-            value: fullPath,
-            content: (
-              <Paragraph style={{ width: 275, margin: 0 }} ellipsis={{ tooltip: fullPath }}>
-                {fullPath}
-              </Paragraph>
-            ),
-          },
+          // {
+          //   label: '全路径',
+          //   value: fullPath,
+          //   content: (
+          //     <Paragraph style={{ width: 275, margin: 0 }} ellipsis={{ tooltip: fullPath }}>
+          //       {fullPath}
+          //     </Paragraph>
+          //   ),
+          // },
           {
             label: '敏感度',
             value: SENSITIVE_LEVEL_ENUM[sensitiveLevel],

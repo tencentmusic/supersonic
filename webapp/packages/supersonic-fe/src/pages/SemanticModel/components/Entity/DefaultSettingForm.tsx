@@ -28,11 +28,10 @@ const FormItem = Form.Item;
 const Option = Select.Option;
 
 const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
-  { metricList, dimensionList, domainId, entityData, chatConfigKey, chatConfigType, onSubmit },
+  { metricList, dimensionList, entityData, chatConfigKey, chatConfigType, onSubmit },
   ref,
 ) => {
   const [form] = Form.useForm();
-  const [metricListOptions, setMetricListOptions] = useState<any>([]);
   const [dataItemListOptions, setDataItemListOptions] = useState<any>([]);
   const formatEntityData = formatRichEntityDataListToIds(entityData);
   const getFormValidateFields = async () => {
@@ -73,16 +72,6 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
       dataItemIds: [...dimensionIdString, ...metricIdString],
     });
   };
-
-  useEffect(() => {
-    const metricOption = metricList.map((item: any) => {
-      return {
-        label: item.name,
-        value: item.id,
-      };
-    });
-    setMetricListOptions(metricOption);
-  }, [metricList]);
 
   useEffect(() => {
     if (Array.isArray(dimensionList) && Array.isArray(metricList)) {
@@ -141,9 +130,10 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
       ...formatEntityData,
       chatDefaultConfig: { ...values, ...dimensionConfig },
     };
+    const { modelId } = entityData;
     const { code, msg, data } = await saveDomainExtendQuery({
       [chatConfigKey]: params,
-      // domainId,
+      modelId,
       id,
     });
     if (code === 200) {

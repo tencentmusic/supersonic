@@ -16,7 +16,7 @@ import {
 import { isFunction } from 'lodash';
 import FullScreen from '@/components/FullScreen';
 import SqlEditor from '@/components/SqlEditor';
-import type { TaskResultItem, DataInstanceItem, TaskResultColumn } from '../data';
+import type { TaskResultItem, TaskResultColumn } from '../data';
 import { excuteSql } from '@/pages/SemanticModel/service';
 import DataSourceCreateForm from './DataSourceCreateForm';
 import type { Dispatch } from 'umi';
@@ -36,7 +36,6 @@ type IProps = {
   onUpdateSql?: (sql: string) => void;
   sql?: string;
   onSubmitSuccess?: (dataSourceInfo: any) => void;
-  onJdbcSourceChange?: (jdbcId: number) => void;
 };
 
 type ResultTableItem = Record<string, any>;
@@ -60,7 +59,6 @@ const SqlDetail: React.FC<IProps> = ({
   onSubmitSuccess,
   sql = '',
   onUpdateSql,
-  onJdbcSourceChange,
 }) => {
   const { databaseConfigList, selectModelId: modelId } = domainManger;
   const [resultTable, setResultTable] = useState<ResultTableItem[]>([]);
@@ -101,20 +99,6 @@ const SqlDetail: React.FC<IProps> = ({
 
   const [scriptColumns, setScriptColumns] = useState<any[]>([]);
 
-  // useEffect(() => {
-  //   const list = databaseConfigList.map((item: ISemantic.IDatabaseItem) => {
-  //     return {
-  //       label: item.name,
-  //       key: item.id,
-  //       disabled: !item.hasUsePermission,
-  //     };
-  //   });
-  //   setJdbcSourceItems(list);
-  //   const config = list[0];
-  //   setCurrentJdbcSourceItem(config);
-  //   onJdbcSourceChange?.(config?.key && Number(config?.key));
-  // }, [databaseConfigList]);
-
   useEffect(() => {
     const list = databaseConfigList.map((item: ISemantic.IDatabaseItem) => {
       return {
@@ -133,8 +117,11 @@ const SqlDetail: React.FC<IProps> = ({
       }
     }
     setCurrentJdbcSourceItem(targetDataBase);
-    // onJdbcSourceChange?.(targetDataBase?.key && Number(targetDataBase?.key));
   }, [dataSourceItem, databaseConfigList]);
+
+  useEffect(() => {
+    setRunState(undefined);
+  }, [currentJdbcSourceItem]);
 
   function creatCalcItem(key: string, data: string) {
     const line = document.createElement('div'); // 需要每条数据一行，这样避免数据换行的时候获得的宽度不准确
@@ -408,9 +395,7 @@ const SqlDetail: React.FC<IProps> = ({
                     return item.key === Number(value);
                   })[0];
                   if (target) {
-                    // setJdbcSourceName(target.label);
                     setCurrentJdbcSourceItem(target);
-                    onJdbcSourceChange?.(Number(value));
                   }
                 },
               }}
@@ -520,6 +505,7 @@ const SqlDetail: React.FC<IProps> = ({
       {dataSourceModalVisible && (
         <DataSourceCreateForm
           sql={sql}
+          databaseItem={currentJdbcSourceItem}
           dataSourceItem={dataSourceItem}
           scriptColumns={scriptColumns}
           onCancel={() => {

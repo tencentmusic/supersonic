@@ -141,24 +141,28 @@ const PermissionCreateDrawer: React.FC<Props> = ({
               <DimensionMetricVisibleTransfer
                 titles={['未授权维度/指标', '已授权维度/指标']}
                 sourceList={[
-                  ...dimensionList.map((item) => {
-                    const transType = TransType.DIMENSION;
-                    const { id } = item;
-                    return {
-                      ...item,
-                      transType,
-                      key: wrapperTransTypeAndId(transType, id),
-                    };
-                  }),
-                  ...metricList.map((item) => {
-                    const transType = TransType.METRIC;
-                    const { id } = item;
-                    return {
-                      ...item,
-                      transType,
-                      key: wrapperTransTypeAndId(transType, id),
-                    };
-                  }),
+                  ...dimensionList
+                    .map((item) => {
+                      const transType = TransType.DIMENSION;
+                      const { id } = item;
+                      return {
+                        ...item,
+                        transType,
+                        key: wrapperTransTypeAndId(transType, id),
+                      };
+                    })
+                    .filter((item) => item.sensitiveLevel === 2),
+                  ...metricList
+                    .map((item) => {
+                      const transType = TransType.METRIC;
+                      const { id } = item;
+                      return {
+                        ...item,
+                        transType,
+                        key: wrapperTransTypeAndId(transType, id),
+                      };
+                    })
+                    .filter((item) => item.sensitiveLevel === 2),
                 ]}
                 targetList={selectedKeyList}
                 onChange={(newTargetKeys: string[]) => {

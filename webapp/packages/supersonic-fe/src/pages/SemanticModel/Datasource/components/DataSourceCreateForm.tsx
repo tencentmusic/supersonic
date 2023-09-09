@@ -4,19 +4,21 @@ import DataSourceBasicForm from './DataSourceBasicForm';
 import FieldForm from './DataSourceFieldForm';
 import { formLayout } from '@/components/FormHelper/utils';
 import { EnumDataSourceType } from '../constants';
-import type { DataInstanceItem } from '../data';
+// import type { DataInstanceItem } from '../data';
 import styles from '../style.less';
 import { createDatasource, updateDatasource, getColumns } from '../../service';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
 import { connect } from 'umi';
+import { IDataSource } from '../../data';
 
 export type CreateFormProps = {
   domainManger: StateType;
   dispatch: Dispatch;
   createModalVisible: boolean;
   sql?: string;
-  dataSourceItem: DataInstanceItem | any;
+  databaseItem?: any;
+  dataSourceItem: IDataSource.IDataSourceItem;
   onCancel?: () => void;
   onSubmit?: (dataSourceInfo: any) => void;
   scriptColumns?: any[] | undefined;
@@ -39,6 +41,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   sql = '',
   onSubmit,
   dataSourceItem,
+  databaseItem,
   basicInfoFormMode,
 }) => {
   const isEdit = !!dataSourceItem?.id;
@@ -160,10 +163,10 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       const queryParams = {
         ...submitForm,
         sqlQuery: sql,
-        databaseId: dataSourceItem?.databaseId || formDatabaseId,
+        databaseId: dataSourceItem?.databaseId || formDatabaseId || databaseItem?.key,
         queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
         tableQuery: dbName && tableName ? `${dbName}.${tableName}` : '',
-        modelId,
+        modelId: isEdit ? dataSourceItem.modelId : modelId,
       };
       const queryDatasource = isEdit ? updateDatasource : createDatasource;
       const { code, msg, data } = await queryDatasource(queryParams);
@@ -303,7 +306,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     return (
       <>
         <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
-          <FieldForm fields={fields} onFieldChange={handleFieldChange} />;
+          <FieldForm fields={fields} onFieldChange={handleFieldChange} />
         </div>
         <div style={{ display: currentStep !== 1 ? 'block' : 'none' }}>
           <DataSourceBasicForm
