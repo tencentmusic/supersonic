@@ -243,7 +243,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
         <FormItem name="pattern" label="函数描述">
           <TextArea placeholder="请输入函数描述，多个描述换行分隔" allowClear />
         </FormItem>
-        <FormItem name="params" label="函数参数" hidden={pluginType === PluginTypeEnum.DSL}>
+        {/* <FormItem name="params" label="函数参数" hidden={pluginType === PluginTypeEnum.DSL}>
           <div className={styles.paramsSection}>
             {functionParams.map((functionParam: FunctionParamFormItemType) => {
               const { id, name, type, description } = functionParam;
@@ -300,7 +300,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
               新增函数参数
             </Button>
           </div>
-        </FormItem>
+        </FormItem> */}
         <FormItem name="exampleQuestions" label="示例问题">
           <div className={styles.paramsSection}>
             {examples.map((example) => {
@@ -340,7 +340,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
             <FormItem name="url" label="地址" rules={[{ required: true, message: '请输入地址' }]}>
               <Input placeholder="请输入地址" allowClear />
             </FormItem>
-            <FormItem name="params" label="参数">
+            <FormItem name="params" label="函数参数">
               <div className={styles.paramsSection}>
                 {filters.map((filter: any) => {
                   return (
