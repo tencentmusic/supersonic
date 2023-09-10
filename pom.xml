@@ -64,7 +64,7 @@
         <xk.time.version>3.2.4</xk.time.version>
         <mockito-inline.version>4.5.1</mockito-inline.version>
         <jsqlparser.version>4.5</jsqlparser.version>
-        <revision>0.7.3</revision>
+        <revision>0.7.4</revision>
     </properties>
 
     <dependencyManagement>
