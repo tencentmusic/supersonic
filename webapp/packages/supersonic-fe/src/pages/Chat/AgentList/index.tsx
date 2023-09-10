@@ -4,20 +4,7 @@ import styles from './style.less';
 import classNames from 'classnames';
 import { message } from 'antd';
 import IconFont from '@/components/IconFont';
-
-const agents = [
-  'icon-fukuanbaobiaochaxun',
-  'icon-hangweifenxi1',
-  'icon-xiaofeifenxi',
-  'icon-renwuchaxun',
-  'icon-liushuichaxun',
-  'icon-baobiao',
-  'icon-cangkuchaxun',
-  'icon-xiaoshoushuju',
-  'icon-tongji',
-  'icon-shujutongji',
-  'icon-mendiankanban',
-];
+import { AGENT_ICONS } from '../constants';
 
 type Props = {
   agentList: AgentType[];
@@ -49,8 +36,7 @@ const AgentList: React.FC<Props> = ({ agentList, currentAgent, onSelectAgent }) 
                 onSelectAgent(agent);
               }}
             >
-              {/* <img src={agents[index % agents.length]} alt="avatar" className={styles.avatar} /> */}
-              <IconFont type={agents[index % agents.length]} className={styles.avatar} />
+              <IconFont type={AGENT_ICONS[index % AGENT_ICONS.length]} className={styles.avatar} />
               <div className={styles.agentInfo}>
                 <div className={styles.agentName}>{agent.name}</div>
                 <div className={styles.agentDesc}>{agent.description}</div>
