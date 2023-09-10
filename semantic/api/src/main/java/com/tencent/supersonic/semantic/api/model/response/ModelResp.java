@@ -13,6 +13,8 @@ public class ModelResp extends SchemaItem {
 
     private Long domainId;
 
+    private String alias;
+
     private List<String> viewers;
 
     private List<String> viewOrgs;

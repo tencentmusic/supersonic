@@ -32,6 +32,4 @@ public class KnowledgeInfoReq {
      * advanced knowledge config for single item
      */
     private KnowledgeAdvancedConfig knowledgeAdvancedConfig;
-
-
 }

@@ -3,7 +3,7 @@ package com.tencent.supersonic.knowledge.utils;
 import com.hankcs.hanlp.corpus.tag.Nature;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
-import com.tencent.supersonic.knowledge.dictionary.DictWordType;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.ModelInfoStat;
 import java.util.ArrayList;
 import java.util.Comparator;

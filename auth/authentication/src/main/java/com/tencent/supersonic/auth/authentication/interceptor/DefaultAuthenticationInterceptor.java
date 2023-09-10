@@ -46,6 +46,10 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
         }
 
         String uri = request.getServletPath();
+        if (!isIncludedUri(uri)) {
+            return true;
+        }
+
         if (isExcludedUri(uri)) {
             return true;
         }

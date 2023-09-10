@@ -62,4 +62,6 @@ public class Constants {
     public static final String BRACKETS_START = "[";
     public static final String BRACKETS_END = "]";
 
+    public static final Long DEFAULT_FREQUENCY = 100000L;
+
 }

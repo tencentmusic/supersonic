@@ -24,7 +24,6 @@ import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -169,7 +168,7 @@ public class DataPermissionAOP {
             String modelName = modelResp.getName();
             List<String> admins = modelService.getModelAdmin(modelResp.getId());
             String message = String.format("您没有主题域[%s]权限，请联系管理员%s开通", modelName, admins);
-            throw new InvalidArgumentException(message);
+            throw new InvalidPermissionException(message);
         }
 
     }

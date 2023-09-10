@@ -44,7 +44,8 @@ public class FunctionBasedParser extends PluginParser {
                     queryContext.getRequest().getQueryText());
             return false;
         }
-        return true;
+        List<Plugin> plugins = getPluginList(queryContext);
+        return !CollectionUtils.isEmpty(plugins);
     }
 
     @Override
@@ -82,7 +83,6 @@ public class FunctionBasedParser extends PluginParser {
             log.info("function call parser, plugin is empty, skip");
             return null;
         }
-        FunctionCallInfoConfig functionCallConfig = ContextUtils.getBean(FunctionCallInfoConfig.class);
         FunctionResp functionResp = new FunctionResp();
         if (pluginToFunctionCall.size() == 1) {
             functionResp.setToolSelection(pluginToFunctionCall.iterator().next().getName());
@@ -90,7 +90,7 @@ public class FunctionBasedParser extends PluginParser {
             FunctionReq functionReq = FunctionReq.builder()
                     .queryText(queryContext.getRequest().getQueryText())
                     .pluginConfigs(pluginToFunctionCall).build();
-            functionResp = requestFunction(functionCallConfig.getUrl(), functionReq);
+            functionResp = requestFunction(functionReq);
         }
         return functionResp;
     }
@@ -133,7 +133,9 @@ public class FunctionBasedParser extends PluginParser {
         return functionDOList;
     }
 
-    public FunctionResp requestFunction(String url, FunctionReq functionReq) {
+    public FunctionResp requestFunction(FunctionReq functionReq) {
+        FunctionCallInfoConfig functionCallInfoConfig = ContextUtils.getBean(FunctionCallInfoConfig.class);
+        String url = functionCallInfoConfig.getUrl() + functionCallInfoConfig.getPluginSelectPath();
         HttpHeaders headers = new HttpHeaders();
         long startTime = System.currentTimeMillis();
         headers.setContentType(MediaType.APPLICATION_JSON);

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CorrectionInfo {
+public class SemanticCorrectInfo {
 
     private QueryFilters queryFilters;
 

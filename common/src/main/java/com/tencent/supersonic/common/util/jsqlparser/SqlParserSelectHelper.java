@@ -26,6 +26,7 @@ import org.springframework.util.CollectionUtils;
  */
 @Slf4j
 public class SqlParserSelectHelper {
+
     public static List<FilterExpression> getFilterExpression(String sql) {
         PlainSelect plainSelect = getPlainSelect(sql);
         if (Objects.isNull(plainSelect)) {
@@ -132,16 +133,12 @@ public class SqlParserSelectHelper {
             }
         }
         List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
-        if (orderByElements != null) {
+        if (!CollectionUtils.isEmpty(orderByElements)) {
             for (OrderByElement orderByElement : orderByElements) {
-                Expression expression = orderByElement.getExpression();
-
-                if (expression instanceof Column) {
-                    Column column = (Column) expression;
-                    result.add(column.getColumnName());
-                }
+                orderByElement.accept(new OrderByAcquireVisitor(result));
             }
         }
+
         Expression where = plainSelect.getWhere();
         if (where != null) {
             where.accept(new ExpressionVisitorAdapter() {
@@ -181,7 +178,17 @@ public class SqlParserSelectHelper {
         for (SelectItem selectItem : selectItems) {
             selectItem.accept(visitor);
         }
-        return visitor.hasAggregateFunction();
+        boolean selectFunction = visitor.hasAggregateFunction();
+        if (selectFunction) {
+            return true;
+        }
+        GroupByElement groupBy = plainSelect.getGroupBy();
+        if (Objects.nonNull(groupBy)) {
+            GroupByVisitor replaceVisitor = new GroupByVisitor();
+            groupBy.accept(replaceVisitor);
+            return replaceVisitor.isHasAggregateFunction();
+        }
+        return false;
     }
 
 }

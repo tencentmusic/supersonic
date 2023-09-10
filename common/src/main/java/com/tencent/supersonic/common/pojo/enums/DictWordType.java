@@ -1,4 +1,4 @@
-package com.tencent.supersonic.knowledge.dictionary;
+package com.tencent.supersonic.common.pojo.enums;
 
 import org.apache.commons.lang3.StringUtils;
 

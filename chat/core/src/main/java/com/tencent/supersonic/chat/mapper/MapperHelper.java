@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +50,6 @@ public class MapperHelper {
     }
 
     public double getThresholdMatch(List<String> natures) {
-        log.info("optimizationConfig:{}", optimizationConfig);
         if (existDimensionValues(natures)) {
             return optimizationConfig.getDimensionValueThresholdConfig();
         }
@@ -90,9 +90,20 @@ public class MapperHelper {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
 
         Set<Long> detectModelIds = agentService.getDslToolsModelIds(request.getAgentId(), null);
+        //contains all
+        if (isContainsAllModel(detectModelIds)) {
+            if (Objects.nonNull(modelId) && modelId > 0) {
+                Set<Long> result = new HashSet<>();
+                result.add(modelId);
+                return result;
+            }
+            return new HashSet<>();
+        }
+
         if (Objects.nonNull(detectModelIds)) {
             detectModelIds = detectModelIds.stream().filter(entry -> entry > 0).collect(Collectors.toSet());
         }
+
         if (Objects.nonNull(modelId) && modelId > 0 && Objects.nonNull(detectModelIds)) {
             if (detectModelIds.contains(modelId)) {
                 Set<Long> result = new HashSet<>();
@@ -101,6 +112,10 @@ public class MapperHelper {
             }
         }
         return detectModelIds;
+    }
+
+    private boolean isContainsAllModel(Set<Long> detectModelIds) {
+        return CollectionUtils.isNotEmpty(detectModelIds) && detectModelIds.contains(-1L);
     }
 
 }

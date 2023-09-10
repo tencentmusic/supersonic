@@ -77,7 +77,7 @@ public class DatabaseServiceImpl implements DatabaseService {
                 databaseResp.setHasEditPermission(true);
                 databaseResp.setHasUsePermission(true);
             }
-            if (databaseResp.getViewers().contains(databaseResp.getCreatedBy())) {
+            if (databaseResp.getViewers().contains(user.getName())) {
                 databaseResp.setHasUsePermission(true);
             }
         });
@@ -108,8 +108,10 @@ public class DatabaseServiceImpl implements DatabaseService {
             return new QueryResultWithSchemaResp();
         }
         List<String> admins = databaseResp.getAdmins();
+        List<String> viewers = databaseResp.getViewers();
         if (!admins.contains(user.getName())
-                || !databaseResp.getCreatedBy().equalsIgnoreCase(user.getName())) {
+                && !viewers.contains(user.getName())
+                && !databaseResp.getCreatedBy().equalsIgnoreCase(user.getName())) {
             String message = String.format("您暂无当前数据库%s权限, 请联系数据库管理员%s开通",
                     databaseResp.getName(),
                     String.join(",", admins));

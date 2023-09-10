@@ -24,7 +24,7 @@ public class BasePluginTest {
         Assert.assertEquals(queryResult.getQueryMode(), WebPageQuery.QUERY_MODE);
         WebPageResponse webPageResponse = (WebPageResponse) queryResult.getResponse();
         WebBaseResult webPage = webPageResponse.getWebPage();
-        Assert.assertEquals(webPage.getUrl(), "www.test.com");
+        Assert.assertEquals(webPage.getUrl(), "www.yourbi.com");
         Assert.assertEquals(1, webPage.getParams().size());
         Assert.assertEquals("alice", webPage.getParams().get(0).getValue());
     }

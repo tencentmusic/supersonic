@@ -7,7 +7,7 @@ import java.util.List;
 @Data
 public class MetaFilter {
 
-    private Long id;
+    private String id;
 
     private String name;
 
@@ -20,5 +20,7 @@ public class MetaFilter {
     private Integer sensitiveLevel;
 
     private Integer status;
+
+    private String key;
 
 }

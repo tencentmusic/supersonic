@@ -46,3 +46,7 @@ alter table s2_database drop column domain_id;
 
 --20230831
 alter table s2_chat add column agent_id int after chat_id;
+
+--20230907
+
+ALTER TABLE s2_model add alias varchar(200) default null after domain_id;

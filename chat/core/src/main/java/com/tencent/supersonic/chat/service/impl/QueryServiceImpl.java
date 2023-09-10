@@ -247,7 +247,9 @@ public class QueryServiceImpl implements QueryService {
     public QueryResult executeDirectQuery(QueryDataReq queryData, User user) throws SqlParseException {
         SemanticQuery semanticQuery = QueryManager.createRuleQuery(queryData.getQueryMode());
         BeanUtils.copyProperties(queryData, semanticQuery.getParseInfo());
-        return semanticQuery.execute(user);
+        QueryResult queryResult = semanticQuery.execute(user);
+        queryResult.setChatContext(semanticQuery.getParseInfo());
+        return queryResult;
     }
 
     @Override
@@ -274,7 +276,7 @@ public class QueryServiceImpl implements QueryService {
         List<String> groups = new ArrayList<>();
         groups.add(dimensionValueReq.getBizName());
         queryStructReq.setGroups(groups);
-        if (Objects.isNull(dimensionValueReq.getValue())) {
+        if (!Objects.isNull(dimensionValueReq.getValue())) {
             List<Filter> dimensionFilters = new ArrayList<>();
             Filter dimensionFilter = new Filter();
             dimensionFilter.setOperator(FilterOperatorEnum.LIKE);

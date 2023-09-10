@@ -75,6 +75,10 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public void deleteDomain(Long id) {
+        List<ModelResp> modelResps = modelService.getModelByDomainIds(Lists.newArrayList(id));
+        if (!CollectionUtils.isEmpty(modelResps)) {
+            throw new RuntimeException("该主题域下还存在模型, 暂不能删除, 请确认");
+        }
         domainRepository.deleteDomain(id);
     }
 
@@ -124,7 +128,9 @@ public class DomainServiceImpl implements DomainService {
         List<Long> domainIds = domainWithAuth.stream().map(DomainResp::getId)
                 .collect(Collectors.toList());
         //get all child domain
-        return getDomainChildren(domainIds);
+        return getDomainChildren(domainIds).stream()
+                .peek(domainResp -> domainResp.setHasEditPermission(true))
+                .collect(Collectors.toSet());
     }
 
     private Set<DomainResp> getParentDomain(List<Long> ids) {

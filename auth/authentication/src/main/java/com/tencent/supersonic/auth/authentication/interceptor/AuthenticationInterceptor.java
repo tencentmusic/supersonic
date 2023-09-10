@@ -42,6 +42,17 @@ public abstract class AuthenticationInterceptor implements HandlerInterceptor {
         return excludePaths.stream().anyMatch(uri::startsWith);
     }
 
+    protected boolean isIncludedUri(String uri) {
+        String includePathStr = authenticationConfig.getIncludePath();
+        if (Strings.isEmpty(includePathStr)) {
+            return false;
+        }
+        List<String> includePaths = Arrays.asList(includePathStr.split(","));
+        if (CollectionUtils.isEmpty(includePaths)) {
+            return false;
+        }
+        return includePaths.stream().anyMatch(uri::startsWith);
+    }
 
     protected boolean isInternalRequest(HttpServletRequest request) {
         String internal = request.getHeader(UserConstants.INTERNAL);

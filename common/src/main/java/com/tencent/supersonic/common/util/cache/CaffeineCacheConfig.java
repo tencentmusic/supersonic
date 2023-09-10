@@ -20,10 +20,21 @@ public class CaffeineCacheConfig {
     @Value("${caffeine.max.size:5000}")
     private Integer caffeineMaximumSize;
 
-    @Bean
+    @Bean(name = "caffeineCache")
     public Cache<String, Object> caffeineCache() {
         return Caffeine.newBuilder()
                 .expireAfterWrite(cacheCommonConfig.getCacheCommonExpireAfterWrite(), TimeUnit.MINUTES)
+                // 初始的缓存空间大小
+                .initialCapacity(caffeineInitialCapacity)
+                // 缓存的最大条数
+                .maximumSize(caffeineMaximumSize)
+                .build();
+    }
+
+    @Bean(name = "searchCaffeineCache")
+    public Cache<Long, Object> searchCaffeineCache() {
+        return Caffeine.newBuilder()
+                .expireAfterWrite(10000, TimeUnit.MINUTES)
                 // 初始的缓存空间大小
                 .initialCapacity(caffeineInitialCapacity)
                 // 缓存的最大条数

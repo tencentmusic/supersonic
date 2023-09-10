@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.corrector;
 
-import com.tencent.supersonic.chat.api.pojo.CorrectionInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.StringUtil;
@@ -18,18 +18,17 @@ import org.apache.commons.lang3.StringUtils;
 public class QueryFilterAppend extends BaseSemanticCorrector {
 
     @Override
-    public CorrectionInfo corrector(CorrectionInfo correctionInfo) throws JSQLParserException {
-        String queryFilter = getQueryFilter(correctionInfo.getQueryFilters());
-        String preSql = correctionInfo.getSql();
+    public void correct(SemanticCorrectInfo semanticCorrectInfo) throws JSQLParserException {
+        String queryFilter = getQueryFilter(semanticCorrectInfo.getQueryFilters());
+        String preSql = semanticCorrectInfo.getSql();
 
         if (StringUtils.isNotEmpty(queryFilter)) {
             log.info("add queryFilter to preSql :{}", queryFilter);
             Expression expression = CCJSqlParserUtil.parseCondExpression(queryFilter);
             String sql = SqlParserUpdateHelper.addWhere(preSql, expression);
-            correctionInfo.setPreSql(preSql);
-            correctionInfo.setSql(sql);
+            semanticCorrectInfo.setPreSql(preSql);
+            semanticCorrectInfo.setSql(sql);
         }
-        return correctionInfo;
     }
 
     private String getQueryFilter(QueryFilters queryFilters) {

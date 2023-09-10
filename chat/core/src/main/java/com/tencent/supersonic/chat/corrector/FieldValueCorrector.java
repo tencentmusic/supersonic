@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.corrector;
 
-import com.tencent.supersonic.chat.api.pojo.CorrectionInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
@@ -20,23 +20,23 @@ import org.springframework.util.CollectionUtils;
 public class FieldValueCorrector extends BaseSemanticCorrector {
 
     @Override
-    public CorrectionInfo corrector(CorrectionInfo correctionInfo) {
+    public void correct(SemanticCorrectInfo semanticCorrectInfo) {
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-        Long modelId = correctionInfo.getParseInfo().getModel().getId();
+        Long modelId = semanticCorrectInfo.getParseInfo().getModel().getId();
         List<SchemaElement> dimensions = semanticSchema.getDimensions().stream()
                 .filter(schemaElement -> modelId.equals(schemaElement.getModel()))
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(dimensions)) {
-            return correctionInfo;
+            return;
         }
 
         Map<String, Map<String, String>> aliasAndBizNameToTechName = getAliasAndBizNameToTechName(dimensions);
-        String preSql = correctionInfo.getSql();
-        correctionInfo.setPreSql(preSql);
+        String preSql = semanticCorrectInfo.getSql();
+        semanticCorrectInfo.setPreSql(preSql);
         String sql = SqlParserUpdateHelper.replaceValue(preSql, aliasAndBizNameToTechName);
-        correctionInfo.setSql(sql);
-        return correctionInfo;
+        semanticCorrectInfo.setSql(sql);
+        return;
     }
 
 

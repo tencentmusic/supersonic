@@ -17,7 +17,7 @@ import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
-import com.tencent.supersonic.chat.query.metricinterpret.MetricInterpretQuery;
+import com.tencent.supersonic.chat.query.llm.interpret.MetricInterpretQuery;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.service.AgentService;

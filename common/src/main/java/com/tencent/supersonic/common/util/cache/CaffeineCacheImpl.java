@@ -6,6 +6,7 @@ import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,7 +16,9 @@ public class CaffeineCacheImpl implements CacheUtils {
 
     @Autowired
     private CacheCommonConfig cacheCommonConfig;
+
     @Autowired
+    @Qualifier("caffeineCache")
     private Cache<String, Object> caffeineCache;
 
     @Override

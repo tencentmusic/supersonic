@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.mapper;
 import com.google.common.collect.Lists;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.knowledge.dictionary.DictWordType;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.service.SearchService;
 import java.util.List;

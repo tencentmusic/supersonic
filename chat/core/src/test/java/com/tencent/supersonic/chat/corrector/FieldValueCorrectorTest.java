@@ -2,9 +2,9 @@ package com.tencent.supersonic.chat.corrector;
 
 import static org.mockito.Mockito.when;
 
-import com.tencent.supersonic.chat.api.pojo.CorrectionInfo;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
+import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -53,19 +53,19 @@ class FieldValueCorrectorTest {
         SchemaElement model = new SchemaElement();
         model.setId(2L);
         parseInfo.setModel(model);
-        CorrectionInfo correctionInfo = CorrectionInfo.builder()
+        SemanticCorrectInfo semanticCorrectInfo = SemanticCorrectInfo.builder()
                 .sql("select count(song_name) from 歌曲库 where singer_name = '周先生'")
                 .parseInfo(parseInfo)
                 .build();
 
         FieldValueCorrector corrector = new FieldValueCorrector();
-        CorrectionInfo info = corrector.corrector(correctionInfo);
+        corrector.correct(semanticCorrectInfo);
 
-        Assert.assertEquals("SELECT count(song_name) FROM 歌曲库 WHERE singer_name = '周杰伦'", info.getSql());
+        Assert.assertEquals("SELECT count(song_name) FROM 歌曲库 WHERE singer_name = '周杰伦'", semanticCorrectInfo.getSql());
 
-        correctionInfo.setSql("select count(song_name) from 歌曲库 where singer_name = '杰伦'");
-        info = corrector.corrector(correctionInfo);
+        semanticCorrectInfo.setSql("select count(song_name) from 歌曲库 where singer_name = '杰伦'");
+        corrector.correct(semanticCorrectInfo);
 
-        Assert.assertEquals("SELECT count(song_name) FROM 歌曲库 WHERE singer_name = '周杰伦'", info.getSql());
+        Assert.assertEquals("SELECT count(song_name) FROM 歌曲库 WHERE singer_name = '周杰伦'", semanticCorrectInfo.getSql());
     }
 }

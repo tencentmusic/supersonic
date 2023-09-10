@@ -11,13 +11,13 @@ public class EmbeddingConfig {
     @Value("${embedding.url:}")
     private String url;
 
-    @Value("${embedding.recognize.path:preset_query_retrival}")
+    @Value("${embedding.recognize.path:/preset_query_retrival}")
     private String recognizePath;
 
-    @Value("${embedding.delete.path:preset_delete_by_ids}")
+    @Value("${embedding.delete.path:/preset_delete_by_ids}")
     private String deletePath;
 
-    @Value("${embedding.add.path:preset_query_add}")
+    @Value("${embedding.add.path:/preset_query_add}")
     private String addPath;
 
     @Value("${embedding.nResult:1}")

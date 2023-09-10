@@ -9,9 +9,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AuthenticationConfig {
 
-
     @Value("${authentication.exclude.path:XXX}")
     private String excludePath;
+
+    @Value("${authentication.include.path:/api}")
+    private String includePath;
 
     @Value("${authentication.enable:false}")
     private boolean enabled;
@@ -21,6 +23,5 @@ public class AuthenticationConfig {
 
     @Value("${authentication.token.http.header.key:Authorization}")
     private String tokenHttpHeaderKey;
-
 
 }

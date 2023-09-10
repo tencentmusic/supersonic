@@ -1,4 +1,4 @@
-package com.tencent.supersonic.knowledge;
+package com.tencent.supersonic.knowledge.listener;
 
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
 import com.tencent.supersonic.knowledge.service.SchemaService;
@@ -16,7 +16,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class ApplicationStartedInit implements ApplicationListener<ApplicationStartedEvent> {
+public class ApplicationStartedListener implements ApplicationListener<ApplicationStartedEvent> {
 
     @Autowired
     private KnowledgeService knowledgeService;
@@ -27,6 +27,11 @@ public class ApplicationStartedInit implements ApplicationListener<ApplicationSt
 
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
+        updateKnowledgeDimValue();
+    }
+
+    public Boolean updateKnowledgeDimValue() {
+        Boolean isOk = false;
         try {
             log.debug("ApplicationStartedInit start");
 
@@ -35,9 +40,11 @@ public class ApplicationStartedInit implements ApplicationListener<ApplicationSt
             knowledgeService.reloadAllData(dictWords);
 
             log.debug("ApplicationStartedInit end");
+            isOk = true;
         } catch (Exception e) {
             log.error("ApplicationStartedInit error", e);
         }
+        return isOk;
     }
 
     /***

@@ -35,6 +35,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>com.tencent.supersonic</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
@@ -73,9 +78,6 @@
             <version>${pagehelper.version}</version>
             <scope>compile</scope>
         </dependency>
-
-
-
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>

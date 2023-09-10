@@ -117,6 +117,7 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
     `name` varchar(255) DEFAULT NULL  , -- domain name
     `biz_name` varchar(255) DEFAULT NULL  , -- internal name
     `domain_id` INT DEFAULT '0'  , -- parent domain ID
+    `alias` varchar(255) DEFAULT NULL  , -- internal name
     `created_at` TIMESTAMP DEFAULT NULL  ,
     `created_by` varchar(100) DEFAULT NULL  ,
     `updated_at` TIMESTAMP DEFAULT NULL  ,
@@ -392,7 +393,21 @@ CREATE TABLE IF NOT EXISTS `singer` (
     );
 COMMENT ON TABLE singer IS 'singer_info';
 
-
+CREATE TABLE IF NOT EXISTS `s2_dictionary_task` (
+   `id` INT NOT NULL AUTO_INCREMENT,
+   `name` varchar(255) NOT NULL , -- task name
+   `description` varchar(255) ,
+   `command`LONGVARCHAR  NOT NULL , -- task Request Parameters
+   `command_md5` varchar(255)  NOT NULL , -- task Request Parameters md5
+   `status` INT NOT NULL , -- the final status of the task
+   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
+   `created_by` varchar(100) NOT NULL ,
+   `progress` DOUBLE default 0.00  ,  -- task real-time progress
+   `elapsed_ms` bigINT DEFAULT NULL , -- the task takes time in milliseconds
+   `message` LONGVARCHAR  , -- remark related information
+   PRIMARY KEY (`id`)
+);
+COMMENT ON TABLE s2_dictionary_task IS 'dictionary task information table';
 
 
 

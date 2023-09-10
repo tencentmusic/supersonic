@@ -11,6 +11,7 @@ import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.ContextUtils;
 
@@ -56,9 +57,18 @@ public class WebServiceQuery extends PluginSemanticQuery {
         PluginParseResult pluginParseResult = JsonUtil.toObject(
                 JsonUtil.toString(properties.get(Constants.CONTEXT)), PluginParseResult.class);
         WebServiceResponse webServiceResponse = buildResponse(pluginParseResult);
-        queryResult.setResponse(webServiceResponse);
-        queryResult.setQueryState(QueryState.SUCCESS);
-        //parseInfo.setProperties(null);
+        Object object = webServiceResponse.getResult();
+        // in order to show webServiceQuery result int frontend conveniently,
+        // webServiceResponse result format is consistent with queryByStruct result.
+        log.info("webServiceResponse result:{}", JsonUtil.toString(object));
+        try {
+            Map<String, Object> data = JsonUtil.toMap(JsonUtil.toString(object), String.class, Object.class);
+            queryResult.setQueryResults((List<Map<String, Object>>) data.get("resultList"));
+            queryResult.setQueryColumns((List<QueryColumn>) data.get("columns"));
+            queryResult.setQueryState(QueryState.SUCCESS);
+        } catch (Exception e) {
+            log.info("webServiceResponse result has an exception:{}", e.getMessage());
+        }
         return queryResult;
     }
 

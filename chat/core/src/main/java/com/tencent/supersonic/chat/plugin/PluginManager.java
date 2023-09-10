@@ -15,6 +15,7 @@ import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingConfig;
 import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingResp;
 import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrieval;
 import com.tencent.supersonic.chat.plugin.event.PluginAddEvent;
+import com.tencent.supersonic.chat.plugin.event.PluginDelEvent;
 import com.tencent.supersonic.chat.plugin.event.PluginUpdateEvent;
 import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
@@ -116,8 +117,8 @@ public class PluginManager {
     }
 
     @EventListener
-    public void delPlugin(PluginAddEvent pluginAddEvent) {
-        Plugin plugin = pluginAddEvent.getPlugin();
+    public void delPlugin(PluginDelEvent pluginDelEvent) {
+        Plugin plugin = pluginDelEvent.getPlugin();
         if (CollectionUtils.isNotEmpty(plugin.getExampleQuestionList())) {
             requestEmbeddingPluginDelete(getEmbeddingId(Lists.newArrayList(plugin)));
         }
@@ -142,18 +143,22 @@ public class PluginManager {
             return ResponseEntity.of(Optional.empty());
         }
         String url = embeddingConfig.getUrl() + path;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setLocation(URI.create(url));
-        URI requestUrl = UriComponentsBuilder
-                .fromHttpUrl(url).build().encode().toUri();
-        HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
-        log.info("[embedding] equest body :{}, url:{}", jsonBody, url);
-        ResponseEntity<String> responseEntity =
-                restTemplate.exchange(requestUrl, HttpMethod.POST, entity, new ParameterizedTypeReference<String>() {
-                });
-        log.info("[embedding] result body:{}", responseEntity);
-        return responseEntity;
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setLocation(URI.create(url));
+            URI requestUrl = UriComponentsBuilder
+                    .fromHttpUrl(url).build().encode().toUri();
+            HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
+            log.info("[embedding] equest body :{}, url:{}", jsonBody, url);
+            ResponseEntity<String> responseEntity = restTemplate.exchange(requestUrl,
+                    HttpMethod.POST, entity, new ParameterizedTypeReference<String>() {});
+            log.info("[embedding] result body:{}", responseEntity);
+            return responseEntity;
+        } catch (Throwable e) {
+            log.warn("connect to embedding service failed, url:{}", url);
+        }
+        return ResponseEntity.of(Optional.empty());
     }
 
     public void requestEmbeddingPluginAddALL(List<Plugin> plugins) {
@@ -298,7 +303,7 @@ public class PluginManager {
     private static Set<Long> getPluginMatchedModel(Plugin plugin, QueryContext queryContext) {
         Set<Long> matchedModel = queryContext.getMapInfo().getMatchedModels();
         if (plugin.isContainsAllModel()) {
-            return matchedModel;
+            return Sets.newHashSet(plugin.getDefaultMode());
         }
         List<Long> modelIds = plugin.getModelList();
         Set<Long> pluginMatchedModel = Sets.newHashSet();
