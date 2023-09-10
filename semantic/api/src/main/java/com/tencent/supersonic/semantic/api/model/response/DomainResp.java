@@ -4,6 +4,7 @@ import com.tencent.supersonic.semantic.api.model.pojo.Entity;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 
 import java.util.List;
+import java.util.Objects;
 
 import lombok.Data;
 import lombok.ToString;
@@ -32,4 +33,25 @@ public class DomainResp extends SchemaItem {
 
     private Entity entity;
 
+    private boolean hasEditPermission = false;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DomainResp that = (DomainResp) o;
+        if (getId() == null || that.getId() == null) {
+            return false;
+        }
+        return Objects.equals(getId().intValue(), that.getId().intValue());
+    }
+
+    @Override
+    public int hashCode() {
+        if (getId() == null) {
+            return 0;
+        }
+        return getId().hashCode();
+    }
 }

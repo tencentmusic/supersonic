@@ -1,5 +1,12 @@
 package com.tencent.supersonic.chat.parser.rule;
 
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.DIMENSION;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ID;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.METRIC;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.MODEL;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.VALUE;
+
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
@@ -8,8 +15,8 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
+import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricSemanticQuery;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -20,13 +27,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.METRIC;
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.DIMENSION;
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.VALUE;
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.MODEL;
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ID;
 
 @Slf4j
 public class ContextInheritParser implements SemanticParser {
@@ -97,10 +97,10 @@ public class ContextInheritParser implements SemanticParser {
     }
 
     protected boolean shouldInherit(QueryContext queryContext, ChatContext chatContext) {
-        Long contextmodelId = chatContext.getParseInfo().getModelId();
+        Long contextModelId = chatContext.getParseInfo().getModelId();
         // if map info doesn't contain the same Model of the context,
         // no inheritance could be done
-        if (queryContext.getMapInfo().getMatchedElements(contextmodelId) == null) {
+        if (queryContext.getMapInfo().getMatchedElements(contextModelId) == null) {
             return false;
         }
 

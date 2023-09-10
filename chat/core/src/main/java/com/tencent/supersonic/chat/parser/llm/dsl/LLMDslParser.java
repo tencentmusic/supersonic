@@ -6,11 +6,11 @@ import com.tencent.supersonic.chat.agent.tool.DslTool;
 import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.CorrectionInfo;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -67,7 +67,7 @@ public class LLMDslParser implements SemanticParser {
         QueryReq request = queryCtx.getRequest();
         LLMConfig llmConfig = ContextUtils.getBean(LLMConfig.class);
         if (StringUtils.isEmpty(llmConfig.getUrl()) || SatisfactionChecker.check(queryCtx)) {
-            log.info("llmConfig:{}, skip function parser, queryText:{}", llmConfig, request.getQueryText());
+            log.info("llmConfig:{}, skip dsl parser, queryText:{}", llmConfig, request.getQueryText());
             return;
         }
         try {
@@ -93,22 +93,56 @@ public class LLMDslParser implements SemanticParser {
 
             SemanticParseInfo parseInfo = getParseInfo(queryCtx, modelId, dslTool, dslParseResult);
 
-            CorrectionInfo correctionInfo = getCorrectorSql(queryCtx, parseInfo, llmResp.getSqlOutput());
+            SemanticCorrectInfo semanticCorrectInfo = getCorrectorSql(queryCtx, parseInfo, llmResp.getSqlOutput());
 
-            llmResp.setCorrectorSql(correctionInfo.getSql());
+            llmResp.setCorrectorSql(semanticCorrectInfo.getSql());
 
-            setFilter(correctionInfo, modelId, parseInfo);
+            setFilter(semanticCorrectInfo, modelId, parseInfo);
+
+            setDimensionsAndMetrics(modelId, parseInfo, semanticCorrectInfo.getSql());
 
         } catch (Exception e) {
             log.error("LLMDSLParser error", e);
         }
     }
 
-    public void setFilter(CorrectionInfo correctionInfo, Long modelId, SemanticParseInfo parseInfo) {
+    private void setDimensionsAndMetrics(Long modelId, SemanticParseInfo parseInfo, String sql) {
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
 
-        String correctorSql = correctionInfo.getPreSql();
+        if (Objects.isNull(semanticSchema)) {
+            return;
+        }
+        List<String> allFields = getFieldsExceptDate(sql);
+
+        Set<SchemaElement> metrics = getElements(modelId, allFields, semanticSchema.getMetrics());
+        parseInfo.setMetrics(metrics);
+
+        Set<SchemaElement> dimensions = getElements(modelId, allFields, semanticSchema.getDimensions());
+        parseInfo.setDimensions(dimensions);
+    }
+
+    private Set<SchemaElement> getElements(Long modelId, List<String> allFields, List<SchemaElement> elements) {
+        return elements.stream()
+                .filter(schemaElement -> modelId.equals(schemaElement.getModel())
+                        && allFields.contains(schemaElement.getBizName())
+                ).collect(Collectors.toSet());
+    }
+
+    private List<String> getFieldsExceptDate(String sql) {
+        List<String> allFields = SqlParserSelectHelper.getAllFields(sql);
+        if (CollectionUtils.isEmpty(allFields)) {
+            return new ArrayList<>();
+        }
+        return allFields.stream()
+                .filter(entry -> !TimeDimensionEnum.getNameList().contains(entry))
+                .collect(Collectors.toList());
+    }
+
+    public void setFilter(SemanticCorrectInfo semanticCorrectInfo, Long modelId, SemanticParseInfo parseInfo) {
+
+        String correctorSql = semanticCorrectInfo.getPreSql();
         if (StringUtils.isEmpty(correctorSql)) {
-            correctorSql = correctionInfo.getSql();
+            correctorSql = semanticCorrectInfo.getSql();
         }
         List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctorSql);
         if (CollectionUtils.isEmpty(expressions)) {
@@ -204,9 +238,9 @@ public class LLMDslParser implements SemanticParser {
         return dateExpressions.size() > 1 && Objects.nonNull(dateExpressions.get(1).getFieldValue());
     }
 
-    private CorrectionInfo getCorrectorSql(QueryContext queryCtx, SemanticParseInfo parseInfo, String sql) {
+    private SemanticCorrectInfo getCorrectorSql(QueryContext queryCtx, SemanticParseInfo parseInfo, String sql) {
 
-        CorrectionInfo correctionInfo = CorrectionInfo.builder()
+        SemanticCorrectInfo correctInfo = SemanticCorrectInfo.builder()
                 .queryFilters(queryCtx.getRequest().getQueryFilters()).sql(sql)
                 .parseInfo(parseInfo).build();
 
@@ -214,14 +248,13 @@ public class LLMDslParser implements SemanticParser {
 
         dslCorrections.forEach(dslCorrection -> {
             try {
-                dslCorrection.corrector(correctionInfo);
-                log.info("sqlCorrection:{} sql:{}", dslCorrection.getClass().getSimpleName(),
-                        correctionInfo.getSql());
+                dslCorrection.correct(correctInfo);
+                log.info("sqlCorrection:{} sql:{}", dslCorrection.getClass().getSimpleName(), correctInfo.getSql());
             } catch (Exception e) {
-                log.error("sqlCorrection:{} execute error,correctionInfo:{}", dslCorrection, correctionInfo, e);
+                log.error("sqlCorrection:{} correct error,correctInfo:{}", dslCorrection, correctInfo, e);
             }
         });
-        return correctionInfo;
+        return correctInfo;
     }
 
     private SemanticParseInfo getParseInfo(QueryContext queryCtx, Long modelId, DslTool dslTool,
@@ -305,12 +338,12 @@ public class LLMDslParser implements SemanticParser {
         List<ElementValue> linking = new ArrayList<>();
         linking.addAll(getValueList(queryCtx, modelId, semanticSchema));
         llmReq.setLinking(linking);
-        String currentDate = DSLDateHelper.getCurrentDate(modelId);
+        String currentDate = DSLDateHelper.getReferenceDate(modelId);
         llmReq.setCurrentDate(currentDate);
         return llmReq;
     }
 
-    private List<ElementValue> getValueList(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema) {
+    protected List<ElementValue> getValueList(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema) {
         Map<Long, String> itemIdToName = getItemIdToName(modelId, semanticSchema);
 
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(modelId);
@@ -348,7 +381,7 @@ public class LLMDslParser implements SemanticParser {
     }
 
 
-    private List<String> getFieldNameList(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema) {
+    protected List<String> getFieldNameList(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema) {
         Map<Long, String> itemIdToName = getItemIdToName(modelId, semanticSchema);
 
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(modelId);
@@ -375,7 +408,7 @@ public class LLMDslParser implements SemanticParser {
         return new ArrayList<>(fieldNameList);
     }
 
-    private Map<Long, String> getItemIdToName(Long modelId, SemanticSchema semanticSchema) {
+    protected Map<Long, String> getItemIdToName(Long modelId, SemanticSchema semanticSchema) {
         return semanticSchema.getDimensions().stream()
                 .filter(entry -> modelId.equals(entry.getModel()))
                 .collect(Collectors.toMap(SchemaElement::getId, SchemaElement::getName, (value1, value2) -> value2));

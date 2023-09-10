@@ -31,6 +31,7 @@ public class ModelDOExample {
     protected Integer limitEnd;
 
     /**
+     *
      * @mbg.generated
      */
     public ModelDOExample() {
@@ -38,6 +39,7 @@ public class ModelDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setOrderByClause(String orderByClause) {
@@ -45,6 +47,7 @@ public class ModelDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public String getOrderByClause() {
@@ -52,6 +55,7 @@ public class ModelDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setDistinct(boolean distinct) {
@@ -59,6 +63,7 @@ public class ModelDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public boolean isDistinct() {
@@ -66,6 +71,7 @@ public class ModelDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public List<Criteria> getOredCriteria() {
@@ -73,6 +79,7 @@ public class ModelDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void or(Criteria criteria) {
@@ -80,6 +87,7 @@ public class ModelDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Criteria or() {
@@ -89,6 +97,7 @@ public class ModelDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Criteria createCriteria() {
@@ -100,6 +109,7 @@ public class ModelDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     protected Criteria createCriteriaInternal() {
@@ -108,6 +118,7 @@ public class ModelDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void clear() {
@@ -117,13 +128,15 @@ public class ModelDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setLimitStart(Integer limitStart) {
-        this.limitStart = limitStart;
+        this.limitStart=limitStart;
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Integer getLimitStart() {
@@ -131,13 +144,15 @@ public class ModelDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setLimitEnd(Integer limitEnd) {
-        this.limitEnd = limitEnd;
+        this.limitEnd=limitEnd;
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Integer getLimitEnd() {
@@ -445,6 +460,76 @@ public class ModelDOExample {
 
         public Criteria andDomainIdNotBetween(Long value1, Long value2) {
             addCriterion("domain_id not between", value1, value2, "domainId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasIsNull() {
+            addCriterion("alias is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasIsNotNull() {
+            addCriterion("alias is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasEqualTo(String value) {
+            addCriterion("alias =", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasNotEqualTo(String value) {
+            addCriterion("alias <>", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasGreaterThan(String value) {
+            addCriterion("alias >", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasGreaterThanOrEqualTo(String value) {
+            addCriterion("alias >=", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasLessThan(String value) {
+            addCriterion("alias <", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasLessThanOrEqualTo(String value) {
+            addCriterion("alias <=", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasLike(String value) {
+            addCriterion("alias like", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasNotLike(String value) {
+            addCriterion("alias not like", value, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasIn(List<String> values) {
+            addCriterion("alias in", values, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasNotIn(List<String> values) {
+            addCriterion("alias not in", values, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasBetween(String value1, String value2) {
+            addCriterion("alias between", value1, value2, "alias");
+            return (Criteria) this;
+        }
+
+        public Criteria andAliasNotBetween(String value1, String value2) {
+            addCriterion("alias not between", value1, value2, "alias");
             return (Criteria) this;
         }
 
@@ -1079,6 +1164,38 @@ public class ModelDOExample {
 
         private String typeHandler;
 
+        public String getCondition() {
+            return condition;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Object getSecondValue() {
+            return secondValue;
+        }
+
+        public boolean isNoValue() {
+            return noValue;
+        }
+
+        public boolean isSingleValue() {
+            return singleValue;
+        }
+
+        public boolean isBetweenValue() {
+            return betweenValue;
+        }
+
+        public boolean isListValue() {
+            return listValue;
+        }
+
+        public String getTypeHandler() {
+            return typeHandler;
+        }
+
         protected Criterion(String condition) {
             super();
             this.condition = condition;
@@ -1113,38 +1230,6 @@ public class ModelDOExample {
 
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
-        }
-
-        public String getCondition() {
-            return condition;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public Object getSecondValue() {
-            return secondValue;
-        }
-
-        public boolean isNoValue() {
-            return noValue;
-        }
-
-        public boolean isSingleValue() {
-            return singleValue;
-        }
-
-        public boolean isBetweenValue() {
-            return betweenValue;
-        }
-
-        public boolean isListValue() {
-            return listValue;
-        }
-
-        public String getTypeHandler() {
-            return typeHandler;
         }
     }
 }

@@ -11,6 +11,7 @@ import com.tencent.supersonic.semantic.api.model.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
+import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Constants;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DimensionTimeTypeParams;
@@ -26,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -65,7 +67,7 @@ public class SemanticSchemaManager {
         Map<String, List<DimensionYamlTpl>> dimensionYamlTpls = new HashMap<>();
         List<DatasourceYamlTpl> datasourceYamlTpls = new ArrayList<>();
         List<MetricYamlTpl> metricYamlTpls = new ArrayList<>();
-        catalog.getModelYamlTplByMoldelIds(modelIds, dimensionYamlTpls, datasourceYamlTpls, metricYamlTpls);
+        catalog.getModelYamlTplByModelIds(modelIds, dimensionYamlTpls, datasourceYamlTpls, metricYamlTpls);
         if (!datasourceYamlTpls.isEmpty()) {
             Map<String, DataSource> dataSourceMap = datasourceYamlTpls.stream().map(d -> getDatasource(d))
                     .collect(Collectors.toMap(DataSource::getName, item -> item, (k1, k2) -> k1));
@@ -114,7 +116,17 @@ public class SemanticSchemaManager {
         datasource.setIdentifiers(getIdentify(d.getIdentifiers()));
         datasource.setDimensions(getDimensions(d.getDimensions()));
         datasource.setMeasures(getMeasures(d.getMeasures()));
+        datasource.setAggTime(getDataSourceAggTime(datasource.getDimensions()));
         return datasource;
+    }
+
+    private static String getDataSourceAggTime(List<Dimension> dimensions) {
+        Optional<Dimension> timeDimension = dimensions.stream()
+                .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType())).findFirst();
+        if (timeDimension.isPresent() && Objects.nonNull(timeDimension.get().getDimensionTimeTypeParams())) {
+            return timeDimension.get().getDimensionTimeTypeParams().getTimeGranularity();
+        }
+        return Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE;
     }
 
     private static List<Metric> getMetricsByMetricYamlTpl(List<MetricYamlTpl> metricYamlTpls) {

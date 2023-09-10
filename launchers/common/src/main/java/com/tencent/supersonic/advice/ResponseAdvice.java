@@ -1,6 +1,7 @@
 package com.tencent.supersonic.advice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tencent.supersonic.common.pojo.ResultData;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ public class ResponseAdvice implements ResponseBodyAdvice<Object> {
     public Object beforeBodyWrite(Object result, MethodParameter methodParameter, MediaType mediaType,
             Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest serverHttpRequest,
             ServerHttpResponse serverHttpResponse) {
+        objectMapper.registerModule(new JavaTimeModule());
         if (result instanceof String) {
             return objectMapper.writeValueAsString(ResultData.success(result));
         }

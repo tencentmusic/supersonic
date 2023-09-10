@@ -4,6 +4,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.ModelReq;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
+import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 
@@ -39,4 +40,6 @@ public interface ModelService {
     ModelSchemaResp fetchSingleModelSchema(Long modelId);
 
     List<ModelSchemaResp> fetchModelSchema(ModelSchemaFilterReq modelSchemaFilterReq);
+
+    DatabaseResp getDatabaseByModelId(Long modelId);
 }

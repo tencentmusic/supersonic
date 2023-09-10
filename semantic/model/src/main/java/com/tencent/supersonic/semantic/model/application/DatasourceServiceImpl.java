@@ -6,6 +6,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.pojo.DatasourceDetail;
 import com.tencent.supersonic.semantic.api.model.pojo.Dim;
+import com.tencent.supersonic.semantic.api.model.pojo.Identify;
 import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
@@ -175,8 +176,17 @@ public class DatasourceServiceImpl implements DatasourceService {
 
     private void preCheck(DatasourceReq datasourceReq) {
         List<Dim> dims = datasourceReq.getDimensions();
+        List<Measure> measures = datasourceReq.getMeasures();
+        List<Dim> timeDims = datasourceReq.getTimeDimension();
+        List<Identify> identifies = datasourceReq.getIdentifiers();
         if (CollectionUtils.isEmpty(dims)) {
-            throw new RuntimeException("lack of dimension");
+            throw new RuntimeException("缺少维度信息");
+        }
+        if (CollectionUtils.isEmpty(identifies)) {
+            throw new RuntimeException("缺少主键信息");
+        }
+        if (!CollectionUtils.isEmpty(measures) && CollectionUtils.isEmpty(timeDims)) {
+            throw new RuntimeException("有度量时, 不可缺少时间维度");
         }
     }
 
@@ -241,7 +251,7 @@ public class DatasourceServiceImpl implements DatasourceService {
         List<MetricResp> metricResps = metricService.getMetrics(modelId, datasourceId);
         List<DimensionResp> dimensionResps = dimensionService.getDimensionsByDatasource(datasourceId);
         if (!CollectionUtils.isEmpty(metricResps) || !CollectionUtils.isEmpty(dimensionResps)) {
-            throw new RuntimeException("exist dimension or metric on this datasource, please check");
+            throw new RuntimeException("存在基于该数据源创建的指标和维度, 暂不能删除, 请确认");
         }
     }
 

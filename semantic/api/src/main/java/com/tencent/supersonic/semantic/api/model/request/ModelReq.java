@@ -16,6 +16,8 @@ public class ModelReq extends SchemaItem {
 
     private Integer isOpen = 0;
 
+    private String alias;
+
     private List<String> viewers = new ArrayList<>();
 
     private List<String> viewOrgs = new ArrayList<>();

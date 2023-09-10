@@ -25,31 +25,20 @@ app = FastAPI()
 
 @app.post("/query2sql/")
 async def din_query2sql(query_body: Mapping[str, Any]):
-    if 'queryText' not in query_body:
-        raise HTTPException(status_code=400,
+  if 'queryText' not in query_body:
+    raise HTTPException(status_code=400,
                         detail="query_text is not in query_body")
-    else:
-        query_text = query_body['queryText']
+  else:
+    query_text = query_body['queryText']
 
-    if 'schema' not in query_body:
-        raise HTTPException(status_code=400, detail="schema is not in query_body")
-    else:
-        schema = query_body['schema']
+  if 'schema' not in query_body:
+    raise HTTPException(status_code=400, detail="schema is not in query_body")
+  else:
+    schema = query_body['schema']
 
-    if 'currentDate' not in query_body:
-        raise HTTPException(status_code=400, detail="currentDate is not in query_body")
-    else:
-        current_date = query_body['currentDate']
+  resp = query2sql(query_text=query_text, schema=schema)
 
-    if 'linking' not in query_body:
-        linking = None
-    else:
-        linking = query_body['linking']
-
-    resp = query2sql(query_text=query_text,  
-                     schema=schema, current_date=current_date, linking=linking)
-
-    return resp
+  return resp
 
 
 @app.post("/preset_query_retrival/")

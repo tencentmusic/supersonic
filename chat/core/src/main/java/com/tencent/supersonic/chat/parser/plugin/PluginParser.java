@@ -1,5 +1,7 @@
 package com.tencent.supersonic.chat.parser.plugin;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
@@ -8,7 +10,6 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.plugin.Plugin;
 import com.tencent.supersonic.chat.plugin.PluginManager;
@@ -16,14 +17,13 @@ import com.tencent.supersonic.chat.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
-import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import org.springframework.util.CollectionUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class PluginParser implements SemanticParser {
 
@@ -45,7 +45,11 @@ public abstract class PluginParser implements SemanticParser {
 
     public void buildQuery(QueryContext queryContext, PluginRecallResult pluginRecallResult) {
         Plugin plugin = pluginRecallResult.getPlugin();
-        for (Long modelId : pluginRecallResult.getModelIds()) {
+        Set<Long> modelIds = pluginRecallResult.getModelIds();
+        if (plugin.isContainsAllModel()) {
+            modelIds = Sets.newHashSet(-1L);
+        }
+        for (Long modelId : modelIds) {
             PluginSemanticQuery pluginQuery = QueryManager.createPluginQuery(plugin.getType());
             SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(modelId, plugin, queryContext.getRequest(),
                     queryContext.getMapInfo().getMatchedElements(modelId), pluginRecallResult.getDistance());
@@ -53,9 +57,6 @@ public abstract class PluginParser implements SemanticParser {
             semanticParseInfo.setScore(pluginRecallResult.getScore());
             pluginQuery.setParseInfo(semanticParseInfo);
             queryContext.getCandidateQueries().add(pluginQuery);
-            if (plugin.isContainsAllModel()) {
-                break;
-            }
         }
     }
 
@@ -67,6 +68,9 @@ public abstract class PluginParser implements SemanticParser {
                                                        List<SchemaElementMatch> schemaElementMatches, double distance) {
         if (modelId == null && !CollectionUtils.isEmpty(plugin.getModelList())) {
             modelId = plugin.getModelList().get(0);
+        }
+        if (schemaElementMatches == null) {
+            schemaElementMatches = Lists.newArrayList();
         }
         SchemaElement model = new SchemaElement();
         model.setModel(modelId);
@@ -85,17 +89,9 @@ public abstract class PluginParser implements SemanticParser {
         semanticParseInfo.setProperties(properties);
         semanticParseInfo.setScore(distance);
         fillSemanticParseInfo(semanticParseInfo);
-        setEntity(modelId, semanticParseInfo);
         return semanticParseInfo;
     }
 
-    private void setEntity(Long modelId, SemanticParseInfo semanticParseInfo) {
-        SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
-        ModelSchema modelSchema = semanticService.getModelSchema(modelId);
-        if (modelSchema != null && modelSchema.getEntity() != null) {
-            semanticParseInfo.setEntity(modelSchema.getEntity());
-        }
-    }
 
     private void fillSemanticParseInfo(SemanticParseInfo semanticParseInfo) {
         List<SchemaElementMatch> schemaElementMatches = semanticParseInfo.getElementMatches();

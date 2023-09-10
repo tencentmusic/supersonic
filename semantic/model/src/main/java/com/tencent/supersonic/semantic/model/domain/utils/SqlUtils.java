@@ -2,8 +2,9 @@ package com.tencent.supersonic.semantic.model.domain.utils;
 
 import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 
-import com.tencent.supersonic.semantic.api.model.enums.DataTypeEnum;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.semantic.api.model.enums.DataTypeEnum;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.model.domain.pojo.JdbcDataSource;
@@ -12,7 +13,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -147,11 +152,26 @@ public class SqlUtils {
         for (QueryColumn queryColumn : queryColumns) {
             String colName = queryColumn.getNameEn();
             Object value = rs.getObject(colName);
-            map.put(colName, value instanceof byte[] ? new String((byte[]) value) : value);
+            map.put(colName, getValue(value));
         }
         return map;
     }
 
+    private Object getValue(Object value) {
+        if (value instanceof LocalDate) {
+            LocalDate localDate = (LocalDate) value;
+            return localDate.format(DateTimeFormatter.ofPattern(DateUtils.DATE_FORMAT));
+        } else if (value instanceof LocalDateTime) {
+            LocalDateTime localDateTime = (LocalDateTime) value;
+            return localDateTime.format(DateTimeFormatter.ofPattern(DateUtils.TIME_FORMAT));
+        } else if (value instanceof Date) {
+            Date date = (Date) value;
+            return DateUtils.format(date);
+        } else if (value instanceof byte[]) {
+            return new String((byte[]) value);
+        }
+        return value;
+    }
 
     public static final class SqlUtilsBuilder {
 

@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Component
@@ -49,12 +48,7 @@ public class CatalogImpl implements Catalog {
     }
 
     public DatabaseResp getDatabaseByModelId(Long modelId) {
-        List<DatasourceResp> datasourceResps = datasourceService.getDatasourceList(modelId);
-        if (!CollectionUtils.isEmpty(datasourceResps)) {
-            Long databaseId = datasourceResps.iterator().next().getDatabaseId();
-            return databaseService.getDatabase(databaseId);
-        }
-        return null;
+        return modelService.getDatabaseByModelId(modelId);
     }
 
     @Override
@@ -77,7 +71,7 @@ public class CatalogImpl implements Catalog {
     }
 
     @Override
-    public void getModelYamlTplByMoldelIds(Set<Long> modelIds, Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
+    public void getModelYamlTplByModelIds(Set<Long> modelIds, Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
             List<DatasourceYamlTpl> datasourceYamlTplList, List<MetricYamlTpl> metricYamlTplList) {
         datasourceService.getModelYamlTplByModelIds(modelIds, dimensionYamlMap, datasourceYamlTplList,
                 metricYamlTplList);

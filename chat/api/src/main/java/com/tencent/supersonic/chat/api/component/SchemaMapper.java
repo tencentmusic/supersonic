@@ -3,11 +3,8 @@ package com.tencent.supersonic.chat.api.component;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 
 /**
- * This interface defines the contract for a schema mapper that identifies references to schema
- * elements in natural language queries.
- *
- * The schema mapper matches queries against the knowledge base which is constructed using the
- * schema of semantic models.
+ * A schema mapper identifies references to schema elements(metrics/dimensions/entities/values)
+ * in user queries. It matches the query text against the knowledge base.
  */
 public interface SchemaMapper {
 

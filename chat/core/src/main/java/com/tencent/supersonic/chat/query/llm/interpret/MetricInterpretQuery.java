@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.query.metricinterpret;
+package com.tencent.supersonic.chat.query.llm.interpret;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;

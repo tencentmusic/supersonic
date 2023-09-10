@@ -58,6 +58,7 @@ public class DatasourceDO {
      */
     private String datasourceDetail;
 
+
     /**
      * @return id
      */
@@ -251,4 +252,6 @@ public class DatasourceDO {
     public void setDatasourceDetail(String datasourceDetail) {
         this.datasourceDetail = datasourceDetail == null ? null : datasourceDetail.trim();
     }
+
+
 }

@@ -5,11 +5,9 @@ import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 
 /**
- * This interface defines the contract for a semantic parser that can analyze natural language query
- * and extract meaning from it.
- *
- * The semantic parser uses either rule-based or model-based algorithms to identify query intent
- * and related semantic items described in the query.
+ * A semantic parser understands user queries and extracts semantic information.
+ * It could leverage either rule-based or LLM-based approach to identify query intent
+ * and extract related semantic items from the query.
  */
 public interface SemanticParser {
 

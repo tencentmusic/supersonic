@@ -1,7 +1,10 @@
 package com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter;
 
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.Constants;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ClickHouseAdaptor extends EngineAdaptor {
 
@@ -38,6 +41,15 @@ public class ClickHouseAdaptor extends EngineAdaptor {
     @Override
     public String getTableMetaQueryTpl() {
         return "select name from system.tables where database = '%s';";
+    }
+
+    @Override
+    public String functionNameCorrector(String sql) {
+        Map<String, String> functionMap = new HashMap<>();
+        functionMap.put("MONTH".toLowerCase(), "toMonth");
+        functionMap.put("DAY".toLowerCase(), "toDayOfMonth");
+        functionMap.put("YEAR".toLowerCase(), "toYear");
+        return SqlParserUpdateHelper.replaceFunction(sql, functionMap);
     }
 
     @Override

@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class PageSchemaItemReq extends PageBaseReq {
 
-    private Long id;
+    private String id;
     private String name;
     private String bizName;
     private String createdBy;

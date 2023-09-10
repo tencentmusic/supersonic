@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
                                           `name` varchar(255) DEFAULT NULL  , -- domain name
     `biz_name` varchar(255) DEFAULT NULL  , -- internal name
     `domain_id` INT DEFAULT '0'  , -- parent domain ID
+    `alias` varchar(255) DEFAULT NULL  , -- internal name
     `created_at` TIMESTAMP DEFAULT NULL  ,
     `created_by` varchar(100) DEFAULT NULL  ,
     `updated_at` TIMESTAMP DEFAULT NULL  ,

@@ -14,9 +14,11 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatDetailConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.request.KnowledgeInfoReq;
 import com.tencent.supersonic.chat.api.pojo.request.RecommendedQuestionReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.plugin.Plugin;
+import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.chat.service.QueryService;
@@ -119,6 +121,16 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         chatAggConfig.setChatDefaultConfig(chatDefaultConfigAgg);
         ItemVisibility visibility1 = new ItemVisibility();
         chatAggConfig.setVisibility(visibility1);
+        List<KnowledgeInfoReq> knowledgeInfos = new ArrayList<>();
+        KnowledgeInfoReq knowledgeInfoReq = new KnowledgeInfoReq();
+        knowledgeInfoReq.setItemId(1L);
+        knowledgeInfoReq.setSearchEnable(true);
+        knowledgeInfos.add(knowledgeInfoReq);
+        KnowledgeInfoReq knowledgeInfoReq2 = new KnowledgeInfoReq();
+        knowledgeInfoReq2.setItemId(2L);
+        knowledgeInfoReq2.setSearchEnable(true);
+        knowledgeInfos.add(knowledgeInfoReq2);
+        chatAggConfig.setKnowledgeInfos(knowledgeInfos);
         chatConfigBaseReq.setChatAggConfig(chatAggConfig);
 
         List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
@@ -170,13 +182,18 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         configService.addConfig(chatConfigBaseReq, user);
     }
 
+
     private void addPlugin_1() {
         Plugin plugin1 = new Plugin();
         plugin1.setType("WEB_PAGE");
         plugin1.setModelList(Arrays.asList(1L));
         plugin1.setPattern("用于分析超音数的流量概况，包含UV、PV等核心指标的追踪。P.S. 仅作为示例展示，无实际看板");
-        plugin1.setParseModeConfig(null);
         plugin1.setName("超音数流量分析看板");
+        PluginParseConfig pluginParseConfig = new PluginParseConfig();
+        pluginParseConfig.setDescription(plugin1.getPattern());
+        pluginParseConfig.setName(plugin1.getName());
+        pluginParseConfig.setExamples(Lists.newArrayList("tom最近访问超音数情况怎么样"));
+        plugin1.setParseModeConfig(JSONObject.toJSONString(pluginParseConfig));
         WebBase webBase = new WebBase();
         webBase.setUrl("www.yourbi.com");
         ParamOption paramOption = new ParamOption();
@@ -198,8 +215,8 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         agent.setDescription("帮助您用自然语言查询指标，支持时间限定、条件筛选、下钻维度以及聚合统计");
         agent.setStatus(1);
         agent.setEnableSearch(1);
-        agent.setExamples(Lists.newArrayList("超音数访问次数", "近15天超音数访问次数汇总",
-                "按部门统计超音数的访问人数", "对比alice和lucy的停留时长", "超音数访问次数最高的部门"));
+        agent.setExamples(Lists.newArrayList("超音数访问次数", "近15天超音数访问次数汇总", "按部门统计超音数的访问人数",
+                "对比alice和lucy的停留时长", "超音数访问次数最高的部门"));
         AgentConfig agentConfig = new AgentConfig();
         RuleQueryTool ruleQueryTool = new RuleQueryTool();
         ruleQueryTool.setType(AgentToolType.RULE);
