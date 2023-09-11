@@ -109,4 +109,9 @@ public class AgentServiceImpl implements AgentService {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
     }
+
+    @Override
+    public boolean containsAllModel(Set<Long> detectModelIds) {
+        return !CollectionUtils.isEmpty(detectModelIds) && detectModelIds.contains(-1L);
+    }
 }

@@ -24,7 +24,7 @@ import org.apache.commons.collections.CollectionUtils;
 public class HeuristicModelResolver implements ModelResolver {
 
     protected static Long selectModelBySchemaElementCount(Map<Long, SemanticQuery> modelQueryModes,
-                                                          SchemaMapInfo schemaMap) {
+            SchemaMapInfo schemaMap) {
         Map<Long, ModelMatchResult> modelTypeMap = getModelTypeMap(schemaMap);
         if (modelTypeMap.size() == 1) {
             Long modelSelect = modelTypeMap.entrySet().stream().collect(Collectors.toList()).get(0).getKey();
@@ -57,8 +57,8 @@ public class HeuristicModelResolver implements ModelResolver {
      * @return false will use context Model, true will use other Model , maybe include context Model
      */
     protected static boolean isAllowSwitch(Map<Long, SemanticQuery> modelQueryModes, SchemaMapInfo schemaMap,
-                                           ChatContext chatCtx, QueryReq searchCtx,
-                                           Long modelId, Set<Long> restrictiveModels) {
+            ChatContext chatCtx, QueryReq searchCtx,
+            Long modelId, Set<Long> restrictiveModels) {
         if (!Objects.nonNull(modelId) || modelId <= 0) {
             return true;
         }
@@ -137,7 +137,10 @@ public class HeuristicModelResolver implements ModelResolver {
     public Long resolve(QueryContext queryContext, ChatContext chatCtx, Set<Long> restrictiveModels) {
         Long modelId = queryContext.getRequest().getModelId();
         if (Objects.nonNull(modelId) && modelId > 0) {
-            if (CollectionUtils.isNotEmpty(restrictiveModels) && restrictiveModels.contains(modelId)) {
+            if (CollectionUtils.isEmpty(restrictiveModels)) {
+                return modelId;
+            }
+            if (restrictiveModels.contains(modelId)) {
                 return modelId;
             } else {
                 return null;
@@ -162,7 +165,7 @@ public class HeuristicModelResolver implements ModelResolver {
     }
 
     public Long resolve(Map<Long, SemanticQuery> modelQueryModes, QueryContext queryContext,
-                        ChatContext chatCtx, SchemaMapInfo schemaMap, Set<Long> restrictiveModels) {
+            ChatContext chatCtx, SchemaMapInfo schemaMap, Set<Long> restrictiveModels) {
         Long selectModel = selectModel(modelQueryModes, queryContext.getRequest(),
                 chatCtx, schemaMap, restrictiveModels);
         if (selectModel > 0) {
@@ -174,8 +177,8 @@ public class HeuristicModelResolver implements ModelResolver {
     }
 
     public Long selectModel(Map<Long, SemanticQuery> modelQueryModes, QueryReq queryContext,
-                            ChatContext chatCtx,
-                            SchemaMapInfo schemaMap, Set<Long> restrictiveModels) {
+            ChatContext chatCtx,
+            SchemaMapInfo schemaMap, Set<Long> restrictiveModels) {
         // if QueryContext has modelId and in ModelQueryModes
         if (modelQueryModes.containsKey(queryContext.getModelId())) {
             log.info("selectModel from QueryContext [{}]", queryContext.getModelId());

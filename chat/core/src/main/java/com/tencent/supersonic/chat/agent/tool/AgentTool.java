@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AgentTool {
 
+    private String id;
+
     private String name;
 
     private AgentToolType type;

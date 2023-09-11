@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -91,7 +90,7 @@ public class MapperHelper {
 
         Set<Long> detectModelIds = agentService.getDslToolsModelIds(request.getAgentId(), null);
         //contains all
-        if (isContainsAllModel(detectModelIds)) {
+        if (agentService.containsAllModel(detectModelIds)) {
             if (Objects.nonNull(modelId) && modelId > 0) {
                 Set<Long> result = new HashSet<>();
                 result.add(modelId);
@@ -113,9 +112,4 @@ public class MapperHelper {
         }
         return detectModelIds;
     }
-
-    private boolean isContainsAllModel(Set<Long> detectModelIds) {
-        return CollectionUtils.isNotEmpty(detectModelIds) && detectModelIds.contains(-1L);
-    }
-
 }
