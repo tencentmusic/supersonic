@@ -6,6 +6,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.AgentConfig;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
+import com.tencent.supersonic.chat.agent.tool.DslTool;
 import com.tencent.supersonic.chat.agent.tool.RuleQueryTool;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
@@ -13,19 +14,19 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDetailConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.KnowledgeInfoReq;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.RecommendedQuestionReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.plugin.Plugin;
 import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
-import com.tencent.supersonic.chat.service.QueryService;
+import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.PluginService;
-import com.tencent.supersonic.chat.service.AgentService;
+import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.common.util.JsonUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent> {
+
     private User user = User.getFakeUser();
     @Qualifier("chatQueryService")
     @Autowired
@@ -108,7 +110,6 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         chatDetailConfig.setVisibility(visibility0);
         chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
 
-
         ChatAggConfigReq chatAggConfig = new ChatAggConfigReq();
         ChatDefaultConfigReq chatDefaultConfigAgg = new ChatDefaultConfigReq();
         List<Long> dimensionIds1 = Arrays.asList(1L, 2L);
@@ -160,7 +161,6 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         ItemVisibility visibility0 = new ItemVisibility();
         chatDetailConfig.setVisibility(visibility0);
         chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
-
 
         ChatAggConfigReq chatAggConfig = new ChatAggConfigReq();
         ChatDefaultConfigReq chatDefaultConfigAgg = new ChatDefaultConfigReq();
@@ -226,6 +226,12 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
                 "METRIC_MODEL", "METRIC_ORDERBY"
         ));
         agentConfig.getTools().add(ruleQueryTool);
+
+        DslTool dslTool = new DslTool();
+        dslTool.setType(AgentToolType.DSL);
+        dslTool.setModelIds(Lists.newArrayList(-1L));
+        agentConfig.getTools().add(dslTool);
+
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());
     }
@@ -245,6 +251,12 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         ruleQueryTool.setQueryModes(Lists.newArrayList(
                 "ENTITY_DETAIL", "ENTITY_LIST_FILTER", "ENTITY_ID"));
         agentConfig.getTools().add(ruleQueryTool);
+
+        DslTool dslTool = new DslTool();
+        dslTool.setType(AgentToolType.DSL);
+        dslTool.setModelIds(Lists.newArrayList(-1L));
+        agentConfig.getTools().add(dslTool);
+
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());
     }
