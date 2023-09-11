@@ -34,7 +34,7 @@ const ROUTES = [
     component: './Agent',
     envEnableList: [ENV_KEY.CHAT],
   },
- {
+  {
     path: '/model',
     name: 'semanticModel',
     envEnableList: [ENV_KEY.SEMANTIC],
@@ -53,6 +53,7 @@ const ROUTES = [
       },
     ],
   },
+
   {
     path: '/database',
     name: 'database',
