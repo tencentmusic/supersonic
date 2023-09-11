@@ -1,7 +1,7 @@
 package com.tencent.supersonic.knowledge.dictionary.builder;
 
 
-import com.tencent.supersonic.knowledge.dictionary.DictWordType;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

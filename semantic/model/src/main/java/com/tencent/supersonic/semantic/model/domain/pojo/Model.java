@@ -18,6 +18,8 @@ public class Model extends SchemaItem {
 
     private Integer isOpen;
 
+    private String alias;
+
     private List<String> viewers;
 
     private List<String> viewOrgs;

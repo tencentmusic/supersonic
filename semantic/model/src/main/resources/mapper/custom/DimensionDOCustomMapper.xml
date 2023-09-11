@@ -2,23 +2,28 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOCustomMapper">
-    <resultMap id="BaseResultMap"
-            type="com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="biz_name" jdbcType="VARCHAR" property="bizName"/>
-        <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="status" jdbcType="INTEGER" property="status"/>
-        <result column="model_id" jdbcType="BIGINT" property="modelId"/>
-        <result column="type" jdbcType="VARCHAR" property="type"/>
-        <result column="type_params" jdbcType="VARCHAR" property="typeParams"/>
-        <result column="expr" jdbcType="VARCHAR" property="expr"/>
-        <result column="datasource_id" jdbcType="BIGINT" property="datasourceId"/>
-        <result column="created_at" jdbcType="TIMESTAMP" property="createdAt"/>
-        <result column="created_by" jdbcType="VARCHAR" property="createdBy"/>
-        <result column="updated_by" jdbcType="VARCHAR" property="updatedBy"/>
-        <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt"/>
-        <result column="semantic_type" jdbcType="VARCHAR" property="semanticType"/>
+    <resultMap id="BaseResultMap" type="com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="model_id" jdbcType="BIGINT" property="modelId" />
+        <result column="datasource_id" jdbcType="BIGINT" property="datasourceId" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+        <result column="biz_name" jdbcType="VARCHAR" property="bizName" />
+        <result column="description" jdbcType="VARCHAR" property="description" />
+        <result column="status" jdbcType="INTEGER" property="status" />
+        <result column="sensitive_level" jdbcType="INTEGER" property="sensitiveLevel" />
+        <result column="type" jdbcType="VARCHAR" property="type" />
+        <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
+        <result column="created_by" jdbcType="VARCHAR" property="createdBy" />
+        <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+        <result column="updated_by" jdbcType="VARCHAR" property="updatedBy" />
+        <result column="semantic_type" jdbcType="VARCHAR" property="semanticType" />
+        <result column="alias" jdbcType="VARCHAR" property="alias" />
+        <result column="default_values" jdbcType="VARCHAR" property="defaultValues" />
+        <result column="dim_value_maps" jdbcType="VARCHAR" property="dimValueMaps" />
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO">
+        <result column="type_params" jdbcType="LONGVARCHAR" property="typeParams" />
+        <result column="expr" jdbcType="LONGVARCHAR" property="expr" />
     </resultMap>
 
 
@@ -101,6 +106,37 @@
             where id = #{dimension.id,jdbcType=BIGINT}
         </foreach>
     </update>
+
+    <select id="query" resultMap="ResultMapWithBLOBs">
+        select *
+        from s2_dimension
+        where 1=1
+        <if test="key != null and key != ''">
+            and ( id like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
+            name like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
+            biz_name like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
+            description like CONCAT('%',#{key , jdbcType=VARCHAR},'%') )
+        </if>
+        <if test="id != null">
+            and id like CONCAT('%',#{id , jdbcType=VARCHAR},'%')
+        </if>
+        <if test="name != null and name != '' ">
+            and name like CONCAT('%',#{name , jdbcType=VARCHAR},'%')
+        </if>
+        <if test="bizName != null and bizName != ''">
+            and biz_name like CONCAT('%',#{bizName , jdbcType=VARCHAR},'%')
+        </if>
+        <if test="sensitiveLevel != null">
+            and sensitive_level = #{sensitiveLevel}
+        </if>
+        <if test="modelIds != null and modelIds.size >0">
+            and model_id in
+            <foreach collection="modelIds" index="index" item="model" open="(" close=")"
+                     separator=",">
+                #{model}
+            </foreach>
+        </if>
+    </select>
 
 
 </mapper>

@@ -21,6 +21,10 @@ public class SchemaMapInfo {
         return modelElementMatches;
     }
 
+    public void setModelElementMatches(Map<Long, List<SchemaElementMatch>> modelElementMatches) {
+        this.modelElementMatches = modelElementMatches;
+    }
+
     public void setMatchedElements(Long model, List<SchemaElementMatch> elementMatches) {
         modelElementMatches.put(model, elementMatches);
     }

@@ -43,6 +43,9 @@ public class AgentCheckParser implements SemanticParser {
                 if (!tool.getQueryModes().contains(query.getQueryMode())) {
                     return true;
                 }
+                if (CollectionUtils.isEmpty(tool.getModelIds())) {
+                    return true;
+                }
                 if (tool.isContainsAllModel() || tool.getModelIds().contains(query.getParseInfo().getModelId())) {
                     return false;
                 }

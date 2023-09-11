@@ -16,6 +16,7 @@ type Props = {
   currentAgent?: AgentType;
   agentList: AgentType[];
   onToggleHistoryVisible: () => void;
+  onOpenMobileAgents: () => void;
   onInputMsgChange: (value: string) => void;
   onSendMsg: (msg: string, modelId?: number) => void;
   onAddConversation: (agent?: AgentType) => void;
@@ -41,6 +42,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     currentAgent,
     agentList,
     onToggleHistoryVisible,
+    onOpenMobileAgents,
     onInputMsgChange,
     onSendMsg,
     onAddConversation,
@@ -308,6 +310,12 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
           <div className={styles.toolItem} onClick={onToggleHistoryVisible}>
             <IconFont type="icon-lishi" className={styles.toolIcon} />
             <div>历史对话</div>
+          </div>
+        )}
+        {isMobile && (
+          <div className={styles.toolItem} onClick={onOpenMobileAgents}>
+            <IconFont type="icon-zhinengzhuli" className={styles.toolIcon} />
+            <div>智能助理</div>
           </div>
         )}
       </div>

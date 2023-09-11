@@ -4,6 +4,8 @@ spring:
       path: /h2-console/chat
       # enabled web
       enabled: true
+    demo:
+      enabled: true
   datasource:
     driver-class-name: org.h2.Driver
     schema: classpath:db/schema-h2.sql

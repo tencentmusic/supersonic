@@ -6,6 +6,10 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.DataAddEvent;
+import com.tencent.supersonic.common.pojo.DataDeleteEvent;
+import com.tencent.supersonic.common.pojo.DataUpdateEvent;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
@@ -23,14 +27,18 @@ import com.tencent.supersonic.semantic.model.domain.repository.MetricRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.MetricConverter;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.pojo.Metric;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -45,6 +53,9 @@ public class MetricServiceImpl implements MetricService {
     private DomainService domainService;
 
     private ChatGptHelper chatGptHelper;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     public MetricServiceImpl(MetricRepository metricRepository,
                              ModelService modelService,
@@ -63,6 +74,11 @@ public class MetricServiceImpl implements MetricService {
         metric.createdBy(user.getName());
         log.info("[create metric] object:{}", JSONObject.toJSONString(metric));
         saveMetric(metric);
+        //动态更新字典
+        String type = DictWordType.METRIC.getType();
+        MetricResp metricResp = getMetric(metric.getModelId(), metric.getBizName());
+        applicationEventPublisher.publishEvent(
+                new DataAddEvent(this, metric.getName(), metric.getModelId(), metricResp.getId(), type));
     }
 
     @Override
@@ -150,7 +166,21 @@ public class MetricServiceImpl implements MetricService {
         Metric metric = MetricConverter.convert(metricReq);
         metric.updatedBy(user.getName());
         log.info("[update metric] object:{}", JSONObject.toJSONString(metric));
+        List<MetricResp> metricRespList = getMetrics(metricReq.getModelId()).stream().filter(
+                o -> o.getId().equals(metricReq.getId())).collect(Collectors.toList());
         updateMetric(metric);
+        //动态更新字典
+        String type = DictWordType.METRIC.getType();
+        //MetricResp metricResp = getMetric(metric.getModelId(), metric.getBizName());
+        if (!CollectionUtils.isEmpty(metricRespList)) {
+            log.info("metricRespList size:{}", metricRespList.size());
+            log.info("name:{}", metricRespList.get(0).getName());
+            applicationEventPublisher.publishEvent(
+                    new DataUpdateEvent(this, metricRespList.get(0).getName(),
+                            metricReq.getName(),
+                            metric.getModelId(),
+                            metricRespList.get(0).getId(), type));
+        }
     }
 
     public void saveMetric(Metric metric) {
@@ -205,6 +235,10 @@ public class MetricServiceImpl implements MetricService {
             throw new RuntimeException(String.format("the metric %s not exist", id));
         }
         metricRepository.deleteMetric(id);
+        //动态更新字典
+        String type = DictWordType.METRIC.getType();
+        applicationEventPublisher.publishEvent(
+                new DataDeleteEvent(this, metricDO.getName(), metricDO.getModelId(), metricDO.getId(), type));
     }
 
     @Override
@@ -215,7 +249,6 @@ public class MetricServiceImpl implements MetricService {
         return JSONObject.parseObject(mockAlias, new TypeReference<List<String>>() {
         });
     }
-
 
 
     private void saveMetricBatch(List<Metric> metrics, User user) {

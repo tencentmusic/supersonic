@@ -1,37 +1,45 @@
 package com.tencent.supersonic.chat.corrector;
 
-import com.tencent.supersonic.chat.api.pojo.CorrectionInfo;
+import static org.mockito.ArgumentMatchers.any;
+
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.parser.llm.dsl.DSLDateHelper;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 class DateFieldCorrectorTest {
 
     @Test
-    void rewriter() {
+    void corrector() {
+        MockedStatic<DSLDateHelper> dslDateHelper = Mockito.mockStatic(DSLDateHelper.class);
+
+        dslDateHelper.when(() -> DSLDateHelper.getReferenceDate(any())).thenReturn("2023-08-14");
         DateFieldCorrector dateFieldCorrector = new DateFieldCorrector();
         SemanticParseInfo parseInfo = new SemanticParseInfo();
         SchemaElement model = new SchemaElement();
         model.setId(2L);
         parseInfo.setModel(model);
-        CorrectionInfo correctionInfo = CorrectionInfo.builder()
+        SemanticCorrectInfo semanticCorrectInfo = SemanticCorrectInfo.builder()
                 .sql("select count(歌曲名) from 歌曲库 ")
                 .parseInfo(parseInfo)
                 .build();
 
-        CorrectionInfo rewriter = dateFieldCorrector.corrector(correctionInfo);
+        dateFieldCorrector.correct(semanticCorrectInfo);
 
-        Assert.assertEquals("SELECT count(歌曲名) FROM 歌曲库 WHERE 数据日期 = '2023-08-14'", rewriter.getSql());
+        Assert.assertEquals("SELECT count(歌曲名) FROM 歌曲库 WHERE 数据日期 = '2023-08-14'", semanticCorrectInfo.getSql());
 
-        correctionInfo = CorrectionInfo.builder()
+        semanticCorrectInfo = SemanticCorrectInfo.builder()
                 .sql("select count(歌曲名) from 歌曲库 where 数据日期 = '2023-08-14'")
                 .parseInfo(parseInfo)
                 .build();
 
-        rewriter = dateFieldCorrector.corrector(correctionInfo);
+        dateFieldCorrector.correct(semanticCorrectInfo);
 
-        Assert.assertEquals("select count(歌曲名) from 歌曲库 where 数据日期 = '2023-08-14'", rewriter.getSql());
+        Assert.assertEquals("select count(歌曲名) from 歌曲库 where 数据日期 = '2023-08-14'", semanticCorrectInfo.getSql());
 
     }
 }

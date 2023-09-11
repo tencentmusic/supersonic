@@ -153,6 +153,7 @@ public class TimeRangeParser implements SemanticParser {
                 }
                 info.setDetectWord(detectWord);
                 info.setStartDate(LocalDate.now().minusDays(days).toString());
+                info.setEndDate(LocalDate.now().minusDays(1).toString());
                 info.setUnit(num);
 
                 return info;

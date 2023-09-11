@@ -6,8 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import org.apache.calcite.sql.parser.SqlParseException;
 
 /**
- * This class defines the contract for a semantic query that executes specific type of
- * query based on the results of semantic parsing.
+ * A semantic query executes specific type of query based on the results of semantic parsing.
  */
 public interface SemanticQuery {
 

@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.corrector;
 
-import com.tencent.supersonic.chat.api.pojo.CorrectionInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
@@ -14,16 +14,16 @@ import org.springframework.util.CollectionUtils;
 public class SelectFieldAppendCorrector extends BaseSemanticCorrector {
 
     @Override
-    public CorrectionInfo corrector(CorrectionInfo correctionInfo) {
-        String preSql = correctionInfo.getSql();
+    public void correct(SemanticCorrectInfo semanticCorrectInfo) {
+        String preSql = semanticCorrectInfo.getSql();
         if (SqlParserSelectHelper.hasAggregateFunction(preSql)) {
-            return correctionInfo;
+            return;
         }
         Set<String> selectFields = new HashSet<>(SqlParserSelectHelper.getSelectFields(preSql));
         Set<String> whereFields = new HashSet<>(SqlParserSelectHelper.getWhereFields(preSql));
 
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(whereFields)) {
-            return correctionInfo;
+            return;
         }
 
         whereFields.addAll(SqlParserSelectHelper.getOrderByFields(preSql));
@@ -32,8 +32,7 @@ public class SelectFieldAppendCorrector extends BaseSemanticCorrector {
         whereFields.remove(TimeDimensionEnum.WEEK.getName());
         whereFields.remove(TimeDimensionEnum.MONTH.getName());
         String replaceFields = SqlParserUpdateHelper.addFieldsToSelect(preSql, new ArrayList<>(whereFields));
-        correctionInfo.setPreSql(preSql);
-        correctionInfo.setSql(replaceFields);
-        return correctionInfo;
+        semanticCorrectInfo.setPreSql(preSql);
+        semanticCorrectInfo.setSql(replaceFields);
     }
 }

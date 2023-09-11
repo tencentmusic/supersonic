@@ -16,6 +16,7 @@
     "allowJs": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
+    "suppressImplicitAnyIndexErrors": true,
     "ignoreDeprecations": "5.0",
     "strict": true,
     "paths": {

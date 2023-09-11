@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.corrector;
 
-import com.tencent.supersonic.chat.api.pojo.CorrectionInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMReq;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMReq.ElementValue;
@@ -19,32 +19,31 @@ import org.springframework.util.CollectionUtils;
 public class FieldNameCorrector extends BaseSemanticCorrector {
 
     @Override
-    public CorrectionInfo corrector(CorrectionInfo correctionInfo) {
+    public void correct(SemanticCorrectInfo semanticCorrectInfo) {
 
-        Object context = correctionInfo.getParseInfo().getProperties().get(Constants.CONTEXT);
+        Object context = semanticCorrectInfo.getParseInfo().getProperties().get(Constants.CONTEXT);
         if (Objects.isNull(context)) {
-            return correctionInfo;
+            return;
         }
 
         DSLParseResult dslParseResult = JsonUtil.toObject(JsonUtil.toString(context), DSLParseResult.class);
         if (Objects.isNull(dslParseResult) || Objects.isNull(dslParseResult.getLlmReq())) {
-            return correctionInfo;
+            return;
         }
         LLMReq llmReq = dslParseResult.getLlmReq();
         List<ElementValue> linking = llmReq.getLinking();
         if (CollectionUtils.isEmpty(linking)) {
-            return correctionInfo;
+            return;
         }
 
         Map<String, Set<String>> fieldValueToFieldNames = linking.stream().collect(
                 Collectors.groupingBy(ElementValue::getFieldValue,
                         Collectors.mapping(ElementValue::getFieldName, Collectors.toSet())));
 
-        String preSql = correctionInfo.getSql();
-        correctionInfo.setPreSql(preSql);
+        String preSql = semanticCorrectInfo.getSql();
+        semanticCorrectInfo.setPreSql(preSql);
         String sql = SqlParserUpdateHelper.replaceFieldNameByValue(preSql, fieldValueToFieldNames);
-        correctionInfo.setSql(sql);
-        return correctionInfo;
+        semanticCorrectInfo.setSql(sql);
     }
 
 }

@@ -4,6 +4,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.ModelReq;
+import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import org.springframework.web.bind.annotation.RestController;
@@ -72,6 +73,11 @@ public class ModelController {
     public List<ModelResp> getModelListByIds(@PathVariable("modelIds") String modelIds) {
         return modelService.getModelList(Arrays.stream(modelIds.split(",")).map(Long::parseLong)
                 .collect(Collectors.toList()));
+    }
+
+    @GetMapping("/getModelDatabase/{modelId}")
+    public DatabaseResp getModelDatabase(@PathVariable("modelId") Long modelId) {
+        return modelService.getDatabaseByModelId(modelId);
     }
 
 }

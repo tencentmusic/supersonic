@@ -1,0 +1,55 @@
+.mobileAgents {
+  :global {
+    .ant-drawer-content {
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+
+      .ant-drawer-header {
+        padding: 16px 12px;
+      }
+
+      .ant-drawer-body {
+        padding: 12px;
+      }
+    }
+  }
+
+  .agentListContent {
+    display: flex;
+    flex-direction: column;
+    row-gap: 12px;
+
+    .agentItem {
+      padding: 12px 16px;
+      background-color: #f5f7f9;
+      border: 1px solid transparent;
+      border-radius: 10px;
+
+      &.active {
+        border: 1px solid var(--chat-blue);
+      }
+
+      .agentTitleBar {
+        display: flex;
+        align-items: center;
+        column-gap: 6px;
+
+        .avatar {
+          font-size: 24px;
+        }
+
+        .agentName {
+          color: var(--text-color);
+          font-weight: 500;
+        }
+      }
+
+      .agentDesc {
+        margin-top: 8px;
+        color: var(--text-color-third);
+        font-size: 13px;
+        line-height: 24px;
+      }
+    }
+  }
+}

@@ -94,6 +94,31 @@ public class SqlParserUpdateHelper {
         return selectStatement.toString();
     }
 
+    public static String replaceFunction(String sql, Map<String, String> functionMap) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+        //1. replace where dataDiff function
+        Expression where = plainSelect.getWhere();
+
+        FunctionNameReplaceVisitor visitor = new FunctionNameReplaceVisitor(functionMap);
+        if (Objects.nonNull(where)) {
+            where.accept(visitor);
+        }
+        GroupByElement groupBy = plainSelect.getGroupBy();
+        if (Objects.nonNull(groupBy)) {
+            GroupByFunctionReplaceVisitor replaceVisitor = new GroupByFunctionReplaceVisitor(functionMap);
+            groupBy.accept(replaceVisitor);
+        }
+
+        for (SelectItem selectItem : plainSelect.getSelectItems()) {
+            selectItem.accept(visitor);
+        }
+        return selectStatement.toString();
+    }
 
     public static String replaceFunction(String sql) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);

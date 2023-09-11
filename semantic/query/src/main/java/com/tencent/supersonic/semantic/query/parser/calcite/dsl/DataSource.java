@@ -20,4 +20,6 @@ public class DataSource {
     private List<Dimension> dimensions;
 
     private List<Measure> measures;
+
+    private String aggTime;
 }

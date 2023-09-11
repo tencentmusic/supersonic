@@ -36,7 +36,7 @@ public class PluginRecognizeTest extends BasePluginTest {
     public void webPageRecognize() throws Exception {
         MockConfiguration.mockEmbeddingRecognize(pluginManager, "alice最近的访问情况怎么样", "1");
         MockConfiguration.mockEmbeddingUrl(embeddingConfig);
-        QueryReq queryContextReq = DataUtils.getQueryContextReq(1000, "alice最近的访问情况怎么样");
+        QueryReq queryContextReq = DataUtils.getQueryReqWithAgent(1000, "alice最近的访问情况怎么样", 1);
         QueryResult queryResult = queryService.executeQuery(queryContextReq);
         assertPluginRecognizeResult(queryResult);
     }
@@ -45,7 +45,7 @@ public class PluginRecognizeTest extends BasePluginTest {
     public void webPageRecognizeWithQueryFilter() throws Exception {
         MockConfiguration.mockEmbeddingRecognize(pluginManager, "在超音数最近的情况怎么样", "1");
         MockConfiguration.mockEmbeddingUrl(embeddingConfig);
-        QueryReq queryRequest = DataUtils.getQueryContextReq(1000, "在超音数最近的情况怎么样");
+        QueryReq queryRequest = DataUtils.getQueryReqWithAgent(1000, "在超音数最近的情况怎么样", 1);
         QueryFilters queryFilters = new QueryFilters();
         QueryFilter queryFilter = new QueryFilter();
         queryFilter.setElementID(2L);

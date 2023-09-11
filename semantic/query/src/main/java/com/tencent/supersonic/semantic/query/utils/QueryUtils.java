@@ -97,6 +97,9 @@ public class QueryUtils {
                 column.setDataFormatType(metricRespMap.get(nameEn).getDataFormatType());
                 column.setDataFormat(metricRespMap.get(nameEn).getDataFormat());
             }
+            if (StringUtils.isEmpty(column.getShowType())) {
+                column.setShowType("NUMBER");
+            }
         });
     }
 
@@ -145,6 +148,9 @@ public class QueryUtils {
         }
         if (type.equalsIgnoreCase("int") || type.equalsIgnoreCase("bigint")
                 || type.equalsIgnoreCase("float") || type.equalsIgnoreCase("double")) {
+            return true;
+        }
+        if (type.toLowerCase().startsWith("uint") || type.toLowerCase().startsWith("int")) {
             return true;
         }
         return false;

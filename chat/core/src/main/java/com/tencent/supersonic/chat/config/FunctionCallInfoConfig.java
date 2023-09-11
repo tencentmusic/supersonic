@@ -9,4 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class FunctionCallInfoConfig {
     @Value("${functionCall.url:}")
     private String url;
+
+    @Value("${funtionCall.plugin.select.path:/plugin_selection}")
+    private String pluginSelectPath;
 }

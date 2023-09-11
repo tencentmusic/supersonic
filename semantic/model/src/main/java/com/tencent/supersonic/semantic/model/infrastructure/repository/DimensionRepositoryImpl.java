@@ -6,10 +6,7 @@ import com.tencent.supersonic.semantic.model.domain.repository.DimensionReposito
 import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOCustomMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOMapper;
-
 import java.util.List;
-
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 
@@ -84,27 +81,7 @@ public class DimensionRepositoryImpl implements DimensionRepository {
 
     @Override
     public List<DimensionDO> getDimension(DimensionFilter dimensionFilter) {
-        DimensionDOExample dimensionDOExample = new DimensionDOExample();
-        dimensionDOExample.createCriteria();
-        if (dimensionFilter.getId() != null) {
-            dimensionDOExample.getOredCriteria().get(0).andIdEqualTo(dimensionFilter.getId());
-        }
-        if (dimensionFilter.getName() != null) {
-            dimensionDOExample.getOredCriteria().get(0).andNameLike("%" + dimensionFilter.getName() + "%");
-        }
-        if (dimensionFilter.getBizName() != null) {
-            dimensionDOExample.getOredCriteria().get(0).andBizNameLike("%" + dimensionFilter.getBizName() + "%");
-        }
-        if (dimensionFilter.getCreatedBy() != null) {
-            dimensionDOExample.getOredCriteria().get(0).andCreatedByEqualTo(dimensionFilter.getCreatedBy());
-        }
-        if (CollectionUtils.isNotEmpty(dimensionFilter.getModelIds())) {
-            dimensionDOExample.getOredCriteria().get(0).andModelIdIn(dimensionFilter.getModelIds());
-        }
-        if (dimensionFilter.getSensitiveLevel() != null) {
-            dimensionDOExample.getOredCriteria().get(0).andSensitiveLevelEqualTo(dimensionFilter.getSensitiveLevel());
-        }
-        return dimensionDOMapper.selectByExampleWithBLOBs(dimensionDOExample);
+        return dimensionDOCustomMapper.query(dimensionFilter);
     }
 
 

@@ -12,5 +12,4 @@ public class AgentTool {
     private String name;
 
     private AgentToolType type;
-
 }

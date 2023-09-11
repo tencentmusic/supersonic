@@ -43,4 +43,9 @@ public class H2Adaptor extends EngineAdaptor {
         return "SELECT TABLE_NAME as name FROM INFORMATION_SCHEMA.TABLES "
                 + "WHERE STORAGE_TYPE = 'MEMORY' AND TABLE_SCHEMA = '%s'";
     }
+
+    @Override
+    public String functionNameCorrector(String sql) {
+        return sql;
+    }
 }

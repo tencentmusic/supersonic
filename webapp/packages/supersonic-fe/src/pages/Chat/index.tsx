@@ -23,6 +23,7 @@ import 'supersonic-chat-sdk/dist/index.css';
 import { setToken as setChatSdkToken } from 'supersonic-chat-sdk';
 import AgentList from './AgentList';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
+import MobileAgents from './MobileAgents';
 
 type Props = {
   isCopilotMode?: boolean;
@@ -58,6 +59,7 @@ const Chat: React.FC<Props> = ({
   const [defaultEntity, setDefaultEntity] = useState<DefaultEntityType>();
   const [agentList, setAgentList] = useState<AgentType[]>([]);
   const [currentAgent, setCurrentAgent] = useState<AgentType>();
+  const [mobileAgentsVisible, setMobileAgentsVisible] = useState(false);
   const dispatch = useDispatch();
 
   const conversationRef = useRef<any>();
@@ -403,6 +405,9 @@ const Chat: React.FC<Props> = ({
                   onSendMsg={sendMsg}
                   onAddConversation={onAddConversation}
                   onSelectAgent={onSelectAgent}
+                  onOpenMobileAgents={() => {
+                    setMobileAgentsVisible(true);
+                  }}
                   ref={chatFooterRef}
                 />
               </div>
@@ -423,6 +428,15 @@ const Chat: React.FC<Props> = ({
           ref={conversationRef}
         />
       </div>
+      <MobileAgents
+        open={mobileAgentsVisible}
+        agentList={agentList}
+        currentAgent={currentAgent}
+        onSelectAgent={onSelectAgent}
+        onClose={() => {
+          setMobileAgentsVisible(false);
+        }}
+      />
     </div>
   );
 };

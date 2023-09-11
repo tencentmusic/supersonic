@@ -91,7 +91,7 @@ public class DataUtils {
         dateInfo.setDateMode(dateMode);
         dateInfo.setPeriod(period);
         dateInfo.setStartDate(now().plusDays(-unit).toString());
-        dateInfo.setEndDate(now().toString());
+        dateInfo.setEndDate(now().plusDays(-1).toString());
         return dateInfo;
     }
 

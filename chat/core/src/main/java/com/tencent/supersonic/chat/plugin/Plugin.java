@@ -55,4 +55,8 @@ public class Plugin extends RecordInfo {
         return CollectionUtils.isNotEmpty(modelList) && modelList.contains(-1L);
     }
 
+    public Long getDefaultMode() {
+        return -1L;
+    }
+
 }

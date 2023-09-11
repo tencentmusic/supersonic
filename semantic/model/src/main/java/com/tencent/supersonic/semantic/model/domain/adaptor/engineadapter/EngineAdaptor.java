@@ -12,4 +12,6 @@ public abstract class EngineAdaptor {
     public abstract String getDbMetaQueryTpl();
 
     public abstract String getTableMetaQueryTpl();
+
+    public abstract String functionNameCorrector(String sql);
 }

@@ -28,6 +28,10 @@ public class EmbeddingBasedParser extends PluginParser {
         if (StringUtils.isBlank(embeddingConfig.getUrl())) {
             return false;
         }
+        List<Plugin> plugins = getPluginList(queryContext);
+        if (CollectionUtils.isEmpty(plugins)) {
+            return false;
+        }
         List<SemanticQuery> semanticQueries = queryContext.getCandidateQueries();
         for (SemanticQuery semanticQuery : semanticQueries) {
             if (queryContext.getRequest().getQueryText().length() <= semanticQuery.getParseInfo().getScore()) {

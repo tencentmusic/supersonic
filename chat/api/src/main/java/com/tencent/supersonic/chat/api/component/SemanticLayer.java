@@ -18,10 +18,9 @@ import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.util.List;
 
 /**
- * This interface defines the contract for a semantic layer that provides a simplified and
- * consistent view of data from multiple sources.
- * The semantic layer abstracts away the complexity of the underlying data sources and provides
- * a unified view of the data that is easier to understand and use.
+ * A semantic layer provides a simplified and consistent view of data from multiple sources.
+ * It abstracts away the complexity of the underlying data sources and provides a unified view
+ * of the data that is easier to understand and use.
  * <p>
  * The interface defines methods for getting metadata as well as querying data in the semantic layer.
  * Implementations of this interface should provide concrete implementations that interact with the

@@ -9,6 +9,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.ModelReq;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
+import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
@@ -17,6 +18,7 @@ import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
+import com.tencent.supersonic.semantic.model.domain.DatabaseService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
@@ -51,16 +53,19 @@ public class ModelServiceImpl implements ModelService {
     private final DatasourceService datasourceService;
     private final DomainService domainService;
     private final UserService userService;
+    private final DatabaseService databaseService;
 
     public ModelServiceImpl(ModelRepository modelRepository, @Lazy MetricService metricService,
                             @Lazy DimensionService dimensionService, @Lazy DatasourceService datasourceService,
-                            @Lazy DomainService domainService, UserService userService) {
+                            @Lazy DomainService domainService, UserService userService,
+                            @Lazy DatabaseService databaseService) {
         this.modelRepository = modelRepository;
         this.metricService = metricService;
         this.dimensionService = dimensionService;
         this.datasourceService = datasourceService;
         this.domainService = domainService;
         this.userService = userService;
+        this.databaseService = databaseService;
     }
 
     @Override
@@ -172,7 +177,7 @@ public class ModelServiceImpl implements ModelService {
         List<DatasourceResp> datasourceResps = datasourceService.getDatasourceList(id);
         if (!CollectionUtils.isEmpty(metricResps) || !CollectionUtils.isEmpty(datasourceResps)
                 || !CollectionUtils.isEmpty(dimensionResps)) {
-            throw new RuntimeException("exist datasource, dimension or metric in this model, please check");
+            throw new RuntimeException("该模型下存在数据源、指标或者维度, 暂不能删除, 请确认");
         }
     }
 
@@ -275,6 +280,16 @@ public class ModelServiceImpl implements ModelService {
             }
         });
         return modelSchemaRespList;
+    }
+
+    @Override
+    public DatabaseResp getDatabaseByModelId(Long modelId) {
+        List<DatasourceResp> datasourceResps = datasourceService.getDatasourceList(modelId);
+        if (!CollectionUtils.isEmpty(datasourceResps)) {
+            Long databaseId = datasourceResps.iterator().next().getDatabaseId();
+            return databaseService.getDatabase(databaseId);
+        }
+        return null;
     }
 
     private List<MetricSchemaResp> generateMetricSchema(Long modelId) {

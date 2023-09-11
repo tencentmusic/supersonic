@@ -32,6 +32,18 @@ class SqlParserUpdateHelperTest {
                         + "song_publis_date = '2023-08-01' AND publish_date >= '2023-08-08' "
                         + "ORDER BY play_count DESC LIMIT 11", replaceSql);
 
+        replaceSql = "select MONTH(数据日期), sum(访问次数) from 内容库产品 "
+                + "where datediff('year', 数据日期, '2023-09-03') <= 0.5 "
+                + "group by MONTH(数据日期) order by sum(访问次数) desc limit 1";
+
+        replaceSql = SqlParserUpdateHelper.replaceFields(replaceSql, fieldToBizName);
+        replaceSql = SqlParserUpdateHelper.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT MONTH(sys_imp_date), sum(pv) FROM 内容库产品 WHERE sys_imp_date <= '2023-09-03' "
+                        + "AND sys_imp_date >= '2023-03-03' "
+                        + "GROUP BY MONTH(sys_imp_date) ORDER BY sum(pv) DESC LIMIT 1", replaceSql);
+
         replaceSql = "select YEAR(发行日期), count(歌曲名) from 歌曲库 where YEAR(发行日期) "
                 + "in (2022, 2023) and 数据日期 = '2023-08-14' group by YEAR(发行日期)";
 
@@ -180,6 +192,31 @@ class SqlParserUpdateHelperTest {
 
     }
 
+
+    @Test
+    void replaceFunctionName() {
+
+        String sql = "select MONTH(数据日期) as 月份, avg(访问次数) as 平均访问次数 from 内容库产品 where"
+                + " datediff('month', 数据日期, '2023-09-02') <= 6 group by MONTH(数据日期)";
+        Map<String, String> functionMap = new HashMap<>();
+        functionMap.put("MONTH".toLowerCase(), "toMonth");
+        String replaceSql = SqlParserUpdateHelper.replaceFunction(sql, functionMap);
+
+        Assert.assertEquals(
+                "SELECT toMonth(数据日期) AS 月份, avg(访问次数) AS 平均访问次数 FROM 内容库产品 WHERE"
+                        + " datediff('month', 数据日期, '2023-09-02') <= 6 GROUP BY toMonth(数据日期)",
+                replaceSql);
+
+        sql = "select month(数据日期) as 月份, avg(访问次数) as 平均访问次数 from 内容库产品 where"
+                + " datediff('month', 数据日期, '2023-09-02') <= 6 group by MONTH(数据日期)";
+        replaceSql = SqlParserUpdateHelper.replaceFunction(sql, functionMap);
+
+        Assert.assertEquals(
+                "SELECT toMonth(数据日期) AS 月份, avg(访问次数) AS 平均访问次数 FROM 内容库产品 WHERE"
+                        + " datediff('month', 数据日期, '2023-09-02') <= 6 GROUP BY toMonth(数据日期)",
+                replaceSql);
+    }
+
     private Map<String, String> initParams() {
         Map<String, String> fieldToBizName = new HashMap<>();
         fieldToBizName.put("部门", "department");
@@ -192,7 +229,7 @@ class SqlParserUpdateHelperTest {
         fieldToBizName.put("播放", "play_count");
         fieldToBizName.put("歌曲发布时间", "song_publis_date");
         fieldToBizName.put("歌曲发布年份", "song_publis_year");
-        fieldToBizName.put("转3.0前后30天结算份额衰减", "fdafdfdsa_fdas");
+        fieldToBizName.put("访问次数", "pv");
         return fieldToBizName;
     }
 }
