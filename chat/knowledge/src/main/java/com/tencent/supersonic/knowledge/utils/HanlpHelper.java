@@ -167,7 +167,7 @@ public class HanlpHelper {
     public static void removeFromCustomDictionary(DictWord dictWord) {
         log.info("dictWord:{}", dictWord);
         CoreDictionary.Attribute attribute = getDynamicCustomDictionary().get(dictWord.getWord());
-        if (attribute != null) {
+        if (attribute == null) {
             return;
         }
         log.info("get attribute:{}", attribute);
