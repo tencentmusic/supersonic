@@ -197,6 +197,15 @@ public class SearchServiceImpl implements SearchService {
                 .schemaElementType(schemaElementType)
                 .subRecommend(wordName)
                 .build();
+        ItemNameVisibilityInfo visibility = (ItemNameVisibilityInfo) caffeineCache.getIfPresent(modelId);
+        if (visibility == null) {
+            visibility = configService.getVisibilityByModelId(modelId);
+            caffeineCache.put(modelId, visibility);
+        }
+        if (visibility.getBlackMetricNameList().contains(searchResult.getRecommend())
+                || visibility.getBlackDimNameList().contains(searchResult.getRecommend())) {
+            return searchResults;
+        }
         if (metricModelCount <= 0 && !existMetricAndDimension) {
             if (filterByQueryFilter(wordName, queryFilters)) {
                 return searchResults;
@@ -204,12 +213,7 @@ public class SearchServiceImpl implements SearchService {
             searchResults.add(searchResult);
             int metricSize = getMetricSize(natureToNameMap);
             //invisibility to filter  metrics
-            ItemNameVisibilityInfo itemNameVisibility = (ItemNameVisibilityInfo) caffeineCache.getIfPresent(modelId);
-            if (itemNameVisibility == null) {
-                itemNameVisibility = configService.getVisibilityByModelId(modelId);
-                caffeineCache.put(modelId, itemNameVisibility);
-            }
-            List<String> blackMetricNameList = itemNameVisibility.getBlackMetricNameList();
+            List<String> blackMetricNameList = visibility.getBlackMetricNameList();
             List<String> metrics = filerMetricsByModel(metricsDb, modelId, metricSize * 3)
                     .stream().filter(o -> !blackMetricNameList.contains(o))
                     .limit(metricSize).collect(Collectors.toList());
@@ -328,12 +332,8 @@ public class SearchServiceImpl implements SearchService {
                     visibility = configService.getVisibilityByModelId(modelId);
                     caffeineCache.put(modelId, visibility);
                 }
-                if (semanticType.equals(SchemaElementType.DIMENSION)
+                if (!visibility.getBlackMetricNameList().contains(mapResult.getName())
                         && !visibility.getBlackDimNameList().contains(mapResult.getName())) {
-                    searchResults.add(searchResult);
-                }
-                if (semanticType.equals(SchemaElementType.METRIC)
-                        && !visibility.getBlackMetricNameList().contains(mapResult.getName())) {
                     searchResults.add(searchResult);
                 }
             }
