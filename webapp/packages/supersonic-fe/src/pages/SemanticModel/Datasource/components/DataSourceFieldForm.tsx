@@ -4,7 +4,13 @@ import TableTitleTooltips from '../../components/TableTitleTooltips';
 import { isUndefined } from 'lodash';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import Marquee from 'react-fast-marquee';
-import { TYPE_OPTIONS, DATE_FORMATTER, AGG_OPTIONS, EnumDataSourceType } from '../constants';
+import {
+  TYPE_OPTIONS,
+  DATE_FORMATTER,
+  AGG_OPTIONS,
+  EnumDataSourceType,
+  DATE_OPTIONS,
+} from '../constants';
 import styles from '../style.less';
 
 type FieldItem = {
@@ -15,6 +21,7 @@ type FieldItem = {
   agg?: string;
   checked?: number;
   dateFormat?: string;
+  timeGranularity?: string;
 };
 
 type Props = {
@@ -106,7 +113,7 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
     {
       title: '扩展配置',
       dataIndex: 'extender',
-      width: 100,
+      width: 180,
       render: (_: any, record: FieldItem) => {
         const { type } = record;
         if (type === EnumDataSourceType.MEASURES) {
@@ -131,6 +138,9 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
         }
         if (type === EnumDataSourceType.TIME) {
           const dateFormat = fields.find((field) => field.bizName === record.bizName)?.dateFormat;
+          const timeGranularity = fields.find(
+            (field) => field.bizName === record.bizName,
+          )?.timeGranularity;
           return (
             <Space>
               <Select
@@ -140,7 +150,7 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
                   handleFieldChange(record, 'dateFormat', value);
                 }}
                 defaultValue={DATE_FORMATTER[0]}
-                style={{ minWidth: 180 }}
+                style={{ minWidth: 150 }}
               >
                 {DATE_FORMATTER.map((item) => (
                   <Option key={item} value={item}>
@@ -151,6 +161,22 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
               <Tooltip title="请选择数据库中时间字段对应格式">
                 <ExclamationCircleOutlined />
               </Tooltip>
+              <span>时间粒度:</span>
+              <Select
+                placeholder="时间粒度"
+                value={timeGranularity}
+                onChange={(value) => {
+                  handleFieldChange(record, 'timeGranularity', value);
+                }}
+                defaultValue={DATE_OPTIONS[0]}
+                style={{ minWidth: 50 }}
+              >
+                {DATE_OPTIONS.map((item) => (
+                  <Option key={item} value={item}>
+                    {item}
+                  </Option>
+                ))}
+              </Select>
             </Space>
           );
         }
