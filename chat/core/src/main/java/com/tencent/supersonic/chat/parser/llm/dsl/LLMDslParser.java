@@ -40,6 +40,7 @@ import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,8 +67,12 @@ public class LLMDslParser implements SemanticParser {
     public void parse(QueryContext queryCtx, ChatContext chatCtx) {
         QueryReq request = queryCtx.getRequest();
         LLMConfig llmConfig = ContextUtils.getBean(LLMConfig.class);
-        if (StringUtils.isEmpty(llmConfig.getUrl()) || SatisfactionChecker.check(queryCtx)) {
-            log.info("llmConfig:{}, skip dsl parser, queryText:{}", llmConfig, request.getQueryText());
+        if (StringUtils.isEmpty(llmConfig.getUrl())) {
+            log.info("llm url is empty, skip dsl parser, llmConfig:{}", llmConfig);
+            return;
+        }
+        if (SatisfactionChecker.check(queryCtx)) {
+            log.info("skip dsl parser, queryText:{}", request.getQueryText());
             return;
         }
         try {
@@ -88,8 +93,8 @@ public class LLMDslParser implements SemanticParser {
             if (Objects.isNull(llmResp)) {
                 return;
             }
-            DSLParseResult dslParseResult = DSLParseResult.builder().request(request).dslTool(dslTool).llmReq(llmReq)
-                    .llmResp(llmResp).build();
+            DSLParseResult dslParseResult = DSLParseResult.builder().request(request)
+                    .dslTool(dslTool).llmReq(llmReq).llmResp(llmResp).build();
 
             SemanticParseInfo parseInfo = getParseInfo(queryCtx, modelId, dslTool, dslParseResult);
 
@@ -287,7 +292,14 @@ public class LLMDslParser implements SemanticParser {
     private DslTool getDslTool(QueryReq request, Long modelId) {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         List<DslTool> dslTools = agentService.getDslTools(request.getAgentId(), AgentToolType.DSL);
-        Optional<DslTool> dslToolOptional = dslTools.stream().filter(tool -> tool.getModelIds().contains(modelId))
+        Optional<DslTool> dslToolOptional = dslTools.stream()
+                .filter(tool -> {
+                    List<Long> modelIds = tool.getModelIds();
+                    if (agentService.containsAllModel(new HashSet<>(modelIds))) {
+                        return true;
+                    }
+                    return modelIds.contains(modelId);
+                })
                 .findFirst();
         return dslToolOptional.orElse(null);
     }
@@ -295,6 +307,9 @@ public class LLMDslParser implements SemanticParser {
     private Long getModelId(QueryContext queryCtx, ChatContext chatCtx, Integer agentId) {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         Set<Long> distinctModelIds = agentService.getDslToolsModelIds(agentId, AgentToolType.DSL);
+        if (agentService.containsAllModel(distinctModelIds)) {
+            distinctModelIds = new HashSet<>();
+        }
         ModelResolver modelResolver = ComponentFactory.getModelResolver();
         Long modelId = modelResolver.resolve(queryCtx, chatCtx, distinctModelIds);
         log.info("resolve modelId:{},dslModels:{}", modelId, distinctModelIds);
