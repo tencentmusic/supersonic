@@ -4,7 +4,7 @@ import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
-import com.tencent.supersonic.knowledge.dictionary.DictWordType;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.builder.WordBuilderFactory;
 
 import java.util.ArrayList;

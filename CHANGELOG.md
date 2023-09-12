@@ -3,6 +3,25 @@
 - All notable changes to this project will be documented in this file.
 - "Breaking Changes" describes any changes that may break existing functionality or cause
   compatibility issues with previous versions.
+  
+  ## SuperSonic [0.7.4] - 2023-09-10
+  
+  ### Added
+  - add llm parser config
+  - add datasource agg_time option
+  - add function name adaptor in clickhouse
+  - add dimension and metric show in dsl
+  
+  
+  ### Updated
+  - update user guide doc
+  - update query building of plugin in default model
+  - update some core API constructs to keep naming consistency
+  - update ConfigureDemo config
+  - update the association mechanism so that invisible dimensions and metrics will no longer be associated
+  
+  ### Fixed
+  - fix hasAggregateFunction logic in SqlParserSelectHelper
 
 ## SuperSonic [0.7.3] - 2023-08-29
 

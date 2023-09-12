@@ -30,7 +30,7 @@ public interface Catalog {
 
     List<MetricResp> getMetrics(Long modelId);
 
-    void getModelYamlTplByMoldelIds(Set<Long> modelIds, Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
+    void getModelYamlTplByModelIds(Set<Long> modelIds, Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
             List<DatasourceYamlTpl> datasourceYamlTplList, List<MetricYamlTpl> metricYamlTplList);
 
 

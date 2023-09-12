@@ -2,9 +2,9 @@ package com.tencent.supersonic.chat.parser.llm.dsl;
 
 import static org.mockito.Mockito.when;
 
-import com.tencent.supersonic.chat.api.pojo.CorrectionInfo;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
+import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -67,14 +67,14 @@ class LLMDslParserTest {
         SchemaElement model = new SchemaElement();
         model.setId(2L);
         parseInfo.setModel(model);
-        CorrectionInfo correctionInfo = CorrectionInfo.builder()
+        SemanticCorrectInfo semanticCorrectInfo = SemanticCorrectInfo.builder()
                 .sql("select count(song_name) from 歌曲库 where singer_name = '周先生' and YEAR(publish_time) >= 2023 and ")
                 .parseInfo(parseInfo)
                 .build();
 
         LLMDslParser llmDslParser = new LLMDslParser();
 
-        llmDslParser.setFilter(correctionInfo, 2L, parseInfo);
+        llmDslParser.setFilter(semanticCorrectInfo, 2L, parseInfo);
 
     }
 }

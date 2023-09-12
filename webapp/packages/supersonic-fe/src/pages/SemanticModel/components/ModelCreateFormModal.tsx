@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Modal, Input, Switch } from 'antd';
+import { Form, Button, Modal, Input, Switch, Select } from 'antd';
 import styles from './style.less';
 import { message } from 'antd';
 import { formLayout } from '@/components/FormHelper/utils';
@@ -22,13 +22,20 @@ const ModelCreateFormModal: React.FC<ModelCreateFormModalProps> = (props) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    form.setFieldsValue(basicInfo);
+    form.setFieldsValue({
+      ...basicInfo,
+      alias: basicInfo?.alias && basicInfo.alias.trim() ? basicInfo.alias.split(',') : [],
+    });
   }, [basicInfo]);
 
   const handleConfirm = async () => {
     const fieldsValue = await form.validateFields();
     const columnsValue = { ...fieldsValue, isUnique: 1, domainId };
-    const submitData = { ...formVals, ...columnsValue };
+    const submitData = {
+      ...formVals,
+      ...columnsValue,
+      alias: Array.isArray(fieldsValue.alias) ? fieldsValue.alias.join(',') : '',
+    };
     setFormVals(submitData);
     setSaveLoading(true);
     const { code, msg } = await (!submitData.id ? createModel : updateModel)(submitData);
@@ -80,6 +87,14 @@ const ModelCreateFormModal: React.FC<ModelCreateFormModalProps> = (props) => {
           rules={[{ required: true, message: '请输入模型英文名称！' }]}
         >
           <Input placeholder="请输入模型英文名称" />
+        </FormItem>
+        <FormItem name="alias" label="别名">
+          <Select
+            mode="tags"
+            placeholder="输入别名后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
+            tokenSeparators={[',']}
+            maxTagCount={9}
+          />
         </FormItem>
         <FormItem name="description" label="模型描述">
           <Input.TextArea placeholder="模型描述" />

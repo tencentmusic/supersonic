@@ -23,4 +23,5 @@ public interface AgentService {
 
     Set<Long> getDslToolsModelIds(Integer agentId, AgentToolType agentToolType);
 
+    boolean containsAllModel(Set<Long> detectModelIds);
 }

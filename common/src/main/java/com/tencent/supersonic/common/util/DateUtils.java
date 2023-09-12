@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.util;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,11 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DateUtils {
 
-    public static final String DATE_FORMAT_DOT = "yyyy-MM-dd";
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
+
+    public static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     public static Integer currentYear() {
         Date date = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_DOT);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         String time = dateFormat.format(date).replaceAll("-", "");
         int year = Integer.parseInt(time.substring(0, 4));
         return year;
@@ -56,12 +59,19 @@ public class DateUtils {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.add(Calendar.DAY_OF_MONTH, -intervalDay);
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_DOT);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         return dateFormat.format(calendar.getTime());
     }
 
+
+    public static String getBeforeDate(int intervalDay, DatePeriodEnum datePeriodEnum) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+        String currentDate = dateFormat.format(new Date());
+        return getBeforeDate(currentDate, intervalDay, datePeriodEnum);
+    }
+
     public static String getBeforeDate(String date, int intervalDay, DatePeriodEnum datePeriodEnum) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_DOT);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         LocalDate currentDate = LocalDate.parse(date, dateTimeFormatter);
         LocalDate result = null;
         switch (datePeriodEnum) {
@@ -89,8 +99,26 @@ public class DateUtils {
             default:
         }
         if (Objects.nonNull(result)) {
-            return result.format(DateTimeFormatter.ofPattern(DATE_FORMAT_DOT));
+            return result.format(DateTimeFormatter.ofPattern(DATE_FORMAT));
         }
         return null;
     }
+
+
+    public static String format(Date date) {
+        DateFormat dateFormat;
+        if (containsTime(date)) {
+            dateFormat = new SimpleDateFormat(DateUtils.TIME_FORMAT);
+        } else {
+            dateFormat = new SimpleDateFormat(DateUtils.DATE_FORMAT);
+        }
+        return dateFormat.format(date);
+    }
+
+    private static boolean containsTime(Date date) {
+        DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        String timeString = timeFormat.format(date);
+        return !timeString.equals("00:00:00");
+    }
+
 }

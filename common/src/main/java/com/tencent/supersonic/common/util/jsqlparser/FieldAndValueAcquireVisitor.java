@@ -16,6 +16,7 @@ import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
@@ -29,6 +30,21 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
         this.filterExpressions = filterExpressions;
     }
 
+    public void visit(LikeExpression expr) {
+        Expression leftExpression = expr.getLeftExpression();
+        Expression rightExpression = expr.getRightExpression();
+
+        FilterExpression filterExpression = new FilterExpression();
+        String columnName = null;
+        if (leftExpression instanceof Column) {
+            Column column = (Column) leftExpression;
+            columnName = column.getColumnName();
+            filterExpression.setFieldName(columnName);
+        }
+        filterExpression.setFieldValue(getFieldValue(rightExpression));
+        filterExpression.setOperator(expr.getStringExpression());
+        filterExpressions.add(filterExpression);
+    }
 
     @Override
     public void visit(MinorThan expr) {

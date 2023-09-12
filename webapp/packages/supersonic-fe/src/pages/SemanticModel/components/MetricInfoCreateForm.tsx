@@ -136,7 +136,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       sensitiveLevel,
       description,
       // isPercent,
-      dataFormatType,
+      dataFormatType: dataFormatType || '',
       alias: alias && alias.trim() ? alias.split(',') : [],
       dataFormat: dataFormat || {
         decimalPlaces: 2,
@@ -163,7 +163,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
 
   const saveMetric = async (fieldsValue: any) => {
     const queryParams = {
-      modelId,
+      modelId: isEdit ? metricItem.modelId : modelId,
       ...fieldsValue,
     };
     const { typeParams, alias, dataFormatType } = queryParams;

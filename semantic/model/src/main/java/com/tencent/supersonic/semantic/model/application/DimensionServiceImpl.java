@@ -7,6 +7,10 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.DataAddEvent;
+import com.tencent.supersonic.common.pojo.DataDeleteEvent;
+import com.tencent.supersonic.common.pojo.DataUpdateEvent;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.DatasourceDetail;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
@@ -18,12 +22,12 @@ import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.model.domain.DatabaseService;
+import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
 import com.tencent.supersonic.semantic.model.domain.repository.DimensionRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.DimensionConverter;
 import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.DomainService;
 import com.tencent.supersonic.semantic.model.domain.pojo.Dimension;
 import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
 
@@ -35,6 +39,8 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -48,19 +54,22 @@ public class DimensionServiceImpl implements DimensionService {
 
     private DatasourceService datasourceService;
 
-    private DomainService domainService;
+    private ModelService modelService;
 
     private ChatGptHelper chatGptHelper;
 
     private DatabaseService databaseService;
 
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
 
     public DimensionServiceImpl(DimensionRepository dimensionRepository,
-                                DomainService domainService,
+                                ModelService modelService,
                                 DatasourceService datasourceService,
                                 ChatGptHelper chatGptHelper,
                                 DatabaseService databaseService) {
-        this.domainService = domainService;
+        this.modelService = modelService;
         this.dimensionRepository = dimensionRepository;
         this.datasourceService = datasourceService;
         this.chatGptHelper = chatGptHelper;
@@ -75,6 +84,11 @@ public class DimensionServiceImpl implements DimensionService {
         log.info("[create dimension] object:{}", JSONObject.toJSONString(dimension));
         dimension.createdBy(user.getName());
         saveDimension(dimension);
+        //动态更新字典
+        String type = DictWordType.DIMENSION.getType();
+        DimensionResp dimensionResp = getDimension(dimension.getBizName(), dimension.getModelId());
+        applicationEventPublisher.publishEvent(
+                new DataAddEvent(this, dimension.getName(), dimension.getModelId(), dimensionResp.getId(), type));
     }
 
 
@@ -102,7 +116,20 @@ public class DimensionServiceImpl implements DimensionService {
         Dimension dimension = DimensionConverter.convert(dimensionReq);
         dimension.updatedBy(user.getName());
         log.info("[update dimension] object:{}", JSONObject.toJSONString(dimension));
+        List<DimensionResp> dimensionRespList = getDimensions(dimensionReq.getModelId()).stream().filter(
+                o -> o.getId().equals(dimensionReq.getId())).collect(Collectors.toList());
         updateDimension(dimension);
+        //动态更新字典
+        String type = DictWordType.DIMENSION.getType();
+        if (!CollectionUtils.isEmpty(dimensionRespList)) {
+            log.info("dimensionRespList size:{}", dimensionRespList.size());
+            log.info("name:{}", dimensionRespList.get(0).getName());
+            applicationEventPublisher.publishEvent(
+                    new DataUpdateEvent(this, dimensionRespList.get(0).getName(),
+                            dimensionReq.getName(),
+                            dimension.getModelId(),
+                            dimensionRespList.get(0).getId(), type));
+        }
     }
 
     protected void updateDimension(Dimension dimension) {
@@ -148,10 +175,10 @@ public class DimensionServiceImpl implements DimensionService {
     public List<DimensionResp> getDimensions(List<Long> ids) {
         List<DimensionResp> dimensionResps = Lists.newArrayList();
         List<DimensionDO> dimensionDOS = dimensionRepository.getDimensionListByIds(ids);
-        Map<Long, String> fullDomainPathMap = domainService.getDomainFullPath();
+        Map<Long, String> modelFullPathMap = modelService.getModelFullPathMap();
         if (!CollectionUtils.isEmpty(dimensionDOS)) {
             dimensionResps = dimensionDOS.stream()
-                    .map(dimensionDO -> DimensionConverter.convert2DimensionResp(dimensionDO, fullDomainPathMap,
+                    .map(dimensionDO -> DimensionConverter.convert2DimensionResp(dimensionDO, modelFullPathMap,
                             new HashMap<>()))
                     .collect(Collectors.toList());
         }
@@ -184,10 +211,10 @@ public class DimensionServiceImpl implements DimensionService {
     private List<DimensionResp> convertList(List<DimensionDO> dimensionDOS,
                                             Map<Long, DatasourceResp> datasourceRespMap) {
         List<DimensionResp> dimensionResps = Lists.newArrayList();
-        Map<Long, String> fullDomainPathMap = domainService.getDomainFullPath();
+        Map<Long, String> modelFullPathMap = modelService.getModelFullPathMap();
         if (!CollectionUtils.isEmpty(dimensionDOS)) {
             dimensionResps = dimensionDOS.stream()
-                    .map(dimensionDO -> DimensionConverter.convert2DimensionResp(dimensionDO, fullDomainPathMap,
+                    .map(dimensionDO -> DimensionConverter.convert2DimensionResp(dimensionDO, modelFullPathMap,
                             datasourceRespMap))
                     .collect(Collectors.toList());
         }
@@ -256,6 +283,11 @@ public class DimensionServiceImpl implements DimensionService {
             throw new RuntimeException(String.format("the dimension %s not exist", id));
         }
         dimensionRepository.deleteDimension(id);
+        //动态更新字典
+        String type = DictWordType.DIMENSION.getType();
+        applicationEventPublisher.publishEvent(
+                new DataDeleteEvent(this, dimensionDO.getName(), dimensionDO.getModelId(), dimensionDO.getId(), type));
+
     }
 
     @Override
@@ -300,10 +332,19 @@ public class DimensionServiceImpl implements DimensionService {
         int i = 0;
         for (Map<String, Object> stringObjectMap : resultList) {
             DimValueMap dimValueMap = new DimValueMap();
-            dimValueMap.setTechName((String) stringObjectMap.get(dimensionReq.getBizName()));
-            dimValueMap.setBizName(jsonObject.getJSONArray("tran").getString(i));
-            dimValueMap.setAlias(jsonObject.getJSONObject("alias").getJSONArray(
-                    (String) stringObjectMap.get(dimensionReq.getBizName())).toJavaList(String.class));
+            dimValueMap.setTechName(String.valueOf(stringObjectMap.get(dimensionReq.getBizName())));
+            try {
+                String tran = jsonObject.getJSONArray("tran").getString(i);
+                dimValueMap.setBizName(tran);
+            } catch (Exception exception) {
+                dimValueMap.setBizName("");
+            }
+            try {
+                dimValueMap.setAlias(jsonObject.getJSONObject("alias")
+                        .getJSONArray(stringObjectMap.get(dimensionReq.getBizName()) + "").toJavaList(String.class));
+            } catch (Exception exception) {
+                dimValueMap.setAlias(null);
+            }
             dimValueMapsResp.add(dimValueMap);
             i++;
         }

@@ -7,7 +7,7 @@ import com.hankcs.hanlp.dictionary.CoreDictionary;
 import com.hankcs.hanlp.dictionary.DynamicCustomDictionary;
 import com.hankcs.hanlp.seg.Segment;
 import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.knowledge.dictionary.DictWordType;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -20,6 +20,7 @@ import com.tencent.supersonic.knowledge.dictionary.HadoopFileIOAdapter;
 import com.tencent.supersonic.knowledge.service.SearchService;
 import com.tencent.supersonic.knowledge.dictionary.MultiCustomDictionary;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ResourceUtils;
 
@@ -161,6 +162,29 @@ public class HanlpHelper {
     public static boolean addToCustomDictionary(DictWord dictWord) {
         log.info("dictWord:{}", dictWord);
         return getDynamicCustomDictionary().insert(dictWord.getWord(), dictWord.getNatureWithFrequency());
+    }
+
+    public static void removeFromCustomDictionary(DictWord dictWord) {
+        log.info("dictWord:{}", dictWord);
+        CoreDictionary.Attribute attribute = getDynamicCustomDictionary().get(dictWord.getWord());
+        if (attribute == null) {
+            return;
+        }
+        log.info("get attribute:{}", attribute);
+        getDynamicCustomDictionary().remove(dictWord.getWord());
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < attribute.nature.length; i++) {
+            if (!attribute.nature[i].toString().equals(dictWord.getNature())) {
+                sb.append(attribute.nature[i].toString() + " ");
+                sb.append(attribute.frequency[i] + " ");
+            }
+        }
+        String natureWithFrequency = sb.toString();
+        int len = natureWithFrequency.length();
+        log.info("filtered natureWithFrequency:{}", natureWithFrequency);
+        if (StringUtils.isNotBlank(natureWithFrequency)) {
+            getDynamicCustomDictionary().add(dictWord.getWord(), natureWithFrequency.substring(0, len - 1));
+        }
     }
 
     public static void transLetterOriginal(List<MapResult> mapResults) {

@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -141,58 +142,41 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
 
         if (!id2Values.isEmpty()) {
             for (Map.Entry<Long, List<SchemaElementMatch>> entry : id2Values.entrySet()) {
-                SchemaElement entity = modelSchema.getElement(SchemaElementType.ENTITY, entry.getKey());
-
-                if (entry.getValue().size() == 1) {
-                    SchemaElementMatch schemaMatch = entry.getValue().get(0);
-                    QueryFilter dimensionFilter = new QueryFilter();
-                    dimensionFilter.setValue(schemaMatch.getWord());
-                    dimensionFilter.setBizName(entity.getBizName());
-                    dimensionFilter.setName(entity.getName());
-                    dimensionFilter.setOperator(FilterOperatorEnum.EQUALS);
-                    dimensionFilter.setElementID(schemaMatch.getElement().getId());
-                    parseInfo.getDimensionFilters().add(dimensionFilter);
-                    parseInfo.setEntity(modelSchema.getEntity());
-                } else {
-                    QueryFilter dimensionFilter = new QueryFilter();
-                    List<String> vals = new ArrayList<>();
-                    entry.getValue().stream().forEach(i -> vals.add(i.getWord()));
-                    dimensionFilter.setValue(vals);
-                    dimensionFilter.setBizName(entity.getBizName());
-                    dimensionFilter.setName(entity.getName());
-                    dimensionFilter.setOperator(FilterOperatorEnum.IN);
-                    dimensionFilter.setElementID(entry.getKey());
-                    parseInfo.getDimensionFilters().add(dimensionFilter);
-                }
+                addFilters(parseInfo, modelSchema, entry, SchemaElementType.ENTITY);
             }
         }
 
         if (!dim2Values.isEmpty()) {
             for (Map.Entry<Long, List<SchemaElementMatch>> entry : dim2Values.entrySet()) {
-                SchemaElement dimension = modelSchema.getElement(SchemaElementType.DIMENSION, entry.getKey());
-
-                if (entry.getValue().size() == 1) {
-                    SchemaElementMatch schemaMatch = entry.getValue().get(0);
-                    QueryFilter dimensionFilter = new QueryFilter();
-                    dimensionFilter.setValue(schemaMatch.getWord());
-                    dimensionFilter.setBizName(dimension.getBizName());
-                    dimensionFilter.setName(dimension.getName());
-                    dimensionFilter.setOperator(FilterOperatorEnum.EQUALS);
-                    dimensionFilter.setElementID(schemaMatch.getElement().getId());
-                    parseInfo.getDimensionFilters().add(dimensionFilter);
-                    parseInfo.setEntity(modelSchema.getEntity());
-                } else {
-                    QueryFilter dimensionFilter = new QueryFilter();
-                    List<String> vals = new ArrayList<>();
-                    entry.getValue().stream().forEach(i -> vals.add(i.getWord()));
-                    dimensionFilter.setValue(vals);
-                    dimensionFilter.setBizName(dimension.getBizName());
-                    dimensionFilter.setName(dimension.getName());
-                    dimensionFilter.setOperator(FilterOperatorEnum.IN);
-                    dimensionFilter.setElementID(entry.getKey());
-                    parseInfo.getDimensionFilters().add(dimensionFilter);
-                }
+                addFilters(parseInfo, modelSchema, entry, SchemaElementType.DIMENSION);
             }
+        }
+    }
+
+    private void addFilters(SemanticParseInfo parseInfo, ModelSchema modelSchema,
+            Entry<Long, List<SchemaElementMatch>> entry, SchemaElementType dimension1) {
+        SchemaElement dimension = modelSchema.getElement(dimension1, entry.getKey());
+
+        if (entry.getValue().size() == 1) {
+            SchemaElementMatch schemaMatch = entry.getValue().get(0);
+            QueryFilter dimensionFilter = new QueryFilter();
+            dimensionFilter.setValue(schemaMatch.getWord());
+            dimensionFilter.setBizName(dimension.getBizName());
+            dimensionFilter.setName(dimension.getName());
+            dimensionFilter.setOperator(FilterOperatorEnum.EQUALS);
+            dimensionFilter.setElementID(schemaMatch.getElement().getId());
+            parseInfo.getDimensionFilters().add(dimensionFilter);
+            parseInfo.setEntity(modelSchema.getEntity());
+        } else {
+            QueryFilter dimensionFilter = new QueryFilter();
+            List<String> vals = new ArrayList<>();
+            entry.getValue().stream().forEach(i -> vals.add(i.getWord()));
+            dimensionFilter.setValue(vals);
+            dimensionFilter.setBizName(dimension.getBizName());
+            dimensionFilter.setName(dimension.getName());
+            dimensionFilter.setOperator(FilterOperatorEnum.IN);
+            dimensionFilter.setElementID(entry.getKey());
+            parseInfo.getDimensionFilters().add(dimensionFilter);
         }
     }
 
@@ -290,7 +274,6 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
 
         return matchedQueries;
     }
-
 
 
     protected QueryStructReq convertQueryStruct() {

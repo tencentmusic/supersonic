@@ -1,16 +1,19 @@
 package com.tencent.supersonic.chat.service.impl;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.collect.Lists;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
+import com.tencent.supersonic.chat.api.pojo.request.ItemNameVisibilityInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SearchResult;
 import com.tencent.supersonic.chat.mapper.MapperHelper;
+import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.knowledge.dictionary.ModelInfoStat;
 import com.tencent.supersonic.chat.mapper.ModelWithSemanticType;
@@ -22,7 +25,7 @@ import com.tencent.supersonic.chat.service.SearchService;
 import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
-import com.tencent.supersonic.knowledge.dictionary.DictWordType;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import java.util.ArrayList;
@@ -40,6 +43,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 
@@ -59,6 +63,12 @@ public class SearchServiceImpl implements SearchService {
     private SearchMatchStrategy searchMatchStrategy;
     @Autowired
     private AgentService agentService;
+    @Autowired
+    @Qualifier("searchCaffeineCache")
+    private Cache<Long, Object> caffeineCache;
+
+    @Autowired
+    private ConfigService configService;
 
     @Override
     public List<SearchResult> search(QueryReq queryReq) {
@@ -80,7 +90,7 @@ public class SearchServiceImpl implements SearchService {
 
         // 3.detect by segment
         List<Term> originals = HanlpHelper.getTerms(queryText);
-
+        log.info("hanlp parse result: {}", originals);
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
         Set<Long> detectModelIds = mapperHelper.getModelIds(queryReq);
 
@@ -94,7 +104,6 @@ public class SearchServiceImpl implements SearchService {
                 .reduce((entry1, entry2) ->
                         entry1.getKey().getDetectSegment().length() >= entry2.getKey().getDetectSegment().length()
                                 ? entry1 : entry2);
-        log.debug("mostSimilarSearchResult:{}", mostSimilarSearchResult);
 
         // 5.optimize the results after the query
         if (!mostSimilarSearchResult.isPresent()) {
@@ -188,13 +197,26 @@ public class SearchServiceImpl implements SearchService {
                 .schemaElementType(schemaElementType)
                 .subRecommend(wordName)
                 .build();
+        ItemNameVisibilityInfo visibility = (ItemNameVisibilityInfo) caffeineCache.getIfPresent(modelId);
+        if (visibility == null) {
+            visibility = configService.getVisibilityByModelId(modelId);
+            caffeineCache.put(modelId, visibility);
+        }
+        if (visibility.getBlackMetricNameList().contains(searchResult.getRecommend())
+                || visibility.getBlackDimNameList().contains(searchResult.getRecommend())) {
+            return searchResults;
+        }
         if (metricModelCount <= 0 && !existMetricAndDimension) {
             if (filterByQueryFilter(wordName, queryFilters)) {
                 return searchResults;
             }
             searchResults.add(searchResult);
             int metricSize = getMetricSize(natureToNameMap);
-            List<String> metrics = filerMetricsByModel(metricsDb, modelId, metricSize);
+            //invisibility to filter  metrics
+            List<String> blackMetricNameList = visibility.getBlackMetricNameList();
+            List<String> metrics = filerMetricsByModel(metricsDb, modelId, metricSize * 3)
+                    .stream().filter(o -> !blackMetricNameList.contains(o))
+                    .limit(metricSize).collect(Collectors.toList());
 
             for (String metric : metrics) {
                 SearchResult result = SearchResult.builder()
@@ -279,7 +301,7 @@ public class SearchServiceImpl implements SearchService {
     private boolean searchMetricAndDimension(Set<Long> possibleModels, Map<Long, String> modelToName,
             Map.Entry<MatchText, List<MapResult>> searchTextEntry, Set<SearchResult> searchResults) {
         boolean existMetric = false;
-
+        log.info("searchMetricAndDimension searchTextEntry:{}", searchTextEntry);
         MatchText matchText = searchTextEntry.getKey();
         List<MapResult> mapResults = searchTextEntry.getValue();
 
@@ -297,7 +319,6 @@ public class SearchServiceImpl implements SearchService {
                 existMetric = true;
                 Long modelId = modelWithSemanticType.getModel();
                 SchemaElementType semanticType = modelWithSemanticType.getSemanticType();
-
                 SearchResult searchResult = SearchResult.builder()
                         .modelId(modelId)
                         .modelName(modelToName.get(modelId))
@@ -305,12 +326,21 @@ public class SearchServiceImpl implements SearchService {
                         .subRecommend(mapResult.getName())
                         .schemaElementType(semanticType)
                         .build();
-
-                searchResults.add(searchResult);
+                //visibility to filter  metrics
+                ItemNameVisibilityInfo visibility = (ItemNameVisibilityInfo) caffeineCache.getIfPresent(modelId);
+                if (visibility == null) {
+                    visibility = configService.getVisibilityByModelId(modelId);
+                    caffeineCache.put(modelId, visibility);
+                }
+                if (!visibility.getBlackMetricNameList().contains(mapResult.getName())
+                        && !visibility.getBlackDimNameList().contains(mapResult.getName())) {
+                    searchResults.add(searchResult);
+                }
             }
             log.info("parseResult:{},dimensionMetricClassIds:{},possibleModels:{}", mapResult, dimensionMetricClassIds,
                     possibleModels);
         }
+        log.info("searchMetricAndDimension searchResults:{}", searchResults);
         return existMetric;
     }
 

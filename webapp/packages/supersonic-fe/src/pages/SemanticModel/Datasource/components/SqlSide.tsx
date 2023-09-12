@@ -43,8 +43,6 @@ const SqlSide: React.FC<Props> = ({ initialValues, onSubmitSuccess }) => {
   const tableRef: TableRef = useRef();
   const panesRef = useRef<Panes[]>(defaultPanes);
 
-  const [dataSourceItem, setDataSourceItem] = useState<any>(initialValues || {});
-
   const updatePane = (list: Panes[]) => {
     setPanes(list);
     panesRef.current = list;
@@ -96,15 +94,9 @@ const SqlSide: React.FC<Props> = ({ initialValues, onSubmitSuccess }) => {
               >
                 <SqlDetail
                   onSubmitSuccess={onSubmitSuccess}
-                  dataSourceItem={dataSourceItem}
+                  dataSourceItem={initialValues}
                   onUpdateSql={(sql: string) => {
                     updateTabSql(sql, pane.key);
-                  }}
-                  onJdbcSourceChange={(databaseId) => {
-                    setDataSourceItem({
-                      ...dataSourceItem,
-                      databaseId,
-                    });
                   }}
                   sql={pane.sql}
                 />

@@ -124,7 +124,6 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
         <DataSourceCreateForm
           sql={fastModeSql}
           basicInfoFormMode="fast"
-          domainId={Number(selectDomainId)}
           dataSourceItem={dataSourceItem}
           onCancel={() => {
             setDataSourceModalVisible(false);

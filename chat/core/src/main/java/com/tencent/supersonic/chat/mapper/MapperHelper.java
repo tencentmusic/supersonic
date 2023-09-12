@@ -49,7 +49,6 @@ public class MapperHelper {
     }
 
     public double getThresholdMatch(List<String> natures) {
-        log.info("optimizationConfig:{}", optimizationConfig);
         if (existDimensionValues(natures)) {
             return optimizationConfig.getDimensionValueThresholdConfig();
         }
@@ -90,9 +89,20 @@ public class MapperHelper {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
 
         Set<Long> detectModelIds = agentService.getDslToolsModelIds(request.getAgentId(), null);
+        //contains all
+        if (agentService.containsAllModel(detectModelIds)) {
+            if (Objects.nonNull(modelId) && modelId > 0) {
+                Set<Long> result = new HashSet<>();
+                result.add(modelId);
+                return result;
+            }
+            return new HashSet<>();
+        }
+
         if (Objects.nonNull(detectModelIds)) {
             detectModelIds = detectModelIds.stream().filter(entry -> entry > 0).collect(Collectors.toSet());
         }
+
         if (Objects.nonNull(modelId) && modelId > 0 && Objects.nonNull(detectModelIds)) {
             if (detectModelIds.contains(modelId)) {
                 Set<Long> result = new HashSet<>();
@@ -102,5 +112,4 @@ public class MapperHelper {
         }
         return detectModelIds;
     }
-
 }

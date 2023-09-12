@@ -83,8 +83,8 @@ public class ChatGptHelper {
                             String table,
                             String desc,
                             Boolean isPercentage) {
-        String msg = "Assuming you are a professional data analyst specializing in indicators, "
-                + "you have a vast amount of data analysis indicator content. You are familiar with the basic"
+        String msg = "Assuming you are a professional data analyst specializing in metrics and dimensions, "
+                + "you have a vast amount of data analysis metrics content. You are familiar with the basic"
                 + " format of the content,Now, Construct your answer Based on the following json-schema.\n"
                 + "{\n"
                 + "\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n"
@@ -104,10 +104,15 @@ public class ChatGptHelper {
                 + mockType
                 + " calculates the field source: "
                 + bizName
-                + ", The description of this indicator is: "
+                + ", The description of this metrics is: "
                 + desc
-                + ", provide some aliases for this，please take chinese or english,"
-                + "but more chinese and Not repeating，\"\n"
+                + ", provide some aliases for this, please take chinese or english,"
+                + "You must adhere to the following rules:\n"
+                + "1. Please do not generate aliases like xxx1, xxx2, xxx3.\n"
+                + "2. Please do not generate aliases that are the same as the original names of metrics/dimensions.\n"
+                + "3. Please pay attention to the quality of the generated aliases and "
+                + "   avoid creating aliases that look like test data.\n"
+                + "4. Please generate more Chinese aliases."
                 + "},\n"
                 + "\"additionalProperties\":false}\n"
                 + "Please double-check whether the answer conforms to the format described in the JSON-schema.\n"

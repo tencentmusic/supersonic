@@ -16,11 +16,13 @@
     "allowJs": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
+    "suppressImplicitAnyIndexErrors": true,
     "ignoreDeprecations": "5.0",
     "strict": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@@/*": ["./src/.umi/*"]
+      "@@/*": ["./src/.umi/*"],
+      "react": [ "./node_modules/@types/react" ]
     }
   },
   "include": [

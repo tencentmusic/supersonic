@@ -3,7 +3,6 @@ package com.tencent.supersonic.semantic.api.model.request;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.semantic.api.model.enums.DataTypeEnum;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 
@@ -37,7 +36,7 @@ public class DatabaseReq {
     private List<String> viewers = Lists.newArrayList();
 
     public String getUrl() {
-        if (StringUtils.isNotBlank(url)) {
+        if (type.equalsIgnoreCase(DataTypeEnum.H2.getFeature())) {
             return url;
         }
         if (type.equalsIgnoreCase(DataTypeEnum.MYSQL.getFeature())) {

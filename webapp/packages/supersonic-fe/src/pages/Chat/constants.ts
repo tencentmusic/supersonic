@@ -27,6 +27,20 @@ export const SEMANTIC_TYPE_MAP = {
   [SemanticTypeEnum.VALUE]: '维度值',
 };
 
+export const AGENT_ICONS = [
+  'icon-fukuanbaobiaochaxun',
+  'icon-hangweifenxi1',
+  'icon-xiaofeifenxi',
+  'icon-renwuchaxun',
+  'icon-baobiao',
+  'icon-liushuichaxun',
+  'icon-cangkuchaxun',
+  'icon-xiaoshoushuju',
+  'icon-tongji',
+  'icon-shujutongji',
+  'icon-mendiankanban',
+];
+
 export const CHAT_TITLE = '';
 
 export const DEFAULT_CONVERSATION_NAME = '新问答对话';

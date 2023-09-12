@@ -9,5 +9,8 @@ public class Constants {
     public static final String JOIN_TABLE_PREFIX = "src1_";
     public static final String JOIN_TABLE_OUT_PREFIX = "src11_";
     public static final String JOIN_TABLE_LEFT_PREFIX = "src12_";
+    public static final String DIMENSION_TYPE_TIME_GRANULARITY_NONE = "none";
+    public static final String DIMENSION_TYPE_TIME = "time";
+
 
 }

@@ -1,21 +1,47 @@
+#!/bin/bash
+
+start=$(date +%s)
+
+node_version=$(node -v)
+
+major_version=$(echo $node_version | cut -d'.' -f1 | tr -d 'v')
+
+if [ $major_version -ge 17 ]; then
+  export NODE_OPTIONS=--openssl-legacy-provider
+fi
+
+if ! command -v pnpm >/dev/null 2>&1; then
+  npm i -g pnpm
+fi
+
 rm -rf supersonic-webapp.tar.gz
 
 rm -rf ./packages/supersonic-fe/src/.umi ./packages/supersonic-fe/src/.umi-production
 
-npm i
+cd ./packages/chat-sdk
 
-npx lerna add supersonic-chat-sdk --scope supersonic-fe
+pnpm i
 
-npx lerna bootstrap
+pnpm run build
 
-npx lerna exec --scope supersonic-chat-sdk npm run build
+pnpm link --global
 
-npx lerna exec --scope supersonic-fe npm run build:os-local
+cd ../supersonic-fe
 
-cd ./packages/supersonic-fe
+pnpm link ../chat-sdk
+
+pnpm i
+
+pnpm run build:os-local
 
 tar -zcvf supersonic-webapp.tar.gz ./supersonic-webapp
 
 mv supersonic-webapp.tar.gz ../../
 
 cd ../../
+
+end=$(date +%s)
+
+take=$(( end - start ))
+
+echo Time taken to execute commands is ${take} seconds.

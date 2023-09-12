@@ -60,6 +60,7 @@ export declare namespace IDataSource {
     name: string;
     bizName: string;
     description: string;
+    modelId: number;
     status: number | null;
     sensitiveLevel: SensitiveLevel;
     domainId: number;
@@ -79,6 +80,7 @@ export declare namespace ISemantic {
     name: string;
     bizName: string;
     description: any;
+    hasEditPermission: boolean;
     status?: number;
     typeEnum?: any;
     sensitiveLevel?: number;
@@ -135,6 +137,7 @@ export declare namespace ISemantic {
     expr: string;
     fullPath: string;
     datasourceId: number;
+    modelId: number;
     datasourceName: string;
     datasourceBizName: string;
     semanticType: string;
@@ -178,6 +181,7 @@ export declare namespace ISemantic {
     sensitiveLevel: number;
     domainId: number;
     domainName: string;
+    modelId: number;
     type: string;
     typeParams: ITypeParams;
     fullPath: string;

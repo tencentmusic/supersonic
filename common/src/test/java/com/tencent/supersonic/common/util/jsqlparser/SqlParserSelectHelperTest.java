@@ -40,7 +40,6 @@ class SqlParserSelectHelperTest {
                         + " AND user_id = 'alice'  ORDER BY pv DESC LIMIT 1");
         System.out.println(filterExpression);
 
-
         filterExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, user_id, field_a FROM s2 WHERE sys_imp_date = '2023-08-08' "
                         + " AND user_id = 'alice' AND publish_date = '11' ORDER BY pv DESC LIMIT 1");
@@ -70,6 +69,12 @@ class SqlParserSelectHelperTest {
                         + "user_id = 'alice' AND  publish_date > 10000   ORDER BY pv DESC LIMIT 1");
 
         System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, user_id, field_a FROM s2 WHERE "
+                        + "user_id like '%alice%' AND  publish_date > 10000   ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(filterExpression);
     }
 
 
@@ -93,6 +98,12 @@ class SqlParserSelectHelperTest {
                         + " and 发布日期 ='11' group by 部门 limit 1");
 
         Assert.assertEquals(allFields.size(), 5);
+
+        allFields = SqlParserSelectHelper.getAllFields(
+                "SELECT user_name FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
+                        + "sys_imp_date >= '2023-08-04' GROUP BY user_name ORDER BY sum(pv) DESC LIMIT 10 ");
+
+        Assert.assertEquals(allFields.size(), 3);
     }
 
 
@@ -135,6 +146,12 @@ class SqlParserSelectHelperTest {
         List<String> selectFields = SqlParserSelectHelper.getOrderByFields(sql);
 
         Assert.assertEquals(selectFields.contains("访问次数"), true);
+
+        sql = "SELECT user_name FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
+                + "sys_imp_date >= '2023-08-04' GROUP BY user_name ORDER BY sum(pv) DESC LIMIT 10 ";
+        selectFields = SqlParserSelectHelper.getOrderByFields(sql);
+
+        Assert.assertEquals(selectFields.contains("pv"), true);
     }
 
 
@@ -193,6 +210,11 @@ class SqlParserSelectHelperTest {
         hasAggregateFunction = SqlParserSelectHelper.hasAggregateFunction(sql);
         Assert.assertEquals(hasAggregateFunction, false);
 
+
+        sql = "SELECT user_name, pv FROM t_34 WHERE sys_imp_date <= '2023-09-03' "
+                + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name ORDER BY sum(pv) DESC LIMIT 10";
+        hasAggregateFunction = SqlParserSelectHelper.hasAggregateFunction(sql);
+        Assert.assertEquals(hasAggregateFunction, true);
     }
 
     private Map<String, String> initParams() {

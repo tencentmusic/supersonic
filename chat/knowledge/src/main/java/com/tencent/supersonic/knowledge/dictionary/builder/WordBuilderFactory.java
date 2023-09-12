@@ -1,7 +1,7 @@
 package com.tencent.supersonic.knowledge.dictionary.builder;
 
 
-import com.tencent.supersonic.knowledge.dictionary.DictWordType;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,7 +15,7 @@ public class WordBuilderFactory {
     static {
         wordNatures.put(DictWordType.DIMENSION, new DimensionWordBuilder());
         wordNatures.put(DictWordType.METRIC, new MetricWordBuilder());
-        wordNatures.put(DictWordType.DOMAIN, new DomainWordBuilder());
+        wordNatures.put(DictWordType.DOMAIN, new ModelWordBuilder());
         wordNatures.put(DictWordType.ENTITY, new EntityWordBuilder());
         wordNatures.put(DictWordType.VALUE, new ValueWordBuilder());
     }

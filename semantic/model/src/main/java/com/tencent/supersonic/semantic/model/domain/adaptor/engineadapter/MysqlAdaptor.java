@@ -45,6 +45,11 @@ public class MysqlAdaptor extends EngineAdaptor {
     }
 
     @Override
+    public String functionNameCorrector(String sql) {
+        return sql;
+    }
+
+    @Override
     public String getColumnMetaQueryTpl() {
         return "SELECT COLUMN_NAME as name, DATA_TYPE as dataType, COLUMN_COMMENT as comment "
                 + "FROM information_schema.columns WHERE table_schema ='%s' AND  table_name = '%s'";

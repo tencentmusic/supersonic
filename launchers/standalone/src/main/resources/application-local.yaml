@@ -4,6 +4,8 @@ spring:
       path: /h2-console/semantic
       # enabled web
       enabled: true
+    demo:
+      enabled: true
   datasource:
     driver-class-name: org.h2.Driver
     schema: classpath:db/schema-h2.sql
@@ -33,3 +35,10 @@ time:
 
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
+
+llm:
+  url: http://127.0.0.1:9092
+embedding:
+  url: http://127.0.0.1:9092
+functionCall:
+  url: http://127.0.0.1:9092

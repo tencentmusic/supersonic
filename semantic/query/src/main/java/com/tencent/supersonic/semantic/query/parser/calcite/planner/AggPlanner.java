@@ -2,12 +2,13 @@ package com.tencent.supersonic.semantic.query.parser.calcite.planner;
 
 
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.Renderer;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.TableView;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.DataSourceNode;
+import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Constants;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SchemaBuilder;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.Renderer;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.TableView;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.DataSourceNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.SemanticNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.render.FilterRender;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.render.OutputRender;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 import java.util.Stack;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
@@ -41,6 +43,10 @@ public class AggPlanner implements Planner {
         List<DataSource> datasource = getMatchDataSource(scope);
         if (datasource == null || datasource.isEmpty()) {
             throw new Exception("datasource not found");
+        }
+        if (Objects.nonNull(datasource.get(0).getAggTime()) && !datasource.get(0).getAggTime().equalsIgnoreCase(
+                Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE)) {
+            isAgg = true;
         }
         sourceId = String.valueOf(datasource.get(0).getSourceId());
 

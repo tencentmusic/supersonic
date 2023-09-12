@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.corrector;
 
-import com.tencent.supersonic.chat.api.pojo.CorrectionInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMReq;
@@ -16,10 +16,10 @@ import org.junit.jupiter.api.Test;
 class FieldNameCorrectorTest {
 
     @Test
-    void rewriter() {
+    void corrector() {
 
         FieldNameCorrector corrector = new FieldNameCorrector();
-        CorrectionInfo correctionInfo = CorrectionInfo.builder()
+        SemanticCorrectInfo semanticCorrectInfo = SemanticCorrectInfo.builder()
                 .sql("select 歌曲名 from 歌曲库 where 专辑照片 = '七里香' and 专辑名 = '流行' and 数据日期 = '2023-08-19'")
                 .build();
 
@@ -55,11 +55,11 @@ class FieldNameCorrectorTest {
         properties.put(Constants.CONTEXT, dslParseResult);
 
         parseInfo.setProperties(properties);
-        correctionInfo.setParseInfo(parseInfo);
+        semanticCorrectInfo.setParseInfo(parseInfo);
 
-        CorrectionInfo rewriter = corrector.corrector(correctionInfo);
+        corrector.correct(semanticCorrectInfo);
 
         Assert.assertEquals("SELECT 歌曲名 FROM 歌曲库 WHERE 歌曲名 = '七里香' AND 歌曲流派 = '流行' AND 数据日期 = '2023-08-19'",
-                rewriter.getSql());
+                semanticCorrectInfo.getSql());
     }
 }

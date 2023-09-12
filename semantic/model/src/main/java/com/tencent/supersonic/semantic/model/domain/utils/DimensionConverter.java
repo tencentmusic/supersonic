@@ -52,7 +52,7 @@ public class DimensionConverter {
                                                       Map<Long, DatasourceResp> datasourceRespMap) {
         DimensionResp dimensionResp = new DimensionResp();
         BeanUtils.copyProperties(dimensionDO, dimensionResp);
-        dimensionResp.setFullPath(fullPathMap.get(dimensionDO.getModelId()) + dimensionDO.getBizName());
+        dimensionResp.setFullPath(fullPathMap.get(dimensionDO.getModelId()) + "/" + dimensionDO.getBizName());
         dimensionResp.setDatasourceId(
                 datasourceRespMap.getOrDefault(dimensionResp.getDatasourceId(), new DatasourceResp()).getId());
         dimensionResp.setDatasourceName(

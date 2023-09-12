@@ -12,10 +12,6 @@
     <artifactId>chat-knowledge</artifactId>
     <dependencies>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
@@ -111,6 +107,7 @@
             <groupId>com.tencent.supersonic</groupId>
             <artifactId>semantic-query</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
