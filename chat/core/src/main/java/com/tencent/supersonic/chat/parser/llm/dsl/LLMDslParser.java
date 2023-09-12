@@ -102,28 +102,11 @@ public class LLMDslParser implements SemanticParser {
 
             llmResp.setCorrectorSql(semanticCorrectInfo.getSql());
 
-            setFilter(semanticCorrectInfo, modelId, parseInfo);
-
-            setDimensionsAndMetrics(modelId, parseInfo, semanticCorrectInfo.getSql());
+            updateParseInfo(semanticCorrectInfo, modelId, parseInfo);
 
         } catch (Exception e) {
             log.error("LLMDSLParser error", e);
         }
-    }
-
-    private void setDimensionsAndMetrics(Long modelId, SemanticParseInfo parseInfo, String sql) {
-        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-
-        if (Objects.isNull(semanticSchema)) {
-            return;
-        }
-        List<String> allFields = getFieldsExceptDate(sql);
-
-        Set<SchemaElement> metrics = getElements(modelId, allFields, semanticSchema.getMetrics());
-        parseInfo.setMetrics(metrics);
-
-        Set<SchemaElement> dimensions = getElements(modelId, allFields, semanticSchema.getDimensions());
-        parseInfo.setDimensions(dimensions);
     }
 
     private Set<SchemaElement> getElements(Long modelId, List<String> allFields, List<SchemaElement> elements) {
@@ -133,8 +116,7 @@ public class LLMDslParser implements SemanticParser {
                 ).collect(Collectors.toSet());
     }
 
-    private List<String> getFieldsExceptDate(String sql) {
-        List<String> allFields = SqlParserSelectHelper.getAllFields(sql);
+    private List<String> getFieldsExceptDate(List<String> allFields) {
         if (CollectionUtils.isEmpty(allFields)) {
             return new ArrayList<>();
         }
@@ -143,20 +125,19 @@ public class LLMDslParser implements SemanticParser {
                 .collect(Collectors.toList());
     }
 
-    public void setFilter(SemanticCorrectInfo semanticCorrectInfo, Long modelId, SemanticParseInfo parseInfo) {
+    public void updateParseInfo(SemanticCorrectInfo semanticCorrectInfo, Long modelId, SemanticParseInfo parseInfo) {
 
         String correctorSql = semanticCorrectInfo.getPreSql();
         if (StringUtils.isEmpty(correctorSql)) {
             correctorSql = semanticCorrectInfo.getSql();
         }
         List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctorSql);
-        if (CollectionUtils.isEmpty(expressions)) {
-            return;
-        }
         //set dataInfo
         try {
-            DateConf dateInfo = getDateInfo(expressions);
-            parseInfo.setDateInfo(dateInfo);
+            if (!CollectionUtils.isEmpty(expressions)) {
+                DateConf dateInfo = getDateInfo(expressions);
+                parseInfo.setDateInfo(dateInfo);
+            }
         } catch (Exception e) {
             log.error("set dateInfo error :", e);
         }
@@ -168,6 +149,28 @@ public class LLMDslParser implements SemanticParser {
             parseInfo.getDimensionFilters().addAll(result);
         } catch (Exception e) {
             log.error("set dimensionFilter error :", e);
+        }
+
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+
+        if (Objects.isNull(semanticSchema)) {
+            return;
+        }
+        List<String> allFields = getFieldsExceptDate(SqlParserSelectHelper.getAllFields(semanticCorrectInfo.getSql()));
+
+        Set<SchemaElement> metrics = getElements(modelId, allFields, semanticSchema.getMetrics());
+        parseInfo.setMetrics(metrics);
+
+        if (SqlParserSelectHelper.hasAggregateFunction(semanticCorrectInfo.getSql())) {
+            parseInfo.setNativeQuery(false);
+            List<String> groupByFields = SqlParserSelectHelper.getGroupByFields(semanticCorrectInfo.getSql());
+            List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
+            parseInfo.setDimensions(getElements(modelId, groupByDimensions, semanticSchema.getDimensions()));
+        } else {
+            parseInfo.setNativeQuery(true);
+            List<String> selectFields = SqlParserSelectHelper.getSelectFields(semanticCorrectInfo.getSql());
+            List<String> selectDimensions = getFieldsExceptDate(selectFields);
+            parseInfo.setDimensions(getElements(modelId, selectDimensions, semanticSchema.getDimensions()));
         }
     }
 

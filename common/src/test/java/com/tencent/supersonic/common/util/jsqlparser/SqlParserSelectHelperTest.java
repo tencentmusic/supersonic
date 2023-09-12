@@ -210,7 +210,6 @@ class SqlParserSelectHelperTest {
         hasAggregateFunction = SqlParserSelectHelper.hasAggregateFunction(sql);
         Assert.assertEquals(hasAggregateFunction, false);
 
-
         sql = "SELECT user_name, pv FROM t_34 WHERE sys_imp_date <= '2023-09-03' "
                 + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name ORDER BY sum(pv) DESC LIMIT 10";
         hasAggregateFunction = SqlParserSelectHelper.hasAggregateFunction(sql);
@@ -232,4 +231,16 @@ class SqlParserSelectHelperTest {
         fieldToBizName.put("转3.0前后30天结算份额衰减", "fdafdfdsa_fdas");
         return fieldToBizName;
     }
+
+    @Test
+    void getGroupByFields() {
+
+        String sql = "select 部门,sum (访问次数) from 超音数 where 数据日期 = '2023-08-08'"
+                + " and 用户 = 'alice' and 发布日期 ='11' group by 部门 limit 1";
+        List<String> selectFields = SqlParserSelectHelper.getGroupByFields(sql);
+
+        Assert.assertEquals(selectFields.contains("部门"), true);
+
+    }
+
 }
