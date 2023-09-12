@@ -74,7 +74,7 @@ class LLMDslParserTest {
 
         LLMDslParser llmDslParser = new LLMDslParser();
 
-        llmDslParser.setFilter(semanticCorrectInfo, 2L, parseInfo);
+        llmDslParser.updateParseInfo(semanticCorrectInfo, 2L, parseInfo);
 
     }
 }
