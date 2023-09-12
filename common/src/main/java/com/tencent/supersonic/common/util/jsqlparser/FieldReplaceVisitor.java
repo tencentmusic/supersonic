@@ -10,13 +10,15 @@ public class FieldReplaceVisitor extends ExpressionVisitorAdapter {
 
     ParseVisitorHelper parseVisitorHelper = new ParseVisitorHelper();
     private Map<String, String> fieldToBizName;
+    private boolean exactReplace;
 
-    public FieldReplaceVisitor(Map<String, String> fieldToBizName) {
+    public FieldReplaceVisitor(Map<String, String> fieldToBizName, boolean exactReplace) {
         this.fieldToBizName = fieldToBizName;
+        this.exactReplace = exactReplace;
     }
 
     @Override
     public void visit(Column column) {
-        parseVisitorHelper.replaceColumn(column, fieldToBizName);
+        parseVisitorHelper.replaceColumn(column, fieldToBizName, exactReplace);
     }
 }
