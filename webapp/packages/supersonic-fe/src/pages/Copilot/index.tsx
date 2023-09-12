@@ -74,7 +74,7 @@ const Copilot: React.FC<Props> = ({ globalCopilotFilter, copilotSendMsg }) => {
                 onClick={onTransferChat}
               />
             </div>
-            <div className={styles.title}>内容库问答</div>
+            <div className={styles.title}>Copilot</div>
           </div>
           <div className={styles.chat}>
             <Chat

@@ -73,7 +73,10 @@ const ParseTip: React.FC<Props> = ({
       properties,
       entity,
       elementMatches,
+      nativeQuery,
     } = parseInfo || {};
+
+    const maxOptionCount = queryMode === 'DSL' ? 10 : MAX_OPTION_VALUES_COUNT;
 
     const { startDate, endDate } = dateInfo || {};
     const dimensionItems = dimensions?.filter(item => item.type === 'DIMENSION');
@@ -180,19 +183,26 @@ const ParseTip: React.FC<Props> = ({
                 </div>
               </div>
             )}
-            {['METRIC_GROUPBY', 'METRIC_ORDERBY', 'ENTITY_DETAIL'].includes(queryMode) &&
+            {['METRIC_GROUPBY', 'METRIC_ORDERBY', 'ENTITY_DETAIL', 'DSL'].includes(queryMode) &&
               fields &&
               fields.length > 0 && (
                 <div className={`${prefixCls}-tip-item`}>
                   <div className={`${prefixCls}-tip-item-name`}>
-                    {queryMode === 'ENTITY_DETAIL' ? '查询字段' : '下钻维度'}：
+                    {queryMode === 'DSL'
+                      ? nativeQuery
+                        ? '查询字段'
+                        : '下钻维度'
+                      : queryMode === 'ENTITY_DETAIL'
+                      ? '查询字段'
+                      : '下钻维度'}
+                    ：
                   </div>
                   <div className={itemValueClass}>
                     {fields
-                      .slice(0, MAX_OPTION_VALUES_COUNT)
+                      .slice(0, maxOptionCount)
                       .map(field => field.name)
                       .join('、')}
-                    {fields.length > MAX_OPTION_VALUES_COUNT && '...'}
+                    {fields.length > maxOptionCount && '...'}
                   </div>
                 </div>
               )}
