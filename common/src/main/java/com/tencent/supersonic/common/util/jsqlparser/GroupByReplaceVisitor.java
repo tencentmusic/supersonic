@@ -18,10 +18,11 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
 
     ParseVisitorHelper parseVisitorHelper = new ParseVisitorHelper();
     private Map<String, String> fieldToBizName;
+    private boolean exactReplace;
 
-
-    public GroupByReplaceVisitor(Map<String, String> fieldToBizName) {
+    public GroupByReplaceVisitor(Map<String, String> fieldToBizName, boolean exactReplace) {
         this.fieldToBizName = fieldToBizName;
+        this.exactReplace = exactReplace;
     }
 
     public void visit(GroupByElement groupByElement) {
@@ -32,7 +33,8 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
         for (int i = 0; i < groupByExpressions.size(); i++) {
             Expression expression = groupByExpressions.get(i);
 
-            String replaceColumn = parseVisitorHelper.getReplaceColumn(expression.toString(), fieldToBizName);
+            String replaceColumn = parseVisitorHelper.getReplaceColumn(expression.toString(), fieldToBizName,
+                    exactReplace);
             if (StringUtils.isNotEmpty(replaceColumn)) {
                 if (expression instanceof Column) {
                     groupByExpressions.set(i, new Column(replaceColumn));

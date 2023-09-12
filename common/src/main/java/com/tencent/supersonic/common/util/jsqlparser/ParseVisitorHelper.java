@@ -11,27 +11,32 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 public class ParseVisitorHelper {
 
-    public void replaceColumn(Column column, Map<String, String> fieldToBizName) {
+    public void replaceColumn(Column column, Map<String, String> fieldToBizName, boolean exactReplace) {
         String columnName = column.getColumnName();
-        column.setColumnName(getReplaceColumn(columnName, fieldToBizName));
+        String replaceColumn = getReplaceColumn(columnName, fieldToBizName, exactReplace);
+        if (StringUtils.isNotBlank(replaceColumn)) {
+            column.setColumnName(replaceColumn);
+        }
     }
 
-    public String getReplaceColumn(String columnName, Map<String, String> fieldToBizName) {
+    public String getReplaceColumn(String columnName, Map<String, String> fieldToBizName, boolean exactReplace) {
         String fieldBizName = fieldToBizName.get(columnName);
-        if (StringUtils.isNotEmpty(fieldBizName)) {
+        if (StringUtils.isNotBlank(fieldBizName)) {
             return fieldBizName;
-        } else {
-            Optional<Entry<String, String>> first = fieldToBizName.entrySet().stream().sorted((k1, k2) -> {
-                String k1FieldNameDb = k1.getKey();
-                String k2FieldNameDb = k2.getKey();
-                Double k1Similarity = getSimilarity(columnName, k1FieldNameDb);
-                Double k2Similarity = getSimilarity(columnName, k2FieldNameDb);
-                return k2Similarity.compareTo(k1Similarity);
-            }).collect(Collectors.toList()).stream().findFirst();
+        }
+        if (exactReplace) {
+            return null;
+        }
+        Optional<Entry<String, String>> first = fieldToBizName.entrySet().stream().sorted((k1, k2) -> {
+            String k1FieldNameDb = k1.getKey();
+            String k2FieldNameDb = k2.getKey();
+            Double k1Similarity = getSimilarity(columnName, k1FieldNameDb);
+            Double k2Similarity = getSimilarity(columnName, k2FieldNameDb);
+            return k2Similarity.compareTo(k1Similarity);
+        }).collect(Collectors.toList()).stream().findFirst();
 
-            if (first.isPresent()) {
-                return first.get().getValue();
-            }
+        if (first.isPresent()) {
+            return first.get().getValue();
         }
         return columnName;
     }
