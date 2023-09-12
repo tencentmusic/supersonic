@@ -47,24 +47,12 @@
 超音数自带样例的语义模型和问答对话，只需以下三步即可快速体验：
 
 - 从[release page](https://github.com/tencentmusic/supersonic/releases)下载预先构建好的发行包
-- 运行 "bin/start-standalone.sh"启动服务
+- 运行 "bin/start-standalone.sh"启动服务（一个Java进程和一个Python进程）
 - 在浏览器访问http://localhost:9080 开启探索
 
-## 如何构建
+## 如何构建和部署
 
-超音数可以运行在两个模式：standalone（一般用于快速演示）和distributed（一般用于生产环境）。
-
-### Standalone模式构建
-
-下载源码包，运行脚本"assembly/bin/build-standalone.sh"，将所有服务一起编译打包。
-
-### Distributed模式构建
-
-下载源码包，分别运行脚本"assembly/bin/build-chat.sh"、"assembly/bin/build-semantic.sh"，为问答层服务和语义层服务编译打包。
-
-### 本地开发构建
-
-下载源码包，运行脚本"assembly/bin/build-ide.sh"，然后在本地IDE运行启动类"StandaloneLauncher"。
+请参考项目[wiki](https://github.com/tencentmusic/supersonic/wiki)。
 
 ## 微信联系方式
 
