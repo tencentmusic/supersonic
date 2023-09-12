@@ -82,6 +82,7 @@ export type ChatContextType = {
   entity: { alias: string[], id: number };
   entityInfo: { dimensions: EntityDimensionType[] };
   elementMatches: any[];
+  nativeQuery: boolean;
   queryMode: string;
   dimensionFilters: FilterItemType[];
   properties: any;
