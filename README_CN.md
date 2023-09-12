@@ -19,7 +19,7 @@
 
 - 内置对话界面以便*业务用户*输入数据查询。
 - 内置图形界面以便*分析工程师*构建语义模型。
-- 内置图形界面以便*系统管理员*管理问答插件和助理。
+- 内置图形界面以便*系统管理员*管理第三方插件和对话助理。
 - 支持文本输入的联想和查询问题的推荐。
 - 支持多轮对话，根据语境自动切换上下文。
 - 支持四级权限控制：主题域级、模型级、列级、行级。
@@ -30,7 +30,9 @@
 
 <img src="./docs/images/supersonic_components.png" height="65%" width="65%" align="center"/> 
 
-- **模式映射器(Schema Mapper)：** 基于语义模型构建知识库，然后将自然语言文本在知识库中进行匹配，为后续的语义解析提供相关信息。
+- **知识库(Knowledge Base)：** 定期从语义模型中提取相关的模式信息，构建词典和索引，以便后续的模式映射。
+
+- **模式映射器(Schema Mapper)：** 将自然语言文本在知识库中进行匹配，为后续的语义解析提供相关信息。
 
 - **语义解析器(Semantic Parser)：** 理解用户查询并抽取语义信息，其由一组基于规则和基于模型的解析器组成，每个解析器可应对不同的特定场景。
 
@@ -54,8 +56,18 @@
 
 ### Standalone模式构建
 
-下载源码包，运行脚本"assembly/bin/build-standalone.sh"，将所有服务一起编译打包
+下载源码包，运行脚本"assembly/bin/build-standalone.sh"，将所有服务一起编译打包。
 
 ### Distributed模式构建
 
-下载源码包，分别运行脚本"assembly/bin/build-chat.sh"、"assembly/bin/build-semantic.sh"，为问答层服务和语义层服务编译打包
+下载源码包，分别运行脚本"assembly/bin/build-chat.sh"、"assembly/bin/build-semantic.sh"，为问答层服务和语义层服务编译打包。
+
+### 本地开发构建
+
+下载源码包，运行脚本"assembly/bin/build-ide.sh"，然后在本地IDE运行启动类"StandaloneLauncher"。
+
+## 微信联系方式
+
+欢迎加入微信群反馈建议：
+
+<img src="./docs/images/wechat_contact.jpeg" height="40%" width="40%" align="center"/> 

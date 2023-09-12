@@ -121,7 +121,8 @@ class SqlParseUtilsTest {
         SqlParserInfo sqlParserInfo = SqlParseUtils.getSqlParseInfo(
                 "select uv from "
                         + " ( "
-                        + " select * from t_1 where sys_imp_date >= '2023-07-07' and  sys_imp_date <= '2023-07-07' and user_id = 22 "
+                        + " select * from t_1 where sys_imp_date >= '2023-07-07' and  "
+                        + "sys_imp_date <= '2023-07-07' and user_id = 22 "
                         + " ) as  t_sub_1 "
                         + " where user_name_元 = 'zhangsan' order by play_count desc limit 10"
         );

@@ -20,7 +20,7 @@ public class MetricRepositoryImpl implements MetricRepository {
     private MetricDOCustomMapper metricDOCustomMapper;
 
     public MetricRepositoryImpl(MetricDOMapper metricDOMapper,
-            MetricDOCustomMapper metricDOCustomMapper) {
+                                MetricDOCustomMapper metricDOCustomMapper) {
         this.metricDOMapper = metricDOMapper;
         this.metricDOCustomMapper = metricDOCustomMapper;
     }

@@ -1,6 +1,0 @@
-export const TRANS_30_REPORT_DASHBOARD_ID = '1165';
-
-export const HEAT_COMPARE_REPORT_DASHBOARD_ID = '1148';
-
-export const INSIGHTS_DETAIL_ID = 'DETAIL';
-export const INSIGHTS_ID = 'INSIGHT';

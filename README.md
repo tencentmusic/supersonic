@@ -21,7 +21,7 @@ With these ideas in mind, we develop SuperSonic as a practical reference impleme
 
 - Built-in CUI(Chat User Interface) for *business users* to enter data queries
 - Built-in GUI(Graphical User Interface) for *analytics engineers* to build semantic models
-- Built-in GUI for *system administrators* to manage chat plugins and agents
+- Built-in GUI for *system administrators* to manage chat agents and third-party plugins
 - Support input auto-completion as well as query recommendation
 - Support multi-turn conversation and history context management 
 - Support four-level permission control: domain-level, model-level, column-level and row-level
@@ -32,15 +32,17 @@ The high-level architecture and main process flow is as follows:
 
 <img src="./docs/images/supersonic_components.png" height="65%" width="65%" align="center"/> 
 
-- **Schema Mapper:** identifies references to schema elements(metrics/dimensions/entities/values) in user queries. It matches the query text against a knowledge base constructed from the semantic models.
+- **Knowledge Base:** extracts schema information periodically from the semantic models and build dictionary and index to facilitate schema mapping.
 
-- **Semantic Parser:** understands user queries and extract semantic information. It consists of a combination of rule-based and model-based parsers, each of which deals with specific scenarios.
+- **Schema Mapper:** identifies references to schema elements(metrics/dimensions/entities/values) in user queries. It matches the query text against the knowledge base.
+
+- **Semantic Parser:** understands user queries and extracts semantic information. It consists of a combination of rule-based and model-based parsers, each of which deals with specific scenarios.
 
 - **Semantic Corrector:** checks validity of extracted semantic information and performs correction and optimization if needed.
 
 - **Semantic Layer:** performs execution according to extracted semantic information. It generates SQL queries and executes them against physical data models.
 
-- **Chat Plugin:** extends functionality with third-party tools. Given all configured plugins with function description and sample questions, the LLM is going to select the most suitable one.  
+- **Chat Plugin:** extends functionality with third-party tools. The LLM is going to select the most suitable one, given all configured plugins with function description and sample questions.
 
 ## Quick Demo
 
@@ -61,3 +63,13 @@ Pull the source code and run script "assembly/bin/build-standalone.sh" to build 
 ### Build for Distributed Mode 
 
 Pull the source code and run scripts "assembly/bin/build-chat.sh" and "assembly/bin/build-semantic.sh" separately to build packages.
+
+### Build for Local Development
+
+Pull the source code and run script "assembly/bin/build-ide.sh" and run bootstrap class "StandaloneLauncher" in the IDE.
+
+## WeChat Contact
+
+Please join the chat group to suggest feedbacks or ideas:
+
+<img src="./docs/images/wechat_contact.jpeg" height="40%" width="40%" align="center"/> 

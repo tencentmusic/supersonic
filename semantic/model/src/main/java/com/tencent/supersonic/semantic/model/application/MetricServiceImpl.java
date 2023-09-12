@@ -5,7 +5,6 @@ import com.alibaba.fastjson.TypeReference;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.plexpt.chatgpt.ChatGPT;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
@@ -81,7 +80,7 @@ public class MetricServiceImpl implements MetricService {
         log.info("[insert metric] object:{}", JSONObject.toJSONString(metricToInsert));
         saveMetricBatch(metricToInsert, user);
     }
-    
+
     @Override
     public List<MetricResp> getMetrics(Long modelId) {
         return convertList(metricRepository.getMetricList(modelId));
@@ -209,10 +208,12 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public List<String> mockAlias(MetricReq metricReq,String mockType,User user) {
+    public List<String> mockAlias(MetricReq metricReq, String mockType, User user) {
 
-        String mockAlias = chatGptHelper.mockAlias(mockType,metricReq.getName(), metricReq.getBizName(), "", metricReq.getDescription() ,!"".equals(metricReq.getDataFormatType()));
-        return JSONObject.parseObject(mockAlias, new TypeReference<List<String>>() {});
+        String mockAlias = chatGptHelper.mockAlias(mockType, metricReq.getName(), metricReq.getBizName(), "",
+                metricReq.getDescription(), !"".equals(metricReq.getDataFormatType()));
+        return JSONObject.parseObject(mockAlias, new TypeReference<List<String>>() {
+        });
     }
 
 

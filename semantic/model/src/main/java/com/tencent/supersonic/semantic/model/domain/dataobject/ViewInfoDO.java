@@ -3,14 +3,11 @@ package com.tencent.supersonic.semantic.model.domain.dataobject;
 import java.util.Date;
 
 public class ViewInfoDO {
-
     /**
-     *
      */
     private Long id;
 
     /**
-     *
      */
     private Long modelId;
 
@@ -20,22 +17,18 @@ public class ViewInfoDO {
     private String type;
 
     /**
-     *
      */
     private Date createdAt;
 
     /**
-     *
      */
     private String createdBy;
 
     /**
-     *
      */
     private Date updatedAt;
 
     /**
-     *
      */
     private String updatedBy;
 
@@ -74,7 +67,6 @@ public class ViewInfoDO {
 
     /**
      * datasource、dimension、metric
-     *
      * @return type datasource、dimension、metric
      */
     public String getType() {
@@ -83,7 +75,6 @@ public class ViewInfoDO {
 
     /**
      * datasource、dimension、metric
-     *
      * @param type datasource、dimension、metric
      */
     public void setType(String type) {
@@ -148,7 +139,6 @@ public class ViewInfoDO {
 
     /**
      * config detail
-     *
      * @return config config detail
      */
     public String getConfig() {
@@ -157,7 +147,6 @@ public class ViewInfoDO {
 
     /**
      * config detail
-     *
      * @param config config detail
      */
     public void setConfig(String config) {

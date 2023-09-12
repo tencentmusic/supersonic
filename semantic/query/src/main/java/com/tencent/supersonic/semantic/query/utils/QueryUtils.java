@@ -40,16 +40,6 @@ public class QueryUtils {
     @Value("${query.cache.enable:true}")
     private Boolean cacheEnable;
 
-    @PostConstruct
-    public void fillPattern() {
-        Set<String> aggFunctions = new HashSet<>(Arrays.asList("MAX", "MIN", "SUM", "AVG"));
-        String patternStr = "\\s*(%s\\((.*)\\)) AS";
-        for (String agg : aggFunctions) {
-            patterns.add(Pattern.compile(String.format(patternStr, agg)));
-        }
-    }
-
-
     private final CacheUtils cacheUtils;
     private final StatUtils statUtils;
 
@@ -63,12 +53,20 @@ public class QueryUtils {
         this.catalog = catalog;
     }
 
+    @PostConstruct
+    public void fillPattern() {
+        Set<String> aggFunctions = new HashSet<>(Arrays.asList("MAX", "MIN", "SUM", "AVG"));
+        String patternStr = "\\s*(%s\\((.*)\\)) AS";
+        for (String agg : aggFunctions) {
+            patterns.add(Pattern.compile(String.format(patternStr, agg)));
+        }
+    }
 
     public void fillItemNameInfo(QueryResultWithSchemaResp queryResultWithColumns, Long modelId) {
         List<MetricResp> metricDescList = catalog.getMetrics(modelId);
         List<DimensionResp> dimensionDescList = catalog.getDimensions(modelId);
-        Map<String,MetricResp> metricRespMap =
-                metricDescList.stream().collect(Collectors.toMap(MetricResp::getBizName, a -> a,(k1, k2)->k1));
+        Map<String, MetricResp> metricRespMap =
+                metricDescList.stream().collect(Collectors.toMap(MetricResp::getBizName, a -> a, (k1, k2) -> k1));
         Map<String, String> namePair = new HashMap<>();
         Map<String, String> nameTypePair = new HashMap<>();
         addSysTimeDimension(namePair, nameTypePair);
@@ -95,22 +93,11 @@ public class QueryUtils {
             if (!nameTypePair.containsKey(nameEn) && isNumberType(column.getType())) {
                 column.setShowType("NUMBER");
             }
-            if(metricRespMap.containsKey(nameEn)){
+            if (metricRespMap.containsKey(nameEn)) {
                 column.setDataFormatType(metricRespMap.get(nameEn).getDataFormatType());
                 column.setDataFormat(metricRespMap.get(nameEn).getDataFormat());
             }
         });
-    }
-
-    private boolean isNumberType(String type) {
-        if (StringUtils.isBlank(type)) {
-            return false;
-        }
-        if (type.equalsIgnoreCase("int") || type.equalsIgnoreCase("bigint")
-                || type.equalsIgnoreCase("float") || type.equalsIgnoreCase("double")) {
-            return true;
-        }
-        return false;
     }
 
     public void fillItemNameInfo(QueryResultWithSchemaResp queryResultWithColumns,
@@ -150,6 +137,17 @@ public class QueryUtils {
                 }
             }
         });
+    }
+
+    private boolean isNumberType(String type) {
+        if (StringUtils.isBlank(type)) {
+            return false;
+        }
+        if (type.equalsIgnoreCase("int") || type.equalsIgnoreCase("bigint")
+                || type.equalsIgnoreCase("float") || type.equalsIgnoreCase("double")) {
+            return true;
+        }
+        return false;
     }
 
     private Map<String, String> getMetricNameFromAgg(List<Aggregator> aggregators) {

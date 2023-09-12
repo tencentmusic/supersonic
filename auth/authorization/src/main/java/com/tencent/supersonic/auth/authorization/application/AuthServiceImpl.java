@@ -12,13 +12,16 @@ import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResource
 import com.tencent.supersonic.auth.api.authorization.service.AuthService;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
-import com.tencent.supersonic.common.util.S2ThreadContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.Map;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service

@@ -1,9 +1,10 @@
 package com.tencent.supersonic.chat.api.pojo;
 
+import lombok.Data;
+
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import lombok.Data;
 
 @Data
 public class ModelSchema {
@@ -32,6 +33,7 @@ public class ModelSchema {
                 break;
             case VALUE:
                 element = dimensionValues.stream().filter(e -> e.getId() == elementID).findFirst();
+                break;
             default:
         }
 

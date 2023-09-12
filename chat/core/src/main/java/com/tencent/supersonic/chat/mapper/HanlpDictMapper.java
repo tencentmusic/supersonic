@@ -9,21 +9,24 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.service.SemanticService;
-import com.tencent.supersonic.chat.utils.NatureHelper;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.knowledge.dictionary.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.dictionary.builder.BaseWordBuilder;
 import com.tencent.supersonic.knowledge.dictionary.builder.WordBuilderFactory;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
+import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
 @Slf4j
 public class HanlpDictMapper implements SchemaMapper {
@@ -37,10 +40,13 @@ public class HanlpDictMapper implements SchemaMapper {
         for (Term term : terms) {
             log.info("word:{},nature:{},frequency:{}", term.word, term.nature.toString(), term.getFrequency());
         }
-        Long modelId = queryContext.getRequest().getModelId();
 
         QueryMatchStrategy matchStrategy = ContextUtils.getBean(QueryMatchStrategy.class);
-        Map<MatchText, List<MapResult>> matchResult = matchStrategy.match(queryText, terms, modelId);
+        MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
+        Set<Long> detectModelIds = mapperHelper.getModelIds(queryContext.getRequest());
+
+        Map<MatchText, List<MapResult>> matchResult = matchStrategy.match(queryContext.getRequest(), terms,
+                detectModelIds);
 
         List<MapResult> matches = getMatches(matchResult);
 
@@ -50,6 +56,7 @@ public class HanlpDictMapper implements SchemaMapper {
 
         convertTermsToSchemaMapInfo(matches, queryContext.getMapInfo(), terms);
     }
+
 
     private void convertTermsToSchemaMapInfo(List<MapResult> mapResults, SchemaMapInfo schemaMap, List<Term> terms) {
         if (CollectionUtils.isEmpty(mapResults)) {
@@ -78,11 +85,14 @@ public class HanlpDictMapper implements SchemaMapper {
                 Long elementID = baseWordBuilder.getElementID(nature);
                 Long frequency = wordNatureToFrequency.get(mapResult.getName() + nature);
 
-                SchemaElement element = modelSchema.getElement(elementType, elementID);
-                if (Objects.isNull(element)) {
+                SchemaElement elementDb = modelSchema.getElement(elementType, elementID);
+                if (Objects.isNull(elementDb)) {
                     log.info("element is null, elementType:{},elementID:{}", elementType, elementID);
                     continue;
                 }
+                SchemaElement element = new SchemaElement();
+                BeanUtils.copyProperties(elementDb, element);
+                element.setAlias(getAlias(elementDb));
                 if (element.getType().equals(SchemaElementType.VALUE)) {
                     element.setName(mapResult.getName());
                 }
@@ -118,5 +128,17 @@ public class HanlpDictMapper implements SchemaMapper {
             matches = first.get();
         }
         return matches;
+    }
+
+    public List<String> getAlias(SchemaElement element) {
+        if (!SchemaElementType.VALUE.equals(element.getType())) {
+            return element.getAlias();
+        }
+        if (CollectionUtils.isNotEmpty(element.getAlias()) && StringUtils.isNotEmpty(element.getName())) {
+            return element.getAlias().stream()
+                    .filter(aliasItem -> aliasItem.contains(element.getName()))
+                    .collect(Collectors.toList());
+        }
+        return element.getAlias();
     }
 }

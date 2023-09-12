@@ -4,6 +4,7 @@ package com.tencent.supersonic.knowledge.dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.Data;
 
 @Data

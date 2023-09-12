@@ -1,12 +1,13 @@
-import { ChatContextType, MsgDataType, ParseStateEnum } from '../../common/type';
+import { ChatContextType, FilterItemType, MsgDataType, ParseStateEnum } from '../../common/type';
 import { useEffect, useState } from 'react';
-import { chatExecute, chatParse, switchEntity } from '../../service';
+import { chatExecute, chatParse, queryData, switchEntity } from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import IconFont from '../IconFont';
 import ParseTip from './ParseTip';
 import ExecuteItem from './ExecuteItem';
 import { isMobile } from '../../utils/utils';
 import classNames from 'classnames';
+import Tools from '../Tools';
 
 type Props = {
   msg: string;
@@ -16,7 +17,7 @@ type Props = {
   filter?: any[];
   isLastMessage?: boolean;
   msgData?: MsgDataType;
-  isMobileMode?: boolean;
+  isHistory?: boolean;
   triggerResize?: boolean;
   parseOptions?: ChatContextType[];
   onMsgDataLoaded?: (data: MsgDataType, valid: boolean) => void;
@@ -30,7 +31,7 @@ const ChatItem: React.FC<Props> = ({
   agentId,
   filter,
   isLastMessage,
-  isMobileMode,
+  isHistory,
   triggerResize,
   msgData,
   parseOptions,
@@ -74,10 +75,7 @@ const ChatItem: React.FC<Props> = ({
     return true;
   };
 
-  const onExecute = async (
-    parseInfoValue: ChatContextType,
-    parseInfoOptions?: ChatContextType[]
-  ) => {
+  const onExecute = async (parseInfoValue: ChatContextType) => {
     setExecuteMode(true);
     setExecuteLoading(true);
     try {
@@ -85,24 +83,10 @@ const ChatItem: React.FC<Props> = ({
       setExecuteLoading(false);
       const valid = updateData(data);
       if (onMsgDataLoaded) {
-        let parseOptions: ChatContextType[] = parseInfoOptions || [];
-        if (
-          parseInfoOptions &&
-          parseInfoOptions.length > 1 &&
-          (parseInfoOptions[0].queryMode.includes('METRIC') ||
-            parseInfoOptions[0].queryMode.includes('ENTITY'))
-        ) {
-          parseOptions = parseInfoOptions.filter(
-            (item, index) =>
-              index === 0 ||
-              (!item.queryMode.includes('METRIC') && !item.queryMode.includes('ENTITY'))
-          );
-        }
         onMsgDataLoaded(
           {
             ...data.data,
             chatContext: parseInfoValue,
-            parseOptions: parseOptions.length > 1 ? parseOptions.slice(1) : undefined,
           },
           valid
         );
@@ -118,15 +102,12 @@ const ChatItem: React.FC<Props> = ({
     const { data: parseData } = await chatParse(msg, conversationId, modelId, agentId, filter);
     setParseLoading(false);
     const { code, data } = parseData || {};
-    const { state, selectedParses } = data || {};
+    const { state, selectedParses, queryId } = data || {};
     if (
       code !== 200 ||
       state === ParseStateEnum.FAILED ||
-      selectedParses == null ||
-      selectedParses.length === 0 ||
-      (selectedParses.length > 0 &&
-        !selectedParses[0]?.properties?.type &&
-        !selectedParses[0]?.queryMode)
+      !selectedParses?.length ||
+      (!selectedParses[0]?.properties?.type && !selectedParses[0]?.queryMode)
     ) {
       setParseTip(PARSE_ERROR_TIP);
       return;
@@ -134,10 +115,14 @@ const ChatItem: React.FC<Props> = ({
     if (onUpdateMessageScroll) {
       onUpdateMessageScroll();
     }
-    setParseInfoOptions(selectedParses || []);
-    const parseInfoValue = selectedParses[0];
+    const parseInfos = selectedParses.map(item => ({
+      ...item,
+      queryId,
+    }));
+    setParseInfoOptions(parseInfos || []);
+    const parseInfoValue = parseInfos[0];
     setParseInfo(parseInfoValue);
-    onExecute(parseInfoValue, selectedParses);
+    onExecute(parseInfoValue);
   };
 
   useEffect(() => {
@@ -158,10 +143,20 @@ const ChatItem: React.FC<Props> = ({
     const res = await switchEntity(entityId, data?.chatContext?.modelId, conversationId || 0);
     setEntitySwitchLoading(false);
     setData(res.data.data);
+    const { chatContext } = res.data.data;
+    setParseInfo(chatContext);
+    setParseInfoOptions([chatContext]);
   };
 
-  const onChangeChart = () => {
-    setChartIndex(chartIndex + 1);
+  const onFiltersChange = async (dimensionFilters: FilterItemType[]) => {
+    setEntitySwitchLoading(true);
+    const chatContextValue = { ...(parseInfoOptions[0] || {}), dimensionFilters };
+    const res: any = await queryData(chatContextValue);
+    setEntitySwitchLoading(false);
+    const resChatContext = res.data?.data?.chatContext;
+    setData({ ...(res.data?.data || {}), chatContext: resChatContext || chatContextValue });
+    setParseInfo(resChatContext || chatContextValue);
+    setParseInfoOptions([resChatContext || chatContextValue]);
   };
 
   const onSelectParseInfo = async (parseInfoValue: ChatContextType) => {
@@ -176,41 +171,40 @@ const ChatItem: React.FC<Props> = ({
     [`${prefixCls}-content-mobile`]: isMobile,
   });
 
+  const isMetricCard =
+    (data?.queryMode === 'METRIC_DOMAIN' || data?.queryMode === 'METRIC_FILTER') &&
+    data?.queryResults?.length === 1;
+
   return (
     <div className={prefixCls}>
-      <div className={`${prefixCls}-section`}>
-        {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
+      {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
+      <div className={isMobile ? `${prefixCls}-mobile-msg-card` : `${prefixCls}-msg-card`}>
         <div className={contentClass}>
           <ParseTip
             parseLoading={parseLoading}
             parseInfoOptions={parseOptions || parseInfoOptions.slice(0, 1)}
             parseTip={parseTip}
             currentParseInfo={parseInfo}
-            optionMode={parseOptions !== undefined}
             onSelectParseInfo={onSelectParseInfo}
+            onSwitchEntity={onSwitchEntity}
+            onFiltersChange={onFiltersChange}
           />
-        </div>
-      </div>
-      {executeMode && data?.queryMode !== 'WEB_PAGE' && (
-        <div className={`${prefixCls}-section`}>
-          {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
-          <div className={contentClass}>
+          {executeMode && (
             <ExecuteItem
-              question={msg}
+              queryId={parseInfo?.queryId}
               executeLoading={executeLoading}
               entitySwitchLoading={entitySwitchLoading}
               executeTip={executeTip}
               chartIndex={chartIndex}
               data={data}
-              isMobileMode={isMobileMode}
-              isLastMessage={isLastMessage}
               triggerResize={triggerResize}
-              onSwitchEntity={onSwitchEntity}
-              onChangeChart={onChangeChart}
             />
-          </div>
+          )}
         </div>
-      )}
+        {!isMetricCard && data && (
+          <Tools data={data} scoreValue={undefined} isLastMessage={isLastMessage} />
+        )}
+      </div>
     </div>
   );
 };

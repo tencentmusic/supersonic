@@ -1,9 +1,11 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import java.util.List;
+
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.List;
 
 /**
  * extended information command about model

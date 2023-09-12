@@ -27,7 +27,6 @@ public class SearchService {
     public static final int SEARCH_SIZE = 200;
     private static BinTrie<List<String>> trie;
     private static BinTrie<List<String>> suffixTrie;
-    private static String localFileCache = "";
 
     static {
         trie = new BinTrie<>();
@@ -39,16 +38,13 @@ public class SearchService {
      * @param key
      * @return
      */
-    public static List<MapResult> prefixSearch(String key) {
-        return prefixSearch(key, SEARCH_SIZE, trie);
+    public static List<MapResult> prefixSearch(String key, int limit, Integer agentId, Set<Long> detectModelIds) {
+        return prefixSearch(key, limit, agentId, trie, detectModelIds);
     }
 
-    public static List<MapResult> prefixSearch(String key, int limit) {
-        return prefixSearch(key, limit, trie);
-    }
-
-    public static List<MapResult> prefixSearch(String key, int limit, BinTrie<List<String>> binTrie) {
-        Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie);
+    public static List<MapResult> prefixSearch(String key, int limit, Integer agentId, BinTrie<List<String>> binTrie,
+            Set<Long> detectModelIds) {
+        Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie, agentId, detectModelIds);
         return result.stream().map(
                         entry -> {
                             String name = entry.getKey().replace("#", " ");
@@ -64,13 +60,14 @@ public class SearchService {
      * @param key
      * @return
      */
-    public static List<MapResult> suffixSearch(String key, int limit) {
+    public static List<MapResult> suffixSearch(String key, int limit, Integer agentId, Set<Long> detectModelIds) {
         String reverseDetectSegment = StringUtils.reverse(key);
-        return suffixSearch(reverseDetectSegment, limit, suffixTrie);
+        return suffixSearch(reverseDetectSegment, limit, agentId, suffixTrie, detectModelIds);
     }
 
-    public static List<MapResult> suffixSearch(String key, int limit, BinTrie<List<String>> binTrie) {
-        Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie);
+    public static List<MapResult> suffixSearch(String key, int limit, Integer agentId, BinTrie<List<String>> binTrie,
+            Set<Long> detectModelIds) {
+        Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie, agentId, detectModelIds);
         return result.stream().map(
                         entry -> {
                             String name = entry.getKey().replace("#", " ");
@@ -86,7 +83,7 @@ public class SearchService {
     }
 
     private static Set<Map.Entry<String, List<String>>> prefixSearchLimit(String key, int limit,
-            BinTrie<List<String>> binTrie) {
+            BinTrie<List<String>> binTrie, Integer agentId, Set<Long> detectModelIds) {
         key = key.toLowerCase();
         Set<Map.Entry<String, List<String>>> entrySet = new TreeSet<Map.Entry<String, List<String>>>();
         StringBuilder sb = new StringBuilder(key.substring(0, key.length() - 1));
@@ -102,7 +99,7 @@ public class SearchService {
         if (branch == null) {
             return entrySet;
         }
-        branch.walkLimit(sb, entrySet, limit);
+        branch.walkLimit(sb, entrySet, limit, agentId, detectModelIds);
         return entrySet;
     }
 

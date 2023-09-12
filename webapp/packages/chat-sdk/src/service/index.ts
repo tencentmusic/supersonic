@@ -1,16 +1,16 @@
 import axios from './axiosInstance';
 import { ChatContextType, DrillDownDimensionType, HistoryType, MsgDataType, ParseDataType, SearchRecommendItem } from '../common/type';
-import { QueryDataType } from '../common/type';
 
 const DEFAULT_CHAT_ID = 0;
 
 const prefix = '/api';
 
-export function searchRecommend(queryText: string, chatId?: number, modelId?: number) {
+export function searchRecommend(queryText: string, chatId?: number, modelId?: number, agentId?: number) {
   return axios.post<Result<SearchRecommendItem[]>>(`${prefix}/chat/query/search`, {
     queryText,
     chatId: chatId || DEFAULT_CHAT_ID,
     modelId,
+    agentId
   });
 }
 
@@ -41,7 +41,8 @@ export function chatExecute(queryText: string,  chatId: number, parseInfo: ChatC
   return axios.post<Result<MsgDataType>>(`${prefix}/chat/query/execute`, {
     queryText,
     chatId: chatId || DEFAULT_CHAT_ID,
-    parseInfo,
+    queryId: parseInfo.queryId,
+    parseId: parseInfo.id
   });
 }
 
@@ -53,8 +54,8 @@ export function switchEntity(entityId: string, modelId?: number, chatId?: number
   });
 }
 
-export function queryData(chatContext: ChatContextType) {
-  return axios.post<Result<QueryDataType>>(`${prefix}/chat/query/queryData`, chatContext);
+export function queryData(chatContext: Partial<ChatContextType>) {
+  return axios.post<Result<MsgDataType>>(`${prefix}/chat/query/queryData`, chatContext);
 }
 
 export function queryContext(queryText: string, chatId?: number) {
@@ -92,4 +93,8 @@ export function updateQAFeedback(questionId: number, score: number) {
 
 export function queryDrillDownDimensions(modelId: number) {
   return axios.get<Result<{ dimensions: DrillDownDimensionType[] }>>(`${prefix}/chat/recommend/metric/${modelId}`);
+}
+
+export function queryDimensionValues(modelId: number, bizName: string, value: string) {
+  return axios.post<Result<any>>(`${prefix}/chat/query/queryDimensionValue`, { modelId, bizName, value});
 }

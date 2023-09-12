@@ -36,11 +36,13 @@ public class DatabaseRepositoryImpl implements DatabaseRepository {
     }
 
     @Override
-    public List<DatabaseDO> getDatabaseByDomainId(Long domainId) {
-        DatabaseDOExample databaseDOExample = new DatabaseDOExample();
-        databaseDOExample.createCriteria().andDomainIdEqualTo(domainId);
-        return databaseDOMapper.selectByExampleWithBLOBs(databaseDOExample);
+    public List<DatabaseDO> getDatabaseList() {
+        return databaseDOMapper.selectByExampleWithBLOBs(new DatabaseDOExample());
     }
 
+    @Override
+    public void deleteDatabase(Long id) {
+        databaseDOMapper.deleteByPrimaryKey(id);
+    }
 
 }

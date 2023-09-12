@@ -11,7 +11,7 @@ import defaultSettings from '../config/defaultSettings';
 import settings from '../config/themeSettings';
 import { queryToken } from './services/login';
 import { queryCurrentUser } from './services/user';
-import { traverseRoutes, deleteUrlQuery } from './utils/utils';
+import { traverseRoutes, deleteUrlQuery, isMobile } from './utils/utils';
 import { publicPath } from '../config/defaultSettings';
 import Copilot from './pages/Copilot';
 export { request } from './services/request';
@@ -158,13 +158,14 @@ export const layout: RunTimeLayoutConfig = (params) => {
     menuHeaderRender: undefined,
     childrenRender: (dom) => {
       return (
-        <>
+        <div
+          style={{ height: location.pathname.includes('chat') ? 'calc(100vh - 48px)' : undefined }}
+        >
           {dom}
-          {history.location.pathname !== '/chat' && <Copilot />}
-        </>
+          {history.location.pathname !== '/chat' && !isMobile && <Copilot />}
+        </div>
       );
     },
-    openKeys: false,
     ...initialState?.settings,
   };
 };

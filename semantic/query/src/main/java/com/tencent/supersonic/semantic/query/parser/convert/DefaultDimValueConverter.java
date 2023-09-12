@@ -8,11 +8,11 @@ import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.query.parser.SemanticConverter;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component("DefaultDimValueConverter")
@@ -24,8 +24,8 @@ public class DefaultDimValueConverter implements SemanticConverter {
     }
 
     @Override
-    public void converter(Catalog catalog, QueryStructReq queryStructCmd, ParseSqlReq sqlCommend,
-            MetricReq metricCommand) throws Exception {
+    public void converter(Catalog catalog, QueryStructReq queryStructCmd,
+                          ParseSqlReq sqlCommend, MetricReq metricCommand) throws Exception {
         List<DimensionResp> dimensionResps = catalog.getDimensions(queryStructCmd.getModelId());
         //dimension which has default values
         dimensionResps = dimensionResps.stream()

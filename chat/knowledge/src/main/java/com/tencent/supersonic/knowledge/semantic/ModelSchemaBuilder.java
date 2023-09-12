@@ -3,6 +3,7 @@ package com.tencent.supersonic.knowledge.semantic;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.Entity;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
@@ -12,7 +13,13 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ModelSchemaBuilder {
@@ -58,9 +65,16 @@ public class ModelSchemaBuilder {
         Set<SchemaElement> dimensionValues = new HashSet<>();
         for (DimSchemaResp dim : resp.getDimensions()) {
 
+            List<String> alias = new ArrayList<>();
+            String aliasStr = dim.getAlias();
+            if (Strings.isNotEmpty(aliasStr)) {
+                alias = Arrays.asList(aliasStr.split(aliasSplit));
+            }
             Set<String> dimValueAlias = new HashSet<>();
-            if (!CollectionUtils.isEmpty(dim.getDimValueMaps())) {
-                List<DimValueMap> dimValueMaps = dim.getDimValueMaps();
+            List<DimValueMap> dimValueMaps = dim.getDimValueMaps();
+            List<SchemaValueMap> schemaValueMaps = new ArrayList<>();
+            if (!CollectionUtils.isEmpty(dimValueMaps)) {
+
                 for (DimValueMap dimValueMap : dimValueMaps) {
                     if (Strings.isNotEmpty(dimValueMap.getBizName())) {
                         dimValueAlias.add(dimValueMap.getBizName());
@@ -68,13 +82,11 @@ public class ModelSchemaBuilder {
                     if (!CollectionUtils.isEmpty(dimValueMap.getAlias())) {
                         dimValueAlias.addAll(dimValueMap.getAlias());
                     }
+                    SchemaValueMap schemaValueMap = new SchemaValueMap();
+                    BeanUtils.copyProperties(dimValueMap, schemaValueMap);
+                    schemaValueMaps.add(schemaValueMap);
                 }
-            }
 
-            List<String> alias = new ArrayList<>();
-            String aliasStr = dim.getAlias();
-            if (Strings.isNotEmpty(aliasStr)) {
-                alias = Arrays.asList(aliasStr.split(aliasSplit));
             }
             SchemaElement dimToAdd = SchemaElement.builder()
                     .model(resp.getId())
@@ -84,6 +96,7 @@ public class ModelSchemaBuilder {
                     .type(SchemaElementType.DIMENSION)
                     .useCnt(dim.getUseCnt())
                     .alias(alias)
+                    .schemaValueMaps(schemaValueMaps)
                     .build();
             dimensions.add(dimToAdd);
 

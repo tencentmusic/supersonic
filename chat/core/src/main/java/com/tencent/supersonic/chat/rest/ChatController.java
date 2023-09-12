@@ -3,9 +3,10 @@ package com.tencent.supersonic.chat.rest;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
+import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
+import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.service.ChatService;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -29,14 +30,16 @@ public class ChatController {
 
     @PostMapping("/save")
     public Boolean save(@RequestParam(value = "chatName") String chatName,
+                        @RequestParam(value = "agentId", required = false) Integer agentId,
             HttpServletRequest request, HttpServletResponse response) {
-        return chatService.addChat(UserHolder.findUser(request, response), chatName);
+        return chatService.addChat(UserHolder.findUser(request, response), chatName, agentId);
     }
 
     @GetMapping("/getAll")
-    public List<ChatDO> getAllConversions(HttpServletRequest request, HttpServletResponse response) {
+    public List<ChatDO> getAllConversions(@RequestParam(value = "agentId", required = false) Integer agentId,
+                                          HttpServletRequest request, HttpServletResponse response) {
         String userName = UserHolder.findUser(request, response).getName();
-        return chatService.getAll(userName);
+        return chatService.getAll(userName, agentId);
     }
 
     @PostMapping("/delete")
@@ -69,11 +72,17 @@ public class ChatController {
 
     @PostMapping("/pageQueryInfo")
     public PageInfo<QueryResp> pageQueryInfo(@RequestBody PageQueryInfoReq pageQueryInfoCommand,
-            @RequestParam(value = "chatId") long chatId,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+                                             @RequestParam(value = "chatId") long chatId,
+                                             HttpServletRequest request,
+                                             HttpServletResponse response) {
         pageQueryInfoCommand.setUserName(UserHolder.findUser(request, response).getName());
         return chatService.queryInfo(pageQueryInfoCommand, chatId);
+    }
+
+    @PostMapping("/queryShowCase")
+    public ShowCaseResp queryShowCase(@RequestBody PageQueryInfoReq pageQueryInfoCommand,
+                                      @RequestParam(value = "agentId") int agentId) {
+        return chatService.queryShowCase(pageQueryInfoCommand, agentId);
     }
 
 }

@@ -24,19 +24,19 @@ export enum QueryModeEnum {
 
 export const AGENT_TOOL_TYPE_LIST = [
   {
-    label: '规则',
+    label: '规则语义解析',
     value: AgentToolTypeEnum.RULE
   },
   {
-    label: 'LLM语义解析',
+    label: '大模型语义解析',
     value: AgentToolTypeEnum.DSL
   },
   {
-    label: '指标解读',
+    label: '大模型指标解读',
     value: AgentToolTypeEnum.INTERPRET
   },
   {
-    label: '插件',
+    label: '第三方插件',
     value: AgentToolTypeEnum.PLUGIN
   },
 ]

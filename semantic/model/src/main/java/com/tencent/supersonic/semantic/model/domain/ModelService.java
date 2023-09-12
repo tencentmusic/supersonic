@@ -6,6 +6,7 @@ import com.tencent.supersonic.semantic.api.model.request.ModelReq;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,8 @@ public interface ModelService {
     Map<Long, ModelResp> getModelMap();
 
     Map<Long, String> getModelFullPathMap();
+
+    List<String> getModelAdmin(Long id);
 
     ModelSchemaResp fetchSingleModelSchema(Long modelId);
 

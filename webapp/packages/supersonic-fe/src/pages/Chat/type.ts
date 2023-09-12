@@ -41,6 +41,7 @@ export type ConversationDetailType = {
   initMsg?: string;
   modelId?: number;
   entityId?: string;
+  agent?: AgentType;
 };
 
 export enum MessageModeEnum {

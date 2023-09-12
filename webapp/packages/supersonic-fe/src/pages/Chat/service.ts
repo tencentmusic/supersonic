@@ -1,12 +1,16 @@
+import { isMobile } from '@/utils/utils';
 import { request } from 'umi';
 import { AgentType, ModelType } from './type';
 
-const prefix = '/api';
+const prefix = isMobile ? '/openapi' : '/api';
 
-export function saveConversation(chatName: string) {
-  return request<Result<any>>(`${prefix}/chat/manage/save?chatName=${chatName}`, {
-    method: 'POST',
-  });
+export function saveConversation(chatName: string, agentId: number) {
+  return request<Result<any>>(
+    `${prefix}/chat/manage/save?chatName=${chatName}&agentId=${agentId}`,
+    {
+      method: 'POST',
+    },
+  );
 }
 
 export function updateConversationName(chatName: string, chatId: number = 0) {
@@ -20,8 +24,8 @@ export function deleteConversation(chatId: number) {
   return request<Result<any>>(`${prefix}/chat/manage/delete?chatId=${chatId}`, { method: 'POST' });
 }
 
-export function getAllConversations() {
-  return request<Result<any>>(`${prefix}/chat/manage/getAll`);
+export function getAllConversations(agentId?: number) {
+  return request<Result<any>>(`${prefix}/chat/manage/getAll`, { params: { agentId } });
 }
 
 export function getMiniProgramList(entityId: string, modelId: number) {

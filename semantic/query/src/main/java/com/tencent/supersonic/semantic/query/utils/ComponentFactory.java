@@ -59,11 +59,9 @@ public class ComponentFactory {
     public static void setSqlParser(SqlParser parser) {
         sqlParser = parser;
     }
-
     private static void initQueryOptimizer() {
         queryOptimizers.add(getBean("DetailQuery", DetailQuery.class));
     }
-
     private static void initSemanticConverter() {
         semanticConverters.add(getBean("DefaultDimValueConverter", DefaultDimValueConverter.class));
         semanticConverters.add(getBean("CalculateAggConverter", CalculateAggConverter.class));

@@ -2,9 +2,10 @@ package com.tencent.supersonic.chat.rest;
 
 
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.chat.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
-import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SearchService;
 import javax.servlet.http.HttpServletRequest;
@@ -53,8 +54,8 @@ public class ChatQueryController {
     }
 
     @PostMapping("execute")
-    public Object execute(@RequestBody ExecuteQueryReq queryCtx, HttpServletRequest request,
-            HttpServletResponse response)
+    public Object execute(@RequestBody ExecuteQueryReq queryCtx,
+            HttpServletRequest request, HttpServletResponse response)
             throws Exception {
         queryCtx.setUser(UserHolder.findUser(request, response));
         return queryService.performExecution(queryCtx);
@@ -68,10 +69,17 @@ public class ChatQueryController {
     }
 
     @PostMapping("queryData")
-    public Object queryData(@RequestBody QueryDataReq queryData, HttpServletRequest request,
-            HttpServletResponse response)
+    public Object queryData(@RequestBody QueryDataReq queryData,
+            HttpServletRequest request, HttpServletResponse response)
             throws Exception {
         return queryService.executeDirectQuery(queryData, UserHolder.findUser(request, response));
+    }
+
+    @PostMapping("queryDimensionValue")
+    public Object queryDimensionValue(@RequestBody DimensionValueReq dimensionValueReq,
+                                      HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        return queryService.queryDimensionValue(dimensionValueReq, UserHolder.findUser(request, response));
     }
 
 }

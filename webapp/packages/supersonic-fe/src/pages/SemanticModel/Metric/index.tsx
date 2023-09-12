@@ -28,7 +28,7 @@ type QueryMetricListParams = {
 };
 
 const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
-  const { selectDomainId } = domainManger;
+  const { selectDomainId, selectModelId: modelId } = domainManger;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -45,13 +45,17 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     queryMetricList();
   }, []);
 
-  const queryMetricList = async (params: QueryMetricListParams = {}) => {
-    setLoading(true);
+  const queryMetricList = async (params: QueryMetricListParams = {}, disabledLoading = false) => {
+    if (!disabledLoading) {
+      setLoading(true);
+    }
     const { code, data, msg } = await queryMetric({
       ...pagination,
       ...params,
     });
-    setLoading(false);
+    if (!disabledLoading) {
+      setLoading(false);
+    }
     const { list, pageSize, current, total } = data || {};
     let resData: any = {};
     if (code === 200) {
@@ -86,15 +90,15 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'name',
       title: '指标名称',
     },
-    {
-      dataIndex: 'alias',
-      title: '别名',
-      search: false,
-    },
-    {
-      dataIndex: 'bizName',
-      title: '字段名称',
-    },
+    // {
+    //   dataIndex: 'alias',
+    //   title: '别名',
+    //   search: false,
+    // },
+    // {
+    //   dataIndex: 'bizName',
+    //   title: '字段名称',
+    // },
     {
       dataIndex: 'modelName',
       title: '所属模型',
@@ -114,14 +118,14 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '描述',
       search: false,
     },
-    {
-      dataIndex: 'type',
-      title: '指标类型',
-      valueEnum: {
-        ATOMIC: '原子指标',
-        DERIVED: '衍生指标',
-      },
-    },
+    // {
+    //   dataIndex: 'type',
+    //   title: '指标类型',
+    //   valueEnum: {
+    //     ATOMIC: '原子指标',
+    //     DERIVED: '衍生指标',
+    //   },
+    // },
 
     {
       dataIndex: 'updatedAt',
@@ -178,7 +182,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   ];
 
   const handleFilterChange = async (filterParams: {
-    name: string;
+    key: string;
     sensitiveLevel: string;
     type: string;
   }) => {
@@ -190,7 +194,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     params.sensitiveLevel = sensitiveLevelValue;
     params.type = typeValue;
     setFilterParams(params);
-    await queryMetricList(params);
+    await queryMetricList(params, filterParams.key ? false : true);
   };
 
   return (
@@ -231,6 +235,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         <MetricInfoCreateForm
           domainId={Number(selectDomainId)}
           createModalVisible={createModalVisible}
+          modelId={modelId}
           metricItem={metricItem}
           onSubmit={() => {
             setCreateModalVisible(false);

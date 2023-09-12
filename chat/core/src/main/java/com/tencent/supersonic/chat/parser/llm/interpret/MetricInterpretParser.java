@@ -7,11 +7,17 @@ import com.tencent.supersonic.chat.agent.tool.AgentToolType;
 import com.tencent.supersonic.chat.agent.tool.MetricInterpretTool;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
-import com.tencent.supersonic.chat.api.pojo.*;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
-import com.tencent.supersonic.chat.query.metricInterpret.MetricInterpretQuery;
+import com.tencent.supersonic.chat.query.metricinterpret.MetricInterpretQuery;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.service.AgentService;
@@ -22,7 +28,11 @@ import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
-import java.util.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,7 +44,8 @@ public class MetricInterpretParser implements SemanticParser {
             log.info("skip MetricInterpretParser");
             return;
         }
-        Map<Long, MetricInterpretTool> metricInterpretToolMap = getMetricInterpretTools(queryContext.getRequest().getAgentId());
+        Map<Long, MetricInterpretTool> metricInterpretToolMap =
+                getMetricInterpretTools(queryContext.getRequest().getAgentId());
         log.info("metric interpret tool : {}", metricInterpretToolMap);
         if (CollectionUtils.isEmpty(metricInterpretToolMap)) {
             return;
@@ -50,8 +61,10 @@ public class MetricInterpretParser implements SemanticParser {
             }
             List<MetricOption> metricOptions = metricInterpretTool.getMetricOptions();
             if (!CollectionUtils.isEmpty(metricOptions)) {
-                List<Long> metricIds = metricOptions.stream().map(MetricOption::getMetricId).collect(Collectors.toList());
-                buildQuery(modelId, queryContext, metricIds, elementMatches.get(modelId), metricInterpretTool.getName());
+                List<Long> metricIds = metricOptions.stream()
+                        .map(MetricOption::getMetricId).collect(Collectors.toList());
+                String name = metricInterpretTool.getName();
+                buildQuery(modelId, queryContext, metricIds, elementMatches.get(modelId), name);
             }
         }
     }
@@ -82,7 +95,7 @@ public class MetricInterpretParser implements SemanticParser {
         if (agent == null) {
             return new HashMap<>();
         }
-        List<String> tools= agent.getTools(AgentToolType.INTERPRET);
+        List<String> tools = agent.getTools(AgentToolType.INTERPRET);
         if (CollectionUtils.isEmpty(tools)) {
             return new HashMap<>();
         }
@@ -100,16 +113,16 @@ public class MetricInterpretParser implements SemanticParser {
 
     private SemanticParseInfo buildSemanticParseInfo(Long modelId, QueryReq queryReq, Set<SchemaElement> metrics,
                                                      List<SchemaElementMatch> schemaElementMatches, String toolName) {
-        SchemaElement Model = new SchemaElement();
-        Model.setModel(modelId);
-        Model.setId(modelId);
+        SchemaElement model = new SchemaElement();
+        model.setModel(modelId);
+        model.setId(modelId);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setMetrics(metrics);
         SchemaElement dimension = new SchemaElement();
         dimension.setBizName(TimeDimensionEnum.DAY.getName());
         semanticParseInfo.setDimensions(Sets.newHashSet(dimension));
         semanticParseInfo.setElementMatches(schemaElementMatches);
-        semanticParseInfo.setModel(Model);
+        semanticParseInfo.setModel(model);
         semanticParseInfo.setScore(queryReq.getQueryText().length());
         DateConf dateConf = new DateConf();
         dateConf.setDateMode(DateConf.DateMode.RECENT);

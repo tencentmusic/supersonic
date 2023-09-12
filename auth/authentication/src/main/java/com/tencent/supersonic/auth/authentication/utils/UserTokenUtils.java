@@ -9,7 +9,6 @@ import static com.tencent.supersonic.auth.api.authentication.constant.UserConsta
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_ID;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_NAME;
 import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_PASSWORD;
-
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
@@ -22,9 +21,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class UserTokenUtils {
 
@@ -68,7 +69,9 @@ public class UserTokenUtils {
     public UserWithPassword getUserWithPassword(HttpServletRequest request) {
         String token = request.getHeader(authenticationConfig.getTokenHttpHeaderKey());
         if (StringUtils.isBlank(token)) {
-            throw new AccessException("token is blank, get user failed");
+            String message = "token is blank, get user failed";
+            log.warn("{}, uri: {}", message, request.getServletPath());
+            throw new AccessException(message);
         }
         final Claims claims = getClaims(token);
         Long userId = Long.parseLong(claims.getOrDefault(TOKEN_USER_ID, 0).toString());

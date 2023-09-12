@@ -1,43 +1,37 @@
 package com.tencent.supersonic.knowledge.semantic;
 
-import static com.tencent.supersonic.common.pojo.Constants.LIST_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.PAGESIZE_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.TOTAL_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.TRUE_LOWER;
-
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.ResultData;
-import com.tencent.supersonic.common.pojo.ReturnCode;
-import com.tencent.supersonic.common.pojo.enums.AuthType;
-import com.tencent.supersonic.common.pojo.exception.CommonException;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.S2ThreadContext;
 import com.tencent.supersonic.common.util.ThreadContext;
+import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
-import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.DomainResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import com.tencent.supersonic.common.pojo.exception.CommonException;
+import com.tencent.supersonic.common.pojo.ResultData;
+import com.tencent.supersonic.common.pojo.ReturnCode;
+
 import java.net.URI;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+import java.util.LinkedHashMap;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
@@ -50,6 +44,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static com.tencent.supersonic.common.pojo.Constants.TRUE_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.LIST_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.TOTAL_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.PAGESIZE_LOWER;
+
 @Slf4j
 public class RemoteSemanticLayer extends BaseSemanticLayer {
 
@@ -57,8 +56,6 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
 
     private AuthenticationConfig authenticationConfig;
 
-    private static final Cache<String, List<ModelSchemaResp>> domainSchemaCache =
-            CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
     private ParameterizedTypeReference<ResultData<QueryResultWithSchemaResp>> structTypeRef =
             new ParameterizedTypeReference<ResultData<QueryResultWithSchemaResp>>() {
             };
@@ -125,7 +122,7 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
 
         URI requestUrl = UriComponentsBuilder.fromHttpUrl(
-                        defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchModelSchemaPath()).build()
+                defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchModelSchemaPath()).build()
                 .encode().toUri();
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
         filter.setModelIds(ids);
@@ -155,8 +152,8 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
     public List<DomainResp> getDomainList(User user) {
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         Object domainDescListObject = fetchHttpResult(
-                defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchDomainListPath(), null,
-                HttpMethod.GET);
+                defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchDomainListPath(),
+                null, HttpMethod.GET);
         return JsonUtil.toList(JsonUtil.toString(domainDescListObject), DomainResp.class);
     }
 
@@ -167,8 +164,8 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
         }
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         String url = String.format("%s?domainId=%s&authType=%s",
-                defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchModelListPath()
-                , domainId, authType.toString());
+                defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchModelListPath(),
+                domainId, authType.toString());
         Object domainDescListObject = fetchHttpResult(url, null, HttpMethod.GET);
         return JsonUtil.toList(JsonUtil.toString(domainDescListObject), ModelResp.class);
     }
@@ -218,8 +215,8 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         log.info("url:{}", defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchMetricPagePath());
         Object dimensionListObject = fetchHttpResult(
-                defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchMetricPagePath(), body,
-                HttpMethod.POST);
+                defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchMetricPagePath(),
+                body, HttpMethod.POST);
         LinkedHashMap map = (LinkedHashMap) dimensionListObject;
         PageInfo<Object> metricDescObjectPageInfo = generatePageInfo(map);
         PageInfo<MetricResp> metricDescPageInfo = new PageInfo<>();
@@ -233,8 +230,8 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
         String body = JsonUtil.toString(pageDimensionCmd);
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         Object dimensionListObject = fetchHttpResult(
-                defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchDimensionPagePath(), body,
-                HttpMethod.POST);
+                defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchDimensionPagePath(),
+                body, HttpMethod.POST);
         LinkedHashMap map = (LinkedHashMap) dimensionListObject;
         PageInfo<Object> dimensionDescObjectPageInfo = generatePageInfo(map);
         PageInfo<DimensionResp> dimensionDescPageInfo = new PageInfo<>();

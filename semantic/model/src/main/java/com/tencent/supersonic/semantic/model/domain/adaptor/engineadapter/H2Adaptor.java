@@ -29,8 +29,8 @@ public class H2Adaptor extends EngineAdaptor {
 
     @Override
     public String getColumnMetaQueryTpl() {
-        return "SELECT COLUMN_NAME AS name, DATA_TYPE AS dataType\n" +
-                "FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA ='%s' AND  TABLE_NAME = '%s'";
+        return "SELECT COLUMN_NAME AS name, DATA_TYPE AS dataType\n"
+                + "FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA ='%s' AND  TABLE_NAME = '%s'";
     }
 
     @Override
@@ -40,6 +40,7 @@ public class H2Adaptor extends EngineAdaptor {
 
     @Override
     public String getTableMetaQueryTpl() {
-        return "SELECT TABLE_NAME as name FROM INFORMATION_SCHEMA.TABLES WHERE STORAGE_TYPE = 'MEMORY' AND TABLE_SCHEMA = '%s'";
+        return "SELECT TABLE_NAME as name FROM INFORMATION_SCHEMA.TABLES "
+                + "WHERE STORAGE_TYPE = 'MEMORY' AND TABLE_SCHEMA = '%s'";
     }
 }

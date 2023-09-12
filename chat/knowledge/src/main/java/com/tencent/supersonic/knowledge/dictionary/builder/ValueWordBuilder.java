@@ -1,11 +1,13 @@
 package com.tencent.supersonic.knowledge.dictionary.builder;
 
 import com.google.common.collect.Lists;
+
+import java.util.List;
+import java.util.Objects;
+
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
 import com.tencent.supersonic.knowledge.dictionary.DictWordType;
-import java.util.List;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;

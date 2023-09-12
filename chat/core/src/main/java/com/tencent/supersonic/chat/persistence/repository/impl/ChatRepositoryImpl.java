@@ -2,8 +2,8 @@ package com.tencent.supersonic.chat.persistence.repository.impl;
 
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.QueryDO;
-import com.tencent.supersonic.chat.persistence.mapper.ChatMapper;
 import com.tencent.supersonic.chat.persistence.repository.ChatRepository;
+import com.tencent.supersonic.chat.persistence.mapper.ChatMapper;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
@@ -26,8 +26,8 @@ public class ChatRepositoryImpl implements ChatRepository {
     }
 
     @Override
-    public List<ChatDO> getAll(String creator) {
-        return chatMapper.getAll(creator);
+    public List<ChatDO> getAll(String creator, Integer agentId) {
+        return chatMapper.getAll(creator, agentId);
     }
 
 

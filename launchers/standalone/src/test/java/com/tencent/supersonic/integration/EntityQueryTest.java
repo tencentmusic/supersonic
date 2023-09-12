@@ -1,7 +1,5 @@
 package com.tencent.supersonic.integration;
 
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
-
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -11,14 +9,15 @@ import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
+import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Test;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
 
 public class EntityQueryTest extends BaseQueryTest {
 
     @Test
-    public void queryTest_METRIC_ENTITY_QUERY() throws Exception {
+    public void queryTest_metric_entity_query() throws Exception {
         QueryResult actualResult = submitNewChat("艺人周杰伦的播放量");
 
         QueryResult expectedResult = new QueryResult();
@@ -41,7 +40,7 @@ public class EntityQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_ENTITY_LIST_FILTER() throws Exception {
+    public void queryTest_entity_list_filter() throws Exception {
         QueryResult actualResult = submitNewChat("爱情、流行类型的艺人");
 
         QueryResult expectedResult = new QueryResult();

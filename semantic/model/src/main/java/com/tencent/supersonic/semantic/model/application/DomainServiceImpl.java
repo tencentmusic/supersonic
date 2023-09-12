@@ -4,20 +4,29 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
-import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.util.BeanMapper;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.DomainReq;
 import com.tencent.supersonic.semantic.api.model.request.DomainUpdateReq;
-import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Domain;
 import com.tencent.supersonic.semantic.model.domain.repository.DomainRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.DomainConvert;
-
-import java.util.*;
+import java.util.List;
+import java.util.Date;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Queue;
+import java.util.LinkedList;
+import java.util.Objects;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Sets;
@@ -36,8 +45,8 @@ public class DomainServiceImpl implements DomainService {
 
 
     public DomainServiceImpl(DomainRepository domainRepository,
-            @Lazy ModelService modelService,
-            UserService userService) {
+                             @Lazy ModelService modelService,
+                             UserService userService) {
         this.domainRepository = domainRepository;
         this.modelService = modelService;
         this.userService = userService;
@@ -83,12 +92,12 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public List<DomainResp> getDomainListWithAdminAuth(User user) {
-        Set<DomainResp> domainWithAuthAll = getDomainAuthSet(user.getName(), AuthType.VISIBLE);
+        Set<DomainResp> domainWithAuthAll = getDomainAuthSet(user.getName(), AuthType.ADMIN);
         if (!CollectionUtils.isEmpty(domainWithAuthAll)) {
             List<Long> domainIds = domainWithAuthAll.stream().map(DomainResp::getId).collect(Collectors.toList());
             domainWithAuthAll.addAll(getParentDomain(domainIds));
         }
-        List<ModelResp> modelResps = modelService.getModelAuthList(user.getName(), AuthType.VISIBLE);
+        List<ModelResp> modelResps = modelService.getModelAuthList(user.getName(), AuthType.ADMIN);
         if (!CollectionUtils.isEmpty(modelResps)) {
             List<Long> domainIds = modelResps.stream().map(ModelResp::getDomainId).collect(Collectors.toList());
             domainWithAuthAll.addAll(getParentDomain(domainIds));

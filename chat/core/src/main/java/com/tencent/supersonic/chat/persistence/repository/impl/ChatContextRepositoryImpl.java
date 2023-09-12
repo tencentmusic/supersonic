@@ -52,8 +52,9 @@ public class ChatContextRepositoryImpl implements ChatContextRepository {
         chatContext.setUser(contextDO.getUser());
         chatContext.setQueryText(contextDO.getQueryText());
         if (contextDO.getSemanticParse() != null && !contextDO.getSemanticParse().isEmpty()) {
-            log.info("--->: {}",contextDO.getSemanticParse());
-            SemanticParseInfo semanticParseInfo = JsonUtil.toObject(contextDO.getSemanticParse(), SemanticParseInfo.class);
+            log.info("--->: {}", contextDO.getSemanticParse());
+            SemanticParseInfo semanticParseInfo = JsonUtil.toObject(contextDO.getSemanticParse(),
+                    SemanticParseInfo.class);
             chatContext.setParseInfo(semanticParseInfo);
         }
         return chatContext;

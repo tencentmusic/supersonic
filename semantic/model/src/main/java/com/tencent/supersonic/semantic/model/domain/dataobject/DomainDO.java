@@ -3,7 +3,6 @@ package com.tencent.supersonic.semantic.model.domain.dataobject;
 import java.util.Date;
 
 public class DomainDO {
-
     /**
      * 自增ID
      */
@@ -76,7 +75,6 @@ public class DomainDO {
 
     /**
      * 自增ID
-     *
      * @return id 自增ID
      */
     public Long getId() {
@@ -85,7 +83,6 @@ public class DomainDO {
 
     /**
      * 自增ID
-     *
      * @param id 自增ID
      */
     public void setId(Long id) {
@@ -94,7 +91,6 @@ public class DomainDO {
 
     /**
      * 主题域名称
-     *
      * @return name 主题域名称
      */
     public String getName() {
@@ -103,7 +99,6 @@ public class DomainDO {
 
     /**
      * 主题域名称
-     *
      * @param name 主题域名称
      */
     public void setName(String name) {
@@ -112,7 +107,6 @@ public class DomainDO {
 
     /**
      * 内部名称
-     *
      * @return biz_name 内部名称
      */
     public String getBizName() {
@@ -121,7 +115,6 @@ public class DomainDO {
 
     /**
      * 内部名称
-     *
      * @param bizName 内部名称
      */
     public void setBizName(String bizName) {
@@ -130,7 +123,6 @@ public class DomainDO {
 
     /**
      * 父主题域ID
-     *
      * @return parent_id 父主题域ID
      */
     public Long getParentId() {
@@ -139,7 +131,6 @@ public class DomainDO {
 
     /**
      * 父主题域ID
-     *
      * @param parentId 父主题域ID
      */
     public void setParentId(Long parentId) {
@@ -148,7 +139,6 @@ public class DomainDO {
 
     /**
      * 主题域状态
-     *
      * @return status 主题域状态
      */
     public Integer getStatus() {
@@ -157,7 +147,6 @@ public class DomainDO {
 
     /**
      * 主题域状态
-     *
      * @param status 主题域状态
      */
     public void setStatus(Integer status) {
@@ -166,7 +155,6 @@ public class DomainDO {
 
     /**
      * 创建时间
-     *
      * @return created_at 创建时间
      */
     public Date getCreatedAt() {
@@ -175,7 +163,6 @@ public class DomainDO {
 
     /**
      * 创建时间
-     *
      * @param createdAt 创建时间
      */
     public void setCreatedAt(Date createdAt) {
@@ -184,7 +171,6 @@ public class DomainDO {
 
     /**
      * 创建人
-     *
      * @return created_by 创建人
      */
     public String getCreatedBy() {
@@ -193,7 +179,6 @@ public class DomainDO {
 
     /**
      * 创建人
-     *
      * @param createdBy 创建人
      */
     public void setCreatedBy(String createdBy) {
@@ -202,7 +187,6 @@ public class DomainDO {
 
     /**
      * 更新时间
-     *
      * @return updated_at 更新时间
      */
     public Date getUpdatedAt() {
@@ -211,7 +195,6 @@ public class DomainDO {
 
     /**
      * 更新时间
-     *
      * @param updatedAt 更新时间
      */
     public void setUpdatedAt(Date updatedAt) {
@@ -220,7 +203,6 @@ public class DomainDO {
 
     /**
      * 更新人
-     *
      * @return updated_by 更新人
      */
     public String getUpdatedBy() {
@@ -229,7 +211,6 @@ public class DomainDO {
 
     /**
      * 更新人
-     *
      * @param updatedBy 更新人
      */
     public void setUpdatedBy(String updatedBy) {
@@ -238,7 +219,6 @@ public class DomainDO {
 
     /**
      * 主题域管理员
-     *
      * @return admin 主题域管理员
      */
     public String getAdmin() {
@@ -247,7 +227,6 @@ public class DomainDO {
 
     /**
      * 主题域管理员
-     *
      * @param admin 主题域管理员
      */
     public void setAdmin(String admin) {
@@ -256,7 +235,6 @@ public class DomainDO {
 
     /**
      * 主题域管理员组织
-     *
      * @return admin_org 主题域管理员组织
      */
     public String getAdminOrg() {
@@ -265,7 +243,6 @@ public class DomainDO {
 
     /**
      * 主题域管理员组织
-     *
      * @param adminOrg 主题域管理员组织
      */
     public void setAdminOrg(String adminOrg) {
@@ -274,7 +251,6 @@ public class DomainDO {
 
     /**
      * 主题域是否公开
-     *
      * @return is_open 主题域是否公开
      */
     public Integer getIsOpen() {
@@ -283,7 +259,6 @@ public class DomainDO {
 
     /**
      * 主题域是否公开
-     *
      * @param isOpen 主题域是否公开
      */
     public void setIsOpen(Integer isOpen) {
@@ -292,7 +267,6 @@ public class DomainDO {
 
     /**
      * 主题域可用用户
-     *
      * @return viewer 主题域可用用户
      */
     public String getViewer() {
@@ -301,7 +275,6 @@ public class DomainDO {
 
     /**
      * 主题域可用用户
-     *
      * @param viewer 主题域可用用户
      */
     public void setViewer(String viewer) {
@@ -310,7 +283,6 @@ public class DomainDO {
 
     /**
      * 主题域可用组织
-     *
      * @return view_org 主题域可用组织
      */
     public String getViewOrg() {
@@ -319,7 +291,6 @@ public class DomainDO {
 
     /**
      * 主题域可用组织
-     *
      * @param viewOrg 主题域可用组织
      */
     public void setViewOrg(String viewOrg) {

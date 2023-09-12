@@ -5,47 +5,92 @@ import java.util.Date;
 import java.util.List;
 
 public class ChatQueryDOExample {
-
+    /**
+     * s2_chat_query
+     */
     protected String orderByClause;
+
+    /**
+     * s2_chat_query
+     */
     protected boolean distinct;
+
+    /**
+     * s2_chat_query
+     */
     protected List<Criteria> oredCriteria;
+
+    /**
+     * s2_chat_query
+     */
     protected Integer limitStart;
+
+    /**
+     * s2_chat_query
+     */
     protected Integer limitEnd;
 
+    /**
+     * @mbg.generated
+     */
     public ChatQueryDOExample() {
         oredCriteria = new ArrayList<Criteria>();
     }
 
-    public String getOrderByClause() {
-        return orderByClause;
-    }
-
+    /**
+     * @mbg.generated
+     */
     public void setOrderByClause(String orderByClause) {
         this.orderByClause = orderByClause;
     }
 
-    public boolean isDistinct() {
-        return distinct;
+    /**
+     * @mbg.generated
+     */
+    public String getOrderByClause() {
+        return orderByClause;
     }
 
+    /**
+     * @mbg.generated
+     */
     public void setDistinct(boolean distinct) {
         this.distinct = distinct;
     }
 
+    /**
+     * @mbg.generated
+     */
+    public boolean isDistinct() {
+        return distinct;
+    }
+
+    /**
+     * @mbg.generated
+     */
     public List<Criteria> getOredCriteria() {
         return oredCriteria;
     }
 
+    /**
+     * @mbg.generated
+     */
     public void or(Criteria criteria) {
         oredCriteria.add(criteria);
     }
 
+    /**
+     * @mbg.generated
+     */
     public Criteria or() {
         Criteria criteria = createCriteriaInternal();
         oredCriteria.add(criteria);
         return criteria;
     }
 
+    /**
+     * @mbg.generated
+     */
     public Criteria createCriteria() {
         Criteria criteria = createCriteriaInternal();
         if (oredCriteria.size() == 0) {
@@ -54,35 +99,55 @@ public class ChatQueryDOExample {
         return criteria;
     }
 
+    /**
+     * @mbg.generated
+     */
     protected Criteria createCriteriaInternal() {
         Criteria criteria = new Criteria();
         return criteria;
     }
 
+    /**
+     * @mbg.generated
+     */
     public void clear() {
         oredCriteria.clear();
         orderByClause = null;
         distinct = false;
     }
 
-    public Integer getLimitStart() {
-        return limitStart;
-    }
-
+    /**
+     * @mbg.generated
+     */
     public void setLimitStart(Integer limitStart) {
         this.limitStart = limitStart;
     }
 
-    public Integer getLimitEnd() {
-        return limitEnd;
+    /**
+     * @mbg.generated
+     */
+    public Integer getLimitStart() {
+        return limitStart;
     }
 
+    /**
+     * @mbg.generated
+     */
     public void setLimitEnd(Integer limitEnd) {
         this.limitEnd = limitEnd;
     }
 
-    protected abstract static class GeneratedCriteria {
+    /**
+     * @mbg.generated
+     */
+    public Integer getLimitEnd() {
+        return limitEnd;
+    }
 
+    /**
+     * s2_chat_query null
+     */
+    protected abstract static class GeneratedCriteria {
         protected List<Criterion> criteria;
 
         protected GeneratedCriteria() {
@@ -180,6 +245,66 @@ public class ChatQueryDOExample {
 
         public Criteria andQuestionIdNotBetween(Long value1, Long value2) {
             addCriterion("question_id not between", value1, value2, "questionId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentIdIsNull() {
+            addCriterion("agent_id is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentIdIsNotNull() {
+            addCriterion("agent_id is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentIdEqualTo(Integer value) {
+            addCriterion("agent_id =", value, "agentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentIdNotEqualTo(Integer value) {
+            addCriterion("agent_id <>", value, "agentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentIdGreaterThan(Integer value) {
+            addCriterion("agent_id >", value, "agentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentIdGreaterThanOrEqualTo(Integer value) {
+            addCriterion("agent_id >=", value, "agentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentIdLessThan(Integer value) {
+            addCriterion("agent_id <", value, "agentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentIdLessThanOrEqualTo(Integer value) {
+            addCriterion("agent_id <=", value, "agentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentIdIn(List<Integer> values) {
+            addCriterion("agent_id in", values, "agentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentIdNotIn(List<Integer> values) {
+            addCriterion("agent_id not in", values, "agentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentIdBetween(Integer value1, Integer value2) {
+            addCriterion("agent_id between", value1, value2, "agentId");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentIdNotBetween(Integer value1, Integer value2) {
+            addCriterion("agent_id not between", value1, value2, "agentId");
             return (Criteria) this;
         }
 
@@ -564,6 +689,9 @@ public class ChatQueryDOExample {
         }
     }
 
+    /**
+     * s2_chat_query
+     */
     public static class Criteria extends GeneratedCriteria {
 
         protected Criteria() {
@@ -571,8 +699,10 @@ public class ChatQueryDOExample {
         }
     }
 
+    /**
+     * s2_chat_query null
+     */
     public static class Criterion {
-
         private String condition;
 
         private Object value;

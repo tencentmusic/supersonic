@@ -1,8 +1,10 @@
 package com.tencent.supersonic.semantic.api.query.pojo;
 
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+
 import java.util.Arrays;
 import java.util.List;
+
 import lombok.Data;
 
 @Data

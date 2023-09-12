@@ -5,8 +5,9 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.semantic.api.model.request.ViewInfoReq;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaRelaResp;
-import com.tencent.supersonic.semantic.model.application.ViewInfoServiceImpl;
 import com.tencent.supersonic.semantic.model.domain.dataobject.ViewInfoDO;
+import com.tencent.supersonic.semantic.model.application.ViewInfoServiceImpl;
+
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

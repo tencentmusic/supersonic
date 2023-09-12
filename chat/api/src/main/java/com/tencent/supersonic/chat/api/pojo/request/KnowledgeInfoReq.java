@@ -1,7 +1,9 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+
 import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 
 /**

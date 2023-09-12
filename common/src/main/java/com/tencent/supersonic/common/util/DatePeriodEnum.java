@@ -1,10 +1,19 @@
 package com.tencent.supersonic.common.util;
 
 public enum DatePeriodEnum {
-    DAY,
-    WEEK,
-    MONTH,
-    YEAR;
+    DAY("日"),
+    WEEK("周"),
+    MONTH("月"),
+    YEAR("年");
+    private String chName;
+
+    DatePeriodEnum(String chName) {
+        this.chName = chName;
+    }
+
+    public String getChName() {
+        return chName;
+    }
 
     public static DatePeriodEnum get(String period) {
         for (DatePeriodEnum value : values()) {
@@ -14,4 +23,6 @@ public enum DatePeriodEnum {
         }
         return null;
     }
+
+
 }

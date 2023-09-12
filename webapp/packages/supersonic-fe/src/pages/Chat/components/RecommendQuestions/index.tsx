@@ -4,6 +4,7 @@ import Message from '../Message';
 import styles from './style.less';
 import { queryRecommendQuestions } from '../../service';
 import Typing from '../Typing';
+import { isMobile } from '@/utils/utils';
 
 type Props = {
   onSelectQuestion: (value: string) => void;
@@ -34,7 +35,7 @@ const RecommendQuestions: React.FC<Props> = ({ onSelectQuestion }) => {
 
   return (
     <div className={styles.recommendQuestions}>
-      <LeftAvatar />
+      {!isMobile && <LeftAvatar />}
       {loading ? (
         <Typing />
       ) : questions.length > 0 ? (

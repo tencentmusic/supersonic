@@ -12,6 +12,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import { ColumnType } from '../../../common/type';
 import NoPermissionChart from '../NoPermissionChart';
+import classNames from 'classnames';
 
 type Props = {
   model?: string;
@@ -146,11 +147,12 @@ const MetricTrendChart: React.FC<Props> = ({
                 }</span><span style="display: inline-block; width: 90px; text-align: right; font-weight: 500;">${
                   item.value === ''
                     ? '-'
-                    : metricField.dataFormatType === 'percent'
+                    : metricField.dataFormatType === 'percent' ||
+                      metricField.dataFormatType === 'decimal'
                     ? `${formatByDecimalPlaces(
                         item.value,
                         metricField.dataFormat?.decimalPlaces || 2
-                      )}%`
+                      )}${metricField.dataFormatType === 'percent' ? '%' : ''}`
                     : getFormattedValue(item.value)
                 }</span></div>`
             )
@@ -175,7 +177,8 @@ const MetricTrendChart: React.FC<Props> = ({
           smooth: true,
           data: data.map((item: any) => {
             const value = item[valueColumnName];
-            return metricField.dataFormatType === 'percent' &&
+            return (metricField.dataFormatType === 'percent' ||
+              metricField.dataFormatType === 'decimal') &&
               metricField.dataFormat?.needMultiply100
               ? value * 100
               : value;
@@ -201,12 +204,16 @@ const MetricTrendChart: React.FC<Props> = ({
 
   const prefixCls = `${CLS_PREFIX}-metric-trend`;
 
+  const flowTrendChartClass = classNames(`${prefixCls}-flow-trend-chart`, {
+    [`${prefixCls}-flow-trend-chart-single`]: !categoryColumnName,
+  });
+
   return (
     <div>
       {!metricField.authorized ? (
         <NoPermissionChart model={model || ''} onApplyAuth={onApplyAuth} />
       ) : (
-        <div className={`${prefixCls}-flow-trend-chart`} ref={chartRef} />
+        <div className={flowTrendChartClass} ref={chartRef} />
       )}
     </div>
   );

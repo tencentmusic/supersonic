@@ -1,16 +1,23 @@
 package com.tencent.supersonic.chat.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.agent.Agent;
+import com.tencent.supersonic.chat.agent.tool.AgentToolType;
+import com.tencent.supersonic.chat.agent.tool.DslTool;
 import com.tencent.supersonic.chat.persistence.dataobject.AgentDO;
 import com.tencent.supersonic.chat.persistence.repository.AgentRepository;
 import com.tencent.supersonic.chat.service.AgentService;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class AgentServiceImpl implements AgentService {
@@ -54,18 +61,18 @@ public class AgentServiceImpl implements AgentService {
         return agentRepository.getAgents();
     }
 
-    private Agent convert(AgentDO agentDO){
-        if (agentDO == null ) {
+    private Agent convert(AgentDO agentDO) {
+        if (agentDO == null) {
             return null;
         }
         Agent agent = new Agent();
-        BeanUtils.copyProperties(agentDO,agent);
+        BeanUtils.copyProperties(agentDO, agent);
         agent.setAgentConfig(agentDO.getConfig());
         agent.setExamples(JSONObject.parseArray(agentDO.getExamples(), String.class));
         return agent;
     }
 
-    private AgentDO convert(Agent agent, User user){
+    private AgentDO convert(Agent agent, User user) {
         AgentDO agentDO = new AgentDO();
         BeanUtils.copyProperties(agent, agentDO);
         agentDO.setConfig(agent.getAgentConfig());
@@ -78,5 +85,28 @@ public class AgentServiceImpl implements AgentService {
             agentDO.setStatus(1);
         }
         return agentDO;
+    }
+
+    public List<DslTool> getDslTools(Integer agentId, AgentToolType agentToolType) {
+        Agent agent = getAgent(agentId);
+        if (agent == null) {
+            return Lists.newArrayList();
+        }
+        List<String> tools = agent.getTools(agentToolType);
+        if (CollectionUtils.isEmpty(tools)) {
+            return Lists.newArrayList();
+        }
+        return tools.stream().map(tool -> JSONObject.parseObject(tool, DslTool.class)).collect(Collectors.toList());
+    }
+
+    public Set<Long> getDslToolsModelIds(Integer agentId, AgentToolType agentToolType) {
+        List<DslTool> dslTools = getDslTools(agentId, agentToolType);
+        if (CollectionUtils.isEmpty(dslTools)) {
+            return new HashSet<>();
+        }
+        return dslTools.stream().map(DslTool::getModelIds)
+                .filter(modelIds -> !CollectionUtils.isEmpty(modelIds))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 }

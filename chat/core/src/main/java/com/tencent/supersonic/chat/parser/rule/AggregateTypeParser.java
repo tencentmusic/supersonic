@@ -14,6 +14,7 @@ import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
+
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -66,6 +68,7 @@ public class AggregateTypeParser implements SemanticParser {
         Map<AggregateTypeEnum, Integer> aggregateCount = new HashMap<>(REGX_MAP.size());
         Map<AggregateTypeEnum, String> aggregateWord = new HashMap<>(REGX_MAP.size());
 
+
         for (Map.Entry<AggregateTypeEnum, Pattern> entry : REGX_MAP.entrySet()) {
             Matcher matcher = entry.getValue().matcher(queryText);
             int count = 0;
@@ -88,7 +91,6 @@ public class AggregateTypeParser implements SemanticParser {
 
     @AllArgsConstructor
     class AggregateConf {
-
         public AggregateTypeEnum type;
         public String detectWord;
     }

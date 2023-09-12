@@ -6,6 +6,5 @@ import lombok.Data;
 
 @Data
 public class AggregateInfo {
-
     private List<MetricInfo> metricInfos = new ArrayList<>();
 }

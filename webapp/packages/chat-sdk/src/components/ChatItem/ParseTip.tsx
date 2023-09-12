@@ -1,17 +1,20 @@
 import React, { ReactNode } from 'react';
 import { AGG_TYPE_MAP, PREFIX_CLS } from '../../common/constants';
-import { ChatContextType } from '../../common/type';
-import Text from './Text';
-import Typing from './Typing';
+import { ChatContextType, FilterItemType } from '../../common/type';
+import { CheckCircleFilled, InfoCircleOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
+import SwicthEntity from './SwitchEntity';
+import Loading from './Loading';
+import FilterItem from './FilterItem';
 
 type Props = {
   parseLoading: boolean;
   parseInfoOptions: ChatContextType[];
   parseTip: string;
   currentParseInfo?: ChatContextType;
-  optionMode?: boolean;
   onSelectParseInfo: (parseInfo: ChatContextType) => void;
+  onSwitchEntity: (entityId: string) => void;
+  onFiltersChange: (filters: FilterItemType[]) => void;
 };
 
 const MAX_OPTION_VALUES_COUNT = 2;
@@ -21,17 +24,36 @@ const ParseTip: React.FC<Props> = ({
   parseInfoOptions,
   parseTip,
   currentParseInfo,
-  optionMode,
   onSelectParseInfo,
+  onSwitchEntity,
+  onFiltersChange,
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
 
+  const getNode = (tipTitle: string, tipNode?: ReactNode, parseSucceed?: boolean) => {
+    const contentContainerClass = classNames(`${prefixCls}-content-container`, {
+      [`${prefixCls}-content-container-succeed`]: parseSucceed,
+    });
+    return (
+      <div className={`${prefixCls}-parse-tip`}>
+        <div className={`${prefixCls}-title-bar`}>
+          <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+          <div className={`${prefixCls}-step-title`}>
+            {tipTitle}
+            {!tipNode && <Loading />}
+          </div>
+        </div>
+        {tipNode && <div className={contentContainerClass}>{tipNode}</div>}
+      </div>
+    );
+  };
+
   if (parseLoading) {
-    return <Typing />;
+    return getNode('意图解析中');
   }
 
   if (parseTip) {
-    return <Text data={parseTip} />;
+    return getNode('意图解析失败', parseTip);
   }
 
   if (parseInfoOptions.length === 0) {
@@ -40,6 +62,7 @@ const ParseTip: React.FC<Props> = ({
 
   const getTipNode = (parseInfo: ChatContextType, isOptions?: boolean, index?: number) => {
     const {
+      modelId,
       modelName,
       dateInfo,
       dimensionFilters,
@@ -51,27 +74,12 @@ const ParseTip: React.FC<Props> = ({
       entity,
       elementMatches,
     } = parseInfo || {};
+
     const { startDate, endDate } = dateInfo || {};
     const dimensionItems = dimensions?.filter(item => item.type === 'DIMENSION');
     const metric = metrics?.[0];
 
-    const tipContentClass = classNames(`${prefixCls}-tip-content`, {
-      [`${prefixCls}-tip-content-option`]: isOptions,
-      [`${prefixCls}-tip-content-option-active`]:
-        isOptions &&
-        currentParseInfo &&
-        JSON.stringify(currentParseInfo) === JSON.stringify(parseInfo),
-      [`${prefixCls}-tip-content-option-disabled`]:
-        isOptions &&
-        currentParseInfo !== undefined &&
-        JSON.stringify(currentParseInfo) !== JSON.stringify(parseInfo),
-    });
-
-    const itemValueClass = classNames({
-      [`${prefixCls}-tip-item-value`]: !isOptions,
-      [`${prefixCls}-tip-item-option`]: isOptions,
-    });
-
+    const itemValueClass = `${prefixCls}-tip-item-value`;
     const entityId = dimensionFilters?.length > 0 ? dimensionFilters[0].value : undefined;
     const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
     const entityName = elementMatches?.find(item => item.element?.type === 'ID')?.element.name;
@@ -81,9 +89,47 @@ const ParseTip: React.FC<Props> = ({
     const fields =
       queryMode === 'ENTITY_DETAIL' ? dimensionItems?.concat(metrics || []) : dimensionItems;
 
+    const getFilterContent = (filters: any) => {
+      return (
+        <div className={`${prefixCls}-tip-item-filter-content`}>
+          {filters.map((filter: any) => (
+            <div className={`${prefixCls}-tip-item-option`}>
+              <span>
+                <span className={`${prefixCls}-tip-item-filter-name`}>{filter.name}</span>
+                {filter.operator !== '=' && filter.operator !== 'IN'
+                  ? ` ${filter.operator} `
+                  : '：'}
+              </span>
+              {queryMode !== 'DSL' && !filter.bizName?.includes('_id') ? (
+                <FilterItem
+                  modelId={modelId}
+                  filters={dimensionFilters}
+                  filter={filter}
+                  onFiltersChange={onFiltersChange}
+                />
+              ) : (
+                <span className={itemValueClass}>{filter.value}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    const getFiltersNode = () => {
+      return (
+        <div className={`${prefixCls}-tip-item`}>
+          <div className={`${prefixCls}-tip-item-name`}>筛选条件：</div>
+          <div className={`${prefixCls}-tip-item-content`}>
+            {getFilterContent(dimensionFilters)}
+          </div>
+        </div>
+      );
+    };
+
     return (
       <div
-        className={tipContentClass}
+        className={`${prefixCls}-tip-content`}
         onClick={() => {
           if (isOptions && currentParseInfo === undefined) {
             onSelectParseInfo(parseInfo);
@@ -91,20 +137,28 @@ const ParseTip: React.FC<Props> = ({
         }}
       >
         {index !== undefined && <div>{index + 1}.</div>}
-        {!!agentType ? (
+        {!!agentType && queryMode !== 'DSL' ? (
           <div className={`${prefixCls}-tip-item`}>
             将由{agentType === 'plugin' ? '插件' : '内置'}工具
             <span className={itemValueClass}>{agentName}</span>来解答
           </div>
         ) : (
           <>
-            {queryMode.includes('ENTITY') &&
+            {(queryMode.includes('ENTITY') || queryMode === 'DSL') &&
             typeof entityId === 'string' &&
             !!entityAlias &&
             !!entityName ? (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>{entityAlias}：</div>
-                <div className={itemValueClass}>{entityName}</div>
+                {!isOptions && (entityAlias === '歌曲' || entityAlias === '艺人') ? (
+                  <SwicthEntity
+                    entityName={entityName}
+                    chatContext={parseInfo}
+                    onSwitchEntity={onSwitchEntity}
+                  />
+                ) : (
+                  <div className={itemValueClass}>{entityName}</div>
+                )}
               </div>
             ) : (
               <div className={`${prefixCls}-tip-item`}>
@@ -112,7 +166,7 @@ const ParseTip: React.FC<Props> = ({
                 <div className={itemValueClass}>{modelName}</div>
               </div>
             )}
-            {metric && (
+            {!queryMode.includes('ENTITY') && metric && (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>指标：</div>
                 <div className={itemValueClass}>{metric.name}</div>
@@ -120,7 +174,7 @@ const ParseTip: React.FC<Props> = ({
             )}
             {!isOptions && (
               <div className={`${prefixCls}-tip-item`}>
-                <div className={`${prefixCls}-tip-item-name`}>时间：</div>
+                <div className={`${prefixCls}-tip-item-name`}>数据时间：</div>
                 <div className={itemValueClass}>
                   {startDate === endDate ? startDate : `${startDate} ~ ${endDate}`}
                 </div>
@@ -148,23 +202,11 @@ const ParseTip: React.FC<Props> = ({
               'ENTITY_DETAIL',
               'ENTITY_LIST_FILTER',
               'ENTITY_ID',
+              'DSL',
             ].includes(queryMode) &&
               dimensionFilters &&
-              dimensionFilters?.length > 0 && (
-                <div className={`${prefixCls}-tip-item`}>
-                  <div className={`${prefixCls}-tip-item-name`}>筛选条件：</div>
-                  {dimensionFilters.slice(0, MAX_OPTION_VALUES_COUNT).map((filter, index) => (
-                    <div className={itemValueClass}>
-                      <span>{filter.name}：</span>
-                      <span>
-                        {Array.isArray(filter.value) ? filter.value.join('、') : filter.value}
-                      </span>
-                      {index !== dimensionFilters.length - 1 && <span>、</span>}
-                    </div>
-                  ))}
-                  {dimensionFilters.length > MAX_OPTION_VALUES_COUNT && '...'}
-                </div>
-              )}
+              dimensionFilters?.length > 0 &&
+              getFiltersNode()}
             {queryMode === 'METRIC_ORDERBY' && aggType && aggType !== 'NONE' && (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>聚合方式：</div>
@@ -177,30 +219,47 @@ const ParseTip: React.FC<Props> = ({
     );
   };
 
-  let tipNode: ReactNode;
+  const parseInfo = parseInfoOptions[0] || {};
+  const { properties, entity, entityInfo, elementMatches, queryMode } = parseInfo || {};
 
-  if (parseInfoOptions.length > 1 || optionMode) {
-    tipNode = (
-      <div className={`${prefixCls}-multi-options`}>
-        <div>
-          还有以下的相关问题，<strong>请您点击提交</strong>
-        </div>
-        <div className={`${prefixCls}-options`}>
-          {parseInfoOptions.map((item, index) => getTipNode(item, true, index))}
-        </div>
-      </div>
-    );
-  } else {
-    const agentType = parseInfoOptions[0]?.properties?.type;
-    tipNode = (
-      <div className={`${prefixCls}-tip`}>
-        <div>{!!agentType ? '您的问题' : '您的问题解析为：'}</div>
-        {getTipNode(parseInfoOptions[0])}
-      </div>
-    );
-  }
+  const { type } = properties || {};
+  const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
+  const entityName = elementMatches?.find(item => item.element?.type === 'ID')?.element.name;
 
-  return <Text data={tipNode} />;
+  const entityDimensions = entityInfo?.dimensions?.filter(
+    item =>
+      !['zyqk_song_id', 'song_name', 'singer_id'].includes(item.bizName) &&
+      !(
+        entityInfo?.dimensions?.some(dimension => dimension.bizName === 'singer_id') &&
+        item.bizName === 'singer_name'
+      )
+  );
+
+  const tipNode = (
+    <div className={`${prefixCls}-tip`}>
+      {getTipNode(parseInfo)}
+      {queryMode !== 'ENTITY_ID' && entityDimensions?.length > 0 && (
+        <div className={`${prefixCls}-entity-info`}>
+          {entityDimensions.map(dimension => (
+            <div className={`${prefixCls}-dimension-item`} key={dimension.itemId}>
+              <div className={`${prefixCls}-dimension-name`}>{dimension.name}：</div>
+              <div className={`${prefixCls}-dimension-value`}>{dimension.value}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      {(!type || queryMode === 'DSL') && entityAlias && entityName && (
+        <div className={`${prefixCls}-switch-entity-tip`}>
+          <InfoCircleOutlined />
+          <div>
+            如果未匹配到您查询的{entityAlias}，可点击上面的{entityAlias}名切换
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  return getNode('意图解析结果', tipNode, true);
 };
 
 export default ParseTip;

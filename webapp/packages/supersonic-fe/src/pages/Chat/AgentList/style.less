@@ -1,0 +1,78 @@
+.agentList {
+  width: 248px;
+  height: 100%;
+  background: #f9f9f9;
+  border-right: 1px solid #f1f1f1;
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 50px;
+    padding: 0 16px;
+
+    .headerTitle {
+      color: var(--text-color);
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    .plusIcon {
+      color: var(--text-color);
+      font-size: 15px;
+      cursor: pointer;
+
+      &:hover {
+        color: var(--chat-blue);
+      }
+    }
+  }
+
+  .agentListContent {
+    display: flex;
+    flex-direction: column;
+    padding: 4px 8px;
+    row-gap: 2px;
+
+    .agentItem {
+      display: flex;
+      align-items: center;
+      padding: 8px 4px;
+      column-gap: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+
+      .avatar {
+        font-size: 40px;
+      }
+
+      .agentInfo {
+        display: flex;
+        flex-direction: column;
+        row-gap: 2px;
+
+        .agentName {
+          color: #000;
+          font-size: 14px;
+        }
+
+        .agentDesc {
+          width: 160px;
+          overflow: hidden;
+          color: var(--text-color-fourth);
+          font-size: 12px;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+      }
+
+      &:hover, &.active {
+        background: #22a5f7;
+
+        .agentName, .agentDesc {
+          color: #fff;
+        }
+      }
+    }
+  }
+}

@@ -1,16 +1,27 @@
 package com.tencent.supersonic.semantic.model.application;
 
 import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
-import com.tencent.supersonic.semantic.api.model.response.*;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
-import com.tencent.supersonic.semantic.model.domain.*;
+import com.tencent.supersonic.semantic.model.domain.DatabaseService;
+import com.tencent.supersonic.semantic.model.domain.ModelService;
+import com.tencent.supersonic.semantic.model.domain.DimensionService;
+import com.tencent.supersonic.semantic.model.domain.DatasourceService;
+import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.semantic.model.domain.Catalog;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Component
@@ -38,7 +49,12 @@ public class CatalogImpl implements Catalog {
     }
 
     public DatabaseResp getDatabaseByModelId(Long modelId) {
-        return databaseService.getDatabaseByModelId(modelId);
+        List<DatasourceResp> datasourceResps = datasourceService.getDatasourceList(modelId);
+        if (!CollectionUtils.isEmpty(datasourceResps)) {
+            Long databaseId = datasourceResps.iterator().next().getDatabaseId();
+            return databaseService.getDatabase(databaseId);
+        }
+        return null;
     }
 
     @Override

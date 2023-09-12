@@ -5,7 +5,7 @@
 <mapper namespace="com.tencent.supersonic.semantic.query.persistence.mapper.StatMapper">
 
     <resultMap id="QueryStatDO"
-            type="com.tencent.supersonic.semantic.api.model.pojo.QueryStat">
+               type="com.tencent.supersonic.semantic.api.model.pojo.QueryStat">
         <id column="id" property="id"/>
         <result column="trace_id" property="traceId"/>
         <result column="model_id" property="modelId"/>
@@ -40,18 +40,17 @@
 
     <insert id="createRecord">
         insert into s2_query_stat_info
-        (trace_id, model_id, `user`, query_type, query_type_back, query_sql_cmd, sql_cmd_md5,
-         query_struct_cmd, struct_cmd_md5, `sql`, sql_md5, query_engine,
-         elapsed_ms, query_state, native_query, start_date, end_date, dimensions, metrics,
-         select_cols, agg_cols, filter_cols, group_by_cols,
-         order_by_cols, use_result_cache, use_sql_cache, sql_cache_key, result_cache_key)
-        values (#{traceId}, #{modelId}, #{user}, #{queryType}, #{queryTypeBack}, #{querySqlCmd},
-                #{querySqlCmdMd5}, #{queryStructCmd}, #{queryStructCmdMd5}, #{sql}, #{sqlMd5},
-                #{queryEngine},
-                #{elapsedMs}, #{queryState}, #{nativeQuery}, #{startDate}, #{endDate},
-                #{dimensions}, #{metrics}, #{selectCols}, #{aggCols}, #{filterCols}, #{groupByCols},
-                #{orderByCols}, #{useResultCache}, #{useSqlCache}, #{sqlCacheKey},
-                #{resultCacheKey})
+        (
+            trace_id, model_id, `user`, query_type, query_type_back, query_sql_cmd, sql_cmd_md5, query_struct_cmd, struct_cmd_md5, `sql`, sql_md5, query_engine,
+            elapsed_ms, query_state, native_query, start_date, end_date, dimensions, metrics, select_cols, agg_cols, filter_cols, group_by_cols,
+            order_by_cols, use_result_cache, use_sql_cache, sql_cache_key, result_cache_key
+        )
+        values
+        (
+            #{traceId}, #{modelId}, #{user}, #{queryType}, #{queryTypeBack}, #{querySqlCmd}, #{querySqlCmdMd5}, #{queryStructCmd}, #{queryStructCmdMd5}, #{sql}, #{sqlMd5}, #{queryEngine},
+            #{elapsedMs}, #{queryState}, #{nativeQuery}, #{startDate}, #{endDate}, #{dimensions}, #{metrics}, #{selectCols}, #{aggCols}, #{filterCols}, #{groupByCols},
+            #{orderByCols}, #{useResultCache}, #{useSqlCache}, #{sqlCacheKey}, #{resultCacheKey}
+        )
     </insert>
 
     <select id="getStatInfo"

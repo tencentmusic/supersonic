@@ -2,8 +2,8 @@ package com.tencent.supersonic.semantic.query.parser.calcite.sql.node;
 
 
 import com.tencent.supersonic.semantic.query.parser.calcite.Configuration;
-import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSqlDialect;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.Optimization;
+import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSqlDialect;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;

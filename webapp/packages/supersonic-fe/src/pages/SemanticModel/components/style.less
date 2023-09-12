@@ -31,22 +31,50 @@
 
     .title {
       margin-bottom: 0;
-      padding: 20px;
+      // padding: 20px;
       font-size: 20px;
       line-height: 34px;
       border-bottom: 1px solid #d9d9d9;
+      display: flex;
     }
-
+    .navContainer {
+      padding: 20px;
+      padding-left: 30px;
+    }
+    .backBtn {
+      background-color: #f8f8f8;
+      padding: 5px;
+      color: #b0b4bc;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      &:hover {
+        background-color: #7599e5;
+        color: #fff;
+      }
+    }
     .tab {
       :global {
         .ant-tabs-tab-btn {
-          font-size: 16px !important;
+          font-size: 16px;
         }
         .ant-tabs-nav-wrap {
           padding: 0 20px;
         }
         .ant-tabs-nav {
           margin-bottom: 0;
+        }
+      }
+    }
+    .chatSettingSectionTab {
+      :global {
+        .ant-tabs-tab-btn {
+          font-size: 14px;
+        }
+        .ant-tabs-nav-wrap {
+          padding: 0;
         }
       }
     }
@@ -60,9 +88,7 @@
         padding: 0 !important;
       }
       .ant-tabs-content-holder {
-        margin-top: 20px;
-        // overflow: scroll;
-        // height: calc(100vh - 175px);
+        padding-top: 20px;
       }
     }
 
@@ -96,7 +122,7 @@
 }
 
 .domainTreeSelect {
-  width: 300px;
+  // width: 300px;
 }
 
 .domainList {

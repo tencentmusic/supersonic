@@ -1,18 +1,20 @@
 package com.tencent.supersonic.semantic.model.domain.utils;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
+import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.semantic.api.model.request.DimensionReq;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Dimension;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
@@ -46,8 +48,8 @@ public class DimensionConverter {
 
 
     public static DimensionResp convert2DimensionResp(DimensionDO dimensionDO,
-            Map<Long, String> fullPathMap,
-            Map<Long, DatasourceResp> datasourceRespMap) {
+                                                      Map<Long, String> fullPathMap,
+                                                      Map<Long, DatasourceResp> datasourceRespMap) {
         DimensionResp dimensionResp = new DimensionResp();
         BeanUtils.copyProperties(dimensionDO, dimensionResp);
         dimensionResp.setFullPath(fullPathMap.get(dimensionDO.getModelId()) + dimensionDO.getBizName());
