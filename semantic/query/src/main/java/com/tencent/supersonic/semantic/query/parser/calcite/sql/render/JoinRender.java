@@ -1,18 +1,18 @@
 package com.tencent.supersonic.semantic.query.parser.calcite.sql.render;
 
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.Renderer;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.AggFunctionNode;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.DataSourceNode;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.FilterNode;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.MetricNode;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.TableView;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Constants;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Identify;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Metric;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.Renderer;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.TableView;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.AggFunctionNode;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.DataSourceNode;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.FilterNode;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.MetricNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.SemanticNode;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -118,7 +118,7 @@ public class JoinRender extends Renderer {
         innerView.setTable(left);
         filterView.setTable(SemanticNode.buildAs(Constants.JOIN_TABLE_OUT_PREFIX, innerView.build()));
         if (!filterDimension.isEmpty()) {
-            for (String d : filterDimension) {
+            for (String d : getQueryDimension(filterDimension, queryAllDimension, whereFields)) {
                 if (nonAgg) {
                     filterView.getMeasure().add(SemanticNode.parse(d, scope));
                 } else {
@@ -181,6 +181,12 @@ public class JoinRender extends Renderer {
                 filterDimension.add(d);
             }
         }
+    }
+
+    private Set<String> getQueryDimension(Set<String> filterDimension, Set<String> queryAllDimension,
+            Set<String> whereFields) {
+        return filterDimension.stream().filter(d -> queryAllDimension.contains(d) || whereFields.contains(d)).collect(
+                Collectors.toSet());
     }
 
 
