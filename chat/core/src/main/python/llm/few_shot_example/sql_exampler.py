@@ -292,5 +292,57 @@ examplars= [
 基于table和columns，可能的cell values 是 = ['刘锝桦', 1992, 4, 2, 2020, 5, 2, 200000]。""",
         "schema_links":"""["结算播放量", "发布时间", "歌手名", "刘锝桦", 1992, 4, 2, 2020, 5, 2, 200000]""",
         "sql":"""select 歌曲名 from 歌曲库 where YEAR(发布时间) >= 1992 and MONTH(发布时间) >= 4 and DAY(发布时间) >= 2 and YEAR(发布时间) <= 2020 and MONTH(发布时间) <= 5 and DAY(发布时间) <= 2 and 歌手名 = '刘锝桦' and 结算播放量 > 200000 and 数据日期 = '2023-08-16'"""
+        },
+    {
+        "current_date":"2023-09-04",
+        "table_name":"内容库产品",
+        "fields_list":"""["用户名", "部门", "模块", "访问时长", "访问次数", "访问人数", "数据日期"]""",
+        "question":"内容库近30天访问次数的平均数",
+        "prior_schema_links":"""[]""",
+        "analysis": """让我们一步一步地思考。在问题“内容库近30天访问次数的平均数“中，我们被问：
+“访问次数的平均数”，所以我们需要column=[访问次数]
+”内容库近30天“，所以我们需要column=[数据日期]
+基于table和columns，可能的cell values 是 = [30]。""",
+        "schema_links":"""["访问次数", "数据日期", 30]""",
+        "sql":"""select avg(访问次数) from 内容库产品 where datediff('day', 数据日期, '2023-09-04') <= 30 """
+        },
+    {
+        "current_date":"2023-09-04",
+        "table_name":"内容库产品",
+        "fields_list":"""["用户名", "部门", "模块", "访问时长", "访问次数", "访问人数", "数据日期"]""",
+        "question":"内容库近半年哪个月的访问次数汇总最高",
+        "prior_schema_links":"""[]""",
+        "analysis": """让我们一步一步地思考。在问题“内容库近半年哪个月的访问次数汇总最高“中，我们被问：
+“访问次数汇总最高”，所以我们需要column=[访问次数]
+”内容库近半年“，所以我们需要column=[数据日期]
+基于table和columns，可能的cell values 是 = [0.5]。""",
+        "schema_links":"""["访问次数", "数据日期", 0.5]""",
+        "sql":"""select MONTH(数据日期), sum(访问次数) from 内容库产品 where datediff('year', 数据日期, '2023-09-04') <= 0.5 group by MONTH(数据日期) order by sum(访问次数) desc limit 1 """
+        },
+    {
+        "current_date":"2023-09-04",
+        "table_name":"内容库产品",
+        "fields_list":"""["用户名", "部门", "模块", "访问时长", "访问次数", "访问人数", "数据日期"]""",
+        "question":"内容库近半年每个月的平均访问次数",
+        "prior_schema_links":"""[]""",
+        "analysis": """让我们一步一步地思考。在问题“内容库近半年每个月的平均访问次数“中，我们被问：
+“每个月的平均访问次数”，所以我们需要column=[访问次数]
+”内容库近半年“，所以我们需要column=[数据日期]
+基于table和columns，可能的cell values 是 = [0.5]。""",
+        "schema_links":"""["访问次数", "数据日期", 0.5]""",
+        "sql":"""select MONTH(数据日期), avg(访问次数) from 内容库产品 where datediff('year', 数据日期, '2023-09-04') <= 0.5 group by MONTH(数据日期) """
+        },
+    {
+        "current_date":"2023-09-10",
+        "table_name":"内容库产品",
+        "fields_list":"""["用户名", "部门", "模块", "访问时长", "访问次数", "访问人数", "数据日期"]""",
+        "question":"内容库 按部门统计访问次数 top10 的部门",
+        "prior_schema_links":"""[]""",
+        "analysis": """让我们一步一步地思考。在问题“内容库 按部门统计访问次数 top10 的部门“中，我们被问：
+“访问次数 top10 的部门”，所以我们需要column=[访问次数]
+”内容库 按部门统计“，所以我们需要column=[部门]
+基于table和columns，可能的cell values 是 = [10]。""",
+        "schema_links":"""["访问次数", "部门", 10]""",
+        "sql":"""select 部门, sum(访问次数) from 内容库产品 group by 部门 order by sum(访问次数) desc limit 10 """
         }
 ]
