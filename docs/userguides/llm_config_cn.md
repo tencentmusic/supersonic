@@ -8,7 +8,7 @@
 ### **配置方式**
 <div align="left" >
     <img src=../images/nlp_config.png width="70%"/>
-    <p>图1-1 NPL配置文件</p>
+    <p>图1-1 LLM配置文件</p>
 </div>
 
 1. LLM模型相关的配置，在 supersonic/chat/core/src/main/python/llm/run_config.py 进行配置。
