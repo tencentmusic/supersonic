@@ -12,9 +12,7 @@ del /q "%buildDir%\*.tar.gz" 2>NUL
 call mvn -f "%baseDir%\..\pom.xml" clean package -DskipTests
 
 rem 2. move package to build
-echo f|xcopy "%baseDir%\..\launchers\standalone\target\*.tar.gz" "%buildDir%\supersonic-standalone.tar.gz"
-echo f|xcopy "%baseDir%\..\launchers\semantic\target\*.tar.gz" "%buildDir%\supersonic-semantic.tar.gz"
-echo f|xcopy "%baseDir%\..\launchers\chat\target\*.tar.gz" "%buildDir%\supersonic-chat.tar.gz"
+echo f|xcopy "%baseDir%\..\launchers\standalone\target\*.tar.gz" "%buildDir%\supersonic.tar.gz"
 
 rem 3. build webapp
 cd "%baseDir%\..\webapp"

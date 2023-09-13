@@ -18,7 +18,6 @@ set "llm_host=127.0.0.1"
 set "llm_port=9092"
 set "start_name=api_service"
 
-set "llm_path=%baseDir%\..\chat\core\src\main\python"
 
 if "%module%"=="" (
    set "module=standalone"
@@ -53,9 +52,10 @@ if "%command%"=="restart" (
 ::1. clear file
 rd /s /q "%runtimeDir%"
 mkdir "%runtimeDir%"
+set "llm_path=%runtimeDir%\supersonic-standalone\llm"
 
 if "%module%"=="llmparser" (
-   tar -zxvf "%buildDir%\supersonic-standalone.tar.gz" -C "%runtimeDir%"
+   tar -zxvf "%buildDir%\supersonic.tar.gz" -C "%runtimeDir%"
    for /d %%f in ("%runtimeDir%\launchers-standalone-*") do (
        move "%%f" "%runtimeDir%\supersonic-standalone"
    )
@@ -68,7 +68,7 @@ if "%module%"=="llmparser" (
    goto :EOF
 )
 
-tar -zxvf "%buildDir%\supersonic-%module%.tar.gz" -C "%runtimeDir%"
+tar -zxvf "%buildDir%\supersonic.tar.gz" -C "%runtimeDir%"
 for /d %%f in ("%runtimeDir%\launchers-%module%-*") do (
     move "%%f" "%runtimeDir%\supersonic-%module%"
 )
