@@ -68,7 +68,7 @@ const Message: React.FC<Props> = ({
               <div className={`${prefixCls}-info-bar`}>
                 <div className={`${prefixCls}-main-entity-info`}>
                   <div className={`${prefixCls}-info-item`}>
-                    <div className={`${prefixCls}-info-name`}>主题域：</div>
+                    <div className={`${prefixCls}-info-name`}>数据模型：</div>
                     <div className={`${prefixCls}-info-value`}>{modelName}</div>
                   </div>
                   <div className={`${prefixCls}-info-item`}>

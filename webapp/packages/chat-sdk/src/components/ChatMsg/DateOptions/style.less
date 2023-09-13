@@ -1,0 +1,43 @@
+@import '../../../styles/index.less';
+
+@date-options-prefix-cls: ~'@{supersonic-chat-prefix}-date-options';
+
+.@{date-options-prefix-cls} {
+  display: flex;
+  align-items: center;
+  column-gap: 20px;
+  font-size: 14px;
+  
+  &-item {
+    position: relative;
+    color: var(--text-color-secondary);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--chat-blue);
+    }
+  }
+
+  &-date-active {
+    color: var(--chat-blue);
+  }
+
+  &-date-mobile {
+    font-size: 12px;
+  }
+
+  &-active-identifier {
+    position: absolute;
+    bottom: -6px;
+    width: 100%;
+    height: 4px;
+    background-color: var(--chat-blue);
+    border-radius: 4px 4px 0 0;
+  }
+
+  &-item-divider {
+    width: 1px;
+    height: 16px;
+    background-color: var(--text-color-fifth);
+  }
+}

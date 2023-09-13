@@ -1,9 +1,8 @@
 import { PREFIX_CLS } from '../../../common/constants';
 import { formatByDecimalPlaces, formatMetric, formatNumberWithCN } from '../../../utils/utils';
 import ApplyAuth from '../ApplyAuth';
-import { DrillDownDimensionType, MsgDataType } from '../../../common/type';
+import { MsgDataType } from '../../../common/type';
 import PeriodCompareItem from './PeriodCompareItem';
-import DrillDownDimensions from '../../DrillDownDimensions';
 import { Spin } from 'antd';
 import classNames from 'classnames';
 import { SwapOutlined } from '@ant-design/icons';
@@ -11,20 +10,12 @@ import { useState } from 'react';
 
 type Props = {
   data: MsgDataType;
-  drillDownDimension?: DrillDownDimensionType;
   loading: boolean;
-  onSelectDimension: (dimension?: DrillDownDimensionType) => void;
   onApplyAuth?: (model: string) => void;
 };
 
-const MetricCard: React.FC<Props> = ({
-  data,
-  drillDownDimension,
-  loading,
-  onSelectDimension,
-  onApplyAuth,
-}) => {
-  const { queryMode, queryColumns, queryResults, entityInfo, aggregateInfo, chatContext } = data;
+const MetricCard: React.FC<Props> = ({ data, loading, onApplyAuth }) => {
+  const { queryMode, queryColumns, queryResults, entityInfo, aggregateInfo } = data;
 
   const { metricInfos } = aggregateInfo || {};
 
@@ -56,20 +47,6 @@ const MetricCard: React.FC<Props> = ({
           <div className={`${prefixCls}-indicator-name`}>{indicatorColumn?.name}</div>
         ) : (
           <div style={{ height: 10 }} />
-        )}
-        {drillDownDimension && (
-          <div className={`${prefixCls}-filter-section-wrapper`}>
-            (
-            <div className={`${prefixCls}-filter-section`}>
-              {drillDownDimension && (
-                <div className={`${prefixCls}-filter-item`}>
-                  <div className={`${prefixCls}-filter-item-label`}>下钻维度：</div>
-                  <div className={`${prefixCls}-filter-item-value`}>{drillDownDimension.name}</div>
-                </div>
-              )}
-            </div>
-            )
-          </div>
         )}
       </div>
       <Spin spinning={loading}>
@@ -104,16 +81,6 @@ const MetricCard: React.FC<Props> = ({
           )}
         </div>
       </Spin>
-      {queryMode.includes('METRIC') && (
-        <div className={`${prefixCls}-drill-down-dimensions`}>
-          <DrillDownDimensions
-            modelId={chatContext?.modelId}
-            dimensionFilters={chatContext?.dimensionFilters}
-            drillDownDimension={drillDownDimension}
-            onSelectDimension={onSelectDimension}
-          />
-        </div>
-      )}
     </div>
   );
 };
