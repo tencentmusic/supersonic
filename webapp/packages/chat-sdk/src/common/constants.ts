@@ -42,7 +42,7 @@ export const THEME_COLOR_LIST = [
 
 export const PARSE_ERROR_TIP = '智能助理不太懂您说什么呐，回去一定补充知识';
 
-export const SEARCH_EXCEPTION_TIP = '查询出错啦，智能助理还不够聪明，请您换个表达再试试';
+export const SEARCH_EXCEPTION_TIP = '查询出错啦，数据库可能出现异常或者负载繁忙，请联系管理员或者稍后重试';
 
 export const MSG_VALID_TIP = {
   [MsgValidTypeEnum.SEARCH_EXCEPTION]: '数据查询异常',

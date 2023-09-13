@@ -165,7 +165,7 @@ const ParseTip: React.FC<Props> = ({
               </div>
             ) : (
               <div className={`${prefixCls}-tip-item`}>
-                <div className={`${prefixCls}-tip-item-name`}>主题域：</div>
+                <div className={`${prefixCls}-tip-item-name`}>数据模型：</div>
                 <div className={itemValueClass}>{modelName}</div>
               </div>
             )}

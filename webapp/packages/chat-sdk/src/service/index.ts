@@ -1,7 +1,7 @@
 import axios from './axiosInstance';
 import { ChatContextType, DrillDownDimensionType, HistoryType, MsgDataType, ParseDataType, SearchRecommendItem } from '../common/type';
 
-const DEFAULT_CHAT_ID = 0;
+const DEFAULT_CHAT_ID = 12009993;
 
 const prefix = '/api';
 
