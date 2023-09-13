@@ -29,7 +29,7 @@ public class WordService {
 
         addWordsByType(DictWordType.DIMENSION, semanticSchema.getDimensions(), words);
         addWordsByType(DictWordType.METRIC, semanticSchema.getMetrics(), words);
-        addWordsByType(DictWordType.DOMAIN, semanticSchema.getModels(), words);
+        addWordsByType(DictWordType.MODEL, semanticSchema.getModels(), words);
         addWordsByType(DictWordType.ENTITY, semanticSchema.getEntities(), words);
         addWordsByType(DictWordType.VALUE, semanticSchema.getDimensionValues(), words);
 
