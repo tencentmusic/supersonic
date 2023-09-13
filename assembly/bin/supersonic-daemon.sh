@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+
+sbinDir=$(cd "$(dirname "$0")"; pwd)
+baseDir=$(cd "$sbinDir/.." && pwd -P)
+runtimeDir=$baseDir/../runtime
+buildDir=$baseDir/build
+
+command=$1
+service=$2
+
+cd $baseDir
+if [[ "$service" == "semantic" || -z "$service"  ]] && [ "$command" != "stop"  ]; then
+   #1. clear file
+   mkdir -p ${runtimeDir}
+   rm -fr ${runtimeDir}/*
+
+   #2. package lib
+
+   tar -zxvf ${buildDir}/supersonic.tar.gz  -C ${runtimeDir}
+   tar -zxvf ${buildDir}/supersonic-chat.tar.gz  -C ${runtimeDir}
+   tar -zxvf ${buildDir}/supersonic-semantic.tar.gz  -C ${runtimeDir}
+
+   mv ${runtimeDir}/launchers-standalone-* ${runtimeDir}/supersonic-standalone
+   mv ${runtimeDir}/launchers-chat-* ${runtimeDir}/supersonic-chat
+   mv ${runtimeDir}/launchers-semantic-* ${runtimeDir}/supersonic-semantic
+
+   tar -zxvf ${buildDir}/supersonic-webapp.tar.gz  -C ${buildDir}
+
+   mkdir -p ${runtimeDir}/supersonic-semantic/webapp
+   mkdir -p ${runtimeDir}/supersonic-chat/webapp
+   mkdir -p ${runtimeDir}/supersonic-standalone/webapp
+
+   cp -fr  ${buildDir}/supersonic-webapp/* ${runtimeDir}/supersonic-semantic/webapp
+   cp -fr  ${buildDir}/supersonic-webapp/* ${runtimeDir}/supersonic-chat/webapp
+   cp -fr  ${buildDir}/supersonic-webapp/* ${runtimeDir}/supersonic-standalone/webapp
+
+   rm -fr  ${buildDir}/supersonic-webapp
+fi
+if [[ "$service" == "semantic"  ]]; then
+   json=$(cat ${runtimeDir}/supersonic-semantic/webapp/supersonic.config.json)
+   json=$(echo $json | jq '.env="semantic"')
+   echo $json > ${runtimeDir}/supersonic-semantic/webapp/supersonic.config.json
+fi
+
+if [[ "$service" == "chat"  ]]; then
+   json=$(cat ${runtimeDir}/supersonic-chat/webapp/supersonic.config.json)
+   json=$(echo $json | jq '.env="chat"')
+   echo $json > ${runtimeDir}/supersonic-chat/webapp/supersonic.config.json
+fi
+echo $command
+echo $service
+case "$command" in
+  start)
+        if [[ "$service" == "semantic"  ]];then
+          echo -e "Starting semantic"
+          sh ${runtimeDir}/supersonic-semantic/bin/service.sh start
+        elif [[ "$service" == "chat"  ]];then
+          echo -e "Starting chat"
+          sh ${runtimeDir}/supersonic-chat/bin/service.sh start
+        elif [[ "$service" == "llmparser"  ]];then
+          echo -e "Starting LLM"
+          sh ${runtimeDir}/supersonic-chat/llm/bin/service.sh  start
+        elif [[ -z "$service"  ]]; then
+          echo -e "Starting supersonic"
+          sh ${runtimeDir}/supersonic-standalone/bin/service.sh start
+          sh ${runtimeDir}/supersonic-chat/llm/bin/service.sh start
+        else
+          echo "Use command {semantic|semantic||} to run."
+        fi
+        ;;
+  stop)
+        if [[ "$service" == "semantic"  ]];then
+          echo -e "Stopping semantic"
+          sh ${runtimeDir}/supersonic-semantic/bin/service.sh stop
+        elif [[ "$service" == "chat"  ]];then
+          echo -e "Stopping chat"
+          sh ${runtimeDir}/supersonic-chat/bin/service.sh stop
+        elif [[ "$service" == "llmparser"  ]];then
+          echo -e "Stopping LLM"
+          sh ${runtimeDir}/supersonic-chat/llm/bin/service.sh  stop
+        elif [[ -z "$service"  ]]; then
+          echo -e "Stopping supersonic"
+          sh ${runtimeDir}/supersonic-standalone/bin/service.sh stop
+          sh ${runtimeDir}/supersonic-chat/llm/bin/service.sh stop
+        else
+          echo "Use command {semantic|semantic||} to run."
+        fi
+        ;;
+  restart)
+        if [[ "$service" == "semantic"  ]];then
+          echo -e "Restarting semantic"
+          sh ${runtimeDir}/supersonic-semantic/bin/service.sh restart
+        elif [[ "$service" == "chat"  ]];then
+          echo -e "Restarting chat"
+          sh ${runtimeDir}/supersonic-chat/bin/service.sh restart
+        elif [[ "$service" == "llmparser"  ]];then
+          echo -e "Restarting LLM"
+          sh ${runtimeDir}/supersonic-chat/llm/bin/service.sh  restart
+        elif [[ -z "$service"  ]]; then
+          echo -e "Restarting supersonic"
+          sh ${runtimeDir}/supersonic-standalone/bin/service.sh restart
+          sh ${runtimeDir}/supersonic-chat/llm/bin/service.sh restart
+        else
+          echo "Use command {semantic|semantic||} to run."
+        fi
+        ;;
+  *)
+        echo "Use command {start|stop|status|restart} to run."
+        exit 1
+esac
+
+exit 0
