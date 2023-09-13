@@ -15,9 +15,6 @@ mvn -f $baseDir/../ clean package -DskipTests
 
 #2. move package to build
 cp $baseDir/../launchers/standalone/target/*.tar.gz ${buildDir}/supersonic.tar.gz
-#cp $baseDir/../launchers/semantic/target/*.tar.gz ${buildDir}/supersonic-semantic.tar.gz
-#cp $baseDir/../launchers/chat/target/*.tar.gz ${buildDir}/supersonic-chat.tar.gz
-
 
 #3. build webapp
 chmod +x $baseDir/../webapp/start-fe-prod.sh
