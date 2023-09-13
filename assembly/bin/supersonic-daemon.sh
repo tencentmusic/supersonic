@@ -17,21 +17,21 @@ if [[ "$service" == "semantic" || -z "$service"  ]] && [ "$command" != "stop"  ]
    #2. package lib
 
    tar -zxvf ${buildDir}/supersonic.tar.gz  -C ${runtimeDir}
-   tar -zxvf ${buildDir}/supersonic-chat.tar.gz  -C ${runtimeDir}
-   tar -zxvf ${buildDir}/supersonic-semantic.tar.gz  -C ${runtimeDir}
+#   tar -zxvf ${buildDir}/supersonic-chat.tar.gz  -C ${runtimeDir}
+#   tar -zxvf ${buildDir}/supersonic-semantic.tar.gz  -C ${runtimeDir}
 
    mv ${runtimeDir}/launchers-standalone-* ${runtimeDir}/supersonic-standalone
-   mv ${runtimeDir}/launchers-chat-* ${runtimeDir}/supersonic-chat
-   mv ${runtimeDir}/launchers-semantic-* ${runtimeDir}/supersonic-semantic
+#   mv ${runtimeDir}/launchers-chat-* ${runtimeDir}/supersonic-chat
+#   mv ${runtimeDir}/launchers-semantic-* ${runtimeDir}/supersonic-semantic
 
    tar -zxvf ${buildDir}/supersonic-webapp.tar.gz  -C ${buildDir}
 
-   mkdir -p ${runtimeDir}/supersonic-semantic/webapp
-   mkdir -p ${runtimeDir}/supersonic-chat/webapp
+#   mkdir -p ${runtimeDir}/supersonic-semantic/webapp
+#   mkdir -p ${runtimeDir}/supersonic-chat/webapp
    mkdir -p ${runtimeDir}/supersonic-standalone/webapp
 
-   cp -fr  ${buildDir}/supersonic-webapp/* ${runtimeDir}/supersonic-semantic/webapp
-   cp -fr  ${buildDir}/supersonic-webapp/* ${runtimeDir}/supersonic-chat/webapp
+#   cp -fr  ${buildDir}/supersonic-webapp/* ${runtimeDir}/supersonic-semantic/webapp
+#   cp -fr  ${buildDir}/supersonic-webapp/* ${runtimeDir}/supersonic-chat/webapp
    cp -fr  ${buildDir}/supersonic-webapp/* ${runtimeDir}/supersonic-standalone/webapp
 
    rm -fr  ${buildDir}/supersonic-webapp
@@ -63,7 +63,7 @@ case "$command" in
         elif [[ -z "$service"  ]]; then
           echo -e "Starting supersonic"
           sh ${runtimeDir}/supersonic-standalone/bin/service.sh start
-          sh ${runtimeDir}/supersonic-chat/llm/bin/service.sh start
+          sh ${runtimeDir}/supersonic-standalone/llm/bin/service.sh start
         else
           echo "Use command {semantic|semantic||} to run."
         fi
@@ -81,7 +81,7 @@ case "$command" in
         elif [[ -z "$service"  ]]; then
           echo -e "Stopping supersonic"
           sh ${runtimeDir}/supersonic-standalone/bin/service.sh stop
-          sh ${runtimeDir}/supersonic-chat/llm/bin/service.sh stop
+          sh ${runtimeDir}/supersonic-standalone/llm/bin/service.sh stop
         else
           echo "Use command {semantic|semantic||} to run."
         fi
@@ -99,7 +99,7 @@ case "$command" in
         elif [[ -z "$service"  ]]; then
           echo -e "Restarting supersonic"
           sh ${runtimeDir}/supersonic-standalone/bin/service.sh restart
-          sh ${runtimeDir}/supersonic-chat/llm/bin/service.sh restart
+          sh ${runtimeDir}/supersonic-standalone/llm/bin/service.sh restart
         else
           echo "Use command {semantic|semantic||} to run."
         fi
