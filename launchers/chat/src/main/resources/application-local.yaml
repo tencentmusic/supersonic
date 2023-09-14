@@ -13,7 +13,7 @@ spring:
     password: chat
 
 server:
-  port: 9080
+  port: 9082
 
 authentication:
   enable: true
