@@ -1,8 +1,10 @@
 package com.tencent.supersonic.knowledge.persistence.mapper;
 
 import com.tencent.supersonic.knowledge.persistence.dataobject.DictTaskDO;
-import com.tencent.supersonic.knowledge.dictionary.DictTaskFilter;
+import com.tencent.supersonic.chat.api.pojo.request.DictTaskFilterReq;
+
 import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
@@ -12,5 +14,5 @@ public interface DictTaskMapper {
 
     Boolean updateTaskStatus(DictTaskDO dictTaskDO);
 
-    List<DictTaskDO> searchDictTaskList(DictTaskFilter filter);
+    List<DictTaskDO> searchDictTaskList(DictTaskFilterReq filter);
 }

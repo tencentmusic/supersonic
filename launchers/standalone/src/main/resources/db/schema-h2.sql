@@ -400,6 +400,7 @@ CREATE TABLE IF NOT EXISTS `s2_dictionary_task` (
    `command`LONGVARCHAR  NOT NULL , -- task Request Parameters
    `command_md5` varchar(255)  NOT NULL , -- task Request Parameters md5
    `status` INT NOT NULL , -- the final status of the task
+   `dimension_ids` varchar(500)  NULL ,
    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
    `created_by` varchar(100) NOT NULL ,
    `progress` DOUBLE default 0.00  ,  -- task real-time progress

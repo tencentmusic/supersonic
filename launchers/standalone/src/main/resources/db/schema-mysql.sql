@@ -183,6 +183,7 @@ CREATE TABLE `s2_dictionary_task` (
                                       `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '任务描述',
                                       `command` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务请求参数',
                                       `command_md5` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务请求参数',
+                                      `dimension_ids` mediumtext  NULL COMMENT '本次执行维度列表',
                                       `status` int(10) NOT NULL COMMENT '任务最终运行状态',
                                       `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                                       `created_by` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '创建人',

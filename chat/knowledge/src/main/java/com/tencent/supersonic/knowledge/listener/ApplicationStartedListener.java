@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
@@ -45,6 +46,14 @@ public class ApplicationStartedListener implements ApplicationListener<Applicati
             log.error("ApplicationStartedInit error", e);
         }
         return isOk;
+    }
+
+    public Boolean updateKnowledgeDimValueAsync() {
+        CompletableFuture.supplyAsync(() -> {
+            updateKnowledgeDimValue();
+            return null;
+        });
+        return true;
     }
 
     /***

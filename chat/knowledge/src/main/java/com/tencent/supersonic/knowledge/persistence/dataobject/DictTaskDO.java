@@ -1,6 +1,7 @@
 package com.tencent.supersonic.knowledge.persistence.dataobject;
 
 import java.util.Date;
+
 import lombok.Data;
 import lombok.ToString;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -18,6 +19,8 @@ public class DictTaskDO {
     private String command;
 
     private String commandMd5;
+
+    private String dimIds;
 
     private Integer status;
 
