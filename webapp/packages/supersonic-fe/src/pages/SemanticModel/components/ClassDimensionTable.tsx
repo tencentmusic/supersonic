@@ -1,6 +1,6 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Button, Space, Popconfirm } from 'antd';
+import { message, Button, Space, Popconfirm, Input } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
@@ -85,10 +85,18 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: 'ID',
       width: 80,
       order: 100,
+      search: false,
+    },
+    {
+      dataIndex: 'key',
+      title: '维度搜索',
+      hideInTable: true,
+      renderFormItem: () => <Input placeholder="请输入ID/维度名称/字段名称" />,
     },
     {
       dataIndex: 'name',
       title: '维度名称',
+      search: false,
     },
     {
       dataIndex: 'alias',
@@ -100,6 +108,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'bizName',
       title: '字段名称',
+      search: false,
       // order: 9,
     },
     {

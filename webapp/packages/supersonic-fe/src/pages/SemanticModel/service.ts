@@ -340,3 +340,24 @@ export function deleteModel(modelId: number): Promise<any> {
 export function getModelDetail(data: any): Promise<any> {
   return request.get(`${process.env.API_BASE_URL}model/getModel/${data.modelId}`);
 }
+
+export function createDictTask(data: any): Promise<any> {
+  return request(`${process.env.CHAT_API_BASE_URL}dict/task`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function deleteDictTask(data: any): Promise<any> {
+  return request(`${process.env.CHAT_API_BASE_URL}dict/task/delete`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function searchDictLatestTaskList(data: any): Promise<any> {
+  return request(`${process.env.CHAT_API_BASE_URL}dict/task/search/latest`, {
+    method: 'POST',
+    data,
+  });
+}
