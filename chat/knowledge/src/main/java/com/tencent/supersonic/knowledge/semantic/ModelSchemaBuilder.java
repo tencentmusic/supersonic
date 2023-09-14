@@ -9,6 +9,7 @@ import com.tencent.supersonic.semantic.api.model.pojo.Entity;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
@@ -26,26 +27,23 @@ public class ModelSchemaBuilder {
 
     private static String aliasSplit = ",";
 
+
     public static ModelSchema build(ModelSchemaResp resp) {
         ModelSchema domainSchema = new ModelSchema();
-
         SchemaElement domain = SchemaElement.builder()
                 .model(resp.getId())
                 .id(resp.getId())
                 .name(resp.getName())
                 .bizName(resp.getBizName())
                 .type(SchemaElementType.MODEL)
+                .alias(getAliasList(resp.getAlias()))
                 .build();
         domainSchema.setModel(domain);
 
         Set<SchemaElement> metrics = new HashSet<>();
         for (MetricSchemaResp metric : resp.getMetrics()) {
 
-            List<String> alias = new ArrayList<>();
-            String aliasStr = metric.getAlias();
-            if (Strings.isNotEmpty(aliasStr)) {
-                alias = Arrays.asList(aliasStr.split(aliasSplit));
-            }
+            List<String> alias = getAliasList(metric.getAlias());
 
             SchemaElement metricToAdd = SchemaElement.builder()
                     .model(resp.getId())
@@ -65,11 +63,7 @@ public class ModelSchemaBuilder {
         Set<SchemaElement> dimensionValues = new HashSet<>();
         for (DimSchemaResp dim : resp.getDimensions()) {
 
-            List<String> alias = new ArrayList<>();
-            String aliasStr = dim.getAlias();
-            if (Strings.isNotEmpty(aliasStr)) {
-                alias = Arrays.asList(aliasStr.split(aliasSplit));
-            }
+            List<String> alias = getAliasList(dim.getAlias());
             Set<String> dimValueAlias = new HashSet<>();
             List<DimValueMap> dimValueMaps = dim.getDimValueMaps();
             List<SchemaValueMap> schemaValueMaps = new ArrayList<>();
@@ -133,4 +127,12 @@ public class ModelSchemaBuilder {
 
         return domainSchema;
     }
+
+    private static List<String> getAliasList(String alias) {
+        if (StringUtils.isEmpty(alias)) {
+            return new ArrayList<>();
+        }
+        return Arrays.asList(alias.split(aliasSplit));
+    }
+
 }

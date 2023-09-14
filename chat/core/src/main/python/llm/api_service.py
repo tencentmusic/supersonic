@@ -10,7 +10,7 @@ from typing import Any, List, Mapping, Optional, Union
 
 from fastapi import FastAPI, HTTPException
 
-from sql.run import query2sql
+from sql.run import text2sql_agent
 
 from preset_retrieval.run import preset_query_retrieval_run, collection as preset_query_collection
 from preset_retrieval.preset_query_db import (add2preset_query_collection, update_preset_query_collection, 
@@ -25,20 +25,49 @@ app = FastAPI()
 
 @app.post("/query2sql/")
 async def din_query2sql(query_body: Mapping[str, Any]):
-  if 'queryText' not in query_body:
-    raise HTTPException(status_code=400,
+    if 'queryText' not in query_body:
+        raise HTTPException(status_code=400,
                         detail="query_text is not in query_body")
-  else:
-    query_text = query_body['queryText']
+    else:
+        query_text = query_body['queryText']
 
-  if 'schema' not in query_body:
-    raise HTTPException(status_code=400, detail="schema is not in query_body")
-  else:
-    schema = query_body['schema']
+    if 'schema' not in query_body:
+        raise HTTPException(status_code=400, detail="schema is not in query_body")
+    else:
+        schema = query_body['schema']
 
-  resp = query2sql(query_text=query_text, schema=schema)
+    if 'currentDate' not in query_body:
+        raise HTTPException(status_code=400, detail="currentDate is not in query_body")
+    else:
+        current_date = query_body['currentDate']
 
-  return resp
+    if 'linking' not in query_body:
+        linking = None
+    else:
+        linking = query_body['linking']
+
+    resp = text2sql_agent.query2sql(query_text=query_text,  
+                     schema=schema, current_date=current_date, linking=linking)
+
+    return resp
+
+
+@app.post("/query2sql_setting_update/")
+async def query2sql_setting_update(query_body: Mapping[str, Any]):
+    if 'sqlExamplars' not in query_body:
+        raise HTTPException(status_code=400,
+                        detail="sqlExamplars is not in query_body")
+    else:
+        sql_examplars = query_body['sqlExamplars']
+
+    if 'exampleNums' not in query_body:
+        raise HTTPException(status_code=400, detail="exampleNums is not in query_body")
+    else:
+        example_nums = query_body['exampleNums']
+
+    text2sql_agent.update_examples(sql_examplars=sql_examplars, example_nums=example_nums)
+
+    return "success"
 
 
 @app.post("/preset_query_retrival/")

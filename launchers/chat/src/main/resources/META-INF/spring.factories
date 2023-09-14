@@ -32,6 +32,7 @@ com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
 
 com.tencent.supersonic.chat.api.component.SemanticCorrector=\
     com.tencent.supersonic.chat.corrector.DateFieldCorrector, \
+    com.tencent.supersonic.chat.corrector.FunctionAliasCorrector, \
     com.tencent.supersonic.chat.corrector.FieldNameCorrector, \
     com.tencent.supersonic.chat.corrector.FieldCorrector, \
     com.tencent.supersonic.chat.corrector.FunctionCorrector, \

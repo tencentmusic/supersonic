@@ -217,6 +217,19 @@ class SqlParserUpdateHelperTest {
                 replaceSql);
     }
 
+    @Test
+    void replaceAlias() {
+        String sql = "select 部门, sum(访问次数) as 总访问次数 from 超音数 where "
+                + "datediff('day', 数据日期, '2023-09-05') <= 3 group by 部门 order by 总访问次数 desc limit 10";
+        String replaceSql = SqlParserUpdateHelper.replaceAlias(sql);
+        System.out.println(replaceSql);
+        Assert.assertEquals(
+                "SELECT 部门, sum(访问次数) FROM 超音数 WHERE "
+                        + "datediff('day', 数据日期, '2023-09-05') <= 3 GROUP BY 部门 ORDER BY sum(访问次数) DESC LIMIT 10",
+                replaceSql);
+
+    }
+
     private Map<String, String> initParams() {
         Map<String, String> fieldToBizName = new HashMap<>();
         fieldToBizName.put("部门", "department");

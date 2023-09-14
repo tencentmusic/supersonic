@@ -40,6 +40,7 @@ import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,8 +67,12 @@ public class LLMDslParser implements SemanticParser {
     public void parse(QueryContext queryCtx, ChatContext chatCtx) {
         QueryReq request = queryCtx.getRequest();
         LLMConfig llmConfig = ContextUtils.getBean(LLMConfig.class);
-        if (StringUtils.isEmpty(llmConfig.getUrl()) || SatisfactionChecker.check(queryCtx)) {
-            log.info("llmConfig:{}, skip dsl parser, queryText:{}", llmConfig, request.getQueryText());
+        if (StringUtils.isEmpty(llmConfig.getUrl())) {
+            log.info("llm url is empty, skip dsl parser, llmConfig:{}", llmConfig);
+            return;
+        }
+        if (SatisfactionChecker.check(queryCtx)) {
+            log.info("skip dsl parser, queryText:{}", request.getQueryText());
             return;
         }
         try {
@@ -88,8 +93,8 @@ public class LLMDslParser implements SemanticParser {
             if (Objects.isNull(llmResp)) {
                 return;
             }
-            DSLParseResult dslParseResult = DSLParseResult.builder().request(request).dslTool(dslTool).llmReq(llmReq)
-                    .llmResp(llmResp).build();
+            DSLParseResult dslParseResult = DSLParseResult.builder().request(request)
+                    .dslTool(dslTool).llmReq(llmReq).llmResp(llmResp).build();
 
             SemanticParseInfo parseInfo = getParseInfo(queryCtx, modelId, dslTool, dslParseResult);
 
@@ -97,28 +102,11 @@ public class LLMDslParser implements SemanticParser {
 
             llmResp.setCorrectorSql(semanticCorrectInfo.getSql());
 
-            setFilter(semanticCorrectInfo, modelId, parseInfo);
-
-            setDimensionsAndMetrics(modelId, parseInfo, semanticCorrectInfo.getSql());
+            updateParseInfo(semanticCorrectInfo, modelId, parseInfo);
 
         } catch (Exception e) {
             log.error("LLMDSLParser error", e);
         }
-    }
-
-    private void setDimensionsAndMetrics(Long modelId, SemanticParseInfo parseInfo, String sql) {
-        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-
-        if (Objects.isNull(semanticSchema)) {
-            return;
-        }
-        List<String> allFields = getFieldsExceptDate(sql);
-
-        Set<SchemaElement> metrics = getElements(modelId, allFields, semanticSchema.getMetrics());
-        parseInfo.setMetrics(metrics);
-
-        Set<SchemaElement> dimensions = getElements(modelId, allFields, semanticSchema.getDimensions());
-        parseInfo.setDimensions(dimensions);
     }
 
     private Set<SchemaElement> getElements(Long modelId, List<String> allFields, List<SchemaElement> elements) {
@@ -128,8 +116,7 @@ public class LLMDslParser implements SemanticParser {
                 ).collect(Collectors.toSet());
     }
 
-    private List<String> getFieldsExceptDate(String sql) {
-        List<String> allFields = SqlParserSelectHelper.getAllFields(sql);
+    private List<String> getFieldsExceptDate(List<String> allFields) {
         if (CollectionUtils.isEmpty(allFields)) {
             return new ArrayList<>();
         }
@@ -138,20 +125,19 @@ public class LLMDslParser implements SemanticParser {
                 .collect(Collectors.toList());
     }
 
-    public void setFilter(SemanticCorrectInfo semanticCorrectInfo, Long modelId, SemanticParseInfo parseInfo) {
+    public void updateParseInfo(SemanticCorrectInfo semanticCorrectInfo, Long modelId, SemanticParseInfo parseInfo) {
 
         String correctorSql = semanticCorrectInfo.getPreSql();
         if (StringUtils.isEmpty(correctorSql)) {
             correctorSql = semanticCorrectInfo.getSql();
         }
         List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctorSql);
-        if (CollectionUtils.isEmpty(expressions)) {
-            return;
-        }
         //set dataInfo
         try {
-            DateConf dateInfo = getDateInfo(expressions);
-            parseInfo.setDateInfo(dateInfo);
+            if (!CollectionUtils.isEmpty(expressions)) {
+                DateConf dateInfo = getDateInfo(expressions);
+                parseInfo.setDateInfo(dateInfo);
+            }
         } catch (Exception e) {
             log.error("set dateInfo error :", e);
         }
@@ -163,6 +149,28 @@ public class LLMDslParser implements SemanticParser {
             parseInfo.getDimensionFilters().addAll(result);
         } catch (Exception e) {
             log.error("set dimensionFilter error :", e);
+        }
+
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+
+        if (Objects.isNull(semanticSchema)) {
+            return;
+        }
+        List<String> allFields = getFieldsExceptDate(SqlParserSelectHelper.getAllFields(semanticCorrectInfo.getSql()));
+
+        Set<SchemaElement> metrics = getElements(modelId, allFields, semanticSchema.getMetrics());
+        parseInfo.setMetrics(metrics);
+
+        if (SqlParserSelectHelper.hasAggregateFunction(semanticCorrectInfo.getSql())) {
+            parseInfo.setNativeQuery(false);
+            List<String> groupByFields = SqlParserSelectHelper.getGroupByFields(semanticCorrectInfo.getSql());
+            List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
+            parseInfo.setDimensions(getElements(modelId, groupByDimensions, semanticSchema.getDimensions()));
+        } else {
+            parseInfo.setNativeQuery(true);
+            List<String> selectFields = SqlParserSelectHelper.getSelectFields(semanticCorrectInfo.getSql());
+            List<String> selectDimensions = getFieldsExceptDate(selectFields);
+            parseInfo.setDimensions(getElements(modelId, selectDimensions, semanticSchema.getDimensions()));
         }
     }
 
@@ -287,7 +295,14 @@ public class LLMDslParser implements SemanticParser {
     private DslTool getDslTool(QueryReq request, Long modelId) {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         List<DslTool> dslTools = agentService.getDslTools(request.getAgentId(), AgentToolType.DSL);
-        Optional<DslTool> dslToolOptional = dslTools.stream().filter(tool -> tool.getModelIds().contains(modelId))
+        Optional<DslTool> dslToolOptional = dslTools.stream()
+                .filter(tool -> {
+                    List<Long> modelIds = tool.getModelIds();
+                    if (agentService.containsAllModel(new HashSet<>(modelIds))) {
+                        return true;
+                    }
+                    return modelIds.contains(modelId);
+                })
                 .findFirst();
         return dslToolOptional.orElse(null);
     }
@@ -295,6 +310,9 @@ public class LLMDslParser implements SemanticParser {
     private Long getModelId(QueryContext queryCtx, ChatContext chatCtx, Integer agentId) {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         Set<Long> distinctModelIds = agentService.getDslToolsModelIds(agentId, AgentToolType.DSL);
+        if (agentService.containsAllModel(distinctModelIds)) {
+            distinctModelIds = new HashSet<>();
+        }
         ModelResolver modelResolver = ComponentFactory.getModelResolver();
         Long modelId = modelResolver.resolve(queryCtx, chatCtx, distinctModelIds);
         log.info("resolve modelId:{},dslModels:{}", modelId, distinctModelIds);

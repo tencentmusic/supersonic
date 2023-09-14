@@ -82,6 +82,7 @@ export type ChatContextType = {
   entity: { alias: string[], id: number };
   entityInfo: { dimensions: EntityDimensionType[] };
   elementMatches: any[];
+  nativeQuery: boolean;
   queryMode: string;
   dimensionFilters: FilterItemType[];
   properties: any;
@@ -172,7 +173,7 @@ export enum SemanticTypeEnum {
 };
 
 export const SEMANTIC_TYPE_MAP = {
-  [SemanticTypeEnum.DOMAIN]: '主题域',
+  [SemanticTypeEnum.DOMAIN]: '数据模型',
   [SemanticTypeEnum.DIMENSION]: '维度',
   [SemanticTypeEnum.METRIC]: '指标',
   [SemanticTypeEnum.VALUE]: '维度值',

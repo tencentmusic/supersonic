@@ -11,7 +11,7 @@
   - add datasource agg_time option
   - add function name adaptor in clickhouse
   - add dimension and metric show in dsl
-  - add support for dimensions and metrics to dynamically update the knowledge base
+  
   
   ### Updated
   - update user guide doc

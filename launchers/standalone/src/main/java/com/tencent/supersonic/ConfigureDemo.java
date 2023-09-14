@@ -220,6 +220,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         AgentConfig agentConfig = new AgentConfig();
         RuleQueryTool ruleQueryTool = new RuleQueryTool();
         ruleQueryTool.setType(AgentToolType.RULE);
+        ruleQueryTool.setId("0");
         ruleQueryTool.setModelIds(Lists.newArrayList(-1L));
         ruleQueryTool.setQueryModes(Lists.newArrayList(
                 "METRIC_ENTITY", "METRIC_FILTER", "METRIC_GROUPBY",
@@ -228,6 +229,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         agentConfig.getTools().add(ruleQueryTool);
 
         DslTool dslTool = new DslTool();
+        dslTool.setId("1");
         dslTool.setType(AgentToolType.DSL);
         dslTool.setModelIds(Lists.newArrayList(-1L));
         agentConfig.getTools().add(dslTool);
@@ -246,6 +248,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         agent.setExamples(Lists.newArrayList("国风风格艺人", "港台地区的艺人", "风格为流行的艺人"));
         AgentConfig agentConfig = new AgentConfig();
         RuleQueryTool ruleQueryTool = new RuleQueryTool();
+        ruleQueryTool.setId("0");
         ruleQueryTool.setType(AgentToolType.RULE);
         ruleQueryTool.setModelIds(Lists.newArrayList(-1L));
         ruleQueryTool.setQueryModes(Lists.newArrayList(
@@ -253,6 +256,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         agentConfig.getTools().add(ruleQueryTool);
 
         DslTool dslTool = new DslTool();
+        dslTool.setId("1");
         dslTool.setType(AgentToolType.DSL);
         dslTool.setModelIds(Lists.newArrayList(-1L));
         agentConfig.getTools().add(dslTool);

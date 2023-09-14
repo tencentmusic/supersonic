@@ -1,13 +1,10 @@
 @echo off
-
 setlocal
 
 set "sbinDir=%~dp0"
 set "baseDir=%~dp0.."
-set "runtimeDir=%baseDir%\runtime"
 set "buildDir=%baseDir%\build"
 
-cd "%baseDir%"
 
 rem 1. build semantic chat service
 del /q "%buildDir%\*.tar.gz" 2>NUL
@@ -21,5 +18,11 @@ rem 3. build webapp
 cd "%baseDir%\..\webapp"
 call start-fe-prod.bat
 copy /y "%baseDir%\..\webapp\supersonic-webapp.tar.gz" "%buildDir%\"
+
+
+cd "%buildDir%"
+tar -zxvf supersonic-webapp.tar.gz
+move supersonic-webapp webapp
+move webapp ..\..\launchers\standalone\target\classes
 
 endlocal

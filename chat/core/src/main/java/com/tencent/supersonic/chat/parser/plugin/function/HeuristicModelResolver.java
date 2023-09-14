@@ -1,30 +1,37 @@
 package com.tencent.supersonic.chat.parser.plugin.function;
 
-import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.api.component.SemanticQuery;
-import lombok.extern.slf4j.Slf4j;
-
-import java.util.Map;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Objects;
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 
 @Slf4j
 public class HeuristicModelResolver implements ModelResolver {
 
     protected static Long selectModelBySchemaElementCount(Map<Long, SemanticQuery> modelQueryModes,
-                                                          SchemaMapInfo schemaMap) {
+            SchemaMapInfo schemaMap) {
+        //model count priority
+        Long modelIdByModelCount = getModelIdByModelCount(schemaMap);
+        if (Objects.nonNull(modelIdByModelCount)) {
+            log.info("selectModel by model count:{}", modelIdByModelCount);
+            return modelIdByModelCount;
+        }
+
         Map<Long, ModelMatchResult> modelTypeMap = getModelTypeMap(schemaMap);
         if (modelTypeMap.size() == 1) {
             Long modelSelect = modelTypeMap.entrySet().stream().collect(Collectors.toList()).get(0).getKey();
@@ -33,6 +40,7 @@ public class HeuristicModelResolver implements ModelResolver {
                 return modelSelect;
             }
         } else {
+
             Map.Entry<Long, ModelMatchResult> maxModel = modelTypeMap.entrySet().stream()
                     .filter(entry -> modelQueryModes.containsKey(entry.getKey()))
                     .sorted((o1, o2) -> {
@@ -51,14 +59,39 @@ public class HeuristicModelResolver implements ModelResolver {
         return 0L;
     }
 
+    private static Long getModelIdByModelCount(SchemaMapInfo schemaMap) {
+        Map<Long, List<SchemaElementMatch>> modelElementMatches = schemaMap.getModelElementMatches();
+        Map<Long, Integer> modelIdToModelCount = new HashMap<>();
+        if (Objects.nonNull(modelElementMatches)) {
+            for (Entry<Long, List<SchemaElementMatch>> modelElementMatch : modelElementMatches.entrySet()) {
+                Long modelId = modelElementMatch.getKey();
+                List<SchemaElementMatch> modelMatches = modelElementMatch.getValue().stream().filter(
+                        elementMatch -> SchemaElementType.MODEL.equals(elementMatch.getElement().getType())
+                ).collect(Collectors.toList());
+
+                if (!CollectionUtils.isEmpty(modelMatches)) {
+                    Integer count = modelMatches.size();
+                    modelIdToModelCount.put(modelId, count);
+                }
+            }
+            Entry<Long, Integer> maxModelCount = modelIdToModelCount.entrySet().stream()
+                    .max(Comparator.comparingInt(o -> o.getValue())).orElse(null);
+            log.info("maxModelCount:{},modelIdToModelCount:{}", maxModelCount, modelIdToModelCount);
+            if (Objects.nonNull(maxModelCount)) {
+                return maxModelCount.getKey();
+            }
+        }
+        return null;
+    }
+
     /**
      * to check can switch Model if context exit Model
      *
      * @return false will use context Model, true will use other Model , maybe include context Model
      */
     protected static boolean isAllowSwitch(Map<Long, SemanticQuery> modelQueryModes, SchemaMapInfo schemaMap,
-                                           ChatContext chatCtx, QueryReq searchCtx,
-                                           Long modelId, Set<Long> restrictiveModels) {
+            ChatContext chatCtx, QueryReq searchCtx,
+            Long modelId, Set<Long> restrictiveModels) {
         if (!Objects.nonNull(modelId) || modelId <= 0) {
             return true;
         }
@@ -137,7 +170,10 @@ public class HeuristicModelResolver implements ModelResolver {
     public Long resolve(QueryContext queryContext, ChatContext chatCtx, Set<Long> restrictiveModels) {
         Long modelId = queryContext.getRequest().getModelId();
         if (Objects.nonNull(modelId) && modelId > 0) {
-            if (CollectionUtils.isNotEmpty(restrictiveModels) && restrictiveModels.contains(modelId)) {
+            if (CollectionUtils.isEmpty(restrictiveModels)) {
+                return modelId;
+            }
+            if (restrictiveModels.contains(modelId)) {
                 return modelId;
             } else {
                 return null;
@@ -162,7 +198,7 @@ public class HeuristicModelResolver implements ModelResolver {
     }
 
     public Long resolve(Map<Long, SemanticQuery> modelQueryModes, QueryContext queryContext,
-                        ChatContext chatCtx, SchemaMapInfo schemaMap, Set<Long> restrictiveModels) {
+            ChatContext chatCtx, SchemaMapInfo schemaMap, Set<Long> restrictiveModels) {
         Long selectModel = selectModel(modelQueryModes, queryContext.getRequest(),
                 chatCtx, schemaMap, restrictiveModels);
         if (selectModel > 0) {
@@ -174,8 +210,8 @@ public class HeuristicModelResolver implements ModelResolver {
     }
 
     public Long selectModel(Map<Long, SemanticQuery> modelQueryModes, QueryReq queryContext,
-                            ChatContext chatCtx,
-                            SchemaMapInfo schemaMap, Set<Long> restrictiveModels) {
+            ChatContext chatCtx,
+            SchemaMapInfo schemaMap, Set<Long> restrictiveModels) {
         // if QueryContext has modelId and in ModelQueryModes
         if (modelQueryModes.containsKey(queryContext.getModelId())) {
             log.info("selectModel from QueryContext [{}]", queryContext.getModelId());

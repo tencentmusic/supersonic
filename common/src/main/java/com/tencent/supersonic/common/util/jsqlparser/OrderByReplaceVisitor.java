@@ -12,23 +12,25 @@ public class OrderByReplaceVisitor extends OrderByVisitorAdapter {
 
     ParseVisitorHelper parseVisitorHelper = new ParseVisitorHelper();
     private Map<String, String> fieldToBizName;
+    private boolean exactReplace;
 
-    public OrderByReplaceVisitor(Map<String, String> fieldToBizName) {
+    public OrderByReplaceVisitor(Map<String, String> fieldToBizName, boolean exactReplace) {
         this.fieldToBizName = fieldToBizName;
+        this.exactReplace = exactReplace;
     }
 
     @Override
     public void visit(OrderByElement orderBy) {
         Expression expression = orderBy.getExpression();
         if (expression instanceof Column) {
-            parseVisitorHelper.replaceColumn((Column) expression, fieldToBizName);
+            parseVisitorHelper.replaceColumn((Column) expression, fieldToBizName, exactReplace);
         }
         if (expression instanceof Function) {
             Function function = (Function) expression;
             List<Expression> expressions = function.getParameters().getExpressions();
             for (Expression column : expressions) {
                 if (column instanceof Column) {
-                    parseVisitorHelper.replaceColumn((Column) column, fieldToBizName);
+                    parseVisitorHelper.replaceColumn((Column) column, fieldToBizName, exactReplace);
                 }
             }
         }

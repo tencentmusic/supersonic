@@ -58,8 +58,11 @@ public class SqlParserUpdateHelper {
         return selectStatement.toString();
     }
 
-
     public static String replaceFields(String sql, Map<String, String> fieldToBizName) {
+        return replaceFields(sql, fieldToBizName, false);
+    }
+
+    public static String replaceFields(String sql, Map<String, String> fieldToBizName, boolean exactReplace) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
         if (!(selectBody instanceof PlainSelect)) {
@@ -68,7 +71,7 @@ public class SqlParserUpdateHelper {
         PlainSelect plainSelect = (PlainSelect) selectBody;
         //1. replace where fields
         Expression where = plainSelect.getWhere();
-        FieldReplaceVisitor visitor = new FieldReplaceVisitor(fieldToBizName);
+        FieldReplaceVisitor visitor = new FieldReplaceVisitor(fieldToBizName, exactReplace);
         if (Objects.nonNull(where)) {
             where.accept(visitor);
         }
@@ -82,14 +85,14 @@ public class SqlParserUpdateHelper {
         List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
         if (!CollectionUtils.isEmpty(orderByElements)) {
             for (OrderByElement orderByElement : orderByElements) {
-                orderByElement.accept(new OrderByReplaceVisitor(fieldToBizName));
+                orderByElement.accept(new OrderByReplaceVisitor(fieldToBizName, exactReplace));
             }
         }
 
         //4. replace group by fields
         GroupByElement groupByElement = plainSelect.getGroupBy();
         if (Objects.nonNull(groupByElement)) {
-            groupByElement.accept(new GroupByReplaceVisitor(fieldToBizName));
+            groupByElement.accept(new GroupByReplaceVisitor(fieldToBizName, exactReplace));
         }
         return selectStatement.toString();
     }
@@ -177,6 +180,24 @@ public class SqlParserUpdateHelper {
         return selectStatement.toString();
     }
 
+
+    public static String replaceAlias(String sql) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+        FunctionAliasReplaceVisitor visitor = new FunctionAliasReplaceVisitor();
+        for (SelectItem selectItem : plainSelect.getSelectItems()) {
+            selectItem.accept(visitor);
+        }
+        Map<String, String> aliasToActualExpression = visitor.getAliasToActualExpression();
+        if (Objects.nonNull(aliasToActualExpression) && !aliasToActualExpression.isEmpty()) {
+            return replaceFields(selectStatement.toString(), aliasToActualExpression, true);
+        }
+        return selectStatement.toString();
+    }
 
     public static String addWhere(String sql, String column, Object value) {
         if (StringUtils.isEmpty(column) || Objects.isNull(value)) {

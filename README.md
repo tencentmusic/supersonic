@@ -49,24 +49,12 @@ The high-level architecture and main process flow is as follows:
 SuperSonic comes with sample semantic models as well as chat conversations that can be used as a starting point. Please follow the steps: 
 
 - Download the latest prebuilt binary from the [release page](https://github.com/tencentmusic/supersonic/releases)
-- Run script "bin/start-standalone.sh" to start a standalone server
+- Run script "bin/start-standalone.sh" to start services (one java process and one python process)
 - Visit http://localhost:9080 in the browser to start exploration
 
-## How to Build
+## Build and Delopment
 
-SuperSonic can be deployed in two modes: standalone (for a quick demo) and distributed (for production use). 
-
-### Build for Standalone Mode 
- 
-Pull the source code and run script "assembly/bin/build-standalone.sh" to build a single packages.
-
-### Build for Distributed Mode 
-
-Pull the source code and run scripts "assembly/bin/build-chat.sh" and "assembly/bin/build-semantic.sh" separately to build packages.
-
-### Build for Local Development
-
-Pull the source code and run script "assembly/bin/build-ide.sh" and run bootstrap class "StandaloneLauncher" in the IDE.
+Please refer to project [wiki](https://github.com/tencentmusic/supersonic/wiki). 
 
 ## WeChat Contact
 

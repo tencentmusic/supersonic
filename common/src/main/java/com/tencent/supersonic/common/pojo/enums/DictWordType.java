@@ -8,11 +8,13 @@ import org.apache.commons.lang3.StringUtils;
  */
 public enum DictWordType {
     METRIC("metric"),
+
     DIMENSION("dimension"),
+
     VALUE("value"),
 
-    DOMAIN("dm"),
     MODEL("model"),
+
     ENTITY("entity"),
 
     NUMBER("m"),
@@ -44,7 +46,7 @@ public enum DictWordType {
         //domain
         String[] natures = nature.split(DictWordType.NATURE_SPILT);
         if (natures.length == 2 && StringUtils.isNumeric(natures[1])) {
-            return DOMAIN;
+            return MODEL;
         }
         //dimension value
         if (natures.length == 3 && StringUtils.isNumeric(natures[1]) && StringUtils.isNumeric(natures[2])) {

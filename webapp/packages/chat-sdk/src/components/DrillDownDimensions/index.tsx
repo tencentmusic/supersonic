@@ -10,6 +10,7 @@ type Props = {
   modelId: number;
   drillDownDimension?: DrillDownDimensionType;
   isMetricCard?: boolean;
+  originDimensions?: DrillDownDimensionType[];
   dimensionFilters?: FilterItemType[];
   onSelectDimension: (dimension?: DrillDownDimensionType) => void;
 };
@@ -20,6 +21,7 @@ const DrillDownDimensions: React.FC<Props> = ({
   modelId,
   drillDownDimension,
   isMetricCard,
+  originDimensions,
   dimensionFilters,
   onSelectDimension,
 }) => {
@@ -33,7 +35,11 @@ const DrillDownDimensions: React.FC<Props> = ({
     const res = await queryDrillDownDimensions(modelId);
     setDimensions(
       res.data.data.dimensions
-        .filter(dimension => !dimensionFilters?.some(filter => filter.name === dimension.name))
+        .filter(
+          dimension =>
+            !dimensionFilters?.some(filter => filter.name === dimension.name) &&
+            (!originDimensions || !originDimensions.some(item => item.id === dimension.id))
+        )
         .slice(0, MAX_DIMENSION_COUNT)
     );
   };

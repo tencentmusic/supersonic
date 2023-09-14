@@ -1,5 +1,6 @@
 import IconFont from '@/components/IconFont';
 import { CaretRightOutlined, CloseOutlined } from '@ant-design/icons';
+import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import Chat from '../Chat';
 import { DefaultEntityType, ModelType } from '../Chat/type';
@@ -15,6 +16,7 @@ const Copilot: React.FC<Props> = ({ globalCopilotFilter, copilotSendMsg }) => {
   const [defaultModelName, setDefaultModelName] = useState('');
   const [defaultEntityFilter, setDefaultEntityFilter] = useState<DefaultEntityType>();
   const [triggerNewConversation, setTriggerNewConversation] = useState(false);
+  const [copilotMinimized, setCopilotMinimized] = useState(false);
 
   useEffect(() => {
     if (globalCopilotFilter && globalCopilotFilter.entityId !== defaultEntityFilter?.entityId) {
@@ -58,10 +60,29 @@ const Copilot: React.FC<Props> = ({ globalCopilotFilter, copilotSendMsg }) => {
     setTriggerNewConversation(false);
   };
 
+  const onMinimizeCopilot = (e: any) => {
+    e.stopPropagation();
+    updateChatVisible(false);
+    setCopilotMinimized(true);
+  };
+
+  const copilotClass = classNames(styles.copilot, {
+    [styles.copilotMinimized]: copilotMinimized,
+  });
+
   return (
     <>
-      <div className={styles.copilot} onClick={onToggleChatVisible}>
+      <div
+        className={copilotClass}
+        onMouseEnter={() => {
+          setCopilotMinimized(false);
+        }}
+        onClick={onToggleChatVisible}
+      >
         <IconFont type="icon-copilot-fill" />
+        <div className={styles.minimizeWrapper} onClick={onMinimizeCopilot}>
+          <div className={styles.minimize}>-</div>
+        </div>
       </div>
       <div className={styles.copilotContent} style={{ display: chatVisible ? 'block' : 'none' }}>
         <div className={styles.chatPopover}>
@@ -74,7 +95,7 @@ const Copilot: React.FC<Props> = ({ globalCopilotFilter, copilotSendMsg }) => {
                 onClick={onTransferChat}
               />
             </div>
-            <div className={styles.title}>内容库问答</div>
+            <div className={styles.title}>Copilot</div>
           </div>
           <div className={styles.chat}>
             <Chat

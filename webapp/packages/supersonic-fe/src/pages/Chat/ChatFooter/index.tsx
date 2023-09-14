@@ -207,7 +207,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
           : `${item.modelName || ''}${item.recommend}` === value,
       );
     if (option && isSelect) {
-      onSendMsg(option.recommend, option.modelId);
+      onSendMsg(option.recommend, Object.keys(stepOptions).length > 1 ? option.modelId : undefined);
     } else {
       onSendMsg(value.trim());
     }
