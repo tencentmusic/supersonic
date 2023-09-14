@@ -7,10 +7,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Data
-public class LLMConfig {
+public class LLMParserConfig {
 
 
-    @Value("${llm.url:}")
+    @Value("${llm.parser.url:}")
     private String url;
 
     @Value("${query2sql.path:/query2sql}")

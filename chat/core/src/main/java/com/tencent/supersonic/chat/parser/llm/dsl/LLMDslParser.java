@@ -15,7 +15,7 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.config.LLMConfig;
+import com.tencent.supersonic.chat.config.LLMParserConfig;
 import com.tencent.supersonic.chat.corrector.BaseSemanticCorrector;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.chat.parser.plugin.function.ModelResolver;
@@ -66,9 +66,9 @@ public class LLMDslParser implements SemanticParser {
     @Override
     public void parse(QueryContext queryCtx, ChatContext chatCtx) {
         QueryReq request = queryCtx.getRequest();
-        LLMConfig llmConfig = ContextUtils.getBean(LLMConfig.class);
-        if (StringUtils.isEmpty(llmConfig.getUrl())) {
-            log.info("llm url is empty, skip dsl parser, llmConfig:{}", llmConfig);
+        LLMParserConfig llmParserConfig = ContextUtils.getBean(LLMParserConfig.class);
+        if (StringUtils.isEmpty(llmParserConfig.getUrl())) {
+            log.info("llm parser url is empty, skip dsl parser, llmParserConfig:{}", llmParserConfig);
             return;
         }
         if (SatisfactionChecker.check(queryCtx)) {
@@ -88,7 +88,7 @@ public class LLMDslParser implements SemanticParser {
             }
 
             LLMReq llmReq = getLlmReq(queryCtx, modelId);
-            LLMResp llmResp = requestLLM(llmReq, modelId, llmConfig);
+            LLMResp llmResp = requestLLM(llmReq, modelId, llmParserConfig);
 
             if (Objects.isNull(llmResp)) {
                 return;
@@ -319,8 +319,8 @@ public class LLMDslParser implements SemanticParser {
         return modelId;
     }
 
-    private LLMResp requestLLM(LLMReq llmReq, Long modelId, LLMConfig llmConfig) {
-        String questUrl = llmConfig.getUrl() + llmConfig.getQueryToSqlPath();
+    private LLMResp requestLLM(LLMReq llmReq, Long modelId, LLMParserConfig llmParserConfig) {
+        String questUrl = llmParserConfig.getUrl() + llmParserConfig.getQueryToSqlPath();
         long startTime = System.currentTimeMillis();
         log.info("requestLLM request, modelId:{},llmReq:{}", modelId, llmReq);
         RestTemplate restTemplate = ContextUtils.getBean(RestTemplate.class);
