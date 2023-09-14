@@ -397,14 +397,6 @@ export function traverseRoutes(routes, env: string, result: any[] = []) {
   for (let i = 0; i < routes.length; i++) {
     const route = routes[i];
 
-    if (
-      (route.envEnableList &&
-        (route.envEnableList.includes(env) || route.envEnableList.length === 0)) ||
-      !route.envEnableList
-    ) {
-      result.push(route);
-    }
-
     if (route.envRedirect) {
       route.redirect = route.envRedirect[env];
     }
@@ -418,6 +410,12 @@ export function traverseRoutes(routes, env: string, result: any[] = []) {
           routes: filteredRoutes,
         });
       }
+    } else if (
+      (route.envEnableList &&
+        (route.envEnableList.includes(env) || route.envEnableList.length === 0)) ||
+      !route.envEnableList
+    ) {
+      result.push(route);
     }
   }
   return result;

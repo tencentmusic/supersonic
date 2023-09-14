@@ -1,6 +1,6 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Button, Space, Popconfirm } from 'antd';
+import { message, Button, Space, Popconfirm, Input } from 'antd';
 import React, { useRef, useState } from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
@@ -65,10 +65,18 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'id',
       title: 'ID',
       width: 80,
+      search: false,
     },
     {
       dataIndex: 'name',
       title: '指标名称',
+      search: false,
+    },
+    {
+      dataIndex: 'key',
+      title: '指标搜索',
+      hideInTable: true,
+      renderFormItem: () => <Input placeholder="请输入ID/指标名称/字段名称" />,
     },
     {
       dataIndex: 'alias',
@@ -80,6 +88,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'bizName',
       title: '字段名称',
+      search: false,
     },
     {
       dataIndex: 'sensitiveLevel',

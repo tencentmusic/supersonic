@@ -197,7 +197,7 @@ const DimensionAndMetricVisibleModal: React.FC<Props> = ({
   return (
     <>
       <Modal
-        width={1200}
+        width={1500}
         destroyOnClose
         title={settingTypeConfig.modalTitle}
         maskClosable={false}

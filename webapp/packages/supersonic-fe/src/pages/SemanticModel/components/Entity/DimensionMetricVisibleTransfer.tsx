@@ -62,7 +62,7 @@ const DimensionMetricVisibleTransfer: React.FC<Props> = ({
         showSearch
         titles={titles || ['不可见维度', '可见维度']}
         listStyle={{
-          width: 500,
+          width: 720,
           height: 600,
         }}
         filterOption={(inputValue: string, item: any) => {
