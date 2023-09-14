@@ -20,6 +20,7 @@ import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
@@ -111,6 +112,14 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
             throw new RuntimeException("search semantic interface error,url:" + url, e);
         }
         throw new CommonException(responseBody.getCode(), responseBody.getMsg());
+    }
+
+    @Override
+    public QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user) {
+        DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
+        return searchByRestTemplate(defaultSemanticConfig.getSemanticUrl()
+                        + defaultSemanticConfig.getQueryDimValuePath(),
+                new Gson().toJson(queryDimValueReq));
     }
 
     @Override

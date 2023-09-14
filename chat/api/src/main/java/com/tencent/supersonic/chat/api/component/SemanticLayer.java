@@ -11,6 +11,7 @@ import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
@@ -33,6 +34,7 @@ public interface SemanticLayer {
     QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user);
     QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user);
     QueryResultWithSchemaResp queryByDsl(QueryDslReq queryDslReq, User user);
+    QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user);
     List<ModelSchema> getModelSchema();
     List<ModelSchema> getModelSchema(List<Long> ids);
     ModelSchema getModelSchema(Long model, Boolean cacheEnable);

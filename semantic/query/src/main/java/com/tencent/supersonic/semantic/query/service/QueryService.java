@@ -3,6 +3,7 @@ package com.tencent.supersonic.semantic.query.service;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
@@ -19,6 +20,8 @@ public interface QueryService {
             throws Exception;
 
     QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructCmd, User user) throws Exception;
+
+    QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user);
 
     List<ItemUseResp> getStatInfo(ItemUseReq itemUseCommend);
 
