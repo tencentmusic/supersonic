@@ -1,7 +1,7 @@
 # python path
-export python_path="/usr/local/bin/python3.9"
+export python_path="/usr/local/bin/python3"
 # pip path
-export pip_path="/usr/local/bin/pip3.9"
+export pip_path="/usr/local/bin/pip3"
 # host
 export llm_host="127.0.0.1"
 # port
