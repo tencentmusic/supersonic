@@ -2,13 +2,15 @@ package com.tencent.supersonic.common.pojo.enums;
 
 public enum TaskStatusEnum {
 
-    RUNNING("running", 0),
-
-    SUCCESS("success", 1),
-
     ERROR("error", -1),
 
-    UNKNOWN("UNKNOWN", 2);
+    PENDING("pending", 0),
+
+    RUNNING("running", 1),
+
+    SUCCESS("success", 2),
+
+    UNKNOWN("UNKNOWN", 3);
 
     private String status;
     private Integer code;

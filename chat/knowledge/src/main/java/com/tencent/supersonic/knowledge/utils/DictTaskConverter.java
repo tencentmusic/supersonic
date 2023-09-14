@@ -19,7 +19,7 @@ public class DictTaskConverter {
 
     private static String dateTimeFormatter = "yyyyMMddHHmmss";
 
-    public static DictTaskDO generateDimValueDictTaskPO(DimValue2DictCommand dimValue2DictCommend, User user) {
+    public static DictTaskDO generateDimValueDictTaskDO(DimValue2DictCommand dimValue2DictCommend, User user) {
         DictTaskDO taskPO = new DictTaskDO();
         Date createAt = new Date();
         String date = DateTimeFormatter.ofPattern(dateTimeFormatter)
@@ -31,7 +31,7 @@ public class DictTaskConverter {
 
         taskPO.setCreatedAt(createAt);
         taskPO.setCommand(JsonUtil.toString(dimValue2DictCommend));
-        taskPO.setStatus(TaskStatusEnum.RUNNING.getCode());
+        taskPO.setStatus(TaskStatusEnum.PENDING.getCode());
         taskPO.setCreatedBy(creator);
 
         return taskPO;

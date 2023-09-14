@@ -11,6 +11,7 @@
         <result column="description" property="description"/>
         <result column="command" property="command"/>
         <result column="command_md5" property="commandMd5"/>
+        <result column="dimension_ids" property="dimIds"/>
         <result column="status" property="status"/>
         <result column="created_by" property="createdBy"/>
         <result column="created_at" property="createdAt"/>
@@ -18,11 +19,11 @@
         <result column="elapsed_ms" property="elapsedMs"/>
     </resultMap>
 
-    <insert id="createDimValueTask">
+    <insert id="createDimValueTask" useGeneratedKeys="true" keyProperty="id">
         insert into s2_dictionary_task
-        (`name`, description, command, command_md5, status, created_by, progress, elapsed_ms)
+        (`name`, description, command, command_md5, dimension_ids, status, created_by, progress, elapsed_ms)
         values
-        (#{name}, #{description}, #{command}, #{commandMd5}, #{status}, #{createdBy}, #{progress}, #{elapsedMs})
+        (#{name}, #{description}, #{command}, #{commandMd5}, #{dimIds}, #{status}, #{createdBy}, #{progress}, #{elapsedMs})
     </insert>
 
     <update id="updateTaskStatus">
@@ -34,6 +35,9 @@
             <if test="status != null">
                 status = #{status},
             </if>
+            <if test="dimIds != null">
+                dimension_ids = #{dimIds},
+            </if>
             <if test="progress != null">
                 progress = #{progress},
             </if>
@@ -42,8 +46,7 @@
             </if>
 
         </set>
-        where name = #{name}
-        and status = 0
+        where id = #{id}
     </update>
 
     <select id="searchDictTaskList" resultMap="DimValueDictTaskPO">
@@ -51,10 +54,10 @@
         from s2_dictionary_task
         <where>
             <if test="id != null and id != ''">
-                and id >= #{id}
+                and id = #{id}
             </if>
             <if test="name != null and name !=''">
-                and `name` like  "%"#{name}"%"
+                and `name` like  CONCAT('%', #{name}, '%')
             </if>
             <if test="createdBy != null and createdBy !=''">
                 and created_by = #{createdBy}
@@ -62,10 +65,11 @@
             <if test="createdAt != null and createdAt !=''">
                 and created_at &gt;= #{createdAt}
             </if>
-            <if test="status != null and status !=''">
-                and status= #{status}
+            <if test="status != null">
+                and status= #{status.code}
             </if>
         </where>
+        order by created_at desc
     </select>
 
 </mapper>

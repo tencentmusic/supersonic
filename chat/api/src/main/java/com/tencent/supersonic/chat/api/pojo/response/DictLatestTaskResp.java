@@ -1,15 +1,16 @@
-package com.tencent.supersonic.knowledge.dictionary;
-
+package com.tencent.supersonic.chat.api.pojo.response;
 
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
+import lombok.Data;
+import lombok.ToString;
 
 import java.util.Date;
-import java.util.Set;
 
-import lombok.Data;
-
+@ToString
 @Data
-public class DimValueDictInfo {
+public class DictLatestTaskResp {
+
+    private Long dimId;
 
     private Long id;
 
@@ -26,6 +27,4 @@ public class DimValueDictInfo {
     private Date createdAt;
 
     private Long elapsedMs;
-
-    private Set<Long> dimIds;
 }

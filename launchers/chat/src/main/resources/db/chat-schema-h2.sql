@@ -118,6 +118,7 @@ CREATE TABLE IF NOT EXISTS `s2_dictionary_task` (
    `description` varchar(255) ,
    `command`LONGVARCHAR  NOT NULL , -- task Request Parameters
    `command_md5` varchar(255)  NOT NULL , -- task Request Parameters md5
+   `dimension_ids` varchar(500) ,
    `status` INT NOT NULL , -- the final status of the task
    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
    `created_by` varchar(100) NOT NULL ,

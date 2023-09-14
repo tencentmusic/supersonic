@@ -3,6 +3,7 @@ package com.tencent.supersonic.knowledge.utils;
 import static com.hankcs.hanlp.HanLP.Config.CustomDictionaryPath;
 
 import com.hankcs.hanlp.dictionary.DynamicCustomDictionary;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class FileHelper {
         for (File file : customSubFiles) {
             try {
                 file.delete();
-                log.info("customPath:{},delete cache file:{}", customPath, file);
+                log.info("customPath:{},delete file:{}", customPath, file);
             } catch (Exception e) {
                 log.error("delete " + file, e);
             }
@@ -70,7 +71,7 @@ public class FileHelper {
             }
         }
 
-        log.info("CustomDictionaryPath:{}", fileList);
+        log.debug("CustomDictionaryPath:{}", fileList);
         CustomDictionaryPath = fileList.toArray(new String[0]);
         customDictionary.path = (CustomDictionaryPath == null || CustomDictionaryPath.length == 0) ? path
                 : CustomDictionaryPath;
