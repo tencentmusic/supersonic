@@ -14,6 +14,7 @@ import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
@@ -33,18 +34,19 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
     private ModelService modelService;
     private DimensionService dimensionService;
     private MetricService metricService;
+    private QueryService queryService;
 
     @SneakyThrows
     @Override
     public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user) {
-        QueryService queryService = ContextUtils.getBean(QueryService.class);
+        queryService = ContextUtils.getBean(QueryService.class);
         return queryService.queryByStructWithAuth(queryStructReq, user);
     }
 
     @Override
     public QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user) {
         try {
-            QueryService queryService = ContextUtils.getBean(QueryService.class);
+            queryService = ContextUtils.getBean(QueryService.class);
             return queryService.queryByMultiStruct(queryMultiStructReq, user);
         } catch (Exception e) {
             log.info("queryByMultiStruct has an exception:{}", e);
@@ -55,7 +57,7 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
     @Override
     public QueryResultWithSchemaResp queryByDsl(QueryDslReq queryDslReq, User user) {
         try {
-            QueryService queryService = ContextUtils.getBean(QueryService.class);
+            queryService = ContextUtils.getBean(QueryService.class);
             Object object = queryService.queryBySql(queryDslReq, user);
             QueryResultWithSchemaResp queryResultWithSchemaResp = JsonUtil.toObject(JsonUtil.toString(object),
                     QueryResultWithSchemaResp.class);
@@ -64,6 +66,13 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
             log.info("queryByDsl has an exception:{}", e);
         }
         return null;
+    }
+
+    @Override
+    @SneakyThrows
+    public QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user) {
+        queryService = ContextUtils.getBean(QueryService.class);
+        return queryService.queryDimValue(queryDimValueReq, user);
     }
 
     @Override

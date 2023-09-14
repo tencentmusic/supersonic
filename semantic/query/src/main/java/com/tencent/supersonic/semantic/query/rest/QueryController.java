@@ -2,7 +2,9 @@ package com.tencent.supersonic.semantic.query.rest;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.SqlParserResp;
+import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
@@ -83,6 +85,14 @@ public class QueryController {
     @PostMapping("/stat")
     public List<ItemUseResp> getStatInfo(@RequestBody ItemUseReq itemUseReq) {
         return queryService.getStatInfo(itemUseReq);
+    }
+
+    @PostMapping("/queryDimValue")
+    public QueryResultWithSchemaResp queryDimValue(@RequestBody QueryDimValueReq queryDimValueReq,
+                                                   HttpServletRequest request,
+                                                   HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return queryService.queryDimValue(queryDimValueReq, user);
     }
 
 }
