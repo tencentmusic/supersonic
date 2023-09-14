@@ -13,10 +13,10 @@ set "APP_NAME=standalone-service"
 set "MAIN_CLASS=com.tencent.supersonic.StandaloneLauncher"
 
 set "python_path=python"
-set "pip_path=pip3.9"
+set "pip_path=pip3"
 set "llm_host=127.0.0.1"
 set "llm_port=9092"
-set "start_name=api_service"
+set "start_name=supersonic-llmparser"
 
 
 if "%module%"=="" (

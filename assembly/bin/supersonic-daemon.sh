@@ -38,56 +38,56 @@ echo $service
 case "$command" in
   start)
         if [[ "$service" == "semantic"  ]];then
-          echo -e "Starting semantic"
+          echo -e "Starting semantic java service"
           sh ${runtimeDir}/supersonic-semantic/bin/service.sh start
         elif [[ "$service" == "chat"  ]];then
-          echo -e "Starting chat"
+          echo -e "Starting chat java service"
           sh ${runtimeDir}/supersonic-chat/bin/service.sh start
         elif [[ "$service" == "llmparser"  ]];then
-          echo -e "Starting LLM"
+          echo -e "Starting llmparser python service"
           sh ${runtimeDir}/supersonic-standalone/llm/bin/service.sh  start
         elif [[ -z "$service"  ]]; then
-          echo -e "Starting supersonic"
+          echo -e "Starting supersonic services"
           sh ${runtimeDir}/supersonic-standalone/bin/service.sh start
           sh ${runtimeDir}/supersonic-standalone/llm/bin/service.sh start
         else
-          echo "Use command {semantic|semantic||} to run."
+          echo "Use command {chat|semantic|llmparser} to run."
         fi
         ;;
   stop)
         if [[ "$service" == "semantic"  ]];then
-          echo -e "Stopping semantic"
+          echo -e "Stopping semantic java service"
           sh ${runtimeDir}/supersonic-semantic/bin/service.sh stop
         elif [[ "$service" == "chat"  ]];then
-          echo -e "Stopping chat"
+          echo -e "Stopping chat java service"
           sh ${runtimeDir}/supersonic-chat/bin/service.sh stop
         elif [[ "$service" == "llmparser"  ]];then
-          echo -e "Stopping LLM"
+          echo -e "Stopping llmparser python service"
           sh ${runtimeDir}/supersonic-standalone/llm/bin/service.sh  stop
         elif [[ -z "$service"  ]]; then
-          echo -e "Stopping supersonic"
+          echo -e "Stopping supersonic services"
           sh ${runtimeDir}/supersonic-standalone/bin/service.sh stop
           sh ${runtimeDir}/supersonic-standalone/llm/bin/service.sh stop
         else
-          echo "Use command {semantic|semantic||} to run."
+          echo "Use command {chat|semantic|llmparser} to run."
         fi
         ;;
   restart)
         if [[ "$service" == "semantic"  ]];then
-          echo -e "Restarting semantic"
+          echo -e "Restarting semantic java service"
           sh ${runtimeDir}/supersonic-semantic/bin/service.sh restart
         elif [[ "$service" == "chat"  ]];then
-          echo -e "Restarting chat"
+          echo -e "Restarting chat java service"
           sh ${runtimeDir}/supersonic-chat/bin/service.sh restart
         elif [[ "$service" == "llmparser"  ]];then
-          echo -e "Restarting LLM"
+          echo -e "Restarting llmparser python service"
           sh ${runtimeDir}/supersonic-standalone/llm/bin/service.sh  restart
         elif [[ -z "$service"  ]]; then
-          echo -e "Restarting supersonic"
+          echo -e "Restarting supersonic services"
           sh ${runtimeDir}/supersonic-standalone/bin/service.sh restart
           sh ${runtimeDir}/supersonic-standalone/llm/bin/service.sh restart
         else
-          echo "Use command {semantic|semantic||} to run."
+          echo "Use command {chat|semantic|llmparser} to run."
         fi
         ;;
   *)
