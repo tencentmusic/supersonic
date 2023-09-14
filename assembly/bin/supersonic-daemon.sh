@@ -58,6 +58,9 @@ function setEnvToWeb {
 }
 
 function resetEnvironment {
+  if [[ ${app_name} == $LLMPARSER_APP_NAME ]]; then
+    return
+  fi
   if [[ "$command" == "start" || "$command" == "restart" ]]; then
      #1. clear file
      mkdir -p ${runtimeDir}
