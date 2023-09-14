@@ -2,6 +2,7 @@
 import os
 import logging
 import sys
+import uvicorn
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -20,7 +21,11 @@ from preset_retrieval.preset_query_db import (add2preset_query_collection, updat
 
 from plugin_call.run import plugin_selection_run
 
+from run_config import LLMPARSER_HOST
+from run_config import LLMPARSER_PORT
+
 app = FastAPI()
+
 
 
 @app.post("/query2sql/")
@@ -147,3 +152,6 @@ async def tool_selection(query_body: Mapping[str, Any]):
     resp = plugin_selection_run(query_text=query_text, plugin_configs=plugin_configs)
 
     return resp
+
+if __name__ == "__main__":
+    uvicorn.run(app, host=LLMPARSER_HOST, port=LLMPARSER_PORT)

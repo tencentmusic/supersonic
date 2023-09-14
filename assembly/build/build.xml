@@ -6,14 +6,6 @@
         <format>tar.gz</format>
     </formats>
     <fileSets>
-
-        <fileSet>
-            <directory>${project.basedir}/src/main/bin</directory>
-            <outputDirectory>bin</outputDirectory>
-            <fileMode>0777</fileMode>
-            <directoryMode>0755</directoryMode>
-        </fileSet>
-
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
             <outputDirectory>conf</outputDirectory>
@@ -30,7 +22,7 @@
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/../../chat/core/src/main/python</directory>
-            <outputDirectory>llm</outputDirectory>
+            <outputDirectory>llmparser</outputDirectory>
             <fileMode>0777</fileMode>
             <directoryMode>0755</directoryMode>
         </fileSet>
