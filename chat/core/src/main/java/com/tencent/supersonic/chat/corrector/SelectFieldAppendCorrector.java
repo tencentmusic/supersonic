@@ -6,8 +6,10 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.expression.Expression;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
@@ -17,6 +19,12 @@ public class SelectFieldAppendCorrector extends BaseSemanticCorrector {
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
         String preSql = semanticCorrectInfo.getSql();
         if (SqlParserSelectHelper.hasAggregateFunction(preSql)) {
+            Expression havingExpression = SqlParserSelectHelper.getHavingExpression(preSql);
+            if (Objects.nonNull(havingExpression)) {
+                String replaceSql = SqlParserUpdateHelper.addFunctionToSelect(preSql, havingExpression);
+                semanticCorrectInfo.setPreSql(preSql);
+                semanticCorrectInfo.setSql(replaceSql);
+            }
             return;
         }
         Set<String> selectFields = new HashSet<>(SqlParserSelectHelper.getSelectFields(preSql));
