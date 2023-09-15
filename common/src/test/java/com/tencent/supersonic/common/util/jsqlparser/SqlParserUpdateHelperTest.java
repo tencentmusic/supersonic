@@ -242,6 +242,30 @@ class SqlParserUpdateHelperTest {
 
     }
 
+    @Test
+    void addFunctionToSelect() {
+        String sql = "SELECT user_name FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
+                + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
+        Expression havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+
+        String replaceSql = SqlParserUpdateHelper.addFunctionToSelect(sql, havingExpression);
+        System.out.println(replaceSql);
+        Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' "
+                        + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
+                replaceSql);
+
+        sql = "SELECT user_name,sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
+                + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
+        havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+
+        replaceSql = SqlParserUpdateHelper.addFunctionToSelect(sql, havingExpression);
+        System.out.println(replaceSql);
+        Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' "
+                        + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
+                replaceSql);
+
+    }
+
     private Map<String, String> initParams() {
         Map<String, String> fieldToBizName = new HashMap<>();
         fieldToBizName.put("部门", "department");

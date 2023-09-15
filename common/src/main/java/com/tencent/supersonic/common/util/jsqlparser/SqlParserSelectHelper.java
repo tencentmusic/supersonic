@@ -8,6 +8,8 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -128,6 +130,23 @@ public class SqlParserSelectHelper {
             having.accept(new FieldAcquireVisitor(result));
         }
 
+    }
+
+    public static Expression getHavingExpression(String sql) {
+        PlainSelect plainSelect = getPlainSelect(sql);
+        Expression having = plainSelect.getHaving();
+        if (Objects.nonNull(having)) {
+            if (!(having instanceof ComparisonOperator)) {
+                return null;
+            }
+            ComparisonOperator comparisonOperator = (ComparisonOperator) having;
+            if (comparisonOperator.getLeftExpression() instanceof Function) {
+                return comparisonOperator.getLeftExpression();
+            } else if (comparisonOperator.getRightExpression() instanceof Function) {
+                return comparisonOperator.getRightExpression();
+            }
+        }
+        return null;
     }
 
     public static List<String> getOrderByFields(String sql) {
