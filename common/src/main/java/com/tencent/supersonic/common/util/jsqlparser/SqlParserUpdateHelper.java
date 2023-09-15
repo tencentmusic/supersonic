@@ -94,6 +94,11 @@ public class SqlParserUpdateHelper {
         if (Objects.nonNull(groupByElement)) {
             groupByElement.accept(new GroupByReplaceVisitor(fieldToBizName, exactReplace));
         }
+        //5. replace having fields
+        Expression having = plainSelect.getHaving();
+        if (Objects.nonNull(having)) {
+            having.accept(visitor);
+        }
         return selectStatement.toString();
     }
 

@@ -44,6 +44,18 @@ class SqlParserUpdateHelperTest {
                         + "AND sys_imp_date >= '2023-03-03' "
                         + "GROUP BY MONTH(sys_imp_date) ORDER BY sum(pv) DESC LIMIT 1", replaceSql);
 
+        replaceSql = "select MONTH(数据日期), sum(访问次数) from 内容库产品 "
+                + "where datediff('year', 数据日期, '2023-09-03') <= 0.5 "
+                + "group by MONTH(数据日期) HAVING sum(访问次数) > 1000";
+
+        replaceSql = SqlParserUpdateHelper.replaceFields(replaceSql, fieldToBizName);
+        replaceSql = SqlParserUpdateHelper.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT MONTH(sys_imp_date), sum(pv) FROM 内容库产品 WHERE sys_imp_date <= '2023-09-03' "
+                        + "AND sys_imp_date >= '2023-03-03' GROUP BY MONTH(sys_imp_date) HAVING sum(pv) > 1000",
+                replaceSql);
+
         replaceSql = "select YEAR(发行日期), count(歌曲名) from 歌曲库 where YEAR(发行日期) "
                 + "in (2022, 2023) and 数据日期 = '2023-08-14' group by YEAR(发行日期)";
 
