@@ -50,35 +50,7 @@ function setAppName {
   fi
 }
 
-function setEnvToWeb {
-  if [[ "$service" == $CHAT_SERVICE  || "$service" == $SEMANTIC_SERVICE ]]; then
-     json='{"env": "'$service'"}'
-     echo $json > ${runtimeDir}/supersonic-${model_name}/webapp/supersonic.config.json
-  fi
-}
-
-function resetEnvironment {
-  if [[ ${app_name} == $LLMPARSER_APP_NAME ]]; then
-    return
-  fi
-  if [[ "$command" == "start" || "$command" == "restart" ]]; then
-     #1. clear file
-     mkdir -p ${runtimeDir}
-     rm -fr ${runtimeDir}/supersonic-${model_name}
-     #2. package lib
-     tar -zxvf ${buildDir}/supersonic-${model_name}.tar.gz  -C ${runtimeDir}
-     mv ${runtimeDir}/launchers-${model_name}-* ${runtimeDir}/supersonic-${model_name}
-
-     tar -zxvf ${buildDir}/supersonic-webapp.tar.gz  -C ${buildDir}
-     mkdir -p ${runtimeDir}/supersonic-${model_name}/webapp
-     cp -fr  ${buildDir}/supersonic-webapp/* ${runtimeDir}/supersonic-${model_name}/webapp
-     rm -fr  ${buildDir}/supersonic-webapp
-  fi
-}
-
 setAppName
-resetEnvironment
-setEnvToWeb
 setMainClass
 
 function runJavaService {
