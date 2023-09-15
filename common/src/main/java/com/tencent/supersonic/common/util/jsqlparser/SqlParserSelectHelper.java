@@ -117,7 +117,17 @@ public class SqlParserSelectHelper {
 
         getWhereFields(plainSelect, result);
 
+        getHavingFields(plainSelect, result);
+
         return new ArrayList<>(result);
+    }
+
+    private static void getHavingFields(PlainSelect plainSelect, Set<String> result) {
+        Expression having = plainSelect.getHaving();
+        if (Objects.nonNull(having)) {
+            having.accept(new FieldAcquireVisitor(result));
+        }
+
     }
 
     public static List<String> getOrderByFields(String sql) {
