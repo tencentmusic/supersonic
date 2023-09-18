@@ -18,6 +18,7 @@ import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
+import com.tencent.supersonic.semantic.query.utils.DslPermissionAnnotation;
 import com.tencent.supersonic.semantic.query.executor.QueryExecutor;
 import com.tencent.supersonic.semantic.query.parser.convert.QueryReqConverter;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
@@ -63,6 +64,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
+    @DslPermissionAnnotation()
     public Object queryBySql(QueryDslReq querySqlCmd, User user) throws Exception {
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
         List<Long> modelIds = new ArrayList<>();

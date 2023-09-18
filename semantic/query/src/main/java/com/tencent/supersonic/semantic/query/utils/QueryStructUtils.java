@@ -6,11 +6,13 @@ import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 
@@ -145,9 +147,17 @@ public class QueryStructUtils {
         sqlFilterUtils.getFiltersCol(queryStructCmd.getOriginalFilter()).stream().forEach(col -> resNameEnSet.add(col));
         return resNameEnSet;
     }
-
+    public Set<String> getResNameEn(QueryDslReq queryDslReq) {
+        Set<String> resNameEnSet = SqlParserSelectHelper.getAllFields(queryDslReq.getSql())
+                        .stream().collect(Collectors.toSet());
+        return resNameEnSet;
+    }
     public Set<String> getResNameEnExceptInternalCol(QueryStructReq queryStructCmd) {
         Set<String> resNameEnSet = getResNameEn(queryStructCmd);
+        return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
+    }
+    public Set<String> getResNameEnExceptInternalCol(QueryDslReq queryDslReq) {
+        Set<String> resNameEnSet = getResNameEn(queryDslReq);
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 
@@ -159,6 +169,12 @@ public class QueryStructUtils {
 
     public Set<String> getFilterResNameEnExceptInternalCol(QueryStructReq queryStructCmd) {
         Set<String> resNameEnSet = getFilterResNameEn(queryStructCmd);
+        return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
+    }
+
+    public Set<String> getFilterResNameEnExceptInternalCol(QueryDslReq queryDslReq) {
+        String sql = queryDslReq.getSql();
+        Set<String> resNameEnSet = SqlParserSelectHelper.getWhereFields(sql).stream().collect(Collectors.toSet());
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 
