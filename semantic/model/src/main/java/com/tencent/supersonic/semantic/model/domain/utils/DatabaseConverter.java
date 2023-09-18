@@ -22,6 +22,7 @@ public class DatabaseConverter {
         connectInfo.setUserName(databaseReq.getUsername());
         connectInfo.setPassword(databaseReq.getPassword());
         connectInfo.setUrl(databaseReq.getUrl());
+        connectInfo.setDatabase(databaseReq.getDatabase());
         database.setConnectInfo(connectInfo);
         database.setCreatedAt(new Date());
         database.setCreatedBy(user.getName());
@@ -58,6 +59,7 @@ public class DatabaseConverter {
         databaseResp.setUrl(connectInfo.getUrl());
         databaseResp.setPassword(connectInfo.getPassword());
         databaseResp.setUsername(connectInfo.getUserName());
+        databaseResp.setDatabase(connectInfo.getDatabase());
         if (StringUtils.isNotBlank(databaseDO.getAdmin())) {
             databaseResp.setAdmins(Arrays.asList(databaseDO.getAdmin().split(",")));
         }
