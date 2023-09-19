@@ -75,6 +75,13 @@ class SqlParserSelectHelperTest {
                         + "user_id like '%alice%' AND  publish_date > 10000   ORDER BY pv DESC LIMIT 1");
 
         System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, pv FROM s2 WHERE "
+                        + "user_id like '%alice%' AND  publish_date > 10000  "
+                        + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(filterExpression);
     }
 
 

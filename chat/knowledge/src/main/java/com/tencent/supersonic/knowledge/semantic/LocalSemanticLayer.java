@@ -8,12 +8,14 @@ import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
+import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
@@ -93,6 +95,12 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
     public List<ModelResp> getModelList(AuthType authType, Long domainId, User user) {
         schemaService = ContextUtils.getBean(SchemaService.class);
         return schemaService.getModelList(user, authType, domainId);
+    }
+
+    @Override
+    public <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception {
+        queryService = ContextUtils.getBean(QueryService.class);
+        return queryService.explain(explainSqlReq, user);
     }
 
     @Override
