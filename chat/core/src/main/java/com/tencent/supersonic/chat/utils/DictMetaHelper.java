@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.utils;
 import static com.tencent.supersonic.common.pojo.Constants.DAY;
 import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
 
+import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
@@ -26,7 +27,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.util.Strings;
+import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -174,8 +176,9 @@ public class DictMetaHelper {
                         //default cnt
                         if (Objects.isNull(chatDefaultConfig)
                                 || CollectionUtils.isEmpty(chatDefaultConfig.getMetrics())) {
-                            String datasourceBizName = dimensionDesc.getBizName();
-                            if (Strings.isNotEmpty(datasourceBizName)) {
+                            Long dimId = dimensionDesc.getId();
+                            if (Objects.nonNull(dimId)) {
+                                String datasourceBizName = queryDataSourceByDimId(dimId);
                                 String internalMetricName =
                                         datasourceBizName + UNDERLINE + internalMetricNameSuffix;
                                 defaultMetricDescList.add(new DefaultMetric(internalMetricName,
@@ -214,5 +217,16 @@ public class DictMetaHelper {
                 dimValueDOList.add(dimValueDO);
             }
         }
+    }
+
+    private String queryDataSourceByDimId(Long id) {
+        PageDimensionReq pageDimensionCmd = new PageDimensionReq();
+        pageDimensionCmd.setId(id.toString());
+        PageInfo<DimensionResp> dimensionPage = semanticLayer.getDimensionPage(pageDimensionCmd);
+        if (Objects.nonNull(dimensionPage) && !CollectionUtils.isEmpty(dimensionPage.getList())) {
+            List<DimensionResp> list = dimensionPage.getList();
+            return list.get(0).getDatasourceBizName();
+        }
+        return "";
     }
 }
