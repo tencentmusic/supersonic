@@ -39,6 +39,7 @@ import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -87,7 +88,7 @@ public class LLMDslParser implements SemanticParser {
                 return;
             }
 
-            LLMReq llmReq = getLlmReq(queryCtx, modelId);
+            LLMReq llmReq = getLlmReq(queryCtx, modelId, llmParserConfig);
             LLMResp llmResp = requestLLM(llmReq, modelId, llmParserConfig);
 
             if (Objects.isNull(llmResp)) {
@@ -340,22 +341,28 @@ public class LLMDslParser implements SemanticParser {
         return null;
     }
 
-    private LLMReq getLlmReq(QueryContext queryCtx, Long modelId) {
+    private LLMReq getLlmReq(QueryContext queryCtx, Long modelId, LLMParserConfig llmParserConfig) {
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         Map<Long, String> modelIdToName = semanticSchema.getModelIdToName();
         String queryText = queryCtx.getRequest().getQueryText();
+
         LLMReq llmReq = new LLMReq();
         llmReq.setQueryText(queryText);
+
         LLMReq.LLMSchema llmSchema = new LLMReq.LLMSchema();
         llmSchema.setModelName(modelIdToName.get(modelId));
         llmSchema.setDomainName(modelIdToName.get(modelId));
-        List<String> fieldNameList = getFieldNameList(queryCtx, modelId, semanticSchema);
+
+        List<String> fieldNameList = getFieldNameList(queryCtx, modelId, semanticSchema, llmParserConfig);
+
         fieldNameList.add(BaseSemanticCorrector.DATE_FIELD);
         llmSchema.setFieldNameList(fieldNameList);
         llmReq.setSchema(llmSchema);
+
         List<ElementValue> linking = new ArrayList<>();
         linking.addAll(getValueList(queryCtx, modelId, semanticSchema));
         llmReq.setLinking(linking);
+
         String currentDate = DSLDateHelper.getReferenceDate(modelId);
         llmReq.setCurrentDate(currentDate);
         return llmReq;
@@ -399,12 +406,27 @@ public class LLMDslParser implements SemanticParser {
     }
 
 
-    protected List<String> getFieldNameList(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema) {
+    protected List<String> getFieldNameList(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema,
+            LLMParserConfig llmParserConfig) {
         Map<Long, String> itemIdToName = getItemIdToName(modelId, semanticSchema);
+
+        Set<String> results = semanticSchema.getDimensions().stream()
+                .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
+                .limit(llmParserConfig.getDimensionTopN())
+                .map(entry -> entry.getName())
+                .collect(Collectors.toSet());
+
+        Set<String> metrics = semanticSchema.getMetrics().stream()
+                .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
+                .limit(llmParserConfig.getMetricTopN())
+                .map(entry -> entry.getName())
+                .collect(Collectors.toSet());
+
+        results.addAll(metrics);
 
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(modelId);
         if (CollectionUtils.isEmpty(matchedElements)) {
-            return new ArrayList<>();
+            return new ArrayList<>(results);
         }
         Set<String> fieldNameList = matchedElements.stream()
                 .filter(schemaElementMatch -> {
@@ -423,7 +445,8 @@ public class LLMDslParser implements SemanticParser {
                 })
                 .filter(name -> StringUtils.isNotEmpty(name) && !name.contains("%"))
                 .collect(Collectors.toSet());
-        return new ArrayList<>(fieldNameList);
+        results.addAll(fieldNameList);
+        return new ArrayList<>(results);
     }
 
     protected Map<Long, String> getItemIdToName(Long modelId, SemanticSchema semanticSchema) {

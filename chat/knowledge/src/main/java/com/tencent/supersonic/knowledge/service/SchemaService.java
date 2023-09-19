@@ -18,7 +18,7 @@ public class SchemaService {
 
 
     public static final String ALL_CACHE = "all";
-    private static final Integer META_CACHE_TIME = 5;
+    private static final Integer META_CACHE_TIME = 2;
     private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
 
     private LoadingCache<String, SemanticSchema> cache = CacheBuilder.newBuilder()
