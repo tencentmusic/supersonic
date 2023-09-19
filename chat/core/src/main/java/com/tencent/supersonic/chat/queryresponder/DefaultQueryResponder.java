@@ -28,7 +28,7 @@ import java.util.Set;
 
 @Slf4j
 @Component
-public class DefaultQueryResponder implements QueryResponder{
+public class DefaultQueryResponder implements QueryResponder {
 
 
     private EmbeddingConfig embeddingConfig;

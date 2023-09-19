@@ -133,8 +133,8 @@ public class QueryServiceImpl implements QueryService {
             saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
         } else {
-           List<SolvedQueryRecallResp> solvedQueryRecallResps =
-                   queryResponder.recallSolvedQuery(queryCtx.getRequest().getQueryText());
+            List<SolvedQueryRecallResp> solvedQueryRecallResps =
+                    queryResponder.recallSolvedQuery(queryCtx.getRequest().getQueryText());
             parseResult = ParseResp.builder()
                     .chatId(queryReq.getChatId())
                     .queryText(queryReq.getQueryText())
