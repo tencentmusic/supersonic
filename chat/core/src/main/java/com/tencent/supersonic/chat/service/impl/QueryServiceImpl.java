@@ -15,12 +15,14 @@ import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
+import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.chat.query.QuerySelector;
 import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.chat.query.QueryManager;
+import com.tencent.supersonic.chat.queryresponder.QueryResponder;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SemanticService;
@@ -63,6 +65,8 @@ public class QueryServiceImpl implements QueryService {
     private ChatService chatService;
     @Autowired
     private StatisticsService statisticsService;
+    @Autowired
+    private QueryResponder queryResponder;
 
     private final String entity = "ENTITY";
 
@@ -129,10 +133,13 @@ public class QueryServiceImpl implements QueryService {
             saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
         } else {
+           List<SolvedQueryRecallResp> solvedQueryRecallResps =
+                   queryResponder.recallSolvedQuery(queryCtx.getRequest().getQueryText());
             parseResult = ParseResp.builder()
                     .chatId(queryReq.getChatId())
                     .queryText(queryReq.getQueryText())
                     .state(ParseResp.ParseState.FAILED)
+                    .similarSolvedQuery(solvedQueryRecallResps)
                     .build();
         }
         return parseResult;
@@ -171,6 +178,7 @@ public class QueryServiceImpl implements QueryService {
             chatCtx.setUser(queryReq.getUser().getName());
             //chatService.addQuery(queryResult, chatCtx);
             chatService.updateQuery(queryReq.getQueryId(), queryResult, chatCtx);
+            queryResponder.saveSolvedQuery(queryReq.getQueryText(), queryReq.getQueryId(), queryReq.getParseId());
         } else {
             chatService.deleteChatQuery(queryReq.getQueryId());
         }
