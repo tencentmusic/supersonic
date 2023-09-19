@@ -28,6 +28,7 @@ import com.tencent.supersonic.semantic.model.domain.utils.MetricConverter;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.pojo.Metric;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -250,6 +251,16 @@ public class MetricServiceImpl implements MetricService {
         });
     }
 
+    @Override
+    public Set<String> getMetricTags() {
+        List<MetricResp> metricResps = getMetrics();
+        if (CollectionUtils.isEmpty(metricResps)) {
+            return new HashSet<>();
+        }
+        return metricResps.stream().flatMap(metricResp ->
+                metricResp.getTags().stream()).collect(Collectors.toSet());
+    }
+
 
     private void saveMetricBatch(List<Metric> metrics, User user) {
         if (CollectionUtils.isEmpty(metrics)) {
@@ -293,7 +304,7 @@ public class MetricServiceImpl implements MetricService {
         Map<Long, ModelResp> modelMap = modelService.getModelMap();
         if (!CollectionUtils.isEmpty(metricDOS)) {
             metricDescs = metricDOS.stream()
-                    .map(metricDO -> MetricConverter.convert2MetricDesc(metricDO, modelMap))
+                    .map(metricDO -> MetricConverter.convert2MetricResp(metricDO, modelMap))
                     .collect(Collectors.toList());
         }
         return metricDescs;

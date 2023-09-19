@@ -9,6 +9,7 @@ import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import java.util.List;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -89,5 +90,10 @@ public class MetricController {
         return metricService.getAllHighSensitiveMetric();
     }
 
+
+    @GetMapping("/getMetricTags")
+    public Set<String> getMetricTags() {
+        return metricService.getMetricTags();
+    }
 
 }

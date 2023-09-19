@@ -1,11 +1,15 @@
 package com.tencent.supersonic.semantic.api.model.response;
 
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DataFormat;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import lombok.Data;
 import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
+import java.util.Arrays;
+import java.util.List;
 
 
 @Data
@@ -13,6 +17,8 @@ import lombok.ToString;
 public class MetricResp extends SchemaItem {
 
     private Long modelId;
+
+    private Long domainId;
 
     private String modelName;
 
@@ -27,5 +33,13 @@ public class MetricResp extends SchemaItem {
 
     private String alias;
 
+    private List<String> tags;
 
+    public void setTag(String tag) {
+        if (StringUtils.isBlank(tag)) {
+            tags = Lists.newArrayList();
+        } else {
+            tags = Arrays.asList(tag.split(","));
+        }
+    }
 }

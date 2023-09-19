@@ -205,6 +205,7 @@ CREATE TABLE IF NOT EXISTS `s2_metric` (
     `data_format_type` varchar(50) DEFAULT NULL ,
     `data_format` varchar(500) DEFAULT NULL,
     `alias` varchar(500) DEFAULT NULL,
+    `tags` varchar(500) DEFAULT NULL,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_metric IS 'metric information table';

@@ -7,6 +7,7 @@ import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 
 import java.util.List;
+import java.util.Set;
 
 public interface MetricService {
 
@@ -22,7 +23,7 @@ public interface MetricService {
 
     void createMetricBatch(List<MetricReq> metricReqs, User user) throws Exception;
 
-    PageInfo<MetricResp> queryMetric(PageMetricReq pageMetrricReq);
+    PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq);
 
     MetricResp getMetric(Long modelId, String bizName);
 
@@ -35,4 +36,6 @@ public interface MetricService {
     void deleteMetric(Long id) throws Exception;
 
     List<String> mockAlias(MetricReq metricReq, String mockType, User user);
+
+    Set<String> getMetricTags();
 }
