@@ -21,8 +21,11 @@ import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
+import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.io.Serializable;
@@ -213,6 +216,22 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
                 .getEntityInfo(parseInfo, user);
         queryResult.setEntityInfo(entityInfo);
         return queryResult;
+    }
+
+
+    @Override
+    public ExplainResp explain(User user) {
+        ExplainSqlReq explainSqlReq = null;
+        try {
+            explainSqlReq = ExplainSqlReq.builder()
+                    .queryTypeEnum(QueryTypeEnum.STRUCT)
+                    .queryReq(convertQueryStruct())
+                    .build();
+            return semanticLayer.explain(explainSqlReq, user);
+        } catch (Exception e) {
+            log.error("explain error explainSqlReq:{}", explainSqlReq, e);
+        }
+        return null;
     }
 
     public QueryResult multiStructExecute(User user) {

@@ -6,12 +6,15 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.util.cache.CacheUtils;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
+import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Cache;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
+import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
@@ -64,6 +67,11 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public Object queryBySql(QueryDslReq querySqlCmd, User user) throws Exception {
+        QueryStatement queryStatement = convertToQueryStatement(querySqlCmd, user);
+        return semanticQueryEngine.execute(queryStatement);
+    }
+
+    private QueryStatement convertToQueryStatement(QueryDslReq querySqlCmd, User user) throws Exception {
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
         List<Long> modelIds = new ArrayList<>();
         modelIds.add(querySqlCmd.getModelId());
@@ -74,7 +82,7 @@ public class QueryServiceImpl implements QueryService {
 
         QueryStatement queryStatement = queryReqConverter.convert(querySqlCmd, domainSchemas);
         queryStatement.setModelId(querySqlCmd.getModelId());
-        return semanticQueryEngine.execute(queryStatement);
+        return queryStatement;
     }
 
     @Override
@@ -182,6 +190,32 @@ public class QueryServiceImpl implements QueryService {
         List<ItemUseResp> statInfos = statUtils.getStatInfo(itemUseCommend);
         return statInfos;
     }
+
+    @Override
+    public <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception {
+        QueryTypeEnum queryTypeEnum = explainSqlReq.getQueryTypeEnum();
+        T queryReq = explainSqlReq.getQueryReq();
+
+        if (QueryTypeEnum.SQL.equals(queryTypeEnum) && queryReq instanceof QueryDslReq) {
+            QueryStatement queryStatement = convertToQueryStatement((QueryDslReq) queryReq, user);
+            return getExplainResp(queryStatement);
+        }
+        if (QueryTypeEnum.STRUCT.equals(queryTypeEnum) && queryReq instanceof QueryStructReq) {
+            QueryStatement queryStatement = semanticQueryEngine.plan((QueryStructReq) queryReq);
+            return getExplainResp(queryStatement);
+        }
+
+        throw new IllegalArgumentException("Parameters are invalid, explainSqlReq: " + explainSqlReq);
+    }
+
+    private ExplainResp getExplainResp(QueryStatement queryStatement) {
+        String sql = "";
+        if (Objects.nonNull(queryStatement)) {
+            sql = queryStatement.getSql();
+        }
+        return ExplainResp.builder().sql(sql).build();
+    }
+
 
     private boolean isCache(QueryStructReq queryStructCmd) {
         if (!cacheEnable) {
