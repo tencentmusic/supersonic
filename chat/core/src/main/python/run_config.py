@@ -3,6 +3,9 @@ import os
 
 PROJECT_DIR_PATH = os.path.dirname(os.path.abspath(__file__))
 
+LLMPARSER_HOST = "127.0.0.1"
+LLMPARSER_PORT = 9092
+
 MODEL_NAME = "gpt-3.5-turbo-16k"
 OPENAI_API_KEY = "YOUR_API_KEY"
 
@@ -21,3 +24,5 @@ if __name__ == '__main__':
     print('PROJECT_DIR_PATH: ', PROJECT_DIR_PATH)
     print('EMB_MODEL_PATH: ', HF_TEXT2VEC_MODEL_NAME)
     print('CHROMA_DB_PERSIST_PATH: ', CHROMA_DB_PERSIST_PATH)
+    print('LLMPARSER_HOST: ', LLMPARSER_HOST)
+    print('LLMPARSER_PORT: ', LLMPARSER_PORT)

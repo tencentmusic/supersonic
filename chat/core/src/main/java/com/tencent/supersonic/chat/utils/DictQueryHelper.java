@@ -1,10 +1,5 @@
 package com.tencent.supersonic.chat.utils;
 
-import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
-import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
-import static com.tencent.supersonic.common.pojo.Constants.COMMA;
-import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE_DOUBLE;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.config.DefaultMetric;
@@ -34,6 +29,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import static com.tencent.supersonic.common.pojo.Constants.SPACE;
+import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
+import static com.tencent.supersonic.common.pojo.Constants.COMMA;
+import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
+import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE_DOUBLE;
+
 @Slf4j
 @Component
 public class DictQueryHelper {
@@ -46,6 +47,8 @@ public class DictQueryHelper {
     private Integer printDataShow;
     @Value("${dimension.max.limit:3000000}")
     private Long dimMaxLimit;
+    @Value("${dimension.white.weight:60000000}")
+    private Long dimensionWhiteWeight;
 
     public List<String> fetchDimValueSingle(Long modelId, DefaultMetric defaultMetricDesc, Dim4Dict dim4Dict,
                                             User user) {
@@ -53,10 +56,11 @@ public class DictQueryHelper {
         QueryStructReq queryStructCmd = generateQueryStructCmd(modelId, defaultMetricDesc, dim4Dict);
         try {
             QueryResultWithSchemaResp queryResultWithColumns = semanticLayer.queryByStruct(queryStructCmd, user);
+            log.info("fetchDimValueSingle sql:{}", queryResultWithColumns.getSql());
             String nature = String.format("_%d_%d", modelId, dim4Dict.getDimId());
             String dimNameRewrite = rewriteDimName(queryResultWithColumns.getColumns(), dim4Dict.getBizName());
             data = generateFileData(queryResultWithColumns.getResultList(), nature, dimNameRewrite,
-                    defaultMetricDesc.getBizName());
+                    defaultMetricDesc.getBizName(), dim4Dict);
             if (!CollectionUtils.isEmpty(data)) {
                 int size = (data.size() > printDataShow) ? printDataShow : data.size();
                 log.info("data:{}", data.subList(0, size - 1));
@@ -91,7 +95,7 @@ public class DictQueryHelper {
     }
 
     private List<String> generateFileData(List<Map<String, Object>> resultList, String nature, String dimName,
-                                          String metricName) {
+                                          String metricName, Dim4Dict dim4Dict) {
         List<String> data = new ArrayList<>();
         if (CollectionUtils.isEmpty(resultList)) {
             return data;
@@ -111,17 +115,26 @@ public class DictQueryHelper {
             }
 
         }
-        constructDataLines(valueAndFrequencyPair, nature, data);
+        constructDataLines(valueAndFrequencyPair, nature, data, dim4Dict);
         return data;
     }
 
-    private void constructDataLines(Map<String, Long> valueAndFrequencyPair, String nature, List<String> data) {
+    private void constructDataLines(Map<String, Long> valueAndFrequencyPair, String nature,
+                                    List<String> data, Dim4Dict dim4Dict) {
         valueAndFrequencyPair.forEach((dimValue, metric) -> {
             if (metric > MAX_FREQUENCY) {
                 metric = MAX_FREQUENCY;
             }
+            if (Strings.isNotEmpty(dimValue) && dimValue.contains(SPACE)) {
+                dimValue = dimValue.replace(SPACE, "#");
+            }
             data.add(String.format("%s %s %s", dimValue, nature, metric));
         });
+
+        if (Objects.nonNull(dim4Dict) && !CollectionUtils.isEmpty(dim4Dict.getWhiteList())) {
+            dim4Dict.getWhiteList().stream()
+                    .forEach(white -> data.add(String.format("%s %s %s", white, nature, dimensionWhiteWeight)));
+        }
     }
 
     private void mergeMultivaluedValue(Map<String, Long> valueAndFrequencyPair, String dimValue, Long metric) {
@@ -185,7 +198,7 @@ public class DictQueryHelper {
         if (Objects.isNull(dim4Dict)) {
             return "";
         }
-        StringJoiner joiner = new StringJoiner(AND_UPPER);
+        StringJoiner joiner = new StringJoiner(SPACE + AND_UPPER + SPACE);
 
         String dimName = dim4Dict.getBizName();
         if (!CollectionUtils.isEmpty(dim4Dict.getBlackList())) {

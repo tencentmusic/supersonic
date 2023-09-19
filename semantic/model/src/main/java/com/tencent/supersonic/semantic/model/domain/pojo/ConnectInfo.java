@@ -13,4 +13,6 @@ public class ConnectInfo {
 
     private String password;
 
+    private String database;
+
 }

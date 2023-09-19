@@ -44,6 +44,18 @@ class SqlParserUpdateHelperTest {
                         + "AND sys_imp_date >= '2023-03-03' "
                         + "GROUP BY MONTH(sys_imp_date) ORDER BY sum(pv) DESC LIMIT 1", replaceSql);
 
+        replaceSql = "select MONTH(数据日期), sum(访问次数) from 内容库产品 "
+                + "where datediff('year', 数据日期, '2023-09-03') <= 0.5 "
+                + "group by MONTH(数据日期) HAVING sum(访问次数) > 1000";
+
+        replaceSql = SqlParserUpdateHelper.replaceFields(replaceSql, fieldToBizName);
+        replaceSql = SqlParserUpdateHelper.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT MONTH(sys_imp_date), sum(pv) FROM 内容库产品 WHERE sys_imp_date <= '2023-09-03' "
+                        + "AND sys_imp_date >= '2023-03-03' GROUP BY MONTH(sys_imp_date) HAVING sum(pv) > 1000",
+                replaceSql);
+
         replaceSql = "select YEAR(发行日期), count(歌曲名) from 歌曲库 where YEAR(发行日期) "
                 + "in (2022, 2023) and 数据日期 = '2023-08-14' group by YEAR(发行日期)";
 
@@ -226,6 +238,30 @@ class SqlParserUpdateHelperTest {
         Assert.assertEquals(
                 "SELECT 部门, sum(访问次数) FROM 超音数 WHERE "
                         + "datediff('day', 数据日期, '2023-09-05') <= 3 GROUP BY 部门 ORDER BY sum(访问次数) DESC LIMIT 10",
+                replaceSql);
+
+    }
+
+    @Test
+    void addFunctionToSelect() {
+        String sql = "SELECT user_name FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
+                + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
+        Expression havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+
+        String replaceSql = SqlParserUpdateHelper.addFunctionToSelect(sql, havingExpression);
+        System.out.println(replaceSql);
+        Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' "
+                        + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
+                replaceSql);
+
+        sql = "SELECT user_name,sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
+                + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
+        havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+
+        replaceSql = SqlParserUpdateHelper.addFunctionToSelect(sql, havingExpression);
+        System.out.println(replaceSql);
+        Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' "
+                        + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
                 replaceSql);
 
     }

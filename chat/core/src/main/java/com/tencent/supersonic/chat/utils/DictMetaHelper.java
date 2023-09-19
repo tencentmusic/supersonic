@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.utils;
 import static com.tencent.supersonic.common.pojo.Constants.DAY;
 import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
 
+import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
@@ -26,7 +27,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.util.Strings;
+import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +42,8 @@ public class DictMetaHelper {
     private ConfigService configService;
     @Value("${model.internal.metric.suffix:internal_cnt}")
     private String internalMetricNameSuffix;
+    @Value("${model.internal.day.number:2}")
+    private Integer internalMetricDays;
     private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
 
     public List<DimValueDO> generateDimValueInfo(DimValue2DictCommand dimValue2DictCommend) {
@@ -134,14 +138,21 @@ public class DictMetaHelper {
 
             ChatDefaultRichConfigResp chatDefaultConfig =
                     chaConfigRichDesc.getChatAggRichConfig().getChatDefaultConfig();
+
+            KnowledgeAdvancedConfig globalKnowledgeConfigAgg = chaConfigRichDesc.getChatAggRichConfig()
+                    .getGlobalKnowledgeConfig();
             List<KnowledgeInfoReq> knowledgeAggInfo =
                     chaConfigRichDesc.getChatAggRichConfig().getKnowledgeInfos();
 
+            KnowledgeAdvancedConfig globalKnowledgeConfigDetail = chaConfigRichDesc.getChatDetailRichConfig()
+                    .getGlobalKnowledgeConfig();
             List<KnowledgeInfoReq> knowledgeDetailInfo =
                     chaConfigRichDesc.getChatDetailRichConfig().getKnowledgeInfos();
 
-            fillKnowledgeDimValue(knowledgeDetailInfo, chatDefaultConfig, dimValueDOList, dimIdAndDescPair, modelId);
-            fillKnowledgeDimValue(knowledgeAggInfo, chatDefaultConfig, dimValueDOList, dimIdAndDescPair, modelId);
+            fillKnowledgeDimValue(knowledgeDetailInfo, chatDefaultConfig, dimValueDOList, dimIdAndDescPair,
+                    modelId, globalKnowledgeConfigDetail);
+            fillKnowledgeDimValue(knowledgeAggInfo, chatDefaultConfig, dimValueDOList, dimIdAndDescPair,
+                    modelId, globalKnowledgeConfigAgg);
 
 
         }
@@ -150,7 +161,8 @@ public class DictMetaHelper {
     private void fillKnowledgeDimValue(List<KnowledgeInfoReq> knowledgeInfos,
                                        ChatDefaultRichConfigResp chatDefaultConfig,
                                        List<DimValueDO> dimValueDOList,
-                                       Map<Long, SchemaElement> dimIdAndDescPair, Long modelId) {
+                                       Map<Long, SchemaElement> dimIdAndDescPair, Long modelId,
+                                       KnowledgeAdvancedConfig globalKnowledgeConfigDetail) {
         if (!CollectionUtils.isEmpty(knowledgeInfos)) {
             List<Dim4Dict> dimensions = new ArrayList<>();
             List<DefaultMetric> defaultMetricDescList = new ArrayList<>();
@@ -159,36 +171,42 @@ public class DictMetaHelper {
                             && !CollectionUtils.isEmpty(dimIdAndDescPair)
                             && dimIdAndDescPair.containsKey(knowledgeInfo.getItemId()))
                     .forEach(knowledgeInfo -> {
-                        if (dimIdAndDescPair.containsKey(knowledgeInfo.getItemId())) {
-                            SchemaElement dimensionDesc = dimIdAndDescPair.get(knowledgeInfo.getItemId());
+                        SchemaElement dimensionDesc = dimIdAndDescPair.get(knowledgeInfo.getItemId());
 
-                            //default cnt
-                            if (Objects.isNull(chatDefaultConfig)
-                                    || CollectionUtils.isEmpty(chatDefaultConfig.getMetrics())) {
-                                String datasourceBizName = dimensionDesc.getBizName();
-                                if (Strings.isNotEmpty(datasourceBizName)) {
-                                    String internalMetricName =
-                                            datasourceBizName + UNDERLINE + internalMetricNameSuffix;
-                                    defaultMetricDescList.add(new DefaultMetric(internalMetricName, 2, DAY));
-                                }
-                            } else {
-                                SchemaElement schemaItem = chatDefaultConfig.getMetrics().get(0);
-                                defaultMetricDescList.add(new DefaultMetric(schemaItem.getBizName(),
-                                        chatDefaultConfig.getUnit(), chatDefaultConfig.getPeriod()));
-
+                        //default cnt
+                        if (Objects.isNull(chatDefaultConfig)
+                                || CollectionUtils.isEmpty(chatDefaultConfig.getMetrics())) {
+                            Long dimId = dimensionDesc.getId();
+                            if (Objects.nonNull(dimId)) {
+                                String datasourceBizName = queryDataSourceByDimId(dimId);
+                                String internalMetricName =
+                                        datasourceBizName + UNDERLINE + internalMetricNameSuffix;
+                                defaultMetricDescList.add(new DefaultMetric(internalMetricName,
+                                        internalMetricDays, DAY));
                             }
+                        } else {
+                            SchemaElement schemaItem = chatDefaultConfig.getMetrics().get(0);
+                            defaultMetricDescList.add(new DefaultMetric(schemaItem.getBizName(),
+                                    chatDefaultConfig.getUnit(), chatDefaultConfig.getPeriod()));
 
-                            String bizName = dimensionDesc.getBizName();
-                            Dim4Dict dim4Dict = new Dim4Dict();
-                            dim4Dict.setDimId(knowledgeInfo.getItemId());
-                            dim4Dict.setBizName(bizName);
-                            if (Objects.nonNull(knowledgeInfo.getKnowledgeAdvancedConfig())) {
-                                KnowledgeAdvancedConfig knowledgeAdvancedConfig
-                                        = knowledgeInfo.getKnowledgeAdvancedConfig();
-                                BeanUtils.copyProperties(knowledgeAdvancedConfig, dim4Dict);
-                            }
-                            dimensions.add(dim4Dict);
                         }
+
+                        String bizName = dimensionDesc.getBizName();
+                        Dim4Dict dim4Dict = new Dim4Dict();
+                        dim4Dict.setDimId(knowledgeInfo.getItemId());
+                        dim4Dict.setBizName(bizName);
+                        if (Objects.nonNull(knowledgeInfo.getKnowledgeAdvancedConfig())) {
+                            KnowledgeAdvancedConfig knowledgeAdvancedConfig
+                                    = knowledgeInfo.getKnowledgeAdvancedConfig();
+                            BeanUtils.copyProperties(knowledgeAdvancedConfig, dim4Dict);
+
+                            if (Objects.nonNull(globalKnowledgeConfigDetail)
+                                    && !CollectionUtils.isEmpty(globalKnowledgeConfigDetail.getRuleList())) {
+                                dim4Dict.getRuleList().addAll(globalKnowledgeConfigDetail.getRuleList());
+                            }
+                        }
+                        dimensions.add(dim4Dict);
+
                     });
 
             if (!CollectionUtils.isEmpty(dimensions)) {
@@ -199,5 +217,16 @@ public class DictMetaHelper {
                 dimValueDOList.add(dimValueDO);
             }
         }
+    }
+
+    private String queryDataSourceByDimId(Long id) {
+        PageDimensionReq pageDimensionCmd = new PageDimensionReq();
+        pageDimensionCmd.setId(id.toString());
+        PageInfo<DimensionResp> dimensionPage = semanticLayer.getDimensionPage(pageDimensionCmd);
+        if (Objects.nonNull(dimensionPage) && !CollectionUtils.isEmpty(dimensionPage.getList())) {
+            List<DimensionResp> list = dimensionPage.getList();
+            return list.get(0).getDatasourceBizName();
+        }
+        return "";
     }
 }

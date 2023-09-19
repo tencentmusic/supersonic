@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -37,7 +38,7 @@ public class LocalFileHandler implements FileHandler {
         Path targetPath = Paths.get(target);
         try {
             Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-            log.info("File copied successfully!");
+            log.info("backupFile successfully! path:{}", targetPath.toAbsolutePath());
         } catch (IOException e) {
             log.info("Failed to copy file: " + e.getMessage());
         }
@@ -62,7 +63,7 @@ public class LocalFileHandler implements FileHandler {
             Files.delete(path);
             log.info("File:{} deleted successfully!", getAbsolutePath(filePath));
         } catch (IOException e) {
-            log.info("Failed to delete file:{}, e:", getAbsolutePath(filePath), e);
+            log.warn("Failed to delete file:{}, e:", getAbsolutePath(filePath), e);
         }
     }
 

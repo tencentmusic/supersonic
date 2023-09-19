@@ -1,14 +1,19 @@
 package com.tencent.supersonic.semantic.query.service;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.util.cache.CacheUtils;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Cache;
+import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
@@ -19,6 +24,7 @@ import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.utils.QueryUtils;
 import com.tencent.supersonic.semantic.query.utils.StatUtils;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import lombok.SneakyThrows;
@@ -155,6 +161,13 @@ public class QueryServiceImpl implements QueryService {
         }
     }
 
+    @Override
+    @SneakyThrows
+    public QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user) {
+        QueryStructReq queryStructReq = generateDimValueQueryStruct(queryDimValueReq);
+        return queryByStruct(queryStructReq, user);
+    }
+
 
     private void handleGlobalCacheDisable(QueryStructReq queryStructCmd) {
         if (!cacheEnable) {
@@ -202,5 +215,30 @@ public class QueryServiceImpl implements QueryService {
         return null;
     }
 
+    private QueryStructReq generateDimValueQueryStruct(QueryDimValueReq queryDimValueReq) {
+        QueryStructReq queryStructReq = new QueryStructReq();
+
+        queryStructReq.setModelId(queryDimValueReq.getModelId());
+        queryStructReq.setGroups(Collections.singletonList(queryDimValueReq.getDimensionBizName()));
+
+        if (!Objects.isNull(queryDimValueReq.getValue())) {
+            List<Filter> dimensionFilters = new ArrayList<>();
+            Filter dimensionFilter = new Filter();
+            dimensionFilter.setOperator(FilterOperatorEnum.LIKE);
+            dimensionFilter.setRelation(Filter.Relation.FILTER);
+            dimensionFilter.setBizName(queryDimValueReq.getDimensionBizName());
+            dimensionFilter.setValue(queryDimValueReq.getValue());
+            dimensionFilters.add(dimensionFilter);
+            queryStructReq.setDimensionFilters(dimensionFilters);
+        }
+        List<Aggregator> aggregators = new ArrayList<>();
+        queryStructReq.setAggregators(aggregators);
+
+        DateConf dateInfo = new DateConf();
+        dateInfo.setDateMode(DateConf.DateMode.RECENT);
+        dateInfo.setUnit(1);
+        queryStructReq.setDateInfo(dateInfo);
+        return queryStructReq;
+    }
 
 }

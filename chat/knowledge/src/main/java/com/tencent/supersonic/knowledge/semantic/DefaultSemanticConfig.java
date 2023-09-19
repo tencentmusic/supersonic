@@ -20,6 +20,9 @@ public class DefaultSemanticConfig {
     @Value("${searchByStruct.path:/api/semantic/query/sql}")
     private String searchBySqlPath;
 
+    @Value("${searchByStruct.path:/api/semantic/query/queryDimValue}")
+    private String queryDimValuePath;
+
     @Value("${fetchModelSchemaPath.path:/api/semantic/schema}")
     private String fetchModelSchemaPath;
 
