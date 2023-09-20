@@ -19,7 +19,7 @@ supersonic-webapp.tar.gz
 
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
+../../content-base/assembly/bin/pnpm-lock.yaml
 
 # misc
 .DS_Store
