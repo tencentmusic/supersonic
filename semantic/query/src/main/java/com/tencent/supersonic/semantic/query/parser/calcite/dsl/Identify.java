@@ -10,6 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Identify {
 
+    public enum Type {
+        PRIMARY, FOREIGN
+    }
+
     private String name;
 
     // primary or foreign
