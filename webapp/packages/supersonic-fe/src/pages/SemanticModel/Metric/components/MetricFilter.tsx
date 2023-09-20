@@ -81,7 +81,7 @@ const MetricFilter: React.FC<Props> = ({ filterValues = {}, onFiltersChange }) =
               <FormItem name="key" noStyle>
                 <div className={styles.searchInput}>
                   <Input.Search
-                    placeholder="请输入需要查询指标的ID、指标名称、字段名称"
+                    placeholder="请输入需要查询指标的ID、指标名称、字段名称、标签"
                     enterButton={<SearchOutlined style={{ marginTop: 5 }} />}
                     onSearch={(value) => {
                       onSearch(value);

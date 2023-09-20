@@ -119,6 +119,10 @@ export function mockMetricAlias(data: any): Promise<any> {
   });
 }
 
+export function getMetricTags(): Promise<any> {
+  return request.get(`${process.env.API_BASE_URL}metric/getMetricTags`);
+}
+
 export function getMeasureListByModelId(modelId: number): Promise<any> {
   return request.get(`${process.env.API_BASE_URL}datasource/getMeasureListOfModel/${modelId}`);
 }
