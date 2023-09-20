@@ -67,8 +67,11 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public Object queryBySql(QueryDslReq querySqlCmd, User user) throws Exception {
+        statUtils.initStatInfo(querySqlCmd, user);
         QueryStatement queryStatement = convertToQueryStatement(querySqlCmd, user);
-        return semanticQueryEngine.execute(queryStatement);
+        QueryResultWithSchemaResp results = semanticQueryEngine.execute(queryStatement);
+        statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
+        return results;
     }
 
     private QueryStatement convertToQueryStatement(QueryDslReq querySqlCmd, User user) throws Exception {
