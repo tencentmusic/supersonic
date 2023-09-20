@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDOExample {
-
     /**
      * s2_user
      */
@@ -31,6 +30,7 @@ public class UserDOExample {
     protected Integer limitEnd;
 
     /**
+     *
      * @mbg.generated
      */
     public UserDOExample() {
@@ -38,13 +38,7 @@ public class UserDOExample {
     }
 
     /**
-     * @mbg.generated
-     */
-    public String getOrderByClause() {
-        return orderByClause;
-    }
-
-    /**
+     *
      * @mbg.generated
      */
     public void setOrderByClause(String orderByClause) {
@@ -52,13 +46,15 @@ public class UserDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
-    public boolean isDistinct() {
-        return distinct;
+    public String getOrderByClause() {
+        return orderByClause;
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setDistinct(boolean distinct) {
@@ -66,6 +62,15 @@ public class UserDOExample {
     }
 
     /**
+     *
+     * @mbg.generated
+     */
+    public boolean isDistinct() {
+        return distinct;
+    }
+
+    /**
+     *
      * @mbg.generated
      */
     public List<Criteria> getOredCriteria() {
@@ -73,6 +78,7 @@ public class UserDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void or(Criteria criteria) {
@@ -80,6 +86,7 @@ public class UserDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Criteria or() {
@@ -89,6 +96,7 @@ public class UserDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Criteria createCriteria() {
@@ -100,6 +108,7 @@ public class UserDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     protected Criteria createCriteriaInternal() {
@@ -108,6 +117,7 @@ public class UserDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void clear() {
@@ -117,6 +127,15 @@ public class UserDOExample {
     }
 
     /**
+     *
+     * @mbg.generated
+     */
+    public void setLimitStart(Integer limitStart) {
+        this.limitStart=limitStart;
+    }
+
+    /**
+     *
      * @mbg.generated
      */
     public Integer getLimitStart() {
@@ -124,13 +143,15 @@ public class UserDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
-    public void setLimitStart(Integer limitStart) {
-        this.limitStart = limitStart;
+    public void setLimitEnd(Integer limitEnd) {
+        this.limitEnd=limitEnd;
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Integer getLimitEnd() {
@@ -138,17 +159,9 @@ public class UserDOExample {
     }
 
     /**
-     * @mbg.generated
-     */
-    public void setLimitEnd(Integer limitEnd) {
-        this.limitEnd = limitEnd;
-    }
-
-    /**
      * s2_user null
      */
     protected abstract static class GeneratedCriteria {
-
         protected List<Criterion> criteria;
 
         protected GeneratedCriteria() {
@@ -528,6 +541,66 @@ public class UserDOExample {
             addCriterion("email not between", value1, value2, "email");
             return (Criteria) this;
         }
+
+        public Criteria andIsAdminIsNull() {
+            addCriterion("is_admin is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsAdminIsNotNull() {
+            addCriterion("is_admin is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsAdminEqualTo(Integer value) {
+            addCriterion("is_admin =", value, "isAdmin");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsAdminNotEqualTo(Integer value) {
+            addCriterion("is_admin <>", value, "isAdmin");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsAdminGreaterThan(Integer value) {
+            addCriterion("is_admin >", value, "isAdmin");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsAdminGreaterThanOrEqualTo(Integer value) {
+            addCriterion("is_admin >=", value, "isAdmin");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsAdminLessThan(Integer value) {
+            addCriterion("is_admin <", value, "isAdmin");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsAdminLessThanOrEqualTo(Integer value) {
+            addCriterion("is_admin <=", value, "isAdmin");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsAdminIn(List<Integer> values) {
+            addCriterion("is_admin in", values, "isAdmin");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsAdminNotIn(List<Integer> values) {
+            addCriterion("is_admin not in", values, "isAdmin");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsAdminBetween(Integer value1, Integer value2) {
+            addCriterion("is_admin between", value1, value2, "isAdmin");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsAdminNotBetween(Integer value1, Integer value2) {
+            addCriterion("is_admin not between", value1, value2, "isAdmin");
+            return (Criteria) this;
+        }
     }
 
     /**
@@ -544,7 +617,6 @@ public class UserDOExample {
      * s2_user null
      */
     public static class Criterion {
-
         private String condition;
 
         private Object value;
@@ -560,6 +632,38 @@ public class UserDOExample {
         private boolean listValue;
 
         private String typeHandler;
+
+        public String getCondition() {
+            return condition;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Object getSecondValue() {
+            return secondValue;
+        }
+
+        public boolean isNoValue() {
+            return noValue;
+        }
+
+        public boolean isSingleValue() {
+            return singleValue;
+        }
+
+        public boolean isBetweenValue() {
+            return betweenValue;
+        }
+
+        public boolean isListValue() {
+            return listValue;
+        }
+
+        public String getTypeHandler() {
+            return typeHandler;
+        }
 
         protected Criterion(String condition) {
             super();
@@ -595,38 +699,6 @@ public class UserDOExample {
 
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
-        }
-
-        public String getCondition() {
-            return condition;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public Object getSecondValue() {
-            return secondValue;
-        }
-
-        public boolean isNoValue() {
-            return noValue;
-        }
-
-        public boolean isSingleValue() {
-            return singleValue;
-        }
-
-        public boolean isBetweenValue() {
-            return betweenValue;
-        }
-
-        public boolean isListValue() {
-            return listValue;
-        }
-
-        public String getTypeHandler() {
-            return typeHandler;
         }
     }
 }

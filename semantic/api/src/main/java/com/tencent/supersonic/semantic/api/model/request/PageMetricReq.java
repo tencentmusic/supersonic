@@ -9,6 +9,4 @@ public class PageMetricReq extends PageSchemaItemReq {
 
     private String type;
 
-    private String key;
-
 }

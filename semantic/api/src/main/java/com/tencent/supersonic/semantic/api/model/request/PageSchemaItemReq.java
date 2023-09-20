@@ -16,4 +16,5 @@ public class PageSchemaItemReq extends PageBaseReq {
     private List<Long> modelIds = Lists.newArrayList();
     private Integer sensitiveLevel;
     private Integer status;
+    private String key;
 }

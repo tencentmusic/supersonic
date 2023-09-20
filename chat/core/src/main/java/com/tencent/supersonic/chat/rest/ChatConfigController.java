@@ -110,17 +110,18 @@ public class ChatConfigController {
     }
 
     @PostMapping("/dimension/page")
-    public PageInfo<DimensionResp> getDimension(@RequestBody PageDimensionReq pageDimensionCmd,
+    public PageInfo<DimensionResp> getDimension(@RequestBody PageDimensionReq pageDimensionReq,
                                                 HttpServletRequest request,
                                                 HttpServletResponse response) {
-        return semanticLayer.getDimensionPage(pageDimensionCmd);
+        return semanticLayer.getDimensionPage(pageDimensionReq);
     }
 
     @PostMapping("/metric/page")
-    public PageInfo<MetricResp> getMetric(@RequestBody PageMetricReq pageMetrricCmd,
+    public PageInfo<MetricResp> getMetric(@RequestBody PageMetricReq pageMetricReq,
                                           HttpServletRequest request,
                                           HttpServletResponse response) {
-        return semanticLayer.getMetricPage(pageMetrricCmd);
+        User user = UserHolder.findUser(request, response);
+        return semanticLayer.getMetricPage(pageMetricReq, user);
     }
 
 
