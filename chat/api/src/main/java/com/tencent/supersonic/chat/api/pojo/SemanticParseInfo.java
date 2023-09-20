@@ -37,6 +37,8 @@ public class SemanticParseInfo {
     private List<SchemaElementMatch> elementMatches = new ArrayList<>();
     private Map<String, Object> properties = new HashMap<>();
     private EntityInfo entityInfo;
+    private String sql;
+
     public Long getModelId() {
         return model != null ? model.getId() : 0L;
     }
@@ -46,6 +48,7 @@ public class SemanticParseInfo {
     }
 
     private static class SchemaNameLengthComparator implements Comparator<SchemaElement> {
+
         @Override
         public int compare(SchemaElement o1, SchemaElement o2) {
             int len1 = o1.getName().length();

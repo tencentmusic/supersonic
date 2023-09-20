@@ -1,38 +1,44 @@
 package com.tencent.supersonic.knowledge.semantic;
 
+import static com.tencent.supersonic.common.pojo.Constants.LIST_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.PAGESIZE_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.TOTAL_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.TRUE_LOWER;
+
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.google.gson.Gson;
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.ResultData;
+import com.tencent.supersonic.common.pojo.ReturnCode;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.exception.CommonException;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.S2ThreadContext;
 import com.tencent.supersonic.common.util.ThreadContext;
-import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
-import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-import com.tencent.supersonic.common.pojo.exception.CommonException;
-import com.tencent.supersonic.common.pojo.ResultData;
-import com.tencent.supersonic.common.pojo.ReturnCode;
-
 import java.net.URI;
+import java.net.URL;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.LinkedHashMap;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
@@ -45,11 +51,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static com.tencent.supersonic.common.pojo.Constants.TRUE_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.LIST_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.TOTAL_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.PAGESIZE_LOWER;
-
 @Slf4j
 public class RemoteSemanticLayer extends BaseSemanticLayer {
 
@@ -59,6 +60,10 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
 
     private ParameterizedTypeReference<ResultData<QueryResultWithSchemaResp>> structTypeRef =
             new ParameterizedTypeReference<ResultData<QueryResultWithSchemaResp>>() {
+            };
+
+    private ParameterizedTypeReference<ResultData<ExplainResp>> explainTypeRef =
+            new ParameterizedTypeReference<ResultData<ExplainResp>>() {
             };
 
     @Override
@@ -130,9 +135,10 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
         fillToken(headers);
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
 
-        URI requestUrl = UriComponentsBuilder.fromHttpUrl(
-                defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchModelSchemaPath()).build()
-                .encode().toUri();
+        String semanticUrl = defaultSemanticConfig.getSemanticUrl();
+        String fetchModelSchemaPath = defaultSemanticConfig.getFetchModelSchemaPath();
+        URI requestUrl = UriComponentsBuilder.fromHttpUrl(semanticUrl + fetchModelSchemaPath)
+                .build().encode().toUri();
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
         filter.setModelIds(ids);
         ParameterizedTypeReference<ResultData<List<ModelSchemaResp>>> responseTypeRef =
@@ -177,6 +183,39 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
                 domainId, authType.toString());
         Object domainDescListObject = fetchHttpResult(url, null, HttpMethod.GET);
         return JsonUtil.toList(JsonUtil.toString(domainDescListObject), ModelResp.class);
+    }
+
+    @Override
+    public <T> ExplainResp explain(ExplainSqlReq<T> explainResp, User user) throws Exception {
+        DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
+        String semanticUrl = defaultSemanticConfig.getSemanticUrl();
+        String explainPath = defaultSemanticConfig.getExplainPath();
+        URL url = new URL(new URL(semanticUrl), explainPath);
+        return explain(url.toString(), JsonUtil.toString(explainResp));
+    }
+
+    public ExplainResp explain(String url, String jsonReq) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        fillToken(headers);
+        URI requestUrl = UriComponentsBuilder.fromHttpUrl(url).build().encode().toUri();
+        HttpEntity<String> entity = new HttpEntity<>(jsonReq, headers);
+        log.info("url:{},explain:{}", url, entity.getBody());
+        ResultData<ExplainResp> responseBody;
+        try {
+            RestTemplate restTemplate = ContextUtils.getBean(RestTemplate.class);
+
+            ResponseEntity<ResultData<ExplainResp>> responseEntity = restTemplate.exchange(
+                    requestUrl, HttpMethod.POST, entity, explainTypeRef);
+            log.info("ApiResponse<ExplainResp> responseBody:{}", responseEntity);
+            responseBody = responseEntity.getBody();
+            if (Objects.nonNull(responseBody.getData())) {
+                return responseBody.getData();
+            }
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException("explain interface error,url:" + url, e);
+        }
     }
 
     public Object fetchHttpResult(String url, String bodyJson, HttpMethod httpMethod) {
