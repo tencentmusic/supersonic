@@ -52,3 +52,6 @@ ALTER TABLE s2_model add alias varchar(200) default null after domain_id;
 
 --20230919
 alter table s2_metric add tags varchar(500) null;
+
+--20230920
+alter table s2_user add is_admin int null;

@@ -126,7 +126,7 @@ public class SchemaServiceImpl implements SchemaService {
 
     @Override
     public List<ModelResp> getModelList(User user, AuthType authTypeEnum, Long domainId) {
-        return modelService.getModelListWithAuth(user.getName(), domainId, authTypeEnum);
+        return modelService.getModelListWithAuth(user, domainId, authTypeEnum);
     }
 
 }

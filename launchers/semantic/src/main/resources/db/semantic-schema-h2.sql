@@ -80,6 +80,7 @@ create table s2_user
     display_name varchar(100) null,
     password varchar(100) null,
     email varchar(100) null,
+    is_admin INT null,
     PRIMARY KEY (`id`)
 );
 COMMENT ON TABLE s2_user IS 'user information table';

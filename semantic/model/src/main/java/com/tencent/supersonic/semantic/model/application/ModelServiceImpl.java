@@ -97,10 +97,10 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public List<ModelResp> getModelListWithAuth(String userName, Long domainId, AuthType authType) {
-        List<ModelResp> modelResps = getModelAuthList(userName, authType);
+    public List<ModelResp> getModelListWithAuth(User user, Long domainId, AuthType authType) {
+        List<ModelResp> modelResps = getModelAuthList(user, authType);
         Set<ModelResp> modelRespSet = new HashSet<>(modelResps);
-        List<ModelResp> modelRespsAuthInheritDomain = getModelRespAuthInheritDomain(userName, authType);
+        List<ModelResp> modelRespsAuthInheritDomain = getModelRespAuthInheritDomain(user, authType);
         modelRespSet.addAll(modelRespsAuthInheritDomain);
         if (domainId != null && domainId > 0) {
             modelRespSet = modelRespSet.stream().filter(modelResp ->
@@ -109,8 +109,8 @@ public class ModelServiceImpl implements ModelService {
         return fillMetricInfo(new ArrayList<>(modelRespSet));
     }
 
-    public List<ModelResp> getModelRespAuthInheritDomain(String userName, AuthType authType) {
-        Set<DomainResp> domainResps = domainService.getDomainAuthSet(userName, authType);
+    public List<ModelResp> getModelRespAuthInheritDomain(User user, AuthType authType) {
+        Set<DomainResp> domainResps = domainService.getDomainAuthSet(user, authType);
         if (CollectionUtils.isEmpty(domainResps)) {
             return Lists.newArrayList();
         }
@@ -121,18 +121,18 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public List<ModelResp> getModelAuthList(String userName, AuthType authTypeEnum) {
+    public List<ModelResp> getModelAuthList(User user, AuthType authTypeEnum) {
         List<ModelResp> modelResps = getModelList();
-        Set<String> orgIds = userService.getUserAllOrgId(userName);
+        Set<String> orgIds = userService.getUserAllOrgId(user.getName());
         List<ModelResp> modelWithAuth = Lists.newArrayList();
         if (authTypeEnum.equals(AuthType.ADMIN)) {
             modelWithAuth = modelResps.stream()
-                    .filter(modelResp -> checkAdminPermission(orgIds, userName, modelResp))
+                    .filter(modelResp -> checkAdminPermission(orgIds, user, modelResp))
                     .collect(Collectors.toList());
         }
         if (authTypeEnum.equals(AuthType.VISIBLE)) {
             modelWithAuth = modelResps.stream()
-                    .filter(domainResp -> checkViewerPermission(orgIds, userName, domainResp))
+                    .filter(domainResp -> checkViewerPermission(orgIds, user, domainResp))
                     .collect(Collectors.toList());
         }
         return modelWithAuth;
@@ -325,9 +325,13 @@ public class ModelServiceImpl implements ModelService {
         return new ArrayList<>(getModelMap().keySet());
     }
 
-    public static boolean checkAdminPermission(Set<String> orgIds, String userName, ModelResp modelResp) {
+    public static boolean checkAdminPermission(Set<String> orgIds, User user, ModelResp modelResp) {
         List<String> admins = modelResp.getAdmins();
         List<String> adminOrgs = modelResp.getAdminOrgs();
+        if (user.isSuperAdmin()) {
+            return true;
+        }
+        String userName = user.getName();
         if (admins.contains(userName) || modelResp.getCreatedBy().equals(userName)) {
             return true;
         }
@@ -342,14 +346,18 @@ public class ModelServiceImpl implements ModelService {
         return false;
     }
 
-    public static boolean checkViewerPermission(Set<String> orgIds, String userName, ModelResp modelResp) {
+    public static boolean checkViewerPermission(Set<String> orgIds, User user, ModelResp modelResp) {
         List<String> admins = modelResp.getAdmins();
         List<String> viewers = modelResp.getViewers();
         List<String> adminOrgs = modelResp.getAdminOrgs();
         List<String> viewOrgs = modelResp.getViewOrgs();
+        if (user.isSuperAdmin()) {
+            return true;
+        }
         if (modelResp.openToAll()) {
             return true;
         }
+        String userName = user.getName();
         if (admins.contains(userName) || viewers.contains(userName) || modelResp.getCreatedBy().equals(userName)) {
             return true;
         }

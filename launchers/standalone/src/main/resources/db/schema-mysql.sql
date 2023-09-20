@@ -369,7 +369,8 @@ create table s2_user
     display_name varchar(100) null,
     password varchar(100) null,
     email varchar(100) null,
+    is_admin int(11) null,
     PRIMARY KEY (`id`)
 );
 
-insert into s2_user (id, `name`, password, display_name, email) values (1, 'admin','admin','admin','admin@xx.com');
+insert into s2_user (id, `name`, password, display_name, email, is_admin) values (1, 'admin','admin','admin','admin@xx.com', 1);
