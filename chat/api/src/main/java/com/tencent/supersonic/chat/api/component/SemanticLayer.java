@@ -49,7 +49,7 @@ public interface SemanticLayer {
 
     PageInfo<DimensionResp> getDimensionPage(PageDimensionReq pageDimensionCmd);
 
-    PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricCmd);
+    PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricCmd, User user);
 
     List<DomainResp> getDomainList(User user);
 

@@ -9,6 +9,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DataAddEvent;
 import com.tencent.supersonic.common.pojo.DataDeleteEvent;
 import com.tencent.supersonic.common.pojo.DataUpdateEvent;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
@@ -124,7 +125,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq) {
+    public PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user) {
         MetricFilter metricFilter = new MetricFilter();
         BeanUtils.copyProperties(pageMetricReq, metricFilter);
         Set<DomainResp> domainResps = domainService.getDomainChildren(pageMetricReq.getDomainIds());
@@ -138,12 +139,29 @@ public class MetricServiceImpl implements MetricService {
                 .doSelectPageInfo(() -> queryMetric(metricFilter));
         PageInfo<MetricResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(metricDOPageInfo, pageInfo);
-        pageInfo.setList(convertList(metricDOPageInfo.getList()));
+        List<MetricResp> metricResps = convertList(metricDOPageInfo.getList());
+        fillAdminRes(metricResps, user);
+        pageInfo.setList(metricResps);
         return pageInfo;
     }
 
     private List<MetricDO> queryMetric(MetricFilter metricFilter) {
         return metricRepository.getMetric(metricFilter);
+    }
+
+
+    private void fillAdminRes(List<MetricResp> metricResps, User user) {
+        List<ModelResp> modelResps = modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
+        if (CollectionUtils.isEmpty(modelResps)) {
+            return;
+        }
+        Set<Long> modelIdSet = modelResps.stream().map(ModelResp::getId).collect(Collectors.toSet());
+        for (MetricResp metricResp : metricResps) {
+            if (modelIdSet.contains(metricResp.getModelId())) {
+                metricResp.setHasAdminRes(true);
+            }
+        }
+
     }
 
     @Override

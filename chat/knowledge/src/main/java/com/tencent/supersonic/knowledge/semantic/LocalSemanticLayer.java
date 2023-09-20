@@ -110,9 +110,9 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
     }
 
     @Override
-    public PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricReq) {
+    public PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricReq, User user) {
         metricService = ContextUtils.getBean(MetricService.class);
-        return metricService.queryMetric(pageMetricReq);
+        return metricService.queryMetric(pageMetricReq, user);
     }
 
 }
