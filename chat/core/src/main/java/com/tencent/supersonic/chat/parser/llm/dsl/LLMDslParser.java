@@ -411,12 +411,14 @@ public class LLMDslParser implements SemanticParser {
         Map<Long, String> itemIdToName = getItemIdToName(modelId, semanticSchema);
 
         Set<String> results = semanticSchema.getDimensions().stream()
+                .filter(schemaElement -> modelId.equals(schemaElement.getModel()))
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                 .limit(llmParserConfig.getDimensionTopN())
                 .map(entry -> entry.getName())
                 .collect(Collectors.toSet());
 
         Set<String> metrics = semanticSchema.getMetrics().stream()
+                .filter(schemaElement -> modelId.equals(schemaElement.getModel()))
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                 .limit(llmParserConfig.getMetricTopN())
                 .map(entry -> entry.getName())
