@@ -55,7 +55,10 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public List<ModelSchemaResp> fetchModelSchema(ModelSchemaFilterReq filter, User user) {
         List<ModelSchemaResp> domainSchemaDescList = modelService.fetchModelSchema(filter);
-        List<ItemUseResp> statInfos = queryService.getStatInfo(new ItemUseReq());
+        ItemUseReq itemUseCommend = new ItemUseReq();
+        itemUseCommend.setModelIds(filter.getModelIds());
+
+        List<ItemUseResp> statInfos = queryService.getStatInfo(itemUseCommend);
         log.debug("statInfos:{}", statInfos);
         fillCnt(domainSchemaDescList, statInfos);
         return domainSchemaDescList;
