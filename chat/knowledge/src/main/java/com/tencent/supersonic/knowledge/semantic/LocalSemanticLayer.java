@@ -81,8 +81,9 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
     public List<ModelSchemaResp> doFetchModelSchema(List<Long> ids) {
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
         filter.setModelIds(ids);
-        modelService = ContextUtils.getBean(ModelService.class);
-        return modelService.fetchModelSchema(filter);
+        schemaService = ContextUtils.getBean(SchemaService.class);
+        User user = User.getFakeUser();
+        return schemaService.fetchModelSchema(filter, user);
     }
 
     @Override

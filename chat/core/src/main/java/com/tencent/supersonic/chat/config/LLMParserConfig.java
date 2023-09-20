@@ -16,4 +16,10 @@ public class LLMParserConfig {
     @Value("${query2sql.path:/query2sql}")
     private String queryToSqlPath;
 
+    @Value("${dimension.topn:5}")
+    private Integer dimensionTopN;
+
+    @Value("${metric.topn:5}")
+    private Integer metricTopN;
+
 }
