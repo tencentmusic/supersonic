@@ -64,6 +64,12 @@
             <if test="modelId != null">
                 and model_id = #{modelId}
             </if>
+            <if test="modelIds != null and modelIds.size() > 0">
+                and model_id in
+                <foreach item="id" collection="modelIds" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
             <if test="metric != null">
                 and metrics like concat('%',#{metric},'%')
             </if>

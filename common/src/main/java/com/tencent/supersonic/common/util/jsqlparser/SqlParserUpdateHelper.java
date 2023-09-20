@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -17,6 +18,7 @@ import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.util.SelectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -170,6 +172,33 @@ public class SqlParserUpdateHelper {
             SelectUtils.addExpression(selectStatement, new Column(field));
         }
         return selectStatement.toString();
+    }
+
+    public static String addFunctionToSelect(String sql, Expression expression) {
+        PlainSelect plainSelect = SqlParserSelectHelper.getPlainSelect(sql);
+        if (Objects.isNull(plainSelect)) {
+            return sql;
+        }
+        List<SelectItem> selectItems = plainSelect.getSelectItems();
+        if (CollectionUtils.isEmpty(selectItems)) {
+            return sql;
+        }
+        boolean existFunction = false;
+        for (SelectItem selectItem : selectItems) {
+            SelectExpressionItem expressionItem = (SelectExpressionItem) selectItem;
+            if (expressionItem.getExpression() instanceof Function) {
+                Function expressionFunction = (Function) expressionItem.getExpression();
+                if (expression.toString().equalsIgnoreCase(expressionFunction.toString())) {
+                    existFunction = true;
+                    break;
+                }
+            }
+        }
+        if (!existFunction) {
+            SelectExpressionItem sumExpressionItem = new SelectExpressionItem(expression);
+            selectItems.add(sumExpressionItem);
+        }
+        return plainSelect.toString();
     }
 
     public static String replaceTable(String sql, String tableName) {

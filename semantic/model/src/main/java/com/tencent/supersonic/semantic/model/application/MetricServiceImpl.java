@@ -9,6 +9,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DataAddEvent;
 import com.tencent.supersonic.common.pojo.DataDeleteEvent;
 import com.tencent.supersonic.common.pojo.DataUpdateEvent;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
@@ -28,6 +29,7 @@ import com.tencent.supersonic.semantic.model.domain.utils.MetricConverter;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.pojo.Metric;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -123,7 +125,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq) {
+    public PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user) {
         MetricFilter metricFilter = new MetricFilter();
         BeanUtils.copyProperties(pageMetricReq, metricFilter);
         Set<DomainResp> domainResps = domainService.getDomainChildren(pageMetricReq.getDomainIds());
@@ -137,12 +139,29 @@ public class MetricServiceImpl implements MetricService {
                 .doSelectPageInfo(() -> queryMetric(metricFilter));
         PageInfo<MetricResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(metricDOPageInfo, pageInfo);
-        pageInfo.setList(convertList(metricDOPageInfo.getList()));
+        List<MetricResp> metricResps = convertList(metricDOPageInfo.getList());
+        fillAdminRes(metricResps, user);
+        pageInfo.setList(metricResps);
         return pageInfo;
     }
 
     private List<MetricDO> queryMetric(MetricFilter metricFilter) {
         return metricRepository.getMetric(metricFilter);
+    }
+
+
+    private void fillAdminRes(List<MetricResp> metricResps, User user) {
+        List<ModelResp> modelResps = modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
+        if (CollectionUtils.isEmpty(modelResps)) {
+            return;
+        }
+        Set<Long> modelIdSet = modelResps.stream().map(ModelResp::getId).collect(Collectors.toSet());
+        for (MetricResp metricResp : metricResps) {
+            if (modelIdSet.contains(metricResp.getModelId())) {
+                metricResp.setHasAdminRes(true);
+            }
+        }
+
     }
 
     @Override
@@ -250,6 +269,16 @@ public class MetricServiceImpl implements MetricService {
         });
     }
 
+    @Override
+    public Set<String> getMetricTags() {
+        List<MetricResp> metricResps = getMetrics();
+        if (CollectionUtils.isEmpty(metricResps)) {
+            return new HashSet<>();
+        }
+        return metricResps.stream().flatMap(metricResp ->
+                metricResp.getTags().stream()).collect(Collectors.toSet());
+    }
+
 
     private void saveMetricBatch(List<Metric> metrics, User user) {
         if (CollectionUtils.isEmpty(metrics)) {
@@ -293,7 +322,7 @@ public class MetricServiceImpl implements MetricService {
         Map<Long, ModelResp> modelMap = modelService.getModelMap();
         if (!CollectionUtils.isEmpty(metricDOS)) {
             metricDescs = metricDOS.stream()
-                    .map(metricDO -> MetricConverter.convert2MetricDesc(metricDO, modelMap))
+                    .map(metricDO -> MetricConverter.convert2MetricResp(metricDO, modelMap))
                     .collect(Collectors.toList());
         }
         return metricDescs;

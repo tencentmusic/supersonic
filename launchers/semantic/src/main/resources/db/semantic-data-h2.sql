@@ -36,7 +36,7 @@ insert into s2_auth_groups (group_id, config)
 values (2, '{"domainId":"1","name":"tom_sales_permission","groupId":2,"authRules":[{"metrics":["stay_hours"],"dimensions":["page"]}],"dimensionFilters":["department in (''sales'')"],"dimensionFilterDescription":"开通 tom sales部门权限", "authorizedUsers":["tom"],"authorizedDepartmentIds":[]}');
 
 
-insert into s2_user (id, `name`, password, display_name, email) values (1, 'admin','admin','admin','admin@xx.com');
+insert into s2_user (id, `name`, password, display_name, email, is_admin) values (1, 'admin','admin','admin','admin@xx.com', 1);
 insert into s2_user (id, `name`, password, display_name, email) values (2, 'jack','123456','jack','jack@xx.com');
 insert into s2_user (id, `name`, password, display_name, email) values (3, 'tom','123456','tom','tom@xx.com');
 insert into s2_user (id, `name`, password, display_name, email) values (4, 'lucy','123456','lucy','lucy@xx.com');

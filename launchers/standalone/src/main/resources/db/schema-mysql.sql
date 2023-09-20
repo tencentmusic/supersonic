@@ -254,6 +254,7 @@ CREATE TABLE `s2_metric` (
                              `data_format_type` varchar(50) DEFAULT NULL COMMENT '数值类型',
                              `data_format` varchar(500) DEFAULT NULL COMMENT '数值类型参数',
                              `alias` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+                             `tags` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
                              PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='指标表';
 
@@ -368,7 +369,8 @@ create table s2_user
     display_name varchar(100) null,
     password varchar(100) null,
     email varchar(100) null,
+    is_admin int(11) null,
     PRIMARY KEY (`id`)
 );
 
-insert into s2_user (id, `name`, password, display_name, email) values (1, 'admin','admin','admin','admin@xx.com');
+insert into s2_user (id, `name`, password, display_name, email, is_admin) values (1, 'admin','admin','admin','admin@xx.com', 1);

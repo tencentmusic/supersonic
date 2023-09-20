@@ -37,6 +37,7 @@ public class MetricConverter {
         if (metric.getDataFormat() != null) {
             metricDO.setDataFormat(JSONObject.toJSONString(metric.getDataFormat()));
         }
+        metricDO.setTags(metric.getTag());
         return metricDO;
     }
 
@@ -51,27 +52,23 @@ public class MetricConverter {
         BeanUtils.copyProperties(metric, metricDO);
         metricDO.setTypeParams(JSONObject.toJSONString(metric.getTypeParams()));
         metricDO.setDataFormat(JSONObject.toJSONString(metric.getDataFormat()));
+        metricDO.setTags(metric.getTag());
         return metricDO;
     }
 
 
-    public static MetricResp convert2MetricDesc(MetricDO metricDO, Map<Long, ModelResp> modelMap) {
-        MetricResp metricDesc = new MetricResp();
-        BeanUtils.copyProperties(metricDO, metricDesc);
-        metricDesc.setTypeParams(JSONObject.parseObject(metricDO.getTypeParams(), MetricTypeParams.class));
-        metricDesc.setDataFormat(JSONObject.parseObject(metricDO.getDataFormat(), DataFormat.class));
+    public static MetricResp convert2MetricResp(MetricDO metricDO, Map<Long, ModelResp> modelMap) {
+        MetricResp metricResp = new MetricResp();
+        BeanUtils.copyProperties(metricDO, metricResp);
+        metricResp.setTypeParams(JSONObject.parseObject(metricDO.getTypeParams(), MetricTypeParams.class));
+        metricResp.setDataFormat(JSONObject.parseObject(metricDO.getDataFormat(), DataFormat.class));
         ModelResp modelResp = modelMap.get(metricDO.getModelId());
         if (modelResp != null) {
-            metricDesc.setModelName(modelResp.getName());
+            metricResp.setModelName(modelResp.getName());
+            metricResp.setDomainId(modelResp.getDomainId());
         }
-        return metricDesc;
-    }
-
-    public static Metric convert2Metric(MetricDO metricDO) {
-        Metric metric = new Metric();
-        BeanUtils.copyProperties(metricDO, metric);
-        metric.setTypeParams(JSONObject.parseObject(metricDO.getTypeParams(), MetricTypeParams.class));
-        return metric;
+        metricResp.setTag(metricDO.getTags());
+        return metricResp;
     }
 
 

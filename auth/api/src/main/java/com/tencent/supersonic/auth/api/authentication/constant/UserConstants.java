@@ -12,6 +12,8 @@ public class UserConstants {
 
     public static final String TOKEN_USER_EMAIL = "token_user_email";
 
+    public static final String TOKEN_IS_ADMIN = "token_is_admin";
+
     public static final String TOKEN_ALGORITHM = "HS512";
 
     public static final String TOKEN_CREATE_TIME = "token_create_time";

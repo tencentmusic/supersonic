@@ -75,6 +75,13 @@ class SqlParserSelectHelperTest {
                         + "user_id like '%alice%' AND  publish_date > 10000   ORDER BY pv DESC LIMIT 1");
 
         System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, pv FROM s2 WHERE "
+                        + "user_id like '%alice%' AND  publish_date > 10000  "
+                        + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(filterExpression);
     }
 
 
@@ -247,6 +254,17 @@ class SqlParserSelectHelperTest {
         List<String> selectFields = SqlParserSelectHelper.getGroupByFields(sql);
 
         Assert.assertEquals(selectFields.contains("部门"), true);
+
+    }
+
+    @Test
+    void getHavingExpression() {
+
+        String sql = "SELECT user_name FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
+                + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
+        Expression leftExpression = SqlParserSelectHelper.getHavingExpression(sql);
+
+        Assert.assertEquals(leftExpression.toString(), "sum(pv)");
 
     }
 

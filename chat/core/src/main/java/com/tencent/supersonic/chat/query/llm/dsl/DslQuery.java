@@ -15,7 +15,10 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
+import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +45,10 @@ public class DslQuery extends PluginSemanticQuery {
 
     @Override
     public QueryResult execute(User user) {
-        String json = JsonUtil.toString(parseInfo.getProperties().get(Constants.CONTEXT));
-        DSLParseResult dslParseResult = JsonUtil.toObject(json, DSLParseResult.class);
-        LLMResp llmResp = dslParseResult.getLlmResp();
+        LLMResp llmResp = getLlmResp();
 
         long startTime = System.currentTimeMillis();
-        QueryDslReq queryDslReq = QueryReqBuilder.buildDslReq(llmResp.getCorrectorSql(), parseInfo.getModelId());
+        QueryDslReq queryDslReq = getQueryDslReq(llmResp);
         QueryResultWithSchemaResp queryResp = semanticLayer.queryByDsl(queryDslReq, user);
 
         log.info("queryByDsl cost:{},querySql:{}", System.currentTimeMillis() - startTime, llmResp.getSqlOutput());
@@ -70,5 +71,31 @@ public class DslQuery extends PluginSemanticQuery {
         queryResult.setEntityInfo(entityInfo);
         parseInfo.setProperties(null);
         return queryResult;
+    }
+
+    private LLMResp getLlmResp() {
+        String json = JsonUtil.toString(parseInfo.getProperties().get(Constants.CONTEXT));
+        DSLParseResult dslParseResult = JsonUtil.toObject(json, DSLParseResult.class);
+        return dslParseResult.getLlmResp();
+    }
+
+    private QueryDslReq getQueryDslReq(LLMResp llmResp) {
+        QueryDslReq queryDslReq = QueryReqBuilder.buildDslReq(llmResp.getCorrectorSql(), parseInfo.getModelId());
+        return queryDslReq;
+    }
+
+    @Override
+    public ExplainResp explain(User user) {
+        ExplainSqlReq explainSqlReq = null;
+        try {
+            explainSqlReq = ExplainSqlReq.builder()
+                    .queryTypeEnum(QueryTypeEnum.SQL)
+                    .queryReq(getQueryDslReq(getLlmResp()))
+                    .build();
+            return semanticLayer.explain(explainSqlReq, user);
+        } catch (Exception e) {
+            log.error("explain error explainSqlReq:{}", explainSqlReq, e);
+        }
+        return null;
     }
 }

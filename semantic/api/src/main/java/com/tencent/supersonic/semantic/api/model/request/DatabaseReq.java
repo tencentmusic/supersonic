@@ -3,6 +3,7 @@ package com.tencent.supersonic.semantic.api.model.request;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.semantic.api.model.enums.DataTypeEnum;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 
@@ -39,10 +40,16 @@ public class DatabaseReq {
         if (type.equalsIgnoreCase(DataTypeEnum.H2.getFeature())) {
             return url;
         }
-        if (type.equalsIgnoreCase(DataTypeEnum.MYSQL.getFeature())) {
-            return String.format("jdbc:%s://%s:%s?sessionVariables=sql_mode='IGNORE_SPACE'&allowMultiQueries=true",
-                    type, host, port);
+        String databaseUrl = database;
+        if (StringUtils.isBlank(databaseUrl)) {
+            databaseUrl = "";
+        } else {
+            databaseUrl = "/" + database;
         }
-        return String.format("jdbc:%s://%s:%s", type, host, port);
+        if (type.equalsIgnoreCase(DataTypeEnum.MYSQL.getFeature())) {
+            return String.format("jdbc:%s://%s:%s%s?sessionVariables=sql_mode='IGNORE_SPACE'&allowMultiQueries=true",
+                    type, host, port, databaseUrl);
+        }
+        return String.format("jdbc:%s://%s:%s%s", type, host, port, databaseUrl);
     }
 }
