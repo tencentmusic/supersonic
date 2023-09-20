@@ -24,7 +24,7 @@ import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import styles from './style.less';
 import { getMeasureListByModelId } from '../service';
 import TableTitleTooltips from '../components/TableTitleTooltips';
-import { creatExprMetric, updateExprMetric, mockMetricAlias } from '../service';
+import { creatExprMetric, updateExprMetric, mockMetricAlias, getMetricTags } from '../service';
 import { ISemantic } from '../data';
 import { history } from 'umi';
 
@@ -75,6 +75,8 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   const [hasMeasuresState, setHasMeasuresState] = useState<boolean>(true);
   const [llmLoading, setLlmLoading] = useState<boolean>(false);
 
+  const [tagOptions, setTagOptions] = useState<{ label: string; value: string }[]>([]);
+
   const forward = () => setCurrentStep(currentStep + 1);
   const backward = () => setCurrentStep(currentStep - 1);
 
@@ -95,6 +97,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
 
   useEffect(() => {
     queryClassMeasureList();
+    queryMetricTags();
   }, []);
 
   const handleNext = async () => {
@@ -126,6 +129,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       dataFormat,
       dataFormatType,
       alias,
+      tags,
     } = metricItem as any;
     const isPercent = dataFormatType === 'percent';
     const isDecimal = dataFormatType === 'decimal';
@@ -135,6 +139,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       bizName,
       sensitiveLevel,
       description,
+      tags,
       // isPercent,
       dataFormatType: dataFormatType || '',
       alias: alias && alias.trim() ? alias.split(',') : [],
@@ -201,6 +206,22 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       form.setFieldValue('alias', Array.from(new Set([...formAlias, ...data])));
     } else {
       message.error('大语言模型解析异常');
+    }
+  };
+
+  const queryMetricTags = async () => {
+    const { code, data } = await getMetricTags();
+    if (code === 200) {
+      // form.setFieldValue('alias', Array.from(new Set([...formAlias, ...data])));
+      setTagOptions(
+        Array.isArray(data)
+          ? data.map((tag: string) => {
+              return { label: tag, value: tag };
+            })
+          : [],
+      );
+    } else {
+      message.error('获取指标标签失败');
     }
   };
 
@@ -276,6 +297,15 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
               </Col>
             )}
           </Row>
+        </FormItem>
+        <FormItem name="tags" label="标签">
+          <Select
+            mode="tags"
+            placeholder="输入别名后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
+            tokenSeparators={[',']}
+            maxTagCount={9}
+            options={tagOptions}
+          />
         </FormItem>
         <FormItem
           name="sensitiveLevel"

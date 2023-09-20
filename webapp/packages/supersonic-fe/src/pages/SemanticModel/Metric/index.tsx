@@ -1,9 +1,9 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Space, Popconfirm } from 'antd';
+import { message, Space, Popconfirm, Tag } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
-import { connect } from 'umi';
+import { connect, history } from 'umi';
 import type { StateType } from '../model';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
 import { queryMetric, deleteMetric } from '../service';
@@ -89,6 +89,20 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'name',
       title: '指标名称',
+      render: (_, record: any) => {
+        if (record.hasAdminRes) {
+          return (
+            <a
+              onClick={() => {
+                history.replace(`/model/${record.domainId}/${record.modelId}/metric`);
+              }}
+            >
+              {record.name}
+            </a>
+          );
+        }
+        return <> {record.name}</>;
+      },
     },
     // {
     //   dataIndex: 'alias',
@@ -112,6 +126,25 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'createdBy',
       title: '创建人',
       search: false,
+    },
+    {
+      dataIndex: 'tags',
+      title: '标签',
+      search: false,
+      render: (tags) => {
+        if (Array.isArray(tags)) {
+          return (
+            <Space size={2}>
+              {tags.map((tag) => (
+                <Tag color="blue" key={tag}>
+                  {tag}
+                </Tag>
+              ))}
+            </Space>
+          );
+        }
+        return <>--</>;
+      },
     },
     {
       dataIndex: 'description',
@@ -140,43 +173,47 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'x',
       valueType: 'option',
       render: (_, record) => {
-        return (
-          <Space>
-            <a
-              key="metricEditBtn"
-              onClick={() => {
-                setMetricItem(record);
-                setCreateModalVisible(true);
-              }}
-            >
-              编辑
-            </a>
-
-            <Popconfirm
-              title="确认删除？"
-              okText="是"
-              cancelText="否"
-              onConfirm={async () => {
-                const { code, msg } = await deleteMetric(record.id);
-                if (code === 200) {
-                  setMetricItem(undefined);
-                  actionRef.current?.reload();
-                } else {
-                  message.error(msg);
-                }
-              }}
-            >
+        if (record.hasAdminRes) {
+          return (
+            <Space>
               <a
-                key="metricDeleteBtn"
+                key="metricEditBtn"
                 onClick={() => {
                   setMetricItem(record);
+                  setCreateModalVisible(true);
                 }}
               >
-                删除
+                编辑
               </a>
-            </Popconfirm>
-          </Space>
-        );
+
+              <Popconfirm
+                title="确认删除？"
+                okText="是"
+                cancelText="否"
+                onConfirm={async () => {
+                  const { code, msg } = await deleteMetric(record.id);
+                  if (code === 200) {
+                    setMetricItem(undefined);
+                    queryMetricList();
+                  } else {
+                    message.error(msg);
+                  }
+                }}
+              >
+                <a
+                  key="metricDeleteBtn"
+                  onClick={() => {
+                    setMetricItem(record);
+                  }}
+                >
+                  删除
+                </a>
+              </Popconfirm>
+            </Space>
+          );
+        } else {
+          return <></>;
+        }
       },
     },
   ];
@@ -239,7 +276,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           metricItem={metricItem}
           onSubmit={() => {
             setCreateModalVisible(false);
-            actionRef?.current?.reload();
+            queryMetricList();
             dispatch({
               type: 'domainManger/queryMetricList',
               payload: {
