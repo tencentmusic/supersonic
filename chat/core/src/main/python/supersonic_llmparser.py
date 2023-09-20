@@ -51,7 +51,7 @@ async def din_query2sql(query_body: Mapping[str, Any]):
     else:
         linking = query_body['linking']
 
-    resp = text2sql_agent.query2sql(query_text=query_text,  
+    resp = text2sql_agent.query2sql_run(query_text=query_text,  
                      schema=schema, current_date=current_date, linking=linking)
 
     return resp
@@ -70,7 +70,12 @@ async def query2sql_setting_update(query_body: Mapping[str, Any]):
     else:
         example_nums = query_body['exampleNums']
 
-    text2sql_agent.update_examples(sql_examplars=sql_examplars, example_nums=example_nums)
+    if 'isShortcut' not in query_body:
+        raise HTTPException(status_code=400, detail="isShortcut is not in query_body")
+    else:
+        is_shortcut = query_body['isShortcut']
+
+    text2sql_agent.update_examples(sql_examples=sql_examplars, example_nums=example_nums, is_shortcut=is_shortcut)
 
     return "success"
 
