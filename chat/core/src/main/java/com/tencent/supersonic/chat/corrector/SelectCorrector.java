@@ -13,11 +13,12 @@ import net.sf.jsqlparser.expression.Expression;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
-public class SelectFieldAppendCorrector extends BaseSemanticCorrector {
+public class SelectCorrector extends BaseSemanticCorrector {
 
     @Override
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
         String preSql = semanticCorrectInfo.getSql();
+
         if (SqlParserSelectHelper.hasAggregateFunction(preSql)) {
             Expression havingExpression = SqlParserSelectHelper.getHavingExpression(preSql);
             if (Objects.nonNull(havingExpression)) {
