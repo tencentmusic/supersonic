@@ -144,6 +144,7 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
     `viewer` varchar(3000) DEFAULT NULL  , -- domain available users
     `view_org` varchar(3000) DEFAULT NULL  , -- domain available organization
     `entity` varchar(500) DEFAULT NULL  , -- domain entity info
+    `drill_down_dimensions` varchar(500) DEFAULT NULL  , -- drill down dimensions info
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_model IS 'model information';
@@ -207,6 +208,7 @@ CREATE TABLE IF NOT EXISTS `s2_metric` (
     `data_format` varchar(500) DEFAULT NULL,
     `alias` varchar(500) DEFAULT NULL,
     `tags` varchar(500) DEFAULT NULL,
+    `relate_dimensions` varchar(500) DEFAULT NULL,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_metric IS 'metric information table';

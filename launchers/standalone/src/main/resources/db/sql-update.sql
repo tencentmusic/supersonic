@@ -55,3 +55,7 @@ alter table s2_metric add tags varchar(500) null;
 
 --20230920
 alter table s2_user add is_admin int null;
+
+--20230926
+alter table s2_model add drill_down_dimensions varchar(500) null;
+alter table s2_metric add relate_dimensions varchar(500) null;

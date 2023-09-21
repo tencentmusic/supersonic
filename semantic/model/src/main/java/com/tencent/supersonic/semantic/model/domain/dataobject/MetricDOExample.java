@@ -1262,6 +1262,76 @@ public class MetricDOExample {
             addCriterion("tags not between", value1, value2, "tags");
             return (Criteria) this;
         }
+
+        public Criteria andRelateDimensionsIsNull() {
+            addCriterion("relate_dimensions is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsIsNotNull() {
+            addCriterion("relate_dimensions is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsEqualTo(String value) {
+            addCriterion("relate_dimensions =", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsNotEqualTo(String value) {
+            addCriterion("relate_dimensions <>", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsGreaterThan(String value) {
+            addCriterion("relate_dimensions >", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsGreaterThanOrEqualTo(String value) {
+            addCriterion("relate_dimensions >=", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsLessThan(String value) {
+            addCriterion("relate_dimensions <", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsLessThanOrEqualTo(String value) {
+            addCriterion("relate_dimensions <=", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsLike(String value) {
+            addCriterion("relate_dimensions like", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsNotLike(String value) {
+            addCriterion("relate_dimensions not like", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsIn(List<String> values) {
+            addCriterion("relate_dimensions in", values, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsNotIn(List<String> values) {
+            addCriterion("relate_dimensions not in", values, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsBetween(String value1, String value2) {
+            addCriterion("relate_dimensions between", value1, value2, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsNotBetween(String value1, String value2) {
+            addCriterion("relate_dimensions not between", value1, value2, "relateDimensions");
+            return (Criteria) this;
+        }
     }
 
     /**

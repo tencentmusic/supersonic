@@ -4,6 +4,7 @@ package com.tencent.supersonic.semantic.api.model.response;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DataFormat;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
+import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import lombok.Data;
 import lombok.ToString;
@@ -34,6 +35,8 @@ public class MetricResp extends SchemaItem {
     private String alias;
 
     private List<String> tags;
+
+    private RelateDimension relateDimension;
 
     private boolean hasAdminRes = false;
 

@@ -34,4 +34,9 @@ public class Measure {
         this.isCreateMetric = isCreateMetric;
         this.bizName = bizName;
     }
+
+    public Measure(String bizName, Long datasourceId) {
+        this.bizName = bizName;
+        this.datasourceId = datasourceId;
+    }
 }

@@ -8,6 +8,7 @@ import com.tencent.supersonic.auth.api.authorization.service.AuthService;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
+import com.tencent.supersonic.semantic.api.model.enums.DataTypeEnum;
 import com.tencent.supersonic.semantic.api.model.enums.DimensionTypeEnum;
 import com.tencent.supersonic.semantic.api.model.enums.IdentifyTypeEnum;
 import com.tencent.supersonic.semantic.api.model.enums.SemanticTypeEnum;
@@ -93,7 +94,7 @@ public class LoadModelDataDemo implements CommandLineRunner {
         DatabaseReq databaseReq = new DatabaseReq();
         databaseReq.setName("H2数据实例");
         databaseReq.setDescription("样例数据库实例");
-        databaseReq.setType("h2");
+        databaseReq.setType(DataTypeEnum.H2.getFeature());
         databaseReq.setUrl("jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false");
         databaseReq.setUsername("root");
         databaseReq.setPassword("semantic");

@@ -1,11 +1,14 @@
 package com.tencent.supersonic.knowledge.semantic;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
+import com.tencent.supersonic.chat.api.pojo.RelateSchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.Entity;
+import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
@@ -29,7 +32,7 @@ public class ModelSchemaBuilder {
 
 
     public static ModelSchema build(ModelSchemaResp resp) {
-        ModelSchema domainSchema = new ModelSchema();
+        ModelSchema modelSchema = new ModelSchema();
         SchemaElement domain = SchemaElement.builder()
                 .model(resp.getId())
                 .id(resp.getId())
@@ -38,7 +41,7 @@ public class ModelSchemaBuilder {
                 .type(SchemaElementType.MODEL)
                 .alias(getAliasList(resp.getAlias()))
                 .build();
-        domainSchema.setModel(domain);
+        modelSchema.setModel(domain);
 
         Set<SchemaElement> metrics = new HashSet<>();
         for (MetricSchemaResp metric : resp.getMetrics()) {
@@ -53,12 +56,13 @@ public class ModelSchemaBuilder {
                     .type(SchemaElementType.METRIC)
                     .useCnt(metric.getUseCnt())
                     .alias(alias)
+                    .relateSchemaElements(getRelateSchemaElement(metric))
                     .defaultAgg(metric.getDefaultAgg())
                     .build();
             metrics.add(metricToAdd);
 
         }
-        domainSchema.getMetrics().addAll(metrics);
+        modelSchema.getMetrics().addAll(metrics);
 
         Set<SchemaElement> dimensions = new HashSet<>();
         Set<SchemaElement> dimensionValues = new HashSet<>();
@@ -106,8 +110,8 @@ public class ModelSchemaBuilder {
                     .build();
             dimensionValues.add(dimValueToAdd);
         }
-        domainSchema.getDimensions().addAll(dimensions);
-        domainSchema.getDimensionValues().addAll(dimensionValues);
+        modelSchema.getDimensions().addAll(dimensions);
+        modelSchema.getDimensionValues().addAll(dimensionValues);
 
         Entity entity = resp.getEntity();
         if (Objects.nonNull(entity)) {
@@ -122,11 +126,11 @@ public class ModelSchemaBuilder {
                     entityElement.setType(SchemaElementType.ENTITY);
                 }
                 entityElement.setAlias(entity.getNames());
-                domainSchema.setEntity(entityElement);
+                modelSchema.setEntity(entityElement);
             }
         }
 
-        return domainSchema;
+        return modelSchema;
     }
 
     private static List<String> getAliasList(String alias) {
@@ -134,6 +138,18 @@ public class ModelSchemaBuilder {
             return new ArrayList<>();
         }
         return Arrays.asList(alias.split(aliasSplit));
+    }
+
+    private static List<RelateSchemaElement> getRelateSchemaElement(MetricSchemaResp metricSchemaResp) {
+        RelateDimension relateDimension = metricSchemaResp.getRelateDimension();
+        if (relateDimension == null || CollectionUtils.isEmpty(relateDimension.getDrillDownDimensions())) {
+            return Lists.newArrayList();
+        }
+        return relateDimension.getDrillDownDimensions().stream().map(dimension -> {
+            RelateSchemaElement relateSchemaElement = new RelateSchemaElement();
+            BeanUtils.copyProperties(dimension, relateSchemaElement);
+            return relateSchemaElement;
+        }).collect(Collectors.toList());
     }
 
 }
