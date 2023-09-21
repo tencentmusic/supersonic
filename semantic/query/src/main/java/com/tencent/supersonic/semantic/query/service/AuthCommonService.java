@@ -55,7 +55,7 @@ public class AuthCommonService {
     private ModelService modelService;
 
     public boolean doModelAdmin(User user, Long modelId) {
-        List<ModelResp> modelListAdmin = modelService.getModelListWithAuth(user.getName(), null, AuthType.ADMIN);
+        List<ModelResp> modelListAdmin = modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
         if (CollectionUtils.isEmpty(modelListAdmin)) {
             return false;
         } else {
@@ -67,7 +67,7 @@ public class AuthCommonService {
 
     public void doModelVisible(User user, Long modelId) {
         Boolean visible = true;
-        List<ModelResp> modelListVisible = modelService.getModelListWithAuth(user.getName(), null, AuthType.VISIBLE);
+        List<ModelResp> modelListVisible = modelService.getModelListWithAuth(user, null, AuthType.VISIBLE);
         if (CollectionUtils.isEmpty(modelListVisible)) {
             visible = false;
         } else {
