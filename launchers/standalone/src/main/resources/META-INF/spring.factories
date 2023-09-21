@@ -31,12 +31,9 @@ com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
 
 com.tencent.supersonic.chat.api.component.SemanticCorrector=\
-    com.tencent.supersonic.chat.corrector.DateFieldCorrector, \
-    com.tencent.supersonic.chat.corrector.FunctionAliasCorrector, \
-    com.tencent.supersonic.chat.corrector.FieldNameCorrector, \
-    com.tencent.supersonic.chat.corrector.FieldCorrector, \
-    com.tencent.supersonic.chat.corrector.FunctionCorrector, \
-    com.tencent.supersonic.chat.corrector.TableNameCorrector, \
-    com.tencent.supersonic.chat.corrector.QueryFilterAppend, \
-    com.tencent.supersonic.chat.corrector.SelectFieldAppendCorrector, \
-    com.tencent.supersonic.chat.corrector.FieldValueCorrector
+    com.tencent.supersonic.chat.corrector.GlobalCorrector, \
+    com.tencent.supersonic.chat.corrector.TableCorrector, \
+    com.tencent.supersonic.chat.corrector.GroupByCorrector, \
+    com.tencent.supersonic.chat.corrector.SelectCorrector, \
+    com.tencent.supersonic.chat.corrector.WhereCorrector, \
+    com.tencent.supersonic.chat.corrector.HavingCorrector
