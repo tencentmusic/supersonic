@@ -5,6 +5,7 @@ import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Constants;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Identify;
+import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Identify.Type;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Metric;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.Renderer;
@@ -12,15 +13,20 @@ import com.tencent.supersonic.semantic.query.parser.calcite.sql.TableView;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.AggFunctionNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.DataSourceNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.FilterNode;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.IdentifyNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.MetricNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.SemanticNode;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +39,7 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class JoinRender extends Renderer {
@@ -41,6 +48,7 @@ public class JoinRender extends Renderer {
     public void render(MetricReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
             SemanticSchema schema, boolean nonAgg) throws Exception {
         String queryWhere = metricCommand.getWhere();
+        dataSources = getOrderSource(dataSources);
         Set<String> whereFields = new HashSet<>();
         List<String> fieldWhere = new ArrayList<>();
         if (queryWhere != null && !queryWhere.isEmpty()) {
@@ -95,6 +103,7 @@ public class JoinRender extends Renderer {
             String alias = Constants.JOIN_TABLE_PREFIX + dataSource.getName();
             tableView.setAlias(alias);
             tableView.setPrimary(primary);
+            tableView.setDataSource(dataSource);
             if (left == null) {
                 leftTable = tableView;
                 left = SemanticNode.buildAs(tableView.getAlias(), getTable(tableView, scope));
@@ -246,7 +255,7 @@ public class JoinRender extends Renderer {
 
     private SqlNode getCondition(TableView left, TableView right, DataSource dataSource, SemanticSchema schema,
             SqlValidatorScope scope) throws Exception {
-        log.info(left.getClass().toString());
+
         Set<String> selectLeft = SemanticNode.getSelect(left.getTable());
         Set<String> selectRight = SemanticNode.getSelect(right.getTable());
         selectLeft.retainAll(selectRight);
@@ -254,6 +263,16 @@ public class JoinRender extends Renderer {
         for (String on : selectLeft) {
             if (!SourceRender.isDimension(on, dataSource, schema)) {
                 continue;
+            }
+            if (IdentifyNode.isForeign(on, left.getDataSource().getIdentifiers())) {
+                if (!IdentifyNode.isPrimary(on, right.getDataSource().getIdentifiers())) {
+                    continue;
+                }
+            }
+            if (IdentifyNode.isForeign(on, right.getDataSource().getIdentifiers())) {
+                if (!IdentifyNode.isPrimary(on, left.getDataSource().getIdentifiers())) {
+                    continue;
+                }
             }
             List<SqlNode> ons = new ArrayList<>();
             ons.add(SemanticNode.parse(left.getAlias() + "." + on, scope));
@@ -275,5 +294,86 @@ public class JoinRender extends Renderer {
                     SqlParserPos.ZERO, null);
         }
         return condition;
+    }
+
+    private List<DataSource> getOrderSource(List<DataSource> dataSources) throws Exception {
+        if (CollectionUtils.isEmpty(dataSources) || dataSources.size() <= 2) {
+            return dataSources;
+        }
+        Map<String, Set<String>> next = new HashMap<>();
+        Map<String, Boolean> visited = new HashMap<>();
+        Map<String, List<Identify>> dataSourceIdentifies = new HashMap<>();
+        dataSources.stream().forEach(d -> {
+            next.put(d.getName(), new HashSet<>());
+            visited.put(d.getName(), false);
+            dataSourceIdentifies.put(d.getName(), d.getIdentifiers());
+        });
+        int cnt = dataSources.size();
+        List<Map.Entry<String, List<Identify>>> dataSourceIdentifyList = dataSourceIdentifies.entrySet().stream()
+                .collect(
+                        Collectors.toList());
+        for (int i = 0; i < cnt; i++) {
+            for (int j = i + 1; j < cnt; j++) {
+                Set<String> primaries = IdentifyNode.getIdentifyNames(dataSourceIdentifyList.get(i).getValue(),
+                        Type.PRIMARY);
+                Set<String> foreign = IdentifyNode.getIdentifyNames(dataSourceIdentifyList.get(i).getValue(),
+                        Type.FOREIGN);
+                Set<String> nextPrimaries = IdentifyNode.getIdentifyNames(dataSourceIdentifyList.get(j).getValue(),
+                        Type.PRIMARY);
+                Set<String> nextForeign = IdentifyNode.getIdentifyNames(dataSourceIdentifyList.get(j).getValue(),
+                        Type.FOREIGN);
+                Set<String> nextAll = new HashSet<>();
+                nextAll.addAll(nextPrimaries);
+                nextAll.addAll(nextForeign);
+                primaries.retainAll(nextPrimaries);
+                foreign.retainAll(nextPrimaries);
+                if (primaries.size() > 0 || foreign.size() > 0) {
+                    next.get(dataSourceIdentifyList.get(i).getKey()).add(dataSourceIdentifyList.get(j).getKey());
+                    next.get(dataSourceIdentifyList.get(j).getKey()).add(dataSourceIdentifyList.get(i).getKey());
+                }
+
+            }
+        }
+        Queue<String> paths = new ArrayDeque<>();
+        for (String id : visited.keySet()) {
+            if (!visited.get(id)) {
+                joinOrder(cnt, id, next, paths, visited);
+                if (paths.size() >= cnt) {
+                    break;
+                }
+            }
+        }
+        if (paths.size() < cnt) {
+            throw new Exception("datasource cant join,pls check identify :" + dataSources.stream()
+                    .map(d -> d.getName()).collect(
+                            Collectors.joining(",")));
+        }
+        List<String> orderList = new ArrayList<>(paths);
+        Collections.sort(dataSources, new Comparator<DataSource>() {
+            @Override
+            public int compare(DataSource o1, DataSource o2) {
+                return orderList.indexOf(o1.getName()) - orderList.indexOf(o2.getName());
+            }
+        });
+        return dataSources;
+    }
+
+    private static void joinOrder(int cnt, String id, Map<String, Set<String>> next, Queue<String> orders,
+            Map<String, Boolean> visited) {
+        visited.put(id, true);
+        orders.add(id);
+        if (orders.size() >= cnt) {
+            return;
+        }
+        for (String nextId : next.get(id)) {
+            if (!visited.get(nextId)) {
+                joinOrder(cnt, nextId, next, orders, visited);
+                if (orders.size() >= cnt) {
+                    return;
+                }
+            }
+        }
+        orders.poll();
+        visited.put(id, false);
     }
 }
