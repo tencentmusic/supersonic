@@ -67,10 +67,16 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    @DslPermissionAnnotation()
-    public Object queryBySql(QueryDslReq querySqlCmd, User user) throws Exception {
+    @DslPermissionAnnotation
+    @SneakyThrows
+    public Object queryBySql(QueryDslReq querySqlCmd, User user) {
         statUtils.initStatInfo(querySqlCmd, user);
-        QueryStatement queryStatement = convertToQueryStatement(querySqlCmd, user);
+        QueryStatement queryStatement = new QueryStatement();
+        try {
+            queryStatement = convertToQueryStatement(querySqlCmd, user);
+        } catch (Exception e) {
+            log.info("convertToQueryStatement has a exception:{}", e.toString());
+        }
         QueryResultWithSchemaResp results = semanticQueryEngine.execute(queryStatement);
         statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
         return results;

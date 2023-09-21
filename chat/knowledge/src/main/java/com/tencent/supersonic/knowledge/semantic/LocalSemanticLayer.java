@@ -57,17 +57,13 @@ public class LocalSemanticLayer extends BaseSemanticLayer {
     }
 
     @Override
+    @SneakyThrows
     public QueryResultWithSchemaResp queryByDsl(QueryDslReq queryDslReq, User user) {
-        try {
-            queryService = ContextUtils.getBean(QueryService.class);
-            Object object = queryService.queryBySql(queryDslReq, user);
-            QueryResultWithSchemaResp queryResultWithSchemaResp = JsonUtil.toObject(JsonUtil.toString(object),
+        queryService = ContextUtils.getBean(QueryService.class);
+        Object object = queryService.queryBySql(queryDslReq, user);
+        QueryResultWithSchemaResp queryResultWithSchemaResp = JsonUtil.toObject(JsonUtil.toString(object),
                     QueryResultWithSchemaResp.class);
-            return queryResultWithSchemaResp;
-        } catch (Exception e) {
-            log.info("queryByDsl has an exception:{}", e);
-        }
-        return null;
+        return queryResultWithSchemaResp;
     }
 
     @Override
