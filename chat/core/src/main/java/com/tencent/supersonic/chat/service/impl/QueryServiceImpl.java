@@ -3,11 +3,14 @@ package com.tencent.supersonic.chat.service.impl;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
+import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
+import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
@@ -15,37 +18,43 @@ import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
+import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.chat.query.QuerySelector;
-import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.chat.query.QueryManager;
+import com.tencent.supersonic.chat.query.llm.dsl.DslQuery;
+import com.tencent.supersonic.chat.query.llm.dsl.LLMResp;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.service.StatisticsService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 
+import java.util.Map;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
-import org.springframework.beans.BeanUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
@@ -258,8 +267,52 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public QueryResult executeDirectQuery(QueryDataReq queryData, User user) throws SqlParseException {
-        SemanticQuery semanticQuery = QueryManager.createRuleQuery(queryData.getQueryMode());
-        BeanUtils.copyProperties(queryData, semanticQuery.getParseInfo());
+        ChatParseDO chatParseDO = chatService.getParseInfo(queryData.getQueryId(),
+                queryData.getUser().getName(), queryData.getParseId());
+        SemanticParseInfo parseInfo = JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
+        if (!parseInfo.getQueryMode().equals(DslQuery.QUERY_MODE)) {
+            if (CollectionUtils.isNotEmpty(queryData.getDimensions())) {
+                parseInfo.setDimensions(queryData.getDimensions());
+            }
+            if (CollectionUtils.isNotEmpty(queryData.getMetrics())) {
+                parseInfo.setMetrics(queryData.getMetrics());
+            }
+            if (CollectionUtils.isNotEmpty(queryData.getDimensionFilters())) {
+                parseInfo.setDimensionFilters(queryData.getDimensionFilters());
+            }
+        }
+        if (Objects.nonNull(queryData.getDateInfo())) {
+            parseInfo.setDateInfo(queryData.getDateInfo());
+        }
+        if (parseInfo.getQueryMode().equals(DslQuery.QUERY_MODE)
+                && CollectionUtils.isNotEmpty(queryData.getDimensionFilters())) {
+            Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
+            String json = JsonUtil.toString(parseInfo.getProperties().get(Constants.CONTEXT));
+            DSLParseResult dslParseResult = JsonUtil.toObject(json, DSLParseResult.class);
+            LLMResp llmResp = dslParseResult.getLlmResp();
+            String correctorSql = llmResp.getCorrectorSql();
+            log.info("correctorSql before replacing:{}", correctorSql);
+            for (QueryFilter dslQueryFilter : queryData.getDimensionFilters()) {
+                for (QueryFilter queryFilter : parseInfo.getDimensionFilters()) {
+                    if (dslQueryFilter.getBizName().equals(queryFilter.getBizName())) {
+                        Map<String, String> map = new HashMap<>();
+                        map.put(queryFilter.getValue().toString(), dslQueryFilter.getValue().toString());
+                        filedNameToValueMap.put(dslQueryFilter.getBizName(), map);
+                        break;
+                    }
+                }
+            }
+            log.info("filedNameToValueMap:{}", filedNameToValueMap);
+            correctorSql = SqlParserUpdateHelper.replaceValue(correctorSql, filedNameToValueMap);
+            log.info("correctorSql after replacing:{}", correctorSql);
+            llmResp.setCorrectorSql(correctorSql);
+            dslParseResult.setLlmResp(llmResp);
+            Map<String, Object> properties = new HashMap<>();
+            properties.put(Constants.CONTEXT, dslParseResult);
+            parseInfo.setProperties(properties);
+        }
+        SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
+        semanticQuery.setParseInfo(parseInfo);
         QueryResult queryResult = semanticQuery.execute(user);
         queryResult.setChatContext(semanticQuery.getParseInfo());
         return queryResult;
@@ -267,8 +320,6 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
-        com.tencent.supersonic.semantic.query.service.QueryService queryService =
-                ContextUtils.getBean(com.tencent.supersonic.semantic.query.service.QueryService.class);
         QueryStructReq queryStructReq = new QueryStructReq();
 
         DateConf dateConf = new DateConf();
@@ -292,7 +343,8 @@ public class QueryServiceImpl implements QueryService {
             dimensionFilters.add(dimensionFilter);
             queryStructReq.setDimensionFilters(dimensionFilters);
         }
-        QueryResultWithSchemaResp queryResultWithSchemaResp = queryService.queryByStructWithAuth(queryStructReq, user);
+        SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
+        QueryResultWithSchemaResp queryResultWithSchemaResp = semanticLayer.queryByStruct(queryStructReq, user);
         Set<String> dimensionValues = new HashSet<>();
         queryResultWithSchemaResp.getResultList().removeIf(o -> {
             if (dimensionValues.contains(o.get(dimensionValueReq.getBizName()))) {
