@@ -60,7 +60,7 @@ public class ModelController {
                                          HttpServletRequest request,
                                           HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return modelService.getModelListWithAuth(user.getName(), domainId, AuthType.ADMIN);
+        return modelService.getModelListWithAuth(user, domainId, AuthType.ADMIN);
     }
 
 

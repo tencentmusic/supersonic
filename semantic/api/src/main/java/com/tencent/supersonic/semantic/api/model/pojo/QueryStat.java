@@ -79,7 +79,7 @@ public class QueryStat {
         return this;
     }
 
-    public QueryStat setClassId(Long modelId) {
+    public QueryStat setModelId(Long modelId) {
         this.modelId = modelId;
         return this;
     }

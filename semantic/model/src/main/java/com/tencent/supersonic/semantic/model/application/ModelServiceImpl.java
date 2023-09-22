@@ -4,44 +4,43 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.ModelReq;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelResp;
-import com.tencent.supersonic.semantic.api.model.response.DomainResp;
-import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
+import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.model.domain.DatabaseService;
-import com.tencent.supersonic.semantic.model.domain.ModelService;
-import com.tencent.supersonic.semantic.model.domain.DomainService;
-import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.DatasourceService;
-
+import com.tencent.supersonic.semantic.model.domain.DimensionService;
+import com.tencent.supersonic.semantic.model.domain.DomainService;
+import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.ModelDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Model;
 import com.tencent.supersonic.semantic.model.domain.repository.ModelRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.ModelConvert;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import java.util.List;
-import java.util.Objects;
-import java.util.Date;
-import java.util.Set;
-import java.util.Map;
-import java.util.HashSet;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -97,10 +96,10 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public List<ModelResp> getModelListWithAuth(String userName, Long domainId, AuthType authType) {
-        List<ModelResp> modelResps = getModelAuthList(userName, authType);
+    public List<ModelResp> getModelListWithAuth(User user, Long domainId, AuthType authType) {
+        List<ModelResp> modelResps = getModelAuthList(user, authType);
         Set<ModelResp> modelRespSet = new HashSet<>(modelResps);
-        List<ModelResp> modelRespsAuthInheritDomain = getModelRespAuthInheritDomain(userName, authType);
+        List<ModelResp> modelRespsAuthInheritDomain = getModelRespAuthInheritDomain(user, authType);
         modelRespSet.addAll(modelRespsAuthInheritDomain);
         if (domainId != null && domainId > 0) {
             modelRespSet = modelRespSet.stream().filter(modelResp ->
@@ -109,8 +108,8 @@ public class ModelServiceImpl implements ModelService {
         return fillMetricInfo(new ArrayList<>(modelRespSet));
     }
 
-    public List<ModelResp> getModelRespAuthInheritDomain(String userName, AuthType authType) {
-        Set<DomainResp> domainResps = domainService.getDomainAuthSet(userName, authType);
+    public List<ModelResp> getModelRespAuthInheritDomain(User user, AuthType authType) {
+        Set<DomainResp> domainResps = domainService.getDomainAuthSet(user, authType);
         if (CollectionUtils.isEmpty(domainResps)) {
             return Lists.newArrayList();
         }
@@ -121,18 +120,18 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public List<ModelResp> getModelAuthList(String userName, AuthType authTypeEnum) {
+    public List<ModelResp> getModelAuthList(User user, AuthType authTypeEnum) {
         List<ModelResp> modelResps = getModelList();
-        Set<String> orgIds = userService.getUserAllOrgId(userName);
+        Set<String> orgIds = userService.getUserAllOrgId(user.getName());
         List<ModelResp> modelWithAuth = Lists.newArrayList();
         if (authTypeEnum.equals(AuthType.ADMIN)) {
             modelWithAuth = modelResps.stream()
-                    .filter(modelResp -> checkAdminPermission(orgIds, userName, modelResp))
+                    .filter(modelResp -> checkAdminPermission(orgIds, user, modelResp))
                     .collect(Collectors.toList());
         }
         if (authTypeEnum.equals(AuthType.VISIBLE)) {
             modelWithAuth = modelResps.stream()
-                    .filter(domainResp -> checkViewerPermission(orgIds, userName, domainResp))
+                    .filter(domainResp -> checkViewerPermission(orgIds, user, domainResp))
                     .collect(Collectors.toList());
         }
         return modelWithAuth;
@@ -325,9 +324,13 @@ public class ModelServiceImpl implements ModelService {
         return new ArrayList<>(getModelMap().keySet());
     }
 
-    public static boolean checkAdminPermission(Set<String> orgIds, String userName, ModelResp modelResp) {
+    public static boolean checkAdminPermission(Set<String> orgIds, User user, ModelResp modelResp) {
         List<String> admins = modelResp.getAdmins();
         List<String> adminOrgs = modelResp.getAdminOrgs();
+        if (user.isSuperAdmin()) {
+            return true;
+        }
+        String userName = user.getName();
         if (admins.contains(userName) || modelResp.getCreatedBy().equals(userName)) {
             return true;
         }
@@ -342,14 +345,18 @@ public class ModelServiceImpl implements ModelService {
         return false;
     }
 
-    public static boolean checkViewerPermission(Set<String> orgIds, String userName, ModelResp modelResp) {
+    public static boolean checkViewerPermission(Set<String> orgIds, User user, ModelResp modelResp) {
         List<String> admins = modelResp.getAdmins();
         List<String> viewers = modelResp.getViewers();
         List<String> adminOrgs = modelResp.getAdminOrgs();
         List<String> viewOrgs = modelResp.getViewOrgs();
+        if (user.isSuperAdmin()) {
+            return true;
+        }
         if (modelResp.openToAll()) {
             return true;
         }
+        String userName = user.getName();
         if (admins.contains(userName) || viewers.contains(userName) || modelResp.getCreatedBy().equals(userName)) {
             return true;
         }

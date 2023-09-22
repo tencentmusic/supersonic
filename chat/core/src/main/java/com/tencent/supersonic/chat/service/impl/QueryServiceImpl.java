@@ -29,6 +29,7 @@ import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.service.StatisticsService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 
+import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
@@ -37,9 +38,7 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-//import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
-//import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
@@ -67,8 +66,6 @@ public class QueryServiceImpl implements QueryService {
     private StatisticsService statisticsService;
     @Autowired
     private QueryResponder queryResponder;
-
-    private final String entity = "ENTITY";
 
     @Value("${time.threshold: 100}")
     private Integer timeThreshold;
@@ -113,12 +110,16 @@ public class QueryServiceImpl implements QueryService {
                     .map(SemanticQuery::getParseInfo)
                     .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
                     .collect(Collectors.toList());
+
             selectedParses.forEach(parseInfo -> {
-                if (parseInfo.getQueryMode().contains(entity)) {
+                String queryMode = parseInfo.getQueryMode();
+                if (QueryManager.isEntityQuery(queryMode)) {
                     EntityInfo entityInfo = ContextUtils.getBean(SemanticService.class)
                             .getEntityInfo(parseInfo, queryReq.getUser());
                     parseInfo.setEntityInfo(entityInfo);
                 }
+                addExplainSql(queryReq, parseInfo);
+
             });
             List<SemanticParseInfo> candidateParses = queryCtx.getCandidateQueries().stream()
                     .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
@@ -145,6 +146,19 @@ public class QueryServiceImpl implements QueryService {
         return parseResult;
     }
 
+    private void addExplainSql(QueryReq queryReq, SemanticParseInfo parseInfo) {
+        SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
+        if (Objects.isNull(semanticQuery)) {
+            return;
+        }
+        semanticQuery.setParseInfo(parseInfo);
+        ExplainResp explain = semanticQuery.explain(queryReq.getUser());
+        if (Objects.isNull(explain)) {
+            return;
+        }
+        parseInfo.setSql(explain.getSql());
+    }
+
     @Override
     public QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception {
         ChatParseDO chatParseDO = chatService.getParseInfo(queryReq.getQueryId(),
@@ -162,9 +176,9 @@ public class QueryServiceImpl implements QueryService {
         chatCtx.setAgentId(queryReq.getAgentId());
         Long startTime = System.currentTimeMillis();
         QueryResult queryResult = semanticQuery.execute(queryReq.getUser());
-        Long endTime = System.currentTimeMillis();
+
         if (queryResult != null) {
-            timeCostDOList.add(StatisticsDO.builder().cost((int) (endTime - startTime))
+            timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(semanticQuery.getClass().getSimpleName()).type(CostType.QUERY.getType()).build());
             saveInfo(timeCostDOList, queryReq.getQueryText(), queryReq.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
@@ -176,7 +190,6 @@ public class QueryServiceImpl implements QueryService {
             }
             chatCtx.setQueryText(queryReq.getQueryText());
             chatCtx.setUser(queryReq.getUser().getName());
-            //chatService.addQuery(queryResult, chatCtx);
             chatService.updateQuery(queryReq.getQueryId(), queryResult, chatCtx);
             queryResponder.saveSolvedQuery(queryReq.getQueryText(), queryReq.getQueryId(), queryReq.getParseId());
         } else {
@@ -187,8 +200,8 @@ public class QueryServiceImpl implements QueryService {
     }
 
     public void saveInfo(List<StatisticsDO> timeCostDOList,
-                         String queryText, Long queryId,
-                         String userName, Long chatId) {
+            String queryText, Long queryId,
+            String userName, Long chatId) {
         List<StatisticsDO> list = timeCostDOList.stream()
                 .filter(o -> o.getCost() > timeThreshold).collect(Collectors.toList());
         list.forEach(o -> {
@@ -272,13 +285,6 @@ public class QueryServiceImpl implements QueryService {
         dateConf.setPeriod("DAY");
         queryStructReq.setDateInfo(dateConf);
         queryStructReq.setLimit(20L);
-
-        //        List<Aggregator> aggregators = new ArrayList<>();
-        //        Aggregator aggregator = new Aggregator(dimensionValueReq.getQueryFilter().getBizName(),
-        //                AggOperatorEnum.DISTINCT);
-        //        aggregators.add(aggregator);
-        //        queryStructReq.setAggregators(aggregators);
-
         queryStructReq.setModelId(dimensionValueReq.getModelId());
         queryStructReq.setNativeQuery(true);
         List<String> groups = new ArrayList<>();

@@ -140,7 +140,7 @@ public class DataPermissionAOP {
 
     private boolean doModelAdmin(User user, QueryStructReq queryStructReq) {
         Long modelId = queryStructReq.getModelId();
-        List<ModelResp> modelListAdmin = modelService.getModelListWithAuth(user.getName(), null, AuthType.ADMIN);
+        List<ModelResp> modelListAdmin = modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
         if (CollectionUtils.isEmpty(modelListAdmin)) {
             return false;
         } else {
@@ -153,7 +153,7 @@ public class DataPermissionAOP {
     private void doModelVisible(User user, QueryStructReq queryStructReq) {
         Boolean visible = true;
         Long modelId = queryStructReq.getModelId();
-        List<ModelResp> modelListVisible = modelService.getModelListWithAuth(user.getName(), null, AuthType.VISIBLE);
+        List<ModelResp> modelListVisible = modelService.getModelListWithAuth(user, null, AuthType.VISIBLE);
         if (CollectionUtils.isEmpty(modelListVisible)) {
             visible = false;
         } else {
