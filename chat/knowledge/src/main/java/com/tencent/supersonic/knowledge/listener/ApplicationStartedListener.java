@@ -7,8 +7,8 @@ import com.tencent.supersonic.knowledge.service.WordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationStartedEvent;
-import org.springframework.context.ApplicationListener;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,8 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
-public class ApplicationStartedListener implements ApplicationListener<ApplicationStartedEvent> {
+@Order(5)
+public class ApplicationStartedListener implements CommandLineRunner {
 
     @Autowired
     private KnowledgeService knowledgeService;
@@ -27,7 +28,7 @@ public class ApplicationStartedListener implements ApplicationListener<Applicati
     private SchemaService schemaService;
 
     @Override
-    public void onApplicationEvent(ApplicationStartedEvent event) {
+    public void run(String... args) {
         updateKnowledgeDimValue();
     }
 

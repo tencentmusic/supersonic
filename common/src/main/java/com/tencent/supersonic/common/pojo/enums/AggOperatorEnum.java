@@ -10,7 +10,7 @@ public enum AggOperatorEnum {
 
     SUM("SUM"),
 
-    DISTINCT("DISTINCT"),
+    COUNT_DISTINCT("COUNT_DISTINCT"),
 
     TOPN("TOPN"),
 

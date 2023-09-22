@@ -10,7 +10,7 @@ public interface AuthService {
 
     List<AuthGroup> queryAuthGroups(String domainId, Integer groupId);
 
-    void updateAuthGroup(AuthGroup group);
+    void addOrUpdateAuthGroup(AuthGroup group);
 
     void removeAuthGroup(AuthGroup group);
 
