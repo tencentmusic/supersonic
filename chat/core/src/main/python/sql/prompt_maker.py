@@ -73,3 +73,38 @@ def sql_exampler(user_query: str,
                                                             schema_links=schema_link_str)
 
     return sql_example_prompt
+
+
+def schema_linking_sql_combo_examplar(user_query: str,
+                            domain_name: str,
+                            data_date : str,
+                            fields_list: List[str],
+                            prior_schema_links: Mapping[str,str],
+                            example_selector: SemanticSimilarityExampleSelector) -> str:
+    
+    prior_schema_links_str = '['+ ','.join(["""'{}'->{}""".format(k,v) for k,v in prior_schema_links.items()]) + ']'
+
+    example_prompt_template = PromptTemplate(input_variables=["table_name", "fields_list", "prior_schema_links", "current_date", "question", "analysis", "schema_links", "sql"],
+                                template="Table {table_name}, columns = {fields_list}, prior_schema_links = {prior_schema_links}\nCurrent_date:{current_date}\n问题:{question}\n分析:{analysis} 所以Schema_links是:\nSchema_links:{schema_links}\nSQL:{sql}")
+
+    instruction = "# 根据数据库的表结构,参考先验信息,找出为每个问题生成SQL查询语句的schema_links,再根据schema_links为每个问题生成SQL查询语句"
+
+    schema_linking_sql_combo_prompt = "Table {table_name}, columns = {fields_list}, prior_schema_links = {prior_schema_links}\nCurrent_date:{current_date}\n问题:{question}\n分析: 让我们一步一步地思考。"
+
+    schema_linking_sql_combo_example_prompt_template = FewShotPromptTemplate(
+        example_selector=example_selector,
+        example_prompt=example_prompt_template,
+        example_separator="\n\n", 
+        prefix=instruction,
+        input_variables=["table_name", "fields_list", "prior_schema_links", "current_date", "question"],
+        suffix=schema_linking_sql_combo_prompt
+        )
+
+    schema_linking_sql_combo_example_prompt = schema_linking_sql_combo_example_prompt_template.format(table_name=domain_name,
+                                                                                    fields_list=fields_list,
+                                                                                    prior_schema_links=prior_schema_links_str,
+                                                                                    current_date=data_date,
+                                                                                    question=user_query)
+    return schema_linking_sql_combo_example_prompt
+
+
