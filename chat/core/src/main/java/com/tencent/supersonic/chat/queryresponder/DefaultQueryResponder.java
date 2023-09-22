@@ -60,7 +60,7 @@ public class DefaultQueryResponder implements QueryResponder {
         List<SolvedQueryRecallResp> solvedQueryRecallResps = Lists.newArrayList();
         try {
             String url = embeddingConfig.getUrl() + embeddingConfig.getSolvedQueryRecallPath() + "?n_results="
-                    + embeddingConfig.getNResult();
+                    + embeddingConfig.getSolvedQueryResultNum();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setLocation(URI.create(url));

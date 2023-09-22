@@ -175,27 +175,34 @@ public class QueryServiceImpl implements QueryService {
         ChatContext chatCtx = chatService.getOrCreateContext(queryReq.getChatId());
         chatCtx.setAgentId(queryReq.getAgentId());
         Long startTime = System.currentTimeMillis();
-        QueryResult queryResult = semanticQuery.execute(queryReq.getUser());
-
-        if (queryResult != null) {
-            timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
-                    .interfaceName(semanticQuery.getClass().getSimpleName()).type(CostType.QUERY.getType()).build());
-            saveInfo(timeCostDOList, queryReq.getQueryText(), queryReq.getQueryId(),
-                    queryReq.getUser().getName(), queryReq.getChatId().longValue());
-            queryResult.setChatContext(parseInfo);
-            // update chat context after a successful semantic query
-            if (queryReq.isSaveAnswer() && QueryState.SUCCESS.equals(queryResult.getQueryState())) {
-                chatCtx.setParseInfo(parseInfo);
-                chatService.updateContext(chatCtx);
-            }
-            chatCtx.setQueryText(queryReq.getQueryText());
-            chatCtx.setUser(queryReq.getUser().getName());
-            chatService.updateQuery(queryReq.getQueryId(), queryResult, chatCtx);
-            queryResponder.saveSolvedQuery(queryReq.getQueryText(), queryReq.getQueryId(), queryReq.getParseId());
-        } else {
-            chatService.deleteChatQuery(queryReq.getQueryId());
+        QueryResult queryResult = null;
+        try {
+            queryResult = semanticQuery.execute(queryReq.getUser());
+        } catch (Exception e) {
+            log.error("query execute failed, queryText:{}", queryReq.getQueryText(), e);
+            queryResult = new QueryResult();
+            queryResult.setQueryState(QueryState.INVALID);
         }
 
+        timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
+                .interfaceName(semanticQuery.getClass().getSimpleName()).type(CostType.QUERY.getType()).build());
+        saveInfo(timeCostDOList, queryReq.getQueryText(), queryReq.getQueryId(),
+                queryReq.getUser().getName(), queryReq.getChatId().longValue());
+        queryResult.setChatContext(parseInfo);
+        // update chat context after a successful semantic query
+        if (queryReq.isSaveAnswer() && QueryState.SUCCESS.equals(queryResult.getQueryState())) {
+            chatCtx.setParseInfo(parseInfo);
+            chatService.updateContext(chatCtx);
+            queryResponder.saveSolvedQuery(queryReq.getQueryText(), queryReq.getQueryId(), queryReq.getParseId());
+        }
+        chatCtx.setQueryText(queryReq.getQueryText());
+        chatCtx.setUser(queryReq.getUser().getName());
+        chatService.updateQuery(queryReq.getQueryId(), queryResult, chatCtx);
+        if (!QueryState.SUCCESS.equals(queryResult.getQueryState())) {
+            List<SolvedQueryRecallResp> solvedQueryRecallResps =
+                    queryResponder.recallSolvedQuery(queryReq.getQueryText());
+            queryResult.setSimilarSolvedQuery(solvedQueryRecallResps);
+        }
         return queryResult;
     }
 

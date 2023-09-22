@@ -29,4 +29,7 @@ public class EmbeddingConfig {
     @Value("${embedding.solvedQuery.add.path:/solved_query_add}")
     private String solvedQueryAddPath;
 
+    @Value("${embedding.solved.query.nResult:5}")
+    private String solvedQueryResultNum;
+
 }
