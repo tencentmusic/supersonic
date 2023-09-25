@@ -1,9 +1,13 @@
 # -*- coding:utf-8 -*-
 from langchain.llms import OpenAI
 
-from run_config import MODEL_NAME, OPENAI_API_KEY, TEMPERATURE
-
+from run_config import *
+from util.stringutils import *
 
 llm = OpenAI(
-    openai_api_key=OPENAI_API_KEY, model_name=MODEL_NAME, temperature=TEMPERATURE
+    model_name=MODEL_NAME,
+    openai_api_key=OPENAI_API_KEY,
+    openai_api_base=default_if_blank(OPENAI_API_BASE),
+    openai_proxy=default_if_blank(OPENAI_PROXY),
+    temperature=TEMPERATURE,
 )
