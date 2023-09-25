@@ -37,7 +37,8 @@ public class SemanticParseInfo {
     private List<SchemaElementMatch> elementMatches = new ArrayList<>();
     private Map<String, Object> properties = new HashMap<>();
     private EntityInfo entityInfo;
-    private String sql;
+    private String logicSql;
+    private String querySql;
 
     public Long getModelId() {
         return model != null ? model.getId() : 0L;

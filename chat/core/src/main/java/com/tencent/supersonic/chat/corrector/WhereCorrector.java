@@ -30,7 +30,9 @@ import org.springframework.util.CollectionUtils;
 public class WhereCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void correct(SemanticCorrectInfo semanticCorrectInfo) throws JSQLParserException {
+    public void correct(SemanticCorrectInfo semanticCorrectInfo) {
+
+        super.correct(semanticCorrectInfo);
 
         addDateIfNotExist(semanticCorrectInfo);
 
@@ -41,24 +43,27 @@ public class WhereCorrector extends BaseSemanticCorrector {
         updateFieldValueByTechName(semanticCorrectInfo);
     }
 
-    private void addQueryFilter(SemanticCorrectInfo semanticCorrectInfo) throws JSQLParserException {
+    private void addQueryFilter(SemanticCorrectInfo semanticCorrectInfo) {
         String queryFilter = getQueryFilter(semanticCorrectInfo.getQueryFilters());
 
         String preSql = semanticCorrectInfo.getSql();
 
         if (StringUtils.isNotEmpty(queryFilter)) {
             log.info("add queryFilter to preSql :{}", queryFilter);
-            Expression expression = CCJSqlParserUtil.parseCondExpression(queryFilter);
+            Expression expression = null;
+            try {
+                expression = CCJSqlParserUtil.parseCondExpression(queryFilter);
+            } catch (JSQLParserException e) {
+                log.error("parseCondExpression", e);
+            }
             String sql = SqlParserUpdateHelper.addWhere(preSql, expression);
-            semanticCorrectInfo.setPreSql(preSql);
             semanticCorrectInfo.setSql(sql);
         }
     }
 
     private void parserDateDiffFunction(SemanticCorrectInfo semanticCorrectInfo) {
-        String preSql = semanticCorrectInfo.getSql();
-        semanticCorrectInfo.setPreSql(preSql);
-        String sql = SqlParserUpdateHelper.replaceFunction(preSql);
+        String sql = semanticCorrectInfo.getSql();
+        sql = SqlParserUpdateHelper.replaceFunction(sql);
         semanticCorrectInfo.setSql(sql);
     }
 
@@ -98,9 +103,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
         }
 
         Map<String, Map<String, String>> aliasAndBizNameToTechName = getAliasAndBizNameToTechName(dimensions);
-        String preSql = semanticCorrectInfo.getSql();
-        semanticCorrectInfo.setPreSql(preSql);
-        String sql = SqlParserUpdateHelper.replaceValue(preSql, aliasAndBizNameToTechName);
+        String sql = SqlParserUpdateHelper.replaceValue(semanticCorrectInfo.getSql(), aliasAndBizNameToTechName);
         semanticCorrectInfo.setSql(sql);
         return;
     }

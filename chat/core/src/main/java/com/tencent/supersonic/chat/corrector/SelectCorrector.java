@@ -17,31 +17,30 @@ public class SelectCorrector extends BaseSemanticCorrector {
 
     @Override
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
-        String preSql = semanticCorrectInfo.getSql();
+        super.correct(semanticCorrectInfo);
+        String sql = semanticCorrectInfo.getSql();
 
-        if (SqlParserSelectHelper.hasAggregateFunction(preSql)) {
-            Expression havingExpression = SqlParserSelectHelper.getHavingExpression(preSql);
+        if (SqlParserSelectHelper.hasAggregateFunction(sql)) {
+            Expression havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
             if (Objects.nonNull(havingExpression)) {
-                String replaceSql = SqlParserUpdateHelper.addFunctionToSelect(preSql, havingExpression);
-                semanticCorrectInfo.setPreSql(preSql);
+                String replaceSql = SqlParserUpdateHelper.addFunctionToSelect(sql, havingExpression);
                 semanticCorrectInfo.setSql(replaceSql);
             }
             return;
         }
-        Set<String> selectFields = new HashSet<>(SqlParserSelectHelper.getSelectFields(preSql));
-        Set<String> whereFields = new HashSet<>(SqlParserSelectHelper.getWhereFields(preSql));
+        Set<String> selectFields = new HashSet<>(SqlParserSelectHelper.getSelectFields(sql));
+        Set<String> whereFields = new HashSet<>(SqlParserSelectHelper.getWhereFields(sql));
 
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(whereFields)) {
             return;
         }
 
-        whereFields.addAll(SqlParserSelectHelper.getOrderByFields(preSql));
+        whereFields.addAll(SqlParserSelectHelper.getOrderByFields(sql));
         whereFields.removeAll(selectFields);
         whereFields.remove(TimeDimensionEnum.DAY.getName());
         whereFields.remove(TimeDimensionEnum.WEEK.getName());
         whereFields.remove(TimeDimensionEnum.MONTH.getName());
-        String replaceFields = SqlParserUpdateHelper.addFieldsToSelect(preSql, new ArrayList<>(whereFields));
-        semanticCorrectInfo.setPreSql(preSql);
+        String replaceFields = SqlParserUpdateHelper.addFieldsToSelect(sql, new ArrayList<>(whereFields));
         semanticCorrectInfo.setSql(replaceFields);
     }
 }

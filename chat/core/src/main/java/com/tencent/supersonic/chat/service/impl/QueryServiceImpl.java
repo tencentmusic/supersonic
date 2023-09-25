@@ -165,7 +165,7 @@ public class QueryServiceImpl implements QueryService {
         if (Objects.isNull(explain)) {
             return;
         }
-        parseInfo.setSql(explain.getSql());
+        parseInfo.setQuerySql(explain.getSql());
     }
 
     @Override
