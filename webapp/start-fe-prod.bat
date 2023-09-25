@@ -35,7 +35,7 @@ rmdir /S /Q .\packages\supersonic-fe\src\.umi-production
 
 cd ./packages/chat-sdk
 
-call pnpm i
+call pnpm install --frozen-lockfile
 
 call pnpm run build
 
@@ -45,7 +45,7 @@ cd ../supersonic-fe
 
 call pnpm link ../chat-sdk
 
-call pnpm i
+call pnpm install --frozen-lockfile
 
 call pnpm run build:os-local
 

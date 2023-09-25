@@ -16,7 +16,7 @@ rm -rf ./packages/supersonic-fe/src/.umi ./packages/supersonic-fe/src/.umi-produ
 
 cd ./packages/chat-sdk
 
-pnpm i
+pnpm install --frozen-lockfile
 
 pnpm run build
 
@@ -26,6 +26,6 @@ cd ../supersonic-fe
 
 pnpm link ../chat-sdk
 
-pnpm i
+pnpm install --frozen-lockfile
 
 pnpm start
