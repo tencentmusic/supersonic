@@ -21,6 +21,7 @@ public class GlobalCorrector extends BaseSemanticCorrector {
 
     @Override
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
+        super.correct(semanticCorrectInfo);
 
         replaceAlias(semanticCorrectInfo);
 
@@ -74,9 +75,8 @@ public class GlobalCorrector extends BaseSemanticCorrector {
                 Collectors.groupingBy(ElementValue::getFieldValue,
                         Collectors.mapping(ElementValue::getFieldName, Collectors.toSet())));
 
-        String preSql = semanticCorrectInfo.getSql();
-        semanticCorrectInfo.setPreSql(preSql);
-        String sql = SqlParserUpdateHelper.replaceFieldNameByValue(preSql, fieldValueToFieldNames);
+        String sql = SqlParserUpdateHelper.replaceFieldNameByValue(semanticCorrectInfo.getSql(),
+                fieldValueToFieldNames);
         semanticCorrectInfo.setSql(sql);
     }
 }

@@ -11,10 +11,9 @@ public class TableCorrector extends BaseSemanticCorrector {
 
     @Override
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
+        super.correct(semanticCorrectInfo);
         Long modelId = semanticCorrectInfo.getParseInfo().getModelId();
-        String preSql = semanticCorrectInfo.getSql();
-        semanticCorrectInfo.setPreSql(preSql);
-        String sql = SqlParserUpdateHelper.replaceTable(preSql, TABLE_PREFIX + modelId);
+        String sql = SqlParserUpdateHelper.replaceTable(semanticCorrectInfo.getSql(), TABLE_PREFIX + modelId);
         semanticCorrectInfo.setSql(sql);
     }
 

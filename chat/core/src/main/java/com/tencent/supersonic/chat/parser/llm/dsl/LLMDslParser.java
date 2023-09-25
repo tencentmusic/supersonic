@@ -132,6 +132,7 @@ public class LLMDslParser implements SemanticParser {
         if (StringUtils.isEmpty(correctorSql)) {
             correctorSql = semanticCorrectInfo.getSql();
         }
+        parseInfo.setLogicSql(correctorSql);
         List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctorSql);
         //set dataInfo
         try {
