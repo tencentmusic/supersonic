@@ -72,6 +72,7 @@ public class ChatQueryController {
     public Object queryData(@RequestBody QueryDataReq queryData,
             HttpServletRequest request, HttpServletResponse response)
             throws Exception {
+        queryData.setUser(UserHolder.findUser(request, response));
         return queryService.executeDirectQuery(queryData, UserHolder.findUser(request, response));
     }
 

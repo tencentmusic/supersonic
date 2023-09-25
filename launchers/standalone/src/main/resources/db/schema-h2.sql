@@ -414,4 +414,47 @@ COMMENT ON TABLE s2_dictionary_task IS 'dictionary task information table';
 
 
 
+-- benchmark
+CREATE TABLE IF NOT EXISTS `genre` (
+    `g_name` varchar(20) NOT NULL , -- genre name
+    `rating` INT ,
+    `most_popular_in` varchar(50) ,
+    PRIMARY KEY (`g_name`)
+    );
+COMMENT ON TABLE genre IS 'genre';
+
+CREATE TABLE IF NOT EXISTS `artist` (
+    `artist_name` varchar(50) NOT NULL , -- genre name
+    `country` varchar(20) ,
+    `gender` varchar(20) ,
+    `g_name` varchar(50)
+    );
+COMMENT ON TABLE artist IS 'artist';
+
+CREATE TABLE IF NOT EXISTS `files` (
+    `f_id` bigINT NOT NULL,
+    `artist_name` varchar(50) ,
+    `file_size` varchar(20) ,
+    `duration` varchar(20) ,
+    `formats` varchar(20) ,
+    PRIMARY KEY (`f_id`)
+    );
+COMMENT ON TABLE files IS 'files';
+
+CREATE TABLE IF NOT EXISTS `song` (
+    `imp_date` varchar(50) ,
+    `song_name` varchar(50) ,
+    `artist_name` varchar(50) ,
+    `country` varchar(20) ,
+    `f_id` bigINT ,
+    `g_name` varchar(20) ,
+    `rating` INT ,
+    `languages` varchar(20) ,
+    `releasedate` varchar(50) ,
+    `resolution` bigINT NOT NULL
+    );
+COMMENT ON TABLE song IS 'song';
+
+-- benchmark
+
 

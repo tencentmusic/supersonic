@@ -16,11 +16,39 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
-public class FieldNameCorrector extends BaseSemanticCorrector {
+public class GlobalCorrector extends BaseSemanticCorrector {
 
     @Override
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
 
+        replaceAlias(semanticCorrectInfo);
+
+        updateFieldNameByLinkingValue(semanticCorrectInfo);
+
+        updateFieldNameByBizName(semanticCorrectInfo);
+
+        addAggregateToMetric(semanticCorrectInfo);
+    }
+
+    private void addAggregateToMetric(SemanticCorrectInfo semanticCorrectInfo) {
+
+    }
+
+    private void replaceAlias(SemanticCorrectInfo semanticCorrectInfo) {
+        String replaceAlias = SqlParserUpdateHelper.replaceAlias(semanticCorrectInfo.getSql());
+        semanticCorrectInfo.setSql(replaceAlias);
+    }
+
+    private void updateFieldNameByBizName(SemanticCorrectInfo semanticCorrectInfo) {
+
+        Map<String, String> fieldToBizName = getFieldToBizName(semanticCorrectInfo.getParseInfo().getModelId());
+
+        String sql = SqlParserUpdateHelper.replaceFields(semanticCorrectInfo.getSql(), fieldToBizName);
+
+        semanticCorrectInfo.setSql(sql);
+    }
+
+    private void updateFieldNameByLinkingValue(SemanticCorrectInfo semanticCorrectInfo) {
         Object context = semanticCorrectInfo.getParseInfo().getProperties().get(Constants.CONTEXT);
         if (Objects.isNull(context)) {
             return;
@@ -45,5 +73,4 @@ public class FieldNameCorrector extends BaseSemanticCorrector {
         String sql = SqlParserUpdateHelper.replaceFieldNameByValue(preSql, fieldValueToFieldNames);
         semanticCorrectInfo.setSql(sql);
     }
-
 }

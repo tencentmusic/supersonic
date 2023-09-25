@@ -408,27 +408,20 @@ public class LLMDslParser implements SemanticParser {
 
     protected List<String> getFieldNameList(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema,
             LLMParserConfig llmParserConfig) {
+
+        Set<String> results = getTopNFieldNames(modelId, semanticSchema, llmParserConfig);
+
+        Set<String> fieldNameList = getMatchedFieldNames(queryCtx, modelId, semanticSchema);
+
+        results.addAll(fieldNameList);
+        return new ArrayList<>(results);
+    }
+
+    protected Set<String> getMatchedFieldNames(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema) {
         Map<Long, String> itemIdToName = getItemIdToName(modelId, semanticSchema);
-
-        Set<String> results = semanticSchema.getDimensions().stream()
-                .filter(schemaElement -> modelId.equals(schemaElement.getModel()))
-                .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
-                .limit(llmParserConfig.getDimensionTopN())
-                .map(entry -> entry.getName())
-                .collect(Collectors.toSet());
-
-        Set<String> metrics = semanticSchema.getMetrics().stream()
-                .filter(schemaElement -> modelId.equals(schemaElement.getModel()))
-                .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
-                .limit(llmParserConfig.getMetricTopN())
-                .map(entry -> entry.getName())
-                .collect(Collectors.toSet());
-
-        results.addAll(metrics);
-
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(modelId);
         if (CollectionUtils.isEmpty(matchedElements)) {
-            return new ArrayList<>(results);
+            return new HashSet<>();
         }
         Set<String> fieldNameList = matchedElements.stream()
                 .filter(schemaElementMatch -> {
@@ -447,13 +440,29 @@ public class LLMDslParser implements SemanticParser {
                 })
                 .filter(name -> StringUtils.isNotEmpty(name) && !name.contains("%"))
                 .collect(Collectors.toSet());
-        results.addAll(fieldNameList);
-        return new ArrayList<>(results);
+        return fieldNameList;
+    }
+
+    private Set<String> getTopNFieldNames(Long modelId, SemanticSchema semanticSchema,
+            LLMParserConfig llmParserConfig) {
+        Set<String> results = semanticSchema.getDimensions(modelId).stream()
+                .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
+                .limit(llmParserConfig.getDimensionTopN())
+                .map(entry -> entry.getName())
+                .collect(Collectors.toSet());
+
+        Set<String> metrics = semanticSchema.getMetrics(modelId).stream()
+                .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
+                .limit(llmParserConfig.getMetricTopN())
+                .map(entry -> entry.getName())
+                .collect(Collectors.toSet());
+
+        results.addAll(metrics);
+        return results;
     }
 
     protected Map<Long, String> getItemIdToName(Long modelId, SemanticSchema semanticSchema) {
-        return semanticSchema.getDimensions().stream()
-                .filter(entry -> modelId.equals(entry.getModel()))
+        return semanticSchema.getDimensions(modelId).stream()
                 .collect(Collectors.toMap(SchemaElement::getId, SchemaElement::getName, (value1, value2) -> value2));
     }
 

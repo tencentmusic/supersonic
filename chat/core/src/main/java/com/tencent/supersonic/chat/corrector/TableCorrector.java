@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TableNameCorrector extends BaseSemanticCorrector {
+public class TableCorrector extends BaseSemanticCorrector {
 
     public static final String TABLE_PREFIX = "t_";
 

@@ -11,17 +11,31 @@ from langchain.prompts.few_shot import FewShotPromptTemplate
 from langchain.prompts.example_selector import SemanticSimilarityExampleSelector
 
 
-def schema_linking_exampler(user_query: str,
-                            domain_name: str,
-                            fields_list: List[str],
-                            prior_schema_links: Mapping[str,str],
-                            example_selector: SemanticSimilarityExampleSelector, 
-                            ) -> str:
+def schema_linking_exampler(
+    user_query: str,
+    domain_name: str,
+    fields_list: List[str],
+    prior_schema_links: Mapping[str, str],
+    example_selector: SemanticSimilarityExampleSelector,
+) -> str:
 
-    prior_schema_links_str = '['+ ','.join(["""'{}'->{}""".format(k,v) for k,v in prior_schema_links.items()]) + ']'
+    prior_schema_links_str = (
+        "["
+        + ",".join(["""'{}'->{}""".format(k, v) for k, v in prior_schema_links.items()])
+        + "]"
+    )
 
-    example_prompt_template = PromptTemplate(input_variables=["table_name", "fields_list", "prior_schema_links", "question", "analysis", "schema_links"],
-                                template="Table {table_name}, columns = {fields_list}, prior_schema_links = {prior_schema_links}\n问题:{question}\n分析:{analysis} 所以Schema_links是:\nSchema_links:{schema_links}")
+    example_prompt_template = PromptTemplate(
+        input_variables=[
+            "table_name",
+            "fields_list",
+            "prior_schema_links",
+            "question",
+            "analysis",
+            "schema_links",
+        ],
+        template="Table {table_name}, columns = {fields_list}, prior_schema_links = {prior_schema_links}\n问题:{question}\n分析:{analysis} 所以Schema_links是:\nSchema_links:{schema_links}",
+    )
 
     instruction = "# 根据数据库的表结构,参考先验信息,找出为每个问题生成SQL查询语句的schema_links"
 
@@ -30,81 +44,121 @@ def schema_linking_exampler(user_query: str,
     schema_linking_example_prompt_template = FewShotPromptTemplate(
         example_selector=example_selector,
         example_prompt=example_prompt_template,
-        example_separator="\n\n", 
+        example_separator="\n\n",
         prefix=instruction,
         input_variables=["table_name", "fields_list", "prior_schema_links", "question"],
-        suffix=schema_linking_prompt
-        )
+        suffix=schema_linking_prompt,
+    )
 
-    schema_linking_example_prompt = schema_linking_example_prompt_template.format(table_name=domain_name,
-                                                                                    fields_list=fields_list,
-                                                                                    prior_schema_links=prior_schema_links_str,
-                                                                                    question=user_query)
+    schema_linking_example_prompt = schema_linking_example_prompt_template.format(
+        table_name=domain_name,
+        fields_list=fields_list,
+        prior_schema_links=prior_schema_links_str,
+        question=user_query,
+    )
 
     return schema_linking_example_prompt
 
 
-def sql_exampler(user_query: str,
-                domain_name: str,
-                schema_link_str: str,
-                data_date: str,
-                example_selector: SemanticSimilarityExampleSelector,
-                ) -> str:
-    
+def sql_exampler(
+    user_query: str,
+    domain_name: str,
+    schema_link_str: str,
+    data_date: str,
+    example_selector: SemanticSimilarityExampleSelector,
+) -> str:
+
     instruction = "# 根据schema_links为每个问题生成SQL查询语句"
 
-    sql_example_prompt_template = PromptTemplate(input_variables=["question", "current_date", "table_name", "schema_links", "sql"],
-                                template="问题:{question}\nCurrent_date:{current_date}\nTable {table_name}\nSchema_links:{schema_links}\nSQL:{sql}")
+    sql_example_prompt_template = PromptTemplate(
+        input_variables=[
+            "question",
+            "current_date",
+            "table_name",
+            "schema_links",
+            "sql",
+        ],
+        template="问题:{question}\nCurrent_date:{current_date}\nTable {table_name}\nSchema_links:{schema_links}\nSQL:{sql}",
+    )
 
     sql_prompt = "问题:{question}\nCurrent_date:{current_date}\nTable {table_name}\nSchema_links:{schema_links}\nSQL:"
 
     sql_example_prompt_template = FewShotPromptTemplate(
         example_selector=example_selector,
         example_prompt=sql_example_prompt_template,
-        example_separator="\n\n", 
+        example_separator="\n\n",
         prefix=instruction,
         input_variables=["question", "current_date", "table_name", "schema_links"],
-        suffix=sql_prompt
-        )
+        suffix=sql_prompt,
+    )
 
-    sql_example_prompt = sql_example_prompt_template.format(question=user_query,
-                                                            current_date=data_date,
-                                                            table_name=domain_name,
-                                                            schema_links=schema_link_str)
+    sql_example_prompt = sql_example_prompt_template.format(
+        question=user_query,
+        current_date=data_date,
+        table_name=domain_name,
+        schema_links=schema_link_str,
+    )
 
     return sql_example_prompt
 
 
-def schema_linking_sql_combo_examplar(user_query: str,
-                            domain_name: str,
-                            data_date : str,
-                            fields_list: List[str],
-                            prior_schema_links: Mapping[str,str],
-                            example_selector: SemanticSimilarityExampleSelector) -> str:
-    
-    prior_schema_links_str = '['+ ','.join(["""'{}'->{}""".format(k,v) for k,v in prior_schema_links.items()]) + ']'
+def schema_linking_sql_combo_examplar(
+    user_query: str,
+    domain_name: str,
+    data_date: str,
+    fields_list: List[str],
+    prior_schema_links: Mapping[str, str],
+    example_selector: SemanticSimilarityExampleSelector,
+) -> str:
 
-    example_prompt_template = PromptTemplate(input_variables=["table_name", "fields_list", "prior_schema_links", "current_date", "question", "analysis", "schema_links", "sql"],
-                                template="Table {table_name}, columns = {fields_list}, prior_schema_links = {prior_schema_links}\nCurrent_date:{current_date}\n问题:{question}\n分析:{analysis} 所以Schema_links是:\nSchema_links:{schema_links}\nSQL:{sql}")
+    prior_schema_links_str = (
+        "["
+        + ",".join(["""'{}'->{}""".format(k, v) for k, v in prior_schema_links.items()])
+        + "]"
+    )
 
-    instruction = "# 根据数据库的表结构,参考先验信息,找出为每个问题生成SQL查询语句的schema_links,再根据schema_links为每个问题生成SQL查询语句"
+    example_prompt_template = PromptTemplate(
+        input_variables=[
+            "table_name",
+            "fields_list",
+            "prior_schema_links",
+            "current_date",
+            "question",
+            "analysis",
+            "schema_links",
+            "sql",
+        ],
+        template="Table {table_name}, columns = {fields_list}, prior_schema_links = {prior_schema_links}\nCurrent_date:{current_date}\n问题:{question}\n分析:{analysis} 所以Schema_links是:\nSchema_links:{schema_links}\nSQL:{sql}",
+    )
+
+    instruction = (
+        "# 根据数据库的表结构,参考先验信息,找出为每个问题生成SQL查询语句的schema_links,再根据schema_links为每个问题生成SQL查询语句"
+    )
 
     schema_linking_sql_combo_prompt = "Table {table_name}, columns = {fields_list}, prior_schema_links = {prior_schema_links}\nCurrent_date:{current_date}\n问题:{question}\n分析: 让我们一步一步地思考。"
 
     schema_linking_sql_combo_example_prompt_template = FewShotPromptTemplate(
         example_selector=example_selector,
         example_prompt=example_prompt_template,
-        example_separator="\n\n", 
+        example_separator="\n\n",
         prefix=instruction,
-        input_variables=["table_name", "fields_list", "prior_schema_links", "current_date", "question"],
-        suffix=schema_linking_sql_combo_prompt
+        input_variables=[
+            "table_name",
+            "fields_list",
+            "prior_schema_links",
+            "current_date",
+            "question",
+        ],
+        suffix=schema_linking_sql_combo_prompt,
+    )
+
+    schema_linking_sql_combo_example_prompt = (
+        schema_linking_sql_combo_example_prompt_template.format(
+            table_name=domain_name,
+            fields_list=fields_list,
+            prior_schema_links=prior_schema_links_str,
+            current_date=data_date,
+            question=user_query,
         )
-
-    schema_linking_sql_combo_example_prompt = schema_linking_sql_combo_example_prompt_template.format(table_name=domain_name,
-                                                                                    fields_list=fields_list,
-                                                                                    prior_schema_links=prior_schema_links_str,
-                                                                                    current_date=data_date,
-                                                                                    question=user_query)
+    )
     return schema_linking_sql_combo_example_prompt
-
-

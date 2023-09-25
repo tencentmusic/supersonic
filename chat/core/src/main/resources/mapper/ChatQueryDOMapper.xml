@@ -3,7 +3,7 @@
 <mapper namespace="com.tencent.supersonic.chat.persistence.mapper.ChatQueryDOMapper">
   <resultMap id="BaseResultMap" type="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO">
     <id column="question_id" jdbcType="BIGINT" property="questionId" />
-    <result column="agent_id" jdbcType="BIGINT" property="agentId" />
+    <result column="agent_id" jdbcType="INTEGER" property="agentId" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="user_name" jdbcType="VARCHAR" property="userName" />
     <result column="query_state" jdbcType="INTEGER" property="queryState" />
@@ -77,7 +77,7 @@
       query_state, chat_id, score,
       feedback, query_text, query_result
       )
-    values (#{questionId,jdbcType=BIGINT}, #{agentId,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{userName,jdbcType=VARCHAR},
+    values (#{questionId,jdbcType=BIGINT}, #{agentId,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{userName,jdbcType=VARCHAR},
       #{queryState,jdbcType=INTEGER}, #{chatId,jdbcType=BIGINT}, #{score,jdbcType=INTEGER},
       #{feedback,jdbcType=VARCHAR}, #{queryText,jdbcType=LONGVARCHAR}, #{queryResult,jdbcType=LONGVARCHAR}
       )
@@ -98,9 +98,6 @@
       <if test="chatId != null">
         chat_id = #{chatId,jdbcType=BIGINT},
       </if>
-      <if test="agentId != null">
-        agent_id = #{agentId,jdbcType=INTEGER},
-      </if>
       <if test="score != null">
         score = #{score,jdbcType=INTEGER},
       </if>
@@ -116,5 +113,4 @@
     </set>
     where question_id = #{questionId,jdbcType=BIGINT}
   </update>
-
 </mapper>
