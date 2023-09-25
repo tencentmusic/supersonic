@@ -24,7 +24,7 @@ PROFILES="-P "
 # python style checks rely on `black` in path
 if ! command -v black &> /dev/null
 then
-    echo "Skip Python lint since 'black' is not available."
+    echo "Skip Python lint since 'black' is not available. Please install 'black' by running 'pip install black==22.3.0'"
 else
     PROFILES="${PROFILES} spotless-python"
 fi
