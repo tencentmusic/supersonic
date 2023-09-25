@@ -6,6 +6,7 @@ import com.tencent.supersonic.chat.query.llm.dsl.LLMReq;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMReq.ElementValue;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,11 @@ public class GlobalCorrector extends BaseSemanticCorrector {
     }
 
     private void addAggregateToMetric(SemanticCorrectInfo semanticCorrectInfo) {
+
+        if (SqlParserSelectHelper.hasGroupBy(semanticCorrectInfo.getSql())) {
+
+            return;
+        }
 
     }
 
