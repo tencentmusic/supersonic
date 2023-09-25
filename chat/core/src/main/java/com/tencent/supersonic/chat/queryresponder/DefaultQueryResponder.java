@@ -95,7 +95,7 @@ public class DefaultQueryResponder implements QueryResponder {
                 }
             }
         } catch (Exception e) {
-            log.warn("recall similar solved query failed", e);
+            log.warn("recall similar solved query failed, queryText:{}", queryText);
         }
         return solvedQueryRecallResps;
     }
