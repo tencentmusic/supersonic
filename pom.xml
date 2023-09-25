@@ -65,7 +65,11 @@
         <mockito-inline.version>4.5.1</mockito-inline.version>
         <jsqlparser.version>4.5</jsqlparser.version>
         <revision>0.7.5-SNAPSHOT</revision>
+        <!-- Do not bump spotless plugin version since 2.30.0 is the latest version supports Java 8-->
         <maven.plugin.spotless.version>2.30.0</maven.plugin.spotless.version>
+        <spotless.python.includes></spotless.python.includes>
+        <!-- Do not bump black version as decided by spotless maven plugin-->
+        <spotless.python.black.version>22.3.0</spotless.python.black.version>
     </properties>
 
     <dependencyManagement>
@@ -212,7 +216,7 @@
                                 <include>${spotless.python.includes}</include>
                             </includes>
                             <black>
-                                <version>22.3.0</version>
+                                <version>${spotless.python.black.version}</version>
                             </black>
                         </python>
                     </configuration>
