@@ -1,21 +1,25 @@
 # -*- coding:utf-8 -*-
 import re
 
+
 def schema_link_parse(schema_link_output):
     try:
         schema_link_output = schema_link_output.strip()
-        pattern = r'Schema_links:(.*)'
-        schema_link_output = re.findall(pattern, schema_link_output, re.DOTALL)[0].strip()
+        pattern = r"Schema_links:(.*)"
+        schema_link_output = re.findall(pattern, schema_link_output, re.DOTALL)[
+            0
+        ].strip()
     except Exception as e:
         print(e)
         schema_link_output = None
 
     return schema_link_output
 
+
 def combo_schema_link_parse(schema_linking_sql_combo_output: str):
     try:
         schema_linking_sql_combo_output = schema_linking_sql_combo_output.strip()
-        pattern = r'Schema_links:(\[.*?\])'
+        pattern = r"Schema_links:(\[.*?\])"
         schema_links_match = re.search(pattern, schema_linking_sql_combo_output)
 
         if schema_links_match:
@@ -28,10 +32,11 @@ def combo_schema_link_parse(schema_linking_sql_combo_output: str):
 
     return schema_links
 
+
 def combo_sql_parse(schema_linking_sql_combo_output: str):
     try:
         schema_linking_sql_combo_output = schema_linking_sql_combo_output.strip()
-        pattern = r'SQL:(.*)'
+        pattern = r"SQL:(.*)"
         sql_match = re.search(pattern, schema_linking_sql_combo_output)
 
         if sql_match:
