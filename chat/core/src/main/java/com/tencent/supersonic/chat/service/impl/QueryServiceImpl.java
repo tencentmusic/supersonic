@@ -19,6 +19,7 @@ import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
 import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
+import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
@@ -26,6 +27,7 @@ import com.tencent.supersonic.chat.query.QuerySelector;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.llm.dsl.DslQuery;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMResp;
+import com.tencent.supersonic.chat.queryresponder.QueryResponder;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SemanticService;
@@ -71,6 +73,8 @@ public class QueryServiceImpl implements QueryService {
     private ChatService chatService;
     @Autowired
     private StatisticsService statisticsService;
+    @Autowired
+    private QueryResponder queryResponder;
 
     @Value("${time.threshold: 100}")
     private Integer timeThreshold;
@@ -145,6 +149,9 @@ public class QueryServiceImpl implements QueryService {
                     .state(ParseResp.ParseState.FAILED)
                     .build();
         }
+        List<SolvedQueryRecallResp> solvedQueryRecallResps =
+                queryResponder.recallSolvedQuery(queryCtx.getRequest().getQueryText());
+        parseResult.setSimilarSolvedQuery(solvedQueryRecallResps);
         return parseResult;
     }
 
