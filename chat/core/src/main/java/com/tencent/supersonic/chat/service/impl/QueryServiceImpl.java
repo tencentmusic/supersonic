@@ -196,6 +196,7 @@ public class QueryServiceImpl implements QueryService {
             if (queryReq.isSaveAnswer() && QueryState.SUCCESS.equals(queryResult.getQueryState())) {
                 chatCtx.setParseInfo(parseInfo);
                 chatService.updateContext(chatCtx);
+                queryResponder.saveSolvedQuery(queryReq.getQueryText(), queryReq.getQueryId(), queryReq.getParseId());
             }
             chatCtx.setQueryText(queryReq.getQueryText());
             chatCtx.setUser(queryReq.getUser().getName());

@@ -80,6 +80,9 @@ public class DefaultQueryResponder implements QueryResponder {
                 for (EmbeddingResp embeddingResp : embeddingResps) {
                     List<RecallRetrieval> embeddingRetrievals = embeddingResp.getRetrieval();
                     for (RecallRetrieval embeddingRetrieval : embeddingRetrievals) {
+                        if (queryText.equalsIgnoreCase(embeddingRetrieval.getQuery())) {
+                            continue;
+                        }
                         if (querySet.contains(embeddingRetrieval.getQuery())) {
                             continue;
                         }
