@@ -2,18 +2,18 @@
 
 # SuperSonic (超音数)
 
-**SuperSonic is an out-of-the-box yet highly extensible framework for building a data chatbot**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to build logical semantic models (definition of metrics/dimensions/entities, along with their meaning, context and relationships) on top of physical data models, and no data modification or copying is required. Meanwhile, SuperSonic is designed to be pluggable, allowing new functionalities to be added through plugins and core components to be integrated with other systems.
+**SuperSonic is an out-of-the-box yet highly extensible framework for building ChatBI**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to build logical semantic models (definition of metrics/dimensions/entities, along with their meaning, context and relationships) on top of physical data models, and no data modification or copying is required. Meanwhile, SuperSonic is designed to be pluggable, allowing new functionalities to be added through plugins and core components to be integrated with other systems.
 
 <img src="./docs/images/supersonic_demo.gif" height="100%" width="100%" align="center"/>
 
 ## Motivation
 
-The emergence of Large Language Model (LLM) like ChatGPT is reshaping the way information is retrieved. In the field of data analytics, both academia and industry are primarily focused on leveraging LLM to convert natural language queries into SQL queries. While some works show promising results, they are still not applicable to real-world scenarios.
+The emergence of Large Language Model (LLM) like ChatGPT is reshaping the way information is retrieved. In the field of data analytics, both academia and industry are primarily focused on leveraging LLM to convert natural language into SQL (so called text2sql or nl2sql). While some works show promising results, they are still not applicable to real-world scenarios.
 
 From our perspective, the key to filling the real-world gap lies in three aspects: 
-1. Complement the LLM-based semantic parser with rule-based semantic parsers to improve **efficiency**(in terms of latency and cost).
+1. Introduce a semantic layer encapsulating underlying data context(joins, formulas, etc) to reduce **complexity**.
 2. Augment semantic parsing with schema mappers(as a kind of preprocessor) and semantic correctors(as a kind of postprocessor) to improve **accuracy** and **stability**.
-3. Introduce a semantic layer encapsulating underlying data context(joins, formulas, etc) to reduce **complexity**.
+3. Complement the LLM-based semantic parser with rule-based semantic parsers to improve **efficiency**(in terms of latency and cost).
 
 With these ideas in mind, we develop SuperSonic as a practical reference implementation and use it to power our real-world products. Additionally, to facilitate further development of data chatbot, we decide to open source SuperSonic as an extensible framework.
 
