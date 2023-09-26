@@ -8,6 +8,5 @@ llm = OpenAI(
     model_name=MODEL_NAME,
     openai_api_key=OPENAI_API_KEY,
     openai_api_base=default_if_blank(OPENAI_API_BASE),
-    openai_proxy=default_if_blank(OPENAI_PROXY),
     temperature=TEMPERATURE,
 )
