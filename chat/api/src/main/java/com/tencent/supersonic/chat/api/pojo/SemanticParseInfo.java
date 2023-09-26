@@ -1,20 +1,20 @@
 package com.tencent.supersonic.chat.api.pojo;
 
 
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.LinkedHashSet;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Comparator;
-
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
+import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import lombok.Data;
 
 @Data
@@ -37,8 +37,7 @@ public class SemanticParseInfo {
     private List<SchemaElementMatch> elementMatches = new ArrayList<>();
     private Map<String, Object> properties = new HashMap<>();
     private EntityInfo entityInfo;
-    private String logicSql;
-    private String querySql;
+    private SqlInfo sqlInfo = new SqlInfo();
 
     public Long getModelId() {
         return model != null ? model.getId() : 0L;

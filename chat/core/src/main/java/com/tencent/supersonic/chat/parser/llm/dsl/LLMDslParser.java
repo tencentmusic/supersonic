@@ -132,7 +132,7 @@ public class LLMDslParser implements SemanticParser {
         if (StringUtils.isEmpty(correctorSql)) {
             correctorSql = semanticCorrectInfo.getSql();
         }
-        parseInfo.setLogicSql(correctorSql);
+        parseInfo.getSqlInfo().setLogicSql(correctorSql);
         List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctorSql);
         //set dataInfo
         try {
@@ -281,6 +281,7 @@ public class LLMDslParser implements SemanticParser {
         parseInfo.setProperties(properties);
         parseInfo.setScore(function_bonus_threshold);
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
+        parseInfo.getSqlInfo().setLlmParseSql(dslParseResult.getLlmResp().getSqlOutput());
 
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         Map<Long, String> modelIdToName = semanticSchema.getModelIdToName();
