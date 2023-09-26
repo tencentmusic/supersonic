@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DimensionTimeTypeParams {
 
-    private String isPrimary;
+    private String isPrimary = "true";
 
-    private String timeGranularity;
+    private String timeGranularity = "day";
 
 }

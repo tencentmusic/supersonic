@@ -205,6 +205,30 @@ public class SqlParserSelectHelper {
 
 
     public static boolean hasAggregateFunction(String sql) {
+        if (hasFunction(sql)) {
+            return true;
+        }
+        return hasGroupBy(sql);
+    }
+
+    public static boolean hasGroupBy(String sql) {
+        Select selectStatement = getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+
+        if (!(selectBody instanceof PlainSelect)) {
+            return false;
+        }
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+        GroupByElement groupBy = plainSelect.getGroupBy();
+        if (Objects.nonNull(groupBy)) {
+            GroupByVisitor replaceVisitor = new GroupByVisitor();
+            groupBy.accept(replaceVisitor);
+            return replaceVisitor.isHasAggregateFunction();
+        }
+        return false;
+    }
+
+    public static boolean hasFunction(String sql) {
         Select selectStatement = getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
 
@@ -220,12 +244,6 @@ public class SqlParserSelectHelper {
         boolean selectFunction = visitor.hasAggregateFunction();
         if (selectFunction) {
             return true;
-        }
-        GroupByElement groupBy = plainSelect.getGroupBy();
-        if (Objects.nonNull(groupBy)) {
-            GroupByVisitor replaceVisitor = new GroupByVisitor();
-            groupBy.accept(replaceVisitor);
-            return replaceVisitor.isHasAggregateFunction();
         }
         return false;
     }

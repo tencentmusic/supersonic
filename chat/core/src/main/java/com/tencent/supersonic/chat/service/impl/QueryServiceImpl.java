@@ -41,7 +41,6 @@ import java.util.Map;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;

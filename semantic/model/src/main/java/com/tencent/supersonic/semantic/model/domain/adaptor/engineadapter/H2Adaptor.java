@@ -29,8 +29,13 @@ public class H2Adaptor extends EngineAdaptor {
 
     @Override
     public String getColumnMetaQueryTpl() {
-        return "SELECT COLUMN_NAME AS name, DATA_TYPE AS dataType\n"
-                + "FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA ='%s' AND  TABLE_NAME = '%s'";
+        return "SELECT COLUMN_NAME AS name, "
+                + " case DATA_TYPE"
+                + " when '12' then 'varchar'"
+                + " when '-5' then 'integer'"
+                + " when '8' then 'double'"
+                + " end  AS dataType"
+                + " FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA ='%s' AND  TABLE_NAME = '%s'";
     }
 
     @Override

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # pip path
-pip_path="/usr/local/bin/pip3"
+pip_path=${PIP_PATH:-"/usr/local/bin/pip3"}
 
 sbinDir=$(cd "$(dirname "$0")"; pwd)
 baseDir=$(cd "$sbinDir/.." && pwd -P)
@@ -36,8 +36,9 @@ cp -fr webapp ../../launchers/chat/target/classes
 cp -fr webapp ../../launchers/standalone/target/classes
 
 #5. build backend python modules
+echo "start installing python modules with pip: ${pip_path}"
 requirementPath=$baseDir/../chat/core/src/main/python/requirements.txt
-${pip_path}  install -r ${requirementPath}
+${pip_path} install -r ${requirementPath}
 echo "install python modules success"
 
 #6. reset runtime

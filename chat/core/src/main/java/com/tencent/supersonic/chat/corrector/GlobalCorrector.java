@@ -6,6 +6,7 @@ import com.tencent.supersonic.chat.query.llm.dsl.LLMReq;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMReq.ElementValue;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import java.util.List;
 import java.util.Map;
@@ -16,11 +17,45 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
-public class FieldNameCorrector extends BaseSemanticCorrector {
+public class GlobalCorrector extends BaseSemanticCorrector {
 
     @Override
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
+        super.correct(semanticCorrectInfo);
 
+        replaceAlias(semanticCorrectInfo);
+
+        updateFieldNameByLinkingValue(semanticCorrectInfo);
+
+        updateFieldNameByBizName(semanticCorrectInfo);
+
+        addAggregateToMetric(semanticCorrectInfo);
+    }
+
+    private void addAggregateToMetric(SemanticCorrectInfo semanticCorrectInfo) {
+
+        if (SqlParserSelectHelper.hasGroupBy(semanticCorrectInfo.getSql())) {
+
+            return;
+        }
+
+    }
+
+    private void replaceAlias(SemanticCorrectInfo semanticCorrectInfo) {
+        String replaceAlias = SqlParserUpdateHelper.replaceAlias(semanticCorrectInfo.getSql());
+        semanticCorrectInfo.setSql(replaceAlias);
+    }
+
+    private void updateFieldNameByBizName(SemanticCorrectInfo semanticCorrectInfo) {
+
+        Map<String, String> fieldToBizName = getFieldToBizName(semanticCorrectInfo.getParseInfo().getModelId());
+
+        String sql = SqlParserUpdateHelper.replaceFields(semanticCorrectInfo.getSql(), fieldToBizName);
+
+        semanticCorrectInfo.setSql(sql);
+    }
+
+    private void updateFieldNameByLinkingValue(SemanticCorrectInfo semanticCorrectInfo) {
         Object context = semanticCorrectInfo.getParseInfo().getProperties().get(Constants.CONTEXT);
         if (Objects.isNull(context)) {
             return;
@@ -40,10 +75,8 @@ public class FieldNameCorrector extends BaseSemanticCorrector {
                 Collectors.groupingBy(ElementValue::getFieldValue,
                         Collectors.mapping(ElementValue::getFieldName, Collectors.toSet())));
 
-        String preSql = semanticCorrectInfo.getSql();
-        semanticCorrectInfo.setPreSql(preSql);
-        String sql = SqlParserUpdateHelper.replaceFieldNameByValue(preSql, fieldValueToFieldNames);
+        String sql = SqlParserUpdateHelper.replaceFieldNameByValue(semanticCorrectInfo.getSql(),
+                fieldValueToFieldNames);
         semanticCorrectInfo.setSql(sql);
     }
-
 }

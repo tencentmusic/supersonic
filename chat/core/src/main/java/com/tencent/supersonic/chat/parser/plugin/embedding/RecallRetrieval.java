@@ -14,4 +14,6 @@ public class RecallRetrieval {
 
     private String presetId;
 
+    private String query;
+
 }

@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.corrector;
 
 import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.knowledge.service.SchemaService;
@@ -14,7 +15,14 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class BaseSemanticCorrector implements SemanticCorrector {
+
     public static final String DATE_FIELD = "数据日期";
+
+
+    public void correct(SemanticCorrectInfo semanticCorrectInfo) {
+        semanticCorrectInfo.setPreSql(semanticCorrectInfo.getSql());
+    }
+
     protected Map<String, String> getFieldToBizName(Long modelId) {
 
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
