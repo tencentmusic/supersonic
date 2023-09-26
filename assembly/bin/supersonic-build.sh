@@ -36,8 +36,9 @@ cp -fr webapp ../../launchers/chat/target/classes
 cp -fr webapp ../../launchers/standalone/target/classes
 
 #5. build backend python modules
+echo "start installing python modules with pip: ${pip_path}"
 requirementPath=$baseDir/../chat/core/src/main/python/requirements.txt
-${pip_path}  install -r ${requirementPath}
+${pip_path} install -r ${requirementPath}
 echo "install python modules success"
 
 #6. reset runtime
