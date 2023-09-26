@@ -10,6 +10,9 @@ import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
+import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
+import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
@@ -281,10 +284,6 @@ public class SqlParserUpdateHelper {
     }
 
     public static String addAggregateToField(String sql, Map<String, String> fieldNameToAggregate) {
-        if (SqlParserSelectHelper.hasGroupBy(sql)) {
-            return sql;
-        }
-
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
 
@@ -296,13 +295,15 @@ public class SqlParserUpdateHelper {
             public void visit(PlainSelect plainSelect) {
                 addAggregateToSelectItems(plainSelect.getSelectItems(), fieldNameToAggregate);
                 addAggregateToOrderByItems(plainSelect.getOrderByElements(), fieldNameToAggregate);
+                addAggregateToGroupByItems(plainSelect.getGroupBy(), fieldNameToAggregate);
+                addAggregateToWhereItems(plainSelect.getWhere(), fieldNameToAggregate);
             }
         });
         return selectStatement.toString();
     }
 
-    public static String addGroupBy(String sql, List<String> groupByFields) {
-        if (SqlParserSelectHelper.hasGroupBy(sql)) {
+    public static String addGroupBy(String sql, Set<String> groupByFields) {
+        if (SqlParserSelectHelper.hasGroupBy(sql) || CollectionUtils.isEmpty(groupByFields)) {
             return sql;
         }
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
@@ -327,9 +328,8 @@ public class SqlParserUpdateHelper {
             if (selectItem instanceof SelectExpressionItem) {
                 SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
                 Expression expression = selectExpressionItem.getExpression();
-                String columnName = ((Column) expression).getColumnName();
-                Function function = getFunction(expression, fieldNameToAggregate.get(columnName));
-                if (Objects.isNull(function)) {
+                Function function = getFunction(expression, fieldNameToAggregate);
+                if (function == null) {
                     continue;
                 }
                 selectExpressionItem.setExpression(function);
@@ -344,16 +344,100 @@ public class SqlParserUpdateHelper {
         }
         for (OrderByElement orderByElement : orderByElements) {
             Expression expression = orderByElement.getExpression();
-            String columnName = ((Column) expression).getColumnName();
-            if (StringUtils.isEmpty(columnName)) {
-                continue;
-            }
-            Function function = getFunction(expression, fieldNameToAggregate.get(columnName));
-            if (Objects.isNull(function)) {
+            Function function = getFunction(expression, fieldNameToAggregate);
+            if (function == null) {
                 continue;
             }
             orderByElement.setExpression(function);
         }
+    }
+
+    private static void addAggregateToGroupByItems(GroupByElement groupByElement,
+            Map<String, String> fieldNameToAggregate) {
+        if (groupByElement == null) {
+            return;
+        }
+        for (Expression expression : groupByElement.getGroupByExpressions()) {
+            Function function = getFunction(expression, fieldNameToAggregate);
+            if (function == null) {
+                continue;
+            }
+            groupByElement.addGroupByExpression(function);
+        }
+    }
+
+    private static void addAggregateToWhereItems(Expression whereExpression, Map<String, String> fieldNameToAggregate) {
+        if (whereExpression == null) {
+            return;
+        }
+        modifyWhereExpression(whereExpression, fieldNameToAggregate);
+    }
+
+    private static void modifyWhereExpression(Expression whereExpression,
+            Map<String, String> fieldNameToAggregate) {
+        if (isLogicExpression(whereExpression)) {
+            AndExpression andExpression = (AndExpression) whereExpression;
+            Expression leftExpression = andExpression.getLeftExpression();
+            Expression rightExpression = andExpression.getRightExpression();
+            if (isLogicExpression(leftExpression)) {
+                modifyWhereExpression(leftExpression, fieldNameToAggregate);
+            } else {
+                setAggToFunction(leftExpression, fieldNameToAggregate);
+            }
+            if (isLogicExpression(rightExpression)) {
+                modifyWhereExpression(rightExpression, fieldNameToAggregate);
+            } else {
+                setAggToFunction(rightExpression, fieldNameToAggregate);
+            }
+            setAggToFunction(rightExpression, fieldNameToAggregate);
+        } else {
+            setAggToFunction(whereExpression, fieldNameToAggregate);
+        }
+    }
+
+    private static boolean isLogicExpression(Expression whereExpression) {
+        return whereExpression instanceof AndExpression || (whereExpression instanceof OrExpression
+                || (whereExpression instanceof XorExpression));
+    }
+
+
+    private static void setAggToFunction(Expression expression, Map<String, String> fieldNameToAggregate) {
+        if (!(expression instanceof ComparisonOperator)) {
+            return;
+        }
+        ComparisonOperator comparisonOperator = (ComparisonOperator) expression;
+        if (comparisonOperator.getRightExpression() instanceof Column) {
+            String columnName = ((Column) (comparisonOperator).getRightExpression()).getColumnName();
+            Function function = getFunction(comparisonOperator.getRightExpression(),
+                    fieldNameToAggregate.get(columnName));
+            if (Objects.nonNull(function)) {
+                comparisonOperator.setRightExpression(function);
+            }
+        }
+        if (comparisonOperator.getLeftExpression() instanceof Column) {
+            String columnName = ((Column) (comparisonOperator).getLeftExpression()).getColumnName();
+            Function function = getFunction(comparisonOperator.getLeftExpression(),
+                    fieldNameToAggregate.get(columnName));
+            if (Objects.nonNull(function)) {
+                comparisonOperator.setLeftExpression(function);
+            }
+        }
+    }
+
+
+    private static Function getFunction(Expression expression, Map<String, String> fieldNameToAggregate) {
+        if (!(expression instanceof Column)) {
+            return null;
+        }
+        String columnName = ((Column) expression).getColumnName();
+        if (StringUtils.isEmpty(columnName)) {
+            return null;
+        }
+        Function function = getFunction(expression, fieldNameToAggregate.get(columnName));
+        if (Objects.isNull(function)) {
+            return null;
+        }
+        return function;
     }
 
     private static Function getFunction(Expression expression, String aggregateName) {

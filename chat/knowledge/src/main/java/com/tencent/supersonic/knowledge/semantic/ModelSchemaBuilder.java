@@ -53,6 +53,7 @@ public class ModelSchemaBuilder {
                     .type(SchemaElementType.METRIC)
                     .useCnt(metric.getUseCnt())
                     .alias(alias)
+                    .defaultAgg(metric.getDefaultAgg())
                     .build();
             metrics.add(metricToAdd);
 

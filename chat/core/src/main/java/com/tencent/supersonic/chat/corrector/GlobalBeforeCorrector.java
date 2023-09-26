@@ -1,13 +1,16 @@
 package com.tencent.supersonic.chat.corrector;
 
 import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMReq;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMReq.ElementValue;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
+import com.tencent.supersonic.knowledge.service.SchemaService;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,10 +20,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
-public class GlobalCorrector extends BaseSemanticCorrector {
+public class GlobalBeforeCorrector extends BaseSemanticCorrector {
 
     @Override
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
+
         super.correct(semanticCorrectInfo);
 
         replaceAlias(semanticCorrectInfo);
@@ -33,12 +37,26 @@ public class GlobalCorrector extends BaseSemanticCorrector {
     }
 
     private void addAggregateToMetric(SemanticCorrectInfo semanticCorrectInfo) {
+        //add aggregate to all metric
+        String sql = semanticCorrectInfo.getSql();
+        Long modelId = semanticCorrectInfo.getParseInfo().getModel().getModel();
 
-        if (SqlParserSelectHelper.hasGroupBy(semanticCorrectInfo.getSql())) {
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
 
+        Map<String, String> metricToAggregate = semanticSchema.getMetrics(modelId).stream()
+                .map(schemaElement -> {
+                    if (Objects.isNull(schemaElement.getDefaultAgg())) {
+                        schemaElement.setDefaultAgg(AggregateTypeEnum.SUM.name());
+                    }
+                    return schemaElement;
+                }).collect(Collectors.toMap(a -> a.getBizName(), a -> a.getDefaultAgg(), (k1, k2) -> k1));
+
+        if (CollectionUtils.isEmpty(metricToAggregate)) {
             return;
         }
 
+        String aggregateSql = SqlParserUpdateHelper.addAggregateToField(sql, metricToAggregate);
+        semanticCorrectInfo.setSql(aggregateSql);
     }
 
     private void replaceAlias(SemanticCorrectInfo semanticCorrectInfo) {
