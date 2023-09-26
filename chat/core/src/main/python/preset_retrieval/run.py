@@ -2,30 +2,23 @@
 
 import os
 import sys
-import uuid
-from typing import Any, List, Mapping, Optional, Union
+from typing import List
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-
-from chromadb.api import Collection, Documents, Embeddings
-
-from langchain.llms import OpenAI
+from chromadb.api import Collection
 
 from preset_query_db import (
-    get_ids,
-    add2preset_query_collection,
     query2preset_query_collection,
     parse_retrieval_preset_query,
     preset_query_retrieval_format,
-    empty_preset_query_collection,
     preset_query_collection_size,
 )
 
 from util.text2vec import Text2VecEmbeddingFunction
 
-from run_config import CHROMA_DB_PERSIST_PATH, PRESET_QUERY_COLLECTION_NAME
+from run_config import PRESET_QUERY_COLLECTION_NAME
 from util.chromadb_instance import client
 
 

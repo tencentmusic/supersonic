@@ -1,9 +1,8 @@
 # -*- coding:utf-8 -*-
-import os
-from typing import Any, List, Mapping, Optional, Union
+from typing import List
 
-from langchain.embeddings import HuggingFaceEmbeddings
 from chromadb.api.types import Documents, EmbeddingFunction, Embeddings
+from langchain.embeddings import HuggingFaceEmbeddings
 
 from run_config import HF_TEXT2VEC_MODEL_NAME
 

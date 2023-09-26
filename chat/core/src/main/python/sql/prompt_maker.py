@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
-from typing import Any, List, Mapping, Optional, Union
 import os
 import sys
+from typing import List, Mapping
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
