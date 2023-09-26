@@ -1,7 +1,9 @@
 package com.tencent.supersonic.chat.queryresponder;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.chat.api.pojo.request.SolvedQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingConfig;
 import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingResp;
@@ -42,12 +44,17 @@ public class DefaultQueryResponder implements QueryResponder {
     }
 
     @Override
-    public void saveSolvedQuery(String queryText, Long queryId, Integer parseId) {
+    public void saveSolvedQuery(SolvedQueryReq solvedQueryReq) {
+        String queryText = solvedQueryReq.getQueryText();
         try {
-            String uniqueId = generateUniqueId(queryId, parseId);
-            Map<String, String> requestMap = new HashMap<>();
+            String uniqueId = generateUniqueId(solvedQueryReq.getQueryId(), solvedQueryReq.getParseId());
+            Map<String, Object> requestMap = new HashMap<>();
             requestMap.put("query", queryText);
             requestMap.put("query_id", uniqueId);
+            Map<String, Object> metaData = new HashMap<>();
+            metaData.put("modelId", String.valueOf(solvedQueryReq.getModelId()));
+            metaData.put("agentId", String.valueOf(solvedQueryReq.getAgentId()));
+            requestMap.put("metadata", metaData);
             doRequest(embeddingConfig.getSolvedQueryAddPath(),
                     JSONObject.toJSONString(Lists.newArrayList(requestMap)));
         } catch (Exception e) {
@@ -56,7 +63,7 @@ public class DefaultQueryResponder implements QueryResponder {
     }
 
     @Override
-    public List<SolvedQueryRecallResp> recallSolvedQuery(String queryText) {
+    public List<SolvedQueryRecallResp> recallSolvedQuery(String queryText, Integer agentId) {
         List<SolvedQueryRecallResp> solvedQueryRecallResps = Lists.newArrayList();
         try {
             String url = embeddingConfig.getUrl() + embeddingConfig.getSolvedQueryRecallPath() + "?n_results="
@@ -66,7 +73,12 @@ public class DefaultQueryResponder implements QueryResponder {
             headers.setLocation(URI.create(url));
             URI requestUrl = UriComponentsBuilder
                     .fromHttpUrl(url).build().encode().toUri();
-            String jsonBody = JSONObject.toJSONString(Lists.newArrayList(queryText));
+            Map<String, Object> map = new HashMap<>();
+            map.put("queryTextsList", Lists.newArrayList(queryText));
+            Map<String, Object> filterCondition = new HashMap<>();
+            filterCondition.put("agentId", String.valueOf(agentId));
+            map.put("filterCondition", filterCondition);
+            String jsonBody = JSONObject.toJSONString(map, SerializerFeature.WriteMapNullValue);
             HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
             log.info("[embedding] request body:{}, url:{}", jsonBody, url);
             ResponseEntity<List<EmbeddingResp>> embeddingResponseEntity =
@@ -80,12 +92,14 @@ public class DefaultQueryResponder implements QueryResponder {
                 for (EmbeddingResp embeddingResp : embeddingResps) {
                     List<RecallRetrieval> embeddingRetrievals = embeddingResp.getRetrieval();
                     for (RecallRetrieval embeddingRetrieval : embeddingRetrievals) {
+                        if (queryText.equalsIgnoreCase(embeddingRetrieval.getQuery())) {
+                            continue;
+                        }
                         if (querySet.contains(embeddingRetrieval.getQuery())) {
                             continue;
                         }
                         String id = embeddingRetrieval.getId();
-                        SolvedQueryRecallResp solvedQueryRecallResp =
-                                SolvedQueryRecallResp.builder()
+                        SolvedQueryRecallResp solvedQueryRecallResp = SolvedQueryRecallResp.builder()
                                         .queryText(embeddingRetrieval.getQuery())
                                         .queryId(getQueryId(id)).parseId(getParseId(id))
                                         .build();

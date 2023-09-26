@@ -3,6 +3,7 @@ package com.tencent.supersonic.semantic.model.application;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.pojo.DatasourceDetail;
 import com.tencent.supersonic.semantic.api.model.pojo.Dim;
@@ -48,11 +49,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.tencent.supersonic.semantic.model.domain.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 
@@ -84,25 +88,27 @@ public class DatasourceServiceImpl implements DatasourceService {
     }
 
     @Override
+    @Transactional
     public DatasourceResp createDatasource(DatasourceReq datasourceReq, User user) throws Exception {
         preCheck(datasourceReq);
+        checkExist(datasourceReq);
         Datasource datasource = DatasourceConverter.convert(datasourceReq);
         log.info("[create datasource] object:{}", JSONObject.toJSONString(datasource));
         saveDatasource(datasource, user);
         Optional<DatasourceResp> datasourceDescOptional = getDatasource(datasourceReq.getModelId(),
                 datasourceReq.getBizName());
         if (!datasourceDescOptional.isPresent()) {
-            throw new RuntimeException("create datasource failed");
+            throw new RuntimeException("创建数据源失败");
         }
-        DatasourceResp datasourceDesc = datasourceDescOptional.get();
-        datasource.setId(datasourceDesc.getId());
+        DatasourceResp datasourceResp = datasourceDescOptional.get();
+        datasource.setId(datasourceResp.getId());
         batchCreateDimension(datasource, user);
         batchCreateMetric(datasource, user);
-        return datasourceDesc;
+        return datasourceResp;
     }
 
-
     @Override
+    @Transactional
     public DatasourceResp updateDatasource(DatasourceReq datasourceReq, User user) throws Exception {
         preCheck(datasourceReq);
         Datasource datasource = DatasourceConverter.convert(datasourceReq);
@@ -124,20 +130,20 @@ public class DatasourceServiceImpl implements DatasourceService {
 
     @Override
     public List<MeasureResp> getMeasureListOfModel(Long modelId) {
-        List<DatasourceResp> datasourceDescs = getDatasourceList(modelId);
-        List<MeasureResp> measureDescs = Lists.newArrayList();
-        if (!CollectionUtils.isEmpty(datasourceDescs)) {
-            for (DatasourceResp datasourceDesc : datasourceDescs) {
+        List<DatasourceResp> datasourceResps = getDatasourceList(modelId);
+        List<MeasureResp> measureResps = Lists.newArrayList();
+        if (!CollectionUtils.isEmpty(datasourceResps)) {
+            for (DatasourceResp datasourceDesc : datasourceResps) {
                 DatasourceDetail datasourceDetail = datasourceDesc.getDatasourceDetail();
                 List<Measure> measures = datasourceDetail.getMeasures();
                 if (!CollectionUtils.isEmpty(measures)) {
-                    measureDescs.addAll(
+                    measureResps.addAll(
                             measures.stream().map(measure -> DatasourceConverter.convert(measure, datasourceDesc))
                                     .collect(Collectors.toList()));
                 }
             }
         }
-        return measureDescs;
+        return measureResps;
     }
 
 
@@ -153,11 +159,11 @@ public class DatasourceServiceImpl implements DatasourceService {
 
 
     private Optional<DatasourceResp> getDatasource(Long modelId, String bizName) {
-        List<DatasourceResp> datasourceDescs = getDatasourceList(modelId);
-        if (CollectionUtils.isEmpty(datasourceDescs)) {
+        List<DatasourceResp> datasourceResps = getDatasourceList(modelId);
+        if (CollectionUtils.isEmpty(datasourceResps)) {
             return Optional.empty();
         }
-        for (DatasourceResp datasourceDesc : datasourceDescs) {
+        for (DatasourceResp datasourceDesc : datasourceResps) {
             if (datasourceDesc.getBizName().equals(bizName)) {
                 return Optional.of(datasourceDesc);
             }
@@ -175,18 +181,51 @@ public class DatasourceServiceImpl implements DatasourceService {
 
 
     private void preCheck(DatasourceReq datasourceReq) {
+        if (NameCheckUtils.containsSpecialCharacters(datasourceReq.getName())) {
+            String message = String.format("数据源名称[%s]包含特殊字符, 请修改", datasourceReq.getName());
+            throw new InvalidArgumentException(message);
+        }
         List<Dim> dims = datasourceReq.getDimensions();
         List<Measure> measures = datasourceReq.getMeasures();
         List<Dim> timeDims = datasourceReq.getTimeDimension();
         List<Identify> identifies = datasourceReq.getIdentifiers();
         if (CollectionUtils.isEmpty(dims)) {
-            throw new RuntimeException("缺少维度信息");
+            throw new InvalidArgumentException("缺少维度信息");
         }
         if (CollectionUtils.isEmpty(identifies)) {
-            throw new RuntimeException("缺少主键信息");
+            throw new InvalidArgumentException("缺少主键信息");
         }
         if (!CollectionUtils.isEmpty(measures) && CollectionUtils.isEmpty(timeDims)) {
-            throw new RuntimeException("有度量时, 不可缺少时间维度");
+            throw new InvalidArgumentException("有度量时, 不可缺少时间维度");
+        }
+        for (Measure measure : measures) {
+            if (StringUtils.isNotBlank(measure.getName())
+                    && NameCheckUtils.containsSpecialCharacters(measure.getName())) {
+                String message = String.format("度量[%s]包含特殊字符, 请修改", measure.getName());
+                throw new InvalidArgumentException(message);
+            }
+        }
+        for (Dim dim : dims) {
+            if (StringUtils.isNotBlank(dim.getName())
+                    && NameCheckUtils.containsSpecialCharacters(dim.getName())) {
+                String message = String.format("维度[%s]包含特殊字符, 请修改", dim.getName());
+                throw new InvalidArgumentException(message);
+            }
+        }
+        for (Identify identify : identifies) {
+            if (StringUtils.isNotBlank(identify.getName())
+                    && NameCheckUtils.containsSpecialCharacters(identify.getName())) {
+                String message = String.format("主键/外键[%s]包含特殊字符, 请修改", identify.getName());
+                throw new InvalidArgumentException(message);
+            }
+        }
+    }
+
+    private void checkExist(DatasourceReq datasourceReq) {
+        Optional<DatasourceResp> datasourceRespOptional = getDatasource(datasourceReq.getModelId(),
+                datasourceReq.getBizName());
+        if (datasourceRespOptional.isPresent()) {
+            throw new InvalidArgumentException("已存在相同名字的数据源:" + datasourceReq.getBizName());
         }
     }
 
@@ -229,11 +268,11 @@ public class DatasourceServiceImpl implements DatasourceService {
     @Override
     public Map<Long, DatasourceResp> getDatasourceMap() {
         Map<Long, DatasourceResp> map = new HashMap<>();
-        List<DatasourceResp> datasourceDescs = getDatasourceList();
-        if (CollectionUtils.isEmpty(datasourceDescs)) {
+        List<DatasourceResp> datasourceResps = getDatasourceList();
+        if (CollectionUtils.isEmpty(datasourceResps)) {
             return map;
         }
-        return datasourceDescs.stream().collect(Collectors.toMap(DatasourceResp::getId, a -> a, (k1, k2) -> k1));
+        return datasourceResps.stream().collect(Collectors.toMap(DatasourceResp::getId, a -> a, (k1, k2) -> k1));
     }
 
 
