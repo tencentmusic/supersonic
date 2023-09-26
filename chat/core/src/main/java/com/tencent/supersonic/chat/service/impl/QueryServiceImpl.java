@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.service.impl;
 
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
@@ -33,6 +34,9 @@ import com.tencent.supersonic.chat.service.StatisticsService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 
 import java.util.Map;
+
+import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import java.util.List;
 import java.util.ArrayList;
@@ -280,27 +284,73 @@ public class QueryServiceImpl implements QueryService {
             if (CollectionUtils.isNotEmpty(queryData.getDimensionFilters())) {
                 parseInfo.setDimensionFilters(queryData.getDimensionFilters());
             }
-        }
-        if (Objects.nonNull(queryData.getDateInfo())) {
-            parseInfo.setDateInfo(queryData.getDateInfo());
+            if (Objects.nonNull(queryData.getDateInfo())) {
+                parseInfo.setDateInfo(queryData.getDateInfo());
+            }
         }
         if (parseInfo.getQueryMode().equals(DslQuery.QUERY_MODE)
-                && CollectionUtils.isNotEmpty(queryData.getDimensionFilters())) {
+                && (CollectionUtils.isNotEmpty(queryData.getDimensionFilters())
+                || CollectionUtils.isNotEmpty(queryData.getMetricFilters()))) {
             Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
             String json = JsonUtil.toString(parseInfo.getProperties().get(Constants.CONTEXT));
             DSLParseResult dslParseResult = JsonUtil.toObject(json, DSLParseResult.class);
             LLMResp llmResp = dslParseResult.getLlmResp();
             String correctorSql = llmResp.getCorrectorSql();
             log.info("correctorSql before replacing:{}", correctorSql);
+            List<FilterExpression> filterExpressionList = SqlParserSelectHelper.getFilterExpression(correctorSql);
             for (QueryFilter dslQueryFilter : queryData.getDimensionFilters()) {
-                for (QueryFilter queryFilter : parseInfo.getDimensionFilters()) {
-                    if (dslQueryFilter.getBizName().equals(queryFilter.getBizName())) {
-                        Map<String, String> map = new HashMap<>();
-                        map.put(queryFilter.getValue().toString(), dslQueryFilter.getValue().toString());
-                        filedNameToValueMap.put(dslQueryFilter.getBizName(), map);
+                Map<String, String> map = new HashMap<>();
+                for (FilterExpression filterExpression : filterExpressionList) {
+                    if (filterExpression.getFieldName().equals(dslQueryFilter.getBizName())
+                            && dslQueryFilter.getOperator().getValue().equals(filterExpression.getOperator())) {
+                        map.put(filterExpression.getFieldValue().toString(), dslQueryFilter.getValue().toString());
                         break;
                     }
                 }
+                filedNameToValueMap.put(dslQueryFilter.getBizName(), map);
+            }
+            for (QueryFilter dslQueryFilter : queryData.getMetricFilters()) {
+                Map<String, String> map = new HashMap<>();
+                for (FilterExpression filterExpression : filterExpressionList) {
+                    if (filterExpression.getFieldName().equals(dslQueryFilter.getBizName())
+                            && dslQueryFilter.getOperator().getValue().equals(filterExpression.getOperator())) {
+                        map.put(filterExpression.getFieldValue().toString(), dslQueryFilter.getValue().toString());
+                        break;
+                    }
+                }
+                filedNameToValueMap.put(dslQueryFilter.getBizName(), map);
+            }
+            String dateField = "sys_imp_date";
+            if (Objects.nonNull(queryData.getDateInfo())) {
+                Map<String, String> map = new HashMap<>();
+                List<String> dateFields = Lists.newArrayList("dayno", "sys_imp_date", "sys_imp_week", "sys_imp_month");
+                if (queryData.getDateInfo().getStartDate().equals(queryData.getDateInfo().getEndDate())) {
+                    for (FilterExpression filterExpression : filterExpressionList) {
+                        if (dateFields.contains(filterExpression.getFieldName())) {
+                            dateField = filterExpression.getFieldName();
+                            map.put(filterExpression.getFieldValue().toString(),
+                                    queryData.getDateInfo().getStartDate());
+                            break;
+                        }
+                    }
+                } else {
+                    for (FilterExpression filterExpression : filterExpressionList) {
+                        if (dateFields.contains(filterExpression.getFieldName())) {
+                            dateField = filterExpression.getFieldName();
+                            if (filterExpression.getOperator().equals(">=")
+                                    || filterExpression.getOperator().equals(">")) {
+                                map.put(filterExpression.getFieldValue().toString(),
+                                        queryData.getDateInfo().getStartDate());
+                            }
+                            if (filterExpression.getOperator().equals("<=")
+                                    || filterExpression.getOperator().equals("<")) {
+                                map.put(filterExpression.getFieldValue().toString(),
+                                        queryData.getDateInfo().getEndDate());
+                            }
+                        }
+                    }
+                }
+                filedNameToValueMap.put(dateField, map);
             }
             log.info("filedNameToValueMap:{}", filedNameToValueMap);
             correctorSql = SqlParserUpdateHelper.replaceValue(correctorSql, filedNameToValueMap);
