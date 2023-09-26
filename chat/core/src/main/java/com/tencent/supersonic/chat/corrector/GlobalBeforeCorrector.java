@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
-public class GlobalCorrector extends BaseSemanticCorrector {
+public class GlobalBeforeCorrector extends BaseSemanticCorrector {
 
     @Override
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
