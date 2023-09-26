@@ -15,18 +15,22 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.request.SolvedQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
 import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
+import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
+import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.chat.query.QuerySelector;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.llm.dsl.DslQuery;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMResp;
+import com.tencent.supersonic.chat.queryresponder.QueryResponder;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SemanticService;
@@ -34,7 +38,7 @@ import com.tencent.supersonic.chat.service.StatisticsService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 
 import java.util.Map;
-
+import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
@@ -75,6 +79,8 @@ public class QueryServiceImpl implements QueryService {
     private ChatService chatService;
     @Autowired
     private StatisticsService statisticsService;
+    @Autowired
+    private QueryResponder queryResponder;
 
     @Value("${time.threshold: 100}")
     private Integer timeThreshold;
@@ -149,6 +155,9 @@ public class QueryServiceImpl implements QueryService {
                     .state(ParseResp.ParseState.FAILED)
                     .build();
         }
+        List<SolvedQueryRecallResp> solvedQueryRecallResps =
+                queryResponder.recallSolvedQuery(queryCtx.getRequest().getQueryText(), queryReq.getAgentId());
+        parseResult.setSimilarSolvedQuery(solvedQueryRecallResps);
         return parseResult;
     }
 
@@ -162,13 +171,14 @@ public class QueryServiceImpl implements QueryService {
         if (Objects.isNull(explain)) {
             return;
         }
-        parseInfo.setSql(explain.getSql());
+        parseInfo.getSqlInfo().setQuerySql(explain.getSql());
     }
 
     @Override
     public QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception {
         ChatParseDO chatParseDO = chatService.getParseInfo(queryReq.getQueryId(),
                 queryReq.getUser().getName(), queryReq.getParseId());
+        ChatQueryDO chatQueryDO = chatService.getLastQuery(queryReq.getChatId());
         List<StatisticsDO> timeCostDOList = new ArrayList<>();
         SemanticParseInfo parseInfo = JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
         SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
@@ -193,6 +203,11 @@ public class QueryServiceImpl implements QueryService {
             if (queryReq.isSaveAnswer() && QueryState.SUCCESS.equals(queryResult.getQueryState())) {
                 chatCtx.setParseInfo(parseInfo);
                 chatService.updateContext(chatCtx);
+                queryResponder.saveSolvedQuery(SolvedQueryReq.builder().parseId(queryReq.getParseId())
+                        .queryId(queryReq.getQueryId())
+                        .agentId(chatQueryDO.getAgentId())
+                        .modelId(parseInfo.getModelId())
+                        .queryText(queryReq.getQueryText()).build());
             }
             chatCtx.setQueryText(queryReq.getQueryText());
             chatCtx.setUser(queryReq.getUser().getName());
