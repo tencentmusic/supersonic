@@ -1,10 +1,9 @@
 # -*- coding:utf-8 -*-
-import os
-import sys
 import json
-import time
+import os
 import re
-from typing import Any, List, Mapping, Optional, Union
+import sys
+from typing import Any, List, Mapping, Union
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))

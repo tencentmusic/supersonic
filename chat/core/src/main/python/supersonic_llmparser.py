@@ -1,13 +1,13 @@
 # -*- coding:utf-8 -*-
 import os
-import logging
 import sys
+
 import uvicorn
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from typing import Any, List, Mapping, Optional, Union
+from typing import Any, List, Mapping
 
 from fastapi import FastAPI, HTTPException
 
@@ -19,7 +19,6 @@ from preset_retrieval.run import (
 )
 from preset_retrieval.preset_query_db import (
     add2preset_query_collection,
-    update_preset_query_collection,
     empty_preset_query_collection,
     delete_preset_query_by_ids,
     update_preset_query_collection,

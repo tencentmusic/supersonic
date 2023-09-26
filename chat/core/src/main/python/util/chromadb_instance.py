@@ -1,8 +1,7 @@
 # -*- coding:utf-8 -*-
-from typing import Any, List, Mapping, Optional, Union
 
 import chromadb
-from chromadb.api import Collection, Documents, Embeddings
+from chromadb.api import Collection
 from chromadb.config import Settings
 
 from run_config import CHROMA_DB_PERSIST_PATH

@@ -1,9 +1,10 @@
 # -*- coding:utf-8 -*-
-from typing import Any, List, Mapping, Optional, Union
+import json
 import os
 import sys
+from typing import List, Mapping
+
 import requests
-import json
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))

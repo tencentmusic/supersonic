@@ -2,10 +2,9 @@
 import os
 import sys
 import uuid
-import numpy as np
-from typing import Any, List, Mapping, Optional, Union
+from typing import Any, List, Mapping
 
-from chromadb.api import Collection, Documents, Embeddings
+from chromadb.api import Collection
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
