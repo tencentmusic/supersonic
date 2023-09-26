@@ -49,10 +49,10 @@ The high-level architecture and main process flow is as follows:
 SuperSonic comes with sample semantic models as well as chat conversations that can be used as a starting point. Please follow the steps: 
 
 - Download the latest prebuilt binary from the [release page](https://github.com/tencentmusic/supersonic/releases)
-- Run script "bin/start-standalone.sh" to start services (one java process and one python process)
+- Run script "bin/supersonic-daemon.sh" to start services (one java process and one python process)
 - Visit http://localhost:9080 in the browser to start exploration
 
-## Build and Delopment
+## Build and Development
 
 Please refer to project [wiki](https://github.com/tencentmusic/supersonic/wiki). 
 
