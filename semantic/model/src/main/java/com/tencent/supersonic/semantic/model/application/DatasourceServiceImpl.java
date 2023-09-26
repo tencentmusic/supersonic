@@ -222,7 +222,8 @@ public class DatasourceServiceImpl implements DatasourceService {
     }
 
     private void checkExist(DatasourceReq datasourceReq) {
-        Optional<DatasourceResp> datasourceRespOptional = getDatasource(datasourceReq.getModelId(), datasourceReq.getBizName());
+        Optional<DatasourceResp> datasourceRespOptional = getDatasource(datasourceReq.getModelId(),
+                datasourceReq.getBizName());
         if (datasourceRespOptional.isPresent()) {
             throw new InvalidArgumentException("已存在相同名字的数据源:" + datasourceReq.getBizName());
         }
