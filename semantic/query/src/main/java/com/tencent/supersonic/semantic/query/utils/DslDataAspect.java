@@ -84,7 +84,7 @@ public class DslDataAspect {
         authCommonService.doModelVisible(user, modelId);
 
         // 3. fetch data permission meta information
-        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(queryDslReq);
+        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(queryDslReq,user);
         log.info("modelId:{}, res4Privilege:{}", modelId, res4Privilege);
 
         Set<String> sensitiveResByModel = authCommonService.getHighSensitiveColsByModelId(modelId);
