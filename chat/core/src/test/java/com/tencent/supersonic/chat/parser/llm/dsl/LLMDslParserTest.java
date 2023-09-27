@@ -68,7 +68,7 @@ class LLMDslParserTest {
         model.setId(2L);
         parseInfo.setModel(model);
         SemanticCorrectInfo semanticCorrectInfo = SemanticCorrectInfo.builder()
-                .sql("select count(song_name) from 歌曲库 where singer_name = '周先生' and YEAR(publish_time) >= 2023 and ")
+                .sql("select count(song_name) from 歌曲库 where singer_name = '周先生' and YEAR(publish_time) >= 2023 ")
                 .parseInfo(parseInfo)
                 .build();
 

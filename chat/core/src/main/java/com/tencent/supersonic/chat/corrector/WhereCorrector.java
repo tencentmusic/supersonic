@@ -8,11 +8,11 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.parser.llm.dsl.DSLDateHelper;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
-import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,9 +70,9 @@ public class WhereCorrector extends BaseSemanticCorrector {
     private void addDateIfNotExist(SemanticCorrectInfo semanticCorrectInfo) {
         String sql = semanticCorrectInfo.getSql();
         List<String> whereFields = SqlParserSelectHelper.getWhereFields(sql);
-        if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(TimeDimensionEnum.DAY.getName())) {
+        if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(DateUtils.DATE_FIELD)) {
             String currentDate = DSLDateHelper.getReferenceDate(semanticCorrectInfo.getParseInfo().getModelId());
-            sql = SqlParserUpdateHelper.addWhere(sql, TimeDimensionEnum.DAY.getName(), currentDate);
+            sql = SqlParserUpdateHelper.addWhere(sql, DateUtils.DATE_FIELD, currentDate);
         }
         semanticCorrectInfo.setSql(sql);
     }
@@ -83,7 +83,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
         }
         return queryFilters.getFilters().stream()
                 .map(filter -> {
-                    String bizNameWrap = StringUtil.getSpaceWrap(filter.getBizName());
+                    String bizNameWrap = StringUtil.getSpaceWrap(filter.getName());
                     String operatorWrap = StringUtil.getSpaceWrap(filter.getOperator().getValue());
                     String valueWrap = StringUtil.getCommaWrap(filter.getValue().toString());
                     return bizNameWrap + operatorWrap + valueWrap;
@@ -117,11 +117,11 @@ public class WhereCorrector extends BaseSemanticCorrector {
 
         for (SchemaElement dimension : dimensions) {
             if (Objects.isNull(dimension)
-                    || Strings.isEmpty(dimension.getBizName())
+                    || Strings.isEmpty(dimension.getName())
                     || CollectionUtils.isEmpty(dimension.getSchemaValueMaps())) {
                 continue;
             }
-            String bizName = dimension.getBizName();
+            String name = dimension.getName();
 
             Map<String, String> aliasAndBizNameToTechName = new HashMap<>();
 
@@ -141,7 +141,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
                 }
             }
             if (!CollectionUtils.isEmpty(aliasAndBizNameToTechName)) {
-                result.put(bizName, aliasAndBizNameToTechName);
+                result.put(name, aliasAndBizNameToTechName);
             }
         }
         return result;

@@ -65,11 +65,11 @@ public class SqlParserUpdateHelper {
         return selectStatement.toString();
     }
 
-    public static String replaceFields(String sql, Map<String, String> fieldToBizName) {
-        return replaceFields(sql, fieldToBizName, false);
+    public static String replaceFields(String sql, Map<String, String> fieldNameMap) {
+        return replaceFields(sql, fieldNameMap, false);
     }
 
-    public static String replaceFields(String sql, Map<String, String> fieldToBizName, boolean exactReplace) {
+    public static String replaceFields(String sql, Map<String, String> fieldNameMap, boolean exactReplace) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
         if (!(selectBody instanceof PlainSelect)) {
@@ -78,7 +78,7 @@ public class SqlParserUpdateHelper {
         PlainSelect plainSelect = (PlainSelect) selectBody;
         //1. replace where fields
         Expression where = plainSelect.getWhere();
-        FieldReplaceVisitor visitor = new FieldReplaceVisitor(fieldToBizName, exactReplace);
+        FieldReplaceVisitor visitor = new FieldReplaceVisitor(fieldNameMap, exactReplace);
         if (Objects.nonNull(where)) {
             where.accept(visitor);
         }
@@ -92,14 +92,14 @@ public class SqlParserUpdateHelper {
         List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
         if (!CollectionUtils.isEmpty(orderByElements)) {
             for (OrderByElement orderByElement : orderByElements) {
-                orderByElement.accept(new OrderByReplaceVisitor(fieldToBizName, exactReplace));
+                orderByElement.accept(new OrderByReplaceVisitor(fieldNameMap, exactReplace));
             }
         }
 
         //4. replace group by fields
         GroupByElement groupByElement = plainSelect.getGroupBy();
         if (Objects.nonNull(groupByElement)) {
-            groupByElement.accept(new GroupByReplaceVisitor(fieldToBizName, exactReplace));
+            groupByElement.accept(new GroupByReplaceVisitor(fieldNameMap, exactReplace));
         }
         //5. replace having fields
         Expression having = plainSelect.getHaving();
