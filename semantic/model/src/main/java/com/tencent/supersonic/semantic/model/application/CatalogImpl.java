@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -103,22 +104,33 @@ public class CatalogImpl implements Catalog {
 
     @Override
     public String getAgg(Long modelId, String metricBizName) {
-        List<MetricResp> metricResps = getMetrics(modelId);
-        if (!CollectionUtils.isEmpty(metricResps)) {
-            Optional<MetricResp> metric = metricResps.stream()
-                    .filter(m -> m.getBizName().equalsIgnoreCase(metricBizName)).findFirst();
-            if (metric.isPresent() && Objects.nonNull(metric.get().getTypeParams()) && !CollectionUtils.isEmpty(
-                    metric.get().getTypeParams().getMeasures())) {
-                List<MeasureResp> measureRespList = datasourceService.getMeasureListOfModel(modelId);
-                if (!CollectionUtils.isEmpty(measureRespList)) {
-                    String measureName = metric.get().getTypeParams().getMeasures().get(0).getBizName();
-                    Optional<MeasureResp> measure = measureRespList.stream()
-                            .filter(m -> m.getBizName().equalsIgnoreCase(measureName)).findFirst();
-                    if (measure.isPresent()) {
-                        return measure.get().getAgg();
+        try {
+            List<MetricResp> metricResps = getMetrics(modelId);
+            if (!CollectionUtils.isEmpty(metricResps)) {
+                Optional<MetricResp> metric = metricResps.stream()
+                        .filter(m -> m.getBizName().equalsIgnoreCase(metricBizName)).findFirst();
+                if (metric.isPresent() && Objects.nonNull(metric.get().getTypeParams()) && !CollectionUtils.isEmpty(
+                        metric.get().getTypeParams().getMeasures())) {
+                    List<MeasureResp> measureRespList = datasourceService.getMeasureListOfModel(modelId);
+                    if (!CollectionUtils.isEmpty(measureRespList)) {
+                        String measureName = metric.get().getTypeParams().getMeasures().get(0).getBizName();
+                        Optional<MeasureResp> measure = measureRespList.stream()
+                                .filter(Objects::nonNull)
+                                .filter(m -> {
+                                    if (StringUtils.isNotEmpty(m.getBizName())) {
+                                        return m.getBizName().equalsIgnoreCase(measureName);
+                                    }
+                                    return false;
+                                })
+                                .findFirst();
+                        if (measure.isPresent()) {
+                            return measure.get().getAgg();
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            log.error("getAgg:", e);
         }
         return "";
     }

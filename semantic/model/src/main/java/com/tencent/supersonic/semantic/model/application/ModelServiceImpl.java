@@ -18,6 +18,7 @@ import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.DatabaseService;
 import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
@@ -54,10 +55,13 @@ public class ModelServiceImpl implements ModelService {
     private final UserService userService;
     private final DatabaseService databaseService;
 
+    private final Catalog catalog;
+
     public ModelServiceImpl(ModelRepository modelRepository, @Lazy MetricService metricService,
-                            @Lazy DimensionService dimensionService, @Lazy DatasourceService datasourceService,
-                            @Lazy DomainService domainService, UserService userService,
-                            @Lazy DatabaseService databaseService) {
+            @Lazy DimensionService dimensionService, @Lazy DatasourceService datasourceService,
+            @Lazy DomainService domainService, UserService userService,
+            @Lazy DatabaseService databaseService,
+            @Lazy Catalog catalog) {
         this.modelRepository = modelRepository;
         this.metricService = metricService;
         this.dimensionService = dimensionService;
@@ -65,6 +69,7 @@ public class ModelServiceImpl implements ModelService {
         this.domainService = domainService;
         this.userService = userService;
         this.databaseService = databaseService;
+        this.catalog = catalog;
     }
 
     @Override
@@ -166,7 +171,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public ModelResp getModel(Long id) {
         Map<Long, DomainResp> domainRespMap = domainService.getDomainList().stream()
-                        .collect(Collectors.toMap(DomainResp::getId, d -> d));
+                .collect(Collectors.toMap(DomainResp::getId, d -> d));
         return ModelConvert.convert(getModelDO(id), domainRespMap);
     }
 
@@ -192,7 +197,7 @@ public class ModelServiceImpl implements ModelService {
             return modelResps;
         }
         Map<Long, DomainResp> domainRespMap = domainService.getDomainList()
-                        .stream().collect(Collectors.toMap(DomainResp::getId, d -> d));
+                .stream().collect(Collectors.toMap(DomainResp::getId, d -> d));
         return modelDOS.stream()
                 .map(modelDO -> ModelConvert.convert(modelDO, domainRespMap))
                 .collect(Collectors.toList());
@@ -298,6 +303,8 @@ public class ModelServiceImpl implements ModelService {
                     MetricSchemaResp metricSchemaDesc = new MetricSchemaResp();
                     BeanUtils.copyProperties(metricDesc, metricSchemaDesc);
                     metricSchemaDesc.setUseCnt(0L);
+                    String agg = catalog.getAgg(modelId, metricSchemaDesc.getBizName());
+                    metricSchemaDesc.setDefaultAgg(agg);
                     metricSchemaDescList.add(metricSchemaDesc);
                 }
         );

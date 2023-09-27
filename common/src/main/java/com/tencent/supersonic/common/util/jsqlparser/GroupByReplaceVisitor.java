@@ -17,11 +17,11 @@ import org.apache.commons.lang3.StringUtils;
 public class GroupByReplaceVisitor implements GroupByVisitor {
 
     ParseVisitorHelper parseVisitorHelper = new ParseVisitorHelper();
-    private Map<String, String> fieldToBizName;
+    private Map<String, String> fieldNameMap;
     private boolean exactReplace;
 
-    public GroupByReplaceVisitor(Map<String, String> fieldToBizName, boolean exactReplace) {
-        this.fieldToBizName = fieldToBizName;
+    public GroupByReplaceVisitor(Map<String, String> fieldNameMap, boolean exactReplace) {
+        this.fieldNameMap = fieldNameMap;
         this.exactReplace = exactReplace;
     }
 
@@ -33,7 +33,7 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
         for (int i = 0; i < groupByExpressions.size(); i++) {
             Expression expression = groupByExpressions.get(i);
 
-            String replaceColumn = parseVisitorHelper.getReplaceColumn(expression.toString(), fieldToBizName,
+            String replaceColumn = parseVisitorHelper.getReplaceColumn(expression.toString(), fieldNameMap,
                     exactReplace);
             if (StringUtils.isNotEmpty(replaceColumn)) {
                 if (expression instanceof Column) {
