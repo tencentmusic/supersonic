@@ -46,6 +46,24 @@ class SqlParserUpdateHelperTest {
                 "SELECT 歌曲名 FROM 歌曲库 WHERE datediff('day', 发布日期, '2023-08-09') <= 1 "
                         + "AND 歌手名 LIKE '邓紫棋' AND 数据日期 = '2023-08-09' AND 歌曲发布时 = "
                         + "'2023-08-01' ORDER BY 播放量 DESC LIMIT 11", replaceSql);
+
+        Set<String> fieldNames = new HashSet<>();
+        fieldNames.add("歌手名");
+        fieldNames.add("歌曲名");
+        fieldNames.add("专辑名");
+
+        fieldValueToFieldNames.put("林俊杰", fieldNames);
+        replaceSql = "select 歌曲名 from 歌曲库 where datediff('day', 发布日期, '2023-08-09') <= 1 "
+                + "and 歌手名 = '林俊杰' and 数据日期 = '2023-08-09' and 歌曲发布时 = '2023-08-01'"
+                + " order by 播放量 desc limit 11";
+
+        replaceSql = SqlParserUpdateHelper.replaceFieldNameByValue(replaceSql, fieldValueToFieldNames);
+
+        Assert.assertEquals(
+                "SELECT 歌曲名 FROM 歌曲库 WHERE datediff('day', 发布日期, '2023-08-09') <= 1 "
+                        + "AND 歌手名 = '林俊杰' AND 数据日期 = '2023-08-09' AND 歌曲发布时 = "
+                        + "'2023-08-01' ORDER BY 播放量 DESC LIMIT 11", replaceSql);
+
     }
 
     @Test
