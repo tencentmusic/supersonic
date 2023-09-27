@@ -4,6 +4,7 @@ import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
+import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -58,5 +60,28 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         whereFields.remove(TimeDimensionEnum.MONTH.getName());
         String replaceFields = SqlParserUpdateHelper.addFieldsToSelect(sql, new ArrayList<>(whereFields));
         semanticCorrectInfo.setSql(replaceFields);
+    }
+
+    protected void addAggregateToMetric(SemanticCorrectInfo semanticCorrectInfo) {
+        //add aggregate to all metric
+        String sql = semanticCorrectInfo.getSql();
+        Long modelId = semanticCorrectInfo.getParseInfo().getModel().getModel();
+
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+
+        Map<String, String> metricToAggregate = semanticSchema.getMetrics(modelId).stream()
+                .map(schemaElement -> {
+                    if (Objects.isNull(schemaElement.getDefaultAgg())) {
+                        schemaElement.setDefaultAgg(AggregateTypeEnum.SUM.name());
+                    }
+                    return schemaElement;
+                }).collect(Collectors.toMap(a -> a.getBizName(), a -> a.getDefaultAgg(), (k1, k2) -> k1));
+
+        if (CollectionUtils.isEmpty(metricToAggregate)) {
+            return;
+        }
+
+        String aggregateSql = SqlParserUpdateHelper.addAggregateToField(sql, metricToAggregate);
+        semanticCorrectInfo.setSql(aggregateSql);
     }
 }
