@@ -1,0 +1,23 @@
+[llmparser]
+host = "127.0.0.1"
+port = 9092
+
+[llm]
+model_name = "gpt-3.5-turbo-16k"
+openai_api_key = "YOUR_API_KEY"
+openai_api_base = ""
+temperature = 0
+
+[vector_store]
+chroma_db_persist_dir = "chm_db"
+
+[query]
+preset_query_collection_name = "preset_query_collection"
+
+[text2dsl]
+collection_name = "text2dsl_collection"
+few_shots_example_num = 15
+is_shortcut = false
+
+[embedding]
+hf_text2vec_model_name = "GanymedeNil/text2vec-large-chinese"
