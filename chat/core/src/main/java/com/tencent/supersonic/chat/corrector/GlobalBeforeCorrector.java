@@ -6,7 +6,6 @@ import com.tencent.supersonic.chat.query.llm.dsl.LLMReq;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMReq.ElementValue;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import java.util.List;
 import java.util.Map;
@@ -17,40 +16,34 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
-public class GlobalCorrector extends BaseSemanticCorrector {
+public class GlobalBeforeCorrector extends BaseSemanticCorrector {
 
     @Override
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
+
         super.correct(semanticCorrectInfo);
 
         replaceAlias(semanticCorrectInfo);
 
         updateFieldNameByLinkingValue(semanticCorrectInfo);
 
-        updateFieldNameByBizName(semanticCorrectInfo);
+        correctFieldName(semanticCorrectInfo);
 
         addAggregateToMetric(semanticCorrectInfo);
     }
 
-    private void addAggregateToMetric(SemanticCorrectInfo semanticCorrectInfo) {
 
-        if (SqlParserSelectHelper.hasGroupBy(semanticCorrectInfo.getSql())) {
-
-            return;
-        }
-
-    }
 
     private void replaceAlias(SemanticCorrectInfo semanticCorrectInfo) {
         String replaceAlias = SqlParserUpdateHelper.replaceAlias(semanticCorrectInfo.getSql());
         semanticCorrectInfo.setSql(replaceAlias);
     }
 
-    private void updateFieldNameByBizName(SemanticCorrectInfo semanticCorrectInfo) {
+    private void correctFieldName(SemanticCorrectInfo semanticCorrectInfo) {
 
-        Map<String, String> fieldToBizName = getFieldToBizName(semanticCorrectInfo.getParseInfo().getModelId());
+        Map<String, String> fieldNameMap = getFieldNameMap(semanticCorrectInfo.getParseInfo().getModelId());
 
-        String sql = SqlParserUpdateHelper.replaceFields(semanticCorrectInfo.getSql(), fieldToBizName);
+        String sql = SqlParserUpdateHelper.replaceFields(semanticCorrectInfo.getSql(), fieldNameMap);
 
         semanticCorrectInfo.setSql(sql);
     }
