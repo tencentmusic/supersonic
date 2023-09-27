@@ -10,6 +10,8 @@ import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
+import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
+
 import java.util.List;
 
 public interface QueryService {
@@ -24,6 +26,8 @@ public interface QueryService {
     QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructCmd, User user) throws Exception;
 
     QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user);
+
+    Object queryByQueryStatement(QueryStatement queryStatement);
 
     List<ItemUseResp> getStatInfo(ItemUseReq itemUseCommend);
 

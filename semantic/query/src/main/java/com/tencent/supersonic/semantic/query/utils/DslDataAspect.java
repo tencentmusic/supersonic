@@ -84,7 +84,7 @@ public class DslDataAspect {
         authCommonService.doModelVisible(user, modelId);
 
         // 3. fetch data permission meta information
-        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(queryDslReq);
+        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(queryDslReq, user);
         log.info("modelId:{}, res4Privilege:{}", modelId, res4Privilege);
 
         Set<String> sensitiveResByModel = authCommonService.getHighSensitiveColsByModelId(modelId);
@@ -117,6 +117,7 @@ public class DslDataAspect {
         // 6.if the column has no permission, hit *
         Set<String> need2Apply = sensitiveResReq.stream().filter(req -> !resAuthSet.contains(req))
                 .collect(Collectors.toSet());
+        log.info("need2Apply:{},sensitiveResReq:{},resAuthSet:{}", need2Apply, sensitiveResReq, resAuthSet);
         QueryResultWithSchemaResp queryResultAfterDesensitization = authCommonService
                 .desensitizationData(queryResultWithColumns, need2Apply);
         authCommonService.addPromptInfoInfo(modelId, queryResultAfterDesensitization, authorizedResource, need2Apply);
