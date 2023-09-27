@@ -90,8 +90,11 @@ public class QueryServiceImpl implements QueryService {
         filter.setModelIds(modelIds);
         SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
         List<ModelSchemaResp> domainSchemas = schemaService.fetchModelSchema(filter, user);
-
-        QueryStatement queryStatement = queryReqConverter.convert(querySqlCmd, domainSchemas);
+        ModelSchemaResp domainSchema = null;
+        if (CollectionUtils.isNotEmpty(domainSchemas)) {
+            domainSchema = domainSchemas.get(0);
+        }
+        QueryStatement queryStatement = queryReqConverter.convert(querySqlCmd, domainSchema);
         queryStatement.setModelId(querySqlCmd.getModelId());
         return queryStatement;
     }

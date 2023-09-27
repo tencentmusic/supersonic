@@ -18,6 +18,36 @@ import org.junit.jupiter.api.Test;
  */
 class SqlParserUpdateHelperTest {
 
+
+    @Test
+    void replaceFieldNameByValue() {
+
+        String replaceSql = "select 歌曲名 from 歌曲库 where datediff('day', 发布日期, '2023-08-09') <= 1 "
+                + "and 歌曲名 = '邓紫棋' and 数据日期 = '2023-08-09' and 歌曲发布时 = '2023-08-01'"
+                + " order by 播放量 desc limit 11";
+
+        Map<String, Set<String>> fieldValueToFieldNames = new HashMap<>();
+        fieldValueToFieldNames.put("邓紫棋", Collections.singleton("歌手名"));
+
+        replaceSql = SqlParserUpdateHelper.replaceFieldNameByValue(replaceSql, fieldValueToFieldNames);
+
+        Assert.assertEquals(
+                "SELECT 歌曲名 FROM 歌曲库 WHERE datediff('day', 发布日期, '2023-08-09') <= 1 AND "
+                        + "歌手名 = '邓紫棋' AND 数据日期 = '2023-08-09' AND 歌曲发布时 = '2023-08-01' "
+                        + "ORDER BY 播放量 DESC LIMIT 11", replaceSql);
+
+        replaceSql = "select 歌曲名 from 歌曲库 where datediff('day', 发布日期, '2023-08-09') <= 1 "
+                + "and 歌曲名 like '%邓紫棋%' and 数据日期 = '2023-08-09' and 歌曲发布时 = '2023-08-01'"
+                + " order by 播放量 desc limit 11";
+
+        replaceSql = SqlParserUpdateHelper.replaceFieldNameByValue(replaceSql, fieldValueToFieldNames);
+
+        Assert.assertEquals(
+                "SELECT 歌曲名 FROM 歌曲库 WHERE datediff('day', 发布日期, '2023-08-09') <= 1 "
+                        + "AND 歌手名 LIKE '邓紫棋' AND 数据日期 = '2023-08-09' AND 歌曲发布时 = "
+                        + "'2023-08-01' ORDER BY 播放量 DESC LIMIT 11", replaceSql);
+    }
+
     @Test
     void replaceFields() {
 
@@ -301,7 +331,7 @@ class SqlParserUpdateHelperTest {
         Map<String, String> filedNameToAggregate = new HashMap<>();
         filedNameToAggregate.put("pv", "sum");
 
-        List<String> groupByFields = new ArrayList<>();
+        Set<String> groupByFields = new HashSet<>();
         groupByFields.add("department");
 
         String replaceSql = SqlParserUpdateHelper.addAggregateToField(sql, filedNameToAggregate);
@@ -311,6 +341,64 @@ class SqlParserUpdateHelperTest {
                 "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
                         + "GROUP BY department ORDER BY sum(pv) DESC LIMIT 10",
                 replaceSql);
+
+        sql = "select department, pv from t_1 where sys_imp_date = '2023-09-11' and pv >1  "
+                + "order by pv desc limit 10";
+        replaceSql = SqlParserUpdateHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserUpdateHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
+                        + "AND sum(pv) > 1 GROUP BY department ORDER BY sum(pv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, pv from t_1 where pv >1  order by pv desc limit 10";
+        replaceSql = SqlParserUpdateHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserUpdateHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, sum(pv) FROM t_1 WHERE sum(pv) > 1 "
+                        + "GROUP BY department ORDER BY sum(pv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, pv from t_1 where sum(pv) >1  order by pv desc limit 10";
+        replaceSql = SqlParserUpdateHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserUpdateHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, sum(pv) FROM t_1 WHERE sum(pv) > 1 "
+                        + "GROUP BY department ORDER BY sum(pv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, sum(pv) from t_1 where sys_imp_date = '2023-09-11' and sum(pv) >1 "
+                + "GROUP BY department order by pv desc limit 10";
+        replaceSql = SqlParserUpdateHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserUpdateHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
+                        + "AND sum(pv) > 1 GROUP BY department ORDER BY sum(pv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, pv from t_1 where sys_imp_date = '2023-09-11' and pv >1 "
+                + "GROUP BY department order by pv desc limit 10";
+        replaceSql = SqlParserUpdateHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserUpdateHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
+                        + "AND sum(pv) > 1 GROUP BY department ORDER BY sum(pv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, pv from t_1 where sys_imp_date = '2023-09-11' and pv >1 and department = 'HR' "
+                + "GROUP BY department order by pv desc limit 10";
+        replaceSql = SqlParserUpdateHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserUpdateHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' AND sum(pv) > 1 "
+                        + "AND department = 'HR' GROUP BY department ORDER BY sum(pv) DESC LIMIT 10",
+                replaceSql);
     }
 
     @Test
@@ -318,7 +406,7 @@ class SqlParserUpdateHelperTest {
         String sql = "select department, sum(pv) from t_1 where sys_imp_date = '2023-09-11' "
                 + "order by sum(pv) desc limit 10";
 
-        List<String> groupByFields = new ArrayList<>();
+        Set<String> groupByFields = new HashSet<>();
         groupByFields.add("department");
 
         String replaceSql = SqlParserUpdateHelper.addGroupBy(sql, groupByFields);
@@ -342,8 +430,8 @@ class SqlParserUpdateHelperTest {
         String replaceSql = SqlParserUpdateHelper.addHaving(sql, fieldNames);
 
         Assert.assertEquals(
-                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
-                        + "AND 1 > 1 GROUP BY department HAVING sum(pv) > 2000 ORDER BY sum(pv) DESC LIMIT 10",
+                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' AND 2 > 1 "
+                        + "GROUP BY department HAVING sum(pv) > 2000 ORDER BY sum(pv) DESC LIMIT 10",
                 replaceSql);
     }
 

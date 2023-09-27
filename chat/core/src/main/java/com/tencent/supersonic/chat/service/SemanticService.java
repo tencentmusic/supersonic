@@ -120,7 +120,7 @@ public class SemanticService {
 
                         return entityInfo;
                     } catch (Exception e) {
-                        log.error("setMaintModel error {}", e);
+                        log.error("setMainModel error {}", e);
                     }
                 }
             }

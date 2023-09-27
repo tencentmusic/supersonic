@@ -31,7 +31,7 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(MinorThan expr) {
-        List<Expression> expressions = parserFilter(expr);
+        List<Expression> expressions = parserFilter(expr, " 1 < 2 ");
         if (Objects.nonNull(expressions)) {
             waitingForAdds.addAll(expressions);
         }
@@ -39,7 +39,7 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(EqualsTo expr) {
-        List<Expression> expressions = parserFilter(expr);
+        List<Expression> expressions = parserFilter(expr, " 1 = 1 ");
         if (Objects.nonNull(expressions)) {
             waitingForAdds.addAll(expressions);
         }
@@ -47,7 +47,7 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(MinorThanEquals expr) {
-        List<Expression> expressions = parserFilter(expr);
+        List<Expression> expressions = parserFilter(expr, " 1 <= 1 ");
         if (Objects.nonNull(expressions)) {
             waitingForAdds.addAll(expressions);
         }
@@ -56,7 +56,7 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(GreaterThan expr) {
-        List<Expression> expressions = parserFilter(expr);
+        List<Expression> expressions = parserFilter(expr, " 2 > 1 ");
         if (Objects.nonNull(expressions)) {
             waitingForAdds.addAll(expressions);
         }
@@ -64,7 +64,7 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(GreaterThanEquals expr) {
-        List<Expression> expressions = parserFilter(expr);
+        List<Expression> expressions = parserFilter(expr, " 1 >= 1 ");
         if (Objects.nonNull(expressions)) {
             waitingForAdds.addAll(expressions);
         }
@@ -75,7 +75,7 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
     }
 
 
-    public List<Expression> parserFilter(ComparisonOperator comparisonOperator) {
+    public List<Expression> parserFilter(ComparisonOperator comparisonOperator, String condExpr) {
         List<Expression> result = new ArrayList<>();
         String toString = comparisonOperator.toString();
         Expression leftExpression = comparisonOperator.getLeftExpression();
@@ -97,7 +97,7 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
             return null;
         }
         try {
-            ComparisonOperator expression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(" 1 = 1 ");
+            ComparisonOperator expression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(condExpr);
             comparisonOperator.setLeftExpression(expression.getLeftExpression());
             comparisonOperator.setRightExpression(expression.getRightExpression());
             comparisonOperator.setASTNode(expression.getASTNode());
