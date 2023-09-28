@@ -14,7 +14,6 @@ public class GlobalAfterCorrector extends BaseSemanticCorrector {
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
 
         super.correct(semanticCorrectInfo);
-        addAggregateToMetric(semanticCorrectInfo);
         String sql = semanticCorrectInfo.getSql();
         if (!SqlParserSelectHelper.hasAggregateFunction(sql)) {
             return;
