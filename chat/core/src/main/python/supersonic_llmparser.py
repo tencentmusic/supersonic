@@ -4,6 +4,10 @@ import sys
 
 import uvicorn
 
+from util.logging_utils import init_logger
+
+init_logger()
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
