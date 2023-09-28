@@ -16,7 +16,6 @@ import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.config.LLMParserConfig;
-import com.tencent.supersonic.chat.corrector.BaseSemanticCorrector;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.chat.parser.plugin.function.ModelResolver;
 import com.tencent.supersonic.chat.query.QueryManager;
@@ -31,11 +30,11 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
-import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -113,7 +112,7 @@ public class LLMDslParser implements SemanticParser {
     private Set<SchemaElement> getElements(Long modelId, List<String> allFields, List<SchemaElement> elements) {
         return elements.stream()
                 .filter(schemaElement -> modelId.equals(schemaElement.getModel())
-                        && allFields.contains(schemaElement.getBizName())
+                        && allFields.contains(schemaElement.getName())
                 ).collect(Collectors.toSet());
     }
 
@@ -122,16 +121,15 @@ public class LLMDslParser implements SemanticParser {
             return new ArrayList<>();
         }
         return allFields.stream()
-                .filter(entry -> !TimeDimensionEnum.getNameList().contains(entry))
+                .filter(entry -> !DateUtils.DATE_FIELD.equalsIgnoreCase(entry))
                 .collect(Collectors.toList());
     }
 
     public void updateParseInfo(SemanticCorrectInfo semanticCorrectInfo, Long modelId, SemanticParseInfo parseInfo) {
 
-        String correctorSql = semanticCorrectInfo.getPreSql();
-        if (StringUtils.isEmpty(correctorSql)) {
-            correctorSql = semanticCorrectInfo.getSql();
-        }
+        String correctorSql = semanticCorrectInfo.getSql();
+        parseInfo.getSqlInfo().setLogicSql(correctorSql);
+
         List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctorSql);
         //set dataInfo
         try {
@@ -145,8 +143,8 @@ public class LLMDslParser implements SemanticParser {
 
         //set filter
         try {
-            Map<String, SchemaElement> bizNameToElement = getBizNameToElement(modelId);
-            List<QueryFilter> result = getDimensionFilter(bizNameToElement, expressions);
+            Map<String, SchemaElement> fieldNameToElement = getNameToElement(modelId);
+            List<QueryFilter> result = getDimensionFilter(fieldNameToElement, expressions);
             parseInfo.getDimensionFilters().addAll(result);
         } catch (Exception e) {
             log.error("set dimensionFilter error :", e);
@@ -175,20 +173,18 @@ public class LLMDslParser implements SemanticParser {
         }
     }
 
-    private List<QueryFilter> getDimensionFilter(Map<String, SchemaElement> bizNameToElement,
+    private List<QueryFilter> getDimensionFilter(Map<String, SchemaElement> fieldNameToElement,
             List<FilterExpression> filterExpressions) {
         List<QueryFilter> result = Lists.newArrayList();
         for (FilterExpression expression : filterExpressions) {
             QueryFilter dimensionFilter = new QueryFilter();
             dimensionFilter.setValue(expression.getFieldValue());
-            String bizName = expression.getFieldName();
-            SchemaElement schemaElement = bizNameToElement.get(bizName);
+            SchemaElement schemaElement = fieldNameToElement.get(expression.getFieldName());
             if (Objects.isNull(schemaElement)) {
                 continue;
             }
-            String fieldName = schemaElement.getName();
-            dimensionFilter.setName(fieldName);
-            dimensionFilter.setBizName(bizName);
+            dimensionFilter.setName(schemaElement.getName());
+            dimensionFilter.setBizName(schemaElement.getBizName());
             dimensionFilter.setElementID(schemaElement.getId());
 
             FilterOperatorEnum operatorEnum = FilterOperatorEnum.getSqlOperator(expression.getOperator());
@@ -200,13 +196,8 @@ public class LLMDslParser implements SemanticParser {
 
     private DateConf getDateInfo(List<FilterExpression> filterExpressions) {
         List<FilterExpression> dateExpressions = filterExpressions.stream()
-                .filter(expression -> {
-                    List<String> nameList = TimeDimensionEnum.getNameList();
-                    if (StringUtils.isEmpty(expression.getFieldName())) {
-                        return false;
-                    }
-                    return nameList.contains(expression.getFieldName().toLowerCase());
-                }).collect(Collectors.toList());
+                .filter(expression -> DateUtils.DATE_FIELD.equalsIgnoreCase(expression.getFieldName()))
+                .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dateExpressions)) {
             return new DateConf();
         }
@@ -280,6 +271,7 @@ public class LLMDslParser implements SemanticParser {
         parseInfo.setProperties(properties);
         parseInfo.setScore(function_bonus_threshold);
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
+        parseInfo.getSqlInfo().setLlmParseSql(dslParseResult.getLlmResp().getSqlOutput());
 
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         Map<Long, String> modelIdToName = semanticSchema.getModelIdToName();
@@ -355,7 +347,7 @@ public class LLMDslParser implements SemanticParser {
 
         List<String> fieldNameList = getFieldNameList(queryCtx, modelId, semanticSchema, llmParserConfig);
 
-        fieldNameList.add(BaseSemanticCorrector.DATE_FIELD);
+        fieldNameList.add(DateUtils.DATE_FIELD);
         llmSchema.setFieldNameList(fieldNameList);
         llmReq.setSchema(llmSchema);
 
@@ -392,7 +384,7 @@ public class LLMDslParser implements SemanticParser {
     }
 
 
-    protected Map<String, SchemaElement> getBizNameToElement(Long modelId) {
+    protected Map<String, SchemaElement> getNameToElement(Long modelId) {
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         List<SchemaElement> dimensions = semanticSchema.getDimensions();
         List<SchemaElement> metrics = semanticSchema.getMetrics();
@@ -402,33 +394,26 @@ public class LLMDslParser implements SemanticParser {
         allElements.addAll(metrics);
         return allElements.stream()
                 .filter(schemaElement -> schemaElement.getModel().equals(modelId))
-                .collect(Collectors.toMap(SchemaElement::getBizName, Function.identity(), (value1, value2) -> value2));
+                .collect(Collectors.toMap(SchemaElement::getName, Function.identity(), (value1, value2) -> value2));
     }
 
 
     protected List<String> getFieldNameList(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema,
             LLMParserConfig llmParserConfig) {
+
+        Set<String> results = getTopNFieldNames(modelId, semanticSchema, llmParserConfig);
+
+        Set<String> fieldNameList = getMatchedFieldNames(queryCtx, modelId, semanticSchema);
+
+        results.addAll(fieldNameList);
+        return new ArrayList<>(results);
+    }
+
+    protected Set<String> getMatchedFieldNames(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema) {
         Map<Long, String> itemIdToName = getItemIdToName(modelId, semanticSchema);
-
-        Set<String> results = semanticSchema.getDimensions().stream()
-                .filter(schemaElement -> modelId.equals(schemaElement.getModel()))
-                .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
-                .limit(llmParserConfig.getDimensionTopN())
-                .map(entry -> entry.getName())
-                .collect(Collectors.toSet());
-
-        Set<String> metrics = semanticSchema.getMetrics().stream()
-                .filter(schemaElement -> modelId.equals(schemaElement.getModel()))
-                .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
-                .limit(llmParserConfig.getMetricTopN())
-                .map(entry -> entry.getName())
-                .collect(Collectors.toSet());
-
-        results.addAll(metrics);
-
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(modelId);
         if (CollectionUtils.isEmpty(matchedElements)) {
-            return new ArrayList<>(results);
+            return new HashSet<>();
         }
         Set<String> fieldNameList = matchedElements.stream()
                 .filter(schemaElementMatch -> {
@@ -447,13 +432,29 @@ public class LLMDslParser implements SemanticParser {
                 })
                 .filter(name -> StringUtils.isNotEmpty(name) && !name.contains("%"))
                 .collect(Collectors.toSet());
-        results.addAll(fieldNameList);
-        return new ArrayList<>(results);
+        return fieldNameList;
+    }
+
+    private Set<String> getTopNFieldNames(Long modelId, SemanticSchema semanticSchema,
+            LLMParserConfig llmParserConfig) {
+        Set<String> results = semanticSchema.getDimensions(modelId).stream()
+                .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
+                .limit(llmParserConfig.getDimensionTopN())
+                .map(entry -> entry.getName())
+                .collect(Collectors.toSet());
+
+        Set<String> metrics = semanticSchema.getMetrics(modelId).stream()
+                .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
+                .limit(llmParserConfig.getMetricTopN())
+                .map(entry -> entry.getName())
+                .collect(Collectors.toSet());
+
+        results.addAll(metrics);
+        return results;
     }
 
     protected Map<Long, String> getItemIdToName(Long modelId, SemanticSchema semanticSchema) {
-        return semanticSchema.getDimensions().stream()
-                .filter(entry -> modelId.equals(entry.getModel()))
+        return semanticSchema.getDimensions(modelId).stream()
                 .collect(Collectors.toMap(SchemaElement::getId, SchemaElement::getName, (value1, value2) -> value2));
     }
 

@@ -41,6 +41,7 @@ const PermissionAdminForm: React.FC<Props> = ({
         ...data,
       };
       fieldsValue.admins = fieldsValue.admins || [];
+      fieldsValue.adminOrgs = fieldsValue.adminOrgs || [];
       fieldsValue.viewers = fieldsValue.viewers || [];
       fieldsValue.viewOrgs = fieldsValue.viewOrgs || [];
       fieldsValue.isOpen = !!fieldsValue.isOpen;
@@ -57,10 +58,11 @@ const PermissionAdminForm: React.FC<Props> = ({
 
   const saveAuth = async () => {
     const values = await form.validateFields();
-    const { admins, isOpen, viewOrgs = [], viewers = [] } = values;
+    const { admins, adminOrgs, isOpen, viewOrgs = [], viewers = [] } = values;
     const queryClassData = {
       ...classDetail,
       admins,
+      adminOrgs,
       viewOrgs,
       viewers,
       isOpen: isOpen ? 1 : 0,
@@ -100,7 +102,16 @@ const PermissionAdminForm: React.FC<Props> = ({
         >
           <SelectTMEPerson placeholder="请邀请团队成员" />
         </FormItem>
-
+        {APP_TARGET === 'inner' && (
+          <FormItem name="adminOrgs" label="按组织">
+            <SelectPartner
+              type="selectedDepartment"
+              treeSelectProps={{
+                placeholder: '请选择需要授权的部门',
+              }}
+            />
+          </FormItem>
+        )}
         <Form.Item
           label={
             <FormItemTitle

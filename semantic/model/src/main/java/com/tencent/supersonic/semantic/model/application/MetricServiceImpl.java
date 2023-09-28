@@ -9,7 +9,9 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DataAddEvent;
 import com.tencent.supersonic.common.pojo.DataDeleteEvent;
 import com.tencent.supersonic.common.pojo.DataUpdateEvent;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
+import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
@@ -27,13 +29,13 @@ import com.tencent.supersonic.semantic.model.domain.repository.MetricRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.MetricConverter;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.pojo.Metric;
-
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import com.tencent.supersonic.semantic.model.domain.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -69,7 +71,7 @@ public class MetricServiceImpl implements MetricService {
 
     @Override
     public void creatExprMetric(MetricReq metricReq, User user) {
-        checkExist(Lists.newArrayList(metricReq));
+        check(Lists.newArrayList(metricReq));
         Metric metric = MetricConverter.convert(metricReq);
         metric.createdBy(user.getName());
         log.info("[create metric] object:{}", JSONObject.toJSONString(metric));
@@ -88,11 +90,11 @@ public class MetricServiceImpl implements MetricService {
         }
         List<Metric> metrics = metricReqs.stream().map(MetricConverter::convert).collect(Collectors.toList());
         Long modelId = metricReqs.get(0).getModelId();
-        List<MetricResp> metricDescs = getMetricByModelId(modelId);
-        Map<String, MetricResp> metricDescMap = metricDescs.stream()
+        List<MetricResp> metricResps = getMetricByModelId(modelId);
+        Map<String, MetricResp> metricRespMap = metricResps.stream()
                 .collect(Collectors.toMap(MetricResp::getBizName, a -> a, (k1, k2) -> k1));
         List<Metric> metricToInsert = metrics.stream()
-                .filter(metric -> !metricDescMap.containsKey(metric.getBizName())).collect(Collectors.toList());
+                .filter(metric -> !metricRespMap.containsKey(metric.getBizName())).collect(Collectors.toList());
         log.info("[insert metric] object:{}", JSONObject.toJSONString(metricToInsert));
         saveMetricBatch(metricToInsert, user);
     }
@@ -123,7 +125,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq) {
+    public PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user) {
         MetricFilter metricFilter = new MetricFilter();
         BeanUtils.copyProperties(pageMetricReq, metricFilter);
         Set<DomainResp> domainResps = domainService.getDomainChildren(pageMetricReq.getDomainIds());
@@ -137,7 +139,9 @@ public class MetricServiceImpl implements MetricService {
                 .doSelectPageInfo(() -> queryMetric(metricFilter));
         PageInfo<MetricResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(metricDOPageInfo, pageInfo);
-        pageInfo.setList(convertList(metricDOPageInfo.getList()));
+        List<MetricResp> metricResps = convertList(metricDOPageInfo.getList());
+        fillAdminRes(metricResps, user);
+        pageInfo.setList(metricResps);
         return pageInfo;
     }
 
@@ -145,19 +149,34 @@ public class MetricServiceImpl implements MetricService {
         return metricRepository.getMetric(metricFilter);
     }
 
-    @Override
-    public MetricResp getMetric(Long modelId, String bizName) {
-        List<MetricResp> metricDescs = getMetricByModelId(modelId);
-        MetricResp metricDesc = null;
-        if (CollectionUtils.isEmpty(metricDescs)) {
-            return metricDesc;
+
+    private void fillAdminRes(List<MetricResp> metricResps, User user) {
+        List<ModelResp> modelResps = modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
+        if (CollectionUtils.isEmpty(modelResps)) {
+            return;
         }
-        for (MetricResp metric : metricDescs) {
-            if (metric.getBizName().equalsIgnoreCase(bizName)) {
-                metricDesc = metric;
+        Set<Long> modelIdSet = modelResps.stream().map(ModelResp::getId).collect(Collectors.toSet());
+        for (MetricResp metricResp : metricResps) {
+            if (modelIdSet.contains(metricResp.getModelId())) {
+                metricResp.setHasAdminRes(true);
             }
         }
-        return metricDesc;
+
+    }
+
+    @Override
+    public MetricResp getMetric(Long modelId, String bizName) {
+        List<MetricResp> metricResps = getMetricByModelId(modelId);
+        MetricResp metricResp = null;
+        if (CollectionUtils.isEmpty(metricResps)) {
+            return metricResp;
+        }
+        for (MetricResp metric : metricResps) {
+            if (metric.getBizName().equalsIgnoreCase(bizName)) {
+                metricResp = metric;
+            }
+        }
+        return metricResp;
     }
 
     @Override
@@ -207,24 +226,24 @@ public class MetricServiceImpl implements MetricService {
 
     @Override
     public List<MetricResp> getHighSensitiveMetric(Long modelId) {
-        List<MetricResp> metricDescs = getMetricByModelId(modelId);
-        if (CollectionUtils.isEmpty(metricDescs)) {
-            return metricDescs;
+        List<MetricResp> metricResps = getMetricByModelId(modelId);
+        if (CollectionUtils.isEmpty(metricResps)) {
+            return metricResps;
         }
-        return metricDescs.stream()
-                .filter(metricDesc -> SensitiveLevelEnum.HIGH.getCode().equals(metricDesc.getSensitiveLevel()))
+        return metricResps.stream()
+                .filter(metricResp -> SensitiveLevelEnum.HIGH.getCode().equals(metricResp.getSensitiveLevel()))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<MetricResp> getAllHighSensitiveMetric() {
-        List<MetricResp> metricDescs = Lists.newArrayList();
+        List<MetricResp> metricResps = Lists.newArrayList();
         List<MetricDO> metricDOS = metricRepository.getAllMetricList();
         if (CollectionUtils.isEmpty(metricDOS)) {
-            return metricDescs;
+            return metricResps;
         }
         return convertList(metricDOS.stream()
-                .filter(metricDesc -> SensitiveLevelEnum.HIGH.getCode().equals(metricDesc.getSensitiveLevel()))
+                .filter(metricResp -> SensitiveLevelEnum.HIGH.getCode().equals(metricResp.getSensitiveLevel()))
                 .collect(Collectors.toList()));
     }
 
@@ -250,6 +269,16 @@ public class MetricServiceImpl implements MetricService {
         });
     }
 
+    @Override
+    public Set<String> getMetricTags() {
+        List<MetricResp> metricResps = getMetrics();
+        if (CollectionUtils.isEmpty(metricResps)) {
+            return new HashSet<>();
+        }
+        return metricResps.stream().flatMap(metricResp ->
+                metricResp.getTags().stream()).collect(Collectors.toSet());
+    }
+
 
     private void saveMetricBatch(List<Metric> metrics, User user) {
         if (CollectionUtils.isEmpty(metrics)) {
@@ -265,23 +294,26 @@ public class MetricServiceImpl implements MetricService {
         MetricTypeParams typeParams = metricReq.getTypeParams();
         List<Measure> measures = typeParams.getMeasures();
         if (CollectionUtils.isEmpty(measures)) {
-            throw new RuntimeException("measure can not be none");
+            throw new InvalidArgumentException("不可缺少度量");
         }
         if (StringUtils.isBlank(typeParams.getExpr())) {
-            throw new RuntimeException("expr can not be blank");
+            throw new InvalidArgumentException("表达式不可为空");
+        }
+        if (NameCheckUtils.containsSpecialCharacters(metricReq.getName())) {
+            throw new InvalidArgumentException("名称包含特殊字符, 请修改");
         }
     }
 
-    private void checkExist(List<MetricReq> exprMetricReqList) {
+    private void check(List<MetricReq> exprMetricReqList) {
         Long modelId = exprMetricReqList.get(0).getModelId();
-        List<MetricResp> metricDescs = getMetrics(modelId);
+        List<MetricResp> metricResps = getMetrics(modelId);
         for (MetricReq exprMetricReq : exprMetricReqList) {
-            for (MetricResp metricDesc : metricDescs) {
-                if (metricDesc.getName().equalsIgnoreCase(exprMetricReq.getName())) {
-                    throw new RuntimeException(String.format("exist same metric name:%s", metricDesc.getName()));
+            for (MetricResp metricResp : metricResps) {
+                if (metricResp.getName().equalsIgnoreCase(exprMetricReq.getName())) {
+                    throw new RuntimeException(String.format("存在相同的指标名:%s", metricResp.getName()));
                 }
-                if (metricDesc.getBizName().equalsIgnoreCase(exprMetricReq.getBizName())) {
-                    throw new RuntimeException(String.format("exist same metric en name:%s", metricDesc.getName()));
+                if (metricResp.getBizName().equalsIgnoreCase(exprMetricReq.getBizName())) {
+                    throw new RuntimeException(String.format("存在相同的指标名:%s", metricResp.getBizName()));
                 }
                 preCheckMetric(exprMetricReq);
             }
@@ -289,14 +321,14 @@ public class MetricServiceImpl implements MetricService {
     }
 
     private List<MetricResp> convertList(List<MetricDO> metricDOS) {
-        List<MetricResp> metricDescs = Lists.newArrayList();
+        List<MetricResp> metricResps = Lists.newArrayList();
         Map<Long, ModelResp> modelMap = modelService.getModelMap();
         if (!CollectionUtils.isEmpty(metricDOS)) {
-            metricDescs = metricDOS.stream()
-                    .map(metricDO -> MetricConverter.convert2MetricDesc(metricDO, modelMap))
+            metricResps = metricDOS.stream()
+                    .map(metricDO -> MetricConverter.convert2MetricResp(metricDO, modelMap))
                     .collect(Collectors.toList());
         }
-        return metricDescs;
+        return metricResps;
     }
 
 

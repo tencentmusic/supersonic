@@ -210,7 +210,7 @@ public class MetricQueryTest extends BaseQueryTest {
         ChatConfigEditReqReq extendEditCmd = new ChatConfigEditReqReq();
         BeanUtils.copyProperties(chatConfig, extendEditCmd);
         // add blacklist
-        List<Long> blackMetrics = Arrays.asList(3L);
+        List<Long> blackMetrics = Arrays.asList(2L);
         extendEditCmd.getChatAggConfig().getVisibility().setBlackMetricIdList(blackMetrics);
         configService.editConfig(extendEditCmd, User.getFakeUser());
 

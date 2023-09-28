@@ -4,18 +4,13 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
-import com.tencent.supersonic.common.pojo.ResultData;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
@@ -23,10 +18,6 @@ public abstract class BaseSemanticLayer implements SemanticLayer {
 
     protected final Cache<String, List<ModelSchemaResp>> modelSchemaCache =
             CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
-
-    protected ParameterizedTypeReference<ResultData<QueryResultWithSchemaResp>> structTypeRef =
-            new ParameterizedTypeReference<ResultData<QueryResultWithSchemaResp>>() {
-            };
 
     @SneakyThrows
     public List<ModelSchemaResp> fetchModelSchema(List<Long> ids, Boolean cacheEnable) {

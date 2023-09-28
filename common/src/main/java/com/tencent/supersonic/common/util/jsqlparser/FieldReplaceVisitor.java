@@ -9,16 +9,16 @@ import net.sf.jsqlparser.schema.Column;
 public class FieldReplaceVisitor extends ExpressionVisitorAdapter {
 
     ParseVisitorHelper parseVisitorHelper = new ParseVisitorHelper();
-    private Map<String, String> fieldToBizName;
+    private Map<String, String> fieldNameMap;
     private boolean exactReplace;
 
-    public FieldReplaceVisitor(Map<String, String> fieldToBizName, boolean exactReplace) {
-        this.fieldToBizName = fieldToBizName;
+    public FieldReplaceVisitor(Map<String, String> fieldNameMap, boolean exactReplace) {
+        this.fieldNameMap = fieldNameMap;
         this.exactReplace = exactReplace;
     }
 
     @Override
     public void visit(Column column) {
-        parseVisitorHelper.replaceColumn(column, fieldToBizName, exactReplace);
+        parseVisitorHelper.replaceColumn(column, fieldNameMap, exactReplace);
     }
 }

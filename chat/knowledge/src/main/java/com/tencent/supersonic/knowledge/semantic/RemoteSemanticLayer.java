@@ -258,7 +258,7 @@ public class RemoteSemanticLayer extends BaseSemanticLayer {
     }
 
     @Override
-    public PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricCmd) {
+    public PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricCmd, User user) {
         String body = JsonUtil.toString(pageMetricCmd);
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         log.info("url:{}", defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchMetricPagePath());

@@ -65,6 +65,11 @@
         <mockito-inline.version>4.5.1</mockito-inline.version>
         <jsqlparser.version>4.5</jsqlparser.version>
         <revision>0.7.5-SNAPSHOT</revision>
+        <!-- Do not bump spotless plugin version since 2.30.0 is the latest version supports Java 8-->
+        <maven.plugin.spotless.version>2.30.0</maven.plugin.spotless.version>
+        <spotless.python.includes></spotless.python.includes>
+        <!-- Do not bump black version as decided by spotless maven plugin-->
+        <spotless.python.black.version>22.3.0</spotless.python.black.version>
     </properties>
 
     <dependencyManagement>
@@ -100,6 +105,15 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <profiles>
+        <profile>
+            <id>spotless-python</id>
+            <properties>
+                <spotless.python.includes>src/**/*.py</spotless.python.includes>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
@@ -147,6 +161,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -179,6 +197,31 @@
                             <id>checkstyle-validation</id>
                             <phase>validate</phase>
                             <inherited>true</inherited>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${maven.plugin.spotless.version}</version>
+                    <configuration>
+                        <upToDateChecking>
+                            <enabled>true</enabled>
+                        </upToDateChecking>
+                        <python>
+                            <includes>
+                                <include>${spotless.python.includes}</include>
+                            </includes>
+                            <black>
+                                <version>${spotless.python.black.version}</version>
+                            </black>
+                        </python>
+                    </configuration>
+                    <executions>
+                        <execution>
                             <goals>
                                 <goal>check</goal>
                             </goals>

@@ -18,6 +18,7 @@ import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.DatabaseService;
 import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
@@ -54,10 +55,13 @@ public class ModelServiceImpl implements ModelService {
     private final UserService userService;
     private final DatabaseService databaseService;
 
+    private final Catalog catalog;
+
     public ModelServiceImpl(ModelRepository modelRepository, @Lazy MetricService metricService,
-                            @Lazy DimensionService dimensionService, @Lazy DatasourceService datasourceService,
-                            @Lazy DomainService domainService, UserService userService,
-                            @Lazy DatabaseService databaseService) {
+            @Lazy DimensionService dimensionService, @Lazy DatasourceService datasourceService,
+            @Lazy DomainService domainService, UserService userService,
+            @Lazy DatabaseService databaseService,
+            @Lazy Catalog catalog) {
         this.modelRepository = modelRepository;
         this.metricService = metricService;
         this.dimensionService = dimensionService;
@@ -65,6 +69,7 @@ public class ModelServiceImpl implements ModelService {
         this.domainService = domainService;
         this.userService = userService;
         this.databaseService = databaseService;
+        this.catalog = catalog;
     }
 
     @Override
@@ -96,10 +101,10 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public List<ModelResp> getModelListWithAuth(String userName, Long domainId, AuthType authType) {
-        List<ModelResp> modelResps = getModelAuthList(userName, authType);
+    public List<ModelResp> getModelListWithAuth(User user, Long domainId, AuthType authType) {
+        List<ModelResp> modelResps = getModelAuthList(user, authType);
         Set<ModelResp> modelRespSet = new HashSet<>(modelResps);
-        List<ModelResp> modelRespsAuthInheritDomain = getModelRespAuthInheritDomain(userName, authType);
+        List<ModelResp> modelRespsAuthInheritDomain = getModelRespAuthInheritDomain(user, authType);
         modelRespSet.addAll(modelRespsAuthInheritDomain);
         if (domainId != null && domainId > 0) {
             modelRespSet = modelRespSet.stream().filter(modelResp ->
@@ -108,8 +113,8 @@ public class ModelServiceImpl implements ModelService {
         return fillMetricInfo(new ArrayList<>(modelRespSet));
     }
 
-    public List<ModelResp> getModelRespAuthInheritDomain(String userName, AuthType authType) {
-        Set<DomainResp> domainResps = domainService.getDomainAuthSet(userName, authType);
+    public List<ModelResp> getModelRespAuthInheritDomain(User user, AuthType authType) {
+        Set<DomainResp> domainResps = domainService.getDomainAuthSet(user, authType);
         if (CollectionUtils.isEmpty(domainResps)) {
             return Lists.newArrayList();
         }
@@ -120,18 +125,18 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public List<ModelResp> getModelAuthList(String userName, AuthType authTypeEnum) {
+    public List<ModelResp> getModelAuthList(User user, AuthType authTypeEnum) {
         List<ModelResp> modelResps = getModelList();
-        Set<String> orgIds = userService.getUserAllOrgId(userName);
+        Set<String> orgIds = userService.getUserAllOrgId(user.getName());
         List<ModelResp> modelWithAuth = Lists.newArrayList();
         if (authTypeEnum.equals(AuthType.ADMIN)) {
             modelWithAuth = modelResps.stream()
-                    .filter(modelResp -> checkAdminPermission(orgIds, userName, modelResp))
+                    .filter(modelResp -> checkAdminPermission(orgIds, user, modelResp))
                     .collect(Collectors.toList());
         }
         if (authTypeEnum.equals(AuthType.VISIBLE)) {
             modelWithAuth = modelResps.stream()
-                    .filter(domainResp -> checkViewerPermission(orgIds, userName, domainResp))
+                    .filter(domainResp -> checkViewerPermission(orgIds, user, domainResp))
                     .collect(Collectors.toList());
         }
         return modelWithAuth;
@@ -166,7 +171,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public ModelResp getModel(Long id) {
         Map<Long, DomainResp> domainRespMap = domainService.getDomainList().stream()
-                        .collect(Collectors.toMap(DomainResp::getId, d -> d));
+                .collect(Collectors.toMap(DomainResp::getId, d -> d));
         return ModelConvert.convert(getModelDO(id), domainRespMap);
     }
 
@@ -192,7 +197,7 @@ public class ModelServiceImpl implements ModelService {
             return modelResps;
         }
         Map<Long, DomainResp> domainRespMap = domainService.getDomainList()
-                        .stream().collect(Collectors.toMap(DomainResp::getId, d -> d));
+                .stream().collect(Collectors.toMap(DomainResp::getId, d -> d));
         return modelDOS.stream()
                 .map(modelDO -> ModelConvert.convert(modelDO, domainRespMap))
                 .collect(Collectors.toList());
@@ -221,7 +226,7 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public Map<Long, String> getModelFullPathMap() {
-        return getModelList().stream().collect(Collectors.toMap(ModelResp::getId,
+        return getModelList().stream().filter(m -> m != null).collect(Collectors.toMap(ModelResp::getId,
                 ModelResp::getFullPath, (k1, k2) -> k1));
     }
 
@@ -298,6 +303,8 @@ public class ModelServiceImpl implements ModelService {
                     MetricSchemaResp metricSchemaDesc = new MetricSchemaResp();
                     BeanUtils.copyProperties(metricDesc, metricSchemaDesc);
                     metricSchemaDesc.setUseCnt(0L);
+                    String agg = catalog.getAgg(modelId, metricSchemaDesc.getBizName());
+                    metricSchemaDesc.setDefaultAgg(agg);
                     metricSchemaDescList.add(metricSchemaDesc);
                 }
         );
@@ -324,9 +331,13 @@ public class ModelServiceImpl implements ModelService {
         return new ArrayList<>(getModelMap().keySet());
     }
 
-    public static boolean checkAdminPermission(Set<String> orgIds, String userName, ModelResp modelResp) {
+    public static boolean checkAdminPermission(Set<String> orgIds, User user, ModelResp modelResp) {
         List<String> admins = modelResp.getAdmins();
         List<String> adminOrgs = modelResp.getAdminOrgs();
+        if (user.isSuperAdmin()) {
+            return true;
+        }
+        String userName = user.getName();
         if (admins.contains(userName) || modelResp.getCreatedBy().equals(userName)) {
             return true;
         }
@@ -341,14 +352,18 @@ public class ModelServiceImpl implements ModelService {
         return false;
     }
 
-    public static boolean checkViewerPermission(Set<String> orgIds, String userName, ModelResp modelResp) {
+    public static boolean checkViewerPermission(Set<String> orgIds, User user, ModelResp modelResp) {
         List<String> admins = modelResp.getAdmins();
         List<String> viewers = modelResp.getViewers();
         List<String> adminOrgs = modelResp.getAdminOrgs();
         List<String> viewOrgs = modelResp.getViewOrgs();
+        if (user.isSuperAdmin()) {
+            return true;
+        }
         if (modelResp.openToAll()) {
             return true;
         }
+        String userName = user.getName();
         if (admins.contains(userName) || viewers.contains(userName) || modelResp.getCreatedBy().equals(userName)) {
             return true;
         }

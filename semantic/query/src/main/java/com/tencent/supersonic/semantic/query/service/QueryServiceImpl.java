@@ -21,6 +21,7 @@ import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
+import com.tencent.supersonic.semantic.query.utils.DslPermissionAnnotation;
 import com.tencent.supersonic.semantic.query.executor.QueryExecutor;
 import com.tencent.supersonic.semantic.query.parser.convert.QueryReqConverter;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
@@ -66,11 +67,24 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public Object queryBySql(QueryDslReq querySqlCmd, User user) throws Exception {
+    @DslPermissionAnnotation
+    @SneakyThrows
+    public Object queryBySql(QueryDslReq querySqlCmd, User user) {
         statUtils.initStatInfo(querySqlCmd, user);
-        QueryStatement queryStatement = convertToQueryStatement(querySqlCmd, user);
+        QueryStatement queryStatement = new QueryStatement();
+        try {
+            queryStatement = convertToQueryStatement(querySqlCmd, user);
+        } catch (Exception e) {
+            log.info("convertToQueryStatement has a exception:{}", e.toString());
+        }
+        log.info("queryStatement:{}", queryStatement);
         QueryResultWithSchemaResp results = semanticQueryEngine.execute(queryStatement);
         statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
+        return results;
+    }
+
+    public Object queryByQueryStatement(QueryStatement queryStatement) {
+        QueryResultWithSchemaResp results = semanticQueryEngine.execute(queryStatement);
         return results;
     }
 
@@ -82,8 +96,11 @@ public class QueryServiceImpl implements QueryService {
         filter.setModelIds(modelIds);
         SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
         List<ModelSchemaResp> domainSchemas = schemaService.fetchModelSchema(filter, user);
-
-        QueryStatement queryStatement = queryReqConverter.convert(querySqlCmd, domainSchemas);
+        ModelSchemaResp domainSchema = null;
+        if (CollectionUtils.isNotEmpty(domainSchemas)) {
+            domainSchema = domainSchemas.get(0);
+        }
+        QueryStatement queryStatement = queryReqConverter.convert(querySqlCmd, domainSchema);
         queryStatement.setModelId(querySqlCmd.getModelId());
         return queryStatement;
     }

@@ -5,10 +5,10 @@ import static com.tencent.supersonic.common.pojo.Constants.PARENTHESES_START;
 import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 import static com.tencent.supersonic.common.pojo.Constants.SYS_VAR;
 
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Criterion;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
-import com.tencent.supersonic.common.pojo.Constants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +25,7 @@ import org.springframework.util.CollectionUtils;
 public class SqlFilterUtils {
 
     private static String pattern = "^'.*?'$";
+    private static String numericPattern = "^[0-9]+$";
 
     public List<String> getFiltersCol(List<Filter> filters) {
         List<String> filterCols = new ArrayList<>();
@@ -219,7 +220,7 @@ public class SqlFilterUtils {
     }
 
     private String valueApostropheLogic(String value) {
-        if (Pattern.matches(pattern, value)) {
+        if (Pattern.matches(pattern, value) || Pattern.matches(numericPattern, value)) {
             return value;
         }
         return Constants.APOSTROPHE + value + Constants.APOSTROPHE;

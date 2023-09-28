@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SemanticSchema implements Serializable {
+
     private List<ModelSchema> modelSchemaList;
 
     public SemanticSchema(List<ModelSchema> modelSchemaList) {
@@ -34,10 +35,26 @@ public class SemanticSchema implements Serializable {
         return dimensions;
     }
 
+    public List<SchemaElement> getDimensions(Long modelId) {
+        List<SchemaElement> dimensions = getDimensions();
+        return getElementsByModelId(modelId, dimensions);
+    }
+
     public List<SchemaElement> getMetrics() {
         List<SchemaElement> metrics = new ArrayList<>();
         modelSchemaList.stream().forEach(d -> metrics.addAll(d.getMetrics()));
         return metrics;
+    }
+
+    public List<SchemaElement> getMetrics(Long modelId) {
+        List<SchemaElement> metrics = getMetrics();
+        return getElementsByModelId(modelId, metrics);
+    }
+
+    private List<SchemaElement> getElementsByModelId(Long modelId, List<SchemaElement> elements) {
+        return elements.stream()
+                .filter(schemaElement -> modelId.equals(schemaElement.getModel()))
+                .collect(Collectors.toList());
     }
 
     public List<SchemaElement> getModels() {
