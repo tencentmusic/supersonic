@@ -77,8 +77,14 @@ public class QueryServiceImpl implements QueryService {
         } catch (Exception e) {
             log.info("convertToQueryStatement has a exception:{}", e.toString());
         }
+        log.info("queryStatement:{}", queryStatement);
         QueryResultWithSchemaResp results = semanticQueryEngine.execute(queryStatement);
         statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
+        return results;
+    }
+
+    public Object queryByQueryStatement(QueryStatement queryStatement) {
+        QueryResultWithSchemaResp results = semanticQueryEngine.execute(queryStatement);
         return results;
     }
 
