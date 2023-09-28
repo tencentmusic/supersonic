@@ -30,7 +30,7 @@ collection = client.get_or_create_collection(
     metadata={"hnsw:space": "cosine"},
 )  # Get a collection object from an existing collection, by name. If it doesn't exist, create it.
 
-print("init_preset_query_collection_size: ", preset_query_collection_size(collection))
+logger.info("init_preset_query_collection_size: {}", preset_query_collection_size(collection))
 
 
 def preset_query_retrieval_run(
@@ -45,6 +45,6 @@ def preset_query_retrieval_run(
         query_texts_list, parsed_retrieval_res
     )
 
-    print("parsed_retrieval_res_format: ", parsed_retrieval_res_format)
+    logger.info("parsed_retrieval_res_format: {}", parsed_retrieval_res_format)
 
     return parsed_retrieval_res_format

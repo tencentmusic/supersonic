@@ -23,7 +23,7 @@ def text2dsl_setting_update(
 ):
 
     url = f"http://{llm_parser_host}:{llm_parser_port}/query2sql_setting_update/"
-    print("url: ", url)
+    logger.info("url: {}", url)
     payload = {
         "sqlExamplars": sql_examplars,
         "exampleNums": example_nums,
@@ -31,7 +31,7 @@ def text2dsl_setting_update(
     }
     headers = {"content-type": "application/json"}
     response = requests.post(url, data=json.dumps(payload), headers=headers)
-    print(response.text)
+    logger.info(response.text)
 
 
 if __name__ == "__main__":

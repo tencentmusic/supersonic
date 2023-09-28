@@ -5,6 +5,8 @@ import re
 import sys
 from typing import Any, List, Mapping, Union
 
+from loguru import logger
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -52,10 +54,10 @@ def plugin_selection_output_parse(llm_output: str) -> Union[Mapping[str, str], N
         find_result = re.findall(pattern, llm_output)
         result = find_result[0].strip()
 
-        print("result: ", result)
+        logger.info("result: {}", result)
 
         result_dict = json.loads(result)
-        print("result_dict: ", result_dict)
+        logger.info("result_dict: {}", result_dict)
 
         key_mapping = {"分析过程": "analysis", "选择工具": "toolSelection"}
 
@@ -66,7 +68,7 @@ def plugin_selection_output_parse(llm_output: str) -> Union[Mapping[str, str], N
         }
 
     except Exception as e:
-        print(e)
+        logger.exception(e)
         converted_result_dict = None
 
     return converted_result_dict
