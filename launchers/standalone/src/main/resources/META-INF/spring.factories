@@ -34,6 +34,6 @@ com.tencent.supersonic.chat.api.component.SemanticCorrector=\
     com.tencent.supersonic.chat.corrector.GlobalBeforeCorrector, \
     com.tencent.supersonic.chat.corrector.SelectCorrector, \
     com.tencent.supersonic.chat.corrector.WhereCorrector, \
-    com.tencent.supersonic.chat.corrector.HavingCorrector, \
     com.tencent.supersonic.chat.corrector.GroupByCorrector, \
+    com.tencent.supersonic.chat.corrector.HavingCorrector, \
     com.tencent.supersonic.chat.corrector.GlobalAfterCorrector
