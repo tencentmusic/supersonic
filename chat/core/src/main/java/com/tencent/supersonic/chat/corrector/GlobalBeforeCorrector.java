@@ -28,8 +28,6 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
         updateFieldNameByLinkingValue(semanticCorrectInfo);
 
         correctFieldName(semanticCorrectInfo);
-
-        addAggregateToMetric(semanticCorrectInfo);
     }
 
 
