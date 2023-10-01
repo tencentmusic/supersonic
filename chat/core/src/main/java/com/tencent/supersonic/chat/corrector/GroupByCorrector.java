@@ -30,21 +30,18 @@ public class GroupByCorrector extends BaseSemanticCorrector {
 
         if (!CollectionUtils.isEmpty(selectFields)
                 && !CollectionUtils.isEmpty(metrics)
-                && selectFields.stream().anyMatch(s -> metrics.contains(s))) {
-            return;
+                && !selectFields.stream().anyMatch(s -> metrics.contains(s))) {
+            //add aggregate to all metric
+            addAggregateToMetric(semanticCorrectInfo);
         }
-
-        //add aggregate to all metric
-        addAggregateToMetric(semanticCorrectInfo);
 
         //add dimension group by
         String sql = semanticCorrectInfo.getSql();
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
 
         Set<String> dimensions = semanticSchema.getDimensions(modelId).stream()
-                .filter(schemaElement -> !DateUtils.DATE_FIELD.equals(schemaElement.getBizName()))
                 .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());
-
+        dimensions.add(DateUtils.DATE_FIELD);
         selectFields = SqlParserSelectHelper.getSelectFields(sql);
 
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(dimensions)) {

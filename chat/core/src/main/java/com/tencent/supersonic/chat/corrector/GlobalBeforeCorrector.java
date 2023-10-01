@@ -30,8 +30,6 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
         correctFieldName(semanticCorrectInfo);
     }
 
-
-
     private void replaceAlias(SemanticCorrectInfo semanticCorrectInfo) {
         String replaceAlias = SqlParserUpdateHelper.replaceAlias(semanticCorrectInfo.getSql());
         semanticCorrectInfo.setSql(replaceAlias);

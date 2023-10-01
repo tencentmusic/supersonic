@@ -468,7 +468,12 @@ public class SqlParserUpdateHelper {
         List<Expression> waitingForAdds = visitor.getWaitingForAdds();
         if (!CollectionUtils.isEmpty(waitingForAdds)) {
             for (Expression waitingForAdd : waitingForAdds) {
-                plainSelect.setHaving(waitingForAdd);
+                Expression having = plainSelect.getHaving();
+                if (Objects.isNull(having)) {
+                    plainSelect.setHaving(waitingForAdd);
+                } else {
+                    plainSelect.setHaving(new AndExpression(having, waitingForAdd));
+                }
             }
         }
         return selectStatement.toString();
