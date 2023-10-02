@@ -34,7 +34,7 @@ const DrillDownDimensions: React.FC<Props> = ({
   const initData = async () => {
     const res = await queryDrillDownDimensions(modelId);
     setDimensions(
-      res.data.data.dimensions
+      res.data.dimensions
         .filter(
           dimension =>
             !dimensionFilters?.some(filter => filter.name === dimension.name) &&

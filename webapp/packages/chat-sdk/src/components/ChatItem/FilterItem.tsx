@@ -23,7 +23,7 @@ const FilterItem: React.FC<Props> = ({ modelId, filters, filter, onFiltersChange
   const initData = async () => {
     const { data } = await queryDimensionValues(modelId, filter.bizName, '');
     setOptions(
-      data?.data?.resultList.map((item: any) => ({
+      data?.resultList.map((item: any) => ({
         label: item[filter.bizName],
         value: item[filter.bizName],
       })) || []
@@ -47,9 +47,8 @@ const FilterItem: React.FC<Props> = ({ modelId, filters, filter, onFiltersChange
         if (fetchId !== fetchRef.current) {
           return;
         }
-
         setOptions(
-          newOptions.data?.data?.resultList.map((item: any) => ({
+          newOptions.data?.resultList.map((item: any) => ({
             label: item[filter.bizName],
             value: item[filter.bizName],
           })) || []
@@ -76,7 +75,8 @@ const FilterItem: React.FC<Props> = ({ modelId, filters, filter, onFiltersChange
 
   return (
     <span className={prefixCls}>
-      {typeof filter.value === 'string' || isArray(filter.value) ? (
+      {(typeof filter.value === 'string' || isArray(filter.value)) &&
+      (filter.operator === '=' || filter.operator === 'IN') ? (
         <Select
           bordered={false}
           value={filter.value}

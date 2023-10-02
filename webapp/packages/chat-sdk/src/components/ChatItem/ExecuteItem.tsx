@@ -58,7 +58,7 @@ const ExecuteItem: React.FC<Props> = ({
     <>
       <div className={`${prefixCls}-title-bar`}>
         <CheckCircleFilled className={`${prefixCls}-step-icon`} />
-        <div className={`${prefixCls}-step-title`}>数据查询结果</div>
+        <div className={`${prefixCls}-step-title`}>数据查询</div>
       </div>
       <div className={`${prefixCls}-content-container ${prefixCls}-last-node`}>
         <Spin spinning={entitySwitchLoading}>
@@ -68,7 +68,12 @@ const ExecuteItem: React.FC<Props> = ({
           {data?.queryMode === 'WEB_PAGE' ? (
             <WebPage id={queryId!} data={data} />
           ) : (
-            <ChatMsg data={data} chartIndex={chartIndex} triggerResize={triggerResize} />
+            <ChatMsg
+              queryId={queryId}
+              data={data}
+              chartIndex={chartIndex}
+              triggerResize={triggerResize}
+            />
           )}
         </Spin>
       </div>

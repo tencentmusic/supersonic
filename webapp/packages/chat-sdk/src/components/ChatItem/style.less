@@ -2,6 +2,8 @@
 
 @chat-item-prefix-cls: ~'@{supersonic-chat-prefix}-item';
 @filter-item-prefix-cls: ~'@{supersonic-chat-prefix}-filter-item';
+@sql-item-prefix-cls: ~'@{supersonic-chat-prefix}-sql-item';
+@similar-questions-prefix-cls: ~'@{supersonic-chat-prefix}-similar-questions';
 
 .@{chat-item-prefix-cls} {
   display: flex;
@@ -17,7 +19,6 @@
     display: inline-block;
     width: 4px;
     height: 4px;
-    // border-radius: 50%;
     background-color: var(--text-color);
     margin: 0 2px;
     opacity: 0;
@@ -124,8 +125,7 @@
     display: flex;
     align-items: center;
     column-gap: 6px;
-    margin-top: 4px;
-    color: var(--text-color-third);
+    color: var(--text-color-fourth);
     font-size: 13px;
   }
 
@@ -169,7 +169,7 @@
   &-tip {
     display: flex;
     flex-direction: column;
-    row-gap: 6px;
+    row-gap: 10px;
     flex-wrap: wrap;
     color: var(--text-color-third);
   }
@@ -178,7 +178,7 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    row-gap: 6px;
+    row-gap: 10px;
     column-gap: 12px;
     color: var(--text-color-third);
   }
@@ -251,7 +251,6 @@
     flex-wrap: wrap;
     row-gap: 6px;
     column-gap: 12px;
-    margin-top: 4px;
     color: var(--text-color-third);
     font-size: 14px;
   }
@@ -324,5 +323,94 @@
   &-filter-value {
     color: var(--chat-blue);
     font-weight: 500;
+  }
+}
+
+.@{sql-item-prefix-cls} {
+  position: relative;
+  margin: 2px 0 2px 7px;
+  padding: 2px 0 8px 18px;
+  border-left: 1px solid var(--green);
+  overflow: auto;
+
+  &-toggle-expand-btn {
+    margin-left: 4px;
+    color: var(--text-color-fourth);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  &-sql-options {
+    margin-left: 4px;
+    display: flex;
+    align-items: center;
+    column-gap: 13px;
+    color: var(--text-color-third);
+  }
+
+  &-sql-option {
+    border-radius: 4px;
+    padding: 1px 4px;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--chat-blue);
+    }
+  }
+
+  &-sql-option-active {
+    color: #fff !important;
+    background-color: var(--chat-blue);
+  }
+  
+  &-code {
+    margin-top: 10px !important;
+    padding: 6px 14px 8px !important;
+    border: 1px solid var(--border-color-base) !important;
+    border-radius: 4px !important;
+    background: #f5f8fb !important;
+  }
+  
+  &-copy-btn {
+    position: absolute;
+    top: 30px;
+    right: 20px;
+    background: transparent !important;
+    border: 0 !important;
+    color: var(--chat-blue);
+    cursor: pointer;
+  }
+}
+
+.@{sql-item-prefix-cls}-copilot {
+  width: 700px;
+}
+
+.@{similar-questions-prefix-cls} {
+  position: relative;
+  margin: 2px 0 2px 7px;
+  padding: 2px 0 8px 18px;
+  border-left: 1px solid var(--green);
+  overflow: auto;
+
+  &-toggle-expand-btn {
+    margin-left: 4px;
+    color: var(--text-color-fourth);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  &-content {
+    display: flex;
+    flex-direction: column;
+    row-gap: 12px;
+    margin-top: 6px;
+    margin-bottom: 2px;
+  }
+
+  &-question {
+    width: fit-content;
+    color: var(--chat-blue);
+    cursor: pointer;
   }
 }
