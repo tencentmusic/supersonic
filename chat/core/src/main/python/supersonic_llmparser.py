@@ -19,6 +19,10 @@ from services_router import (query2sql_service, preset_query_service,
 
 app = FastAPI()
 
+@app.get("/health")
+def read_health():
+    return {"status": "Healthy"}
+
 app.include_router(preset_query_service.router)
 app.include_router(solved_query_service.router)
 app.include_router(query2sql_service.router)
