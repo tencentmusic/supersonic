@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
@@ -15,6 +16,7 @@ import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.GroupByElement;
@@ -477,6 +479,76 @@ public class SqlParserUpdateHelper {
             }
         }
         return selectStatement.toString();
+    }
+
+    public static String removeWhereCondition(String sql, Set<String> removeFieldNames) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        selectBody.accept(new SelectVisitorAdapter() {
+            @Override
+            public void visit(PlainSelect plainSelect) {
+                removeWhereCondition(plainSelect.getWhere(), removeFieldNames);
+            }
+        });
+        return selectStatement.toString();
+    }
+
+    private static void removeWhereCondition(Expression whereExpression, Set<String> removeFieldNames) {
+        if (whereExpression == null) {
+            return;
+        }
+        removeWhereExpression(whereExpression, removeFieldNames);
+    }
+
+    private static void removeWhereExpression(Expression whereExpression, Set<String> removeFieldNames) {
+        if (isLogicExpression(whereExpression)) {
+            AndExpression andExpression = (AndExpression) whereExpression;
+            Expression leftExpression = andExpression.getLeftExpression();
+            Expression rightExpression = andExpression.getRightExpression();
+            if (isLogicExpression(leftExpression)) {
+                removeWhereExpression(leftExpression, removeFieldNames);
+            } else {
+                removeExpressionWithConstant(leftExpression, removeFieldNames);
+            }
+            if (isLogicExpression(rightExpression)) {
+                removeWhereExpression(rightExpression, removeFieldNames);
+            } else {
+                removeExpressionWithConstant(rightExpression, removeFieldNames);
+            }
+            removeExpressionWithConstant(rightExpression, removeFieldNames);
+        } else {
+            removeExpressionWithConstant(whereExpression, removeFieldNames);
+        }
+    }
+
+    private static void removeExpressionWithConstant(Expression expression, Set<String> removeFieldNames) {
+        if (!(expression instanceof EqualsTo)) {
+            return;
+        }
+        ComparisonOperator comparisonOperator = (ComparisonOperator) expression;
+        String columnName = "";
+        if (comparisonOperator.getRightExpression() instanceof Column) {
+            columnName = ((Column) (comparisonOperator).getRightExpression()).getColumnName();
+        }
+        if (comparisonOperator.getLeftExpression() instanceof Column) {
+            columnName = ((Column) (comparisonOperator).getLeftExpression()).getColumnName();
+        }
+        if (!removeFieldNames.contains(columnName)) {
+            return;
+        }
+        try {
+            ComparisonOperator constantExpression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(
+                    JsqlConstants.EQUAL_CONSTANT);
+            comparisonOperator.setLeftExpression(constantExpression.getLeftExpression());
+            comparisonOperator.setRightExpression(constantExpression.getRightExpression());
+            comparisonOperator.setASTNode(constantExpression.getASTNode());
+        } catch (JSQLParserException e) {
+            log.error("JSQLParserException", e);
+        }
     }
 }
 

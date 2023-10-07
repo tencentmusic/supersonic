@@ -2,13 +2,14 @@ package com.tencent.supersonic.semantic.query.parser.calcite.sql.node;
 
 
 import com.tencent.supersonic.semantic.query.parser.calcite.Configuration;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.Optimization;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSqlDialect;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.Optimization;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import org.apache.calcite.sql.SqlAsOperator;
 import org.apache.calcite.sql.SqlBasicCall;
@@ -17,7 +18,6 @@ import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.SqlWriterConfig;
-import org.apache.calcite.sql.advise.SqlSimpleParser;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.pretty.SqlPrettyWriter;
@@ -41,13 +41,12 @@ public abstract class SemanticNode {
     }
 
     public static String getSql(SqlNode sqlNode) {
-        SqlSimpleParser sqlSimpleParser = new SqlSimpleParser("", Configuration.getParserConfig());
         SqlWriterConfig config = SqlPrettyWriter.config().withDialect(SemanticSqlDialect.DEFAULT)
                 .withKeywordsLowerCase(true).withClauseEndsLine(true).withAlwaysUseParentheses(false)
                 .withSelectListItemsOnSeparateLines(false).withUpdateSetListNewline(false).withIndentation(0);
-        return sqlSimpleParser.simplifySql(sqlNode.toSqlString((c) -> {
-            return config;
-        }).getSql());
+
+        UnaryOperator<SqlWriterConfig> sqlWriterConfigUnaryOperator = (c) -> config;
+        return sqlNode.toSqlString(sqlWriterConfigUnaryOperator).getSql();
     }
 
     public static boolean isNumeric(String expr) {
