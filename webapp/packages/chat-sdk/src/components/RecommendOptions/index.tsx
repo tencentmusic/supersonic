@@ -25,7 +25,7 @@ const RecommendOptions: React.FC<Props> = ({ entityId, modelId, modelName, onSel
     setLoading(true);
     const res = await queryEntities(entityId, modelId);
     setLoading(false);
-    setData(res.data.data);
+    setData(res.data);
   };
 
   useEffect(() => {

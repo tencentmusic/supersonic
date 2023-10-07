@@ -5,3 +5,4 @@ chromadb==0.3.21
 tiktoken==0.3.3
 uvicorn[standard]==0.21.1
 pandas==1.5.3
+loguru==0.7.2

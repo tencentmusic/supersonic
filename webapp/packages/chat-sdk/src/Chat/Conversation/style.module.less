@@ -1,0 +1,171 @@
+.conversation {
+  position: relative;
+  width: 0;
+  height: 100%;
+  background: #fff;
+
+  .rightSection {
+    width: 100%;
+    height: 100%;
+
+    .titleBar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .title {
+        color: var(--text-color);
+        font-weight: 500;
+        font-size: 15px;
+      }
+
+      .rightOperation {
+        display: flex;
+        align-items: center;
+        column-gap: 12px;
+
+        .newConversation {
+          color: var(--text-color);
+          font-size: 14px;
+          cursor: pointer;
+
+          &:hover {
+            color: var(--chat-blue);
+          }
+        }
+
+        .closeIcon {
+          color: var(--text-color);
+          font-size: 16px;
+          cursor: pointer;
+
+          &:hover {
+            color: var(--chat-blue);
+          }
+        }
+      }
+    }
+
+    .searchConversation {
+      display: flex;
+      align-items: center;
+      padding: 12px 0 10px;
+
+      .searchIcon {
+        color: #999 !important;
+      }
+
+      .searchTask {
+        font-size: 13px;
+        background-color: #f5f5f5;
+        border: 0;
+        border-radius: 4px;
+        box-shadow: none !important;
+
+        :global {
+          .ant-input {
+            font-size: 13px !important;
+            background-color: transparent !important;
+          }
+        }
+      }
+    }
+
+    .conversationList {
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 70px);
+      padding: 2px 0 0;
+      overflow-y: auto;
+      row-gap: 12px;
+
+      .conversationItem {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        border: 1px solid #efefef;
+        border-radius: 8px;
+        cursor: pointer;
+
+        .conversationContent {
+          width: 100%;
+
+          .topTitleBar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+
+            .conversationTitleBar {
+              display: flex;
+              align-items: center;
+              column-gap: 6px;
+
+              .conversationName {
+                max-width: 300px;
+                margin-right: 2px;
+                overflow: hidden;
+                color: var(--text-color);
+                font-weight: 500;
+                font-size: 14px;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+              }
+
+              .currentConversation {
+                padding: 0 4px;
+                color: var(--chat-blue);
+                font-size: 12px;
+                background-color: var(--light-blue-background);
+                border-radius: 4px;
+              }
+            }
+
+            .conversationTime {
+              color: var(--text-color-six);
+              font-size: 12px;
+            }
+          }
+
+          .bottomSection {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 4px;
+
+            .subTitle {
+              width: 350px;
+              overflow: hidden;
+              color: var(--text-color-six);
+              font-size: 12px;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            }
+
+            .deleteIcon {
+              color: var(--text-color-six);
+              font-size: 14px;
+              cursor: pointer;
+
+              &:hover {
+                color: var(--chat-blue);
+              }
+            }
+          }
+        }
+
+        &:hover,
+        &.activeConversationItem {
+          background-color: #f0f0f0;
+        }
+      }
+    }
+  }
+
+  &.historyVisible {
+    width: 400px;
+    padding: 10px 16px;
+    border-left: 1px solid #f1f1f1;
+    z-index: 99;
+  }
+}

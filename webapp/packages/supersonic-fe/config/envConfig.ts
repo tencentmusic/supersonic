@@ -1,4 +1,4 @@
 const ENV_CONFIG = {
-  tmeAvatarUrl: 'http://tpp.tmeoa.com/photo/48/',
+  tmeAvatarUrl: '',
 };
 export default ENV_CONFIG;
