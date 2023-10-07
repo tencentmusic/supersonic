@@ -94,12 +94,13 @@ function runPythonService {
   for i in {1..10}
   do
     echo "Performing health check attempt $i..."
-    response=$(curl -s http://${LLMPARSER_HOST}:${LLMPARSER_PORT}/health | jq -r '.status')
-    if [ "$response" == "Healthy" ]; then
+    response=$(curl -s http://${LLMPARSER_HOST}:${LLMPARSER_PORT}/health)
+    echo "health check response: $response"
+    status_ok="Healthy"
+    if [[ $response == *$status_ok* ]] ; then
       echo "Health check passed."
       break
     else
-      echo "Health check failed with status: $response"
       if [ "$i" -eq 10 ]; then
         echo "Health check failed after 10 attempts. Exiting."
         exit 1
