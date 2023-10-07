@@ -19,33 +19,7 @@ const Text: React.FC<Props> = ({ columns, referenceColumn, dataSource }) => {
 
   const initData = () => {
     let textValue = dataSource[0][columns[0].nameEn];
-    let htmlCodeValue: string;
-    const match = textValue.match(/```html([\s\S]*?)```/);
-    htmlCodeValue = match && match[1].trim();
-    if (htmlCodeValue) {
-      textValue = textValue.replace(/```html([\s\S]*?)```/, '');
-    }
-    let scriptCode: string;
-    let scriptSrc: string;
-    if (htmlCodeValue) {
-      scriptSrc = htmlCodeValue.match(/<script src="([\s\S]*?)"><\/script>/)?.[1] || '';
-      scriptCode =
-        htmlCodeValue.match(/<script type="text\/javascript">([\s\S]*?)<\/script>/)?.[1] || '';
-      if (scriptSrc) {
-        const script = document.createElement('script');
-        script.src = scriptSrc;
-        document.body.appendChild(script);
-      }
-      if (scriptCode) {
-        const script = document.createElement('script');
-        script.innerHTML = scriptCode;
-        setTimeout(() => {
-          document.body.appendChild(script);
-        }, 1500);
-      }
-    }
-    setText(textValue);
-    setHtmlCode(htmlCodeValue);
+    setText(textValue === undefined ? '暂无数据，如有疑问请联系管理员' : textValue);
     if (referenceColumn) {
       const referenceDataValue = dataSource[0][referenceColumn.nameEn];
       setReferenceData(referenceDataValue || []);

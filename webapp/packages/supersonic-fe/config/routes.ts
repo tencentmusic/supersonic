@@ -11,7 +11,7 @@ const ROUTES = [
   {
     path: '/chat/mobile',
     name: 'chat',
-    component: './Chat',
+    component: './ChatPage',
     hideInMenu: true,
     layout: false,
     envEnableList: [ENV_KEY.CHAT],
@@ -19,7 +19,7 @@ const ROUTES = [
   {
     path: '/chat',
     name: 'chat',
-    component: './Chat',
+    component: './ChatPage',
     envEnableList: [ENV_KEY.CHAT],
   },
   {

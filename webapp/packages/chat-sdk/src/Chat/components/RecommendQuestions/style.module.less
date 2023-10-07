@@ -1,0 +1,36 @@
+.recommendQuestions {
+  display: flex;
+
+  .recommendQuestionsMsg {
+    padding: 12px 20px 20px !important;
+
+    .title {
+      margin-bottom: 12px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .content {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      column-gap: 16px;
+      row-gap: 20px;
+
+      .question {
+        height: 22px;
+        padding: 0 6px;
+        color: var(--text-color);
+        font-size: 12px;
+        line-height: 22px;
+        background-color: #f4f4f4;
+        border-radius: 11px;
+        cursor: pointer;
+
+        &:hover {
+          color: var(--chat-blue);
+        }
+      }
+    }
+  }
+}

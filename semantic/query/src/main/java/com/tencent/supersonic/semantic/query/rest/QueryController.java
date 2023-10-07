@@ -59,6 +59,12 @@ public class QueryController {
         return queryService.queryByStructWithAuth(queryStructReq, user);
     }
 
+    @PostMapping("/queryStatement")
+    public Object queryStatement(@RequestBody QueryStatement queryStatement) throws Exception {
+        Object result = queryService.queryByQueryStatement(queryStatement);
+        return result;
+    }
+
     @PostMapping("/struct/parse")
     public SqlParserResp parseByStruct(@RequestBody ParseSqlReq parseSqlReq,
             HttpServletRequest request,

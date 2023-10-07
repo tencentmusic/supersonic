@@ -1,22 +1,17 @@
-import { AUTH_TOKEN_KEY, FROM_URL_KEY } from '@/common/constants';
 import RightContent from '@/components/RightContent';
 import S2Icon, { ICON } from '@/components/S2Icon';
 import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
 import { Space, Spin } from 'antd';
-import qs from 'qs';
 import ScaleLoader from 'react-spinners/ScaleLoader';
 import type { RunTimeLayoutConfig } from 'umi';
 import { history } from 'umi';
 import defaultSettings from '../config/defaultSettings';
 import settings from '../config/themeSettings';
-import { queryToken } from './services/login';
 import { queryCurrentUser } from './services/user';
-import { traverseRoutes, deleteUrlQuery, isMobile } from './utils/utils';
+import { traverseRoutes, isMobile, getToken } from './utils/utils';
 import { publicPath } from '../config/defaultSettings';
-import Copilot from './pages/Copilot';
+import { Copilot } from 'supersonic-chat-sdk';
 export { request } from './services/request';
-
-const TOKEN_KEY = AUTH_TOKEN_KEY;
 
 const replaceRoute = '/';
 
@@ -42,25 +37,6 @@ export const initialStateConfig = {
   ),
 };
 
-const getToken = async () => {
-  let { search } = window.location;
-  if (search.length > 0) {
-    search = search.slice(1);
-  }
-  const data = qs.parse(search);
-  if (data.code) {
-    try {
-      const fromUrl = localStorage.getItem(FROM_URL_KEY);
-      const res = await queryToken(data.code as string);
-      localStorage.setItem(TOKEN_KEY, res.payload);
-      const newUrl = deleteUrlQuery(window.location.href, 'code');
-      window.location.href = fromUrl || newUrl;
-    } catch (err) {
-      console.log(err);
-    }
-  }
-};
-
 const getAuthCodes = () => {
   return [];
 };
@@ -81,12 +57,6 @@ export async function getInitialState(): Promise<{
     } catch (error) {}
     return undefined;
   };
-  const { query } = history.location as any;
-  const currentToken = query[TOKEN_KEY] || localStorage.getItem(TOKEN_KEY);
-
-  if (window.location.host.includes('tmeoa') && !currentToken) {
-    await getToken();
-  }
 
   let currentUser: any;
   if (!window.location.pathname.includes('login')) {
@@ -162,7 +132,9 @@ export const layout: RunTimeLayoutConfig = (params) => {
           style={{ height: location.pathname.includes('chat') ? 'calc(100vh - 48px)' : undefined }}
         >
           {dom}
-          {history.location.pathname !== '/chat' && !isMobile && <Copilot />}
+          {history.location.pathname !== '/chat' && !isMobile && (
+            <Copilot token={getToken() || ''} isDeveloper />
+          )}
         </div>
       );
     },

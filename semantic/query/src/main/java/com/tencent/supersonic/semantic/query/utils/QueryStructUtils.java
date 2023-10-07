@@ -2,6 +2,7 @@ package com.tencent.supersonic.semantic.query.utils;
 
 import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
 
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.Aggregator;
@@ -9,9 +10,13 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
+import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
@@ -25,8 +30,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.tencent.supersonic.semantic.query.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.assertj.core.util.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -42,6 +50,8 @@ public class QueryStructUtils {
     private final Catalog catalog;
     @Value("${internal.metric.cnt.suffix:internal_cnt}")
     private String internalMetricNameSuffix;
+    @Autowired
+    private SchemaService schemaService;
 
     public QueryStructUtils(
             DateUtils dateUtils,
@@ -147,17 +157,37 @@ public class QueryStructUtils {
         sqlFilterUtils.getFiltersCol(queryStructCmd.getOriginalFilter()).stream().forEach(col -> resNameEnSet.add(col));
         return resNameEnSet;
     }
-    public Set<String> getResNameEn(QueryDslReq queryDslReq) {
-        Set<String> resNameEnSet = SqlParserSelectHelper.getAllFields(queryDslReq.getSql())
+    public Set<String> getResName(QueryDslReq queryDslReq) {
+        Set<String> resNameSet = SqlParserSelectHelper.getAllFields(queryDslReq.getSql())
                         .stream().collect(Collectors.toSet());
-        return resNameEnSet;
+        return resNameSet;
     }
     public Set<String> getResNameEnExceptInternalCol(QueryStructReq queryStructCmd) {
         Set<String> resNameEnSet = getResNameEn(queryStructCmd);
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
-    public Set<String> getResNameEnExceptInternalCol(QueryDslReq queryDslReq) {
-        Set<String> resNameEnSet = getResNameEn(queryDslReq);
+
+    public Set<String> getResNameEnExceptInternalCol(QueryDslReq queryDslReq, User user) {
+        Set<String> resNameSet = getResName(queryDslReq);
+        Set<String> resNameEnSet = new HashSet<>();
+        ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
+        List<Long> modelIds = Lists.newArrayList(queryDslReq.getModelId());
+        filter.setModelIds(modelIds);
+        List<ModelSchemaResp> modelSchemaRespList = schemaService.fetchModelSchema(filter, user);
+        if (!CollectionUtils.isEmpty(modelSchemaRespList)) {
+            List<MetricSchemaResp> metrics = modelSchemaRespList.get(0).getMetrics();
+            List<DimSchemaResp> dimensions = modelSchemaRespList.get(0).getDimensions();
+            metrics.stream().forEach(o -> {
+                if (resNameSet.contains(o.getName())) {
+                    resNameEnSet.add(o.getBizName());
+                }
+            });
+            dimensions.stream().forEach(o -> {
+                if (resNameSet.contains(o.getName())) {
+                    resNameEnSet.add(o.getBizName());
+                }
+            });
+        }
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 

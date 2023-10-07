@@ -7,7 +7,7 @@
     "jsx": "react-jsx",
     "moduleResolution":"Node",
     "allowSyntheticDefaultImports": true,
-    "importHelpers": true,
+    "importHelpers": true
   },
   "include": [
     "src"
