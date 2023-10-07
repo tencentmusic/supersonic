@@ -23,6 +23,9 @@ public class NatureHelper {
 
     public static SchemaElementType convertToElementType(String nature) {
         DictWordType dictWordType = DictWordType.getNatureType(nature);
+        if (Objects.isNull(dictWordType)) {
+            return null;
+        }
         SchemaElementType result = null;
         switch (dictWordType) {
             case METRIC:

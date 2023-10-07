@@ -30,7 +30,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
 
         if (!CollectionUtils.isEmpty(selectFields)
                 && !CollectionUtils.isEmpty(metrics)
-                && !selectFields.stream().anyMatch(s -> metrics.contains(s))) {
+                && selectFields.stream().anyMatch(s -> metrics.contains(s))) {
             //add aggregate to all metric
             addAggregateToMetric(semanticCorrectInfo);
         }
