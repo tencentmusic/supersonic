@@ -49,27 +49,24 @@ if "%command%"=="restart" (
     goto :EOF
 
 :STOP
-    for /f "tokens=2" %%i in ('tasklist ^| findstr /i "python"') do (
-         taskkill /PID %%i /F
-         echo "python service (PID = %%i) is killed."
+    if "%service%"=="%llmparser_service%" (
+        call :STOP_PYTHON
+        goto :EOF
     )
-    for /f "tokens=2" %%i in ('tasklist ^| findstr /i "java"') do (
-         taskkill /PID %%i /F
-         echo "java service (PID = %%i) is killed."
-    )
+    call :STOP_PYTHON
+    call :STOP_JAVA
     goto :EOF
 
-
 :START_PYTHON
-   echo 'python service starting'
+   echo 'python service starting, see logs in llmparser/llmparser.log'
    cd "%pythonRunDir%"
    start /B %python_path% supersonic_llmparser.py  > %pythonRunDir%\llmparser.log 2>&1
-   timeout /t 6 >nul
-   echo 'python service started, see logs in llmparser/llmparser.log'
+   timeout /t 10 >nul
+   echo 'python service started'
    goto :EOF
 
 :START_JAVA
-  echo 'java service starting'
+  echo 'java service starting, see logs in logs/'
    cd "%javaRunDir%"
    if not exist "%runtimeDir%\supersonic-standalone\logs" mkdir "%runtimeDir%\supersonic-standalone\logs"
    set "libDir=%runtimeDir%\supersonic-%service%\lib"
@@ -78,7 +75,22 @@ if "%command%"=="restart" (
    set "classpath=%confDir%;%webDir%;%libDir%\*"
    set "java-command=-Dfile.encoding=UTF-8 -Duser.language=Zh -Duser.region=CN -Duser.timezone=GMT+08 -Xms1024m -Xmx2048m -cp %CLASSPATH% %MAIN_CLASS%"
    start /B java %java-command% >nul 2>&1
-   echo 'java service started, see logs in logs/'
+   timeout /t 10 >nul
+   echo 'java service started'
+   goto :EOF
+
+:STOP_PYTHON
+   for /f "tokens=2" %%i in ('tasklist ^| findstr /i "python"') do (
+           taskkill /PID %%i /F
+           echo "python service (PID = %%i) is killed."
+   )
+   goto :EOF
+
+:STOP_JAVA
+   for /f "tokens=2" %%i in ('tasklist ^| findstr /i "java"') do (
+            taskkill /PID %%i /F
+            echo "java service (PID = %%i) is killed."
+   )
    goto :EOF
 
 :RELOAD_EXAMPLE
