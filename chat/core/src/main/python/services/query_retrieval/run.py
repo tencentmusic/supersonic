@@ -5,6 +5,8 @@ import sys
 import uuid
 from typing import Any, List, Mapping, Optional, Union
 
+from loguru import logger
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -28,14 +30,14 @@ solved_query_collection = client.get_or_create_collection(name=SOLVED_QUERY_COLL
                                             embedding_function=emb_func,
                                             metadata={"hnsw:space": "cosine"}
                                             ) # Get a collection object from an existing collection, by name. If it doesn't exist, create it.
-print("init_solved_query_collection_size: ", get_chroma_collection_size(solved_query_collection))
+logger.info("init_solved_query_collection_size: {}", get_chroma_collection_size(solved_query_collection))
 
 
 preset_query_collection = client.get_or_create_collection(name=PRESET_QUERY_COLLECTION_NAME,
                                             embedding_function=emb_func,
                                             metadata={"hnsw:space": "cosine"}
                                             )
-print("init_preset_query_collection_size: ", get_chroma_collection_size(preset_query_collection))
+logger.info("init_preset_query_collection_size: {}", get_chroma_collection_size(preset_query_collection))
 
 class ChromaCollectionRetriever(object):
     def __init__(self, collection:Collection):
@@ -50,7 +52,7 @@ class ChromaCollectionRetriever(object):
         parsed_retrieval_res = parse_retrieval_chroma_collection_query(retrieval_res)
         parsed_retrieval_res_format = chroma_collection_query_retrieval_format(query_texts_list, parsed_retrieval_res)
 
-        print('parsed_retrieval_res_format: ', parsed_retrieval_res_format)
+        logger.info('parsed_retrieval_res_format: {}', parsed_retrieval_res_format)
 
         return parsed_retrieval_res_format
 

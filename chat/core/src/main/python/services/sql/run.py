@@ -2,6 +2,8 @@ import os
 import sys
 from typing import List, Union, Mapping
 
+from loguru import logger
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -63,10 +65,10 @@ class Text2DSLAgent(object):
         linking: Union[List[Mapping[str, str]], None] = None,
     ):
 
-        print("query_text: ", query_text)
-        print("schema: ", schema)
-        print("current_date: ", current_date)
-        print("prior_schema_links: ", linking)
+        logger.info("query_text: {}", query_text)
+        logger.info("schema: {}", schema)
+        logger.info("current_date: {}", current_date)
+        logger.info("prior_schema_links: {}", linking)
 
         if linking is not None:
             prior_schema_links = {
@@ -85,7 +87,7 @@ class Text2DSLAgent(object):
             prior_schema_links,
             self.sql_example_selector,
         )
-        print("schema_linking_prompt->", schema_linking_prompt)
+        logger.info("schema_linking_prompt-> {}", schema_linking_prompt)
         schema_link_output = self.llm(schema_linking_prompt)
         schema_link_str = self.schema_link_parse(schema_link_output)
 
@@ -96,7 +98,7 @@ class Text2DSLAgent(object):
             current_date,
             self.sql_example_selector,
         )
-        print("sql_prompt->", sql_prompt)
+        logger.info("sql_prompt->", sql_prompt)
         sql_output = self.llm(sql_prompt)
 
         resp = dict()
@@ -111,7 +113,7 @@ class Text2DSLAgent(object):
 
         resp["sqlOutput"] = sql_output
 
-        print("resp: ", resp)
+        logger.info("resp: ", resp)
 
         return resp
 
@@ -123,10 +125,10 @@ class Text2DSLAgent(object):
         linking: Union[List[Mapping[str, str]], None] = None,
     ):
 
-        print("query_text: ", query_text)
-        print("schema: ", schema)
-        print("current_date: ", current_date)
-        print("prior_schema_links: ", linking)
+        logger.info("query_text: ", query_text)
+        logger.info("schema: ", schema)
+        logger.info("current_date: ", current_date)
+        logger.info("prior_schema_links: ", linking)
 
         if linking is not None:
             prior_schema_links = {
@@ -146,7 +148,7 @@ class Text2DSLAgent(object):
             prior_schema_links,
             self.sql_example_selector,
         )
-        print("schema_linking_sql_combo_prompt->", schema_linking_sql_combo_prompt)
+        logger.info("schema_linking_sql_combo_prompt->", schema_linking_sql_combo_prompt)
         schema_linking_sql_combo_output = self.llm(schema_linking_sql_combo_prompt)
 
         schema_linking_str = self.combo_schema_link_parse(
@@ -165,7 +167,7 @@ class Text2DSLAgent(object):
         resp["schemaLinkStr"] = schema_linking_str
         resp["sqlOutput"] = sql_str
 
-        print("resp: ", resp)
+        logger.info("resp: ", resp)
 
         return resp
 
