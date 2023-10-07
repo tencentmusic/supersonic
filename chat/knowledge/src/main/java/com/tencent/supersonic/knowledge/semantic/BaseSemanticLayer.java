@@ -24,6 +24,7 @@ public abstract class BaseSemanticLayer implements SemanticLayer {
         if (cacheEnable) {
             return modelSchemaCache.get(String.valueOf(ids), () -> {
                 List<ModelSchemaResp> data = doFetchModelSchema(ids);
+                modelSchemaCache.put(String.valueOf(ids), data);
                 return data;
             });
         }
