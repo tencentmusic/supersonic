@@ -22,7 +22,7 @@ from sql.output_parser import (
 )
 
 from util.llm_instance import llm
-from run_config import TEXT2DSL_IS_SHORTCUT
+from config.config_parse import TEXT2DSL_IS_SHORTCUT
 
 
 class Text2DSLAgent(object):

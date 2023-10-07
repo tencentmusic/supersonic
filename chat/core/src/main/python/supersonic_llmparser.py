@@ -11,7 +11,7 @@ from typing import Any, List, Mapping
 
 from fastapi import FastAPI, HTTPException
 
-from run_config import LLMPARSER_HOST, LLMPARSER_PORT
+from config.config_parse import LLMPARSER_HOST, LLMPARSER_PORT
 
 from services_router import (query2sql_service, preset_query_service,
                             solved_query_service, plugin_call_service)

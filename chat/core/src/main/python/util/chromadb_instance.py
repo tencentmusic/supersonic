@@ -5,7 +5,7 @@ import chromadb
 from chromadb.api import Collection
 from chromadb.config import Settings
 
-from run_config import CHROMA_DB_PERSIST_PATH
+from config.config_parse import CHROMA_DB_PERSIST_PATH
 
 client = chromadb.Client(
     Settings(

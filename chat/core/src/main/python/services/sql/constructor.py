@@ -12,7 +12,7 @@ from langchain.prompts.example_selector import SemanticSimilarityExampleSelector
 from few_shot_example.sql_exampler import examplars as sql_examplars
 from util.text2vec import hg_embedding
 from util.chromadb_instance import client as chromadb_client, empty_chroma_collection_2
-from run_config import TEXT2DSL_COLLECTION_NAME, TEXT2DSL_FEW_SHOTS_EXAMPLE_NUM
+from config.config_parse import TEXT2DSL_COLLECTION_NAME, TEXT2DSL_FEW_SHOTS_EXAMPLE_NUM
 
 
 def reload_sql_example_collection(
