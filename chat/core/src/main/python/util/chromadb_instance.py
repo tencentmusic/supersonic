@@ -4,6 +4,7 @@ from typing import Any, List, Mapping, Optional, Union
 import chromadb
 from chromadb.api import Collection
 from chromadb.config import Settings
+from loguru import logger
 
 from run_config import CHROMA_DB_PERSIST_PATH
 
@@ -29,7 +30,7 @@ def empty_chroma_collection_2(collection:Collection):
 
     size_of_new_collection = new_collection.count()
 
-    print(f'Collection {collection_name} emptied. Size of new collection: {size_of_new_collection}')
+    logger.info(f'Collection {collection_name} emptied. Size of new collection: {size_of_new_collection}')
 
     return new_collection
 
@@ -74,7 +75,7 @@ def query_chroma_collection(collection:Collection, query_texts:List[str],
     else:
         outer_filter = None
 
-    print('outer_filter: ', outer_filter)
+    logger.info('outer_filter: ', outer_filter)
     res = collection.query(query_texts=query_texts, n_results=n_results, where=outer_filter)
     return res
 

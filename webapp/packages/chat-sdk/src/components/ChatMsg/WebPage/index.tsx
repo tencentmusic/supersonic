@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { CLS_PREFIX } from '../../../common/constants';
 import { MsgDataType } from '../../../common/type';
-import { isProd } from '../../../utils/utils';
+import { getToken, isProd } from '../../../utils/utils';
 
 type Props = {
   id: string | number;
@@ -89,10 +89,8 @@ const WebPage: React.FC<Props> = ({ id, data }) => {
       );
       urlValue = urlValue.replace(
         '?',
-        `?miniProgram=true&reportName=${name}&filterData=${filterData}&`
+        `?token=${getToken()}&miniProgram=true&reportName=${name}&filterData=${filterData}&`
       );
-      urlValue =
-        !isProd() && !urlValue.includes('http') ? `http://s2.tmeoa.com${urlValue}` : urlValue;
     } else {
       const params = Object.keys(valueParams || {}).map(key => `${key}=${valueParams[key]}`);
       if (params.length > 0) {
@@ -103,7 +101,6 @@ const WebPage: React.FC<Props> = ({ id, data }) => {
         }
       }
     }
-    // onReportLoaded(heightValue + 190);
     setPluginUrl(urlValue);
   };
 
@@ -112,7 +109,6 @@ const WebPage: React.FC<Props> = ({ id, data }) => {
   }, []);
 
   return (
-    // <div className={prefixCls} style={{ height }}>
     <iframe
       id={`reportIframe_${id}`}
       name={`reportIframe_${id}`}
@@ -121,7 +117,6 @@ const WebPage: React.FC<Props> = ({ id, data }) => {
       title="reportIframe"
       allowFullScreen
     />
-    // </div>
   );
 };
 

@@ -3,6 +3,7 @@ import { nodeResolve } from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import less from 'rollup-plugin-less'
+import styles from "rollup-plugin-styles";
 import postcss from 'rollup-plugin-postcss'
 import cssnano from 'cssnano'
 
@@ -18,7 +19,12 @@ const config = {
     commonjs(),
     json(),
     typescript({ tsconfigOverride: overrides }),
-    less({ output: 'dist/index.css' }),
+    styles({
+      // mode: ["extract"],
+      // modules: true,
+      autoModules: id => id.includes(".module."),
+    }),
+    // less({ output: 'dist/index.css' }),
     // postcss({
     //   plugins: [  
     //     cssnano()  

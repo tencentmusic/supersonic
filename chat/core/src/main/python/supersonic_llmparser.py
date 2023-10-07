@@ -4,6 +4,10 @@ import sys
 
 import uvicorn
 
+from util.logging_utils import init_logger
+
+init_logger()
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -18,6 +22,10 @@ from services_router import (query2sql_service, preset_query_service,
 
 
 app = FastAPI()
+
+@app.get("/health")
+def read_health():
+    return {"status": "Healthy"}
 
 app.include_router(preset_query_service.router)
 app.include_router(solved_query_service.router)

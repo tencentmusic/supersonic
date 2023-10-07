@@ -10,7 +10,7 @@ def schema_link_parse(schema_link_output):
             0
         ].strip()
     except Exception as e:
-        print(e)
+        logger.exception(e)
         schema_link_output = None
 
     return schema_link_output
@@ -27,7 +27,7 @@ def combo_schema_link_parse(schema_linking_sql_combo_output: str):
         else:
             schema_links = None
     except Exception as e:
-        print(e)
+        logger.info(e)
         schema_links = None
 
     return schema_links
@@ -44,7 +44,7 @@ def combo_sql_parse(schema_linking_sql_combo_output: str):
         else:
             sql = None
     except Exception as e:
-        print(e)
+        logger.exception(e)
         sql = None
 
     return sql

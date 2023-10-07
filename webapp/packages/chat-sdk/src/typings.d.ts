@@ -1,6 +1,7 @@
 declare module 'slash2';
 declare module '*.css';
 declare module '*.less';
+declare module '*.module.less';
 declare module '*.scss';
 declare module '*.sass';
 declare module '*.svg';
@@ -18,11 +19,21 @@ declare module 'react-fittext';
 declare module 'bizcharts-plugin-slider';
 declare module 'react-split-pane/lib/Pane';
 
-// preview.pro.ant.design only do not use in your production ;
-// preview.pro.ant.design Dedicated environment variable, please do not use it in your project.
-declare let ANT_DESIGN_PRO_ONLY_DO_NOT_USE_IN_YOUR_PRODUCTION: 'site' | undefined;
-
 declare const REACT_APP_ENV: 'test' | 'dev' | 'pre' | false;
+
+declare module '*.module.less' {
+  const classes: {
+    readonly [key: string]: string
+  }
+  export default classes
+  declare module '*.less'
+}
+
+interface AxiosResponse<T = any> extends Promise<T> {
+  code: number;
+  data: T;
+  msg: string;  
+}
 
 type Result<T> = {
   code: number;

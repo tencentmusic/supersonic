@@ -3,6 +3,8 @@ import os
 import sys
 from typing import List, Mapping
 
+from loguru import logger
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,11 +23,11 @@ def reload_sql_example_collection(
     sql_example_selector: SemanticSimilarityExampleSelector,
     example_nums: int,
 ):
-    print("original sql_examples_collection size:", vectorstore._collection.count())
+    logger.info("original sql_examples_collection size: {}", vectorstore._collection.count())
     new_collection = empty_chroma_collection_2(collection=vectorstore._collection)
     vectorstore._collection = new_collection
 
-    print("emptied sql_examples_collection size:", vectorstore._collection.count())
+    logger.info("emptied sql_examples_collection size: {}", vectorstore._collection.count())
 
     sql_example_selector = SemanticSimilarityExampleSelector(
         vectorstore=sql_examples_vectorstore,
@@ -46,7 +48,7 @@ def reload_sql_example_collection(
     for example in sql_examplars:
         sql_example_selector.add_example(example)
 
-    print("reloaded sql_examples_collection size:", vectorstore._collection.count())
+    logger.info("reloaded sql_examples_collection size: {}", vectorstore._collection.count())
 
     return vectorstore, sql_example_selector
 
@@ -76,11 +78,11 @@ sql_example_selector = SemanticSimilarityExampleSelector(
 )
 
 if sql_examples_vectorstore._collection.count() > 0:
-    print("examples already in sql_vectorstore")
-    print("init sql_vectorstore size:", sql_examples_vectorstore._collection.count())
+    logger.info("examples already in sql_vectorstore")
+    logger.info("init sql_vectorstore size: {}", sql_examples_vectorstore._collection.count())
 
-print("sql_examplars size:", len(sql_examplars))
+logger.info("sql_examplars size: {}", len(sql_examplars))
 sql_examples_vectorstore, sql_example_selector = reload_sql_example_collection(
     sql_examples_vectorstore, sql_examplars, sql_example_selector, example_nums
 )
-print("added sql_vectorstore size:", sql_examples_vectorstore._collection.count())
+logger.info("added sql_vectorstore size: {}", sql_examples_vectorstore._collection.count())

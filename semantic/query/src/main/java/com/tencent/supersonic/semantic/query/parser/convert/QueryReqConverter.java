@@ -100,7 +100,7 @@ public class QueryReqConverter {
         Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(modelSchemaResp);
         String sql = databaseReq.getSql();
         log.info("convert name to bizName before:{}", sql);
-        String replaceFields = SqlParserUpdateHelper.replaceFields(sql, fieldNameToBizNameMap, true);
+        String replaceFields = SqlParserUpdateHelper.replaceFields(sql, fieldNameToBizNameMap, false);
         log.info("convert name to bizName after:{}", replaceFields);
         databaseReq.setSql(replaceFields);
     }

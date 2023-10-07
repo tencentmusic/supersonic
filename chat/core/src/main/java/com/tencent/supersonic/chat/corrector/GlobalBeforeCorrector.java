@@ -28,11 +28,7 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
         updateFieldNameByLinkingValue(semanticCorrectInfo);
 
         correctFieldName(semanticCorrectInfo);
-
-        addAggregateToMetric(semanticCorrectInfo);
     }
-
-
 
     private void replaceAlias(SemanticCorrectInfo semanticCorrectInfo) {
         String replaceAlias = SqlParserUpdateHelper.replaceAlias(semanticCorrectInfo.getSql());

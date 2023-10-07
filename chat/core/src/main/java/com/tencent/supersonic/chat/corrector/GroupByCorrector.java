@@ -20,18 +20,29 @@ public class GroupByCorrector extends BaseSemanticCorrector {
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
 
         super.correct(semanticCorrectInfo);
-
-        //add aggregate to all metric
-        String sql = semanticCorrectInfo.getSql();
         Long modelId = semanticCorrectInfo.getParseInfo().getModel().getModel();
+        // if select not exit metric not add aggregate
+        List<String> selectFields = SqlParserSelectHelper.getSelectFields(semanticCorrectInfo.getSql());
 
+        Set<String> metrics = getMetricElements(modelId).stream()
+                .map(schemaElement -> schemaElement.getName())
+                .collect(Collectors.toSet());
+
+        if (!CollectionUtils.isEmpty(selectFields)
+                && !CollectionUtils.isEmpty(metrics)
+                && !selectFields.stream().anyMatch(s -> metrics.contains(s))) {
+            //add aggregate to all metric
+            addAggregateToMetric(semanticCorrectInfo);
+        }
+
+        //add dimension group by
+        String sql = semanticCorrectInfo.getSql();
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
 
         Set<String> dimensions = semanticSchema.getDimensions(modelId).stream()
-                .filter(schemaElement -> !DateUtils.DATE_FIELD.equals(schemaElement.getBizName()))
                 .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());
-
-        List<String> selectFields = SqlParserSelectHelper.getSelectFields(sql);
+        dimensions.add(DateUtils.DATE_FIELD);
+        selectFields = SqlParserSelectHelper.getSelectFields(sql);
 
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(dimensions)) {
             return;

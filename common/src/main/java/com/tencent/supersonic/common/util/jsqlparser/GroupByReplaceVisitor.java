@@ -2,6 +2,7 @@ package com.tencent.supersonic.common.util.jsqlparser;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -32,8 +33,12 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
 
         for (int i = 0; i < groupByExpressions.size(); i++) {
             Expression expression = groupByExpressions.get(i);
-
-            String replaceColumn = parseVisitorHelper.getReplaceColumn(expression.toString(), fieldNameMap,
+            String columnName = expression.toString();
+            if (expression instanceof Function && Objects.nonNull(
+                    ((Function) expression).getParameters().getExpressions().get(0))) {
+                columnName = ((Function) expression).getParameters().getExpressions().get(0).toString();
+            }
+            String replaceColumn = parseVisitorHelper.getReplaceColumn(columnName, fieldNameMap,
                     exactReplace);
             if (StringUtils.isNotEmpty(replaceColumn)) {
                 if (expression instanceof Column) {

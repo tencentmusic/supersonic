@@ -62,9 +62,9 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         String sql = semanticCorrectInfo.getSql();
         Long modelId = semanticCorrectInfo.getParseInfo().getModel().getModel();
 
-        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+        List<SchemaElement> metrics = getMetricElements(modelId);
 
-        Map<String, String> metricToAggregate = semanticSchema.getMetrics(modelId).stream()
+        Map<String, String> metricToAggregate = metrics.stream()
                 .map(schemaElement -> {
                     if (Objects.isNull(schemaElement.getDefaultAgg())) {
                         schemaElement.setDefaultAgg(AggregateTypeEnum.SUM.name());
@@ -78,5 +78,15 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
         String aggregateSql = SqlParserUpdateHelper.addAggregateToField(sql, metricToAggregate);
         semanticCorrectInfo.setSql(aggregateSql);
+    }
+
+    protected List<SchemaElement> getMetricElements(Long modelId) {
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+        return semanticSchema.getMetrics(modelId);
+    }
+
+    protected List<SchemaElement> getDimensionElements(Long modelId) {
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+        return semanticSchema.getDimensions(modelId);
     }
 }
