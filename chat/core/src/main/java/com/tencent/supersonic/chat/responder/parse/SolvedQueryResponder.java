@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.queryresponder;
+package com.tencent.supersonic.chat.responder.parse;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingConfig;
 import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingResp;
 import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrieval;
+import com.tencent.supersonic.chat.responder.query.QueryResponder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -30,15 +31,15 @@ import java.util.Set;
 
 @Slf4j
 @Component
-public class DefaultQueryResponder implements QueryResponder {
+public class SolvedQueryResponder implements QueryResponder {
 
 
     private EmbeddingConfig embeddingConfig;
 
     private RestTemplate restTemplate;
 
-    public DefaultQueryResponder(EmbeddingConfig embeddingConfig,
-                          RestTemplate restTemplate) {
+    public SolvedQueryResponder(EmbeddingConfig embeddingConfig,
+                                RestTemplate restTemplate) {
         this.embeddingConfig = embeddingConfig;
         this.restTemplate = restTemplate;
     }

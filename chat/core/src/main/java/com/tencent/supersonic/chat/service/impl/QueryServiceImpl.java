@@ -30,7 +30,7 @@ import com.tencent.supersonic.chat.query.QuerySelector;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.llm.dsl.DslQuery;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMResp;
-import com.tencent.supersonic.chat.queryresponder.QueryResponder;
+import com.tencent.supersonic.chat.responder.query.QueryResponder;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SemanticService;
