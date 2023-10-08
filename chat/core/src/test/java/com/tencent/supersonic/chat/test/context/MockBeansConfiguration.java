@@ -41,7 +41,8 @@ public class MockBeansConfiguration {
         when(chatService.getOrCreateContext(1)).thenReturn(context);
     }
 
-    public static void buildHttpSemanticServiceImpl(SemanticInterpreter httpSemanticInterpreter, List<DimSchemaResp> dimensionDescs,
+    public static void buildHttpSemanticServiceImpl(SemanticInterpreter httpSemanticInterpreter,
+                                                    List<DimSchemaResp> dimensionDescs,
                                                     List<MetricSchemaResp> metricDescs) {
         DefaultMetric defaultMetricDesc = new DefaultMetric();
         defaultMetricDesc.setUnit(3);
