@@ -29,7 +29,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class LocalSemanticLayer extends BaseSemanticLayer {
+public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
 
     private SchemaService schemaService;
     private DimensionService dimensionService;

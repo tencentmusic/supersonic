@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.utils;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.config.DefaultMetric;
 import com.tencent.supersonic.chat.config.Dim4Dict;
 import com.tencent.supersonic.common.pojo.QueryColumn;
@@ -40,7 +40,7 @@ import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE_DOUBLE;
 public class DictQueryHelper {
 
     private static final Long MAX_FREQUENCY = 99999999L;
-    private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
+    private SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
     @Value("${dimension.multi.value.split:#}")
     private String dimMultiValueSplit;
     @Value("${dimension.value.show:50}")
@@ -55,7 +55,7 @@ public class DictQueryHelper {
         List<String> data = new ArrayList<>();
         QueryStructReq queryStructCmd = generateQueryStructCmd(modelId, defaultMetricDesc, dim4Dict);
         try {
-            QueryResultWithSchemaResp queryResultWithColumns = semanticLayer.queryByStruct(queryStructCmd, user);
+            QueryResultWithSchemaResp queryResultWithColumns = semanticInterpreter.queryByStruct(queryStructCmd, user);
             log.info("fetchDimValueSingle sql:{}", queryResultWithColumns.getSql());
             String nature = String.format("_%d_%d", modelId, dim4Dict.getDimId());
             String dimNameRewrite = rewriteDimName(queryResultWithColumns.getColumns(), dim4Dict.getBizName());

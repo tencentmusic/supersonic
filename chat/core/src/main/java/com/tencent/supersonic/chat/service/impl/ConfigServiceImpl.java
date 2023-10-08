@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.service.impl;
 
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
@@ -63,7 +63,7 @@ public class ConfigServiceImpl implements ConfigService {
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
-    private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
+    private SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
 
 
     public ConfigServiceImpl(ChatConfigRepository chatConfigRepository,
@@ -353,7 +353,7 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public List<ChatConfigRichResp> getAllChatRichConfig() {
         List<ChatConfigRichResp> chatConfigRichInfoList = new ArrayList<>();
-        List<ModelSchema> modelSchemas = semanticLayer.getModelSchema();
+        List<ModelSchema> modelSchemas = semanticInterpreter.getModelSchema();
         modelSchemas.stream().forEach(modelSchema -> {
             ChatConfigRichResp chatConfigRichInfo = getConfigRichInfo(modelSchema.getModel().getId());
             if (Objects.nonNull(chatConfigRichInfo)) {

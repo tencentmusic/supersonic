@@ -31,7 +31,7 @@ import java.util.List;
  * as proxy to a remote semantic service.
  * </p>
  */
-public interface SemanticLayer {
+public interface SemanticInterpreter {
 
     QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user);
 
