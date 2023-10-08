@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -123,7 +122,7 @@ public class CalculateAggConverter implements SemanticConverter {
 
     @Override
     public void converter(Catalog catalog, QueryStructReq queryStructCmd, ParseSqlReq sqlCommend,
-                          MetricReq metricCommand) throws Exception {
+            MetricReq metricCommand) throws Exception {
         DatabaseResp databaseResp = catalog.getDatabaseByModelId(queryStructCmd.getModelId());
         ParseSqlReq parseSqlReq = generateSqlCommend(queryStructCmd,
                 EngineTypeEnum.valueOf(databaseResp.getType().toUpperCase()), databaseResp.getVersion());
@@ -150,7 +149,7 @@ public class CalculateAggConverter implements SemanticConverter {
     }
 
     public ParseSqlReq generateRatioSqlCommand(QueryStructReq queryStructCmd, EngineTypeEnum engineTypeEnum,
-                                               String version)
+            String version)
             throws Exception {
         check(queryStructCmd);
         ParseSqlReq sqlCommand = new ParseSqlReq();
@@ -384,7 +383,7 @@ public class CalculateAggConverter implements SemanticConverter {
     }
 
 
-    private static String getAllJoinSelect(QueryStructReq queryStructCmd, String alias) {
+    private String getAllJoinSelect(QueryStructReq queryStructCmd, String alias) {
         String aggStr = queryStructCmd.getAggregators().stream()
                 .map(f -> getSelectField(f, alias) + " as " + getSelectField(f, "")
                         + "_roll")
@@ -418,23 +417,18 @@ public class CalculateAggConverter implements SemanticConverter {
     }
 
 
-    private static String getAllSelect(QueryStructReq queryStructCmd, String alias) {
+    private String getAllSelect(QueryStructReq queryStructCmd, String alias) {
         String aggStr = queryStructCmd.getAggregators().stream().map(f -> getSelectField(f, alias))
                 .collect(Collectors.joining(","));
         return CollectionUtils.isEmpty(queryStructCmd.getGroups()) ? aggStr
                 : alias + String.join("," + alias, queryStructCmd.getGroups()) + "," + aggStr;
     }
 
-    private static String getSelectField(final Aggregator agg, String alias) {
+    private String getSelectField(final Aggregator agg, String alias) {
         if (agg.getFunc().equals(AggOperatorEnum.RATIO_OVER) || agg.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
             return alias + agg.getColumn();
         }
-        if (CollectionUtils.isEmpty(agg.getArgs())) {
-            return agg.getFunc() + "( " + alias + agg.getColumn() + " ) AS " + agg.getColumn() + " ";
-        }
-        return agg.getFunc() + "( " + agg.getArgs().stream().map(arg ->
-                arg.equals(agg.getColumn()) ? arg : (StringUtils.isNumeric(arg) ? arg : ("'" + arg + "'"))
-        ).collect(Collectors.joining(",")) + " ) AS " + agg.getColumn() + " ";
+        return sqlGenerateUtils.getSelectField(agg);
     }
 
     private String getGroupBy(QueryStructReq queryStructCmd) {
