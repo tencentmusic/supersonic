@@ -52,7 +52,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
-public class RemoteSemanticLayer extends BaseSemanticLayer {
+public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
 
     private S2ThreadContext s2ThreadContext;
 

@@ -13,8 +13,8 @@ com.tencent.supersonic.chat.api.component.SemanticParser=\
 com.tencent.supersonic.chat.api.component.QueryProcessor=\
     com.tencent.supersonic.chat.application.processor.SemanticQueryProcessor
 
-com.tencent.supersonic.chat.api.component.SemanticLayer=\
-    com.tencent.supersonic.knowledge.semantic.LocalSemanticLayer
+com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
+    com.tencent.supersonic.knowledge.semantic.LocalSemanticInterpreter
 
 com.tencent.supersonic.chat.query.QuerySelector=\
    com.tencent.supersonic.chat.query.HeuristicQuerySelector
