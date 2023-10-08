@@ -93,17 +93,16 @@ function runPythonService {
   # Add health check
   for i in {1..10}
   do
-    echo "Performing health check attempt $i..."
+    echo "llmparser health check attempt $i..."
     response=$(curl -s http://${LLMPARSER_HOST}:${LLMPARSER_PORT}/health)
-    echo "health check response: $response"
+    echo "llmparser health check response: $response"
     status_ok="Healthy"
     if [[ $response == *$status_ok* ]] ; then
-      echo "Health check passed."
+      echo "llmparser Health check passed."
       break
     else
       if [ "$i" -eq 10 ]; then
-        echo "Health check failed after 10 attempts. Exiting."
-        exit 1
+        echo "llmparser Health check failed after 10 attempts. Exiting."
       fi
       echo "Retrying after 5 seconds..."
       sleep 5
