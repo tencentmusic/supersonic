@@ -1,6 +1,4 @@
 from loguru import logger
+import sys
 
-
-def init_logger():
-    logger.remove()
-    logger.add("llmparser.info.log")
+# logger.add(sys.stdout, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}")

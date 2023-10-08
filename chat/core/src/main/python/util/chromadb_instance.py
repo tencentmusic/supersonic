@@ -4,9 +4,15 @@ from typing import Any, List, Mapping, Optional, Union
 import chromadb
 from chromadb.api import Collection
 from chromadb.config import Settings
-from loguru import logger
 
-from run_config import CHROMA_DB_PERSIST_PATH
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from util.logging_utils import logger
+
+from config.config_parse import CHROMA_DB_PERSIST_PATH
 
 client = chromadb.Client(
     Settings(
@@ -75,7 +81,7 @@ def query_chroma_collection(collection:Collection, query_texts:List[str],
     else:
         outer_filter = None
 
-    logger.info('outer_filter: ', outer_filter)
+    print('outer_filter: ', outer_filter)
     res = collection.query(query_texts=query_texts, n_results=n_results, where=outer_filter)
     return res
 

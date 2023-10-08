@@ -6,6 +6,8 @@ from typing import List, Mapping
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+from util.logging_utils import logger
+
 from langchain.prompts import PromptTemplate
 from langchain.prompts.few_shot import FewShotPromptTemplate
 from langchain.prompts.example_selector import SemanticSimilarityExampleSelector
