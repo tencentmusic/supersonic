@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.parser.plugin.function;
+package com.tencent.supersonic.chat.parser.llm.dsl;
 
 import lombok.Data;
 

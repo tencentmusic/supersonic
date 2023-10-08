@@ -227,8 +227,8 @@ public class SemanticService {
 
         QueryResultWithSchemaResp queryResultWithColumns = null;
         try {
-            queryResultWithColumns = semanticInterpreter.queryByStruct(QueryReqBuilder.buildStructReq(semanticParseInfo),
-                    user);
+            queryResultWithColumns = semanticInterpreter.queryByStruct(
+                    QueryReqBuilder.buildStructReq(semanticParseInfo), user);
         } catch (Exception e) {
             log.warn("setMainModel queryByStruct error, e:", e);
         }

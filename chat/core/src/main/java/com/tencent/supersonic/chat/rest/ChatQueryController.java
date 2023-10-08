@@ -54,11 +54,11 @@ public class ChatQueryController {
     }
 
     @PostMapping("execute")
-    public Object execute(@RequestBody ExecuteQueryReq queryCtx,
+    public Object execute(@RequestBody ExecuteQueryReq queryReq,
             HttpServletRequest request, HttpServletResponse response)
             throws Exception {
-        queryCtx.setUser(UserHolder.findUser(request, response));
-        return queryService.performExecution(queryCtx);
+        queryReq.setUser(UserHolder.findUser(request, response));
+        return queryService.performExecution(queryReq);
     }
 
     @PostMapping("queryContext")
