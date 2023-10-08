@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.responder.parse;
+package com.tencent.supersonic.chat.utils;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -8,7 +8,6 @@ import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingConfig;
 import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingResp;
 import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrieval;
-import com.tencent.supersonic.chat.responder.query.QueryResponder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -31,20 +30,14 @@ import java.util.Set;
 
 @Slf4j
 @Component
-public class SolvedQueryResponder implements QueryResponder {
-
+public class SolvedQueryManager {
 
     private EmbeddingConfig embeddingConfig;
 
-    private RestTemplate restTemplate;
-
-    public SolvedQueryResponder(EmbeddingConfig embeddingConfig,
-                                RestTemplate restTemplate) {
+    public SolvedQueryManager(EmbeddingConfig embeddingConfig) {
         this.embeddingConfig = embeddingConfig;
-        this.restTemplate = restTemplate;
     }
 
-    @Override
     public void saveSolvedQuery(SolvedQueryReq solvedQueryReq) {
         String queryText = solvedQueryReq.getQueryText();
         try {
@@ -63,7 +56,6 @@ public class SolvedQueryResponder implements QueryResponder {
         }
     }
 
-    @Override
     public List<SolvedQueryRecallResp> recallSolvedQuery(String queryText, Integer agentId) {
         List<SolvedQueryRecallResp> solvedQueryRecallResps = Lists.newArrayList();
         try {
@@ -82,6 +74,7 @@ public class SolvedQueryResponder implements QueryResponder {
             String jsonBody = JSONObject.toJSONString(map, SerializerFeature.WriteMapNullValue);
             HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
             log.info("[embedding] request body:{}, url:{}", jsonBody, url);
+            RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<List<EmbeddingResp>> embeddingResponseEntity =
                     restTemplate.exchange(requestUrl, HttpMethod.POST, entity,
                             new ParameterizedTypeReference<List<EmbeddingResp>>() {
@@ -101,9 +94,9 @@ public class SolvedQueryResponder implements QueryResponder {
                         }
                         String id = embeddingRetrieval.getId();
                         SolvedQueryRecallResp solvedQueryRecallResp = SolvedQueryRecallResp.builder()
-                                        .queryText(embeddingRetrieval.getQuery())
-                                        .queryId(getQueryId(id)).parseId(getParseId(id))
-                                        .build();
+                                .queryText(embeddingRetrieval.getQuery())
+                                .queryId(getQueryId(id)).parseId(getParseId(id))
+                                .build();
                         solvedQueryRecallResps.add(solvedQueryRecallResp);
                         querySet.add(embeddingRetrieval.getQuery());
                     }
@@ -144,6 +137,7 @@ public class SolvedQueryResponder implements QueryResponder {
                     .fromHttpUrl(url).build().encode().toUri();
             HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
             log.info("[embedding] request body :{}, url:{}", jsonBody, url);
+            RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> responseEntity = restTemplate.exchange(requestUrl,
                     HttpMethod.POST, entity, new ParameterizedTypeReference<String>() {});
             log.info("[embedding] result body:{}", responseEntity);
@@ -153,4 +147,5 @@ public class SolvedQueryResponder implements QueryResponder {
         }
         return ResponseEntity.of(Optional.empty());
     }
+
 }
