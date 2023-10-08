@@ -178,9 +178,76 @@ export function isProd() {
 }
 
 export function setToken(token: string) {
-  localStorage.setItem('SUPERSONIC_CHAT_TOKEN', token);
+  localStorage.setItem('SUPERSONIC_TOKEN', token);
 }
 
 export function getToken() {
-  return localStorage.getItem('SUPERSONIC_CHAT_TOKEN');
+  return localStorage.getItem('SUPERSONIC_TOKEN');
 }
+
+export const updateMessageContainerScroll = (nodeId?: string) => {
+  setTimeout(() => {
+    const ele: any = document.getElementById('messageContainer');
+    if (ele && ele.scrollHeight > ele.clientHeight) {
+      if (nodeId) {
+        const node = document.getElementById(nodeId);
+        if (node) {
+          ele.scrollTop = ele.scrollHeight - node.clientHeight - 130;
+        }
+      } else {
+        ele.scrollTop = ele.scrollHeight;
+      }
+    }
+  }, 100);
+};
+
+/**
+ * UUID生成器
+ * @param len 长度 number
+ * @param radix 随机数基数 number
+ * @returns {string}
+ */
+export const uuid = (len: number = 8, radix: number = 62) => {
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+  const uuid: string[] = [];
+  let i;
+
+  if (len) {
+    // Compact form
+    for (i = 0; i < len; i++) {
+      uuid[i] = chars[Math.floor(Math.random() * radix)];
+    }
+  } else {
+    // rfc4122, version 4 form
+    let r;
+
+    // rfc4122 requires these characters
+    uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+    uuid[14] = '4';
+
+    // Fill in random data.  At i==19 set the high bits of clock sequence as
+    // per rfc4122, sec. 4.1.5
+    for (i = 0; i < 36; i++) {
+      if (!uuid[i]) {
+        r = Math.floor(Math.random() * 16);
+        uuid[i] = chars[i === 19 ? ((r % 4) % 8) + 8 : r];
+      }
+    }
+  }
+  return uuid.join('');
+};
+
+let utilCanvas: any = null;
+
+export const getTextWidth = (
+  text: string,
+  fontSize: string = '16px',
+  fontWeight: string = 'normal',
+  fontFamily: string = 'DINPro Medium',
+): number => {
+  const canvas = utilCanvas || (utilCanvas = document.createElement('canvas'));
+  const context = canvas.getContext('2d');
+  context.font = `${fontWeight} ${fontSize} ${fontFamily}`;
+  const metrics = context.measureText(text);
+  return Math.ceil(metrics.width);
+};

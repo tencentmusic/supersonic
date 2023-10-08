@@ -13,11 +13,6 @@ import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 @Slf4j
 public class DateFunctionHelper {
 
-    public static final String DATE_FUNCTION = "datediff";
-    public static final double HALF_YEAR = 0.5d;
-    public static final int SIX_MONTH = 6;
-    public static final String EQUAL = "=";
-
     public static String getStartDateStr(ComparisonOperator minorThanEquals, List<Expression> expressions) {
         String unitValue = getUnit(expressions);
         String dateValue = getEndDateValue(expressions);
@@ -27,9 +22,9 @@ public class DateFunctionHelper {
         if (rightExpression instanceof DoubleValue) {
             DoubleValue value = (DoubleValue) rightExpression;
             double doubleValue = value.getValue();
-            if (DatePeriodEnum.YEAR.equals(datePeriodEnum) && doubleValue == HALF_YEAR) {
+            if (DatePeriodEnum.YEAR.equals(datePeriodEnum) && doubleValue == JsqlConstants.HALF_YEAR) {
                 datePeriodEnum = DatePeriodEnum.MONTH;
-                dateStr = DateUtils.getBeforeDate(dateValue, SIX_MONTH, datePeriodEnum);
+                dateStr = DateUtils.getBeforeDate(dateValue, JsqlConstants.SIX_MONTH, datePeriodEnum);
             }
         } else if (rightExpression instanceof LongValue) {
             LongValue value = (LongValue) rightExpression;
@@ -41,7 +36,7 @@ public class DateFunctionHelper {
 
     public static String getEndDateOperator(ComparisonOperator comparisonOperator) {
         String operator = comparisonOperator.getStringExpression();
-        if (EQUAL.equalsIgnoreCase(operator)) {
+        if (JsqlConstants.EQUAL.equalsIgnoreCase(operator)) {
             operator = "<=";
         }
         return operator;

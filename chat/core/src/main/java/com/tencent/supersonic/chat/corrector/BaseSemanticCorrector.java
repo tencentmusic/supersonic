@@ -6,10 +6,10 @@ import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
-import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -23,14 +23,11 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
-    public static final String DATE_FIELD = "数据日期";
-
-
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
         semanticCorrectInfo.setPreSql(semanticCorrectInfo.getSql());
     }
 
-    protected Map<String, String> getFieldToBizName(Long modelId) {
+    protected Map<String, String> getFieldNameMap(Long modelId) {
 
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
 
@@ -40,8 +37,8 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
         Map<String, String> result = dbAllFields.stream()
                 .filter(entry -> entry.getModel().equals(modelId))
-                .collect(Collectors.toMap(SchemaElement::getName, a -> a.getBizName(), (k1, k2) -> k1));
-        result.put(DATE_FIELD, TimeDimensionEnum.DAY.getName());
+                .collect(Collectors.toMap(SchemaElement::getName, a -> a.getName(), (k1, k2) -> k1));
+        result.put(DateUtils.DATE_FIELD, DateUtils.DATE_FIELD);
         return result;
     }
 
@@ -55,9 +52,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
         whereFields.addAll(SqlParserSelectHelper.getOrderByFields(sql));
         whereFields.removeAll(selectFields);
-        whereFields.remove(TimeDimensionEnum.DAY.getName());
-        whereFields.remove(TimeDimensionEnum.WEEK.getName());
-        whereFields.remove(TimeDimensionEnum.MONTH.getName());
+        whereFields.remove(DateUtils.DATE_FIELD);
         String replaceFields = SqlParserUpdateHelper.addFieldsToSelect(sql, new ArrayList<>(whereFields));
         semanticCorrectInfo.setSql(replaceFields);
     }
@@ -67,15 +62,15 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         String sql = semanticCorrectInfo.getSql();
         Long modelId = semanticCorrectInfo.getParseInfo().getModel().getModel();
 
-        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+        List<SchemaElement> metrics = getMetricElements(modelId);
 
-        Map<String, String> metricToAggregate = semanticSchema.getMetrics(modelId).stream()
+        Map<String, String> metricToAggregate = metrics.stream()
                 .map(schemaElement -> {
                     if (Objects.isNull(schemaElement.getDefaultAgg())) {
                         schemaElement.setDefaultAgg(AggregateTypeEnum.SUM.name());
                     }
                     return schemaElement;
-                }).collect(Collectors.toMap(a -> a.getBizName(), a -> a.getDefaultAgg(), (k1, k2) -> k1));
+                }).collect(Collectors.toMap(a -> a.getName(), a -> a.getDefaultAgg(), (k1, k2) -> k1));
 
         if (CollectionUtils.isEmpty(metricToAggregate)) {
             return;
@@ -83,5 +78,15 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
         String aggregateSql = SqlParserUpdateHelper.addAggregateToField(sql, metricToAggregate);
         semanticCorrectInfo.setSql(aggregateSql);
+    }
+
+    protected List<SchemaElement> getMetricElements(Long modelId) {
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+        return semanticSchema.getMetrics(modelId);
+    }
+
+    protected List<SchemaElement> getDimensionElements(Long modelId) {
+        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+        return semanticSchema.getDimensions(modelId);
     }
 }

@@ -47,8 +47,8 @@ export type FilterItemType = {
   elementID: number;
   name: string;
   bizName: string;
-  operator: string;
-  type: string;
+  operator?: string;
+  type?: string;
   value: any;
 };
 
@@ -69,6 +69,12 @@ export type EntityDimensionType = {
   value: string;
 }
 
+export type SqlInfoType = {
+  llmParseSql: string;
+  logicSql: string;
+  querySql: string;
+}
+
 export type ChatContextType = {
   id: number;
   queryId: number;
@@ -86,6 +92,7 @@ export type ChatContextType = {
   queryMode: string;
   dimensionFilters: FilterItemType[];
   properties: any;
+  sqlInfo: SqlInfoType;
 };
 
 export enum MsgValidTypeEnum {
@@ -143,6 +150,7 @@ export type ParseDataType = {
   state: ParseStateEnum;
   selectedParses: ChatContextType[];
   candidateParses: ChatContextType[];
+  similarSolvedQuery: SimilarQuestionType[];
 }
 
 export type QueryDataType = {
@@ -173,7 +181,7 @@ export enum SemanticTypeEnum {
 };
 
 export const SEMANTIC_TYPE_MAP = {
-  [SemanticTypeEnum.DOMAIN]: '数据模型',
+  [SemanticTypeEnum.DOMAIN]: '数据来源',
   [SemanticTypeEnum.DIMENSION]: '维度',
   [SemanticTypeEnum.METRIC]: '指标',
   [SemanticTypeEnum.VALUE]: '维度值',
@@ -217,4 +225,17 @@ export type DrillDownDimensionType = {
   model: number;
   name: string;
   bizName: string;
+}
+
+export type SendMsgParamsType = {
+  msg: string;
+  agentId: number;
+  modelId: number;
+  filters?: FilterItemType[];
+}
+
+export type SimilarQuestionType = {
+  // queryId: number;
+  // parseId: number;
+  queryText: string;
 }

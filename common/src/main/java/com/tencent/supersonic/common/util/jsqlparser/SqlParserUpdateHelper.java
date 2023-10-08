@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
@@ -15,6 +16,7 @@ import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.GroupByElement;
@@ -65,11 +67,11 @@ public class SqlParserUpdateHelper {
         return selectStatement.toString();
     }
 
-    public static String replaceFields(String sql, Map<String, String> fieldToBizName) {
-        return replaceFields(sql, fieldToBizName, false);
+    public static String replaceFields(String sql, Map<String, String> fieldNameMap) {
+        return replaceFields(sql, fieldNameMap, false);
     }
 
-    public static String replaceFields(String sql, Map<String, String> fieldToBizName, boolean exactReplace) {
+    public static String replaceFields(String sql, Map<String, String> fieldNameMap, boolean exactReplace) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
         if (!(selectBody instanceof PlainSelect)) {
@@ -78,7 +80,7 @@ public class SqlParserUpdateHelper {
         PlainSelect plainSelect = (PlainSelect) selectBody;
         //1. replace where fields
         Expression where = plainSelect.getWhere();
-        FieldReplaceVisitor visitor = new FieldReplaceVisitor(fieldToBizName, exactReplace);
+        FieldReplaceVisitor visitor = new FieldReplaceVisitor(fieldNameMap, exactReplace);
         if (Objects.nonNull(where)) {
             where.accept(visitor);
         }
@@ -92,14 +94,14 @@ public class SqlParserUpdateHelper {
         List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
         if (!CollectionUtils.isEmpty(orderByElements)) {
             for (OrderByElement orderByElement : orderByElements) {
-                orderByElement.accept(new OrderByReplaceVisitor(fieldToBizName, exactReplace));
+                orderByElement.accept(new OrderByReplaceVisitor(fieldNameMap, exactReplace));
             }
         }
 
         //4. replace group by fields
         GroupByElement groupByElement = plainSelect.getGroupBy();
         if (Objects.nonNull(groupByElement)) {
-            groupByElement.accept(new GroupByReplaceVisitor(fieldToBizName, exactReplace));
+            groupByElement.accept(new GroupByReplaceVisitor(fieldNameMap, exactReplace));
         }
         //5. replace having fields
         Expression having = plainSelect.getHaving();
@@ -468,10 +470,85 @@ public class SqlParserUpdateHelper {
         List<Expression> waitingForAdds = visitor.getWaitingForAdds();
         if (!CollectionUtils.isEmpty(waitingForAdds)) {
             for (Expression waitingForAdd : waitingForAdds) {
-                plainSelect.setHaving(waitingForAdd);
+                Expression having = plainSelect.getHaving();
+                if (Objects.isNull(having)) {
+                    plainSelect.setHaving(waitingForAdd);
+                } else {
+                    plainSelect.setHaving(new AndExpression(having, waitingForAdd));
+                }
             }
         }
         return selectStatement.toString();
+    }
+
+    public static String removeWhereCondition(String sql, Set<String> removeFieldNames) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        selectBody.accept(new SelectVisitorAdapter() {
+            @Override
+            public void visit(PlainSelect plainSelect) {
+                removeWhereCondition(plainSelect.getWhere(), removeFieldNames);
+            }
+        });
+        return selectStatement.toString();
+    }
+
+    private static void removeWhereCondition(Expression whereExpression, Set<String> removeFieldNames) {
+        if (whereExpression == null) {
+            return;
+        }
+        removeWhereExpression(whereExpression, removeFieldNames);
+    }
+
+    private static void removeWhereExpression(Expression whereExpression, Set<String> removeFieldNames) {
+        if (isLogicExpression(whereExpression)) {
+            AndExpression andExpression = (AndExpression) whereExpression;
+            Expression leftExpression = andExpression.getLeftExpression();
+            Expression rightExpression = andExpression.getRightExpression();
+            if (isLogicExpression(leftExpression)) {
+                removeWhereExpression(leftExpression, removeFieldNames);
+            } else {
+                removeExpressionWithConstant(leftExpression, removeFieldNames);
+            }
+            if (isLogicExpression(rightExpression)) {
+                removeWhereExpression(rightExpression, removeFieldNames);
+            } else {
+                removeExpressionWithConstant(rightExpression, removeFieldNames);
+            }
+            removeExpressionWithConstant(rightExpression, removeFieldNames);
+        } else {
+            removeExpressionWithConstant(whereExpression, removeFieldNames);
+        }
+    }
+
+    private static void removeExpressionWithConstant(Expression expression, Set<String> removeFieldNames) {
+        if (!(expression instanceof EqualsTo)) {
+            return;
+        }
+        ComparisonOperator comparisonOperator = (ComparisonOperator) expression;
+        String columnName = "";
+        if (comparisonOperator.getRightExpression() instanceof Column) {
+            columnName = ((Column) (comparisonOperator).getRightExpression()).getColumnName();
+        }
+        if (comparisonOperator.getLeftExpression() instanceof Column) {
+            columnName = ((Column) (comparisonOperator).getLeftExpression()).getColumnName();
+        }
+        if (!removeFieldNames.contains(columnName)) {
+            return;
+        }
+        try {
+            ComparisonOperator constantExpression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(
+                    JsqlConstants.EQUAL_CONSTANT);
+            comparisonOperator.setLeftExpression(constantExpression.getLeftExpression());
+            comparisonOperator.setRightExpression(constantExpression.getRightExpression());
+            comparisonOperator.setASTNode(constantExpression.getASTNode());
+        } catch (JSQLParserException e) {
+            log.error("JSQLParserException", e);
+        }
     }
 }
 

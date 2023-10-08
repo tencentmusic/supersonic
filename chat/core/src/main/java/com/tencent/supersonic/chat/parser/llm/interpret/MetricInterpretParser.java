@@ -5,7 +5,7 @@ import com.google.common.collect.Sets;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
 import com.tencent.supersonic.chat.agent.tool.MetricInterpretTool;
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
@@ -82,8 +82,8 @@ public class MetricInterpretParser implements SemanticParser {
     }
 
     public Set<SchemaElement> getMetrics(List<Long> metricIds, Long modelId) {
-        SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
-        ModelSchema modelSchema = semanticLayer.getModelSchema(modelId, true);
+        SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
+        ModelSchema modelSchema = semanticInterpreter.getModelSchema(modelId, true);
         Set<SchemaElement> metrics = modelSchema.getMetrics();
         return metrics.stream().filter(schemaElement -> metricIds.contains(schemaElement.getId()))
                 .collect(Collectors.toSet());

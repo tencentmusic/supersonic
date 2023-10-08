@@ -4,6 +4,7 @@ from typing import Any, List, Mapping, Optional, Union
 import chromadb
 from chromadb.api import Collection
 from chromadb.config import Settings
+from loguru import logger
 
 from config.config_parse import CHROMA_DB_PERSIST_PATH
 
@@ -29,7 +30,7 @@ def empty_chroma_collection_2(collection:Collection):
 
     size_of_new_collection = new_collection.count()
 
-    print(f'Collection {collection_name} emptied. Size of new collection: {size_of_new_collection}')
+    logger.info(f'Collection {collection_name} emptied. Size of new collection: {size_of_new_collection}')
 
     return new_collection
 

@@ -24,8 +24,8 @@ CHROMA_DB_PERSIST_PATH = os.path.join(PROJECT_DIR_PATH, CHROMA_DB_PERSIST_DIR)
 HF_TEXT2VEC_MODEL_NAME = "GanymedeNil/text2vec-large-chinese"
 
 if __name__ == "__main__":
-    print("PROJECT_DIR_PATH: ", PROJECT_DIR_PATH)
-    print("EMB_MODEL_PATH: ", HF_TEXT2VEC_MODEL_NAME)
-    print("CHROMA_DB_PERSIST_PATH: ", CHROMA_DB_PERSIST_PATH)
-    print("LLMPARSER_HOST: ", LLMPARSER_HOST)
-    print("LLMPARSER_PORT: ", LLMPARSER_PORT)
+    logger.info("PROJECT_DIR_PATH: {}", PROJECT_DIR_PATH)
+    logger.info("EMB_MODEL_PATH: {}", HF_TEXT2VEC_MODEL_NAME)
+    logger.info("CHROMA_DB_PERSIST_PATH: {}", CHROMA_DB_PERSIST_PATH)
+    logger.info("LLMPARSER_HOST: {}", LLMPARSER_HOST)
+    logger.info("LLMPARSER_PORT: {}", LLMPARSER_PORT)

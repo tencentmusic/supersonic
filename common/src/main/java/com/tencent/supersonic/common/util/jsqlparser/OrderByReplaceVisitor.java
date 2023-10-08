@@ -11,11 +11,11 @@ import net.sf.jsqlparser.statement.select.OrderByVisitorAdapter;
 public class OrderByReplaceVisitor extends OrderByVisitorAdapter {
 
     ParseVisitorHelper parseVisitorHelper = new ParseVisitorHelper();
-    private Map<String, String> fieldToBizName;
+    private Map<String, String> fieldNameMap;
     private boolean exactReplace;
 
-    public OrderByReplaceVisitor(Map<String, String> fieldToBizName, boolean exactReplace) {
-        this.fieldToBizName = fieldToBizName;
+    public OrderByReplaceVisitor(Map<String, String> fieldNameMap, boolean exactReplace) {
+        this.fieldNameMap = fieldNameMap;
         this.exactReplace = exactReplace;
     }
 
@@ -23,14 +23,14 @@ public class OrderByReplaceVisitor extends OrderByVisitorAdapter {
     public void visit(OrderByElement orderBy) {
         Expression expression = orderBy.getExpression();
         if (expression instanceof Column) {
-            parseVisitorHelper.replaceColumn((Column) expression, fieldToBizName, exactReplace);
+            parseVisitorHelper.replaceColumn((Column) expression, fieldNameMap, exactReplace);
         }
         if (expression instanceof Function) {
             Function function = (Function) expression;
             List<Expression> expressions = function.getParameters().getExpressions();
             for (Expression column : expressions) {
                 if (column instanceof Column) {
-                    parseVisitorHelper.replaceColumn((Column) column, fieldToBizName, exactReplace);
+                    parseVisitorHelper.replaceColumn((Column) column, fieldNameMap, exactReplace);
                 }
             }
         }

@@ -155,9 +155,11 @@ public class AuthCommonService {
 
         boolean doDesensitization = false;
         for (QueryColumn queryColumn : columns) {
-            if (need2Apply.contains(queryColumn.getNameEn())) {
-                doDesensitization = true;
-                break;
+            for (String sensitiveCol : need2Apply) {
+                if (queryColumn.getNameEn().contains(sensitiveCol)) {
+                    doDesensitization = true;
+                    break;
+                }
             }
         }
         if (!doDesensitization) {
@@ -192,8 +194,15 @@ public class AuthCommonService {
             Map<String, Object> row = result.get(i);
             Map<String, Object> newRow = new HashMap<>();
             for (String col : row.keySet()) {
-                if (need2Apply.contains(col)) {
-                    newRow.put(col, "****");
+                boolean sensitive = false;
+                for (String sensitiveCol : need2Apply) {
+                    if (col.contains(sensitiveCol)) {
+                        sensitive = true;
+                        break;
+                    }
+                }
+                if (sensitive) {
+                    newRow.put(col, "******");
                 } else {
                     newRow.put(col, row.get(col));
                 }

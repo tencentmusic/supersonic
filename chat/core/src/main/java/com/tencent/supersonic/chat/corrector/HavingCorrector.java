@@ -25,7 +25,7 @@ public class HavingCorrector extends BaseSemanticCorrector {
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
 
         Set<String> metrics = semanticSchema.getMetrics(modelId).stream()
-                .map(schemaElement -> schemaElement.getBizName()).collect(Collectors.toSet());
+                .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());
 
         if (CollectionUtils.isEmpty(metrics)) {
             return;

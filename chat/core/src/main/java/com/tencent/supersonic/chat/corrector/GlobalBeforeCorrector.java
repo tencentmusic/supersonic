@@ -27,23 +27,19 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
 
         updateFieldNameByLinkingValue(semanticCorrectInfo);
 
-        updateFieldNameByBizName(semanticCorrectInfo);
-
-        addAggregateToMetric(semanticCorrectInfo);
+        correctFieldName(semanticCorrectInfo);
     }
-
-
 
     private void replaceAlias(SemanticCorrectInfo semanticCorrectInfo) {
         String replaceAlias = SqlParserUpdateHelper.replaceAlias(semanticCorrectInfo.getSql());
         semanticCorrectInfo.setSql(replaceAlias);
     }
 
-    private void updateFieldNameByBizName(SemanticCorrectInfo semanticCorrectInfo) {
+    private void correctFieldName(SemanticCorrectInfo semanticCorrectInfo) {
 
-        Map<String, String> fieldToBizName = getFieldToBizName(semanticCorrectInfo.getParseInfo().getModelId());
+        Map<String, String> fieldNameMap = getFieldNameMap(semanticCorrectInfo.getParseInfo().getModelId());
 
-        String sql = SqlParserUpdateHelper.replaceFields(semanticCorrectInfo.getSql(), fieldToBizName);
+        String sql = SqlParserUpdateHelper.replaceFields(semanticCorrectInfo.getSql(), fieldNameMap);
 
         semanticCorrectInfo.setSql(sql);
     }
