@@ -1,14 +1,15 @@
 package com.tencent.supersonic.semantic.query.utils;
 
+import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
+
+import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-import com.tencent.supersonic.common.pojo.Aggregator;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
 
 @Component
 @Slf4j
@@ -54,9 +55,9 @@ public class SqlGenerateUtils {
 
     public String getSelectField(final Aggregator agg) {
         if (CollectionUtils.isEmpty(agg.getArgs())) {
-            return agg.getFunc() + " ( " + agg.getColumn() + " ) AS " + agg.getColumn() + " ";
+            return agg.getFunc() + "( " + agg.getColumn() + " ) AS " + agg.getColumn() + " ";
         }
-        return agg.getFunc() + " ( " + agg.getArgs().stream().map(arg ->
+        return agg.getFunc() + "( " + agg.getArgs().stream().map(arg ->
                 arg.equals(agg.getColumn()) ? arg : (StringUtils.isNumeric(arg) ? arg : ("'" + arg + "'"))
         ).collect(Collectors.joining(",")) + " ) AS " + agg.getColumn() + " ";
     }
