@@ -11,4 +11,6 @@ public class FilterExpression {
 
     private Object fieldValue;
 
+    private String function;
+
 }
