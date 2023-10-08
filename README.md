@@ -8,12 +8,12 @@
 
 ## Motivation
 
-The emergence of Large Language Model (LLM) like ChatGPT is reshaping the way information is retrieved. In the field of data analytics, both academia and industry are primarily focused on leveraging LLM to convert natural language into SQL (so called text2sql or nl2sql). While some works show promising results, they are still not applicable to real-world scenarios. The biggest obstacle stems from the 
+The emergence of Large Language Model (LLM) like ChatGPT is reshaping the way information is retrieved. In the field of data analytics, both academia and industry are primarily focused on leveraging LLM to convert natural language into SQL (so called text2sql or nl2sql). While some works exhibit promising results, their **reliability** is inadequate for real-world applications.  
 
 From our perspective, the key to filling the real-world gap lies in three aspects: 
 1. Introduce a semantic layer encapsulating underlying data context(joins, formulas, etc) to reduce **complexity**.
 2. Augment the LLM with schema mappers(as a kind of preprocessor) and semantic correctors(as a kind of postprocessor) to mitigate **hallucination**.
-3. Utilize heuristic rules to improve **efficiency**(in terms of latency and cost).
+3. Utilize heuristic rules when necessary to improve **efficiency**(in terms of latency and cost).
 
 With these ideas in mind, we develop SuperSonic as a practical reference implementation and use it to power our real-world products. Additionally, to facilitate further development of ChatBI, we decide to open source SuperSonic as an extensible framework.
 
