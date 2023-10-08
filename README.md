@@ -40,7 +40,7 @@ The high-level architecture and main process flow is as follows:
 
 - **Semantic Corrector:** checks validity of extracted semantic information and performs correction and optimization if needed.
 
-- **Semantic Layer:** performs execution according to extracted semantic information. It generates SQL queries and executes them against physical data models.
+- **Semantic Interpreter:** performs execution according to extracted semantic information. It generates SQL statements and executes them against physical data models.
 
 - **Chat Plugin:** extends functionality with third-party tools. The LLM is going to select the most suitable one, given all configured plugins with function description and sample questions.
 

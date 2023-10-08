@@ -1,6 +1,6 @@
 package com.tencent.supersonic.knowledge.utils;
 
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 
 import java.util.List;
@@ -8,17 +8,17 @@ import java.util.Objects;
 
 public class ComponentFactory {
 
-    private static SemanticLayer semanticLayer;
+    private static SemanticInterpreter semanticInterpreter;
 
-    public static SemanticLayer getSemanticLayer() {
-        if (Objects.isNull(semanticLayer)) {
-            semanticLayer = init(SemanticLayer.class);
+    public static SemanticInterpreter getSemanticLayer() {
+        if (Objects.isNull(semanticInterpreter)) {
+            semanticInterpreter = init(SemanticInterpreter.class);
         }
-        return semanticLayer;
+        return semanticInterpreter;
     }
 
-    public static void setSemanticLayer(SemanticLayer layer) {
-        semanticLayer = layer;
+    public static void setSemanticLayer(SemanticInterpreter layer) {
+        semanticInterpreter = layer;
     }
 
     private static <T> List<T> init(Class<T> factoryType, List list) {

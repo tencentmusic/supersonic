@@ -12,7 +12,7 @@ import static com.tencent.supersonic.common.pojo.Constants.TIME_FORMAT;
 import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
@@ -78,7 +78,7 @@ public class SemanticService {
     @Autowired
     private AggregatorConfig aggregatorConfig;
 
-    private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
+    private SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
 
     public ModelSchema getModelSchema(Long id) {
         ModelSchema modelSchema = schemaService.getModelSchema(id);
@@ -227,7 +227,7 @@ public class SemanticService {
 
         QueryResultWithSchemaResp queryResultWithColumns = null;
         try {
-            queryResultWithColumns = semanticLayer.queryByStruct(QueryReqBuilder.buildStructReq(semanticParseInfo),
+            queryResultWithColumns = semanticInterpreter.queryByStruct(QueryReqBuilder.buildStructReq(semanticParseInfo),
                     user);
         } catch (Exception e) {
             log.warn("setMainModel queryByStruct error, e:", e);
@@ -393,7 +393,7 @@ public class SemanticService {
 
         queryStructReq.setGroups(new ArrayList<>(Arrays.asList(dateField)));
         queryStructReq.setDateInfo(getRatioDateConf(aggOperatorEnum, semanticParseInfo, results));
-        QueryResultWithSchemaResp queryResp = semanticLayer.queryByStruct(queryStructReq, user);
+        QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
         if (Objects.nonNull(queryResp) && !CollectionUtils.isEmpty(queryResp.getResultList())) {
 
             Map<String, Object> result = queryResp.getResultList().get(0);

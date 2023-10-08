@@ -4,7 +4,7 @@ package com.tencent.supersonic.chat.service.impl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
@@ -429,8 +429,8 @@ public class QueryServiceImpl implements QueryService {
             dimensionFilters.add(dimensionFilter);
             queryStructReq.setDimensionFilters(dimensionFilters);
         }
-        SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
-        QueryResultWithSchemaResp queryResultWithSchemaResp = semanticLayer.queryByStruct(queryStructReq, user);
+        SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
+        QueryResultWithSchemaResp queryResultWithSchemaResp = semanticInterpreter.queryByStruct(queryStructReq, user);
         Set<String> dimensionValues = new HashSet<>();
         queryResultWithSchemaResp.getResultList().removeIf(o -> {
             if (dimensionValues.contains(o.get(dimensionValueReq.getBizName()))) {

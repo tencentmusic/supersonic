@@ -2,7 +2,7 @@ package com.tencent.supersonic.knowledge.semantic;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
-public abstract class BaseSemanticLayer implements SemanticLayer {
+public abstract class BaseSemanticInterpreter implements SemanticInterpreter {
 
     protected final Cache<String, List<ModelSchemaResp>> modelSchemaCache =
             CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();

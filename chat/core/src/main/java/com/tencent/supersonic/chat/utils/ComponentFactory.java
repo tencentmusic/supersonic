@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.utils;
 
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 
 import com.tencent.supersonic.chat.api.component.SemanticCorrector;
@@ -20,7 +20,7 @@ public class ComponentFactory {
     private static List<SemanticParser> semanticParsers = new ArrayList<>();
 
     private static List<SemanticCorrector> dslCorrections = new ArrayList<>();
-    private static SemanticLayer semanticLayer;
+    private static SemanticInterpreter semanticInterpreter;
     private static QuerySelector querySelector;
     private static ModelResolver modelResolver;
     public static List<SchemaMapper> getSchemaMappers() {
@@ -36,15 +36,15 @@ public class ComponentFactory {
     }
 
 
-    public static SemanticLayer getSemanticLayer() {
-        if (Objects.isNull(semanticLayer)) {
-            semanticLayer = init(SemanticLayer.class);
+    public static SemanticInterpreter getSemanticLayer() {
+        if (Objects.isNull(semanticInterpreter)) {
+            semanticInterpreter = init(SemanticInterpreter.class);
         }
-        return semanticLayer;
+        return semanticInterpreter;
     }
 
-    public static void setSemanticLayer(SemanticLayer layer) {
-        semanticLayer = layer;
+    public static void setSemanticLayer(SemanticInterpreter layer) {
+        semanticInterpreter = layer;
     }
 
     public static QuerySelector getQuerySelector() {
