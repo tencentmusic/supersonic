@@ -38,6 +38,10 @@ public class SqlParserSelectHelper {
         if (Objects.nonNull(where)) {
             where.accept(new FieldAndValueAcquireVisitor(result));
         }
+        Expression having = plainSelect.getHaving();
+        if (Objects.nonNull(having)) {
+            having.accept(new FieldAndValueAcquireVisitor(result));
+        }
         return new ArrayList<>(result);
     }
 
