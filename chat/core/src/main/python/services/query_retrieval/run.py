@@ -5,10 +5,10 @@ import sys
 import uuid
 from typing import Any, List, Mapping, Optional, Union
 
-from loguru import logger
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from util.logging_utils import logger
 
 import chromadb
 from chromadb.config import Settings
@@ -16,7 +16,7 @@ from chromadb.api import Collection, Documents, Embeddings
 
 from util.text2vec import Text2VecEmbeddingFunction
 
-from run_config import SOLVED_QUERY_COLLECTION_NAME, PRESET_QUERY_COLLECTION_NAME
+from config.config_parse import SOLVED_QUERY_COLLECTION_NAME, PRESET_QUERY_COLLECTION_NAME
 from util.chromadb_instance import (client, 
                                     get_chroma_collection_size, query_chroma_collection, 
                                     parse_retrieval_chroma_collection_query, chroma_collection_query_retrieval_format,
