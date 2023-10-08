@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.config.DefaultMetric;
@@ -41,7 +40,7 @@ public class MockBeansConfiguration {
         when(chatService.getOrCreateContext(1)).thenReturn(context);
     }
 
-    public static void buildHttpSemanticServiceImpl(SemanticInterpreter httpSemanticInterpreter, List<DimSchemaResp> dimensionDescs,
+    public static void buildHttpSemanticServiceImpl(List<DimSchemaResp> dimensionDescs,
                                                     List<MetricSchemaResp> metricDescs) {
         DefaultMetric defaultMetricDesc = new DefaultMetric();
         defaultMetricDesc.setUnit(3);
