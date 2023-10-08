@@ -14,8 +14,8 @@ com.tencent.supersonic.chat.api.component.SemanticParser=\
     com.tencent.supersonic.chat.parser.plugin.function.FunctionBasedParser
 
 
-com.tencent.supersonic.chat.api.component.SemanticLayer=\
-    com.tencent.supersonic.knowledge.semantic.RemoteSemanticLayer
+com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
+    com.tencent.supersonic.knowledge.semantic.RemoteSemanticInterpreter
 
 com.tencent.supersonic.chat.query.QuerySelector=\
    com.tencent.supersonic.chat.query.HeuristicQuerySelector

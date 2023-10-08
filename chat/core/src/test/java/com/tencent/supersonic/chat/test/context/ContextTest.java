@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.test.context;
 import com.tencent.supersonic.chat.persistence.repository.impl.ChatContextRepositoryImpl;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.persistence.mapper.ChatContextMapper;
-import com.tencent.supersonic.knowledge.semantic.RemoteSemanticLayer;
+import com.tencent.supersonic.knowledge.semantic.RemoteSemanticInterpreter;
 import com.tencent.supersonic.chat.test.ChatBizLauncher;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
@@ -24,7 +24,7 @@ import org.springframework.web.client.RestTemplate;
 @MockBean(ModelService.class)
 @MockBean(ChatContextMapper.class)
 @MockBean(RestTemplate.class)
-@MockBean(RemoteSemanticLayer.class)
+@MockBean(RemoteSemanticInterpreter.class)
 @MockBean(ComponentFactory.class)
 //@MybatisTest
 //@AutoConfigureMybatis

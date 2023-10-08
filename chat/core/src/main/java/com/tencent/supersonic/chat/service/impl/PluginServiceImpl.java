@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.service.impl;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.request.PluginQueryReq;
 import com.tencent.supersonic.chat.persistence.dataobject.PluginDO;
 import com.tencent.supersonic.chat.persistence.dataobject.PluginDOExample;
@@ -152,8 +152,8 @@ public class PluginServiceImpl implements PluginService {
     }
 
     private List<Plugin> authCheck(List<Plugin> plugins, User user) {
-        SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
-        List<Long> modelIdAuthorized = semanticLayer.getModelList(AuthType.ADMIN, null, user).stream()
+        SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
+        List<Long> modelIdAuthorized = semanticInterpreter.getModelList(AuthType.ADMIN, null, user).stream()
                 .map(ModelResp::getId).collect(Collectors.toList());
         plugins = plugins.stream().filter(plugin -> {
             if (CollectionUtils.isEmpty(plugin.getModelList()) || plugin.isContainsAllModel()) {

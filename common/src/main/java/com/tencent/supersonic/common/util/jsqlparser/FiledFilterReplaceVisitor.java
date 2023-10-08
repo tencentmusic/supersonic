@@ -31,7 +31,7 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(MinorThan expr) {
-        List<Expression> expressions = parserFilter(expr, " 1 < 2 ");
+        List<Expression> expressions = parserFilter(expr, JsqlConstants.MINOR_THAN_CONSTANT);
         if (Objects.nonNull(expressions)) {
             waitingForAdds.addAll(expressions);
         }
@@ -39,7 +39,7 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(EqualsTo expr) {
-        List<Expression> expressions = parserFilter(expr, " 1 = 1 ");
+        List<Expression> expressions = parserFilter(expr, JsqlConstants.EQUAL_CONSTANT);
         if (Objects.nonNull(expressions)) {
             waitingForAdds.addAll(expressions);
         }
@@ -47,7 +47,7 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(MinorThanEquals expr) {
-        List<Expression> expressions = parserFilter(expr, " 1 <= 1 ");
+        List<Expression> expressions = parserFilter(expr, JsqlConstants.MINOR_THAN_EQUALS_CONSTANT);
         if (Objects.nonNull(expressions)) {
             waitingForAdds.addAll(expressions);
         }
@@ -56,7 +56,7 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(GreaterThan expr) {
-        List<Expression> expressions = parserFilter(expr, " 2 > 1 ");
+        List<Expression> expressions = parserFilter(expr, JsqlConstants.GREATER_THAN_CONSTANT);
         if (Objects.nonNull(expressions)) {
             waitingForAdds.addAll(expressions);
         }
@@ -64,7 +64,7 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
 
     @Override
     public void visit(GreaterThanEquals expr) {
-        List<Expression> expressions = parserFilter(expr, " 1 >= 1 ");
+        List<Expression> expressions = parserFilter(expr, JsqlConstants.GREATER_THAN_EQUALS_CONSTANT);
         if (Objects.nonNull(expressions)) {
             waitingForAdds.addAll(expressions);
         }
@@ -83,7 +83,7 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
             return result;
         }
         Function leftExpressionFunction = (Function) leftExpression;
-        if (leftExpressionFunction.toString().contains(DateFunctionHelper.DATE_FUNCTION)) {
+        if (leftExpressionFunction.toString().contains(JsqlConstants.DATE_FUNCTION)) {
             return result;
         }
 

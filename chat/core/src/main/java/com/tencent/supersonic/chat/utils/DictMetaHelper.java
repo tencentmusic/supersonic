@@ -4,7 +4,7 @@ import static com.tencent.supersonic.common.pojo.Constants.DAY;
 import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
 
 import com.github.pagehelper.PageInfo;
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.request.KnowledgeAdvancedConfig;
@@ -44,7 +44,7 @@ public class DictMetaHelper {
     private String internalMetricNameSuffix;
     @Value("${model.internal.day.number:2}")
     private Integer internalMetricDays;
-    private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
+    private SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
 
     public List<DimValueDO> generateDimValueInfo(DimValue2DictCommand dimValue2DictCommend) {
         List<DimValueDO> dimValueDOList = new ArrayList<>();
@@ -56,7 +56,7 @@ public class DictMetaHelper {
                 dimValueDOList = generateDimValueInfoByModel(modelIds);
                 break;
             case OFFLINE_FULL:
-                List<ModelSchema> modelSchemaDescList = semanticLayer.getModelSchema();
+                List<ModelSchema> modelSchemaDescList = semanticInterpreter.getModelSchema();
                 if (CollectionUtils.isEmpty(modelSchemaDescList)) {
                     break;
                 }
@@ -87,7 +87,7 @@ public class DictMetaHelper {
             return dimValueDOList;
         }
 
-        List<ModelSchema> modelSchemaDescList = semanticLayer.getModelSchema();
+        List<ModelSchema> modelSchemaDescList = semanticInterpreter.getModelSchema();
         if (CollectionUtils.isEmpty(modelSchemaDescList)) {
             return dimValueDOList;
         }
@@ -116,7 +116,7 @@ public class DictMetaHelper {
 
     private List<DimValueDO> generateDimValueInfoByModel(Set<Long> modelIds) {
         List<DimValueDO> dimValueDOList = new ArrayList<>();
-        List<ModelSchema> modelSchemaDescList = semanticLayer.getModelSchema(new ArrayList<>(modelIds));
+        List<ModelSchema> modelSchemaDescList = semanticInterpreter.getModelSchema(new ArrayList<>(modelIds));
         if (CollectionUtils.isEmpty(modelSchemaDescList)) {
             return dimValueDOList;
         }
@@ -222,7 +222,7 @@ public class DictMetaHelper {
     private String queryDataSourceByDimId(Long id) {
         PageDimensionReq pageDimensionCmd = new PageDimensionReq();
         pageDimensionCmd.setId(id.toString());
-        PageInfo<DimensionResp> dimensionPage = semanticLayer.getDimensionPage(pageDimensionCmd);
+        PageInfo<DimensionResp> dimensionPage = semanticInterpreter.getDimensionPage(pageDimensionCmd);
         if (Objects.nonNull(dimensionPage) && !CollectionUtils.isEmpty(dimensionPage.getList())) {
             List<DimensionResp> list = dimensionPage.getList();
             return list.get(0).getDatasourceBizName();

@@ -77,7 +77,7 @@ public class FunctionReplaceVisitor extends ExpressionVisitorAdapter {
             return result;
         }
         Function leftExpressionFunction = (Function) leftExpression;
-        if (!leftExpressionFunction.toString().contains(DateFunctionHelper.DATE_FUNCTION)) {
+        if (!leftExpressionFunction.toString().contains(JsqlConstants.DATE_FUNCTION)) {
             return result;
         }
         List<Expression> leftExpressions = leftExpressionFunction.getParameters().getExpressions();
@@ -98,9 +98,9 @@ public class FunctionReplaceVisitor extends ExpressionVisitorAdapter {
             String startDataCondExpr =
                     columnName + StringUtil.getSpaceWrap(startDateOperator) + StringUtil.getCommaWrap(startDateValue);
 
-            if (DateFunctionHelper.EQUAL.equalsIgnoreCase(endDateOperator)) {
+            if (JsqlConstants.EQUAL.equalsIgnoreCase(endDateOperator)) {
                 result.add(CCJSqlParserUtil.parseCondExpression(condExpr));
-                expression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(" 1 = 1 ");
+                expression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(JsqlConstants.EQUAL_CONSTANT);
             }
             comparisonOperator.setLeftExpression(null);
             comparisonOperator.setRightExpression(null);
