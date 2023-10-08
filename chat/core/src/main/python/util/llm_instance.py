@@ -1,13 +1,12 @@
 # -*- coding:utf-8 -*-
 from langchain import llms
 
-from util.stringutils import *
-from config.config_parse import LLM_PROVIDER_NAME, llm_config_dict
-
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from config.config_parse import LLM_PROVIDER_NAME, llm_config_dict
 
 
 def get_llm_provider(llm_provider_name: str, llm_config_dict: dict):

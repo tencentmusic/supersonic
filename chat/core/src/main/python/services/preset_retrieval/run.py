@@ -7,6 +7,7 @@ from typing import List
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+from util.logging_utils import logger
 from chromadb.api import Collection
 
 from preset_query_db import (
@@ -18,7 +19,7 @@ from preset_query_db import (
 
 from util.text2vec import Text2VecEmbeddingFunction
 
-from run_config import PRESET_QUERY_COLLECTION_NAME
+from config.config_parse import PRESET_QUERY_COLLECTION_NAME
 from util.chromadb_instance import client
 
 

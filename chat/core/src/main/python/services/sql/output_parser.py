@@ -1,6 +1,15 @@
 # -*- coding:utf-8 -*-
 import re
 
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from util.logging_utils import logger
+
 
 def schema_link_parse(schema_link_output):
     try:

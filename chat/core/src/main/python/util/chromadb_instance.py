@@ -4,7 +4,13 @@ from typing import Any, List, Mapping, Optional, Union
 import chromadb
 from chromadb.api import Collection
 from chromadb.config import Settings
-from loguru import logger
+
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from util.logging_utils import logger
 
 from config.config_parse import CHROMA_DB_PERSIST_PATH
 

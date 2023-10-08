@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
 import os
 import configparser
+from util.logging_utils import logger
+
 
 def type_convert(input_str: str):
     try:
@@ -42,10 +44,10 @@ for option in config.options(llm_model_section_name):
 
 
 if __name__ == "__main__":
-    print("PROJECT_DIR_PATH: ", PROJECT_DIR_PATH)
-    print("EMB_MODEL_PATH: ", HF_TEXT2VEC_MODEL_NAME)
-    print("CHROMA_DB_PERSIST_PATH: ", CHROMA_DB_PERSIST_PATH)
-    print("LLMPARSER_HOST: ", LLMPARSER_HOST)
-    print("LLMPARSER_PORT: ", LLMPARSER_PORT)
-    print("llm_config_dict: ", llm_config_dict)
-    print("is_shortcut: ", TEXT2DSL_IS_SHORTCUT)
+    logger.info("PROJECT_DIR_PATH: ", PROJECT_DIR_PATH)
+    logger.info("EMB_MODEL_PATH: ", HF_TEXT2VEC_MODEL_NAME)
+    logger.info("CHROMA_DB_PERSIST_PATH: ", CHROMA_DB_PERSIST_PATH)
+    logger.info("LLMPARSER_HOST: ", LLMPARSER_HOST)
+    logger.info("LLMPARSER_PORT: ", LLMPARSER_PORT)
+    logger.info("llm_config_dict: ", llm_config_dict)
+    logger.info("is_shortcut: ", TEXT2DSL_IS_SHORTCUT)

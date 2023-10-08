@@ -5,10 +5,10 @@ import sys
 import uuid
 from typing import Any, List, Mapping, Optional, Union
 
-from loguru import logger
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from util.logging_utils import logger
 
 import chromadb
 from chromadb.config import Settings

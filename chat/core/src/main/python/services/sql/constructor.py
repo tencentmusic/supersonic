@@ -3,10 +3,10 @@ import os
 import sys
 from typing import List, Mapping
 
-from loguru import logger
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from util.logging_utils import logger
 
 from langchain.vectorstores import Chroma
 from langchain.prompts.example_selector import SemanticSimilarityExampleSelector
