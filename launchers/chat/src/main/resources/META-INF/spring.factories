@@ -38,7 +38,10 @@ com.tencent.supersonic.chat.api.component.SemanticCorrector=\
     com.tencent.supersonic.chat.corrector.HavingCorrector, \
     com.tencent.supersonic.chat.corrector.GlobalAfterCorrector
 
-com.tencent.supersonic.chat.responder.ParseResponder=\
-    com.tencent.supersonic.chat.responder.EntityInfoResponder, \
-    com.tencent.supersonic.chat.responder.ExplainSqlResponder, \
-    com.tencent.supersonic.chat.responder.SolvedQueryResponder
+com.tencent.supersonic.chat.responder.parse.ParseResponder=\
+    com.tencent.supersonic.chat.responder.parse.EntityInfoParseResponder, \
+    com.tencent.supersonic.chat.responder.parse.ExplainSqlParseResponder, \
+    com.tencent.supersonic.chat.responder.parse.SolvedQueryParseResponder
+
+com.tencent.supersonic.chat.responder.execute.ExecuteResponder=\
+    com.tencent.supersonic.chat.responder.execute.EntityInfoExecuteResponder

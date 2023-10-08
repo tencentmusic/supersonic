@@ -12,7 +12,6 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
 import com.tencent.supersonic.chat.query.QueryManager;
@@ -211,10 +210,6 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         queryResult.setQueryMode(queryMode);
         queryResult.setQueryState(QueryState.SUCCESS);
 
-        // add Model info
-        EntityInfo entityInfo = ContextUtils.getBean(SemanticService.class)
-                .getEntityInfo(parseInfo, user);
-        queryResult.setEntityInfo(entityInfo);
         return queryResult;
     }
 
@@ -260,10 +255,6 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         queryResult.setQueryMode(queryMode);
         queryResult.setQueryState(QueryState.SUCCESS);
 
-        // add Model info
-        EntityInfo entityInfo = ContextUtils.getBean(SemanticService.class)
-                .getEntityInfo(parseInfo, user);
-        queryResult.setEntityInfo(entityInfo);
         return queryResult;
     }
 

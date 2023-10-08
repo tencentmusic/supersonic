@@ -8,7 +8,6 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
 import com.tencent.supersonic.chat.plugin.Plugin;
@@ -57,8 +56,6 @@ public class WebPageQuery extends PluginSemanticQuery {
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
         ModelSchema modelSchema = semanticService.getModelSchema(parseInfo.getModelId());
         parseInfo.setModel(modelSchema.getModel());
-        EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, user);
-        queryResult.setEntityInfo(entityInfo);
         queryResult.setQueryState(QueryState.SUCCESS);
         return queryResult;
     }

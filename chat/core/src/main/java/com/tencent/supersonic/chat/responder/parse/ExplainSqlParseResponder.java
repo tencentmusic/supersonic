@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.responder;
+package com.tencent.supersonic.chat.responder.parse;
 
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
@@ -11,7 +11,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 import java.util.Objects;
 
-public class ExplainSqlResponder implements ParseResponder {
+public class ExplainSqlParseResponder implements ParseResponder {
 
     @Override
     public void fillResponse(ParseResp parseResp, QueryContext queryContext) {

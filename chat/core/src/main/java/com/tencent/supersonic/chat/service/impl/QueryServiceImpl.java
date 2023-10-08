@@ -28,7 +28,8 @@ import com.tencent.supersonic.chat.query.QuerySelector;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.llm.dsl.DslQuery;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMResp;
-import com.tencent.supersonic.chat.responder.ParseResponder;
+import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
+import com.tencent.supersonic.chat.responder.parse.ParseResponder;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.StatisticsService;
@@ -82,6 +83,7 @@ public class QueryServiceImpl implements QueryService {
     private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
     private QuerySelector querySelector = ComponentFactory.getQuerySelector();
     private List<ParseResponder> parseResponders = ComponentFactory.getParseResponders();
+    private List<ExecuteResponder> executeResponders = ComponentFactory.getExecuteResponders();
 
     @Override
     public ParseResp performParsing(QueryReq queryReq) {
@@ -182,6 +184,9 @@ public class QueryServiceImpl implements QueryService {
             chatCtx.setQueryText(queryReq.getQueryText());
             chatCtx.setUser(queryReq.getUser().getName());
             chatService.updateQuery(queryReq.getQueryId(), queryResult, chatCtx);
+            for (ExecuteResponder executeResponder : executeResponders) {
+                executeResponder.fillResponse(queryResult, parseInfo, queryReq);
+            }
         } else {
             chatService.deleteChatQuery(queryReq.getQueryId());
         }
