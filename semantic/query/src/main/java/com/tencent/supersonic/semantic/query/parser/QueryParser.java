@@ -79,7 +79,8 @@ public class QueryParser {
                     } else {
                         sql = sqlCommend.getSql();
                         for (String[] tb : tables) {
-                            sql = StringUtils.replace(sql, tb[0], "(" + tb[1] + ")", -1);
+                            sql = StringUtils.replace(sql, tb[0],
+                                    "(" + tb[1] + ") " + (sqlCommend.isWithAlias() ? "" : tb[0]), -1);
                         }
                     }
                     queryStatement.setSql(sql);

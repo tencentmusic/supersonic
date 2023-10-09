@@ -21,6 +21,7 @@ import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 
+import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -50,6 +51,8 @@ public class QueryStructUtils {
     private final Catalog catalog;
     @Value("${internal.metric.cnt.suffix:internal_cnt}")
     private String internalMetricNameSuffix;
+    @Value("${metricParser.agg.mysql.lowVersion:5.7}")
+    private String mysqlLowVersion;
     @Autowired
     private SchemaService schemaService;
 
@@ -224,6 +227,14 @@ public class QueryStructUtils {
         }
         String internalMetricName = internalMetricNamePrefix + internalMetricNameSuffix;
         return internalMetricName;
+    }
+
+    public boolean isSupportWith(EngineTypeEnum engineTypeEnum, String version) {
+        if (engineTypeEnum.equals(EngineTypeEnum.MYSQL) && Objects.nonNull(version) && version.startsWith(
+                mysqlLowVersion)) {
+            return false;
+        }
+        return true;
     }
 
 }
