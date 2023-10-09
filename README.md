@@ -58,6 +58,6 @@ Please refer to project [wiki](https://github.com/tencentmusic/supersonic/wiki).
 
 ## WeChat Contact
 
-Please join the chat group to suggest feedbacks or ideas:
+Please follow SuperSonic wechat official account:
 
-<img src="./docs/images/wechat_contact.jpeg" height="40%" width="40%" align="center"/> 
+<img src="./docs/images/supersonic_wechat_oa.png" height="50%" width="50%" align="center"/> 

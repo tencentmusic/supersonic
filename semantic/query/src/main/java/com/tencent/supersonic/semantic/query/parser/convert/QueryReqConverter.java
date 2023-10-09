@@ -15,6 +15,7 @@ import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter.EngineAdaptor;
 import com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter.EngineAdaptorFactory;
+import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
@@ -90,6 +91,12 @@ public class QueryReqConverter {
         BeanUtils.copyProperties(databaseReq, result);
         result.setRootPath(domainService.getModelFullPathMap().get(databaseReq.getModelId()));
         result.setTables(tables);
+        DatabaseResp database = catalog.getDatabaseByModelId(databaseReq.getModelId());
+        if (!queryStructUtils.isSupportWith(EngineTypeEnum.valueOf(database.getType().toUpperCase()),
+                database.getVersion())) {
+            result.setSupportWith(false);
+            result.setWithAlias(false);
+        }
 
         QueryStatement queryStatement = parserService.physicalSql(result);
         queryStatement.setSql(String.format(SqlExecuteReq.LIMIT_WRAPPER, queryStatement.getSql()));

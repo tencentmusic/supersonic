@@ -56,6 +56,6 @@
 
 ## 微信联系方式
 
-欢迎加入微信群反馈建议：
+欢迎关注微信公众号：
 
-<img src="./docs/images/wechat_contact.jpeg" height="40%" width="40%" align="center"/> 
+<img src="./docs/images/supersonic_wechat_oa.png" height="50%" width="50%" align="center"/> 
