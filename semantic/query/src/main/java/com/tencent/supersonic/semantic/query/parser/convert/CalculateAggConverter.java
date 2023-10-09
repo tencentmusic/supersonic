@@ -42,8 +42,6 @@ public class CalculateAggConverter implements SemanticConverter {
     @Value("${metricParser.agg.default:sum}")
     private String metricAggDefault;
 
-    @Value("${metricParser.agg.mysql.lowVersion:5.7}")
-    private String mysqlLowVersion;
 
 
     public CalculateAggConverter(
@@ -83,8 +81,7 @@ public class CalculateAggConverter implements SemanticConverter {
                 metricTableName,
                 sqlGenerateUtils.getGroupBy(queryStructCmd), sqlGenerateUtils.getOrderBy(queryStructCmd),
                 sqlGenerateUtils.getLimit(queryStructCmd));
-        if (engineTypeEnum.equals(engineTypeEnum.MYSQL) && Objects.nonNull(version) && version.startsWith(
-                mysqlLowVersion)) {
+        if (!queryStructUtils.isSupportWith(engineTypeEnum, version)) {
             sqlCommand.setSupportWith(false);
             sql = String.format("select %s from %s t0 %s %s %s", sqlGenerateUtils.getSelect(queryStructCmd),
                     metricTableName,
@@ -173,8 +170,7 @@ public class CalculateAggConverter implements SemanticConverter {
             case MYSQL:
             case DORIS:
             case CLICKHOUSE:
-                if (engineTypeEnum.equals(EngineTypeEnum.MYSQL) && Objects.nonNull(version) && version.startsWith(
-                        mysqlLowVersion)) {
+                if (!queryStructUtils.isSupportWith(engineTypeEnum, version)) {
                     sqlCommand.setSupportWith(false);
                     sql = new MysqlEngineSql().sql(queryStructCmd, isOver, metricTableName);
                 } else {
