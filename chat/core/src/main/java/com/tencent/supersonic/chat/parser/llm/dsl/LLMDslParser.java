@@ -188,6 +188,7 @@ public class LLMDslParser implements SemanticParser {
 
             FilterOperatorEnum operatorEnum = FilterOperatorEnum.getSqlOperator(expression.getOperator());
             dimensionFilter.setOperator(operatorEnum);
+            dimensionFilter.setFunction(expression.getFunction());
             result.add(dimensionFilter);
         }
         return result;
