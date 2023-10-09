@@ -14,6 +14,7 @@ public class ParseSqlReq {
     private String sql = "";
     private List<MetricTable> tables;
     private boolean supportWith = true;
+    private boolean withAlias = true;
 
     public Map<String, String> getVariables() {
         if (variables == null) {
