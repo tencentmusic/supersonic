@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -x
+
 python_path=${PYTHON_PATH:-"/usr/local/bin/python3"}
 readonly CHAT_APP_NAME="supersonic_chat"
 readonly SEMANTIC_APP_NAME="supersonic_semantic"
