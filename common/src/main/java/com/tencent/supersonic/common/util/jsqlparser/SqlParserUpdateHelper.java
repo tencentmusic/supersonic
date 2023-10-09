@@ -16,6 +16,7 @@ import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -526,29 +527,50 @@ public class SqlParserUpdateHelper {
     }
 
     private static void removeExpressionWithConstant(Expression expression, Set<String> removeFieldNames) {
-        if (!(expression instanceof EqualsTo)) {
-            return;
+        if (expression instanceof EqualsTo) {
+            ComparisonOperator comparisonOperator = (ComparisonOperator) expression;
+            String columnName = getColumnName(comparisonOperator.getLeftExpression(),
+                    comparisonOperator.getRightExpression());
+            if (!removeFieldNames.contains(columnName)) {
+                return;
+            }
+            try {
+                ComparisonOperator constantExpression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(
+                        JsqlConstants.EQUAL_CONSTANT);
+                comparisonOperator.setLeftExpression(constantExpression.getLeftExpression());
+                comparisonOperator.setRightExpression(constantExpression.getRightExpression());
+                comparisonOperator.setASTNode(constantExpression.getASTNode());
+            } catch (JSQLParserException e) {
+                log.error("JSQLParserException", e);
+            }
         }
-        ComparisonOperator comparisonOperator = (ComparisonOperator) expression;
+        if (expression instanceof InExpression) {
+            InExpression inExpression = (InExpression) expression;
+            String columnName = getColumnName(inExpression.getLeftExpression(), inExpression.getRightExpression());
+            if (!removeFieldNames.contains(columnName)) {
+                return;
+            }
+            try {
+                InExpression constantExpression = (InExpression) CCJSqlParserUtil.parseCondExpression(
+                        JsqlConstants.IN_CONSTANT);
+                inExpression.setLeftExpression(constantExpression.getLeftExpression());
+                inExpression.setRightItemsList(constantExpression.getRightItemsList());
+                inExpression.setASTNode(constantExpression.getASTNode());
+            } catch (JSQLParserException e) {
+                log.error("JSQLParserException", e);
+            }
+        }
+    }
+
+    private static String getColumnName(Expression leftExpression, Expression rightExpression) {
         String columnName = "";
-        if (comparisonOperator.getRightExpression() instanceof Column) {
-            columnName = ((Column) (comparisonOperator).getRightExpression()).getColumnName();
+        if (leftExpression instanceof Column) {
+            columnName = ((Column) leftExpression).getColumnName();
         }
-        if (comparisonOperator.getLeftExpression() instanceof Column) {
-            columnName = ((Column) (comparisonOperator).getLeftExpression()).getColumnName();
+        if (rightExpression instanceof Column) {
+            columnName = ((Column) rightExpression).getColumnName();
         }
-        if (!removeFieldNames.contains(columnName)) {
-            return;
-        }
-        try {
-            ComparisonOperator constantExpression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(
-                    JsqlConstants.EQUAL_CONSTANT);
-            comparisonOperator.setLeftExpression(constantExpression.getLeftExpression());
-            comparisonOperator.setRightExpression(constantExpression.getRightExpression());
-            comparisonOperator.setASTNode(constantExpression.getASTNode());
-        } catch (JSQLParserException e) {
-            log.error("JSQLParserException", e);
-        }
+        return columnName;
     }
 }
 
