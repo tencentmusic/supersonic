@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -x
+
 # pip path
 pip_path=${PIP_PATH:-"/usr/local/bin/pip3"}
 
