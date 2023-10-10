@@ -47,7 +47,15 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(dimensions)) {
             return;
         }
-        Set<String> groupByFields = selectFields.stream().filter(field -> dimensions.contains(field))
+        List<String> aggregateFields = SqlParserSelectHelper.getAggregateFields(sql);
+        Set<String> groupByFields = selectFields.stream()
+                .filter(field -> dimensions.contains(field))
+                .filter(field -> {
+                    if (!CollectionUtils.isEmpty(aggregateFields) && aggregateFields.contains(field)) {
+                        return false;
+                    }
+                    return true;
+                })
                 .collect(Collectors.toSet());
         semanticCorrectInfo.setSql(SqlParserUpdateHelper.addGroupBy(sql, groupByFields));
     }

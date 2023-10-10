@@ -9,6 +9,7 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
@@ -387,17 +388,10 @@ public class SqlParserUpdateHelper {
             AndExpression andExpression = (AndExpression) whereExpression;
             Expression leftExpression = andExpression.getLeftExpression();
             Expression rightExpression = andExpression.getRightExpression();
-            if (isLogicExpression(leftExpression)) {
-                modifyWhereExpression(leftExpression, fieldNameToAggregate);
-            } else {
-                setAggToFunction(leftExpression, fieldNameToAggregate);
-            }
-            if (isLogicExpression(rightExpression)) {
-                modifyWhereExpression(rightExpression, fieldNameToAggregate);
-            } else {
-                setAggToFunction(rightExpression, fieldNameToAggregate);
-            }
-            setAggToFunction(rightExpression, fieldNameToAggregate);
+            modifyWhereExpression(leftExpression, fieldNameToAggregate);
+            modifyWhereExpression(rightExpression, fieldNameToAggregate);
+        } else if (whereExpression instanceof Parenthesis) {
+            modifyWhereExpression(((Parenthesis) whereExpression).getExpression(), fieldNameToAggregate);
         } else {
             setAggToFunction(whereExpression, fieldNameToAggregate);
         }
@@ -515,17 +509,11 @@ public class SqlParserUpdateHelper {
             AndExpression andExpression = (AndExpression) whereExpression;
             Expression leftExpression = andExpression.getLeftExpression();
             Expression rightExpression = andExpression.getRightExpression();
-            if (isLogicExpression(leftExpression)) {
-                removeWhereExpression(leftExpression, removeFieldNames);
-            } else {
-                removeExpressionWithConstant(leftExpression, removeFieldNames);
-            }
-            if (isLogicExpression(rightExpression)) {
-                removeWhereExpression(rightExpression, removeFieldNames);
-            } else {
-                removeExpressionWithConstant(rightExpression, removeFieldNames);
-            }
-            removeExpressionWithConstant(rightExpression, removeFieldNames);
+
+            removeWhereExpression(leftExpression, removeFieldNames);
+            removeWhereExpression(rightExpression, removeFieldNames);
+        } else if (whereExpression instanceof Parenthesis) {
+            removeWhereExpression(((Parenthesis) whereExpression).getExpression(), removeFieldNames);
         } else {
             removeExpressionWithConstant(whereExpression, removeFieldNames);
         }
@@ -576,6 +564,22 @@ public class SqlParserUpdateHelper {
             columnName = ((Column) rightExpression).getColumnName();
         }
         return columnName;
+    }
+
+    public static String addParenthesisToWhere(String sql) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+        Expression where = plainSelect.getWhere();
+        if (Objects.nonNull(where)) {
+            Parenthesis parenthesis = new Parenthesis(where);
+            plainSelect.setWhere(parenthesis);
+        }
+        return selectStatement.toString();
     }
 }
 
