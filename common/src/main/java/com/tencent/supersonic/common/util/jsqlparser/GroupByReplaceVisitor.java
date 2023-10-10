@@ -38,7 +38,7 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
                     ((Function) expression).getParameters().getExpressions().get(0))) {
                 columnName = ((Function) expression).getParameters().getExpressions().get(0).toString();
             }
-            String replaceColumn = parseVisitorHelper.getReplaceColumn(columnName, fieldNameMap,
+            String replaceColumn = parseVisitorHelper.getReplaceValue(columnName, fieldNameMap,
                     exactReplace);
             if (StringUtils.isNotEmpty(replaceColumn)) {
                 if (expression instanceof Column) {

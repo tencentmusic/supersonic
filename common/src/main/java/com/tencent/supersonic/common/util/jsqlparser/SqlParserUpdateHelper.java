@@ -39,6 +39,11 @@ import org.springframework.util.CollectionUtils;
 public class SqlParserUpdateHelper {
 
     public static String replaceValue(String sql, Map<String, Map<String, String>> filedNameToValueMap) {
+        return replaceValue(sql, filedNameToValueMap, true);
+    }
+
+    public static String replaceValue(String sql, Map<String, Map<String, String>> filedNameToValueMap,
+            boolean exactReplace) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
         if (!(selectBody instanceof PlainSelect)) {
@@ -46,7 +51,7 @@ public class SqlParserUpdateHelper {
         }
         PlainSelect plainSelect = (PlainSelect) selectBody;
         Expression where = plainSelect.getWhere();
-        FieldlValueReplaceVisitor visitor = new FieldlValueReplaceVisitor(filedNameToValueMap);
+        FieldlValueReplaceVisitor visitor = new FieldlValueReplaceVisitor(exactReplace, filedNameToValueMap);
         if (Objects.nonNull(where)) {
             where.accept(visitor);
         }
