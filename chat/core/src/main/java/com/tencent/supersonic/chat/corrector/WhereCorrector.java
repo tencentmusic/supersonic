@@ -72,6 +72,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
         List<String> whereFields = SqlParserSelectHelper.getWhereFields(sql);
         if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(DateUtils.DATE_FIELD)) {
             String currentDate = DSLDateHelper.getReferenceDate(semanticCorrectInfo.getParseInfo().getModelId());
+            sql = SqlParserUpdateHelper.addParenthesisToWhere(sql);
             sql = SqlParserUpdateHelper.addWhere(sql, DateUtils.DATE_FIELD, currentDate);
         }
         semanticCorrectInfo.setSql(sql);
