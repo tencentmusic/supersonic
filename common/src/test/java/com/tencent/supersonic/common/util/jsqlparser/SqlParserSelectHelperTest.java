@@ -261,4 +261,14 @@ class SqlParserSelectHelperTest {
 
     }
 
+    @Test
+    void getAggregateFields() {
+
+        String sql = "select 部门,sum (访问次数) from 超音数 where 数据日期 = '2023-08-08'"
+                + " and 用户 = 'alice' and 发布日期 ='11' group by 部门 limit 1";
+        List<String> selectFields = SqlParserSelectHelper.getAggregateFields(sql);
+        Assert.assertEquals(selectFields.contains("访问次数"), true);
+
+    }
+
 }
