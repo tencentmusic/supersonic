@@ -409,16 +409,6 @@ public class QueryServiceImpl implements QueryService {
         }
         SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
         QueryResultWithSchemaResp queryResultWithSchemaResp = semanticInterpreter.queryByStruct(queryStructReq, user);
-        log.info("queryResultWithSchemaResp:{}", queryResultWithSchemaResp);
-        //        Set<String> dimensionValues = new HashSet<>();
-        //        queryResultWithSchemaResp.getResultList().removeIf(o -> {
-        //            if (dimensionValues.contains(o.get(dimensionValueReq.getBizName()))) {
-        //                return true;
-        //            } else {
-        //                dimensionValues.add(o.get(dimensionValueReq.getBizName()).toString());
-        //                return false;
-        //            }
-        //        });
         return queryResultWithSchemaResp;
     }
 
