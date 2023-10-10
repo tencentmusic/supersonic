@@ -41,13 +41,17 @@ public abstract class EntityListQuery extends EntitySemanticQuery {
                 ChatDefaultRichConfigResp chatDefaultConfig = chaConfigRichDesc
                         .getChatDetailRichConfig().getChatDefaultConfig();
                 if (chatDefaultConfig != null) {
-                    chatDefaultConfig.getMetrics().stream()
-                            .forEach(metric -> {
-                                metrics.add(metric);
-                                orders.add(new Order(metric.getBizName(), Constants.DESC_UPPER));
-                            });
-                    chatDefaultConfig.getDimensions().stream()
-                            .forEach(dimension -> dimensions.add(dimension));
+                    if (chatDefaultConfig.getMetrics() != null) {
+                        chatDefaultConfig.getMetrics().stream()
+                                .forEach(metric -> {
+                                    metrics.add(metric);
+                                    orders.add(new Order(metric.getBizName(), Constants.DESC_UPPER));
+                                });
+                    }
+                    if (chatDefaultConfig.getDimensions() != null) {
+                        chatDefaultConfig.getDimensions().stream()
+                                .forEach(dimension -> dimensions.add(dimension));
+                    }
 
                 }
 
