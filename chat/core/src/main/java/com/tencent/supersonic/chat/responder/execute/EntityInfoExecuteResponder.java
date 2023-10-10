@@ -7,7 +7,6 @@ import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,15 +40,6 @@ public class EntityInfoExecuteResponder implements ExecuteResponder {
                 .map(String::valueOf)
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(entities)) {
-            return;
-        }
-        QueryResultWithSchemaResp queryResultWithSchemaResp = semanticService.getQueryResultWithSchemaResp(entityInfo,
-                semanticParseInfo.getModelId(), entities, user);
-        if (Objects.isNull(queryResultWithSchemaResp)) {
-            return;
-        }
-        List<Map<String, Object>> entityResultList = queryResultWithSchemaResp.getResultList();
-        if (CollectionUtils.isEmpty(entityResultList)) {
             return;
         }
     }

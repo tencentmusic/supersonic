@@ -21,43 +21,19 @@ import org.springframework.util.CollectionUtils;
 
 public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
 
+    ParseVisitorHelper parseVisitorHelper = new ParseVisitorHelper();
+    private boolean exactReplace;
     private Map<String, Map<String, String>> filedNameToValueMap;
 
-    public FieldlValueReplaceVisitor(Map<String, Map<String, String>> filedNameToValueMap) {
+
+    public FieldlValueReplaceVisitor(boolean exactReplace, Map<String, Map<String, String>> filedNameToValueMap) {
+        this.exactReplace = exactReplace;
         this.filedNameToValueMap = filedNameToValueMap;
     }
 
     @Override
     public void visit(EqualsTo expr) {
-        Expression leftExpression = expr.getLeftExpression();
-        Expression rightExpression = expr.getRightExpression();
-        if (!(rightExpression instanceof StringValue)) {
-            return;
-        }
-        if (!(leftExpression instanceof Column)) {
-            return;
-        }
-        if (CollectionUtils.isEmpty(filedNameToValueMap)) {
-            return;
-        }
-        if (Objects.isNull(rightExpression) || Objects.isNull(leftExpression)) {
-            return;
-        }
-        Column leftColumnName = (Column) leftExpression;
-        StringValue rightStringValue = (StringValue) rightExpression;
-
-        String columnName = leftColumnName.getColumnName();
-        if (StringUtils.isEmpty(columnName)) {
-            return;
-        }
-        Map<String, String> valueMap = filedNameToValueMap.get(columnName);
-        if (Objects.isNull(valueMap) || valueMap.isEmpty()) {
-            return;
-        }
-        String replaceValue = valueMap.get(rightStringValue.getValue());
-        if (StringUtils.isNotEmpty(replaceValue)) {
-            rightStringValue.setValue(replaceValue);
-        }
+        replaceComparisonExpression(expr);
     }
 
     public void visit(GreaterThan expr) {
@@ -77,47 +53,57 @@ public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
     }
 
     public <T extends Expression> void replaceComparisonExpression(T expression) {
-        if ((expression instanceof GreaterThanEquals) || (expression instanceof GreaterThan)
-                || (expression instanceof MinorThanEquals) || (expression instanceof MinorThan)) {
-            Expression leftExpression = ((ComparisonOperator) expression).getLeftExpression();
-            Expression rightExpression = ((ComparisonOperator) expression).getRightExpression();
-            if (!(leftExpression instanceof Column)) {
-                return;
-            }
-            if (CollectionUtils.isEmpty(filedNameToValueMap)) {
-                return;
-            }
-            if (Objects.isNull(rightExpression) || Objects.isNull(leftExpression)) {
-                return;
-            }
-            Column leftColumnName = (Column) leftExpression;
-
-            String columnName = leftColumnName.getColumnName();
-            if (StringUtils.isEmpty(columnName)) {
-                return;
-            }
-            Map<String, String> valueMap = filedNameToValueMap.get(columnName);
-            if (Objects.isNull(valueMap) || valueMap.isEmpty()) {
-                return;
-            }
-            for (String oriValue : valueMap.keySet()) {
-                String replaceValue = valueMap.get(oriValue);
-                if (StringUtils.isNotEmpty(replaceValue)) {
-                    if (rightExpression instanceof LongValue) {
-                        LongValue rightStringValue = (LongValue) rightExpression;
-                        rightStringValue.setValue(Long.parseLong(replaceValue));
-                    }
-                    if (rightExpression instanceof DoubleValue) {
-                        DoubleValue rightStringValue = (DoubleValue) rightExpression;
-                        rightStringValue.setValue(Double.parseDouble(replaceValue));
-                    }
-                    if (rightExpression instanceof StringValue) {
-                        StringValue rightStringValue = (StringValue) rightExpression;
-                        rightStringValue.setValue(replaceValue);
-                    }
-                }
-            }
-
+        Expression leftExpression = ((ComparisonOperator) expression).getLeftExpression();
+        Expression rightExpression = ((ComparisonOperator) expression).getRightExpression();
+        if (!(leftExpression instanceof Column)) {
+            return;
         }
+        if (CollectionUtils.isEmpty(filedNameToValueMap)) {
+            return;
+        }
+        if (Objects.isNull(rightExpression) || Objects.isNull(leftExpression)) {
+            return;
+        }
+        Column leftColumnName = (Column) leftExpression;
+
+        String columnName = leftColumnName.getColumnName();
+        if (StringUtils.isEmpty(columnName)) {
+            return;
+        }
+
+        Map<String, String> valueMap = filedNameToValueMap.get(columnName);
+        if (Objects.isNull(valueMap) || valueMap.isEmpty()) {
+            return;
+        }
+
+        if (rightExpression instanceof LongValue) {
+            LongValue rightStringValue = (LongValue) rightExpression;
+            String replaceValue = getReplaceValue(valueMap, String.valueOf(rightStringValue.getValue()));
+            if (StringUtils.isNotEmpty(replaceValue)) {
+                rightStringValue.setValue(Long.parseLong(replaceValue));
+            }
+        }
+        if (rightExpression instanceof DoubleValue) {
+            DoubleValue rightStringValue = (DoubleValue) rightExpression;
+            String replaceValue = getReplaceValue(valueMap, String.valueOf(rightStringValue.getValue()));
+            if (StringUtils.isNotEmpty(replaceValue)) {
+                rightStringValue.setValue(Double.parseDouble(replaceValue));
+            }
+        }
+        if (rightExpression instanceof StringValue) {
+            StringValue rightStringValue = (StringValue) rightExpression;
+            String replaceValue = getReplaceValue(valueMap, String.valueOf(rightStringValue.getValue()));
+            if (StringUtils.isNotEmpty(replaceValue)) {
+                rightStringValue.setValue(replaceValue);
+            }
+        }
+    }
+
+    private String getReplaceValue(Map<String, String> valueMap, String beforeValue) {
+        String afterValue = valueMap.get(String.valueOf(beforeValue));
+        if (StringUtils.isEmpty(afterValue) && !exactReplace) {
+            return parseVisitorHelper.getReplaceValue(beforeValue, valueMap, false);
+        }
+        return afterValue;
     }
 }
