@@ -19,6 +19,7 @@ import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.springframework.util.CollectionUtils;
 
@@ -205,6 +206,29 @@ public class SqlParserSelectHelper {
 
         Table table = (Table) plainSelect.getFromItem();
         return table.getName();
+    }
+
+    public static List<String> getAggregateFields(String sql) {
+        PlainSelect plainSelect = getPlainSelect(sql);
+        if (Objects.isNull(plainSelect)) {
+            return new ArrayList<>();
+        }
+        Set<String> result = new HashSet<>();
+        List<SelectItem> selectItems = plainSelect.getSelectItems();
+        for (SelectItem selectItem : selectItems) {
+            if (selectItem instanceof SelectExpressionItem) {
+                SelectExpressionItem expressionItem = (SelectExpressionItem) selectItem;
+                if (expressionItem.getExpression() instanceof Function) {
+                    Function function = (Function) expressionItem.getExpression();
+                    if (Objects.nonNull(function.getParameters())
+                            && !CollectionUtils.isEmpty(function.getParameters().getExpressions())) {
+                        String columnName = function.getParameters().getExpressions().get(0).toString();
+                        result.add(columnName);
+                    }
+                }
+            }
+        }
+        return new ArrayList<>(result);
     }
 
 
