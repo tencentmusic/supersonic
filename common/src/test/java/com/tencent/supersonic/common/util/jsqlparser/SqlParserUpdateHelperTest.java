@@ -18,6 +18,47 @@ import org.junit.jupiter.api.Test;
  */
 class SqlParserUpdateHelperTest {
 
+    @Test
+    void replaceValue() {
+
+        String replaceSql = "select 歌曲名 from 歌曲库 where datediff('day', 发布日期, '2023-08-09') <= 1 "
+                + "and 歌手名 = '杰伦' and 数据日期 = '2023-08-09' and 歌曲发布时 = '2023-08-01'"
+                + " order by 播放量 desc limit 11";
+
+        Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
+
+        Map<String, String> valueMap = new HashMap<>();
+        valueMap.put("杰伦", "周杰伦");
+        filedNameToValueMap.put("歌手名", valueMap);
+
+        replaceSql = SqlParserUpdateHelper.replaceValue(replaceSql, filedNameToValueMap);
+
+        Assert.assertEquals(
+                "SELECT 歌曲名 FROM 歌曲库 WHERE datediff('day', 发布日期, '2023-08-09') <= 1 AND "
+                        + "歌手名 = '周杰伦' AND 数据日期 = '2023-08-09' AND 歌曲发布时 = '2023-08-01' "
+                        + "ORDER BY 播放量 DESC LIMIT 11", replaceSql);
+
+        replaceSql = "select 歌曲名 from 歌曲库 where datediff('day', 发布日期, '2023-08-09') <= 1 "
+                + "and 歌手名 = '周杰' and 歌手名 = '林俊' and 歌手名 = '陈' and 数据日期 = '2023-08-09' and 歌曲发布时 = '2023-08-01'"
+                + " order by 播放量 desc limit 11";
+
+        Map<String, Map<String, String>> filedNameToValueMap2 = new HashMap<>();
+
+        Map<String, String> valueMap2 = new HashMap<>();
+        valueMap2.put("周杰伦", "周杰伦");
+        valueMap2.put("林俊杰", "林俊杰");
+        valueMap2.put("陈奕迅", "陈奕迅");
+        filedNameToValueMap2.put("歌手名", valueMap2);
+
+        replaceSql = SqlParserUpdateHelper.replaceValue(replaceSql, filedNameToValueMap2, false);
+
+        Assert.assertEquals(
+                "SELECT 歌曲名 FROM 歌曲库 WHERE datediff('day', 发布日期, '2023-08-09') <= 1 AND 歌手名 = '周杰伦' "
+                        + "AND 歌手名 = '林俊杰' AND 歌手名 = '陈奕迅' AND 数据日期 = '2023-08-09' AND "
+                        + "歌曲发布时 = '2023-08-01' ORDER BY 播放量 DESC LIMIT 11", replaceSql);
+
+    }
+
 
     @Test
     void replaceFieldNameByValue() {

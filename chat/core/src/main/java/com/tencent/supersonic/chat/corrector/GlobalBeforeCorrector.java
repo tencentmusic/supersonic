@@ -27,6 +27,8 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
 
         updateFieldNameByLinkingValue(semanticCorrectInfo);
 
+        updateFieldValueByLinkingValue(semanticCorrectInfo);
+
         correctFieldName(semanticCorrectInfo);
     }
 
@@ -45,17 +47,7 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
     }
 
     private void updateFieldNameByLinkingValue(SemanticCorrectInfo semanticCorrectInfo) {
-        Object context = semanticCorrectInfo.getParseInfo().getProperties().get(Constants.CONTEXT);
-        if (Objects.isNull(context)) {
-            return;
-        }
-
-        DSLParseResult dslParseResult = JsonUtil.toObject(JsonUtil.toString(context), DSLParseResult.class);
-        if (Objects.isNull(dslParseResult) || Objects.isNull(dslParseResult.getLlmReq())) {
-            return;
-        }
-        LLMReq llmReq = dslParseResult.getLlmReq();
-        List<ElementValue> linking = llmReq.getLinking();
+        List<ElementValue> linking = getLinkingValues(semanticCorrectInfo);
         if (CollectionUtils.isEmpty(linking)) {
             return;
         }
@@ -66,6 +58,39 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
 
         String sql = SqlParserUpdateHelper.replaceFieldNameByValue(semanticCorrectInfo.getSql(),
                 fieldValueToFieldNames);
+        semanticCorrectInfo.setSql(sql);
+    }
+
+    private List<ElementValue> getLinkingValues(SemanticCorrectInfo semanticCorrectInfo) {
+        Object context = semanticCorrectInfo.getParseInfo().getProperties().get(Constants.CONTEXT);
+        if (Objects.isNull(context)) {
+            return null;
+        }
+
+        DSLParseResult dslParseResult = JsonUtil.toObject(JsonUtil.toString(context), DSLParseResult.class);
+        if (Objects.isNull(dslParseResult) || Objects.isNull(dslParseResult.getLlmReq())) {
+            return null;
+        }
+        LLMReq llmReq = dslParseResult.getLlmReq();
+        return llmReq.getLinking();
+    }
+
+
+    private void updateFieldValueByLinkingValue(SemanticCorrectInfo semanticCorrectInfo) {
+        List<ElementValue> linking = getLinkingValues(semanticCorrectInfo);
+        if (CollectionUtils.isEmpty(linking)) {
+            return;
+        }
+
+        Map<String, Map<String, String>> filedNameToValueMap = linking.stream().collect(
+                Collectors.groupingBy(ElementValue::getFieldName,
+                        Collectors.mapping(ElementValue::getFieldValue, Collectors.toMap(
+                                oldValue -> oldValue,
+                                newValue -> newValue,
+                                (existingValue, newValue) -> newValue)
+                        )));
+
+        String sql = SqlParserUpdateHelper.replaceValue(semanticCorrectInfo.getSql(), filedNameToValueMap, false);
         semanticCorrectInfo.setSql(sql);
     }
 }
