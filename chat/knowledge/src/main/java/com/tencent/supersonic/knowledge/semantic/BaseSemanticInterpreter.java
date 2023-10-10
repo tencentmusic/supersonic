@@ -17,13 +17,14 @@ import org.springframework.util.CollectionUtils;
 public abstract class BaseSemanticInterpreter implements SemanticInterpreter {
 
     protected final Cache<String, List<ModelSchemaResp>> modelSchemaCache =
-            CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
+            CacheBuilder.newBuilder().expireAfterWrite(60, TimeUnit.SECONDS).build();
 
     @SneakyThrows
     public List<ModelSchemaResp> fetchModelSchema(List<Long> ids, Boolean cacheEnable) {
         if (cacheEnable) {
             return modelSchemaCache.get(String.valueOf(ids), () -> {
                 List<ModelSchemaResp> data = doFetchModelSchema(ids);
+                modelSchemaCache.put(String.valueOf(ids), data);
                 return data;
             });
         }
