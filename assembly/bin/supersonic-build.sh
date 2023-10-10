@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+set -x
+
 # pip path
-pip_path=${PIP_PATH:-"/usr/local/bin/pip3"}
+pip_path=${PIP_PATH:-"pip3"}
 
 sbinDir=$(cd "$(dirname "$0")"; pwd)
 baseDir=$(cd "$sbinDir/.." && pwd -P)
