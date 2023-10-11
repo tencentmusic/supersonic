@@ -103,15 +103,13 @@ public class CatalogImpl implements Catalog {
     }
 
     @Override
-    public String getAgg(Long modelId, String metricBizName) {
+    public String getAgg(List<MetricResp> metricResps, List<MeasureResp> measureRespList, String metricBizName) {
         try {
-            List<MetricResp> metricResps = getMetrics(modelId);
             if (!CollectionUtils.isEmpty(metricResps)) {
                 Optional<MetricResp> metric = metricResps.stream()
                         .filter(m -> m.getBizName().equalsIgnoreCase(metricBizName)).findFirst();
                 if (metric.isPresent() && Objects.nonNull(metric.get().getTypeParams()) && !CollectionUtils.isEmpty(
                         metric.get().getTypeParams().getMeasures())) {
-                    List<MeasureResp> measureRespList = datasourceService.getMeasureListOfModel(modelId);
                     if (!CollectionUtils.isEmpty(measureRespList)) {
                         String measureName = metric.get().getTypeParams().getMeasures().get(0).getBizName();
                         Optional<MeasureResp> measure = measureRespList.stream()

@@ -1,9 +1,11 @@
 package com.tencent.supersonic.semantic.query.service;
 
+import com.google.common.cache.CacheBuilder;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
+import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.cache.CacheUtils;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -42,6 +45,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class QueryServiceImpl implements QueryService {
 
+    protected final com.google.common.cache.Cache<String, List<ItemUseResp>> itemUseCache =
+            CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).build();
 
     private final StatUtils statUtils;
     private final CacheUtils cacheUtils;
@@ -206,9 +211,16 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public List<ItemUseResp> getStatInfo(ItemUseReq itemUseCommend) {
-        List<ItemUseResp> statInfos = statUtils.getStatInfo(itemUseCommend);
-        return statInfos;
+    @SneakyThrows
+    public List<ItemUseResp> getStatInfo(ItemUseReq itemUseReq) {
+        if (itemUseReq.getCacheEnable()) {
+            return itemUseCache.get(JsonUtil.toString(itemUseReq), () -> {
+                List<ItemUseResp> data = statUtils.getStatInfo(itemUseReq);
+                itemUseCache.put(JsonUtil.toString(itemUseReq), data);
+                return data;
+            });
+        }
+        return statUtils.getStatInfo(itemUseReq);
     }
 
     @Override

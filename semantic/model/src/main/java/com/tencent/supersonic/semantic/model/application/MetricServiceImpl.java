@@ -121,7 +121,14 @@ public class MetricServiceImpl implements MetricService {
     }
 
     public List<MetricResp> getMetrics(List<Long> ids) {
-        return convertList(metricRepository.getMetricListByIds(ids));
+        List<MetricDO> metricDOS = metricRepository.getMetricListByIds(ids);
+        return convertList(metricDOS);
+    }
+
+    @Override
+    public List<MetricResp> getMetricsByModelIds(List<Long> modelIds) {
+        List<MetricDO> metricDOS = metricRepository.getMetricList(modelIds);
+        return convertList(metricDOS);
     }
 
     @Override

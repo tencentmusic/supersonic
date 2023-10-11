@@ -14,6 +14,7 @@ import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
@@ -226,7 +227,7 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public Map<Long, String> getModelFullPathMap() {
-        return getModelList().stream().filter(m -> m != null).collect(Collectors.toMap(ModelResp::getId,
+        return getModelList().stream().filter(Objects::nonNull).collect(Collectors.toMap(ModelResp::getId,
                 ModelResp::getFullPath, (k1, k2) -> k1));
     }
 
@@ -277,12 +278,29 @@ public class ModelServiceImpl implements ModelService {
         if (CollectionUtils.isEmpty(modelIds)) {
             modelIds = generateModelIdsReq(modelSchemaFilterReq);
         }
-        modelIds.stream().forEach(modelId -> {
-            ModelSchemaResp modelSchemaResp = fetchSingleModelSchema(modelId);
-            if (Objects.nonNull(modelSchemaResp)) {
-                modelSchemaRespList.add(modelSchemaResp);
+        Map<Long, List<MetricResp>> metricRespMap = metricService.getMetricsByModelIds(modelIds)
+                .stream().collect(Collectors.groupingBy(MetricResp::getModelId));
+        Map<Long, List<DimensionResp>> dimensionRespsMap = dimensionService.getDimensionsByModelIds(modelIds)
+                .stream().collect(Collectors.groupingBy(DimensionResp::getModelId));
+        Map<Long, List<MeasureResp>> measureRespsMap = datasourceService.getMeasureListOfModel(modelIds)
+                .stream().collect(Collectors.groupingBy(MeasureResp::getModelId));
+        for (Long modelId : modelIds) {
+            ModelResp modelResp = getModelMap().get(modelId);
+            if (modelResp == null) {
+                continue;
             }
-        });
+            List<MeasureResp> measureResps = measureRespsMap.getOrDefault(modelId, Lists.newArrayList());
+            List<MetricResp> metricResps = metricRespMap.getOrDefault(modelId, Lists.newArrayList());
+            List<MetricSchemaResp> metricSchemaResps = metricResps.stream().map(metricResp ->
+                    convert(metricResp, metricResps, measureResps)).collect(Collectors.toList());
+            List<DimSchemaResp> dimensionResps = dimensionRespsMap.getOrDefault(modelId, Lists.newArrayList())
+                    .stream().map(this::convert).collect(Collectors.toList());
+            ModelSchemaResp modelSchemaResp = new ModelSchemaResp();
+            BeanUtils.copyProperties(modelResp, modelSchemaResp);
+            modelSchemaResp.setDimensions(dimensionResps);
+            modelSchemaResp.setMetrics(metricSchemaResps);
+            modelSchemaRespList.add(modelSchemaResp);
+        }
         return modelSchemaRespList;
     }
 
@@ -298,30 +316,33 @@ public class ModelServiceImpl implements ModelService {
 
     private List<MetricSchemaResp> generateMetricSchema(Long modelId) {
         List<MetricSchemaResp> metricSchemaDescList = new ArrayList<>();
-        List<MetricResp> metricDescList = metricService.getMetrics(modelId);
-        metricDescList.stream().forEach(metricDesc -> {
-                    MetricSchemaResp metricSchemaDesc = new MetricSchemaResp();
-                    BeanUtils.copyProperties(metricDesc, metricSchemaDesc);
-                    metricSchemaDesc.setUseCnt(0L);
-                    String agg = catalog.getAgg(modelId, metricSchemaDesc.getBizName());
-                    metricSchemaDesc.setDefaultAgg(agg);
-                    metricSchemaDescList.add(metricSchemaDesc);
-                }
-        );
+        List<MetricResp> metricResps = metricService.getMetrics(modelId);
+        List<MeasureResp> measureResps = datasourceService.getMeasureListOfModel(modelId);
+        metricResps.stream().forEach(metricResp ->
+                metricSchemaDescList.add(convert(metricResp, metricResps, measureResps)));
         return metricSchemaDescList;
     }
 
     private List<DimSchemaResp> generateDimSchema(Long modelId) {
-        List<DimSchemaResp> dimSchemaDescList = new ArrayList<>();
         List<DimensionResp> dimDescList = dimensionService.getDimensions(modelId);
-        dimDescList.stream().forEach(dimDesc -> {
-                    DimSchemaResp dimSchemaDesc = new DimSchemaResp();
-                    BeanUtils.copyProperties(dimDesc, dimSchemaDesc);
-                    dimSchemaDesc.setUseCnt(0L);
-                    dimSchemaDescList.add(dimSchemaDesc);
-                }
-        );
-        return dimSchemaDescList;
+        return dimDescList.stream().map(this::convert).collect(Collectors.toList());
+    }
+
+    private DimSchemaResp convert(DimensionResp dimensionResp) {
+        DimSchemaResp dimSchemaResp = new DimSchemaResp();
+        BeanUtils.copyProperties(dimensionResp, dimSchemaResp);
+        dimSchemaResp.setUseCnt(0L);
+        return dimSchemaResp;
+    }
+
+    private MetricSchemaResp convert(MetricResp metricResp, List<MetricResp> metricResps,
+                                     List<MeasureResp> measureResps) {
+        MetricSchemaResp metricSchemaResp = new MetricSchemaResp();
+        BeanUtils.copyProperties(metricResp, metricSchemaResp);
+        metricSchemaResp.setUseCnt(0L);
+        String agg = catalog.getAgg(metricResps, measureResps, metricSchemaResp.getBizName());
+        metricSchemaResp.setDefaultAgg(agg);
+        return metricSchemaResp;
     }
 
     private List<Long> generateModelIdsReq(ModelSchemaFilterReq filter) {

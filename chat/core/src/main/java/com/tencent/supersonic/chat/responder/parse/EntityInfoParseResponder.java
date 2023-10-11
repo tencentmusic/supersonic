@@ -22,7 +22,7 @@ public class EntityInfoParseResponder implements ParseResponder {
         QueryReq queryReq = queryContext.getRequest();
         selectedParses.forEach(parseInfo -> {
             String queryMode = parseInfo.getQueryMode();
-            if (QueryManager.isEntityQuery(queryMode)) {
+            if (QueryManager.isEntityQuery(queryMode) || QueryManager.isMetricQuery(queryMode)) {
                 EntityInfo entityInfo = ContextUtils.getBean(SemanticService.class)
                         .getEntityInfo(parseInfo, queryReq.getUser());
                 parseInfo.setEntityInfo(entityInfo);

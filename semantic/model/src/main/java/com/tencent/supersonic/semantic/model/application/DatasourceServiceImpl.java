@@ -146,6 +146,28 @@ public class DatasourceServiceImpl implements DatasourceService {
         return measureResps;
     }
 
+    @Override
+    public List<MeasureResp> getMeasureListOfModel(List<Long> modelIds) {
+        if (CollectionUtils.isEmpty(modelIds)) {
+            return Lists.newArrayList();
+        }
+        List<DatasourceResp> datasourceResps = getDatasourceList().stream().filter(datasourceResp ->
+                modelIds.contains(datasourceResp.getModelId())).collect(Collectors.toList());
+        List<MeasureResp> measureResps = Lists.newArrayList();
+        if (!CollectionUtils.isEmpty(datasourceResps)) {
+            for (DatasourceResp datasourceDesc : datasourceResps) {
+                DatasourceDetail datasourceDetail = datasourceDesc.getDatasourceDetail();
+                List<Measure> measures = datasourceDetail.getMeasures();
+                if (!CollectionUtils.isEmpty(measures)) {
+                    measureResps.addAll(
+                            measures.stream().map(measure -> DatasourceConverter.convert(measure, datasourceDesc))
+                                    .collect(Collectors.toList()));
+                }
+            }
+        }
+        return measureResps;
+    }
+
 
     private void batchCreateDimension(Datasource datasource, User user) throws Exception {
         List<DimensionReq> dimensionReqs = DatasourceConverter.convertDimensionList(datasource);
@@ -237,13 +259,6 @@ public class DatasourceServiceImpl implements DatasourceService {
     @Override
     public List<DatasourceResp> getDatasourceList() {
         return DatasourceConverter.convertList(datasourceRepository.getDatasourceList());
-    }
-
-    @Override
-    public List<DatasourceResp> getDatasourceListByDatabaseId(Long databaseId) {
-        return getDatasourceList().stream()
-                .filter(datasourceResp -> datasourceResp.getDatabaseId().equals(databaseId))
-                .collect(Collectors.toList());
     }
 
     @Override

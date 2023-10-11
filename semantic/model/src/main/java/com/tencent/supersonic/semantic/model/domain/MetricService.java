@@ -23,6 +23,8 @@ public interface MetricService {
 
     void createMetricBatch(List<MetricReq> metricReqs, User user) throws Exception;
 
+    List<MetricResp> getMetricsByModelIds(List<Long> modelIds);
+
     PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user);
 
     MetricResp getMetric(Long modelId, String bizName);
