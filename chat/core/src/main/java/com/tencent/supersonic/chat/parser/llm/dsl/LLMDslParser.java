@@ -251,7 +251,7 @@ public class LLMDslParser implements SemanticParser {
                 dslCorrection.correct(correctInfo);
                 log.info("sqlCorrection:{} sql:{}", dslCorrection.getClass().getSimpleName(), correctInfo.getSql());
             } catch (Exception e) {
-                log.error("sqlCorrection:{} correct error,correctInfo:{}", dslCorrection, correctInfo, e);
+                log.error(String.format("correct error,correctInfo:%s", correctInfo), e);
             }
         });
         return correctInfo;
