@@ -62,7 +62,7 @@ public class LoadBenchMarkDemo implements CommandLineRunner {
 
     public void addDomain() {
         DomainReq domainReq = new DomainReq();
-        domainReq.setName("测评数据-音乐");
+        domainReq.setName("测评数据_音乐");
         domainReq.setBizName("music");
         domainReq.setParentId(0L);
         domainReq.setViewers(Arrays.asList("admin", "tom", "jack"));
@@ -74,7 +74,7 @@ public class LoadBenchMarkDemo implements CommandLineRunner {
 
     public void addModel_1() {
         ModelReq modelReq = new ModelReq();
-        modelReq.setName("测评数据-音乐");
+        modelReq.setName("测评数据_音乐");
         modelReq.setBizName("music");
         modelReq.setDomainId(2L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
