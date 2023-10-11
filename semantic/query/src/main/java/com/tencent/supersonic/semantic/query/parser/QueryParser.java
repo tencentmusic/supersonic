@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.query.parser;
 
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
@@ -60,7 +61,7 @@ public class QueryParser {
                     metricReq.setDimensions(metricTable.getDimensions());
                     metricReq.setWhere(formatWhere(metricTable.getWhere()));
                     metricReq.setRootPath(sqlCommend.getRootPath());
-                    QueryStatement tableSql = parser(metricReq, metricTable.isAgg());
+                    QueryStatement tableSql = parser(metricReq, metricTable.getAggOption());
                     if (!tableSql.isOk()) {
                         queryStatement.setErrMsg(String.format("parser table [%s] error [%s]", metricTable.getAlias(),
                                 tableSql.getErrMsg()));
@@ -96,10 +97,10 @@ public class QueryParser {
     }
 
     public QueryStatement parser(MetricReq metricCommand) {
-        return parser(metricCommand, !metricCommand.isNativeQuery());
+        return parser(metricCommand, AggOption.getAggregation(metricCommand.isNativeQuery()));
     }
 
-    public QueryStatement parser(MetricReq metricCommand, boolean isAgg) {
+    public QueryStatement parser(MetricReq metricCommand, AggOption isAgg) {
         log.info("parser MetricReq [{}] isAgg [{}]", metricCommand, isAgg);
         QueryStatement queryStatement = new QueryStatement();
         if (metricCommand.getRootPath().isEmpty()) {
