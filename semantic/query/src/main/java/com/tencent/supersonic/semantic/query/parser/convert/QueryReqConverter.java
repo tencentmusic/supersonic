@@ -8,6 +8,7 @@ import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.request.SqlExecuteReq;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
@@ -49,10 +50,6 @@ public class QueryReqConverter {
     private Catalog catalog;
 
     public QueryStatement convert(QueryDslReq databaseReq, ModelSchemaResp modelSchemaResp) throws Exception {
-
-        List<MetricTable> tables = new ArrayList<>();
-        MetricTable metricTable = new MetricTable();
-
         if (Objects.isNull(modelSchemaResp)) {
             return new QueryStatement();
         }
@@ -64,14 +61,13 @@ public class QueryReqConverter {
         correctTableName(databaseReq);
 
         String tableName = SqlParserSelectHelper.getTableName(databaseReq.getSql());
-
         if (StringUtils.isEmpty(tableName)) {
             return new QueryStatement();
         }
-
+        //4.build MetricTables
         List<String> allFields = SqlParserSelectHelper.getAllFields(databaseReq.getSql());
-
         List<String> metrics = getMetrics(modelSchemaResp, allFields);
+        MetricTable metricTable = new MetricTable();
         metricTable.setMetrics(metrics);
 
         Set<String> dimensions = getDimensions(modelSchemaResp, allFields);
@@ -85,8 +81,13 @@ public class QueryReqConverter {
                     queryStructUtils.generateInternalMetricName(databaseReq.getModelId(),
                             metricTable.getDimensions()))));
         }
+        // if there is no group by in dsl,set MetricTable's aggOption to "NATIVE"
+        if (!SqlParserSelectHelper.hasGroupBy(databaseReq.getSql())) {
+            metricTable.setAggOption(AggOption.NATIVE);
+        }
+        List<MetricTable> tables = new ArrayList<>();
         tables.add(metricTable);
-
+        //4.build ParseSqlReq
         ParseSqlReq result = new ParseSqlReq();
         BeanUtils.copyProperties(databaseReq, result);
         result.setRootPath(domainService.getModelFullPathMap().get(databaseReq.getModelId()));
@@ -97,7 +98,7 @@ public class QueryReqConverter {
             result.setSupportWith(false);
             result.setWithAlias(false);
         }
-
+        //5.physicalSql by ParseSqlReq
         QueryStatement queryStatement = parserService.physicalSql(result);
         queryStatement.setSql(String.format(SqlExecuteReq.LIMIT_WRAPPER, queryStatement.getSql()));
         return queryStatement;
