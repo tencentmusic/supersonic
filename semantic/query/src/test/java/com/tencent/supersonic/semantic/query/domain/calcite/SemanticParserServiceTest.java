@@ -8,6 +8,7 @@ import com.tencent.supersonic.semantic.api.model.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
 import com.tencent.supersonic.semantic.api.model.response.SqlParserResp;
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.semantic.query.parser.calcite.SemanticSchemaManager;
@@ -37,7 +38,7 @@ class SemanticParserServiceTest {
                 return sqlParser;
             }
             AggPlanner aggBuilder = new AggPlanner(semanticSchema);
-            aggBuilder.explain(metricCommand, isAgg);
+            aggBuilder.explain(metricCommand, AggOption.getAggregation(!isAgg));
             sqlParser.setSql(aggBuilder.getSql());
             sqlParser.setSourceId(aggBuilder.getSourceId());
         } catch (Exception e) {
