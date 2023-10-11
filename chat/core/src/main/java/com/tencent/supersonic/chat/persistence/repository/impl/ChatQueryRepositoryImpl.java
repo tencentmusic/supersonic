@@ -118,9 +118,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         } catch (Exception e) {
             log.info("database insert has an exception:{}", e.toString());
         }
-
-        ChatQueryDO lastChatQuery = getLastChatQuery(chatCtx.getChatId());
-        Long queryId = lastChatQuery.getQuestionId();
+        Long queryId = chatQueryDO.getQuestionId();
         parseResult.setQueryId(queryId);
         return queryId;
     }
