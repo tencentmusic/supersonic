@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
@@ -75,7 +76,7 @@ public class CalculateAggConverter implements SemanticConverter {
         String where = queryStructUtils.generateWhere(queryStructCmd);
         log.info("in generateSqlCommand, complete where:{}", where);
         metricTable.setWhere(where);
-        metricTable.setAgg(true);
+        metricTable.setAggOption(AggOption.AGGREGATION);
         sqlCommand.setTables(new ArrayList<>(Collections.singletonList(metricTable)));
         String sql = String.format("select %s from %s  %s %s %s", sqlGenerateUtils.getSelect(queryStructCmd),
                 metricTableName,
@@ -159,7 +160,7 @@ public class CalculateAggConverter implements SemanticConverter {
         String where = queryStructUtils.generateWhere(queryStructCmd);
         log.info("in generateSqlCommend, complete where:{}", where);
         metricTable.setWhere(where);
-        metricTable.setAgg(true);
+        metricTable.setAggOption(AggOption.AGGREGATION);
         sqlCommand.setTables(new ArrayList<>(Collections.singletonList(metricTable)));
         boolean isOver = isOverRatio(queryStructCmd);
         String sql = "";

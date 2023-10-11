@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.api.query.pojo;
 
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import java.util.List;
 import lombok.Data;
 
@@ -10,6 +11,6 @@ public class MetricTable {
     private List<String> metrics;
     private List<String> dimensions;
     private String where;
-    private boolean isAgg = false;
+    private AggOption aggOption = AggOption.DEFAULT;
 
 }

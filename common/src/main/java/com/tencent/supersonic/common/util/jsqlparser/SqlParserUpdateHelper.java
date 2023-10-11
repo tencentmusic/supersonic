@@ -312,7 +312,7 @@ public class SqlParserUpdateHelper {
     }
 
     public static String addGroupBy(String sql, Set<String> groupByFields) {
-        if (SqlParserSelectHelper.hasGroupBy(sql) || CollectionUtils.isEmpty(groupByFields)) {
+        if (CollectionUtils.isEmpty(groupByFields)) {
             return sql;
         }
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
@@ -324,6 +324,10 @@ public class SqlParserUpdateHelper {
 
         PlainSelect plainSelect = (PlainSelect) selectBody;
         GroupByElement groupByElement = new GroupByElement();
+        List<String> originalGroupByFields = SqlParserSelectHelper.getGroupByFields(sql);
+        if (!CollectionUtils.isEmpty(originalGroupByFields)) {
+            groupByFields.addAll(originalGroupByFields);
+        }
         for (String groupByField : groupByFields) {
             groupByElement.addGroupByExpression(new Column(groupByField));
         }
