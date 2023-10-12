@@ -303,8 +303,7 @@ public class QueryServiceImpl implements QueryService {
                 Map<String, String> map = new HashMap<>();
                 for (FilterExpression filterExpression : filterExpressionList) {
                     if (filterExpression.getFieldName() != null
-                            && filterExpression.getFieldName().equals(dslQueryFilter.getName())
-                            && dslQueryFilter.getOperator().getValue().equals(filterExpression.getOperator())) {
+                            && filterExpression.getFieldName().equals(dslQueryFilter.getName())) {
                         map.put(filterExpression.getFieldValue().toString(), dslQueryFilter.getValue().toString());
                         parseInfo.getDimensionFilters().stream().forEach(o -> {
                             if (o.getName().equals(dslQueryFilter.getName())) {
@@ -316,9 +315,11 @@ public class QueryServiceImpl implements QueryService {
                 }
                 filedNameToValueMap.put(dslQueryFilter.getName(), map);
             }
+            List<FilterExpression> havingExpressions = SqlParserSelectHelper.getHavingExpressions(correctorSql);
+            Map<String, Map<String, String>> havingFiledNameToValueMap = new HashMap<>();
             for (QueryFilter dslQueryFilter : queryData.getMetricFilters()) {
                 Map<String, String> map = new HashMap<>();
-                for (FilterExpression filterExpression : filterExpressionList) {
+                for (FilterExpression filterExpression : havingExpressions) {
                     if (filterExpression.getFieldName() != null
                             && filterExpression.getFieldName().equals(dslQueryFilter.getName())
                             && dslQueryFilter.getOperator().getValue().equals(filterExpression.getOperator())) {
@@ -331,7 +332,7 @@ public class QueryServiceImpl implements QueryService {
                         break;
                     }
                 }
-                filedNameToValueMap.put(dslQueryFilter.getName(), map);
+                havingFiledNameToValueMap.put(dslQueryFilter.getName(), map);
             }
             String dateField = "sys_imp_date";
             if (Objects.nonNull(queryData.getDateInfo())) {
@@ -369,6 +370,7 @@ public class QueryServiceImpl implements QueryService {
             }
             log.info("filedNameToValueMap:{}", filedNameToValueMap);
             correctorSql = SqlParserUpdateHelper.replaceValue(correctorSql, filedNameToValueMap);
+            correctorSql = SqlParserUpdateHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
             log.info("correctorSql after replacing:{}", correctorSql);
             llmResp.setCorrectorSql(correctorSql);
             dslParseResult.setLlmResp(llmResp);
@@ -376,11 +378,11 @@ public class QueryServiceImpl implements QueryService {
             properties.put(Constants.CONTEXT, dslParseResult);
             parseInfo.setProperties(properties);
             parseInfo.getSqlInfo().setLogicSql(correctorSql);
-            semanticQuery.setParseInfo(parseInfo);
             ExplainResp explain = semanticQuery.explain(user);
             if (!Objects.isNull(explain)) {
                 parseInfo.getSqlInfo().setQuerySql(explain.getSql());
             }
+            semanticQuery.setParseInfo(parseInfo);
         }
         semanticQuery.setParseInfo(parseInfo);
         QueryResult queryResult = semanticQuery.execute(user);
@@ -399,7 +401,7 @@ public class QueryServiceImpl implements QueryService {
         queryStructReq.setDateInfo(dateConf);
         queryStructReq.setLimit(20L);
         queryStructReq.setModelId(dimensionValueReq.getModelId());
-        queryStructReq.setNativeQuery(true);
+        queryStructReq.setNativeQuery(false);
         List<String> groups = new ArrayList<>();
         groups.add(dimensionValueReq.getBizName());
         queryStructReq.setGroups(groups);
