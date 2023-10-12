@@ -118,12 +118,8 @@ public class QueryServiceImpl implements QueryService {
             log.debug("pick after [{}]", selectedQueries.stream().collect(
                     Collectors.toList()));
 
-            List<SemanticParseInfo> selectedParses = selectedQueries.stream()
-                    .map(SemanticQuery::getParseInfo)
-                    .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
-                    .collect(Collectors.toList());
-            List<SemanticParseInfo> candidateParses = queryCtx.getCandidateQueries().stream()
-                    .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
+            List<SemanticParseInfo> selectedParses = convertParseInfo(selectedQueries);
+            List<SemanticParseInfo> candidateParses = convertParseInfo(queryCtx.getCandidateQueries());
             parseResult = ParseResp.builder()
                     .chatId(queryReq.getChatId())
                     .queryText(queryReq.getQueryText())
@@ -145,6 +141,13 @@ public class QueryServiceImpl implements QueryService {
             parseResponder.fillResponse(parseResult, queryCtx);
         }
         return parseResult;
+    }
+
+    private List<SemanticParseInfo> convertParseInfo(List<SemanticQuery> semanticQueries) {
+        return semanticQueries.stream()
+                .map(SemanticQuery::getParseInfo)
+                .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
+                .collect(Collectors.toList());
     }
 
     @Override

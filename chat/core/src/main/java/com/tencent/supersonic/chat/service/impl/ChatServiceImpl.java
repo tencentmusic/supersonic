@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
+import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
@@ -25,6 +26,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.tencent.supersonic.chat.service.ChatService;
+import com.tencent.supersonic.chat.utils.SolvedQueryManager;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
@@ -38,12 +40,14 @@ public class ChatServiceImpl implements ChatService {
     private ChatContextRepository chatContextRepository;
     private ChatRepository chatRepository;
     private ChatQueryRepository chatQueryRepository;
+    private SolvedQueryManager solvedQueryManager;
 
     public ChatServiceImpl(ChatContextRepository chatContextRepository, ChatRepository chatRepository,
-                           ChatQueryRepository chatQueryRepository) {
+                           ChatQueryRepository chatQueryRepository, SolvedQueryManager solvedQueryManager) {
         this.chatContextRepository = chatContextRepository;
         this.chatRepository = chatRepository;
         this.chatQueryRepository = chatQueryRepository;
+        this.solvedQueryManager = solvedQueryManager;
     }
 
     @Override
@@ -190,6 +194,11 @@ public class ChatServiceImpl implements ChatService {
 
     public Boolean deleteChatQuery(Long questionId) {
         return chatQueryRepository.deleteChatQuery(questionId);
+    }
+
+    @Override
+    public List<SolvedQueryRecallResp> getSolvedQuery(String queryText, Integer agentId) {
+        return solvedQueryManager.recallSolvedQuery(queryText, agentId);
     }
 
 }

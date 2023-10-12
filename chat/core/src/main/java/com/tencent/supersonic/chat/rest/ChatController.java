@@ -4,6 +4,7 @@ package com.tencent.supersonic.chat.rest;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
+import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
@@ -83,6 +84,12 @@ public class ChatController {
     public ShowCaseResp queryShowCase(@RequestBody PageQueryInfoReq pageQueryInfoCommand,
                                       @RequestParam(value = "agentId") int agentId) {
         return chatService.queryShowCase(pageQueryInfoCommand, agentId);
+    }
+
+    @RequestMapping("/getSolvedQuery")
+    public List<SolvedQueryRecallResp> getSolvedQuery(@RequestParam(value = "queryText") String queryText,
+                                                      @RequestParam(value = "agentId") Integer agentId) {
+        return chatService.getSolvedQuery(queryText, agentId);
     }
 
 }
