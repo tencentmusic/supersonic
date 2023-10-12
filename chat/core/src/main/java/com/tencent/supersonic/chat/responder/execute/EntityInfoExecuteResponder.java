@@ -22,9 +22,9 @@ public class EntityInfoExecuteResponder implements ExecuteResponder {
         }
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
         User user = queryReq.getUser();
-        queryResult.setEntityInfo(semanticService.getEntityInfo(semanticParseInfo, user));
+        EntityInfo entityInfo = semanticService.getEntityInfo(semanticParseInfo, user);
+        queryResult.setEntityInfo(entityInfo);
 
-        EntityInfo entityInfo = semanticService.getEntityInfo(semanticParseInfo.getModelId());
         if (Objects.isNull(entityInfo) || Objects.isNull(entityInfo.getModelInfo())
                 || Objects.isNull(entityInfo.getModelInfo().getPrimaryEntityName())) {
             return;
@@ -35,6 +35,8 @@ public class EntityInfoExecuteResponder implements ExecuteResponder {
         }
         boolean existPrimaryEntityName = queryResult.getQueryColumns().stream()
                 .anyMatch(queryColumn -> primaryEntityBizName.equals(queryColumn.getNameEn()));
+
+        semanticParseInfo.setNativeQuery(existPrimaryEntityName);
 
         if (!existPrimaryEntityName) {
             return;
