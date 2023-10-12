@@ -120,19 +120,16 @@ public class DimensionServiceImpl implements DimensionService {
         Dimension dimension = DimensionConverter.convert(dimensionReq);
         dimension.updatedBy(user.getName());
         log.info("[update dimension] object:{}", JSONObject.toJSONString(dimension));
-        List<DimensionResp> dimensionRespList = getDimensions(dimensionReq.getModelId()).stream().filter(
-                o -> o.getId().equals(dimensionReq.getId())).collect(Collectors.toList());
         updateDimension(dimension);
+        DimensionResp dimensionResp = getDimension(dimensionReq.getId());
         //动态更新字典
         String type = DictWordType.DIMENSION.getType();
-        if (!CollectionUtils.isEmpty(dimensionRespList)) {
-            log.info("dimensionRespList size:{}", dimensionRespList.size());
-            log.info("name:{}", dimensionRespList.get(0).getName());
+        if (dimensionResp != null) {
             applicationEventPublisher.publishEvent(
-                    new DataUpdateEvent(this, dimensionRespList.get(0).getName(),
+                    new DataUpdateEvent(this, dimensionResp.getName(),
                             dimensionReq.getName(),
                             dimension.getModelId(),
-                            dimensionRespList.get(0).getId(), type));
+                            dimensionResp.getId(), type));
         }
     }
 
@@ -154,6 +151,12 @@ public class DimensionServiceImpl implements DimensionService {
             }
         }
         return null;
+    }
+
+    @Override
+    public DimensionResp getDimension(Long id) {
+        DimensionDO dimensionDO = dimensionRepository.getDimensionById(id);
+        return DimensionConverter.convert2DimensionResp(dimensionDO, new HashMap<>(), new HashMap<>());
     }
 
     @Override
@@ -200,6 +203,12 @@ public class DimensionServiceImpl implements DimensionService {
     }
 
     @Override
+    public List<DimensionResp> getDimensionsByModelIds(List<Long> modelIds) {
+        List<DimensionDO> dimensionDOS = dimensionRepository.getDimensionListOfmodelIds(modelIds);
+        return convertList(dimensionDOS, datasourceService.getDatasourceMap());
+    }
+
+    @Override
     public List<DimensionResp> getDimensionsByDatasource(Long datasourceId) {
         List<DimensionResp> dimensionResps = Lists.newArrayList();
         List<DimensionDO> dimensionDOS = dimensionRepository.getDimensionListOfDatasource(datasourceId);
@@ -239,7 +248,7 @@ public class DimensionServiceImpl implements DimensionService {
 
 
     protected List<DimensionDO> getDimensionDOS(Long modelId) {
-        return dimensionRepository.getDimensionListOfDomain(modelId);
+        return dimensionRepository.getDimensionListOfmodel(modelId);
     }
 
     protected List<DimensionDO> getDimensionDOS() {

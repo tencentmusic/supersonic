@@ -96,7 +96,7 @@ public class QueryServiceImpl implements QueryService {
         // in order to support multi-turn conversation, chat context is needed
         ChatContext chatCtx = chatService.getOrCreateContext(queryReq.getChatId());
         List<StatisticsDO> timeCostDOList = new ArrayList<>();
-        schemaMappers.stream().forEach(mapper -> {
+        for (SchemaMapper mapper : schemaMappers) {
             Long startTime = System.currentTimeMillis();
             mapper.map(queryCtx);
             Long endTime = System.currentTimeMillis();
@@ -104,8 +104,8 @@ public class QueryServiceImpl implements QueryService {
             timeCostDOList.add(StatisticsDO.builder().cost((int) (endTime - startTime))
                     .interfaceName(className).type(CostType.MAPPER.getType()).build());
             log.info("{} result:{}", className, JsonUtil.toString(queryCtx));
-        });
-        semanticParsers.stream().forEach(parser -> {
+        }
+        for (SemanticParser parser : semanticParsers) {
             Long startTime = System.currentTimeMillis();
             parser.parse(queryCtx, chatCtx);
             Long endTime = System.currentTimeMillis();
@@ -113,7 +113,7 @@ public class QueryServiceImpl implements QueryService {
             timeCostDOList.add(StatisticsDO.builder().cost((int) (endTime - startTime))
                     .interfaceName(className).type(CostType.PARSER.getType()).build());
             log.info("{} result:{}", className, JsonUtil.toString(queryCtx));
-        });
+        }
         ParseResp parseResult;
         if (queryCtx.getCandidateQueries().size() > 0) {
             log.debug("pick before [{}]", queryCtx.getCandidateQueries().stream().collect(
@@ -122,12 +122,8 @@ public class QueryServiceImpl implements QueryService {
             log.debug("pick after [{}]", selectedQueries.stream().collect(
                     Collectors.toList()));
 
-            List<SemanticParseInfo> selectedParses = selectedQueries.stream()
-                    .map(SemanticQuery::getParseInfo)
-                    .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
-                    .collect(Collectors.toList());
-            List<SemanticParseInfo> candidateParses = queryCtx.getCandidateQueries().stream()
-                    .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
+            List<SemanticParseInfo> selectedParses = convertParseInfo(selectedQueries);
+            List<SemanticParseInfo> candidateParses = convertParseInfo(queryCtx.getCandidateQueries());
             parseResult = ParseResp.builder()
                     .chatId(queryReq.getChatId())
                     .queryText(queryReq.getQueryText())
@@ -149,6 +145,13 @@ public class QueryServiceImpl implements QueryService {
             parseResponder.fillResponse(parseResult, queryCtx);
         }
         return parseResult;
+    }
+
+    private List<SemanticParseInfo> convertParseInfo(List<SemanticQuery> semanticQueries) {
+        return semanticQueries.stream()
+                .map(SemanticQuery::getParseInfo)
+                .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
+                .collect(Collectors.toList());
     }
 
     @Override

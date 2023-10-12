@@ -88,13 +88,14 @@ public class DatasourceConverter {
         return datasourceDesc;
     }
 
-    public static MeasureResp convert(Measure measure, DatasourceResp datasourceDesc) {
-        MeasureResp measureDesc = new MeasureResp();
-        BeanUtils.copyProperties(measure, measureDesc);
-        measureDesc.setDatasourceId(datasourceDesc.getId());
-        measureDesc.setDatasourceName(datasourceDesc.getName());
-        measureDesc.setDatasourceBizName(datasourceDesc.getBizName());
-        return measureDesc;
+    public static MeasureResp convert(Measure measure, DatasourceResp datasourceResp) {
+        MeasureResp measureResp = new MeasureResp();
+        BeanUtils.copyProperties(measure, measureResp);
+        measureResp.setDatasourceId(datasourceResp.getId());
+        measureResp.setDatasourceName(datasourceResp.getName());
+        measureResp.setDatasourceBizName(datasourceResp.getBizName());
+        measureResp.setModelId(datasourceResp.getModelId());
+        return measureResp;
     }
 
     public static DimensionReq convert(Dim dim, Datasource datasource) {

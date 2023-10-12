@@ -48,9 +48,16 @@ public class DimensionRepositoryImpl implements DimensionRepository {
     }
 
     @Override
-    public List<DimensionDO> getDimensionListOfDomain(Long domainId) {
+    public List<DimensionDO> getDimensionListOfmodel(Long modelId) {
         DimensionDOExample dimensionDOExample = new DimensionDOExample();
-        dimensionDOExample.createCriteria().andModelIdEqualTo(domainId);
+        dimensionDOExample.createCriteria().andModelIdEqualTo(modelId);
+        return dimensionDOMapper.selectByExampleWithBLOBs(dimensionDOExample);
+    }
+
+    @Override
+    public List<DimensionDO> getDimensionListOfmodelIds(List<Long> modelIds) {
+        DimensionDOExample dimensionDOExample = new DimensionDOExample();
+        dimensionDOExample.createCriteria().andModelIdIn(modelIds);
         return dimensionDOMapper.selectByExampleWithBLOBs(dimensionDOExample);
     }
 

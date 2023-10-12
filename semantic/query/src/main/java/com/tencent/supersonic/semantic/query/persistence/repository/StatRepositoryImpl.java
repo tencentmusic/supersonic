@@ -1,7 +1,6 @@
 package com.tencent.supersonic.semantic.query.persistence.repository;
 
 import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tencent.supersonic.semantic.api.model.pojo.QueryStat;
@@ -16,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Repository;
@@ -37,9 +37,10 @@ public class StatRepositoryImpl implements StatRepository {
     }
 
     @Override
-    public List<ItemUseResp> getStatInfo(ItemUseReq itemUseCommend) {
+    @SneakyThrows
+    public List<ItemUseResp> getStatInfo(ItemUseReq itemUseReq) {
         List<ItemUseResp> result = new ArrayList<>();
-        List<QueryStat> statInfos = statMapper.getStatInfo(itemUseCommend);
+        List<QueryStat> statInfos = statMapper.getStatInfo(itemUseReq);
         Map<String, Long> map = new ConcurrentHashMap<>();
         statInfos.stream().forEach(stat -> {
             String dimensions = stat.getDimensions();
@@ -55,9 +56,8 @@ public class StatRepositoryImpl implements StatRepository {
             result.add(new ItemUseResp(classId, type, nameEn, v));
         });
 
-        List<ItemUseResp> itemUseResps = result.stream().sorted(Comparator.comparing(ItemUseResp::getUseCnt).reversed())
+        return result.stream().sorted(Comparator.comparing(ItemUseResp::getUseCnt).reversed())
                 .collect(Collectors.toList());
-        return itemUseResps;
     }
 
     @Override

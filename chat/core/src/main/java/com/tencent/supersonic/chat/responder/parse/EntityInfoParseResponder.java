@@ -26,7 +26,8 @@ public class EntityInfoParseResponder implements ParseResponder {
             SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
             EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, queryReq.getUser());
 
-            if (QueryManager.isEntityQuery(parseInfo.getQueryMode())) {
+            if (QueryManager.isEntityQuery(parseInfo.getQueryMode())
+                    || QueryManager.isMetricQuery(parseInfo.getQueryMode())) {
                 parseInfo.setEntityInfo(entityInfo);
             }
             //2. set native value
