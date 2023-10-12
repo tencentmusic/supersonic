@@ -44,8 +44,16 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 @Component
 public class QueryStructUtils {
-    public static Set<String> internalCols = new HashSet<>(
-            Arrays.asList("dayno", "plat_sys_var", "sys_imp_date", "sys_imp_week", "sys_imp_month"));
+
+    public static Set<String> internalTimeCols = new HashSet<>(
+            Arrays.asList("dayno", "sys_imp_date", "sys_imp_week", "sys_imp_month"));
+    public static Set<String> internalCols;
+
+    static {
+        internalCols = new HashSet<>(Arrays.asList("plat_sys_var"));
+        internalCols.addAll(internalTimeCols);
+    }
+
     private final DateUtils dateUtils;
     private final SqlFilterUtils sqlFilterUtils;
     private final Catalog catalog;
@@ -160,11 +168,13 @@ public class QueryStructUtils {
         sqlFilterUtils.getFiltersCol(queryStructCmd.getOriginalFilter()).stream().forEach(col -> resNameEnSet.add(col));
         return resNameEnSet;
     }
+
     public Set<String> getResName(QueryDslReq queryDslReq) {
         Set<String> resNameSet = SqlParserSelectHelper.getAllFields(queryDslReq.getSql())
-                        .stream().collect(Collectors.toSet());
+                .stream().collect(Collectors.toSet());
         return resNameSet;
     }
+
     public Set<String> getResNameEnExceptInternalCol(QueryStructReq queryStructCmd) {
         Set<String> resNameEnSet = getResNameEn(queryStructCmd);
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
