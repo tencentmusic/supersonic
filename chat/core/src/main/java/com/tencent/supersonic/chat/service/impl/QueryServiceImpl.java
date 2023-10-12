@@ -104,20 +104,16 @@ public class QueryServiceImpl implements QueryService {
         schemaMappers.stream().forEach(mapper -> {
             Long startTime = System.currentTimeMillis();
             mapper.map(queryCtx);
-            Long endTime = System.currentTimeMillis();
-            String className = mapper.getClass().getSimpleName();
-            timeCostDOList.add(StatisticsDO.builder().cost((int) (endTime - startTime))
-                    .interfaceName(className).type(CostType.MAPPER.getType()).build());
-            log.info("{} result:{}", className, JsonUtil.toString(queryCtx));
+            timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
+                    .interfaceName(mapper.getClass().getSimpleName()).type(CostType.MAPPER.getType()).build());
+            log.info("{} result:{}", mapper.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
         semanticParsers.stream().forEach(parser -> {
             Long startTime = System.currentTimeMillis();
             parser.parse(queryCtx, chatCtx);
-            Long endTime = System.currentTimeMillis();
-            String className = parser.getClass().getSimpleName();
-            timeCostDOList.add(StatisticsDO.builder().cost((int) (endTime - startTime))
-                    .interfaceName(className).type(CostType.PARSER.getType()).build());
-            log.info("{} result:{}", className, JsonUtil.toString(queryCtx));
+            timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
+                    .interfaceName(parser.getClass().getSimpleName()).type(CostType.PARSER.getType()).build());
+            log.info("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
         ParseResp parseResult;
         if (queryCtx.getCandidateQueries().size() > 0) {
