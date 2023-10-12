@@ -220,13 +220,18 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         try {
             explainSqlReq = ExplainSqlReq.builder()
                     .queryTypeEnum(QueryTypeEnum.STRUCT)
-                    .queryReq(convertQueryStruct())
+                    .queryReq(isMultiStructQuery()
+                            ? convertQueryMultiStruct() : convertQueryStruct())
                     .build();
             return semanticInterpreter.explain(explainSqlReq, user);
         } catch (Exception e) {
             log.error("explain error explainSqlReq:{}", explainSqlReq, e);
         }
         return null;
+    }
+
+    protected boolean isMultiStructQuery() {
+        return false;
     }
 
     public QueryResult multiStructExecute(User user) {
