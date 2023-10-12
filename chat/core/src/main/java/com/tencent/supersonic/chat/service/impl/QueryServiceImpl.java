@@ -270,6 +270,7 @@ public class QueryServiceImpl implements QueryService {
 
         if (DslQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
             Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
+            Map<String, Map<String, String>> havingFiledNameToValueMap = new HashMap<>();
             String json = JsonUtil.toString(parseInfo.getProperties().get(Constants.CONTEXT));
             DSLParseResult dslParseResult = JsonUtil.toObject(json, DSLParseResult.class);
             LLMResp llmResp = dslParseResult.getLlmResp();
@@ -281,13 +282,14 @@ public class QueryServiceImpl implements QueryService {
             updateFilters(filedNameToValueMap, filterExpressionList, queryData.getDimensionFilters(),
                     parseInfo.getDimensionFilters());
 
-            updateFilters(filedNameToValueMap, filterExpressionList, queryData.getMetricFilters(),
+            updateFilters(havingFiledNameToValueMap, filterExpressionList, queryData.getMetricFilters(),
                     parseInfo.getMetricFilters());
 
             updateDateInfo(queryData, parseInfo, filedNameToValueMap, filterExpressionList);
 
             log.info("filedNameToValueMap:{}", filedNameToValueMap);
             correctorSql = SqlParserUpdateHelper.replaceValue(correctorSql, filedNameToValueMap);
+            correctorSql = SqlParserUpdateHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
             log.info("correctorSql after replacing:{}", correctorSql);
             llmResp.setCorrectorSql(correctorSql);
 
