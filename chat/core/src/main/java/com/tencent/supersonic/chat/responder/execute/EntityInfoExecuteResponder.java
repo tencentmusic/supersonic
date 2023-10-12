@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class EntityInfoExecuteResponder implements ExecuteResponder {
 
@@ -25,12 +26,9 @@ public class EntityInfoExecuteResponder implements ExecuteResponder {
         EntityInfo entityInfo = semanticService.getEntityInfo(semanticParseInfo, user);
         queryResult.setEntityInfo(entityInfo);
 
-        if (Objects.isNull(entityInfo) || Objects.isNull(entityInfo.getModelInfo())
-                || Objects.isNull(entityInfo.getModelInfo().getPrimaryEntityName())) {
-            return;
-        }
-        String primaryEntityBizName = entityInfo.getModelInfo().getPrimaryEntityBizName();
-        if (CollectionUtils.isEmpty(queryResult.getQueryColumns())) {
+        String primaryEntityBizName = semanticService.getPrimaryEntityBizName(entityInfo);
+        if (StringUtils.isEmpty(primaryEntityBizName)
+                || CollectionUtils.isEmpty(queryResult.getQueryColumns())) {
             return;
         }
         boolean existPrimaryEntityName = queryResult.getQueryColumns().stream()
