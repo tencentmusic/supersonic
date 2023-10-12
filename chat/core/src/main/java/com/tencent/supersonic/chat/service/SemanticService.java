@@ -189,6 +189,13 @@ public class SemanticService {
         return entityInfo;
     }
 
+    public String getPrimaryEntityBizName(EntityInfo entityInfo) {
+        if (Objects.isNull(entityInfo) || Objects.isNull(entityInfo.getModelInfo())) {
+            return null;
+        }
+        return entityInfo.getModelInfo().getPrimaryEntityBizName();
+    }
+
     public void setMainModel(EntityInfo modelInfo, Long model, String entity, User user) {
         if (StringUtils.isEmpty(entity)) {
             return;
