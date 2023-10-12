@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.rest;
 
 
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
@@ -34,7 +35,7 @@ public class ChatQueryController {
 
     @PostMapping("search")
     public Object search(@RequestBody QueryReq queryCtx, HttpServletRequest request,
-            HttpServletResponse response) {
+                         HttpServletResponse response) {
         queryCtx.setUser(UserHolder.findUser(request, response));
         return searchService.search(queryCtx);
     }
@@ -55,7 +56,7 @@ public class ChatQueryController {
 
     @PostMapping("execute")
     public Object execute(@RequestBody ExecuteQueryReq queryReq,
-            HttpServletRequest request, HttpServletResponse response)
+                          HttpServletRequest request, HttpServletResponse response)
             throws Exception {
         queryReq.setUser(UserHolder.findUser(request, response));
         return queryService.performExecution(queryReq);
@@ -63,14 +64,14 @@ public class ChatQueryController {
 
     @PostMapping("queryContext")
     public Object queryContext(@RequestBody QueryReq queryCtx, HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+                               HttpServletResponse response) throws Exception {
         queryCtx.setUser(UserHolder.findUser(request, response));
         return queryService.queryContext(queryCtx);
     }
 
     @PostMapping("queryData")
     public Object queryData(@RequestBody QueryDataReq queryData,
-            HttpServletRequest request, HttpServletResponse response)
+                            HttpServletRequest request, HttpServletResponse response)
             throws Exception {
         queryData.setUser(UserHolder.findUser(request, response));
         return queryService.executeDirectQuery(queryData, UserHolder.findUser(request, response));
@@ -83,4 +84,12 @@ public class ChatQueryController {
         return queryService.queryDimensionValue(dimensionValueReq, UserHolder.findUser(request, response));
     }
 
+    @RequestMapping("/getEntityInfo")
+    public Object getEntityInfo(Long queryId, Integer parseId,
+                                HttpServletRequest request,
+                                HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return queryService.getEntityInfo(queryId, parseId, user);
+    }
 }
+

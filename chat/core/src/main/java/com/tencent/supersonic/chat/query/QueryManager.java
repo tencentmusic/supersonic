@@ -77,6 +77,10 @@ public class QueryManager {
         return ruleQueryMap.get(queryMode) instanceof EntitySemanticQuery;
     }
 
+    public static boolean isPluginQuery(String queryMode) {
+        return queryMode != null && pluginQueryMap.containsKey(queryMode);
+    }
+
     public static RuleSemanticQuery getRuleQuery(String queryMode) {
         if (queryMode == null) {
             return null;

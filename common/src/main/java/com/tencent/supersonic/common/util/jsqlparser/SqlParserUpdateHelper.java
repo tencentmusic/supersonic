@@ -67,7 +67,7 @@ public class SqlParserUpdateHelper {
         }
         PlainSelect plainSelect = (PlainSelect) selectBody;
         Expression having = plainSelect.getHaving();
-        FieldlValueReplaceVisitor visitor = new FieldlValueReplaceVisitor(true, filedNameToValueMap);
+        FieldlValueReplaceVisitor visitor = new FieldlValueReplaceVisitor(false, filedNameToValueMap);
         if (Objects.nonNull(having)) {
             having.accept(visitor);
         }
