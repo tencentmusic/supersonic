@@ -83,8 +83,6 @@ public class QueryServiceImpl implements QueryService {
     private StatisticsService statisticsService;
     @Autowired
     private SolvedQueryManager solvedQueryManager;
-    @Autowired
-    private SearchService searchService;
 
     @Value("${time.threshold: 100}")
     private Integer timeThreshold;
