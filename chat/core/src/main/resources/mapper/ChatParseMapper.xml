@@ -29,7 +29,7 @@
         select *
         from s2_chat_parse
         where question_id = #{questionId} and user_name = #{userName}
-        and parse_id = #{parseId} and is_candidate = 0 limit 1
+        and parse_id = #{parseId} limit 1
     </select>
 
 </mapper>

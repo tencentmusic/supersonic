@@ -154,6 +154,19 @@ public class SqlParserSelectHelper {
         return null;
     }
 
+    public static List<FilterExpression> getHavingExpressions(String sql) {
+        PlainSelect plainSelect = getPlainSelect(sql);
+        if (Objects.isNull(plainSelect)) {
+            return new ArrayList<>();
+        }
+        Set<FilterExpression> result = new HashSet<>();
+        Expression having = plainSelect.getHaving();
+        if (Objects.nonNull(having)) {
+            having.accept(new FieldAndValueAcquireVisitor(result));
+        }
+        return new ArrayList<>(result);
+    }
+
     public static List<String> getOrderByFields(String sql) {
         PlainSelect plainSelect = getPlainSelect(sql);
         if (Objects.isNull(plainSelect)) {

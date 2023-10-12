@@ -15,12 +15,16 @@ public class ExplainSqlParseResponder implements ParseResponder {
 
     @Override
     public void fillResponse(ParseResp parseResp, QueryContext queryContext) {
-        List<SemanticParseInfo> selectedParses = parseResp.getSelectedParses();
-        if (CollectionUtils.isEmpty(selectedParses)) {
+        QueryReq queryReq = queryContext.getRequest();
+        addExplainSql(queryReq, parseResp.getSelectedParses());
+        addExplainSql(queryReq, parseResp.getCandidateParses());
+    }
+
+    private void addExplainSql(QueryReq queryReq, List<SemanticParseInfo> semanticParseInfos) {
+        if (CollectionUtils.isEmpty(semanticParseInfos)) {
             return;
         }
-        QueryReq queryReq = queryContext.getRequest();
-        selectedParses.forEach(parseInfo -> {
+        semanticParseInfos.forEach(parseInfo -> {
             addExplainSql(queryReq, parseInfo);
         });
     }
