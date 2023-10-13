@@ -15,7 +15,7 @@ import java.util.List;
 
 public interface ChatQueryRepository {
 
-    PageInfo<QueryResp> getChatQuery(PageQueryInfoReq pageQueryInfoCommend, long chatId);
+    PageInfo<QueryResp> getChatQuery(PageQueryInfoReq pageQueryInfoCommend, Long chatId);
 
     List<QueryResp> queryShowCase(PageQueryInfoReq pageQueryInfoCommend, int agentId);
 
