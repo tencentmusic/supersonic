@@ -89,8 +89,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     public Object queryByQueryStatement(QueryStatement queryStatement) {
-        QueryResultWithSchemaResp results = semanticQueryEngine.execute(queryStatement);
-        return results;
+        return semanticQueryEngine.execute(queryStatement);
     }
 
     private QueryStatement convertToQueryStatement(QueryDslReq querySqlCmd, User user) throws Exception {
