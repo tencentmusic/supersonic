@@ -24,7 +24,7 @@ function setEnvToWeb {
    model_name=$1
    json='{"env": "'$model_name'"}'
    echo $json > ${runtimeDir}/supersonic-${model_name}/webapp/supersonic.config.json
-   echo $json > ../../launchers/${model_name}/target/classes/webapp/supersonic.config.json
+   echo $json > $baseDir/../launchers/${model_name}/target/classes/webapp/supersonic.config.json
 }
 
 function moveToRuntime {
