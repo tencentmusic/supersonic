@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { CLS_PREFIX } from '../../../common/constants';
 import { MsgDataType } from '../../../common/type';
 import { getToken, isProd } from '../../../utils/utils';
 
@@ -13,8 +12,6 @@ const DEFAULT_HEIGHT = 800;
 const WebPage: React.FC<Props> = ({ id, data }) => {
   const [pluginUrl, setPluginUrl] = useState('');
   const [height, setHeight] = useState(DEFAULT_HEIGHT);
-
-  const prefixCls = `${CLS_PREFIX}-web-page`;
 
   const {
     name,

@@ -9,6 +9,7 @@ export type SearchRecommendItem = {
 
 export type FieldType = {
   bizName: string;
+  itemId: number;
   id: number;
   name: string;
   status: number;
@@ -86,7 +87,7 @@ export type ChatContextType = {
   dimensions: FieldType[];
   metrics: FieldType[];
   entity: { alias: string[], id: number };
-  entityInfo: { dimensions: EntityDimensionType[] };
+  entityInfo: EntityInfoType;
   elementMatches: any[];
   nativeQuery: boolean;
   queryMode: string;
@@ -133,6 +134,7 @@ export type MsgDataType = {
   queryId: number;
   queryMode: string;
   queryState: string;
+  queryText: string;
   response: PluginResonseType;
   parseOptions?: ChatContextType[];
 };

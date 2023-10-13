@@ -2,7 +2,7 @@ import { Input } from 'antd';
 import styles from './style.module.less';
 import { useEffect, useState } from 'react';
 import ChatItem from '../components/ChatItem';
-import { queryContext, searchRecommend } from '../service';
+import { searchRecommend } from '../service';
 
 const { Search } = Input;
 

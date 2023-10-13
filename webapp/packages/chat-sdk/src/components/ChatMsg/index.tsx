@@ -129,7 +129,6 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
   const onLoadData = async (value: any) => {
     setLoading(true);
     const res: any = await queryData({
-      // ...chatContext,
       queryId,
       parseId: chatContext.id,
       ...value,
@@ -200,7 +199,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
 
   const existDrillDownDimension = queryMode.includes('METRIC') && !isText && !isEntityMode;
 
-  const isMultipleMetric = existDrillDownDimension && chatContext?.metrics?.length > 1;
+  const isMultipleMetric = queryMode.includes('METRIC') && chatContext?.metrics?.length > 1;
 
   return (
     <div className={chartMsgClass}>

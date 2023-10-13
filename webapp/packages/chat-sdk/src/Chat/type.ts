@@ -1,4 +1,4 @@
-import { ChatContextType, MsgDataType, SendMsgParamsType } from "../common/type";
+import { MsgDataType, SendMsgParamsType } from "../common/type";
 
 export enum MessageTypeEnum {
   TEXT = 'text', // 指标文本
@@ -10,7 +10,6 @@ export enum MessageTypeEnum {
   PLUGIN = 'PLUGIN', // 插件
   WEB_PAGE = 'WEB_PAGE', // 插件
   RECOMMEND_QUESTIONS = 'recommend_questions', // 推荐问题
-  PARSE_OPTIONS = 'parse_options', // 解析选项
   AGENT_LIST = 'agent_list', // 专家列表
 }
 
@@ -27,7 +26,6 @@ export type MessageItem = {
   quote?: string;
   score?: number;
   feedback?: string;
-  parseOptions?: ChatContextType[];
   filters?: any;
 };
 
