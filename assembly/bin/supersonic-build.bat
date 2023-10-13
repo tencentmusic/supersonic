@@ -31,20 +31,23 @@ set requirementPath="%baseDir%/../chat/core/src/main/python/requirements.txt"
 %pip_path% install -r %requirementPath%
 echo "install python modules success"
 
-rem 6. reset runtime
-rd /s /q "%runtimeDir%"
-mkdir "%runtimeDir%"
-tar -zxvf "%buildDir%\supersonic-standalone.tar.gz" -C "%runtimeDir%"
-for /d %%f in ("%runtimeDir%\launchers-standalone-*") do (
-    move "%%f" "%runtimeDir%\supersonic-standalone"
-)
+call :BUILD_RUNTIME
 
-rem 7. copy webapp to runtime
-tar -zxvf "%buildDir%\supersonic-webapp.tar.gz" -C "%buildDir%"
-if not exist "%runtimeDir%\supersonic-standalone\webapp" mkdir "%runtimeDir%\supersonic-standalone\webapp"
-xcopy /s /e /h /y "%buildDir%\supersonic-webapp\*" "%runtimeDir%\supersonic-standalone\webapp"
-if not exist "%runtimeDir%\supersonic-standalone\conf\webapp" mkdir "%runtimeDir%\supersonic-standalone\conf\webapp"
-xcopy /s /e /h /y "%runtimeDir%\supersonic-standalone\webapp\*" "%runtimeDir%\supersonic-standalone\conf\webapp"
-rd /s /q "%buildDir%\supersonic-webapp"
+:BUILD_RUNTIME
+  rem 6. reset runtime
+  rd /s /q "%runtimeDir%"
+  mkdir "%runtimeDir%"
+  tar -zxvf "%buildDir%\supersonic-standalone.tar.gz" -C "%runtimeDir%"
+  for /d %%f in ("%runtimeDir%\launchers-standalone-*") do (
+      move "%%f" "%runtimeDir%\supersonic-standalone"
+  )
+
+  rem 7. copy webapp to runtime
+  tar -zxvf "%buildDir%\supersonic-webapp.tar.gz" -C "%buildDir%"
+  if not exist "%runtimeDir%\supersonic-standalone\webapp" mkdir "%runtimeDir%\supersonic-standalone\webapp"
+  xcopy /s /e /h /y "%buildDir%\supersonic-webapp\*" "%runtimeDir%\supersonic-standalone\webapp"
+  if not exist "%runtimeDir%\supersonic-standalone\conf\webapp" mkdir "%runtimeDir%\supersonic-standalone\conf\webapp"
+  xcopy /s /e /h /y "%runtimeDir%\supersonic-standalone\webapp\*" "%runtimeDir%\supersonic-standalone\conf\webapp"
+  rd /s /q "%buildDir%\supersonic-webapp"
 
 endlocal

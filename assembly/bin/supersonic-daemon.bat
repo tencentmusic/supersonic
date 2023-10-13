@@ -21,6 +21,8 @@ if "%service%"=="" (
    set "service=%standalone_service%"
 )
 
+call :BUILD_RUNTIME
+
 if "%command%"=="restart" (
    call :STOP
    call :START
@@ -97,3 +99,20 @@ if "%command%"=="restart" (
    cd "%runtimeDir%\supersonic-standalone\llmparser\sql"
    start  %python_path% examples_reload_run.py
    goto :EOF
+
+:BUILD_RUNTIME
+  rem 6. reset runtime
+  if exist "%runtimeDir%" goto :EOF
+  mkdir "%runtimeDir%"
+  tar -zxvf "%buildDir%\supersonic-standalone.tar.gz" -C "%runtimeDir%"
+  for /d %%f in ("%runtimeDir%\launchers-standalone-*") do (
+      move "%%f" "%runtimeDir%\supersonic-standalone"
+  )
+
+  rem 7. copy webapp to runtime
+  tar -zxvf "%buildDir%\supersonic-webapp.tar.gz" -C "%buildDir%"
+  if not exist "%runtimeDir%\supersonic-standalone\webapp" mkdir "%runtimeDir%\supersonic-standalone\webapp"
+  xcopy /s /e /h /y "%buildDir%\supersonic-webapp\*" "%runtimeDir%\supersonic-standalone\webapp"
+  if not exist "%runtimeDir%\supersonic-standalone\conf\webapp" mkdir "%runtimeDir%\supersonic-standalone\conf\webapp"
+  xcopy /s /e /h /y "%runtimeDir%\supersonic-standalone\webapp\*" "%runtimeDir%\supersonic-standalone\conf\webapp"
+  rd /s /q "%buildDir%\supersonic-webapp"

@@ -205,11 +205,10 @@ public class ChatServiceImpl implements ChatService {
         List<SolvedQueryRecallResp> solvedQueryRecallResps = solvedQueryManager.recallSolvedQuery(queryText, agentId);
         List<Long> queryIds = solvedQueryRecallResps.stream()
                 .map(SolvedQueryRecallResp::getQueryId).collect(Collectors.toList());
-        List<Long> queryIds = solvedQueryRecallResps.stream().map(SolvedQueryRecallResp::getQueryId)
-                .collect(Collectors.toList());
         PageQueryInfoReq pageQueryInfoReq = new PageQueryInfoReq();
         pageQueryInfoReq.setIds(queryIds);
         pageQueryInfoReq.setPageSize(100);
+        pageQueryInfoReq.setCurrent(1);
         //2. remove low score query
         int lowScoreThreshold = 3;
         PageInfo<QueryResp> queryRespPageInfo = chatQueryRepository.getChatQuery(pageQueryInfoReq, null);

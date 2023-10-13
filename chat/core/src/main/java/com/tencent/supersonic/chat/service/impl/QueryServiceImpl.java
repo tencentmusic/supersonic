@@ -205,11 +205,7 @@ public class QueryServiceImpl implements QueryService {
             if (queryReq.isSaveAnswer() && QueryState.SUCCESS.equals(queryResult.getQueryState())) {
                 chatCtx.setParseInfo(parseInfo);
                 chatService.updateContext(chatCtx);
-                solvedQueryManager.saveSolvedQuery(SolvedQueryReq.builder().parseId(queryReq.getParseId())
-                        .queryId(queryReq.getQueryId())
-                        .agentId(chatQueryDO.getAgentId())
-                        .modelId(parseInfo.getModelId())
-                        .queryText(queryReq.getQueryText()).build());
+                saveSolvedQuery(queryReq, parseInfo, chatQueryDO, queryResult);
             }
             chatCtx.setQueryText(queryReq.getQueryText());
             chatCtx.setUser(queryReq.getUser().getName());
@@ -240,6 +236,18 @@ public class QueryServiceImpl implements QueryService {
             log.info("filterStatistics size:{},data:{}", list.size(), JsonUtil.toString(list));
             statisticsService.batchSaveStatistics(list);
         }
+    }
+
+    private void saveSolvedQuery(ExecuteQueryReq queryReq, SemanticParseInfo parseInfo,
+                                 ChatQueryDO chatQueryDO, QueryResult queryResult) {
+        if (queryResult.getResponse() == null && CollectionUtils.isEmpty(queryResult.getQueryResults())) {
+            return;
+        }
+        solvedQueryManager.saveSolvedQuery(SolvedQueryReq.builder().parseId(queryReq.getParseId())
+                .queryId(queryReq.getQueryId())
+                .agentId(chatQueryDO.getAgentId())
+                .modelId(parseInfo.getModelId())
+                .queryText(queryReq.getQueryText()).build());
     }
 
     @Override
