@@ -203,7 +203,8 @@ public class ChatServiceImpl implements ChatService {
     public List<SolvedQueryRecallResp> getSolvedQuery(String queryText, Integer agentId) {
         //1. recall solved query by queryText
         List<SolvedQueryRecallResp> solvedQueryRecallResps = solvedQueryManager.recallSolvedQuery(queryText, agentId);
-        List<Long> queryIds = solvedQueryRecallResps.stream().map(SolvedQueryRecallResp::getQueryId).collect(Collectors.toList());
+        List<Long> queryIds = solvedQueryRecallResps.stream()
+                .map(SolvedQueryRecallResp::getQueryId).collect(Collectors.toList());
         PageQueryInfoReq pageQueryInfoReq = new PageQueryInfoReq();
         pageQueryInfoReq.setIds(queryIds);
         pageQueryInfoReq.setPageSize(100);
