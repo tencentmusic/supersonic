@@ -3,25 +3,40 @@
 - All notable changes to this project will be documented in this file.
 - "Breaking Changes" describes any changes that may break existing functionality or cause
   compatibility issues with previous versions.
+
+## SuperSonic [0.7.5] - 2023-10-13
+
+### Added
+- add SQL generation improvement optimization, support LLM SQL, Logic SQL, and Physical SQL display.
+- add showcase functionality to support recommending similar questions.
+- add frontend modification of filtering conditions and re-querying feature.
+- support nested query functionality in semantic.
+- support switching queries between multiple parsers in the frontend.
+
+### Updated
+- optimizing the build and deployment of the project.
+- overall optimization of the SQL Corrector functionality.
+
+### Fixed
+- fix execute error on mysql <=5.7
   
-  ## SuperSonic [0.7.4] - 2023-09-10
+## SuperSonic [0.7.4] - 2023-09-10
   
-  ### Added
-  - add llm parser config
-  - add datasource agg_time option
-  - add function name adaptor in clickhouse
-  - add dimension and metric show in dsl
+### Added
+- add llm parser config
+- add datasource agg_time option
+- add function name adaptor in clickhouse
+- add dimension and metric show in dsl
   
-  
-  ### Updated
-  - update user guide doc
-  - update query building of plugin in default model
-  - update some core API constructs to keep naming consistency
-  - update ConfigureDemo config
-  - update the association mechanism so that invisible dimensions and metrics will no longer be associated
-  
-  ### Fixed
-  - fix hasAggregateFunction logic in SqlParserSelectHelper
+### Updated
+- update user guide doc
+- update query building of plugin in default model
+- update some core API constructs to keep naming consistency
+- update ConfigureDemo config
+- update the association mechanism so that invisible dimensions and metrics will no longer be associated
+
+### Fixed
+- fix hasAggregateFunction logic in SqlParserSelectHelper
 
 ## SuperSonic [0.7.3] - 2023-08-29
 
