@@ -163,6 +163,7 @@ public class LoadModelDataDemo implements CommandLineRunner {
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         Dim dimension2 = new Dim("", "page", DimensionTypeEnum.categorical.name(), 0);
+        dimension2.setExpr("page");
         dimensions.add(dimension2);
         datasourceReq.setDimensions(dimensions);
 
@@ -196,6 +197,7 @@ public class LoadModelDataDemo implements CommandLineRunner {
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         Dim dimension2 = new Dim("页面", "page", DimensionTypeEnum.categorical.name(), 1);
+        dimension2.setExpr("page");
         dimensions.add(dimension2);
         datasourceReq.setDimensions(dimensions);
 
