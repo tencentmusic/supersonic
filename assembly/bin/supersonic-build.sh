@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 set -x
-chmod +x supersonic-common.sh
-source supersonic-common.sh
+sbinDir=$(cd "$(dirname "$0")"; pwd)
+chmod +x $sbinDir/supersonic-common.sh
+source $sbinDir/supersonic-common.sh
 
 cd $baseDir
 

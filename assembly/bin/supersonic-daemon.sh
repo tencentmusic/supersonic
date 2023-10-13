@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-chmod +x supersonic-common.sh
-source supersonic-common.sh
+set -x
+sbinDir=$(cd "$(dirname "$0")"; pwd)
+chmod +x $sbinDir/supersonic-common.sh
+source $sbinDir/supersonic-common.sh
 
 # 1.init environment parameters
 if [ ! -d "$runtimeDir" ]; then
