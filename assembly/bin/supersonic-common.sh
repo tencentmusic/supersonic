@@ -41,9 +41,6 @@ function moveAllToRuntime {
   moveToRuntime chat
   moveToRuntime semantic
   moveToRuntime standalone
-
-  setEnvToWeb chat
-  setEnvToWeb semantic
 }
 
 # run java service

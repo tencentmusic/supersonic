@@ -41,5 +41,7 @@ echo "install python modules success"
 #6. reset runtime
 rm -fr $runtimeDir/*
 moveAllToRuntime
+setEnvToWeb chat
+setEnvToWeb semantic
 
 rm -fr  ${buildDir}/webapp
