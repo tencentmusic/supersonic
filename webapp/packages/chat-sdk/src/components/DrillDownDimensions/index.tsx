@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { CLS_PREFIX } from '../../common/constants';
 import { DrillDownDimensionType, FilterItemType } from '../../common/type';
 import { queryDrillDownDimensions } from '../../service';
-import { Dropdown } from 'antd';
+import { Dropdown, Menu } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
 
@@ -87,26 +87,27 @@ const DrillDownDimensions: React.FC<Props> = ({
             <div>
               <span>、</span>
               <Dropdown
-                menu={{
-                  items: dimensions.slice(DEFAULT_DIMENSION_COUNT).map(dimension => {
-                    const itemNameClass = classNames({
-                      [`${prefixCls}-menu-item-active`]: drillDownDimension?.id === dimension.id,
-                    });
-                    return {
-                      label: (
-                        <span
-                          className={itemNameClass}
-                          onClick={() => {
-                            onSelectDimension(dimension);
-                          }}
-                        >
-                          {dimension.name}
-                        </span>
-                      ),
-                      key: dimension.id,
-                    };
-                  }),
-                }}
+                overlay={
+                  <Menu>
+                    {dimensions.slice(DEFAULT_DIMENSION_COUNT).map(dimension => {
+                      const itemNameClass = classNames({
+                        [`${prefixCls}-menu-item-active`]: drillDownDimension?.id === dimension.id,
+                      });
+                      return (
+                        <Menu.Item key={dimension.id}>
+                          <span
+                            className={itemNameClass}
+                            onClick={() => {
+                              onSelectDimension(dimension);
+                            }}
+                          >
+                            {dimension.name}
+                          </span>
+                        </Menu.Item>
+                      );
+                    })}
+                  </Menu>
+                }
               >
                 <span>
                   <span className={`${prefixCls}-content-item-name`}>更多</span>

@@ -36,18 +36,18 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
       <div className={`${tipPrefixCls}-title-bar`}>
         <CheckCircleFilled className={`${tipPrefixCls}-step-icon`} />
         <div className={`${tipPrefixCls}-step-title`}>
-          SQL生成
+          SQL生成：
           {sqlType && (
             <span className={`${prefixCls}-toggle-expand-btn`} onClick={onCollapse}>
               <UpOutlined />
             </span>
           )}
         </div>
-        <div className={`${prefixCls}-sql-options`}>
+        <div className={`${tipPrefixCls}-content-options`}>
           {sqlInfo.llmParseSql && (
             <div
-              className={`${prefixCls}-sql-option ${
-                sqlType === 'llmParseSql' ? `${prefixCls}-sql-option-active` : ''
+              className={`${tipPrefixCls}-content-option ${
+                sqlType === 'llmParseSql' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
                 setSqlType(sqlType === 'llmParseSql' ? '' : 'llmParseSql');
@@ -58,8 +58,8 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
           )}
           {sqlInfo.logicSql && (
             <div
-              className={`${prefixCls}-sql-option ${
-                sqlType === 'logicSql' ? `${prefixCls}-sql-option-active` : ''
+              className={`${tipPrefixCls}-content-option ${
+                sqlType === 'logicSql' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
                 setSqlType(sqlType === 'logicSql' ? '' : 'logicSql');
@@ -70,8 +70,8 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
           )}
           {sqlInfo.querySql && (
             <div
-              className={`${prefixCls}-sql-option ${
-                sqlType === 'querySql' ? `${prefixCls}-sql-option-active` : ''
+              className={`${tipPrefixCls}-content-option ${
+                sqlType === 'querySql' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
                 setSqlType(sqlType === 'querySql' ? '' : 'querySql');
