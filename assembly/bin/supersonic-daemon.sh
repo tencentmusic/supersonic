@@ -10,6 +10,7 @@ if [ ! -d "$runtimeDir" ]; then
     echo "the runtime dir does not exist move all to runtime"
     moveAllToRuntime
 fi
+set +x
 
 command=$1
 service=$2
