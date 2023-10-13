@@ -40,10 +40,11 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.service.SearchService;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
@@ -59,8 +60,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.commons.collections.CollectionUtils;
@@ -155,7 +154,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     private List<SemanticParseInfo> getTop5CandidateParseInfo(List<SemanticParseInfo> selectedParses,
-                                                              List<SemanticParseInfo> candidateParses) {
+            List<SemanticParseInfo> candidateParses) {
         if (CollectionUtils.isEmpty(selectedParses) || CollectionUtils.isEmpty(candidateParses)) {
             return candidateParses;
         }
@@ -318,9 +317,9 @@ public class QueryServiceImpl implements QueryService {
             updateDateInfo(queryData, parseInfo, filedNameToValueMap, filterExpressionList);
 
             log.info("filedNameToValueMap:{}", filedNameToValueMap);
-            correctorSql = SqlParserUpdateHelper.replaceValue(correctorSql, filedNameToValueMap);
+            correctorSql = SqlParserReplaceHelper.replaceValue(correctorSql, filedNameToValueMap);
             log.info("havingFiledNameToValueMap:{}", havingFiledNameToValueMap);
-            correctorSql = SqlParserUpdateHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
+            correctorSql = SqlParserReplaceHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
             log.info("correctorSql after replacing:{}", correctorSql);
             llmResp.setCorrectorSql(correctorSql);
             dslParseResult.setLlmResp(llmResp);
@@ -355,12 +354,10 @@ public class QueryServiceImpl implements QueryService {
             return;
         }
         Map<String, String> map = new HashMap<>();
-        //List<String> dateFields = new ArrayList<>(QueryStructUtils.internalTimeCols);
-        String dateField = "数据日期";
+        String dateField = DateUtils.DATE_FIELD;
         if (queryData.getDateInfo().getStartDate().equals(queryData.getDateInfo().getEndDate())) {
             for (FilterExpression filterExpression : filterExpressionList) {
-                if (filterExpression.getFieldName() != null
-                        && filterExpression.getFieldName().equals("数据日期")) {
+                if (DateUtils.DATE_FIELD.equals(filterExpression.getFieldName())) {
                     dateField = filterExpression.getFieldName();
                     map.put(filterExpression.getFieldValue().toString(),
                             queryData.getDateInfo().getStartDate());
@@ -369,7 +366,7 @@ public class QueryServiceImpl implements QueryService {
             }
         } else {
             for (FilterExpression filterExpression : filterExpressionList) {
-                if (filterExpression.getFieldName().equals("数据日期")) {
+                if (DateUtils.DATE_FIELD.equals(filterExpression.getFieldName())) {
                     dateField = filterExpression.getFieldName();
                     if (FilterOperatorEnum.GREATER_THAN_EQUALS.getValue().equals(filterExpression.getOperator())
                             || FilterOperatorEnum.GREATER_THAN.getValue().equals(filterExpression.getOperator())) {

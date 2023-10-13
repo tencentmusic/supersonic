@@ -7,8 +7,8 @@ import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -53,7 +53,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         whereFields.addAll(SqlParserSelectHelper.getOrderByFields(sql));
         whereFields.removeAll(selectFields);
         whereFields.remove(DateUtils.DATE_FIELD);
-        String replaceFields = SqlParserUpdateHelper.addFieldsToSelect(sql, new ArrayList<>(whereFields));
+        String replaceFields = SqlParserAddHelper.addFieldsToSelect(sql, new ArrayList<>(whereFields));
         semanticCorrectInfo.setSql(replaceFields);
     }
 
@@ -76,7 +76,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
             return;
         }
 
-        String aggregateSql = SqlParserUpdateHelper.addAggregateToField(sql, metricToAggregate);
+        String aggregateSql = SqlParserAddHelper.addAggregateToField(sql, metricToAggregate);
         semanticCorrectInfo.setSql(aggregateSql);
     }
 

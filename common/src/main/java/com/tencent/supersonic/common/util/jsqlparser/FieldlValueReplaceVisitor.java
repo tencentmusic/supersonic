@@ -1,23 +1,20 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -28,7 +25,6 @@ public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
     ParseVisitorHelper parseVisitorHelper = new ParseVisitorHelper();
     private boolean exactReplace;
     private Map<String, Map<String, String>> filedNameToValueMap;
-
 
     public FieldlValueReplaceVisitor(boolean exactReplace, Map<String, Map<String, String>> filedNameToValueMap) {
         this.exactReplace = exactReplace;
@@ -68,27 +64,11 @@ public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
         if (Objects.isNull(rightExpression) || Objects.isNull(leftExpression)) {
             return;
         }
-        String columnName = "";
-        if (leftExpression instanceof Column) {
-            Column leftColumnName = (Column) leftExpression;
-            columnName = leftColumnName.getColumnName();
-        }
-        if (leftExpression instanceof Function) {
-            Function function = (Function) leftExpression;
-            columnName = ((Column) function.getParameters().getExpressions().get(0)).getColumnName();
-        }
+        String columnName = SqlParserSelectHelper.getColumnName(leftExpression);
         if (StringUtils.isEmpty(columnName)) {
             return;
         }
-
-        Map<String, String> valueMap = new HashMap<>();
-        for (String key : filedNameToValueMap.keySet()) {
-            if (columnName.contains(key)) {
-                valueMap = filedNameToValueMap.get(key);
-                break;
-            }
-        }
-        //filedNameToValueMap.get(columnName);
+        Map<String, String> valueMap = filedNameToValueMap.get(columnName);
         if (Objects.isNull(valueMap) || valueMap.isEmpty()) {
             return;
         }
