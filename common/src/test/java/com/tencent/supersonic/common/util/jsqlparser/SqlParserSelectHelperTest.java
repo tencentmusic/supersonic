@@ -126,6 +126,13 @@ class SqlParserSelectHelperTest {
                         + "= '2023-08-08' ORDER BY pv DESC LIMIT 1");
 
         Assert.assertEquals(allFields.size(), 6);
+
+        allFields = SqlParserSelectHelper.getAllFields(
+                "SELECT * FROM CSpider  WHERE (评分 < (SELECT min(评分) FROM CSpider WHERE 语种 = '英文' ))"
+                        + " AND 数据日期 = '2023-10-12'");
+
+        Assert.assertEquals(allFields.size(), 3);
+
     }
 
 
