@@ -59,6 +59,21 @@ public class SqlParserUpdateHelper {
         return selectStatement.toString();
     }
 
+    public static String replaceHavingValue(String sql, Map<String, Map<String, String>> filedNameToValueMap) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+        Expression having = plainSelect.getHaving();
+        FieldlValueReplaceVisitor visitor = new FieldlValueReplaceVisitor(false, filedNameToValueMap);
+        if (Objects.nonNull(having)) {
+            having.accept(visitor);
+        }
+        return selectStatement.toString();
+    }
+
     public static String replaceFieldNameByValue(String sql, Map<String, Set<String>> fieldValueToFieldNames) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();

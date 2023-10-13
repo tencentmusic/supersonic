@@ -5,6 +5,7 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
+import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import java.util.List;
@@ -19,6 +20,9 @@ public class EntityInfoExecuteResponder implements ExecuteResponder {
     @Override
     public void fillResponse(QueryResult queryResult, SemanticParseInfo semanticParseInfo, ExecuteQueryReq queryReq) {
         if (semanticParseInfo == null || semanticParseInfo.getModelId() <= 0L) {
+            return;
+        }
+        if (QueryManager.isPluginQuery(semanticParseInfo.getQueryMode())) {
             return;
         }
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
