@@ -2,10 +2,6 @@
 
 set -x
 sbinDir=$(cd "$(dirname "$0")"; pwd)
-baseDir=$(cd "$sbinDir/.." && pwd -P)
-runtimeDir=$baseDir/../runtime
-buildDir=$baseDir/build
-
 chmod +x $sbinDir/supersonic-common.sh
 source $sbinDir/supersonic-common.sh
 
@@ -37,6 +33,7 @@ mv supersonic-webapp webapp
 cp -fr webapp ../../launchers/semantic/target/classes
 cp -fr webapp ../../launchers/chat/target/classes
 cp -fr webapp ../../launchers/standalone/target/classes
+rm -fr  ${buildDir}/webapp
 
 #5. build backend python modules
 echo "start installing python modules with pip: ${pip_path}"
@@ -49,5 +46,3 @@ rm -fr $runtimeDir/*
 moveAllToRuntime
 setEnvToWeb chat
 setEnvToWeb semantic
-
-rm -fr  ${buildDir}/webapp

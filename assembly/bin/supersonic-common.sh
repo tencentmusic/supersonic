@@ -4,6 +4,11 @@
 python_path=${PYTHON_PATH:-"python3"}
 pip_path=${PIP_PATH:-"pip3"}
 
+sbinDir=$(cd "$(dirname "$0")"; pwd)
+baseDir=$(cd "$sbinDir/.." && pwd -P)
+runtimeDir=$baseDir/../runtime
+buildDir=$baseDir/build
+
 readonly CHAT_APP_NAME="supersonic_chat"
 readonly SEMANTIC_APP_NAME="supersonic_semantic"
 readonly LLMPARSER_APP_NAME="supersonic_llmparser"
@@ -33,9 +38,13 @@ function moveToRuntime {
 
 function moveAllToRuntime {
   mkdir -p ${runtimeDir}
+  tar xvf  ${buildDir}/supersonic-webapp.tar.gz  -C ${buildDir}
+  mv ${buildDir}/supersonic-webapp ${buildDir}/webapp
+
   moveToRuntime chat
   moveToRuntime semantic
   moveToRuntime standalone
+  rm -fr  ${buildDir}/webapp
 }
 
 # run java service
