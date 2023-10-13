@@ -183,6 +183,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
       msg: item.queryText,
       msgData: item.queryResult,
       score: item.score,
+      agentId: currentAgent?.id,
     }));
   };
 
