@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.query.llm.dsl.LLMReq;
 import com.tencent.supersonic.chat.query.llm.dsl.LLMReq.ElementValue;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,7 +33,7 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
     }
 
     private void replaceAlias(SemanticCorrectInfo semanticCorrectInfo) {
-        String replaceAlias = SqlParserUpdateHelper.replaceAlias(semanticCorrectInfo.getSql());
+        String replaceAlias = SqlParserReplaceHelper.replaceAlias(semanticCorrectInfo.getSql());
         semanticCorrectInfo.setSql(replaceAlias);
     }
 
@@ -41,7 +41,7 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
 
         Map<String, String> fieldNameMap = getFieldNameMap(semanticCorrectInfo.getParseInfo().getModelId());
 
-        String sql = SqlParserUpdateHelper.replaceFields(semanticCorrectInfo.getSql(), fieldNameMap);
+        String sql = SqlParserReplaceHelper.replaceFields(semanticCorrectInfo.getSql(), fieldNameMap);
 
         semanticCorrectInfo.setSql(sql);
     }
@@ -56,7 +56,7 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
                 Collectors.groupingBy(ElementValue::getFieldValue,
                         Collectors.mapping(ElementValue::getFieldName, Collectors.toSet())));
 
-        String sql = SqlParserUpdateHelper.replaceFieldNameByValue(semanticCorrectInfo.getSql(),
+        String sql = SqlParserReplaceHelper.replaceFieldNameByValue(semanticCorrectInfo.getSql(),
                 fieldValueToFieldNames);
         semanticCorrectInfo.setSql(sql);
     }
@@ -90,7 +90,7 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
                                 (existingValue, newValue) -> newValue)
                         )));
 
-        String sql = SqlParserUpdateHelper.replaceValue(semanticCorrectInfo.getSql(), filedNameToValueMap, false);
+        String sql = SqlParserReplaceHelper.replaceValue(semanticCorrectInfo.getSql(), filedNameToValueMap, false);
         semanticCorrectInfo.setSql(sql);
     }
 }

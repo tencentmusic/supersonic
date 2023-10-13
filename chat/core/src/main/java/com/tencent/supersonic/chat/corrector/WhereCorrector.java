@@ -10,8 +10,9 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.StringUtil;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import java.util.HashMap;
 import java.util.List;
@@ -56,14 +57,14 @@ public class WhereCorrector extends BaseSemanticCorrector {
             } catch (JSQLParserException e) {
                 log.error("parseCondExpression", e);
             }
-            String sql = SqlParserUpdateHelper.addWhere(preSql, expression);
+            String sql = SqlParserAddHelper.addWhere(preSql, expression);
             semanticCorrectInfo.setSql(sql);
         }
     }
 
     private void parserDateDiffFunction(SemanticCorrectInfo semanticCorrectInfo) {
         String sql = semanticCorrectInfo.getSql();
-        sql = SqlParserUpdateHelper.replaceFunction(sql);
+        sql = SqlParserReplaceHelper.replaceFunction(sql);
         semanticCorrectInfo.setSql(sql);
     }
 
@@ -72,8 +73,8 @@ public class WhereCorrector extends BaseSemanticCorrector {
         List<String> whereFields = SqlParserSelectHelper.getWhereFields(sql);
         if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(DateUtils.DATE_FIELD)) {
             String currentDate = DSLDateHelper.getReferenceDate(semanticCorrectInfo.getParseInfo().getModelId());
-            sql = SqlParserUpdateHelper.addParenthesisToWhere(sql);
-            sql = SqlParserUpdateHelper.addWhere(sql, DateUtils.DATE_FIELD, currentDate);
+            sql = SqlParserAddHelper.addParenthesisToWhere(sql);
+            sql = SqlParserAddHelper.addWhere(sql, DateUtils.DATE_FIELD, currentDate);
         }
         semanticCorrectInfo.setSql(sql);
     }
@@ -104,7 +105,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
         }
 
         Map<String, Map<String, String>> aliasAndBizNameToTechName = getAliasAndBizNameToTechName(dimensions);
-        String sql = SqlParserUpdateHelper.replaceValue(semanticCorrectInfo.getSql(), aliasAndBizNameToTechName);
+        String sql = SqlParserReplaceHelper.replaceValue(semanticCorrectInfo.getSql(), aliasAndBizNameToTechName);
         semanticCorrectInfo.setSql(sql);
         return;
     }

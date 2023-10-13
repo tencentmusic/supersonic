@@ -1,8 +1,8 @@
 package com.tencent.supersonic.semantic.query.parser.convert;
 
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.request.SqlExecuteReq;
@@ -108,7 +108,7 @@ public class QueryReqConverter {
         Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(modelSchemaResp);
         String sql = databaseReq.getSql();
         log.info("convert name to bizName before:{}", sql);
-        String replaceFields = SqlParserUpdateHelper.replaceFields(sql, fieldNameToBizNameMap, false);
+        String replaceFields = SqlParserReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, false);
         log.info("convert name to bizName after:{}", replaceFields);
         databaseReq.setSql(replaceFields);
     }
@@ -159,7 +159,7 @@ public class QueryReqConverter {
     }
 
     public void correctTableName(QueryDslReq databaseReq) {
-        String sql = SqlParserUpdateHelper.replaceTable(databaseReq.getSql(), TABLE_PREFIX + databaseReq.getModelId());
+        String sql = SqlParserReplaceHelper.replaceTable(databaseReq.getSql(), TABLE_PREFIX + databaseReq.getModelId());
         databaseReq.setSql(sql);
     }
 
