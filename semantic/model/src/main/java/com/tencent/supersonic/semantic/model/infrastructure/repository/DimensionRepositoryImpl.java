@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.model.infrastructure.repository;
 
+import com.clickhouse.client.internal.apache.commons.compress.utils.Lists;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDOExample;
 import com.tencent.supersonic.semantic.model.domain.repository.DimensionRepository;
@@ -7,6 +8,7 @@ import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOCustomMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOMapper;
 import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 
@@ -56,6 +58,9 @@ public class DimensionRepositoryImpl implements DimensionRepository {
 
     @Override
     public List<DimensionDO> getDimensionListOfmodelIds(List<Long> modelIds) {
+        if (CollectionUtils.isEmpty(modelIds)) {
+            return Lists.newArrayList();
+        }
         DimensionDOExample dimensionDOExample = new DimensionDOExample();
         dimensionDOExample.createCriteria().andModelIdIn(modelIds);
         return dimensionDOMapper.selectByExampleWithBLOBs(dimensionDOExample);

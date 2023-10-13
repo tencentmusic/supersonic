@@ -10,6 +10,7 @@ import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingResp;
 import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrieval;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -39,6 +40,9 @@ public class SolvedQueryManager {
     }
 
     public void saveSolvedQuery(SolvedQueryReq solvedQueryReq) {
+        if (StringUtils.isBlank(embeddingConfig.getUrl())) {
+            return;
+        }
         String queryText = solvedQueryReq.getQueryText();
         try {
             String uniqueId = generateUniqueId(solvedQueryReq.getQueryId(), solvedQueryReq.getParseId());
@@ -57,6 +61,9 @@ public class SolvedQueryManager {
     }
 
     public List<SolvedQueryRecallResp> recallSolvedQuery(String queryText, Integer agentId) {
+        if (StringUtils.isBlank(embeddingConfig.getUrl())) {
+            return Lists.newArrayList();
+        }
         List<SolvedQueryRecallResp> solvedQueryRecallResps = Lists.newArrayList();
         try {
             String url = embeddingConfig.getUrl() + embeddingConfig.getSolvedQueryRecallPath() + "?n_results="
