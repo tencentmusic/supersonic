@@ -160,7 +160,12 @@ public class QueryServiceImpl implements QueryService {
             return candidateParses;
         }
         int selectParseSize = selectedParses.size();
+        Set<Double> selectParseScoreSet = selectedParses.stream()
+                .map(SemanticParseInfo::getScore).collect(Collectors.toSet());
         int candidateParseSize = 5 - selectParseSize;
+        candidateParses = candidateParses.stream()
+                .filter(candidateParse -> !selectParseScoreSet.contains(candidateParse.getScore()))
+                .collect(Collectors.toList());
         SemanticParseInfo semanticParseInfo = selectedParses.get(0);
         Long modelId = semanticParseInfo.getModelId();
         if (modelId == null || modelId <= 0) {
