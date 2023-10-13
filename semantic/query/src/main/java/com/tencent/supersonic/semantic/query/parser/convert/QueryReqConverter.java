@@ -2,6 +2,7 @@ package com.tencent.supersonic.semantic.query.parser.convert;
 
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
@@ -81,10 +82,7 @@ public class QueryReqConverter {
                     queryStructUtils.generateInternalMetricName(databaseReq.getModelId(),
                             metricTable.getDimensions()))));
         }
-        // if there is no group by in dsl,set MetricTable's aggOption to "NATIVE"
-        if (!SqlParserSelectHelper.hasGroupBy(databaseReq.getSql())) {
-            metricTable.setAggOption(AggOption.NATIVE);
-        }
+        metricTable.setAggOption(getAggOption(databaseReq));
         List<MetricTable> tables = new ArrayList<>();
         tables.add(metricTable);
         //4.build ParseSqlReq
@@ -102,6 +100,17 @@ public class QueryReqConverter {
         QueryStatement queryStatement = parserService.physicalSql(result);
         queryStatement.setSql(String.format(SqlExecuteReq.LIMIT_WRAPPER, queryStatement.getSql()));
         return queryStatement;
+    }
+
+    private AggOption getAggOption(QueryDslReq databaseReq) {
+        // if there is no group by in dsl,set MetricTable's aggOption to "NATIVE"
+        // if there is count() in dsl,set MetricTable's aggOption to "NATIVE"
+        String sql = databaseReq.getSql();
+        if (!SqlParserSelectHelper.hasGroupBy(sql)
+                || SqlParserSelectFunctionHelper.hasFunction(sql, "count")) {
+            return AggOption.NATIVE;
+        }
+        return AggOption.DEFAULT;
     }
 
     private void convertNameToBizName(QueryDslReq databaseReq, ModelSchemaResp modelSchemaResp) {

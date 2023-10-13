@@ -44,16 +44,16 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
     protected void addFieldsToSelect(SemanticCorrectInfo semanticCorrectInfo, String sql) {
         Set<String> selectFields = new HashSet<>(SqlParserSelectHelper.getSelectFields(sql));
-        Set<String> whereFields = new HashSet<>(SqlParserSelectHelper.getWhereFields(sql));
+        Set<String> needAddFields = new HashSet<>(SqlParserSelectHelper.getGroupByFields(sql));
+        needAddFields.addAll(SqlParserSelectHelper.getOrderByFields(sql));
 
-        if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(whereFields)) {
+        if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(needAddFields)) {
             return;
         }
 
-        whereFields.addAll(SqlParserSelectHelper.getOrderByFields(sql));
-        whereFields.removeAll(selectFields);
-        whereFields.remove(DateUtils.DATE_FIELD);
-        String replaceFields = SqlParserAddHelper.addFieldsToSelect(sql, new ArrayList<>(whereFields));
+        needAddFields.removeAll(selectFields);
+        needAddFields.remove(DateUtils.DATE_FIELD);
+        String replaceFields = SqlParserAddHelper.addFieldsToSelect(sql, new ArrayList<>(needAddFields));
         semanticCorrectInfo.setSql(replaceFields);
     }
 

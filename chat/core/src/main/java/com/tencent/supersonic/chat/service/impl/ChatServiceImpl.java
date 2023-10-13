@@ -46,7 +46,7 @@ public class ChatServiceImpl implements ChatService {
     private SolvedQueryManager solvedQueryManager;
 
     public ChatServiceImpl(ChatContextRepository chatContextRepository, ChatRepository chatRepository,
-                           ChatQueryRepository chatQueryRepository, SolvedQueryManager solvedQueryManager) {
+            ChatQueryRepository chatQueryRepository, SolvedQueryManager solvedQueryManager) {
         this.chatContextRepository = chatContextRepository;
         this.chatRepository = chatRepository;
         this.chatQueryRepository = chatQueryRepository;
@@ -174,9 +174,9 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public void batchAddParse(ChatContext chatCtx, QueryReq queryReq,
-                              ParseResp parseResult,
-                              List<SemanticParseInfo> candidateParses,
-                              List<SemanticParseInfo> selectedParses) {
+            ParseResp parseResult,
+            List<SemanticParseInfo> candidateParses,
+            List<SemanticParseInfo> selectedParses) {
         chatQueryRepository.batchSaveParseInfo(chatCtx, queryReq, parseResult, candidateParses, selectedParses);
 
     }
@@ -205,6 +205,8 @@ public class ChatServiceImpl implements ChatService {
         List<SolvedQueryRecallResp> solvedQueryRecallResps = solvedQueryManager.recallSolvedQuery(queryText, agentId);
         List<Long> queryIds = solvedQueryRecallResps.stream()
                 .map(SolvedQueryRecallResp::getQueryId).collect(Collectors.toList());
+        List<Long> queryIds = solvedQueryRecallResps.stream().map(SolvedQueryRecallResp::getQueryId)
+                .collect(Collectors.toList());
         PageQueryInfoReq pageQueryInfoReq = new PageQueryInfoReq();
         pageQueryInfoReq.setIds(queryIds);
         pageQueryInfoReq.setPageSize(100);
@@ -219,7 +221,7 @@ public class ChatServiceImpl implements ChatService {
                         queryResp.getScore() != null && queryResp.getScore() <= lowScoreThreshold)
                 .map(QueryResp::getQuestionId).collect(Collectors.toSet());
         return solvedQueryRecallResps.stream().filter(solvedQueryRecallResp ->
-                !lowScoreQueryIds.contains(solvedQueryRecallResp.getQueryId()))
+                        !lowScoreQueryIds.contains(solvedQueryRecallResp.getQueryId()))
                 .collect(Collectors.toList());
     }
 
