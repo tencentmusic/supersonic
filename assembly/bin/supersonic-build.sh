@@ -2,6 +2,10 @@
 
 set -x
 sbinDir=$(cd "$(dirname "$0")"; pwd)
+baseDir=$(cd "$sbinDir/.." && pwd -P)
+runtimeDir=$baseDir/../runtime
+buildDir=$baseDir/build
+
 chmod +x $sbinDir/supersonic-common.sh
 source $sbinDir/supersonic-common.sh
 
@@ -10,6 +14,8 @@ cd $baseDir
 #1. build backend java modules
 rm -fr ${buildDir}/*.tar.gz
 rm -fr dist
+
+set +x
 
 mvn -f $baseDir/../ clean package -DskipTests
 

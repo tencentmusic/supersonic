@@ -2,6 +2,10 @@
 
 set -x
 sbinDir=$(cd "$(dirname "$0")"; pwd)
+baseDir=$(cd "$sbinDir/.." && pwd -P)
+runtimeDir=$baseDir/../runtime
+buildDir=$baseDir/build
+
 chmod +x $sbinDir/supersonic-common.sh
 source $sbinDir/supersonic-common.sh
 

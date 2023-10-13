@@ -15,11 +15,6 @@ readonly STANDALONE_SERVICE="standalone"
 readonly LLMPARSER_HOST="127.0.0.1"
 readonly LLMPARSER_PORT="9092"
 
-sbinDir=$(cd "$(dirname "$0")"; pwd)
-baseDir=$(cd "$sbinDir/.." && pwd -P)
-runtimeDir=$baseDir/../runtime
-buildDir=$baseDir/build
-
 function setEnvToWeb {
    model_name=$1
    json='{"env": "'$model_name'"}'
