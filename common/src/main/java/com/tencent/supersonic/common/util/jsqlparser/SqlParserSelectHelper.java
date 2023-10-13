@@ -139,8 +139,16 @@ public class SqlParserSelectHelper {
     }
 
     public static List<String> getAllFields(String sql) {
+        List<PlainSelect> plainSelects = getPlainSelects(getPlainSelect(sql));
+        Set<String> results = new HashSet<>();
+        for (PlainSelect plainSelect : plainSelects) {
+            List<String> fields = getFieldsByPlainSelect(plainSelect);
+            results.addAll(fields);
+        }
+        return new ArrayList<>(results);
+    }
 
-        PlainSelect plainSelect = getPlainSelect(sql);
+    private static ArrayList<String> getFieldsByPlainSelect(PlainSelect plainSelect) {
         if (Objects.isNull(plainSelect)) {
             return new ArrayList<>();
         }
