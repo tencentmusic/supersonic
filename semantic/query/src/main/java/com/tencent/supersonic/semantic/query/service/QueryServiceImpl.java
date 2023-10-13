@@ -172,15 +172,7 @@ public class QueryServiceImpl implements QueryService {
         }
         log.info("stat queryByStructWithoutCache, queryMultiStructReq:{}", queryMultiStructReq);
         try {
-            List<QueryStatement> sqlParsers = new ArrayList<>();
-            for (QueryStructReq queryStructCmd : queryMultiStructReq.getQueryStructReqs()) {
-                QueryStatement queryStatement = semanticQueryEngine.plan(queryStructCmd);
-                queryUtils.checkSqlParse(queryStatement);
-                sqlParsers.add(queryStatement);
-            }
-            log.info("multi sqlParser:{}", sqlParsers);
-
-            QueryStatement sqlParser = queryUtils.sqlParserUnion(queryMultiStructReq, sqlParsers);
+            QueryStatement sqlParser = getQueryStatementByMultiStruct(queryMultiStructReq);
             queryResultWithColumns = semanticQueryEngine.execute(sqlParser);
             if (queryResultWithColumns != null) {
                 statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
@@ -192,6 +184,17 @@ public class QueryServiceImpl implements QueryService {
             statUtils.statInfo2DbAsync(TaskStatusEnum.ERROR);
             throw e;
         }
+    }
+
+    private QueryStatement getQueryStatementByMultiStruct(QueryMultiStructReq queryMultiStructReq) throws Exception {
+        List<QueryStatement> sqlParsers = new ArrayList<>();
+        for (QueryStructReq queryStructCmd : queryMultiStructReq.getQueryStructReqs()) {
+            QueryStatement queryStatement = semanticQueryEngine.plan(queryStructCmd);
+            queryUtils.checkSqlParse(queryStatement);
+            sqlParsers.add(queryStatement);
+        }
+        log.info("multi sqlParser:{}", sqlParsers);
+        return queryUtils.sqlParserUnion(queryMultiStructReq, sqlParsers);
     }
 
     @Override
@@ -234,6 +237,11 @@ public class QueryServiceImpl implements QueryService {
         }
         if (QueryTypeEnum.STRUCT.equals(queryTypeEnum) && queryReq instanceof QueryStructReq) {
             QueryStatement queryStatement = semanticQueryEngine.plan((QueryStructReq) queryReq);
+            return getExplainResp(queryStatement);
+        }
+        if (QueryTypeEnum.STRUCT.equals(queryTypeEnum) && queryReq instanceof QueryMultiStructReq) {
+            QueryMultiStructReq queryMultiStructReq = (QueryMultiStructReq) queryReq;
+            QueryStatement queryStatement = getQueryStatementByMultiStruct(queryMultiStructReq);
             return getExplainResp(queryStatement);
         }
 
