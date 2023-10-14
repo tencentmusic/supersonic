@@ -11,7 +11,6 @@ type Props = {
 
 const Text: React.FC<Props> = ({ columns, referenceColumn, dataSource }) => {
   const [text, setText] = useState<string>();
-  const [htmlCode, setHtmlCode] = useState<string>();
   const [referenceExpanded, setRederenceExpanded] = useState(false);
   const [referenceData, setReferenceData] = useState<any[]>([]);
 
@@ -43,7 +42,7 @@ const Text: React.FC<Props> = ({ columns, referenceColumn, dataSource }) => {
         overflowX: 'hidden',
       }}
     >
-      {htmlCode ? <pre>{text}</pre> : text}
+      {text}
       {referenceData.length > 0 && (
         <span className={`${prefixCls}-check-more`} onClick={onToggleMore}>
           {referenceExpanded ? '收起' : '查看'}更多
@@ -64,7 +63,6 @@ const Text: React.FC<Props> = ({ columns, referenceColumn, dataSource }) => {
           ))}
         </div>
       )}
-      {!!htmlCode && <div dangerouslySetInnerHTML={{ __html: htmlCode }} />}
     </div>
   );
 };
