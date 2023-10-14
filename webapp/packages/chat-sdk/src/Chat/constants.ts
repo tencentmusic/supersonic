@@ -43,15 +43,7 @@ export const AGENT_ICONS = [
 
 export const HOLDER_TAG = '@_supersonic_@';
 
-export const CHAT_TITLE = '';
-
 export const DEFAULT_CONVERSATION_NAME = '新问答对话';
-
-export const PAGE_TITLE = '问答对话';
-
-export const WEB_TITLE = '问答对话';
-
-export const MOBILE_TITLE = '问答对话';
 
 export const PLACE_HOLDER = '请输入您的问题，或输入“/”切换助理';
 

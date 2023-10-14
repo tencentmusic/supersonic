@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { MsgDataType } from '../../../common/type';
 import { getToken, isProd } from '../../../utils/utils';
+import { webPageHost } from '../../../common/env';
 
 type Props = {
   id: string | number;
@@ -88,6 +89,7 @@ const WebPage: React.FC<Props> = ({ id, data }) => {
         '?',
         `?token=${getToken()}&miniProgram=true&reportName=${name}&filterData=${filterData}&`
       );
+      urlValue = `${webPageHost}${urlValue}`;
     } else {
       const params = Object.keys(valueParams || {}).map(key => `${key}=${valueParams[key]}`);
       if (params.length > 0) {
