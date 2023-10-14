@@ -5,7 +5,7 @@ import './styles/index.less';
 // import ChatDemo from './demo/ChatDemo';
 // import CopilotDemo from './demo/CopilotDemo';
 // const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-// root.render(<ChatDemo />);
+// root.render(<Chat />);
 
 export { default as Chat } from './Chat';
 

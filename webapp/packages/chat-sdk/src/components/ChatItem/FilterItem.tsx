@@ -150,7 +150,6 @@ const FilterItem: React.FC<Props> = ({
           onChange={onChange}
           mode={isArray(filter.value) ? 'multiple' : undefined}
           showSearch
-          // allowClear
         />
       ) : entityAlias &&
         ['歌曲', '艺人'].includes(entityAlias) &&

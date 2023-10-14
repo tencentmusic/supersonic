@@ -78,7 +78,6 @@ const ParseTip: React.FC<Props> = ({
     queryMode,
     properties,
     entity,
-    // entityInfo,
     elementMatches,
     nativeQuery,
   } = currentParseInfo || {};
@@ -198,7 +197,7 @@ const ParseTip: React.FC<Props> = ({
       <div className={`${prefixCls}-tip-item-filter-content`}>
         <div className={`${prefixCls}-tip-item-option`}>
           <span className={`${prefixCls}-tip-item-filter-name`}>数据时间：</span>
-          {dimensions?.some(item => item.bizName?.includes('_id')) ? (
+          {nativeQuery ? (
             <span className={itemValueClass}>
               {startDate === endDate ? startDate : `${startDate} ~ ${endDate}`}
             </span>

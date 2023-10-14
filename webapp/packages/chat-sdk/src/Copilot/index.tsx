@@ -14,6 +14,7 @@ import { AgentType } from '../Chat/type';
 import { setToken } from '../utils/utils';
 import { SendMsgParamsType } from '../common/type';
 import styles from './style.module.less';
+import { copilotTitle } from '../common/env';
 
 type Props = {
   token?: string;
@@ -123,7 +124,7 @@ const Copilot: ForwardRefRenderFunction<any, Props> = (
                 />
               )}
             </div>
-            <div className={styles.title}>内容库问答</div>
+            <div className={styles.title}>{copilotTitle}</div>
           </div>
           <div className={styles.chat}>
             <Chat

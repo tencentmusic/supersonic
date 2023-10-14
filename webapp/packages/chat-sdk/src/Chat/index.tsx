@@ -15,7 +15,6 @@ import { useThrottleFn } from 'ahooks';
 import Conversation from './Conversation';
 import ChatFooter from './ChatFooter';
 import classNames from 'classnames';
-import { CHAT_TITLE } from './constants';
 import { cloneDeep } from 'lodash';
 import AgentList from './AgentList';
 import MobileAgents from './MobileAgents';
@@ -59,7 +58,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   const [historyInited, setHistoryInited] = useState(false);
   const [currentConversation, setCurrentConversation] = useState<
     ConversationDetailType | undefined
-  >(isMobile ? { chatId: 0, chatName: `${CHAT_TITLE}问答` } : undefined);
+  >(isMobile ? { chatId: 0, chatName: '问答' } : undefined);
   const [historyVisible, setHistoryVisible] = useState(false);
   const [agentList, setAgentList] = useState<AgentType[]>([]);
   const [currentAgent, setCurrentAgent] = useState<AgentType>();

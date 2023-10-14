@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import LeftAvatar from './CopilotAvatar';
 import Message from './Message';
 import styles from './style.module.less';
+import { userAvatarUrl } from '../../common/env';
 
 type Props = {
   position: 'left' | 'right';
@@ -15,6 +16,7 @@ const Text: React.FC<Props> = ({ position, data, quote }) => {
   const textWrapperClass = classNames(styles.textWrapper, {
     [styles.rightTextWrapper]: position === 'right',
   });
+  const rightAvatarUrl = userAvatarUrl;
   return (
     <div className={textWrapperClass}>
       {!isMobile && position === 'left' && <LeftAvatar />}
@@ -22,6 +24,9 @@ const Text: React.FC<Props> = ({ position, data, quote }) => {
         {position === 'right' && quote && <div className={styles.quote}>{quote}</div>}
         <div className={styles.text}>{data}</div>
       </Message>
+      {!isMobile && position === 'right' && rightAvatarUrl && (
+        <Avatar shape="circle" size={40} src={rightAvatarUrl} className={styles.rightAvatar} />
+      )}
     </div>
   );
 };
