@@ -4,8 +4,8 @@ import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import java.util.List;
 import java.util.Set;
@@ -57,6 +57,6 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                     return true;
                 })
                 .collect(Collectors.toSet());
-        semanticCorrectInfo.setSql(SqlParserUpdateHelper.addGroupBy(sql, groupByFields));
+        semanticCorrectInfo.setSql(SqlParserAddHelper.addGroupBy(sql, groupByFields));
     }
 }

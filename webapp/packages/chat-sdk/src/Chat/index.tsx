@@ -183,6 +183,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
       msg: item.queryText,
       msgData: item.queryResult,
       score: item.score,
+      agentId: currentAgent?.id,
     }));
   };
 
@@ -309,21 +310,11 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
     if (!data) {
       return;
     }
-    let parseOptionsItem: any;
-    if (data.parseOptions && data.parseOptions.length > 0) {
-      parseOptionsItem = {
-        id: uuid(),
-        msg: messageList[messageList.length - 1]?.msg,
-        type: MessageTypeEnum.PARSE_OPTIONS,
-        parseOptions: data.parseOptions,
-      };
-    }
     const msgs = cloneDeep(messageList);
     const msg = msgs.find(item => item.id === questionId);
     if (msg) {
       msg.msgData = data;
-      const msgList = [...msgs, ...(parseOptionsItem ? [parseOptionsItem] : [])];
-      setMessageList(msgList);
+      setMessageList(msgs);
     }
     updateMessageContainerScroll(`${questionId}`);
   };

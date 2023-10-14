@@ -1,11 +1,13 @@
 package com.tencent.supersonic.semantic.query.utils;
 
+import static com.tencent.supersonic.common.pojo.Constants.MINUS;
+
 import com.google.common.base.Strings;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
@@ -13,6 +15,13 @@ import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.query.service.AuthCommonService;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -27,17 +36,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.StringJoiner;
-import java.util.Objects;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-
-import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.common.pojo.Constants.MINUS;
 
 @Component
 @Aspect
@@ -147,7 +145,7 @@ public class DslDataAspect {
         try {
             Expression expression = CCJSqlParserUtil.parseCondExpression(" ( " + joiner.toString() + " ) ");
             if (StringUtils.isNotEmpty(joiner.toString())) {
-                String sql = SqlParserUpdateHelper.addWhere(queryDslReq.getSql(), expression);
+                String sql = SqlParserAddHelper.addWhere(queryDslReq.getSql(), expression);
                 log.info("before doRowPermission, queryDslReq:{}", queryDslReq.getSql());
                 queryDslReq.setSql(sql);
                 log.info("after doRowPermission, queryDslReq:{}", queryDslReq.getSql());

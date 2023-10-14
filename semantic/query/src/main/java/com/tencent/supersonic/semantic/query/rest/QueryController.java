@@ -61,8 +61,7 @@ public class QueryController {
 
     @PostMapping("/queryStatement")
     public Object queryStatement(@RequestBody QueryStatement queryStatement) throws Exception {
-        Object result = queryService.queryByQueryStatement(queryStatement);
-        return result;
+        return queryService.queryByQueryStatement(queryStatement);
     }
 
     @PostMapping("/struct/parse")

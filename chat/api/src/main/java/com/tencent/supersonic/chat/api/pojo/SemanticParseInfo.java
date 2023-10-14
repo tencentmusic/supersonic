@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import com.tencent.supersonic.common.pojo.enums.FilterType;
 import lombok.Data;
 
 @Data
@@ -27,6 +28,7 @@ public class SemanticParseInfo {
     private Set<SchemaElement> dimensions = new LinkedHashSet();
     private SchemaElement entity;
     private AggregateTypeEnum aggType = AggregateTypeEnum.NONE;
+    private FilterType filterType = FilterType.UNION;
     private Set<QueryFilter> dimensionFilters = new LinkedHashSet();
     private Set<QueryFilter> metricFilters = new LinkedHashSet();
     private Set<Order> orders = new LinkedHashSet();

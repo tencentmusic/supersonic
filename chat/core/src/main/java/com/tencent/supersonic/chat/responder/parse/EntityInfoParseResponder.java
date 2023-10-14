@@ -10,11 +10,9 @@ import com.tencent.supersonic.chat.query.llm.dsl.DslQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import java.util.List;
-
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
-@Slf4j
+
 public class EntityInfoParseResponder implements ParseResponder {
 
     @Override
@@ -26,7 +24,7 @@ public class EntityInfoParseResponder implements ParseResponder {
         QueryReq queryReq = queryContext.getRequest();
         selectedParses.forEach(parseInfo -> {
             if (QueryManager.isPluginQuery(parseInfo.getQueryMode())
-                    && !parseInfo.getQueryMode().equals(DslQuery.QUERY_MODE)) {
+                    && !DslQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
                 return;
             }
             //1. set entity info
@@ -37,8 +35,6 @@ public class EntityInfoParseResponder implements ParseResponder {
                 parseInfo.setEntityInfo(entityInfo);
             }
             //2. set native value
-            entityInfo = semanticService.getEntityInfo(parseInfo.getModelId());
-            log.info("entityInfo:{}", entityInfo);
             String primaryEntityBizName = semanticService.getPrimaryEntityBizName(entityInfo);
             if (StringUtils.isNotEmpty(primaryEntityBizName)) {
                 //if exist primaryEntityBizName in parseInfo's dimensions, set nativeQuery to true

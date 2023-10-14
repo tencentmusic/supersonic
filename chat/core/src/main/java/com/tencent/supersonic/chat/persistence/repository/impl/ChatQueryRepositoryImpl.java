@@ -52,15 +52,21 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     }
 
     @Override
-    public PageInfo<QueryResp> getChatQuery(PageQueryInfoReq pageQueryInfoCommend, long chatId) {
+    public PageInfo<QueryResp> getChatQuery(PageQueryInfoReq pageQueryInfoReq, Long chatId) {
         ChatQueryDOExample example = new ChatQueryDOExample();
         example.setOrderByClause("question_id desc");
         Criteria criteria = example.createCriteria();
-        criteria.andChatIdEqualTo(chatId);
-        criteria.andUserNameEqualTo(pageQueryInfoCommend.getUserName());
-
-        PageInfo<ChatQueryDO> pageInfo = PageHelper.startPage(pageQueryInfoCommend.getCurrent(),
-                        pageQueryInfoCommend.getPageSize())
+        if (chatId != null) {
+            criteria.andChatIdEqualTo(chatId);
+        }
+        if (StringUtils.isNotBlank(pageQueryInfoReq.getUserName())) {
+            criteria.andUserNameEqualTo(pageQueryInfoReq.getUserName());
+        }
+        if (!CollectionUtils.isEmpty(pageQueryInfoReq.getIds())) {
+            criteria.andQuestionIdIn(pageQueryInfoReq.getIds());
+        }
+        PageInfo<ChatQueryDO> pageInfo = PageHelper.startPage(pageQueryInfoReq.getCurrent(),
+                        pageQueryInfoReq.getPageSize())
                 .doSelectPageInfo(() -> chatQueryDOMapper.selectByExampleWithBLOBs(example));
 
         PageInfo<QueryResp> chatQueryVOPageInfo = PageUtils.pageInfo2PageInfoVo(pageInfo);

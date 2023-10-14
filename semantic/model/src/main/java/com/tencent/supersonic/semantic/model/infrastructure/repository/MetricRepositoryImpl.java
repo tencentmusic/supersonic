@@ -1,6 +1,7 @@
 package com.tencent.supersonic.semantic.model.infrastructure.repository;
 
 
+import com.clickhouse.client.internal.apache.commons.compress.utils.Lists;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDOExample;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
@@ -8,6 +9,7 @@ import com.tencent.supersonic.semantic.model.domain.repository.MetricRepository;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.MetricDOCustomMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.MetricDOMapper;
 import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 
@@ -50,6 +52,9 @@ public class MetricRepositoryImpl implements MetricRepository {
 
     @Override
     public List<MetricDO> getMetricList(List<Long> modelIds) {
+        if (CollectionUtils.isEmpty(modelIds)) {
+            return Lists.newArrayList();
+        }
         MetricDOExample metricDOExample = new MetricDOExample();
         metricDOExample.createCriteria().andModelIdIn(modelIds);
         return metricDOMapper.selectByExampleWithBLOBs(metricDOExample);

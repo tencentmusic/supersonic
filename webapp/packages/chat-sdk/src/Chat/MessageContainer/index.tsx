@@ -75,7 +75,6 @@ const MessageContainer: React.FC<Props> = ({
             identityMsg,
             msgData,
             score,
-            parseOptions,
             filters,
           } = msgItem;
 
@@ -107,24 +106,6 @@ const MessageContainer: React.FC<Props> = ({
                     onSendMsg={onSendMsg}
                   />
                 </>
-              )}
-              {type === MessageTypeEnum.PARSE_OPTIONS && (
-                <ChatItem
-                  msg={msgValue || msg || ''}
-                  conversationId={chatId}
-                  modelId={modelId}
-                  agentId={agentId}
-                  filter={filters}
-                  isLastMessage={index === messageList.length - 1}
-                  triggerResize={triggerResize}
-                  parseOptions={parseOptions}
-                  integrateSystem={integrateSystem}
-                  onMsgDataLoaded={(data: MsgDataType, valid: boolean) => {
-                    onMsgDataLoaded(data, msgId, msgValue || msg || '', valid);
-                  }}
-                  onUpdateMessageScroll={updateMessageContainerScroll}
-                  onSendMsg={onSendMsg}
-                />
               )}
             </div>
           );

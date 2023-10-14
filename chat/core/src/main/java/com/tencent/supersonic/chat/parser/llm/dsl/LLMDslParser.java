@@ -32,6 +32,7 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
@@ -59,8 +60,6 @@ import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 public class LLMDslParser implements SemanticParser {
-
-    public static final double function_bonus_threshold = 201;
 
     @Override
     public void parse(QueryContext queryCtx, ChatContext chatCtx) {
@@ -159,7 +158,7 @@ public class LLMDslParser implements SemanticParser {
         Set<SchemaElement> metrics = getElements(modelId, allFields, semanticSchema.getMetrics());
         parseInfo.setMetrics(metrics);
 
-        if (SqlParserSelectHelper.hasAggregateFunction(semanticCorrectInfo.getSql())) {
+        if (SqlParserSelectFunctionHelper.hasAggregateFunction(semanticCorrectInfo.getSql())) {
             parseInfo.setNativeQuery(false);
             List<String> groupByFields = SqlParserSelectHelper.getGroupByFields(semanticCorrectInfo.getSql());
             List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
@@ -269,7 +268,7 @@ public class LLMDslParser implements SemanticParser {
         properties.put("name", dslTool.getName());
 
         parseInfo.setProperties(properties);
-        parseInfo.setScore(function_bonus_threshold);
+        parseInfo.setScore(queryCtx.getRequest().getQueryText().length());
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
         parseInfo.getSqlInfo().setLlmParseSql(dslParseResult.getLlmResp().getSqlOutput());
 

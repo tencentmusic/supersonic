@@ -1,6 +1,6 @@
 package com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter;
 
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.Constants;
 import java.util.HashMap;
@@ -49,7 +49,7 @@ public class ClickHouseAdaptor extends EngineAdaptor {
         functionMap.put("MONTH".toLowerCase(), "toMonth");
         functionMap.put("DAY".toLowerCase(), "toDayOfMonth");
         functionMap.put("YEAR".toLowerCase(), "toYear");
-        return SqlParserUpdateHelper.replaceFunction(sql, functionMap);
+        return SqlParserReplaceHelper.replaceFunction(sql, functionMap);
     }
 
     @Override

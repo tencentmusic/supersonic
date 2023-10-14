@@ -1,8 +1,9 @@
 package com.tencent.supersonic.semantic.query.parser.convert;
 
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.request.SqlExecuteReq;
@@ -81,10 +82,7 @@ public class QueryReqConverter {
                     queryStructUtils.generateInternalMetricName(databaseReq.getModelId(),
                             metricTable.getDimensions()))));
         }
-        // if there is no group by in dsl,set MetricTable's aggOption to "NATIVE"
-        if (!SqlParserSelectHelper.hasGroupBy(databaseReq.getSql())) {
-            metricTable.setAggOption(AggOption.NATIVE);
-        }
+        metricTable.setAggOption(getAggOption(databaseReq));
         List<MetricTable> tables = new ArrayList<>();
         tables.add(metricTable);
         //4.build ParseSqlReq
@@ -104,11 +102,22 @@ public class QueryReqConverter {
         return queryStatement;
     }
 
+    private AggOption getAggOption(QueryDslReq databaseReq) {
+        // if there is no group by in dsl,set MetricTable's aggOption to "NATIVE"
+        // if there is count() in dsl,set MetricTable's aggOption to "NATIVE"
+        String sql = databaseReq.getSql();
+        if (!SqlParserSelectHelper.hasGroupBy(sql)
+                || SqlParserSelectFunctionHelper.hasFunction(sql, "count")) {
+            return AggOption.NATIVE;
+        }
+        return AggOption.DEFAULT;
+    }
+
     private void convertNameToBizName(QueryDslReq databaseReq, ModelSchemaResp modelSchemaResp) {
         Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(modelSchemaResp);
         String sql = databaseReq.getSql();
         log.info("convert name to bizName before:{}", sql);
-        String replaceFields = SqlParserUpdateHelper.replaceFields(sql, fieldNameToBizNameMap, false);
+        String replaceFields = SqlParserReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, false);
         log.info("convert name to bizName after:{}", replaceFields);
         databaseReq.setSql(replaceFields);
     }
@@ -159,7 +168,7 @@ public class QueryReqConverter {
     }
 
     public void correctTableName(QueryDslReq databaseReq) {
-        String sql = SqlParserUpdateHelper.replaceTable(databaseReq.getSql(), TABLE_PREFIX + databaseReq.getModelId());
+        String sql = SqlParserReplaceHelper.replaceTable(databaseReq.getSql(), TABLE_PREFIX + databaseReq.getModelId());
         databaseReq.setSql(sql);
     }
 

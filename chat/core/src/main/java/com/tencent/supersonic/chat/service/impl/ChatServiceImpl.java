@@ -23,14 +23,17 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.utils.SolvedQueryManager;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service("ChatService")
 @Primary
@@ -43,7 +46,7 @@ public class ChatServiceImpl implements ChatService {
     private SolvedQueryManager solvedQueryManager;
 
     public ChatServiceImpl(ChatContextRepository chatContextRepository, ChatRepository chatRepository,
-                           ChatQueryRepository chatQueryRepository, SolvedQueryManager solvedQueryManager) {
+            ChatQueryRepository chatQueryRepository, SolvedQueryManager solvedQueryManager) {
         this.chatContextRepository = chatContextRepository;
         this.chatRepository = chatRepository;
         this.chatQueryRepository = chatQueryRepository;
@@ -129,8 +132,8 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public PageInfo<QueryResp> queryInfo(PageQueryInfoReq pageQueryInfoCommend, long chatId) {
-        return chatQueryRepository.getChatQuery(pageQueryInfoCommend, chatId);
+    public PageInfo<QueryResp> queryInfo(PageQueryInfoReq pageQueryInfoReq, long chatId) {
+        return chatQueryRepository.getChatQuery(pageQueryInfoReq, chatId);
     }
 
     @Override
@@ -171,9 +174,9 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public void batchAddParse(ChatContext chatCtx, QueryReq queryReq,
-                              ParseResp parseResult,
-                              List<SemanticParseInfo> candidateParses,
-                              List<SemanticParseInfo> selectedParses) {
+            ParseResp parseResult,
+            List<SemanticParseInfo> candidateParses,
+            List<SemanticParseInfo> selectedParses) {
         chatQueryRepository.batchSaveParseInfo(chatCtx, queryReq, parseResult, candidateParses, selectedParses);
 
     }
@@ -198,7 +201,30 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<SolvedQueryRecallResp> getSolvedQuery(String queryText, Integer agentId) {
-        return solvedQueryManager.recallSolvedQuery(queryText, agentId);
+        //1. recall solved query by queryText
+        List<SolvedQueryRecallResp> solvedQueryRecallResps = solvedQueryManager.recallSolvedQuery(queryText, agentId);
+        if (CollectionUtils.isEmpty(solvedQueryRecallResps)) {
+            return Lists.newArrayList();
+        }
+        List<Long> queryIds = solvedQueryRecallResps.stream()
+                .map(SolvedQueryRecallResp::getQueryId).collect(Collectors.toList());
+        PageQueryInfoReq pageQueryInfoReq = new PageQueryInfoReq();
+        pageQueryInfoReq.setIds(queryIds);
+        pageQueryInfoReq.setPageSize(100);
+        pageQueryInfoReq.setCurrent(1);
+        //2. remove low score query
+        int lowScoreThreshold = 3;
+        PageInfo<QueryResp> queryRespPageInfo = chatQueryRepository.getChatQuery(pageQueryInfoReq, null);
+        List<QueryResp> queryResps = queryRespPageInfo.getList();
+        if (CollectionUtils.isEmpty(queryResps)) {
+            return Lists.newArrayList();
+        }
+        Set<Long> lowScoreQueryIds = queryResps.stream().filter(queryResp ->
+                        queryResp.getScore() != null && queryResp.getScore() <= lowScoreThreshold)
+                .map(QueryResp::getQuestionId).collect(Collectors.toSet());
+        return solvedQueryRecallResps.stream().filter(solvedQueryRecallResp ->
+                        !lowScoreQueryIds.contains(solvedQueryRecallResp.getQueryId()))
+                .collect(Collectors.toList());
     }
 
 }
