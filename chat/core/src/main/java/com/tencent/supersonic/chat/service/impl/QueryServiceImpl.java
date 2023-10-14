@@ -132,8 +132,6 @@ public class QueryServiceImpl implements QueryService {
                     .candidateParses(candidateParses)
                     .build();
             chatService.batchAddParse(chatCtx, queryReq, parseResult, candidateParses, selectedParses);
-            saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
-                    queryReq.getUser().getName(), queryReq.getChatId().longValue());
         } else {
             parseResult = ParseResp.builder()
                     .chatId(queryReq.getChatId())
@@ -142,7 +140,14 @@ public class QueryServiceImpl implements QueryService {
                     .build();
         }
         for (ParseResponder parseResponder : parseResponders) {
+            Long startTime = System.currentTimeMillis();
             parseResponder.fillResponse(parseResult, queryCtx);
+            timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
+                    .interfaceName(parseResponder.getClass().getSimpleName()).type(CostType.PARSERRESPONDER.getType()).build());
+        }
+        if (timeCostDOList.size() > 0) {
+            saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
+                    queryReq.getUser().getName(), queryReq.getChatId().longValue());
         }
         return parseResult;
     }
@@ -333,6 +338,9 @@ public class QueryServiceImpl implements QueryService {
         semanticQuery.setParseInfo(parseInfo);
         QueryResult queryResult = semanticQuery.execute(user);
         queryResult.setChatContext(semanticQuery.getParseInfo());
+        SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
+        EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, user);
+        queryResult.setEntityInfo(entityInfo);
         return queryResult;
     }
 
