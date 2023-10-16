@@ -113,6 +113,31 @@ public class SqlParserAddHelper {
         return selectStatement.toString();
     }
 
+    public static String addWhere(String sql, List<Expression> expressionList) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        if (CollectionUtils.isEmpty(expressionList)) {
+            return sql;
+        }
+        Expression expression = expressionList.get(0);
+        for (int i = 1; i < expressionList.size(); i++) {
+            expression = new AndExpression(expression, expressionList.get(i));
+        }
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+        Expression where = plainSelect.getWhere();
+
+        if (where == null) {
+            plainSelect.setWhere(expression);
+        } else {
+            plainSelect.setWhere(new AndExpression(where, expression));
+        }
+        return selectStatement.toString();
+    }
+
     public static String addAggregateToField(String sql, Map<String, String> fieldNameToAggregate) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
@@ -274,12 +299,19 @@ public class SqlParserAddHelper {
         return selectStatement.toString();
     }
 
-    public static String addHaving(String sql, Expression expression) {
+    public static String addHaving(String sql, List<Expression> expressionList) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
 
         if (!(selectBody instanceof PlainSelect)) {
             return sql;
+        }
+        if (CollectionUtils.isEmpty(expressionList)) {
+            return sql;
+        }
+        Expression expression = expressionList.get(0);
+        for (int i = 1; i < expressionList.size(); i++) {
+            expression = new AndExpression(expression, expressionList.get(i));
         }
         PlainSelect plainSelect = (PlainSelect) selectBody;
         Expression having = plainSelect.getHaving();

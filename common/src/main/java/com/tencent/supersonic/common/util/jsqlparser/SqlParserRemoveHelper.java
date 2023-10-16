@@ -114,5 +114,21 @@ public class SqlParserRemoveHelper {
         }
     }
 
+    public static String removeHavingCondition(String sql, Set<String> removeFieldNames) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        selectBody.accept(new SelectVisitorAdapter() {
+            @Override
+            public void visit(PlainSelect plainSelect) {
+                removeWhereCondition(plainSelect.getHaving(), removeFieldNames);
+            }
+        });
+        return selectStatement.toString();
+    }
+
 }
 

@@ -203,6 +203,19 @@ public class SqlParserSelectHelper {
         return null;
     }
 
+    public static List<FilterExpression> getWhereExpressions(String sql) {
+        PlainSelect plainSelect = getPlainSelect(sql);
+        if (Objects.isNull(plainSelect)) {
+            return new ArrayList<>();
+        }
+        Set<FilterExpression> result = new HashSet<>();
+        Expression where = plainSelect.getWhere();
+        if (Objects.nonNull(where)) {
+            where.accept(new FieldAndValueAcquireVisitor(result));
+        }
+        return new ArrayList<>(result);
+    }
+
     public static List<FilterExpression> getHavingExpressions(String sql) {
         PlainSelect plainSelect = getPlainSelect(sql);
         if (Objects.isNull(plainSelect)) {

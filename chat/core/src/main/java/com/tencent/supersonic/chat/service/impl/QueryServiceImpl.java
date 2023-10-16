@@ -43,9 +43,11 @@ import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.service.SearchService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
@@ -336,19 +338,23 @@ public class QueryServiceImpl implements QueryService {
             LLMResp llmResp = dslParseResult.getLlmResp();
             String correctorSql = llmResp.getCorrectorSql();
             log.info("correctorSql before replacing:{}", correctorSql);
-            //PlainSelect plainSelect = SqlParserSelectHelper.getPlainSelect(correctorSql);
-            //Expression where = plainSelect.getWhere();
-            //Expression having = plainSelect.getHaving();
-            List<FilterExpression> filterExpressionList = SqlParserSelectHelper.getFilterExpression(correctorSql);
-            List<Expression> addConditions = new ArrayList<>();
-            //List<Expression> removeConditions = new ArrayList<>();
-            updateFilters(filedNameToValueMap, filterExpressionList, queryData.getDimensionFilters(),
-                    parseInfo.getDimensionFilters(), addConditions);
+            List<FilterExpression> whereExpressionList = SqlParserSelectHelper.getWhereExpressions(correctorSql);
+            List<FilterExpression> havingExpressionList = SqlParserSelectHelper.getHavingExpressions(correctorSql);
+            List<Expression> addWhereConditions = new ArrayList<>();
+            List<Expression> addHavingConditions = new ArrayList<>();
+            Set<String> removeWhereFieldNames = new HashSet<>();
+            Set<String> removeHavingFieldNames = new HashSet<>();
+            updateFilters(filedNameToValueMap, whereExpressionList, queryData.getDimensionFilters(),
+                    parseInfo.getDimensionFilters(), addWhereConditions, removeWhereFieldNames);
+            updateDateInfo(queryData, parseInfo, filedNameToValueMap, whereExpressionList);
+            correctorSql = SqlParserRemoveHelper.removeWhereCondition(correctorSql, removeWhereFieldNames);
 
-            updateFilters(havingFiledNameToValueMap, filterExpressionList, queryData.getDimensionFilters(),
-                    parseInfo.getDimensionFilters(), addConditions);
+            updateFilters(havingFiledNameToValueMap, havingExpressionList, queryData.getDimensionFilters(),
+                    parseInfo.getDimensionFilters(), addHavingConditions, removeHavingFieldNames);
+            correctorSql = SqlParserRemoveHelper.removeHavingCondition(correctorSql, removeWhereFieldNames);
 
-            updateDateInfo(queryData, parseInfo, filedNameToValueMap, filterExpressionList);
+            correctorSql = SqlParserAddHelper.addWhere(correctorSql, addWhereConditions);
+            correctorSql = SqlParserAddHelper.addHaving(correctorSql, addHavingConditions);
 
             log.info("filedNameToValueMap:{}", filedNameToValueMap);
             correctorSql = SqlParserReplaceHelper.replaceValue(correctorSql, filedNameToValueMap);
@@ -424,9 +430,11 @@ public class QueryServiceImpl implements QueryService {
     }
 
     private void updateFilters(Map<String, Map<String, String>> filedNameToValueMap,
-                               List<FilterExpression> filterExpressionList, Set<QueryFilter> metricFilters,
+                               List<FilterExpression> filterExpressionList,
+                               Set<QueryFilter> metricFilters,
                                Set<QueryFilter> contextMetricFilters,
-                               List<Expression> addConditions) {
+                               List<Expression> addConditions,
+                               Set<String> removeFieldNames) {
         if (CollectionUtils.isEmpty(metricFilters)) {
             return;
         }
@@ -444,6 +452,7 @@ public class QueryServiceImpl implements QueryService {
                             }
                         });
                     } else {
+                        removeFieldNames.add(dslQueryFilter.getBizName());
                         if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.EQUALS)) {
                             EqualsTo equalsTo = new EqualsTo();
                             addCondition(dslQueryFilter, equalsTo, contextMetricFilters, addConditions);
