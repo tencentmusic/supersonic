@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.rest;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
@@ -41,7 +41,7 @@ public class ChatConfigController {
     private ConfigService configService;
 
 
-    private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
+    private SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
 
 
     @PostMapping
@@ -85,42 +85,43 @@ public class ChatConfigController {
                                         HttpServletRequest request,
                                         HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return semanticLayer.getModelList(AuthType.ADMIN, domainId, user);
+        return semanticInterpreter.getModelList(AuthType.ADMIN, domainId, user);
     }
 
     @GetMapping("/modelList")
     public List<ModelResp> getModelList(HttpServletRequest request,
                                         HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return semanticLayer.getModelList(AuthType.ADMIN, null, user);
+        return semanticInterpreter.getModelList(AuthType.ADMIN, null, user);
     }
 
     @GetMapping("/domainList")
     public List<DomainResp> getDomainList(HttpServletRequest request,
                                           HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return semanticLayer.getDomainList(user);
+        return semanticInterpreter.getDomainList(user);
     }
 
     @GetMapping("/modelList/view")
     public List<ModelResp> getModelListVisible(HttpServletRequest request,
                                                HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return semanticLayer.getModelList(AuthType.VISIBLE, null, user);
+        return semanticInterpreter.getModelList(AuthType.VISIBLE, null, user);
     }
 
     @PostMapping("/dimension/page")
-    public PageInfo<DimensionResp> getDimension(@RequestBody PageDimensionReq pageDimensionCmd,
+    public PageInfo<DimensionResp> getDimension(@RequestBody PageDimensionReq pageDimensionReq,
                                                 HttpServletRequest request,
                                                 HttpServletResponse response) {
-        return semanticLayer.getDimensionPage(pageDimensionCmd);
+        return semanticInterpreter.getDimensionPage(pageDimensionReq);
     }
 
     @PostMapping("/metric/page")
-    public PageInfo<MetricResp> getMetric(@RequestBody PageMetricReq pageMetrricCmd,
+    public PageInfo<MetricResp> getMetric(@RequestBody PageMetricReq pageMetricReq,
                                           HttpServletRequest request,
                                           HttpServletResponse response) {
-        return semanticLayer.getMetricPage(pageMetrricCmd);
+        User user = UserHolder.findUser(request, response);
+        return semanticInterpreter.getMetricPage(pageMetricReq, user);
     }
 
 

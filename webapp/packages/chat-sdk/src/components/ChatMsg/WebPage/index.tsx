@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { CLS_PREFIX } from '../../../common/constants';
 import { MsgDataType } from '../../../common/type';
-import { isProd } from '../../../utils/utils';
+import { getToken, isProd } from '../../../utils/utils';
+import { webPageHost } from '../../../common/env';
 
 type Props = {
   id: string | number;
@@ -13,8 +13,6 @@ const DEFAULT_HEIGHT = 800;
 const WebPage: React.FC<Props> = ({ id, data }) => {
   const [pluginUrl, setPluginUrl] = useState('');
   const [height, setHeight] = useState(DEFAULT_HEIGHT);
-
-  const prefixCls = `${CLS_PREFIX}-web-page`;
 
   const {
     name,
@@ -89,10 +87,9 @@ const WebPage: React.FC<Props> = ({ id, data }) => {
       );
       urlValue = urlValue.replace(
         '?',
-        `?miniProgram=true&reportName=${name}&filterData=${filterData}&`
+        `?token=${getToken()}&miniProgram=true&reportName=${name}&filterData=${filterData}&`
       );
-      urlValue =
-        !isProd() && !urlValue.includes('http') ? `http://s2.tmeoa.com${urlValue}` : urlValue;
+      urlValue = `${webPageHost}${urlValue}`;
     } else {
       const params = Object.keys(valueParams || {}).map(key => `${key}=${valueParams[key]}`);
       if (params.length > 0) {
@@ -103,7 +100,6 @@ const WebPage: React.FC<Props> = ({ id, data }) => {
         }
       }
     }
-    // onReportLoaded(heightValue + 190);
     setPluginUrl(urlValue);
   };
 
@@ -112,7 +108,6 @@ const WebPage: React.FC<Props> = ({ id, data }) => {
   }, []);
 
   return (
-    // <div className={prefixCls} style={{ height }}>
     <iframe
       id={`reportIframe_${id}`}
       name={`reportIframe_${id}`}
@@ -121,7 +116,6 @@ const WebPage: React.FC<Props> = ({ id, data }) => {
       title="reportIframe"
       allowFullScreen
     />
-    // </div>
   );
 };
 

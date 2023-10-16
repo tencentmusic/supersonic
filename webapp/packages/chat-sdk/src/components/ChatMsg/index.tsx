@@ -12,12 +12,13 @@ import DrillDownDimensions from '../DrillDownDimensions';
 import MetricOptions from '../MetricOptions';
 
 type Props = {
+  queryId?: number;
   data: MsgDataType;
   chartIndex: number;
   triggerResize?: boolean;
 };
 
-const ChatMsg: React.FC<Props> = ({ data, chartIndex, triggerResize }) => {
+const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) => {
   const { queryColumns, queryResults, chatContext, queryMode } = data || {};
   const { dimensionFilters, elementMatches } = chatContext || {};
 
@@ -127,14 +128,15 @@ const ChatMsg: React.FC<Props> = ({ data, chartIndex, triggerResize }) => {
 
   const onLoadData = async (value: any) => {
     setLoading(true);
-    const { data } = await queryData({
-      ...chatContext,
+    const res: any = await queryData({
+      queryId,
+      parseId: chatContext.id,
       ...value,
     });
     setLoading(false);
-    if (data.code === 200) {
-      updateColummns(data.data?.queryColumns || []);
-      setDataSource(data.data?.queryResults || []);
+    if (res.code === 200) {
+      updateColummns(res.data?.queryColumns || []);
+      setDataSource(res.data?.queryResults || []);
     }
   };
 
@@ -197,7 +199,7 @@ const ChatMsg: React.FC<Props> = ({ data, chartIndex, triggerResize }) => {
 
   const existDrillDownDimension = queryMode.includes('METRIC') && !isText && !isEntityMode;
 
-  const isMultipleMetric = existDrillDownDimension && chatContext?.metrics?.length > 1;
+  const isMultipleMetric = queryMode.includes('METRIC') && chatContext?.metrics?.length > 1;
 
   return (
     <div className={chartMsgClass}>

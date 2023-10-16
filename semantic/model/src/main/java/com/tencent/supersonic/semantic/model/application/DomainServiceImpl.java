@@ -96,12 +96,12 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public List<DomainResp> getDomainListWithAdminAuth(User user) {
-        Set<DomainResp> domainWithAuthAll = getDomainAuthSet(user.getName(), AuthType.ADMIN);
+        Set<DomainResp> domainWithAuthAll = getDomainAuthSet(user, AuthType.ADMIN);
         if (!CollectionUtils.isEmpty(domainWithAuthAll)) {
             List<Long> domainIds = domainWithAuthAll.stream().map(DomainResp::getId).collect(Collectors.toList());
             domainWithAuthAll.addAll(getParentDomain(domainIds));
         }
-        List<ModelResp> modelResps = modelService.getModelAuthList(user.getName(), AuthType.ADMIN);
+        List<ModelResp> modelResps = modelService.getModelAuthList(user, AuthType.ADMIN);
         if (!CollectionUtils.isEmpty(modelResps)) {
             List<Long> domainIds = modelResps.stream().map(ModelResp::getDomainId).collect(Collectors.toList());
             domainWithAuthAll.addAll(getParentDomain(domainIds));
@@ -111,18 +111,18 @@ public class DomainServiceImpl implements DomainService {
     }
 
     @Override
-    public Set<DomainResp> getDomainAuthSet(String userName, AuthType authTypeEnum) {
+    public Set<DomainResp> getDomainAuthSet(User user, AuthType authTypeEnum) {
         List<DomainResp> domainResps = getDomainList();
-        Set<String> orgIds = userService.getUserAllOrgId(userName);
+        Set<String> orgIds = userService.getUserAllOrgId(user.getName());
         List<DomainResp> domainWithAuth = Lists.newArrayList();
         if (authTypeEnum.equals(AuthType.ADMIN)) {
             domainWithAuth = domainResps.stream()
-                    .filter(domainResp -> checkAdminPermission(orgIds, userName, domainResp))
+                    .filter(domainResp -> checkAdminPermission(orgIds, user, domainResp))
                     .collect(Collectors.toList());
         }
         if (authTypeEnum.equals(AuthType.VISIBLE)) {
             domainWithAuth = domainResps.stream()
-                    .filter(domainResp -> checkViewerPermission(orgIds, userName, domainResp))
+                    .filter(domainResp -> checkViewerPermission(orgIds, user, domainResp))
                     .collect(Collectors.toList());
         }
         List<Long> domainIds = domainWithAuth.stream().map(DomainResp::getId)
@@ -240,11 +240,13 @@ public class DomainServiceImpl implements DomainService {
     }
 
 
-    private boolean checkAdminPermission(Set<String> orgIds, String userName, DomainResp domainResp) {
-
+    private boolean checkAdminPermission(Set<String> orgIds, User user, DomainResp domainResp) {
         List<String> admins = domainResp.getAdmins();
         List<String> adminOrgs = domainResp.getAdminOrgs();
-        if (admins.contains(userName) || domainResp.getCreatedBy().equals(userName)) {
+        if (user.isSuperAdmin()) {
+            return true;
+        }
+        if (admins.contains(user.getName()) || domainResp.getCreatedBy().equals(user.getName())) {
             return true;
         }
         if (CollectionUtils.isEmpty(adminOrgs)) {
@@ -258,12 +260,17 @@ public class DomainServiceImpl implements DomainService {
         return false;
     }
 
-    private boolean checkViewerPermission(Set<String> orgIds, String userName, DomainResp domainDesc) {
+    private boolean checkViewerPermission(Set<String> orgIds, User user, DomainResp domainDesc) {
         List<String> admins = domainDesc.getAdmins();
         List<String> viewers = domainDesc.getViewers();
         List<String> adminOrgs = domainDesc.getAdminOrgs();
         List<String> viewOrgs = domainDesc.getViewOrgs();
-        if (admins.contains(userName) || viewers.contains(userName) || domainDesc.getCreatedBy().equals(userName)) {
+        if (user.isSuperAdmin()) {
+            return true;
+        }
+        if (admins.contains(user.getName())
+                || viewers.contains(user.getName())
+                || domainDesc.getCreatedBy().equals(user.getName())) {
             return true;
         }
         if (CollectionUtils.isEmpty(adminOrgs) && CollectionUtils.isEmpty(viewOrgs)) {

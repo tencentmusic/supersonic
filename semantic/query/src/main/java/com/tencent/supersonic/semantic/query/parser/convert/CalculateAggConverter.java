@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
@@ -23,7 +24,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -43,8 +43,6 @@ public class CalculateAggConverter implements SemanticConverter {
     @Value("${metricParser.agg.default:sum}")
     private String metricAggDefault;
 
-    @Value("${metricParser.agg.mysql.lowVersion:5.7}")
-    private String mysqlLowVersion;
 
 
     public CalculateAggConverter(
@@ -78,14 +76,13 @@ public class CalculateAggConverter implements SemanticConverter {
         String where = queryStructUtils.generateWhere(queryStructCmd);
         log.info("in generateSqlCommand, complete where:{}", where);
         metricTable.setWhere(where);
-        metricTable.setAgg(true);
+        metricTable.setAggOption(AggOption.AGGREGATION);
         sqlCommand.setTables(new ArrayList<>(Collections.singletonList(metricTable)));
         String sql = String.format("select %s from %s  %s %s %s", sqlGenerateUtils.getSelect(queryStructCmd),
                 metricTableName,
                 sqlGenerateUtils.getGroupBy(queryStructCmd), sqlGenerateUtils.getOrderBy(queryStructCmd),
                 sqlGenerateUtils.getLimit(queryStructCmd));
-        if (engineTypeEnum.equals(engineTypeEnum.MYSQL) && Objects.nonNull(version) && version.startsWith(
-                mysqlLowVersion)) {
+        if (!queryStructUtils.isSupportWith(engineTypeEnum, version)) {
             sqlCommand.setSupportWith(false);
             sql = String.format("select %s from %s t0 %s %s %s", sqlGenerateUtils.getSelect(queryStructCmd),
                     metricTableName,
@@ -123,7 +120,7 @@ public class CalculateAggConverter implements SemanticConverter {
 
     @Override
     public void converter(Catalog catalog, QueryStructReq queryStructCmd, ParseSqlReq sqlCommend,
-                          MetricReq metricCommand) throws Exception {
+            MetricReq metricCommand) throws Exception {
         DatabaseResp databaseResp = catalog.getDatabaseByModelId(queryStructCmd.getModelId());
         ParseSqlReq parseSqlReq = generateSqlCommend(queryStructCmd,
                 EngineTypeEnum.valueOf(databaseResp.getType().toUpperCase()), databaseResp.getVersion());
@@ -150,7 +147,7 @@ public class CalculateAggConverter implements SemanticConverter {
     }
 
     public ParseSqlReq generateRatioSqlCommand(QueryStructReq queryStructCmd, EngineTypeEnum engineTypeEnum,
-                                               String version)
+            String version)
             throws Exception {
         check(queryStructCmd);
         ParseSqlReq sqlCommand = new ParseSqlReq();
@@ -163,7 +160,7 @@ public class CalculateAggConverter implements SemanticConverter {
         String where = queryStructUtils.generateWhere(queryStructCmd);
         log.info("in generateSqlCommend, complete where:{}", where);
         metricTable.setWhere(where);
-        metricTable.setAgg(true);
+        metricTable.setAggOption(AggOption.AGGREGATION);
         sqlCommand.setTables(new ArrayList<>(Collections.singletonList(metricTable)));
         boolean isOver = isOverRatio(queryStructCmd);
         String sql = "";
@@ -174,8 +171,7 @@ public class CalculateAggConverter implements SemanticConverter {
             case MYSQL:
             case DORIS:
             case CLICKHOUSE:
-                if (engineTypeEnum.equals(EngineTypeEnum.MYSQL) && Objects.nonNull(version) && version.startsWith(
-                        mysqlLowVersion)) {
+                if (!queryStructUtils.isSupportWith(engineTypeEnum, version)) {
                     sqlCommand.setSupportWith(false);
                     sql = new MysqlEngineSql().sql(queryStructCmd, isOver, metricTableName);
                 } else {
@@ -384,7 +380,7 @@ public class CalculateAggConverter implements SemanticConverter {
     }
 
 
-    private static String getAllJoinSelect(QueryStructReq queryStructCmd, String alias) {
+    private String getAllJoinSelect(QueryStructReq queryStructCmd, String alias) {
         String aggStr = queryStructCmd.getAggregators().stream()
                 .map(f -> getSelectField(f, alias) + " as " + getSelectField(f, "")
                         + "_roll")
@@ -418,23 +414,18 @@ public class CalculateAggConverter implements SemanticConverter {
     }
 
 
-    private static String getAllSelect(QueryStructReq queryStructCmd, String alias) {
+    private String getAllSelect(QueryStructReq queryStructCmd, String alias) {
         String aggStr = queryStructCmd.getAggregators().stream().map(f -> getSelectField(f, alias))
                 .collect(Collectors.joining(","));
         return CollectionUtils.isEmpty(queryStructCmd.getGroups()) ? aggStr
                 : alias + String.join("," + alias, queryStructCmd.getGroups()) + "," + aggStr;
     }
 
-    private static String getSelectField(final Aggregator agg, String alias) {
+    private String getSelectField(final Aggregator agg, String alias) {
         if (agg.getFunc().equals(AggOperatorEnum.RATIO_OVER) || agg.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
             return alias + agg.getColumn();
         }
-        if (CollectionUtils.isEmpty(agg.getArgs())) {
-            return agg.getFunc() + "( " + alias + agg.getColumn() + " ) AS " + agg.getColumn() + " ";
-        }
-        return agg.getFunc() + "( " + agg.getArgs().stream().map(arg ->
-                arg.equals(agg.getColumn()) ? arg : (StringUtils.isNumeric(arg) ? arg : ("'" + arg + "'"))
-        ).collect(Collectors.joining(",")) + " ) AS " + agg.getColumn() + " ";
+        return sqlGenerateUtils.getSelectField(agg);
     }
 
     private String getGroupBy(QueryStructReq queryStructCmd) {

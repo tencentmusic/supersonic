@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
+import com.google.common.base.Objects;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
-import java.util.Objects;
 import lombok.Data;
 import lombok.ToString;
 
@@ -19,6 +19,8 @@ public class QueryFilter {
 
     private Long elementID;
 
+    private String function;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -27,14 +29,15 @@ public class QueryFilter {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        QueryFilter filter = (QueryFilter) o;
-        return Objects.equals(bizName, filter.bizName) && Objects.equals(name, filter.name)
-                && operator == filter.operator && Objects.equals(value, filter.value) && Objects.equals(
-                elementID, filter.elementID);
+        QueryFilter that = (QueryFilter) o;
+        return Objects.equal(bizName, that.bizName) && Objects.equal(name,
+                that.name) && operator == that.operator && Objects.equal(value, that.value)
+                && Objects.equal(elementID, that.elementID) && Objects.equal(
+                function, that.function);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(bizName, name, operator, value, elementID);
+        return Objects.hashCode(bizName, name, operator, value, elementID, function);
     }
 }

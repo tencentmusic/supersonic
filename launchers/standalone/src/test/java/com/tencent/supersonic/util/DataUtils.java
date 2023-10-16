@@ -23,7 +23,7 @@ import static java.time.LocalDate.now;
 
 public class DataUtils {
 
-    private static final User user_test = new User(1L, "admin", "admin", "admin@email");
+    private static final User user_test = User.getFakeUser();
 
     public static User getUser() {
         return user_test;

@@ -2,18 +2,26 @@ package com.tencent.supersonic.semantic.query.utils;
 
 import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
 
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
+import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
+import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 
+import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -23,8 +31,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.tencent.supersonic.semantic.query.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.assertj.core.util.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -33,13 +44,25 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 @Component
 public class QueryStructUtils {
-    public static Set<String> internalCols = new HashSet<>(
-            Arrays.asList("dayno", "plat_sys_var", "sys_imp_date", "sys_imp_week", "sys_imp_month"));
+
+    public static Set<String> internalTimeCols = new HashSet<>(
+            Arrays.asList("dayno", "sys_imp_date", "sys_imp_week", "sys_imp_month"));
+    public static Set<String> internalCols;
+
+    static {
+        internalCols = new HashSet<>(Arrays.asList("plat_sys_var"));
+        internalCols.addAll(internalTimeCols);
+    }
+
     private final DateUtils dateUtils;
     private final SqlFilterUtils sqlFilterUtils;
     private final Catalog catalog;
     @Value("${internal.metric.cnt.suffix:internal_cnt}")
     private String internalMetricNameSuffix;
+    @Value("${metricParser.agg.mysql.lowVersion:5.7}")
+    private String mysqlLowVersion;
+    @Autowired
+    private SchemaService schemaService;
 
     public QueryStructUtils(
             DateUtils dateUtils,
@@ -146,8 +169,38 @@ public class QueryStructUtils {
         return resNameEnSet;
     }
 
+    public Set<String> getResName(QueryDslReq queryDslReq) {
+        Set<String> resNameSet = SqlParserSelectHelper.getAllFields(queryDslReq.getSql())
+                .stream().collect(Collectors.toSet());
+        return resNameSet;
+    }
+
     public Set<String> getResNameEnExceptInternalCol(QueryStructReq queryStructCmd) {
         Set<String> resNameEnSet = getResNameEn(queryStructCmd);
+        return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
+    }
+
+    public Set<String> getResNameEnExceptInternalCol(QueryDslReq queryDslReq, User user) {
+        Set<String> resNameSet = getResName(queryDslReq);
+        Set<String> resNameEnSet = new HashSet<>();
+        ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
+        List<Long> modelIds = Lists.newArrayList(queryDslReq.getModelId());
+        filter.setModelIds(modelIds);
+        List<ModelSchemaResp> modelSchemaRespList = schemaService.fetchModelSchema(filter, user);
+        if (!CollectionUtils.isEmpty(modelSchemaRespList)) {
+            List<MetricSchemaResp> metrics = modelSchemaRespList.get(0).getMetrics();
+            List<DimSchemaResp> dimensions = modelSchemaRespList.get(0).getDimensions();
+            metrics.stream().forEach(o -> {
+                if (resNameSet.contains(o.getName())) {
+                    resNameEnSet.add(o.getBizName());
+                }
+            });
+            dimensions.stream().forEach(o -> {
+                if (resNameSet.contains(o.getName())) {
+                    resNameEnSet.add(o.getBizName());
+                }
+            });
+        }
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 
@@ -159,6 +212,12 @@ public class QueryStructUtils {
 
     public Set<String> getFilterResNameEnExceptInternalCol(QueryStructReq queryStructCmd) {
         Set<String> resNameEnSet = getFilterResNameEn(queryStructCmd);
+        return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
+    }
+
+    public Set<String> getFilterResNameEnExceptInternalCol(QueryDslReq queryDslReq) {
+        String sql = queryDslReq.getSql();
+        Set<String> resNameEnSet = SqlParserSelectHelper.getWhereFields(sql).stream().collect(Collectors.toSet());
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 
@@ -178,6 +237,14 @@ public class QueryStructUtils {
         }
         String internalMetricName = internalMetricNamePrefix + internalMetricNameSuffix;
         return internalMetricName;
+    }
+
+    public boolean isSupportWith(EngineTypeEnum engineTypeEnum, String version) {
+        if (engineTypeEnum.equals(EngineTypeEnum.MYSQL) && Objects.nonNull(version) && version.startsWith(
+                mysqlLowVersion)) {
+            return false;
+        }
+        return true;
     }
 
 }

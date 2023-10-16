@@ -11,34 +11,34 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 public class ParseVisitorHelper {
 
-    public void replaceColumn(Column column, Map<String, String> fieldToBizName, boolean exactReplace) {
+    public void replaceColumn(Column column, Map<String, String> fieldNameMap, boolean exactReplace) {
         String columnName = column.getColumnName();
-        String replaceColumn = getReplaceColumn(columnName, fieldToBizName, exactReplace);
+        String replaceColumn = getReplaceValue(columnName, fieldNameMap, exactReplace);
         if (StringUtils.isNotBlank(replaceColumn)) {
             column.setColumnName(replaceColumn);
         }
     }
 
-    public String getReplaceColumn(String columnName, Map<String, String> fieldToBizName, boolean exactReplace) {
-        String fieldBizName = fieldToBizName.get(columnName);
-        if (StringUtils.isNotBlank(fieldBizName)) {
-            return fieldBizName;
+    public String getReplaceValue(String beforeValue, Map<String, String> valueMap, boolean exactReplace) {
+        String value = valueMap.get(beforeValue);
+        if (StringUtils.isNotBlank(value)) {
+            return value;
         }
         if (exactReplace) {
             return null;
         }
-        Optional<Entry<String, String>> first = fieldToBizName.entrySet().stream().sorted((k1, k2) -> {
-            String k1FieldNameDb = k1.getKey();
-            String k2FieldNameDb = k2.getKey();
-            Double k1Similarity = getSimilarity(columnName, k1FieldNameDb);
-            Double k2Similarity = getSimilarity(columnName, k2FieldNameDb);
+        Optional<Entry<String, String>> first = valueMap.entrySet().stream().sorted((k1, k2) -> {
+            String k1Value = k1.getKey();
+            String k2Value = k2.getKey();
+            Double k1Similarity = getSimilarity(beforeValue, k1Value);
+            Double k2Similarity = getSimilarity(beforeValue, k2Value);
             return k2Similarity.compareTo(k1Similarity);
         }).collect(Collectors.toList()).stream().findFirst();
 
         if (first.isPresent()) {
             return first.get().getValue();
         }
-        return columnName;
+        return beforeValue;
     }
 
     public static int editDistance(String word1, String word2) {

@@ -3,6 +3,7 @@
 <mapper namespace="com.tencent.supersonic.chat.persistence.mapper.ChatQueryDOMapper">
   <resultMap id="BaseResultMap" type="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO">
     <id column="question_id" jdbcType="BIGINT" property="questionId" />
+    <result column="agent_id" jdbcType="INTEGER" property="agentId" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="user_name" jdbcType="VARCHAR" property="userName" />
     <result column="query_state" jdbcType="INTEGER" property="queryState" />
@@ -44,7 +45,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    question_id, create_time, user_name, query_state, chat_id, score, feedback
+    question_id, agent_id, create_time, user_name, query_state, chat_id, score, feedback
   </sql>
   <sql id="Blob_Column_List">
     query_text, query_result
@@ -65,142 +66,23 @@
       order by ${orderByClause}
     </if>
   </select>
-  <select id="selectByExample" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDOExample" resultMap="BaseResultMap">
-    select
-    <if test="distinct">
-      distinct
-    </if>
-    <include refid="Base_Column_List" />
-    from s2_chat_query
-    <if test="_parameter != null">
-      <include refid="Example_Where_Clause" />
-    </if>
-    <if test="orderByClause != null">
-      order by ${orderByClause}
-    </if>
-    <if test="limitStart != null and limitStart>=0">
-      limit #{limitStart} , #{limitEnd}
-    </if>
-  </select>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
-    select
-    <include refid="Base_Column_List" />
-    ,
-    <include refid="Blob_Column_List" />
-    from s2_chat_query
-    where question_id = #{questionId,jdbcType=BIGINT}
-  </select>
+
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from s2_chat_query
     where question_id = #{questionId,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO">
-    insert into s2_chat_query (question_id, create_time, user_name,
+  <insert id="insert" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO" useGeneratedKeys="true" keyProperty="questionId">
+    insert into s2_chat_query (agent_id, create_time, user_name,
       query_state, chat_id, score,
       feedback, query_text, query_result
       )
-    values (#{questionId,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{userName,jdbcType=VARCHAR},
+    values (#{agentId,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{userName,jdbcType=VARCHAR},
       #{queryState,jdbcType=INTEGER}, #{chatId,jdbcType=BIGINT}, #{score,jdbcType=INTEGER},
       #{feedback,jdbcType=VARCHAR}, #{queryText,jdbcType=LONGVARCHAR}, #{queryResult,jdbcType=LONGVARCHAR}
       )
   </insert>
-  <insert id="insertSelective" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO">
-    insert into s2_chat_query
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="questionId != null">
-        question_id,
-      </if>
-      <if test="createTime != null">
-        create_time,
-      </if>
-      <if test="userName != null">
-        user_name,
-      </if>
-      <if test="queryState != null">
-        query_state,
-      </if>
-      <if test="chatId != null">
-        chat_id,
-      </if>
-      <if test="score != null">
-        score,
-      </if>
-      <if test="feedback != null">
-        feedback,
-      </if>
-      <if test="queryText != null">
-        query_text,
-      </if>
-      <if test="queryResult != null">
-        query_result,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="questionId != null">
-        #{questionId,jdbcType=BIGINT},
-      </if>
-      <if test="createTime != null">
-        #{createTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="userName != null">
-        #{userName,jdbcType=VARCHAR},
-      </if>
-      <if test="queryState != null">
-        #{queryState,jdbcType=INTEGER},
-      </if>
-      <if test="chatId != null">
-        #{chatId,jdbcType=BIGINT},
-      </if>
-      <if test="score != null">
-        #{score,jdbcType=INTEGER},
-      </if>
-      <if test="feedback != null">
-        #{feedback,jdbcType=VARCHAR},
-      </if>
-      <if test="queryText != null">
-        #{queryText,jdbcType=LONGVARCHAR},
-      </if>
-      <if test="queryResult != null">
-        #{queryResult,jdbcType=LONGVARCHAR},
-      </if>
-    </trim>
-  </insert>
-  <select id="countByExample" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDOExample" resultType="java.lang.Long">
-    select count(*) from s2_chat_query
-    <if test="_parameter != null">
-      <include refid="Example_Where_Clause" />
-    </if>
-  </select>
-  <update id="updateByPrimaryKeySelective" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO">
-    update s2_chat_query
-    <set>
-      <if test="createTime != null">
-        create_time = #{createTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="userName != null">
-        user_name = #{userName,jdbcType=VARCHAR},
-      </if>
-      <if test="queryState != null">
-        query_state = #{queryState,jdbcType=INTEGER},
-      </if>
-      <if test="chatId != null">
-        chat_id = #{chatId,jdbcType=BIGINT},
-      </if>
-      <if test="score != null">
-        score = #{score,jdbcType=INTEGER},
-      </if>
-      <if test="feedback != null">
-        feedback = #{feedback,jdbcType=VARCHAR},
-      </if>
-      <if test="queryText != null">
-        query_text = #{queryText,jdbcType=LONGVARCHAR},
-      </if>
-      <if test="queryResult != null">
-        query_result = #{queryResult,jdbcType=LONGVARCHAR},
-      </if>
-    </set>
-    where question_id = #{questionId,jdbcType=BIGINT}
-  </update>
+
   <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO">
     update s2_chat_query
     <set>
@@ -229,16 +111,6 @@
         query_result = #{queryResult,jdbcType=LONGVARCHAR},
       </if>
     </set>
-    where question_id = #{questionId,jdbcType=BIGINT}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO">
-    update s2_chat_query
-    set create_time = #{createTime,jdbcType=TIMESTAMP},
-      user_name = #{userName,jdbcType=VARCHAR},
-      query_state = #{queryState,jdbcType=INTEGER},
-      chat_id = #{chatId,jdbcType=BIGINT},
-      score = #{score,jdbcType=INTEGER},
-      feedback = #{feedback,jdbcType=VARCHAR}
     where question_id = #{questionId,jdbcType=BIGINT}
   </update>
 </mapper>

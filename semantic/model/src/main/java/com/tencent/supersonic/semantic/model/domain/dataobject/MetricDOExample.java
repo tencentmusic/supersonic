@@ -31,6 +31,7 @@ public class MetricDOExample {
     protected Integer limitEnd;
 
     /**
+     *
      * @mbg.generated
      */
     public MetricDOExample() {
@@ -38,6 +39,7 @@ public class MetricDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setOrderByClause(String orderByClause) {
@@ -45,6 +47,7 @@ public class MetricDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public String getOrderByClause() {
@@ -52,6 +55,7 @@ public class MetricDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setDistinct(boolean distinct) {
@@ -59,6 +63,7 @@ public class MetricDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public boolean isDistinct() {
@@ -66,6 +71,7 @@ public class MetricDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public List<Criteria> getOredCriteria() {
@@ -73,6 +79,7 @@ public class MetricDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void or(Criteria criteria) {
@@ -80,6 +87,7 @@ public class MetricDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Criteria or() {
@@ -89,6 +97,7 @@ public class MetricDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Criteria createCriteria() {
@@ -100,6 +109,7 @@ public class MetricDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     protected Criteria createCriteriaInternal() {
@@ -108,6 +118,7 @@ public class MetricDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void clear() {
@@ -117,13 +128,15 @@ public class MetricDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setLimitStart(Integer limitStart) {
-        this.limitStart = limitStart;
+        this.limitStart=limitStart;
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Integer getLimitStart() {
@@ -131,13 +144,15 @@ public class MetricDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setLimitEnd(Integer limitEnd) {
-        this.limitEnd = limitEnd;
+        this.limitEnd=limitEnd;
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Integer getLimitEnd() {
@@ -1177,6 +1192,146 @@ public class MetricDOExample {
             addCriterion("alias not between", value1, value2, "alias");
             return (Criteria) this;
         }
+
+        public Criteria andTagsIsNull() {
+            addCriterion("tags is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andTagsIsNotNull() {
+            addCriterion("tags is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andTagsEqualTo(String value) {
+            addCriterion("tags =", value, "tags");
+            return (Criteria) this;
+        }
+
+        public Criteria andTagsNotEqualTo(String value) {
+            addCriterion("tags <>", value, "tags");
+            return (Criteria) this;
+        }
+
+        public Criteria andTagsGreaterThan(String value) {
+            addCriterion("tags >", value, "tags");
+            return (Criteria) this;
+        }
+
+        public Criteria andTagsGreaterThanOrEqualTo(String value) {
+            addCriterion("tags >=", value, "tags");
+            return (Criteria) this;
+        }
+
+        public Criteria andTagsLessThan(String value) {
+            addCriterion("tags <", value, "tags");
+            return (Criteria) this;
+        }
+
+        public Criteria andTagsLessThanOrEqualTo(String value) {
+            addCriterion("tags <=", value, "tags");
+            return (Criteria) this;
+        }
+
+        public Criteria andTagsLike(String value) {
+            addCriterion("tags like", value, "tags");
+            return (Criteria) this;
+        }
+
+        public Criteria andTagsNotLike(String value) {
+            addCriterion("tags not like", value, "tags");
+            return (Criteria) this;
+        }
+
+        public Criteria andTagsIn(List<String> values) {
+            addCriterion("tags in", values, "tags");
+            return (Criteria) this;
+        }
+
+        public Criteria andTagsNotIn(List<String> values) {
+            addCriterion("tags not in", values, "tags");
+            return (Criteria) this;
+        }
+
+        public Criteria andTagsBetween(String value1, String value2) {
+            addCriterion("tags between", value1, value2, "tags");
+            return (Criteria) this;
+        }
+
+        public Criteria andTagsNotBetween(String value1, String value2) {
+            addCriterion("tags not between", value1, value2, "tags");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsIsNull() {
+            addCriterion("relate_dimensions is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsIsNotNull() {
+            addCriterion("relate_dimensions is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsEqualTo(String value) {
+            addCriterion("relate_dimensions =", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsNotEqualTo(String value) {
+            addCriterion("relate_dimensions <>", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsGreaterThan(String value) {
+            addCriterion("relate_dimensions >", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsGreaterThanOrEqualTo(String value) {
+            addCriterion("relate_dimensions >=", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsLessThan(String value) {
+            addCriterion("relate_dimensions <", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsLessThanOrEqualTo(String value) {
+            addCriterion("relate_dimensions <=", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsLike(String value) {
+            addCriterion("relate_dimensions like", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsNotLike(String value) {
+            addCriterion("relate_dimensions not like", value, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsIn(List<String> values) {
+            addCriterion("relate_dimensions in", values, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsNotIn(List<String> values) {
+            addCriterion("relate_dimensions not in", values, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsBetween(String value1, String value2) {
+            addCriterion("relate_dimensions between", value1, value2, "relateDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andRelateDimensionsNotBetween(String value1, String value2) {
+            addCriterion("relate_dimensions not between", value1, value2, "relateDimensions");
+            return (Criteria) this;
+        }
     }
 
     /**
@@ -1208,6 +1363,38 @@ public class MetricDOExample {
         private boolean listValue;
 
         private String typeHandler;
+
+        public String getCondition() {
+            return condition;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Object getSecondValue() {
+            return secondValue;
+        }
+
+        public boolean isNoValue() {
+            return noValue;
+        }
+
+        public boolean isSingleValue() {
+            return singleValue;
+        }
+
+        public boolean isBetweenValue() {
+            return betweenValue;
+        }
+
+        public boolean isListValue() {
+            return listValue;
+        }
+
+        public String getTypeHandler() {
+            return typeHandler;
+        }
 
         protected Criterion(String condition) {
             super();
@@ -1243,38 +1430,6 @@ public class MetricDOExample {
 
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
-        }
-
-        public String getCondition() {
-            return condition;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public Object getSecondValue() {
-            return secondValue;
-        }
-
-        public boolean isNoValue() {
-            return noValue;
-        }
-
-        public boolean isSingleValue() {
-            return singleValue;
-        }
-
-        public boolean isBetweenValue() {
-            return betweenValue;
-        }
-
-        public boolean isListValue() {
-            return listValue;
-        }
-
-        public String getTypeHandler() {
-            return typeHandler;
         }
     }
 }

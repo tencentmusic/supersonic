@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void updateAuthGroup(AuthGroup group) {
+    public void addOrUpdateAuthGroup(AuthGroup group) {
         Gson g = new Gson();
         if (group.getGroupId() == null) {
             int nextGroupId = 1;

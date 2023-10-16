@@ -1,9 +1,15 @@
 package com.tencent.supersonic.semantic.query.parser.convert;
 
+import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
+import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.request.SqlExecuteReq;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
@@ -11,12 +17,14 @@ import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter.EngineAdaptor;
 import com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter.EngineAdaptorFactory;
+import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +39,7 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class QueryReqConverter {
 
+    public static final String TABLE_PREFIX = "t_";
     @Autowired
     private ModelService domainService;
     @Autowired
@@ -41,38 +50,31 @@ public class QueryReqConverter {
     @Autowired
     private Catalog catalog;
 
-    public QueryStatement convert(QueryDslReq databaseReq, List<ModelSchemaResp> domainSchemas) throws Exception {
-
-        List<MetricTable> tables = new ArrayList<>();
-        MetricTable metricTable = new MetricTable();
-
-        List<String> allFields = SqlParserSelectHelper.getAllFields(databaseReq.getSql());
-        String tableName = SqlParserSelectHelper.getTableName(databaseReq.getSql());
-
-        functionNameCorrector(databaseReq);
-
-        if (CollectionUtils.isEmpty(domainSchemas) || StringUtils.isEmpty(tableName)) {
+    public QueryStatement convert(QueryDslReq databaseReq, ModelSchemaResp modelSchemaResp) throws Exception {
+        if (Objects.isNull(modelSchemaResp)) {
             return new QueryStatement();
         }
+        //1.convert name to bizName
+        convertNameToBizName(databaseReq, modelSchemaResp);
+        //2.functionName corrector
+        functionNameCorrector(databaseReq);
+        //3.correct tableName
+        correctTableName(databaseReq);
 
-        Set<String> dimensions = domainSchemas.get(0).getDimensions().stream()
-                .map(entry -> entry.getBizName().toLowerCase())
-                .collect(Collectors.toSet());
-        dimensions.addAll(QueryStructUtils.internalCols);
-
-        Set<String> metrics = domainSchemas.get(0).getMetrics().stream().map(entry -> entry.getBizName().toLowerCase())
-                .collect(Collectors.toSet());
-
-        metricTable.setMetrics(allFields.stream().filter(entry -> metrics.contains(entry.toLowerCase()))
-                .map(String::toLowerCase).collect(Collectors.toList()));
-        Set<String> collect = allFields.stream().filter(entry -> dimensions.contains(entry.toLowerCase()))
-                .map(String::toLowerCase).collect(Collectors.toSet());
-        for (String internalCol : QueryStructUtils.internalCols) {
-            if (databaseReq.getSql().contains(internalCol)) {
-                collect.add(internalCol);
-            }
+        String tableName = SqlParserSelectHelper.getTableName(databaseReq.getSql());
+        if (StringUtils.isEmpty(tableName)) {
+            return new QueryStatement();
         }
-        metricTable.setDimensions(new ArrayList<>(collect));
+        //4.build MetricTables
+        List<String> allFields = SqlParserSelectHelper.getAllFields(databaseReq.getSql());
+        List<String> metrics = getMetrics(modelSchemaResp, allFields);
+        MetricTable metricTable = new MetricTable();
+        metricTable.setMetrics(metrics);
+
+        Set<String> dimensions = getDimensions(modelSchemaResp, allFields);
+
+        metricTable.setDimensions(new ArrayList<>(dimensions));
+
         metricTable.setAlias(tableName.toLowerCase());
         // if metric empty , fill model default
         if (CollectionUtils.isEmpty(metricTable.getMetrics())) {
@@ -80,16 +82,62 @@ public class QueryReqConverter {
                     queryStructUtils.generateInternalMetricName(databaseReq.getModelId(),
                             metricTable.getDimensions()))));
         }
+        metricTable.setAggOption(getAggOption(databaseReq));
+        List<MetricTable> tables = new ArrayList<>();
         tables.add(metricTable);
-
+        //4.build ParseSqlReq
         ParseSqlReq result = new ParseSqlReq();
         BeanUtils.copyProperties(databaseReq, result);
         result.setRootPath(domainService.getModelFullPathMap().get(databaseReq.getModelId()));
         result.setTables(tables);
-
+        DatabaseResp database = catalog.getDatabaseByModelId(databaseReq.getModelId());
+        if (!queryStructUtils.isSupportWith(EngineTypeEnum.valueOf(database.getType().toUpperCase()),
+                database.getVersion())) {
+            result.setSupportWith(false);
+            result.setWithAlias(false);
+        }
+        //5.physicalSql by ParseSqlReq
         QueryStatement queryStatement = parserService.physicalSql(result);
         queryStatement.setSql(String.format(SqlExecuteReq.LIMIT_WRAPPER, queryStatement.getSql()));
         return queryStatement;
+    }
+
+    private AggOption getAggOption(QueryDslReq databaseReq) {
+        // if there is no group by in dsl,set MetricTable's aggOption to "NATIVE"
+        // if there is count() in dsl,set MetricTable's aggOption to "NATIVE"
+        String sql = databaseReq.getSql();
+        if (!SqlParserSelectHelper.hasGroupBy(sql)
+                || SqlParserSelectFunctionHelper.hasFunction(sql, "count")) {
+            return AggOption.NATIVE;
+        }
+        return AggOption.DEFAULT;
+    }
+
+    private void convertNameToBizName(QueryDslReq databaseReq, ModelSchemaResp modelSchemaResp) {
+        Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(modelSchemaResp);
+        String sql = databaseReq.getSql();
+        log.info("convert name to bizName before:{}", sql);
+        String replaceFields = SqlParserReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, false);
+        log.info("convert name to bizName after:{}", replaceFields);
+        databaseReq.setSql(replaceFields);
+    }
+
+    private Set<String> getDimensions(ModelSchemaResp modelSchemaResp, List<String> allFields) {
+        Set<String> allDimensions = modelSchemaResp.getDimensions().stream()
+                .map(entry -> entry.getBizName().toLowerCase())
+                .collect(Collectors.toSet());
+        allDimensions.addAll(QueryStructUtils.internalCols);
+        Set<String> collect = allFields.stream().filter(entry -> allDimensions.contains(entry.toLowerCase()))
+                .map(String::toLowerCase).collect(Collectors.toSet());
+        return collect;
+    }
+
+    private List<String> getMetrics(ModelSchemaResp modelSchemaResp, List<String> allFields) {
+        Set<String> allMetrics = modelSchemaResp.getMetrics().stream().map(entry -> entry.getBizName().toLowerCase())
+                .collect(Collectors.toSet());
+        List<String> metrics = allFields.stream().filter(entry -> allMetrics.contains(entry.toLowerCase()))
+                .map(String::toLowerCase).collect(Collectors.toList());
+        return metrics;
     }
 
     private void functionNameCorrector(QueryDslReq databaseReq) {
@@ -105,6 +153,23 @@ public class QueryReqConverter {
             log.info("sql:{} ,after corrector", databaseReq.getSql(), functionNameCorrector);
             databaseReq.setSql(functionNameCorrector);
         }
+    }
+
+
+    protected Map<String, String> getFieldNameToBizNameMap(ModelSchemaResp modelSchemaResp) {
+        List<SchemaItem> allSchemaItems = new ArrayList<>();
+        allSchemaItems.addAll(modelSchemaResp.getDimensions());
+        allSchemaItems.addAll(modelSchemaResp.getMetrics());
+
+        Map<String, String> result = allSchemaItems.stream()
+                .collect(Collectors.toMap(SchemaItem::getName, a -> a.getBizName(), (k1, k2) -> k1));
+        result.put(DateUtils.DATE_FIELD, TimeDimensionEnum.DAY.getName());
+        return result;
+    }
+
+    public void correctTableName(QueryDslReq databaseReq) {
+        String sql = SqlParserReplaceHelper.replaceTable(databaseReq.getSql(), TABLE_PREFIX + databaseReq.getModelId());
+        databaseReq.setSql(sql);
     }
 
 }

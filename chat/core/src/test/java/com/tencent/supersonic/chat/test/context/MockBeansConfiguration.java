@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.config.DefaultMetric;
 import com.tencent.supersonic.chat.config.DefaultMetricInfo;
@@ -41,8 +40,8 @@ public class MockBeansConfiguration {
         when(chatService.getOrCreateContext(1)).thenReturn(context);
     }
 
-    public static void buildHttpSemanticServiceImpl(SemanticLayer httpSemanticLayer, List<DimSchemaResp> dimensionDescs,
-            List<MetricSchemaResp> metricDescs) {
+    public static void buildHttpSemanticServiceImpl(List<DimSchemaResp> dimensionDescs,
+                                                    List<MetricSchemaResp> metricDescs) {
         DefaultMetric defaultMetricDesc = new DefaultMetric();
         defaultMetricDesc.setUnit(3);
         defaultMetricDesc.setPeriod(Constants.DAY);

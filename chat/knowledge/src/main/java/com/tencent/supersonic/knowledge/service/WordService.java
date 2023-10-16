@@ -1,6 +1,6 @@
 package com.tencent.supersonic.knowledge.service;
 
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
@@ -22,8 +22,8 @@ public class WordService {
     private List<DictWord> preDictWords = new ArrayList<>();
 
     public List<DictWord> getAllDictWords() {
-        SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
-        SemanticSchema semanticSchema = new SemanticSchema(semanticLayer.getModelSchema());
+        SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
+        SemanticSchema semanticSchema = new SemanticSchema(semanticInterpreter.getModelSchema());
 
         List<DictWord> words = new ArrayList<>();
 

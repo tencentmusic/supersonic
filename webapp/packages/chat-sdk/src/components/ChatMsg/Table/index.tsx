@@ -4,6 +4,7 @@ import { MsgDataType } from '../../../common/type';
 import { CLS_PREFIX } from '../../../common/constants';
 import ApplyAuth from '../ApplyAuth';
 import { SizeType } from 'antd/es/config-provider/SizeContext';
+import moment from 'moment';
 
 type Props = {
   data: MsgDataType;
@@ -60,6 +61,11 @@ const Table: React.FC<Props> = ({ data, size, onApplyAuth }) => {
     return index % 2 !== 0 ? `${prefixCls}-even-row` : '';
   };
 
+  const dateColumn = queryColumns.find(column => column.type === 'DATE');
+  const dataSource = dateColumn
+    ? queryResults.sort((a, b) => moment(a[dateColumn.nameEn]).diff(moment(b[dateColumn.nameEn])))
+    : queryResults;
+
   return (
     <div className={prefixCls}>
       <AntTable
@@ -67,8 +73,8 @@ const Table: React.FC<Props> = ({ data, size, onApplyAuth }) => {
           queryResults.length <= 10 ? false : { defaultPageSize: 10, position: ['bottomCenter'] }
         }
         columns={tableColumns}
-        dataSource={queryResults}
-        style={{ width: '100%', overflowX: 'auto' }}
+        dataSource={dataSource}
+        style={{ width: '100%', overflowX: 'auto', overflowY: 'hidden' }}
         rowClassName={getRowClassName}
         size={size}
       />

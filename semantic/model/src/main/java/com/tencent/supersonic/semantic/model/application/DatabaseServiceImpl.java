@@ -72,7 +72,8 @@ public class DatabaseServiceImpl implements DatabaseService {
     private void fillPermission(List<DatabaseResp> databaseResps, User user) {
         databaseResps.forEach(databaseResp -> {
             if (databaseResp.getAdmins().contains(user.getName())
-                    || user.getName().equalsIgnoreCase(databaseResp.getCreatedBy())) {
+                    || user.getName().equalsIgnoreCase(databaseResp.getCreatedBy())
+                    || user.isSuperAdmin()) {
                 databaseResp.setHasPermission(true);
                 databaseResp.setHasEditPermission(true);
                 databaseResp.setHasUsePermission(true);
@@ -111,7 +112,8 @@ public class DatabaseServiceImpl implements DatabaseService {
         List<String> viewers = databaseResp.getViewers();
         if (!admins.contains(user.getName())
                 && !viewers.contains(user.getName())
-                && !databaseResp.getCreatedBy().equalsIgnoreCase(user.getName())) {
+                && !databaseResp.getCreatedBy().equalsIgnoreCase(user.getName())
+                && !user.isSuperAdmin()) {
             String message = String.format("您暂无当前数据库%s权限, 请联系数据库管理员%s开通",
                     databaseResp.getName(),
                     String.join(",", admins));

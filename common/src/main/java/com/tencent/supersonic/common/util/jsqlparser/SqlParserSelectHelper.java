@@ -8,7 +8,11 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
+import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
@@ -19,7 +23,10 @@ import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
+import net.sf.jsqlparser.statement.select.SubSelect;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -37,6 +44,10 @@ public class SqlParserSelectHelper {
         Expression where = plainSelect.getWhere();
         if (Objects.nonNull(where)) {
             where.accept(new FieldAndValueAcquireVisitor(result));
+        }
+        Expression having = plainSelect.getHaving();
+        if (Objects.nonNull(having)) {
+            having.accept(new FieldAndValueAcquireVisitor(result));
         }
         return new ArrayList<>(result);
     }
@@ -104,10 +115,40 @@ public class SqlParserSelectHelper {
         return (Select) statement;
     }
 
+    public static List<PlainSelect> getPlainSelects(PlainSelect plainSelect) {
+        List<PlainSelect> plainSelects = new ArrayList<>();
+        plainSelects.add(plainSelect);
+        plainSelect.accept(new SelectVisitorAdapter() {
+            @Override
+            public void visit(PlainSelect plainSelect) {
+                Expression whereExpression = plainSelect.getWhere();
+                if (whereExpression != null) {
+                    whereExpression.accept(new ExpressionVisitorAdapter() {
+                        @Override
+                        public void visit(SubSelect subSelect) {
+                            SelectBody subSelectBody = subSelect.getSelectBody();
+                            if (subSelectBody instanceof PlainSelect) {
+                                plainSelects.add((PlainSelect) subSelectBody);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+        return plainSelects;
+    }
 
     public static List<String> getAllFields(String sql) {
+        List<PlainSelect> plainSelects = getPlainSelects(getPlainSelect(sql));
+        Set<String> results = new HashSet<>();
+        for (PlainSelect plainSelect : plainSelects) {
+            List<String> fields = getFieldsByPlainSelect(plainSelect);
+            results.addAll(fields);
+        }
+        return new ArrayList<>(results);
+    }
 
-        PlainSelect plainSelect = getPlainSelect(sql);
+    private static ArrayList<String> getFieldsByPlainSelect(PlainSelect plainSelect) {
         if (Objects.isNull(plainSelect)) {
             return new ArrayList<>();
         }
@@ -147,6 +188,19 @@ public class SqlParserSelectHelper {
             }
         }
         return null;
+    }
+
+    public static List<FilterExpression> getHavingExpressions(String sql) {
+        PlainSelect plainSelect = getPlainSelect(sql);
+        if (Objects.isNull(plainSelect)) {
+            return new ArrayList<>();
+        }
+        Set<FilterExpression> result = new HashSet<>();
+        Expression having = plainSelect.getHaving();
+        if (Objects.nonNull(having)) {
+            having.accept(new FieldAndValueAcquireVisitor(result));
+        }
+        return new ArrayList<>(result);
     }
 
     public static List<String> getOrderByFields(String sql) {
@@ -203,8 +257,30 @@ public class SqlParserSelectHelper {
         return table.getName();
     }
 
+    public static List<String> getAggregateFields(String sql) {
+        PlainSelect plainSelect = getPlainSelect(sql);
+        if (Objects.isNull(plainSelect)) {
+            return new ArrayList<>();
+        }
+        Set<String> result = new HashSet<>();
+        List<SelectItem> selectItems = plainSelect.getSelectItems();
+        for (SelectItem selectItem : selectItems) {
+            if (selectItem instanceof SelectExpressionItem) {
+                SelectExpressionItem expressionItem = (SelectExpressionItem) selectItem;
+                if (expressionItem.getExpression() instanceof Function) {
+                    Function function = (Function) expressionItem.getExpression();
+                    if (Objects.nonNull(function.getParameters())
+                            && !CollectionUtils.isEmpty(function.getParameters().getExpressions())) {
+                        String columnName = function.getParameters().getExpressions().get(0).toString();
+                        result.add(columnName);
+                    }
+                }
+            }
+        }
+        return new ArrayList<>(result);
+    }
 
-    public static boolean hasAggregateFunction(String sql) {
+    public static boolean hasGroupBy(String sql) {
         Select selectStatement = getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
 
@@ -212,15 +288,6 @@ public class SqlParserSelectHelper {
             return false;
         }
         PlainSelect plainSelect = (PlainSelect) selectBody;
-        List<SelectItem> selectItems = plainSelect.getSelectItems();
-        AggregateFunctionVisitor visitor = new AggregateFunctionVisitor();
-        for (SelectItem selectItem : selectItems) {
-            selectItem.accept(visitor);
-        }
-        boolean selectFunction = visitor.hasAggregateFunction();
-        if (selectFunction) {
-            return true;
-        }
         GroupByElement groupBy = plainSelect.getGroupBy();
         if (Objects.nonNull(groupBy)) {
             GroupByVisitor replaceVisitor = new GroupByVisitor();
@@ -228,6 +295,38 @@ public class SqlParserSelectHelper {
             return replaceVisitor.isHasAggregateFunction();
         }
         return false;
+    }
+
+    public static boolean isLogicExpression(Expression whereExpression) {
+        return whereExpression instanceof AndExpression || (whereExpression instanceof OrExpression
+                || (whereExpression instanceof XorExpression));
+    }
+
+    public static String getColumnName(Expression leftExpression, Expression rightExpression) {
+        if (leftExpression instanceof Column) {
+            return ((Column) leftExpression).getColumnName();
+        }
+        if (rightExpression instanceof Column) {
+            return ((Column) rightExpression).getColumnName();
+        }
+        return "";
+    }
+
+    public static String getColumnName(Expression leftExpression) {
+        if (leftExpression instanceof Column) {
+            Column leftColumnName = (Column) leftExpression;
+            return leftColumnName.getColumnName();
+        }
+        if (leftExpression instanceof Function) {
+            Function function = (Function) leftExpression;
+            if (!CollectionUtils.isEmpty(function.getParameters().getExpressions())) {
+                Expression expression = function.getParameters().getExpressions().get(0);
+                if (expression instanceof Column) {
+                    return ((Column) expression).getColumnName();
+                }
+            }
+        }
+        return "";
     }
 }
 

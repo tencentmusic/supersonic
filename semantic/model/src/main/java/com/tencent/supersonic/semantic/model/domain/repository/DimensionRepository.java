@@ -15,7 +15,9 @@ public interface DimensionRepository {
 
     List<DimensionDO> getDimensionListOfDatasource(Long datasourceId);
 
-    List<DimensionDO> getDimensionListOfDomain(Long domainId);
+    List<DimensionDO> getDimensionListOfmodel(Long domainId);
+
+    List<DimensionDO> getDimensionListOfmodelIds(List<Long> modelIds);
 
     List<DimensionDO> getDimensionList();
 

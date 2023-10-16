@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DataFormat;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
+import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricTypeParamsYamlTpl;
@@ -37,6 +38,10 @@ public class MetricConverter {
         if (metric.getDataFormat() != null) {
             metricDO.setDataFormat(JSONObject.toJSONString(metric.getDataFormat()));
         }
+        if (metric.getRelateDimension() != null) {
+            metricDO.setRelateDimensions(JSONObject.toJSONString(metric.getRelateDimension()));
+        }
+        metricDO.setTags(metric.getTag());
         return metricDO;
     }
 
@@ -51,27 +56,26 @@ public class MetricConverter {
         BeanUtils.copyProperties(metric, metricDO);
         metricDO.setTypeParams(JSONObject.toJSONString(metric.getTypeParams()));
         metricDO.setDataFormat(JSONObject.toJSONString(metric.getDataFormat()));
+        metricDO.setTags(metric.getTag());
+        metricDO.setRelateDimensions(JSONObject.toJSONString(metric.getRelateDimension()));
         return metricDO;
     }
 
 
-    public static MetricResp convert2MetricDesc(MetricDO metricDO, Map<Long, ModelResp> modelMap) {
-        MetricResp metricDesc = new MetricResp();
-        BeanUtils.copyProperties(metricDO, metricDesc);
-        metricDesc.setTypeParams(JSONObject.parseObject(metricDO.getTypeParams(), MetricTypeParams.class));
-        metricDesc.setDataFormat(JSONObject.parseObject(metricDO.getDataFormat(), DataFormat.class));
+    public static MetricResp convert2MetricResp(MetricDO metricDO, Map<Long, ModelResp> modelMap) {
+        MetricResp metricResp = new MetricResp();
+        BeanUtils.copyProperties(metricDO, metricResp);
+        metricResp.setTypeParams(JSONObject.parseObject(metricDO.getTypeParams(), MetricTypeParams.class));
+        metricResp.setDataFormat(JSONObject.parseObject(metricDO.getDataFormat(), DataFormat.class));
         ModelResp modelResp = modelMap.get(metricDO.getModelId());
         if (modelResp != null) {
-            metricDesc.setModelName(modelResp.getName());
+            metricResp.setModelName(modelResp.getName());
+            metricResp.setDomainId(modelResp.getDomainId());
         }
-        return metricDesc;
-    }
-
-    public static Metric convert2Metric(MetricDO metricDO) {
-        Metric metric = new Metric();
-        BeanUtils.copyProperties(metricDO, metric);
-        metric.setTypeParams(JSONObject.parseObject(metricDO.getTypeParams(), MetricTypeParams.class));
-        return metric;
+        metricResp.setTag(metricDO.getTags());
+        metricResp.setRelateDimension(JSONObject.parseObject(metricDO.getRelateDimensions(),
+                RelateDimension.class));
+        return metricResp;
     }
 
 

@@ -30,7 +30,7 @@ public interface DomainService {
 
     List<DomainResp> getDomainListWithAdminAuth(User user);
 
-    Set<DomainResp> getDomainAuthSet(String userName, AuthType authTypeEnum);
+    Set<DomainResp> getDomainAuthSet(User user, AuthType authTypeEnum);
 
     Set<DomainResp> getDomainChildren(List<Long> domainId);
 

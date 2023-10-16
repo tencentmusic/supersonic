@@ -8,5 +8,6 @@ import lombok.Data;
 public class ModelInfo extends DataInfo implements Serializable {
 
     private List<String> words;
+    private String primaryEntityName;
     private String primaryEntityBizName;
 }

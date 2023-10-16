@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.query.parser.calcite;
 
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.query.parser.SqlParser;
@@ -19,7 +20,7 @@ public class CalciteSqlParser implements SqlParser {
     }
 
     @Override
-    public QueryStatement explain(MetricReq metricReq, boolean isAgg, Catalog catalog) throws Exception {
+    public QueryStatement explain(MetricReq metricReq, AggOption isAgg, Catalog catalog) throws Exception {
         QueryStatement queryStatement = new QueryStatement();
         SemanticModel semanticModel = semanticSchemaManager.get(metricReq.getRootPath());
         if (semanticModel == null) {

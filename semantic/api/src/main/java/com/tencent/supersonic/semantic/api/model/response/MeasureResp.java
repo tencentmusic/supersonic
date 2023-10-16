@@ -25,4 +25,6 @@ public class MeasureResp {
 
     private String bizName;
 
+    private Long modelId;
+
 }

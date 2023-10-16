@@ -9,6 +9,7 @@ export type SearchRecommendItem = {
 
 export type FieldType = {
   bizName: string;
+  itemId: number;
   id: number;
   name: string;
   status: number;
@@ -47,8 +48,8 @@ export type FilterItemType = {
   elementID: number;
   name: string;
   bizName: string;
-  operator: string;
-  type: string;
+  operator?: string;
+  type?: string;
   value: any;
 };
 
@@ -69,6 +70,12 @@ export type EntityDimensionType = {
   value: string;
 }
 
+export type SqlInfoType = {
+  llmParseSql: string;
+  logicSql: string;
+  querySql: string;
+}
+
 export type ChatContextType = {
   id: number;
   queryId: number;
@@ -80,12 +87,13 @@ export type ChatContextType = {
   dimensions: FieldType[];
   metrics: FieldType[];
   entity: { alias: string[], id: number };
-  entityInfo: { dimensions: EntityDimensionType[] };
+  entityInfo: EntityInfoType;
   elementMatches: any[];
   nativeQuery: boolean;
   queryMode: string;
   dimensionFilters: FilterItemType[];
   properties: any;
+  sqlInfo: SqlInfoType;
 };
 
 export enum MsgValidTypeEnum {
@@ -126,6 +134,7 @@ export type MsgDataType = {
   queryId: number;
   queryMode: string;
   queryState: string;
+  queryText: string;
   response: PluginResonseType;
   parseOptions?: ChatContextType[];
 };
@@ -143,6 +152,7 @@ export type ParseDataType = {
   state: ParseStateEnum;
   selectedParses: ChatContextType[];
   candidateParses: ChatContextType[];
+  similarSolvedQuery: SimilarQuestionType[];
 }
 
 export type QueryDataType = {
@@ -217,4 +227,17 @@ export type DrillDownDimensionType = {
   model: number;
   name: string;
   bizName: string;
+}
+
+export type SendMsgParamsType = {
+  msg: string;
+  agentId: number;
+  modelId: number;
+  filters?: FilterItemType[];
+}
+
+export type SimilarQuestionType = {
+  // queryId: number;
+  // parseId: number;
+  queryText: string;
 }

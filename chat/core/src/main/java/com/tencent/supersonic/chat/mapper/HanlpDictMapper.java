@@ -37,13 +37,11 @@ public class HanlpDictMapper implements SchemaMapper {
         String queryText = queryContext.getRequest().getQueryText();
         List<Term> terms = HanlpHelper.getTerms(queryText);
 
-        for (Term term : terms) {
-            log.info("word:{},nature:{},frequency:{}", term.word, term.nature.toString(), term.getFrequency());
-        }
-
         QueryMatchStrategy matchStrategy = ContextUtils.getBean(QueryMatchStrategy.class);
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
         Set<Long> detectModelIds = mapperHelper.getModelIds(queryContext.getRequest());
+
+        terms = filterByModelIds(terms, detectModelIds);
 
         Map<MatchText, List<MapResult>> matchResult = matchStrategy.match(queryContext.getRequest(), terms,
                 detectModelIds);
@@ -55,6 +53,26 @@ public class HanlpDictMapper implements SchemaMapper {
         log.info("queryContext:{},matches:{}", queryContext, matches);
 
         convertTermsToSchemaMapInfo(matches, queryContext.getMapInfo(), terms);
+    }
+
+    private List<Term> filterByModelIds(List<Term> terms, Set<Long> detectModelIds) {
+        for (Term term : terms) {
+            log.info("before word:{},nature:{},frequency:{}", term.word, term.nature.toString(), term.getFrequency());
+        }
+        if (CollectionUtils.isNotEmpty(detectModelIds)) {
+            terms = terms.stream().filter(term -> {
+                Long modelId = NatureHelper.getModelId(term.getNature().toString());
+                if (Objects.nonNull(modelId)) {
+                    return detectModelIds.contains(modelId);
+                }
+                return false;
+            }).collect(Collectors.toList());
+        }
+        for (Term term : terms) {
+            log.info("after filter word:{},nature:{},frequency:{}", term.word, term.nature.toString(),
+                    term.getFrequency());
+        }
+        return terms;
     }
 
 

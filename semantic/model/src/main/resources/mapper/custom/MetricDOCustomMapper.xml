@@ -2,22 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tencent.supersonic.semantic.model.infrastructure.mapper.MetricDOCustomMapper">
-    <resultMap id="BaseResultMap"
-            type="com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="model_id" jdbcType="BIGINT" property="modelId"/>
-        <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="biz_name" jdbcType="VARCHAR" property="bizName"/>
-        <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="type" jdbcType="VARCHAR" property="type"/>
-        <result column="created_at" jdbcType="TIMESTAMP" property="createdAt"/>
-        <result column="created_by" jdbcType="VARCHAR" property="createdBy"/>
-        <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt"/>
-        <result column="updated_by" jdbcType="VARCHAR" property="updatedBy"/>
+    <resultMap id="BaseResultMap" type="com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="model_id" jdbcType="BIGINT" property="modelId" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+        <result column="biz_name" jdbcType="VARCHAR" property="bizName" />
+        <result column="description" jdbcType="VARCHAR" property="description" />
+        <result column="status" jdbcType="INTEGER" property="status" />
+        <result column="sensitive_level" jdbcType="INTEGER" property="sensitiveLevel" />
+        <result column="type" jdbcType="VARCHAR" property="type" />
+        <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
+        <result column="created_by" jdbcType="VARCHAR" property="createdBy" />
+        <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+        <result column="updated_by" jdbcType="VARCHAR" property="updatedBy" />
+        <result column="data_format_type" jdbcType="VARCHAR" property="dataFormatType" />
+        <result column="data_format" jdbcType="VARCHAR" property="dataFormat" />
+        <result column="alias" jdbcType="VARCHAR" property="alias" />
+        <result column="tags" jdbcType="VARCHAR" property="tags" />
     </resultMap>
-    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs"
-            type="com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO">
-        <result column="type_params" jdbcType="LONGVARCHAR" property="typeParams"/>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO">
+        <result column="type_params" jdbcType="LONGVARCHAR" property="typeParams" />
     </resultMap>
     <sql id="Example_Where_Clause">
         <where>
@@ -51,12 +55,11 @@
         </where>
     </sql>
     <sql id="Base_Column_List">
-        id
-        , model_id, name, biz_name, description, type, created_at, created_by, updated_at,
-    updated_by
+        id, model_id, name, biz_name, description, status, sensitive_level, type, created_at,
+    created_by, updated_at, updated_by, data_format_type, data_format, alias, tags
     </sql>
     <sql id="Blob_Column_List">
-        typeParams
+        type_params
     </sql>
 
     <insert id="batchInsert" parameterType="java.util.List">
@@ -108,7 +111,9 @@
             and ( id like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
             name like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
             biz_name like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
-            description like CONCAT('%',#{key , jdbcType=VARCHAR},'%') )
+            description like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
+            alias like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
+            tags like CONCAT('%',#{key , jdbcType=VARCHAR},'%') )
         </if>
         <if test="id != null">
             and id like CONCAT('%',#{id , jdbcType=VARCHAR},'%')
@@ -128,6 +133,9 @@
                      separator=",">
                 #{model}
             </foreach>
+        </if>
+        <if test="createdBy != null">
+            and created_by = #{createdBy}
         </if>
     </select>
 

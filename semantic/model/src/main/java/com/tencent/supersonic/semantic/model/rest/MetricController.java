@@ -4,11 +4,13 @@ package com.tencent.supersonic.semantic.model.rest;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import java.util.List;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -68,8 +70,11 @@ public class MetricController {
 
 
     @PostMapping("/queryMetric")
-    public PageInfo<MetricResp> queryMetric(@RequestBody PageMetricReq pageMetrricReq) {
-        return metricService.queryMetric(pageMetrricReq);
+    public PageInfo<MetricResp> queryMetric(@RequestBody PageMetricReq pageMetricReq,
+                                            HttpServletRequest request,
+                                            HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return metricService.queryMetric(pageMetricReq, user);
     }
 
     @GetMapping("getMetric/{modelId}/{bizName}")
@@ -90,4 +95,14 @@ public class MetricController {
     }
 
 
+    @GetMapping("/getMetricTags")
+    public Set<String> getMetricTags() {
+        return metricService.getMetricTags();
+    }
+
+
+    @GetMapping("/getDrillDownDimension")
+    public List<DrillDownDimension> getDrillDownDimension(Long metricId) {
+        return metricService.getDrillDownDimension(metricId);
+    }
 }

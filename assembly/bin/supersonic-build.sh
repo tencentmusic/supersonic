@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
 
-# pip path
-pip_path="/usr/local/bin/pip3"
-
+set -x
 sbinDir=$(cd "$(dirname "$0")"; pwd)
-baseDir=$(cd "$sbinDir/.." && pwd -P)
-runtimeDir=$baseDir/../runtime
-buildDir=$baseDir/build
+chmod +x $sbinDir/supersonic-common.sh
+source $sbinDir/supersonic-common.sh
 
 cd $baseDir
 
 #1. build backend java modules
 rm -fr ${buildDir}/*.tar.gz
 rm -fr dist
+
+set +x
 
 mvn -f $baseDir/../ clean package -DskipTests
 
@@ -34,37 +33,16 @@ mv supersonic-webapp webapp
 cp -fr webapp ../../launchers/semantic/target/classes
 cp -fr webapp ../../launchers/chat/target/classes
 cp -fr webapp ../../launchers/standalone/target/classes
+rm -fr  ${buildDir}/webapp
 
 #5. build backend python modules
+echo "start installing python modules with pip: ${pip_path}"
 requirementPath=$baseDir/../chat/core/src/main/python/requirements.txt
-${pip_path}  install -r ${requirementPath}
+${pip_path} install -r ${requirementPath}
 echo "install python modules success"
 
 #6. reset runtime
-function setEnvToWeb {
-   model_name=$1
-   json='{"env": "'$model_name'"}'
-   echo $json > ${runtimeDir}/supersonic-${model_name}/webapp/supersonic.config.json
-   echo $json > ../../launchers/${model_name}/target/classes/webapp/supersonic.config.json
-}
-
-function moveToRuntime {
-  model_name=$1
-  tar -zxvf ${buildDir}/supersonic-${model_name}.tar.gz  -C ${runtimeDir}
-  mv ${runtimeDir}/launchers-${model_name}-* ${runtimeDir}/supersonic-${model_name}
-
-  mkdir -p ${runtimeDir}/supersonic-${model_name}/webapp
-  cp -fr  ${buildDir}/webapp/* ${runtimeDir}/supersonic-${model_name}/webapp
-}
-
-mkdir -p ${runtimeDir}
 rm -fr $runtimeDir/*
-
-moveToRuntime chat
-moveToRuntime semantic
-moveToRuntime standalone
-
+moveAllToRuntime
 setEnvToWeb chat
 setEnvToWeb semantic
-
-rm -fr  ${buildDir}/webapp

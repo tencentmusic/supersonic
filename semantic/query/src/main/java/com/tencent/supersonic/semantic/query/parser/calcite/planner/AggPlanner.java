@@ -1,6 +1,7 @@
 package com.tencent.supersonic.semantic.query.parser.calcite.planner;
 
 
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Constants;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
@@ -30,7 +31,8 @@ public class AggPlanner implements Planner {
     private Stack<TableView> dataSets = new Stack<>();
     private SqlNode parserNode;
     private String sourceId;
-    private boolean isAgg = true;
+    private boolean isAgg = false;
+    private AggOption aggOption = AggOption.DEFAULT;
 
     public AggPlanner(SemanticSchema schema) {
         this.schema = schema;
@@ -44,10 +46,7 @@ public class AggPlanner implements Planner {
         if (datasource == null || datasource.isEmpty()) {
             throw new Exception("datasource not found");
         }
-        if (Objects.nonNull(datasource.get(0).getAggTime()) && !datasource.get(0).getAggTime().equalsIgnoreCase(
-                Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE)) {
-            isAgg = true;
-        }
+        isAgg = getAgg(datasource.get(0));
         sourceId = String.valueOf(datasource.get(0).getSourceId());
 
         // build  level by level
@@ -78,9 +77,21 @@ public class AggPlanner implements Planner {
         return DataSourceNode.getMatchDataSources(scope, schema, metricCommand);
     }
 
+    private boolean getAgg(DataSource dataSource) {
+        if (!AggOption.DEFAULT.equals(aggOption)) {
+            return AggOption.isAgg(aggOption);
+        }
+        // default by dataSource time aggregation
+        if (Objects.nonNull(dataSource.getAggTime()) && !dataSource.getAggTime().equalsIgnoreCase(
+                Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE)) {
+            return true;
+        }
+        return isAgg;
+    }
+
 
     @Override
-    public void explain(MetricReq metricCommand, boolean isAgg) throws Exception {
+    public void explain(MetricReq metricCommand, AggOption aggOption) throws Exception {
         this.metricCommand = metricCommand;
         if (metricCommand.getMetrics() == null) {
             metricCommand.setMetrics(new ArrayList<>());
@@ -91,7 +102,7 @@ public class AggPlanner implements Planner {
         if (metricCommand.getLimit() == null) {
             metricCommand.setLimit(0L);
         }
-        this.isAgg = isAgg;
+        this.aggOption = aggOption;
         // build a parse Node
         parse();
         // optimizer

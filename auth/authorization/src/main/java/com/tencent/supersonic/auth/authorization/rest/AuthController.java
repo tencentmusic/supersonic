@@ -40,7 +40,7 @@ public class AuthController {
     @PostMapping("/createGroup")
     public void newAuthGroup(@RequestBody AuthGroup group) {
         group.setGroupId(null);
-        authService.updateAuthGroup(group);
+        authService.addOrUpdateAuthGroup(group);
     }
 
     @PostMapping("/removeGroup")
@@ -58,7 +58,7 @@ public class AuthController {
         if (group.getGroupId() == null || group.getGroupId() == 0) {
             throw new RuntimeException("groupId is empty");
         }
-        authService.updateAuthGroup(group);
+        authService.addOrUpdateAuthGroup(group);
     }
 
     /**

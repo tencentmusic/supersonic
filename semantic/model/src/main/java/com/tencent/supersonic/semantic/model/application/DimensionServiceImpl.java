@@ -11,6 +11,7 @@ import com.tencent.supersonic.common.pojo.DataAddEvent;
 import com.tencent.supersonic.common.pojo.DataDeleteEvent;
 import com.tencent.supersonic.common.pojo.DataUpdateEvent;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
+import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.DatasourceDetail;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
@@ -37,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
+import com.tencent.supersonic.semantic.model.domain.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +86,6 @@ public class DimensionServiceImpl implements DimensionService {
         log.info("[create dimension] object:{}", JSONObject.toJSONString(dimension));
         dimension.createdBy(user.getName());
         saveDimension(dimension);
-        //动态更新字典
         String type = DictWordType.DIMENSION.getType();
         DimensionResp dimensionResp = getDimension(dimension.getBizName(), dimension.getModelId());
         applicationEventPublisher.publishEvent(
@@ -113,22 +114,22 @@ public class DimensionServiceImpl implements DimensionService {
 
     @Override
     public void updateDimension(DimensionReq dimensionReq, User user) {
+        if (NameCheckUtils.containsSpecialCharacters(dimensionReq.getName())) {
+            throw new InvalidArgumentException("名称包含特殊字符, 请修改");
+        }
         Dimension dimension = DimensionConverter.convert(dimensionReq);
         dimension.updatedBy(user.getName());
         log.info("[update dimension] object:{}", JSONObject.toJSONString(dimension));
-        List<DimensionResp> dimensionRespList = getDimensions(dimensionReq.getModelId()).stream().filter(
-                o -> o.getId().equals(dimensionReq.getId())).collect(Collectors.toList());
         updateDimension(dimension);
+        DimensionResp dimensionResp = getDimension(dimensionReq.getId());
         //动态更新字典
         String type = DictWordType.DIMENSION.getType();
-        if (!CollectionUtils.isEmpty(dimensionRespList)) {
-            log.info("dimensionRespList size:{}", dimensionRespList.size());
-            log.info("name:{}", dimensionRespList.get(0).getName());
+        if (dimensionResp != null) {
             applicationEventPublisher.publishEvent(
-                    new DataUpdateEvent(this, dimensionRespList.get(0).getName(),
+                    new DataUpdateEvent(this, dimensionResp.getName(),
                             dimensionReq.getName(),
                             dimension.getModelId(),
-                            dimensionRespList.get(0).getId(), type));
+                            dimensionResp.getId(), type));
         }
     }
 
@@ -150,6 +151,12 @@ public class DimensionServiceImpl implements DimensionService {
             }
         }
         return null;
+    }
+
+    @Override
+    public DimensionResp getDimension(Long id) {
+        DimensionDO dimensionDO = dimensionRepository.getDimensionById(id);
+        return DimensionConverter.convert2DimensionResp(dimensionDO, new HashMap<>(), new HashMap<>());
     }
 
     @Override
@@ -196,6 +203,12 @@ public class DimensionServiceImpl implements DimensionService {
     }
 
     @Override
+    public List<DimensionResp> getDimensionsByModelIds(List<Long> modelIds) {
+        List<DimensionDO> dimensionDOS = dimensionRepository.getDimensionListOfmodelIds(modelIds);
+        return convertList(dimensionDOS, datasourceService.getDatasourceMap());
+    }
+
+    @Override
     public List<DimensionResp> getDimensionsByDatasource(Long datasourceId) {
         List<DimensionResp> dimensionResps = Lists.newArrayList();
         List<DimensionDO> dimensionDOS = dimensionRepository.getDimensionListOfDatasource(datasourceId);
@@ -235,7 +248,7 @@ public class DimensionServiceImpl implements DimensionService {
 
 
     protected List<DimensionDO> getDimensionDOS(Long modelId) {
-        return dimensionRepository.getDimensionListOfDomain(modelId);
+        return dimensionRepository.getDimensionListOfmodel(modelId);
     }
 
     protected List<DimensionDO> getDimensionDOS() {
@@ -356,13 +369,16 @@ public class DimensionServiceImpl implements DimensionService {
         Long modelId = dimensionReqs.get(0).getModelId();
         List<DimensionResp> dimensionResps = getDimensions(modelId);
         for (DimensionReq dimensionReq : dimensionReqs) {
+            if (NameCheckUtils.containsSpecialCharacters(dimensionReq.getName())) {
+                throw new InvalidArgumentException("名称包含特殊字符, 请修改");
+            }
             for (DimensionResp dimensionResp : dimensionResps) {
-                if (dimensionResp.getName().equalsIgnoreCase(dimensionReq.getBizName())) {
-                    throw new RuntimeException(String.format("exist same dimension name:%s", dimensionReq.getName()));
+                if (dimensionResp.getName().equalsIgnoreCase(dimensionReq.getName())) {
+                    throw new RuntimeException(String.format("存在相同的维度名 :%s", dimensionReq.getName()));
                 }
                 if (dimensionResp.getBizName().equalsIgnoreCase(dimensionReq.getBizName())) {
                     throw new RuntimeException(
-                            String.format("exist same dimension bizName:%s", dimensionReq.getBizName()));
+                            String.format("存在相同的维度名: %s", dimensionReq.getBizName()));
                 }
             }
         }

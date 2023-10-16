@@ -74,9 +74,9 @@ public class HttpClientUtils {
      */
     private static final int DEFAULT_MAX_TOTAL_CONN = 200;
 
-    private static final int DEFAULT_CONNECTION_TIMEOUT = 15000;
-    private static final int DEFAULT_READ_TIMEOUT = 15000;
-    private static final int DEFAULT_CONN_REQUEST_TIMEOUT = 10000;
+    private static final int DEFAULT_CONNECTION_TIMEOUT = 150000;
+    private static final int DEFAULT_READ_TIMEOUT = 150000;
+    private static final int DEFAULT_CONN_REQUEST_TIMEOUT = 100000;
 
     // httpClient singleton
     private static CloseableHttpClient httpClient = null;

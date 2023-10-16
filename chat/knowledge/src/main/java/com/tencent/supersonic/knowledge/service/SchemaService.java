@@ -3,7 +3,7 @@ package com.tencent.supersonic.knowledge.service;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.tencent.supersonic.chat.api.component.SemanticLayer;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.knowledge.utils.ComponentFactory;
@@ -19,7 +19,7 @@ public class SchemaService {
 
     public static final String ALL_CACHE = "all";
     private static final Integer META_CACHE_TIME = 2;
-    private SemanticLayer semanticLayer = ComponentFactory.getSemanticLayer();
+    private SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
 
     private LoadingCache<String, SemanticSchema> cache = CacheBuilder.newBuilder()
             .expireAfterWrite(META_CACHE_TIME, TimeUnit.MINUTES)
@@ -28,13 +28,13 @@ public class SchemaService {
                         @Override
                         public SemanticSchema load(String key) {
                             log.info("load getDomainSchemaInfo cache [{}]", key);
-                            return new SemanticSchema(semanticLayer.getModelSchema());
+                            return new SemanticSchema(semanticInterpreter.getModelSchema());
                         }
                     }
             );
 
     public ModelSchema getModelSchema(Long id) {
-        return semanticLayer.getModelSchema(id, true);
+        return semanticInterpreter.getModelSchema(id, true);
     }
 
     public SemanticSchema getSemanticSchema() {

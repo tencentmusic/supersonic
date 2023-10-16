@@ -23,4 +23,13 @@ public class EmbeddingConfig {
     @Value("${embedding.nResult:1}")
     private String nResult;
 
+    @Value("${embedding.solvedQuery.recall.path:/solved_query_retrival}")
+    private String solvedQueryRecallPath;
+
+    @Value("${embedding.solvedQuery.add.path:/solved_query_add}")
+    private String solvedQueryAddPath;
+
+    @Value("${embedding.solved.query.nResult:5}")
+    private String solvedQueryResultNum;
+
 }
