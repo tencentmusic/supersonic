@@ -22,10 +22,9 @@ public class SchemaElement implements Serializable {
     private String bizName;
     private Long useCnt;
     private SchemaElementType type;
-
     private List<String> alias;
-
     private List<SchemaValueMap> schemaValueMaps;
+    private List<RelateSchemaElement> relateSchemaElements;
 
     private String defaultAgg;
 

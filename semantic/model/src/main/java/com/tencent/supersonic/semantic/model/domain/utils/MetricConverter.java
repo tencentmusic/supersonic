@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DataFormat;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
+import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricTypeParamsYamlTpl;
@@ -37,6 +38,9 @@ public class MetricConverter {
         if (metric.getDataFormat() != null) {
             metricDO.setDataFormat(JSONObject.toJSONString(metric.getDataFormat()));
         }
+        if (metric.getRelateDimension() != null) {
+            metricDO.setRelateDimensions(JSONObject.toJSONString(metric.getRelateDimension()));
+        }
         metricDO.setTags(metric.getTag());
         return metricDO;
     }
@@ -53,6 +57,7 @@ public class MetricConverter {
         metricDO.setTypeParams(JSONObject.toJSONString(metric.getTypeParams()));
         metricDO.setDataFormat(JSONObject.toJSONString(metric.getDataFormat()));
         metricDO.setTags(metric.getTag());
+        metricDO.setRelateDimensions(JSONObject.toJSONString(metric.getRelateDimension()));
         return metricDO;
     }
 
@@ -68,6 +73,8 @@ public class MetricConverter {
             metricResp.setDomainId(modelResp.getDomainId());
         }
         metricResp.setTag(metricDO.getTags());
+        metricResp.setRelateDimension(JSONObject.parseObject(metricDO.getRelateDimensions(),
+                RelateDimension.class));
         return metricResp;
     }
 

@@ -7,6 +7,7 @@ import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
 import com.tencent.supersonic.semantic.api.model.request.ModelReq;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
@@ -75,7 +76,7 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public void createModel(ModelReq modelReq, User user) {
-        log.info("[create model] cmd : {}", JSONObject.toJSONString(modelReq));
+        log.info("[create model] req : {}", JSONObject.toJSONString(modelReq));
         Model model = ModelConvert.convert(modelReq);
         log.info("[create model] object:{}", JSONObject.toJSONString(modelReq));
         saveModel(model, user);
@@ -261,7 +262,7 @@ public class ModelServiceImpl implements ModelService {
         ModelSchemaResp modelSchemaResp = new ModelSchemaResp();
         BeanUtils.copyProperties(modelResp, modelSchemaResp);
         modelSchemaResp.setDimensions(generateDimSchema(modelId));
-        modelSchemaResp.setMetrics(generateMetricSchema(modelId));
+        modelSchemaResp.setMetrics(generateMetricSchema(modelId, modelResp));
         return modelSchemaResp;
     }
 
@@ -292,7 +293,7 @@ public class ModelServiceImpl implements ModelService {
             List<MeasureResp> measureResps = measureRespsMap.getOrDefault(modelId, Lists.newArrayList());
             List<MetricResp> metricResps = metricRespMap.getOrDefault(modelId, Lists.newArrayList());
             List<MetricSchemaResp> metricSchemaResps = metricResps.stream().map(metricResp ->
-                    convert(metricResp, metricResps, measureResps)).collect(Collectors.toList());
+                    convert(metricResp, metricResps, measureResps, modelResp)).collect(Collectors.toList());
             List<DimSchemaResp> dimensionResps = dimensionRespsMap.getOrDefault(modelId, Lists.newArrayList())
                     .stream().map(this::convert).collect(Collectors.toList());
             ModelSchemaResp modelSchemaResp = new ModelSchemaResp();
@@ -314,12 +315,12 @@ public class ModelServiceImpl implements ModelService {
         return null;
     }
 
-    private List<MetricSchemaResp> generateMetricSchema(Long modelId) {
+    private List<MetricSchemaResp> generateMetricSchema(Long modelId, ModelResp modelResp) {
         List<MetricSchemaResp> metricSchemaDescList = new ArrayList<>();
         List<MetricResp> metricResps = metricService.getMetrics(modelId);
         List<MeasureResp> measureResps = datasourceService.getMeasureListOfModel(modelId);
         metricResps.stream().forEach(metricResp ->
-                metricSchemaDescList.add(convert(metricResp, metricResps, measureResps)));
+                metricSchemaDescList.add(convert(metricResp, metricResps, measureResps, modelResp)));
         return metricSchemaDescList;
     }
 
@@ -336,9 +337,14 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private MetricSchemaResp convert(MetricResp metricResp, List<MetricResp> metricResps,
-                                     List<MeasureResp> measureResps) {
+                                     List<MeasureResp> measureResps, ModelResp modelResp) {
         MetricSchemaResp metricSchemaResp = new MetricSchemaResp();
         BeanUtils.copyProperties(metricResp, metricSchemaResp);
+        RelateDimension relateDimension = metricResp.getRelateDimension();
+        if (relateDimension == null || CollectionUtils.isEmpty(relateDimension.getDrillDownDimensions())) {
+            metricSchemaResp.setRelateDimension(RelateDimension.builder()
+                    .drillDownDimensions(modelResp.getDrillDownDimensions()).build());
+        }
         metricSchemaResp.setUseCnt(0L);
         String agg = catalog.getAgg(metricResps, measureResps, metricSchemaResp.getBizName());
         metricSchemaResp.setDefaultAgg(agg);

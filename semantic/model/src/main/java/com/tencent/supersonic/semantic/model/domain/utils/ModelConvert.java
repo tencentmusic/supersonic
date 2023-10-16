@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
 import com.tencent.supersonic.semantic.api.model.pojo.Entity;
 import com.tencent.supersonic.semantic.api.model.request.ModelReq;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
@@ -38,6 +39,7 @@ public class ModelConvert {
         modelDO.setViewer(String.join(",", model.getViewers()));
         modelDO.setViewOrg(String.join(",", model.getViewOrgs()));
         modelDO.setEntity(JsonUtil.toString(model.getEntity()));
+        modelDO.setDrillDownDimensions(JsonUtil.toString(model.getDrillDownDimensions()));
         return modelDO;
     }
 
@@ -53,6 +55,7 @@ public class ModelConvert {
         modelResp.setViewOrgs(StringUtils.isBlank(modelDO.getViewOrg())
                 ? Lists.newArrayList() : Arrays.asList(modelDO.getViewOrg().split(",")));
         modelResp.setEntity(JsonUtil.toObject(modelDO.getEntity(), Entity.class));
+        modelResp.setDrillDownDimensions(JsonUtil.toList(modelDO.getDrillDownDimensions(), DrillDownDimension.class));
         return modelResp;
     }
 

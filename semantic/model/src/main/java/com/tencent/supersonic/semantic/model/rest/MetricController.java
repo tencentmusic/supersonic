@@ -4,6 +4,7 @@ package com.tencent.supersonic.semantic.model.rest;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
@@ -99,4 +100,9 @@ public class MetricController {
         return metricService.getMetricTags();
     }
 
+
+    @GetMapping("/getDrillDownDimension")
+    public List<DrillDownDimension> getDrillDownDimension(Long metricId) {
+        return metricService.getDrillDownDimension(metricId);
+    }
 }

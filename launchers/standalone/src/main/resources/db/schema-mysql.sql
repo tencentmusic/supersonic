@@ -255,6 +255,7 @@ CREATE TABLE `s2_metric` (
                              `data_format` varchar(500) DEFAULT NULL COMMENT '数值类型参数',
                              `alias` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
                              `tags` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+                             `relate_dimensions` varchar(500) DEFAULT NULL COMMENT '指标相关维度',
                              PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='指标表';
 
@@ -275,6 +276,7 @@ CREATE TABLE `s2_model` (
                             `updated_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
                             `updated_at` datetime DEFAULT NULL,
                             `entity` text COLLATE utf8_unicode_ci,
+                            `drill_down_dimensions` varchar(500) DEFAULT NULL,
                             PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
