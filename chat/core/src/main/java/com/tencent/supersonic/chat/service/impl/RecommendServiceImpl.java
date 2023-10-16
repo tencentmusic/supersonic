@@ -56,14 +56,14 @@ public class RecommendServiceImpl implements RecommendService {
         if (recommendReq.getMetricId() != null && !CollectionUtils.isEmpty(metricElements)) {
             Optional<SchemaElement> metric = metricElements.stream().filter(schemaElement ->
                             recommendReq.getMetricId().equals(schemaElement.getId())
-                            && !CollectionUtils.isEmpty(schemaElement.getRelateSchemaElements()))
+                                    && !CollectionUtils.isEmpty(schemaElement.getRelateSchemaElements()))
                     .findFirst();
             if (metric.isPresent()) {
                 drillDownDimensions = metric.get().getRelateSchemaElements().stream()
                         .map(RelateSchemaElement::getDimensionId).collect(Collectors.toList());
             }
         }
-        final  List<Long> drillDownDimensionsFinal = drillDownDimensions;
+        final List<Long> drillDownDimensionsFinal = drillDownDimensions;
         List<SchemaElement> dimensions = modelSchema.getDimensions().stream()
                 .filter(dim -> {
                     if (Objects.isNull(dim)) {
