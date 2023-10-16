@@ -274,6 +274,24 @@ public class SqlParserAddHelper {
         return selectStatement.toString();
     }
 
+    public static String addHaving(String sql, Expression expression) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+        Expression having = plainSelect.getHaving();
+
+        if (having == null) {
+            plainSelect.setHaving(expression);
+        } else {
+            plainSelect.setHaving(new AndExpression(having, expression));
+        }
+        return selectStatement.toString();
+    }
+
     public static String addParenthesisToWhere(String sql) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
