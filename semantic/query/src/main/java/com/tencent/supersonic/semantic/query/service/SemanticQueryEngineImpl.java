@@ -48,6 +48,10 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
         queryUtils.checkSqlParse(queryStatement);
         queryStatement.setModelId(queryStructCmd.getModelId());
         log.info("queryStatement:{}", queryStatement);
+        return optimize(queryStructCmd, queryStatement);
+    }
+
+    public QueryStatement optimize(QueryStructReq queryStructCmd, QueryStatement queryStatement) {
         for (QueryOptimizer queryOptimizer : ComponentFactory.getQueryOptimizers()) {
             queryOptimizer.rewrite(queryStructCmd, queryStatement);
         }
@@ -65,12 +69,12 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
 
 
     @Override
-    public QueryStatement physicalSql(ParseSqlReq sqlCommend) throws Exception {
-        return queryParser.parser(sqlCommend);
+    public QueryStatement physicalSql(QueryStructReq queryStructCmd, ParseSqlReq sqlCommend) throws Exception {
+        return optimize(queryStructCmd, queryParser.parser(sqlCommend));
     }
 
 
-    public QueryStatement physicalSql(MetricReq metricCommand) throws Exception {
+    public QueryStatement physicalSql(QueryStructReq queryStructCmd, MetricReq metricCommand) throws Exception {
         return queryParser.parser(metricCommand);
     }
 }

@@ -58,6 +58,8 @@ public class DatasourceDO {
      */
     private String datasourceDetail;
 
+    private String depends;
+
 
     /**
      * @return id
@@ -253,5 +255,11 @@ public class DatasourceDO {
         this.datasourceDetail = datasourceDetail == null ? null : datasourceDetail.trim();
     }
 
+    public void setDepends(String depends) {
+        this.depends = depends;
+    }
 
+    public String getDepends() {
+        return depends;
+    }
 }

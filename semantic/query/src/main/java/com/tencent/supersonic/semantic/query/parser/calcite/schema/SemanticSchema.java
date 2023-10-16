@@ -3,6 +3,7 @@ package com.tencent.supersonic.semantic.query.parser.calcite.schema;
 
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Dimension;
+import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Materialization;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Metric;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.SemanticModel;
 import java.util.HashMap;
@@ -32,6 +33,14 @@ public class SemanticSchema extends AbstractSchema {
 
     public String getRootPath() {
         return rootPath;
+    }
+
+    public void setSemanticModel(SemanticModel semanticModel) {
+        this.semanticModel = semanticModel;
+    }
+
+    public SemanticModel getSemanticModel() {
+        return semanticModel;
     }
 
     @Override
@@ -66,6 +75,13 @@ public class SemanticSchema extends AbstractSchema {
 
     public void setMetric(List<Metric> metric) {
         semanticModel.setMetrics(metric);
+    }
+
+    public void setMaterializationList(List<Materialization> materializationList) {
+        semanticModel.setMaterializationList(materializationList);
+    }
+    public List<Materialization> getMaterializationList() {
+        return semanticModel.getMaterializationList();
     }
 
 

@@ -14,6 +14,7 @@ import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.SemanticNod
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.render.FilterRender;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.render.OutputRender;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.render.SourceRender;
+import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -84,15 +85,17 @@ public class AggPlanner implements Planner {
         // default by dataSource time aggregation
         if (Objects.nonNull(dataSource.getAggTime()) && !dataSource.getAggTime().equalsIgnoreCase(
                 Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE)) {
-            return true;
+            if (!metricCommand.isNativeQuery()) {
+                return true;
+            }
         }
         return isAgg;
     }
 
 
     @Override
-    public void explain(MetricReq metricCommand, AggOption aggOption) throws Exception {
-        this.metricCommand = metricCommand;
+    public void explain(QueryStatement queryStatement, AggOption aggOption) throws Exception {
+        this.metricCommand = queryStatement.getMetricReq();
         if (metricCommand.getMetrics() == null) {
             metricCommand.setMetrics(new ArrayList<>());
         }
@@ -116,5 +119,10 @@ public class AggPlanner implements Planner {
     @Override
     public String getSourceId() {
         return sourceId;
+    }
+
+    @Override
+    public SemanticSchema findBest() {
+        return schema;
     }
 }
