@@ -20,29 +20,22 @@ public class GroupByCorrector extends BaseSemanticCorrector {
     public void correct(SemanticCorrectInfo semanticCorrectInfo) {
 
         super.correct(semanticCorrectInfo);
+
+        addGroupByFields(semanticCorrectInfo);
+
+        addAggregate(semanticCorrectInfo);
+    }
+
+    private void addGroupByFields(SemanticCorrectInfo semanticCorrectInfo) {
         Long modelId = semanticCorrectInfo.getParseInfo().getModel().getModel();
-        // if select not exit metric not add aggregate
-        List<String> selectFields = SqlParserSelectHelper.getSelectFields(semanticCorrectInfo.getSql());
-
-        Set<String> metrics = getMetricElements(modelId).stream()
-                .map(schemaElement -> schemaElement.getName())
-                .collect(Collectors.toSet());
-
-        if (!CollectionUtils.isEmpty(selectFields)
-                && !CollectionUtils.isEmpty(metrics)
-                && selectFields.stream().anyMatch(s -> metrics.contains(s))) {
-            //add aggregate to all metric
-            addAggregateToMetric(semanticCorrectInfo);
-        }
 
         //add dimension group by
         String sql = semanticCorrectInfo.getSql();
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-
         Set<String> dimensions = semanticSchema.getDimensions(modelId).stream()
                 .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());
         dimensions.add(DateUtils.DATE_FIELD);
-        selectFields = SqlParserSelectHelper.getSelectFields(sql);
+        List<String> selectFields = SqlParserSelectHelper.getSelectFields(sql);
 
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(dimensions)) {
             return;
@@ -58,7 +51,13 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                 })
                 .collect(Collectors.toSet());
         semanticCorrectInfo.setSql(SqlParserAddHelper.addGroupBy(sql, groupByFields));
+    }
 
+    private void addAggregate(SemanticCorrectInfo semanticCorrectInfo) {
+        List<String> sqlGroupByFields = SqlParserSelectHelper.getGroupByFields(semanticCorrectInfo.getSql());
+        if (CollectionUtils.isEmpty(sqlGroupByFields)) {
+            return;
+        }
         addAggregateToMetric(semanticCorrectInfo);
     }
 }
