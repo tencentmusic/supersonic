@@ -379,8 +379,6 @@ const SqlDetail: React.FC<IProps> = ({
     setScreenSize(size);
   }, []);
 
-  const exploreEditorSize = localStorage.getItem('exploreEditorSize');
-
   return (
     <>
       <div className={styles.sqlOprBar}>
@@ -445,10 +443,9 @@ const SqlDetail: React.FC<IProps> = ({
         split="horizontal"
         onChange={(size) => {
           setEditorSize(size);
-          localStorage.setItem('exploreEditorSize', size[0]);
         }}
       >
-        <Pane initialSize={exploreEditorSize || '500px'}>
+        <Pane initialSize={'500px'}>
           <div className={styles.sqlMain}>
             <div className={styles.sqlEditorWrapper}>
               <SqlEditor

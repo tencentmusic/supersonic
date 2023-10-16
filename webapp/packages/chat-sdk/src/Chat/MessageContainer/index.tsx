@@ -74,7 +74,6 @@ const MessageContainer: React.FC<Props> = ({
             msgValue,
             identityMsg,
             msgData,
-            score,
             filters,
           } = msgItem;
 

@@ -1,9 +1,10 @@
 import axios from './axiosInstance';
 import { ChatContextType, DrillDownDimensionType, EntityInfoType, HistoryType, MsgDataType, ParseDataType, SearchRecommendItem } from '../common/type';
+import { isMobile } from '../utils/utils';
 
 const DEFAULT_CHAT_ID = 0;
 
-const prefix = '/api';
+const prefix = isMobile ? '/openapi' : '/api';
 
 export function searchRecommend(queryText: string, chatId?: number, modelId?: number, agentId?: number) {
   return axios.post<SearchRecommendItem[]>(`${prefix}/chat/query/search`, {

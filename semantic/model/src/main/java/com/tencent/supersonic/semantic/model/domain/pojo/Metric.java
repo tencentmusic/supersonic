@@ -2,6 +2,7 @@ package com.tencent.supersonic.semantic.model.domain.pojo;
 
 import com.tencent.supersonic.common.pojo.DataFormat;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
+import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +27,8 @@ public class Metric extends SchemaItem {
     private String alias;
 
     private List<String> tags;
+
+    private RelateDimension relateDimension;
 
     public String getTag() {
         if (CollectionUtils.isEmpty(tags)) {

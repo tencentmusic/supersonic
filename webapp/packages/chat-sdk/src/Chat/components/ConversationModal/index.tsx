@@ -2,7 +2,6 @@ import { Form, Input, Modal } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { updateConversationName } from '../../service';
 import type { ConversationDetailType } from '../../type';
-import { CHAT_TITLE } from '../../constants';
 
 const FormItem = Form.Item;
 
@@ -44,7 +43,7 @@ const ConversationModal: React.FC<Props> = ({ visible, editConversation, onClose
 
   return (
     <Modal
-      title={`修改${CHAT_TITLE}问答名称`}
+      title="修改问答名称"
       open={visible}
       onCancel={onClose}
       onOk={onConfirm}
@@ -53,7 +52,7 @@ const ConversationModal: React.FC<Props> = ({ visible, editConversation, onClose
       <Form {...layout} form={form}>
         <FormItem name="conversationName" label="名称" rules={[{ required: true }]}>
           <Input
-            placeholder={`请输入${CHAT_TITLE}问答名称`}
+            placeholder="请输入问答名称"
             ref={conversationNameInputRef}
             onPressEnter={onConfirm}
           />

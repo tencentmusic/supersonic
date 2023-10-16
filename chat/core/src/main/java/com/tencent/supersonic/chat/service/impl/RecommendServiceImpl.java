@@ -2,8 +2,9 @@ package com.tencent.supersonic.chat.service.impl;
 
 
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
+import com.tencent.supersonic.chat.api.pojo.RelateSchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.request.RecommendReq;
 import com.tencent.supersonic.chat.api.pojo.response.RecommendQuestionResp;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
@@ -14,12 +15,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.RecommendService;
 import com.tencent.supersonic.chat.service.SemanticService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -37,20 +41,40 @@ public class RecommendServiceImpl implements RecommendService {
     private SemanticService semanticService;
 
     @Override
-    public RecommendResp recommend(QueryReq queryCtx, Long limit) {
+    public RecommendResp recommend(RecommendReq recommendReq, Long limit) {
         if (Objects.isNull(limit) || limit <= 0) {
             limit = Long.MAX_VALUE;
         }
         log.debug("limit:{}", limit);
-        Long modelId = queryCtx.getModelId();
+        Long modelId = recommendReq.getModelId();
         if (Objects.isNull(modelId)) {
             return new RecommendResp();
         }
-
         ModelSchema modelSchema = semanticService.getModelSchema(modelId);
-
+        List<Long> drillDownDimensions = Lists.newArrayList();
+        Set<SchemaElement> metricElements = modelSchema.getMetrics();
+        if (recommendReq.getMetricId() != null && !CollectionUtils.isEmpty(metricElements)) {
+            Optional<SchemaElement> metric = metricElements.stream().filter(schemaElement ->
+                            recommendReq.getMetricId().equals(schemaElement.getId())
+                                    && !CollectionUtils.isEmpty(schemaElement.getRelateSchemaElements()))
+                    .findFirst();
+            if (metric.isPresent()) {
+                drillDownDimensions = metric.get().getRelateSchemaElements().stream()
+                        .map(RelateSchemaElement::getDimensionId).collect(Collectors.toList());
+            }
+        }
+        final List<Long> drillDownDimensionsFinal = drillDownDimensions;
         List<SchemaElement> dimensions = modelSchema.getDimensions().stream()
-                .filter(dim -> Objects.nonNull(dim) && Objects.nonNull(dim.getUseCnt()))
+                .filter(dim -> {
+                    if (Objects.isNull(dim)) {
+                        return false;
+                    }
+                    if (!CollectionUtils.isEmpty(drillDownDimensionsFinal)) {
+                        return drillDownDimensionsFinal.contains(dim.getId());
+                    } else {
+                        return Objects.nonNull(dim.getUseCnt());
+                    }
+                })
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                 .limit(limit)
                 .map(dimSchemaDesc -> {
@@ -84,14 +108,14 @@ public class RecommendServiceImpl implements RecommendService {
     }
 
     @Override
-    public RecommendResp recommendMetricMode(QueryReq queryCtx, Long limit) {
-        RecommendResp recommendResponse = recommend(queryCtx, limit);
+    public RecommendResp recommendMetricMode(RecommendReq recommendReq, Long limit) {
+        RecommendResp recommendResponse = recommend(recommendReq, limit);
         // filter black Item
         if (Objects.isNull(recommendResponse)) {
             return recommendResponse;
         }
 
-        ChatConfigRichResp chatConfigRich = configService.getConfigRichInfo(Long.valueOf(queryCtx.getModelId()));
+        ChatConfigRichResp chatConfigRich = configService.getConfigRichInfo(recommendReq.getModelId());
         if (Objects.nonNull(chatConfigRich) && Objects.nonNull(chatConfigRich.getChatAggRichConfig())
                 && Objects.nonNull(chatConfigRich.getChatAggRichConfig().getVisibility())) {
             List<Long> blackMetricIdList = chatConfigRich.getChatAggRichConfig().getVisibility().getBlackMetricIdList();

@@ -8,4 +8,11 @@ module.exports = function(app) {
       changeOrigin: true,
     })
   );
+  app.use(
+    '/openapi',
+    createProxyMiddleware({
+      target: 'http://localhost:9080',
+      changeOrigin: true,
+    })
+  );
 };

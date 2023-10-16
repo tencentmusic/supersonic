@@ -365,3 +365,48 @@ export function searchDictLatestTaskList(data: any): Promise<any> {
     data,
   });
 }
+
+export function queryStruct({
+  modelId,
+  bizName,
+  dateField = 'sys_imp_date',
+  startDate,
+  endDate,
+}: {
+  modelId: number;
+  bizName: string;
+  dateField: string;
+  startDate: string;
+  endDate: string;
+}): Promise<any> {
+  return request(`${process.env.API_BASE_URL}query/struct`, {
+    method: 'POST',
+    data: {
+      modelId,
+      groups: [dateField],
+      aggregators: [
+        {
+          column: bizName,
+          // func: 'SUM',
+          nameCh: 'null',
+          args: null,
+        },
+      ],
+      orders: [],
+      dimensionFilters: [],
+      metricFilters: [],
+      params: [],
+      dateInfo: {
+        dateMode: 'BETWEEN',
+        startDate,
+        endDate,
+        dateList: [],
+        unit: 7,
+        period: 'DAY',
+        text: 'null',
+      },
+      limit: 365,
+      nativeQuery: false,
+    },
+  });
+}

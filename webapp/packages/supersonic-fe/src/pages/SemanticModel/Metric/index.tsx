@@ -1,6 +1,6 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Space, Popconfirm, Tag } from 'antd';
+import { message, Space, Popconfirm, Tag, Spin } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { connect, history } from 'umi';
@@ -9,9 +9,12 @@ import { SENSITIVE_LEVEL_ENUM } from '../constant';
 import { queryMetric, deleteMetric } from '../service';
 import MetricFilter from './components/MetricFilter';
 import MetricInfoCreateForm from '../components/MetricInfoCreateForm';
+import MetricCardList from './components/MetricCardList';
+import NodeInfoDrawer from '../SemanticGraph/components/NodeInfoDrawer';
+import { SemanticNodeType } from '../enum';
 import moment from 'moment';
 import styles from './style.less';
-import { IDataSource, ISemantic } from '../data';
+import { ISemantic } from '../data';
 
 type Props = {
   dispatch: Dispatch;
@@ -30,19 +33,23 @@ type QueryMetricListParams = {
 const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const { selectDomainId, selectModelId: modelId } = domainManger;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
-  const [pagination, setPagination] = useState({
+  const defaultPagination = {
     current: 1,
     pageSize: 20,
     total: 0,
-  });
+  };
+  const [pagination, setPagination] = useState(defaultPagination);
   const [loading, setLoading] = useState<boolean>(false);
-  const [dataSource, setDataSource] = useState<IDataSource.IDataSourceItem[]>([]);
+  const [dataSource, setDataSource] = useState<ISemantic.IMetricItem[]>([]);
   const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
-  const [filterParams, setFilterParams] = useState<Record<string, any>>({});
+  const [filterParams, setFilterParams] = useState<Record<string, any>>({
+    showType: localStorage.getItem('metricMarketShowType') === '1' ? true : false,
+  });
+  const [infoDrawerVisible, setInfoDrawerVisible] = useState<boolean>(false);
   const actionRef = useRef<ActionType>();
 
   useEffect(() => {
-    queryMetricList();
+    queryMetricList(filterParams);
   }, []);
 
   const queryMetricList = async (params: QueryMetricListParams = {}, disabledLoading = false) => {
@@ -52,10 +59,9 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     const { code, data, msg } = await queryMetric({
       ...pagination,
       ...params,
+      pageSize: params.showType ? 100 : defaultPagination.pageSize,
     });
-    if (!disabledLoading) {
-      setLoading(false);
-    }
+    setLoading(false);
     const { list, pageSize, current, total } = data || {};
     let resData: any = {};
     if (code === 200) {
@@ -81,6 +87,21 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     return resData;
   };
 
+  const deleteMetricQuery = async (id: number) => {
+    const { code, msg } = await deleteMetric(id);
+    if (code === 200) {
+      setMetricItem(undefined);
+      queryMetricList(filterParams);
+    } else {
+      message.error(msg);
+    }
+  };
+
+  const handleMetricEdit = (metricItem: ISemantic.IMetricItem) => {
+    setMetricItem(metricItem);
+    setCreateModalVisible(true);
+  };
+
   const columns: ProColumns[] = [
     {
       dataIndex: 'id',
@@ -90,18 +111,16 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'name',
       title: '指标名称',
       render: (_, record: any) => {
-        if (record.hasAdminRes) {
-          return (
-            <a
-              onClick={() => {
-                history.replace(`/model/${record.domainId}/${record.modelId}/metric`);
-              }}
-            >
-              {record.name}
-            </a>
-          );
-        }
-        return <> {record.name}</>;
+        return (
+          <a
+            onClick={() => {
+              setMetricItem(record);
+              setInfoDrawerVisible(true);
+            }}
+          >
+            {record.name}
+          </a>
+        );
       },
     },
     // {
@@ -116,6 +135,20 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'modelName',
       title: '所属模型',
+      render: (_, record: any) => {
+        if (record.hasAdminRes) {
+          return (
+            <a
+              onClick={() => {
+                history.replace(`/model/${record.domainId}/${record.modelId}/metric`);
+              }}
+            >
+              {record.modelName}
+            </a>
+          );
+        }
+        return <> {record.modelName}</>;
+      },
     },
     {
       dataIndex: 'sensitiveLevel',
@@ -179,27 +212,13 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               <a
                 key="metricEditBtn"
                 onClick={() => {
-                  setMetricItem(record);
-                  setCreateModalVisible(true);
+                  handleMetricEdit(record);
                 }}
               >
                 编辑
               </a>
 
-              <Popconfirm
-                title="确认删除？"
-                okText="是"
-                cancelText="否"
-                onConfirm={async () => {
-                  const { code, msg } = await deleteMetric(record.id);
-                  if (code === 200) {
-                    setMetricItem(undefined);
-                    queryMetricList();
-                  } else {
-                    message.error(msg);
-                  }
-                }}
-              >
+              <Popconfirm title="确认删除？" okText="是" cancelText="否" onConfirm={() => {}}>
                 <a
                   key="metricDeleteBtn"
                   onClick={() => {
@@ -238,36 +257,64 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     <>
       <div className={styles.metricFilterWrapper}>
         <MetricFilter
+          initFilterValues={filterParams}
           onFiltersChange={(_, values) => {
+            if (_.showType !== undefined) {
+              setLoading(true);
+              setDataSource([]);
+            }
             handleFilterChange(values);
           }}
         />
       </div>
-      <ProTable
-        className={`${styles.metricTable}`}
-        actionRef={actionRef}
-        rowKey="id"
-        search={false}
-        dataSource={dataSource}
-        columns={columns}
-        pagination={pagination}
-        tableAlertRender={() => {
-          return false;
-        }}
-        loading={loading}
-        onChange={(data: any) => {
-          const { current, pageSize, total } = data;
-          const pagin = {
-            current,
-            pageSize,
-            total,
-          };
-          setPagination(pagin);
-          queryMetricList({ ...pagin, ...filterParams });
-        }}
-        size="small"
-        options={{ reload: false, density: false, fullScreen: false }}
-      />
+      <>
+        {filterParams.showType ? (
+          <Spin spinning={loading} style={{ minHeight: 500 }}>
+            <MetricCardList
+              metricList={dataSource}
+              disabledEdit={true}
+              onMetricChange={(metricItem) => {
+                setInfoDrawerVisible(true);
+                setMetricItem(metricItem);
+              }}
+              onDeleteBtnClick={(metricItem) => {
+                deleteMetricQuery(metricItem.id);
+              }}
+              onEditBtnClick={(metricItem) => {
+                setMetricItem(metricItem);
+                setCreateModalVisible(true);
+              }}
+            />
+          </Spin>
+        ) : (
+          <ProTable
+            className={`${styles.metricTable}`}
+            actionRef={actionRef}
+            rowKey="id"
+            search={false}
+            dataSource={dataSource}
+            columns={columns}
+            pagination={pagination}
+            tableAlertRender={() => {
+              return false;
+            }}
+            loading={loading}
+            onChange={(data: any) => {
+              const { current, pageSize, total } = data;
+              const pagin = {
+                current,
+                pageSize,
+                total,
+              };
+              setPagination(pagin);
+              queryMetricList({ ...pagin, ...filterParams });
+            }}
+            size="small"
+            options={{ reload: false, density: false, fullScreen: false }}
+          />
+        )}
+      </>
+
       {createModalVisible && (
         <MetricInfoCreateForm
           domainId={Number(selectDomainId)}
@@ -276,7 +323,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           metricItem={metricItem}
           onSubmit={() => {
             setCreateModalVisible(false);
-            queryMetricList();
+            queryMetricList(filterParams);
             dispatch({
               type: 'domainManger/queryMetricList',
               payload: {
@@ -286,6 +333,26 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           }}
           onCancel={() => {
             setCreateModalVisible(false);
+          }}
+        />
+      )}
+      {infoDrawerVisible && (
+        <NodeInfoDrawer
+          nodeData={{ ...metricItem, nodeType: SemanticNodeType.METRIC }}
+          placement="right"
+          onClose={() => {
+            setInfoDrawerVisible(false);
+          }}
+          width="100%"
+          open={infoDrawerVisible}
+          mask={true}
+          getContainer={false}
+          onEditBtnClick={(nodeData: any) => {
+            handleMetricEdit(nodeData);
+          }}
+          maskClosable={true}
+          onNodeChange={({ eventName }: { eventName: string }) => {
+            setInfoDrawerVisible(false);
           }}
         />
       )}

@@ -13,6 +13,7 @@ import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.ChatGptHelper;
+import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
@@ -29,6 +30,8 @@ import com.tencent.supersonic.semantic.model.domain.repository.MetricRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.MetricConverter;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.pojo.Metric;
+
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -186,6 +189,14 @@ public class MetricServiceImpl implements MetricService {
         return metricResp;
     }
 
+    private MetricResp getMetric(Long id) {
+        MetricDO metricDO = metricRepository.getMetricById(id);
+        if (metricDO == null) {
+            return null;
+        }
+        return MetricConverter.convert2MetricResp(metricDO, new HashMap<>());
+    }
+
     @Override
     public void updateExprMetric(MetricReq metricReq, User user) {
         preCheckMetric(metricReq);
@@ -286,6 +297,19 @@ public class MetricServiceImpl implements MetricService {
                 metricResp.getTags().stream()).collect(Collectors.toSet());
     }
 
+    @Override
+    public List<DrillDownDimension> getDrillDownDimension(Long metricId) {
+        MetricResp metricResp = getMetric(metricId);
+        if (metricResp == null) {
+            return Lists.newArrayList();
+        }
+        if (metricResp.getRelateDimension() != null
+                && !CollectionUtils.isEmpty(metricResp.getRelateDimension().getDrillDownDimensions())) {
+            return metricResp.getRelateDimension().getDrillDownDimensions();
+        }
+        ModelResp modelResp = modelService.getModel(metricResp.getModelId());
+        return modelResp.getDrillDownDimensions();
+    }
 
     private void saveMetricBatch(List<Metric> metrics, User user) {
         if (CollectionUtils.isEmpty(metrics)) {

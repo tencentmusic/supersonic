@@ -23,6 +23,7 @@ import { formLayout } from '@/components/FormHelper/utils';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import styles from './style.less';
 import { getMeasureListByModelId } from '../service';
+import DimensionAndMetricRelationModal from './DimensionAndMetricRelationModal';
 import TableTitleTooltips from '../components/TableTitleTooltips';
 import { creatExprMetric, updateExprMetric, mockMetricAlias, getMetricTags } from '../service';
 import { ISemantic } from '../data';
@@ -76,6 +77,12 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   const [llmLoading, setLlmLoading] = useState<boolean>(false);
 
   const [tagOptions, setTagOptions] = useState<{ label: string; value: string }[]>([]);
+
+  const [metricRelationModalOpenState, setMetricRelationModalOpenState] = useState<boolean>(false);
+
+  const [drillDownDimensions, setDrillDownDimensions] = useState<
+    ISemantic.IDrillDownDimensionItem[]
+  >(metricItem?.relateDimension?.drillDownDimensions || []);
 
   const forward = () => setCurrentStep(currentStep + 1);
   const backward = () => setCurrentStep(currentStep - 1);
@@ -169,6 +176,10 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   const saveMetric = async (fieldsValue: any) => {
     const queryParams = {
       modelId: isEdit ? metricItem.modelId : modelId,
+      relateDimension: {
+        ...(metricItem?.relateDimension || {}),
+        drillDownDimensions,
+      },
       ...fieldsValue,
     };
     const { typeParams, alias, dataFormatType } = queryParams;
@@ -349,6 +360,23 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
         <FormItem
           label={
             <FormItemTitle
+              title={'下钻维度配置'}
+              subTitle={'配置下钻维度后，将可以在指标卡中进行下钻'}
+            />
+          }
+        >
+          <Button
+            type="primary"
+            onClick={() => {
+              setMetricRelationModalOpenState(true);
+            }}
+          >
+            设 置
+          </Button>
+        </FormItem>
+        <FormItem
+          label={
+            <FormItemTitle
               title={'数据格式化'}
               // subTitle={'开启后，指标数据展示时会根据配置进行格式化，如0.02 -> 2%'}
             />
@@ -362,22 +390,6 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
           </Radio.Group>
         </FormItem>
 
-        {/* <FormItem
-          label={
-            <FormItemTitle
-              title={'是否展示为百分比'}
-              subTitle={'开启后，指标数据展示时会根据配置进行格式化，如0.02 -> 2%'}
-            />
-          }
-          name="isPercent"
-          valuePropName="checked"
-        >
-          <Switch
-            onChange={(checked) => {
-              form.setFieldValue(['dataFormat', 'needMultiply100'], checked);
-            }}
-          />
-        </FormItem> */}
         {(isPercentState || isDecimalState) && (
           <FormItem
             label={
@@ -486,6 +498,17 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
           >
             {renderContent()}
           </Form>
+          <DimensionAndMetricRelationModal
+            relationsInitialValue={drillDownDimensions}
+            open={metricRelationModalOpenState}
+            onCancel={() => {
+              setMetricRelationModalOpenState(false);
+            }}
+            onSubmit={(relations) => {
+              setDrillDownDimensions(relations);
+              setMetricRelationModalOpenState(false);
+            }}
+          />
         </>
       ) : (
         <Result

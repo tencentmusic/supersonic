@@ -68,7 +68,7 @@ const ChatItem: React.FC<Props> = ({
   const [dateInfo, setDateInfo] = useState<DateInfoType>({} as DateInfoType);
   const [entityInfo, setEntityInfo] = useState<EntityInfoType>({} as EntityInfoType);
 
-  const [chartIndex, setChartIndex] = useState(0);
+  // const [chartIndex, setChartIndex] = useState(0);
 
   const prefixCls = `${PREFIX_CLS}-item`;
 
@@ -276,7 +276,7 @@ const ChatItem: React.FC<Props> = ({
                 executeLoading={executeLoading}
                 entitySwitchLoading={entitySwitchLoading}
                 executeTip={executeTip}
-                chartIndex={chartIndex}
+                chartIndex={0}
                 data={data}
                 triggerResize={triggerResize}
                 executeItemNode={executeItemNode}

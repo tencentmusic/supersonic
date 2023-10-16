@@ -35,14 +35,7 @@ const CopilotDemo = () => {
           </Button>
         ))}
       </Space>
-      <Copilot
-        // token={localStorage.getItem('SUPERSONIC_TOKEN') || ''}
-        // agentIds={[8]}
-        isDeveloper
-        // integrateSystem="c2"
-        ref={copilotRef}
-        // noInput
-      />
+      <Copilot isDeveloper ref={copilotRef} />
     </div>
   );
 };
