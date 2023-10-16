@@ -60,6 +60,9 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
         setMetricColumnConfig(targetConfig);
       }
     } else {
+      if (code === 401) {
+        setAuthMessage(msg);
+      }
       message.error(msg);
       setMetricTrendData([]);
       setMetricColumnConfig(undefined);
@@ -105,6 +108,11 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
           disabledAdvanceSetting={true}
         />
       </div>
+      {authMessage && (
+        <div style={{ color: '#d46b08', marginBottom: 15 }}>
+          指标存在如下权限问题: {authMessage}
+        </div>
+      )}
       <div style={{ color: '#d46b08', marginBottom: 15 }}>指标存在如下权限问题: {authMessage}</div>
       <TrendChart
         data={metricTrendData}
