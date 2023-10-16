@@ -1,0 +1,84 @@
+.popverOverlayContent {
+  padding-top: 0;
+  width: 440px;
+  :global {
+    .ant-popover-content {
+      .ant-popover-arrow {
+        display: none;
+      }
+    }
+  }
+}
+.dateProCard {
+  :global {
+    .ant-pro-card-header {
+      padding: 10px;
+    }
+    .ant-pro-card-body{
+      padding:10px;
+    }
+  } 
+}
+.dateTimeShowInput {
+  :global {
+    .ant-input{
+      font-size: 14px;
+    }
+  }
+}
+
+.advancedSettingItemText {
+  width: 40px;
+  display: inline-block;
+}
+
+.dateAdvancedSettingContent {
+  :global {
+    .ant-input{
+      font-size: 14px;
+    }
+  }
+}
+
+.dateShortCutSettingContent {
+  :global {
+    .ant-tag-checkable:active, .ant-tag-checkable-checked{
+      background-color: #e6effc;
+      color: #0e73ff;
+    }
+  }
+  .ant-tag-checkable {
+    position: relative;
+    width: 120px;
+    height: 28px;
+    margin-right: 4px;
+    border: none;
+    // margin-right: 0;
+  }
+    
+  .tag-value-box {
+    position: absolute;
+    top: 0;
+    left: 0;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding: 0 3px;
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 28px;
+    white-space: nowrap;
+    text-align: center;
+    text-overflow: ellipsis;
+    background-color: #f7f9fc;
+    // background-color: #296df3;
+    border-radius: 3px;
+    cursor: pointer;
+    &:hover {
+      background-color: #e6effc;
+      color: #0e73ff;
+    }
+  }
+}
+

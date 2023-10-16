@@ -276,6 +276,17 @@ export function formatByDecimalPlaces(value: number | string, decimalPlaces: num
   return str;
 }
 
+export function formatByPercentageData(value: number | string, decimalPlaces: number) {
+  const formattedValue: any = Number(value) * 100;
+  if (!isFinite(formattedValue)) {
+    return value;
+  }
+  if (formattedValue < 0) {
+    return `-${formatByDecimalPlaces(Math.abs(formattedValue), decimalPlaces)}%`;
+  }
+  return `${formatByDecimalPlaces(formattedValue, decimalPlaces)}%`;
+}
+
 export function formatByThousandSeperator(value: number | string) {
   if (isNaN(+value)) {
     return value;
@@ -400,7 +411,6 @@ export function traverseRoutes(routes, env: string, result: any[] = []) {
     if (route.envRedirect) {
       route.redirect = route.envRedirect[env];
     }
-
     if (route.routes) {
       const filteredRoutes = traverseRoutes(route.routes, env);
 
