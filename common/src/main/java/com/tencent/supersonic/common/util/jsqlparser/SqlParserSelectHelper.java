@@ -133,6 +133,19 @@ public class SqlParserSelectHelper {
                         }
                     });
                 }
+                Expression having = plainSelect.getHaving();
+                if (Objects.nonNull(having)) {
+                    having.accept(new ExpressionVisitorAdapter() {
+                        @Override
+                        public void visit(SubSelect subSelect) {
+                            SelectBody subSelectBody = subSelect.getSelectBody();
+                            if (subSelectBody instanceof PlainSelect) {
+                                plainSelects.add((PlainSelect) subSelectBody);
+                            }
+                        }
+                    });
+                }
+
             }
         });
         return plainSelects;

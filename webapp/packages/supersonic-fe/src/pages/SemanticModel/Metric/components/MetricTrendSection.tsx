@@ -113,6 +113,7 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
           指标存在如下权限问题: {authMessage}
         </div>
       )}
+      <div style={{ color: '#d46b08', marginBottom: 15 }}>指标存在如下权限问题: {authMessage}</div>
       <TrendChart
         data={metricTrendData}
         isPer={

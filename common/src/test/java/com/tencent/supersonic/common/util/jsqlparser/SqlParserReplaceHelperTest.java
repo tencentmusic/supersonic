@@ -285,6 +285,16 @@ class SqlParserReplaceHelperTest {
         Assert.assertEquals(
                 "SELECT sum(pv) FROM 超音数 WHERE sys_imp_date >= '2023-08-06' "
                         + "AND sys_imp_date <= '2023-08-06' AND department = 'hr'", replaceSql);
+
+        replaceSql = "SELECT 歌曲名称, sum(评分) FROM CSpider WHERE(1 < 2) AND 数据日期 = '2023-10-15' "
+                + "GROUP BY 歌曲名称 HAVING sum(评分) < ( SELECT min(评分) FROM CSpider WHERE 语种 = '英文')";
+        replaceSql = SqlParserReplaceHelper.replaceFields(replaceSql, fieldToBizName);
+        replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT song_name, sum(user_id) FROM CSpider WHERE (1 < 2) AND "
+                        + "sys_imp_date = '2023-10-15' GROUP BY song_name HAVING "
+                        + "sum(user_id) < (SELECT min(user_id) FROM CSpider WHERE user_id = '英文')", replaceSql);
     }
 
 
@@ -306,6 +316,17 @@ class SqlParserReplaceHelperTest {
         Assert.assertEquals(
                 "SELECT * FROM cspider WHERE (评分 < (SELECT min(评分) FROM "
                         + "cspider WHERE 语种 = '英文')) AND 数据日期 = '2023-10-11'", replaceSql);
+
+        sql = "SELECT 歌曲名称, sum(评分) FROM CSpider音乐 WHERE(1 < 2) AND 数据日期 = '2023-10-15' "
+                + "GROUP BY 歌曲名称 HAVING sum(评分) < ( SELECT min(评分) FROM CSpider音乐 WHERE 语种 = '英文')";
+
+        replaceSql = SqlParserReplaceHelper.replaceTable(sql, "cspider");
+
+        Assert.assertEquals(
+                "SELECT 歌曲名称, sum(评分) FROM cspider WHERE (1 < 2) AND 数据日期 = "
+                        + "'2023-10-15' GROUP BY 歌曲名称 HAVING sum(评分) < (SELECT min(评分) "
+                        + "FROM cspider WHERE 语种 = '英文')",
+                replaceSql);
     }
 
     @Test
