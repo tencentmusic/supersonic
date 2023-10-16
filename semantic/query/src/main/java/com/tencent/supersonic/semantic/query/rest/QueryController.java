@@ -68,7 +68,8 @@ public class QueryController {
     public SqlParserResp parseByStruct(@RequestBody ParseSqlReq parseSqlReq,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
-        QueryStatement queryStatement = semanticQueryEngine.physicalSql(parseSqlReq);
+        QueryStructReq queryStructCmd = new QueryStructReq();
+        QueryStatement queryStatement = semanticQueryEngine.physicalSql(queryStructCmd, parseSqlReq);
         SqlParserResp sqlParserResp = new SqlParserResp();
         BeanUtils.copyProperties(queryStatement, sqlParserResp);
         return sqlParserResp;

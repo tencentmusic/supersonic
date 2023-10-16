@@ -27,9 +27,10 @@ public class CalciteSqlParser implements SqlParser {
             queryStatement.setErrMsg("semanticSchema not found");
             return queryStatement;
         }
+        queryStatement.setMetricReq(metricReq);
         SemanticSchema semanticSchema = getSemanticSchema(semanticModel);
         AggPlanner aggBuilder = new AggPlanner(semanticSchema);
-        aggBuilder.explain(metricReq, isAgg);
+        aggBuilder.explain(queryStatement, isAgg);
         queryStatement.setSql(aggBuilder.getSql());
         queryStatement.setSourceId(aggBuilder.getSourceId());
         return queryStatement;

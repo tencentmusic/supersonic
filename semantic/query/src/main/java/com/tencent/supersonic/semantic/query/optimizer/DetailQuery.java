@@ -19,16 +19,16 @@ public class DetailQuery implements QueryOptimizer {
         if (Strings.isNullOrEmpty(sqlRaw)) {
             throw new RuntimeException("sql is empty or null");
         }
-        log.info("before handleNoMetric, sql:{}", sqlRaw);
+        log.debug("before handleNoMetric, sql:{}", sqlRaw);
         if (isDetailQuery(queryStructCmd)) {
-            if (queryStructCmd.getMetrics().size() == 0) {
+            if (queryStructCmd.getMetrics().size() == 0 && !CollectionUtils.isEmpty(queryStructCmd.getGroups())) {
                 String sqlForm = "select %s from ( %s ) src_no_metric";
                 String sql = String.format(sqlForm, queryStructCmd.getGroups().stream().collect(
                         Collectors.joining(",")), sqlRaw);
                 queryStatement.setSql(sql);
             }
         }
-        log.info("after handleNoMetric, sql:{}", queryStatement.getSql());
+        log.debug("after handleNoMetric, sql:{}", queryStatement.getSql());
     }
 
     public boolean isDetailQuery(QueryStructReq queryStructCmd) {

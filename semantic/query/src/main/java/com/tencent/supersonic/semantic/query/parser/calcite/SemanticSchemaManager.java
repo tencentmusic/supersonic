@@ -107,15 +107,9 @@ public class SemanticSchemaManager {
 
 
     public static DataSource getDatasource(final DatasourceYamlTpl d) {
-        DataSource datasource = new DataSource();
-        datasource.setSqlQuery(d.getSqlQuery());
-        datasource.setName(d.getName());
-        datasource.setSourceId(d.getSourceId());
-        datasource.setTableQuery(d.getTableQuery());
-
-        datasource.setIdentifiers(getIdentify(d.getIdentifiers()));
-        datasource.setDimensions(getDimensions(d.getDimensions()));
-        datasource.setMeasures(getMeasures(d.getMeasures()));
+        DataSource datasource = DataSource.builder().sourceId(d.getSourceId()).sqlQuery(d.getSqlQuery())
+                .name(d.getName()).tableQuery(d.getTableQuery()).identifiers(getIdentify(d.getIdentifiers()))
+                .measures(getMeasures(d.getMeasures())).dimensions(getDimensions(d.getDimensions())).build();
         datasource.setAggTime(getDataSourceAggTime(datasource.getDimensions()));
         return datasource;
     }
@@ -167,7 +161,7 @@ public class SemanticSchemaManager {
     private static List<Dimension> getDimension(List<DimensionYamlTpl> dimensionYamlTpls) {
         List<Dimension> dimensions = new ArrayList<>();
         for (DimensionYamlTpl dimensionYamlTpl : dimensionYamlTpls) {
-            Dimension dimension = new Dimension();
+            Dimension dimension = Dimension.builder().build();
             dimension.setType(dimensionYamlTpl.getType());
             dimension.setExpr(dimensionYamlTpl.getExpr());
             dimension.setName(dimensionYamlTpl.getName());
