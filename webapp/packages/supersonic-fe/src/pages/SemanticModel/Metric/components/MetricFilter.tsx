@@ -1,4 +1,4 @@
-import { Form, Input, Space, Row, Col } from 'antd';
+import { Form, Input, Space, Row, Col, Switch } from 'antd';
 import StandardFormRow from '@/components/StandardFormRow';
 import TagSelect from '@/components/TagSelect';
 import React, { useEffect } from 'react';
@@ -10,20 +10,21 @@ import styles from '../style.less';
 const FormItem = Form.Item;
 
 type Props = {
-  filterValues?: any;
+  initFilterValues?: any;
   onFiltersChange: (_: any, values: any) => void;
 };
 
-const MetricFilter: React.FC<Props> = ({ filterValues = {}, onFiltersChange }) => {
+const MetricFilter: React.FC<Props> = ({ initFilterValues = {}, onFiltersChange }) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
     form.setFieldsValue({
-      ...filterValues,
+      ...initFilterValues,
     });
-  }, [form, filterValues]);
+  }, [form]);
 
   const handleValuesChange = (value: any, values: any) => {
+    localStorage.setItem('metricMarketShowType', !!values.showType ? '1' : '0');
     onFiltersChange(value, values);
   };
 
@@ -32,17 +33,6 @@ const MetricFilter: React.FC<Props> = ({ filterValues = {}, onFiltersChange }) =
   };
 
   const filterList = [
-    // {
-    //   title: '指标类型',
-    //   key: 'type',
-    //   options: [
-    //     {
-    //       value: 'ATOMIC',
-    //       label: '原子指标',
-    //     },
-    //     { value: 'DERIVED', label: '衍生指标' },
-    //   ],
-    // },
     {
       title: '敏感度',
       key: 'sensitiveLevel',
@@ -94,6 +84,11 @@ const MetricFilter: React.FC<Props> = ({ filterValues = {}, onFiltersChange }) =
         </div>
       </StandardFormRow>
       <Space size={80}>
+        <StandardFormRow key="showType" title="切换为卡片" block>
+          <FormItem name="showType" valuePropName="checked">
+            <Switch size="small" />
+          </FormItem>
+        </StandardFormRow>
         <StandardFormRow key="domainIds" title="所属主题域" block>
           <FormItem name="domainIds">
             <DomainTreeSelect />
@@ -103,17 +98,15 @@ const MetricFilter: React.FC<Props> = ({ filterValues = {}, onFiltersChange }) =
           const { title, key, options } = item;
           return (
             <StandardFormRow key={key} title={title} block>
-              <div style={{ marginLeft: -30 }}>
-                <FormItem name={key}>
-                  <TagSelect reverseCheckAll single>
-                    {options.map((item: any) => (
-                      <TagSelect.Option key={item.value} value={item.value}>
-                        {item.label}
-                      </TagSelect.Option>
-                    ))}
-                  </TagSelect>
-                </FormItem>
-              </div>
+              <FormItem name={key}>
+                <TagSelect reverseCheckAll single>
+                  {options.map((item: any) => (
+                    <TagSelect.Option key={item.value} value={item.value}>
+                      {item.label}
+                    </TagSelect.Option>
+                  ))}
+                </TagSelect>
+              </FormItem>
             </StandardFormRow>
           );
         })}
