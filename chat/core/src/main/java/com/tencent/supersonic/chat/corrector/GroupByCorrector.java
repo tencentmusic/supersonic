@@ -58,5 +58,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                 })
                 .collect(Collectors.toSet());
         semanticCorrectInfo.setSql(SqlParserAddHelper.addGroupBy(sql, groupByFields));
+
+        addAggregateToMetric(semanticCorrectInfo);
     }
 }
