@@ -33,7 +33,7 @@ type Props = {
   integrateSystem?: string;
   executeItemNode?: React.ReactNode;
   renderCustomExecuteNode?: boolean;
-  onMsgDataLoaded?: (data: MsgDataType, valid: boolean) => void;
+  onMsgDataLoaded?: (data: MsgDataType, valid: boolean, isRefresh?: boolean) => void;
   onUpdateMessageScroll?: () => void;
   onSendMsg?: (msg: string) => void;
 };
@@ -208,9 +208,7 @@ const ChatItem: React.FC<Props> = ({
       const resChatContext = res.data?.chatContext;
       const contextValue = { ...(resChatContext || chatContextValue), queryId };
       const dataValue = { ...res.data, chatContext: contextValue };
-      if (onMsgDataLoaded) {
-        onMsgDataLoaded(dataValue, true);
-      }
+      onMsgDataLoaded?.(dataValue, true, true);
       setData(dataValue);
       setParseInfo(contextValue);
     }
@@ -230,7 +228,6 @@ const ChatItem: React.FC<Props> = ({
     } else {
       getEntityInfo(parseInfoValue);
     }
-    onUpdateMessageScroll?.();
   };
 
   const onSelectQuestion = (question: SimilarQuestionType) => {

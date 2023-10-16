@@ -22,7 +22,8 @@ type Props = {
     data: MsgDataType,
     questionId: string | number,
     question: string,
-    valid: boolean
+    valid: boolean,
+    isRefresh?: boolean
   ) => void;
   onSendMsg: (value: string) => void;
 };
@@ -98,8 +99,8 @@ const MessageContainer: React.FC<Props> = ({
                     triggerResize={triggerResize}
                     isDeveloper={isDeveloper}
                     integrateSystem={integrateSystem}
-                    onMsgDataLoaded={(data: MsgDataType, valid: boolean) => {
-                      onMsgDataLoaded(data, msgId, msgValue || msg || '', valid);
+                    onMsgDataLoaded={(data: MsgDataType, valid: boolean, isRefresh) => {
+                      onMsgDataLoaded(data, msgId, msgValue || msg || '', valid, isRefresh);
                     }}
                     onUpdateMessageScroll={updateMessageContainerScroll}
                     onSendMsg={onSendMsg}

@@ -1,5 +1,5 @@
 import { CLS_PREFIX } from '../../../common/constants';
-import { FieldType, MsgDataType } from '../../../common/type';
+import { DrillDownDimensionType, FieldType, MsgDataType } from '../../../common/type';
 import { isMobile } from '../../../utils/utils';
 import MetricTrendChart from './MetricTrendChart';
 import { Spin } from 'antd';
@@ -13,6 +13,7 @@ type Props = {
   triggerResize?: boolean;
   loading: boolean;
   activeMetricField?: FieldType;
+  drillDownDimension?: DrillDownDimensionType;
   currentDateOption?: number;
   onApplyAuth?: (model: string) => void;
   onSelectDateOption: (value: number) => void;
@@ -24,6 +25,7 @@ const MetricTrend: React.FC<Props> = ({
   triggerResize,
   loading,
   activeMetricField,
+  drillDownDimension,
   currentDateOption,
   onApplyAuth,
   onSelectDateOption,
@@ -58,9 +60,11 @@ const MetricTrend: React.FC<Props> = ({
         </div>
         <Spin spinning={loading}>
           <div className={`${prefixCls}-content`}>
-            {!isMobile && aggregateInfo?.metricInfos?.length > 0 && (
-              <MetricInfo aggregateInfo={aggregateInfo} currentMetricField={currentMetricField} />
-            )}
+            {!isMobile &&
+              aggregateInfo?.metricInfos?.length > 0 &&
+              drillDownDimension === undefined && (
+                <MetricInfo aggregateInfo={aggregateInfo} currentMetricField={currentMetricField} />
+              )}
             <DateOptions
               chatContext={chatContext}
               currentDateOption={currentDateOption}

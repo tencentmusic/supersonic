@@ -1,0 +1,25 @@
+.showCase {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 20px;
+
+  .showCaseItem {
+    // flex: 1;
+    display: flex;
+    flex-direction: column;
+    row-gap: 12px;
+    padding: 12px;
+    height: 800px;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+    background: linear-gradient(180deg, rgba(23, 74, 228, 0) 29.44%, rgba(23, 74, 228, 0.06) 100%),
+    linear-gradient(90deg, #f3f3f7 0%, #f3f3f7 20%, #ebf0f9 60%, #f3f3f7 80%, #f3f3f7 100%);
+
+    .showCaseChatItem {
+      display: flex;
+      flex-direction: column;
+      row-gap: 12px;
+    }
+  }
+}

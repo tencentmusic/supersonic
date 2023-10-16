@@ -34,6 +34,9 @@ const FilterItem: React.FC<Props> = ({
   const prefixCls = `${PREFIX_CLS}-filter-item`;
 
   const initData = async () => {
+    if (window.location.href.includes('showcase')) {
+      return;
+    }
     const { data } = await queryDimensionValues(
       modelId,
       filter.bizName,

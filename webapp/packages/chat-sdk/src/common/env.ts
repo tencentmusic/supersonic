@@ -1,5 +1,5 @@
-export const userAvatarUrl = '';
+export const userAvatarUrl = `http://tpp.tmeoa.com/photo/48/${localStorage.getItem('user')}.png`;
 
-export const webPageHost = '';
+export const webPageHost = 'http://s2.tmeoa.com';
 
-export const copilotTitle = 'Copilot';
+export const copilotTitle = '内容库问答';

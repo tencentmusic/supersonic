@@ -178,12 +178,14 @@ const ParseTip: React.FC<Props> = ({
                   <div className={itemValueClass}>{dimension.value}</div>
                 </div>
               ))}
-            {queryMode === 'METRIC_ORDERBY' && aggType && aggType !== 'NONE' && (
-              <div className={`${prefixCls}-tip-item`}>
-                <div className={`${prefixCls}-tip-item-name`}>聚合方式：</div>
-                <div className={itemValueClass}>{AGG_TYPE_MAP[aggType]}</div>
-              </div>
-            )}
+            {(queryMode === 'METRIC_ORDERBY' || queryMode === 'METRIC_MODEL') &&
+              aggType &&
+              aggType !== 'NONE' && (
+                <div className={`${prefixCls}-tip-item`}>
+                  <div className={`${prefixCls}-tip-item-name`}>聚合方式：</div>
+                  <div className={itemValueClass}>{AGG_TYPE_MAP[aggType]}</div>
+                </div>
+              )}
           </>
         )}
       </div>

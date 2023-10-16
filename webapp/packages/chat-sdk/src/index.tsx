@@ -5,7 +5,7 @@ import './styles/index.less';
 // import ChatDemo from './demo/ChatDemo';
 // import CopilotDemo from './demo/CopilotDemo';
 // const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-// root.render(<Chat />);
+// root.render(<ChatDemo />);
 
 export { default as Chat } from './Chat';
 
@@ -14,6 +14,8 @@ export { default as Copilot } from './Copilot';
 export { default as ChatMsg } from './components/ChatMsg';
 
 export { default as ChatItem } from './components/ChatItem';
+
+export { default as ShowCase } from './ShowCase';
 
 export type {
   SearchRecommendItem,

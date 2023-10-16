@@ -61,9 +61,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
   const isDslMetricCard =
     queryMode === 'DSL' && singleData && metricFields.length === 1 && columns.length === 1;
 
-  const isMetricCard =
-    (queryMode.includes('METRIC') || isDslMetricCard) &&
-    (singleData || chatContext?.dateInfo?.startDate === chatContext?.dateInfo?.endDate);
+  const isMetricCard = (queryMode.includes('METRIC') || isDslMetricCard) && singleData;
 
   const isText =
     columns.length === 1 &&
@@ -108,6 +106,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
             chartIndex={chartIndex}
             triggerResize={triggerResize}
             activeMetricField={activeMetricField}
+            drillDownDimension={drillDownDimension}
             currentDateOption={currentDateOption}
             onSelectDateOption={selectDateOption}
           />
@@ -209,7 +208,11 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
         <div>
           {getMsgContent()}
           {(isMultipleMetric || existDrillDownDimension) && (
-            <div className={`${prefixCls}-bottom-tools`}>
+            <div
+              className={`${prefixCls}-bottom-tools ${
+                isMetricCard ? `${prefixCls}-metric-card-tools` : ''
+              }`}
+            >
               {isMultipleMetric && (
                 <MetricOptions
                   metrics={chatContext.metrics}
@@ -221,6 +224,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
               {existDrillDownDimension && (
                 <DrillDownDimensions
                   modelId={chatContext.modelId}
+                  metricId={activeMetricField?.id || defaultMetricField?.id}
                   drillDownDimension={drillDownDimension}
                   originDimensions={chatContext.dimensions}
                   dimensionFilters={chatContext.dimensionFilters}
