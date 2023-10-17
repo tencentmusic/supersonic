@@ -32,7 +32,7 @@ public class RecommendController {
 
     @GetMapping("recommend/metric/{modelId}")
     public RecommendResp recommendMetricMode(@PathVariable("modelId") Long modelId,
-                                             @RequestParam(value = "metric", required = false) Long metricId,
+                                             @RequestParam(value = "metricId", required = false) Long metricId,
                                              @RequestParam(value = "limit", required = false) Long limit) {
         RecommendReq recommendReq = new RecommendReq();
         recommendReq.setModelId(modelId);

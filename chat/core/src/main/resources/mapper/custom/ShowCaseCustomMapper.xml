@@ -60,6 +60,9 @@
             select distinct chat_id
             from s2_chat_query
             where query_state = 1 and agent_id = ${agentId}
+            <if test="userName != null and userName != ''">
+                  and user_name = #{userName}
+            </if>
             order by chat_id desc
                 limit #{start}, #{limit}
         ) q2

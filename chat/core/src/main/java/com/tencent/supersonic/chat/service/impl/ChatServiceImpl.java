@@ -137,14 +137,14 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ShowCaseResp queryShowCase(PageQueryInfoReq pageQueryInfoCommend, int agentId) {
+    public ShowCaseResp queryShowCase(PageQueryInfoReq pageQueryInfoReq, int agentId) {
         ShowCaseResp showCaseResp = new ShowCaseResp();
-        List<QueryResp> queryResps = chatQueryRepository.queryShowCase(pageQueryInfoCommend, agentId);
+        List<QueryResp> queryResps = chatQueryRepository.queryShowCase(pageQueryInfoReq, agentId);
         Map<Long, List<QueryResp>> showCaseMap = queryResps.stream()
                 .collect(Collectors.groupingBy(QueryResp::getChatId));
         showCaseResp.setShowCaseMap(showCaseMap);
-        showCaseResp.setCurrent(pageQueryInfoCommend.getCurrent());
-        showCaseResp.setPageSize(pageQueryInfoCommend.getPageSize());
+        showCaseResp.setCurrent(pageQueryInfoReq.getCurrent());
+        showCaseResp.setPageSize(pageQueryInfoReq.getPageSize());
         return showCaseResp;
     }
 

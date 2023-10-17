@@ -11,6 +11,7 @@ import com.tencent.supersonic.semantic.query.parser.SqlParser;
 import com.tencent.supersonic.semantic.query.parser.calcite.CalciteSqlParser;
 import com.tencent.supersonic.semantic.query.parser.convert.CalculateAggConverter;
 import com.tencent.supersonic.semantic.query.parser.convert.DefaultDimValueConverter;
+import com.tencent.supersonic.semantic.query.parser.convert.MetricCheckConverter;
 import com.tencent.supersonic.semantic.query.parser.convert.MultiSourceJoin;
 import com.tencent.supersonic.semantic.query.parser.convert.ParserDefaultConverter;
 import java.util.ArrayList;
@@ -78,6 +79,7 @@ public class ComponentFactory {
     }
 
     private static void initSemanticConverter() {
+        semanticConverters.add(getBean("MetricCheckConverter", MetricCheckConverter.class));
         semanticConverters.add(getBean("DefaultDimValueConverter", DefaultDimValueConverter.class));
         semanticConverters.add(getBean("CalculateAggConverter", CalculateAggConverter.class));
         semanticConverters.add(getBean("ParserDefaultConverter", ParserDefaultConverter.class));

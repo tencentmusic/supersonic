@@ -13,6 +13,7 @@ import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public interface QueryService {
@@ -20,6 +21,8 @@ public interface QueryService {
     Object queryBySql(QueryDslReq querySqlCmd, User user) throws Exception;
 
     QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructCmd, User user) throws Exception;
+
+    void downloadByStruct(QueryStructReq queryStructReq, User user, HttpServletResponse response) throws Exception;
 
     QueryResultWithSchemaResp queryByStructWithAuth(QueryStructReq queryStructCmd, User user)
             throws Exception;

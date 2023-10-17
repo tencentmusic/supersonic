@@ -2,6 +2,7 @@ package com.tencent.supersonic.advice;
 
 import com.tencent.supersonic.common.pojo.exception.AccessException;
 import com.tencent.supersonic.common.pojo.exception.CommonException;
+import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.common.pojo.ResultData;
 import com.tencent.supersonic.common.pojo.ReturnCode;
@@ -37,6 +38,13 @@ public class RestExceptionHandler {
     public ResultData<String> invalidPermissionException(Exception e) {
         log.error("default global exception", e);
         return ResultData.fail(ReturnCode.INVALID_PERMISSION.getCode(), e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidArgumentException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public ResultData<String> invalidArgumentException(Exception e) {
+        log.error("default global exception", e);
+        return ResultData.fail(ReturnCode.INVALID_REQUEST.getCode(), e.getMessage());
     }
 
     @ExceptionHandler(CommonException.class)
