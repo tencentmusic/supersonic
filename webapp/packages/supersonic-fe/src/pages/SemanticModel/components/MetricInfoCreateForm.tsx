@@ -499,6 +499,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
             {renderContent()}
           </Form>
           <DimensionAndMetricRelationModal
+            metricItem={metricItem}
             relationsInitialValue={drillDownDimensions}
             open={metricRelationModalOpenState}
             onCancel={() => {
