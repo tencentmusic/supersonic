@@ -97,7 +97,7 @@ function runPythonService {
     else
       if [ "$i" -eq 10 ]; then
         echo "llmparser Health check failed after 10 attempts."
-        echo "May still downloading model files. Please check llmparser.log in runtime/llmparser directory."
+        echo "May still downloading model files. Please check llmparser.log in runtime directory."
       fi
       echo "Retrying after 5 seconds..."
       sleep 5
