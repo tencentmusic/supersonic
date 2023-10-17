@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SemanticNodeType } from '../../enum';
 import moment from 'moment';
-import { message } from 'antd';
-import { queryStruct } from '@/pages/SemanticModel/service';
+import { message, Row, Col, Button } from 'antd';
+import { queryStruct, downloadCosFile } from '@/pages/SemanticModel/service';
 import TrendChart from '@/pages/SemanticModel/Metric/components/MetricTrend';
 import MDatePicker from '@/components/MDatePicker';
+import { useModel } from 'umi';
 import { DateRangeType, DateSettingType } from '@/components/MDatePicker/type';
 import { ISemantic } from '../../data';
 
@@ -24,6 +25,7 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
   const [metricTrendLoading, setMetricTrendLoading] = useState<boolean>(false);
   const [metricColumnConfig, setMetricColumnConfig] = useState<ISemantic.IMetricTrendColumn>();
   const [authMessage, setAuthMessage] = useState<string>('');
+  const [downloadLoding, setDownloadLoding] = useState<boolean>(false);
   const [periodDate, setPeriodDate] = useState<{
     startDate: string;
     endDate: string;
@@ -34,17 +36,28 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
     dateField: dateFieldMap[DateRangeType.DAY],
   });
 
-  const getMetricTrendData = async () => {
-    setMetricTrendLoading(true);
+  const getMetricTrendData = async (download = false) => {
+    if (download) {
+      setDownloadLoding(true);
+    } else {
+      setMetricTrendLoading(true);
+    }
+
     const { modelId, bizName, name } = nodeData;
     indicatorFields.current = [{ name, column: bizName }];
-    const { code, data, msg } = await queryStruct({
+    const res = await queryStruct({
       modelId,
       bizName,
       dateField: periodDate.dateField,
       startDate: periodDate.startDate,
       endDate: periodDate.endDate,
+      download,
     });
+    if (download) {
+      setDownloadLoding(false);
+      return;
+    }
+    const { code, data, msg } = res;
     setMetricTrendLoading(false);
     if (code === 200) {
       const { resultList, columns, queryAuthorization } = data;
@@ -78,42 +91,52 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
   return (
     <>
       <div style={{ marginBottom: 5 }}>
-        <MDatePicker
-          initialValues={{
-            dateSettingType: 'DYNAMIC',
-            dynamicParams: {
-              number: 7,
-              periodType: 'DAYS',
-              includesCurrentPeriod: true,
-              shortCutId: 'last7Days',
-              dateRangeType: 'DAY',
-              dynamicAdvancedConfigType: 'last',
-              dateRangeStringDesc: '最近7天',
-              dateSettingType: DateSettingType.DYNAMIC,
-            },
-            staticParams: {},
-          }}
-          onDateRangeChange={(value, config) => {
-            const [startDate, endDate] = value;
-            const { dateSettingType, dynamicParams, staticParams } = config;
-            let dateField = dateFieldMap[DateRangeType.DAY];
-            if (DateSettingType.DYNAMIC === dateSettingType) {
-              dateField = dateFieldMap[dynamicParams.dateRangeType];
-            }
-            if (DateSettingType.STATIC === dateSettingType) {
-              dateField = dateFieldMap[staticParams.dateRangeType];
-            }
-            setPeriodDate({ startDate, endDate, dateField });
-          }}
-          disabledAdvanceSetting={true}
-        />
+        <Row>
+          <Col flex="1 1 200px">
+            <MDatePicker
+              initialValues={{
+                dateSettingType: 'DYNAMIC',
+                dynamicParams: {
+                  number: 7,
+                  periodType: 'DAYS',
+                  includesCurrentPeriod: true,
+                  shortCutId: 'last7Days',
+                  dateRangeType: 'DAY',
+                  dynamicAdvancedConfigType: 'last',
+                  dateRangeStringDesc: '最近7天',
+                  dateSettingType: DateSettingType.DYNAMIC,
+                },
+                staticParams: {},
+              }}
+              onDateRangeChange={(value, config) => {
+                const [startDate, endDate] = value;
+                const { dateSettingType, dynamicParams, staticParams } = config;
+                let dateField = dateFieldMap[DateRangeType.DAY];
+                if (DateSettingType.DYNAMIC === dateSettingType) {
+                  dateField = dateFieldMap[dynamicParams.dateRangeType];
+                }
+                if (DateSettingType.STATIC === dateSettingType) {
+                  dateField = dateFieldMap[staticParams.dateRangeType];
+                }
+                setPeriodDate({ startDate, endDate, dateField });
+              }}
+              disabledAdvanceSetting={true}
+            />
+          </Col>
+          <Col flex="0 1">
+            <Button
+              type="primary"
+              loading={downloadLoding}
+              onClick={() => {
+                getMetricTrendData(true);
+              }}
+            >
+              下载
+            </Button>
+          </Col>
+        </Row>
       </div>
-      {authMessage && (
-        <div style={{ color: '#d46b08', marginBottom: 15 }}>
-          指标存在如下权限问题: {authMessage}
-        </div>
-      )}
-      <div style={{ color: '#d46b08', marginBottom: 15 }}>指标存在如下权限问题: {authMessage}</div>
+      {authMessage && <div style={{ color: '#d46b08', marginBottom: 15 }}>{authMessage}</div>}
       <TrendChart
         data={metricTrendData}
         isPer={

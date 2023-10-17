@@ -75,14 +75,6 @@ const MDatePicker: React.FC<Props> = ({
       initialValues?.staticParams?.dateRangeType ||
       DateRangeType.DAY,
   );
-  // const [pickerType, setPickerType] = useState<PickerType>(() => {
-  //   // if (staticFormData.dateRangeType) {
-  //   //   return DateRangeTypeToPickerMap[staticFormData.dateRangeType];
-  //   // }
-  //   return DateRangePicker.DATE;
-  // });
-
-  // const [dateRangeValue, setDateRangeValue] = useState<any>([]);
 
   const staticDefaultConfig = {
     dateSettingType: DateSettingType.STATIC,
@@ -92,8 +84,7 @@ const MDatePicker: React.FC<Props> = ({
     dateMultiple: [],
     dateRangeStringDesc: '',
   };
-  // const { getMaxPartitionData } = useModel('useMaxPartitionData');
-  // const { globalViewId } = useModel('useViewsData');
+
   const [latestDateMap, setLatestDateMap] = useState<LatestDateMap>({
     maxPartition: moment().format('YYYY-MM-DD'),
   });
