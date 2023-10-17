@@ -481,7 +481,8 @@ public class QueryServiceImpl implements QueryService {
             for (FilterExpression filterExpression : filterExpressionList) {
                 if (filterExpression.getFieldName() != null
                         && filterExpression.getFieldName().contains(dslQueryFilter.getName())) {
-                    if (dslQueryFilter.getOperator().getValue().equals(filterExpression.getOperator())) {
+                    if (dslQueryFilter.getOperator().getValue().equals(filterExpression.getOperator())
+                            && Objects.nonNull(dslQueryFilter.getValue())) {
                         map.put(filterExpression.getFieldValue().toString(), dslQueryFilter.getValue().toString());
                         filedNameToValueMap.put(dslQueryFilter.getName(), map);
                         contextMetricFilters.stream().forEach(o -> {
@@ -552,6 +553,9 @@ public class QueryServiceImpl implements QueryService {
         String columnName = dslQueryFilter.getName();
         if (StringUtils.isNotBlank(dslQueryFilter.getFunction())) {
             columnName = dslQueryFilter.getFunction() + "(" + dslQueryFilter.getName() + ")";
+        }
+        if (Objects.isNull(dslQueryFilter.getValue())) {
+            return;
         }
         Column column = new Column(columnName);
         LongValue longValue = new LongValue(Long.parseLong(dslQueryFilter.getValue().toString()));
