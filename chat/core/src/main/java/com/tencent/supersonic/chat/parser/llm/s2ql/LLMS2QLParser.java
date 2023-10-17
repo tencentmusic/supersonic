@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.parser.llm.s2ql;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
-import com.tencent.supersonic.chat.agent.tool.LLMParserTool;
+import com.tencent.supersonic.chat.agent.tool.CommonAgentTool;
 import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
@@ -18,10 +18,10 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.config.LLMParserConfig;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.query.llm.s2ql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2ql.LLMReq.ElementValue;
 import com.tencent.supersonic.chat.query.llm.s2ql.LLMResp;
+import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
@@ -79,8 +79,8 @@ public class LLMS2QLParser implements SemanticParser {
                 return;
             }
 
-            LLMParserTool LLMParserTool = getLLMParserTool(request, modelId);
-            if (Objects.isNull(LLMParserTool)) {
+            CommonAgentTool commonAgentTool = getParserTool(request, modelId);
+            if (Objects.isNull(commonAgentTool)) {
                 log.info("no tool in this agent, skip {}", LLMS2QLParser.class);
                 return;
             }
@@ -92,9 +92,9 @@ public class LLMS2QLParser implements SemanticParser {
                 return;
             }
             ParseResult parseResult = ParseResult.builder().request(request)
-                    .LLMParserTool(LLMParserTool).llmReq(llmReq).llmResp(llmResp).build();
+                    .commonAgentTool(commonAgentTool).llmReq(llmReq).llmResp(llmResp).build();
 
-            SemanticParseInfo parseInfo = getParseInfo(queryCtx, modelId, LLMParserTool, parseResult);
+            SemanticParseInfo parseInfo = getParseInfo(queryCtx, modelId, commonAgentTool, parseResult);
 
             SemanticCorrectInfo semanticCorrectInfo = getCorrectorSql(queryCtx, parseInfo, llmResp.getSqlOutput());
 
@@ -256,7 +256,7 @@ public class LLMS2QLParser implements SemanticParser {
         return correctInfo;
     }
 
-    private SemanticParseInfo getParseInfo(QueryContext queryCtx, Long modelId, LLMParserTool LLMParserTool,
+    private SemanticParseInfo getParseInfo(QueryContext queryCtx, Long modelId, CommonAgentTool commonAgentTool,
             ParseResult parseResult) {
         PluginSemanticQuery semanticQuery = QueryManager.createPluginQuery(S2QLQuery.QUERY_MODE);
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
@@ -265,7 +265,7 @@ public class LLMS2QLParser implements SemanticParser {
         Map<String, Object> properties = new HashMap<>();
         properties.put(Constants.CONTEXT, parseResult);
         properties.put("type", "internal");
-        properties.put("name", LLMParserTool.getName());
+        properties.put("name", commonAgentTool.getName());
 
         parseInfo.setProperties(properties);
         parseInfo.setScore(queryCtx.getRequest().getQueryText().length());
@@ -284,11 +284,11 @@ public class LLMS2QLParser implements SemanticParser {
         return parseInfo;
     }
 
-    private LLMParserTool getLLMParserTool(QueryReq request, Long modelId) {
+    private CommonAgentTool getParserTool(QueryReq request, Long modelId) {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
-        List<LLMParserTool> LLMParserTools = agentService.getLLMParserTools(request.getAgentId(),
+        List<CommonAgentTool> commonAgentTools = agentService.getParserTools(request.getAgentId(),
                 AgentToolType.LLM_PARSER);
-        Optional<LLMParserTool> llmParserTool = LLMParserTools.stream()
+        Optional<CommonAgentTool> llmParserTool = commonAgentTools.stream()
                 .filter(tool -> {
                     List<Long> modelIds = tool.getModelIds();
                     if (agentService.containsAllModel(new HashSet<>(modelIds))) {

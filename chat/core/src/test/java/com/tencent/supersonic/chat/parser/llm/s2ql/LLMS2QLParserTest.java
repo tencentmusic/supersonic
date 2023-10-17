@@ -72,9 +72,9 @@ class LLMS2QLParserTest {
                 .parseInfo(parseInfo)
                 .build();
 
-        LLMS2QLParser LLMS2QLParser = new LLMS2QLParser();
+        LLMS2QLParser llms2QLParser = new LLMS2QLParser();
 
-        LLMS2QLParser.updateParseInfo(semanticCorrectInfo, 2L, parseInfo);
+        llms2QLParser.updateParseInfo(semanticCorrectInfo, 2L, parseInfo);
 
     }
 }

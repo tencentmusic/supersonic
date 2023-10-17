@@ -228,11 +228,11 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         ));
         agentConfig.getTools().add(ruleQueryTool);
 
-        LLMParserTool LLMParserTool = new LLMParserTool();
-        LLMParserTool.setId("1");
-        LLMParserTool.setType(AgentToolType.LLM_PARSER);
-        LLMParserTool.setModelIds(Lists.newArrayList(-1L));
-        agentConfig.getTools().add(LLMParserTool);
+        LLMParserTool llmParserTool = new LLMParserTool();
+        llmParserTool.setId("1");
+        llmParserTool.setType(AgentToolType.LLM_PARSER);
+        llmParserTool.setModelIds(Lists.newArrayList(-1L));
+        agentConfig.getTools().add(llmParserTool);
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());
@@ -255,11 +255,11 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
                 "ENTITY_DETAIL", "ENTITY_LIST_FILTER", "ENTITY_ID"));
         agentConfig.getTools().add(ruleQueryTool);
 
-        LLMParserTool LLMParserTool = new LLMParserTool();
-        LLMParserTool.setId("1");
-        LLMParserTool.setType(AgentToolType.LLM_PARSER);
-        LLMParserTool.setModelIds(Lists.newArrayList(-1L));
-        agentConfig.getTools().add(LLMParserTool);
+        LLMParserTool llmParserTool = new LLMParserTool();
+        llmParserTool.setId("1");
+        llmParserTool.setType(AgentToolType.LLM_PARSER);
+        llmParserTool.setModelIds(Lists.newArrayList(-1L));
+        agentConfig.getTools().add(llmParserTool);
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());

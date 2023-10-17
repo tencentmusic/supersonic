@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.parser.llm.s2ql;
 
-import com.tencent.supersonic.chat.agent.tool.LLMParserTool;
+import com.tencent.supersonic.chat.agent.tool.CommonAgentTool;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.query.llm.s2ql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2ql.LLMResp;
@@ -21,5 +21,5 @@ public class ParseResult {
 
     private QueryReq request;
 
-    private LLMParserTool LLMParserTool;
+    private CommonAgentTool commonAgentTool;
 }
