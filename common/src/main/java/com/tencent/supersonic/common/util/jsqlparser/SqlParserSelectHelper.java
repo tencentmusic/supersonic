@@ -330,6 +330,12 @@ public class SqlParserSelectHelper {
         if (leftExpression instanceof Column) {
             return ((Column) leftExpression).getColumnName();
         }
+        if (leftExpression instanceof Function) {
+            List<Expression> expressionList = ((Function) leftExpression).getParameters().getExpressions();
+            if (!CollectionUtils.isEmpty(expressionList)) {
+                return ((Column) expressionList.get(0)).getColumnName();
+            }
+        }
         if (rightExpression instanceof Column) {
             return ((Column) rightExpression).getColumnName();
         }

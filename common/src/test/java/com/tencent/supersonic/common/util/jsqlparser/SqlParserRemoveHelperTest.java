@@ -11,6 +11,18 @@ import org.junit.jupiter.api.Test;
 class SqlParserRemoveHelperTest {
 
     @Test
+    void removeHavingCondition() {
+        String sql = "select 歌曲名 from 歌曲库 where 歌手名 = '周杰伦'   HAVING sum(播放量) > 20000";
+        Set<String> removeFieldNames = new HashSet<>();
+        removeFieldNames.add("播放量");
+        String replaceSql = SqlParserRemoveHelper.removeHavingCondition(sql, removeFieldNames);
+        Assert.assertEquals(
+                "SELECT 歌曲名 FROM 歌曲库 WHERE 歌手名 = '周杰伦' HAVING 2 > 1",
+                replaceSql);
+
+    }
+
+    @Test
     void removeWhereCondition() {
         String sql = "select 歌曲名 from 歌曲库 where datediff('day', 发布日期, '2023-08-09') <= 1 "
                 + "and 歌曲名 = '邓紫棋' and 数据日期 = '2023-08-09' and 歌曲发布时 = '2023-08-01'"

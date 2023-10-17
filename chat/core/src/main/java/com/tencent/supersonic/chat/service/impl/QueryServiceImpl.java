@@ -358,7 +358,7 @@ public class QueryServiceImpl implements QueryService {
             log.info("havingFiledNameToValueMap:{}", havingFiledNameToValueMap);
             log.info("removeHavingFieldNames:{}", removeHavingFieldNames);
             correctorSql = SqlParserReplaceHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
-            correctorSql = SqlParserRemoveHelper.removeHavingCondition(correctorSql, removeWhereFieldNames);
+            correctorSql = SqlParserRemoveHelper.removeHavingCondition(correctorSql, removeHavingFieldNames);
 
             log.info("addWhereConditions:{}", addWhereConditions);
             log.info("addHavingConditions:{}", addHavingConditions);
@@ -378,7 +378,6 @@ public class QueryServiceImpl implements QueryService {
                 parseInfo.getSqlInfo().setQuerySql(explain.getSql());
             }
         }
-        log.info("parseInfo:{}", JsonUtil.toString(semanticQuery.getParseInfo().getProperties()));
         semanticQuery.setParseInfo(parseInfo);
         QueryResult queryResult = semanticQuery.execute(user);
         queryResult.setChatContext(semanticQuery.getParseInfo());
@@ -552,9 +551,6 @@ public class QueryServiceImpl implements QueryService {
         comparisonExpression.setLeftExpression(column);
         comparisonExpression.setRightExpression(longValue);
         addConditions.add(comparisonExpression);
-        //        AndExpression and = new AndExpression(expression, comparisonExpression);
-        //        // 设置新的where条件
-        //        plainSelect.setWhere(and);
         contextMetricFilters.stream().forEach(o -> {
             if (o.getName().equals(dslQueryFilter.getName())) {
                 o.setValue(dslQueryFilter.getValue());
