@@ -8,12 +8,14 @@ import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 type Props = {
   onCancel: () => void;
   open: boolean;
+  metricItem: ISemantic.IMetricItem;
   relationsInitialValue?: ISemantic.IDrillDownDimensionItem[];
   onSubmit: (relations: ISemantic.IDrillDownDimensionItem[]) => void;
 };
 
 const DimensionAndMetricRelationModal: React.FC<Props> = ({
   open,
+  metricItem,
   relationsInitialValue,
   onCancel,
   onSubmit,
@@ -54,6 +56,7 @@ const DimensionAndMetricRelationModal: React.FC<Props> = ({
       >
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <DimensionMetricRelationTableTransfer
+            metricItem={metricItem}
             relationsInitialValue={relationsInitialValue}
             onChange={(relations: ISemantic.IDrillDownDimensionItem[]) => {
               setRelationList(relations);
