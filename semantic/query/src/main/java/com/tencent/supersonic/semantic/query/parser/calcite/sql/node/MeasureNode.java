@@ -1,7 +1,7 @@
 package com.tencent.supersonic.semantic.query.parser.calcite.sql.node;
 
 
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Measure;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Measure;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 

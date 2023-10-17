@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.query.llm.dsl;
+package com.tencent.supersonic.chat.query.llm.s2ql;
 
 import java.util.List;
 import lombok.Data;

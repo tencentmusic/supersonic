@@ -1,4 +1,4 @@
-package com.tencent.supersonic.semantic.query.parser.calcite.dsl;
+package com.tencent.supersonic.semantic.query.parser.calcite.s2ql;
 
 import java.util.List;
 import lombok.Data;

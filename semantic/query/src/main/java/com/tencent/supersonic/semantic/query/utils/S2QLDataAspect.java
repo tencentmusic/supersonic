@@ -11,7 +11,7 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.query.service.AuthCommonService;
@@ -41,7 +41,7 @@ import org.springframework.util.CollectionUtils;
 @Aspect
 @Order(1)
 @Slf4j
-public class DslDataAspect {
+public class S2QLDataAspect {
 
     @Autowired
     private QueryStructUtils queryStructUtils;
@@ -54,24 +54,24 @@ public class DslDataAspect {
     @Value("${permission.data.enable:true}")
     private Boolean permissionDataEnable;
 
-    @Pointcut("@annotation(com.tencent.supersonic.semantic.query.utils.DslPermissionAnnotation)")
-    private void dslPermissionCheck() {
+    @Pointcut("@annotation(com.tencent.supersonic.semantic.query.utils.S2QLPermissionAnnotation)")
+    private void s2QLPermissionCheck() {
     }
 
-    @Around("dslPermissionCheck()")
+    @Around("s2QLPermissionCheck()")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
-        log.info("dsl permission check!");
+        log.info("s2ql permission check!");
         Object[] objects = joinPoint.getArgs();
-        QueryDslReq queryDslReq = (QueryDslReq) objects[0];
+        QueryS2QLReq queryS2QLReq = (QueryS2QLReq) objects[0];
         User user = (User) objects[1];
         if (!permissionDataEnable) {
-            log.info("not to check dsl permission!");
+            log.info("not to check s2QL permission!");
             return joinPoint.proceed();
         }
         if (Objects.isNull(user) || Strings.isNullOrEmpty(user.getName())) {
             throw new RuntimeException("please provide user information");
         }
-        Long modelId = queryDslReq.getModelId();
+        Long modelId = queryS2QLReq.getModelId();
 
         //1. determine whether admin of the model
         if (authCommonService.doModelAdmin(user, modelId)) {
@@ -82,7 +82,7 @@ public class DslDataAspect {
         authCommonService.doModelVisible(user, modelId);
 
         // 3. fetch data permission meta information
-        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(queryDslReq, user);
+        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(queryS2QLReq, user);
         log.info("modelId:{}, res4Privilege:{}", modelId, res4Privilege);
 
         Set<String> sensitiveResByModel = authCommonService.getHighSensitiveColsByModelId(modelId);
@@ -97,10 +97,10 @@ public class DslDataAspect {
         Set<String> resAuthSet = authCommonService.getAuthResNameSet(authorizedResource, modelId);
 
         // 4.if sensitive fields without permission are involved in filter, thrown an exception
-        doFilterCheckLogic(queryDslReq, resAuthSet, sensitiveResReq);
+        doFilterCheckLogic(queryS2QLReq, resAuthSet, sensitiveResReq);
 
         // 5.row permission pre-filter
-        doRowPermission(queryDslReq, authorizedResource);
+        doRowPermission(queryS2QLReq, authorizedResource);
 
         // 6.proceed
         QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) joinPoint.proceed();
@@ -123,7 +123,7 @@ public class DslDataAspect {
         return queryResultAfterDesensitization;
     }
 
-    private void doRowPermission(QueryDslReq queryDslReq, AuthorizedResourceResp authorizedResource) {
+    private void doRowPermission(QueryS2QLReq queryS2QLReq, AuthorizedResourceResp authorizedResource) {
         log.debug("start doRowPermission logic");
         StringJoiner joiner = new StringJoiner(" OR ");
         List<String> dimensionFilters = new ArrayList<>();
@@ -143,12 +143,12 @@ public class DslDataAspect {
             }
         });
         try {
-            Expression expression = CCJSqlParserUtil.parseCondExpression(" ( " + joiner.toString() + " ) ");
+            Expression expression = CCJSqlParserUtil.parseCondExpression(" ( " + joiner + " ) ");
             if (StringUtils.isNotEmpty(joiner.toString())) {
-                String sql = SqlParserAddHelper.addWhere(queryDslReq.getSql(), expression);
-                log.info("before doRowPermission, queryDslReq:{}", queryDslReq.getSql());
-                queryDslReq.setSql(sql);
-                log.info("after doRowPermission, queryDslReq:{}", queryDslReq.getSql());
+                String sql = SqlParserAddHelper.addWhere(queryS2QLReq.getSql(), expression);
+                log.info("before doRowPermission, queryS2QLReq:{}", queryS2QLReq.getSql());
+                queryS2QLReq.setSql(sql);
+                log.info("after doRowPermission, queryS2QLReq:{}", queryS2QLReq.getSql());
             }
         } catch (JSQLParserException jsqlParserException) {
             log.info("jsqlParser has an exception:{}", jsqlParserException.toString());
@@ -156,22 +156,22 @@ public class DslDataAspect {
 
     }
 
-    private void doFilterCheckLogic(QueryDslReq queryDslReq, Set<String> resAuthName,
-                                    Set<String> sensitiveResReq) {
-        Set<String> resFilterSet = queryStructUtils.getFilterResNameEnExceptInternalCol(queryDslReq);
+    private void doFilterCheckLogic(QueryS2QLReq queryS2QLReq, Set<String> resAuthName,
+            Set<String> sensitiveResReq) {
+        Set<String> resFilterSet = queryStructUtils.getFilterResNameEnExceptInternalCol(queryS2QLReq);
         Set<String> need2Apply = resFilterSet.stream()
                 .filter(res -> !resAuthName.contains(res) && sensitiveResReq.contains(res)).collect(Collectors.toSet());
         Set<String> nameCnSet = new HashSet<>();
 
         List<Long> modelIds = new ArrayList<>();
-        modelIds.add(queryDslReq.getModelId());
+        modelIds.add(queryS2QLReq.getModelId());
         List<ModelResp> modelInfos = modelService.getModelList(modelIds);
         String modelNameCn = Constants.EMPTY;
         if (!CollectionUtils.isEmpty(modelInfos)) {
             modelNameCn = modelInfos.get(0).getName();
         }
 
-        List<DimensionResp> dimensionDescList = dimensionService.getDimensions(queryDslReq.getModelId());
+        List<DimensionResp> dimensionDescList = dimensionService.getDimensions(queryS2QLReq.getModelId());
         String finalDomainNameCn = modelNameCn;
         dimensionDescList.stream().filter(dim -> need2Apply.contains(dim.getBizName()))
                 .forEach(dim -> nameCnSet.add(finalDomainNameCn + MINUS + dim.getName()));

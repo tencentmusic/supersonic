@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.query.llm.dsl.DslQuery;
+import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import java.util.List;
@@ -24,7 +24,7 @@ public class EntityInfoExecuteResponder implements ExecuteResponder {
             return;
         }
         String queryMode = semanticParseInfo.getQueryMode();
-        if (QueryManager.isPluginQuery(queryMode) && !DslQuery.QUERY_MODE.equals(queryMode)) {
+        if (QueryManager.isPluginQuery(queryMode) && !S2QLQuery.QUERY_MODE.equals(queryMode)) {
             return;
         }
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);

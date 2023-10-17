@@ -24,11 +24,11 @@ import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
-import com.tencent.supersonic.semantic.query.utils.DslPermissionAnnotation;
+import com.tencent.supersonic.semantic.query.utils.S2QLPermissionAnnotation;
 import com.tencent.supersonic.semantic.query.executor.QueryExecutor;
 import com.tencent.supersonic.semantic.query.parser.convert.QueryReqConverter;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
@@ -89,9 +89,9 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    @DslPermissionAnnotation
+    @S2QLPermissionAnnotation
     @SneakyThrows
-    public Object queryBySql(QueryDslReq querySqlCmd, User user) {
+    public Object queryBySql(QueryS2QLReq querySqlCmd, User user) {
         statUtils.initStatInfo(querySqlCmd, user);
         QueryStatement queryStatement = new QueryStatement();
         try {
@@ -109,7 +109,7 @@ public class QueryServiceImpl implements QueryService {
         return semanticQueryEngine.execute(queryStatement);
     }
 
-    private QueryStatement convertToQueryStatement(QueryDslReq querySqlCmd, User user) throws Exception {
+    private QueryStatement convertToQueryStatement(QueryS2QLReq querySqlCmd, User user) throws Exception {
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
         List<Long> modelIds = new ArrayList<>();
         modelIds.add(querySqlCmd.getModelId());
@@ -294,8 +294,8 @@ public class QueryServiceImpl implements QueryService {
         QueryTypeEnum queryTypeEnum = explainSqlReq.getQueryTypeEnum();
         T queryReq = explainSqlReq.getQueryReq();
 
-        if (QueryTypeEnum.SQL.equals(queryTypeEnum) && queryReq instanceof QueryDslReq) {
-            QueryStatement queryStatement = convertToQueryStatement((QueryDslReq) queryReq, user);
+        if (QueryTypeEnum.SQL.equals(queryTypeEnum) && queryReq instanceof QueryS2QLReq) {
+            QueryStatement queryStatement = convertToQueryStatement((QueryS2QLReq) queryReq, user);
             return getExplainResp(queryStatement);
         }
         if (QueryTypeEnum.STRUCT.equals(queryTypeEnum) && queryReq instanceof QueryStructReq) {

@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class SqlInfo {
 
-    private String llmParseSql;
+    private String s2QL;
     private String logicSql;
     private String querySql;
 }

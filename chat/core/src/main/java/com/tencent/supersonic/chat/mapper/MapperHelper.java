@@ -88,7 +88,7 @@ public class MapperHelper {
 
         AgentService agentService = ContextUtils.getBean(AgentService.class);
 
-        Set<Long> detectModelIds = agentService.getDslToolsModelIds(request.getAgentId(), null);
+        Set<Long> detectModelIds = agentService.getModelIds(request.getAgentId(), null);
         //contains all
         if (agentService.containsAllModel(detectModelIds)) {
             if (Objects.nonNull(modelId) && modelId > 0) {

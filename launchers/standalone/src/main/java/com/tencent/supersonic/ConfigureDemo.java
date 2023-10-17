@@ -6,7 +6,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.AgentConfig;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
-import com.tencent.supersonic.chat.agent.tool.DslTool;
+import com.tencent.supersonic.chat.agent.tool.LLMParserTool;
 import com.tencent.supersonic.chat.agent.tool.RuleQueryTool;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
@@ -228,11 +228,11 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         ));
         agentConfig.getTools().add(ruleQueryTool);
 
-        DslTool dslTool = new DslTool();
-        dslTool.setId("1");
-        dslTool.setType(AgentToolType.DSL);
-        dslTool.setModelIds(Lists.newArrayList(-1L));
-        agentConfig.getTools().add(dslTool);
+        LLMParserTool LLMParserTool = new LLMParserTool();
+        LLMParserTool.setId("1");
+        LLMParserTool.setType(AgentToolType.LLM_PARSER);
+        LLMParserTool.setModelIds(Lists.newArrayList(-1L));
+        agentConfig.getTools().add(LLMParserTool);
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());
@@ -255,11 +255,11 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
                 "ENTITY_DETAIL", "ENTITY_LIST_FILTER", "ENTITY_ID"));
         agentConfig.getTools().add(ruleQueryTool);
 
-        DslTool dslTool = new DslTool();
-        dslTool.setId("1");
-        dslTool.setType(AgentToolType.DSL);
-        dslTool.setModelIds(Lists.newArrayList(-1L));
-        agentConfig.getTools().add(dslTool);
+        LLMParserTool LLMParserTool = new LLMParserTool();
+        LLMParserTool.setId("1");
+        LLMParserTool.setType(AgentToolType.LLM_PARSER);
+        LLMParserTool.setModelIds(Lists.newArrayList(-1L));
+        agentConfig.getTools().add(LLMParserTool);
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());

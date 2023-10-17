@@ -1,10 +1,10 @@
-package com.tencent.supersonic.chat.query.llm.dsl;
+package com.tencent.supersonic.chat.query.llm.s2ql;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
-import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
+import com.tencent.supersonic.chat.parser.llm.s2ql.ParseResult;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
@@ -16,7 +16,7 @@ import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +26,12 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class DslQuery extends PluginSemanticQuery {
+public class S2QLQuery extends PluginSemanticQuery {
 
-    public static final String QUERY_MODE = "DSL";
+    public static final String QUERY_MODE = "LLM_S2QL";
     protected SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
 
-    public DslQuery() {
+    public S2QLQuery() {
         QueryManager.register(this);
     }
 
@@ -45,10 +45,10 @@ public class DslQuery extends PluginSemanticQuery {
         LLMResp llmResp = getLlmResp();
 
         long startTime = System.currentTimeMillis();
-        QueryDslReq queryDslReq = getQueryDslReq(llmResp);
-        QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByDsl(queryDslReq, user);
+        QueryS2QLReq queryS2QLReq = getQueryS2QLReq(llmResp);
+        QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByS2QL(queryS2QLReq, user);
 
-        log.info("queryByDsl cost:{},querySql:{}", System.currentTimeMillis() - startTime, llmResp.getSqlOutput());
+        log.info("queryByS2QL cost:{},querySql:{}", System.currentTimeMillis() - startTime, llmResp.getSqlOutput());
 
         QueryResult queryResult = new QueryResult();
         if (Objects.nonNull(queryResp)) {
@@ -69,13 +69,12 @@ public class DslQuery extends PluginSemanticQuery {
 
     private LLMResp getLlmResp() {
         String json = JsonUtil.toString(parseInfo.getProperties().get(Constants.CONTEXT));
-        DSLParseResult dslParseResult = JsonUtil.toObject(json, DSLParseResult.class);
-        return dslParseResult.getLlmResp();
+        ParseResult parseResult = JsonUtil.toObject(json, ParseResult.class);
+        return parseResult.getLlmResp();
     }
 
-    private QueryDslReq getQueryDslReq(LLMResp llmResp) {
-        QueryDslReq queryDslReq = QueryReqBuilder.buildDslReq(llmResp.getCorrectorSql(), parseInfo.getModelId());
-        return queryDslReq;
+    private QueryS2QLReq getQueryS2QLReq(LLMResp llmResp) {
+        return QueryReqBuilder.buildS2QLReq(llmResp.getCorrectorSql(), parseInfo.getModelId());
     }
 
     @Override
@@ -84,7 +83,7 @@ public class DslQuery extends PluginSemanticQuery {
         try {
             explainSqlReq = ExplainSqlReq.builder()
                     .queryTypeEnum(QueryTypeEnum.SQL)
-                    .queryReq(getQueryDslReq(getLlmResp()))
+                    .queryReq(getQueryS2QLReq(getLlmResp()))
                     .build();
             return semanticInterpreter.explain(explainSqlReq, user);
         } catch (Exception e) {

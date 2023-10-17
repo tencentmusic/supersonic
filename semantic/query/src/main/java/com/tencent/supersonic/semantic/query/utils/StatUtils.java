@@ -12,7 +12,7 @@ import com.tencent.supersonic.semantic.api.model.pojo.QueryStat;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
@@ -87,11 +87,11 @@ public class StatUtils {
     }
 
 
-    public void initStatInfo(QueryDslReq queryDslReq, User facadeUser) {
+    public void initStatInfo(QueryS2QLReq queryS2QLReq, User facadeUser) {
         QueryStat queryStatInfo = new QueryStat();
-        List<String> allFields = SqlParserSelectHelper.getAllFields(queryDslReq.getSql());
-        queryStatInfo.setModelId(queryDslReq.getModelId());
-        ModelSchemaResp modelSchemaResp = modelService.fetchSingleModelSchema(queryDslReq.getModelId());
+        List<String> allFields = SqlParserSelectHelper.getAllFields(queryS2QLReq.getSql());
+        queryStatInfo.setModelId(queryS2QLReq.getModelId());
+        ModelSchemaResp modelSchemaResp = modelService.fetchSingleModelSchema(queryS2QLReq.getModelId());
 
         List<String> dimensions = new ArrayList<>();
         if (Objects.nonNull(modelSchemaResp)) {
@@ -106,12 +106,12 @@ public class StatUtils {
         String userName = getUserName(facadeUser);
         try {
             queryStatInfo.setTraceId("")
-                    .setModelId(queryDslReq.getModelId())
+                    .setModelId(queryS2QLReq.getModelId())
                     .setUser(userName)
                     .setQueryType(QueryTypeEnum.SQL.getValue())
                     .setQueryTypeBack(QueryTypeBackEnum.NORMAL.getState())
-                    .setQuerySqlCmd(queryDslReq.toString())
-                    .setQuerySqlCmdMd5(DigestUtils.md5Hex(queryDslReq.toString()))
+                    .setQuerySqlCmd(queryS2QLReq.toString())
+                    .setQuerySqlCmdMd5(DigestUtils.md5Hex(queryS2QLReq.toString()))
                     .setStartTime(System.currentTimeMillis())
                     .setUseResultCache(true)
                     .setUseSqlCache(true)

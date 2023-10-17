@@ -6,7 +6,7 @@ import lombok.ToString;
 
 @Data
 @ToString
-public class QueryDslReq {
+public class QueryS2QLReq {
 
     private Long modelId;
 

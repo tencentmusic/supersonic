@@ -2,7 +2,7 @@ package com.tencent.supersonic.semantic.query.parser.calcite.schema;
 
 
 import com.tencent.supersonic.semantic.query.parser.calcite.Configuration;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.DSLSqlValidatorImpl;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.S2QLSqlValidatorImpl;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,9 +35,9 @@ public class SchemaBuilder {
                 Configuration.typeFactory,
                 Configuration.config
         );
-        DSLSqlValidatorImpl dslSqlValidator = new DSLSqlValidatorImpl(Configuration.operatorTable, catalogReader,
+        S2QLSqlValidatorImpl s2QLSqlValidator = new S2QLSqlValidatorImpl(Configuration.operatorTable, catalogReader,
                 Configuration.typeFactory, Configuration.validatorConfig);
-        return new ParameterScope(dslSqlValidator, nameToTypeMap);
+        return new ParameterScope(s2QLSqlValidator, nameToTypeMap);
     }
 
     public static CalciteSchema getMaterializationSchema() {
