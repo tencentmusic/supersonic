@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Objects;
+
 import lombok.Data;
 import lombok.ToString;
 
@@ -48,6 +49,13 @@ public class QueryStat {
     private Boolean useSqlCache;
     private String sqlCacheKey;
     private String resultCacheKey;
+    private String queryOptMode;
+
+
+    public QueryStat setQueryOptMode(String queryOptMode) {
+        this.queryOptMode = queryOptMode;
+        return this;
+    }
 
     public QueryStat setQuerySqlCmdMd5(String querySqlCmdMd5) {
         this.querySqlCmdMd5 = querySqlCmdMd5;

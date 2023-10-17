@@ -71,6 +71,12 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>com.tencent.supersonic</groupId>
+            <artifactId>semantic-materialization</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.calcite.avatica</groupId>
             <artifactId>avatica-core</artifactId>
             <version>${calcite.avatica.version}</version>

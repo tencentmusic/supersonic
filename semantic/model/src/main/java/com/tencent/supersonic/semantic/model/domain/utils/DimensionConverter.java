@@ -1,6 +1,7 @@
 package com.tencent.supersonic.semantic.model.domain.utils;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
@@ -14,6 +15,7 @@ import com.tencent.supersonic.semantic.model.domain.pojo.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
@@ -35,6 +37,9 @@ public class DimensionConverter {
         } else {
             dimensionDO.setDimValueMaps(JSONObject.toJSONString(new ArrayList<>()));
         }
+        if (Objects.nonNull(dimension.getDataType())) {
+            dimensionDO.setDataType(dimension.getDataType().getType());
+        }
         return dimensionDO;
     }
 
@@ -43,6 +48,9 @@ public class DimensionConverter {
         BeanUtils.copyProperties(dimension, dimensionDO);
         dimensionDO.setDefaultValues(JSONObject.toJSONString(dimension.getDefaultValues()));
         dimensionDO.setDimValueMaps(JSONObject.toJSONString(dimension.getDimValueMaps()));
+        if (Objects.nonNull(dimension.getDataType())) {
+            dimensionDO.setDataType(dimension.getDataType().getType());
+        }
         return dimensionDO;
     }
 
@@ -64,6 +72,9 @@ public class DimensionConverter {
         }
         if (Strings.isNotEmpty(dimensionDO.getDimValueMaps())) {
             dimensionResp.setDimValueMaps(JsonUtil.toList(dimensionDO.getDimValueMaps(), DimValueMap.class));
+        }
+        if (Strings.isNotEmpty(dimensionDO.getDataType())) {
+            dimensionResp.setDataType(DataTypeEnums.of(dimensionDO.getDataType()));
         }
         return dimensionResp;
     }

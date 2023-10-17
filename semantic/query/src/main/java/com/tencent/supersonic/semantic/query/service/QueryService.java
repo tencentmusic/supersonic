@@ -5,6 +5,7 @@ import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
+import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
@@ -25,6 +26,7 @@ public interface QueryService {
 
     QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructCmd, User user) throws Exception;
 
+
     QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user);
 
     Object queryByQueryStatement(QueryStatement queryStatement);
@@ -32,4 +34,8 @@ public interface QueryService {
     List<ItemUseResp> getStatInfo(ItemUseReq itemUseCommend);
 
     <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception;
+
+    QueryStatement parseMetricReq(MetricReq metricReq) throws Exception;
+
+
 }

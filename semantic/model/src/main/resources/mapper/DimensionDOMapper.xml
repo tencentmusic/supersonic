@@ -19,6 +19,7 @@
     <result column="alias" jdbcType="VARCHAR" property="alias" />
     <result column="default_values" jdbcType="VARCHAR" property="defaultValues" />
     <result column="dim_value_maps" jdbcType="VARCHAR" property="dimValueMaps" />
+    <result column="data_type" jdbcType="VARCHAR" property="dataType"/>
   </resultMap>
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO">
     <result column="type_params" jdbcType="LONGVARCHAR" property="typeParams" />
@@ -56,7 +57,7 @@
   <sql id="Base_Column_List">
     id, model_id, datasource_id, name, biz_name, description, status, sensitive_level, 
     type, created_at, created_by, updated_at, updated_by, semantic_type, alias, default_values, 
-    dim_value_maps
+    dim_value_maps, data_type
   </sql>
   <sql id="Blob_Column_List">
     type_params, expr
@@ -113,14 +114,14 @@
       created_at, created_by, updated_at, 
       updated_by, semantic_type, alias, 
       default_values, dim_value_maps, type_params, 
-      expr)
+      expr, data_type)
     values (#{id,jdbcType=BIGINT}, #{modelId,jdbcType=BIGINT}, #{datasourceId,jdbcType=BIGINT}, 
       #{name,jdbcType=VARCHAR}, #{bizName,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, 
       #{status,jdbcType=INTEGER}, #{sensitiveLevel,jdbcType=INTEGER}, #{type,jdbcType=VARCHAR}, 
       #{createdAt,jdbcType=TIMESTAMP}, #{createdBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP}, 
       #{updatedBy,jdbcType=VARCHAR}, #{semanticType,jdbcType=VARCHAR}, #{alias,jdbcType=VARCHAR}, 
-      #{defaultValues,jdbcType=VARCHAR}, #{dimValueMaps,jdbcType=VARCHAR}, #{typeParams,jdbcType=LONGVARCHAR}, 
-      #{expr,jdbcType=LONGVARCHAR})
+      #{defaultValues,jdbcType=VARCHAR}, #{dimValueMaps,jdbcType=VARCHAR}, #{typeParams,jdbcType=LONGVARCHAR},
+      #{expr,jdbcType=LONGVARCHAR}, #{dataType,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO">
     insert into s2_dimension
@@ -182,6 +183,9 @@
       <if test="expr != null">
         expr,
       </if>
+        <if test="data_type != null">
+            data_type,
+        </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -241,6 +245,9 @@
       <if test="expr != null">
         #{expr,jdbcType=LONGVARCHAR},
       </if>
+        <if test="dataType != null">
+            #{dataType,jdbcType=VARCHAR},
+        </if>
     </trim>
   </insert>
   <select id="countByExample" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDOExample" resultType="java.lang.Long">
@@ -306,6 +313,9 @@
       <if test="expr != null">
         expr = #{expr,jdbcType=LONGVARCHAR},
       </if>
+        <if test="dataType != null">
+            data_type = #{dataType,jdbcType=VARCHAR},
+        </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -328,7 +338,8 @@
       default_values = #{defaultValues,jdbcType=VARCHAR},
       dim_value_maps = #{dimValueMaps,jdbcType=VARCHAR},
       type_params = #{typeParams,jdbcType=LONGVARCHAR},
-      expr = #{expr,jdbcType=LONGVARCHAR}
+      expr = #{expr,jdbcType=LONGVARCHAR},
+      data_type = #{dataType,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO">
@@ -348,7 +359,8 @@
       semantic_type = #{semanticType,jdbcType=VARCHAR},
       alias = #{alias,jdbcType=VARCHAR},
       default_values = #{defaultValues,jdbcType=VARCHAR},
-      dim_value_maps = #{dimValueMaps,jdbcType=VARCHAR}
+      dim_value_maps = #{dimValueMaps,jdbcType=VARCHAR},
+      data_type = #{dataType,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

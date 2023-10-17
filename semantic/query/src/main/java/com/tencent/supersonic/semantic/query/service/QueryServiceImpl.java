@@ -18,6 +18,7 @@ import com.tencent.supersonic.semantic.api.query.pojo.Cache;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
+import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
@@ -256,6 +257,11 @@ public class QueryServiceImpl implements QueryService {
     }
 
 
+    public QueryStatement parseMetricReq(MetricReq metricReq) throws Exception {
+        QueryStructReq queryStructCmd = new QueryStructReq();
+        return semanticQueryEngine.physicalSql(queryStructCmd, metricReq);
+    }
+
     private boolean isCache(QueryStructReq queryStructCmd) {
         if (!cacheEnable) {
             return false;
@@ -313,5 +319,6 @@ public class QueryServiceImpl implements QueryService {
         queryStructReq.setDateInfo(dateInfo);
         return queryStructReq;
     }
+
 
 }

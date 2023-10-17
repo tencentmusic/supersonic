@@ -142,7 +142,7 @@ public class DataSourceNode extends SemanticNode {
                         String.format("not find the match datasource : dimension[%s],measure[%s]", queryDimension,
                                 measures));
             }
-            log.info("linkDataSources {}", linkDataSources);
+            log.debug("linkDataSources {}", linkDataSources);
 
             dataSources.addAll(linkDataSources);
         }

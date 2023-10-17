@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.supersonic.semantic.materialization.infrastructure.mapper.MaterializationDOCustomMapper">
+  <resultMap id="BaseResultMap" type="com.tencent.supersonic.semantic.materialization.domain.dataobject.MaterializationDO">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="materialized_type" jdbcType="VARCHAR" property="materializedType" />
+    <result column="update_cycle" jdbcType="VARCHAR" property="updateCycle" />
+    <result column="model_id" jdbcType="BIGINT" property="modelId" />
+    <result column="database_id" jdbcType="BIGINT" property="databaseId" />
+    <result column="level" jdbcType="INTEGER" property="level" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="destination_table" jdbcType="VARCHAR" property="destinationTable" />
+    <result column="principals" jdbcType="VARCHAR" property="principals" />
+    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="created_by" jdbcType="VARCHAR" property="createdBy" />
+    <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="updated_by" jdbcType="VARCHAR" property="updatedBy" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.tencent.supersonic.semantic.materialization.domain.dataobject.MaterializationDOWithBLOBs">
+    <result column="date_info" jdbcType="LONGVARCHAR" property="dateInfo" />
+    <result column="entities" jdbcType="LONGVARCHAR" property="entities" />
+    <result column="description" jdbcType="LONGVARCHAR" property="description" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, name, materialized_type, update_cycle, model_id, database_id, level, status, 
+    destination_table, principals, created_at, created_by, updated_at, updated_by
+  </sql>
+  <sql id="Blob_Column_List">
+    date_info, entities, description
+  </sql>
+
+  <select id="getMaterializationResp" parameterType="com.tencent.supersonic.semantic.api.materialization.pojo.MaterializationFilter" resultMap="ResultMapWithBLOBs">
+    select *
+    from s2_materialization
+    <where>
+      <if test="materializationId != null">
+        and `id` = #{materializationId}
+      </if>
+      <if test="name != null and name != ''">
+        and `name` = #{name}
+      </if>
+      <if test="materializedType != null">
+        and `materialized_type` = #{materializedType.name()}
+      </if>
+      <if test="updateCycle != null">
+        and update_cycle = #{updateCycle.name()}
+      </if>
+      <if test="modelId != null and modelId !=''">
+        and model_id = #{modelId}
+      </if>
+      <if test="databaseId != null and databaseId !=''">
+        and database_id= #{databaseId}
+      </if>
+      <if test="level != null and level !=''">
+        and level= #{level}
+      </if>
+      <if test="createdBy != null and createdBy !=''">
+        and created_by = #{createdBy}
+      </if>
+      <if test="destinationTable != null and destinationTable !=''">
+        and destination_table = #{destinationTable}
+      </if>
+    </where>
+  </select>
+</mapper>

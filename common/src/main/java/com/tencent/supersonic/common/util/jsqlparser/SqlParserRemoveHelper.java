@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
+import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -127,6 +128,24 @@ public class SqlParserRemoveHelper {
                 removeWhereCondition(plainSelect.getHaving(), removeFieldNames);
             }
         });
+        return selectStatement.toString();
+    }
+
+    public static String removeWhere(String sql, List<String> fields) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+        Expression where = plainSelect.getWhere();
+
+        if (where == null) {
+            return sql;
+        } else {
+            where.accept(new FilterRemoveVisitor(fields));
+            plainSelect.setWhere(where);
+        }
         return selectStatement.toString();
     }
 
