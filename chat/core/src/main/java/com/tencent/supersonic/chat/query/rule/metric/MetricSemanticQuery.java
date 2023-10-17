@@ -3,14 +3,9 @@ package com.tencent.supersonic.chat.query.rule.metric;
 import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.METRIC;
 import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
 import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
-
-import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.RelateSchemaElement;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
@@ -28,11 +23,7 @@ import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaR
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -86,53 +77,9 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
                 filteredMatches.add(schemaElementMatch);
             }
         }
-        filteredMatches = metricRelateDimensionCheck(filteredMatches, modelId);
         return filteredMatches;
     }
 
-    private List<SchemaElementMatch> metricRelateDimensionCheck(List<SchemaElementMatch> elementMatches, Long modelId) {
-        List<SchemaElementMatch> filterSchemaElementMatch = Lists.newArrayList();
-
-        ModelSchema modelSchema = semanticInterpreter.getModelSchema(modelId, true);
-        Set<SchemaElement> metricElements = modelSchema.getMetrics();
-        Map<Long, SchemaElementMatch> valueElementMatchMap = elementMatches.stream()
-                .filter(elementMatch ->
-                        SchemaElementType.VALUE.equals(elementMatch.getElement().getType())
-                        || SchemaElementType.ID.equals(elementMatch.getElement().getType()))
-                .collect(Collectors.toMap(elementMatch -> elementMatch.getElement().getId(), e -> e, (e1, e2) -> e1));
-        Map<Long, SchemaElement> metricMap = metricElements.stream()
-                .collect(Collectors.toMap(SchemaElement::getId, e -> e, (e1, e2) -> e2));
-
-        for (SchemaElementMatch schemaElementMatch : elementMatches) {
-            if (!SchemaElementType.METRIC.equals(schemaElementMatch.getElement().getType())) {
-                filterSchemaElementMatch.add(schemaElementMatch);
-                continue;
-            }
-            SchemaElement metric = metricMap.get(schemaElementMatch.getElement().getId());
-            if (metric == null) {
-                continue;
-            }
-            List<RelateSchemaElement> relateSchemaElements = metric.getRelateSchemaElements();
-            if (CollectionUtils.isEmpty(relateSchemaElements)) {
-                filterSchemaElementMatch.add(schemaElementMatch);
-                continue;
-            }
-            List<Long> necessaryDimensionIds = relateSchemaElements.stream()
-                    .filter(RelateSchemaElement::isNecessary).map(RelateSchemaElement::getDimensionId)
-                    .collect(Collectors.toList());
-            boolean flag = true;
-            for (Long necessaryDimensionId : necessaryDimensionIds) {
-                if (!valueElementMatchMap.containsKey(necessaryDimensionId)) {
-                    flag = false;
-                    break;
-                }
-            }
-            if (flag) {
-                filterSchemaElementMatch.add(schemaElementMatch);
-            }
-        }
-        return filterSchemaElementMatch;
-    }
 
     @Override
     public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {

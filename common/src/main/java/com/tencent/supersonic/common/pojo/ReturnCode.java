@@ -2,6 +2,7 @@ package com.tencent.supersonic.common.pojo;
 
 public enum ReturnCode {
     SUCCESS(200, "success"),
+    INVALID_REQUEST(400, "invalid request"),
     INVALID_PERMISSION(401, "invalid permission"),
     ACCESS_ERROR(403, "access denied"),
     SYSTEM_ERROR(500, "system error");
