@@ -62,13 +62,11 @@ const NodeInfoDrawer: React.FC<Props> = ({
     }
     const {
       alias,
-      fullPath,
       bizName,
       createdBy,
       createdAt,
       updatedAt,
       description,
-      // domainName,
       sensitiveLevel,
       modelName,
       nodeType,
@@ -111,13 +109,11 @@ const NodeInfoDrawer: React.FC<Props> = ({
       {
         title: '指标趋势',
         render: () => (
-          <div key="指标趋势" style={{ display: 'block' }}>
-            <Row key={`metricTrendSection`} style={{ marginBottom: 10, display: 'flex' }}>
-              <Col span={24}>
-                <MetricTrendSection nodeData={nodeData} />
-              </Col>
-            </Row>
-          </div>
+          <Row key={`metricTrendSection`} style={{ marginBottom: 10, display: 'flex' }}>
+            <Col span={24}>
+              <MetricTrendSection nodeData={nodeData} />
+            </Col>
+          </Row>
         ),
       },
       {

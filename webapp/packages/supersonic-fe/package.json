@@ -100,7 +100,7 @@
     "sql-formatter": "^2.3.3",
     "supersonic-chat-sdk": "0.0.0",
     "umi": "3.5",
-    "umi-request": "^1.0.8"
+    "umi-request": "^1.4.0"
   },
   "devDependencies": {
     "@ant-design/pro-cli": "^2.0.2",
