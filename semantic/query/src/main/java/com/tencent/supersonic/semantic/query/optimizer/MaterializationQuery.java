@@ -22,6 +22,7 @@ import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Materialization;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Materialization.TimePartType;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.MaterializationElement;
+import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Measure;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Metric;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.SemanticModel;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.TimeRange;
@@ -290,27 +291,40 @@ public class MaterializationQuery implements QueryOptimizer {
         for (DataSource dataSource : semanticModel.getDatasourceMap().values()) {
             if (!CollectionUtils.isEmpty(dataSource.getMeasures())) {
                 dataSource.getMeasures().stream().forEach(m -> {
-                    m.setExpr(getMetricExpr(semanticModel.getRootPath(), m.getName()));
+                    setMetricExpr(semanticModel.getRootPath(), m.getName(), m);
                 });
             }
         }
         return semanticModel;
     }
 
-    protected String getMetricExpr(String rootPath, String bizName) {
+    protected void setMetricExpr(String rootPath, String bizName, Measure measure) {
         try {
+            measure.setExpr(bizName);
             SemanticModel oriSemanticModel = semanticSchemaManager.get(rootPath);
             if (Objects.nonNull(oriSemanticModel)) {
                 Optional<Metric> metric = oriSemanticModel.getMetrics()
                         .stream().filter(m -> m.getName().equalsIgnoreCase(bizName)).findFirst();
-                if (metric.isPresent() && metric.get().getMetricTypeParams().getExpr().contains(getVariablePrefix())) {
-                    return metric.get().getMetricTypeParams().getExpr();
+                if (metric.isPresent()) {
+                    if (metric.get().getMetricTypeParams().getExpr().contains(getVariablePrefix())) {
+                        measure.setExpr(metric.get().getMetricTypeParams().getExpr());
+                    }
+                    if (!CollectionUtils.isEmpty(metric.get().getMetricTypeParams().getMeasures())) {
+                        String measureParam = metric.get().getMetricTypeParams().getMeasures().get(0).getName();
+                        for (DataSource dataSource : oriSemanticModel.getDatasourceMap().values()) {
+                            Optional<Measure> measureOpt = dataSource.getMeasures().stream()
+                                    .filter(mm -> mm.getName().equalsIgnoreCase(measureParam)).findFirst();
+                            if (measureOpt.isPresent()) {
+                                measure.setAgg(measureOpt.get().getAgg());
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
             log.error("getMetricExpr {}", e);
         }
-        return bizName;
     }
 
     protected void removeDefaultMetric(QueryStructReq queryStructReq, MetricReq metricReq) {
