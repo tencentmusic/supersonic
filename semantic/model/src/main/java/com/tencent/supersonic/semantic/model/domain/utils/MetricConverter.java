@@ -77,7 +77,12 @@ public class MetricConverter {
                 RelateDimension.class));
         return metricResp;
     }
-
+    public static Metric convert2Metric(MetricDO metricDO) {
+        Metric metric = new Metric();
+        BeanUtils.copyProperties(metricDO, metric);
+        metric.setTypeParams(JSONObject.parseObject(metricDO.getTypeParams(), MetricTypeParams.class));
+        return metric;
+    }
 
     public static MetricYamlTpl convert2MetricYamlTpl(Metric metric) {
         MetricYamlTpl metricYamlTpl = new MetricYamlTpl();

@@ -25,7 +25,6 @@ public class TableView {
 
     private String alias;
     private List<String> primary;
-
     private DataSource dataSource;
 
     public SqlNode build() {

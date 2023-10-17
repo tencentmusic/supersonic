@@ -4,6 +4,8 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.semantic.api.materialization.request.MaterializationSourceReq;
+import com.tencent.supersonic.semantic.api.materialization.response.MaterializationSourceResp;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
@@ -12,6 +14,7 @@ import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.query.service.MaterializationService;
 import com.tencent.supersonic.semantic.query.service.SchemaService;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -30,6 +33,8 @@ public class SchemaController {
 
     @Autowired
     private SchemaService schemaService;
+    @Autowired
+    private MaterializationService materializationService;
 
     @PostMapping
     public List<ModelSchemaResp> fetchModelSchema(@RequestBody ModelSchemaFilterReq filter,
@@ -69,6 +74,18 @@ public class SchemaController {
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return schemaService.queryMetric(pageMetricCmd, user);
+    }
+
+    /**
+     * task api
+     */
+
+    @PostMapping("/materialization/source")
+    MaterializationSourceResp queryDataSource(@RequestBody MaterializationSourceReq materializationSourceReq,
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        User user = UserHolder.findUser(request, response);
+        return materializationService.getMaterializationDataSource(materializationSourceReq, user);
     }
 
 }

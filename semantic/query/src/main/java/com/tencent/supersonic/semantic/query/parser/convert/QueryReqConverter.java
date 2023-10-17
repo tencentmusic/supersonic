@@ -1,5 +1,8 @@
 package com.tencent.supersonic.semantic.query.parser.convert;
 
+
+import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
@@ -13,6 +16,7 @@ import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter.EngineAdaptor;
@@ -51,6 +55,7 @@ public class QueryReqConverter {
     private Catalog catalog;
 
     public QueryStatement convert(QueryDslReq databaseReq, ModelSchemaResp modelSchemaResp) throws Exception {
+
         if (Objects.isNull(modelSchemaResp)) {
             return new QueryStatement();
         }
@@ -68,6 +73,7 @@ public class QueryReqConverter {
         //4.build MetricTables
         List<String> allFields = SqlParserSelectHelper.getAllFields(databaseReq.getSql());
         List<String> metrics = getMetrics(modelSchemaResp, allFields);
+        QueryStructReq queryStructCmd = new QueryStructReq();
         MetricTable metricTable = new MetricTable();
         metricTable.setMetrics(metrics);
 
@@ -81,8 +87,13 @@ public class QueryReqConverter {
             metricTable.setMetrics(new ArrayList<>(Arrays.asList(
                     queryStructUtils.generateInternalMetricName(databaseReq.getModelId(),
                             metricTable.getDimensions()))));
+        } else {
+            queryStructCmd.setAggregators(
+                    metricTable.getMetrics().stream().map(m -> new Aggregator(m, AggOperatorEnum.UNKNOWN)).collect(
+                            Collectors.toList()));
         }
-        metricTable.setAggOption(getAggOption(databaseReq));
+        AggOption aggOption = getAggOption(databaseReq);
+        metricTable.setAggOption(aggOption);
         List<MetricTable> tables = new ArrayList<>();
         tables.add(metricTable);
         //4.build ParseSqlReq
@@ -97,7 +108,11 @@ public class QueryReqConverter {
             result.setWithAlias(false);
         }
         //5.physicalSql by ParseSqlReq
-        QueryStatement queryStatement = parserService.physicalSql(result);
+        queryStructCmd.setDateInfo(queryStructUtils.getDateConfBySql(databaseReq.getSql()));
+        queryStructCmd.setModelId(databaseReq.getModelId());
+        queryStructCmd.setNativeQuery(!AggOption.isAgg(aggOption));
+        log.info("QueryReqConverter queryStructCmd[{}]", queryStructCmd);
+        QueryStatement queryStatement = parserService.physicalSql(queryStructCmd, result);
         queryStatement.setSql(String.format(SqlExecuteReq.LIMIT_WRAPPER, queryStatement.getSql()));
         return queryStatement;
     }

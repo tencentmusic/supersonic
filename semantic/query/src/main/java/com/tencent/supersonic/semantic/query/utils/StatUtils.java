@@ -16,18 +16,23 @@ import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
+import com.tencent.supersonic.semantic.api.model.enums.QueryOptMode;
+
 import com.tencent.supersonic.semantic.query.persistence.repository.StatRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
 
 @Component
 @Slf4j
@@ -116,8 +121,9 @@ public class StatUtils {
             log.error("initStatInfo:{}", e);
         }
         StatUtils.set(queryStatInfo);
-
     }
+
+
 
     public void initStatInfo(QueryStructReq queryStructCmd, User facadeUser) {
         QueryStat queryStatInfo = new QueryStat();
@@ -146,7 +152,8 @@ public class StatUtils {
                     .setUseResultCache(true)
                     .setUseSqlCache(true)
                     .setMetrics(objectMapper.writeValueAsString(metrics))
-                    .setDimensions(objectMapper.writeValueAsString(dimensions));
+                    .setDimensions(objectMapper.writeValueAsString(dimensions))
+                    .setQueryOptMode(QueryOptMode.NONE.name());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -171,7 +178,10 @@ public class StatUtils {
                 : "Admin";
     }
 
-
+    public Boolean updateQueryOptMode(String mode) {
+        STATS.get().setQueryOptMode(mode);
+        return true;
+    }
 
     public List<ItemUseResp> getStatInfo(ItemUseReq itemUseCommend) {
         return statRepository.getStatInfo(itemUseCommend);

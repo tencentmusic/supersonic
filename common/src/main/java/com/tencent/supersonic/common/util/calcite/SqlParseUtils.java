@@ -1,7 +1,10 @@
 package com.tencent.supersonic.common.util.calcite;
 
+
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,6 +16,7 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlOrderBy;
 import org.apache.calcite.sql.SqlSelect;
+import org.apache.calcite.sql.fun.SqlCase;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
@@ -39,7 +43,6 @@ public class SqlParseUtils {
             SqlParserInfo sqlParserInfo = new SqlParserInfo();
 
             handlerSQL(sqlNode, sqlParserInfo);
-
 
             sqlParserInfo.setAllFields(sqlParserInfo.getAllFields().stream().distinct().collect(Collectors.toList()));
 
@@ -296,6 +299,70 @@ public class SqlParseUtils {
                 break;
         }
         return null;
+    }
+
+    public static Set<String> getFilterField(String where) {
+        Set<String> result = new HashSet<>();
+        try {
+
+            SqlParser parser = SqlParser.create(where);
+            SqlNode sqlNode = parser.parseExpression();
+            getFieldByExpression(sqlNode, result);
+            return result;
+        } catch (SqlParseException e) {
+            throw new RuntimeException("getSqlParseInfo", e);
+        }
+    }
+
+    public static void getFieldByExpression(SqlNode sqlNode, Set<String> fields) {
+        if (sqlNode instanceof SqlIdentifier) {
+            SqlIdentifier sqlIdentifier = (SqlIdentifier) sqlNode;
+            fields.add(sqlIdentifier.names.get(0).toLowerCase());
+            return;
+        }
+        if (sqlNode instanceof SqlBasicCall) {
+            SqlBasicCall sqlBasicCall = (SqlBasicCall) sqlNode;
+            for (SqlNode operand : sqlBasicCall.getOperandList()) {
+                getFieldByExpression(operand, fields);
+            }
+        }
+    }
+
+    public static Map getCaseExprFields(String expr) {
+        SqlParser parser = SqlParser.create(expr);
+        Map<String, String> ret = new HashMap();
+        try {
+            SqlNode sqlNodeCase = parser.parseExpression();
+            if (sqlNodeCase instanceof SqlCase) {
+                SqlCase sqlCase = (SqlCase) sqlNodeCase;
+                if (CollectionUtils.isEmpty(sqlCase.getThenOperands()) || CollectionUtils.isEmpty(
+                        sqlCase.getWhenOperands())) {
+                    return ret;
+                }
+                SqlDialect dialect = new S2MysqlSqlDialect(S2MysqlSqlDialect.DEFAULT_CONTEXT);
+                int i = 0;
+                for (SqlNode sqlNode : sqlCase.getWhenOperands().getList()) {
+                    if (sqlNode instanceof SqlBasicCall) {
+                        SqlBasicCall when = (SqlBasicCall) sqlNode;
+                        if (!org.springframework.util.CollectionUtils.isEmpty(when.getOperandList())
+                                && when.getOperandList().size() > 1) {
+                            String value = when.getOperandList().get(1).toSqlString(dialect).getSql();
+                            if (sqlCase.getThenOperands().get(i) != null) {
+                                if (sqlCase.getThenOperands().get(i) instanceof SqlIdentifier) {
+                                    SqlIdentifier sqlIdentifier = (SqlIdentifier) sqlCase.getThenOperands().get(i);
+                                    String field = sqlIdentifier.getSimple();
+                                    ret.put(value, field);
+                                }
+                            }
+                        }
+                    }
+                    i++;
+                }
+            }
+        } catch (SqlParseException e) {
+            throw new RuntimeException("getSqlParseInfo", e);
+        }
+        return ret;
     }
 
 }

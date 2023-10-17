@@ -174,6 +174,7 @@ CREATE TABLE  IF NOT EXISTS  `s2_datasource` (
     `biz_name` varchar(255) NOT  NULL ,
     `description` varchar(500) DEFAULT  NULL ,
     `database_id` INT NOT  NULL ,
+    `depends` varchar(500) DEFAULT  NULL ,
     `datasource_detail` LONGVARCHAR NOT  NULL ,
     `created_at` TIMESTAMP NOT  NULL ,
     `created_by` varchar(100) NOT  NULL ,
@@ -223,6 +224,7 @@ CREATE TABLE IF NOT EXISTS `s2_dimension` (
     `description` varchar(500) NOT NULL ,
     `status` INT NOT NULL , -- status, 0 is normal, 1 is off the shelf, 2 is deleted
     `sensitive_level` INT DEFAULT NULL ,
+    `data_type` varchar(50)  DEFAULT NULL , -- type date,array,varchar
     `type` varchar(50)  NOT NULL , -- type categorical,time
     `type_params` LONGVARCHAR  DEFAULT NULL ,
     `expr` LONGVARCHAR NOT NULL , -- expression
@@ -287,6 +289,7 @@ CREATE TABLE `s2_query_stat_info` (
                                       `native_query` INT DEFAULT NULL, -- 1-detail query, 0-aggregation query
                                       `start_date` varchar(50) DEFAULT NULL,
                                       `end_date` varchar(50) DEFAULT NULL,
+                                      `query_opt_mode` varchar(50) DEFAULT NULL,
                                       `dimensions`LONGVARCHAR , -- dimensions involved in sql
                                       `metrics`LONGVARCHAR , -- metric  involved in sql
                                       `select_cols`LONGVARCHAR ,
@@ -396,6 +399,69 @@ CREATE TABLE IF NOT EXISTS `singer` (
     );
 COMMENT ON TABLE singer IS 'singer_info';
 
+
+
+create table s2_materialization
+(
+    id                         int AUTO_INCREMENT ,
+    name                       varchar(255)  not null,
+    materialized_type          varchar(255) not null ,
+    update_cycle               varchar(255) ,
+    model_id                   bigint ,
+    database_id                bigint       not null ,
+    level                      int  not null default 0 ,
+    status                     int  not null default 1 ,
+    destination_table          varchar(255) not null ,
+    date_info                  varchar(255) null ,
+    entities                   varchar(255) null ,
+    principals                 varchar(255) DEFAULT NULL ,
+    created_at                 TIMESTAMP null,
+    created_by                 varchar(100) null,
+    updated_at                 TIMESTAMP null,
+    updated_by                 varchar(100) not null,
+    description                varchar(255) null,
+    primary key (id)
+) ;
+
+create table s2_materialization_element
+(
+    id                       bigint not null ,
+    type                     varchar(255)  not null ,
+    materialization_id       bigint  not null ,
+    depends                  varchar(255)   DEFAULT NULL,
+    element_type             varchar(255) DEFAULT NULL ,
+    default_value            varchar(255) DEFAULT NULL ,
+    outlier                  varchar(255) DEFAULT NULL ,
+    frequency                varchar(255) DEFAULT NULL ,
+    created_at               TIMESTAMP null,
+    created_by               varchar(100) null,
+    updated_at               TIMESTAMP null,
+    updated_by               varchar(100) not null,
+    description              varchar(255) null ,
+    status                   int  not null default 1 ,
+    PRIMARY KEY (id, type, materialization_id)
+) ;
+
+CREATE TABLE s2_materialization_record
+(
+    `id`                      bigint NOT NULL AUTO_INCREMENT ,
+    `materialization_id`      bigint  NOT null ,
+    `element_type`            varchar(255)  not null ,
+    `element_id`              bigint DEFAULT NULL ,
+    `element_name`            varchar(255)  not null ,
+    `data_time`               varchar(64) DEFAULT NULL ,
+    `state`                   varchar(255) DEFAULT NULL ,
+    `task_id`                 varchar(255) DEFAULT NULL,
+    `created_at`              TIMESTAMP null,
+    `updated_at`              TIMESTAMP null,
+    `created_by`              varchar(100) null,
+    `updated_by`              varchar(100) not null,
+    `retry_count`             bigint NOT NULL default 0,
+    `source_count`            bigint NOT NULL default 0,
+    `sink_count`              bigint NOT NULL default 0,
+    `message`                 varchar(255) ,
+    PRIMARY KEY (`id`)
+);
 
 
 

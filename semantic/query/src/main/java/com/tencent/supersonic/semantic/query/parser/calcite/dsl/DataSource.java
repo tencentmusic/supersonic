@@ -1,10 +1,13 @@
 package com.tencent.supersonic.semantic.query.parser.calcite.dsl;
 
+import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Materialization.TimePartType;
 import java.util.List;
+import lombok.Builder;
 import lombok.Data;
 
 
 @Data
+@Builder
 public class DataSource {
 
     private String name;
@@ -22,4 +25,6 @@ public class DataSource {
     private List<Measure> measures;
 
     private String aggTime;
+
+    private TimePartType timePartType = TimePartType.None;
 }

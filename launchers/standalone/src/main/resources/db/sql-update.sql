@@ -59,3 +59,10 @@ alter table s2_user add is_admin int null;
 --20230926
 alter table s2_model add drill_down_dimensions varchar(500) null;
 alter table s2_metric add relate_dimensions varchar(500) null;
+
+
+--20231013
+alter table s2_dimension add column data_type  varchar(50)  not null DEFAULT 'varchar' comment '维度数据类型 varchar、array';
+alter table s2_query_stat_info add column `query_opt_mode` varchar(20) DEFAULT NULL COMMENT '优化模式';
+alter table s2_datasource add column depends text COMMENT '上游依赖标识' after datasource_detail;
+

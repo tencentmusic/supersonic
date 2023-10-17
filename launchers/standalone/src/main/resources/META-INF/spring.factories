@@ -8,6 +8,7 @@ com.tencent.supersonic.chat.api.component.SemanticParser=\
     com.tencent.supersonic.chat.parser.rule.QueryModeParser, \
     com.tencent.supersonic.chat.parser.rule.ContextInheritParser, \
     com.tencent.supersonic.chat.parser.rule.AgentCheckParser, \
+    com.tencent.supersonic.chat.parser.rule.MetricCheckParser, \
     com.tencent.supersonic.chat.parser.rule.TimeRangeParser, \
     com.tencent.supersonic.chat.parser.rule.AggregateTypeParser, \
     com.tencent.supersonic.chat.parser.llm.dsl.LLMDslParser, \
