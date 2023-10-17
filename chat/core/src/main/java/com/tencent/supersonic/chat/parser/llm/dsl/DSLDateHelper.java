@@ -10,39 +10,35 @@ import com.tencent.supersonic.common.util.DateUtils;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 public class DSLDateHelper {
 
     public static String getReferenceDate(Long modelId) {
-        String chatDetailDate = getChatDetailDate(modelId);
-        if (StringUtils.isNotBlank(chatDetailDate)) {
-            return chatDetailDate;
-        }
-        return DateUtils.getBeforeDate(0);
-    }
-
-    private static String getChatDetailDate(Long modelId) {
+        String defaultDate = DateUtils.getBeforeDate(0);
         if (Objects.isNull(modelId)) {
-            return null;
+            return defaultDate;
         }
         ChatConfigFilter filter = new ChatConfigFilter();
         filter.setModelId(modelId);
 
         List<ChatConfigResp> configResps = ContextUtils.getBean(ConfigService.class).search(filter, null);
         if (CollectionUtils.isEmpty(configResps)) {
-            return null;
+            return defaultDate;
         }
         ChatConfigResp chatConfigResp = configResps.get(0);
         if (Objects.isNull(chatConfigResp.getChatDetailConfig()) || Objects.isNull(
                 chatConfigResp.getChatDetailConfig().getChatDefaultConfig())) {
-            return null;
+            return defaultDate;
         }
 
         ChatDefaultConfigReq chatDefaultConfig = chatConfigResp.getChatDetailConfig().getChatDefaultConfig();
         Integer unit = chatDefaultConfig.getUnit();
         String period = chatDefaultConfig.getPeriod();
         if (Objects.nonNull(unit)) {
+            // If the unit is set to less than 0, then do not add relative date.
+            if (unit < 0) {
+                return null;
+            }
             DatePeriodEnum datePeriodEnum = DatePeriodEnum.get(period);
             if (Objects.isNull(datePeriodEnum)) {
                 return DateUtils.getBeforeDate(unit);
@@ -50,6 +46,7 @@ public class DSLDateHelper {
                 return DateUtils.getBeforeDate(unit, datePeriodEnum);
             }
         }
-        return null;
+        return defaultDate;
     }
+
 }
