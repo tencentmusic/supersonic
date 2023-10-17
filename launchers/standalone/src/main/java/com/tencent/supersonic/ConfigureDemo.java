@@ -230,7 +230,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.LLM_PARSER);
+        llmParserTool.setType(AgentToolType.LLM_S2QL);
         llmParserTool.setModelIds(Lists.newArrayList(-1L));
         agentConfig.getTools().add(llmParserTool);
 
@@ -257,7 +257,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.LLM_PARSER);
+        llmParserTool.setType(AgentToolType.LLM_S2QL);
         llmParserTool.setModelIds(Lists.newArrayList(-1L));
         agentConfig.getTools().add(llmParserTool);
 

@@ -287,7 +287,7 @@ public class LLMS2QLParser implements SemanticParser {
     private CommonAgentTool getParserTool(QueryReq request, Long modelId) {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         List<CommonAgentTool> commonAgentTools = agentService.getParserTools(request.getAgentId(),
-                AgentToolType.LLM_PARSER);
+                AgentToolType.LLM_S2QL);
         Optional<CommonAgentTool> llmParserTool = commonAgentTools.stream()
                 .filter(tool -> {
                     List<Long> modelIds = tool.getModelIds();
@@ -302,7 +302,7 @@ public class LLMS2QLParser implements SemanticParser {
 
     private Long getModelId(QueryContext queryCtx, ChatContext chatCtx, Integer agentId) {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
-        Set<Long> distinctModelIds = agentService.getModelIds(agentId, AgentToolType.LLM_PARSER);
+        Set<Long> distinctModelIds = agentService.getModelIds(agentId, AgentToolType.LLM_S2QL);
         if (agentService.containsAllModel(distinctModelIds)) {
             distinctModelIds = new HashSet<>();
         }
