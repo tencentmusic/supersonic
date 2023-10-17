@@ -1,4 +1,7 @@
 import request from 'umi-request';
+import axios from 'axios';
+import { AUTH_TOKEN_KEY } from '@/common/constants';
+import moment from 'moment';
 
 const getRunningEnv = () => {
   return window.location.pathname.includes('/chatSetting/') ? 'chat' : 'semantic';
@@ -366,47 +369,69 @@ export function searchDictLatestTaskList(data: any): Promise<any> {
   });
 }
 
-export function queryStruct({
+const downloadStruct = (blob: Blob) => {
+  const fieldName = `supersonic_${moment().format('YYYYMMDDhhmmss')}.xlsx`;
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(new Blob([blob]));
+  link.download = fieldName;
+  document.body.appendChild(link);
+  link.click();
+  URL.revokeObjectURL(link.href);
+  document.body.removeChild(link);
+};
+
+export async function queryStruct({
   modelId,
   bizName,
   dateField = 'sys_imp_date',
   startDate,
   endDate,
+  download = false,
 }: {
   modelId: number;
   bizName: string;
   dateField: string;
   startDate: string;
   endDate: string;
+  download?: boolean;
 }): Promise<any> {
-  return request(`${process.env.API_BASE_URL}query/struct`, {
-    method: 'POST',
-    data: {
-      modelId,
-      groups: [dateField],
-      aggregators: [
-        {
-          column: bizName,
-          // func: 'SUM',
-          nameCh: 'null',
-          args: null,
+  const response = await request(
+    `${process.env.API_BASE_URL}query/${download ? 'download/' : ''}struct`,
+    {
+      method: 'POST',
+      ...(download ? { responseType: 'blob', getResponse: true } : {}),
+      data: {
+        modelId,
+        groups: [dateField],
+        aggregators: [
+          {
+            column: bizName,
+            // func: 'SUM',
+            nameCh: 'null',
+            args: null,
+          },
+        ],
+        orders: [],
+        dimensionFilters: [],
+        metricFilters: [],
+        params: [],
+        dateInfo: {
+          dateMode: 'BETWEEN',
+          startDate,
+          endDate,
+          dateList: [],
+          unit: 7,
+          period: 'DAY',
+          text: 'null',
         },
-      ],
-      orders: [],
-      dimensionFilters: [],
-      metricFilters: [],
-      params: [],
-      dateInfo: {
-        dateMode: 'BETWEEN',
-        startDate,
-        endDate,
-        dateList: [],
-        unit: 7,
-        period: 'DAY',
-        text: 'null',
+        limit: 365,
+        nativeQuery: false,
       },
-      limit: 365,
-      nativeQuery: false,
     },
-  });
+  );
+  if (download) {
+    downloadStruct(response.data);
+  } else {
+    return response;
+  }
 }

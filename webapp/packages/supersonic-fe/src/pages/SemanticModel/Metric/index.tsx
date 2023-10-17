@@ -3,7 +3,7 @@ import ProTable from '@ant-design/pro-table';
 import { message, Space, Popconfirm, Tag, Spin } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
-import { connect, history } from 'umi';
+import { connect, history, useModel } from 'umi';
 import type { StateType } from '../model';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
 import { queryMetric, deleteMetric } from '../service';
@@ -31,6 +31,10 @@ type QueryMetricListParams = {
 };
 
 const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
+  const { initialState = {} } = useModel('@@initialState');
+
+  const { currentUser = {} } = initialState as any;
+
   const { selectDomainId, selectModelId: modelId } = domainManger;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const defaultPagination = {
@@ -59,6 +63,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     const { code, data, msg } = await queryMetric({
       ...pagination,
       ...params,
+      createdBy: params.onlyShowMe ? currentUser.name : null,
       pageSize: params.showType ? 100 : defaultPagination.pageSize,
     });
     setLoading(false);
@@ -184,15 +189,6 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '描述',
       search: false,
     },
-    // {
-    //   dataIndex: 'type',
-    //   title: '指标类型',
-    //   valueEnum: {
-    //     ATOMIC: '原子指标',
-    //     DERIVED: '衍生指标',
-    //   },
-    // },
-
     {
       dataIndex: 'updatedAt',
       title: '更新时间',
