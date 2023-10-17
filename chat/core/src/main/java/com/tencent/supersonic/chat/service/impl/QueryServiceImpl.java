@@ -405,6 +405,10 @@ public class QueryServiceImpl implements QueryService {
         }
         Map<String, String> map = new HashMap<>();
         String dateField = DateUtils.DATE_FIELD;
+        if (queryData.getDateInfo().getUnit() > 1) {
+            queryData.getDateInfo().setStartDate(DateUtils.getBeforeDate(queryData.getDateInfo().getUnit() + 1));
+            queryData.getDateInfo().setEndDate(DateUtils.getBeforeDate(1));
+        }
         if (queryData.getDateInfo().getStartDate().equals(queryData.getDateInfo().getEndDate())) {
             for (FilterExpression filterExpression : filterExpressionList) {
                 if (DateUtils.DATE_FIELD.equals(filterExpression.getFieldName())) {
@@ -521,7 +525,10 @@ public class QueryServiceImpl implements QueryService {
         ExpressionList expressionList = new ExpressionList();
         List<Expression> expressions = new ArrayList<>();
         List<String> valueList = JsonUtil.toList(
-                dslQueryFilter.getValue().toString(), String.class);
+                JsonUtil.toString(dslQueryFilter.getValue()), String.class);
+        if (CollectionUtils.isEmpty(valueList)) {
+            return;
+        }
         valueList.stream().forEach(o -> {
             StringValue stringValue = new StringValue(o);
             expressions.add(stringValue);
