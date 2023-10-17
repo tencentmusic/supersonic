@@ -1,21 +1,18 @@
 package com.tencent.supersonic.semantic.model.domain.utils;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.semantic.api.model.request.DatabaseReq;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatabaseDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.ConnectInfo;
 import com.tencent.supersonic.semantic.model.domain.pojo.Database;
 import java.util.Arrays;
-import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-
 public class DatabaseConverter {
 
 
-    public static Database convert(DatabaseReq databaseReq, User user) {
+    public static Database convert(DatabaseReq databaseReq) {
         Database database = new Database();
         BeanUtils.copyProperties(databaseReq, database);
         ConnectInfo connectInfo = new ConnectInfo();
@@ -24,16 +21,14 @@ public class DatabaseConverter {
         connectInfo.setUrl(databaseReq.getUrl());
         connectInfo.setDatabase(databaseReq.getDatabase());
         database.setConnectInfo(connectInfo);
-        database.setCreatedAt(new Date());
-        database.setCreatedBy(user.getName());
-        database.setUpdatedAt(new Date());
-        database.setUpdatedBy(user.getName());
         database.setVersion(databaseReq.getVersion());
         return database;
     }
 
     public static DatabaseDO convert(Database database, DatabaseDO databaseDO) {
         database.setId(databaseDO.getId());
+        database.setCreatedBy(databaseDO.getCreatedBy());
+        database.setCreatedAt(databaseDO.getCreatedAt());
         BeanUtils.copyProperties(database, databaseDO);
         databaseDO.setConfig(JSONObject.toJSONString(database.getConnectInfo()));
         databaseDO.setAdmin(String.join(",", database.getAdmins()));
