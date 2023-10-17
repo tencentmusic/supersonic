@@ -141,6 +141,7 @@ CREATE TABLE `s2_datasource` (
                                  `description` varchar(500) DEFAULT NULL COMMENT '数据源描述',
                                  `database_id` bigint(20) NOT NULL COMMENT '数据库实例ID',
                                  `datasource_detail` mediumtext NOT NULL COMMENT '数据源配置',
+                                 `depends` text DEFAULT NULL COMMENT '上游依赖标识',
                                  `created_at` datetime NOT NULL COMMENT '创建时间',
                                  `created_by` varchar(100) NOT NULL COMMENT '创建人',
                                  `updated_at` datetime NOT NULL COMMENT '更新时间',
@@ -205,6 +206,7 @@ CREATE TABLE `s2_dimension` (
                                 `sensitive_level` int(10) DEFAULT NULL COMMENT '敏感级别',
                                 `type` varchar(50) NOT NULL COMMENT '维度类型 categorical,time',
                                 `type_params` text COMMENT '类型参数',
+                                `data_type` varchar(50)  DEFAULT null comment '维度数据类型 varchar、array',
                                 `expr` text NOT NULL COMMENT '表达式',
                                 `created_at` datetime NOT NULL COMMENT '创建时间',
                                 `created_by` varchar(100) NOT NULL COMMENT '创建人',
@@ -328,6 +330,7 @@ CREATE TABLE `s2_query_stat_info` (
                                       `use_sql_cache` tinyint(1) DEFAULT '-1' COMMENT '是否命中sql缓存',
                                       `sql_cache_key` mediumtext COLLATE utf8mb4_unicode_ci COMMENT '缓存的key',
                                       `result_cache_key` mediumtext COLLATE utf8mb4_unicode_ci COMMENT '缓存的key',
+                                      `query_opt_mode` varchar(20) null comment '优化模式',
                                       PRIMARY KEY (`id`),
                                       KEY `domain_index` (`model_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='查询统计信息表';
@@ -376,3 +379,66 @@ create table s2_user
 );
 
 insert into s2_user (id, `name`, password, display_name, email, is_admin) values (1, 'admin','admin','admin','admin@xx.com', 1);
+
+
+CREATE TABLE `s2_materialization`
+(
+    `id`                bigint(20) NOT NULL AUTO_INCREMENT,
+    `name`              varchar(255) NOT NULL COMMENT '物化名称',
+    `materialized_type` varchar(255) NOT NULL COMMENT '物化类型 partition 分区 zipper 拉链 ',
+    `update_cycle`      varchar(255) DEFAULT NULL COMMENT '更新周期，天更新、周更新、月更新',
+    `model_id`          bigint(20) DEFAULT NULL,
+    `database_id`       bigint(20) NOT NULL COMMENT '数据库实例ID',
+    `level`             int(11) NOT NULL DEFAULT '0' COMMENT '优先级，数值越大优先级越高',
+    `status`            int(11) NOT NULL DEFAULT '1' COMMENT '0-废弃，1-使用中',
+    `destination_table` varchar(255) NOT NULL COMMENT '物化表名称',
+    `date_info`         mediumtext COMMENT '时间字段',
+    `entities`          mediumtext COMMENT 'primary字段',
+    `principals`        varchar(255) DEFAULT NULL COMMENT '责任人',
+    `created_at`        datetime     DEFAULT NULL,
+    `created_by`        varchar(100) DEFAULT NULL,
+    `updated_at`        datetime     DEFAULT NULL,
+    `updated_by`        varchar(100) NOT NULL,
+    `description`       mediumtext COMMENT '备注说明',
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+CREATE TABLE `s2_materialization_element`
+(
+    `id`                 bigint(20) NOT NULL COMMENT 'element类型对应id',
+    `type`               varchar(255) NOT NULL COMMENT 'element类型 metric、dimension',
+    `materialization_id` bigint(20) NOT NULL COMMENT '关联s2_materialization主键',
+    `depends`            text COMMENT '上游依赖标识',
+    `element_type`       varchar(255) DEFAULT NULL COMMENT 'varchar,double,bigint,int,array',
+    `default_value`      varchar(255) DEFAULT NULL COMMENT '默认值',
+    `outlier`            varchar(255) DEFAULT NULL COMMENT '异常值',
+    `frequency`          varchar(255) DEFAULT NULL COMMENT '变化频率, UNKNOWN, HIGH, LOW',
+    `created_at`         datetime     DEFAULT NULL,
+    `created_by`         varchar(100) DEFAULT NULL,
+    `updated_at`         datetime     DEFAULT NULL,
+    `updated_by`         varchar(100) NOT NULL,
+    `description`        mediumtext COMMENT '备注说明',
+    `status`             int(11) NOT NULL DEFAULT '1' COMMENT '0-废弃，1-使用中',
+    PRIMARY KEY (`id`, `type`, `materialization_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE `s2_materialization_record`
+(
+    `id`                 bigint(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+    `materialization_id` bigint(20) NOT NULL COMMENT '物化配置ID',
+    `element_type`       varchar(255) NOT NULL COMMENT 'element类型 metric、dimension',
+    `element_id`         bigint(20) DEFAULT NULL COMMENT '数据名字: 例如标签名、指标名',
+    `element_name`       varchar(255) NOT NULL COMMENT 'element 名称',
+    `data_time`          varchar(64)  DEFAULT NULL COMMENT '数据时间',
+    `state`              varchar(255) DEFAULT NULL COMMENT '任务运行状态',
+    `task_id`            varchar(255) DEFAULT NULL COMMENT '任务id',
+    `created_at`         datetime     DEFAULT NULL,
+    `updated_at`         datetime     DEFAULT NULL,
+    `created_by`         varchar(100) DEFAULT NULL,
+    `updated_by`         varchar(100) NOT NULL,
+    `retry_count`        bigint(20) NOT NULL DEFAULT '0',
+    `source_count`       bigint(20) NOT NULL DEFAULT '0',
+    `sink_count`         bigint(20) NOT NULL DEFAULT '0',
+    `message`            text COMMENT '信息',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_id` (`materialization_id`,`element_type`,`element_id`,`data_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+

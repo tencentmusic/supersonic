@@ -99,6 +99,11 @@ public class DimensionDO {
     private String expr;
 
     /**
+     * 数据类型
+     */
+    private String dataType;
+
+    /**
      * 维度ID
      *
      * @return id 维度ID
@@ -430,5 +435,13 @@ public class DimensionDO {
      */
     public void setExpr(String expr) {
         this.expr = expr == null ? null : expr.trim();
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
     }
 }

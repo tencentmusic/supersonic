@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.query.parser;
 
+import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
@@ -59,7 +60,8 @@ public class QueryParser {
                     MetricReq metricReq = new MetricReq();
                     metricReq.setMetrics(metricTable.getMetrics());
                     metricReq.setDimensions(metricTable.getDimensions());
-                    metricReq.setWhere(formatWhere(metricTable.getWhere()));
+                    metricReq.setWhere(StringUtil.formatSqlQuota(metricTable.getWhere()));
+                    metricReq.setNativeQuery(!AggOption.isAgg(metricTable.getAggOption()));
                     metricReq.setRootPath(sqlCommend.getRootPath());
                     QueryStatement tableSql = parser(metricReq, metricTable.getAggOption());
                     if (!tableSql.isOk()) {
@@ -86,6 +88,7 @@ public class QueryParser {
                     }
                     queryStatement.setSql(sql);
                     queryStatement.setSourceId(sourceId);
+                    queryStatement.setParseSqlReq(sqlCommend);
                     return queryStatement;
                 }
             }
@@ -118,10 +121,4 @@ public class QueryParser {
     }
 
 
-    private String formatWhere(String where) {
-        if (StringUtils.isEmpty(where)) {
-            return where;
-        }
-        return where.replace("\"", "\\\\\"");
-    }
 }

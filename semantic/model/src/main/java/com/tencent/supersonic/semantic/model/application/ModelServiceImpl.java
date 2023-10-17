@@ -228,8 +228,9 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public Map<Long, String> getModelFullPathMap() {
-        return getModelList().stream().filter(Objects::nonNull).collect(Collectors.toMap(ModelResp::getId,
-                ModelResp::getFullPath, (k1, k2) -> k1));
+        return getModelList().stream().filter(m -> m != null && m.getFullPath() != null)
+                .collect(Collectors.toMap(ModelResp::getId,
+                        ModelResp::getFullPath, (k1, k2) -> k1));
     }
 
     @Override

@@ -16,6 +16,7 @@
         <module>api</module>
         <module>model</module>
         <module>query</module>
+        <module>materialization</module>
     </modules>
 
 </project>

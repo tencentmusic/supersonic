@@ -1,6 +1,7 @@
 package com.tencent.supersonic.semantic.api.model.response;
 
 
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 
@@ -35,5 +36,7 @@ public class DimensionResp extends SchemaItem {
     private List<String> defaultValues;
 
     private List<DimValueMap> dimValueMaps;
+
+    private DataTypeEnums dataType;
 
 }

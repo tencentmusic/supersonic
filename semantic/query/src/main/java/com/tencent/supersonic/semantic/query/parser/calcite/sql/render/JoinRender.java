@@ -5,7 +5,10 @@ import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Constants;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Identify;
+
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Identify.Type;
+import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Materialization.TimePartType;
+
 import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Metric;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.Renderer;
@@ -97,7 +100,9 @@ public class JoinRender extends Renderer {
                     fieldWhere.add(identify.getName());
                 }
             }
-            TableView tableView = SourceRender.renderOne("", fieldWhere, queryMetrics, queryDimension,
+            List<String> dataSourceWhere = new ArrayList<>(fieldWhere);
+            addZipperField(dataSource, dataSourceWhere);
+            TableView tableView = SourceRender.renderOne("", dataSourceWhere, queryMetrics, queryDimension,
                     metricCommand.getWhere(), dataSources.get(i), scope, schema, true);
             log.info("tableView {}", tableView.getTable().toString());
             String alias = Constants.JOIN_TABLE_PREFIX + dataSource.getName();
@@ -255,7 +260,10 @@ public class JoinRender extends Renderer {
 
     private SqlNode getCondition(TableView left, TableView right, DataSource dataSource, SemanticSchema schema,
             SqlValidatorScope scope) throws Exception {
-
+        if (TimePartType.ZIPPER.equals(left.getDataSource().getTimePartType()) || TimePartType.ZIPPER.equals(
+                right.getDataSource().getTimePartType())) {
+            return getZipperCondition(left, right, dataSource, schema, scope);
+        }
         Set<String> selectLeft = SemanticNode.getSelect(left.getTable());
         Set<String> selectRight = SemanticNode.getSelect(right.getTable());
         selectLeft.retainAll(selectRight);
@@ -375,5 +383,96 @@ public class JoinRender extends Renderer {
         }
         orders.poll();
         visited.put(id, false);
+    }
+    private void addZipperField(DataSource dataSource, List<String> fields) {
+        if (TimePartType.ZIPPER.equals(dataSource.getTimePartType())) {
+            dataSource.getDimensions().stream()
+                    .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType())).forEach(t -> {
+                        if (t.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_END)
+                                && !fields.contains(t.getName())
+                        ) {
+                            fields.add(t.getName());
+                        }
+                        if (t.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_START)
+                                && !fields.contains(t.getName())
+                        ) {
+                            fields.add(t.getName());
+                        }
+                    });
+        }
+    }
+
+    private SqlNode getZipperCondition(TableView left, TableView right, DataSource dataSource, SemanticSchema schema,
+            SqlValidatorScope scope) throws Exception {
+        if (TimePartType.ZIPPER.equals(left.getDataSource().getTimePartType()) && TimePartType.ZIPPER.equals(
+                right.getDataSource().getTimePartType())) {
+            throw new Exception("not support two zipper table");
+        }
+        SqlNode condition = null;
+        Optional<Dimension> leftTime = left.getDataSource().getDimensions().stream()
+                .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType())).findFirst();
+        Optional<Dimension> rightTime = right.getDataSource().getDimensions().stream()
+                .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType())).findFirst();
+        if (leftTime.isPresent() && rightTime.isPresent()) {
+
+            String startTime = "";
+            String endTime = "";
+            String dateTime = "";
+            List<String> primaryZipper = new ArrayList<>();
+            List<String> primaryPartition = new ArrayList<>();
+
+            Optional<Dimension> startTimeOp = (TimePartType.ZIPPER.equals(left.getDataSource().getTimePartType()) ? left
+                    : right).getDataSource().getDimensions().stream()
+                    .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
+                    .filter(d -> d.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_START)).findFirst();
+            Optional<Dimension> endTimeOp = (TimePartType.ZIPPER.equals(left.getDataSource().getTimePartType()) ? left
+                    : right).getDataSource().getDimensions().stream()
+                    .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
+                    .filter(d -> d.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_END)).findFirst();
+            if (startTimeOp.isPresent() && endTimeOp.isPresent()) {
+                TableView zipper = TimePartType.ZIPPER.equals(left.getDataSource().getTimePartType()) ? left : right;
+                TableView partMetric =
+                        TimePartType.ZIPPER.equals(left.getDataSource().getTimePartType()) ? right : left;
+                Optional<Dimension> partTime =
+                        TimePartType.ZIPPER.equals(left.getDataSource().getTimePartType()) ? rightTime : leftTime;
+                startTime = zipper.getAlias() + "." + startTimeOp.get().getName();
+                endTime = zipper.getAlias() + "." + endTimeOp.get().getName();
+                dateTime = partMetric.getAlias() + "." + partTime.get().getName();
+                primaryZipper = zipper.getDataSource().getIdentifiers().stream().map(i -> i.getName()).collect(
+                        Collectors.toList());
+                primaryPartition = partMetric.getDataSource().getIdentifiers().stream().map(i -> i.getName()).collect(
+                        Collectors.toList());
+            }
+            primaryZipper.retainAll(primaryPartition);
+            condition =
+                    new SqlBasicCall(
+                            SqlStdOperatorTable.AND,
+                            new ArrayList<SqlNode>(Arrays.asList(new SqlBasicCall(
+                                    SqlStdOperatorTable.LESS_THAN_OR_EQUAL,
+                                    new ArrayList<SqlNode>(Arrays.asList(SemanticNode.parse(startTime, scope),
+                                            SemanticNode.parse(dateTime, scope))),
+                                    SqlParserPos.ZERO, null), new SqlBasicCall(
+                                    SqlStdOperatorTable.GREATER_THAN,
+                                            new ArrayList<SqlNode>(Arrays.asList(SemanticNode.parse(endTime, scope),
+                                            SemanticNode.parse(dateTime, scope))),
+                                    SqlParserPos.ZERO, null))),
+                            SqlParserPos.ZERO, null);
+
+            for (String p : primaryZipper) {
+                List<SqlNode> ons = new ArrayList<>();
+                ons.add(SemanticNode.parse(left.getAlias() + "." + p, scope));
+                ons.add(SemanticNode.parse(right.getAlias() + "." + p, scope));
+                SqlNode addCondition = new SqlBasicCall(
+                        SqlStdOperatorTable.EQUALS,
+                        ons,
+                        SqlParserPos.ZERO, null);
+                condition = new SqlBasicCall(
+                        SqlStdOperatorTable.AND,
+                        new ArrayList<>(Arrays.asList(condition, addCondition)),
+                        SqlParserPos.ZERO, null);
+            }
+
+        }
+        return condition;
     }
 }
