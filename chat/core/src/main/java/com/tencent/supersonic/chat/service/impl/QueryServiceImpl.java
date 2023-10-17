@@ -204,7 +204,7 @@ public class QueryServiceImpl implements QueryService {
     @Override
     public QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception {
         ChatParseDO chatParseDO = chatService.getParseInfo(queryReq.getQueryId(),
-                queryReq.getUser().getName(), queryReq.getParseId());
+                queryReq.getParseId());
         ChatQueryDO chatQueryDO = chatService.getLastQuery(queryReq.getChatId());
         List<StatisticsDO> timeCostDOList = new ArrayList<>();
         SemanticParseInfo parseInfo = JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
@@ -325,7 +325,7 @@ public class QueryServiceImpl implements QueryService {
     @Override
     public QueryResult executeDirectQuery(QueryDataReq queryData, User user) throws SqlParseException {
         ChatParseDO chatParseDO = chatService.getParseInfo(queryData.getQueryId(),
-                queryData.getUser().getName(), queryData.getParseId());
+                queryData.getParseId());
         SemanticParseInfo parseInfo = getSemanticParseInfo(queryData, chatParseDO);
 
         SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
@@ -346,20 +346,25 @@ public class QueryServiceImpl implements QueryService {
             Set<String> removeHavingFieldNames = new HashSet<>();
             updateFilters(filedNameToValueMap, whereExpressionList, queryData.getDimensionFilters(),
                     parseInfo.getDimensionFilters(), addWhereConditions, removeWhereFieldNames);
-            updateDateInfo(queryData, parseInfo, filedNameToValueMap, whereExpressionList);
+            updateDateInfo(queryData, parseInfo, filedNameToValueMap,
+                    whereExpressionList, addWhereConditions, removeWhereFieldNames);
+            log.info("filedNameToValueMap:{}", filedNameToValueMap);
+            log.info("removeWhereFieldNames:{}", removeWhereFieldNames);
+            correctorSql = SqlParserReplaceHelper.replaceValue(correctorSql, filedNameToValueMap);
             correctorSql = SqlParserRemoveHelper.removeWhereCondition(correctorSql, removeWhereFieldNames);
 
             updateFilters(havingFiledNameToValueMap, havingExpressionList, queryData.getDimensionFilters(),
                     parseInfo.getDimensionFilters(), addHavingConditions, removeHavingFieldNames);
+            log.info("havingFiledNameToValueMap:{}", havingFiledNameToValueMap);
+            log.info("removeHavingFieldNames:{}", removeHavingFieldNames);
+            correctorSql = SqlParserReplaceHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
             correctorSql = SqlParserRemoveHelper.removeHavingCondition(correctorSql, removeWhereFieldNames);
 
+            log.info("addWhereConditions:{}", addWhereConditions);
+            log.info("addHavingConditions:{}", addHavingConditions);
             correctorSql = SqlParserAddHelper.addWhere(correctorSql, addWhereConditions);
             correctorSql = SqlParserAddHelper.addHaving(correctorSql, addHavingConditions);
 
-            log.info("filedNameToValueMap:{}", filedNameToValueMap);
-            correctorSql = SqlParserReplaceHelper.replaceValue(correctorSql, filedNameToValueMap);
-            log.info("havingFiledNameToValueMap:{}", havingFiledNameToValueMap);
-            correctorSql = SqlParserReplaceHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
             log.info("correctorSql after replacing:{}", correctorSql);
             llmResp.setCorrectorSql(correctorSql);
             dslParseResult.setLlmResp(llmResp);
@@ -385,7 +390,7 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public EntityInfo getEntityInfo(Long queryId, Integer parseId, User user) {
-        ChatParseDO chatParseDO = chatService.getParseInfo(queryId, user.getName(), parseId);
+        ChatParseDO chatParseDO = chatService.getParseInfo(queryId, parseId);
         SemanticParseInfo parseInfo = JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
         return semanticService.getEntityInfo(parseInfo, user);
@@ -393,7 +398,9 @@ public class QueryServiceImpl implements QueryService {
 
     private void updateDateInfo(QueryDataReq queryData, SemanticParseInfo parseInfo,
                                 Map<String, Map<String, String>> filedNameToValueMap,
-                                List<FilterExpression> filterExpressionList) {
+                                List<FilterExpression> filterExpressionList,
+                                List<Expression> addConditions,
+                                Set<String> removeFieldNames) {
         if (Objects.isNull(queryData.getDateInfo())) {
             return;
         }
@@ -402,9 +409,20 @@ public class QueryServiceImpl implements QueryService {
         if (queryData.getDateInfo().getStartDate().equals(queryData.getDateInfo().getEndDate())) {
             for (FilterExpression filterExpression : filterExpressionList) {
                 if (DateUtils.DATE_FIELD.equals(filterExpression.getFieldName())) {
-                    dateField = filterExpression.getFieldName();
-                    map.put(filterExpression.getFieldValue().toString(),
-                            queryData.getDateInfo().getStartDate());
+                    if (filterExpression.getOperator().equals(FilterOperatorEnum.EQUALS)) {
+                        dateField = filterExpression.getFieldName();
+                        map.put(filterExpression.getFieldValue().toString(),
+                                queryData.getDateInfo().getStartDate());
+                        filedNameToValueMap.put(dateField, map);
+                    } else {
+                        removeFieldNames.add(DateUtils.DATE_FIELD);
+                        EqualsTo equalsTo = new EqualsTo();
+                        Column column = new Column(DateUtils.DATE_FIELD);
+                        StringValue stringValue = new StringValue(queryData.getDateInfo().getStartDate());
+                        equalsTo.setLeftExpression(column);
+                        equalsTo.setRightExpression(stringValue);
+                        addConditions.add(equalsTo);
+                    }
                     break;
                 }
             }
@@ -422,11 +440,28 @@ public class QueryServiceImpl implements QueryService {
                         map.put(filterExpression.getFieldValue().toString(),
                                 queryData.getDateInfo().getEndDate());
                     }
+                    filedNameToValueMap.put(dateField, map);
+                    if (FilterOperatorEnum.EQUALS.getValue().equals(filterExpression.getOperator())) {
+                        removeFieldNames.add(DateUtils.DATE_FIELD);
+                        GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
+                        addTimeCondition(queryData.getDateInfo().getStartDate(), greaterThanEquals, addConditions);
+                        MinorThanEquals minorThanEquals = new MinorThanEquals();
+                        addTimeCondition(queryData.getDateInfo().getEndDate(), minorThanEquals, addConditions);
+                    }
                 }
             }
         }
-        filedNameToValueMap.put(dateField, map);
         parseInfo.setDateInfo(queryData.getDateInfo());
+    }
+
+    public <T extends ComparisonOperator> void addTimeCondition(String date,
+                                                                T comparisonExpression,
+                                                                List<Expression> addConditions) {
+        Column column = new Column(DateUtils.DATE_FIELD);
+        StringValue stringValue = new StringValue(date);
+        comparisonExpression.setLeftExpression(column);
+        comparisonExpression.setRightExpression(stringValue);
+        addConditions.add(comparisonExpression);
     }
 
     private void updateFilters(Map<String, Map<String, String>> filedNameToValueMap,
@@ -452,43 +487,25 @@ public class QueryServiceImpl implements QueryService {
                             }
                         });
                     } else {
-                        removeFieldNames.add(dslQueryFilter.getBizName());
+                        removeFieldNames.add(dslQueryFilter.getName());
                         if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.EQUALS)) {
                             EqualsTo equalsTo = new EqualsTo();
-                            addCondition(dslQueryFilter, equalsTo, contextMetricFilters, addConditions);
+                            addWhereCondition(dslQueryFilter, equalsTo, contextMetricFilters, addConditions);
                         } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.GREATER_THAN_EQUALS)) {
                             GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
-                            addCondition(dslQueryFilter, greaterThanEquals, contextMetricFilters, addConditions);
+                            addWhereCondition(dslQueryFilter, greaterThanEquals, contextMetricFilters, addConditions);
                         } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.GREATER_THAN)) {
                             GreaterThan greaterThan = new GreaterThan();
-                            addCondition(dslQueryFilter, greaterThan, contextMetricFilters, addConditions);
+                            addWhereCondition(dslQueryFilter, greaterThan, contextMetricFilters, addConditions);
                         } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.MINOR_THAN_EQUALS)) {
                             MinorThanEquals minorThanEquals = new MinorThanEquals();
-                            addCondition(dslQueryFilter, minorThanEquals, contextMetricFilters, addConditions);
+                            addWhereCondition(dslQueryFilter, minorThanEquals, contextMetricFilters, addConditions);
                         } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.MINOR_THAN)) {
                             MinorThan minorThan = new MinorThan();
-                            addCondition(dslQueryFilter, minorThan, contextMetricFilters, addConditions);
+                            addWhereCondition(dslQueryFilter, minorThan, contextMetricFilters, addConditions);
                         } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.IN)) {
-                            Column column = new Column(dslQueryFilter.getBizName());
-                            ExpressionList expressionList = new ExpressionList();
-                            List<Expression> expressions = new ArrayList<>();
-                            List<String> valueList = JsonUtil.toList(
-                                    dslQueryFilter.getValue().toString(), String.class);
-                            valueList.stream().forEach(o -> {
-                                StringValue stringValue = new StringValue(o);
-                                expressions.add(stringValue);
-                            });
-                            expressionList.setExpressions(expressions);
                             InExpression inExpression = new InExpression();
-                            inExpression.setLeftExpression(column);
-                            inExpression.setRightItemsList(expressionList);
-                            addConditions.add(inExpression);
-                            contextMetricFilters.stream().forEach(o -> {
-                                if (o.getName().equals(dslQueryFilter.getName())) {
-                                    o.setValue(dslQueryFilter.getValue());
-                                    o.setOperator(dslQueryFilter.getOperator());
-                                }
-                            });
+                            addWhereInCondition(dslQueryFilter, inExpression, contextMetricFilters, addConditions);
                         }
                     }
                     break;
@@ -497,11 +514,40 @@ public class QueryServiceImpl implements QueryService {
         }
     }
 
-    public <T extends ComparisonOperator> void addCondition(QueryFilter dslQueryFilter,
-                                                            T comparisonExpression,
-                                                            Set<QueryFilter> contextMetricFilters,
-                                                            List<Expression> addConditions) {
-        Column column = new Column(dslQueryFilter.getBizName());
+    public void addWhereInCondition(QueryFilter dslQueryFilter,
+                                    InExpression inExpression,
+                                    Set<QueryFilter> contextMetricFilters,
+                                    List<Expression> addConditions) {
+        Column column = new Column(dslQueryFilter.getName());
+        ExpressionList expressionList = new ExpressionList();
+        List<Expression> expressions = new ArrayList<>();
+        List<String> valueList = JsonUtil.toList(
+                dslQueryFilter.getValue().toString(), String.class);
+        valueList.stream().forEach(o -> {
+            StringValue stringValue = new StringValue(o);
+            expressions.add(stringValue);
+        });
+        expressionList.setExpressions(expressions);
+        inExpression.setLeftExpression(column);
+        inExpression.setRightItemsList(expressionList);
+        addConditions.add(inExpression);
+        contextMetricFilters.stream().forEach(o -> {
+            if (o.getName().equals(dslQueryFilter.getName())) {
+                o.setValue(dslQueryFilter.getValue());
+                o.setOperator(dslQueryFilter.getOperator());
+            }
+        });
+    }
+
+    public <T extends ComparisonOperator> void addWhereCondition(QueryFilter dslQueryFilter,
+                                                                 T comparisonExpression,
+                                                                 Set<QueryFilter> contextMetricFilters,
+                                                                 List<Expression> addConditions) {
+        String columnName = dslQueryFilter.getName();
+        if (StringUtils.isNotBlank(dslQueryFilter.getFunction())) {
+            columnName = dslQueryFilter.getFunction() + "(" + dslQueryFilter.getName() + ")";
+        }
+        Column column = new Column(columnName);
         LongValue longValue = new LongValue(Long.parseLong(dslQueryFilter.getValue().toString()));
         comparisonExpression.setLeftExpression(column);
         comparisonExpression.setRightExpression(longValue);

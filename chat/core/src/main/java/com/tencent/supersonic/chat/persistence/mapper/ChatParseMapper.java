@@ -12,6 +12,6 @@ public interface ChatParseMapper {
 
     boolean batchSaveParseInfo(@Param("list") List<ChatParseDO> list);
 
-    ChatParseDO getParseInfo(Long questionId, String userName, int parseId);
+    ChatParseDO getParseInfo(Long questionId, int parseId);
 
 }
