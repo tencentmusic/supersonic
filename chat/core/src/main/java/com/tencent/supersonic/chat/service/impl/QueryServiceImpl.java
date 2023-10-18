@@ -63,6 +63,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -113,6 +114,7 @@ public class QueryServiceImpl implements QueryService {
             log.info("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
         ParseResp parseResult;
+        List<ChatParseDO> chatParseDOS = Lists.newArrayList();
         if (queryCtx.getCandidateQueries().size() > 0) {
             log.debug("pick before [{}]", queryCtx.getCandidateQueries().stream().collect(
                     Collectors.toList()));
@@ -130,7 +132,7 @@ public class QueryServiceImpl implements QueryService {
                     .selectedParses(selectedParses)
                     .candidateParses(candidateParses)
                     .build();
-            chatService.batchAddParse(chatCtx, queryReq, parseResult, candidateParses, selectedParses);
+            chatParseDOS = chatService.batchAddParse(chatCtx, queryReq, parseResult, candidateParses, selectedParses);
             saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
         } else {
@@ -141,8 +143,9 @@ public class QueryServiceImpl implements QueryService {
                     .build();
         }
         for (ParseResponder parseResponder : parseResponders) {
-            parseResponder.fillResponse(parseResult, queryCtx);
+            parseResponder.fillResponse(parseResult, queryCtx, chatParseDOS);
         }
+        chatService.updateChatParse(chatParseDOS);
         return parseResult;
     }
 

@@ -5,6 +5,7 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
+import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
@@ -16,7 +17,8 @@ import org.springframework.util.CollectionUtils;
 public class EntityInfoParseResponder implements ParseResponder {
 
     @Override
-    public void fillResponse(ParseResp parseResp, QueryContext queryContext) {
+    public void fillResponse(ParseResp parseResp, QueryContext queryContext,
+                             List<ChatParseDO> chatParseDOS) {
         List<SemanticParseInfo> selectedParses = parseResp.getSelectedParses();
         if (CollectionUtils.isEmpty(selectedParses)) {
             return;
