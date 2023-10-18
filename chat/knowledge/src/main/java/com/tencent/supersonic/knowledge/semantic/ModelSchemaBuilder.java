@@ -9,27 +9,23 @@ import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.Entity;
 import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
+import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-import org.apache.commons.lang3.StringUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 public class ModelSchemaBuilder {
-
-    private static String aliasSplit = ",";
-
 
     public static ModelSchema build(ModelSchemaResp resp) {
         ModelSchema modelSchema = new ModelSchema();
@@ -39,14 +35,14 @@ public class ModelSchemaBuilder {
                 .name(resp.getName())
                 .bizName(resp.getBizName())
                 .type(SchemaElementType.MODEL)
-                .alias(getAliasList(resp.getAlias()))
+                .alias(SchemaItem.getAliasList(resp.getAlias()))
                 .build();
         modelSchema.setModel(domain);
 
         Set<SchemaElement> metrics = new HashSet<>();
         for (MetricSchemaResp metric : resp.getMetrics()) {
 
-            List<String> alias = getAliasList(metric.getAlias());
+            List<String> alias = SchemaItem.getAliasList(metric.getAlias());
 
             SchemaElement metricToAdd = SchemaElement.builder()
                     .model(resp.getId())
@@ -68,7 +64,7 @@ public class ModelSchemaBuilder {
         Set<SchemaElement> dimensionValues = new HashSet<>();
         for (DimSchemaResp dim : resp.getDimensions()) {
 
-            List<String> alias = getAliasList(dim.getAlias());
+            List<String> alias = SchemaItem.getAliasList(dim.getAlias());
             Set<String> dimValueAlias = new HashSet<>();
             List<DimValueMap> dimValueMaps = dim.getDimValueMaps();
             List<SchemaValueMap> schemaValueMaps = new ArrayList<>();
@@ -131,13 +127,6 @@ public class ModelSchemaBuilder {
         }
 
         return modelSchema;
-    }
-
-    private static List<String> getAliasList(String alias) {
-        if (StringUtils.isEmpty(alias)) {
-            return new ArrayList<>();
-        }
-        return Arrays.asList(alias.split(aliasSplit));
     }
 
     private static List<RelateSchemaElement> getRelateSchemaElement(MetricSchemaResp metricSchemaResp) {
