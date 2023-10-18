@@ -17,7 +17,7 @@ import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
@@ -56,9 +56,9 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
 
     @Override
     @SneakyThrows
-    public QueryResultWithSchemaResp queryByDsl(QueryDslReq queryDslReq, User user) {
+    public QueryResultWithSchemaResp queryByS2QL(QueryS2QLReq queryS2QLReq, User user) {
         queryService = ContextUtils.getBean(QueryService.class);
-        Object object = queryService.queryBySql(queryDslReq, user);
+        Object object = queryService.queryBySql(queryS2QLReq, user);
         QueryResultWithSchemaResp queryResultWithSchemaResp = JsonUtil.toObject(JsonUtil.toString(object),
                     QueryResultWithSchemaResp.class);
         return queryResultWithSchemaResp;

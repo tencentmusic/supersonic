@@ -430,7 +430,7 @@ importers:
         specifier: '3.5'
         version: 3.5.41(react-router@5.3.4)
       umi-request:
-        specifier: ^1.0.8
+        specifier: ^1.4.0
         version: 1.4.0
     devDependencies:
       '@ant-design/pro-cli':

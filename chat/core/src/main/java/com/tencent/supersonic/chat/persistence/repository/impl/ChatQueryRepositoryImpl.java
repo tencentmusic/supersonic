@@ -130,7 +130,8 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         return queryId;
     }
 
-    public Boolean batchSaveParseInfo(ChatContext chatCtx, QueryReq queryReq,
+    @Override
+    public List<ChatParseDO> batchSaveParseInfo(ChatContext chatCtx, QueryReq queryReq,
                                       ParseResp parseResult,
                                       List<SemanticParseInfo> candidateParses,
                                       List<SemanticParseInfo> selectedParses) {
@@ -139,8 +140,15 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         log.info("candidateParses size:{},selectedParses size:{}", candidateParses.size(), selectedParses.size());
         getChatParseDO(chatCtx, queryReq, queryId, 0, 1, candidateParses, chatParseDOList);
         getChatParseDO(chatCtx, queryReq, queryId, candidateParses.size(), 0, selectedParses, chatParseDOList);
-        Boolean save = chatParseMapper.batchSaveParseInfo(chatParseDOList);
-        return save;
+        chatParseMapper.batchSaveParseInfo(chatParseDOList);
+        return chatParseDOList;
+    }
+
+    @Override
+    public void updateChatParseInfo(List<ChatParseDO> chatParseDOS) {
+        for (ChatParseDO chatParseDO : chatParseDOS) {
+            chatParseMapper.updateParseInfo(chatParseDO);
+        }
     }
 
     public void getChatParseDO(ChatContext chatCtx, QueryReq queryReq, Long queryId, int base, int isCandidate,
@@ -180,8 +188,14 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         return chatQueryDOMapper.updateByPrimaryKeyWithBLOBs(chatQueryDO);
     }
 
+    @Override
     public ChatParseDO getParseInfo(Long questionId, String userName, int parseId) {
         return chatParseMapper.getParseInfo(questionId, userName, parseId);
+    }
+
+    @Override
+    public List<ChatParseDO> getParseInfoList(List<Long> questionIds) {
+        return chatParseMapper.getParseInfoList(questionIds);
     }
 
     @Override

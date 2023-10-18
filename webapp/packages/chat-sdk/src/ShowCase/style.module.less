@@ -1,0 +1,27 @@
+.showCase {
+  column-count: 2;
+  column-gap: 20px;
+  height: 100%;
+  min-height: 400px;
+  overflow-y: auto;
+
+  .showCaseItem {
+    display: flex;
+    flex-direction: column;
+    row-gap: 12px;
+    padding: 12px;
+    margin-bottom: 20px;
+    max-height: 800px;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+    background: linear-gradient(180deg, rgba(23, 74, 228, 0) 29.44%, rgba(23, 74, 228, 0.06) 100%),
+    linear-gradient(90deg, #f3f3f7 0%, #f3f3f7 20%, #ebf0f9 60%, #f3f3f7 80%, #f3f3f7 100%);
+
+    .showCaseChatItem {
+      display: flex;
+      flex-direction: column;
+      row-gap: 12px;
+    }
+  }
+}

@@ -20,6 +20,7 @@ import com.tencent.supersonic.chat.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.persistence.repository.ChatRepository;
 
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -133,7 +134,30 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public PageInfo<QueryResp> queryInfo(PageQueryInfoReq pageQueryInfoReq, long chatId) {
-        return chatQueryRepository.getChatQuery(pageQueryInfoReq, chatId);
+        PageInfo<QueryResp> queryRespPageInfo = chatQueryRepository.getChatQuery(pageQueryInfoReq, chatId);
+        if (CollectionUtils.isEmpty(queryRespPageInfo.getList())) {
+            return queryRespPageInfo;
+        }
+        List<Long> queryIds = queryRespPageInfo.getList().stream()
+                .map(QueryResp::getQuestionId).collect(Collectors.toList());
+        List<ChatParseDO> chatParseDOs = chatQueryRepository.getParseInfoList(queryIds);
+        if (CollectionUtils.isEmpty(chatParseDOs)) {
+            return queryRespPageInfo;
+        }
+        Map<Long, List<ChatParseDO>> chatParseMap = chatParseDOs.stream()
+                .collect(Collectors.groupingBy(ChatParseDO::getQuestionId));
+        for (QueryResp queryResp : queryRespPageInfo.getList()) {
+            List<ChatParseDO> chatParseDOList = chatParseMap.get(queryResp.getQuestionId());
+            if (CollectionUtils.isEmpty(chatParseMap)) {
+                continue;
+            }
+            List<SemanticParseInfo> parseInfos = chatParseDOList.stream().map(chatParseDO ->
+                    JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class))
+                    .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
+                    .collect(Collectors.toList());
+            queryResp.setParseInfos(parseInfos);
+        }
+        return queryRespPageInfo;
     }
 
     @Override
@@ -173,12 +197,16 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void batchAddParse(ChatContext chatCtx, QueryReq queryReq,
+    public List<ChatParseDO> batchAddParse(ChatContext chatCtx, QueryReq queryReq,
             ParseResp parseResult,
             List<SemanticParseInfo> candidateParses,
             List<SemanticParseInfo> selectedParses) {
-        chatQueryRepository.batchSaveParseInfo(chatCtx, queryReq, parseResult, candidateParses, selectedParses);
+        return chatQueryRepository.batchSaveParseInfo(chatCtx, queryReq, parseResult, candidateParses, selectedParses);
+    }
 
+    @Override
+    public void updateChatParse(List<ChatParseDO> chatParseDOS) {
+        chatQueryRepository.updateChatParseInfo(chatParseDOS);
     }
 
     @Override

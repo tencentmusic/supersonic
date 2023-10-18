@@ -71,7 +71,7 @@ export type EntityDimensionType = {
 }
 
 export type SqlInfoType = {
-  llmParseSql: string;
+  s2QL: string;
   logicSql: string;
   querySql: string;
 }

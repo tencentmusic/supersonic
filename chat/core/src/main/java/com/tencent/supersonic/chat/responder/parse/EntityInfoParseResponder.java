@@ -5,8 +5,9 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
+import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.query.llm.dsl.DslQuery;
+import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import java.util.List;
@@ -16,7 +17,8 @@ import org.springframework.util.CollectionUtils;
 public class EntityInfoParseResponder implements ParseResponder {
 
     @Override
-    public void fillResponse(ParseResp parseResp, QueryContext queryContext) {
+    public void fillResponse(ParseResp parseResp, QueryContext queryContext,
+                             List<ChatParseDO> chatParseDOS) {
         List<SemanticParseInfo> selectedParses = parseResp.getSelectedParses();
         if (CollectionUtils.isEmpty(selectedParses)) {
             return;
@@ -24,7 +26,7 @@ public class EntityInfoParseResponder implements ParseResponder {
         QueryReq queryReq = queryContext.getRequest();
         selectedParses.forEach(parseInfo -> {
             if (QueryManager.isPluginQuery(parseInfo.getQueryMode())
-                    && !DslQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
+                    && !S2QLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
                 return;
             }
             //1. set entity info

@@ -18,6 +18,7 @@ type Props = {
   dimensionFilters: FilterItemType[];
   dateInfo: DateInfoType;
   entityInfo: EntityInfoType;
+  integrateSystem?: string;
   onSelectParseInfo: (parseInfo: ChatContextType) => void;
   onSwitchEntity: (entityId: string) => void;
   onFiltersChange: (filters: FilterItemType[]) => void;
@@ -35,6 +36,7 @@ const ParseTip: React.FC<Props> = ({
   dimensionFilters,
   dateInfo,
   entityInfo,
+  integrateSystem,
   onSelectParseInfo,
   onSwitchEntity,
   onFiltersChange,
@@ -115,14 +117,14 @@ const ParseTip: React.FC<Props> = ({
 
     return (
       <div className={`${prefixCls}-tip-content`}>
-        {!!agentType && queryMode !== 'DSL' ? (
+        {!!agentType && queryMode !== 'LLM_S2QL' ? (
           <div className={`${prefixCls}-tip-item`}>
             将由{agentType === 'plugin' ? '插件' : '内置'}工具
             <span className={itemValueClass}>{agentName}</span>来解答
           </div>
         ) : (
           <>
-            {(queryMode?.includes('ENTITY') || queryMode === 'DSL') &&
+            {(queryMode?.includes('ENTITY') || queryMode === 'LLM_S2QL') &&
             typeof entityId === 'string' &&
             !!entityAlias &&
             !!entityName ? (
@@ -144,12 +146,14 @@ const ParseTip: React.FC<Props> = ({
                   <div className={itemValueClass}>{metric.name}</div>
                 </div>
               )}
-            {['METRIC_GROUPBY', 'METRIC_ORDERBY', 'ENTITY_DETAIL', 'DSL'].includes(queryMode!) &&
+            {['METRIC_GROUPBY', 'METRIC_ORDERBY', 'ENTITY_DETAIL', 'LLM_S2QL'].includes(
+              queryMode!
+            ) &&
               fields &&
               fields.length > 0 && (
                 <div className={`${prefixCls}-tip-item`}>
                   <div className={`${prefixCls}-tip-item-name`}>
-                    {queryMode === 'DSL'
+                    {queryMode === 'LLM_S2QL'
                       ? nativeQuery
                         ? '查询字段'
                         : '下钻维度'
@@ -178,12 +182,14 @@ const ParseTip: React.FC<Props> = ({
                   <div className={itemValueClass}>{dimension.value}</div>
                 </div>
               ))}
-            {queryMode === 'METRIC_ORDERBY' && aggType && aggType !== 'NONE' && (
-              <div className={`${prefixCls}-tip-item`}>
-                <div className={`${prefixCls}-tip-item-name`}>聚合方式：</div>
-                <div className={itemValueClass}>{AGG_TYPE_MAP[aggType]}</div>
-              </div>
-            )}
+            {(queryMode === 'METRIC_ORDERBY' || queryMode === 'METRIC_MODEL') &&
+              aggType &&
+              aggType !== 'NONE' && (
+                <div className={`${prefixCls}-tip-item`}>
+                  <div className={`${prefixCls}-tip-item-name`}>聚合方式：</div>
+                  <div className={itemValueClass}>{AGG_TYPE_MAP[aggType]}</div>
+                </div>
+              )}
           </>
         )}
       </div>
@@ -218,6 +224,7 @@ const ParseTip: React.FC<Props> = ({
             chatContext={currentParseInfo!}
             entityAlias={entityAlias}
             agentId={agentId}
+            integrateSystem={integrateSystem}
             onFiltersChange={onFiltersChange}
             onSwitchEntity={onSwitchEntity}
             key={filter.name}
@@ -240,11 +247,6 @@ const ParseTip: React.FC<Props> = ({
     <div className={`${prefixCls}-tip`}>
       {getTipNode()}
       {getFiltersNode()}
-      {(!type || queryMode === 'DSL') && entityAlias && entityAlias !== '厂牌' && entityName && (
-        <div className={`${prefixCls}-switch-entity-tip`}>
-          (如未匹配到相关{entityAlias}，可点击{entityAlias === '艺人' ? '歌手' : entityAlias}ID切换)
-        </div>
-      )}
     </div>
   );
 

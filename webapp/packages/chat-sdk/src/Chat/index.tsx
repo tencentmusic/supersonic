@@ -20,6 +20,8 @@ import AgentList from './AgentList';
 import MobileAgents from './MobileAgents';
 import { HistoryMsgItemType, MsgDataType, SendMsgParamsType } from '../common/type';
 import { getHistoryMsg } from '../service';
+import ShowCase from '../ShowCase';
+import { Modal } from 'antd';
 
 type Props = {
   token?: string;
@@ -30,7 +32,6 @@ type Props = {
   isDeveloper?: boolean;
   integrateSystem?: string;
   isCopilot?: boolean;
-  apiUrl?: string;
   onCurrentAgentChange?: (agent?: AgentType) => void;
   onReportMsgEvent?: (msg: string, valid: boolean) => void;
 };
@@ -45,7 +46,6 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
     isDeveloper,
     integrateSystem,
     isCopilot,
-    apiUrl,
     onCurrentAgentChange,
     onReportMsgEvent,
   },
@@ -64,6 +64,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   const [currentAgent, setCurrentAgent] = useState<AgentType>();
   const [mobileAgentsVisible, setMobileAgentsVisible] = useState(false);
   const [agentListVisible, setAgentListVisible] = useState(true);
+  const [showCaseVisible, setShowCaseVisible] = useState(false);
 
   const conversationRef = useRef<any>();
   const chatFooterRef = useRef<any>();
@@ -119,12 +120,6 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
       setToken(token);
     }
   }, [token]);
-
-  useEffect(() => {
-    if (apiUrl) {
-      localStorage.setItem('SUPERSONIC_CHAT_API_URL', apiUrl);
-    }
-  }, [apiUrl]);
 
   useEffect(() => {
     if (chatVisible) {
@@ -300,7 +295,8 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
     data: MsgDataType,
     questionId: string | number,
     question: string,
-    valid: boolean
+    valid: boolean,
+    isRefresh?: boolean
   ) => {
     onReportMsgEvent?.(question, valid);
     if (!isMobile) {
@@ -315,7 +311,9 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
       msg.msgData = data;
       setMessageList(msgs);
     }
-    updateMessageContainerScroll(`${questionId}`);
+    if (!isRefresh) {
+      updateMessageContainerScroll(`${questionId}`);
+    }
   };
 
   const onToggleHistoryVisible = () => {
@@ -404,6 +402,9 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
                         setAgentListVisible(!agentListVisible);
                       }
                     }}
+                    onOpenShowcase={() => {
+                      setShowCaseVisible(!showCaseVisible);
+                    }}
                     ref={chatFooterRef}
                   />
                 )}
@@ -419,6 +420,23 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
           onCloseConversation={onCloseConversation}
           ref={conversationRef}
         />
+        {currentAgent && (
+          <Modal
+            title="showcase"
+            width="98%"
+            open={showCaseVisible}
+            centered
+            footer={null}
+            wrapClassName={styles.showCaseModal}
+            onCancel={() => {
+              setShowCaseVisible(false);
+            }}
+          >
+            <div className={styles.showCase}>
+              <ShowCase agentId={currentAgent.id} onSendMsg={onSendMsg} />
+            </div>
+          </Modal>
+        )}
       </div>
       <MobileAgents
         open={mobileAgentsVisible}

@@ -14,7 +14,7 @@ import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 
@@ -37,7 +37,7 @@ public interface SemanticInterpreter {
 
     QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user);
 
-    QueryResultWithSchemaResp queryByDsl(QueryDslReq queryDslReq, User user);
+    QueryResultWithSchemaResp queryByS2QL(QueryS2QLReq queryS2QLReq, User user);
 
     QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user);
 

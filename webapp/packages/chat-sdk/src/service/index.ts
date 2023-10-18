@@ -77,8 +77,8 @@ export function updateQAFeedback(questionId: number, score: number) {
   return axios.post<any>(`${prefix}/chat/manage/updateQAFeedback?id=${questionId}&score=${score}&feedback=`);
 }
 
-export function queryDrillDownDimensions(modelId: number) {
-  return axios.get<{ dimensions: DrillDownDimensionType[] }>(`${prefix}/chat/recommend/metric/${modelId}`);
+export function queryDrillDownDimensions(modelId: number, metricId?: number) {
+  return axios.get<{ dimensions: DrillDownDimensionType[] }>(`${prefix}/chat/recommend/metric/${modelId}${metricId ? `?metricId=${metricId}` : ''}`);
 }
 
 export function queryDimensionValues(modelId: number, bizName: string, agentId: number, elementID: number, value: string) {
@@ -86,7 +86,7 @@ export function queryDimensionValues(modelId: number, bizName: string, agentId: 
 }
 
 export function querySimilarQuestions(queryText: string, agentId?: number) {
-  return axios.get<any>(`${prefix}/chat/manage/getSolvedQuery?queryText=${queryText}&agentId=${agentId}`);
+  return axios.get<any>(`${prefix}/chat/manage/getSolvedQuery?queryText=${queryText}&agentId=${agentId || 0}`);
 }
 
 export function queryEntityInfo(queryId: number, parseId: number) {

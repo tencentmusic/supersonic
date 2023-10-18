@@ -64,13 +64,14 @@
         <xk.time.version>3.2.4</xk.time.version>
         <mockito-inline.version>4.5.1</mockito-inline.version>
         <jsqlparser.version>4.5</jsqlparser.version>
-        <revision>0.7.5-SNAPSHOT</revision>
+        <revision>0.7.6-SNAPSHOT</revision>
         <!-- Do not bump spotless plugin version since 2.30.0 is the latest version supports Java 8-->
         <maven.plugin.spotless.version>2.30.0</maven.plugin.spotless.version>
         <spotless.python.includes></spotless.python.includes>
         <!-- Do not bump black version as decided by spotless maven plugin-->
         <spotless.python.black.version>22.3.0</spotless.python.black.version>
-        <easyexcel.version>3.1.1</easyexcel.version>
+        <easyexcel.version>2.2.6</easyexcel.version>
+        <poi.version>3.17</poi.version>
     </properties>
 
     <dependencyManagement>

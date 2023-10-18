@@ -11,7 +11,7 @@ import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
@@ -42,11 +42,11 @@ public class QueryController {
 
 
     @PostMapping("/sql")
-    public Object queryBySql(@RequestBody QueryDslReq queryDslReq,
+    public Object queryBySql(@RequestBody QueryS2QLReq queryS2QLReq,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        Object queryBySql = queryService.queryBySql(queryDslReq, user);
+        Object queryBySql = queryService.queryBySql(queryS2QLReq, user);
         log.info("queryBySql:{},queryBySql");
         return queryBySql;
     }
@@ -124,9 +124,9 @@ public class QueryController {
         QueryTypeEnum queryTypeEnum = explainSqlReq.getQueryTypeEnum();
 
         if (QueryTypeEnum.SQL.equals(queryTypeEnum)) {
-            QueryDslReq queryDslReq = JsonUtil.toObject(queryReqJson, QueryDslReq.class);
-            ExplainSqlReq<QueryDslReq> explainSqlReqNew = ExplainSqlReq.<QueryDslReq>builder()
-                    .queryReq(queryDslReq)
+            QueryS2QLReq queryS2QLReq = JsonUtil.toObject(queryReqJson, QueryS2QLReq.class);
+            ExplainSqlReq<QueryS2QLReq> explainSqlReqNew = ExplainSqlReq.<QueryS2QLReq>builder()
+                    .queryReq(queryS2QLReq)
                     .queryTypeEnum(queryTypeEnum).build();
             return queryService.explain(explainSqlReqNew, user);
         }
