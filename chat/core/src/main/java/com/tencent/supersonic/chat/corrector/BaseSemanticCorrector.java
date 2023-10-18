@@ -35,9 +35,18 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         dbAllFields.addAll(semanticSchema.getMetrics());
         dbAllFields.addAll(semanticSchema.getDimensions());
 
+        // support fieldName and field alias
         Map<String, String> result = dbAllFields.stream()
                 .filter(entry -> entry.getModel().equals(modelId))
-                .collect(Collectors.toMap(SchemaElement::getName, a -> a.getName(), (k1, k2) -> k1));
+                .flatMap(schemaElement -> {
+                    Set<String> elements = new HashSet<>();
+                    elements.add(schemaElement.getName());
+                    if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {
+                        elements.addAll(schemaElement.getAlias());
+                    }
+                    return elements.stream();
+                })
+                .collect(Collectors.toMap(a -> a, a -> a, (k1, k2) -> k1));
         result.put(DateUtils.DATE_FIELD, DateUtils.DATE_FIELD);
         return result;
     }
