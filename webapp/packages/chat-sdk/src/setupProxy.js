@@ -4,7 +4,7 @@ module.exports = function(app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'http://supersonic-pre.tmeoa.com',
+      target: 'http://localhost:9080',
       changeOrigin: true,
     })
   );

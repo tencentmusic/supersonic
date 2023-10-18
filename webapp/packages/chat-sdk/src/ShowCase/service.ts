@@ -7,6 +7,6 @@ const prefix = isMobile ? '/openapi' : '/api';
 export function queryShowCase(agentId: number, current: number, pageSize: number) {
   return axios.post<ShowCaseType>(
     `${prefix}/chat/manage/queryCbShowCase?agentId=${agentId}`,
-    { current, pageSize, userName: 'jerryjzhang' }
+    { current, pageSize }
   );
 }

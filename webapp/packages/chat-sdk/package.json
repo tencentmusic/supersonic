@@ -1,6 +1,6 @@
 {
   "name": "supersonic-chat-sdk",
-  "version": "0.10.4",
+  "version": "0.0.0",
   "main": "dist/index.es.js",
   "module": "dist/index.es.js",
   "unpkg": "dist/index.umd.js",
