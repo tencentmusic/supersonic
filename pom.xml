@@ -70,7 +70,8 @@
         <spotless.python.includes></spotless.python.includes>
         <!-- Do not bump black version as decided by spotless maven plugin-->
         <spotless.python.black.version>22.3.0</spotless.python.black.version>
-        <easyexcel.version>3.1.1</easyexcel.version>
+        <easyexcel.version>2.2.6</easyexcel.version>
+        <poi.version>3.17</poi.version>
     </properties>
 
     <dependencyManagement>
