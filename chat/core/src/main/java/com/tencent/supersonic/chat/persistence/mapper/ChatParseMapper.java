@@ -14,7 +14,7 @@ public interface ChatParseMapper {
 
     boolean updateParseInfo(ChatParseDO chatParseDO);
 
-    ChatParseDO getParseInfo(Long questionId, String userName, int parseId);
+    ChatParseDO getParseInfo(Long questionId, int parseId);
 
     List<ChatParseDO> getParseInfoList(List<Long> questionIds);
 

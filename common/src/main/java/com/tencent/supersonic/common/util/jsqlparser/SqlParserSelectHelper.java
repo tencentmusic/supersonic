@@ -208,6 +208,19 @@ public class SqlParserSelectHelper {
         return null;
     }
 
+    public static List<FilterExpression> getWhereExpressions(String sql) {
+        PlainSelect plainSelect = getPlainSelect(sql);
+        if (Objects.isNull(plainSelect)) {
+            return new ArrayList<>();
+        }
+        Set<FilterExpression> result = new HashSet<>();
+        Expression where = plainSelect.getWhere();
+        if (Objects.nonNull(where)) {
+            where.accept(new FieldAndValueAcquireVisitor(result));
+        }
+        return new ArrayList<>(result);
+    }
+
     public static List<FilterExpression> getHavingExpressions(String sql) {
         PlainSelect plainSelect = getPlainSelect(sql);
         if (Objects.isNull(plainSelect)) {
@@ -316,6 +329,12 @@ public class SqlParserSelectHelper {
     public static String getColumnName(Expression leftExpression, Expression rightExpression) {
         if (leftExpression instanceof Column) {
             return ((Column) leftExpression).getColumnName();
+        }
+        if (leftExpression instanceof Function) {
+            List<Expression> expressionList = ((Function) leftExpression).getParameters().getExpressions();
+            if (!CollectionUtils.isEmpty(expressionList) && expressionList.get(0) instanceof Column) {
+                return ((Column) expressionList.get(0)).getColumnName();
+            }
         }
         if (rightExpression instanceof Column) {
             return ((Column) rightExpression).getColumnName();

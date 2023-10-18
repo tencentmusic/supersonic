@@ -7,8 +7,12 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
-import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -60,17 +64,36 @@ public class SqlParserRemoveHelper {
         }
     }
 
+    public static String getConstant(Expression expression){
+        String constant = JsqlConstants.EQUAL_CONSTANT;
+        if (expression instanceof GreaterThanEquals) {
+            constant = JsqlConstants.GREATER_THAN_EQUALS_CONSTANT;
+        } else if (expression instanceof MinorThanEquals) {
+            constant = JsqlConstants.MINOR_THAN_EQUALS_CONSTANT;
+        } else if (expression instanceof GreaterThan) {
+            constant = JsqlConstants.GREATER_THAN_CONSTANT;
+        } else if (expression instanceof MinorThan) {
+            constant = JsqlConstants.MINOR_THAN_CONSTANT;
+        }
+        return constant;
+    }
+
     private static void removeExpressionWithConstant(Expression expression, Set<String> removeFieldNames) {
-        if (expression instanceof EqualsTo) {
+        if (expression instanceof EqualsTo
+                || expression instanceof GreaterThanEquals
+                || expression instanceof GreaterThan
+                || expression instanceof MinorThanEquals
+                || expression instanceof MinorThan) {
             ComparisonOperator comparisonOperator = (ComparisonOperator) expression;
             String columnName = SqlParserSelectHelper.getColumnName(comparisonOperator.getLeftExpression(),
                     comparisonOperator.getRightExpression());
             if (!removeFieldNames.contains(columnName)) {
                 return;
             }
+            String constant = getConstant(expression);
             try {
                 ComparisonOperator constantExpression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(
-                        JsqlConstants.EQUAL_CONSTANT);
+                        constant);
                 comparisonOperator.setLeftExpression(constantExpression.getLeftExpression());
                 comparisonOperator.setRightExpression(constantExpression.getRightExpression());
                 comparisonOperator.setASTNode(constantExpression.getASTNode());
@@ -95,6 +118,22 @@ public class SqlParserRemoveHelper {
                 log.error("JSQLParserException", e);
             }
         }
+    }
+
+    public static String removeHavingCondition(String sql, Set<String> removeFieldNames) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        selectBody.accept(new SelectVisitorAdapter() {
+            @Override
+            public void visit(PlainSelect plainSelect) {
+                removeWhereCondition(plainSelect.getHaving(), removeFieldNames);
+            }
+        });
+        return selectStatement.toString();
     }
 
     public static String removeWhere(String sql, List<String> fields) {

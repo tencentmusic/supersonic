@@ -55,6 +55,7 @@ public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
     public <T extends Expression> void replaceComparisonExpression(T expression) {
         Expression leftExpression = ((ComparisonOperator) expression).getLeftExpression();
         Expression rightExpression = ((ComparisonOperator) expression).getRightExpression();
+
         if (!(leftExpression instanceof Column || leftExpression instanceof Function)) {
             return;
         }

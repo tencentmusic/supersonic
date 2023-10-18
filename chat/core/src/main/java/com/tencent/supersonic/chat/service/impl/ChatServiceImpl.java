@@ -219,8 +219,8 @@ public class ChatServiceImpl implements ChatService {
         return tempDate.format(new java.util.Date());
     }
 
-    public ChatParseDO getParseInfo(Long questionId, String userName, int parseId) {
-        return chatQueryRepository.getParseInfo(questionId, userName, parseId);
+    public ChatParseDO getParseInfo(Long questionId, int parseId) {
+        return chatQueryRepository.getParseInfo(questionId, parseId);
     }
 
     public Boolean deleteChatQuery(Long questionId) {

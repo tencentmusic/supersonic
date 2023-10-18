@@ -12,13 +12,14 @@ import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -43,6 +44,14 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
         }
         filterExpression.setFieldValue(getFieldValue(rightExpression));
         filterExpression.setOperator(expr.getStringExpression());
+        filterExpressions.add(filterExpression);
+    }
+
+    public void visit(InExpression expr) {
+        FilterExpression filterExpression = new FilterExpression();
+        filterExpression.setFieldName(((Column) expr.getLeftExpression()).getColumnName());
+        filterExpression.setOperator(JsqlConstants.IN);
+        filterExpression.setFieldValue(expr.getRightItemsList());
         filterExpressions.add(filterExpression);
     }
 

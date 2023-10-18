@@ -34,7 +34,7 @@ public interface ChatQueryRepository {
                                List<SemanticParseInfo> candidateParses,
                                List<SemanticParseInfo> selectedParses);
 
-    public ChatParseDO getParseInfo(Long questionId, String userName, int parseId);
+    public ChatParseDO getParseInfo(Long questionId, int parseId);
 
     List<ChatParseDO> getParseInfoList(List<Long> questionIds);
 
