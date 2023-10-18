@@ -82,6 +82,7 @@ import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -132,6 +133,7 @@ public class QueryServiceImpl implements QueryService {
             log.info("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
         ParseResp parseResult;
+        List<ChatParseDO> chatParseDOS = Lists.newArrayList();
         if (queryCtx.getCandidateQueries().size() > 0) {
             log.debug("pick before [{}]", queryCtx.getCandidateQueries().stream().collect(
                     Collectors.toList()));
@@ -149,7 +151,9 @@ public class QueryServiceImpl implements QueryService {
                     .selectedParses(selectedParses)
                     .candidateParses(candidateParses)
                     .build();
-            chatService.batchAddParse(chatCtx, queryReq, parseResult, candidateParses, selectedParses);
+            chatParseDOS = chatService.batchAddParse(chatCtx, queryReq, parseResult, candidateParses, selectedParses);
+            saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
+                    queryReq.getUser().getName(), queryReq.getChatId().longValue());
         } else {
             parseResult = ParseResp.builder()
                     .chatId(queryReq.getChatId())
@@ -159,7 +163,7 @@ public class QueryServiceImpl implements QueryService {
         }
         for (ParseResponder parseResponder : parseResponders) {
             Long startTime = System.currentTimeMillis();
-            parseResponder.fillResponse(parseResult, queryCtx);
+            parseResponder.fillResponse(parseResult, queryCtx, chatParseDOS);
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(parseResponder.getClass().getSimpleName())
                     .type(CostType.PARSERRESPONDER.getType()).build());
@@ -168,6 +172,7 @@ public class QueryServiceImpl implements QueryService {
             saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
         }
+        chatService.updateChatParse(chatParseDOS);
         return parseResult;
     }
 
@@ -616,16 +621,6 @@ public class QueryServiceImpl implements QueryService {
     }
 
     public Object queryHanlpDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
-        String value = dimensionValueReq.getValue().toString();
-        Set<Map.Entry<String, CoreDictionary.Attribute>> searchResult1 = HanlpHelper.getDynamicCustomDictionary()
-                .trie.prefixSearch(value);
-        log.info("searchResult1:{}", JsonUtil.toString(searchResult1));
-        LinkedList<Map.Entry<String, CoreDictionary.Attribute>> searchResult2 = HanlpHelper.getDynamicCustomDictionary()
-                .trie.commonPrefixSearchWithValue(value);
-        log.info("searchResult2:{}", JsonUtil.toString(searchResult2));
-        LinkedList<Map.Entry<String, CoreDictionary.Attribute>> searchResult3 = HanlpHelper.getDynamicCustomDictionary()
-                .dat.commonPrefixSearchWithValue(value.toCharArray(), 0);
-        log.info("searchResult3:{}", JsonUtil.toString(searchResult3));
         QueryResultWithSchemaResp queryResultWithSchemaResp = new QueryResultWithSchemaResp();
         Set<Long> detectModelIds = new HashSet<>();
         detectModelIds.add(dimensionValueReq.getModelId());
