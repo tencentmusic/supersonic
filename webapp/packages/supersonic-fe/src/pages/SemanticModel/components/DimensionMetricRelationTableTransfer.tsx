@@ -1,4 +1,4 @@
-import { Table, Transfer, Checkbox } from 'antd';
+import { Table, Transfer, Checkbox, message } from 'antd';
 import type { ColumnsType, TableRowSelection } from 'antd/es/table/interface';
 import type { TransferItem } from 'antd/es/transfer';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
@@ -9,6 +9,7 @@ import type { StateType } from '../model';
 import TransTypeTag from './TransTypeTag';
 import TableTitleTooltips from '../components/TableTitleTooltips';
 import { ISemantic } from '../data';
+import { getDimensionList } from '../service';
 import { SemanticNodeType, TransType } from '../enum';
 
 interface RecordType {
@@ -19,23 +20,37 @@ interface RecordType {
 }
 
 type Props = {
+  metricItem: ISemantic.IMetricItem;
   domainManger: StateType;
   relationsInitialValue?: ISemantic.IDrillDownDimensionItem[];
   onChange: (relations: ISemantic.IDrillDownDimensionItem[]) => void;
 };
 
 const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
-  domainManger,
+  metricItem,
   relationsInitialValue,
   onChange,
 }) => {
-  const { dimensionList } = domainManger;
-
   const [targetKeys, setTargetKeys] = useState<string[]>([]);
 
   const [checkedMap, setCheckedMap] = useState<Record<string, ISemantic.IDrillDownDimensionItem>>(
     {},
   );
+
+  const [dimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>([]);
+
+  useEffect(() => {
+    queryDimensionList();
+  }, []);
+
+  const queryDimensionList = async () => {
+    const { code, data, msg } = await getDimensionList(metricItem.modelId);
+    if (code === 200 && Array.isArray(data?.list)) {
+      setDimensionList(data.list);
+    } else {
+      message.error(msg);
+    }
+  };
 
   useEffect(() => {
     if (!Array.isArray(relationsInitialValue)) {

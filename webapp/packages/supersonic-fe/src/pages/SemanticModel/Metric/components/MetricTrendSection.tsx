@@ -73,10 +73,11 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
         setMetricColumnConfig(targetConfig);
       }
     } else {
-      if (code === 401) {
+      if (code === 401 || code === 400) {
         setAuthMessage(msg);
+      } else {
+        message.error(msg);
       }
-      message.error(msg);
       setMetricTrendData([]);
       setMetricColumnConfig(undefined);
     }

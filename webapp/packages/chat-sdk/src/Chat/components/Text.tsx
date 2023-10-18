@@ -5,14 +5,16 @@ import LeftAvatar from './CopilotAvatar';
 import Message from './Message';
 import styles from './style.module.less';
 import { userAvatarUrl } from '../../common/env';
+import IconFont from '../../components/IconFont';
 
 type Props = {
   position: 'left' | 'right';
   data: any;
   quote?: string;
+  anonymousUser?: boolean;
 };
 
-const Text: React.FC<Props> = ({ position, data, quote }) => {
+const Text: React.FC<Props> = ({ position, data, quote, anonymousUser }) => {
   const textWrapperClass = classNames(styles.textWrapper, {
     [styles.rightTextWrapper]: position === 'right',
   });
@@ -25,7 +27,13 @@ const Text: React.FC<Props> = ({ position, data, quote }) => {
         <div className={styles.text}>{data}</div>
       </Message>
       {!isMobile && position === 'right' && rightAvatarUrl && (
-        <Avatar shape="circle" size={40} src={rightAvatarUrl} className={styles.rightAvatar} />
+        <Avatar
+          shape="circle"
+          size={40}
+          src={anonymousUser ? undefined : rightAvatarUrl}
+          icon={<IconFont type="icon-geren" />}
+          className={styles.rightAvatar}
+        />
       )}
     </div>
   );

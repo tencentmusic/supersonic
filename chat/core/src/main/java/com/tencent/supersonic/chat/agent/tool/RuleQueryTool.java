@@ -7,9 +7,8 @@ import org.apache.commons.collections.CollectionUtils;
 import java.util.List;
 
 @Data
-public class RuleQueryTool extends AgentTool {
+public class RuleQueryTool extends CommonAgentTool {
 
-    private List<Long> modelIds;
 
     private List<String> queryModes;
 

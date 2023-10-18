@@ -1,9 +1,9 @@
 package com.tencent.supersonic.chat.corrector;
 
 import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
-import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
-import com.tencent.supersonic.chat.query.llm.dsl.LLMReq;
-import com.tencent.supersonic.chat.query.llm.dsl.LLMReq.ElementValue;
+import com.tencent.supersonic.chat.parser.llm.s2ql.ParseResult;
+import com.tencent.supersonic.chat.query.llm.s2ql.LLMReq;
+import com.tencent.supersonic.chat.query.llm.s2ql.LLMReq.ElementValue;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
@@ -67,11 +67,11 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
             return null;
         }
 
-        DSLParseResult dslParseResult = JsonUtil.toObject(JsonUtil.toString(context), DSLParseResult.class);
-        if (Objects.isNull(dslParseResult) || Objects.isNull(dslParseResult.getLlmReq())) {
+        ParseResult parseResult = JsonUtil.toObject(JsonUtil.toString(context), ParseResult.class);
+        if (Objects.isNull(parseResult) || Objects.isNull(parseResult.getLlmReq())) {
             return null;
         }
-        LLMReq llmReq = dslParseResult.getLlmReq();
+        LLMReq llmReq = parseResult.getLlmReq();
         return llmReq.getLinking();
     }
 

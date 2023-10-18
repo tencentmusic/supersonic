@@ -13,6 +13,7 @@ type Props = {
   chatContext: ChatContextType;
   agentId?: number;
   entityAlias?: string;
+  integrateSystem?: string;
   onFiltersChange: (filters: FilterItemType[]) => void;
   onSwitchEntity: (entityId: string) => void;
 };
@@ -24,6 +25,7 @@ const FilterItem: React.FC<Props> = ({
   chatContext,
   agentId,
   entityAlias,
+  integrateSystem,
   onFiltersChange,
   onSwitchEntity,
 }) => {
@@ -50,7 +52,11 @@ const FilterItem: React.FC<Props> = ({
   };
 
   useEffect(() => {
-    if ((typeof filter.value === 'string' || isArray(filter.value)) && options.length === 0) {
+    if (
+      (typeof filter.value === 'string' || isArray(filter.value)) &&
+      options.length === 0 &&
+      integrateSystem !== 'showcase'
+    ) {
       initData();
     }
   }, []);
@@ -148,17 +154,24 @@ const FilterItem: React.FC<Props> = ({
           onSearch={debounceFetcher}
           notFoundContent={loading ? <Spin size="small" /> : null}
           onChange={onChange}
-          mode={isArray(filter.value) ? 'multiple' : undefined}
+          mode="multiple"
           showSearch
+          allowClear
         />
       ) : entityAlias &&
         ['歌曲', '艺人'].includes(entityAlias) &&
         filter.bizName?.includes('_id') ? (
-        <SwicthEntity
-          entityName={filter.value}
-          chatContext={chatContext}
-          onSwitchEntity={onSwitchEntity}
-        />
+        <>
+          <SwicthEntity
+            entityName={filter.value}
+            chatContext={chatContext}
+            onSwitchEntity={onSwitchEntity}
+          />
+          <span className={`${prefixCls}-switch-entity-tip`}>
+            (如未匹配到相关{entityAlias}，可点击{entityAlias === '艺人' ? '歌手' : entityAlias}
+            ID切换)
+          </span>
+        </>
       ) : (
         <span className={`${prefixCls}-filter-value`}>{filter.value}</span>
       )}

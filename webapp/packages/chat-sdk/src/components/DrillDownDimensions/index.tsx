@@ -8,6 +8,7 @@ import classNames from 'classnames';
 
 type Props = {
   modelId: number;
+  metricId?: number;
   drillDownDimension?: DrillDownDimensionType;
   isMetricCard?: boolean;
   originDimensions?: DrillDownDimensionType[];
@@ -17,8 +18,11 @@ type Props = {
 
 const MAX_DIMENSION_COUNT = 20;
 
+const DEFAULT_DIMENSION_COUNT = 5;
+
 const DrillDownDimensions: React.FC<Props> = ({
   modelId,
+  metricId,
   drillDownDimension,
   isMetricCard,
   originDimensions,
@@ -27,12 +31,10 @@ const DrillDownDimensions: React.FC<Props> = ({
 }) => {
   const [dimensions, setDimensions] = useState<DrillDownDimensionType[]>([]);
 
-  const DEFAULT_DIMENSION_COUNT = isMetricCard ? 3 : 5;
-
   const prefixCls = `${CLS_PREFIX}-drill-down-dimensions`;
 
   const initData = async () => {
-    const res = await queryDrillDownDimensions(modelId);
+    const res = await queryDrillDownDimensions(modelId, metricId);
     setDimensions(
       res.data.dimensions
         .filter(

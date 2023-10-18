@@ -25,6 +25,7 @@ type Props = {
   conversationId?: number;
   modelId?: number;
   agentId?: number;
+  score?: number;
   filter?: any[];
   isLastMessage?: boolean;
   msgData?: MsgDataType;
@@ -33,7 +34,7 @@ type Props = {
   integrateSystem?: string;
   executeItemNode?: React.ReactNode;
   renderCustomExecuteNode?: boolean;
-  onMsgDataLoaded?: (data: MsgDataType, valid: boolean) => void;
+  onMsgDataLoaded?: (data: MsgDataType, valid: boolean, isRefresh?: boolean) => void;
   onUpdateMessageScroll?: () => void;
   onSendMsg?: (msg: string) => void;
 };
@@ -43,6 +44,7 @@ const ChatItem: React.FC<Props> = ({
   conversationId,
   modelId,
   agentId,
+  score,
   filter,
   isLastMessage,
   triggerResize,
@@ -67,8 +69,6 @@ const ChatItem: React.FC<Props> = ({
   const [dimensionFilters, setDimensionFilters] = useState<FilterItemType[]>([]);
   const [dateInfo, setDateInfo] = useState<DateInfoType>({} as DateInfoType);
   const [entityInfo, setEntityInfo] = useState<EntityInfoType>({} as EntityInfoType);
-
-  // const [chartIndex, setChartIndex] = useState(0);
 
   const prefixCls = `${PREFIX_CLS}-item`;
 
@@ -208,9 +208,7 @@ const ChatItem: React.FC<Props> = ({
       const resChatContext = res.data?.chatContext;
       const contextValue = { ...(resChatContext || chatContextValue), queryId };
       const dataValue = { ...res.data, chatContext: contextValue };
-      if (onMsgDataLoaded) {
-        onMsgDataLoaded(dataValue, true);
-      }
+      onMsgDataLoaded?.(dataValue, true, true);
       setData(dataValue);
       setParseInfo(contextValue);
     }
@@ -230,7 +228,6 @@ const ChatItem: React.FC<Props> = ({
     } else {
       getEntityInfo(parseInfoValue);
     }
-    onUpdateMessageScroll?.();
   };
 
   const onSelectQuestion = (question: SimilarQuestionType) => {
@@ -261,6 +258,7 @@ const ChatItem: React.FC<Props> = ({
             dimensionFilters={dimensionFilters}
             dateInfo={dateInfo}
             entityInfo={entityInfo}
+            integrateSystem={integrateSystem}
             onSelectParseInfo={onSelectParseInfo}
             onSwitchEntity={onSwitchEntity}
             onFiltersChange={onFiltersChange}
@@ -294,11 +292,11 @@ const ChatItem: React.FC<Props> = ({
             />
           )}
         </div>
-        {!isMetricCard && data && (
+        {integrateSystem !== 'showcase' && (
           <Tools
             queryId={parseInfo?.queryId || 0}
-            scoreValue={undefined}
-            isLastMessage={isLastMessage}
+            scoreValue={score}
+            // isLastMessage={isLastMessage}
           />
         )}
       </div>

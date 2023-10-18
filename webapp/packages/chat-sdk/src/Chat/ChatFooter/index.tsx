@@ -21,6 +21,7 @@ type Props = {
   onSendMsg: (msg: string, modelId?: number) => void;
   onAddConversation: (agent?: AgentType) => void;
   onSelectAgent: (agent: AgentType) => void;
+  onOpenShowcase: () => void;
 };
 
 const { OptGroup, Option } = Select;
@@ -47,6 +48,7 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
     onSendMsg,
     onAddConversation,
     onSelectAgent,
+    onOpenShowcase,
   },
   ref
 ) => {
@@ -313,14 +315,24 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
           <IconFont type="icon-zhinengzhuli" className={styles.toolIcon} />
           <div>智能助理</div>
         </div>
+        {!isMobile && (
+          <div className={styles.toolItem} onClick={onOpenShowcase}>
+            <IconFont type="icon-showcase" className={styles.toolIcon} />
+            <div>showcase</div>
+          </div>
+        )}
       </div>
       <div className={styles.composer}>
         <div className={styles.composerInputWrapper}>
           <AutoComplete
             className={styles.composerInput}
-            placeholder={`智能助理${
-              isMobile ? `[${currentAgent?.name}]` : `【${currentAgent?.name}】`
-            }将与您对话，输入“/”可切换助理`}
+            placeholder={
+              currentAgent
+                ? `智能助理${
+                    isMobile ? `[${currentAgent?.name}]` : `【${currentAgent?.name}】`
+                  }将与您对话，输入“/”可切换助理`
+                : '请输入您的问题'
+            }
             value={inputMsg}
             onChange={(value: string) => {
               onInputMsgChange(value);

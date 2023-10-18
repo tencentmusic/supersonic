@@ -6,7 +6,7 @@ export type MetricOptionType = {
 
 export enum AgentToolTypeEnum {
   RULE = 'RULE',
-  DSL = 'DSL',
+  LLM_S2QL = 'LLM_S2QL',
   PLUGIN = 'PLUGIN',
   INTERPRET = 'INTERPRET'
 }
@@ -29,7 +29,7 @@ export const AGENT_TOOL_TYPE_LIST = [
   },
   {
     label: '大模型语义解析',
-    value: AgentToolTypeEnum.DSL
+    value: AgentToolTypeEnum.LLM_S2QL
   },
   {
     label: '大模型指标解读',
