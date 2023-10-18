@@ -21,18 +21,22 @@ public interface ChatQueryRepository {
 
     void createChatQuery(QueryResult queryResult, ChatContext chatCtx);
 
+    void updateChatParseInfo(List<ChatParseDO> chatParseDOS);
+
     ChatQueryDO getLastChatQuery(long chatId);
 
     int updateChatQuery(ChatQueryDO chatQueryDO);
 
     Long createChatParse(ParseResp parseResult, ChatContext chatCtx, QueryReq queryReq);
 
-    Boolean batchSaveParseInfo(ChatContext chatCtx, QueryReq queryReq,
+    List<ChatParseDO> batchSaveParseInfo(ChatContext chatCtx, QueryReq queryReq,
                                ParseResp parseResult,
                                List<SemanticParseInfo> candidateParses,
                                List<SemanticParseInfo> selectedParses);
 
     public ChatParseDO getParseInfo(Long questionId, String userName, int parseId);
+
+    List<ChatParseDO> getParseInfoList(List<Long> questionIds);
 
     Boolean deleteChatQuery(Long questionId);
 }

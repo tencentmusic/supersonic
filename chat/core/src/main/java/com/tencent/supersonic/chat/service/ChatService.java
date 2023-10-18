@@ -49,10 +49,12 @@ public interface ChatService {
 
     void addQuery(QueryResult queryResult, ChatContext chatCtx);
 
-    void batchAddParse(ChatContext chatCtx, QueryReq queryReq,
+    List<ChatParseDO> batchAddParse(ChatContext chatCtx, QueryReq queryReq,
                          ParseResp parseResult,
                          List<SemanticParseInfo> candidateParses,
                          List<SemanticParseInfo> selectedParses);
+
+    void updateChatParse(List<ChatParseDO> chatParseDOS);
 
     ChatQueryDO getLastQuery(long chatId);
 
