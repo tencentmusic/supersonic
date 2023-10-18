@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.service.impl;
 
 
-import com.hankcs.hanlp.dictionary.CoreDictionary;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
@@ -50,7 +50,6 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.service.SearchService;
-import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
@@ -63,7 +62,6 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
