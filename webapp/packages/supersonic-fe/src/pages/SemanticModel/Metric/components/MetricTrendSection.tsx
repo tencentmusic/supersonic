@@ -26,6 +26,7 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
   const [metricColumnConfig, setMetricColumnConfig] = useState<ISemantic.IMetricTrendColumn>();
   const [authMessage, setAuthMessage] = useState<string>('');
   const [downloadLoding, setDownloadLoding] = useState<boolean>(false);
+  const [downloadBtnDisabledState, setDownloadBtnDisabledState] = useState<boolean>(true);
   const [periodDate, setPeriodDate] = useState<{
     startDate: string;
     endDate: string;
@@ -72,12 +73,14 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
       if (targetConfig) {
         setMetricColumnConfig(targetConfig);
       }
+      setDownloadBtnDisabledState(false);
     } else {
       if (code === 401 || code === 400) {
         setAuthMessage(msg);
       } else {
         message.error(msg);
       }
+      setDownloadBtnDisabledState(true);
       setMetricTrendData([]);
       setMetricColumnConfig(undefined);
     }
@@ -128,6 +131,7 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
             <Button
               type="primary"
               loading={downloadLoding}
+              disabled={downloadBtnDisabledState}
               onClick={() => {
                 getMetricTrendData(true);
               }}
