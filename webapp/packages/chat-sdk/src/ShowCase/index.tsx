@@ -20,7 +20,7 @@ const ShowCase: React.FC<Props> = ({ agentId, onSendMsg }) => {
     if (pageNo === 1) {
       setLoading(true);
     }
-    const res = await queryShowCase(agentId, pageNo, 20);
+    const res = await queryShowCase(agentId, pageNo, 30);
     if (pageNo === 1) {
       setLoading(false);
     }

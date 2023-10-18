@@ -6,6 +6,8 @@ import { CheckCircleFilled } from '@ant-design/icons';
 import Loading from './Loading';
 import FilterItem from './FilterItem';
 import moment from 'moment';
+import classNames from 'classnames';
+import { isMobile } from '../../utils/utils';
 
 const { RangePicker } = DatePicker;
 
@@ -84,9 +86,7 @@ const ParseTip: React.FC<Props> = ({
     nativeQuery,
   } = currentParseInfo || {};
 
-  const { type } = properties || {};
   const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
-  const entityName = elementMatches?.find(item => item.element?.type === 'ID')?.element.name;
 
   const entityDimensions = entityInfo?.dimensions?.filter(
     item =>
@@ -172,16 +172,15 @@ const ParseTip: React.FC<Props> = ({
                 </div>
               )}
             {queryMode !== 'ENTITY_ID' &&
-              entityDimensions &&
-              entityDimensions?.length > 0 &&
               !dimensions?.some(item => item.bizName?.includes('_id')) &&
-              entityDimensions.some(dimension => dimension.value != null) &&
-              entityDimensions.map(dimension => (
-                <div className={`${prefixCls}-tip-item`} key={dimension.itemId}>
-                  <div className={`${prefixCls}-tip-item-name`}>{dimension.name}：</div>
-                  <div className={itemValueClass}>{dimension.value}</div>
-                </div>
-              ))}
+              entityDimensions
+                ?.filter(dimension => dimension.value != null)
+                .map(dimension => (
+                  <div className={`${prefixCls}-tip-item`} key={dimension.itemId}>
+                    <div className={`${prefixCls}-tip-item-name`}>{dimension.name}：</div>
+                    <div className={itemValueClass}>{dimension.value}</div>
+                  </div>
+                ))}
             {(queryMode === 'METRIC_ORDERBY' || queryMode === 'METRIC_MODEL') &&
               aggType &&
               aggType !== 'NONE' && (
@@ -199,9 +198,12 @@ const ParseTip: React.FC<Props> = ({
   const getFilterContent = (filters: any) => {
     const itemValueClass = `${prefixCls}-tip-item-value`;
     const { startDate, endDate } = dateInfo || {};
+    const tipItemOptionClass = classNames(`${prefixCls}-tip-item-option`, {
+      [`${prefixCls}-mobile-tip-item-option`]: isMobile,
+    });
     return (
       <div className={`${prefixCls}-tip-item-filter-content`}>
-        <div className={`${prefixCls}-tip-item-option`}>
+        <div className={tipItemOptionClass}>
           <span className={`${prefixCls}-tip-item-filter-name`}>数据时间：</span>
           {nativeQuery ? (
             <span className={itemValueClass}>
@@ -209,9 +211,9 @@ const ParseTip: React.FC<Props> = ({
             </span>
           ) : (
             <RangePicker
-              className={`${prefixCls}-range-picker`}
               value={[moment(startDate), moment(endDate)]}
               onChange={onDateInfoChange}
+              getPopupContainer={trigger => trigger.parentNode as HTMLElement}
               allowClear={false}
             />
           )}
