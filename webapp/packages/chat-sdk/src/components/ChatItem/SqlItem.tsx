@@ -27,7 +27,7 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
     setSqlType('');
   };
 
-  if (!sqlInfo.llmParseSql && !sqlInfo.logicSql && !sqlInfo.querySql) {
+  if (!sqlInfo.s2QL && !sqlInfo.logicSql && !sqlInfo.querySql) {
     return null;
   }
 
@@ -44,13 +44,13 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
           )}
         </div>
         <div className={`${tipPrefixCls}-content-options`}>
-          {sqlInfo.llmParseSql && (
+          {sqlInfo.s2QL && (
             <div
               className={`${tipPrefixCls}-content-option ${
-                sqlType === 'llmParseSql' ? `${tipPrefixCls}-content-option-active` : ''
+                sqlType === 's2QL' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
-                setSqlType(sqlType === 'llmParseSql' ? '' : 'llmParseSql');
+                setSqlType(sqlType === 's2QL' ? '' : 's2QL');
               }}
             >
               LLM解析SQL

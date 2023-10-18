@@ -73,6 +73,7 @@ const MessageContainer: React.FC<Props> = ({
             type,
             msg,
             msgValue,
+            score,
             identityMsg,
             msgData,
             filters,
@@ -94,6 +95,7 @@ const MessageContainer: React.FC<Props> = ({
                     conversationId={chatId}
                     modelId={modelId}
                     agentId={agentId}
+                    score={score}
                     filter={filters}
                     isLastMessage={index === messageList.length - 1}
                     triggerResize={triggerResize}

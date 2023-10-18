@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import styles from './style.module.less';
-import { ShowCaseType } from './type';
+import { ShowCaseMapType } from './type';
 import { queryShowCase } from './service';
 import Text from '../Chat/components/Text';
 import ChatItem from '../components/ChatItem';
@@ -9,53 +9,60 @@ import { Spin } from 'antd';
 
 type Props = {
   agentId: number;
+  onSendMsg?: (msg: string) => void;
 };
 
-const ShowCase: React.FC<Props> = ({ agentId }) => {
-  const [data, setData] = useState<ShowCaseType>();
+const ShowCase: React.FC<Props> = ({ agentId, onSendMsg }) => {
+  const [showCaseMap, setShowCaseMap] = useState<ShowCaseMapType>({});
   const [loading, setLoading] = useState(false);
 
-  const updateData = async () => {
-    setLoading(true);
-    const res = await queryShowCase(agentId);
-    setLoading(false);
-    setData(res.data);
+  const updateData = async (pageNo: number) => {
+    if (pageNo === 1) {
+      setLoading(true);
+    }
+    const res = await queryShowCase(agentId, pageNo, 20);
+    if (pageNo === 1) {
+      setLoading(false);
+    }
+    setShowCaseMap(
+      pageNo === 1 ? res.data.showCaseMap : { ...showCaseMap, ...res.data.showCaseMap }
+    );
   };
 
   useEffect(() => {
     if (agentId) {
-      updateData();
+      updateData(1);
     }
   }, [agentId]);
 
   return (
-    <Spin spinning={loading}>
+    <Spin spinning={loading} size="large">
       <div className={styles.showCase}>
-        {data &&
-          Object.keys(data.showCaseMap || []).map(key => {
-            const showCaseItem = data.showCaseMap[key];
-            return (
-              <div key={key} className={styles.showCaseItem}>
-                {showCaseItem
-                  .filter((chatItem: HistoryMsgItemType) => !!chatItem.queryResult)
-                  .slice(0, 10)
-                  .map((chatItem: HistoryMsgItemType) => {
-                    return (
-                      <div className={styles.showCaseChatItem} key={key}>
-                        <Text position="right" data={chatItem.queryText} />
-                        <ChatItem
-                          msg={chatItem.queryText}
-                          msgData={chatItem.queryResult}
-                          conversationId={chatItem.chatId}
-                          agentId={agentId}
-                          integrateSystem="showcase"
-                        />
-                      </div>
-                    );
-                  })}
-              </div>
-            );
-          })}
+        {Object.keys(showCaseMap || {}).map(key => {
+          const showCaseItem = showCaseMap?.[key] || [];
+          return (
+            <div key={key} className={styles.showCaseItem}>
+              {showCaseItem
+                .filter((chatItem: HistoryMsgItemType) => !!chatItem.queryResult)
+                .slice(0, 10)
+                .map((chatItem: HistoryMsgItemType) => {
+                  return (
+                    <div className={styles.showCaseChatItem} key={chatItem.questionId}>
+                      <Text position="right" data={chatItem.queryText} anonymousUser />
+                      <ChatItem
+                        msg={chatItem.queryText}
+                        msgData={chatItem.queryResult}
+                        conversationId={chatItem.chatId}
+                        agentId={agentId}
+                        integrateSystem="showcase"
+                        onSendMsg={onSendMsg}
+                      />
+                    </div>
+                  );
+                })}
+            </div>
+          );
+        })}
       </div>
     </Spin>
   );

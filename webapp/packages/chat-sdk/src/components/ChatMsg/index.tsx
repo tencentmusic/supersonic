@@ -59,7 +59,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
   const metricFields = columns.filter(item => item.showType === 'NUMBER');
 
   const isDslMetricCard =
-    queryMode === 'DSL' && singleData && metricFields.length === 1 && columns.length === 1;
+    queryMode === 'LLM_S2QL' && singleData && metricFields.length === 1 && columns.length === 1;
 
   const isMetricCard = (queryMode.includes('METRIC') || isDslMetricCard) && singleData;
 
@@ -93,25 +93,27 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
     if (isTable) {
       return <Table data={{ ...data, queryColumns: columns, queryResults: dataSource }} />;
     }
-    if (dateField && metricFields.length > 0) {
-      if (!dataSource.every(item => item[dateField.nameEn] === dataSource[0][dateField.nameEn])) {
-        return (
-          <MetricTrend
-            data={{
-              ...data,
-              queryColumns: columns,
-              queryResults: dataSource,
-            }}
-            loading={loading}
-            chartIndex={chartIndex}
-            triggerResize={triggerResize}
-            activeMetricField={activeMetricField}
-            drillDownDimension={drillDownDimension}
-            currentDateOption={currentDateOption}
-            onSelectDateOption={selectDateOption}
-          />
-        );
-      }
+    if (
+      dateField &&
+      metricFields.length > 0 &&
+      !dataSource.every(item => item[dateField.nameEn] === dataSource[0][dateField.nameEn])
+    ) {
+      return (
+        <MetricTrend
+          data={{
+            ...data,
+            queryColumns: columns,
+            queryResults: dataSource,
+          }}
+          loading={loading}
+          chartIndex={chartIndex}
+          triggerResize={triggerResize}
+          activeMetricField={activeMetricField}
+          drillDownDimension={drillDownDimension}
+          currentDateOption={currentDateOption}
+          onSelectDateOption={selectDateOption}
+        />
+      );
     }
     if (categoryField?.length > 0 && metricFields?.length > 0) {
       return (

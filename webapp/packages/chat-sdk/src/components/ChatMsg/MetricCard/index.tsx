@@ -28,7 +28,7 @@ const MetricCard: React.FC<Props> = ({ data, loading, onApplyAuth }) => {
   const prefixCls = `${PREFIX_CLS}-metric-card`;
 
   const matricCardClass = classNames(prefixCls, {
-    [`${PREFIX_CLS}-metric-card-dsl`]: queryMode === 'DSL',
+    [`${PREFIX_CLS}-metric-card-dsl`]: queryMode === 'LLM_S2QL',
   });
 
   const [isNumber, setIsNumber] = useState(false);

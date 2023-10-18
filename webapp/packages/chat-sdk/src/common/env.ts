@@ -2,4 +2,4 @@ export const userAvatarUrl = `http://tpp.tmeoa.com/photo/48/${localStorage.getIt
 
 export const webPageHost = 'http://s2.tmeoa.com';
 
-export const copilotTitle = '内容库问答';
+export const copilotTitle = '内容库小Q';

@@ -6,6 +6,7 @@ import { Spin } from 'antd';
 import Table from '../Table';
 import MetricInfo from './MetricInfo';
 import DateOptions from '../DateOptions';
+import MultiMetricsTrendChart from './MultiMetricsTrendChart';
 
 type Props = {
   data: MsgDataType;
@@ -38,6 +39,7 @@ const MetricTrend: React.FC<Props> = ({
   const dateColumnName = dateField?.nameEn || '';
   const categoryColumnName =
     queryColumns?.find((column: any) => column.showType === 'CATEGORY')?.nameEn || '';
+  const metricFields = queryColumns?.filter((column: any) => column.showType === 'NUMBER');
 
   const currentMetricField = queryColumns?.find((column: any) => column.showType === 'NUMBER');
 
@@ -50,14 +52,16 @@ const MetricTrend: React.FC<Props> = ({
   return (
     <div className={prefixCls}>
       <div className={`${prefixCls}-charts`}>
-        <div className={`${prefixCls}-top-bar`}>
-          <div
-            className={`${prefixCls}-metric-fields ${prefixCls}-metric-field-single`}
-            key={activeMetricField?.bizName}
-          >
-            {activeMetricField?.name}
+        {metricFields?.length === 1 && (
+          <div className={`${prefixCls}-top-bar`}>
+            <div
+              className={`${prefixCls}-metric-fields ${prefixCls}-metric-field-single`}
+              key={activeMetricField?.bizName}
+            >
+              {activeMetricField?.name}
+            </div>
           </div>
-        </div>
+        )}
         <Spin spinning={loading}>
           <div className={`${prefixCls}-content`}>
             {!isMobile &&
@@ -72,6 +76,13 @@ const MetricTrend: React.FC<Props> = ({
             />
             {queryResults?.length === 1 || chartIndex % 2 === 1 ? (
               <Table data={{ ...data, queryResults }} onApplyAuth={onApplyAuth} />
+            ) : metricFields.length > 1 ? (
+              <MultiMetricsTrendChart
+                dateColumnName={dateColumnName}
+                metricFields={metricFields}
+                resultList={queryResults}
+                triggerResize={triggerResize}
+              />
             ) : (
               <MetricTrendChart
                 model={entityInfo?.modelInfo.name}

@@ -21,7 +21,7 @@ import MobileAgents from './MobileAgents';
 import { HistoryMsgItemType, MsgDataType, SendMsgParamsType } from '../common/type';
 import { getHistoryMsg } from '../service';
 import ShowCase from '../ShowCase';
-import { Drawer, Modal } from 'antd';
+import { Modal } from 'antd';
 
 type Props = {
   token?: string;
@@ -423,16 +423,17 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
         {currentAgent && (
           <Modal
             title="showcase"
-            width="95%"
+            width="98%"
             open={showCaseVisible}
             centered
             footer={null}
+            wrapClassName={styles.showCaseModal}
             onCancel={() => {
               setShowCaseVisible(false);
             }}
           >
             <div className={styles.showCase}>
-              <ShowCase agentId={currentAgent.id} />
+              <ShowCase agentId={currentAgent.id} onSendMsg={onSendMsg} />
             </div>
           </Modal>
         )}
