@@ -16,22 +16,16 @@ const ShowCase: React.FC<Props> = ({ agentId, onSendMsg }) => {
   const [showCaseMap, setShowCaseMap] = useState<ShowCaseMapType>({});
   const [loading, setLoading] = useState(false);
 
-  const updateData = async (pageNo: number) => {
-    if (pageNo === 1) {
-      setLoading(true);
-    }
-    const res = await queryShowCase(agentId, pageNo, 30);
-    if (pageNo === 1) {
-      setLoading(false);
-    }
-    setShowCaseMap(
-      pageNo === 1 ? res.data.showCaseMap : { ...showCaseMap, ...res.data.showCaseMap }
-    );
+  const updateData = async () => {
+    setLoading(true);
+    const res = await queryShowCase(agentId, 1, 30);
+    setLoading(false);
+    setShowCaseMap(res.data.showCaseMap);
   };
 
   useEffect(() => {
     if (agentId) {
-      updateData(1);
+      updateData();
     }
   }, [agentId]);
 
