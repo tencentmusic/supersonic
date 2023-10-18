@@ -265,6 +265,28 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         agentService.createAgent(agent, User.getFakeUser());
     }
 
+    private void addAgent3() {
+        Agent agent = new Agent();
+        agent.setId(3);
+        agent.setName("cspider");
+        agent.setDescription("cspider数据集的case展示");
+        agent.setStatus(1);
+        agent.setEnableSearch(1);
+        agent.setExamples(Lists.newArrayList("可用“mp4”格式且分辨率低于1000的歌曲的ID是什么？",
+                "“孟加拉语”歌曲的平均评分和分辨率是多少？",
+                "找出所有至少有一首“英文”歌曲的艺术家的名字和作品数量。"));
+        AgentConfig agentConfig = new AgentConfig();
+
+        LLMParserTool llmParserTool = new LLMParserTool();
+        llmParserTool.setId("1");
+        llmParserTool.setType(AgentToolType.LLM_S2QL);
+        llmParserTool.setModelIds(Lists.newArrayList(3L));
+        agentConfig.getTools().add(llmParserTool);
+
+        agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        agentService.createAgent(agent, User.getFakeUser());
+    }
+
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
         if (!demoEnable) {
@@ -276,6 +298,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             addPlugin_1();
             addAgent1();
             addAgent2();
+            addAgent3();
             addSampleChats();
             addSampleChats2();
         } catch (Exception e) {
