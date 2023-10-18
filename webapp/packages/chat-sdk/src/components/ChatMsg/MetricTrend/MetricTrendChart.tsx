@@ -13,6 +13,7 @@ import moment from 'moment';
 import { ColumnType } from '../../../common/type';
 import NoPermissionChart from '../NoPermissionChart';
 import classNames from 'classnames';
+import { isArray } from 'lodash';
 
 type Props = {
   model?: string;
@@ -83,7 +84,9 @@ const MetricTrendChart: React.FC<Props> = ({
     });
 
     const xData = groupData[sortedGroupKeys[0]]?.map((item: any) => {
-      const date = `${item[dateColumnName]}`;
+      const date = isArray(item[dateColumnName])
+        ? item[dateColumnName].join('-')
+        : `${item[dateColumnName]}`;
       return date.length === 10 ? moment(date).format('MM-DD') : date;
     });
 

@@ -28,11 +28,7 @@ const MetricCard: React.FC<Props> = ({ data, loading, onApplyAuth }) => {
   const prefixCls = `${PREFIX_CLS}-metric-card`;
 
   const matricCardClass = classNames(prefixCls, {
-    [`${PREFIX_CLS}-metric-card-dsl`]: queryMode === 'DSL',
-  });
-
-  const indicatorClass = classNames(`${prefixCls}-indicator`, {
-    [`${prefixCls}-indicator-period-compare`]: metricInfos?.length > 0,
+    [`${PREFIX_CLS}-metric-card-dsl`]: queryMode === 'LLM_S2QL',
   });
 
   const [isNumber, setIsNumber] = useState(false);
@@ -50,7 +46,7 @@ const MetricCard: React.FC<Props> = ({ data, loading, onApplyAuth }) => {
         )}
       </div>
       <Spin spinning={loading}>
-        <div className={indicatorClass}>
+        <div className={`${prefixCls}-indicator`}>
           {indicatorColumn && !indicatorColumn?.authorized ? (
             <ApplyAuth model={entityInfo?.modelInfo.name || ''} onApplyAuth={onApplyAuth} />
           ) : (

@@ -216,7 +216,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
             }))}
             onChange={(value) => {
               setPluginType(value);
-              if (value === PluginTypeEnum.DSL) {
+              if (value === PluginTypeEnum.LLM_S2QL) {
                 form.setFieldsValue({ parseMode: ParseModeEnum.FUNCTION_CALL });
                 setFunctionParams([
                   {
@@ -243,7 +243,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
         <FormItem name="pattern" label="函数描述">
           <TextArea placeholder="请输入函数描述，多个描述换行分隔" allowClear />
         </FormItem>
-        {/* <FormItem name="params" label="函数参数" hidden={pluginType === PluginTypeEnum.DSL}>
+        {/* <FormItem name="params" label="函数参数" hidden={pluginType === PluginTypeEnum.LLM_S2QL}>
           <div className={styles.paramsSection}>
             {functionParams.map((functionParam: FunctionParamFormItemType) => {
               const { id, name, type, description } = functionParam;

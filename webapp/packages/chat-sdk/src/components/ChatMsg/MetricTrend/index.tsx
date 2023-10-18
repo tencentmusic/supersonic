@@ -1,11 +1,12 @@
 import { CLS_PREFIX } from '../../../common/constants';
-import { FieldType, MsgDataType } from '../../../common/type';
+import { DrillDownDimensionType, FieldType, MsgDataType } from '../../../common/type';
 import { isMobile } from '../../../utils/utils';
 import MetricTrendChart from './MetricTrendChart';
 import { Spin } from 'antd';
 import Table from '../Table';
 import MetricInfo from './MetricInfo';
 import DateOptions from '../DateOptions';
+import MultiMetricsTrendChart from './MultiMetricsTrendChart';
 
 type Props = {
   data: MsgDataType;
@@ -13,6 +14,7 @@ type Props = {
   triggerResize?: boolean;
   loading: boolean;
   activeMetricField?: FieldType;
+  drillDownDimension?: DrillDownDimensionType;
   currentDateOption?: number;
   onApplyAuth?: (model: string) => void;
   onSelectDateOption: (value: number) => void;
@@ -24,6 +26,7 @@ const MetricTrend: React.FC<Props> = ({
   triggerResize,
   loading,
   activeMetricField,
+  drillDownDimension,
   currentDateOption,
   onApplyAuth,
   onSelectDateOption,
@@ -36,6 +39,7 @@ const MetricTrend: React.FC<Props> = ({
   const dateColumnName = dateField?.nameEn || '';
   const categoryColumnName =
     queryColumns?.find((column: any) => column.showType === 'CATEGORY')?.nameEn || '';
+  const metricFields = queryColumns?.filter((column: any) => column.showType === 'NUMBER');
 
   const currentMetricField = queryColumns?.find((column: any) => column.showType === 'NUMBER');
 
@@ -48,19 +52,23 @@ const MetricTrend: React.FC<Props> = ({
   return (
     <div className={prefixCls}>
       <div className={`${prefixCls}-charts`}>
-        <div className={`${prefixCls}-top-bar`}>
-          <div
-            className={`${prefixCls}-metric-fields ${prefixCls}-metric-field-single`}
-            key={activeMetricField?.bizName}
-          >
-            {activeMetricField?.name}
+        {metricFields?.length === 1 && (
+          <div className={`${prefixCls}-top-bar`}>
+            <div
+              className={`${prefixCls}-metric-fields ${prefixCls}-metric-field-single`}
+              key={activeMetricField?.bizName}
+            >
+              {activeMetricField?.name}
+            </div>
           </div>
-        </div>
+        )}
         <Spin spinning={loading}>
           <div className={`${prefixCls}-content`}>
-            {!isMobile && aggregateInfo?.metricInfos?.length > 0 && (
-              <MetricInfo aggregateInfo={aggregateInfo} currentMetricField={currentMetricField} />
-            )}
+            {!isMobile &&
+              aggregateInfo?.metricInfos?.length > 0 &&
+              drillDownDimension === undefined && (
+                <MetricInfo aggregateInfo={aggregateInfo} currentMetricField={currentMetricField} />
+              )}
             <DateOptions
               chatContext={chatContext}
               currentDateOption={currentDateOption}
@@ -68,6 +76,13 @@ const MetricTrend: React.FC<Props> = ({
             />
             {queryResults?.length === 1 || chartIndex % 2 === 1 ? (
               <Table data={{ ...data, queryResults }} onApplyAuth={onApplyAuth} />
+            ) : metricFields.length > 1 ? (
+              <MultiMetricsTrendChart
+                dateColumnName={dateColumnName}
+                metricFields={metricFields}
+                resultList={queryResults}
+                triggerResize={triggerResize}
+              />
             ) : (
               <MetricTrendChart
                 model={entityInfo?.modelInfo.name}
