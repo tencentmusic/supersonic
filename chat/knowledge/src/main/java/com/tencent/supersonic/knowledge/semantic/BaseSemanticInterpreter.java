@@ -17,7 +17,7 @@ import org.springframework.util.CollectionUtils;
 public abstract class BaseSemanticInterpreter implements SemanticInterpreter {
 
     protected final Cache<String, List<ModelSchemaResp>> modelSchemaCache =
-            CacheBuilder.newBuilder().expireAfterWrite(60, TimeUnit.SECONDS).build();
+            CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
 
     @SneakyThrows
     public List<ModelSchemaResp> fetchModelSchema(List<Long> ids, Boolean cacheEnable) {
@@ -33,13 +33,13 @@ public abstract class BaseSemanticInterpreter implements SemanticInterpreter {
     }
 
     @Override
-    public ModelSchema getModelSchema(Long domain, Boolean cacheEnable) {
+    public ModelSchema getModelSchema(Long model, Boolean cacheEnable) {
         List<Long> ids = new ArrayList<>();
-        ids.add(domain);
+        ids.add(model);
         List<ModelSchemaResp> modelSchemaResps = fetchModelSchema(ids, cacheEnable);
         if (!CollectionUtils.isEmpty(modelSchemaResps)) {
             Optional<ModelSchemaResp> modelSchemaResp = modelSchemaResps.stream()
-                    .filter(d -> d.getId().equals(domain)).findFirst();
+                    .filter(d -> d.getId().equals(model)).findFirst();
             if (modelSchemaResp.isPresent()) {
                 ModelSchemaResp modelSchema = modelSchemaResp.get();
                 return ModelSchemaBuilder.build(modelSchema);

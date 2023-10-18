@@ -18,6 +18,7 @@ public class DateUtils {
 
     public static final String DATE_FIELD = "数据日期";
     public static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String FORMAT = "yyyyMMddHHmmss";
 
     public static Integer currentYear() {
         Date date = new Date();
@@ -113,6 +114,11 @@ public class DateUtils {
         } else {
             dateFormat = new SimpleDateFormat(DateUtils.DATE_FORMAT);
         }
+        return dateFormat.format(date);
+    }
+
+    public static String format(Date date, String format) {
+        DateFormat dateFormat = new SimpleDateFormat(format);
         return dateFormat.format(date);
     }
 

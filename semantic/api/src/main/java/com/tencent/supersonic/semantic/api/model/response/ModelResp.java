@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.api.model.response;
 
+import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
 import com.tencent.supersonic.semantic.api.model.pojo.Entity;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import lombok.Data;
@@ -32,6 +33,8 @@ public class ModelResp extends SchemaItem {
     private Entity entity;
 
     private String fullPath;
+
+    private List<DrillDownDimension> drillDownDimensions;
 
     public boolean openToAll() {
         return isOpen != null && isOpen == 1;

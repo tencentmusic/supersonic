@@ -1,15 +1,4 @@
-import {
-  Button,
-  Drawer,
-  message,
-  Row,
-  Col,
-  Divider,
-  Tag,
-  Space,
-  Typography,
-  Popconfirm,
-} from 'antd';
+import { Button, Drawer, message, Row, Col, Divider, Tag, Space, Popconfirm } from 'antd';
 import React, { useState, useEffect, ReactNode } from 'react';
 import { SemanticNodeType } from '../../enum';
 import { deleteDimension, deleteMetric, deleteDatasource } from '../../service';
@@ -18,10 +7,8 @@ import type { StateType } from '../../model';
 import moment from 'moment';
 import styles from '../style.less';
 import TransTypeTag from '../../components/TransTypeTag';
-import { MetricTypeWording } from '../../enum';
+import MetricTrendSection from '@/pages/SemanticModel/Metric/components/MetricTrendSection';
 import { SENSITIVE_LEVEL_ENUM } from '../../constant';
-
-const { Paragraph } = Typography;
 
 type Props = {
   nodeData: any;
@@ -46,7 +33,8 @@ type InfoListItemChildrenItem = {
 type InfoListItem = {
   title: string;
   hideItem?: boolean;
-  children: InfoListItemChildrenItem[];
+  render?: () => ReactNode;
+  children?: InfoListItemChildrenItem[];
 };
 
 const DescriptionItem = ({ title, content }: DescriptionItemProps) => (
@@ -66,22 +54,21 @@ const NodeInfoDrawer: React.FC<Props> = ({
   ...restProps
 }) => {
   const [infoList, setInfoList] = useState<InfoListItem[]>([]);
-  const { selectDomainName } = domainManger;
+  const { selectModelName } = domainManger;
+
   useEffect(() => {
     if (!nodeData) {
       return;
     }
     const {
       alias,
-      fullPath,
       bizName,
       createdBy,
       createdAt,
       updatedAt,
       description,
-      domainName,
       sensitiveLevel,
-      type,
+      modelName,
       nodeType,
     } = nodeData;
 
@@ -99,9 +86,9 @@ const NodeInfoDrawer: React.FC<Props> = ({
             value: alias || '-',
           },
           {
-            label: '所属主题域',
-            value: domainName,
-            content: <Tag>{domainName || selectDomainName}</Tag>,
+            label: '所属模型',
+            value: modelName,
+            content: <Tag>{modelName || selectModelName}</Tag>,
           },
 
           {
@@ -113,25 +100,21 @@ const NodeInfoDrawer: React.FC<Props> = ({
       {
         title: '应用信息',
         children: [
-          // {
-          //   label: '全路径',
-          //   value: fullPath,
-          //   content: (
-          //     <Paragraph style={{ width: 275, margin: 0 }} ellipsis={{ tooltip: fullPath }}>
-          //       {fullPath}
-          //     </Paragraph>
-          //   ),
-          // },
           {
             label: '敏感度',
             value: SENSITIVE_LEVEL_ENUM[sensitiveLevel],
           },
-          // {
-          //   label: '指标类型',
-          //   value: MetricTypeWording[type],
-          //   hideItem: nodeType !== SemanticNodeType.METRIC,
-          // },
         ],
+      },
+      {
+        title: '指标趋势',
+        render: () => (
+          <Row key={`metricTrendSection`} style={{ marginBottom: 10, display: 'flex' }}>
+            <Col span={24}>
+              <MetricTrendSection nodeData={nodeData} />
+            </Col>
+          </Row>
+        ),
       },
       {
         title: '创建信息',
@@ -161,9 +144,9 @@ const NodeInfoDrawer: React.FC<Props> = ({
             value: bizName,
           },
           {
-            label: '所属主题域',
-            value: domainName,
-            content: <Tag>{domainName || selectDomainName}</Tag>,
+            label: '所属模型',
+            value: modelName,
+            content: <Tag>{modelName || selectModelName}</Tag>,
           },
           {
             label: '描述',
@@ -259,31 +242,36 @@ const NodeInfoDrawer: React.FC<Props> = ({
       >
         <div key={nodeData?.id} className={styles.nodeInfoDrawerContent}>
           {infoList.map((item) => {
-            const { children, title } = item;
+            const { children, title, render } = item;
             return (
               <div key={title} style={{ display: item.hideItem ? 'none' : 'block' }}>
                 <p className={styles.title}>{title}</p>
-                {children.map((childrenItem) => {
-                  return (
-                    <Row
-                      key={`${childrenItem.label}-${childrenItem.value}`}
-                      style={{ marginBottom: 10, display: childrenItem.hideItem ? 'none' : 'flex' }}
-                    >
-                      <Col span={24}>
-                        <DescriptionItem
-                          title={childrenItem.label}
-                          content={childrenItem.content || childrenItem.value}
-                        />
-                      </Col>
-                    </Row>
-                  );
-                })}
+                {render?.() ||
+                  (Array.isArray(children) &&
+                    children.map((childrenItem) => {
+                      return (
+                        <Row
+                          key={`${childrenItem.label}-${childrenItem.value}`}
+                          style={{
+                            marginBottom: 10,
+                            display: childrenItem.hideItem ? 'none' : 'flex',
+                          }}
+                        >
+                          <Col span={24}>
+                            <DescriptionItem
+                              title={childrenItem.label}
+                              content={childrenItem.content || childrenItem.value}
+                            />
+                          </Col>
+                        </Row>
+                      );
+                    }))}
                 <Divider />
               </div>
             );
           })}
         </div>
-        {extraNode}
+        {nodeData?.hasAdminRes && extraNode}
       </Drawer>
     </>
   );

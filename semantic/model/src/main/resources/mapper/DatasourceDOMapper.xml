@@ -12,6 +12,7 @@
     <result column="created_by" jdbcType="VARCHAR" property="createdBy" />
     <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
     <result column="updated_by" jdbcType="VARCHAR" property="updatedBy" />
+    <result column="depends" jdbcType="VARCHAR" property="depends" />
   </resultMap>
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO">
     <result column="datasource_detail" jdbcType="LONGVARCHAR" property="datasourceDetail" />
@@ -47,7 +48,7 @@
   </sql>
   <sql id="Base_Column_List">
     id, model_id, name, biz_name, description, database_id, created_at, created_by, updated_at, 
-    updated_by
+    updated_by,depends
   </sql>
   <sql id="Blob_Column_List">
     datasource_detail

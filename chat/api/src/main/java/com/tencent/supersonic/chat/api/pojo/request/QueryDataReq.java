@@ -16,6 +16,6 @@ public class QueryDataReq {
     private Set<QueryFilter> dimensionFilters = new HashSet<>();
     private Set<QueryFilter> metricFilters = new HashSet<>();
     private DateConf dateInfo;
-    private Long queryId = 7L;
-    private Integer parseId = 2;
+    private Long queryId;
+    private Integer parseId;
 }

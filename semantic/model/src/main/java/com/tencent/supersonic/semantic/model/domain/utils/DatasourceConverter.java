@@ -3,6 +3,8 @@ package com.tencent.supersonic.semantic.model.domain.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.semantic.api.model.enums.MetricTypeEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.DatasourceDetail;
 import com.tencent.supersonic.semantic.api.model.pojo.Dim;
@@ -15,13 +17,12 @@ import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceRelaResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Datasource;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -108,6 +109,7 @@ public class DatasourceConverter {
         dimensionReq.setModelId(datasource.getModelId());
         dimensionReq.setExpr(dim.getBizName());
         dimensionReq.setType("categorical");
+        dimensionReq.setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
         return dimensionReq;
     }
 

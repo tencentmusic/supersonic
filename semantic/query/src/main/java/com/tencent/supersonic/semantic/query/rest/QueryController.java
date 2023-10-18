@@ -59,6 +59,15 @@ public class QueryController {
         return queryService.queryByStructWithAuth(queryStructReq, user);
     }
 
+    @PostMapping("/download/struct")
+    public void downloadByStruct(@RequestBody QueryStructReq queryStructReq,
+                                HttpServletRequest request,
+                                HttpServletResponse response) throws Exception {
+        User user = UserHolder.findUser(request, response);
+        queryService.downloadByStruct(queryStructReq, user, response);
+
+    }
+
     @PostMapping("/queryStatement")
     public Object queryStatement(@RequestBody QueryStatement queryStatement) throws Exception {
         return queryService.queryByQueryStatement(queryStatement);
@@ -68,7 +77,8 @@ public class QueryController {
     public SqlParserResp parseByStruct(@RequestBody ParseSqlReq parseSqlReq,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
-        QueryStatement queryStatement = semanticQueryEngine.physicalSql(parseSqlReq);
+        QueryStructReq queryStructCmd = new QueryStructReq();
+        QueryStatement queryStatement = semanticQueryEngine.physicalSql(queryStructCmd, parseSqlReq);
         SqlParserResp sqlParserResp = new SqlParserResp();
         BeanUtils.copyProperties(queryStatement, sqlParserResp);
         return sqlParserResp;

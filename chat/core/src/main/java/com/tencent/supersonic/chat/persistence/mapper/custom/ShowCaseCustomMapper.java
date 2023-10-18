@@ -7,6 +7,6 @@ import java.util.List;
 @Mapper
 public interface ShowCaseCustomMapper {
 
-    List<ChatQueryDO> queryShowCase(int start, int limit, int agentId);
+    List<ChatQueryDO> queryShowCase(int start, int limit, int agentId, String userName);
 
 }

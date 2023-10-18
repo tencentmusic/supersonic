@@ -47,9 +47,9 @@ public interface SemanticInterpreter {
 
     ModelSchema getModelSchema(Long model, Boolean cacheEnable);
 
-    PageInfo<DimensionResp> getDimensionPage(PageDimensionReq pageDimensionCmd);
+    PageInfo<DimensionResp> getDimensionPage(PageDimensionReq pageDimensionReq);
 
-    PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricCmd, User user);
+    PageInfo<MetricResp> getMetricPage(PageMetricReq pageDimensionReq, User user);
 
     List<DomainResp> getDomainList(User user);
 

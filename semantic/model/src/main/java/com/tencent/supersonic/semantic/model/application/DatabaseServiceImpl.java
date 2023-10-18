@@ -41,19 +41,21 @@ public class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public boolean testConnect(DatabaseReq databaseReq, User user) {
-        Database database = DatabaseConverter.convert(databaseReq, user);
+        Database database = DatabaseConverter.convert(databaseReq);
         return JdbcDataSourceUtils.testDatabase(database);
     }
 
     @Override
     public DatabaseResp createOrUpdateDatabase(DatabaseReq databaseReq, User user) {
-        Database database = DatabaseConverter.convert(databaseReq, user);
+        Database database = DatabaseConverter.convert(databaseReq);
         DatabaseDO databaseDO = getDatabaseDO(databaseReq.getId());
         if (databaseDO != null) {
+            database.updatedBy(user.getName());
             DatabaseConverter.convert(database, databaseDO);
             databaseRepository.updateDatabase(databaseDO);
             return DatabaseConverter.convert(databaseDO);
         }
+        database.createdBy(user.getName());
         databaseDO = DatabaseConverter.convert(database);
         databaseRepository.createDatabase(databaseDO);
         return DatabaseConverter.convert(databaseDO);

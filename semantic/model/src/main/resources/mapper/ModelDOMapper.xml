@@ -16,6 +16,7 @@
     <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="updated_by" jdbcType="VARCHAR" property="updatedBy" />
     <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="drill_down_dimensions" jdbcType="VARCHAR" property="drillDownDimensions" />
   </resultMap>
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.tencent.supersonic.semantic.model.domain.dataobject.ModelDO">
     <result column="entity" jdbcType="LONGVARCHAR" property="entity" />
@@ -80,7 +81,7 @@
   </sql>
   <sql id="Base_Column_List">
     id, name, biz_name, domain_id, alias, viewer, view_org, admin, admin_org, is_open, 
-    created_by, created_at, updated_by, updated_at
+    created_by, created_at, updated_by, updated_at, drill_down_dimensions
   </sql>
   <sql id="Blob_Column_List">
     entity
@@ -135,14 +136,14 @@
       domain_id, alias, viewer, 
       view_org, admin, admin_org, 
       is_open, created_by, created_at, 
-      updated_by, updated_at, entity
-      )
+      updated_by, updated_at, drill_down_dimensions, 
+      entity)
     values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{bizName,jdbcType=VARCHAR}, 
       #{domainId,jdbcType=BIGINT}, #{alias,jdbcType=VARCHAR}, #{viewer,jdbcType=VARCHAR}, 
       #{viewOrg,jdbcType=VARCHAR}, #{admin,jdbcType=VARCHAR}, #{adminOrg,jdbcType=VARCHAR}, 
       #{isOpen,jdbcType=INTEGER}, #{createdBy,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, 
-      #{updatedBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP}, #{entity,jdbcType=LONGVARCHAR}
-      )
+      #{updatedBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP}, #{drillDownDimensions,jdbcType=VARCHAR}, 
+      #{entity,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.ModelDO">
     insert into s2_model
@@ -188,6 +189,9 @@
       </if>
       <if test="updatedAt != null">
         updated_at,
+      </if>
+      <if test="drillDownDimensions != null">
+        drill_down_dimensions,
       </if>
       <if test="entity != null">
         entity,
@@ -235,6 +239,9 @@
       </if>
       <if test="updatedAt != null">
         #{updatedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="drillDownDimensions != null">
+        #{drillDownDimensions,jdbcType=VARCHAR},
       </if>
       <if test="entity != null">
         #{entity,jdbcType=LONGVARCHAR},
@@ -292,6 +299,9 @@
       <if test="record.updatedAt != null">
         updated_at = #{record.updatedAt,jdbcType=TIMESTAMP},
       </if>
+      <if test="record.drillDownDimensions != null">
+        drill_down_dimensions = #{record.drillDownDimensions,jdbcType=VARCHAR},
+      </if>
       <if test="record.entity != null">
         entity = #{record.entity,jdbcType=LONGVARCHAR},
       </if>
@@ -316,6 +326,7 @@
       created_at = #{record.createdAt,jdbcType=TIMESTAMP},
       updated_by = #{record.updatedBy,jdbcType=VARCHAR},
       updated_at = #{record.updatedAt,jdbcType=TIMESTAMP},
+      drill_down_dimensions = #{record.drillDownDimensions,jdbcType=VARCHAR},
       entity = #{record.entity,jdbcType=LONGVARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -336,7 +347,8 @@
       created_by = #{record.createdBy,jdbcType=VARCHAR},
       created_at = #{record.createdAt,jdbcType=TIMESTAMP},
       updated_by = #{record.updatedBy,jdbcType=VARCHAR},
-      updated_at = #{record.updatedAt,jdbcType=TIMESTAMP}
+      updated_at = #{record.updatedAt,jdbcType=TIMESTAMP},
+      drill_down_dimensions = #{record.drillDownDimensions,jdbcType=VARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -383,6 +395,9 @@
       <if test="updatedAt != null">
         updated_at = #{updatedAt,jdbcType=TIMESTAMP},
       </if>
+      <if test="drillDownDimensions != null">
+        drill_down_dimensions = #{drillDownDimensions,jdbcType=VARCHAR},
+      </if>
       <if test="entity != null">
         entity = #{entity,jdbcType=LONGVARCHAR},
       </if>
@@ -404,6 +419,7 @@
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_by = #{updatedBy,jdbcType=VARCHAR},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+      drill_down_dimensions = #{drillDownDimensions,jdbcType=VARCHAR},
       entity = #{entity,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -421,7 +437,8 @@
       created_by = #{createdBy,jdbcType=VARCHAR},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_by = #{updatedBy,jdbcType=VARCHAR},
-      updated_at = #{updatedAt,jdbcType=TIMESTAMP}
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+      drill_down_dimensions = #{drillDownDimensions,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

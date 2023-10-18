@@ -76,6 +76,11 @@ public class ModelDO {
     /**
      * 
      */
+    private String drillDownDimensions;
+
+    /**
+     * 
+     */
     private String entity;
 
     /**
@@ -300,6 +305,22 @@ public class ModelDO {
      */
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    /**
+     * 
+     * @return drill_down_dimensions 
+     */
+    public String getDrillDownDimensions() {
+        return drillDownDimensions;
+    }
+
+    /**
+     * 
+     * @param drillDownDimensions 
+     */
+    public void setDrillDownDimensions(String drillDownDimensions) {
+        this.drillDownDimensions = drillDownDimensions == null ? null : drillDownDimensions.trim();
     }
 
     /**

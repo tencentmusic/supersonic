@@ -167,6 +167,15 @@ export declare namespace ISemantic {
     expr: string;
   }
 
+  interface IDrillDownDimensionItem {
+    dimensionId: number;
+    necessary: boolean;
+  }
+
+  interface IRelateDimension {
+    drillDownDimensions: IDrillDownDimensionItem[];
+  }
+
   interface IMetricItem {
     createdBy: string;
     updatedBy: string;
@@ -181,6 +190,7 @@ export declare namespace ISemantic {
     sensitiveLevel: number;
     domainId: number;
     domainName: string;
+    modelName: string;
     modelId: number;
     type: string;
     typeParams: ITypeParams;
@@ -189,6 +199,31 @@ export declare namespace ISemantic {
     dataFormat: string;
     alias: string;
     useCnt: number;
+    relateDimension?: IRelateDimension;
+  }
+
+  interface IMetricTrendColumn {
+    name: string;
+    type: string;
+    nameEn: string;
+    showType: string;
+    authorized: boolean;
+    dataFormatType: string;
+    dataFormat: {
+      needMultiply100: boolean;
+      decimalPlaces: number;
+    };
+  }
+
+  type IMetricTrendItem = Record<string, any>;
+  interface IMetricTrend {
+    columns: IMetricTrendColumn;
+    resultList: IMetricTrendItem[];
+    pageNo?: number;
+    pageSize?: number;
+    totalCount?: number;
+    queryAuthorization?: string;
+    sql?: string;
   }
 
   type IDimensionList = IDimensionItem[];
