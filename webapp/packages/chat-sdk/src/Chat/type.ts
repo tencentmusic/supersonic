@@ -1,4 +1,4 @@
-import { MsgDataType, SendMsgParamsType } from "../common/type";
+import { ChatContextType, MsgDataType, SendMsgParamsType } from "../common/type";
 
 export enum MessageTypeEnum {
   TEXT = 'text', // 指标文本
@@ -22,6 +22,7 @@ export type MessageItem = {
   modelId?: number;
   agentId?: number;
   entityId?: string;
+  parseInfos?: ChatContextType[];
   msgData?: MsgDataType;
   quote?: string;
   score?: number;

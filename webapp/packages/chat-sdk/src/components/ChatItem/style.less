@@ -265,6 +265,20 @@
     row-gap: 6px;
   }
 
+  &-tip-item-option {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  &-mobile-tip-item-option {
+    .ant-picker-panel-container .ant-picker-panels {
+      flex-wrap: wrap !important;
+      width: 280px !important;
+    }
+  }
+
   &-tip-item-filter-name {
     color: var(--text-color-secondary);
     font-weight: 500;
@@ -342,6 +356,8 @@
 .@{filter-item-prefix-cls} {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  row-gap: 6px;
   font-weight: 500;
 
   &-filter-name {
