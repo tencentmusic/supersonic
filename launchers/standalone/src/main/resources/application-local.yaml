@@ -26,10 +26,6 @@ authentication:
       header:
         key: Authorization
 
-semantic:
-  url:
-    prefix: http://127.0.0.1:9081
-
 time:
   threshold: 100
 

@@ -64,7 +64,7 @@ public class SqlParserRemoveHelper {
         }
     }
 
-    public static String getConstant(Expression expression){
+    public static String getConstant(Expression expression) {
         String constant = JsqlConstants.EQUAL_CONSTANT;
         if (expression instanceof GreaterThanEquals) {
             constant = JsqlConstants.GREATER_THAN_EQUALS_CONSTANT;
