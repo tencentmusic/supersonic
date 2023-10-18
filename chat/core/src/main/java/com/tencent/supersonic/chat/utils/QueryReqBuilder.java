@@ -12,7 +12,7 @@ import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.time.LocalDate;
@@ -123,19 +123,19 @@ public class QueryReqBuilder {
     }
 
     /**
-     * convert to QueryDslReq
+     * convert to QueryS2QLReq
      *
      * @param querySql
      * @param modelId
      * @return
      */
-    public static QueryDslReq buildDslReq(String querySql, Long modelId) {
-        QueryDslReq queryDslReq = new QueryDslReq();
+    public static QueryS2QLReq buildS2QLReq(String querySql, Long modelId) {
+        QueryS2QLReq queryS2QLReq = new QueryS2QLReq();
         if (Objects.nonNull(querySql)) {
-            queryDslReq.setSql(querySql);
+            queryS2QLReq.setSql(querySql);
         }
-        queryDslReq.setModelId(modelId);
-        return queryDslReq;
+        queryS2QLReq.setModelId(modelId);
+        return queryS2QLReq;
     }
 
 

@@ -1,9 +1,9 @@
-package com.tencent.supersonic.chat.parser.llm.dsl;
+package com.tencent.supersonic.chat.parser.llm.s2ql;
 
-import com.tencent.supersonic.chat.agent.tool.DslTool;
+import com.tencent.supersonic.chat.agent.tool.CommonAgentTool;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.query.llm.dsl.LLMReq;
-import com.tencent.supersonic.chat.query.llm.dsl.LLMResp;
+import com.tencent.supersonic.chat.query.llm.s2ql.LLMReq;
+import com.tencent.supersonic.chat.query.llm.s2ql.LLMResp;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DSLParseResult {
+public class ParseResult {
 
     private LLMReq llmReq;
 
@@ -21,5 +21,5 @@ public class DSLParseResult {
 
     private QueryReq request;
 
-    private DslTool dslTool;
+    private CommonAgentTool commonAgentTool;
 }

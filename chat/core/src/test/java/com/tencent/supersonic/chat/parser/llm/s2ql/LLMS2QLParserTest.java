@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.parser.llm.dsl;
+package com.tencent.supersonic.chat.parser.llm.s2ql;
 
 import static org.mockito.Mockito.when;
 
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-class LLMDslParserTest {
+class LLMS2QLParserTest {
 
     @Test
     void setFilter() {
@@ -72,9 +72,9 @@ class LLMDslParserTest {
                 .parseInfo(parseInfo)
                 .build();
 
-        LLMDslParser llmDslParser = new LLMDslParser();
+        LLMS2QLParser llms2QLParser = new LLMS2QLParser();
 
-        llmDslParser.updateParseInfo(semanticCorrectInfo, 2L, parseInfo);
+        llms2QLParser.updateParseInfo(semanticCorrectInfo, 2L, parseInfo);
 
     }
 }

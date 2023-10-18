@@ -9,6 +9,6 @@ import java.lang.annotation.Documented;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface DslPermissionAnnotation {
+public @interface S2QLPermissionAnnotation {
 
 }

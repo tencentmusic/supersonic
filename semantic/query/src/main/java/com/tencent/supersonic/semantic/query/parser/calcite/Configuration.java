@@ -2,7 +2,6 @@ package com.tencent.supersonic.semantic.query.parser.calcite;
 
 
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSqlDialect;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.DSLSqlValidatorImpl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +32,6 @@ import org.apache.calcite.sql2rel.SqlToRelConverter;
 public class Configuration {
 
     public static Properties configProperties = new Properties();
-    public static DSLSqlValidatorImpl dslSqlValidator;
     public static RelDataTypeFactory typeFactory = new SqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
     public static SqlOperatorTable operatorTable = SqlStdOperatorTable.instance();
     public static CalciteConnectionConfig config = new CalciteConnectionConfigImpl(configProperties);
@@ -71,7 +69,7 @@ public class Configuration {
     public static SqlValidator getSqlValidator(CalciteSchema rootSchema) {
         List<SqlOperatorTable> tables = new ArrayList<>();
         tables.add(SqlStdOperatorTable.instance());
-        SqlOperatorTable operatorTable = new ChainedSqlOperatorTable(tables); //.of(SqlStdOperatorTable.instance());
+        SqlOperatorTable operatorTable = new ChainedSqlOperatorTable(tables);
         //operatorTable.
         SqlValidator.Config validatorConfig = SqlValidator.Config.DEFAULT
                 .withLenientOperatorLookup(config.lenientOperatorLookup())

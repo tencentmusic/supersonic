@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
-import com.tencent.supersonic.chat.agent.tool.DslTool;
+import com.tencent.supersonic.chat.agent.tool.CommonAgentTool;
 import com.tencent.supersonic.chat.persistence.dataobject.AgentDO;
 import com.tencent.supersonic.chat.persistence.repository.AgentRepository;
 import com.tencent.supersonic.chat.service.AgentService;
@@ -87,7 +87,7 @@ public class AgentServiceImpl implements AgentService {
         return agentDO;
     }
 
-    public List<DslTool> getDslTools(Integer agentId, AgentToolType agentToolType) {
+    public List<CommonAgentTool> getParserTools(Integer agentId, AgentToolType agentToolType) {
         Agent agent = getAgent(agentId);
         if (agent == null) {
             return Lists.newArrayList();
@@ -96,15 +96,16 @@ public class AgentServiceImpl implements AgentService {
         if (CollectionUtils.isEmpty(tools)) {
             return Lists.newArrayList();
         }
-        return tools.stream().map(tool -> JSONObject.parseObject(tool, DslTool.class)).collect(Collectors.toList());
+        return tools.stream().map(tool -> JSONObject.parseObject(tool, CommonAgentTool.class))
+                .collect(Collectors.toList());
     }
 
-    public Set<Long> getDslToolsModelIds(Integer agentId, AgentToolType agentToolType) {
-        List<DslTool> dslTools = getDslTools(agentId, agentToolType);
-        if (CollectionUtils.isEmpty(dslTools)) {
+    public Set<Long> getModelIds(Integer agentId, AgentToolType agentToolType) {
+        List<CommonAgentTool> commonAgentTools = getParserTools(agentId, agentToolType);
+        if (CollectionUtils.isEmpty(commonAgentTools)) {
             return new HashSet<>();
         }
-        return dslTools.stream().map(DslTool::getModelIds)
+        return commonAgentTools.stream().map(CommonAgentTool::getModelIds)
                 .filter(modelIds -> !CollectionUtils.isEmpty(modelIds))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());

@@ -5,7 +5,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.chat.parser.llm.dsl.DSLDateHelper;
+import com.tencent.supersonic.chat.parser.llm.s2ql.S2QLDateHelper;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
@@ -72,7 +72,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
         String sql = semanticCorrectInfo.getSql();
         List<String> whereFields = SqlParserSelectHelper.getWhereFields(sql);
         if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(DateUtils.DATE_FIELD)) {
-            String currentDate = DSLDateHelper.getReferenceDate(semanticCorrectInfo.getParseInfo().getModelId());
+            String currentDate = S2QLDateHelper.getReferenceDate(semanticCorrectInfo.getParseInfo().getModelId());
             if (StringUtils.isNotBlank(currentDate)) {
                 sql = SqlParserAddHelper.addParenthesisToWhere(sql);
                 sql = SqlParserAddHelper.addWhere(sql, DateUtils.DATE_FIELD, currentDate);

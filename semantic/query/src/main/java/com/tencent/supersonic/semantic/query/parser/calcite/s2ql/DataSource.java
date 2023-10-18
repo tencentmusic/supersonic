@@ -1,6 +1,6 @@
-package com.tencent.supersonic.semantic.query.parser.calcite.dsl;
+package com.tencent.supersonic.semantic.query.parser.calcite.s2ql;
 
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Materialization.TimePartType;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Materialization.TimePartType;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;

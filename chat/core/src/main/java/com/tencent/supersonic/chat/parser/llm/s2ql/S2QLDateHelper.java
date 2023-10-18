@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.parser.llm.dsl;
+package com.tencent.supersonic.chat.parser.llm.s2ql;
 
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import org.apache.commons.collections.CollectionUtils;
 
-public class DSLDateHelper {
+public class S2QLDateHelper {
 
     public static String getReferenceDate(Long modelId) {
         String defaultDate = DateUtils.getBeforeDate(0);

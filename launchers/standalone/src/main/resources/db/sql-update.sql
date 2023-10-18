@@ -66,3 +66,5 @@ alter table s2_dimension add column data_type  varchar(50)  not null DEFAULT 'va
 alter table s2_query_stat_info add column `query_opt_mode` varchar(20) DEFAULT NULL COMMENT '优化模式';
 alter table s2_datasource add column depends text COMMENT '上游依赖标识' after datasource_detail;
 
+--20231018
+UPDATE `s2_agent` SET `config` = replace (`config`,'DSL','LLM_S2QL') WHERE `config` LIKE '%DSL%';

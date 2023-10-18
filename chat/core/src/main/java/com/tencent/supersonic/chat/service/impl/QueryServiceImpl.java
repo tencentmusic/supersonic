@@ -19,15 +19,15 @@ import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
-import com.tencent.supersonic.chat.parser.llm.dsl.DSLParseResult;
+import com.tencent.supersonic.chat.parser.llm.s2ql.ParseResult;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.QuerySelector;
-import com.tencent.supersonic.chat.query.llm.dsl.DslQuery;
-import com.tencent.supersonic.chat.query.llm.dsl.LLMResp;
+import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
+import com.tencent.supersonic.chat.query.llm.s2ql.LLMResp;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
 import com.tencent.supersonic.chat.service.ChatService;
@@ -239,7 +239,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     private void saveSolvedQuery(ExecuteQueryReq queryReq, SemanticParseInfo parseInfo,
-                                 ChatQueryDO chatQueryDO, QueryResult queryResult) {
+            ChatQueryDO chatQueryDO, QueryResult queryResult) {
         if (queryResult.getResponse() == null && CollectionUtils.isEmpty(queryResult.getQueryResults())) {
             return;
         }
@@ -305,12 +305,12 @@ public class QueryServiceImpl implements QueryService {
 
         SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
 
-        if (DslQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
+        if (S2QLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
             Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
             Map<String, Map<String, String>> havingFiledNameToValueMap = new HashMap<>();
             String json = JsonUtil.toString(parseInfo.getProperties().get(Constants.CONTEXT));
-            DSLParseResult dslParseResult = JsonUtil.toObject(json, DSLParseResult.class);
-            LLMResp llmResp = dslParseResult.getLlmResp();
+            ParseResult parseResult = JsonUtil.toObject(json, ParseResult.class);
+            LLMResp llmResp = parseResult.getLlmResp();
             String correctorSql = llmResp.getCorrectorSql();
             log.info("correctorSql before replacing:{}", correctorSql);
 
@@ -330,9 +330,9 @@ public class QueryServiceImpl implements QueryService {
             correctorSql = SqlParserReplaceHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
             log.info("correctorSql after replacing:{}", correctorSql);
             llmResp.setCorrectorSql(correctorSql);
-            dslParseResult.setLlmResp(llmResp);
+            parseResult.setLlmResp(llmResp);
             Map<String, Object> properties = new HashMap<>();
-            properties.put(Constants.CONTEXT, dslParseResult);
+            properties.put(Constants.CONTEXT, parseResult);
             parseInfo.setProperties(properties);
             parseInfo.getSqlInfo().setLogicSql(correctorSql);
             semanticQuery.setParseInfo(parseInfo);
@@ -399,29 +399,29 @@ public class QueryServiceImpl implements QueryService {
         if (CollectionUtils.isEmpty(metricFilters)) {
             return;
         }
-        for (QueryFilter dslQueryFilter : metricFilters) {
+        for (QueryFilter queryFilter : metricFilters) {
             Map<String, String> map = new HashMap<>();
             for (FilterExpression filterExpression : filterExpressionList) {
                 if (filterExpression.getFieldName() != null
-                        && filterExpression.getFieldName().contains(dslQueryFilter.getName())
-                        && dslQueryFilter.getOperator().getValue().equals(filterExpression.getOperator())) {
-                    map.put(filterExpression.getFieldValue().toString(), dslQueryFilter.getValue().toString());
+                        && filterExpression.getFieldName().contains(queryFilter.getName())
+                        && queryFilter.getOperator().getValue().equals(filterExpression.getOperator())) {
+                    map.put(filterExpression.getFieldValue().toString(), queryFilter.getValue().toString());
                     contextMetricFilters.stream().forEach(o -> {
-                        if (o.getName().equals(dslQueryFilter.getName())) {
-                            o.setValue(dslQueryFilter.getValue());
+                        if (o.getName().equals(queryFilter.getName())) {
+                            o.setValue(queryFilter.getValue());
                         }
                     });
                     break;
                 }
             }
-            filedNameToValueMap.put(dslQueryFilter.getName(), map);
+            filedNameToValueMap.put(queryFilter.getName(), map);
         }
     }
 
 
     private SemanticParseInfo getSemanticParseInfo(QueryDataReq queryData, ChatParseDO chatParseDO) {
         SemanticParseInfo parseInfo = JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
-        if (DslQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
+        if (S2QLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
             return parseInfo;
         }
         if (CollectionUtils.isNotEmpty(queryData.getDimensions())) {

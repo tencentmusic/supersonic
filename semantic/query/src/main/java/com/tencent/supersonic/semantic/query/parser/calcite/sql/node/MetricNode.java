@@ -1,7 +1,7 @@
 package com.tencent.supersonic.semantic.query.parser.calcite.sql.node;
 
 
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Metric;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Metric;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Data;

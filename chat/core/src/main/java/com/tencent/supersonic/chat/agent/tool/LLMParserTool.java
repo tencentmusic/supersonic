@@ -5,9 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class DslTool extends AgentTool {
-
-    private List<Long> modelIds;
+public class LLMParserTool extends CommonAgentTool {
 
     private List<String> exampleQuestions;
 
