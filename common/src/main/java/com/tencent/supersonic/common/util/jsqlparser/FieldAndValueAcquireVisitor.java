@@ -50,7 +50,7 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
     public void visit(InExpression expr) {
         FilterExpression filterExpression = new FilterExpression();
         filterExpression.setFieldName(((Column) expr.getLeftExpression()).getColumnName());
-        filterExpression.setOperator("IN");
+        filterExpression.setOperator(JsqlConstants.IN);
         filterExpression.setFieldValue(expr.getRightItemsList());
         filterExpressions.add(filterExpression);
     }

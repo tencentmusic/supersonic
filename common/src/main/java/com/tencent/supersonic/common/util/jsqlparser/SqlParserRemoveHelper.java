@@ -64,6 +64,20 @@ public class SqlParserRemoveHelper {
         }
     }
 
+    public static String getConstant(Expression expression){
+        String constant = JsqlConstants.EQUAL_CONSTANT;
+        if (expression instanceof GreaterThanEquals) {
+            constant = JsqlConstants.GREATER_THAN_EQUALS_CONSTANT;
+        } else if (expression instanceof MinorThanEquals) {
+            constant = JsqlConstants.MINOR_THAN_EQUALS_CONSTANT;
+        } else if (expression instanceof GreaterThan) {
+            constant = JsqlConstants.GREATER_THAN_CONSTANT;
+        } else if (expression instanceof MinorThan) {
+            constant = JsqlConstants.MINOR_THAN_CONSTANT;
+        }
+        return constant;
+    }
+
     private static void removeExpressionWithConstant(Expression expression, Set<String> removeFieldNames) {
         if (expression instanceof EqualsTo
                 || expression instanceof GreaterThanEquals
@@ -76,16 +90,7 @@ public class SqlParserRemoveHelper {
             if (!removeFieldNames.contains(columnName)) {
                 return;
             }
-            String constant = JsqlConstants.EQUAL_CONSTANT;
-            if (expression instanceof GreaterThanEquals) {
-                constant = JsqlConstants.GREATER_THAN_EQUALS_CONSTANT;
-            } else if (expression instanceof MinorThanEquals) {
-                constant = JsqlConstants.MINOR_THAN_EQUALS_CONSTANT;
-            } else if (expression instanceof GreaterThan) {
-                constant = JsqlConstants.GREATER_THAN_CONSTANT;
-            } else if (expression instanceof MinorThan) {
-                constant = JsqlConstants.MINOR_THAN_CONSTANT;
-            }
+            String constant = getConstant(expression);
             try {
                 ComparisonOperator constantExpression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(
                         constant);
