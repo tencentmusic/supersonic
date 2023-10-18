@@ -17,6 +17,7 @@ const ShowCase: React.FC<Props> = ({ agentId, onSendMsg }) => {
   const [loading, setLoading] = useState(false);
 
   const updateData = async () => {
+    setLoading(true);
     const res = await queryShowCase(agentId, 1, 30);
     setLoading(false);
     setShowCaseMap(res.data.showCaseMap);
