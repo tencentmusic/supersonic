@@ -27,13 +27,16 @@ import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -172,14 +175,30 @@ public class QueryReqConverter {
 
 
     protected Map<String, String> getFieldNameToBizNameMap(ModelSchemaResp modelSchemaResp) {
-        List<SchemaItem> allSchemaItems = new ArrayList<>();
-        allSchemaItems.addAll(modelSchemaResp.getDimensions());
-        allSchemaItems.addAll(modelSchemaResp.getMetrics());
+        // support fieldName and field alias to bizName
+        Map<String, String> dimensionResults = modelSchemaResp.getDimensions().stream()
+                .flatMap(entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
+                .collect(Collectors.toMap(a -> a.getLeft(), a -> a.getRight(), (k1, k2) -> k1));
 
-        Map<String, String> result = allSchemaItems.stream()
-                .collect(Collectors.toMap(SchemaItem::getName, a -> a.getBizName(), (k1, k2) -> k1));
-        result.put(DateUtils.DATE_FIELD, TimeDimensionEnum.DAY.getName());
-        return result;
+        Map<String, String> metricResults = modelSchemaResp.getMetrics().stream()
+                .flatMap(entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
+                .collect(Collectors.toMap(a -> a.getLeft(), a -> a.getRight(), (k1, k2) -> k1));
+
+        dimensionResults.put(DateUtils.DATE_FIELD, TimeDimensionEnum.DAY.getName());
+        dimensionResults.putAll(metricResults);
+        return dimensionResults;
+    }
+
+    private Stream<Pair<String, String>> getPairStream(String aliasStr, String name, String bizName) {
+        Set<Pair<String, String>> elements = new HashSet<>();
+        elements.add(Pair.of(name, bizName));
+        if (StringUtils.isNotBlank(aliasStr)) {
+            List<String> aliasList = SchemaItem.getAliasList(aliasStr);
+            for (String alias : aliasList) {
+                elements.add(Pair.of(alias, bizName));
+            }
+        }
+        return elements.stream();
     }
 
     public void correctTableName(QueryS2QLReq databaseReq) {

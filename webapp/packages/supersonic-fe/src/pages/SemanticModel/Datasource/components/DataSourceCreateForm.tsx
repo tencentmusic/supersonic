@@ -163,7 +163,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       const queryParams = {
         ...submitForm,
         sqlQuery: sql,
-        databaseId: dataSourceItem?.databaseId || formDatabaseId || databaseItem?.key,
+        databaseId: databaseItem?.key || dataSourceItem?.databaseId || formDatabaseId,
         queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
         tableQuery: dbName && tableName ? `${dbName}.${tableName}` : '',
         modelId: isEdit ? dataSourceItem.modelId : modelId,

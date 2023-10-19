@@ -356,6 +356,9 @@ public class LLMS2QLParser implements SemanticParser {
         llmReq.setLinking(linking);
 
         String currentDate = S2QLDateHelper.getReferenceDate(modelId);
+        if (StringUtils.isEmpty(currentDate)) {
+            currentDate = DateUtils.getBeforeDate(0);
+        }
         llmReq.setCurrentDate(currentDate);
         return llmReq;
     }
@@ -423,14 +426,13 @@ public class LLMS2QLParser implements SemanticParser {
                             || SchemaElementType.VALUE.equals(elementType);
                 })
                 .map(schemaElementMatch -> {
-                    SchemaElementType elementType = schemaElementMatch.getElement().getType();
-
-                    if (!SchemaElementType.VALUE.equals(elementType)) {
-                        return schemaElementMatch.getWord();
+                    SchemaElement element = schemaElementMatch.getElement();
+                    SchemaElementType elementType = element.getType();
+                    if (SchemaElementType.VALUE.equals(elementType)) {
+                        return itemIdToName.get(element.getId());
                     }
-                    return itemIdToName.get(schemaElementMatch.getElement().getId());
+                    return schemaElementMatch.getWord();
                 })
-                .filter(name -> StringUtils.isNotEmpty(name) && !name.contains("%"))
                 .collect(Collectors.toSet());
         return fieldNameList;
     }

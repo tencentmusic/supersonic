@@ -75,6 +75,7 @@ const MessageContainer: React.FC<Props> = ({
             msgValue,
             score,
             identityMsg,
+            parseInfos,
             msgData,
             filters,
           } = msgItem;
@@ -91,6 +92,7 @@ const MessageContainer: React.FC<Props> = ({
                   {identityMsg && <Text position="left" data={identityMsg} />}
                   <ChatItem
                     msg={msgValue || msg || ''}
+                    parseInfos={parseInfos}
                     msgData={msgData}
                     conversationId={chatId}
                     modelId={modelId}

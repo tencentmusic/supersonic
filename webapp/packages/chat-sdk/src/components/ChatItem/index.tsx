@@ -28,6 +28,7 @@ type Props = {
   score?: number;
   filter?: any[];
   isLastMessage?: boolean;
+  parseInfos?: ChatContextType[];
   msgData?: MsgDataType;
   triggerResize?: boolean;
   isDeveloper?: boolean;
@@ -48,6 +49,7 @@ const ChatItem: React.FC<Props> = ({
   filter,
   isLastMessage,
   triggerResize,
+  parseInfos,
   msgData,
   isDeveloper,
   integrateSystem,
@@ -152,11 +154,15 @@ const ChatItem: React.FC<Props> = ({
       return;
     }
     if (msgData) {
-      const parseInfoValue = { ...msgData.chatContext, queryId: msgData.queryId };
-      setParseInfoOptions([parseInfoValue]);
+      const parseInfoOptionsValue =
+        parseInfos && parseInfos.length > 0
+          ? parseInfos.map(item => ({ ...item, queryId: msgData.queryId }))
+          : [{ ...msgData.chatContext, queryId: msgData.queryId }];
+      const parseInfoValue = parseInfoOptionsValue[0];
+      setParseInfoOptions(parseInfoOptionsValue);
       setParseInfo(parseInfoValue);
-      setDimensionFilters(msgData.chatContext?.dimensionFilters || []);
-      setDateInfo(msgData.chatContext?.dateInfo);
+      setDimensionFilters(parseInfoValue.dimensionFilters || []);
+      setDateInfo(parseInfoValue.dateInfo);
       setExecuteMode(true);
       updateData({ code: 200, data: msgData, msg: 'success' });
     } else if (msg) {
@@ -238,10 +244,6 @@ const ChatItem: React.FC<Props> = ({
     [`${prefixCls}-content-mobile`]: isMobile,
   });
 
-  const isMetricCard =
-    (data?.queryMode === 'METRIC_DOMAIN' || data?.queryMode === 'METRIC_FILTER') &&
-    data?.queryResults?.length === 1;
-
   return (
     <div className={prefixCls}>
       {!isMobile && integrateSystem !== 'wiki' && (
@@ -266,7 +268,7 @@ const ChatItem: React.FC<Props> = ({
           />
           {executeMode && (
             <>
-              {parseInfo?.sqlInfo && isDeveloper && integrateSystem !== 'c2' && (
+              {!isMobile && parseInfo?.sqlInfo && isDeveloper && integrateSystem !== 'c2' && (
                 <SqlItem integrateSystem={integrateSystem} sqlInfo={parseInfo.sqlInfo} />
               )}
               <ExecuteItem
@@ -292,13 +294,11 @@ const ChatItem: React.FC<Props> = ({
             />
           )}
         </div>
-        {integrateSystem !== 'showcase' && (
-          <Tools
-            queryId={parseInfo?.queryId || 0}
-            scoreValue={score}
-            // isLastMessage={isLastMessage}
-          />
-        )}
+        {(parseTip !== '' || (executeMode && !executeLoading)) &&
+          integrateSystem !== 'c2' &&
+          integrateSystem !== 'showcase' && (
+            <Tools queryId={parseInfo?.queryId || 0} scoreValue={score} />
+          )}
       </div>
     </div>
   );
