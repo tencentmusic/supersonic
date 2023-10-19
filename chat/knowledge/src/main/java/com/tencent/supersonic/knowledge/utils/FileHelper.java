@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FileHelper {
 
-    public static final String FILE_SPILT = "/";
+    public static final String FILE_SPILT = File.separator;
 
     public static void deleteCacheFile(String[] path) throws IOException {
 
