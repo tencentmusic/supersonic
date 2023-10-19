@@ -150,8 +150,6 @@ public class QueryServiceImpl implements QueryService {
                     .candidateParses(candidateParses)
                     .build();
             chatParseDOS = chatService.batchAddParse(chatCtx, queryReq, parseResult, candidateParses, selectedParses);
-            saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
-                    queryReq.getUser().getName(), queryReq.getChatId().longValue());
         } else {
             parseResult = ParseResp.builder()
                     .chatId(queryReq.getChatId())
@@ -166,7 +164,7 @@ public class QueryServiceImpl implements QueryService {
                     .interfaceName(parseResponder.getClass().getSimpleName())
                     .type(CostType.PARSERRESPONDER.getType()).build());
         }
-        if (timeCostDOList.size() > 0) {
+        if (Objects.nonNull(parseResult.getQueryId()) && timeCostDOList.size() > 0) {
             saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
         }
