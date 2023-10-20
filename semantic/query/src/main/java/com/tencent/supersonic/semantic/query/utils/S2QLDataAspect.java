@@ -75,12 +75,13 @@ public class S2QLDataAspect {
 
         //1. determine whether admin of the model
         if (authCommonService.doModelAdmin(user, modelId)) {
+            log.info("determine whether admin of the model");
             return joinPoint.proceed();
         }
-
+        log.info("determine whether the subject field is visible");
         // 2. determine whether the subject field is visible
         authCommonService.doModelVisible(user, modelId);
-
+        log.info("fetch data permission meta information");
         // 3. fetch data permission meta information
         Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(queryS2QLReq, user);
         log.info("modelId:{}, res4Privilege:{}", modelId, res4Privilege);
