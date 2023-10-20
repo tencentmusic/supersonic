@@ -15,6 +15,8 @@ public interface DatasourceRepository {
 
     List<DatasourceDO> getDatasourceList(Long modelId);
 
+    List<DatasourceDO> getDatasourceByDatabase(Long databaseId);
+
     DatasourceDO getDatasourceById(Long id);
 
     void deleteDatasource(Long id);

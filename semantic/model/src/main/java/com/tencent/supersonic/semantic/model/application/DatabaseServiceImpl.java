@@ -88,7 +88,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public void deleteDatabase(Long databaseId) {
-        List<DatasourceResp> datasourceResps = datasourceService.getDatasourceList(databaseId);
+        List<DatasourceResp> datasourceResps = datasourceService.getDatasourceByDatabase(databaseId);
         if (!CollectionUtils.isEmpty(datasourceResps)) {
             List<String> datasourceNames = datasourceResps.stream()
                     .map(DatasourceResp::getName).collect(Collectors.toList());

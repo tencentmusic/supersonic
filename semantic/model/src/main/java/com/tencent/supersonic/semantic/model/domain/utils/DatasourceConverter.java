@@ -150,26 +150,26 @@ public class DatasourceConverter {
     }
 
 
-    private static boolean isCraeteDimension(Dim dim) {
+    private static boolean isCreateDimension(Dim dim) {
         return dim.getIsCreateDimension() == 1
                 && StringUtils.isNotBlank(dim.getName())
                 && !dim.getType().equalsIgnoreCase("time");
     }
 
-    private static boolean isCraeteMetric(Measure measure) {
+    private static boolean isCreateMetric(Measure measure) {
         return measure.getIsCreateMetric() == 1
                 && StringUtils.isNotBlank(measure.getName());
     }
 
     public static List<Dim> getDimToCreateDimension(Datasource datasource) {
         return datasource.getDatasourceDetail().getDimensions().stream()
-                .filter(DatasourceConverter::isCraeteDimension)
+                .filter(DatasourceConverter::isCreateDimension)
                 .collect(Collectors.toList());
     }
 
     public static List<Measure> getMeasureToCreateMetric(Datasource datasource) {
         return datasource.getDatasourceDetail().getMeasures().stream()
-                .filter(DatasourceConverter::isCraeteMetric)
+                .filter(DatasourceConverter::isCreateMetric)
                 .collect(Collectors.toList());
     }
 
