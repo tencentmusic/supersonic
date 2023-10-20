@@ -4,16 +4,16 @@ import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Parenthesis;
-import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
@@ -51,9 +51,9 @@ public class SqlParserRemoveHelper {
 
     private static void removeWhereExpression(Expression whereExpression, Set<String> removeFieldNames) {
         if (SqlParserSelectHelper.isLogicExpression(whereExpression)) {
-            AndExpression andExpression = (AndExpression) whereExpression;
-            Expression leftExpression = andExpression.getLeftExpression();
-            Expression rightExpression = andExpression.getRightExpression();
+            BinaryExpression binaryExpression = (BinaryExpression) whereExpression;
+            Expression leftExpression = binaryExpression.getLeftExpression();
+            Expression rightExpression = binaryExpression.getRightExpression();
 
             removeWhereExpression(leftExpression, removeFieldNames);
             removeWhereExpression(rightExpression, removeFieldNames);
