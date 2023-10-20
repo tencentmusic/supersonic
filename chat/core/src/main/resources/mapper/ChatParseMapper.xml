@@ -28,7 +28,7 @@
     <update id="updateParseInfo" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO">
         update s2_chat_parse
         set parse_info = #{parseInfo}
-        where parse_id = #{parseId}
+        where question_id = #{questionId} and parse_id = #{parseId}
     </update>
 
     <select id="getParseInfo" resultMap="ChatParse">

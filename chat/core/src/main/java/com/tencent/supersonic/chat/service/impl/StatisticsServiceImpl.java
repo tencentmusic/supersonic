@@ -4,6 +4,7 @@ import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.chat.persistence.repository.StatisticsRepository;
 import com.tencent.supersonic.chat.service.StatisticsService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,8 +19,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         this.statisticsRepository = statisticsRepository;
     }
 
+    @Async
     @Override
-    public boolean batchSaveStatistics(List<StatisticsDO> list) {
-        return statisticsRepository.batchSaveStatistics(list);
+    public void batchSaveStatistics(List<StatisticsDO> list) {
+        statisticsRepository.batchSaveStatistics(list);
     }
 }
