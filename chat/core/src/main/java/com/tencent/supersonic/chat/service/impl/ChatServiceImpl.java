@@ -138,25 +138,7 @@ public class ChatServiceImpl implements ChatService {
         if (CollectionUtils.isEmpty(queryRespPageInfo.getList())) {
             return queryRespPageInfo;
         }
-        List<Long> queryIds = queryRespPageInfo.getList().stream()
-                .map(QueryResp::getQuestionId).collect(Collectors.toList());
-        List<ChatParseDO> chatParseDOs = chatQueryRepository.getParseInfoList(queryIds);
-        if (CollectionUtils.isEmpty(chatParseDOs)) {
-            return queryRespPageInfo;
-        }
-        Map<Long, List<ChatParseDO>> chatParseMap = chatParseDOs.stream()
-                .collect(Collectors.groupingBy(ChatParseDO::getQuestionId));
-        for (QueryResp queryResp : queryRespPageInfo.getList()) {
-            List<ChatParseDO> chatParseDOList = chatParseMap.get(queryResp.getQuestionId());
-            if (CollectionUtils.isEmpty(chatParseMap)) {
-                continue;
-            }
-            List<SemanticParseInfo> parseInfos = chatParseDOList.stream().map(chatParseDO ->
-                    JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class))
-                    .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
-                    .collect(Collectors.toList());
-            queryResp.setParseInfos(parseInfos);
-        }
+        fillParseInfo(queryRespPageInfo.getList());
         return queryRespPageInfo;
     }
 
@@ -182,10 +164,34 @@ public class ChatServiceImpl implements ChatService {
             Map<String, Object> data = queryResp.getQueryResult().getQueryResults().get(0);
             return CollectionUtils.isEmpty(data);
         });
+        fillParseInfo(queryResps);
         Map<Long, List<QueryResp>> showCaseMap = queryResps.stream()
                 .collect(Collectors.groupingBy(QueryResp::getChatId));
         showCaseResp.setShowCaseMap(showCaseMap);
         return showCaseResp;
+    }
+
+
+    private void fillParseInfo(List<QueryResp> queryResps) {
+        List<Long> queryIds = queryResps.stream()
+                .map(QueryResp::getQuestionId).collect(Collectors.toList());
+        List<ChatParseDO> chatParseDOs = chatQueryRepository.getParseInfoList(queryIds);
+        if (CollectionUtils.isEmpty(chatParseDOs)) {
+            return;
+        }
+        Map<Long, List<ChatParseDO>> chatParseMap = chatParseDOs.stream()
+                .collect(Collectors.groupingBy(ChatParseDO::getQuestionId));
+        for (QueryResp queryResp : queryResps) {
+            List<ChatParseDO> chatParseDOList = chatParseMap.get(queryResp.getQuestionId());
+            if (CollectionUtils.isEmpty(chatParseMap)) {
+                continue;
+            }
+            List<SemanticParseInfo> parseInfos = chatParseDOList.stream().map(chatParseDO ->
+                            JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class))
+                    .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
+                    .collect(Collectors.toList());
+            queryResp.setParseInfos(parseInfos);
+        }
     }
 
     @Override
