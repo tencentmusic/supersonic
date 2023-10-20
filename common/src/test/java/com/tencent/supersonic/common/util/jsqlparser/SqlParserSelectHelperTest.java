@@ -84,6 +84,30 @@ class SqlParserSelectHelperTest {
                         + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
 
         System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, pv FROM s2 WHERE "
+                        + "(user_id like '%alice%' AND  publish_date > 10000) and song_name in "
+                        + "('七里香','晴天') and sys_imp_date = '2023-08-08' "
+                        + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, pv FROM s2 WHERE "
+                        + "(user_id like '%alice%' AND  publish_date > 10000) and song_name in (1,2) "
+                        + "and sys_imp_date = '2023-08-08' "
+                        + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, pv FROM s2 WHERE "
+                        + "(user_id like '%alice%' AND  publish_date > 10000) and 1 in (1) "
+                        + "and sys_imp_date = '2023-08-08' "
+                        + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(filterExpression);
     }
 
 
