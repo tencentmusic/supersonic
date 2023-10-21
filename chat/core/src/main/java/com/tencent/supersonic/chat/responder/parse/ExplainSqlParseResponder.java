@@ -22,8 +22,10 @@ public class ExplainSqlParseResponder implements ParseResponder {
     public void fillResponse(ParseResp parseResp, QueryContext queryContext,
                              List<ChatParseDO> chatParseDOS) {
         QueryReq queryReq = queryContext.getRequest();
+        Long startTime = System.currentTimeMillis();
         addExplainSql(queryReq, parseResp.getSelectedParses());
         addExplainSql(queryReq, parseResp.getCandidateParses());
+        parseResp.getParseTimeCostDO().setSqlTime(System.currentTimeMillis() - startTime);
         if (!CollectionUtils.isEmpty(chatParseDOS)) {
             Map<Integer, ChatParseDO> chatParseDOMap = chatParseDOS.stream()
                     .collect(Collectors.toMap(ChatParseDO::getParseId,

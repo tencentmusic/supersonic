@@ -22,6 +22,7 @@ public class ParseResp {
     private List<SemanticParseInfo> selectedParses;
     private List<SemanticParseInfo> candidateParses;
     private List<SolvedQueryRecallResp> similarSolvedQuery;
+    private ParseTimeCostDO parseTimeCostDO;
 
     public enum ParseState {
         COMPLETED,
