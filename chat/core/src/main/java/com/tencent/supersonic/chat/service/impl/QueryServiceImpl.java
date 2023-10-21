@@ -166,6 +166,13 @@ public class QueryServiceImpl implements QueryService {
                     .interfaceName(parseResponder.getClass().getSimpleName())
                     .type(CostType.PARSERRESPONDER.getType()).build());
         }
+        Long parseTime = 0L;
+        for (StatisticsDO statisticsDO : timeCostDOList) {
+            if (statisticsDO.getType() == 2) {
+                parseTime = parseTime + statisticsDO.getCost().longValue();
+            }
+        }
+        parseResult.getParseTimeCostDO().setParseTime(parseTime - parseResult.getParseTimeCostDO().getSqlTime());
         if (Objects.nonNull(parseResult.getQueryId()) && timeCostDOList.size() > 0) {
             saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
@@ -229,6 +236,7 @@ public class QueryServiceImpl implements QueryService {
         if (queryResult != null) {
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(semanticQuery.getClass().getSimpleName()).type(CostType.QUERY.getType()).build());
+            queryResult.setQueryTimeCost(timeCostDOList.get(0).getCost().longValue());
             saveInfo(timeCostDOList, queryReq.getQueryText(), queryReq.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
             queryResult.setChatContext(parseInfo);
