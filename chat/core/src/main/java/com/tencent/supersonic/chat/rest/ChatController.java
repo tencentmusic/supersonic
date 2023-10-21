@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.rest;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.chat.api.pojo.response.QueryRecallResp;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
 import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
@@ -89,7 +90,12 @@ public class ChatController {
     @RequestMapping("/getSolvedQuery")
     public List<SolvedQueryRecallResp> getSolvedQuery(@RequestParam(value = "queryText") String queryText,
                                                       @RequestParam(value = "agentId") Integer agentId) {
-        return chatService.getSolvedQuery(queryText, agentId);
+        QueryRecallResp queryRecallResp = new QueryRecallResp();
+        Long startTime = System.currentTimeMillis();
+        List<SolvedQueryRecallResp> solvedQueryRecallRespList = chatService.getSolvedQuery(queryText, agentId);
+        queryRecallResp.setSolvedQueryRecallRespList(solvedQueryRecallRespList);
+        queryRecallResp.setQueryTimeCost(System.currentTimeMillis() - startTime);
+        return solvedQueryRecallRespList;
     }
 
 }

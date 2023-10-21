@@ -21,4 +21,5 @@ public class QueryResult {
     private SemanticParseInfo chatContext;
     private Object response;
     private List<Map<String, Object>> queryResults;
+    private Long queryTimeCost;
 }
