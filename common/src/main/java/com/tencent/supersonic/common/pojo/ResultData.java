@@ -1,6 +1,8 @@
 package com.tencent.supersonic.common.pojo;
 
+import com.tencent.supersonic.common.util.TraceIdUtil;
 import lombok.Data;
+import org.slf4j.MDC;
 
 /***
  * result data
@@ -11,6 +13,7 @@ public class ResultData<T> {
     private String msg;
     private T data;
     private long timestamp;
+    private String traceId;
 
     public ResultData() {
         this.timestamp = System.currentTimeMillis();
@@ -21,6 +24,7 @@ public class ResultData<T> {
         resultData.setCode(ReturnCode.SUCCESS.getCode());
         resultData.setMsg(ReturnCode.SUCCESS.getMessage());
         resultData.setData(data);
+        resultData.setTraceId(MDC.get(TraceIdUtil.TRACE_ID));
         return resultData;
     }
 
@@ -28,6 +32,7 @@ public class ResultData<T> {
         ResultData<T> resultData = new ResultData<>();
         resultData.setCode(code);
         resultData.setMsg(message);
+        resultData.setTraceId(MDC.get(TraceIdUtil.TRACE_ID));
         return resultData;
     }
 
