@@ -5,6 +5,7 @@ import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
+import com.tencent.supersonic.chat.api.pojo.response.ParseTimeCostDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -25,7 +26,8 @@ public class ExplainSqlParseResponder implements ParseResponder {
         Long startTime = System.currentTimeMillis();
         addExplainSql(queryReq, parseResp.getSelectedParses());
         addExplainSql(queryReq, parseResp.getCandidateParses());
-        parseResp.getParseTimeCostDO().setSqlTime(System.currentTimeMillis() - startTime);
+        parseResp.setParseTimeCost(new ParseTimeCostDO());
+        parseResp.getParseTimeCost().setSqlTime(System.currentTimeMillis() - startTime);
         if (!CollectionUtils.isEmpty(chatParseDOS)) {
             Map<Integer, ChatParseDO> chatParseDOMap = chatParseDOS.stream()
                     .collect(Collectors.toMap(ChatParseDO::getParseId,

@@ -113,6 +113,7 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public ParseResp performParsing(QueryReq queryReq) {
+        Long parseTime = System.currentTimeMillis();
         QueryContext queryCtx = new QueryContext(queryReq);
         // in order to support multi-turn conversation, chat context is needed
         ChatContext chatCtx = chatService.getOrCreateContext(queryReq.getChatId());
@@ -165,18 +166,13 @@ public class QueryServiceImpl implements QueryService {
                     .interfaceName(parseResponder.getClass().getSimpleName())
                     .type(CostType.PARSERRESPONDER.getType()).build());
         }
-        Long parseTime = 0L;
-        for (StatisticsDO statisticsDO : timeCostDOList) {
-            if (statisticsDO.getType() == 2) {
-                parseTime = parseTime + statisticsDO.getCost().longValue();
-            }
-        }
-        parseResult.getParseTimeCostDO().setParseTime(parseTime - parseResult.getParseTimeCostDO().getSqlTime());
         if (Objects.nonNull(parseResult.getQueryId()) && timeCostDOList.size() > 0) {
             saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
         }
         chatService.updateChatParse(chatParseDOS);
+        parseResult.getParseTimeCost().setParseTime(
+                System.currentTimeMillis() - parseTime - parseResult.getParseTimeCost().getSqlTime());
         return parseResult;
     }
 
@@ -212,6 +208,7 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception {
+        Long executeTime = System.currentTimeMillis();
         ChatParseDO chatParseDO = chatService.getParseInfo(queryReq.getQueryId(),
                 queryReq.getParseId());
         ChatQueryDO chatQueryDO = chatService.getLastQuery(queryReq.getChatId());
@@ -232,7 +229,6 @@ public class QueryServiceImpl implements QueryService {
         if (queryResult != null) {
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(semanticQuery.getClass().getSimpleName()).type(CostType.QUERY.getType()).build());
-            queryResult.setQueryTimeCost(timeCostDOList.get(0).getCost().longValue());
             saveInfo(timeCostDOList, queryReq.getQueryText(), queryReq.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
             queryResult.setChatContext(parseInfo);
@@ -251,7 +247,7 @@ public class QueryServiceImpl implements QueryService {
         } else {
             chatService.deleteChatQuery(queryReq.getQueryId());
         }
-
+        queryResult.setQueryTimeCost(System.currentTimeMillis() - executeTime);
         return queryResult;
     }
 
