@@ -166,13 +166,6 @@ public class QueryServiceImpl implements QueryService {
                     .interfaceName(parseResponder.getClass().getSimpleName())
                     .type(CostType.PARSERRESPONDER.getType()).build());
         }
-        Long parseTime = 0L;
-        for (StatisticsDO statisticsDO : timeCostDOList) {
-            if (statisticsDO.getType() == 2) {
-                parseTime = parseTime + statisticsDO.getCost().longValue();
-            }
-        }
-        parseResult.getParseTimeCostDO().setParseTime(parseTime - parseResult.getParseTimeCostDO().getSqlTime());
         if (Objects.nonNull(parseResult.getQueryId()) && timeCostDOList.size() > 0) {
             saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
