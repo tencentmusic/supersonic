@@ -624,7 +624,7 @@ public class QueryServiceImpl implements QueryService {
                     + dimensionValueReq.getElementID();
             PriorityQueue<Term> terms = MultiCustomDictionary.NATURE_TO_VALUES.get(nature);
             if (CollectionUtils.isEmpty(terms)) {
-                return null;
+                return new ArrayList<>();
             }
             return terms.stream().map(term -> term.getWord()).collect(Collectors.toList());
         }

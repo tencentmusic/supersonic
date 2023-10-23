@@ -24,7 +24,6 @@ public class GroupByCorrector extends BaseSemanticCorrector {
 
         addGroupByFields(semanticCorrectInfo);
 
-        addAggregate(semanticCorrectInfo);
     }
 
     private void addGroupByFields(SemanticCorrectInfo semanticCorrectInfo) {
@@ -56,6 +55,10 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         if (selectFields.size() == 1 && selectFields.contains(DateUtils.DATE_FIELD)) {
             return;
         }
+        if (SqlParserSelectHelper.hasGroupBy(sql)) {
+            log.info("not add group by ,exist group by in sql:{}", sql);
+            return;
+        }
 
         List<String> aggregateFields = SqlParserSelectHelper.getAggregateFields(sql);
         Set<String> groupByFields = selectFields.stream()
@@ -68,6 +71,8 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                 })
                 .collect(Collectors.toSet());
         semanticCorrectInfo.setSql(SqlParserAddHelper.addGroupBy(sql, groupByFields));
+
+        addAggregate(semanticCorrectInfo);
     }
 
     private void addAggregate(SemanticCorrectInfo semanticCorrectInfo) {
