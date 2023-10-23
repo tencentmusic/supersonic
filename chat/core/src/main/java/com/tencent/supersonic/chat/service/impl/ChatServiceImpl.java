@@ -169,8 +169,7 @@ public class ChatServiceImpl implements ChatService {
         });
         queryResps = new ArrayList<>(queryResps.stream()
                 .collect(Collectors.toMap(QueryResp::getQueryText, Function.identity(),
-                        (existing, replacement) -> existing, LinkedHashMap::new))
-                .values());
+                        (existing, replacement) -> existing, LinkedHashMap::new)).values());
         fillParseInfo(queryResps);
         Map<Long, List<QueryResp>> showCaseMap = queryResps.stream()
                 .collect(Collectors.groupingBy(QueryResp::getChatId));
