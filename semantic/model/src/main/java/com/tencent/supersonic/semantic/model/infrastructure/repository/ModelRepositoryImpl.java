@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.model.infrastructure.repository;
 
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.semantic.model.domain.dataobject.ModelDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.ModelDOExample;
 import com.tencent.supersonic.semantic.model.domain.repository.ModelRepository;
@@ -24,17 +25,21 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public void updateModel(ModelDO modelDO) {
-        modelDOMapper.updateByPrimaryKeyWithBLOBs(modelDO);
+        modelDOMapper.updateByPrimaryKeySelective(modelDO);
     }
 
     @Override
     public void deleteModel(Long id) {
-        modelDOMapper.deleteByPrimaryKey(id);
+        ModelDO modelDO = modelDOMapper.selectByPrimaryKey(id);
+        modelDO.setStatus(StatusEnum.DELETED.getCode());
+        modelDOMapper.updateByPrimaryKey(modelDO);
     }
 
     @Override
     public List<ModelDO> getModelList() {
-        return modelDOMapper.selectByExampleWithBLOBs(new ModelDOExample());
+        ModelDOExample modelDOExample = new ModelDOExample();
+        modelDOExample.createCriteria().andStatusNotEqualTo(StatusEnum.DELETED.getCode());
+        return modelDOMapper.selectByExampleWithBLOBs(modelDOExample);
     }
 
     @Override

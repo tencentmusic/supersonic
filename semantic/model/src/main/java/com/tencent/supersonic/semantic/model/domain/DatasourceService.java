@@ -12,15 +12,16 @@ import com.tencent.supersonic.semantic.api.model.response.DatasourceRelaResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
+import com.tencent.supersonic.semantic.model.domain.pojo.Datasource;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public interface DatasourceService {
 
-    DatasourceResp createDatasource(DatasourceReq datasourceReq, User user) throws Exception;
+    Datasource createDatasource(DatasourceReq datasourceReq, User user) throws Exception;
 
-    DatasourceResp updateDatasource(DatasourceReq datasourceReq, User user) throws Exception;
+    Datasource updateDatasource(DatasourceReq datasourceReq, User user) throws Exception;
 
     List<DatasourceResp> getDatasourceListNoMeasurePrefix(Long modelId);
 
@@ -32,7 +33,7 @@ public interface DatasourceService {
 
     Map<Long, DatasourceResp> getDatasourceMap();
 
-    void deleteDatasource(Long id) throws Exception;
+    void deleteDatasource(Long id, User user);
 
     DatasourceRelaResp createOrUpdateDatasourceRela(DatasourceRelaReq datasourceRelaReq, User user);
 

@@ -13,6 +13,8 @@ public interface MetricDOCustomMapper {
 
     void batchUpdate(List<MetricDO> metricDOS);
 
+    void batchUpdateStatus(List<MetricDO> metricDOS);
+
     List<MetricDO> query(MetricFilter metricFilter);
 
 }

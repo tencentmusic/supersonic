@@ -3,6 +3,7 @@ package com.tencent.supersonic.semantic.model.domain.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DataFormat;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
 import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
@@ -24,24 +25,28 @@ import org.springframework.beans.BeanUtils;
 
 public class MetricConverter {
 
-    public static Metric convert(MetricReq metricReq) {
-        Metric metric = new Metric();
-        BeanUtils.copyProperties(metricReq, metric);
-        metric.setType(metricReq.getMetricType().name());
-        metric.setTypeParams(metricReq.getTypeParams());
-        return metric;
+    public static MetricDO convert2MetricDO(MetricReq metricReq) {
+        MetricDO metricDO = new MetricDO();
+        BeanMapper.mapper(metricReq, metricDO);
+        metricDO.setType(metricReq.getMetricType().name());
+        metricDO.setTypeParams(JSONObject.toJSONString(metricReq.getTypeParams()));
+        metricDO.setDataFormat(JSONObject.toJSONString(metricReq.getDataFormat()));
+        metricDO.setTags(metricReq.getTag());
+        metricDO.setRelateDimensions(JSONObject.toJSONString(metricReq.getRelateDimension()));
+        metricDO.setStatus(StatusEnum.ONLINE.getCode());
+        return metricDO;
     }
 
-    public static MetricDO convert(MetricDO metricDO, Metric metric) {
-        BeanMapper.mapper(metric, metricDO);
-        metricDO.setTypeParams(JSONObject.toJSONString(metric.getTypeParams()));
-        if (metric.getDataFormat() != null) {
-            metricDO.setDataFormat(JSONObject.toJSONString(metric.getDataFormat()));
+    public static MetricDO convert(MetricDO metricDO, MetricReq metricReq) {
+        BeanMapper.mapper(metricReq, metricDO);
+        metricDO.setTypeParams(JSONObject.toJSONString(metricReq.getTypeParams()));
+        if (metricReq.getDataFormat() != null) {
+            metricDO.setDataFormat(JSONObject.toJSONString(metricReq.getDataFormat()));
         }
-        if (metric.getRelateDimension() != null) {
-            metricDO.setRelateDimensions(JSONObject.toJSONString(metric.getRelateDimension()));
+        if (metricReq.getRelateDimension() != null) {
+            metricDO.setRelateDimensions(JSONObject.toJSONString(metricReq.getRelateDimension()));
         }
-        metricDO.setTags(metric.getTag());
+        metricDO.setTags(metricReq.getTag());
         return metricDO;
     }
 
@@ -50,17 +55,6 @@ public class MetricConverter {
         measureYamlTpl.setName(measure.getBizName());
         return measureYamlTpl;
     }
-
-    public static MetricDO convert2MetricDO(Metric metric) {
-        MetricDO metricDO = new MetricDO();
-        BeanUtils.copyProperties(metric, metricDO);
-        metricDO.setTypeParams(JSONObject.toJSONString(metric.getTypeParams()));
-        metricDO.setDataFormat(JSONObject.toJSONString(metric.getDataFormat()));
-        metricDO.setTags(metric.getTag());
-        metricDO.setRelateDimensions(JSONObject.toJSONString(metric.getRelateDimension()));
-        return metricDO;
-    }
-
 
     public static MetricResp convert2MetricResp(MetricDO metricDO, Map<Long, ModelResp> modelMap) {
         MetricResp metricResp = new MetricResp();
@@ -76,12 +70,6 @@ public class MetricConverter {
         metricResp.setRelateDimension(JSONObject.parseObject(metricDO.getRelateDimensions(),
                 RelateDimension.class));
         return metricResp;
-    }
-    public static Metric convert2Metric(MetricDO metricDO) {
-        Metric metric = new Metric();
-        BeanUtils.copyProperties(metricDO, metric);
-        metric.setTypeParams(JSONObject.parseObject(metricDO.getTypeParams(), MetricTypeParams.class));
-        return metric;
     }
 
     public static MetricYamlTpl convert2MetricYamlTpl(Metric metric) {

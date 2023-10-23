@@ -104,7 +104,7 @@
     delete from s2_metric
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO">
+  <insert id="insert" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO" useGeneratedKeys="true" keyProperty="id">
     insert into s2_metric (id, model_id, name, 
       biz_name, description, status, 
       sensitive_level, type, created_at, 

@@ -3,7 +3,6 @@ package com.tencent.supersonic.semantic.api.model.pojo;
 import com.google.common.base.Objects;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +24,7 @@ public class SchemaItem extends RecordInfo {
 
     private String description;
 
-    private Integer status = StatusEnum.ONLINE.getCode();
+    private Integer status;
 
     private TypeEnums typeEnum;
 

@@ -35,8 +35,8 @@ public class DatasourceConverter {
     public static Datasource convert(DatasourceReq datasourceReq) {
         Datasource datasource = new Datasource();
         DatasourceDetail datasourceDetail = new DatasourceDetail();
-        BeanUtils.copyProperties(datasourceReq, datasource);
-        BeanUtils.copyProperties(datasourceReq, datasourceDetail);
+        BeanMapper.mapper(datasourceReq, datasource);
+        BeanMapper.mapper(datasourceReq, datasourceDetail);
         List<Measure> measures = datasourceDetail.getMeasures();
         for (Measure measure : measures) {
             if (StringUtils.isBlank(measure.getExpr())) {
@@ -71,7 +71,7 @@ public class DatasourceConverter {
 
     public static DatasourceDO convert(Datasource datasource, User user) {
         DatasourceDO datasourceDO = new DatasourceDO();
-        BeanUtils.copyProperties(datasource, datasourceDO);
+        BeanMapper.mapper(datasource, datasourceDO);
         datasourceDO.setDatasourceDetail(JSONObject.toJSONString(datasource.getDatasourceDetail()));
         datasourceDO.setUpdatedBy(user.getName());
         datasourceDO.setUpdatedAt(new Date());

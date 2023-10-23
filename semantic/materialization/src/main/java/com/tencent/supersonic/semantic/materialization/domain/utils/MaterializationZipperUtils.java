@@ -1,6 +1,7 @@
 package com.tencent.supersonic.semantic.materialization.domain.utils;
 
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.semantic.api.materialization.enums.ElementFrequencyEnum;
@@ -9,6 +10,7 @@ import com.tencent.supersonic.semantic.api.materialization.response.Materializat
 import com.tencent.supersonic.semantic.api.materialization.response.MaterializationResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
+import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -60,7 +62,9 @@ public class MaterializationZipperUtils implements MaterializationUtils {
             return "";
         }
         StringJoiner joiner = new StringJoiner(",");
-        Map<Long, DimensionResp> dimIdAndDim = dimensionService.getDimensions(materializationResp.getModelId())
+        DimensionFilter dimensionFilter = new DimensionFilter();
+        dimensionFilter.setModelIds(Lists.newArrayList(materializationResp.getModelId()));
+        Map<Long, DimensionResp> dimIdAndDim = dimensionService.getDimensions(dimensionFilter)
                 .stream().collect(Collectors.toMap(DimensionResp::getId, value -> value, (v1, v2) -> v2));
         materializationElementRespList.stream()
                 .filter(element -> TypeEnums.DIMENSION.equals(element.getType()) && ElementFrequencyEnum.LOW.equals(

@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.query.utils;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
@@ -21,6 +22,7 @@ import java.util.Set;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -54,11 +56,12 @@ public class DimValueAspect {
         }
         Object[] args = joinPoint.getArgs();
         QueryS2QLReq queryS2QLReq = (QueryS2QLReq) args[0];
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(queryS2QLReq.getModelId()));
         String sql = queryS2QLReq.getSql();
         log.info("correctorSql before replacing:{}", sql);
         // if dimensionvalue is alias,consider the true dimensionvalue.
         List<FilterExpression> filterExpressionList = SqlParserSelectHelper.getWhereExpressions(sql);
-        List<DimensionResp> dimensions = dimensionService.getDimensions(queryS2QLReq.getModelId());
+        List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
         Set<String> fieldNames = dimensions.stream().map(o -> o.getName()).collect(Collectors.toSet());
         Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
         filterExpressionList.stream().forEach(expression -> {
@@ -145,8 +148,8 @@ public class DimValueAspect {
         Object[] args = joinPoint.getArgs();
         QueryStructReq queryStructReq = (QueryStructReq) args[0];
         Long modelId = queryStructReq.getModelId();
-
-        List<DimensionResp> dimensions = dimensionService.getDimensions(modelId);
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(modelId));
+        List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
         Map<String, Map<String, String>> dimAndAliasAndTechNamePair = getAliasAndBizNameToTechName(dimensions);
         Map<String, Map<String, String>> dimAndTechNameAndBizNamePair = getTechNameToBizName(dimensions);
 

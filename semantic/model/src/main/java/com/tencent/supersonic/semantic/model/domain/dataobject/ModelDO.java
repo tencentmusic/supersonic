@@ -31,6 +31,11 @@ public class ModelDO {
     /**
      * 
      */
+    private String description;
+
+    /**
+     * 
+     */
     private String viewer;
 
     /**
@@ -77,6 +82,11 @@ public class ModelDO {
      * 
      */
     private String drillDownDimensions;
+
+    /**
+     * 
+     */
+    private Integer status;
 
     /**
      * 
@@ -161,6 +171,22 @@ public class ModelDO {
      */
     public void setAlias(String alias) {
         this.alias = alias == null ? null : alias.trim();
+    }
+
+    /**
+     * 
+     * @return description 
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * 
+     * @param description 
+     */
+    public void setDescription(String description) {
+        this.description = description == null ? null : description.trim();
     }
 
     /**
@@ -321,6 +347,22 @@ public class ModelDO {
      */
     public void setDrillDownDimensions(String drillDownDimensions) {
         this.drillDownDimensions = drillDownDimensions == null ? null : drillDownDimensions.trim();
+    }
+
+    /**
+     * 
+     * @return status 
+     */
+    public Integer getStatus() {
+        return status;
+    }
+
+    /**
+     * 
+     * @param status 
+     */
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     /**

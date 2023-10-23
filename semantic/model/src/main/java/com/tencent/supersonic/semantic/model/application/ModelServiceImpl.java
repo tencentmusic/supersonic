@@ -1,10 +1,10 @@
 package com.tencent.supersonic.semantic.model.application;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
@@ -28,7 +28,9 @@ import com.tencent.supersonic.semantic.model.domain.DomainService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.ModelDO;
-import com.tencent.supersonic.semantic.model.domain.pojo.Model;
+import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
+import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.ModelRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.ModelConvert;
 import java.util.ArrayList;
@@ -56,7 +58,6 @@ public class ModelServiceImpl implements ModelService {
     private final DomainService domainService;
     private final UserService userService;
     private final DatabaseService databaseService;
-
     private final Catalog catalog;
 
     public ModelServiceImpl(ModelRepository modelRepository, @Lazy MetricService metricService,
@@ -76,30 +77,33 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public void createModel(ModelReq modelReq, User user) {
-        log.info("[create model] req : {}", JSONObject.toJSONString(modelReq));
-        Model model = ModelConvert.convert(modelReq);
-        log.info("[create model] object:{}", JSONObject.toJSONString(modelReq));
-        saveModel(model, user);
+        modelReq.createdBy(user.getName());
+        ModelDO modelDO = ModelConvert.convert(modelReq);
+        modelRepository.createModel(modelDO);
     }
 
     @Override
     public void updateModel(ModelReq modelReq, User user) {
         ModelDO modelDO = getModelDO(modelReq.getId());
-        modelDO.setUpdatedAt(new Date());
-        modelDO.setUpdatedBy(user.getName());
+        modelReq.updatedBy(user.getName());
         BeanMapper.mapper(modelReq, modelDO);
-        modelDO.setAdmin(String.join(",", modelReq.getAdmins()));
-        modelDO.setAdminOrg(String.join(",", modelReq.getAdminOrgs()));
-        modelDO.setViewer(String.join(",", modelReq.getViewers()));
-        modelDO.setViewOrg(String.join(",", modelReq.getViewOrgs()));
-        modelDO.setEntity(JsonUtil.toString(modelReq.getEntity()));
+        if (modelReq.getEntity() != null) {
+            modelDO.setEntity(JsonUtil.toString(modelReq.getEntity()));
+        }
+        if (modelReq.getDrillDownDimensions() != null) {
+            modelDO.setDrillDownDimensions(JsonUtil.toString(modelReq.getDrillDownDimensions()));
+        }
         modelRepository.updateModel(modelDO);
     }
 
     @Override
-    public void deleteModel(Long id) {
+    public void deleteModel(Long id, User user) {
         checkDelete(id);
-        modelRepository.deleteModel(id);
+        ModelDO modelDO = getModelDO(id);
+        modelDO.setStatus(StatusEnum.DELETED.getCode());
+        modelDO.setUpdatedAt(new Date());
+        modelDO.setUpdatedBy(user.getName());
+        modelRepository.updateModel(modelDO);
     }
 
     @Override
@@ -178,19 +182,14 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private void checkDelete(Long id) {
-        List<MetricResp> metricResps = metricService.getMetrics(id);
-        List<DimensionResp> dimensionResps = dimensionService.getDimensions(id);
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(id));
+        List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
+        List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
         List<DatasourceResp> datasourceResps = datasourceService.getDatasourceList(id);
         if (!CollectionUtils.isEmpty(metricResps) || !CollectionUtils.isEmpty(datasourceResps)
                 || !CollectionUtils.isEmpty(dimensionResps)) {
             throw new RuntimeException("该模型下存在数据源、指标或者维度, 暂不能删除, 请确认");
         }
-    }
-
-    private void saveModel(Model model, User user) {
-        ModelDO modelDO = ModelConvert.convert(model, user);
-        modelRepository.createModel(modelDO);
-        model.setId(modelDO.getId());
     }
 
     private List<ModelResp> convertList(List<ModelDO> modelDOS) {
@@ -209,9 +208,9 @@ public class ModelServiceImpl implements ModelService {
         if (CollectionUtils.isEmpty(modelResps)) {
             return modelResps;
         }
-        Map<Long, List<MetricResp>> metricMap = metricService.getMetrics().stream()
+        Map<Long, List<MetricResp>> metricMap = metricService.getMetrics(new MetricFilter()).stream()
                 .collect(Collectors.groupingBy(MetricResp::getModelId));
-        Map<Long, List<DimensionResp>> dimensionMap = dimensionService.getDimensions().stream()
+        Map<Long, List<DimensionResp>> dimensionMap = dimensionService.getDimensions(new DimensionFilter()).stream()
                 .collect(Collectors.groupingBy(DimensionResp::getModelId));
         modelResps.forEach(modelResp -> {
             modelResp.setDimensionCnt(dimensionMap.getOrDefault(modelResp.getId(), Lists.newArrayList()).size());
@@ -280,15 +279,17 @@ public class ModelServiceImpl implements ModelService {
         if (CollectionUtils.isEmpty(modelIds)) {
             modelIds = generateModelIdsReq(modelSchemaFilterReq);
         }
-        Map<Long, List<MetricResp>> metricRespMap = metricService.getMetricsByModelIds(modelIds)
+        MetaFilter metaFilter = new MetaFilter(modelIds);
+        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
+        Map<Long, List<MetricResp>> metricRespMap = metricService.getMetrics(metaFilter)
                 .stream().collect(Collectors.groupingBy(MetricResp::getModelId));
-        Map<Long, List<DimensionResp>> dimensionRespsMap = dimensionService.getDimensionsByModelIds(modelIds)
+        Map<Long, List<DimensionResp>> dimensionRespsMap = dimensionService.getDimensions(metaFilter)
                 .stream().collect(Collectors.groupingBy(DimensionResp::getModelId));
         Map<Long, List<MeasureResp>> measureRespsMap = datasourceService.getMeasureListOfModel(modelIds)
                 .stream().collect(Collectors.groupingBy(MeasureResp::getModelId));
         for (Long modelId : modelIds) {
             ModelResp modelResp = getModelMap().get(modelId);
-            if (modelResp == null) {
+            if (modelResp == null || !StatusEnum.ONLINE.getCode().equals(modelResp.getStatus())) {
                 continue;
             }
             List<MeasureResp> measureResps = measureRespsMap.getOrDefault(modelId, Lists.newArrayList());
@@ -318,7 +319,7 @@ public class ModelServiceImpl implements ModelService {
 
     private List<MetricSchemaResp> generateMetricSchema(Long modelId, ModelResp modelResp) {
         List<MetricSchemaResp> metricSchemaDescList = new ArrayList<>();
-        List<MetricResp> metricResps = metricService.getMetrics(modelId);
+        List<MetricResp> metricResps = metricService.getMetrics(new MetaFilter(Lists.newArrayList(modelId)));
         List<MeasureResp> measureResps = datasourceService.getMeasureListOfModel(modelId);
         metricResps.stream().forEach(metricResp ->
                 metricSchemaDescList.add(convert(metricResp, metricResps, measureResps, modelResp)));
@@ -326,7 +327,7 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private List<DimSchemaResp> generateDimSchema(Long modelId) {
-        List<DimensionResp> dimDescList = dimensionService.getDimensions(modelId);
+        List<DimensionResp> dimDescList = dimensionService.getDimensions(new MetaFilter(Lists.newArrayList(modelId)));
         return dimDescList.stream().map(this::convert).collect(Collectors.toList());
     }
 
