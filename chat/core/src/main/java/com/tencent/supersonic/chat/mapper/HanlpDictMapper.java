@@ -10,10 +10,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
-import com.tencent.supersonic.knowledge.dictionary.builder.BaseWordBuilder;
-import com.tencent.supersonic.knowledge.dictionary.builder.WordBuilderFactory;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import java.util.ArrayList;
@@ -99,8 +96,7 @@ public class HanlpDictMapper implements SchemaMapper {
                 SemanticService schemaService = ContextUtils.getBean(SemanticService.class);
                 ModelSchema modelSchema = schemaService.getModelSchema(modelId);
 
-                BaseWordBuilder baseWordBuilder = WordBuilderFactory.get(DictWordType.getNatureType(nature));
-                Long elementID = baseWordBuilder.getElementID(nature);
+                Long elementID = NatureHelper.getElementID(nature);
                 Long frequency = wordNatureToFrequency.get(mapResult.getName() + nature);
 
                 SchemaElement elementDb = modelSchema.getElement(elementType, elementID);
