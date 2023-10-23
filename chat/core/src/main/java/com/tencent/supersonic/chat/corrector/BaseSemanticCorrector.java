@@ -94,8 +94,4 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         return semanticSchema.getMetrics(modelId);
     }
 
-    protected List<SchemaElement> getDimensionElements(Long modelId) {
-        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-        return semanticSchema.getDimensions(modelId);
-    }
 }

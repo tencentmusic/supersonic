@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.service.impl;
 
 
+import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
@@ -37,6 +38,7 @@ import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.SolvedQueryManager;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -46,6 +48,7 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
+import com.tencent.supersonic.knowledge.dictionary.MultiCustomDictionary;
 import com.tencent.supersonic.knowledge.service.SearchService;
 import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
@@ -59,6 +62,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -590,8 +594,14 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
-        if (Objects.isNull(dimensionValueReq.getValue())) {
-            dimensionValueReq.setValue("");
+        if (StringUtils.isBlank(dimensionValueReq.getValue().toString())) {
+            String nature =
+                    dimensionValueReq.getModelId() + DictWordType.NATURE_SPILT + dimensionValueReq.getElementID();
+            PriorityQueue<Term> terms = MultiCustomDictionary.NATURE_TO_VALUES.get(nature);
+            if (CollectionUtils.isEmpty(terms)) {
+                return null;
+            }
+            return terms.stream().map(term -> term.getWord()).collect(Collectors.toSet());
         }
         return queryHanlpDimensionValue(dimensionValueReq, user);
     }
