@@ -355,20 +355,14 @@ public class QueryServiceImpl implements QueryService {
                     parseInfo.getDimensionFilters(), addWhereConditions, removeWhereFieldNames);
             updateDateInfo(queryData, parseInfo, filedNameToValueMap,
                     whereExpressionList, addWhereConditions, removeWhereFieldNames);
-            log.info("filedNameToValueMap:{}", filedNameToValueMap);
-            log.info("removeWhereFieldNames:{}", removeWhereFieldNames);
             correctorSql = SqlParserReplaceHelper.replaceValue(correctorSql, filedNameToValueMap);
             correctorSql = SqlParserRemoveHelper.removeWhereCondition(correctorSql, removeWhereFieldNames);
 
             updateFilters(havingFiledNameToValueMap, havingExpressionList, queryData.getDimensionFilters(),
                     parseInfo.getDimensionFilters(), addHavingConditions, removeHavingFieldNames);
-            log.info("havingFiledNameToValueMap:{}", havingFiledNameToValueMap);
-            log.info("removeHavingFieldNames:{}", removeHavingFieldNames);
             correctorSql = SqlParserReplaceHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
             correctorSql = SqlParserRemoveHelper.removeHavingCondition(correctorSql, removeHavingFieldNames);
 
-            log.info("addWhereConditions:{}", addWhereConditions);
-            log.info("addHavingConditions:{}", addHavingConditions);
             correctorSql = SqlParserAddHelper.addWhere(correctorSql, addWhereConditions);
             correctorSql = SqlParserAddHelper.addHaving(correctorSql, addHavingConditions);
 

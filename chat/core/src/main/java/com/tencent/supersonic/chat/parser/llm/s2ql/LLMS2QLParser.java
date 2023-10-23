@@ -46,7 +46,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -141,8 +140,10 @@ public class LLMS2QLParser implements SemanticParser {
 
         //set filter
         try {
-            Map<String, SchemaElement> fieldNameToElement = getNameToElement(modelId);
+            Map<List<String>, SchemaElement> fieldNameToElement = getNameToElement(modelId);
             List<QueryFilter> result = getDimensionFilter(fieldNameToElement, expressions);
+            log.info("fieldNameToElement:{}", fieldNameToElement);
+            log.info("expressions:{}", JsonUtil.toString(expressions));
             parseInfo.getDimensionFilters().addAll(result);
         } catch (Exception e) {
             log.error("set dimensionFilter error :", e);
@@ -171,24 +172,28 @@ public class LLMS2QLParser implements SemanticParser {
         }
     }
 
-    private List<QueryFilter> getDimensionFilter(Map<String, SchemaElement> fieldNameToElement,
-            List<FilterExpression> filterExpressions) {
+    private List<QueryFilter> getDimensionFilter(Map<List<String>, SchemaElement> fieldNameToElement,
+                                                 List<FilterExpression> filterExpressions) {
         List<QueryFilter> result = Lists.newArrayList();
         for (FilterExpression expression : filterExpressions) {
             QueryFilter dimensionFilter = new QueryFilter();
             dimensionFilter.setValue(expression.getFieldValue());
-            SchemaElement schemaElement = fieldNameToElement.get(expression.getFieldName());
-            if (Objects.isNull(schemaElement)) {
-                continue;
-            }
-            dimensionFilter.setName(schemaElement.getName());
-            dimensionFilter.setBizName(schemaElement.getBizName());
-            dimensionFilter.setElementID(schemaElement.getId());
+            for (List<String> fields : fieldNameToElement.keySet()) {
+                if (fields.contains(expression.getFieldName())) {
+                    SchemaElement schemaElement = fieldNameToElement.get(fields);
+                    if (Objects.isNull(schemaElement)) {
+                        continue;
+                    }
+                    dimensionFilter.setName(schemaElement.getName());
+                    dimensionFilter.setBizName(schemaElement.getBizName());
+                    dimensionFilter.setElementID(schemaElement.getId());
 
-            FilterOperatorEnum operatorEnum = FilterOperatorEnum.getSqlOperator(expression.getOperator());
-            dimensionFilter.setOperator(operatorEnum);
-            dimensionFilter.setFunction(expression.getFunction());
-            result.add(dimensionFilter);
+                    FilterOperatorEnum operatorEnum = FilterOperatorEnum.getSqlOperator(expression.getOperator());
+                    dimensionFilter.setOperator(operatorEnum);
+                    dimensionFilter.setFunction(expression.getFunction());
+                    result.add(dimensionFilter);
+                }
+            }
         }
         return result;
     }
@@ -387,7 +392,8 @@ public class LLMS2QLParser implements SemanticParser {
     }
 
 
-    protected Map<String, SchemaElement> getNameToElement(Long modelId) {
+    protected Map<List<String>, SchemaElement> getNameToElement(Long modelId) {
+        Map<List<String>, SchemaElement> fieldNameToElement = new HashMap<>();
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         List<SchemaElement> dimensions = semanticSchema.getDimensions();
         List<SchemaElement> metrics = semanticSchema.getMetrics();
@@ -395,9 +401,17 @@ public class LLMS2QLParser implements SemanticParser {
         List<SchemaElement> allElements = Lists.newArrayList();
         allElements.addAll(dimensions);
         allElements.addAll(metrics);
-        return allElements.stream()
+        allElements.stream()
                 .filter(schemaElement -> schemaElement.getModel().equals(modelId))
-                .collect(Collectors.toMap(SchemaElement::getName, Function.identity(), (value1, value2) -> value2));
+                .forEach(o -> {
+                    List<String> fields = new ArrayList<>();
+                    fields.add(o.getName());
+                    if (!CollectionUtils.isEmpty(o.getAlias())) {
+                        fields.addAll(o.getAlias());
+                    }
+                    fieldNameToElement.put(fields, o);
+                });
+        return fieldNameToElement;
     }
 
 
