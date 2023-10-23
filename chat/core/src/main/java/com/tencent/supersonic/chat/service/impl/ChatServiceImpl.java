@@ -20,11 +20,14 @@ import com.tencent.supersonic.chat.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.persistence.repository.ChatRepository;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.tencent.supersonic.chat.service.ChatService;
@@ -164,6 +167,10 @@ public class ChatServiceImpl implements ChatService {
             Map<String, Object> data = queryResp.getQueryResult().getQueryResults().get(0);
             return CollectionUtils.isEmpty(data);
         });
+        queryResps = new ArrayList<>(queryResps.stream()
+                .collect(Collectors.toMap(QueryResp::getQueryText, Function.identity(),
+                        (existing, replacement) -> existing, LinkedHashMap::new))
+                .values());
         fillParseInfo(queryResps);
         Map<Long, List<QueryResp>> showCaseMap = queryResps.stream()
                 .collect(Collectors.groupingBy(QueryResp::getChatId));

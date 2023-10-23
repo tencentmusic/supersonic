@@ -66,7 +66,7 @@
                      and user_name = #{userName}
                </if>
                order by score, chat_id desc
-            )
+            ) a
             limit #{start}, #{limit}
         ) q2 on q1.chat_id = q2.chat_id
         where agent_id = ${agentId} and (score is null or score > 1)
