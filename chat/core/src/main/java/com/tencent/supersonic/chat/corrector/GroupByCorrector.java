@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,9 +33,20 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         //add dimension group by
         String sql = semanticCorrectInfo.getSql();
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
+        //add alias field name
         Set<String> dimensions = semanticSchema.getDimensions(modelId).stream()
-                .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());
+                .flatMap(
+                        schemaElement -> {
+                            Set<String> elements = new HashSet<>();
+                            elements.add(schemaElement.getName());
+                            if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {
+                                elements.addAll(schemaElement.getAlias());
+                            }
+                            return elements.stream();
+                        }
+                ).collect(Collectors.toSet());
         dimensions.add(DateUtils.DATE_FIELD);
+
         List<String> selectFields = SqlParserSelectHelper.getSelectFields(sql);
 
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(dimensions)) {
