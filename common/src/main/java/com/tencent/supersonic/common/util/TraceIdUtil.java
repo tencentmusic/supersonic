@@ -7,6 +7,8 @@ import java.util.UUID;
 public class TraceIdUtil {
     public static final String TRACE_ID = "traceId";
 
+    public static final String PREFIX = "supersonic";
+
     public static String getTraceId() {
         String traceId = (String) MDC.get(TRACE_ID);
         return traceId == null ? "" : traceId;
@@ -26,6 +28,7 @@ public class TraceIdUtil {
     }
 
     public static String generateTraceId() {
-        return UUID.randomUUID().toString().replace("-", "");
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        return PREFIX + "_" + uuid;
     }
 }

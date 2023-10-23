@@ -22,8 +22,6 @@ public class LogInterceptor implements HandlerInterceptor {
         } else {
             TraceIdUtil.setTraceId(traceId);
         }
-        //log.info("LogInterceptor traceId:{}", traceId);
-        //response.addHeader(TraceIdUtil.TRACE_ID, traceId);
         return true;
     }
 
@@ -38,7 +36,6 @@ public class LogInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
             throws Exception {
         //调用结束后删除
-        //response.addHeader(TraceIdUtil.TRACE_ID, TraceIdUtil.getTraceId());
         TraceIdUtil.remove();
     }
 }
