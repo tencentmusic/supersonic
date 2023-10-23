@@ -15,6 +15,7 @@ import com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter.Engine
 import com.tencent.supersonic.semantic.model.domain.pojo.Datasource;
 import com.tencent.supersonic.semantic.model.domain.pojo.DatasourceQueryEnum;
 import com.tencent.supersonic.semantic.model.domain.utils.SysTimeDimensionBuilder;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -53,6 +54,9 @@ public class DatasourceYamlManager {
         DimensionYamlTpl dimensionYamlTpl = new DimensionYamlTpl();
         BeanUtils.copyProperties(dim, dimensionYamlTpl);
         dimensionYamlTpl.setName(dim.getBizName());
+        if (Objects.isNull(dimensionYamlTpl.getExpr())) {
+            dimensionYamlTpl.setExpr(dim.getBizName());
+        }
         if (dim.getTypeParams() != null) {
             DimensionTimeTypeParamsTpl dimensionTimeTypeParamsTpl = new DimensionTimeTypeParamsTpl();
             dimensionTimeTypeParamsTpl.setIsPrimary(dim.getTypeParams().getIsPrimary());

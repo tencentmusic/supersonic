@@ -50,6 +50,7 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.service.SearchService;
+import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
@@ -622,6 +623,7 @@ public class QueryServiceImpl implements QueryService {
         detectModelIds.add(dimensionValueReq.getModelId());
         List<MapResult> mapResultList = SearchService.prefixSearch(dimensionValueReq.getValue().toString(),
                 2000, dimensionValueReq.getAgentId(), detectModelIds);
+        HanlpHelper.transLetterOriginal(mapResultList);
         log.info("mapResultList:{}", mapResultList);
         mapResultList = mapResultList.stream().filter(o -> {
             for (String nature : o.getNatures()) {

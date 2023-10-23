@@ -1,6 +1,7 @@
 package com.tencent.supersonic.semantic.api.model.yaml;
 
 
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import lombok.Data;
 
 
@@ -17,4 +18,5 @@ public class DimensionYamlTpl {
 
     private DimensionTimeTypeParamsTpl typeParams;
 
+    private DataTypeEnums dataType;
 }
