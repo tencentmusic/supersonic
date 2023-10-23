@@ -95,6 +95,9 @@ public class HanlpDictMapper implements SchemaMapper {
 
                 SemanticService schemaService = ContextUtils.getBean(SemanticService.class);
                 ModelSchema modelSchema = schemaService.getModelSchema(modelId);
+                if (Objects.isNull(modelSchema)) {
+                    return;
+                }
 
                 Long elementID = NatureHelper.getElementID(nature);
                 Long frequency = wordNatureToFrequency.get(mapResult.getName() + nature);

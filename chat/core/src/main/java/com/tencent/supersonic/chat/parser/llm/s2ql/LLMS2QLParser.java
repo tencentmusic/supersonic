@@ -46,10 +46,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -395,9 +395,21 @@ public class LLMS2QLParser implements SemanticParser {
         List<SchemaElement> allElements = Lists.newArrayList();
         allElements.addAll(dimensions);
         allElements.addAll(metrics);
+        //support alias
         return allElements.stream()
                 .filter(schemaElement -> schemaElement.getModel().equals(modelId))
-                .collect(Collectors.toMap(SchemaElement::getName, Function.identity(), (value1, value2) -> value2));
+                .flatMap(schemaElement -> {
+                    Set<Pair<String, SchemaElement>> result = new HashSet<>();
+                    result.add(Pair.of(schemaElement.getName(), schemaElement));
+                    List<String> aliasList = schemaElement.getAlias();
+                    if (!CollectionUtils.isEmpty(aliasList)) {
+                        for (String alias : aliasList) {
+                            result.add(Pair.of(alias, schemaElement));
+                        }
+                    }
+                    return result.stream();
+                })
+                .collect(Collectors.toMap(pair -> pair.getLeft(), pair -> pair.getRight(), (value1, value2) -> value2));
     }
 
 

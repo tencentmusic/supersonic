@@ -17,5 +17,5 @@ public class DimensionValueReq {
     private String bizName;
 
     @NotNull
-    private Object value;
+    private String value;
 }

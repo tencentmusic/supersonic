@@ -50,8 +50,8 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.dictionary.MultiCustomDictionary;
 import com.tencent.supersonic.knowledge.service.SearchService;
-import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
+import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
@@ -594,35 +594,11 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
-        if (StringUtils.isBlank(dimensionValueReq.getValue().toString())) {
-            String nature =
-                    dimensionValueReq.getModelId() + DictWordType.NATURE_SPILT + dimensionValueReq.getElementID();
-            PriorityQueue<Term> terms = MultiCustomDictionary.NATURE_TO_VALUES.get(nature);
-            if (CollectionUtils.isEmpty(terms)) {
-                return null;
-            }
-            return terms.stream().map(term -> term.getWord()).collect(Collectors.toSet());
-        }
-        return queryHanlpDimensionValue(dimensionValueReq, user);
-    }
-
-    public Object queryHanlpDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
         QueryResultWithSchemaResp queryResultWithSchemaResp = new QueryResultWithSchemaResp();
         Set<Long> detectModelIds = new HashSet<>();
         detectModelIds.add(dimensionValueReq.getModelId());
-        List<MapResult> mapResultList = SearchService.prefixSearch(dimensionValueReq.getValue().toString(),
-                2000, dimensionValueReq.getAgentId(), detectModelIds);
-        HanlpHelper.transLetterOriginal(mapResultList);
-        mapResultList = mapResultList.stream().filter(o -> {
-            for (String nature : o.getNatures()) {
-                Long elementID = NatureHelper.getElementID(nature);
-                if (dimensionValueReq.getElementID().equals(elementID)) {
-                    return true;
-                }
-            }
-            return false;
-        }).collect(Collectors.toList());
-        log.info("mapResultList:{}", mapResultList);
+        List<String> dimensionValues = getDimensionValues(dimensionValueReq, detectModelIds);
+
         List<QueryColumn> columns = new ArrayList<>();
         QueryColumn queryColumn = new QueryColumn();
         queryColumn.setNameEn(dimensionValueReq.getBizName());
@@ -631,14 +607,43 @@ public class QueryServiceImpl implements QueryService {
         queryColumn.setType("CHAR");
         columns.add(queryColumn);
         List<Map<String, Object>> resultList = new ArrayList<>();
-        mapResultList.stream().forEach(o -> {
+        dimensionValues.stream().forEach(o -> {
             Map<String, Object> map = new HashMap<>();
-            map.put(dimensionValueReq.getBizName(), o.getName());
+            map.put(dimensionValueReq.getBizName(), o);
             resultList.add(map);
         });
         queryResultWithSchemaResp.setColumns(columns);
         queryResultWithSchemaResp.setResultList(resultList);
         return queryResultWithSchemaResp;
+    }
+
+    private List<String> getDimensionValues(DimensionValueReq dimensionValueReq, Set<Long> detectModelIds) {
+        //if value is null ,then search from NATURE_TO_VALUES
+        if (StringUtils.isBlank(dimensionValueReq.getValue())) {
+            String nature = DictWordType.NATURE_SPILT + dimensionValueReq.getModelId() + DictWordType.NATURE_SPILT
+                    + dimensionValueReq.getElementID();
+            PriorityQueue<Term> terms = MultiCustomDictionary.NATURE_TO_VALUES.get(nature);
+            if (CollectionUtils.isEmpty(terms)) {
+                return new ArrayList<>();
+            }
+            return terms.stream().map(term -> term.getWord()).collect(Collectors.toList());
+        }
+        //search from prefixSearch
+        List<MapResult> mapResultList = SearchService.prefixSearch(dimensionValueReq.getValue(),
+                2000, dimensionValueReq.getAgentId(), detectModelIds);
+        HanlpHelper.transLetterOriginal(mapResultList);
+        return mapResultList.stream()
+                .filter(o -> {
+                    for (String nature : o.getNatures()) {
+                        Long elementID = NatureHelper.getElementID(nature);
+                        if (dimensionValueReq.getElementID().equals(elementID)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                })
+                .map(mapResult -> mapResult.getName())
+                .collect(Collectors.toList());
     }
 
 }
