@@ -16,6 +16,8 @@ public class Dimension implements SemanticItem {
     private String expr;
     private DimensionTimeTypeParams dimensionTimeTypeParams;
 
+    private DataType dataType = DataType.UNKNOWN;
+
     @Override
     public String getName() {
         return name;
