@@ -183,7 +183,7 @@ public class ChatServiceImpl implements ChatService {
                 .collect(Collectors.groupingBy(ChatParseDO::getQuestionId));
         for (QueryResp queryResp : queryResps) {
             List<ChatParseDO> chatParseDOList = chatParseMap.get(queryResp.getQuestionId());
-            if (CollectionUtils.isEmpty(chatParseMap)) {
+            if (CollectionUtils.isEmpty(chatParseDOList)) {
                 continue;
             }
             List<SemanticParseInfo> parseInfos = chatParseDOList.stream().map(chatParseDO ->

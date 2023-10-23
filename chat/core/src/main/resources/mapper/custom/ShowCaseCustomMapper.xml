@@ -56,18 +56,21 @@
     <select id="queryShowCase" resultMap="ResultMapWithBLOBs">
         select q1.*
         from s2_chat_query q1
-                 join (
+        join (
             select distinct chat_id
-            from s2_chat_query
-            where query_state = 1 and agent_id = ${agentId} and (score is null or score > 1)
-        <if test="userName != null and userName != ''">
-                  and user_name = #{userName}
-            </if>
-            order by chat_id desc
-                limit #{start}, #{limit}
-        ) q2
-                      on q1.chat_id = q2.chat_id
-        where agent_id = ${agentId}
+            from (
+               select *
+               from s2_chat_query
+               where query_state = 1 and agent_id = ${agentId}
+               <if test="userName != null and userName != ''">
+                     and user_name = #{userName}
+               </if>
+               order by score, chat_id desc
+            )
+            limit #{start}, #{limit}
+        ) q2 on q1.chat_id = q2.chat_id
+        where agent_id = ${agentId} and (score is null or score > 1)
+        order by score desc
     </select>
 
 </mapper>
