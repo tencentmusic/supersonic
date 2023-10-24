@@ -77,7 +77,7 @@ public class QueryUtils {
         addSysTimeDimension(namePair, nameTypePair);
         metricDescList.forEach(metricDesc -> {
             namePair.put(metricDesc.getBizName(), metricDesc.getName());
-            nameTypePair.put(metricDesc.getBizName(), "NUMBER");
+            nameTypePair.put(metricDesc.getBizName(), SemanticTypeEnum.NUMBER.name());
         });
         dimensionDescList.forEach(dimensionDesc -> {
             namePair.put(dimensionDesc.getBizName(), dimensionDesc.getName());
@@ -105,7 +105,7 @@ public class QueryUtils {
                 column.setShowType(nameTypePair.get(nameEn));
             }
             if (!nameTypePair.containsKey(nameEn) && isNumberType(column.getType())) {
-                column.setShowType(SemanticTypeEnum.CATEGORY.name());
+                column.setShowType(SemanticTypeEnum.NUMBER.name());
             }
             if (metricRespMap.containsKey(nameEn)) {
                 column.setDataFormatType(metricRespMap.get(nameEn).getDataFormatType());
