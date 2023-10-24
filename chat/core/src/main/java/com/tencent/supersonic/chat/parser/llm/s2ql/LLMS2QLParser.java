@@ -49,6 +49,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -140,10 +141,8 @@ public class LLMS2QLParser implements SemanticParser {
 
         //set filter
         try {
-            Map<List<String>, SchemaElement> fieldNameToElement = getNameToElement(modelId);
+            Map<String, SchemaElement> fieldNameToElement = getNameToElement(modelId);
             List<QueryFilter> result = getDimensionFilter(fieldNameToElement, expressions);
-            log.info("fieldNameToElement:{}", fieldNameToElement);
-            log.info("expressions:{}", JsonUtil.toString(expressions));
             parseInfo.getDimensionFilters().addAll(result);
         } catch (Exception e) {
             log.error("set dimensionFilter error :", e);
@@ -172,28 +171,24 @@ public class LLMS2QLParser implements SemanticParser {
         }
     }
 
-    private List<QueryFilter> getDimensionFilter(Map<List<String>, SchemaElement> fieldNameToElement,
+    private List<QueryFilter> getDimensionFilter(Map<String, SchemaElement> fieldNameToElement,
                                                  List<FilterExpression> filterExpressions) {
         List<QueryFilter> result = Lists.newArrayList();
         for (FilterExpression expression : filterExpressions) {
             QueryFilter dimensionFilter = new QueryFilter();
             dimensionFilter.setValue(expression.getFieldValue());
-            for (List<String> fields : fieldNameToElement.keySet()) {
-                if (fields.contains(expression.getFieldName())) {
-                    SchemaElement schemaElement = fieldNameToElement.get(fields);
-                    if (Objects.isNull(schemaElement)) {
-                        continue;
-                    }
-                    dimensionFilter.setName(schemaElement.getName());
-                    dimensionFilter.setBizName(schemaElement.getBizName());
-                    dimensionFilter.setElementID(schemaElement.getId());
-
-                    FilterOperatorEnum operatorEnum = FilterOperatorEnum.getSqlOperator(expression.getOperator());
-                    dimensionFilter.setOperator(operatorEnum);
-                    dimensionFilter.setFunction(expression.getFunction());
-                    result.add(dimensionFilter);
-                }
+            SchemaElement schemaElement = fieldNameToElement.get(expression.getFieldName());
+            if (Objects.isNull(schemaElement)) {
+                continue;
             }
+            dimensionFilter.setName(schemaElement.getName());
+            dimensionFilter.setBizName(schemaElement.getBizName());
+            dimensionFilter.setElementID(schemaElement.getId());
+
+            FilterOperatorEnum operatorEnum = FilterOperatorEnum.getSqlOperator(expression.getOperator());
+            dimensionFilter.setOperator(operatorEnum);
+            dimensionFilter.setFunction(expression.getFunction());
+            result.add(dimensionFilter);
         }
         return result;
     }
@@ -234,7 +229,7 @@ public class LLMS2QLParser implements SemanticParser {
     }
 
     private boolean containOperators(FilterExpression expression, FilterOperatorEnum firstOperator,
-            FilterOperatorEnum... operatorEnums) {
+                                     FilterOperatorEnum... operatorEnums) {
         return (Arrays.asList(operatorEnums).contains(firstOperator) && Objects.nonNull(expression.getFieldValue()));
     }
 
@@ -262,7 +257,7 @@ public class LLMS2QLParser implements SemanticParser {
     }
 
     private SemanticParseInfo getParseInfo(QueryContext queryCtx, Long modelId, CommonAgentTool commonAgentTool,
-            ParseResult parseResult) {
+                                           ParseResult parseResult) {
         PluginSemanticQuery semanticQuery = QueryManager.createPluginQuery(S2QLQuery.QUERY_MODE);
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         parseInfo.getElementMatches().addAll(queryCtx.getMapInfo().getMatchedElements(modelId));
@@ -392,8 +387,7 @@ public class LLMS2QLParser implements SemanticParser {
     }
 
 
-    protected Map<List<String>, SchemaElement> getNameToElement(Long modelId) {
-        Map<List<String>, SchemaElement> fieldNameToElement = new HashMap<>();
+    protected Map<String, SchemaElement> getNameToElement(Long modelId) {
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         List<SchemaElement> dimensions = semanticSchema.getDimensions();
         List<SchemaElement> metrics = semanticSchema.getMetrics();
@@ -401,22 +395,26 @@ public class LLMS2QLParser implements SemanticParser {
         List<SchemaElement> allElements = Lists.newArrayList();
         allElements.addAll(dimensions);
         allElements.addAll(metrics);
-        allElements.stream()
+        //support alias
+        return allElements.stream()
                 .filter(schemaElement -> schemaElement.getModel().equals(modelId))
-                .forEach(o -> {
-                    List<String> fields = new ArrayList<>();
-                    fields.add(o.getName());
-                    if (!CollectionUtils.isEmpty(o.getAlias())) {
-                        fields.addAll(o.getAlias());
+                .flatMap(schemaElement -> {
+                    Set<Pair<String, SchemaElement>> result = new HashSet<>();
+                    result.add(Pair.of(schemaElement.getName(), schemaElement));
+                    List<String> aliasList = schemaElement.getAlias();
+                    if (!CollectionUtils.isEmpty(aliasList)) {
+                        for (String alias : aliasList) {
+                            result.add(Pair.of(alias, schemaElement));
+                        }
                     }
-                    fieldNameToElement.put(fields, o);
-                });
-        return fieldNameToElement;
+                    return result.stream();
+                })
+                .collect(Collectors.toMap(pair -> pair.getLeft(), pair -> pair.getRight(), (value1, value2) -> value2));
     }
 
 
     protected List<String> getFieldNameList(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema,
-            LLMParserConfig llmParserConfig) {
+                                            LLMParserConfig llmParserConfig) {
 
         Set<String> results = getTopNFieldNames(modelId, semanticSchema, llmParserConfig);
 
@@ -452,7 +450,7 @@ public class LLMS2QLParser implements SemanticParser {
     }
 
     private Set<String> getTopNFieldNames(Long modelId, SemanticSchema semanticSchema,
-            LLMParserConfig llmParserConfig) {
+                                          LLMParserConfig llmParserConfig) {
         Set<String> results = semanticSchema.getDimensions(modelId).stream()
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                 .limit(llmParserConfig.getDimensionTopN())

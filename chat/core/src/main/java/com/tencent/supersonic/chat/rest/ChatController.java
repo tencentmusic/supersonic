@@ -88,14 +88,14 @@ public class ChatController {
     }
 
     @RequestMapping("/getSolvedQuery")
-    public QueryRecallResp getSolvedQuery(@RequestParam(value = "queryText") String queryText,
+    public List<SolvedQueryRecallResp> getSolvedQuery(@RequestParam(value = "queryText") String queryText,
                                                       @RequestParam(value = "agentId") Integer agentId) {
         QueryRecallResp queryRecallResp = new QueryRecallResp();
         Long startTime = System.currentTimeMillis();
         List<SolvedQueryRecallResp> solvedQueryRecallRespList = chatService.getSolvedQuery(queryText, agentId);
         queryRecallResp.setSolvedQueryRecallRespList(solvedQueryRecallRespList);
         queryRecallResp.setQueryTimeCost(System.currentTimeMillis() - startTime);
-        return queryRecallResp;
+        return solvedQueryRecallRespList;
     }
 
 }
