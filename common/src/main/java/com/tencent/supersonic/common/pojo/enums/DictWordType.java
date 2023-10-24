@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
  * such as : metric、dimension etc.
  */
 public enum DictWordType {
+
     METRIC("metric"),
 
     DIMENSION("dimension"),

@@ -213,7 +213,6 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         return queryResult;
     }
 
-
     @Override
     public ExplainResp explain(User user) {
         ExplainSqlReq explainSqlReq = null;
