@@ -86,7 +86,11 @@ public class SearchService {
             BinTrie<List<String>> binTrie, Integer agentId, Set<Long> detectModelIds) {
         key = key.toLowerCase();
         Set<Map.Entry<String, List<String>>> entrySet = new TreeSet<Map.Entry<String, List<String>>>();
-        StringBuilder sb = new StringBuilder(key.substring(0, key.length() - 1));
+
+        StringBuilder sb = new StringBuilder();
+        if (StringUtils.isNotBlank(key)) {
+            sb = new StringBuilder(key.substring(0, key.length() - 1));
+        }
         BaseNode branch = binTrie;
         char[] chars = key.toCharArray();
         for (char aChar : chars) {

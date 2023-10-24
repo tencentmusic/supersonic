@@ -1,10 +1,9 @@
 package com.tencent.supersonic.chat.service.impl;
 
 
-
+import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
-import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
@@ -27,8 +26,8 @@ import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.QuerySelector;
-import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.query.llm.s2ql.LLMResp;
+import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
 import com.tencent.supersonic.chat.service.ChatService;
@@ -38,46 +37,46 @@ import com.tencent.supersonic.chat.service.StatisticsService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.SolvedQueryManager;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
+import com.tencent.supersonic.knowledge.dictionary.MultiCustomDictionary;
 import com.tencent.supersonic.knowledge.service.SearchService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
+import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
-import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.commons.collections.CollectionUtils;
@@ -184,7 +183,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     private List<SemanticParseInfo> getTop5CandidateParseInfo(List<SemanticParseInfo> selectedParses,
-                                                              List<SemanticParseInfo> candidateParses) {
+            List<SemanticParseInfo> candidateParses) {
         if (CollectionUtils.isEmpty(selectedParses) || CollectionUtils.isEmpty(candidateParses)) {
             return candidateParses;
         }
@@ -397,10 +396,10 @@ public class QueryServiceImpl implements QueryService {
     }
 
     private void updateDateInfo(QueryDataReq queryData, SemanticParseInfo parseInfo,
-                                Map<String, Map<String, String>> filedNameToValueMap,
-                                List<FilterExpression> filterExpressionList,
-                                List<Expression> addConditions,
-                                Set<String> removeFieldNames) {
+            Map<String, Map<String, String>> filedNameToValueMap,
+            List<FilterExpression> filterExpressionList,
+            List<Expression> addConditions,
+            Set<String> removeFieldNames) {
         if (Objects.isNull(queryData.getDateInfo())) {
             return;
         }
@@ -459,8 +458,8 @@ public class QueryServiceImpl implements QueryService {
     }
 
     public <T extends ComparisonOperator> void addTimeCondition(String date,
-                                                                T comparisonExpression,
-                                                                List<Expression> addConditions) {
+            T comparisonExpression,
+            List<Expression> addConditions) {
         Column column = new Column(DateUtils.DATE_FIELD);
         StringValue stringValue = new StringValue(date);
         comparisonExpression.setLeftExpression(column);
@@ -469,11 +468,11 @@ public class QueryServiceImpl implements QueryService {
     }
 
     private void updateFilters(Map<String, Map<String, String>> filedNameToValueMap,
-                               List<FilterExpression> filterExpressionList,
-                               Set<QueryFilter> metricFilters,
-                               Set<QueryFilter> contextMetricFilters,
-                               List<Expression> addConditions,
-                               Set<String> removeFieldNames) {
+            List<FilterExpression> filterExpressionList,
+            Set<QueryFilter> metricFilters,
+            Set<QueryFilter> contextMetricFilters,
+            List<Expression> addConditions,
+            Set<String> removeFieldNames) {
         if (CollectionUtils.isEmpty(metricFilters)) {
             return;
         }
@@ -520,9 +519,9 @@ public class QueryServiceImpl implements QueryService {
     }
 
     public void addWhereInCondition(QueryFilter dslQueryFilter,
-                                    InExpression inExpression,
-                                    Set<QueryFilter> contextMetricFilters,
-                                    List<Expression> addConditions) {
+            InExpression inExpression,
+            Set<QueryFilter> contextMetricFilters,
+            List<Expression> addConditions) {
         Column column = new Column(dslQueryFilter.getName());
         ExpressionList expressionList = new ExpressionList();
         List<Expression> expressions = new ArrayList<>();
@@ -548,9 +547,9 @@ public class QueryServiceImpl implements QueryService {
     }
 
     public <T extends ComparisonOperator> void addWhereCondition(QueryFilter dslQueryFilter,
-                                                                 T comparisonExpression,
-                                                                 Set<QueryFilter> contextMetricFilters,
-                                                                 List<Expression> addConditions) {
+            T comparisonExpression,
+            Set<QueryFilter> contextMetricFilters,
+            List<Expression> addConditions) {
         String columnName = dslQueryFilter.getName();
         if (StringUtils.isNotBlank(dslQueryFilter.getFunction())) {
             columnName = dslQueryFilter.getFunction() + "(" + dslQueryFilter.getName() + ")";
@@ -594,46 +593,11 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
-        QueryStructReq queryStructReq = new QueryStructReq();
-
-        DateConf dateConf = new DateConf();
-        dateConf.setDateMode(DateConf.DateMode.RECENT);
-        dateConf.setUnit(1);
-        dateConf.setPeriod("DAY");
-        queryStructReq.setDateInfo(dateConf);
-        queryStructReq.setLimit(20L);
-        queryStructReq.setModelId(dimensionValueReq.getModelId());
-        queryStructReq.setNativeQuery(false);
-        List<String> groups = new ArrayList<>();
-        groups.add(dimensionValueReq.getBizName());
-        queryStructReq.setGroups(groups);
-        if ((!Objects.isNull(dimensionValueReq.getValue()))
-                && StringUtils.isNotBlank(dimensionValueReq.getValue().toString())) {
-            return queryHanlpDimensionValue(dimensionValueReq, user);
-        }
-        SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
-        QueryResultWithSchemaResp queryResultWithSchemaResp = semanticInterpreter.queryByStruct(queryStructReq, user);
-        return queryResultWithSchemaResp;
-    }
-
-    public Object queryHanlpDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
         QueryResultWithSchemaResp queryResultWithSchemaResp = new QueryResultWithSchemaResp();
         Set<Long> detectModelIds = new HashSet<>();
         detectModelIds.add(dimensionValueReq.getModelId());
-        List<MapResult> mapResultList = SearchService.prefixSearch(dimensionValueReq.getValue().toString(),
-                2000, dimensionValueReq.getAgentId(), detectModelIds);
-        HanlpHelper.transLetterOriginal(mapResultList);
-        log.info("mapResultList:{}", mapResultList);
-        mapResultList = mapResultList.stream().filter(o -> {
-            for (String nature : o.getNatures()) {
-                String[] natureArray = nature.split("_");
-                if (natureArray[2].equals(dimensionValueReq.getElementID().toString())) {
-                    return true;
-                }
-            }
-            return false;
-        }).collect(Collectors.toList());
-        log.info("mapResultList:{}", mapResultList);
+        List<String> dimensionValues = getDimensionValues(dimensionValueReq, detectModelIds);
+
         List<QueryColumn> columns = new ArrayList<>();
         QueryColumn queryColumn = new QueryColumn();
         queryColumn.setNameEn(dimensionValueReq.getBizName());
@@ -642,14 +606,43 @@ public class QueryServiceImpl implements QueryService {
         queryColumn.setType("CHAR");
         columns.add(queryColumn);
         List<Map<String, Object>> resultList = new ArrayList<>();
-        mapResultList.stream().forEach(o -> {
+        dimensionValues.stream().forEach(o -> {
             Map<String, Object> map = new HashMap<>();
-            map.put(dimensionValueReq.getBizName(), o.getName());
+            map.put(dimensionValueReq.getBizName(), o);
             resultList.add(map);
         });
         queryResultWithSchemaResp.setColumns(columns);
         queryResultWithSchemaResp.setResultList(resultList);
         return queryResultWithSchemaResp;
+    }
+
+    private List<String> getDimensionValues(DimensionValueReq dimensionValueReq, Set<Long> detectModelIds) {
+        //if value is null ,then search from NATURE_TO_VALUES
+        if (StringUtils.isBlank(dimensionValueReq.getValue())) {
+            String nature = DictWordType.NATURE_SPILT + dimensionValueReq.getModelId() + DictWordType.NATURE_SPILT
+                    + dimensionValueReq.getElementID();
+            PriorityQueue<Term> terms = MultiCustomDictionary.NATURE_TO_VALUES.get(nature);
+            if (CollectionUtils.isEmpty(terms)) {
+                return new ArrayList<>();
+            }
+            return terms.stream().map(term -> term.getWord()).collect(Collectors.toList());
+        }
+        //search from prefixSearch
+        List<MapResult> mapResultList = SearchService.prefixSearch(dimensionValueReq.getValue(),
+                2000, dimensionValueReq.getAgentId(), detectModelIds);
+        HanlpHelper.transLetterOriginal(mapResultList);
+        return mapResultList.stream()
+                .filter(o -> {
+                    for (String nature : o.getNatures()) {
+                        Long elementID = NatureHelper.getElementID(nature);
+                        if (dimensionValueReq.getElementID().equals(elementID)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                })
+                .map(mapResult -> mapResult.getName())
+                .collect(Collectors.toList());
     }
 
 }
