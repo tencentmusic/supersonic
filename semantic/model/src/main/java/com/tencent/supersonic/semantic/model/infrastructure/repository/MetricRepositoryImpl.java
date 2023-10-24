@@ -1,7 +1,6 @@
 package com.tencent.supersonic.semantic.model.infrastructure.repository;
 
-
-import com.clickhouse.client.internal.apache.commons.compress.utils.Lists;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDOExample;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
