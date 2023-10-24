@@ -112,6 +112,7 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public ParseResp performParsing(QueryReq queryReq) {
+        Long parseTime = System.currentTimeMillis();
         QueryContext queryCtx = new QueryContext(queryReq);
         // in order to support multi-turn conversation, chat context is needed
         ChatContext chatCtx = chatService.getOrCreateContext(queryReq.getChatId());
@@ -169,6 +170,8 @@ public class QueryServiceImpl implements QueryService {
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
         }
         chatService.updateChatParse(chatParseDOS);
+        parseResult.getParseTimeCost().setParseTime(
+                System.currentTimeMillis() - parseTime - parseResult.getParseTimeCost().getSqlTime());
         return parseResult;
     }
 
@@ -204,6 +207,7 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception {
+        Long executeTime = System.currentTimeMillis();
         ChatParseDO chatParseDO = chatService.getParseInfo(queryReq.getQueryId(),
                 queryReq.getParseId());
         ChatQueryDO chatQueryDO = chatService.getLastQuery(queryReq.getChatId());
@@ -224,6 +228,7 @@ public class QueryServiceImpl implements QueryService {
         if (queryResult != null) {
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(semanticQuery.getClass().getSimpleName()).type(CostType.QUERY.getType()).build());
+            queryResult.setQueryTimeCost(timeCostDOList.get(0).getCost().longValue());
             saveInfo(timeCostDOList, queryReq.getQueryText(), queryReq.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
             queryResult.setChatContext(parseInfo);
@@ -242,7 +247,7 @@ public class QueryServiceImpl implements QueryService {
         } else {
             chatService.deleteChatQuery(queryReq.getQueryId());
         }
-
+        queryResult.setQueryTimeCost(System.currentTimeMillis() - executeTime);
         return queryResult;
     }
 
@@ -349,20 +354,14 @@ public class QueryServiceImpl implements QueryService {
                     parseInfo.getDimensionFilters(), addWhereConditions, removeWhereFieldNames);
             updateDateInfo(queryData, parseInfo, filedNameToValueMap,
                     whereExpressionList, addWhereConditions, removeWhereFieldNames);
-            log.info("filedNameToValueMap:{}", filedNameToValueMap);
-            log.info("removeWhereFieldNames:{}", removeWhereFieldNames);
             correctorSql = SqlParserReplaceHelper.replaceValue(correctorSql, filedNameToValueMap);
             correctorSql = SqlParserRemoveHelper.removeWhereCondition(correctorSql, removeWhereFieldNames);
 
             updateFilters(havingFiledNameToValueMap, havingExpressionList, queryData.getDimensionFilters(),
                     parseInfo.getDimensionFilters(), addHavingConditions, removeHavingFieldNames);
-            log.info("havingFiledNameToValueMap:{}", havingFiledNameToValueMap);
-            log.info("removeHavingFieldNames:{}", removeHavingFieldNames);
             correctorSql = SqlParserReplaceHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
             correctorSql = SqlParserRemoveHelper.removeHavingCondition(correctorSql, removeHavingFieldNames);
 
-            log.info("addWhereConditions:{}", addWhereConditions);
-            log.info("addHavingConditions:{}", addHavingConditions);
             correctorSql = SqlParserAddHelper.addWhere(correctorSql, addWhereConditions);
             correctorSql = SqlParserAddHelper.addHaving(correctorSql, addHavingConditions);
 

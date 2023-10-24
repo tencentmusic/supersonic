@@ -172,7 +172,7 @@ public class LLMS2QLParser implements SemanticParser {
     }
 
     private List<QueryFilter> getDimensionFilter(Map<String, SchemaElement> fieldNameToElement,
-            List<FilterExpression> filterExpressions) {
+                                                 List<FilterExpression> filterExpressions) {
         List<QueryFilter> result = Lists.newArrayList();
         for (FilterExpression expression : filterExpressions) {
             QueryFilter dimensionFilter = new QueryFilter();
@@ -229,7 +229,7 @@ public class LLMS2QLParser implements SemanticParser {
     }
 
     private boolean containOperators(FilterExpression expression, FilterOperatorEnum firstOperator,
-            FilterOperatorEnum... operatorEnums) {
+                                     FilterOperatorEnum... operatorEnums) {
         return (Arrays.asList(operatorEnums).contains(firstOperator) && Objects.nonNull(expression.getFieldValue()));
     }
 
@@ -257,7 +257,7 @@ public class LLMS2QLParser implements SemanticParser {
     }
 
     private SemanticParseInfo getParseInfo(QueryContext queryCtx, Long modelId, CommonAgentTool commonAgentTool,
-            ParseResult parseResult) {
+                                           ParseResult parseResult) {
         PluginSemanticQuery semanticQuery = QueryManager.createPluginQuery(S2QLQuery.QUERY_MODE);
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         parseInfo.getElementMatches().addAll(queryCtx.getMapInfo().getMatchedElements(modelId));
@@ -414,7 +414,7 @@ public class LLMS2QLParser implements SemanticParser {
 
 
     protected List<String> getFieldNameList(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema,
-            LLMParserConfig llmParserConfig) {
+                                            LLMParserConfig llmParserConfig) {
 
         Set<String> results = getTopNFieldNames(modelId, semanticSchema, llmParserConfig);
 
@@ -450,7 +450,7 @@ public class LLMS2QLParser implements SemanticParser {
     }
 
     private Set<String> getTopNFieldNames(Long modelId, SemanticSchema semanticSchema,
-            LLMParserConfig llmParserConfig) {
+                                          LLMParserConfig llmParserConfig) {
         Set<String> results = semanticSchema.getDimensions(modelId).stream()
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                 .limit(llmParserConfig.getDimensionTopN())
