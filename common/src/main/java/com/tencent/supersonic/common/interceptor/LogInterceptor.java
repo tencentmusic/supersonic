@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 public class LogInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        //如果有上层调用就用上层的ID
+        //use previous traceId
         String traceId = request.getHeader(TraceIdUtil.TRACE_ID);
         if (StringUtils.isBlank(traceId)) {
             TraceIdUtil.setTraceId(TraceIdUtil.generateTraceId());
@@ -35,7 +35,7 @@ public class LogInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
             throws Exception {
-        //调用结束后删除
+        //remove after Completing
         TraceIdUtil.remove();
     }
 }
