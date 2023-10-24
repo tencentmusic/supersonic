@@ -66,9 +66,10 @@ public class HeuristicModelResolver implements ModelResolver {
         if (Objects.nonNull(modelElementMatches)) {
             for (Entry<Long, List<SchemaElementMatch>> modelElementMatch : modelElementMatches.entrySet()) {
                 Long modelId = modelElementMatch.getKey();
-                List<Double> modelMatchesScore = modelElementMatch.getValue().stream().filter(
-                        elementMatch -> SchemaElementType.MODEL.equals(elementMatch.getElement().getType()))
-                            .map(elementMatch -> elementMatch.isInherited() ? 0.5 : 1.0).collect(Collectors.toList());
+                List<Double> modelMatchesScore = modelElementMatch.getValue().stream()
+                        .filter(elementMatch -> elementMatch.getSimilarity() >= 1)
+                        .filter(elementMatch -> SchemaElementType.MODEL.equals(elementMatch.getElement().getType()))
+                        .map(elementMatch -> elementMatch.isInherited() ? 0.5 : 1.0).collect(Collectors.toList());
 
                 if (!CollectionUtils.isEmpty(modelMatchesScore)) {
                     // get sum of model match score

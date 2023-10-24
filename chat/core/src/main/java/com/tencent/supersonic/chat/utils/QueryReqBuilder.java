@@ -12,12 +12,14 @@ import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,6 +27,19 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.GroupByElement;
+import net.sf.jsqlparser.statement.select.Limit;
+import net.sf.jsqlparser.statement.select.OrderByElement;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
@@ -138,6 +153,65 @@ public class QueryReqBuilder {
         return queryS2QLReq;
     }
 
+    /**
+     * convert queryStructReq to QueryS2QLReq
+     *
+     * @param queryStructReq
+     * @return
+     */
+    public static QueryS2QLReq buildS2QLReq(QueryStructReq queryStructReq) {
+
+        Select select = new Select();
+
+        // Set the select items (columns)
+        PlainSelect plainSelect = new PlainSelect();
+        List<SelectItem> selectItems = new ArrayList<>();
+
+        if(queryStructReq.getNativeQuery()){
+
+
+        }
+
+        selectItems.add(new SelectExpressionItem(new Column("column1")));
+        selectItems.add(new SelectExpressionItem(new Column("column2")));
+        plainSelect.setSelectItems(selectItems);
+
+        // Set the table name
+        Table table = new Table("table1");
+        plainSelect.setFromItem(table);
+
+        // Set the order by clause
+        OrderByElement orderByElement = new OrderByElement();
+        orderByElement.setExpression(new Column("column1"));
+        plainSelect.setOrderByElements(Collections.singletonList(orderByElement));
+
+        // Set the group by clause
+        GroupByElement groupByElement = new GroupByElement();
+        groupByElement.addGroupByExpression(new Column("column1"));
+        plainSelect.setGroupByElement(groupByElement);
+
+        // Set the having clause
+        Expression havingExpression = null;
+        try {
+            havingExpression = CCJSqlParserUtil.parseCondExpression("condition2");
+        } catch (JSQLParserException e) {
+            log.error("");
+        }
+        plainSelect.setHaving(havingExpression);
+
+        // Set the limit clause
+        Limit limit = new Limit();
+        limit.setRowCount(new LongValue(10));
+        plainSelect.setLimit(limit);
+
+        select.setSelectBody(plainSelect);
+
+        QueryS2QLReq result = new QueryS2QLReq();
+        result.setSql(select.toString());
+        result.setModelId(queryStructReq.getModelId());
+        result.setVariables(new HashMap<>());
+        return result;
+    }
 
     private static List<Aggregator> getAggregatorByMetric(AggregateTypeEnum aggregateType, SchemaElement metric) {
         List<Aggregator> aggregators = new ArrayList<>();
@@ -233,4 +307,6 @@ public class QueryReqBuilder {
         queryStructCmd.setAggregators(aggregators);
         return queryStructCmd;
     }
+
+
 }
