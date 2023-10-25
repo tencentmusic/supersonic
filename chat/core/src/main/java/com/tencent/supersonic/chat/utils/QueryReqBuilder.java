@@ -167,11 +167,6 @@ public class QueryReqBuilder {
         PlainSelect plainSelect = new PlainSelect();
         List<SelectItem> selectItems = new ArrayList<>();
 
-        if(queryStructReq.getNativeQuery()){
-
-
-        }
-
         selectItems.add(new SelectExpressionItem(new Column("column1")));
         selectItems.add(new SelectExpressionItem(new Column("column2")));
         plainSelect.setSelectItems(selectItems);
