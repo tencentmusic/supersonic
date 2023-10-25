@@ -108,6 +108,11 @@ class SqlParserSelectHelperTest {
                         + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
 
         System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression("SELECT sum(销量) / (SELECT sum(销量) FROM 营销月模型 "
+                + "WHERE MONTH(数据日期) = 9) FROM 营销月模型 WHERE 国家中文名 = '肯尼亚' AND MONTH(数据日期) = 9");
+
+        System.out.println(filterExpression);
     }
 
 
@@ -157,6 +162,10 @@ class SqlParserSelectHelperTest {
 
         Assert.assertEquals(allFields.size(), 3);
 
+        allFields = SqlParserSelectHelper.getAllFields("SELECT sum(销量) / (SELECT sum(销量) FROM 营销 "
+                + "WHERE MONTH(数据日期) = 9) FROM 营销 WHERE 国家中文名 = '中国' AND MONTH(数据日期) = 9");
+
+        Assert.assertEquals(allFields.size(), 3);
     }
 
 
