@@ -30,10 +30,10 @@ import com.tencent.supersonic.semantic.materialization.domain.pojo.Materializati
 import com.tencent.supersonic.semantic.materialization.domain.repository.MaterializationElementRepository;
 import com.tencent.supersonic.semantic.materialization.domain.repository.MaterializationRepository;
 import com.tencent.supersonic.semantic.materialization.domain.utils.MaterializationConverter;
-import com.tencent.supersonic.semantic.materialization.domain.utils.MaterializationUtils;
 import com.tencent.supersonic.semantic.materialization.domain.utils.MaterializationZipperUtils;
 import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,6 +44,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -58,16 +59,18 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
     private final MaterializationElementRepository materializationElementRepository;
     private final ModelService modelService;
     private final DatasourceService datasourceService;
+    private final MaterializationZipperUtils materializationZipperUtils;
     private String typeAndIdSplit = "_";
 
     public MaterializationConfServiceImpl(MaterializationRepository materializationRepository,
-            MaterializationElementRepository materializationElementRepository,
-            ModelService modelService, DatasourceService datasourceService) {
+                                          MaterializationElementRepository materializationElementRepository,
+                                          ModelService modelService, DatasourceService datasourceService,
+                                          MaterializationZipperUtils materializationZipperUtils) {
         this.materializationRepository = materializationRepository;
         this.materializationElementRepository = materializationElementRepository;
-
         this.modelService = modelService;
         this.datasourceService = datasourceService;
+        this.materializationZipperUtils = materializationZipperUtils;
     }
 
     @Override
@@ -145,7 +148,7 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
     }
 
     private void fillElementInfo(List<MaterializationElementResp> materializationElementRespList,
-            Map<String, SchemaItem> keyAndSchemaItemPair) {
+                                 Map<String, SchemaItem> keyAndSchemaItemPair) {
         if (CollectionUtils.isEmpty(materializationElementRespList) || Objects.isNull(keyAndSchemaItemPair)) {
             return;
         }
@@ -243,8 +246,7 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
     }
 
     private String generateCreateSql(MaterializationResp materializationResp) {
-        MaterializationUtils materializationUtils = new MaterializationZipperUtils();
-        return materializationUtils.generateCreateSql(materializationResp);
+        return materializationZipperUtils.generateCreateSql(materializationResp);
     }
 
     @Override
@@ -260,7 +262,7 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
     }
 
     private void doDimensionMaterializationLogic(List<DimSchemaResp> dimensions,
-            MaterializationResp materializationResp, User user) {
+                                                 MaterializationResp materializationResp, User user) {
         if (CollectionUtils.isEmpty(dimensions)) {
             return;
         }
