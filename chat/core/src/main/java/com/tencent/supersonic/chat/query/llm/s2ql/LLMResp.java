@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.query.llm.s2ql;
 
 import java.util.List;
+import java.util.Map;
 import lombok.Data;
 
 @Data
@@ -18,5 +19,5 @@ public class LLMResp {
 
     private String schemaLinkStr;
 
-    private String correctorSql;
+    private Map<String, Double> sqlWeight;
 }
