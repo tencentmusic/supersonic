@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.parser.plugin.function;
 import com.alibaba.fastjson.JSON;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.parser.ParseMode;
-import com.tencent.supersonic.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.chat.parser.plugin.PluginParser;
 import com.tencent.supersonic.chat.plugin.Plugin;
 import com.tencent.supersonic.chat.plugin.PluginManager;
@@ -38,7 +37,7 @@ public class FunctionBasedParser extends PluginParser {
     public boolean checkPreCondition(QueryContext queryContext) {
         FunctionCallConfig functionCallConfig = ContextUtils.getBean(FunctionCallConfig.class);
         String functionUrl = functionCallConfig.getUrl();
-        if (StringUtils.isBlank(functionUrl) || SatisfactionChecker.check(queryContext)) {
+        if (StringUtils.isBlank(functionUrl)) {
             log.info("functionUrl:{}, skip function parser, queryText:{}", functionUrl,
                     queryContext.getRequest().getQueryText());
             return false;
