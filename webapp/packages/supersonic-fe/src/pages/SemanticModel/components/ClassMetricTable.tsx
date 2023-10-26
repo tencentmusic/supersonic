@@ -36,12 +36,13 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       ...pagination,
       modelId,
     });
-    const { list, pageSize, total } = data || {};
+    const { list, pageSize, pageNum, total } = data || {};
     let resData: any = {};
     if (code === 200) {
       setPagination({
         ...pagination,
         pageSize: Math.min(pageSize, 100),
+        current: pageNum,
         total,
       });
 
