@@ -11,6 +11,7 @@ import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SearchService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -78,7 +79,7 @@ public class ChatQueryController {
     }
 
     @PostMapping("queryDimensionValue")
-    public Object queryDimensionValue(@RequestBody DimensionValueReq dimensionValueReq,
+    public Object queryDimensionValue(@RequestBody @Valid DimensionValueReq dimensionValueReq,
                                       HttpServletRequest request, HttpServletResponse response)
             throws Exception {
         return queryService.queryDimensionValue(dimensionValueReq, UserHolder.findUser(request, response));

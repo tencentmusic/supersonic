@@ -20,10 +20,9 @@ public class StatisticsRepositoryImpl implements StatisticsRepository {
         this.statisticsMapper = statisticsMapper;
     }
 
-    public boolean batchSaveStatistics(List<StatisticsDO> list) {
-        return statisticsMapper.batchSaveStatistics(list);
+    public void batchSaveStatistics(List<StatisticsDO> list) {
+        statisticsMapper.batchSaveStatistics(list);
     }
 
-    ;
 
 }

@@ -343,7 +343,7 @@ public class CalculateAggConverter implements SemanticConverter {
             String aggStr = queryStructCmd.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER) || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
                     if (queryStructCmd.getDateInfo().getPeriod().equals(Constants.MONTH)) {
-                        return String.format("%s = DATE_FORMAT(date_add(CONCAT(%s,'-01'), %s),'%Y-%m') ",
+                        return String.format("%s = DATE_FORMAT(date_add(CONCAT(%s,'-01'), %s),'%%Y-%%m') ",
                                 aliasLeft + timeDim, aliasRight + timeDim, timeSpan);
                     }
                     if (queryStructCmd.getDateInfo().getPeriod().equals(Constants.WEEK) && isOver) {

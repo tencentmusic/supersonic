@@ -123,34 +123,34 @@ public class SqlParserSelectHelper {
     public static List<PlainSelect> getPlainSelects(PlainSelect plainSelect) {
         List<PlainSelect> plainSelects = new ArrayList<>();
         plainSelects.add(plainSelect);
+
+        ExpressionVisitorAdapter expressionVisitor = new ExpressionVisitorAdapter() {
+            @Override
+            public void visit(SubSelect subSelect) {
+                SelectBody subSelectBody = subSelect.getSelectBody();
+                if (subSelectBody instanceof PlainSelect) {
+                    plainSelects.add((PlainSelect) subSelectBody);
+                }
+            }
+        };
+
         plainSelect.accept(new SelectVisitorAdapter() {
             @Override
             public void visit(PlainSelect plainSelect) {
                 Expression whereExpression = plainSelect.getWhere();
                 if (whereExpression != null) {
-                    whereExpression.accept(new ExpressionVisitorAdapter() {
-                        @Override
-                        public void visit(SubSelect subSelect) {
-                            SelectBody subSelectBody = subSelect.getSelectBody();
-                            if (subSelectBody instanceof PlainSelect) {
-                                plainSelects.add((PlainSelect) subSelectBody);
-                            }
-                        }
-                    });
+                    whereExpression.accept(expressionVisitor);
                 }
                 Expression having = plainSelect.getHaving();
                 if (Objects.nonNull(having)) {
-                    having.accept(new ExpressionVisitorAdapter() {
-                        @Override
-                        public void visit(SubSelect subSelect) {
-                            SelectBody subSelectBody = subSelect.getSelectBody();
-                            if (subSelectBody instanceof PlainSelect) {
-                                plainSelects.add((PlainSelect) subSelectBody);
-                            }
-                        }
-                    });
+                    having.accept(expressionVisitor);
                 }
-
+                List<SelectItem> selectItems = plainSelect.getSelectItems();
+                if (!CollectionUtils.isEmpty(selectItems)) {
+                    for (SelectItem selectItem : selectItems) {
+                        selectItem.accept(expressionVisitor);
+                    }
+                }
             }
         });
         return plainSelects;
@@ -206,6 +206,19 @@ public class SqlParserSelectHelper {
             }
         }
         return null;
+    }
+
+    public static List<FilterExpression> getWhereExpressions(String sql) {
+        PlainSelect plainSelect = getPlainSelect(sql);
+        if (Objects.isNull(plainSelect)) {
+            return new ArrayList<>();
+        }
+        Set<FilterExpression> result = new HashSet<>();
+        Expression where = plainSelect.getWhere();
+        if (Objects.nonNull(where)) {
+            where.accept(new FieldAndValueAcquireVisitor(result));
+        }
+        return new ArrayList<>(result);
     }
 
     public static List<FilterExpression> getHavingExpressions(String sql) {
@@ -316,6 +329,12 @@ public class SqlParserSelectHelper {
     public static String getColumnName(Expression leftExpression, Expression rightExpression) {
         if (leftExpression instanceof Column) {
             return ((Column) leftExpression).getColumnName();
+        }
+        if (leftExpression instanceof Function) {
+            List<Expression> expressionList = ((Function) leftExpression).getParameters().getExpressions();
+            if (!CollectionUtils.isEmpty(expressionList) && expressionList.get(0) instanceof Column) {
+                return ((Column) expressionList.get(0)).getColumnName();
+            }
         }
         if (rightExpression instanceof Column) {
             return ((Column) rightExpression).getColumnName();

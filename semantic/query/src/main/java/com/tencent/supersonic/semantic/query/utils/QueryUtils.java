@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.cache.CacheUtils;
+import com.tencent.supersonic.semantic.api.model.enums.SemanticTypeEnum;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
@@ -76,7 +77,7 @@ public class QueryUtils {
         addSysTimeDimension(namePair, nameTypePair);
         metricDescList.forEach(metricDesc -> {
             namePair.put(metricDesc.getBizName(), metricDesc.getName());
-            nameTypePair.put(metricDesc.getBizName(), "NUMBER");
+            nameTypePair.put(metricDesc.getBizName(), SemanticTypeEnum.NUMBER.name());
         });
         dimensionDescList.forEach(dimensionDesc -> {
             namePair.put(dimensionDesc.getBizName(), dimensionDesc.getName());
@@ -104,14 +105,14 @@ public class QueryUtils {
                 column.setShowType(nameTypePair.get(nameEn));
             }
             if (!nameTypePair.containsKey(nameEn) && isNumberType(column.getType())) {
-                column.setShowType("NUMBER");
+                column.setShowType(SemanticTypeEnum.NUMBER.name());
             }
             if (metricRespMap.containsKey(nameEn)) {
                 column.setDataFormatType(metricRespMap.get(nameEn).getDataFormatType());
                 column.setDataFormat(metricRespMap.get(nameEn).getDataFormat());
             }
             if (StringUtils.isEmpty(column.getShowType())) {
-                column.setShowType("NUMBER");
+                column.setShowType(SemanticTypeEnum.CATEGORY.name());
             }
         });
     }
