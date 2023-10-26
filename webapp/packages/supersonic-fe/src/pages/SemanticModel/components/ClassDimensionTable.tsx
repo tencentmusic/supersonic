@@ -42,12 +42,12 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       ...pagination,
       modelId,
     });
-    const { list, pageSize, current, total } = data || {};
+    const { list, pageSize, total } = data || {};
     let resData: any = {};
     if (code === 200) {
       setPagination({
+        ...pagination,
         pageSize: Math.min(pageSize, 100),
-        current,
         total,
       });
 
@@ -101,7 +101,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'alias',
       title: '别名',
-      width: 300,
+      width: 150,
       ellipsis: true,
       search: false,
     },

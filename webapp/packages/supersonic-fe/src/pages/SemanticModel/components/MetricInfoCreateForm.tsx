@@ -395,7 +395,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
             label={
               <FormItemTitle
                 title={'小数位数'}
-                subTitle={`对小数位数进行设置，如保留两位，0.021252 -> 2.12${
+                subTitle={`对小数位数进行设置，如保留两位，0.021252 -> 0.02${
                   isPercentState ? '%' : ''
                 }`}
               />

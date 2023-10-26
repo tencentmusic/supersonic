@@ -64,17 +64,21 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       ...pagination,
       ...params,
       createdBy: params.onlyShowMe ? currentUser.name : null,
-      pageSize: params.showType ? 100 : defaultPagination.pageSize,
+      pageSize: params.showType ? 100 : params.pageSize || pagination.pageSize,
     });
     setLoading(false);
-    const { list, pageSize, current, total } = data || {};
+    const { list, pageSize, total } = data || {};
     let resData: any = {};
     if (code === 200) {
-      setPagination({
-        pageSize: Math.min(pageSize, 100),
-        current,
-        total,
-      });
+      if (!params.showType) {
+        setPagination({
+          ...pagination,
+          pageSize: Math.min(pageSize, 100),
+          // current,
+          total,
+        });
+      }
+
       setDataSource(list);
       resData = {
         data: list || [],
@@ -128,15 +132,6 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         );
       },
     },
-    // {
-    //   dataIndex: 'alias',
-    //   title: '别名',
-    //   search: false,
-    // },
-    // {
-    //   dataIndex: 'bizName',
-    //   title: '字段名称',
-    // },
     {
       dataIndex: 'modelName',
       title: '所属模型',

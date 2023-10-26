@@ -45,33 +45,6 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
       dataIndex: 'bizName',
       title: '度量名称',
     },
-    // {
-    //   dataIndex: 'alias',
-    //   title: '别名',
-    //   render: (_: any, record: any) => {
-    //     const { alias, name } = record;
-    //     const { measures } = measuresParams;
-    //     return (
-    //       <Input
-    //         placeholder="请输入别名"
-    //         value={alias}
-    //         onChange={(event) => {
-    //           const { value } = event.target;
-    //           const list = measures.map((item: any) => {
-    //             if (item.name === name) {
-    //               return {
-    //                 ...item,
-    //                 alias: value,
-    //               };
-    //             }
-    //             return item;
-    //           });
-    //           onFieldChange?.(list);
-    //         }}
-    //       />
-    //     );
-    //   },
-    // },
     {
       dataIndex: 'constraint',
       title: '限定条件',

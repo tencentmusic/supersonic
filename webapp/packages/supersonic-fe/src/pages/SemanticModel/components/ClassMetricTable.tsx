@@ -1,7 +1,7 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
 import { message, Button, Space, Popconfirm, Input, Tag } from 'antd';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../model';
@@ -25,7 +25,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 20,
+    pageSize: 2,
     total: 0,
   });
   const actionRef = useRef<ActionType>();
@@ -36,12 +36,12 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       ...pagination,
       modelId,
     });
-    const { list, pageSize, current, total } = data || {};
+    const { list, pageSize, total } = data || {};
     let resData: any = {};
     if (code === 200) {
       setPagination({
+        ...pagination,
         pageSize: Math.min(pageSize, 100),
-        current,
         total,
       });
 
@@ -81,7 +81,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'alias',
       title: '别名',
-      width: 300,
+      width: 150,
       ellipsis: true,
       search: false,
     },
