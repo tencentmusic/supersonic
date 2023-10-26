@@ -67,14 +67,14 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       pageSize: params.showType ? 100 : params.pageSize || pagination.pageSize,
     });
     setLoading(false);
-    const { list, pageSize, total } = data || {};
+    const { list, pageSize, pageNum, total } = data || {};
     let resData: any = {};
     if (code === 200) {
       if (!params.showType) {
         setPagination({
           ...pagination,
           pageSize: Math.min(pageSize, 100),
-          // current,
+          current: pageNum,
           total,
         });
       }
