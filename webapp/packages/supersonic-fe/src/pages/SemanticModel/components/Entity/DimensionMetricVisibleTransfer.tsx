@@ -15,7 +15,8 @@ type Props = {
   titles?: string[];
   onKnowledgeInfosMapChange?: (knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap) => void;
   onChange?: (params?: any) => void;
-  transferProps?: Record<string, any>;
+  // transferProps?: Record<string, any>;
+  [key: string]: any;
 };
 
 const DimensionMetricVisibleTransfer: React.FC<Props> = ({
@@ -24,8 +25,8 @@ const DimensionMetricVisibleTransfer: React.FC<Props> = ({
   sourceList = [],
   targetList = [],
   titles,
-  transferProps = {},
   onChange,
+  ...rest
 }) => {
   const [transferData, setTransferData] = useState<RecordType[]>([]);
   const [targetKeys, setTargetKeys] = useState<string[]>(targetList);
@@ -74,7 +75,7 @@ const DimensionMetricVisibleTransfer: React.FC<Props> = ({
         }}
         targetKeys={targetKeys}
         onChange={handleChange}
-        {...transferProps}
+        {...rest}
       />
     </div>
   );
