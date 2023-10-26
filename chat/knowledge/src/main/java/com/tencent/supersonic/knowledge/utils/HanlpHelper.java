@@ -9,6 +9,7 @@ import com.hankcs.hanlp.seg.Segment;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
@@ -30,10 +31,8 @@ import org.springframework.util.ResourceUtils;
 @Slf4j
 public class HanlpHelper {
 
-    public static final String FILE_SPILT = "/";
+    public static final String FILE_SPILT = File.separator;
     public static final String SPACE_SPILT = "#";
-    public static final String DICT_MAIN_FILE_NAME = "CustomDictionary.txt";
-    public static final String DICT_CLASS = "classes";
     private static volatile DynamicCustomDictionary CustomDictionary;
     private static volatile Segment segment;
 

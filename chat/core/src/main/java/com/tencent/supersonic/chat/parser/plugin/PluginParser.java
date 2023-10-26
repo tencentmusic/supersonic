@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.parser.plugin;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
+import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
@@ -29,6 +30,12 @@ public abstract class PluginParser implements SemanticParser {
 
     @Override
     public void parse(QueryContext queryContext, ChatContext chatContext) {
+        for (SemanticQuery semanticQuery : queryContext.getCandidateQueries()) {
+            if (queryContext.getRequest().getQueryText().length() <= semanticQuery.getParseInfo().getScore()
+                    && (QueryManager.getPluginQueryModes().contains(semanticQuery.getQueryMode()))) {
+                return;
+            }
+        }
         if (!checkPreCondition(queryContext)) {
             return;
         }

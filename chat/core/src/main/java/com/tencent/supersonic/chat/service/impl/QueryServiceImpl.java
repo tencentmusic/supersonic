@@ -19,14 +19,12 @@ import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
-import com.tencent.supersonic.chat.parser.llm.s2ql.ParseResult;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.QuerySelector;
-import com.tencent.supersonic.chat.query.llm.s2ql.LLMResp;
 import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
@@ -36,7 +34,6 @@ import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.service.StatisticsService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.SolvedQueryManager;
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -339,10 +336,8 @@ public class QueryServiceImpl implements QueryService {
         if (S2QLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
             Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
             Map<String, Map<String, String>> havingFiledNameToValueMap = new HashMap<>();
-            String json = JsonUtil.toString(parseInfo.getProperties().get(Constants.CONTEXT));
-            ParseResult parseResult = JsonUtil.toObject(json, ParseResult.class);
-            LLMResp llmResp = parseResult.getLlmResp();
-            String correctorSql = llmResp.getCorrectorSql();
+
+            String correctorSql = parseInfo.getSqlInfo().getLogicSql();
             log.info("correctorSql before replacing:{}", correctorSql);
             List<FilterExpression> whereExpressionList = SqlParserSelectHelper.getWhereExpressions(correctorSql);
             List<FilterExpression> havingExpressionList = SqlParserSelectHelper.getHavingExpressions(correctorSql);
@@ -366,11 +361,6 @@ public class QueryServiceImpl implements QueryService {
             correctorSql = SqlParserAddHelper.addHaving(correctorSql, addHavingConditions);
 
             log.info("correctorSql after replacing:{}", correctorSql);
-            llmResp.setCorrectorSql(correctorSql);
-            parseResult.setLlmResp(llmResp);
-            Map<String, Object> properties = new HashMap<>();
-            properties.put(Constants.CONTEXT, parseResult);
-            parseInfo.setProperties(properties);
             parseInfo.getSqlInfo().setLogicSql(correctorSql);
             semanticQuery.setParseInfo(parseInfo);
             ExplainResp explain = semanticQuery.explain(user);

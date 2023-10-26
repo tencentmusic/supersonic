@@ -123,34 +123,34 @@ public class SqlParserSelectHelper {
     public static List<PlainSelect> getPlainSelects(PlainSelect plainSelect) {
         List<PlainSelect> plainSelects = new ArrayList<>();
         plainSelects.add(plainSelect);
+
+        ExpressionVisitorAdapter expressionVisitor = new ExpressionVisitorAdapter() {
+            @Override
+            public void visit(SubSelect subSelect) {
+                SelectBody subSelectBody = subSelect.getSelectBody();
+                if (subSelectBody instanceof PlainSelect) {
+                    plainSelects.add((PlainSelect) subSelectBody);
+                }
+            }
+        };
+
         plainSelect.accept(new SelectVisitorAdapter() {
             @Override
             public void visit(PlainSelect plainSelect) {
                 Expression whereExpression = plainSelect.getWhere();
                 if (whereExpression != null) {
-                    whereExpression.accept(new ExpressionVisitorAdapter() {
-                        @Override
-                        public void visit(SubSelect subSelect) {
-                            SelectBody subSelectBody = subSelect.getSelectBody();
-                            if (subSelectBody instanceof PlainSelect) {
-                                plainSelects.add((PlainSelect) subSelectBody);
-                            }
-                        }
-                    });
+                    whereExpression.accept(expressionVisitor);
                 }
                 Expression having = plainSelect.getHaving();
                 if (Objects.nonNull(having)) {
-                    having.accept(new ExpressionVisitorAdapter() {
-                        @Override
-                        public void visit(SubSelect subSelect) {
-                            SelectBody subSelectBody = subSelect.getSelectBody();
-                            if (subSelectBody instanceof PlainSelect) {
-                                plainSelects.add((PlainSelect) subSelectBody);
-                            }
-                        }
-                    });
+                    having.accept(expressionVisitor);
                 }
-
+                List<SelectItem> selectItems = plainSelect.getSelectItems();
+                if (!CollectionUtils.isEmpty(selectItems)) {
+                    for (SelectItem selectItem : selectItems) {
+                        selectItem.accept(expressionVisitor);
+                    }
+                }
             }
         });
         return plainSelects;
