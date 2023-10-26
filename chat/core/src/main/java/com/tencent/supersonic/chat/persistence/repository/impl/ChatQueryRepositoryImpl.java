@@ -79,7 +79,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
 
     @Override
     public List<QueryResp> queryShowCase(PageQueryInfoReq pageQueryInfoReq, int agentId) {
-        return showCaseCustomMapper.queryShowCase(pageQueryInfoReq.getCurrent(),
+        return showCaseCustomMapper.queryShowCase(pageQueryInfoReq.getLimitStart(),
                         pageQueryInfoReq.getPageSize(), agentId, pageQueryInfoReq.getUserName())
                 .stream().map(this::convertTo)
                 .collect(Collectors.toList());
@@ -188,9 +188,9 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         return chatQueryDOMapper.updateByPrimaryKeyWithBLOBs(chatQueryDO);
     }
 
-    @Override
-    public ChatParseDO getParseInfo(Long questionId, String userName, int parseId) {
-        return chatParseMapper.getParseInfo(questionId, userName, parseId);
+
+    public ChatParseDO getParseInfo(Long questionId, int parseId) {
+        return chatParseMapper.getParseInfo(questionId, parseId);
     }
 
     @Override

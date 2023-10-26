@@ -11,6 +11,7 @@ public class Constants {
     public static final String JOIN_TABLE_LEFT_PREFIX = "src12_";
     public static final String DIMENSION_TYPE_TIME_GRANULARITY_NONE = "none";
     public static final String DIMENSION_TYPE_TIME = "time";
+    public static final String DIMENSION_ARRAY_SINGLE_SUFFIX = "_sgl";
     public static final String MATERIALIZATION_ZIPPER_START = "start_";
     public static final String MATERIALIZATION_ZIPPER_END = "end_";
 

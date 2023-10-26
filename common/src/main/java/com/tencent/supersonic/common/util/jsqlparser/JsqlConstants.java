@@ -16,5 +16,6 @@ public class JsqlConstants {
     public static final String EQUAL_CONSTANT = " 1 = 1 ";
 
     public static final String IN_CONSTANT = " 1 in (1) ";
+    public static final String IN = "IN";
 
 }

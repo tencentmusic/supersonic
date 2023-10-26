@@ -165,7 +165,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
       {
         id: uuid(),
         type: MessageTypeEnum.AGENT_LIST,
-        msg: agent?.name || currentAgent?.name || agentList?.[0].name,
+        msg: agent?.name || currentAgent?.name || agentList?.[0]?.name,
       },
     ]);
   };
@@ -175,6 +175,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
       id: item.questionId,
       type: MessageTypeEnum.QUESTION,
       msg: item.queryText,
+      parseInfos: item.parseInfos,
       msgData: item.queryResult,
       score: item.score,
       agentId: currentAgent?.id,

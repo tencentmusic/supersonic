@@ -29,7 +29,7 @@
         <!--日志输出编码格式化-->
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d [%thread] %-5level [%X{TRACE_ID}] %logger{36} %line - %msg%n</pattern>
+            <pattern>%d [%thread] %-5level [%X{traceId}] %logger{36} %line - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -55,7 +55,7 @@
         <!--日志输出编码格式化-->
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d [%thread] %-5level [%X{TRACE_ID}] %logger{36} %line - %msg%n</pattern>
+            <pattern>%d [%thread] %-5level [%X{traceId}] %logger{36} %line - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -83,7 +83,7 @@
         <!--日志输出编码格式化-->
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d [%thread] %-5level [%X{TRACE_ID}] %logger{36} %line - %msg%n</pattern>
+            <pattern>%d [%thread] %-5level [%X{traceId}] %logger{36} %line - %msg%n</pattern>
         </encoder>
     </appender>
 

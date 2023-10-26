@@ -262,6 +262,11 @@ public class DatasourceServiceImpl implements DatasourceService {
     }
 
     @Override
+    public List<DatasourceResp> getDatasourceByDatabase(Long databaseId) {
+        return DatasourceConverter.convertList(datasourceRepository.getDatasourceByDatabase(databaseId));
+    }
+
+    @Override
     public List<DatasourceResp> getDatasourceListNoMeasurePrefix(Long modelId) {
         List<DatasourceResp> datasourceResps = getDatasourceList(modelId);
         for (DatasourceResp datasourceResp : datasourceResps) {

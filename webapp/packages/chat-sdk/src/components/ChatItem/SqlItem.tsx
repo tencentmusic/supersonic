@@ -53,7 +53,7 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
                 setSqlType(sqlType === 's2QL' ? '' : 's2QL');
               }}
             >
-              LLM解析SQL
+              S2QL
             </div>
           )}
           {sqlInfo.logicSql && (

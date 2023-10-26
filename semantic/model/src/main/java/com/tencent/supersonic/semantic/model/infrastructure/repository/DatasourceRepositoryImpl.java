@@ -52,6 +52,13 @@ public class DatasourceRepositoryImpl implements DatasourceRepository {
     }
 
     @Override
+    public List<DatasourceDO> getDatasourceByDatabase(Long databaseId) {
+        DatasourceDOExample datasourceExample = new DatasourceDOExample();
+        datasourceExample.createCriteria().andDatabaseIdEqualTo(databaseId);
+        return datasourceMapper.selectByExampleWithBLOBs(datasourceExample);
+    }
+
+    @Override
     public DatasourceDO getDatasourceById(Long id) {
         return datasourceMapper.selectByPrimaryKey(id);
     }

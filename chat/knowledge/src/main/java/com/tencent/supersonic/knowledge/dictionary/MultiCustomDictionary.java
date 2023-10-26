@@ -11,12 +11,12 @@ import com.hankcs.hanlp.corpus.tag.Nature;
 import com.hankcs.hanlp.dictionary.CoreDictionary;
 import com.hankcs.hanlp.dictionary.DynamicCustomDictionary;
 import com.hankcs.hanlp.dictionary.other.CharTable;
+import com.hankcs.hanlp.seg.common.Term;
 import com.hankcs.hanlp.utility.LexiconUtility;
 import com.hankcs.hanlp.utility.Predefine;
 import com.hankcs.hanlp.utility.TextUtility;
 import com.tencent.supersonic.knowledge.service.SearchService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -25,15 +25,21 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.PriorityQueue;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MultiCustomDictionary extends DynamicCustomDictionary {
 
+    public static int MAX_SIZE = 10;
     public static Boolean removeDuplicates = true;
+    public static ConcurrentHashMap<String, PriorityQueue<Term>> NATURE_TO_VALUES = new ConcurrentHashMap<>();
     private static boolean addToSuggesterTrie = true;
 
     public MultiCustomDictionary() {
@@ -107,17 +113,26 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                     }
                 }
                 attribute.original = original;
+
                 if (removeDuplicates && map.containsKey(word)) {
                     attribute = DictionaryAttributeUtil.getAttribute(map.get(word), attribute);
-                    map.put(word, attribute);
-                    if (addToSuggeterTrie) {
-                        SearchService.put(word, attribute);
+                }
+                map.put(word, attribute);
+                if (addToSuggeterTrie) {
+                    SearchService.put(word, attribute);
+                }
+                for (int i = 0; i < attribute.nature.length; i++) {
+                    Nature nature = attribute.nature[i];
+                    PriorityQueue<Term> priorityQueue = NATURE_TO_VALUES.get(nature.toString());
+                    if (Objects.isNull(priorityQueue)) {
+                        priorityQueue = new PriorityQueue<>(MAX_SIZE,
+                                Comparator.comparingInt(Term::getFrequency).reversed());
+                        NATURE_TO_VALUES.put(nature.toString(), priorityQueue);
                     }
-
-                } else {
-                    map.put(word, attribute);
-                    if (addToSuggeterTrie) {
-                        SearchService.put(word, attribute);
+                    Term term = new Term(word, nature);
+                    term.setFrequency(attribute.frequency[i]);
+                    if (!priorityQueue.contains(term) && priorityQueue.size() < MAX_SIZE) {
+                        priorityQueue.add(term);
                     }
                 }
             }

@@ -295,6 +295,17 @@ class SqlParserReplaceHelperTest {
                 "SELECT song_name, sum(user_id) FROM CSpider WHERE (1 < 2) AND "
                         + "sys_imp_date = '2023-10-15' GROUP BY song_name HAVING "
                         + "sum(user_id) < (SELECT min(user_id) FROM CSpider WHERE user_id = '英文')", replaceSql);
+
+        replaceSql = "SELECT sum(评分)/ (SELECT sum(评分) FROM CSpider WHERE  数据日期 = '2023-10-15')"
+                + " FROM CSpider WHERE  数据日期 = '2023-10-15' "
+                + "GROUP BY 歌曲名称 HAVING sum(评分) < ( SELECT min(评分) FROM CSpider WHERE 语种 = '英文')";
+        replaceSql = SqlParserReplaceHelper.replaceFields(replaceSql, fieldToBizName);
+        replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
+
+        Assert.assertEquals(
+                "SELECT sum(user_id) / (SELECT sum(user_id) FROM CSpider WHERE sys_imp_date = '2023-10-15') "
+                        + "FROM CSpider WHERE sys_imp_date = '2023-10-15' GROUP BY song_name HAVING "
+                        + "sum(user_id) < (SELECT min(user_id) FROM CSpider WHERE user_id = '英文')", replaceSql);
     }
 
 

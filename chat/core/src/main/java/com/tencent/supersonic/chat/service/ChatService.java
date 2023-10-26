@@ -62,7 +62,7 @@ public interface ChatService {
 
     Boolean updateQuery(Long questionId, QueryResult queryResult, ChatContext chatCtx);
 
-    ChatParseDO getParseInfo(Long questionId, String userName, int parseId);
+    ChatParseDO getParseInfo(Long questionId, int parseId);
 
     Boolean deleteChatQuery(Long questionId);
 

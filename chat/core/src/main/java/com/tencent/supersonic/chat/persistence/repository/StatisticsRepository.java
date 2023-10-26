@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface StatisticsRepository {
 
-    boolean batchSaveStatistics(List<StatisticsDO> list);
+    void batchSaveStatistics(List<StatisticsDO> list);
 }

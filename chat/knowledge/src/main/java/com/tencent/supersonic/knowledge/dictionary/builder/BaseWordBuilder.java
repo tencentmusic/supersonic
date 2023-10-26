@@ -1,11 +1,9 @@
 package com.tencent.supersonic.knowledge.dictionary.builder;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
-import com.tencent.supersonic.common.pojo.enums.DictWordType;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -37,13 +35,4 @@ public abstract class BaseWordBuilder {
     }
 
     protected abstract List<DictWord> doGet(String word, SchemaElement schemaElement);
-
-    public Long getElementID(String nature) {
-        String[] split = nature.split(DictWordType.NATURE_SPILT);
-        if (split.length >= 3) {
-            return Long.valueOf(split[2]);
-        }
-        return 0L;
-    }
-
 }

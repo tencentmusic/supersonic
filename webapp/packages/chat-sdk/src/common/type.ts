@@ -210,6 +210,7 @@ export type SuggestionDataType = {
 export type HistoryMsgItemType = {
   questionId: number;
   queryText: string;
+  parseInfos: ChatContextType[];
   queryResult: MsgDataType;
   chatId: number;
   createTime: string;

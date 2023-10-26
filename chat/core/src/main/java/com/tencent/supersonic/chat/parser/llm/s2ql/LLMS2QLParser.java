@@ -46,10 +46,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -69,42 +69,59 @@ public class LLMS2QLParser implements SemanticParser {
             log.info("llm parser url is empty, skip {} , llmParserConfig:{}", LLMS2QLParser.class, llmParserConfig);
             return;
         }
+        //1.determine whether to skip this parser.
         if (SatisfactionChecker.check(queryCtx)) {
             log.info("skip {}, queryText:{}", LLMS2QLParser.class, request.getQueryText());
             return;
         }
         try {
+            //2.get modelId from queryCtx and chatCtx.
             Long modelId = getModelId(queryCtx, chatCtx, request.getAgentId());
             if (Objects.isNull(modelId) || modelId <= 0) {
                 return;
             }
-
+            //3.get agent tool and determine whether to skip this parser.
             CommonAgentTool commonAgentTool = getParserTool(request, modelId);
             if (Objects.isNull(commonAgentTool)) {
                 log.info("no tool in this agent, skip {}", LLMS2QLParser.class);
                 return;
             }
-
+            //4.construct a request, call the API for the large model, and retrieve the results.
             LLMReq llmReq = getLlmReq(queryCtx, modelId, llmParserConfig);
             LLMResp llmResp = requestLLM(llmReq, modelId, llmParserConfig);
 
             if (Objects.isNull(llmResp)) {
                 return;
             }
+            //5. get and update parserInfo and corrector sql
+            Map<String, Double> sqlWeight = llmResp.getSqlWeight();
+
             ParseResult parseResult = ParseResult.builder().request(request)
                     .commonAgentTool(commonAgentTool).llmReq(llmReq).llmResp(llmResp).build();
 
-            SemanticParseInfo parseInfo = getParseInfo(queryCtx, modelId, commonAgentTool, parseResult);
-
-            SemanticCorrectInfo semanticCorrectInfo = getCorrectorSql(queryCtx, parseInfo, llmResp.getSqlOutput());
-
-            llmResp.setCorrectorSql(semanticCorrectInfo.getSql());
-
-            updateParseInfo(semanticCorrectInfo, modelId, parseInfo);
+            if (Objects.isNull(sqlWeight) || sqlWeight.size() <= 0) {
+                addParseInfo(queryCtx, parseResult, modelId, commonAgentTool, llmResp.getSqlOutput(), 1D);
+            } else {
+                sqlWeight.forEach((sql, weight) -> {
+                    addParseInfo(queryCtx, parseResult, modelId, commonAgentTool, sql, weight);
+                });
+            }
 
         } catch (Exception e) {
             log.error("LLMS2QLParser error", e);
         }
+    }
+
+    private void addParseInfo(QueryContext queryCtx, ParseResult parseResult, Long modelId,
+            CommonAgentTool commonAgentTool, String sql, Double weight) {
+
+        SemanticParseInfo parseInfo = getParseInfo(queryCtx, modelId, commonAgentTool, parseResult, weight);
+
+        SemanticCorrectInfo semanticCorrectInfo = getCorrectorSql(queryCtx, parseInfo, sql);
+
+        parseInfo.getSqlInfo().setLogicSql(semanticCorrectInfo.getSql());
+
+        updateParseInfo(semanticCorrectInfo, modelId, parseInfo);
     }
 
     private Set<SchemaElement> getElements(Long modelId, List<String> allFields, List<SchemaElement> elements) {
@@ -257,7 +274,10 @@ public class LLMS2QLParser implements SemanticParser {
     }
 
     private SemanticParseInfo getParseInfo(QueryContext queryCtx, Long modelId, CommonAgentTool commonAgentTool,
-            ParseResult parseResult) {
+            ParseResult parseResult, Double weight) {
+        if (Objects.isNull(weight)) {
+            weight = 0D;
+        }
         PluginSemanticQuery semanticQuery = QueryManager.createPluginQuery(S2QLQuery.QUERY_MODE);
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         parseInfo.getElementMatches().addAll(queryCtx.getMapInfo().getMatchedElements(modelId));
@@ -268,7 +288,7 @@ public class LLMS2QLParser implements SemanticParser {
         properties.put("name", commonAgentTool.getName());
 
         parseInfo.setProperties(properties);
-        parseInfo.setScore(queryCtx.getRequest().getQueryText().length());
+        parseInfo.setScore(queryCtx.getRequest().getQueryText().length() * (1 + weight));
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
         parseInfo.getSqlInfo().setS2QL(parseResult.getLlmResp().getSqlOutput());
 
@@ -356,6 +376,9 @@ public class LLMS2QLParser implements SemanticParser {
         llmReq.setLinking(linking);
 
         String currentDate = S2QLDateHelper.getReferenceDate(modelId);
+        if (StringUtils.isEmpty(currentDate)) {
+            currentDate = DateUtils.getBeforeDate(0);
+        }
         llmReq.setCurrentDate(currentDate);
         return llmReq;
     }
@@ -392,9 +415,21 @@ public class LLMS2QLParser implements SemanticParser {
         List<SchemaElement> allElements = Lists.newArrayList();
         allElements.addAll(dimensions);
         allElements.addAll(metrics);
+        //support alias
         return allElements.stream()
                 .filter(schemaElement -> schemaElement.getModel().equals(modelId))
-                .collect(Collectors.toMap(SchemaElement::getName, Function.identity(), (value1, value2) -> value2));
+                .flatMap(schemaElement -> {
+                    Set<Pair<String, SchemaElement>> result = new HashSet<>();
+                    result.add(Pair.of(schemaElement.getName(), schemaElement));
+                    List<String> aliasList = schemaElement.getAlias();
+                    if (!CollectionUtils.isEmpty(aliasList)) {
+                        for (String alias : aliasList) {
+                            result.add(Pair.of(alias, schemaElement));
+                        }
+                    }
+                    return result.stream();
+                })
+                .collect(Collectors.toMap(pair -> pair.getLeft(), pair -> pair.getRight(), (value1, value2) -> value2));
     }
 
 
@@ -423,14 +458,13 @@ public class LLMS2QLParser implements SemanticParser {
                             || SchemaElementType.VALUE.equals(elementType);
                 })
                 .map(schemaElementMatch -> {
-                    SchemaElementType elementType = schemaElementMatch.getElement().getType();
-
-                    if (!SchemaElementType.VALUE.equals(elementType)) {
-                        return schemaElementMatch.getWord();
+                    SchemaElement element = schemaElementMatch.getElement();
+                    SchemaElementType elementType = element.getType();
+                    if (SchemaElementType.VALUE.equals(elementType)) {
+                        return itemIdToName.get(element.getId());
                     }
-                    return itemIdToName.get(schemaElementMatch.getElement().getId());
+                    return schemaElementMatch.getWord();
                 })
-                .filter(name -> StringUtils.isNotEmpty(name) && !name.contains("%"))
                 .collect(Collectors.toSet());
         return fieldNameList;
     }

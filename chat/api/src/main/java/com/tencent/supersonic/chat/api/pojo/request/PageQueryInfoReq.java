@@ -13,4 +13,8 @@ public class PageQueryInfoReq {
     private String userName;
 
     private List<Long> ids;
+
+    public Integer getLimitStart() {
+        return this.pageSize * (this.current - 1);
+    }
 }

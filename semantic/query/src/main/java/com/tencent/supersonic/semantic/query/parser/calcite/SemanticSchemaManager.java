@@ -13,6 +13,7 @@ import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Constants;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataSource;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataType;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DimensionTimeTypeParams;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Identify;
@@ -166,6 +167,12 @@ public class SemanticSchemaManager {
             dimension.setExpr(dimensionYamlTpl.getExpr());
             dimension.setName(dimensionYamlTpl.getName());
             dimension.setOwners(dimensionYamlTpl.getOwners());
+            if (Objects.nonNull(dimensionYamlTpl.getDataType())) {
+                dimension.setDataType(DataType.of(dimensionYamlTpl.getDataType().getType()));
+            }
+            if (Objects.isNull(dimension.getDataType())) {
+                dimension.setDataType(DataType.UNKNOWN);
+            }
             dimension.setDimensionTimeTypeParams(getDimensionTimeTypeParams(dimensionYamlTpl.getTypeParams()));
             dimensions.add(dimension);
         }

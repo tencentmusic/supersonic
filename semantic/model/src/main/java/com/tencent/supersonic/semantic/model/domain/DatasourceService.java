@@ -28,13 +28,15 @@ public interface DatasourceService {
 
     List<DatasourceResp> getDatasourceList(Long modelId);
 
+    List<DatasourceResp> getDatasourceByDatabase(Long databaseId);
+
     Map<Long, DatasourceResp> getDatasourceMap();
 
     void deleteDatasource(Long id) throws Exception;
 
     DatasourceRelaResp createOrUpdateDatasourceRela(DatasourceRelaReq datasourceRelaReq, User user);
 
-    List<DatasourceRelaResp> getDatasourceRelaList(Long domainId);
+    List<DatasourceRelaResp> getDatasourceRelaList(Long modelId);
 
     void deleteDatasourceRela(Long id);
 

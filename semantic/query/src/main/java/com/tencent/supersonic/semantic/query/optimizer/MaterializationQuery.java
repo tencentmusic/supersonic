@@ -21,6 +21,8 @@ import com.tencent.supersonic.semantic.query.parser.calcite.SemanticSchemaManage
 import com.tencent.supersonic.semantic.query.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.semantic.query.parser.calcite.planner.MaterializationPlanner;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataSource;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataType;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Materialization;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Materialization.TimePartType;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.MaterializationElement;
@@ -294,8 +296,31 @@ public class MaterializationQuery implements QueryOptimizer {
                     setMetricExpr(semanticModel.getRootPath(), m.getName(), m);
                 });
             }
+            if (!CollectionUtils.isEmpty(dataSource.getDimensions())) {
+                dataSource.getDimensions().stream().forEach(d -> {
+                    setDimension(semanticModel.getRootPath(), d.getName(), d);
+                });
+            }
         }
         return semanticModel;
+    }
+
+    protected void setDimension(String rootPath, String bizName, Dimension dimension) {
+        try {
+            dimension.setDataType(DataType.UNKNOWN);
+            SemanticModel oriSemanticModel = semanticSchemaManager.get(rootPath);
+            if (Objects.nonNull(oriSemanticModel)) {
+                for (List<Dimension> dimensions : oriSemanticModel.getDimensionMap().values()) {
+                    Optional<Dimension> dim = dimensions.stream()
+                            .filter(d -> d.getName().equalsIgnoreCase(bizName)).findFirst();
+                    if (dim.isPresent()) {
+                        dimension.setDataType(dim.get().getDataType());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("getMetricExpr {}", e);
+        }
     }
 
     protected void setMetricExpr(String rootPath, String bizName, Measure measure) {
