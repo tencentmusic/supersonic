@@ -14,6 +14,7 @@ import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
@@ -114,6 +115,22 @@ public class SqlParserRemoveHelper {
                 inExpression.setLeftExpression(constantExpression.getLeftExpression());
                 inExpression.setRightItemsList(constantExpression.getRightItemsList());
                 inExpression.setASTNode(constantExpression.getASTNode());
+            } catch (JSQLParserException e) {
+                log.error("JSQLParserException", e);
+            }
+        }
+        if (expression instanceof LikeExpression) {
+            LikeExpression likeExpression = (LikeExpression) expression;
+            String columnName = SqlParserSelectHelper.getColumnName(likeExpression.getLeftExpression(),
+                    likeExpression.getRightExpression());
+            if (!removeFieldNames.contains(columnName)) {
+                return;
+            }
+            try {
+                LikeExpression constantExpression = (LikeExpression) CCJSqlParserUtil.parseCondExpression(
+                        JsqlConstants.LIKE_CONSTANT);
+                likeExpression.setLeftExpression(constantExpression.getLeftExpression());
+                likeExpression.setRightExpression(constantExpression.getRightExpression());
             } catch (JSQLParserException e) {
                 log.error("JSQLParserException", e);
             }
