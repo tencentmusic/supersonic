@@ -467,40 +467,28 @@ public class QueryServiceImpl implements QueryService {
             return;
         }
         for (QueryFilter dslQueryFilter : metricFilters) {
-            Map<String, String> map = new HashMap<>();
             for (FilterExpression filterExpression : filterExpressionList) {
                 if (filterExpression.getFieldName() != null
                         && filterExpression.getFieldName().contains(dslQueryFilter.getName())) {
-                    if (dslQueryFilter.getOperator().getValue().equals(filterExpression.getOperator())
-                            && Objects.nonNull(dslQueryFilter.getValue())) {
-                        map.put(filterExpression.getFieldValue().toString(), dslQueryFilter.getValue().toString());
-                        filedNameToValueMap.put(dslQueryFilter.getName(), map);
-                        contextMetricFilters.stream().forEach(o -> {
-                            if (o.getName().equals(dslQueryFilter.getName())) {
-                                o.setValue(dslQueryFilter.getValue());
-                            }
-                        });
-                    } else {
-                        removeFieldNames.add(dslQueryFilter.getName());
-                        if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.EQUALS)) {
-                            EqualsTo equalsTo = new EqualsTo();
-                            addWhereCondition(dslQueryFilter, equalsTo, contextMetricFilters, addConditions);
-                        } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.GREATER_THAN_EQUALS)) {
-                            GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
-                            addWhereCondition(dslQueryFilter, greaterThanEquals, contextMetricFilters, addConditions);
-                        } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.GREATER_THAN)) {
-                            GreaterThan greaterThan = new GreaterThan();
-                            addWhereCondition(dslQueryFilter, greaterThan, contextMetricFilters, addConditions);
-                        } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.MINOR_THAN_EQUALS)) {
-                            MinorThanEquals minorThanEquals = new MinorThanEquals();
-                            addWhereCondition(dslQueryFilter, minorThanEquals, contextMetricFilters, addConditions);
-                        } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.MINOR_THAN)) {
-                            MinorThan minorThan = new MinorThan();
-                            addWhereCondition(dslQueryFilter, minorThan, contextMetricFilters, addConditions);
-                        } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.IN)) {
-                            InExpression inExpression = new InExpression();
-                            addWhereInCondition(dslQueryFilter, inExpression, contextMetricFilters, addConditions);
-                        }
+                    removeFieldNames.add(dslQueryFilter.getName());
+                    if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.EQUALS)) {
+                        EqualsTo equalsTo = new EqualsTo();
+                        addWhereCondition(dslQueryFilter, equalsTo, contextMetricFilters, addConditions);
+                    } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.GREATER_THAN_EQUALS)) {
+                        GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
+                        addWhereCondition(dslQueryFilter, greaterThanEquals, contextMetricFilters, addConditions);
+                    } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.GREATER_THAN)) {
+                        GreaterThan greaterThan = new GreaterThan();
+                        addWhereCondition(dslQueryFilter, greaterThan, contextMetricFilters, addConditions);
+                    } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.MINOR_THAN_EQUALS)) {
+                        MinorThanEquals minorThanEquals = new MinorThanEquals();
+                        addWhereCondition(dslQueryFilter, minorThanEquals, contextMetricFilters, addConditions);
+                    } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.MINOR_THAN)) {
+                        MinorThan minorThan = new MinorThan();
+                        addWhereCondition(dslQueryFilter, minorThan, contextMetricFilters, addConditions);
+                    } else if (dslQueryFilter.getOperator().equals(FilterOperatorEnum.IN)) {
+                        InExpression inExpression = new InExpression();
+                        addWhereInCondition(dslQueryFilter, inExpression, contextMetricFilters, addConditions);
                     }
                     break;
                 }
@@ -548,9 +536,14 @@ public class QueryServiceImpl implements QueryService {
             return;
         }
         Column column = new Column(columnName);
-        LongValue longValue = new LongValue(Long.parseLong(dslQueryFilter.getValue().toString()));
         comparisonExpression.setLeftExpression(column);
-        comparisonExpression.setRightExpression(longValue);
+        if (StringUtils.isNumeric(dslQueryFilter.getValue().toString())) {
+            LongValue longValue = new LongValue(Long.parseLong(dslQueryFilter.getValue().toString()));
+            comparisonExpression.setRightExpression(longValue);
+        } else {
+            StringValue stringValue = new StringValue(dslQueryFilter.getValue().toString());
+            comparisonExpression.setRightExpression(stringValue);
+        }
         addConditions.add(comparisonExpression);
         contextMetricFilters.stream().forEach(o -> {
             if (o.getName().equals(dslQueryFilter.getName())) {
