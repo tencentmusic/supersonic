@@ -63,7 +63,7 @@
     "@ant-design/pro-table": "^2.80.6",
     "@antv/dom-util": "^2.0.4",
     "@antv/g6": "^4.8.14",
-    "@antv/g6-core": "^0.8.21",
+    "@antv/g6-core": "^0.8.23",
     "@antv/layout": "^0.3.20",
     "@antv/xflow": "^1.0.55",
     "@babel/runtime": "^7.22.5",
