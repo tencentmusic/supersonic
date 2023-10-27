@@ -11,6 +11,7 @@ import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
@@ -56,5 +57,7 @@ public interface SemanticInterpreter {
     List<ModelResp> getModelList(AuthType authType, Long domainId, User user);
 
     <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception;
+
+    List<ModelSchemaResp> fetchModelSchema(List<Long> ids, Boolean cacheEnable);
 
 }

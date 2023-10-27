@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ParseResult {
 
+    private Long modelId;
+
     private LLMReq llmReq;
 
     private LLMResp llmResp;
