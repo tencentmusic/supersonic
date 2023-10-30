@@ -2,6 +2,7 @@ package com.tencent.supersonic.common.util.jsqlparser;
 
 import java.util.List;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.statement.select.Select;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,10 @@ class SqlParserSelectHelperTest {
 
     @Test
     void getWhereFilterExpression() {
+
+        Select selectStatement = SqlParserSelectHelper.getSelect(
+                "select 用户名, 访问次数 from 超音数 where 用户名 in ('alice', 'lucy')");
+        System.out.println(selectStatement);
 
         List<FilterExpression> filterExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, user_id, field_a FROM s2 WHERE "

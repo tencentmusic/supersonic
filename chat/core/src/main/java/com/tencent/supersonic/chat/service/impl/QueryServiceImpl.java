@@ -4,6 +4,7 @@ package com.tencent.supersonic.chat.service.impl;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
+import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
@@ -34,6 +35,7 @@ import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.service.StatisticsService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.SolvedQueryManager;
+import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -62,6 +64,8 @@ import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -626,6 +630,25 @@ public class QueryServiceImpl implements QueryService {
                 })
                 .map(mapResult -> mapResult.getName())
                 .collect(Collectors.toList());
+    }
+
+    private QueryResultWithSchemaResp queryDatabase(DimensionValueReq dimensionValueReq, User user) {
+        QueryStructReq queryStructReq = new QueryStructReq();
+
+        DateConf dateConf = new DateConf();
+        dateConf.setDateMode(DateConf.DateMode.RECENT);
+        dateConf.setUnit(1);
+        dateConf.setPeriod("DAY");
+        queryStructReq.setDateInfo(dateConf);
+        queryStructReq.setLimit(20L);
+        queryStructReq.setModelId(dimensionValueReq.getModelId());
+        queryStructReq.setNativeQuery(false);
+        List<String> groups = new ArrayList<>();
+        groups.add(dimensionValueReq.getBizName());
+        queryStructReq.setGroups(groups);
+        SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
+        QueryResultWithSchemaResp queryResultWithSchemaResp = semanticInterpreter.queryByStruct(queryStructReq, user);
+        return queryResultWithSchemaResp;
     }
 
 }
