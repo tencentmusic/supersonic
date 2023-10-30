@@ -25,7 +25,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 2,
+    pageSize: 20,
     total: 0,
   });
   const actionRef = useRef<ActionType>();
