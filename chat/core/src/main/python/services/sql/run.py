@@ -1,188 +1,56 @@
+# -*- coding:utf-8 -*-
+
+import asyncio
+
 import os
 import sys
-from typing import List, Union, Mapping
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from util.logging_utils import logger
+from sql.constructor import FewShotPromptTemplate2
+from sql.sql_agent import Text2DSLAgent, Text2DSLAgentConsistency, Text2DSLAgentWrapper
 
-from sql.prompt_maker import (
-    schema_linking_exampler,
-    sql_exampler,
-    schema_linking_sql_combo_examplar,
-)
-from sql.constructor import (
-    sql_examples_vectorstore,
-    sql_example_selector,
-    reload_sql_example_collection,
-)
-from sql.output_parser import (
-    schema_link_parse,
-    combo_schema_link_parse,
-    combo_sql_parse,
-)
+from instances.llm_instance import llm
+from instances.text2vec import Text2VecEmbeddingFunction
+from instances.chromadb_instance import client
+from instances.logging_instance import logger
 
-from util.llm_instance import llm
-from config.config_parse import TEXT2DSL_IS_SHORTCUT
+from few_shot_example.sql_exampler import examplars as sql_examplars
+from config.config_parse import (TEXT2DSLAGENT_COLLECTION_NAME, TEXT2DSLAGENTCS_COLLECTION_NAME, 
+                    TEXT2DSL_EXAMPLE_NUM, TEXT2DSL_FEWSHOTS_NUM, TEXT2DSL_SELF_CONSISTENCY_NUM,
+                    TEXT2DSL_IS_SHORTCUT, TEXT2DSL_IS_SELF_CONSISTENCY)
 
 
-class Text2DSLAgent(object):
-    def __init__(self):
-        self.schema_linking_exampler = schema_linking_exampler
-        self.sql_exampler = sql_exampler
+emb_func = Text2VecEmbeddingFunction()
+text2dsl_agent_collection = client.get_or_create_collection(name=TEXT2DSLAGENT_COLLECTION_NAME,
+                                            embedding_function=emb_func,
+                                            metadata={"hnsw:space": "cosine"})
+text2dsl_agentcs_collection = client.get_or_create_collection(name=TEXT2DSLAGENTCS_COLLECTION_NAME,
+                                            embedding_function=emb_func,
+                                            metadata={"hnsw:space": "cosine"})
 
-        self.schema_linking_sql_combo_exampler = schema_linking_sql_combo_examplar
+text2dsl_agent_example_prompter = FewShotPromptTemplate2(collection=text2dsl_agent_collection,
+                                            few_shot_examples=sql_examplars,
+                                            retrieval_key="question",
+                                            few_shot_seperator='\n\n')
 
-        self.sql_examples_vectorstore = sql_examples_vectorstore
-        self.sql_example_selector = sql_example_selector
+text2dsl_agentcs_example_prompter = FewShotPromptTemplate2(collection=text2dsl_agentcs_collection,
+                                            few_shot_examples=sql_examplars,
+                                            retrieval_key="question",
+                                            few_shot_seperator='\n\n')
 
-        self.schema_link_parse = schema_link_parse
-        self.combo_schema_link_parse = combo_schema_link_parse
-        self.combo_sql_parse = combo_sql_parse
+text2sql_agent = Text2DSLAgent(num_fewshots=TEXT2DSL_EXAMPLE_NUM, 
+                               sql_example_prompter=text2dsl_agent_example_prompter, llm=llm)
 
-        self.llm = llm
+text2sql_cs_agent = Text2DSLAgentConsistency(num_fewshots=TEXT2DSL_FEWSHOTS_NUM, num_examples=TEXT2DSL_EXAMPLE_NUM, num_self_consistency=TEXT2DSL_SELF_CONSISTENCY_NUM,
+                                            sql_example_prompter=text2dsl_agentcs_example_prompter, llm=llm)
 
-        self.is_shortcut = TEXT2DSL_IS_SHORTCUT
+text2sql_agent.update_examples(sql_examplars, TEXT2DSL_EXAMPLE_NUM)
 
-    def update_examples(self, sql_examples, example_nums, is_shortcut):
-        (
-            self.sql_examples_vectorstore,
-            self.sql_example_selector,
-        ) = reload_sql_example_collection(
-            self.sql_examples_vectorstore,
-            sql_examples,
-            self.sql_example_selector,
-            example_nums,
-        )
-        self.is_shortcut = is_shortcut
-
-    def query2sql(
-        self,
-        query_text: str,
-        schema: Union[dict, None] = None,
-        current_date: str = None,
-        linking: Union[List[Mapping[str, str]], None] = None,
-    ):
-
-        logger.info("query_text: {}".format(query_text))
-        logger.info("schema: {}".format(schema))
-        logger.info("current_date: {}".format(current_date))
-        logger.info("prior_schema_links: {}".format(linking))
-
-        if linking is not None:
-            prior_schema_links = {
-                item["fieldValue"]: item["fieldName"] for item in linking
-            }
-        else:
-            prior_schema_links = {}
-
-        model_name = schema["modelName"]
-        fields_list = schema["fieldNameList"]
-
-        schema_linking_prompt = self.schema_linking_exampler(
-            query_text,
-            model_name,
-            fields_list,
-            prior_schema_links,
-            self.sql_example_selector,
-        )
-        logger.info("schema_linking_prompt-> {}".format(schema_linking_prompt))
-        schema_link_output = self.llm(schema_linking_prompt)
-        schema_link_str = self.schema_link_parse(schema_link_output)
-
-        sql_prompt = self.sql_exampler(
-            query_text,
-            model_name,
-            schema_link_str,
-            current_date,
-            self.sql_example_selector,
-        )
-        logger.info("sql_prompt-> {}".format(sql_prompt))
-        sql_output = self.llm(sql_prompt)
-
-        resp = dict()
-        resp["query"] = query_text
-        resp["model"] = model_name
-        resp["fields"] = fields_list
-        resp["priorSchemaLinking"] = linking
-        resp["dataDate"] = current_date
-
-        resp["analysisOutput"] = schema_link_output
-        resp["schemaLinkStr"] = schema_link_str
-
-        resp["sqlOutput"] = sql_output
-
-        logger.info("resp: {}".format(resp))
-
-        return resp
-
-    def query2sqlcombo(
-        self,
-        query_text: str,
-        schema: Union[dict, None] = None,
-        current_date: str = None,
-        linking: Union[List[Mapping[str, str]], None] = None,
-    ):
-
-        logger.info("query_text: {}".format(query_text))
-        logger.info("schema: {}".format(schema))
-        logger.info("current_date: {}".format(current_date))
-        logger.info("prior_schema_links: {}".format(linking))
-
-        if linking is not None:
-            prior_schema_links = {
-                item["fieldValue"]: item["fieldName"] for item in linking
-            }
-        else:
-            prior_schema_links = {}
-
-        model_name = schema["modelName"]
-        fields_list = schema["fieldNameList"]
-
-        schema_linking_sql_combo_prompt = self.schema_linking_sql_combo_exampler(
-            query_text,
-            model_name,
-            current_date,
-            fields_list,
-            prior_schema_links,
-            self.sql_example_selector,
-        )
-        logger.info("schema_linking_sql_combo_prompt-> {}".format(schema_linking_sql_combo_prompt))
-        schema_linking_sql_combo_output = self.llm(schema_linking_sql_combo_prompt)
-
-        schema_linking_str = self.combo_schema_link_parse(
-            schema_linking_sql_combo_output
-        )
-        sql_str = self.combo_sql_parse(schema_linking_sql_combo_output)
-
-        resp = dict()
-        resp["query"] = query_text
-        resp["model"] = model_name
-        resp["fields"] = fields_list
-        resp["priorSchemaLinking"] = prior_schema_links
-        resp["dataDate"] = current_date
-
-        resp["analysisOutput"] = schema_linking_sql_combo_output
-        resp["schemaLinkStr"] = schema_linking_str
-        resp["sqlOutput"] = sql_str
-
-        logger.info("resp: {}".format(resp))
-
-        return resp
-
-    def query2sql_run(
-        self,
-        query_text: str,
-        schema: Union[dict, None] = None,
-        current_date: str = None,
-        linking: Union[List[Mapping[str, str]], None] = None,
-    ):
-
-        if self.is_shortcut:
-            return self.query2sqlcombo(query_text, schema, current_date, linking)
-        else:
-            return self.query2sql(query_text, schema, current_date, linking)
+text2sql_cs_agent.update_examples(sql_examplars, TEXT2DSL_EXAMPLE_NUM, TEXT2DSL_FEWSHOTS_NUM, TEXT2DSL_SELF_CONSISTENCY_NUM)
 
 
-text2sql_agent = Text2DSLAgent()
+text2sql_agent_router = Text2DSLAgentWrapper(sql_agent=text2sql_agent, sql_agent_cs=text2sql_cs_agent,
+                                            is_shortcut=TEXT2DSL_IS_SHORTCUT, is_self_consistency=TEXT2DSL_IS_SELF_CONSISTENCY) 

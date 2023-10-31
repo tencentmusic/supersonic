@@ -5,7 +5,7 @@ import re
 import sys
 from typing import Any, List, Mapping, Union
 
-from util.logging_utils import logger
+from instances.logging_instance import logger
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
