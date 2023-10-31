@@ -56,6 +56,7 @@ public class DimValueAspect {
         QueryS2QLReq queryS2QLReq = (QueryS2QLReq) args[0];
         String sql = queryS2QLReq.getSql();
         log.info("correctorSql before replacing:{}", sql);
+        // if dimensionvalue is alias,consider the true dimensionvalue.
         List<FilterExpression> filterExpressionList = SqlParserSelectHelper.getWhereExpressions(sql);
         List<DimensionResp> dimensions = dimensionService.getDimensions(queryS2QLReq.getModelId());
         Set<String> fieldNames = dimensions.stream().map(o -> o.getName()).collect(Collectors.toSet());
@@ -65,6 +66,7 @@ public class DimValueAspect {
                 dimensions.stream().forEach(dimension -> {
                     if (expression.getFieldName().equals(dimension.getName())
                             && !CollectionUtils.isEmpty(dimension.getDimValueMaps())) {
+                        // consider '=' filter
                         if (expression.getOperator().equals(FilterOperatorEnum.EQUALS.getValue())) {
                             dimension.getDimValueMaps().stream().forEach(dimValue -> {
                                 if (!CollectionUtils.isEmpty(dimValue.getAlias())
@@ -74,6 +76,7 @@ public class DimValueAspect {
                                 }
                             });
                         }
+                        // consider 'in' filter,each element needs to judge.
                         replaceInCondition(expression, dimension, filedNameToValueMap);
                     }
                 });
