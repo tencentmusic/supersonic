@@ -595,6 +595,7 @@ public class QueryServiceImpl implements QueryService {
         // if the search results is null,search dimensionValue from database
         if (CollectionUtils.isEmpty(dimensionValues)) {
             queryResultWithSchemaResp = queryDatabase(dimensionValueReq, user);
+            return queryResultWithSchemaResp;
         }
         List<QueryColumn> columns = new ArrayList<>();
         QueryColumn queryColumn = new QueryColumn();
