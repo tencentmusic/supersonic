@@ -7,8 +7,6 @@ from chromadb.api import Collection
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from util.logging_utils import logger
-
 from instances.logging_instance import logger
 from services.query_retrieval.retriever import ChromaCollectionRetriever
 
