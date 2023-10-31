@@ -203,6 +203,18 @@ class SqlParserAddHelperTest {
                 "SELECT department, sum(pv) FROM t_1 WHERE (sum(pv) > 1 AND department = 'HR') AND "
                         + "sys_imp_date = '2023-09-11' GROUP BY department ORDER BY sum(pv) DESC LIMIT 10",
                 replaceSql);
+
+        sql = "select department, sum(pv) as pv from t_1 where sys_imp_date = '2023-09-11' GROUP BY "
+                + "department order by pv desc limit 10";
+        replaceSql = SqlParserReplaceHelper.replaceAlias(sql);
+        replaceSql = SqlParserAddHelper.addAggregateToField(replaceSql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, sum(pv) AS pv "
+                        + "FROM t_1 WHERE sys_imp_date = '2023-09-11' GROUP BY department "
+                        + "ORDER BY sum(pv) DESC LIMIT 10",
+                replaceSql);
     }
 
     @Test
