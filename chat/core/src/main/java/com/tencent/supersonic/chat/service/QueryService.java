@@ -5,6 +5,7 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
@@ -25,5 +26,8 @@ public interface QueryService {
 
     QueryResult executeDirectQuery(QueryDataReq queryData, User user) throws SqlParseException;
 
+    EntityInfo getEntityInfo(Long queryId, Integer parseId, User user);
+
     Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception;
 }
+

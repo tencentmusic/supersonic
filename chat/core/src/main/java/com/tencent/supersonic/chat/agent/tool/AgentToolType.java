@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.agent.tool;
 
 public enum AgentToolType {
     RULE,
-    DSL,
+    LLM_S2QL,
     PLUGIN,
     INTERPRET
 }

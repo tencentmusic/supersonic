@@ -24,11 +24,11 @@ public interface DatasourceService {
 
     List<DatasourceResp> getDatasourceListNoMeasurePrefix(Long modelId);
 
-    List<DatasourceResp> getDatasourceListByDatabaseId(Long databaseId);
-
     List<DatasourceResp> getDatasourceList();
 
     List<DatasourceResp> getDatasourceList(Long modelId);
+
+    List<DatasourceResp> getDatasourceByDatabase(Long databaseId);
 
     Map<Long, DatasourceResp> getDatasourceMap();
 
@@ -36,13 +36,15 @@ public interface DatasourceService {
 
     DatasourceRelaResp createOrUpdateDatasourceRela(DatasourceRelaReq datasourceRelaReq, User user);
 
-    List<DatasourceRelaResp> getDatasourceRelaList(Long domainId);
+    List<DatasourceRelaResp> getDatasourceRelaList(Long modelId);
 
     void deleteDatasourceRela(Long id);
 
     ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric);
 
     List<MeasureResp> getMeasureListOfModel(Long modelId);
+
+    List<MeasureResp> getMeasureListOfModel(List<Long> modelIds);
 
     void getModelYamlTplByModelIds(Set<Long> modelIds, Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
             List<DatasourceYamlTpl> datasourceYamlTplList, List<MetricYamlTpl> metricYamlTplList);

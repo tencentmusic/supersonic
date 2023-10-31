@@ -2,6 +2,7 @@ package com.tencent.supersonic.semantic.model.domain;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
@@ -23,6 +24,8 @@ public interface MetricService {
 
     void createMetricBatch(List<MetricReq> metricReqs, User user) throws Exception;
 
+    List<MetricResp> getMetricsByModelIds(List<Long> modelIds);
+
     PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user);
 
     MetricResp getMetric(Long modelId, String bizName);
@@ -38,4 +41,6 @@ public interface MetricService {
     List<String> mockAlias(MetricReq metricReq, String mockType, User user);
 
     Set<String> getMetricTags();
+
+    List<DrillDownDimension> getDrillDownDimension(Long metricId);
 }

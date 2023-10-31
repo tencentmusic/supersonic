@@ -10,7 +10,6 @@ export enum MessageTypeEnum {
   PLUGIN = 'PLUGIN', // 插件
   WEB_PAGE = 'WEB_PAGE', // 插件
   RECOMMEND_QUESTIONS = 'recommend_questions', // 推荐问题
-  PARSE_OPTIONS = 'parse_options', // 解析选项
   AGENT_LIST = 'agent_list', // 专家列表
 }
 
@@ -23,11 +22,11 @@ export type MessageItem = {
   modelId?: number;
   agentId?: number;
   entityId?: string;
+  parseInfos?: ChatContextType[];
   msgData?: MsgDataType;
   quote?: string;
   score?: number;
   feedback?: string;
-  parseOptions?: ChatContextType[];
   filters?: any;
 };
 

@@ -52,15 +52,21 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     }
 
     @Override
-    public PageInfo<QueryResp> getChatQuery(PageQueryInfoReq pageQueryInfoCommend, long chatId) {
+    public PageInfo<QueryResp> getChatQuery(PageQueryInfoReq pageQueryInfoReq, Long chatId) {
         ChatQueryDOExample example = new ChatQueryDOExample();
         example.setOrderByClause("question_id desc");
         Criteria criteria = example.createCriteria();
-        criteria.andChatIdEqualTo(chatId);
-        criteria.andUserNameEqualTo(pageQueryInfoCommend.getUserName());
-
-        PageInfo<ChatQueryDO> pageInfo = PageHelper.startPage(pageQueryInfoCommend.getCurrent(),
-                        pageQueryInfoCommend.getPageSize())
+        if (chatId != null) {
+            criteria.andChatIdEqualTo(chatId);
+        }
+        if (StringUtils.isNotBlank(pageQueryInfoReq.getUserName())) {
+            criteria.andUserNameEqualTo(pageQueryInfoReq.getUserName());
+        }
+        if (!CollectionUtils.isEmpty(pageQueryInfoReq.getIds())) {
+            criteria.andQuestionIdIn(pageQueryInfoReq.getIds());
+        }
+        PageInfo<ChatQueryDO> pageInfo = PageHelper.startPage(pageQueryInfoReq.getCurrent(),
+                        pageQueryInfoReq.getPageSize())
                 .doSelectPageInfo(() -> chatQueryDOMapper.selectByExampleWithBLOBs(example));
 
         PageInfo<QueryResp> chatQueryVOPageInfo = PageUtils.pageInfo2PageInfoVo(pageInfo);
@@ -72,9 +78,10 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     }
 
     @Override
-    public List<QueryResp> queryShowCase(PageQueryInfoReq pageQueryInfoCommend, int agentId) {
-        return showCaseCustomMapper.queryShowCase(pageQueryInfoCommend.getCurrent(),
-                        pageQueryInfoCommend.getPageSize(), agentId).stream().map(this::convertTo)
+    public List<QueryResp> queryShowCase(PageQueryInfoReq pageQueryInfoReq, int agentId) {
+        return showCaseCustomMapper.queryShowCase(pageQueryInfoReq.getLimitStart(),
+                        pageQueryInfoReq.getPageSize(), agentId, pageQueryInfoReq.getUserName())
+                .stream().map(this::convertTo)
                 .collect(Collectors.toList());
     }
 
@@ -118,14 +125,13 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         } catch (Exception e) {
             log.info("database insert has an exception:{}", e.toString());
         }
-
-        ChatQueryDO lastChatQuery = getLastChatQuery(chatCtx.getChatId());
-        Long queryId = lastChatQuery.getQuestionId();
+        Long queryId = chatQueryDO.getQuestionId();
         parseResult.setQueryId(queryId);
         return queryId;
     }
 
-    public Boolean batchSaveParseInfo(ChatContext chatCtx, QueryReq queryReq,
+    @Override
+    public List<ChatParseDO> batchSaveParseInfo(ChatContext chatCtx, QueryReq queryReq,
                                       ParseResp parseResult,
                                       List<SemanticParseInfo> candidateParses,
                                       List<SemanticParseInfo> selectedParses) {
@@ -134,8 +140,15 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         log.info("candidateParses size:{},selectedParses size:{}", candidateParses.size(), selectedParses.size());
         getChatParseDO(chatCtx, queryReq, queryId, 0, 1, candidateParses, chatParseDOList);
         getChatParseDO(chatCtx, queryReq, queryId, candidateParses.size(), 0, selectedParses, chatParseDOList);
-        Boolean save = chatParseMapper.batchSaveParseInfo(chatParseDOList);
-        return save;
+        chatParseMapper.batchSaveParseInfo(chatParseDOList);
+        return chatParseDOList;
+    }
+
+    @Override
+    public void updateChatParseInfo(List<ChatParseDO> chatParseDOS) {
+        for (ChatParseDO chatParseDO : chatParseDOS) {
+            chatParseMapper.updateParseInfo(chatParseDO);
+        }
     }
 
     public void getChatParseDO(ChatContext chatCtx, QueryReq queryReq, Long queryId, int base, int isCandidate,
@@ -175,8 +188,14 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         return chatQueryDOMapper.updateByPrimaryKeyWithBLOBs(chatQueryDO);
     }
 
-    public ChatParseDO getParseInfo(Long questionId, String userName, int parseId) {
-        return chatParseMapper.getParseInfo(questionId, userName, parseId);
+
+    public ChatParseDO getParseInfo(Long questionId, int parseId) {
+        return chatParseMapper.getParseInfo(questionId, parseId);
+    }
+
+    @Override
+    public List<ChatParseDO> getParseInfoList(List<Long> questionIds) {
+        return chatParseMapper.getParseInfoList(questionIds);
     }
 
     @Override

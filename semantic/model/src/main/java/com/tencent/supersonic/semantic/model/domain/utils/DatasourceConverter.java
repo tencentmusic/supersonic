@@ -3,6 +3,8 @@ package com.tencent.supersonic.semantic.model.domain.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.semantic.api.model.enums.MetricTypeEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.DatasourceDetail;
 import com.tencent.supersonic.semantic.api.model.pojo.Dim;
@@ -15,13 +17,12 @@ import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceRelaResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Datasource;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -88,13 +89,14 @@ public class DatasourceConverter {
         return datasourceDesc;
     }
 
-    public static MeasureResp convert(Measure measure, DatasourceResp datasourceDesc) {
-        MeasureResp measureDesc = new MeasureResp();
-        BeanUtils.copyProperties(measure, measureDesc);
-        measureDesc.setDatasourceId(datasourceDesc.getId());
-        measureDesc.setDatasourceName(datasourceDesc.getName());
-        measureDesc.setDatasourceBizName(datasourceDesc.getBizName());
-        return measureDesc;
+    public static MeasureResp convert(Measure measure, DatasourceResp datasourceResp) {
+        MeasureResp measureResp = new MeasureResp();
+        BeanUtils.copyProperties(measure, measureResp);
+        measureResp.setDatasourceId(datasourceResp.getId());
+        measureResp.setDatasourceName(datasourceResp.getName());
+        measureResp.setDatasourceBizName(datasourceResp.getBizName());
+        measureResp.setModelId(datasourceResp.getModelId());
+        return measureResp;
     }
 
     public static DimensionReq convert(Dim dim, Datasource datasource) {
@@ -107,6 +109,7 @@ public class DatasourceConverter {
         dimensionReq.setModelId(datasource.getModelId());
         dimensionReq.setExpr(dim.getBizName());
         dimensionReq.setType("categorical");
+        dimensionReq.setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
         return dimensionReq;
     }
 
@@ -147,26 +150,26 @@ public class DatasourceConverter {
     }
 
 
-    private static boolean isCraeteDimension(Dim dim) {
+    private static boolean isCreateDimension(Dim dim) {
         return dim.getIsCreateDimension() == 1
                 && StringUtils.isNotBlank(dim.getName())
                 && !dim.getType().equalsIgnoreCase("time");
     }
 
-    private static boolean isCraeteMetric(Measure measure) {
+    private static boolean isCreateMetric(Measure measure) {
         return measure.getIsCreateMetric() == 1
                 && StringUtils.isNotBlank(measure.getName());
     }
 
     public static List<Dim> getDimToCreateDimension(Datasource datasource) {
         return datasource.getDatasourceDetail().getDimensions().stream()
-                .filter(DatasourceConverter::isCraeteDimension)
+                .filter(DatasourceConverter::isCreateDimension)
                 .collect(Collectors.toList());
     }
 
     public static List<Measure> getMeasureToCreateMetric(Datasource datasource) {
         return datasource.getDatasourceDetail().getMeasures().stream()
-                .filter(DatasourceConverter::isCraeteMetric)
+                .filter(DatasourceConverter::isCreateMetric)
                 .collect(Collectors.toList());
     }
 

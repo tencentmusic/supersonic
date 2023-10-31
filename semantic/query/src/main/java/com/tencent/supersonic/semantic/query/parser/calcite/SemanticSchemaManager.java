@@ -11,15 +11,16 @@ import com.tencent.supersonic.semantic.api.model.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Constants;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Dimension;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DimensionTimeTypeParams;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Identify;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Measure;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Metric;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.MetricTypeParams;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.SemanticModel;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Constants;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataSource;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataType;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Dimension;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DimensionTimeTypeParams;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Identify;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Measure;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Metric;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.MetricTypeParams;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.SemanticModel;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,15 +108,9 @@ public class SemanticSchemaManager {
 
 
     public static DataSource getDatasource(final DatasourceYamlTpl d) {
-        DataSource datasource = new DataSource();
-        datasource.setSqlQuery(d.getSqlQuery());
-        datasource.setName(d.getName());
-        datasource.setSourceId(d.getSourceId());
-        datasource.setTableQuery(d.getTableQuery());
-
-        datasource.setIdentifiers(getIdentify(d.getIdentifiers()));
-        datasource.setDimensions(getDimensions(d.getDimensions()));
-        datasource.setMeasures(getMeasures(d.getMeasures()));
+        DataSource datasource = DataSource.builder().sourceId(d.getSourceId()).sqlQuery(d.getSqlQuery())
+                .name(d.getName()).tableQuery(d.getTableQuery()).identifiers(getIdentify(d.getIdentifiers()))
+                .measures(getMeasures(d.getMeasures())).dimensions(getDimensions(d.getDimensions())).build();
         datasource.setAggTime(getDataSourceAggTime(datasource.getDimensions()));
         return datasource;
     }
@@ -167,11 +162,17 @@ public class SemanticSchemaManager {
     private static List<Dimension> getDimension(List<DimensionYamlTpl> dimensionYamlTpls) {
         List<Dimension> dimensions = new ArrayList<>();
         for (DimensionYamlTpl dimensionYamlTpl : dimensionYamlTpls) {
-            Dimension dimension = new Dimension();
+            Dimension dimension = Dimension.builder().build();
             dimension.setType(dimensionYamlTpl.getType());
             dimension.setExpr(dimensionYamlTpl.getExpr());
             dimension.setName(dimensionYamlTpl.getName());
             dimension.setOwners(dimensionYamlTpl.getOwners());
+            if (Objects.nonNull(dimensionYamlTpl.getDataType())) {
+                dimension.setDataType(DataType.of(dimensionYamlTpl.getDataType().getType()));
+            }
+            if (Objects.isNull(dimension.getDataType())) {
+                dimension.setDataType(DataType.UNKNOWN);
+            }
             dimension.setDimensionTimeTypeParams(getDimensionTimeTypeParams(dimensionYamlTpl.getTypeParams()));
             dimensions.add(dimension);
         }

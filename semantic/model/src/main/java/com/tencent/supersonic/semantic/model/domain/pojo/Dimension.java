@@ -1,9 +1,11 @@
 package com.tencent.supersonic.semantic.model.domain.pojo;
 
 
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import lombok.Data;
+
 import java.util.List;
 
 @Data
@@ -25,5 +27,7 @@ public class Dimension extends SchemaItem {
     private List<String> defaultValues;
 
     private List<DimValueMap> dimValueMaps;
+
+    private DataTypeEnums dataType;
 
 }

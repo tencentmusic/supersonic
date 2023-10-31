@@ -5,13 +5,18 @@ import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import lombok.Data;
 import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 
 @Data
 @ToString(callSuper = true)
 public class SchemaItem extends RecordInfo {
 
+    private static String aliasSplit = ",";
     private Long id;
 
     private String name;
@@ -48,5 +53,12 @@ public class SchemaItem extends RecordInfo {
     @Override
     public int hashCode() {
         return Objects.hashCode(super.hashCode(), id, name, bizName, description, status, typeEnum, sensitiveLevel);
+    }
+
+    public static List<String> getAliasList(String alias) {
+        if (StringUtils.isEmpty(alias)) {
+            return new ArrayList<>();
+        }
+        return Arrays.asList(alias.split(aliasSplit));
     }
 }

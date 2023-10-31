@@ -1132,6 +1132,76 @@ public class ModelDOExample {
             addCriterion("updated_at not between", value1, value2, "updatedAt");
             return (Criteria) this;
         }
+
+        public Criteria andDrillDownDimensionsIsNull() {
+            addCriterion("drill_down_dimensions is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDrillDownDimensionsIsNotNull() {
+            addCriterion("drill_down_dimensions is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDrillDownDimensionsEqualTo(String value) {
+            addCriterion("drill_down_dimensions =", value, "drillDownDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andDrillDownDimensionsNotEqualTo(String value) {
+            addCriterion("drill_down_dimensions <>", value, "drillDownDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andDrillDownDimensionsGreaterThan(String value) {
+            addCriterion("drill_down_dimensions >", value, "drillDownDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andDrillDownDimensionsGreaterThanOrEqualTo(String value) {
+            addCriterion("drill_down_dimensions >=", value, "drillDownDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andDrillDownDimensionsLessThan(String value) {
+            addCriterion("drill_down_dimensions <", value, "drillDownDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andDrillDownDimensionsLessThanOrEqualTo(String value) {
+            addCriterion("drill_down_dimensions <=", value, "drillDownDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andDrillDownDimensionsLike(String value) {
+            addCriterion("drill_down_dimensions like", value, "drillDownDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andDrillDownDimensionsNotLike(String value) {
+            addCriterion("drill_down_dimensions not like", value, "drillDownDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andDrillDownDimensionsIn(List<String> values) {
+            addCriterion("drill_down_dimensions in", values, "drillDownDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andDrillDownDimensionsNotIn(List<String> values) {
+            addCriterion("drill_down_dimensions not in", values, "drillDownDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andDrillDownDimensionsBetween(String value1, String value2) {
+            addCriterion("drill_down_dimensions between", value1, value2, "drillDownDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andDrillDownDimensionsNotBetween(String value1, String value2) {
+            addCriterion("drill_down_dimensions not between", value1, value2, "drillDownDimensions");
+            return (Criteria) this;
+        }
     }
 
     /**

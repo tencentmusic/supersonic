@@ -1,6 +1,7 @@
 package com.tencent.supersonic.common.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 
 @Slf4j
@@ -15,6 +16,13 @@ public class StringUtil {
 
     public static String getSpaceWrap(String value) {
         return String.format(SPACE_WRAPPER, value);
+    }
+
+    public static String formatSqlQuota(String where) {
+        if (StringUtils.isEmpty(where)) {
+            return where;
+        }
+        return where.replace("\"", "\\\\\"");
     }
 
 }

@@ -1,11 +1,8 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.select.Select;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -14,9 +11,12 @@ import org.junit.jupiter.api.Test;
  */
 class SqlParserSelectHelperTest {
 
-
     @Test
     void getWhereFilterExpression() {
+
+        Select selectStatement = SqlParserSelectHelper.getSelect(
+                "select 用户名, 访问次数 from 超音数 where 用户名 in ('alice', 'lucy')");
+        System.out.println(selectStatement);
 
         List<FilterExpression> filterExpression = SqlParserSelectHelper.getFilterExpression(
                 "SELECT department, user_id, field_a FROM s2 WHERE "
@@ -82,6 +82,42 @@ class SqlParserSelectHelperTest {
                         + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
 
         System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, pv FROM s2 WHERE "
+                        + "(user_id like '%alice%' AND  publish_date > 10000)  and sys_imp_date = '2023-08-08' "
+                        + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, pv FROM s2 WHERE "
+                        + "(user_id like '%alice%' AND  publish_date > 10000) and song_name in "
+                        + "('七里香','晴天') and sys_imp_date = '2023-08-08' "
+                        + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, pv FROM s2 WHERE "
+                        + "(user_id like '%alice%' AND  publish_date > 10000) and song_name in (1,2) "
+                        + "and sys_imp_date = '2023-08-08' "
+                        + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression(
+                "SELECT department, pv FROM s2 WHERE "
+                        + "(user_id like '%alice%' AND  publish_date > 10000) and 1 in (1) "
+                        + "and sys_imp_date = '2023-08-08' "
+                        + "group by department having sum(pv) > 2000 ORDER BY pv DESC LIMIT 1");
+
+        System.out.println(filterExpression);
+
+        filterExpression = SqlParserSelectHelper.getFilterExpression("SELECT sum(销量) / (SELECT sum(销量) FROM 营销月模型 "
+                + "WHERE MONTH(数据日期) = 9) FROM 营销月模型 WHERE 国家中文名 = '肯尼亚' AND MONTH(数据日期) = 9");
+
+        System.out.println(filterExpression);
     }
 
 
@@ -118,6 +154,23 @@ class SqlParserSelectHelperTest {
 
         Assert.assertEquals(allFields.size(), 3);
 
+        allFields = SqlParserSelectHelper.getAllFields(
+                "SELECT department, user_id, field_a FROM s2 WHERE "
+                        + "(user_id = 'alice' AND publish_date = '11') and sys_imp_date "
+                        + "= '2023-08-08' ORDER BY pv DESC LIMIT 1");
+
+        Assert.assertEquals(allFields.size(), 6);
+
+        allFields = SqlParserSelectHelper.getAllFields(
+                "SELECT * FROM CSpider  WHERE (评分 < (SELECT min(评分) FROM CSpider WHERE 语种 = '英文' ))"
+                        + " AND 数据日期 = '2023-10-12'");
+
+        Assert.assertEquals(allFields.size(), 3);
+
+        allFields = SqlParserSelectHelper.getAllFields("SELECT sum(销量) / (SELECT sum(销量) FROM 营销 "
+                + "WHERE MONTH(数据日期) = 9) FROM 营销 WHERE 国家中文名 = '中国' AND MONTH(数据日期) = 9");
+
+        Assert.assertEquals(allFields.size(), 3);
     }
 
 
@@ -150,6 +203,15 @@ class SqlParserSelectHelperTest {
         Assert.assertEquals(selectFields.contains("发布日期"), true);
         Assert.assertEquals(selectFields.contains("数据日期"), true);
         Assert.assertEquals(selectFields.contains("用户"), true);
+
+        sql = "select 部门,用户 from 超音数 where"
+                + " (用户 = 'alice' and 发布日期 ='11') and 数据日期 = '2023-08-08' "
+                + "order by 访问次数 limit 1";
+        selectFields = SqlParserSelectHelper.getWhereFields(sql);
+
+        Assert.assertEquals(selectFields.contains("发布日期"), true);
+        Assert.assertEquals(selectFields.contains("数据日期"), true);
+        Assert.assertEquals(selectFields.contains("用户"), true);
     }
 
     @Test
@@ -166,84 +228,6 @@ class SqlParserSelectHelperTest {
         selectFields = SqlParserSelectHelper.getOrderByFields(sql);
 
         Assert.assertEquals(selectFields.contains("pv"), true);
-    }
-
-
-    @Test
-    void addWhere() throws JSQLParserException {
-
-        String sql = "select 部门,sum (访问次数) from 超音数 where 数据日期 = '2023-08-08' "
-                + "and 用户 =alice and 发布日期 ='11' group by 部门 limit 1";
-        sql = SqlParserUpdateHelper.addWhere(sql, "column_a", 123444555);
-        List<String> selectFields = SqlParserSelectHelper.getAllFields(sql);
-
-        Assert.assertEquals(selectFields.contains("column_a"), true);
-
-        sql = SqlParserUpdateHelper.addWhere(sql, "column_b", "123456666");
-        selectFields = SqlParserSelectHelper.getAllFields(sql);
-
-        Assert.assertEquals(selectFields.contains("column_b"), true);
-
-        Expression expression = CCJSqlParserUtil.parseCondExpression(" ( column_c = 111  or column_d = 1111)");
-
-        sql = SqlParserUpdateHelper.addWhere(
-                "select 部门,sum (访问次数) from 超音数 where 数据日期 = '2023-08-08' "
-                        + "and 用户 =alice and 发布日期 ='11' group by 部门 limit 1",
-                expression);
-
-        Assert.assertEquals(sql.contains("column_c = 111"), true);
-
-    }
-
-
-    @Test
-    void hasAggregateFunction() throws JSQLParserException {
-
-        String sql = "select 部门,sum (访问次数) from 超音数 where 数据日期 = '2023-08-08' "
-                + "and 用户 =alice and 发布日期 ='11' group by 部门 limit 1";
-        boolean hasAggregateFunction = SqlParserSelectHelper.hasAggregateFunction(sql);
-
-        Assert.assertEquals(hasAggregateFunction, true);
-        sql = "select 部门,count (访问次数) from 超音数 where 数据日期 = '2023-08-08' "
-                + "and 用户 =alice and 发布日期 ='11' group by 部门 limit 1";
-        hasAggregateFunction = SqlParserSelectHelper.hasAggregateFunction(sql);
-        Assert.assertEquals(hasAggregateFunction, true);
-
-        sql = "SELECT count(1) FROM s2 WHERE sys_imp_date = '2023-08-08' AND user_id = 'alice'"
-                + " AND publish_date = '11' ORDER BY pv DESC LIMIT 1";
-        hasAggregateFunction = SqlParserSelectHelper.hasAggregateFunction(sql);
-        Assert.assertEquals(hasAggregateFunction, true);
-
-        sql = "SELECT department, user_id, field_a FROM s2 WHERE sys_imp_date = '2023-08-08' "
-                + "AND user_id = 'alice' AND publish_date = '11' ORDER BY pv DESC LIMIT 1";
-        hasAggregateFunction = SqlParserSelectHelper.hasAggregateFunction(sql);
-        Assert.assertEquals(hasAggregateFunction, false);
-
-        sql = "SELECT department, user_id, field_a FROM s2 WHERE sys_imp_date = '2023-08-08'"
-                + " AND user_id = 'alice' AND publish_date = '11'";
-        hasAggregateFunction = SqlParserSelectHelper.hasAggregateFunction(sql);
-        Assert.assertEquals(hasAggregateFunction, false);
-
-        sql = "SELECT user_name, pv FROM t_34 WHERE sys_imp_date <= '2023-09-03' "
-                + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name ORDER BY sum(pv) DESC LIMIT 10";
-        hasAggregateFunction = SqlParserSelectHelper.hasAggregateFunction(sql);
-        Assert.assertEquals(hasAggregateFunction, true);
-    }
-
-    private Map<String, String> initParams() {
-        Map<String, String> fieldToBizName = new HashMap<>();
-        fieldToBizName.put("部门", "department");
-        fieldToBizName.put("用户", "user_id");
-        fieldToBizName.put("数据日期", "sys_imp_date");
-        fieldToBizName.put("发布日期", "publish_date");
-        fieldToBizName.put("访问次数", "pv");
-        fieldToBizName.put("歌曲名", "song_name");
-        fieldToBizName.put("歌手名", "singer_name");
-        fieldToBizName.put("播放", "play_count");
-        fieldToBizName.put("歌曲发布时间", "song_publis_date");
-        fieldToBizName.put("歌曲发布年份", "song_publis_year");
-        fieldToBizName.put("转3.0前后30天结算份额衰减", "fdafdfdsa_fdas");
-        return fieldToBizName;
     }
 
     @Test
@@ -265,6 +249,16 @@ class SqlParserSelectHelperTest {
         Expression leftExpression = SqlParserSelectHelper.getHavingExpression(sql);
 
         Assert.assertEquals(leftExpression.toString(), "sum(pv)");
+
+    }
+
+    @Test
+    void getAggregateFields() {
+
+        String sql = "select 部门,sum (访问次数) from 超音数 where 数据日期 = '2023-08-08'"
+                + " and 用户 = 'alice' and 发布日期 ='11' group by 部门 limit 1";
+        List<String> selectFields = SqlParserSelectHelper.getAggregateFields(sql);
+        Assert.assertEquals(selectFields.contains("访问次数"), true);
 
     }
 

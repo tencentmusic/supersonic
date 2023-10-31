@@ -12,22 +12,27 @@ import com.tencent.supersonic.semantic.api.model.pojo.QueryStat;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
+import com.tencent.supersonic.semantic.api.model.enums.QueryOptMode;
+
 import com.tencent.supersonic.semantic.query.persistence.repository.StatRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
 
 @Component
 @Slf4j
@@ -82,11 +87,11 @@ public class StatUtils {
     }
 
 
-    public void initStatInfo(QueryDslReq queryDslReq, User facadeUser) {
+    public void initStatInfo(QueryS2QLReq queryS2QLReq, User facadeUser) {
         QueryStat queryStatInfo = new QueryStat();
-        List<String> allFields = SqlParserSelectHelper.getAllFields(queryDslReq.getSql());
-        queryStatInfo.setModelId(queryDslReq.getModelId());
-        ModelSchemaResp modelSchemaResp = modelService.fetchSingleModelSchema(queryDslReq.getModelId());
+        List<String> allFields = SqlParserSelectHelper.getAllFields(queryS2QLReq.getSql());
+        queryStatInfo.setModelId(queryS2QLReq.getModelId());
+        ModelSchemaResp modelSchemaResp = modelService.fetchSingleModelSchema(queryS2QLReq.getModelId());
 
         List<String> dimensions = new ArrayList<>();
         if (Objects.nonNull(modelSchemaResp)) {
@@ -101,12 +106,12 @@ public class StatUtils {
         String userName = getUserName(facadeUser);
         try {
             queryStatInfo.setTraceId("")
-                    .setModelId(queryDslReq.getModelId())
+                    .setModelId(queryS2QLReq.getModelId())
                     .setUser(userName)
                     .setQueryType(QueryTypeEnum.SQL.getValue())
                     .setQueryTypeBack(QueryTypeBackEnum.NORMAL.getState())
-                    .setQuerySqlCmd(queryDslReq.toString())
-                    .setQuerySqlCmdMd5(DigestUtils.md5Hex(queryDslReq.toString()))
+                    .setQuerySqlCmd(queryS2QLReq.toString())
+                    .setQuerySqlCmdMd5(DigestUtils.md5Hex(queryS2QLReq.toString()))
                     .setStartTime(System.currentTimeMillis())
                     .setUseResultCache(true)
                     .setUseSqlCache(true)
@@ -116,8 +121,9 @@ public class StatUtils {
             log.error("initStatInfo:{}", e);
         }
         StatUtils.set(queryStatInfo);
-
     }
+
+
 
     public void initStatInfo(QueryStructReq queryStructCmd, User facadeUser) {
         QueryStat queryStatInfo = new QueryStat();
@@ -146,7 +152,8 @@ public class StatUtils {
                     .setUseResultCache(true)
                     .setUseSqlCache(true)
                     .setMetrics(objectMapper.writeValueAsString(metrics))
-                    .setDimensions(objectMapper.writeValueAsString(dimensions));
+                    .setDimensions(objectMapper.writeValueAsString(dimensions))
+                    .setQueryOptMode(QueryOptMode.NONE.name());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -171,7 +178,10 @@ public class StatUtils {
                 : "Admin";
     }
 
-
+    public Boolean updateQueryOptMode(String mode) {
+        STATS.get().setQueryOptMode(mode);
+        return true;
+    }
 
     public List<ItemUseResp> getStatInfo(ItemUseReq itemUseCommend) {
         return statRepository.getStatInfo(itemUseCommend);

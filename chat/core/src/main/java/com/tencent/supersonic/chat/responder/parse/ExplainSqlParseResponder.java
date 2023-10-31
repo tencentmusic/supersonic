@@ -5,22 +5,55 @@ import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
+import com.tencent.supersonic.chat.api.pojo.response.ParseTimeCostDO;
+import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.query.QueryManager;
+import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import org.springframework.util.CollectionUtils;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ExplainSqlParseResponder implements ParseResponder {
 
     @Override
-    public void fillResponse(ParseResp parseResp, QueryContext queryContext) {
-        List<SemanticParseInfo> selectedParses = parseResp.getSelectedParses();
-        if (CollectionUtils.isEmpty(selectedParses)) {
+    public void fillResponse(ParseResp parseResp, QueryContext queryContext,
+                             List<ChatParseDO> chatParseDOS) {
+        QueryReq queryReq = queryContext.getRequest();
+        Long startTime = System.currentTimeMillis();
+        addExplainSql(queryReq, parseResp.getSelectedParses());
+        addExplainSql(queryReq, parseResp.getCandidateParses());
+        parseResp.setParseTimeCost(new ParseTimeCostDO());
+        parseResp.getParseTimeCost().setSqlTime(System.currentTimeMillis() - startTime);
+        if (!CollectionUtils.isEmpty(chatParseDOS)) {
+            Map<Integer, ChatParseDO> chatParseDOMap = chatParseDOS.stream()
+                    .collect(Collectors.toMap(ChatParseDO::getParseId,
+                            Function.identity(), (oldValue, newValue) -> newValue));
+            updateParseInfo(chatParseDOMap, parseResp.getSelectedParses());
+            updateParseInfo(chatParseDOMap, parseResp.getCandidateParses());
+        }
+    }
+
+    private void updateParseInfo(Map<Integer, ChatParseDO> chatParseDOMap, List<SemanticParseInfo> parseInfos) {
+        if (CollectionUtils.isEmpty(parseInfos)) {
             return;
         }
-        QueryReq queryReq = queryContext.getRequest();
-        selectedParses.forEach(parseInfo -> {
+        for (SemanticParseInfo parseInfo : parseInfos) {
+            ChatParseDO chatParseDO = chatParseDOMap.get(parseInfo.getId());
+            if (chatParseDO != null) {
+                chatParseDO.setParseInfo(JsonUtil.toString(parseInfo));
+            }
+        }
+    }
+
+    private void addExplainSql(QueryReq queryReq, List<SemanticParseInfo> semanticParseInfos) {
+        if (CollectionUtils.isEmpty(semanticParseInfos)) {
+            return;
+        }
+        semanticParseInfos.forEach(parseInfo -> {
             addExplainSql(queryReq, parseInfo);
         });
     }

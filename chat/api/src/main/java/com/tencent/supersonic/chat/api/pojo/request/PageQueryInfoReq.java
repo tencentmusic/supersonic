@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class PageQueryInfoReq {
@@ -11,27 +12,9 @@ public class PageQueryInfoReq {
 
     private String userName;
 
-    public int getPageSize() {
-        return pageSize;
-    }
+    private List<Long> ids;
 
-    public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    public int getCurrent() {
-        return current;
-    }
-
-    public void setCurrent(int current) {
-        this.current = current;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public Integer getLimitStart() {
+        return this.pageSize * (this.current - 1);
     }
 }

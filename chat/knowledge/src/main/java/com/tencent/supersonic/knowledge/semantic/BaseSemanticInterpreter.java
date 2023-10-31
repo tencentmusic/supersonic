@@ -24,6 +24,7 @@ public abstract class BaseSemanticInterpreter implements SemanticInterpreter {
         if (cacheEnable) {
             return modelSchemaCache.get(String.valueOf(ids), () -> {
                 List<ModelSchemaResp> data = doFetchModelSchema(ids);
+                modelSchemaCache.put(String.valueOf(ids), data);
                 return data;
             });
         }
@@ -32,13 +33,13 @@ public abstract class BaseSemanticInterpreter implements SemanticInterpreter {
     }
 
     @Override
-    public ModelSchema getModelSchema(Long domain, Boolean cacheEnable) {
+    public ModelSchema getModelSchema(Long model, Boolean cacheEnable) {
         List<Long> ids = new ArrayList<>();
-        ids.add(domain);
+        ids.add(model);
         List<ModelSchemaResp> modelSchemaResps = fetchModelSchema(ids, cacheEnable);
         if (!CollectionUtils.isEmpty(modelSchemaResps)) {
             Optional<ModelSchemaResp> modelSchemaResp = modelSchemaResps.stream()
-                    .filter(d -> d.getId().equals(domain)).findFirst();
+                    .filter(d -> d.getId().equals(model)).findFirst();
             if (modelSchemaResp.isPresent()) {
                 ModelSchemaResp modelSchema = modelSchemaResp.get();
                 return ModelSchemaBuilder.build(modelSchema);

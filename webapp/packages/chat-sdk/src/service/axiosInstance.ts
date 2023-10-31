@@ -5,7 +5,7 @@ import { getToken } from '../utils/utils';
 // 创建axios实例
 const axiosInstance: AxiosInstance = axios.create({
   // 设置基本URL，所有请求都会使用这个URL作为前缀
-  baseURL: localStorage.getItem('SUPERSONIC_CHAT_API_URL') || '',
+  baseURL: '',
   // 设置请求超时时间（毫秒）
   timeout: 120000,
   // 设置请求头
@@ -19,7 +19,6 @@ axiosInstance.interceptors.request.use(
   (config: any) => {
     const token = getToken();
     if (token && config?.headers) {
-      // config.headers.Auth = `Bearer ${token}`;
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;

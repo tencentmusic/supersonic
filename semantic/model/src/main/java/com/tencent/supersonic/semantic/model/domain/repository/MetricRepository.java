@@ -17,6 +17,8 @@ public interface MetricRepository {
 
     List<MetricDO> getMetricList(Long domainId);
 
+    List<MetricDO> getMetricList(List<Long> modelIds);
+
     List<MetricDO> getMetricList();
 
     List<MetricDO> getMetricListByIds(List<Long> ids);

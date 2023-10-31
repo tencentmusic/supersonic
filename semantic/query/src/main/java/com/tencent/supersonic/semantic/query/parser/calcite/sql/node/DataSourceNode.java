@@ -3,12 +3,13 @@ package com.tencent.supersonic.semantic.query.parser.calcite.sql.node;
 
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.query.parser.calcite.Configuration;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Constants;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Dimension;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Constants;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataSource;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
-
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.extend.LateralViewExplodeNode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,11 +19,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
+import org.apache.calcite.sql.SqlBasicCall;
+import org.apache.calcite.sql.SqlDataTypeSpec;
 import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.SqlUserDefinedTypeNameSpec;
 import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class DataSourceNode extends SemanticNode {
@@ -40,6 +46,29 @@ public class DataSourceNode extends SemanticNode {
         return buildAs(datasource.getName(), getTable(sqlTable, scope));
     }
 
+
+    public static SqlNode buildExtend(DataSource datasource, Set<String> exprList,
+            SqlValidatorScope scope)
+            throws Exception {
+        if (CollectionUtils.isEmpty(exprList)) {
+            return build(datasource, scope);
+        }
+        SqlNode view = new SqlBasicCall(new LateralViewExplodeNode(), Arrays.asList(build(datasource, scope),
+                new SqlNodeList(getExtendField(exprList, scope), SqlParserPos.ZERO)), SqlParserPos.ZERO);
+        return buildAs(datasource.getName() + Constants.DIMENSION_ARRAY_SINGLE_SUFFIX, view);
+    }
+
+    public static List<SqlNode> getExtendField(Set<String> exprList, SqlValidatorScope scope) throws Exception {
+        List<SqlNode> sqlNodeList = new ArrayList<>();
+        for (String expr : exprList) {
+            sqlNodeList.add(parse(expr, scope));
+            sqlNodeList.add(new SqlDataTypeSpec(
+                    new SqlUserDefinedTypeNameSpec(expr + Constants.DIMENSION_ARRAY_SINGLE_SUFFIX, SqlParserPos.ZERO),
+                    SqlParserPos.ZERO));
+        }
+        return sqlNodeList;
+    }
+
     private static SqlNode getTable(String sqlQuery, SqlValidatorScope scope) throws Exception {
         SqlParser sqlParser = SqlParser.create(sqlQuery, Configuration.getParserConfig());
         SqlNode sqlNode = sqlParser.parseQuery();
@@ -52,7 +81,7 @@ public class DataSourceNode extends SemanticNode {
     }
 
     public static void getQueryDimensionMeasure(SemanticSchema schema, MetricReq metricCommand,
-                                                Set<String> queryDimension, List<String> measures) {
+            Set<String> queryDimension, List<String> measures) {
         queryDimension.addAll(metricCommand.getDimensions().stream()
                 .map(d -> d.contains(Constants.DIMENSION_IDENTIFY) ? d.split(Constants.DIMENSION_IDENTIFY)[1] : d)
                 .collect(Collectors.toSet()));
@@ -64,8 +93,8 @@ public class DataSourceNode extends SemanticNode {
     }
 
     public static void mergeQueryFilterDimensionMeasure(SemanticSchema schema, MetricReq metricCommand,
-                                                        Set<String> queryDimension, List<String> measures,
-                                                        SqlValidatorScope scope) throws Exception {
+            Set<String> queryDimension, List<String> measures,
+            SqlValidatorScope scope) throws Exception {
         if (Objects.nonNull(metricCommand.getWhere()) && !metricCommand.getWhere().isEmpty()) {
             Set<String> filterConditions = new HashSet<>();
             FilterNode.getFilterField(parse(metricCommand.getWhere(), scope), filterConditions);
@@ -87,7 +116,7 @@ public class DataSourceNode extends SemanticNode {
     }
 
     public static List<DataSource> getMatchDataSources(SqlValidatorScope scope, SemanticSchema schema,
-                                                       MetricReq metricCommand) throws Exception {
+            MetricReq metricCommand) throws Exception {
         List<DataSource> dataSources = new ArrayList<>();
 
         // check by metric
@@ -142,7 +171,7 @@ public class DataSourceNode extends SemanticNode {
                         String.format("not find the match datasource : dimension[%s],measure[%s]", queryDimension,
                                 measures));
             }
-            log.info("linkDataSources {}", linkDataSources);
+            log.debug("linkDataSources {}", linkDataSources);
 
             dataSources.addAll(linkDataSources);
         }
@@ -151,11 +180,11 @@ public class DataSourceNode extends SemanticNode {
     }
 
     private static boolean checkMatch(Set<String> sourceMeasure,
-                                      Set<String> queryDimension,
-                                      List<String> measures,
-                                      Set<String> dimension,
-                                      MetricReq metricCommand,
-                                      SqlValidatorScope scope) throws Exception {
+            Set<String> queryDimension,
+            List<String> measures,
+            Set<String> dimension,
+            MetricReq metricCommand,
+            SqlValidatorScope scope) throws Exception {
         boolean isAllMatch = true;
         sourceMeasure.retainAll(measures);
         if (sourceMeasure.size() < measures.size()) {
@@ -180,10 +209,10 @@ public class DataSourceNode extends SemanticNode {
     }
 
     private static List<DataSource> getLinkDataSources(Set<String> baseIdentifiers,
-                                                       Set<String> queryDimension,
-                                                       List<String> measures,
-                                                       DataSource baseDataSource,
-                                                       SemanticSchema schema) {
+            Set<String> queryDimension,
+            List<String> measures,
+            DataSource baseDataSource,
+            SemanticSchema schema) {
         Set<String> linkDataSourceName = new HashSet<>();
         List<DataSource> linkDataSources = new ArrayList<>();
         for (Map.Entry<String, DataSource> entry : schema.getDatasource().entrySet()) {

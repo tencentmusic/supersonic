@@ -1,10 +1,11 @@
 package com.tencent.supersonic.semantic.query.parser.calcite.schema;
 
 
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Dimension;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Metric;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.SemanticModel;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataSource;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Dimension;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Materialization;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Metric;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.SemanticModel;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,14 @@ public class SemanticSchema extends AbstractSchema {
 
     public String getRootPath() {
         return rootPath;
+    }
+
+    public void setSemanticModel(SemanticModel semanticModel) {
+        this.semanticModel = semanticModel;
+    }
+
+    public SemanticModel getSemanticModel() {
+        return semanticModel;
     }
 
     @Override
@@ -66,6 +75,13 @@ public class SemanticSchema extends AbstractSchema {
 
     public void setMetric(List<Metric> metric) {
         semanticModel.setMetrics(metric);
+    }
+
+    public void setMaterializationList(List<Materialization> materializationList) {
+        semanticModel.setMaterializationList(materializationList);
+    }
+    public List<Materialization> getMaterializationList() {
+        return semanticModel.getMaterializationList();
     }
 
 

@@ -1,6 +1,6 @@
 package com.tencent.supersonic.semantic.query.parser.calcite.sql;
 
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +25,6 @@ public class TableView {
 
     private String alias;
     private List<String> primary;
-
     private DataSource dataSource;
 
     public SqlNode build() {

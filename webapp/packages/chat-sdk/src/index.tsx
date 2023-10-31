@@ -15,6 +15,8 @@ export { default as ChatMsg } from './components/ChatMsg';
 
 export { default as ChatItem } from './components/ChatItem';
 
+export { default as ShowCase } from './ShowCase';
+
 export type {
   SearchRecommendItem,
   FieldType,
@@ -35,6 +37,8 @@ export type {
   SendMsgParamsType,
 } from './common/type';
 
-export { getHistoryMsg, searchRecommend, queryContext } from './service';
+export { searchRecommend } from './service';
+
+export { saveConversation, getAllConversations } from './Chat/service';
 
 export { setToken } from './utils/utils';

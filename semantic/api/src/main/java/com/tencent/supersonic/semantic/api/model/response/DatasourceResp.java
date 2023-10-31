@@ -13,6 +13,8 @@ public class DatasourceResp extends SchemaItem {
 
     private DatasourceDetail datasourceDetail;
 
+    private String depends;
+
 
 
 }

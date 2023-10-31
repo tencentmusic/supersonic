@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.parser.plugin.embedding;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.parser.ParseMode;
 import com.tencent.supersonic.chat.parser.plugin.PluginParser;
@@ -29,16 +28,7 @@ public class EmbeddingBasedParser extends PluginParser {
             return false;
         }
         List<Plugin> plugins = getPluginList(queryContext);
-        if (CollectionUtils.isEmpty(plugins)) {
-            return false;
-        }
-        List<SemanticQuery> semanticQueries = queryContext.getCandidateQueries();
-        for (SemanticQuery semanticQuery : semanticQueries) {
-            if (queryContext.getRequest().getQueryText().length() <= semanticQuery.getParseInfo().getScore()) {
-                return false;
-            }
-        }
-        return true;
+        return !CollectionUtils.isEmpty(plugins);
     }
 
     @Override

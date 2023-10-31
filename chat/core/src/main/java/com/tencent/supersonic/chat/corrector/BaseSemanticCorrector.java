@@ -7,8 +7,8 @@ import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,25 +35,34 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         dbAllFields.addAll(semanticSchema.getMetrics());
         dbAllFields.addAll(semanticSchema.getDimensions());
 
+        // support fieldName and field alias
         Map<String, String> result = dbAllFields.stream()
                 .filter(entry -> entry.getModel().equals(modelId))
-                .collect(Collectors.toMap(SchemaElement::getName, a -> a.getName(), (k1, k2) -> k1));
+                .flatMap(schemaElement -> {
+                    Set<String> elements = new HashSet<>();
+                    elements.add(schemaElement.getName());
+                    if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {
+                        elements.addAll(schemaElement.getAlias());
+                    }
+                    return elements.stream();
+                })
+                .collect(Collectors.toMap(a -> a, a -> a, (k1, k2) -> k1));
         result.put(DateUtils.DATE_FIELD, DateUtils.DATE_FIELD);
         return result;
     }
 
     protected void addFieldsToSelect(SemanticCorrectInfo semanticCorrectInfo, String sql) {
         Set<String> selectFields = new HashSet<>(SqlParserSelectHelper.getSelectFields(sql));
-        Set<String> whereFields = new HashSet<>(SqlParserSelectHelper.getWhereFields(sql));
+        Set<String> needAddFields = new HashSet<>(SqlParserSelectHelper.getGroupByFields(sql));
+        needAddFields.addAll(SqlParserSelectHelper.getOrderByFields(sql));
 
-        if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(whereFields)) {
+        if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(needAddFields)) {
             return;
         }
 
-        whereFields.addAll(SqlParserSelectHelper.getOrderByFields(sql));
-        whereFields.removeAll(selectFields);
-        whereFields.remove(DateUtils.DATE_FIELD);
-        String replaceFields = SqlParserUpdateHelper.addFieldsToSelect(sql, new ArrayList<>(whereFields));
+        needAddFields.removeAll(selectFields);
+        needAddFields.remove(DateUtils.DATE_FIELD);
+        String replaceFields = SqlParserAddHelper.addFieldsToSelect(sql, new ArrayList<>(needAddFields));
         semanticCorrectInfo.setSql(replaceFields);
     }
 
@@ -76,7 +85,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
             return;
         }
 
-        String aggregateSql = SqlParserUpdateHelper.addAggregateToField(sql, metricToAggregate);
+        String aggregateSql = SqlParserAddHelper.addAggregateToField(sql, metricToAggregate);
         semanticCorrectInfo.setSql(aggregateSql);
     }
 
@@ -85,8 +94,4 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         return semanticSchema.getMetrics(modelId);
     }
 
-    protected List<SchemaElement> getDimensionElements(Long modelId) {
-        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-        return semanticSchema.getDimensions(modelId);
-    }
 }

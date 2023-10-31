@@ -1,5 +1,7 @@
 package com.tencent.supersonic.semantic.query.domain.calcite;
 
+import com.tencent.supersonic.common.pojo.ColumnOrder;
+import com.tencent.supersonic.semantic.api.model.response.SqlParserResp;
 import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
@@ -7,12 +9,12 @@ import com.tencent.supersonic.semantic.api.model.yaml.IdentifyYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
-import com.tencent.supersonic.semantic.api.model.response.SqlParserResp;
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
-import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.semantic.query.parser.calcite.SemanticSchemaManager;
 import com.tencent.supersonic.semantic.query.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,7 +39,9 @@ class SemanticParserServiceTest {
                 return sqlParser;
             }
             AggPlanner aggBuilder = new AggPlanner(semanticSchema);
-            aggBuilder.explain(metricCommand, isAgg);
+            QueryStatement queryStatement = new QueryStatement();
+            queryStatement.setMetricReq(metricCommand);
+            aggBuilder.explain(queryStatement, AggOption.getAggregation(!isAgg));
             sqlParser.setSql(aggBuilder.getSql());
             sqlParser.setSourceId(aggBuilder.getSourceId());
         } catch (Exception e) {
@@ -47,7 +51,6 @@ class SemanticParserServiceTest {
         return sqlParser;
     }
 
-    //@Test
     public void test() throws Exception {
 
         DatasourceYamlTpl datasource = new DatasourceYamlTpl();

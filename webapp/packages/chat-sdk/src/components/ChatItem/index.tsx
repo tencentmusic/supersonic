@@ -1,12 +1,14 @@
 import {
   ChatContextType,
+  DateInfoType,
+  EntityInfoType,
   FilterItemType,
   MsgDataType,
   ParseStateEnum,
   SimilarQuestionType,
 } from '../../common/type';
 import { useEffect, useState } from 'react';
-import { chatExecute, chatParse, queryData, switchEntity } from '../../service';
+import { chatExecute, chatParse, queryData, queryEntityInfo, switchEntity } from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import IconFont from '../IconFont';
 import ParseTip from './ParseTip';
@@ -16,20 +18,24 @@ import classNames from 'classnames';
 import Tools from '../Tools';
 import SqlItem from './SqlItem';
 import SimilarQuestionItem from './SimilarQuestionItem';
+import moment from 'moment';
 
 type Props = {
   msg: string;
   conversationId?: number;
   modelId?: number;
   agentId?: number;
+  score?: number;
   filter?: any[];
   isLastMessage?: boolean;
+  parseInfos?: ChatContextType[];
   msgData?: MsgDataType;
   triggerResize?: boolean;
-  parseOptions?: ChatContextType[];
   isDeveloper?: boolean;
   integrateSystem?: string;
-  onMsgDataLoaded?: (data: MsgDataType, valid: boolean) => void;
+  executeItemNode?: React.ReactNode;
+  renderCustomExecuteNode?: boolean;
+  onMsgDataLoaded?: (data: MsgDataType, valid: boolean, isRefresh?: boolean) => void;
   onUpdateMessageScroll?: () => void;
   onSendMsg?: (msg: string) => void;
 };
@@ -39,13 +45,16 @@ const ChatItem: React.FC<Props> = ({
   conversationId,
   modelId,
   agentId,
+  score,
   filter,
   isLastMessage,
   triggerResize,
+  parseInfos,
   msgData,
-  parseOptions,
   isDeveloper,
   integrateSystem,
+  executeItemNode,
+  renderCustomExecuteNode,
   onMsgDataLoaded,
   onUpdateMessageScroll,
   onSendMsg,
@@ -53,15 +62,15 @@ const ChatItem: React.FC<Props> = ({
   const [data, setData] = useState<MsgDataType>();
   const [parseLoading, setParseLoading] = useState(false);
   const [parseInfo, setParseInfo] = useState<ChatContextType>();
-  const [parseInfoOptions, setParseInfoOptions] = useState<ChatContextType[]>(parseOptions || []);
+  const [parseInfoOptions, setParseInfoOptions] = useState<ChatContextType[]>([]);
   const [parseTip, setParseTip] = useState('');
   const [executeLoading, setExecuteLoading] = useState(false);
   const [executeTip, setExecuteTip] = useState('');
   const [executeMode, setExecuteMode] = useState(false);
   const [entitySwitchLoading, setEntitySwitchLoading] = useState(false);
-  const [similarQuestions, setSimilarQuestions] = useState<SimilarQuestionType[]>([]);
-
-  const [chartIndex, setChartIndex] = useState(0);
+  const [dimensionFilters, setDimensionFilters] = useState<FilterItemType[]>([]);
+  const [dateInfo, setDateInfo] = useState<DateInfoType>({} as DateInfoType);
+  const [entityInfo, setEntityInfo] = useState<EntityInfoType>({} as EntityInfoType);
 
   const prefixCls = `${PREFIX_CLS}-item`;
 
@@ -95,15 +104,13 @@ const ChatItem: React.FC<Props> = ({
       const res: any = await chatExecute(msg, conversationId!, parseInfoValue);
       setExecuteLoading(false);
       const valid = updateData(res);
-      if (onMsgDataLoaded) {
-        onMsgDataLoaded(
-          {
-            ...res.data,
-            chatContext: parseInfoValue,
-          },
-          valid
-        );
-      }
+      onMsgDataLoaded?.(
+        {
+          ...res.data,
+          chatContext: parseInfoValue,
+        },
+        valid
+      );
     } catch (e) {
       setExecuteLoading(false);
       setExecuteTip(SEARCH_EXCEPTION_TIP);
@@ -115,8 +122,7 @@ const ChatItem: React.FC<Props> = ({
     const parseData: any = await chatParse(msg, conversationId, modelId, agentId, filter);
     setParseLoading(false);
     const { code, data } = parseData || {};
-    const { state, selectedParses, queryId, similarSolvedQuery } = data || {};
-    setSimilarQuestions(similarSolvedQuery || []);
+    const { state, selectedParses, candidateParses, queryId } = data || {};
     if (
       code !== 200 ||
       state === ParseStateEnum.FAILED ||
@@ -126,27 +132,37 @@ const ChatItem: React.FC<Props> = ({
       setParseTip(PARSE_ERROR_TIP);
       return;
     }
-    if (onUpdateMessageScroll) {
-      onUpdateMessageScroll();
-    }
-    const parseInfos = selectedParses.map((item: any) => ({
-      ...item,
-      queryId,
-    }));
+    onUpdateMessageScroll?.();
+    const parseInfos = selectedParses
+      .concat(candidateParses || [])
+      .slice(0, 5)
+      .map((item: any) => ({
+        ...item,
+        queryId,
+      }));
     setParseInfoOptions(parseInfos || []);
     const parseInfoValue = parseInfos[0];
     setParseInfo(parseInfoValue);
+    setEntityInfo(parseInfoValue.entityInfo || {});
+    setDimensionFilters(parseInfoValue?.dimensionFilters || []);
+    setDateInfo(parseInfoValue?.dateInfo);
     onExecute(parseInfoValue);
   };
 
   useEffect(() => {
-    if (data !== undefined || parseOptions !== undefined || executeTip !== '' || parseLoading) {
+    if (data !== undefined || executeTip !== '' || parseLoading) {
       return;
     }
     if (msgData) {
-      const parseInfoValue = { ...msgData.chatContext, queryId: msgData.queryId };
-      setParseInfoOptions([parseInfoValue]);
+      const parseInfoOptionsValue =
+        parseInfos && parseInfos.length > 0
+          ? parseInfos.map(item => ({ ...item, queryId: msgData.queryId }))
+          : [{ ...msgData.chatContext, queryId: msgData.queryId }];
+      const parseInfoValue = parseInfoOptionsValue[0];
+      setParseInfoOptions(parseInfoOptionsValue);
       setParseInfo(parseInfoValue);
+      setDimensionFilters(parseInfoValue.dimensionFilters || []);
+      setDateInfo(parseInfoValue.dateInfo);
       setExecuteMode(true);
       updateData({ code: 200, data: msgData, msg: 'success' });
     } else if (msg) {
@@ -159,14 +175,31 @@ const ChatItem: React.FC<Props> = ({
     const res = await switchEntity(entityId, data?.chatContext?.modelId, conversationId || 0);
     setEntitySwitchLoading(false);
     setData(res.data);
-    const { chatContext } = res.data;
-    setParseInfo(chatContext);
-    setParseInfoOptions([chatContext]);
+    const { chatContext, entityInfo } = res.data;
+    const chatContextValue = { ...(chatContext || {}), queryId: parseInfo?.queryId };
+    setParseInfo(chatContextValue);
+    setEntityInfo(entityInfo);
+    setDimensionFilters(chatContextValue?.dimensionFilters || []);
+    setDateInfo(chatContextValue?.dateInfo);
   };
 
-  const onFiltersChange = async (dimensionFilters: FilterItemType[]) => {
+  const onFiltersChange = (dimensionFilters: FilterItemType[]) => {
+    setDimensionFilters(dimensionFilters);
+  };
+
+  const onDateInfoChange = (dateRange: any) => {
+    setDateInfo({
+      ...(dateInfo || {}),
+      startDate: moment(dateRange[0]).format('YYYY-MM-DD'),
+      endDate: moment(dateRange[1]).format('YYYY-MM-DD'),
+      dateMode: 'BETWEEN',
+      unit: 0,
+    });
+  };
+
+  const onRefresh = async () => {
     setEntitySwitchLoading(true);
-    const { dimensions, metrics, dateInfo, id, queryId } = parseInfoOptions[0] || {};
+    const { dimensions, metrics, id, queryId } = parseInfo || {};
     const chatContextValue = {
       dimensions,
       metrics,
@@ -177,17 +210,29 @@ const ChatItem: React.FC<Props> = ({
     };
     const res: any = await queryData(chatContextValue);
     setEntitySwitchLoading(false);
-    const resChatContext = res.data?.chatContext;
-    setData({ ...(res.data || {}), chatContext: resChatContext || chatContextValue });
-    setParseInfo(resChatContext || chatContextValue);
-    setParseInfoOptions([resChatContext || chatContextValue]);
+    if (res.code === 200) {
+      const resChatContext = res.data?.chatContext;
+      const contextValue = { ...(resChatContext || chatContextValue), queryId };
+      const dataValue = { ...res.data, chatContext: contextValue };
+      onMsgDataLoaded?.(dataValue, true, true);
+      setData(dataValue);
+      setParseInfo(contextValue);
+    }
+  };
+
+  const getEntityInfo = async (parseInfoValue: ChatContextType) => {
+    const res = await queryEntityInfo(parseInfoValue.queryId, parseInfoValue.id);
+    setEntityInfo(res.data);
   };
 
   const onSelectParseInfo = async (parseInfoValue: ChatContextType) => {
     setParseInfo(parseInfoValue);
-    onExecute(parseInfoValue);
-    if (onUpdateMessageScroll) {
-      onUpdateMessageScroll();
+    setDimensionFilters(parseInfoValue.dimensionFilters || []);
+    setDateInfo(parseInfoValue.dateInfo);
+    if (parseInfoValue.entityInfo) {
+      setEntityInfo(parseInfoValue.entityInfo);
+    } else {
+      getEntityInfo(parseInfoValue);
     }
   };
 
@@ -199,58 +244,61 @@ const ChatItem: React.FC<Props> = ({
     [`${prefixCls}-content-mobile`]: isMobile,
   });
 
-  const isMetricCard =
-    (data?.queryMode === 'METRIC_DOMAIN' || data?.queryMode === 'METRIC_FILTER') &&
-    data?.queryResults?.length === 1;
-
   return (
     <div className={prefixCls}>
-      {!isMobile && <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />}
+      {!isMobile && integrateSystem !== 'wiki' && (
+        <IconFont type="icon-zhinengsuanfa" className={`${prefixCls}-avatar`} />
+      )}
       <div className={isMobile ? `${prefixCls}-mobile-msg-card` : `${prefixCls}-msg-card`}>
         <div className={contentClass}>
           <ParseTip
             parseLoading={parseLoading}
-            parseInfoOptions={parseOptions || parseInfoOptions.slice(0, 1)}
+            parseInfoOptions={parseInfoOptions}
             parseTip={parseTip}
             currentParseInfo={parseInfo}
+            agentId={agentId}
+            dimensionFilters={dimensionFilters}
+            dateInfo={dateInfo}
+            entityInfo={entityInfo}
+            integrateSystem={integrateSystem}
             onSelectParseInfo={onSelectParseInfo}
             onSwitchEntity={onSwitchEntity}
             onFiltersChange={onFiltersChange}
+            onDateInfoChange={onDateInfoChange}
           />
-          {parseTip && similarQuestions.length > 0 && (
-            <SimilarQuestionItem
-              similarQuestions={similarQuestions}
-              defaultExpanded
-              onSelectQuestion={onSelectQuestion}
-            />
-          )}
           {executeMode && (
             <>
-              {parseInfoOptions?.[0]?.sqlInfo && isDeveloper && integrateSystem !== 'c2' && (
-                <SqlItem integrateSystem={integrateSystem} sqlInfo={parseInfoOptions[0].sqlInfo} />
-              )}
-              {similarQuestions.length > 0 && (
-                <SimilarQuestionItem
-                  similarQuestions={similarQuestions}
-                  defaultExpanded={executeTip !== ''}
-                  onSelectQuestion={onSelectQuestion}
-                />
+              {!isMobile && parseInfo?.sqlInfo && isDeveloper && integrateSystem !== 'c2' && (
+                <SqlItem integrateSystem={integrateSystem} sqlInfo={parseInfo.sqlInfo} />
               )}
               <ExecuteItem
                 queryId={parseInfo?.queryId}
                 executeLoading={executeLoading}
                 entitySwitchLoading={entitySwitchLoading}
                 executeTip={executeTip}
-                chartIndex={chartIndex}
+                chartIndex={0}
                 data={data}
                 triggerResize={triggerResize}
+                executeItemNode={executeItemNode}
+                renderCustomExecuteNode={renderCustomExecuteNode}
+                onRefresh={onRefresh}
               />
             </>
           )}
+          {(parseTip !== '' || (executeMode && !executeLoading)) && integrateSystem !== 'c2' && (
+            <SimilarQuestionItem
+              queryText={msg || msgData?.queryText || ''}
+              agentId={agentId}
+              defaultExpanded={parseTip !== '' || executeTip !== '' || integrateSystem === 'wiki'}
+              onSelectQuestion={onSelectQuestion}
+            />
+          )}
         </div>
-        {!isMetricCard && data && (
-          <Tools data={data} scoreValue={undefined} isLastMessage={isLastMessage} />
-        )}
+        {(parseTip !== '' || (executeMode && !executeLoading)) &&
+          integrateSystem !== 'c2' &&
+          integrateSystem !== 'showcase' && (
+            <Tools queryId={parseInfo?.queryId || 0} scoreValue={score} />
+          )}
       </div>
     </div>
   );

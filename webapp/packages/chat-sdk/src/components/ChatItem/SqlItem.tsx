@@ -27,7 +27,7 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
     setSqlType('');
   };
 
-  if (!sqlInfo.llmParseSql && !sqlInfo.logicSql && !sqlInfo.querySql) {
+  if (!sqlInfo.s2QL && !sqlInfo.logicSql && !sqlInfo.querySql) {
     return null;
   }
 
@@ -36,30 +36,30 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
       <div className={`${tipPrefixCls}-title-bar`}>
         <CheckCircleFilled className={`${tipPrefixCls}-step-icon`} />
         <div className={`${tipPrefixCls}-step-title`}>
-          SQL生成
+          SQL生成：
           {sqlType && (
             <span className={`${prefixCls}-toggle-expand-btn`} onClick={onCollapse}>
               <UpOutlined />
             </span>
           )}
         </div>
-        <div className={`${prefixCls}-sql-options`}>
-          {sqlInfo.llmParseSql && (
+        <div className={`${tipPrefixCls}-content-options`}>
+          {sqlInfo.s2QL && (
             <div
-              className={`${prefixCls}-sql-option ${
-                sqlType === 'llmParseSql' ? `${prefixCls}-sql-option-active` : ''
+              className={`${tipPrefixCls}-content-option ${
+                sqlType === 's2QL' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
-                setSqlType(sqlType === 'llmParseSql' ? '' : 'llmParseSql');
+                setSqlType(sqlType === 's2QL' ? '' : 's2QL');
               }}
             >
-              LLM解析SQL
+              S2QL
             </div>
           )}
           {sqlInfo.logicSql && (
             <div
-              className={`${prefixCls}-sql-option ${
-                sqlType === 'logicSql' ? `${prefixCls}-sql-option-active` : ''
+              className={`${tipPrefixCls}-content-option ${
+                sqlType === 'logicSql' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
                 setSqlType(sqlType === 'logicSql' ? '' : 'logicSql');
@@ -70,8 +70,8 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
           )}
           {sqlInfo.querySql && (
             <div
-              className={`${prefixCls}-sql-option ${
-                sqlType === 'querySql' ? `${prefixCls}-sql-option-active` : ''
+              className={`${tipPrefixCls}-content-option ${
+                sqlType === 'querySql' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
                 setSqlType(sqlType === 'querySql' ? '' : 'querySql');

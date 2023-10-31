@@ -1,10 +1,11 @@
 package com.tencent.supersonic.semantic.query.parser.calcite;
 
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.query.parser.SqlParser;
 import com.tencent.supersonic.semantic.query.parser.calcite.planner.AggPlanner;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.SemanticModel;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.SemanticModel;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import org.springframework.stereotype.Component;
@@ -19,16 +20,17 @@ public class CalciteSqlParser implements SqlParser {
     }
 
     @Override
-    public QueryStatement explain(MetricReq metricReq, boolean isAgg, Catalog catalog) throws Exception {
+    public QueryStatement explain(MetricReq metricReq, AggOption isAgg, Catalog catalog) throws Exception {
         QueryStatement queryStatement = new QueryStatement();
         SemanticModel semanticModel = semanticSchemaManager.get(metricReq.getRootPath());
         if (semanticModel == null) {
             queryStatement.setErrMsg("semanticSchema not found");
             return queryStatement;
         }
+        queryStatement.setMetricReq(metricReq);
         SemanticSchema semanticSchema = getSemanticSchema(semanticModel);
         AggPlanner aggBuilder = new AggPlanner(semanticSchema);
-        aggBuilder.explain(metricReq, isAgg);
+        aggBuilder.explain(queryStatement, isAgg);
         queryStatement.setSql(aggBuilder.getSql());
         queryStatement.setSourceId(aggBuilder.getSourceId());
         return queryStatement;

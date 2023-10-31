@@ -31,7 +31,7 @@ import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDslReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.net.URI;
@@ -83,10 +83,10 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
     }
 
     @Override
-    public QueryResultWithSchemaResp queryByDsl(QueryDslReq queryDslReq, User user) {
+    public QueryResultWithSchemaResp queryByS2QL(QueryS2QLReq queryS2QLReq, User user) {
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         return searchByRestTemplate(defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getSearchBySqlPath(),
-                new Gson().toJson(queryDslReq));
+                new Gson().toJson(queryS2QLReq));
     }
 
     public QueryResultWithSchemaResp searchByRestTemplate(String url, String jsonReq) {

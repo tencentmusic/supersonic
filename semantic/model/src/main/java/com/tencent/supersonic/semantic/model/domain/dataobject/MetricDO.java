@@ -84,6 +84,11 @@ public class MetricDO {
     private String tags;
 
     /**
+     * 
+     */
+    private String relateDimensions;
+
+    /**
      * 类型参数
      */
     private String typeParams;
@@ -342,6 +347,22 @@ public class MetricDO {
      */
     public void setTags(String tags) {
         this.tags = tags == null ? null : tags.trim();
+    }
+
+    /**
+     * 
+     * @return relate_dimensions 
+     */
+    public String getRelateDimensions() {
+        return relateDimensions;
+    }
+
+    /**
+     * 
+     * @param relateDimensions 
+     */
+    public void setRelateDimensions(String relateDimensions) {
+        this.relateDimensions = relateDimensions == null ? null : relateDimensions.trim();
     }
 
     /**

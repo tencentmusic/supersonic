@@ -140,6 +140,10 @@ const PermissionCreateDrawer: React.FC<Props> = ({
             <ProCard title="列权限" bordered tooltip="仅对敏感度为高的指标/维度进行授权">
               <DimensionMetricVisibleTransfer
                 titles={['未授权维度/指标', '已授权维度/指标']}
+                listStyle={{
+                  width: 520,
+                  height: 600,
+                }}
                 sourceList={[
                   ...dimensionList
                     .map((item) => {

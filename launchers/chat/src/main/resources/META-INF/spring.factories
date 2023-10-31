@@ -8,9 +8,10 @@ com.tencent.supersonic.chat.api.component.SemanticParser=\
     com.tencent.supersonic.chat.parser.rule.QueryModeParser, \
     com.tencent.supersonic.chat.parser.rule.ContextInheritParser, \
     com.tencent.supersonic.chat.parser.rule.AgentCheckParser, \
+    com.tencent.supersonic.chat.parser.rule.MetricCheckParser, \
     com.tencent.supersonic.chat.parser.rule.TimeRangeParser, \
     com.tencent.supersonic.chat.parser.rule.AggregateTypeParser, \
-    com.tencent.supersonic.chat.parser.llm.dsl.LLMDslParser, \
+    com.tencent.supersonic.chat.parser.llm.s2ql.LLMS2QLParser, \
     com.tencent.supersonic.chat.parser.plugin.function.FunctionBasedParser
 
 
@@ -20,8 +21,8 @@ com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
 com.tencent.supersonic.chat.query.QuerySelector=\
    com.tencent.supersonic.chat.query.HeuristicQuerySelector
 
-com.tencent.supersonic.chat.parser.llm.dsl.ModelResolver=\
-  com.tencent.supersonic.chat.parser.llm.dsl.HeuristicModelResolver
+com.tencent.supersonic.chat.parser.llm.s2ql.ModelResolver=\
+  com.tencent.supersonic.chat.parser.llm.s2ql.HeuristicModelResolver
 
 com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\
     com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor
@@ -40,8 +41,7 @@ com.tencent.supersonic.chat.api.component.SemanticCorrector=\
 
 com.tencent.supersonic.chat.responder.parse.ParseResponder=\
     com.tencent.supersonic.chat.responder.parse.EntityInfoParseResponder, \
-    com.tencent.supersonic.chat.responder.parse.ExplainSqlParseResponder, \
-    com.tencent.supersonic.chat.responder.parse.SolvedQueryParseResponder
+    com.tencent.supersonic.chat.responder.parse.ExplainSqlParseResponder
 
 com.tencent.supersonic.chat.responder.execute.ExecuteResponder=\
     com.tencent.supersonic.chat.responder.execute.EntityInfoExecuteResponder

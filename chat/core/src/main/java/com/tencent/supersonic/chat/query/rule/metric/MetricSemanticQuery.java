@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.query.rule.metric;
 import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.METRIC;
 import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
 import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
@@ -66,7 +65,6 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
 
         for (SchemaElementMatch schemaElementMatch : candidateElementMatches) {
             SchemaElementType type = schemaElementMatch.getElement().getType();
-
             if (SchemaElementType.DIMENSION.equals(type) || SchemaElementType.VALUE.equals(type)) {
                 if (!blackDimIdList.contains(schemaElementMatch.getElement().getId())) {
                     filteredMatches.add(schemaElementMatch);
@@ -81,6 +79,7 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
         }
         return filteredMatches;
     }
+
 
     @Override
     public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {

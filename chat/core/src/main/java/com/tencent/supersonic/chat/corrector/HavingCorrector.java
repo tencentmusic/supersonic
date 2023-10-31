@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.corrector;
 import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserUpdateHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,7 +30,7 @@ public class HavingCorrector extends BaseSemanticCorrector {
         if (CollectionUtils.isEmpty(metrics)) {
             return;
         }
-        String havingSql = SqlParserUpdateHelper.addHaving(semanticCorrectInfo.getSql(), metrics);
+        String havingSql = SqlParserAddHelper.addHaving(semanticCorrectInfo.getSql(), metrics);
         semanticCorrectInfo.setSql(havingSql);
     }
 

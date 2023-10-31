@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
+import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
@@ -42,8 +43,6 @@ public class CalculateAggConverter implements SemanticConverter {
     @Value("${metricParser.agg.default:sum}")
     private String metricAggDefault;
 
-    @Value("${metricParser.agg.mysql.lowVersion:5.7}")
-    private String mysqlLowVersion;
 
 
     public CalculateAggConverter(
@@ -77,14 +76,13 @@ public class CalculateAggConverter implements SemanticConverter {
         String where = queryStructUtils.generateWhere(queryStructCmd);
         log.info("in generateSqlCommand, complete where:{}", where);
         metricTable.setWhere(where);
-        metricTable.setAgg(true);
+        metricTable.setAggOption(AggOption.AGGREGATION);
         sqlCommand.setTables(new ArrayList<>(Collections.singletonList(metricTable)));
         String sql = String.format("select %s from %s  %s %s %s", sqlGenerateUtils.getSelect(queryStructCmd),
                 metricTableName,
                 sqlGenerateUtils.getGroupBy(queryStructCmd), sqlGenerateUtils.getOrderBy(queryStructCmd),
                 sqlGenerateUtils.getLimit(queryStructCmd));
-        if (engineTypeEnum.equals(engineTypeEnum.MYSQL) && Objects.nonNull(version) && version.startsWith(
-                mysqlLowVersion)) {
+        if (!queryStructUtils.isSupportWith(engineTypeEnum, version)) {
             sqlCommand.setSupportWith(false);
             sql = String.format("select %s from %s t0 %s %s %s", sqlGenerateUtils.getSelect(queryStructCmd),
                     metricTableName,
@@ -162,7 +160,7 @@ public class CalculateAggConverter implements SemanticConverter {
         String where = queryStructUtils.generateWhere(queryStructCmd);
         log.info("in generateSqlCommend, complete where:{}", where);
         metricTable.setWhere(where);
-        metricTable.setAgg(true);
+        metricTable.setAggOption(AggOption.AGGREGATION);
         sqlCommand.setTables(new ArrayList<>(Collections.singletonList(metricTable)));
         boolean isOver = isOverRatio(queryStructCmd);
         String sql = "";
@@ -173,8 +171,7 @@ public class CalculateAggConverter implements SemanticConverter {
             case MYSQL:
             case DORIS:
             case CLICKHOUSE:
-                if (engineTypeEnum.equals(EngineTypeEnum.MYSQL) && Objects.nonNull(version) && version.startsWith(
-                        mysqlLowVersion)) {
+                if (!queryStructUtils.isSupportWith(engineTypeEnum, version)) {
                     sqlCommand.setSupportWith(false);
                     sql = new MysqlEngineSql().sql(queryStructCmd, isOver, metricTableName);
                 } else {
@@ -346,7 +343,7 @@ public class CalculateAggConverter implements SemanticConverter {
             String aggStr = queryStructCmd.getAggregators().stream().map(f -> {
                 if (f.getFunc().equals(AggOperatorEnum.RATIO_OVER) || f.getFunc().equals(AggOperatorEnum.RATIO_ROLL)) {
                     if (queryStructCmd.getDateInfo().getPeriod().equals(Constants.MONTH)) {
-                        return String.format("%s = DATE_FORMAT(date_add(CONCAT(%s,'-01'), %s),'%Y-%m') ",
+                        return String.format("%s = DATE_FORMAT(date_add(CONCAT(%s,'-01'), %s),'%%Y-%%m') ",
                                 aliasLeft + timeDim, aliasRight + timeDim, timeSpan);
                     }
                     if (queryStructCmd.getDateInfo().getPeriod().equals(Constants.WEEK) && isOver) {

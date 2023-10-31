@@ -15,11 +15,13 @@ import java.util.List;
 
 public interface ChatQueryRepository {
 
-    PageInfo<QueryResp> getChatQuery(PageQueryInfoReq pageQueryInfoCommend, long chatId);
+    PageInfo<QueryResp> getChatQuery(PageQueryInfoReq pageQueryInfoCommend, Long chatId);
 
     List<QueryResp> queryShowCase(PageQueryInfoReq pageQueryInfoCommend, int agentId);
 
     void createChatQuery(QueryResult queryResult, ChatContext chatCtx);
+
+    void updateChatParseInfo(List<ChatParseDO> chatParseDOS);
 
     ChatQueryDO getLastChatQuery(long chatId);
 
@@ -27,12 +29,14 @@ public interface ChatQueryRepository {
 
     Long createChatParse(ParseResp parseResult, ChatContext chatCtx, QueryReq queryReq);
 
-    Boolean batchSaveParseInfo(ChatContext chatCtx, QueryReq queryReq,
+    List<ChatParseDO> batchSaveParseInfo(ChatContext chatCtx, QueryReq queryReq,
                                ParseResp parseResult,
                                List<SemanticParseInfo> candidateParses,
                                List<SemanticParseInfo> selectedParses);
 
-    public ChatParseDO getParseInfo(Long questionId, String userName, int parseId);
+    public ChatParseDO getParseInfo(Long questionId, int parseId);
+
+    List<ChatParseDO> getParseInfoList(List<Long> questionIds);
 
     Boolean deleteChatQuery(Long questionId);
 }

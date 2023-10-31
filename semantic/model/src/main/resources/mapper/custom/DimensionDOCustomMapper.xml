@@ -115,6 +115,7 @@
             and ( id like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
             name like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
             biz_name like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
+            alias like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
             description like CONCAT('%',#{key , jdbcType=VARCHAR},'%') )
         </if>
         <if test="id != null">
@@ -135,6 +136,9 @@
                      separator=",">
                 #{model}
             </foreach>
+        </if>
+        <if test="createdBy != null">
+            and created_by = #{createdBy}
         </if>
     </select>
 

@@ -5,6 +5,7 @@ import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
+import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
@@ -37,6 +38,6 @@ public interface Catalog {
 
     ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric);
 
-    String getAgg(Long modelId, String metricBizName);
+    String getAgg(List<MetricResp> metricResps, List<MeasureResp> measureRespList, String metricBizName);
 
 }

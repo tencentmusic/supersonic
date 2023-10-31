@@ -1,6 +1,7 @@
 package com.tencent.supersonic.semantic.query.service;
 
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.query.executor.QueryExecutor;
@@ -14,5 +15,7 @@ public interface SemanticQueryEngine {
 
     QueryResultWithSchemaResp execute(QueryStatement queryStatement);
 
-    QueryStatement physicalSql(ParseSqlReq sqlCommend) throws Exception;
+    QueryStatement physicalSql(QueryStructReq queryStructCmd, ParseSqlReq sqlCommend) throws Exception;
+
+    QueryStatement physicalSql(QueryStructReq queryStructCmd, MetricReq sqlCommend) throws Exception;
 }

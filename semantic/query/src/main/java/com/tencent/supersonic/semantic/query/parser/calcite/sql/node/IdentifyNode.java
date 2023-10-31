@@ -1,7 +1,7 @@
 package com.tencent.supersonic.semantic.query.parser.calcite.sql.node;
 
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Identify;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Identify.Type;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Identify;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Identify.Type;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

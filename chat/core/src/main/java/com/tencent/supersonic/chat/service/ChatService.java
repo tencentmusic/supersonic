@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
+import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
@@ -22,23 +23,23 @@ public interface ChatService {
      * @param chatId
      * @return
      */
-    public Long getContextModel(Integer chatId);
+    Long getContextModel(Integer chatId);
 
-    public ChatContext getOrCreateContext(int chatId);
+    ChatContext getOrCreateContext(int chatId);
 
-    public void updateContext(ChatContext chatCtx);
+    void updateContext(ChatContext chatCtx);
 
-    public void switchContext(ChatContext chatCtx);
+    void switchContext(ChatContext chatCtx);
 
-    public Boolean addChat(User user, String chatName, Integer agentId);
+    Boolean addChat(User user, String chatName, Integer agentId);
 
-    public List<ChatDO> getAll(String userName, Integer agentId);
+    List<ChatDO> getAll(String userName, Integer agentId);
 
-    public boolean updateChatName(Long chatId, String chatName, String userName);
+    boolean updateChatName(Long chatId, String chatName, String userName);
 
-    public boolean updateFeedback(Integer id, Integer score, String feedback);
+    boolean updateFeedback(Integer id, Integer score, String feedback);
 
-    public boolean updateChatIsTop(Long chatId, int isTop);
+    boolean updateChatIsTop(Long chatId, int isTop);
 
     Boolean deleteChat(Long chatId, String userName);
 
@@ -46,20 +47,24 @@ public interface ChatService {
 
     ShowCaseResp queryShowCase(PageQueryInfoReq pageQueryInfoCommend, int agentId);
 
-    public void addQuery(QueryResult queryResult, ChatContext chatCtx);
+    void addQuery(QueryResult queryResult, ChatContext chatCtx);
 
-    public void batchAddParse(ChatContext chatCtx, QueryReq queryReq,
+    List<ChatParseDO> batchAddParse(ChatContext chatCtx, QueryReq queryReq,
                          ParseResp parseResult,
                          List<SemanticParseInfo> candidateParses,
                          List<SemanticParseInfo> selectedParses);
 
-    public ChatQueryDO getLastQuery(long chatId);
+    void updateChatParse(List<ChatParseDO> chatParseDOS);
 
-    public int updateQuery(ChatQueryDO chatQueryDO);
+    ChatQueryDO getLastQuery(long chatId);
 
-    public Boolean updateQuery(Long questionId, QueryResult queryResult, ChatContext chatCtx);
+    int updateQuery(ChatQueryDO chatQueryDO);
 
-    public ChatParseDO getParseInfo(Long questionId, String userName, int parseId);
+    Boolean updateQuery(Long questionId, QueryResult queryResult, ChatContext chatCtx);
 
-    public Boolean deleteChatQuery(Long questionId);
+    ChatParseDO getParseInfo(Long questionId, int parseId);
+
+    Boolean deleteChatQuery(Long questionId);
+
+    List<SolvedQueryRecallResp> getSolvedQuery(String queryText, Integer agentId);
 }

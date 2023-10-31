@@ -18,6 +18,7 @@
     <result column="data_format" jdbcType="VARCHAR" property="dataFormat" />
     <result column="alias" jdbcType="VARCHAR" property="alias" />
     <result column="tags" jdbcType="VARCHAR" property="tags" />
+    <result column="relate_dimensions" jdbcType="VARCHAR" property="relateDimensions" />
   </resultMap>
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO">
     <result column="type_params" jdbcType="LONGVARCHAR" property="typeParams" />
@@ -53,7 +54,7 @@
   </sql>
   <sql id="Base_Column_List">
     id, model_id, name, biz_name, description, status, sensitive_level, type, created_at, 
-    created_by, updated_at, updated_by, data_format_type, data_format, alias, tags
+    created_by, updated_at, updated_by, data_format_type, data_format, alias, tags, relate_dimensions
   </sql>
   <sql id="Blob_Column_List">
     type_params
@@ -109,13 +110,15 @@
       sensitive_level, type, created_at, 
       created_by, updated_at, updated_by, 
       data_format_type, data_format, alias, 
-      tags, type_params)
+      tags, relate_dimensions, type_params
+      )
     values (#{id,jdbcType=BIGINT}, #{modelId,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, 
       #{bizName,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, 
       #{sensitiveLevel,jdbcType=INTEGER}, #{type,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, 
       #{createdBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP}, #{updatedBy,jdbcType=VARCHAR}, 
       #{dataFormatType,jdbcType=VARCHAR}, #{dataFormat,jdbcType=VARCHAR}, #{alias,jdbcType=VARCHAR}, 
-      #{tags,jdbcType=VARCHAR}, #{typeParams,jdbcType=LONGVARCHAR})
+      #{tags,jdbcType=VARCHAR}, #{relateDimensions,jdbcType=VARCHAR}, #{typeParams,jdbcType=LONGVARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO">
     insert into s2_metric
@@ -167,6 +170,9 @@
       </if>
       <if test="tags != null">
         tags,
+      </if>
+      <if test="relateDimensions != null">
+        relate_dimensions,
       </if>
       <if test="typeParams != null">
         type_params,
@@ -220,6 +226,9 @@
       </if>
       <if test="tags != null">
         #{tags,jdbcType=VARCHAR},
+      </if>
+      <if test="relateDimensions != null">
+        #{relateDimensions,jdbcType=VARCHAR},
       </if>
       <if test="typeParams != null">
         #{typeParams,jdbcType=LONGVARCHAR},
@@ -280,6 +289,9 @@
       <if test="tags != null">
         tags = #{tags,jdbcType=VARCHAR},
       </if>
+      <if test="relateDimensions != null">
+        relate_dimensions = #{relateDimensions,jdbcType=VARCHAR},
+      </if>
       <if test="typeParams != null">
         type_params = #{typeParams,jdbcType=LONGVARCHAR},
       </if>
@@ -303,6 +315,7 @@
       data_format = #{dataFormat,jdbcType=VARCHAR},
       alias = #{alias,jdbcType=VARCHAR},
       tags = #{tags,jdbcType=VARCHAR},
+      relate_dimensions = #{relateDimensions,jdbcType=VARCHAR},
       type_params = #{typeParams,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -322,7 +335,8 @@
       data_format_type = #{dataFormatType,jdbcType=VARCHAR},
       data_format = #{dataFormat,jdbcType=VARCHAR},
       alias = #{alias,jdbcType=VARCHAR},
-      tags = #{tags,jdbcType=VARCHAR}
+      tags = #{tags,jdbcType=VARCHAR},
+      relate_dimensions = #{relateDimensions,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

@@ -22,7 +22,8 @@ type Props = {
     data: MsgDataType,
     questionId: string | number,
     question: string,
-    valid: boolean
+    valid: boolean,
+    isRefresh?: boolean
   ) => void;
   onSendMsg: (value: string) => void;
 };
@@ -72,10 +73,10 @@ const MessageContainer: React.FC<Props> = ({
             type,
             msg,
             msgValue,
-            identityMsg,
-            msgData,
             score,
-            parseOptions,
+            identityMsg,
+            parseInfos,
+            msgData,
             filters,
           } = msgItem;
 
@@ -91,40 +92,24 @@ const MessageContainer: React.FC<Props> = ({
                   {identityMsg && <Text position="left" data={identityMsg} />}
                   <ChatItem
                     msg={msgValue || msg || ''}
+                    parseInfos={parseInfos}
                     msgData={msgData}
                     conversationId={chatId}
                     modelId={modelId}
                     agentId={agentId}
+                    score={score}
                     filter={filters}
                     isLastMessage={index === messageList.length - 1}
                     triggerResize={triggerResize}
                     isDeveloper={isDeveloper}
                     integrateSystem={integrateSystem}
-                    onMsgDataLoaded={(data: MsgDataType, valid: boolean) => {
-                      onMsgDataLoaded(data, msgId, msgValue || msg || '', valid);
+                    onMsgDataLoaded={(data: MsgDataType, valid: boolean, isRefresh) => {
+                      onMsgDataLoaded(data, msgId, msgValue || msg || '', valid, isRefresh);
                     }}
                     onUpdateMessageScroll={updateMessageContainerScroll}
                     onSendMsg={onSendMsg}
                   />
                 </>
-              )}
-              {type === MessageTypeEnum.PARSE_OPTIONS && (
-                <ChatItem
-                  msg={msgValue || msg || ''}
-                  conversationId={chatId}
-                  modelId={modelId}
-                  agentId={agentId}
-                  filter={filters}
-                  isLastMessage={index === messageList.length - 1}
-                  triggerResize={triggerResize}
-                  parseOptions={parseOptions}
-                  integrateSystem={integrateSystem}
-                  onMsgDataLoaded={(data: MsgDataType, valid: boolean) => {
-                    onMsgDataLoaded(data, msgId, msgValue || msg || '', valid);
-                  }}
-                  onUpdateMessageScroll={updateMessageContainerScroll}
-                  onSendMsg={onSendMsg}
-                />
               )}
             </div>
           );

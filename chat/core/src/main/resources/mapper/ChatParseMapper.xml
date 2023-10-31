@@ -25,11 +25,25 @@
         </foreach>
     </insert>
 
+    <update id="updateParseInfo" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO">
+        update s2_chat_parse
+        set parse_info = #{parseInfo}
+        where question_id = #{questionId} and parse_id = #{parseId}
+    </update>
+
     <select id="getParseInfo" resultMap="ChatParse">
         select *
         from s2_chat_parse
-        where question_id = #{questionId} and user_name = #{userName}
-        and parse_id = #{parseId} and is_candidate = 0 limit 1
+        where question_id = #{questionId} and parse_id = #{parseId} limit 1
+    </select>
+
+    <select id="getParseInfoList" resultMap="ChatParse">
+        select *
+        from s2_chat_parse
+        where question_id in
+        <foreach item="questionId" index="index" collection="list" open="(" separator="," close=")">
+            #{questionId}
+        </foreach>
     </select>
 
 </mapper>

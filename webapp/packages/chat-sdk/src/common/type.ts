@@ -9,6 +9,7 @@ export type SearchRecommendItem = {
 
 export type FieldType = {
   bizName: string;
+  itemId: number;
   id: number;
   name: string;
   status: number;
@@ -70,7 +71,7 @@ export type EntityDimensionType = {
 }
 
 export type SqlInfoType = {
-  llmParseSql: string;
+  s2QL: string;
   logicSql: string;
   querySql: string;
 }
@@ -86,7 +87,7 @@ export type ChatContextType = {
   dimensions: FieldType[];
   metrics: FieldType[];
   entity: { alias: string[], id: number };
-  entityInfo: { dimensions: EntityDimensionType[] };
+  entityInfo: EntityInfoType;
   elementMatches: any[];
   nativeQuery: boolean;
   queryMode: string;
@@ -133,6 +134,7 @@ export type MsgDataType = {
   queryId: number;
   queryMode: string;
   queryState: string;
+  queryText: string;
   response: PluginResonseType;
   parseOptions?: ChatContextType[];
 };
@@ -181,7 +183,7 @@ export enum SemanticTypeEnum {
 };
 
 export const SEMANTIC_TYPE_MAP = {
-  [SemanticTypeEnum.DOMAIN]: '数据来源',
+  [SemanticTypeEnum.DOMAIN]: '数据模型',
   [SemanticTypeEnum.DIMENSION]: '维度',
   [SemanticTypeEnum.METRIC]: '指标',
   [SemanticTypeEnum.VALUE]: '维度值',
@@ -208,6 +210,7 @@ export type SuggestionDataType = {
 export type HistoryMsgItemType = {
   questionId: number;
   queryText: string;
+  parseInfos: ChatContextType[];
   queryResult: MsgDataType;
   chatId: number;
   createTime: string;

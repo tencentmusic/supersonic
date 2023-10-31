@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { CLS_PREFIX } from '../../common/constants';
 import { DrillDownDimensionType, FilterItemType } from '../../common/type';
 import { queryDrillDownDimensions } from '../../service';
-import { Dropdown } from 'antd';
+import { Dropdown, Menu } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
 
 type Props = {
   modelId: number;
+  metricId?: number;
   drillDownDimension?: DrillDownDimensionType;
   isMetricCard?: boolean;
   originDimensions?: DrillDownDimensionType[];
@@ -17,8 +18,11 @@ type Props = {
 
 const MAX_DIMENSION_COUNT = 20;
 
+const DEFAULT_DIMENSION_COUNT = 5;
+
 const DrillDownDimensions: React.FC<Props> = ({
   modelId,
+  metricId,
   drillDownDimension,
   isMetricCard,
   originDimensions,
@@ -27,12 +31,10 @@ const DrillDownDimensions: React.FC<Props> = ({
 }) => {
   const [dimensions, setDimensions] = useState<DrillDownDimensionType[]>([]);
 
-  const DEFAULT_DIMENSION_COUNT = isMetricCard ? 3 : 5;
-
   const prefixCls = `${CLS_PREFIX}-drill-down-dimensions`;
 
   const initData = async () => {
-    const res = await queryDrillDownDimensions(modelId);
+    const res = await queryDrillDownDimensions(modelId, metricId);
     setDimensions(
       res.data.dimensions
         .filter(
@@ -87,26 +89,27 @@ const DrillDownDimensions: React.FC<Props> = ({
             <div>
               <span>、</span>
               <Dropdown
-                menu={{
-                  items: dimensions.slice(DEFAULT_DIMENSION_COUNT).map(dimension => {
-                    const itemNameClass = classNames({
-                      [`${prefixCls}-menu-item-active`]: drillDownDimension?.id === dimension.id,
-                    });
-                    return {
-                      label: (
-                        <span
-                          className={itemNameClass}
-                          onClick={() => {
-                            onSelectDimension(dimension);
-                          }}
-                        >
-                          {dimension.name}
-                        </span>
-                      ),
-                      key: dimension.id,
-                    };
-                  }),
-                }}
+                overlay={
+                  <Menu>
+                    {dimensions.slice(DEFAULT_DIMENSION_COUNT).map(dimension => {
+                      const itemNameClass = classNames({
+                        [`${prefixCls}-menu-item-active`]: drillDownDimension?.id === dimension.id,
+                      });
+                      return (
+                        <Menu.Item key={dimension.id}>
+                          <span
+                            className={itemNameClass}
+                            onClick={() => {
+                              onSelectDimension(dimension);
+                            }}
+                          >
+                            {dimension.name}
+                          </span>
+                        </Menu.Item>
+                      );
+                    })}
+                  </Menu>
+                }
               >
                 <span>
                   <span className={`${prefixCls}-content-item-name`}>更多</span>

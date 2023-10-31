@@ -39,11 +39,13 @@ const responseInterceptor = async (response: Response) => {
     const contextpath = response.headers.get('contextpath');
     win.location.href = contextpath;
   } else {
-    const data: Result<any> = await response?.clone()?.json?.();
-    if (Number(data.code) === 403) {
-      history.push('/login');
-      return response;
-    }
+    try {
+      const data: Result<any> = await response?.clone()?.json?.();
+      if (Number(data.code) === 403) {
+        history.push('/login');
+        return response;
+      }
+    } catch (e) {}
   }
 
   return response;

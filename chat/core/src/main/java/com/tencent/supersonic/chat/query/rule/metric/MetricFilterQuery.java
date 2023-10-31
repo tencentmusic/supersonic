@@ -6,6 +6,7 @@ import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNum
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
+import com.tencent.supersonic.common.pojo.enums.FilterType;
 import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
@@ -48,7 +49,7 @@ public class MetricFilterQuery extends MetricSemanticQuery {
         Set<String> filterBizName = new HashSet<>();
         parseInfo.getDimensionFilters().forEach(filter ->
                 filterBizName.add(filter.getBizName()));
-        return filterBizName.size() > 1;
+        return FilterType.UNION.equals(parseInfo.getFilterType()) && filterBizName.size() > 1;
     }
 
     @Override

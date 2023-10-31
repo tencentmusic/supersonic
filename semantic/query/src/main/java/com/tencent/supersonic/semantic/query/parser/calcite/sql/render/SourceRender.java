@@ -2,12 +2,12 @@ package com.tencent.supersonic.semantic.query.parser.calcite.sql.render;
 
 
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Constants;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.DataSource;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Dimension;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Identify;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Measure;
-import com.tencent.supersonic.semantic.query.parser.calcite.dsl.Metric;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Constants;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataSource;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Dimension;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Identify;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Measure;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Metric;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.Renderer;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.TableView;
@@ -42,6 +42,7 @@ public class SourceRender extends Renderer {
         List<String> queryMetrics = new ArrayList<>(reqMetrics);
         List<String> queryDimensions = new ArrayList<>(reqDimensions);
         List<String> fieldWhere = new ArrayList<>(fieldWheres);
+        Set<String> extendFields = new HashSet<>();
         if (!fieldWhere.isEmpty()) {
             Set<String> dimensions = new HashSet<>();
             Set<String> metrics = new HashSet<>();
@@ -50,7 +51,9 @@ public class SourceRender extends Renderer {
             queryMetrics = uniqList(queryMetrics);
             queryDimensions.addAll(dimensions);
             queryDimensions = uniqList(queryDimensions);
-            mergeWhere(fieldWhere, dataSet, output, queryMetrics, queryDimensions, datasource, scope, schema, nonAgg);
+            mergeWhere(fieldWhere, dataSet, output, queryMetrics, queryDimensions, extendFields,
+                    datasource, scope,
+                    schema, nonAgg);
         }
 
         for (String metric : queryMetrics) {
@@ -72,9 +75,11 @@ public class SourceRender extends Renderer {
             }
             buildDimension(dimension.contains(Constants.DIMENSION_IDENTIFY) ? dimension : "",
                     dimension.contains(Constants.DIMENSION_IDENTIFY) ? dimension.split(Constants.DIMENSION_IDENTIFY)[1]
-                            : dimension, datasource, schema, nonAgg, dataSet, output, scope);
+                            : dimension, datasource, schema, nonAgg, extendFields, dataSet, output,
+                    scope);
         }
-        SqlNode tableNode = DataSourceNode.build(datasource, scope);
+
+        SqlNode tableNode = DataSourceNode.buildExtend(datasource, extendFields, scope);
         dataSet.setTable(tableNode);
         output.setTable(SemanticNode.buildAs(
                 Constants.DATASOURCE_TABLE_OUT_PREFIX + datasource.getName() + "_" + UUID.randomUUID().toString()
@@ -83,7 +88,8 @@ public class SourceRender extends Renderer {
     }
 
     private static void buildDimension(String alias, String dimension, DataSource datasource, SemanticSchema schema,
-            boolean nonAgg, TableView dataSet, TableView output, SqlValidatorScope scope) throws Exception {
+            boolean nonAgg, Set<String> extendFields, TableView dataSet, TableView output, SqlValidatorScope scope)
+            throws Exception {
         List<Dimension> dimensionList = schema.getDimension().get(datasource.getName());
         boolean isAdd = false;
         if (!CollectionUtils.isEmpty(dimensionList)) {
@@ -127,12 +133,14 @@ public class SourceRender extends Renderer {
         }
         Optional<Dimension> dimensionOptional = getDimensionByName(dimension, datasource);
         if (dimensionOptional.isPresent()) {
+            dataSet.getMeasure().add(DimensionNode.buildArray(dimensionOptional.get(), scope));
+            if (dimensionOptional.get().getDataType().isArray()) {
+                extendFields.add(dimensionOptional.get().getExpr());
+            }
             if (nonAgg) {
-                dataSet.getMeasure().add(DimensionNode.build(dimensionOptional.get(), scope));
                 output.getMeasure().add(DimensionNode.buildName(dimensionOptional.get(), scope));
                 return;
             }
-            dataSet.getMeasure().add(DimensionNode.build(dimensionOptional.get(), scope));
             output.getDimension().add(DimensionNode.buildName(dimensionOptional.get(), scope));
         }
     }
@@ -146,7 +154,8 @@ public class SourceRender extends Renderer {
     }
 
     private static List<SqlNode> getWhereMeasure(List<String> fields, List<String> queryMetrics,
-            List<String> queryDimensions, DataSource datasource, SqlValidatorScope scope, SemanticSchema schema,
+            List<String> queryDimensions, Set<String> extendFields, DataSource datasource, SqlValidatorScope scope,
+            SemanticSchema schema,
             boolean nonAgg) throws Exception {
         Iterator<String> iterator = fields.iterator();
         List<SqlNode> whereNode = new ArrayList<>();
@@ -164,11 +173,6 @@ public class SourceRender extends Renderer {
                     if (!dim.getName().equalsIgnoreCase(where)) {
                         continue;
                     }
-                    if (nonAgg) {
-                        whereNode.addAll(DimensionNode.expand(dim, scope));
-                        isAdd = true;
-                        continue;
-                    }
                     whereNode.addAll(DimensionNode.expand(dim, scope));
                     isAdd = true;
                 }
@@ -183,11 +187,10 @@ public class SourceRender extends Renderer {
             }
             Optional<Dimension> dimensionOptional = getDimensionByName(where, datasource);
             if (dimensionOptional.isPresent()) {
-                if (nonAgg) {
-                    whereNode.add(DimensionNode.build(dimensionOptional.get(), scope));
-                    continue;
+                whereNode.add(DimensionNode.buildArray(dimensionOptional.get(), scope));
+                if (dimensionOptional.get().getDataType().isArray()) {
+                    extendFields.add(dimensionOptional.get().getExpr());
                 }
-                whereNode.add(DimensionNode.build(dimensionOptional.get(), scope));
             }
         }
         return whereNode;
@@ -195,9 +198,11 @@ public class SourceRender extends Renderer {
 
     private static void mergeWhere(List<String> fields, TableView dataSet, TableView outputSet,
             List<String> queryMetrics,
-            List<String> queryDimensions, DataSource datasource, SqlValidatorScope scope, SemanticSchema schema,
+            List<String> queryDimensions, Set<String> extendFields, DataSource datasource, SqlValidatorScope scope,
+            SemanticSchema schema,
             boolean nonAgg) throws Exception {
-        List<SqlNode> whereNode = getWhereMeasure(fields, queryMetrics, queryDimensions, datasource, scope, schema,
+        List<SqlNode> whereNode = getWhereMeasure(fields, queryMetrics, queryDimensions, extendFields, datasource,
+                scope, schema,
                 nonAgg);
         dataSet.getMeasure().addAll(whereNode);
         //getWhere(outputSet,fields,queryMetrics,queryDimensions,datasource,scope,schema);

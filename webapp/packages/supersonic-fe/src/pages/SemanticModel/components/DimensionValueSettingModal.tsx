@@ -46,8 +46,8 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
       return;
     }
     const queryParams = {
+      ...dimensionItem,
       domainId: selectDomainId,
-      id: dimensionItem.id,
       ...fieldsValue,
     };
     const { code, msg } = await updateDimension(queryParams);

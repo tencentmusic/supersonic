@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { CLS_PREFIX } from '../../../common/constants';
 import { MsgDataType } from '../../../common/type';
 import { getToken, isProd } from '../../../utils/utils';
+import { webPageHost } from '../../../common/env';
 
 type Props = {
   id: string | number;
@@ -13,8 +13,6 @@ const DEFAULT_HEIGHT = 800;
 const WebPage: React.FC<Props> = ({ id, data }) => {
   const [pluginUrl, setPluginUrl] = useState('');
   const [height, setHeight] = useState(DEFAULT_HEIGHT);
-
-  const prefixCls = `${CLS_PREFIX}-web-page`;
 
   const {
     name,
@@ -91,6 +89,7 @@ const WebPage: React.FC<Props> = ({ id, data }) => {
         '?',
         `?token=${getToken()}&miniProgram=true&reportName=${name}&filterData=${filterData}&`
       );
+      urlValue = `${webPageHost}${urlValue}`;
     } else {
       const params = Object.keys(valueParams || {}).map(key => `${key}=${valueParams[key]}`);
       if (params.length > 0) {

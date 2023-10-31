@@ -72,12 +72,12 @@
     delete from s2_chat_query
     where question_id = #{questionId,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO">
-    insert into s2_chat_query (question_id, agent_id, create_time, user_name,
+  <insert id="insert" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO" useGeneratedKeys="true" keyProperty="questionId">
+    insert into s2_chat_query (agent_id, create_time, user_name,
       query_state, chat_id, score,
       feedback, query_text, query_result
       )
-    values (#{questionId,jdbcType=BIGINT}, #{agentId,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{userName,jdbcType=VARCHAR},
+    values (#{agentId,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{userName,jdbcType=VARCHAR},
       #{queryState,jdbcType=INTEGER}, #{chatId,jdbcType=BIGINT}, #{score,jdbcType=INTEGER},
       #{feedback,jdbcType=VARCHAR}, #{queryText,jdbcType=LONGVARCHAR}, #{queryResult,jdbcType=LONGVARCHAR}
       )

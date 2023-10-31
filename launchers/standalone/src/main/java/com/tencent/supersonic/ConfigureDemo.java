@@ -6,7 +6,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.AgentConfig;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
-import com.tencent.supersonic.chat.agent.tool.DslTool;
+import com.tencent.supersonic.chat.agent.tool.LLMParserTool;
 import com.tencent.supersonic.chat.agent.tool.RuleQueryTool;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
@@ -228,11 +228,11 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         ));
         agentConfig.getTools().add(ruleQueryTool);
 
-        DslTool dslTool = new DslTool();
-        dslTool.setId("1");
-        dslTool.setType(AgentToolType.DSL);
-        dslTool.setModelIds(Lists.newArrayList(-1L));
-        agentConfig.getTools().add(dslTool);
+        LLMParserTool llmParserTool = new LLMParserTool();
+        llmParserTool.setId("1");
+        llmParserTool.setType(AgentToolType.LLM_S2QL);
+        llmParserTool.setModelIds(Lists.newArrayList(-1L));
+        agentConfig.getTools().add(llmParserTool);
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());
@@ -255,11 +255,33 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
                 "ENTITY_DETAIL", "ENTITY_LIST_FILTER", "ENTITY_ID"));
         agentConfig.getTools().add(ruleQueryTool);
 
-        DslTool dslTool = new DslTool();
-        dslTool.setId("1");
-        dslTool.setType(AgentToolType.DSL);
-        dslTool.setModelIds(Lists.newArrayList(-1L));
-        agentConfig.getTools().add(dslTool);
+        LLMParserTool llmParserTool = new LLMParserTool();
+        llmParserTool.setId("1");
+        llmParserTool.setType(AgentToolType.LLM_S2QL);
+        llmParserTool.setModelIds(Lists.newArrayList(-1L));
+        agentConfig.getTools().add(llmParserTool);
+
+        agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        agentService.createAgent(agent, User.getFakeUser());
+    }
+
+    private void addAgent3() {
+        Agent agent = new Agent();
+        agent.setId(3);
+        agent.setName("cspider");
+        agent.setDescription("cspider数据集的case展示");
+        agent.setStatus(1);
+        agent.setEnableSearch(1);
+        agent.setExamples(Lists.newArrayList("可用“mp4”格式且分辨率低于1000的歌曲的ID是什么？",
+                "“孟加拉语”歌曲的平均评分和分辨率是多少？",
+                "找出所有至少有一首“英文”歌曲的艺术家的名字和作品数量。"));
+        AgentConfig agentConfig = new AgentConfig();
+
+        LLMParserTool llmParserTool = new LLMParserTool();
+        llmParserTool.setId("1");
+        llmParserTool.setType(AgentToolType.LLM_S2QL);
+        llmParserTool.setModelIds(Lists.newArrayList(3L));
+        agentConfig.getTools().add(llmParserTool);
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());
@@ -276,6 +298,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             addPlugin_1();
             addAgent1();
             addAgent2();
+            addAgent3();
             addSampleChats();
             addSampleChats2();
         } catch (Exception e) {
