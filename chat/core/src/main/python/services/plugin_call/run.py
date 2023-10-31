@@ -12,7 +12,7 @@ from plugin_call.prompt_construct import (
     construct_task_prompt,
     plugin_selection_output_parse,
 )
-from util.llm_instance import llm
+from instances.llm_instance import llm
 
 
 def plugin_selection_run(
