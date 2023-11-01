@@ -4,7 +4,7 @@ import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
+import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;

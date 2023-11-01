@@ -1,4 +1,4 @@
-package com.tencent.supersonic.semantic.query.utils;
+package com.tencent.supersonic.common.util;
 
 import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
 import static com.tencent.supersonic.common.pojo.Constants.COMMA;
@@ -10,7 +10,7 @@ import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
 import com.google.common.base.Strings;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
+import com.tencent.supersonic.common.pojo.ItemDateResp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +31,8 @@ import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Component
-public class DateUtils {
+@Data
+public class DateModeUtils {
 
     @Value("${query.parameter.sys.date:sys_imp_date}")
     private String sysDateCol;
@@ -227,6 +229,9 @@ public class DateUtils {
 
 
     public String recentDateStr(ItemDateResp dateDate, DateConf dateInfo) {
+        if (Objects.isNull(dateDate)) {
+            return "";
+        }
         if (DAY.equalsIgnoreCase(dateInfo.getPeriod())) {
             return recentDayStr(dateDate, dateInfo);
         }
@@ -313,6 +318,11 @@ public class DateUtils {
 
         return String.format("(%s >= '%s' and %s <= '%s')", sysDateCol, LocalDate.now().minusDays(2), sysDateCol,
                 LocalDate.now().minusDays(1));
+    }
+
+    public String getDateWhereStr(DateConf dateInfo) {
+        ItemDateResp dateDate = null;
+        return getDateWhereStr(dateInfo, dateDate);
     }
 
     public String getDateWhereStr(DateConf dateInfo, ItemDateResp dateDate) {

@@ -1,4 +1,4 @@
-package com.tencent.supersonic.semantic.api.query.enums;
+package com.tencent.supersonic.common.pojo.enums;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;

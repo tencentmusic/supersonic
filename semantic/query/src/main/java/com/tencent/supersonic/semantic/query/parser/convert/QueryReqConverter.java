@@ -2,6 +2,7 @@ package com.tencent.supersonic.semantic.query.parser.convert;
 
 
 import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
@@ -46,7 +47,6 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class QueryReqConverter {
 
-    public static final String TABLE_PREFIX = "t_";
     @Autowired
     private ModelService domainService;
     @Autowired
@@ -135,7 +135,7 @@ public class QueryReqConverter {
         Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(modelSchemaResp);
         String sql = databaseReq.getSql();
         log.info("convert name to bizName before:{}", sql);
-        String replaceFields = SqlParserReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, false);
+        String replaceFields = SqlParserReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, true);
         log.info("convert name to bizName after:{}", replaceFields);
         databaseReq.setSql(replaceFields);
     }
@@ -202,7 +202,8 @@ public class QueryReqConverter {
     }
 
     public void correctTableName(QueryS2QLReq databaseReq) {
-        String sql = SqlParserReplaceHelper.replaceTable(databaseReq.getSql(), TABLE_PREFIX + databaseReq.getModelId());
+        String sql = SqlParserReplaceHelper.replaceTable(databaseReq.getSql(),
+                Constants.TABLE_PREFIX + databaseReq.getModelId());
         databaseReq.setSql(sql);
     }
 

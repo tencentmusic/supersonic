@@ -41,7 +41,7 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.text.DecimalFormat;
 import java.time.DayOfWeek;

@@ -15,7 +15,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.parser.llm.interpret.MetricOption;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 
 import java.util.Set;
 

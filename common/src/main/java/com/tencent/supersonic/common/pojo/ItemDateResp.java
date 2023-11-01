@@ -1,4 +1,4 @@
-package com.tencent.supersonic.semantic.api.model.response;
+package com.tencent.supersonic.common.pojo;
 
 import java.util.ArrayList;
 import java.util.List;

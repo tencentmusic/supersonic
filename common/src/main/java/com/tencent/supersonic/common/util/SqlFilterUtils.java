@@ -1,14 +1,14 @@
-package com.tencent.supersonic.semantic.query.utils;
+package com.tencent.supersonic.common.util;
 
 import static com.tencent.supersonic.common.pojo.Constants.PARENTHESES_END;
 import static com.tencent.supersonic.common.pojo.Constants.PARENTHESES_START;
 import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 import static com.tencent.supersonic.common.pojo.Constants.SYS_VAR;
 
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
-import com.tencent.supersonic.semantic.api.query.pojo.Criterion;
-import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.Criterion;
+import com.tencent.supersonic.common.pojo.Filter;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

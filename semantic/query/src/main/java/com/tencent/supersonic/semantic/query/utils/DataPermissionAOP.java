@@ -20,8 +20,8 @@ import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaR
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
-import com.tencent.supersonic.semantic.api.query.pojo.Filter;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
