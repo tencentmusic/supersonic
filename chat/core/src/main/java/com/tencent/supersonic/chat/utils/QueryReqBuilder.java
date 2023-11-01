@@ -7,18 +7,20 @@ import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.DateModeUtils;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
-import com.tencent.supersonic.semantic.api.query.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -29,7 +31,9 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -40,6 +44,7 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
@@ -159,50 +164,93 @@ public class QueryReqBuilder {
      * @param queryStructReq
      * @return
      */
-    public static QueryS2QLReq buildS2QLReq(QueryStructReq queryStructReq) {
-
+    public static QueryS2QLReq buildS2QLReq(QueryStructReq queryStructReq) throws JSQLParserException {
         Select select = new Select();
-
-        // Set the select items (columns)
+        //1.Set the select items (columns)
         PlainSelect plainSelect = new PlainSelect();
         List<SelectItem> selectItems = new ArrayList<>();
-
-        selectItems.add(new SelectExpressionItem(new Column("column1")));
-        selectItems.add(new SelectExpressionItem(new Column("column2")));
+        List<String> groups = queryStructReq.getGroups();
+        if (!CollectionUtils.isEmpty(groups)) {
+            for (String group : groups) {
+                selectItems.add(new SelectExpressionItem(new Column(group)));
+            }
+        }
+        List<Aggregator> aggregators = queryStructReq.getAggregators();
+        if (!CollectionUtils.isEmpty(aggregators)) {
+            for (Aggregator aggregator : aggregators) {
+                if (queryStructReq.getNativeQuery()) {
+                    selectItems.add(new SelectExpressionItem(new Column(aggregator.getColumn())));
+                } else {
+                    Function sumFunction = new Function();
+                    AggOperatorEnum func = aggregator.getFunc();
+                    if (AggOperatorEnum.UNKNOWN.equals(func)) {
+                        func = AggOperatorEnum.SUM;
+                    }
+                    sumFunction.setName(func.getOperator());
+                    sumFunction.setParameters(new ExpressionList(new Column(aggregator.getColumn())));
+                    selectItems.add(new SelectExpressionItem(sumFunction));
+                }
+            }
+        }
         plainSelect.setSelectItems(selectItems);
-
-        // Set the table name
-        Table table = new Table("table1");
+        //2.Set the table name
+        Table table = new Table(Constants.TABLE_PREFIX + queryStructReq.getModelId());
         plainSelect.setFromItem(table);
 
-        // Set the order by clause
-        OrderByElement orderByElement = new OrderByElement();
-        orderByElement.setExpression(new Column("column1"));
-        plainSelect.setOrderByElements(Collections.singletonList(orderByElement));
-
-        // Set the group by clause
-        GroupByElement groupByElement = new GroupByElement();
-        groupByElement.addGroupByExpression(new Column("column1"));
-        plainSelect.setGroupByElement(groupByElement);
-
-        // Set the having clause
-        Expression havingExpression = null;
-        try {
-            havingExpression = CCJSqlParserUtil.parseCondExpression("condition2");
-        } catch (JSQLParserException e) {
-            log.error("");
+        //3.Set the order by clause
+        List<Order> orders = queryStructReq.getOrders();
+        if (!CollectionUtils.isEmpty(orders)) {
+            List<OrderByElement> orderByElements = new ArrayList<>();
+            for (Order order : orders) {
+                OrderByElement orderByElement = new OrderByElement();
+                orderByElement.setExpression(new Column(order.getColumn()));
+                orderByElement.setAsc(false);
+                if (Constants.ASC_UPPER.equalsIgnoreCase(order.getDirection())) {
+                    orderByElement.setAsc(true);
+                }
+                orderByElements.add(orderByElement);
+            }
+            plainSelect.setOrderByElements(orderByElements);
         }
-        plainSelect.setHaving(havingExpression);
 
-        // Set the limit clause
-        Limit limit = new Limit();
-        limit.setRowCount(new LongValue(10));
-        plainSelect.setLimit(limit);
+        //4.Set the group by clause
+        if (!CollectionUtils.isEmpty(groups) && !queryStructReq.getNativeQuery()) {
+            GroupByElement groupByElement = new GroupByElement();
+            for (String group : groups) {
+                groupByElement.addGroupByExpression(new Column(group));
+            }
+            plainSelect.setGroupByElement(groupByElement);
+        }
 
+        //7.Set the limit clause
+        if (Objects.nonNull(queryStructReq.getLimit())) {
+            Limit limit = new Limit();
+            limit.setRowCount(new LongValue(queryStructReq.getLimit()));
+            plainSelect.setLimit(limit);
+        }
         select.setSelectBody(plainSelect);
 
+        //5.Set where
+        List<Filter> dimensionFilters = queryStructReq.getDimensionFilters();
+        SqlFilterUtils sqlFilterUtils = ContextUtils.getBean(SqlFilterUtils.class);
+        String whereClause = sqlFilterUtils.getWhereClause(dimensionFilters);
+
+        String sql = select.toString();
+        if (StringUtils.isNotBlank(whereClause)) {
+            Expression expression = CCJSqlParserUtil.parseCondExpression(whereClause);
+            sql = SqlParserAddHelper.addWhere(sql, expression);
+        }
+
+        //6.Set DateInfo
+        DateModeUtils dateModeUtils = ContextUtils.getBean(DateModeUtils.class);
+        String dateWhereStr = dateModeUtils.getDateWhereStr(queryStructReq.getDateInfo());
+        if (StringUtils.isNotBlank(dateWhereStr)) {
+            Expression expression = CCJSqlParserUtil.parseCondExpression(dateWhereStr);
+            sql = SqlParserAddHelper.addWhere(sql, expression);
+        }
+
         QueryS2QLReq result = new QueryS2QLReq();
-        result.setSql(select.toString());
+        result.setSql(sql);
         result.setModelId(queryStructReq.getModelId());
         result.setVariables(new HashMap<>());
         return result;

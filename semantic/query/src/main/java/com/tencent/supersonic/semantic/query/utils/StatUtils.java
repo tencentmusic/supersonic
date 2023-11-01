@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
+import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.enums.QueryTypeBackEnum;
 import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;

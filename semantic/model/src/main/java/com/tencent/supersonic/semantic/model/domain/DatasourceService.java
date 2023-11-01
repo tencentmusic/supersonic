@@ -10,7 +10,7 @@ import com.tencent.supersonic.semantic.api.model.request.DatasourceRelaReq;
 import com.tencent.supersonic.semantic.api.model.request.DatasourceReq;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceRelaResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
-import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
+import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
 import java.util.List;
 import java.util.Map;

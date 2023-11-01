@@ -23,7 +23,7 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;

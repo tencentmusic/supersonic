@@ -15,7 +15,7 @@ import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
 import com.tencent.supersonic.semantic.query.parser.SemanticConverter;
 import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
-import com.tencent.supersonic.semantic.query.utils.DateUtils;
+import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
 import com.tencent.supersonic.semantic.query.utils.SqlGenerateUtils;
 import java.util.ArrayList;
@@ -410,8 +410,8 @@ public class CalculateAggConverter implements SemanticConverter {
     }
 
     private static String getTimeDim(QueryStructReq queryStructCmd) {
-        DateUtils dateUtils = ContextUtils.getContext().getBean(DateUtils.class);
-        return dateUtils.getSysDateCol(queryStructCmd.getDateInfo());
+        DateModeUtils dateModeUtils = ContextUtils.getContext().getBean(DateModeUtils.class);
+        return dateModeUtils.getSysDateCol(queryStructCmd.getDateInfo());
     }
 
     private static String getLimit(QueryStructReq queryStructCmd) {

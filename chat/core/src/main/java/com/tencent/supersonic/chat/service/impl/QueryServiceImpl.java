@@ -53,7 +53,7 @@ import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
