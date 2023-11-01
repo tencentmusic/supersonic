@@ -11,10 +11,11 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
@@ -73,6 +74,8 @@ public class QueryStructUtils {
     private String internalMetricNameSuffix;
     @Value("${metricParser.agg.mysql.lowVersion:5.7}")
     private String mysqlLowVersion;
+    @Value("${metricParser.agg.ck.lowVersion:20.4}")
+    private String ckLowVersion;
     @Autowired
     private SchemaService schemaService;
 
@@ -261,6 +264,11 @@ public class QueryStructUtils {
     public boolean isSupportWith(EngineTypeEnum engineTypeEnum, String version) {
         if (engineTypeEnum.equals(EngineTypeEnum.MYSQL) && Objects.nonNull(version) && version.startsWith(
                 mysqlLowVersion)) {
+            return false;
+        }
+        if (engineTypeEnum.equals(EngineTypeEnum.CLICKHOUSE) && Objects.nonNull(version)
+                && StringUtil.compareVersion(version,
+                ckLowVersion) < 0) {
             return false;
         }
         return true;
