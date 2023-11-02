@@ -9,6 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.plugin.PluginManager;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
@@ -20,18 +21,17 @@ import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -55,6 +55,10 @@ public class MetricInterpretQuery extends PluginSemanticQuery {
         fillAggregator(queryStructReq, parseInfo.getMetrics());
         queryStructReq.setNativeQuery(true);
         SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
+
+        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
+        queryStructReq.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
+
         QueryResultWithSchemaResp queryResultWithSchemaResp = semanticInterpreter.queryByStruct(queryStructReq, user);
         String text = generateTableText(queryResultWithSchemaResp);
         Map<String, Object> properties = parseInfo.getProperties();
@@ -76,7 +80,7 @@ public class MetricInterpretQuery extends PluginSemanticQuery {
     }
 
     private String replaceText(String text, List<SchemaElementMatch> schemaElementMatches,
-                               Map<String, String> replacedMap) {
+            Map<String, String> replacedMap) {
         if (CollectionUtils.isEmpty(schemaElementMatches)) {
             return text;
         }

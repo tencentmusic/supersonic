@@ -30,18 +30,19 @@ import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.MetricInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ModelInfo;
 import com.tencent.supersonic.chat.config.AggregatorConfig;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.RatioOverType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.text.DecimalFormat;
 import java.time.DayOfWeek;
@@ -262,8 +263,10 @@ public class SemanticService {
 
         QueryResultWithSchemaResp queryResultWithColumns = null;
         try {
-            queryResultWithColumns = semanticInterpreter.queryByStruct(
-                    QueryReqBuilder.buildStructReq(semanticParseInfo), user);
+            QueryStructReq queryStructReq = QueryReqBuilder.buildStructReq(semanticParseInfo);
+            OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
+            queryStructReq.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
+            queryResultWithColumns = semanticInterpreter.queryByStruct(queryStructReq, user);
         } catch (Exception e) {
             log.warn("setMainModel queryByStruct error, e:", e);
         }
@@ -425,7 +428,12 @@ public class SemanticService {
 
         queryStructReq.setGroups(new ArrayList<>(Arrays.asList(dateField)));
         queryStructReq.setDateInfo(getRatioDateConf(aggOperatorEnum, semanticParseInfo, results));
+
+        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
+        queryStructReq.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
+
         QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
+
         if (Objects.nonNull(queryResp) && !CollectionUtils.isEmpty(queryResp.getResultList())) {
 
             Map<String, Object> result = queryResp.getResultList().get(0);

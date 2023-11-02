@@ -171,11 +171,10 @@ public class FuzzyNameMapper extends BaseMapper {
         if (CollectionUtils.isEmpty(elements)) {
             return new HashSet<>();
         }
-        Set<Long> regElementSet = elements.stream()
+        return elements.stream()
                 .filter(elementMatch -> schemaElementType.equals(elementMatch.getElement().getType()))
                 .map(elementMatch -> elementMatch.getElement().getId())
                 .collect(Collectors.toSet());
-        return regElementSet;
     }
 
 }

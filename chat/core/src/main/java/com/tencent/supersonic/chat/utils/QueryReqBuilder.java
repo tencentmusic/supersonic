@@ -11,10 +11,6 @@ import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
-import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.DateModeUtils;
-import com.tencent.supersonic.common.util.SqlFilterUtils;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
@@ -22,7 +18,6 @@ import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,22 +25,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.GroupByElement;
-import net.sf.jsqlparser.statement.select.Limit;
-import net.sf.jsqlparser.statement.select.OrderByElement;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SelectItem;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
@@ -157,104 +136,6 @@ public class QueryReqBuilder {
         }
         queryS2QLReq.setModelId(modelId);
         return queryS2QLReq;
-    }
-
-    /**
-     * convert queryStructReq to QueryS2QLReq
-     *
-     * @param queryStructReq
-     * @return
-     */
-    public static QueryS2QLReq buildS2QLReq(QueryStructReq queryStructReq) throws JSQLParserException {
-        Select select = new Select();
-        //1.Set the select items (columns)
-        PlainSelect plainSelect = new PlainSelect();
-        List<SelectItem> selectItems = new ArrayList<>();
-        List<String> groups = queryStructReq.getGroups();
-        if (!CollectionUtils.isEmpty(groups)) {
-            for (String group : groups) {
-                selectItems.add(new SelectExpressionItem(new Column(group)));
-            }
-        }
-        List<Aggregator> aggregators = queryStructReq.getAggregators();
-        if (!CollectionUtils.isEmpty(aggregators)) {
-            for (Aggregator aggregator : aggregators) {
-                if (queryStructReq.getNativeQuery()) {
-                    selectItems.add(new SelectExpressionItem(new Column(aggregator.getColumn())));
-                } else {
-                    Function sumFunction = new Function();
-                    AggOperatorEnum func = aggregator.getFunc();
-                    if (AggOperatorEnum.UNKNOWN.equals(func)) {
-                        func = AggOperatorEnum.SUM;
-                    }
-                    sumFunction.setName(func.getOperator());
-                    sumFunction.setParameters(new ExpressionList(new Column(aggregator.getColumn())));
-                    selectItems.add(new SelectExpressionItem(sumFunction));
-                }
-            }
-        }
-        plainSelect.setSelectItems(selectItems);
-        //2.Set the table name
-        Table table = new Table(Constants.TABLE_PREFIX + queryStructReq.getModelId());
-        plainSelect.setFromItem(table);
-
-        //3.Set the order by clause
-        List<Order> orders = queryStructReq.getOrders();
-        if (!CollectionUtils.isEmpty(orders)) {
-            List<OrderByElement> orderByElements = new ArrayList<>();
-            for (Order order : orders) {
-                OrderByElement orderByElement = new OrderByElement();
-                orderByElement.setExpression(new Column(order.getColumn()));
-                orderByElement.setAsc(false);
-                if (Constants.ASC_UPPER.equalsIgnoreCase(order.getDirection())) {
-                    orderByElement.setAsc(true);
-                }
-                orderByElements.add(orderByElement);
-            }
-            plainSelect.setOrderByElements(orderByElements);
-        }
-
-        //4.Set the group by clause
-        if (!CollectionUtils.isEmpty(groups) && !queryStructReq.getNativeQuery()) {
-            GroupByElement groupByElement = new GroupByElement();
-            for (String group : groups) {
-                groupByElement.addGroupByExpression(new Column(group));
-            }
-            plainSelect.setGroupByElement(groupByElement);
-        }
-
-        //7.Set the limit clause
-        if (Objects.nonNull(queryStructReq.getLimit())) {
-            Limit limit = new Limit();
-            limit.setRowCount(new LongValue(queryStructReq.getLimit()));
-            plainSelect.setLimit(limit);
-        }
-        select.setSelectBody(plainSelect);
-
-        //5.Set where
-        List<Filter> dimensionFilters = queryStructReq.getDimensionFilters();
-        SqlFilterUtils sqlFilterUtils = ContextUtils.getBean(SqlFilterUtils.class);
-        String whereClause = sqlFilterUtils.getWhereClause(dimensionFilters);
-
-        String sql = select.toString();
-        if (StringUtils.isNotBlank(whereClause)) {
-            Expression expression = CCJSqlParserUtil.parseCondExpression(whereClause);
-            sql = SqlParserAddHelper.addWhere(sql, expression);
-        }
-
-        //6.Set DateInfo
-        DateModeUtils dateModeUtils = ContextUtils.getBean(DateModeUtils.class);
-        String dateWhereStr = dateModeUtils.getDateWhereStr(queryStructReq.getDateInfo());
-        if (StringUtils.isNotBlank(dateWhereStr)) {
-            Expression expression = CCJSqlParserUtil.parseCondExpression(dateWhereStr);
-            sql = SqlParserAddHelper.addWhere(sql, expression);
-        }
-
-        QueryS2QLReq result = new QueryS2QLReq();
-        result.setSql(sql);
-        result.setModelId(queryStructReq.getModelId());
-        result.setVariables(new HashMap<>());
-        return result;
     }
 
     private static List<Aggregator> getAggregatorByMetric(AggregateTypeEnum aggregateType, SchemaElement metric) {

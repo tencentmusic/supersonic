@@ -1,20 +1,27 @@
 package com.tencent.supersonic.chat.utils;
 
+import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
+import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
+import static com.tencent.supersonic.common.pojo.Constants.COMMA;
+import static com.tencent.supersonic.common.pojo.Constants.SPACE;
+import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE_DOUBLE;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.config.DefaultMetric;
 import com.tencent.supersonic.chat.config.Dim4Dict;
-import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.Filter;
-import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
-
+import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,18 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import static com.tencent.supersonic.common.pojo.Constants.SPACE;
-import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
-import static com.tencent.supersonic.common.pojo.Constants.COMMA;
-import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
-import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE_DOUBLE;
 
 @Slf4j
 @Component
@@ -55,7 +55,11 @@ public class DictQueryHelper {
         List<String> data = new ArrayList<>();
         QueryStructReq queryStructCmd = generateQueryStructCmd(modelId, defaultMetricDesc, dim4Dict);
         try {
+            OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
+            queryStructCmd.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
+
             QueryResultWithSchemaResp queryResultWithColumns = semanticInterpreter.queryByStruct(queryStructCmd, user);
+
             log.info("fetchDimValueSingle sql:{}", queryResultWithColumns.getSql());
             String nature = String.format("_%d_%d", modelId, dim4Dict.getDimId());
             String dimNameRewrite = rewriteDimName(queryResultWithColumns.getColumns(), dim4Dict.getBizName());

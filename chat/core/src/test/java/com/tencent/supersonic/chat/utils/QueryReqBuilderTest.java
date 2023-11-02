@@ -14,7 +14,6 @@ import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import net.sf.jsqlparser.JSQLParserException;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -26,7 +25,7 @@ import org.mockito.Mockito;
 class QueryReqBuilderTest {
 
     @Test
-    void buildS2QLReq() throws JSQLParserException {
+    void buildS2QLReq() {
         init();
         QueryStructReq queryStructReq = new QueryStructReq();
         queryStructReq.setModelId(1L);
@@ -50,13 +49,13 @@ class QueryReqBuilderTest {
         orders.add(order);
         queryStructReq.setOrders(orders);
 
-        QueryS2QLReq queryS2QLReq = QueryReqBuilder.buildS2QLReq(queryStructReq);
+        QueryS2QLReq queryS2QLReq = queryStructReq.convert(queryStructReq);
         Assert.assertEquals(
                 "SELECT department, SUM(pv) FROM t_1 WHERE (sys_imp_date IN ('2023-08-01')) "
                         + "GROUP BY department ORDER BY uv LIMIT 2000", queryS2QLReq.getSql());
 
         queryStructReq.setNativeQuery(true);
-        queryS2QLReq = QueryReqBuilder.buildS2QLReq(queryStructReq);
+        queryS2QLReq = queryStructReq.convert(queryStructReq);
         Assert.assertEquals(
                 "SELECT department, pv FROM t_1 WHERE (sys_imp_date IN ('2023-08-01')) "
                         + "ORDER BY uv LIMIT 2000",
