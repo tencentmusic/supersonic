@@ -6,12 +6,12 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.DataAddEvent;
-import com.tencent.supersonic.common.pojo.DataDeleteEvent;
-import com.tencent.supersonic.common.pojo.DataUpdateEvent;
+import com.tencent.supersonic.common.pojo.DataItem;
+import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
-import com.tencent.supersonic.common.pojo.enums.DictWordType;
+import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
@@ -61,7 +61,7 @@ public class MetricServiceImpl implements MetricService {
     private ChatGptHelper chatGptHelper;
 
     @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
+    private ApplicationEventPublisher eventPublisher;
 
     public MetricServiceImpl(MetricRepository metricRepository,
                              ModelService modelService,
@@ -80,10 +80,7 @@ public class MetricServiceImpl implements MetricService {
         metricReq.createdBy(user.getName());
         MetricDO metricDO = MetricConverter.convert2MetricDO(metricReq);
         metricRepository.createMetric(metricDO);
-        //动态更新字典
-        String type = DictWordType.METRIC.getType();
-        applicationEventPublisher.publishEvent(
-                new DataAddEvent(this, metricDO.getName(), metricDO.getModelId(), metricDO.getId(), type));
+        sendEventBatch(Lists.newArrayList(metricDO), EventType.ADD);
     }
 
     @Override
@@ -106,6 +103,64 @@ public class MetricServiceImpl implements MetricService {
         List<MetricDO> metricDOS = metricToInsert.stream().peek(metric -> metric.createdBy(user.getName()))
                 .map(MetricConverter::convert2MetricDO).collect(Collectors.toList());
         metricRepository.createMetricBatch(metricDOS);
+        sendEventBatch(metricDOS, EventType.ADD);
+    }
+
+    @Override
+    public void updateExprMetric(MetricReq metricReq, User user) {
+        checkParam(metricReq);
+        checkExist(Lists.newArrayList(metricReq));
+        metricReq.updatedBy(user.getName());
+        MetricDO metricDO = metricRepository.getMetricById(metricReq.getId());
+        String oldName = metricDO.getName();
+        MetricConverter.convert(metricDO, metricReq);
+        metricRepository.updateMetric(metricDO);
+        if (!oldName.equals(metricDO.getName())) {
+            DataItem dataItem = getDataItem(metricDO);
+            dataItem.setName(oldName);
+            dataItem.setNewName(metricDO.getName());
+            sendEvent(getDataItem(metricDO), EventType.UPDATE);
+        }
+    }
+
+    @Override
+    public void batchUpdateStatus(MetaBatchReq metaBatchReq, User user) {
+        if (CollectionUtils.isEmpty(metaBatchReq.getIds())) {
+            return;
+        }
+        MetricFilter metricFilter = new MetricFilter();
+        metricFilter.setIds(metaBatchReq.getIds());
+        List<MetricDO> metricDOS = metricRepository.getMetric(metricFilter);
+        if (CollectionUtils.isEmpty(metricDOS)) {
+            return;
+        }
+        metricDOS = metricDOS.stream()
+                .peek(metricDO -> {
+                    metricDO.setStatus(metaBatchReq.getStatus());
+                    metricDO.setUpdatedAt(new Date());
+                    metricDO.setUpdatedBy(user.getName());
+                })
+                .collect(Collectors.toList());
+        metricRepository.batchUpdateStatus(metricDOS);
+        if (StatusEnum.OFFLINE.getCode().equals(metaBatchReq.getStatus())
+                || StatusEnum.DELETED.getCode().equals(metaBatchReq.getStatus())) {
+            sendEventBatch(metricDOS, EventType.DELETE);
+        } else if (StatusEnum.ONLINE.getCode().equals(metaBatchReq.getStatus())) {
+            sendEventBatch(metricDOS, EventType.ADD);
+        }
+    }
+
+    @Override
+    public void deleteMetric(Long id, User user) {
+        MetricDO metricDO = metricRepository.getMetricById(id);
+        if (metricDO == null) {
+            throw new RuntimeException(String.format("the metric %s not exist", id));
+        }
+        metricDO.setStatus(StatusEnum.DELETED.getCode());
+        metricDO.setUpdatedAt(new Date());
+        metricDO.setUpdatedBy(user.getName());
+        metricRepository.updateMetric(metricDO);
+        sendEventBatch(Lists.newArrayList(metricDO), EventType.DELETE);
     }
 
     @Override
@@ -186,58 +241,6 @@ public class MetricServiceImpl implements MetricService {
             return null;
         }
         return MetricConverter.convert2MetricResp(metricDO, new HashMap<>());
-    }
-
-    @Override
-    public void updateExprMetric(MetricReq metricReq, User user) {
-        checkParam(metricReq);
-        checkExist(Lists.newArrayList(metricReq));
-        metricReq.updatedBy(user.getName());
-        MetricDO metricDO = metricRepository.getMetricById(metricReq.getId());
-        MetricConverter.convert(metricDO, metricReq);
-        metricRepository.updateMetric(metricDO);
-        //动态更新字典
-        String type = DictWordType.METRIC.getType();
-        applicationEventPublisher.publishEvent(
-                new DataUpdateEvent(this, metricDO.getName(), metricReq.getName(),
-                        metricDO.getModelId(), metricDO.getId(), type));
-    }
-
-    @Override
-    public void batchUpdateStatus(MetaBatchReq metaBatchReq, User user) {
-        if (CollectionUtils.isEmpty(metaBatchReq.getIds())) {
-            return;
-        }
-        MetricFilter metricFilter = new MetricFilter();
-        metricFilter.setIds(metaBatchReq.getIds());
-        List<MetricDO> metricDOS = metricRepository.getMetric(metricFilter);
-        if (CollectionUtils.isEmpty(metricDOS)) {
-            return;
-        }
-        metricDOS = metricDOS.stream()
-                .peek(metricDO -> {
-                    metricDO.setStatus(metaBatchReq.getStatus());
-                    metricDO.setUpdatedAt(new Date());
-                    metricDO.setUpdatedBy(user.getName());
-                })
-                .collect(Collectors.toList());
-        metricRepository.batchUpdateStatus(metricDOS);
-    }
-
-    @Override
-    public void deleteMetric(Long id, User user) {
-        MetricDO metricDO = metricRepository.getMetricById(id);
-        if (metricDO == null) {
-            throw new RuntimeException(String.format("the metric %s not exist", id));
-        }
-        metricDO.setStatus(StatusEnum.DELETED.getCode());
-        metricDO.setUpdatedAt(new Date());
-        metricDO.setUpdatedBy(user.getName());
-        metricRepository.updateMetric(metricDO);
-        //动态更新字典
-        String type = DictWordType.METRIC.getType();
-        applicationEventPublisher.publishEvent(
-                new DataDeleteEvent(this, metricDO.getName(), metricDO.getModelId(), metricDO.getId(), type));
     }
 
     @Override
@@ -334,5 +337,21 @@ public class MetricServiceImpl implements MetricService {
         return metricResps;
     }
 
+    private void sendEventBatch(List<MetricDO> metricDOS, EventType eventType) {
+        List<DataItem> dataItems = metricDOS.stream().map(this::getDataItem)
+                .collect(Collectors.toList());
+        eventPublisher.publishEvent(new DataEvent(this, dataItems, eventType));
+    }
+
+    private void sendEvent(DataItem dataItem, EventType eventType) {
+        eventPublisher.publishEvent(new DataEvent(this,
+                Lists.newArrayList(dataItem), eventType));
+    }
+
+    private DataItem getDataItem(MetricDO metricDO) {
+        return DataItem.builder().id(metricDO.getId()).name(metricDO.getName())
+                .bizName(metricDO.getBizName())
+                .modelId(metricDO.getModelId()).type(TypeEnums.METRIC).build();
+    }
 
 }

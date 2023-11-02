@@ -62,7 +62,7 @@
         type_params
     </sql>
 
-    <insert id="batchInsert" parameterType="java.util.List">
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         insert into s2_metric (model_id, name,
         biz_name, description, type,status,sensitive_level,
         created_at, created_by, updated_at,

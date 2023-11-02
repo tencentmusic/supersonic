@@ -64,7 +64,7 @@
     created_at, created_by, updated_by, updated_at, semantic_type
     </sql>
 
-    <insert id="batchInsert" parameterType="java.util.List">
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         insert into s2_dimension (name, biz_name,
         description, status, model_id,
         type, type_params, expr,

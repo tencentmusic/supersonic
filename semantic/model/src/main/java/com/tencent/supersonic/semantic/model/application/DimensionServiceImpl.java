@@ -7,11 +7,11 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.DataAddEvent;
-import com.tencent.supersonic.common.pojo.DataDeleteEvent;
-import com.tencent.supersonic.common.pojo.DataUpdateEvent;
-import com.tencent.supersonic.common.pojo.enums.DictWordType;
+import com.tencent.supersonic.common.pojo.DataItem;
+import com.tencent.supersonic.common.pojo.DataEvent;
+import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.DatasourceDetail;
@@ -63,7 +63,7 @@ public class DimensionServiceImpl implements DimensionService {
     private DatabaseService databaseService;
 
     @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
+    private ApplicationEventPublisher eventPublisher;
 
 
     public DimensionServiceImpl(DimensionRepository dimensionRepository,
@@ -84,9 +84,7 @@ public class DimensionServiceImpl implements DimensionService {
         dimensionReq.createdBy(user.getName());
         DimensionDO dimensionDO = DimensionConverter.convert2DimensionDO(dimensionReq);
         dimensionRepository.createDimension(dimensionDO);
-        String type = DictWordType.DIMENSION.getType();
-        applicationEventPublisher.publishEvent(
-                new DataAddEvent(this, dimensionDO.getName(), dimensionDO.getModelId(), dimensionDO.getId(), type));
+        sendEventBatch(Lists.newArrayList(dimensionDO), EventType.ADD);
     }
 
     @Override
@@ -104,18 +102,15 @@ public class DimensionServiceImpl implements DimensionService {
                 .filter(dimension -> !bizNameMap.containsKey(dimension.getBizName())
                         && !nameMap.containsKey(dimension.getName()))
                 .collect(Collectors.toList());
-        saveDimensionBatch(dimensionToInsert, user);
-    }
-
-    private void saveDimensionBatch(List<DimensionReq> dimensionReqs, User user) {
-        if (CollectionUtils.isEmpty(dimensionReqs)) {
+        if (CollectionUtils.isEmpty(dimensionToInsert)) {
             return;
         }
-        dimensionReqs = dimensionReqs.stream().peek(dimension ->
-                dimension.createdBy(user.getName())).collect(Collectors.toList());
-        List<DimensionDO> dimensionDOS = dimensionReqs.stream().map(DimensionConverter::convert2DimensionDO)
+        List<DimensionDO> dimensionDOS = dimensionToInsert.stream().peek(dimension ->
+                        dimension.createdBy(user.getName()))
+                .map(DimensionConverter::convert2DimensionDO)
                 .collect(Collectors.toList());
         dimensionRepository.createDimensionBatch(dimensionDOS);
+        sendEventBatch(dimensionDOS, EventType.ADD);
     }
 
     @Override
@@ -123,12 +118,14 @@ public class DimensionServiceImpl implements DimensionService {
         checkExist(Lists.newArrayList(dimensionReq));
         DimensionDO dimensionDO = dimensionRepository.getDimensionById(dimensionReq.getId());
         dimensionReq.updatedBy(user.getName());
+        String oldName = dimensionDO.getName();
         DimensionConverter.convert(dimensionDO, dimensionReq);
         dimensionRepository.updateDimension(dimensionDO);
-        String type = DictWordType.DIMENSION.getType();
-        applicationEventPublisher.publishEvent(
-                new DataUpdateEvent(this, dimensionDO.getName(), dimensionReq.getName(),
-                        dimensionDO.getModelId(), dimensionDO.getId(), type));
+        if (!oldName.equals(dimensionDO.getName())) {
+            sendEvent(DataItem.builder().modelId(dimensionDO.getModelId()).newName(dimensionReq.getName())
+                    .name(oldName).type(TypeEnums.DIMENSION)
+                    .id(dimensionDO.getId()).build(), EventType.UPDATE);
+        }
     }
 
     @Override
@@ -150,6 +147,25 @@ public class DimensionServiceImpl implements DimensionService {
                 })
                 .collect(Collectors.toList());
         dimensionRepository.batchUpdateStatus(dimensionDOS);
+        if (StatusEnum.OFFLINE.getCode().equals(metaBatchReq.getStatus())
+                || StatusEnum.DELETED.getCode().equals(metaBatchReq.getStatus())) {
+            sendEventBatch(dimensionDOS, EventType.DELETE);
+        } else if (StatusEnum.ONLINE.getCode().equals(metaBatchReq.getStatus())) {
+            sendEventBatch(dimensionDOS, EventType.ADD);
+        }
+    }
+
+    @Override
+    public void deleteDimension(Long id, User user) {
+        DimensionDO dimensionDO = dimensionRepository.getDimensionById(id);
+        if (dimensionDO == null) {
+            throw new RuntimeException(String.format("the dimension %s not exist", id));
+        }
+        dimensionDO.setStatus(StatusEnum.DELETED.getCode());
+        dimensionDO.setUpdatedAt(new Date());
+        dimensionDO.setUpdatedBy(user.getName());
+        dimensionRepository.updateDimension(dimensionDO);
+        sendEventBatch(Lists.newArrayList(dimensionDO), EventType.DELETE);
     }
 
     @Override
@@ -212,22 +228,6 @@ public class DimensionServiceImpl implements DimensionService {
                     .collect(Collectors.toList());
         }
         return dimensionResps;
-    }
-
-    @Override
-    public void deleteDimension(Long id, User user) {
-        DimensionDO dimensionDO = dimensionRepository.getDimensionById(id);
-        if (dimensionDO == null) {
-            throw new RuntimeException(String.format("the dimension %s not exist", id));
-        }
-        dimensionDO.setStatus(StatusEnum.DELETED.getCode());
-        dimensionDO.setUpdatedAt(new Date());
-        dimensionDO.setUpdatedBy(user.getName());
-        dimensionRepository.updateDimension(dimensionDO);
-        //动态更新字典
-        String type = DictWordType.DIMENSION.getType();
-        applicationEventPublisher.publishEvent(
-                new DataDeleteEvent(this, dimensionDO.getName(), dimensionDO.getModelId(), dimensionDO.getId(), type));
     }
 
     @Override
@@ -319,4 +319,19 @@ public class DimensionServiceImpl implements DimensionService {
             }
         }
     }
+
+    private void sendEventBatch(List<DimensionDO> dimensionDOS, EventType eventType) {
+        List<DataItem> dataItems = dimensionDOS.stream().map(dimensionDO ->
+                        DataItem.builder().id(dimensionDO.getId()).name(dimensionDO.getName())
+                                .modelId(dimensionDO.getModelId()).type(TypeEnums.DIMENSION).build())
+                .collect(Collectors.toList());
+        eventPublisher.publishEvent(new DataEvent(this, dataItems, eventType));
+    }
+
+    private void sendEvent(DataItem dataItem, EventType eventType) {
+        eventPublisher.publishEvent(new DataEvent(this,
+                Lists.newArrayList(dataItem), eventType));
+    }
+
+
 }
