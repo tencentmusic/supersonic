@@ -5,6 +5,7 @@ import static com.tencent.supersonic.common.pojo.Constants.MINUS;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthResGrp;
@@ -15,13 +16,14 @@ import com.tencent.supersonic.auth.api.authorization.service.AuthService;
 import com.tencent.supersonic.common.pojo.QueryAuthorization;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
-import com.tencent.supersonic.semantic.api.query.pojo.Filter;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -271,8 +274,11 @@ public class DataPermissionAOP {
 
     private Set<String> getHighSensitiveColsByModelId(Long modelId) {
         Set<String> highSensitiveCols = new HashSet<>();
-        List<DimensionResp> highSensitiveDimensions = dimensionService.getHighSensitiveDimension(modelId);
-        List<MetricResp> highSensitiveMetrics = metricService.getHighSensitiveMetric(modelId);
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setModelIds(Lists.newArrayList(modelId));
+        metaFilter.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
+        List<DimensionResp> highSensitiveDimensions = dimensionService.getDimensions(metaFilter);
+        List<MetricResp> highSensitiveMetrics = metricService.getMetrics(metaFilter);
         if (!CollectionUtils.isEmpty(highSensitiveDimensions)) {
             highSensitiveDimensions.stream().forEach(dim -> highSensitiveCols.add(dim.getBizName()));
         }
@@ -387,7 +393,7 @@ public class DataPermissionAOP {
             modelNameCn = modelInfos.get(0).getName();
         }
 
-        List<DimensionResp> dimensionDescList = dimensionService.getDimensions(queryStructReq.getModelId());
+        List<DimensionResp> dimensionDescList = dimensionService.getDimensions(new MetaFilter(modelIds));
         String finalDomainNameCn = modelNameCn;
         dimensionDescList.stream().filter(dim -> need2Apply.contains(dim.getBizName()))
                 .forEach(dim -> nameCnSet.add(finalDomainNameCn + MINUS + dim.getName()));

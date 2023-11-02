@@ -40,6 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.ParameterizedTypeReference;
@@ -68,6 +69,12 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
 
     @Override
     public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user) {
+        QueryS2QLReq queryS2QLReq = queryStructReq.convert(queryStructReq);
+        if (queryStructReq.isUseS2qlSwitch() && StringUtils.isNotBlank(queryS2QLReq.getSql())) {
+            log.info("queryStructReq convert to sql:{},queryStructReq:{}", queryS2QLReq.getSql(), queryStructReq);
+            return queryByS2QL(queryS2QLReq, user);
+        }
+
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         return searchByRestTemplate(
                 defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getSearchByStructPath(),

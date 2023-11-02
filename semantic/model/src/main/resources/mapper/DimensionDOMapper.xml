@@ -107,7 +107,7 @@
     delete from s2_dimension
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO">
+  <insert id="insert" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO" useGeneratedKeys="true" keyProperty="id">
     insert into s2_dimension (id, model_id, datasource_id, 
       name, biz_name, description, 
       status, sensitive_level, type, 

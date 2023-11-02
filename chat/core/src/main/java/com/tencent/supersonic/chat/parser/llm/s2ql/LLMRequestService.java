@@ -23,6 +23,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -134,18 +135,18 @@ public class LLMRequestService {
     }
 
     public LLMResp requestLLM(LLMReq llmReq, Long modelId) {
-        String questUrl = llmParserConfig.getUrl() + llmParserConfig.getQueryToSqlPath();
         long startTime = System.currentTimeMillis();
         log.info("requestLLM request, modelId:{},llmReq:{}", modelId, llmReq);
         try {
+            URL url = new URL(new URL(llmParserConfig.getUrl()), llmParserConfig.getQueryToSqlPath());
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>(JsonUtil.toString(llmReq), headers);
-            ResponseEntity<LLMResp> responseEntity = restTemplate.exchange(questUrl, HttpMethod.POST, entity,
+            ResponseEntity<LLMResp> responseEntity = restTemplate.exchange(url.toString(), HttpMethod.POST, entity,
                     LLMResp.class);
 
             log.info("requestLLM response,cost:{}, questUrl:{} \n entity:{} \n body:{}",
-                    System.currentTimeMillis() - startTime, questUrl, entity, responseEntity.getBody());
+                    System.currentTimeMillis() - startTime, url.toString(), entity, responseEntity.getBody());
             return responseEntity.getBody();
         } catch (Exception e) {
             log.error("requestLLM error", e);
@@ -191,7 +192,7 @@ public class LLMRequestService {
                 String dataFormatType = fieldNameToDataFormatType.get(fieldName);
                 if (DataFormatTypeEnum.DECIMAL.getName().equalsIgnoreCase(dataFormatType)
                         || DataFormatTypeEnum.PERCENT.getName().equalsIgnoreCase(dataFormatType)) {
-                    String format = String.format("%s 的字段类型是 %s", fieldName, "小数; ");
+                    String format = String.format("%s的计量单位是%s", fieldName, "小数; ");
                     extraInfoSb.append(format);
                 }
             }

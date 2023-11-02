@@ -14,6 +14,7 @@ import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaR
 import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import com.tencent.supersonic.semantic.query.service.AuthCommonService;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -169,8 +170,8 @@ public class S2QLDataAspect {
         if (!CollectionUtils.isEmpty(modelInfos)) {
             modelNameCn = modelInfos.get(0).getName();
         }
-
-        List<DimensionResp> dimensionDescList = dimensionService.getDimensions(queryS2QLReq.getModelId());
+        MetaFilter metaFilter = new MetaFilter(modelIds);
+        List<DimensionResp> dimensionDescList = dimensionService.getDimensions(metaFilter);
         String finalDomainNameCn = modelNameCn;
         dimensionDescList.stream().filter(dim -> need2Apply.contains(dim.getBizName()))
                 .forEach(dim -> nameCnSet.add(finalDomainNameCn + MINUS + dim.getName()));

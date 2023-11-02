@@ -2,6 +2,7 @@ package com.tencent.supersonic.semantic.model.domain.utils;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
@@ -23,37 +24,37 @@ import org.springframework.util.CollectionUtils;
 
 public class DimensionConverter {
 
-    public static Dimension convert(DimensionReq dimensionReq) {
-        Dimension dimension = new Dimension();
-        BeanUtils.copyProperties(dimensionReq, dimension);
-        return dimension;
-    }
-
-    public static DimensionDO convert(DimensionDO dimensionDO, Dimension dimension) {
-        BeanMapper.mapper(dimension, dimensionDO);
-        dimensionDO.setDefaultValues(JSONObject.toJSONString(dimension.getDefaultValues()));
-        if (!CollectionUtils.isEmpty(dimension.getDimValueMaps())) {
-            dimensionDO.setDimValueMaps(JSONObject.toJSONString(dimension.getDimValueMaps()));
+    public static DimensionDO convert(DimensionDO dimensionDO, DimensionReq dimensionReq) {
+        BeanMapper.mapper(dimensionReq, dimensionDO);
+        if (dimensionReq.getDefaultValues() != null) {
+            dimensionDO.setDefaultValues(JSONObject.toJSONString(dimensionReq.getDefaultValues()));
+        }
+        if (!CollectionUtils.isEmpty(dimensionReq.getDimValueMaps())) {
+            dimensionDO.setDimValueMaps(JSONObject.toJSONString(dimensionReq.getDimValueMaps()));
         } else {
             dimensionDO.setDimValueMaps(JSONObject.toJSONString(new ArrayList<>()));
         }
-        if (Objects.nonNull(dimension.getDataType())) {
-            dimensionDO.setDataType(dimension.getDataType().getType());
+        if (Objects.nonNull(dimensionReq.getDataType())) {
+            dimensionDO.setDataType(dimensionReq.getDataType().getType());
         }
         return dimensionDO;
     }
 
-    public static DimensionDO convert2DimensionDO(Dimension dimension) {
+    public static DimensionDO convert2DimensionDO(DimensionReq dimensionReq) {
         DimensionDO dimensionDO = new DimensionDO();
-        BeanUtils.copyProperties(dimension, dimensionDO);
-        dimensionDO.setDefaultValues(JSONObject.toJSONString(dimension.getDefaultValues()));
-        dimensionDO.setDimValueMaps(JSONObject.toJSONString(dimension.getDimValueMaps()));
-        if (Objects.nonNull(dimension.getDataType())) {
-            dimensionDO.setDataType(dimension.getDataType().getType());
+        BeanMapper.mapper(dimensionReq, dimensionDO);
+        if (dimensionReq.getDefaultValues() != null) {
+            dimensionDO.setDefaultValues(JSONObject.toJSONString(dimensionReq.getDefaultValues()));
         }
+        if (dimensionReq.getDimValueMaps() != null) {
+            dimensionDO.setDimValueMaps(JSONObject.toJSONString(dimensionReq.getDimValueMaps()));
+        }
+        if (Objects.nonNull(dimensionReq.getDataType())) {
+            dimensionDO.setDataType(dimensionReq.getDataType().getType());
+        }
+        dimensionDO.setStatus(StatusEnum.ONLINE.getCode());
         return dimensionDO;
     }
-
 
     public static DimensionResp convert2DimensionResp(DimensionDO dimensionDO,
                                                       Map<Long, String> fullPathMap,

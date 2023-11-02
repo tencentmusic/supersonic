@@ -68,3 +68,12 @@ alter table s2_datasource add column depends text COMMENT '上游依赖标识' a
 
 --20231018
 UPDATE `s2_agent` SET `config` = replace (`config`,'DSL','LLM_S2QL') WHERE `config` LIKE '%DSL%';
+
+--20231023
+alter table s2_model add column status int null after alias;
+alter table s2_model add column description varchar(500) null after status;
+alter table s2_datasource add column status int null after database_id;
+update s2_model set status = 1;
+update s2_datasource set status = 1;
+update s2_metric set status = 1;
+update s2_dimension set status = 1;

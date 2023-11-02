@@ -1,10 +1,12 @@
 package com.tencent.supersonic.semantic.model.application;
 
+import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
+import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
@@ -22,6 +24,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -84,7 +88,9 @@ public class CatalogImpl implements Catalog {
 
     @Override
     public List<DimensionResp> getDimensions(Long modelId) {
-        return dimensionService.getDimensions(modelId);
+        MetaFilter metricFilter = new MetaFilter(Lists.newArrayList(modelId));
+        metricFilter.setStatus(StatusEnum.ONLINE.getCode());
+        return dimensionService.getDimensions(metricFilter);
     }
 
     @Override
@@ -94,7 +100,8 @@ public class CatalogImpl implements Catalog {
 
     @Override
     public List<MetricResp> getMetrics(Long modelId) {
-        return metricService.getMetrics(modelId);
+        MetaFilter metricFilter = new MetaFilter(Lists.newArrayList(modelId));
+        return metricService.getMetrics(metricFilter);
     }
 
     @Override

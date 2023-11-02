@@ -26,7 +26,7 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
   const menuKey = params.menuKey ? params.menuKey : !Number(modelId) ? 'overview' : '';
   const { selectDomainId, selectModelId, selectDomainName, selectModelName, domainList } =
     domainManger;
-  const [modelList, setModelList] = useState<ISemantic.IDomainItem[]>([]);
+  const [modelList, setModelList] = useState<ISemantic.IModelItem[]>([]);
   const [isModel, setIsModel] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
   const [activeKey, setActiveKey] = useState<string>(menuKey);

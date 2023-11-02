@@ -8,7 +8,7 @@ import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.query.pojo.Filter;
+import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;

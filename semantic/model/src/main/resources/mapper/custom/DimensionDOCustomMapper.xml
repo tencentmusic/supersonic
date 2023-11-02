@@ -64,7 +64,7 @@
     created_at, created_by, updated_by, updated_at, semantic_type
     </sql>
 
-    <insert id="batchInsert" parameterType="java.util.List">
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         insert into s2_dimension (name, biz_name,
         description, status, model_id,
         type, type_params, expr,
@@ -107,10 +107,21 @@
         </foreach>
     </update>
 
+    <update id="batchUpdateStatus" parameterType="java.util.List">
+        <foreach collection="list" item="dimension" separator=";">
+            update s2_dimension
+            set
+            status = #{dimension.status,jdbcType=INTEGER},
+            updated_by = #{dimension.updatedBy,jdbcType=VARCHAR},
+            updated_at = #{dimension.updatedAt,jdbcType=TIMESTAMP}
+            where id = #{dimension.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
     <select id="query" resultMap="ResultMapWithBLOBs">
         select *
         from s2_dimension
-        where 1=1
+        where status != 3
         <if test="key != null and key != ''">
             and ( id like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
             name like CONCAT('%',#{key , jdbcType=VARCHAR},'%') or
@@ -130,6 +141,9 @@
         <if test="sensitiveLevel != null">
             and sensitive_level = #{sensitiveLevel}
         </if>
+        <if test="status != null">
+            and status = #{status}
+        </if>
         <if test="modelIds != null and modelIds.size >0">
             and model_id in
             <foreach collection="modelIds" index="index" item="model" open="(" close=")"
@@ -139,6 +153,9 @@
         </if>
         <if test="createdBy != null">
             and created_by = #{createdBy}
+        </if>
+        <if test="datasourceId != null">
+            and datasource_id = #{datasourceId}
         </if>
     </select>
 

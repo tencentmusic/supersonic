@@ -15,7 +15,11 @@ public class FunctionAliasReplaceVisitor extends SelectItemVisitorAdapter {
     public void visit(SelectExpressionItem selectExpressionItem) {
         if (selectExpressionItem.getExpression() instanceof Function) {
             Function function = (Function) selectExpressionItem.getExpression();
-            if (Objects.nonNull(selectExpressionItem.getAlias())) {
+            String columnName = SqlParserSelectHelper.getColumnName(function);
+            //1.exist alias. as
+            //2.alias's fieldName not equal. "sum(pv) as pv" cannot be replaced.
+            if (Objects.nonNull(selectExpressionItem.getAlias()) && !selectExpressionItem.getAlias().getName()
+                    .equalsIgnoreCase(columnName)) {
                 aliasToActualExpression.put(selectExpressionItem.getAlias().getName(), function.toString());
                 selectExpressionItem.setAlias(null);
             }

@@ -30,4 +30,22 @@ public class ModelReq extends SchemaItem {
     private Entity entity;
 
     private List<DrillDownDimension> drillDownDimensions;
+
+    public String getViewer() {
+        return String.join(",", viewers);
+    }
+
+    public String getViewOrg() {
+        return String.join(",", viewOrgs);
+    }
+
+
+    public String getAdmin() {
+        return String.join(",", admins);
+    }
+
+    public String getAdminOrg() {
+        return String.join(",", adminOrgs);
+    }
+
 }

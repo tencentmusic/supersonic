@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.test.context;
 
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +26,9 @@ import com.tencent.supersonic.semantic.model.domain.MetricService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -81,11 +84,11 @@ public class MockBeansConfiguration {
     }
 
     public static void dimensionDescBuild(DimensionService dimensionService, List<DimensionResp> dimensionDescs) {
-        when(dimensionService.getDimensions(anyList())).thenReturn(dimensionDescs);
+        when(dimensionService.getDimensions(any(DimensionFilter.class))).thenReturn(dimensionDescs);
     }
 
-    public static void metricDescBuild(MetricService dimensionService, List<MetricResp> metricDescs) {
-        when(dimensionService.getMetrics(anyList())).thenReturn(metricDescs);
+    public static void metricDescBuild(MetricService metricService, List<MetricResp> metricDescs) {
+        when(metricService.getMetrics(any(MetaFilter.class))).thenReturn(metricDescs);
     }
 
     public static DimSchemaResp getDimensionDesc(Long id, String bizName, String name) {

@@ -19,7 +19,7 @@ import com.tencent.supersonic.chat.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import org.springframework.util.CollectionUtils;
 import java.util.HashMap;
 import java.util.List;

@@ -27,6 +27,7 @@ import com.tencent.supersonic.semantic.query.service.SchemaService;
 import java.util.List;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
@@ -39,6 +40,12 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
     @SneakyThrows
     @Override
     public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user) {
+        QueryS2QLReq queryS2QLReq = queryStructReq.convert(queryStructReq);
+        if (queryStructReq.isUseS2qlSwitch() && StringUtils.isNotBlank(queryS2QLReq.getSql())) {
+            log.info("queryStructReq convert to sql:{},queryStructReq:{}", queryS2QLReq.getSql(), queryStructReq);
+            return queryByS2QL(queryS2QLReq, user);
+        }
+
         queryService = ContextUtils.getBean(QueryService.class);
         return queryService.queryByStructWithAuth(queryStructReq, user);
     }
@@ -59,9 +66,7 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
     public QueryResultWithSchemaResp queryByS2QL(QueryS2QLReq queryS2QLReq, User user) {
         queryService = ContextUtils.getBean(QueryService.class);
         Object object = queryService.queryBySql(queryS2QLReq, user);
-        QueryResultWithSchemaResp queryResultWithSchemaResp = JsonUtil.toObject(JsonUtil.toString(object),
-                    QueryResultWithSchemaResp.class);
-        return queryResultWithSchemaResp;
+        return JsonUtil.toObject(JsonUtil.toString(object), QueryResultWithSchemaResp.class);
     }
 
     @Override

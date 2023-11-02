@@ -7,6 +7,7 @@
     <result column="biz_name" jdbcType="VARCHAR" property="bizName" />
     <result column="domain_id" jdbcType="BIGINT" property="domainId" />
     <result column="alias" jdbcType="VARCHAR" property="alias" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
     <result column="viewer" jdbcType="VARCHAR" property="viewer" />
     <result column="view_org" jdbcType="VARCHAR" property="viewOrg" />
     <result column="admin" jdbcType="VARCHAR" property="admin" />
@@ -17,6 +18,7 @@
     <result column="updated_by" jdbcType="VARCHAR" property="updatedBy" />
     <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
     <result column="drill_down_dimensions" jdbcType="VARCHAR" property="drillDownDimensions" />
+    <result column="status" jdbcType="INTEGER" property="status" />
   </resultMap>
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.tencent.supersonic.semantic.model.domain.dataobject.ModelDO">
     <result column="entity" jdbcType="LONGVARCHAR" property="entity" />
@@ -80,8 +82,8 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, name, biz_name, domain_id, alias, viewer, view_org, admin, admin_org, is_open, 
-    created_by, created_at, updated_by, updated_at, drill_down_dimensions
+    id, name, biz_name, domain_id, alias, description, viewer, view_org, admin, admin_org, 
+    is_open, created_by, created_at, updated_by, updated_at, drill_down_dimensions, status
   </sql>
   <sql id="Blob_Column_List">
     entity
@@ -133,17 +135,19 @@
   </delete>
   <insert id="insert" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.ModelDO">
     insert into s2_model (id, name, biz_name, 
-      domain_id, alias, viewer, 
-      view_org, admin, admin_org, 
-      is_open, created_by, created_at, 
-      updated_by, updated_at, drill_down_dimensions, 
-      entity)
+      domain_id, alias, description, 
+      viewer, view_org, admin, 
+      admin_org, is_open, created_by, 
+      created_at, updated_by, updated_at, 
+      drill_down_dimensions, status, entity
+      )
     values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{bizName,jdbcType=VARCHAR}, 
-      #{domainId,jdbcType=BIGINT}, #{alias,jdbcType=VARCHAR}, #{viewer,jdbcType=VARCHAR}, 
-      #{viewOrg,jdbcType=VARCHAR}, #{admin,jdbcType=VARCHAR}, #{adminOrg,jdbcType=VARCHAR}, 
-      #{isOpen,jdbcType=INTEGER}, #{createdBy,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, 
-      #{updatedBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP}, #{drillDownDimensions,jdbcType=VARCHAR}, 
-      #{entity,jdbcType=LONGVARCHAR})
+      #{domainId,jdbcType=BIGINT}, #{alias,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, 
+      #{viewer,jdbcType=VARCHAR}, #{viewOrg,jdbcType=VARCHAR}, #{admin,jdbcType=VARCHAR}, 
+      #{adminOrg,jdbcType=VARCHAR}, #{isOpen,jdbcType=INTEGER}, #{createdBy,jdbcType=VARCHAR}, 
+      #{createdAt,jdbcType=TIMESTAMP}, #{updatedBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP}, 
+      #{drillDownDimensions,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{entity,jdbcType=LONGVARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.ModelDO">
     insert into s2_model
@@ -162,6 +166,9 @@
       </if>
       <if test="alias != null">
         alias,
+      </if>
+      <if test="description != null">
+        description,
       </if>
       <if test="viewer != null">
         viewer,
@@ -193,6 +200,9 @@
       <if test="drillDownDimensions != null">
         drill_down_dimensions,
       </if>
+      <if test="status != null">
+        status,
+      </if>
       <if test="entity != null">
         entity,
       </if>
@@ -212,6 +222,9 @@
       </if>
       <if test="alias != null">
         #{alias,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        #{description,jdbcType=VARCHAR},
       </if>
       <if test="viewer != null">
         #{viewer,jdbcType=VARCHAR},
@@ -243,6 +256,9 @@
       <if test="drillDownDimensions != null">
         #{drillDownDimensions,jdbcType=VARCHAR},
       </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
       <if test="entity != null">
         #{entity,jdbcType=LONGVARCHAR},
       </if>
@@ -271,6 +287,9 @@
       </if>
       <if test="record.alias != null">
         alias = #{record.alias,jdbcType=VARCHAR},
+      </if>
+      <if test="record.description != null">
+        description = #{record.description,jdbcType=VARCHAR},
       </if>
       <if test="record.viewer != null">
         viewer = #{record.viewer,jdbcType=VARCHAR},
@@ -302,6 +321,9 @@
       <if test="record.drillDownDimensions != null">
         drill_down_dimensions = #{record.drillDownDimensions,jdbcType=VARCHAR},
       </if>
+      <if test="record.status != null">
+        status = #{record.status,jdbcType=INTEGER},
+      </if>
       <if test="record.entity != null">
         entity = #{record.entity,jdbcType=LONGVARCHAR},
       </if>
@@ -317,6 +339,7 @@
       biz_name = #{record.bizName,jdbcType=VARCHAR},
       domain_id = #{record.domainId,jdbcType=BIGINT},
       alias = #{record.alias,jdbcType=VARCHAR},
+      description = #{record.description,jdbcType=VARCHAR},
       viewer = #{record.viewer,jdbcType=VARCHAR},
       view_org = #{record.viewOrg,jdbcType=VARCHAR},
       admin = #{record.admin,jdbcType=VARCHAR},
@@ -327,6 +350,7 @@
       updated_by = #{record.updatedBy,jdbcType=VARCHAR},
       updated_at = #{record.updatedAt,jdbcType=TIMESTAMP},
       drill_down_dimensions = #{record.drillDownDimensions,jdbcType=VARCHAR},
+      status = #{record.status,jdbcType=INTEGER},
       entity = #{record.entity,jdbcType=LONGVARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -339,6 +363,7 @@
       biz_name = #{record.bizName,jdbcType=VARCHAR},
       domain_id = #{record.domainId,jdbcType=BIGINT},
       alias = #{record.alias,jdbcType=VARCHAR},
+      description = #{record.description,jdbcType=VARCHAR},
       viewer = #{record.viewer,jdbcType=VARCHAR},
       view_org = #{record.viewOrg,jdbcType=VARCHAR},
       admin = #{record.admin,jdbcType=VARCHAR},
@@ -348,7 +373,8 @@
       created_at = #{record.createdAt,jdbcType=TIMESTAMP},
       updated_by = #{record.updatedBy,jdbcType=VARCHAR},
       updated_at = #{record.updatedAt,jdbcType=TIMESTAMP},
-      drill_down_dimensions = #{record.drillDownDimensions,jdbcType=VARCHAR}
+      drill_down_dimensions = #{record.drillDownDimensions,jdbcType=VARCHAR},
+      status = #{record.status,jdbcType=INTEGER}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -367,6 +393,9 @@
       </if>
       <if test="alias != null">
         alias = #{alias,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        description = #{description,jdbcType=VARCHAR},
       </if>
       <if test="viewer != null">
         viewer = #{viewer,jdbcType=VARCHAR},
@@ -398,6 +427,9 @@
       <if test="drillDownDimensions != null">
         drill_down_dimensions = #{drillDownDimensions,jdbcType=VARCHAR},
       </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
       <if test="entity != null">
         entity = #{entity,jdbcType=LONGVARCHAR},
       </if>
@@ -410,6 +442,7 @@
       biz_name = #{bizName,jdbcType=VARCHAR},
       domain_id = #{domainId,jdbcType=BIGINT},
       alias = #{alias,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
       viewer = #{viewer,jdbcType=VARCHAR},
       view_org = #{viewOrg,jdbcType=VARCHAR},
       admin = #{admin,jdbcType=VARCHAR},
@@ -420,6 +453,7 @@
       updated_by = #{updatedBy,jdbcType=VARCHAR},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP},
       drill_down_dimensions = #{drillDownDimensions,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
       entity = #{entity,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -429,6 +463,7 @@
       biz_name = #{bizName,jdbcType=VARCHAR},
       domain_id = #{domainId,jdbcType=BIGINT},
       alias = #{alias,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
       viewer = #{viewer,jdbcType=VARCHAR},
       view_org = #{viewOrg,jdbcType=VARCHAR},
       admin = #{admin,jdbcType=VARCHAR},
@@ -438,7 +473,8 @@
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_by = #{updatedBy,jdbcType=VARCHAR},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP},
-      drill_down_dimensions = #{drillDownDimensions,jdbcType=VARCHAR}
+      drill_down_dimensions = #{drillDownDimensions,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

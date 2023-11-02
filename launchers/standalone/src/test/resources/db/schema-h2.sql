@@ -134,6 +134,8 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
     `biz_name` varchar(255) DEFAULT NULL  , -- internal name
     `domain_id` INT DEFAULT '0'  , -- parent domain ID
     `alias` varchar(255) DEFAULT NULL  , -- alias name
+    `status` INT DEFAULT NULL  ,
+    `description` varchar(500) DEFAULT  NULL ,
     `created_at` TIMESTAMP DEFAULT NULL  ,
     `created_by` varchar(100) DEFAULT NULL  ,
     `updated_at` TIMESTAMP DEFAULT NULL  ,
@@ -176,6 +178,7 @@ CREATE TABLE  IF NOT EXISTS  `s2_datasource` (
     `database_id` INT NOT  NULL ,
     `depends` varchar(500) DEFAULT  NULL ,
     `datasource_detail` LONGVARCHAR NOT  NULL ,
+    `status` int(11) DEFAULT NULL ,
     `created_at` TIMESTAMP NOT  NULL ,
     `created_by` varchar(100) NOT  NULL ,
     `updated_at` TIMESTAMP NOT  NULL ,

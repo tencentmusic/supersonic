@@ -51,6 +51,7 @@ public class EntityInfoExecuteResponder implements ExecuteResponder {
                 .filter(Objects::nonNull)
                 .map(String::valueOf)
                 .collect(Collectors.toList());
+
         if (CollectionUtils.isEmpty(entities)) {
             return;
         }

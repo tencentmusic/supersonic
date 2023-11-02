@@ -5,7 +5,7 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.query.rule.metric.MetricFilterQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricGroupByQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.Test;
 import org.junit.jupiter.api.Order;
