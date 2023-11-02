@@ -192,7 +192,7 @@ public class LLMRequestService {
                 String dataFormatType = fieldNameToDataFormatType.get(fieldName);
                 if (DataFormatTypeEnum.DECIMAL.getName().equalsIgnoreCase(dataFormatType)
                         || DataFormatTypeEnum.PERCENT.getName().equalsIgnoreCase(dataFormatType)) {
-                    String format = String.format("%s 的字段类型是 %s", fieldName, "小数; ");
+                    String format = String.format("%s的计量单位是%s", fieldName, "小数; ");
                     extraInfoSb.append(format);
                 }
             }

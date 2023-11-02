@@ -1,18 +1,16 @@
 package com.tencent.supersonic.chat.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.api.component.SchemaMapper;
-import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,13 +23,14 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
+/***
+ * A mapper capable of fuzzy parsing of metric names and dimension names.
+ */
 @Slf4j
-public class FuzzyNameMapper implements SchemaMapper {
+public class FuzzyNameMapper extends BaseMapper {
 
     @Override
-    public void map(QueryContext queryContext) {
-
-        log.debug("before db mapper,mapInfo:{}", queryContext.getMapInfo());
+    public void work(QueryContext queryContext) {
 
         List<Term> terms = HanlpHelper.getTerms(queryContext.getRequest().getQueryText());
 
@@ -41,7 +40,6 @@ public class FuzzyNameMapper implements SchemaMapper {
 
         detectAndAddToSchema(queryContext, terms, semanticSchema.getMetrics(), SchemaElementType.METRIC);
 
-        log.debug("after db mapper,mapInfo:{}", queryContext.getMapInfo());
     }
 
     private void detectAndAddToSchema(QueryContext queryContext, List<Term> terms, List<SchemaElement> models,
@@ -65,7 +63,7 @@ public class FuzzyNameMapper implements SchemaMapper {
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
         Set<Long> modelIds = mapperHelper.getModelIds(queryContext.getRequest());
 
-        Double metricDimensionThresholdConfig = getThreshold(queryContext, mapperHelper);
+        Double metricDimensionThresholdConfig = getThreshold(queryContext);
 
         Map<String, Set<SchemaElement>> nameToItems = getNameToItems(models);
 
@@ -104,7 +102,7 @@ public class FuzzyNameMapper implements SchemaMapper {
         return modelResultSet;
     }
 
-    private Double getThreshold(QueryContext queryContext, MapperHelper mapperHelper) {
+    private Double getThreshold(QueryContext queryContext) {
 
         OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
         Double metricDimensionThresholdConfig = optimizationConfig.getMetricDimensionThresholdConfig();
@@ -150,16 +148,7 @@ public class FuzzyNameMapper implements SchemaMapper {
             Set<SchemaElement> schemaElements = entry.getValue();
             for (SchemaElement schemaElement : schemaElements) {
 
-                List<SchemaElementMatch> elements = schemaMap.getMatchedElements(schemaElement.getModel());
-                if (CollectionUtils.isEmpty(elements)) {
-                    elements = new ArrayList<>();
-                    schemaMap.setMatchedElements(schemaElement.getModel(), elements);
-                }
-                Set<Long> regElementSet = elements.stream()
-                        .filter(elementMatch -> schemaElementType.equals(elementMatch.getElement().getType()))
-                        .map(elementMatch -> elementMatch.getElement().getId())
-                        .collect(Collectors.toSet());
-
+                Set<Long> regElementSet = getRegElementSet(schemaMap, schemaElementType, schemaElement);
                 if (regElementSet.contains(schemaElement.getId())) {
                     continue;
                 }
@@ -171,9 +160,22 @@ public class FuzzyNameMapper implements SchemaMapper {
                         .similarity(mapperHelper.getSimilarity(detectWord, schemaElement.getName()))
                         .build();
                 log.info("schemaElementType:{},add to schema, elementMatch {}", schemaElementType, schemaElementMatch);
-                elements.add(schemaElementMatch);
+                addToSchemaMap(schemaMap, schemaElement.getModel(), schemaElementMatch);
             }
         }
+    }
+
+    private Set<Long> getRegElementSet(SchemaMapInfo schemaMap, SchemaElementType schemaElementType,
+            SchemaElement schemaElement) {
+        List<SchemaElementMatch> elements = schemaMap.getMatchedElements(schemaElement.getModel());
+        if (CollectionUtils.isEmpty(elements)) {
+            return new HashSet<>();
+        }
+        Set<Long> regElementSet = elements.stream()
+                .filter(elementMatch -> schemaElementType.equals(elementMatch.getElement().getType()))
+                .map(elementMatch -> elementMatch.getElement().getId())
+                .collect(Collectors.toSet());
+        return regElementSet;
     }
 
 }
