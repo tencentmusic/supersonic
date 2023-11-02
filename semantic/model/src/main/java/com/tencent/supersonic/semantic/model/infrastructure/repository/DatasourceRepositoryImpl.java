@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.model.infrastructure.repository;
 
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDOExample;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDO;
@@ -7,9 +8,7 @@ import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDOE
 import com.tencent.supersonic.semantic.model.domain.repository.DatasourceRepository;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DatasourceDOMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DatasourceRelaDOMapper;
-
 import java.util.List;
-
 import org.springframework.stereotype.Component;
 
 
@@ -35,37 +34,35 @@ public class DatasourceRepositoryImpl implements DatasourceRepository {
 
     @Override
     public void updateDatasource(DatasourceDO datasourceDO) {
-        datasourceMapper.updateByPrimaryKeyWithBLOBs(datasourceDO);
+        datasourceMapper.updateByPrimaryKeySelective(datasourceDO);
     }
 
     @Override
     public List<DatasourceDO> getDatasourceList() {
         DatasourceDOExample datasourceExample = new DatasourceDOExample();
+        datasourceExample.createCriteria().andStatusNotEqualTo(StatusEnum.DELETED.getCode());
         return datasourceMapper.selectByExampleWithBLOBs(datasourceExample);
     }
 
     @Override
     public List<DatasourceDO> getDatasourceList(Long modelId) {
         DatasourceDOExample datasourceExample = new DatasourceDOExample();
-        datasourceExample.createCriteria().andModelIdEqualTo(modelId);
+        datasourceExample.createCriteria().andModelIdEqualTo(modelId)
+                .andStatusNotEqualTo(StatusEnum.DELETED.getCode());
         return datasourceMapper.selectByExampleWithBLOBs(datasourceExample);
     }
 
     @Override
     public List<DatasourceDO> getDatasourceByDatabase(Long databaseId) {
         DatasourceDOExample datasourceExample = new DatasourceDOExample();
-        datasourceExample.createCriteria().andDatabaseIdEqualTo(databaseId);
+        datasourceExample.createCriteria().andDatabaseIdEqualTo(databaseId)
+                .andStatusNotEqualTo(StatusEnum.DELETED.getCode());
         return datasourceMapper.selectByExampleWithBLOBs(datasourceExample);
     }
 
     @Override
     public DatasourceDO getDatasourceById(Long id) {
         return datasourceMapper.selectByPrimaryKey(id);
-    }
-
-    @Override
-    public void deleteDatasource(Long id) {
-        datasourceMapper.deleteByPrimaryKey(id);
     }
 
     @Override

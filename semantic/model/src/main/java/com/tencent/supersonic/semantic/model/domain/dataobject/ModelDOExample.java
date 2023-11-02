@@ -533,6 +533,76 @@ public class ModelDOExample {
             return (Criteria) this;
         }
 
+        public Criteria andDescriptionIsNull() {
+            addCriterion("description is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDescriptionIsNotNull() {
+            addCriterion("description is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDescriptionEqualTo(String value) {
+            addCriterion("description =", value, "description");
+            return (Criteria) this;
+        }
+
+        public Criteria andDescriptionNotEqualTo(String value) {
+            addCriterion("description <>", value, "description");
+            return (Criteria) this;
+        }
+
+        public Criteria andDescriptionGreaterThan(String value) {
+            addCriterion("description >", value, "description");
+            return (Criteria) this;
+        }
+
+        public Criteria andDescriptionGreaterThanOrEqualTo(String value) {
+            addCriterion("description >=", value, "description");
+            return (Criteria) this;
+        }
+
+        public Criteria andDescriptionLessThan(String value) {
+            addCriterion("description <", value, "description");
+            return (Criteria) this;
+        }
+
+        public Criteria andDescriptionLessThanOrEqualTo(String value) {
+            addCriterion("description <=", value, "description");
+            return (Criteria) this;
+        }
+
+        public Criteria andDescriptionLike(String value) {
+            addCriterion("description like", value, "description");
+            return (Criteria) this;
+        }
+
+        public Criteria andDescriptionNotLike(String value) {
+            addCriterion("description not like", value, "description");
+            return (Criteria) this;
+        }
+
+        public Criteria andDescriptionIn(List<String> values) {
+            addCriterion("description in", values, "description");
+            return (Criteria) this;
+        }
+
+        public Criteria andDescriptionNotIn(List<String> values) {
+            addCriterion("description not in", values, "description");
+            return (Criteria) this;
+        }
+
+        public Criteria andDescriptionBetween(String value1, String value2) {
+            addCriterion("description between", value1, value2, "description");
+            return (Criteria) this;
+        }
+
+        public Criteria andDescriptionNotBetween(String value1, String value2) {
+            addCriterion("description not between", value1, value2, "description");
+            return (Criteria) this;
+        }
+
         public Criteria andViewerIsNull() {
             addCriterion("viewer is null");
             return (Criteria) this;
@@ -1200,6 +1270,66 @@ public class ModelDOExample {
 
         public Criteria andDrillDownDimensionsNotBetween(String value1, String value2) {
             addCriterion("drill_down_dimensions not between", value1, value2, "drillDownDimensions");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusIsNull() {
+            addCriterion("status is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusIsNotNull() {
+            addCriterion("status is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusEqualTo(Integer value) {
+            addCriterion("status =", value, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusNotEqualTo(Integer value) {
+            addCriterion("status <>", value, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusGreaterThan(Integer value) {
+            addCriterion("status >", value, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusGreaterThanOrEqualTo(Integer value) {
+            addCriterion("status >=", value, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusLessThan(Integer value) {
+            addCriterion("status <", value, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusLessThanOrEqualTo(Integer value) {
+            addCriterion("status <=", value, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusIn(List<Integer> values) {
+            addCriterion("status in", values, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusNotIn(List<Integer> values) {
+            addCriterion("status not in", values, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusBetween(Integer value1, Integer value2) {
+            addCriterion("status between", value1, value2, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusNotBetween(Integer value1, Integer value2) {
+            addCriterion("status not between", value1, value2, "status");
             return (Criteria) this;
         }
     }

@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.query.utils;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
@@ -8,8 +9,8 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
-import com.tencent.supersonic.semantic.api.query.pojo.Filter;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
@@ -21,6 +22,7 @@ import java.util.Set;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -54,51 +56,31 @@ public class DimValueAspect {
         }
         Object[] args = joinPoint.getArgs();
         QueryS2QLReq queryS2QLReq = (QueryS2QLReq) args[0];
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(queryS2QLReq.getModelId()));
         String sql = queryS2QLReq.getSql();
         log.info("correctorSql before replacing:{}", sql);
+        // if dimensionvalue is alias,consider the true dimensionvalue.
         List<FilterExpression> filterExpressionList = SqlParserSelectHelper.getWhereExpressions(sql);
-        List<DimensionResp> dimensions = dimensionService.getDimensions(queryS2QLReq.getModelId());
+        List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
         Set<String> fieldNames = dimensions.stream().map(o -> o.getName()).collect(Collectors.toSet());
         Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
         filterExpressionList.stream().forEach(expression -> {
             if (fieldNames.contains(expression.getFieldName())) {
                 dimensions.stream().forEach(dimension -> {
-                    if (expression.getFieldName().equals(dimension.getName())) {
-                        if (expression.getOperator().equals(FilterOperatorEnum.EQUALS.getValue())
-                                && !CollectionUtils.isEmpty(dimension.getDimValueMaps())) {
+                    if (expression.getFieldName().equals(dimension.getName())
+                            && !CollectionUtils.isEmpty(dimension.getDimValueMaps())) {
+                        // consider '=' filter
+                        if (expression.getOperator().equals(FilterOperatorEnum.EQUALS.getValue())) {
                             dimension.getDimValueMaps().stream().forEach(dimValue -> {
                                 if (!CollectionUtils.isEmpty(dimValue.getAlias())
                                         && dimValue.getAlias().contains(expression.getFieldValue().toString())) {
-                                    Map<String, String> map = new HashMap<>();
-                                    map.put(expression.getFieldValue().toString(), dimValue.getTechName());
-                                    filedNameToValueMap.put(expression.getFieldName(), map);
+                                    getFiledNameToValueMap(filedNameToValueMap, expression.getFieldValue().toString(),
+                                            dimValue.getTechName(), expression.getFieldName());
                                 }
                             });
                         }
-                        if (expression.getOperator().equals(FilterOperatorEnum.IN.getValue())) {
-                            String fieldValue = JsonUtil.toString(expression.getFieldValue());
-                            fieldValue = fieldValue.replace("'", "");
-                            List<String> values = JsonUtil.toList(fieldValue, String.class);
-                            List<String> revisedValues = new ArrayList<>();
-                            for (int i = 0; i < values.size(); i++) {
-                                Boolean flag = new Boolean(false);
-                                for (DimValueMap dimValueMap : dimension.getDimValueMaps()) {
-                                    if (dimValueMap.getAlias().contains(values.get(i))) {
-                                        flag = true;
-                                        revisedValues.add(dimValueMap.getTechName());
-                                        break;
-                                    }
-                                }
-                                if (!flag) {
-                                    revisedValues.add(values.get(i));
-                                }
-                            }
-                            if (!revisedValues.equals(values)) {
-                                Map<String, String> map = new HashMap<>();
-                                map.put(JsonUtil.toString(values), JsonUtil.toString(revisedValues));
-                                filedNameToValueMap.put(expression.getFieldName(), map);
-                            }
-                        }
+                        // consider 'in' filter,each element needs to judge.
+                        replaceInCondition(expression, dimension, filedNameToValueMap);
                     }
                 });
             }
@@ -116,6 +98,41 @@ public class DimValueAspect {
         return queryResultWithColumns;
     }
 
+    public void replaceInCondition(FilterExpression expression, DimensionResp dimension,
+                                   Map<String, Map<String, String>> filedNameToValueMap) {
+        if (expression.getOperator().equals(FilterOperatorEnum.IN.getValue())) {
+            String fieldValue = JsonUtil.toString(expression.getFieldValue());
+            fieldValue = fieldValue.replace("'", "");
+            List<String> values = JsonUtil.toList(fieldValue, String.class);
+            List<String> revisedValues = new ArrayList<>();
+            for (int i = 0; i < values.size(); i++) {
+                Boolean flag = new Boolean(false);
+                for (DimValueMap dimValueMap : dimension.getDimValueMaps()) {
+                    if (!CollectionUtils.isEmpty(dimValueMap.getAlias())
+                            && dimValueMap.getAlias().contains(values.get(i))) {
+                        flag = true;
+                        revisedValues.add(dimValueMap.getTechName());
+                        break;
+                    }
+                }
+                if (!flag) {
+                    revisedValues.add(values.get(i));
+                }
+            }
+            if (!revisedValues.equals(values)) {
+                getFiledNameToValueMap(filedNameToValueMap, JsonUtil.toString(values),
+                        JsonUtil.toString(revisedValues), expression.getFieldName());
+            }
+        }
+    }
+
+    public void getFiledNameToValueMap(Map<String, Map<String, String>> filedNameToValueMap,
+                                       String oldValue, String newValue, String fieldName) {
+        Map<String, String> map = new HashMap<>();
+        map.put(oldValue, newValue);
+        filedNameToValueMap.put(fieldName, map);
+    }
+
 
     @Around("execution(* com.tencent.supersonic.semantic.query.rest.QueryController.queryByStruct(..))"
             + " || execution(* com.tencent.supersonic.semantic.query.service.QueryService.queryByStruct(..))"
@@ -131,8 +148,8 @@ public class DimValueAspect {
         Object[] args = joinPoint.getArgs();
         QueryStructReq queryStructReq = (QueryStructReq) args[0];
         Long modelId = queryStructReq.getModelId();
-
-        List<DimensionResp> dimensions = dimensionService.getDimensions(modelId);
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(modelId));
+        List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
         Map<String, Map<String, String>> dimAndAliasAndTechNamePair = getAliasAndBizNameToTechName(dimensions);
         Map<String, Map<String, String>> dimAndTechNameAndBizNamePair = getTechNameToBizName(dimensions);
 

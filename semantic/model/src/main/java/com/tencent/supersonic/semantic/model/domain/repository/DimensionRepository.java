@@ -13,22 +13,9 @@ public interface DimensionRepository {
 
     void updateDimension(DimensionDO dimensionDO);
 
-    List<DimensionDO> getDimensionListOfDatasource(Long datasourceId);
-
-    List<DimensionDO> getDimensionListOfmodel(Long domainId);
-
-    List<DimensionDO> getDimensionListOfmodelIds(List<Long> modelIds);
-
-    List<DimensionDO> getDimensionList();
-
-    List<DimensionDO> getDimensionListByIds(List<Long> ids);
+    void batchUpdateStatus(List<DimensionDO> dimensionDOS);
 
     DimensionDO getDimensionById(Long id);
 
-
-    List<DimensionDO> getAllDimensionList();
-
     List<DimensionDO> getDimension(DimensionFilter dimensionFilter);
-
-    void deleteDimension(Long id);
 }

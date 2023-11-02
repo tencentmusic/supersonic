@@ -5,7 +5,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.request.SolvedQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
-import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingConfig;
+import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingResp;
 import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrieval;
 import lombok.extern.slf4j.Slf4j;

@@ -2,6 +2,7 @@ package com.tencent.supersonic.semantic.query.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthResGrp;
@@ -13,6 +14,7 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryAuthorization;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
@@ -22,6 +24,7 @@ import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaR
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Sets;
 import org.springframework.beans.BeanUtils;
@@ -89,8 +92,11 @@ public class AuthCommonService {
 
     public Set<String> getHighSensitiveColsByModelId(Long modelId) {
         Set<String> highSensitiveCols = new HashSet<>();
-        List<DimensionResp> highSensitiveDimensions = dimensionService.getHighSensitiveDimension(modelId);
-        List<MetricResp> highSensitiveMetrics = metricService.getHighSensitiveMetric(modelId);
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setModelIds(Lists.newArrayList(modelId));
+        metaFilter.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
+        List<DimensionResp> highSensitiveDimensions = dimensionService.getDimensions(metaFilter);
+        List<MetricResp> highSensitiveMetrics = metricService.getMetrics(metaFilter);
         if (!CollectionUtils.isEmpty(highSensitiveDimensions)) {
             highSensitiveDimensions.stream().forEach(dim -> highSensitiveCols.add(dim.getBizName()));
         }

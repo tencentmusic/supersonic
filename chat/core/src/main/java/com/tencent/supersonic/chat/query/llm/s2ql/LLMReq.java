@@ -14,6 +14,8 @@ public class LLMReq {
 
     private String currentDate;
 
+    private String priorExts;
+
     @Data
     public static class ElementValue {
 

@@ -25,4 +25,25 @@ public class StringUtil {
         return where.replace("\"", "\\\\\"");
     }
 
+    /**
+     *
+     * @param v1
+     * @param v2
+     * @return  value 0 if v1 equal to v2; less than 0 if v1 is less than v2; greater than 0 if v1 is greater than v2
+     */
+    public static int compareVersion(String v1, String v2) {
+        String[] v1s = v1.split("\\.");
+        String[] v2s = v2.split("\\.");
+        int length = Math.min(v1s.length, v2s.length);
+        for (int i = 0; i < length; i++) {
+            Integer vv1 = Integer.parseInt(v1s[i]);
+            Integer vv2 = Integer.parseInt(v2s[i]);
+            int compare = vv1.compareTo(vv2);
+            if (compare != 0) {
+                return compare;
+            }
+        }
+        return v1s.length - v2s.length;
+    }
+
 }

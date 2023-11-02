@@ -50,8 +50,11 @@ public class ModelController {
     }
 
     @DeleteMapping("/deleteModel/{modelId}")
-    public Boolean deleteModel(@PathVariable("modelId") Long modelId) {
-        modelService.deleteModel(modelId);
+    public Boolean deleteModel(@PathVariable("modelId") Long modelId,
+                               HttpServletRequest request,
+                               HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        modelService.deleteModel(modelId, user);
         return true;
     }
 

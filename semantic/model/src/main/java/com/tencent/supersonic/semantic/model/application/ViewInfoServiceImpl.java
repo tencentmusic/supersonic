@@ -8,6 +8,7 @@ import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaRelaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.model.domain.dataobject.ViewInfoDO;
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.ViewInfoRepository;
 import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
@@ -48,8 +49,11 @@ public class ViewInfoServiceImpl {
         for (DatasourceResp datasourceResp : datasourceResps) {
             ModelSchemaRelaResp domainSchemaRelaResp = new ModelSchemaRelaResp();
             Long datasourceId = datasourceResp.getId();
-            List<MetricResp> metricResps = metricService.getMetrics(modelId, datasourceId);
-            List<DimensionResp> dimensionResps = dimensionService.getDimensionsByDatasource(datasourceId);
+            MetaFilter metaFilter = new MetaFilter();
+            metaFilter.setModelIds(Lists.newArrayList(modelId));
+            metaFilter.setDatasourceId(datasourceId);
+            List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
+            List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
             domainSchemaRelaResp.setDatasource(datasourceResp);
             domainSchemaRelaResp.setDimensions(dimensionResps);
             domainSchemaRelaResp.setMetrics(metricResps);

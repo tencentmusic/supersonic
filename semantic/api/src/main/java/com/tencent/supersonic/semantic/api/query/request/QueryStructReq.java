@@ -2,7 +2,7 @@ package com.tencent.supersonic.semantic.api.query.request;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.semantic.api.query.pojo.Cache;
-import com.tencent.supersonic.semantic.api.query.pojo.Filter;
+import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.pojo.Param;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;

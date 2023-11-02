@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.pojo;
 
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import org.springframework.context.ApplicationEvent;
 
 public class DataDeleteEvent extends ApplicationEvent {
@@ -7,9 +8,9 @@ public class DataDeleteEvent extends ApplicationEvent {
     private String name;
     private Long modelId;
     private Long id;
-    private String type;
+    private TypeEnums type;
 
-    public DataDeleteEvent(Object source, String name, Long modelId, Long id, String type) {
+    public DataDeleteEvent(Object source, String name, Long modelId, Long id, TypeEnums type) {
         super(source);
         this.name = name;
         this.modelId = modelId;
@@ -41,11 +42,11 @@ public class DataDeleteEvent extends ApplicationEvent {
         this.modelId = modelId;
     }
 
-    public void setType(String type) {
+    public void setType(TypeEnums type) {
         this.type = type;
     }
 
-    public String getType() {
+    public TypeEnums getType() {
         return type;
     }
 }

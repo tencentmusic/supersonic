@@ -28,6 +28,8 @@ public class SchemaElement implements Serializable {
 
     private String defaultAgg;
 
+    private int order;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

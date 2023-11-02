@@ -8,14 +8,15 @@
     <result column="biz_name" jdbcType="VARCHAR" property="bizName" />
     <result column="description" jdbcType="VARCHAR" property="description" />
     <result column="database_id" jdbcType="BIGINT" property="databaseId" />
+    <result column="status" jdbcType="INTEGER" property="status" />
     <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="created_by" jdbcType="VARCHAR" property="createdBy" />
     <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
     <result column="updated_by" jdbcType="VARCHAR" property="updatedBy" />
-    <result column="depends" jdbcType="VARCHAR" property="depends" />
   </resultMap>
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO">
     <result column="datasource_detail" jdbcType="LONGVARCHAR" property="datasourceDetail" />
+    <result column="depends" jdbcType="LONGVARCHAR" property="depends" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
@@ -47,11 +48,11 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, model_id, name, biz_name, description, database_id, created_at, created_by, updated_at, 
-    updated_by,depends
+    id, model_id, name, biz_name, description, database_id, status, created_at, created_by, 
+    updated_at, updated_by
   </sql>
   <sql id="Blob_Column_List">
-    datasource_detail
+    datasource_detail, depends
   </sql>
   <select id="selectByExampleWithBLOBs" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDOExample" resultMap="ResultMapWithBLOBs">
     select
@@ -98,15 +99,17 @@
     delete from s2_datasource
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO">
+  <insert id="insert" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO" useGeneratedKeys="true" keyProperty="id">
     insert into s2_datasource (id, model_id, name, 
       biz_name, description, database_id, 
-      created_at, created_by, updated_at, 
-      updated_by, datasource_detail)
+      status, created_at, created_by, 
+      updated_at, updated_by, datasource_detail, 
+      depends)
     values (#{id,jdbcType=BIGINT}, #{modelId,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, 
       #{bizName,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{databaseId,jdbcType=BIGINT}, 
-      #{createdAt,jdbcType=TIMESTAMP}, #{createdBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP}, 
-      #{updatedBy,jdbcType=VARCHAR}, #{datasourceDetail,jdbcType=LONGVARCHAR})
+      #{status,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP}, #{createdBy,jdbcType=VARCHAR}, 
+      #{updatedAt,jdbcType=TIMESTAMP}, #{updatedBy,jdbcType=VARCHAR}, #{datasourceDetail,jdbcType=LONGVARCHAR}, 
+      #{depends,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO">
     insert into s2_datasource
@@ -129,6 +132,9 @@
       <if test="databaseId != null">
         database_id,
       </if>
+      <if test="status != null">
+        status,
+      </if>
       <if test="createdAt != null">
         created_at,
       </if>
@@ -143,6 +149,9 @@
       </if>
       <if test="datasourceDetail != null">
         datasource_detail,
+      </if>
+      <if test="depends != null">
+        depends,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -164,6 +173,9 @@
       <if test="databaseId != null">
         #{databaseId,jdbcType=BIGINT},
       </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
       <if test="createdAt != null">
         #{createdAt,jdbcType=TIMESTAMP},
       </if>
@@ -178,6 +190,9 @@
       </if>
       <if test="datasourceDetail != null">
         #{datasourceDetail,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="depends != null">
+        #{depends,jdbcType=LONGVARCHAR},
       </if>
     </trim>
   </insert>
@@ -205,6 +220,9 @@
       <if test="databaseId != null">
         database_id = #{databaseId,jdbcType=BIGINT},
       </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
       <if test="createdAt != null">
         created_at = #{createdAt,jdbcType=TIMESTAMP},
       </if>
@@ -220,6 +238,9 @@
       <if test="datasourceDetail != null">
         datasource_detail = #{datasourceDetail,jdbcType=LONGVARCHAR},
       </if>
+      <if test="depends != null">
+        depends = #{depends,jdbcType=LONGVARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -230,11 +251,13 @@
       biz_name = #{bizName,jdbcType=VARCHAR},
       description = #{description,jdbcType=VARCHAR},
       database_id = #{databaseId,jdbcType=BIGINT},
+      status = #{status,jdbcType=INTEGER},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       created_by = #{createdBy,jdbcType=VARCHAR},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP},
       updated_by = #{updatedBy,jdbcType=VARCHAR},
-      datasource_detail = #{datasourceDetail,jdbcType=LONGVARCHAR}
+      datasource_detail = #{datasourceDetail,jdbcType=LONGVARCHAR},
+      depends = #{depends,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO">
@@ -244,6 +267,7 @@
       biz_name = #{bizName,jdbcType=VARCHAR},
       description = #{description,jdbcType=VARCHAR},
       database_id = #{databaseId,jdbcType=BIGINT},
+      status = #{status,jdbcType=INTEGER},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       created_by = #{createdBy,jdbcType=VARCHAR},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP},

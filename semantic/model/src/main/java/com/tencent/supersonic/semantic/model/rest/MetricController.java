@@ -2,9 +2,12 @@ package com.tencent.supersonic.semantic.model.rest;
 
 
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
+import com.tencent.supersonic.semantic.api.model.request.MetaBatchReq;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
@@ -14,6 +17,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
+import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,7 +46,7 @@ public class MetricController {
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        metricService.creatExprMetric(metricReq, user);
+        metricService.createMetric(metricReq, user);
         return true;
     }
 
@@ -51,6 +56,15 @@ public class MetricController {
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         metricService.updateExprMetric(metricReq, user);
+        return true;
+    }
+
+    @PostMapping("/batchUpdateStatus")
+    public Boolean batchUpdateStatus(@RequestBody MetaBatchReq metaBatchReq,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        metricService.batchUpdateStatus(metaBatchReq, user);
         return true;
     }
 
@@ -65,7 +79,8 @@ public class MetricController {
 
     @GetMapping("/getMetricList/{modelId}")
     public List<MetricResp> getMetricList(@PathVariable("modelId") Long modelId) {
-        return metricService.getMetrics(modelId);
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(modelId));
+        return metricService.getMetrics(metaFilter);
     }
 
 
@@ -84,14 +99,19 @@ public class MetricController {
 
 
     @DeleteMapping("deleteMetric/{id}")
-    public Boolean deleteMetric(@PathVariable("id") Long id) throws Exception {
-        metricService.deleteMetric(id);
+    public Boolean deleteMetric(@PathVariable("id") Long id,
+                                HttpServletRequest request,
+                                HttpServletResponse response) throws Exception {
+        User user = UserHolder.findUser(request, response);
+        metricService.deleteMetric(id, user);
         return true;
     }
 
     @GetMapping("/getAllHighSensitiveMetric")
     public List<MetricResp> getAllHighSensitiveMetric() {
-        return metricService.getAllHighSensitiveMetric();
+        MetricFilter metricFilter = new MetricFilter();
+        metricFilter.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
+        return metricService.getMetrics(metricFilter);
     }
 
 

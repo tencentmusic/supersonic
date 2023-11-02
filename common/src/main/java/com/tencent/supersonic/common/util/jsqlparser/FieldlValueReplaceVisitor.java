@@ -59,6 +59,9 @@ public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
     }
 
     public void visit(InExpression inExpression) {
+        if (!(inExpression.getLeftExpression() instanceof Column)) {
+            return;
+        }
         Column column = (Column) inExpression.getLeftExpression();
         Map<String, String> valueMap = filedNameToValueMap.get(column.getColumnName());
         ExpressionList rightItemsList = (ExpressionList) inExpression.getRightItemsList();
@@ -69,7 +72,13 @@ public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
                 values.add(((StringValue) o).getValue());
             }
         });
+        if (valueMap == null) {
+            return;
+        }
         String value = valueMap.get(JsonUtil.toString(values));
+        if (StringUtils.isBlank(value)) {
+            return;
+        }
         List<String> valueList = JsonUtil.toList(value, String.class);
         List<Expression> newExpressions = new ArrayList<>();
         valueList.stream().forEach(o -> {

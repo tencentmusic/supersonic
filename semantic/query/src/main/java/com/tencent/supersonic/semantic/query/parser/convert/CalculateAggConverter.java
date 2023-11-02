@@ -15,7 +15,7 @@ import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
 import com.tencent.supersonic.semantic.query.parser.SemanticConverter;
 import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
-import com.tencent.supersonic.semantic.query.utils.DateUtils;
+import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
 import com.tencent.supersonic.semantic.query.utils.SqlGenerateUtils;
 import java.util.ArrayList;
@@ -44,7 +44,6 @@ public class CalculateAggConverter implements SemanticConverter {
     private String metricAggDefault;
 
 
-
     public CalculateAggConverter(
             SemanticQueryEngine parserService,
             @Lazy QueryStructUtils queryStructUtils,
@@ -57,7 +56,7 @@ public class CalculateAggConverter implements SemanticConverter {
 
     public interface EngineSql {
 
-        String sql(QueryStructReq queryStructCmd, boolean isOver, String metricSql);
+        String sql(QueryStructReq queryStructCmd, boolean isOver, boolean asWith, String metricSql);
     }
 
     public ParseSqlReq generateSqlCommend(QueryStructReq queryStructCmd, EngineTypeEnum engineTypeEnum, String version)
@@ -166,16 +165,18 @@ public class CalculateAggConverter implements SemanticConverter {
         String sql = "";
         switch (engineTypeEnum) {
             case H2:
-                sql = new H2EngineSql().sql(queryStructCmd, isOver, metricTableName);
+                sql = new H2EngineSql().sql(queryStructCmd, isOver, true, metricTableName);
                 break;
             case MYSQL:
             case DORIS:
             case CLICKHOUSE:
                 if (!queryStructUtils.isSupportWith(engineTypeEnum, version)) {
                     sqlCommand.setSupportWith(false);
-                    sql = new MysqlEngineSql().sql(queryStructCmd, isOver, metricTableName);
+                }
+                if (!engineTypeEnum.equals(engineTypeEnum.CLICKHOUSE)) {
+                    sql = new MysqlEngineSql().sql(queryStructCmd, isOver, sqlCommand.isSupportWith(), metricTableName);
                 } else {
-                    sql = new CkEngineSql().sql(queryStructCmd, isOver, metricTableName);
+                    sql = new CkEngineSql().sql(queryStructCmd, isOver, sqlCommand.isSupportWith(), metricTableName);
                 }
                 break;
             default:
@@ -248,7 +249,7 @@ public class CalculateAggConverter implements SemanticConverter {
         }
 
         @Override
-        public String sql(QueryStructReq queryStructCmd, boolean isOver, String metricSql) {
+        public String sql(QueryStructReq queryStructCmd, boolean isOver, boolean asWith, String metricSql) {
             String sql = String.format(
                     "select %s from ( select %s , %s from %s t0 left join %s t1 on %s ) metric_tb_src %s %s ",
                     getOverSelect(queryStructCmd, isOver), getAllSelect(queryStructCmd, "t0."),
@@ -292,15 +293,22 @@ public class CalculateAggConverter implements SemanticConverter {
         }
 
         @Override
-        public String sql(QueryStructReq queryStructCmd, boolean isOver, String metricSql) {
-            String sql = String.format(
+        public String sql(QueryStructReq queryStructCmd, boolean isOver, boolean asWith, String metricSql) {
+            if (!asWith) {
+                return String.format(
+                        "select %s from ( select %s , %s from %s t0 left join %s t1 on %s ) metric_tb_src %s %s ",
+                        getOverSelect(queryStructCmd, isOver), getAllSelect(queryStructCmd, "t0."),
+                        getAllJoinSelect(queryStructCmd, "t1."), metricSql, metricSql,
+                        getJoinOn(queryStructCmd, isOver, "t0.", "t1."),
+                        getOrderBy(queryStructCmd), getLimit(queryStructCmd));
+            }
+            return String.format(
                     ",t0 as (select * from %s),t1 as (select * from %s) select %s from ( select %s , %s "
                             + "from  t0 left join t1 on %s ) metric_tb_src %s %s ",
                     metricSql, metricSql, getOverSelect(queryStructCmd, isOver), getAllSelect(queryStructCmd, "t0."),
                     getAllJoinSelect(queryStructCmd, "t1."),
                     getJoinOn(queryStructCmd, isOver, "t0.", "t1."),
                     getOrderBy(queryStructCmd), getLimit(queryStructCmd));
-            return sql;
         }
     }
 
@@ -368,7 +376,7 @@ public class CalculateAggConverter implements SemanticConverter {
         }
 
         @Override
-        public String sql(QueryStructReq queryStructCmd, boolean isOver, String metricSql) {
+        public String sql(QueryStructReq queryStructCmd, boolean isOver, boolean asWith, String metricSql) {
             String sql = String.format(
                     "select %s from ( select %s , %s from %s t0 left join %s t1 on %s ) metric_tb_src %s %s ",
                     getOverSelect(queryStructCmd, isOver), getAllSelect(queryStructCmd, "t0."),
@@ -402,8 +410,8 @@ public class CalculateAggConverter implements SemanticConverter {
     }
 
     private static String getTimeDim(QueryStructReq queryStructCmd) {
-        DateUtils dateUtils = ContextUtils.getContext().getBean(DateUtils.class);
-        return dateUtils.getSysDateCol(queryStructCmd.getDateInfo());
+        DateModeUtils dateModeUtils = ContextUtils.getContext().getBean(DateModeUtils.class);
+        return dateModeUtils.getSysDateCol(queryStructCmd.getDateInfo());
     }
 
     private static String getLimit(QueryStructReq queryStructCmd) {

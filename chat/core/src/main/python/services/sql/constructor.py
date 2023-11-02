@@ -2,87 +2,64 @@
 import os
 import sys
 from typing import List, Mapping
+from chromadb.api import Collection
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from util.logging_utils import logger
+from instances.logging_instance import logger
+from services.query_retrieval.retriever import ChromaCollectionRetriever
 
-from langchain.vectorstores import Chroma
-from langchain.prompts.example_selector import SemanticSimilarityExampleSelector
+class FewShotPromptTemplate2(object):
+    def __init__(self, collection:Collection, few_shot_examples:List[Mapping[str, str]],
+                 retrieval_key:str, few_shot_seperator:str = "\n\n") -> None:
+        self.collection = collection
+        self.few_shot_retriever = ChromaCollectionRetriever(self.collection)
 
-from few_shot_example.sql_exampler import examplars as sql_examplars
-from util.text2vec import hg_embedding
-from util.chromadb_instance import client as chromadb_client, empty_chroma_collection_2
-from config.config_parse import TEXT2DSL_COLLECTION_NAME, TEXT2DSL_FEW_SHOTS_EXAMPLE_NUM
+        self.few_shot_examples = few_shot_examples
+        self.retrieval_key = retrieval_key
 
+        self.few_shot_seperator  = few_shot_seperator
 
-def reload_sql_example_collection(
-    vectorstore: Chroma,
-    sql_examplars: List[Mapping[str, str]],
-    sql_example_selector: SemanticSimilarityExampleSelector,
-    example_nums: int,
-):
-    logger.info("original sql_examples_collection size: {}", vectorstore._collection.count())
-    new_collection = empty_chroma_collection_2(collection=vectorstore._collection)
-    vectorstore._collection = new_collection
+    def add_few_shot_example(self, examples: List[Mapping[str, str]])-> None:
+        query_text_list = []
+        query_id_list = []
+        for idx, example in enumerate(examples):
+            query_text_list.append(example[self.retrieval_key])
+            query_id_list.append(str(idx))
 
-    logger.info("emptied sql_examples_collection size: {}", vectorstore._collection.count())
+        self.few_shot_retriever.add_queries(query_text_list=query_text_list, query_id_list=query_id_list, metadatas=examples)
 
-    sql_example_selector = SemanticSimilarityExampleSelector(
-        vectorstore=sql_examples_vectorstore,
-        k=example_nums,
-        input_keys=["question"],
-        example_keys=[
-            "table_name",
-            "fields_list",
-            "prior_schema_links",
-            "question",
-            "analysis",
-            "schema_links",
-            "current_date",
-            "sql",
-        ],
-    )
+    def reload_few_shot_example(self, examples: List[Mapping[str, str]])-> None:
+        logger.info(f"original sql_examples_collection size: {self.few_shot_retriever.get_query_size()}")
 
-    for example in sql_examplars:
-        sql_example_selector.add_example(example)
+        self.few_shot_retriever.empty_query_collection()        
+        logger.info(f"emptied sql_examples_collection size: {self.few_shot_retriever.get_query_size()}")
 
-    logger.info("reloaded sql_examples_collection size: {}", vectorstore._collection.count())
+        self.add_few_shot_example(examples=examples)
+        logger.info(f"reloaded sql_examples_collection size: {self.few_shot_retriever.get_query_size()}")
 
-    return vectorstore, sql_example_selector
+    def _sub_dict(self, d:Mapping[str, str], keys:List[str])-> Mapping[str, str]:
+        return {k:d[k] for k in keys if k in d}
 
+    def retrieve_few_shot_example(self, query_text: str, retrieval_num: int)-> List[Mapping[str, str]]:
+        query_text_list = [query_text]
+        retrieval_res_list = self.few_shot_retriever.retrieval_query_run(query_texts_list=query_text_list, 
+                                                                        filter_condition=None, n_results=retrieval_num)
+        retrieval_res_unit_list = retrieval_res_list[0]['retrieval']
 
-sql_examples_vectorstore = Chroma(
-    collection_name=TEXT2DSL_COLLECTION_NAME,
-    embedding_function=hg_embedding,
-    client=chromadb_client,
-)
+        return retrieval_res_unit_list
 
-example_nums = TEXT2DSL_FEW_SHOTS_EXAMPLE_NUM
+    def make_few_shot_example_prompt(self, few_shot_template: str, example_keys: List[str], 
+                                    few_shot_example_meta_list: List[Mapping[str, str]])-> str:
+        few_shot_example_str_unit_list = []
 
-sql_example_selector = SemanticSimilarityExampleSelector(
-    vectorstore=sql_examples_vectorstore,
-    k=example_nums,
-    input_keys=["question"],
-    example_keys=[
-        "table_name",
-        "fields_list",
-        "prior_schema_links",
-        "question",
-        "analysis",
-        "schema_links",
-        "current_date",
-        "sql",
-    ],
-)
+        retrieval_metas_list = [self._sub_dict(few_shot_example_meta['metadata'], example_keys) for few_shot_example_meta in few_shot_example_meta_list]
 
-if sql_examples_vectorstore._collection.count() > 0:
-    logger.info("examples already in sql_vectorstore")
-    logger.info("init sql_vectorstore size: {}", sql_examples_vectorstore._collection.count())
+        for meta in retrieval_metas_list:
+            few_shot_example_str_unit_list.append(few_shot_template.format(**meta))
 
-logger.info("sql_examplars size: {}", len(sql_examplars))
-sql_examples_vectorstore, sql_example_selector = reload_sql_example_collection(
-    sql_examples_vectorstore, sql_examplars, sql_example_selector, example_nums
-)
-logger.info("added sql_vectorstore size: {}", sql_examples_vectorstore._collection.count())
+        few_shot_example_str = self.few_shot_seperator.join(few_shot_example_str_unit_list)
+
+        return few_shot_example_str 
+

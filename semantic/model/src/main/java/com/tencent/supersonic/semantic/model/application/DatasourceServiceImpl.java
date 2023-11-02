@@ -1,8 +1,8 @@
 package com.tencent.supersonic.semantic.model.application;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.pojo.DatasourceDetail;
@@ -22,7 +22,7 @@ import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceRelaResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.ItemDateResp;
+import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.model.domain.DatabaseService;
@@ -36,6 +36,7 @@ import com.tencent.supersonic.semantic.model.domain.manager.DatasourceYamlManage
 import com.tencent.supersonic.semantic.model.domain.manager.DimensionYamlManager;
 import com.tencent.supersonic.semantic.model.domain.manager.MetricYamlManager;
 import com.tencent.supersonic.semantic.model.domain.pojo.Datasource;
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.DatasourceRepository;
 import com.tencent.supersonic.semantic.model.domain.repository.DateInfoRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.DatasourceConverter;
@@ -74,7 +75,6 @@ public class DatasourceServiceImpl implements DatasourceService {
 
     private DateInfoRepository dateInfoRepository;
 
-
     public DatasourceServiceImpl(DatasourceRepository datasourceRepository,
             DatabaseService databaseService,
             @Lazy DimensionService dimensionService,
@@ -89,36 +89,25 @@ public class DatasourceServiceImpl implements DatasourceService {
 
     @Override
     @Transactional
-    public DatasourceResp createDatasource(DatasourceReq datasourceReq, User user) throws Exception {
-        preCheck(datasourceReq);
+    public Datasource createDatasource(DatasourceReq datasourceReq, User user) throws Exception {
+        checkName(datasourceReq);
         checkExist(datasourceReq);
         Datasource datasource = DatasourceConverter.convert(datasourceReq);
-        log.info("[create datasource] object:{}", JSONObject.toJSONString(datasource));
         saveDatasource(datasource, user);
-        Optional<DatasourceResp> datasourceDescOptional = getDatasource(datasourceReq.getModelId(),
-                datasourceReq.getBizName());
-        if (!datasourceDescOptional.isPresent()) {
-            throw new RuntimeException("创建数据源失败");
-        }
-        DatasourceResp datasourceResp = datasourceDescOptional.get();
-        datasource.setId(datasourceResp.getId());
         batchCreateDimension(datasource, user);
         batchCreateMetric(datasource, user);
-        return datasourceResp;
+        return datasource;
     }
 
     @Override
     @Transactional
-    public DatasourceResp updateDatasource(DatasourceReq datasourceReq, User user) throws Exception {
-        preCheck(datasourceReq);
+    public Datasource updateDatasource(DatasourceReq datasourceReq, User user) throws Exception {
+        checkName(datasourceReq);
         Datasource datasource = DatasourceConverter.convert(datasourceReq);
-
-        log.info("[update datasource] object:{}", JSONObject.toJSONString(datasource));
-
+        updateDatasource(datasource, user);
         batchCreateDimension(datasource, user);
         batchCreateMetric(datasource, user);
-        DatasourceDO datasourceDO = updateDatasource(datasource, user);
-        return DatasourceConverter.convert(datasourceDO);
+        return datasource;
     }
 
     private DatasourceDO updateDatasource(Datasource datasource, User user) {
@@ -168,7 +157,6 @@ public class DatasourceServiceImpl implements DatasourceService {
         return measureResps;
     }
 
-
     private void batchCreateDimension(Datasource datasource, User user) throws Exception {
         List<DimensionReq> dimensionReqs = DatasourceConverter.convertDimensionList(datasource);
         dimensionService.createDimensionBatch(dimensionReqs, user);
@@ -178,7 +166,6 @@ public class DatasourceServiceImpl implements DatasourceService {
         List<MetricReq> exprMetricReqs = DatasourceConverter.convertMetricList(datasource);
         metricService.createMetricBatch(exprMetricReqs, user);
     }
-
 
     private Optional<DatasourceResp> getDatasource(Long modelId, String bizName) {
         List<DatasourceResp> datasourceResps = getDatasourceList(modelId);
@@ -196,13 +183,11 @@ public class DatasourceServiceImpl implements DatasourceService {
     //保存并获取自增ID
     private void saveDatasource(Datasource datasource, User user) {
         DatasourceDO datasourceDO = DatasourceConverter.convert(datasource, user);
-        log.info("[save datasource] datasourceDO:{}", JSONObject.toJSONString(datasourceDO));
         datasourceRepository.createDatasource(datasourceDO);
         datasource.setId(datasourceDO.getId());
     }
 
-
-    private void preCheck(DatasourceReq datasourceReq) {
+    private void checkName(DatasourceReq datasourceReq) {
         if (NameCheckUtils.containsSpecialCharacters(datasourceReq.getName())) {
             String message = String.format("数据源名称[%s]包含特殊字符, 请修改", datasourceReq.getName());
             throw new InvalidArgumentException(message);
@@ -297,18 +282,23 @@ public class DatasourceServiceImpl implements DatasourceService {
 
 
     @Override
-    public void deleteDatasource(Long id) {
+    public void deleteDatasource(Long id, User user) {
         DatasourceDO datasourceDO = datasourceRepository.getDatasourceById(id);
         if (datasourceDO == null) {
             return;
         }
-        checkDelete(datasourceDO.getModelId(), id);
-        datasourceRepository.deleteDatasource(id);
+        checkDelete(id);
+        datasourceDO.setStatus(StatusEnum.DELETED.getCode());
+        datasourceDO.setUpdatedAt(new Date());
+        datasourceDO.setUpdatedBy(user.getName());
+        datasourceRepository.updateDatasource(datasourceDO);
     }
 
-    private void checkDelete(Long modelId, Long datasourceId) {
-        List<MetricResp> metricResps = metricService.getMetrics(modelId, datasourceId);
-        List<DimensionResp> dimensionResps = dimensionService.getDimensionsByDatasource(datasourceId);
+    private void checkDelete(Long datasourceId) {
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setDatasourceId(datasourceId);
+        List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
+        List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
         if (!CollectionUtils.isEmpty(metricResps) || !CollectionUtils.isEmpty(dimensionResps)) {
             throw new RuntimeException("存在基于该数据源创建的指标和维度, 暂不能删除, 请确认");
         }
@@ -420,11 +410,12 @@ public class DatasourceServiceImpl implements DatasourceService {
             List<DatasourceYamlTpl> datasourceYamlTplList, List<MetricYamlTpl> metricYamlTplList) {
         for (Long modelId : modelIds) {
             List<DatasourceResp> datasourceResps = getDatasourceList(modelId);
-            List<MetricResp> metricResps = metricService.getMetrics(modelId);
+            MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(modelId));
+            List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
             metricYamlTplList.addAll(MetricYamlManager.convert2YamlObj(MetricConverter.metricInfo2Metric(metricResps)));
             Long databaseId = datasourceResps.iterator().next().getDatabaseId();
             DatabaseResp databaseResp = databaseService.getDatabase(databaseId);
-            List<DimensionResp> dimensionResps = dimensionService.getDimensions(modelId);
+            List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
             for (DatasourceResp datasourceResp : datasourceResps) {
                 datasourceYamlTplList.add(DatasourceYamlManager.convert2YamlObj(
                         DatasourceConverter.datasourceInfo2Datasource(datasourceResp), databaseResp));
