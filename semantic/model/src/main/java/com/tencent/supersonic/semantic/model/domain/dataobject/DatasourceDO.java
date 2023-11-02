@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class DatasourceDO {
     /**
-     *
+     * 
      */
     private Long id;
 
@@ -34,6 +34,11 @@ public class DatasourceDO {
     private Long databaseId;
 
     /**
+     * 
+     */
+    private Integer status;
+
+    /**
      * 创建时间
      */
     private Date createdAt;
@@ -58,18 +63,22 @@ public class DatasourceDO {
      */
     private String datasourceDetail;
 
+    /**
+     * 上游依赖标识
+     */
     private String depends;
 
-
     /**
-     * @return id
+     * 
+     * @return id 
      */
     public Long getId() {
         return id;
     }
 
     /**
-     * @param id
+     * 
+     * @param id 
      */
     public void setId(Long id) {
         this.id = id;
@@ -77,7 +86,6 @@ public class DatasourceDO {
 
     /**
      * 主题域ID
-     *
      * @return model_id 主题域ID
      */
     public Long getModelId() {
@@ -86,7 +94,6 @@ public class DatasourceDO {
 
     /**
      * 主题域ID
-     *
      * @param modelId 主题域ID
      */
     public void setModelId(Long modelId) {
@@ -95,7 +102,6 @@ public class DatasourceDO {
 
     /**
      * 数据源名称
-     *
      * @return name 数据源名称
      */
     public String getName() {
@@ -104,7 +110,6 @@ public class DatasourceDO {
 
     /**
      * 数据源名称
-     *
      * @param name 数据源名称
      */
     public void setName(String name) {
@@ -113,7 +118,6 @@ public class DatasourceDO {
 
     /**
      * 内部名称
-     *
      * @return biz_name 内部名称
      */
     public String getBizName() {
@@ -122,7 +126,6 @@ public class DatasourceDO {
 
     /**
      * 内部名称
-     *
      * @param bizName 内部名称
      */
     public void setBizName(String bizName) {
@@ -131,7 +134,6 @@ public class DatasourceDO {
 
     /**
      * 数据源描述
-     *
      * @return description 数据源描述
      */
     public String getDescription() {
@@ -140,7 +142,6 @@ public class DatasourceDO {
 
     /**
      * 数据源描述
-     *
      * @param description 数据源描述
      */
     public void setDescription(String description) {
@@ -149,7 +150,6 @@ public class DatasourceDO {
 
     /**
      * 数据库实例ID
-     *
      * @return database_id 数据库实例ID
      */
     public Long getDatabaseId() {
@@ -158,7 +158,6 @@ public class DatasourceDO {
 
     /**
      * 数据库实例ID
-     *
      * @param databaseId 数据库实例ID
      */
     public void setDatabaseId(Long databaseId) {
@@ -166,8 +165,23 @@ public class DatasourceDO {
     }
 
     /**
+     * 
+     * @return status 
+     */
+    public Integer getStatus() {
+        return status;
+    }
+
+    /**
+     * 
+     * @param status 
+     */
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    /**
      * 创建时间
-     *
      * @return created_at 创建时间
      */
     public Date getCreatedAt() {
@@ -176,7 +190,6 @@ public class DatasourceDO {
 
     /**
      * 创建时间
-     *
      * @param createdAt 创建时间
      */
     public void setCreatedAt(Date createdAt) {
@@ -185,7 +198,6 @@ public class DatasourceDO {
 
     /**
      * 创建人
-     *
      * @return created_by 创建人
      */
     public String getCreatedBy() {
@@ -194,7 +206,6 @@ public class DatasourceDO {
 
     /**
      * 创建人
-     *
      * @param createdBy 创建人
      */
     public void setCreatedBy(String createdBy) {
@@ -203,7 +214,6 @@ public class DatasourceDO {
 
     /**
      * 更新时间
-     *
      * @return updated_at 更新时间
      */
     public Date getUpdatedAt() {
@@ -212,7 +222,6 @@ public class DatasourceDO {
 
     /**
      * 更新时间
-     *
      * @param updatedAt 更新时间
      */
     public void setUpdatedAt(Date updatedAt) {
@@ -221,7 +230,6 @@ public class DatasourceDO {
 
     /**
      * 更新人
-     *
      * @return updated_by 更新人
      */
     public String getUpdatedBy() {
@@ -230,7 +238,6 @@ public class DatasourceDO {
 
     /**
      * 更新人
-     *
      * @param updatedBy 更新人
      */
     public void setUpdatedBy(String updatedBy) {
@@ -239,7 +246,6 @@ public class DatasourceDO {
 
     /**
      * 数据源配置
-     *
      * @return datasource_detail 数据源配置
      */
     public String getDatasourceDetail() {
@@ -248,18 +254,25 @@ public class DatasourceDO {
 
     /**
      * 数据源配置
-     *
      * @param datasourceDetail 数据源配置
      */
     public void setDatasourceDetail(String datasourceDetail) {
         this.datasourceDetail = datasourceDetail == null ? null : datasourceDetail.trim();
     }
 
-    public void setDepends(String depends) {
-        this.depends = depends;
-    }
-
+    /**
+     * 上游依赖标识
+     * @return depends 上游依赖标识
+     */
     public String getDepends() {
         return depends;
+    }
+
+    /**
+     * 上游依赖标识
+     * @param depends 上游依赖标识
+     */
+    public void setDepends(String depends) {
+        this.depends = depends == null ? null : depends.trim();
     }
 }

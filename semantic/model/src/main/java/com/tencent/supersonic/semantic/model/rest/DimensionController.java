@@ -1,10 +1,13 @@
 package com.tencent.supersonic.semantic.model.rest;
 
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.request.DimensionReq;
+import com.tencent.supersonic.semantic.api.model.request.MetaBatchReq;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
@@ -13,6 +16,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,6 +62,15 @@ public class DimensionController {
         return true;
     }
 
+    @PostMapping("/batchUpdateStatus")
+    public Boolean batchUpdateStatus(@RequestBody MetaBatchReq metaBatchReq,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        dimensionService.batchUpdateStatus(metaBatchReq, user);
+        return true;
+    }
+
     @PostMapping("/mockDimensionAlias")
     public List<String> mockMetricAlias(@RequestBody DimensionReq dimensionReq,
                                         HttpServletRequest request,
@@ -76,7 +90,9 @@ public class DimensionController {
 
     @GetMapping("/getDimensionList/{modelId}")
     public List<DimensionResp> getDimension(@PathVariable("modelId") Long modelId) {
-        return dimensionService.getDimensions(modelId);
+        DimensionFilter dimensionFilter = new DimensionFilter();
+        dimensionFilter.setModelIds(Lists.newArrayList(modelId));
+        return dimensionService.getDimensions(dimensionFilter);
     }
 
 
@@ -94,15 +110,20 @@ public class DimensionController {
 
 
     @DeleteMapping("deleteDimension/{id}")
-    public Boolean deleteDimension(@PathVariable("id") Long id) throws Exception {
-        dimensionService.deleteDimension(id);
+    public Boolean deleteDimension(@PathVariable("id") Long id,
+                                   HttpServletRequest request,
+                                   HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        dimensionService.deleteDimension(id, user);
         return true;
     }
 
 
     @GetMapping("/getAllHighSensitiveDimension")
     public List<DimensionResp> getAllHighSensitiveDimension() {
-        return dimensionService.getAllHighSensitiveDimension();
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
+        return dimensionService.getDimensions(metaFilter);
     }
 
 

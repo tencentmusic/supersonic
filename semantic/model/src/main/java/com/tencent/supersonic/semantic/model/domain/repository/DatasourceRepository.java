@@ -19,8 +19,6 @@ public interface DatasourceRepository {
 
     DatasourceDO getDatasourceById(Long id);
 
-    void deleteDatasource(Long id);
-
     void createDatasourceRela(DatasourceRelaDO datasourceRelaDO);
 
     void updateDatasourceRela(DatasourceRelaDO datasourceRelaDO);

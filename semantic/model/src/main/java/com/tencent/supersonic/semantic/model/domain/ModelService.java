@@ -7,7 +7,6 @@ import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +28,7 @@ public interface ModelService {
 
     void createModel(ModelReq modelReq, User user);
 
-    void deleteModel(Long model);
+    void deleteModel(Long id, User user);
 
     Map<Long, ModelResp> getModelMap();
 

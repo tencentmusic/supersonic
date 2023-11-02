@@ -119,6 +119,8 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
     `biz_name` varchar(255) DEFAULT NULL  , -- internal name
     `domain_id` INT DEFAULT '0'  , -- parent domain ID
     `alias` varchar(255) DEFAULT NULL  , -- internal name
+    `status` INT DEFAULT NULL,
+    `description` varchar(500) DEFAULT  NULL ,
     `created_at` TIMESTAMP DEFAULT NULL  ,
     `created_by` varchar(100) DEFAULT NULL  ,
     `updated_at` TIMESTAMP DEFAULT NULL  ,
@@ -160,6 +162,7 @@ CREATE TABLE  IF NOT EXISTS  `s2_datasource` (
     `description` varchar(500) DEFAULT  NULL ,
     `database_id` INT NOT  NULL ,
     `datasource_detail` LONGVARCHAR NOT  NULL ,
+    `status` int(11) DEFAULT NULL ,
     `depends` varchar(500) DEFAULT NULL ,
     `created_at` TIMESTAMP NOT  NULL ,
     `created_by` varchar(100) NOT  NULL ,
@@ -182,7 +185,7 @@ CREATE TABLE IF NOT EXISTS `s2_metric` (
                                            `name` varchar(255)  NOT NULL ,
     `biz_name` varchar(255)  NOT NULL ,
     `description` varchar(500) DEFAULT NULL ,
-    `status` INT  NOT NULL , -- status, 0 is normal, 1 is off the shelf, 2 is deleted
+    `status` INT  NOT NULL , -- status, 0 is off the shelf, 1 is normal
     `sensitive_level` INT NOT NULL ,
     `type` varchar(50)  NOT NULL , -- type proxy,expr
     `type_params` LONGVARCHAR DEFAULT NULL  ,
@@ -207,7 +210,7 @@ CREATE TABLE IF NOT EXISTS `s2_dimension` (
                                               `name` varchar(255) NOT NULL ,
     `biz_name` varchar(255)  NOT NULL ,
     `description` varchar(500) NOT NULL ,
-    `status` INT NOT NULL , -- status, 0 is normal, 1 is off the shelf, 2 is deleted
+    `status` INT NOT NULL , -- status, 0 is off the shelf, 1 is normal
     `sensitive_level` INT DEFAULT NULL ,
     `data_type` varchar(50)  DEFAULT NULL , -- type date,array,varchar
     `type` varchar(50)  NOT NULL , -- type categorical,time

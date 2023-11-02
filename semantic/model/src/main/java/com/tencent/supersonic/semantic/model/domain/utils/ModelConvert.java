@@ -2,8 +2,8 @@ package com.tencent.supersonic.semantic.model.domain.utils;
 
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
 import com.tencent.supersonic.semantic.api.model.pojo.Entity;
@@ -11,35 +11,19 @@ import com.tencent.supersonic.semantic.api.model.request.ModelReq;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.model.domain.dataobject.ModelDO;
-import com.tencent.supersonic.semantic.model.domain.pojo.Model;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Map;
 
 public class ModelConvert {
 
-    public static Model convert(ModelReq modelReq) {
-        Model model = new Model();
-        BeanUtils.copyProperties(modelReq, model);
-        model.setStatus(StatusEnum.ONLINE.getCode());
-        return model;
-    }
-
-    public static ModelDO convert(Model model, User user) {
+    public static ModelDO convert(ModelReq modelReq) {
         ModelDO modelDO = new ModelDO();
-        BeanUtils.copyProperties(model, modelDO);
-        modelDO.setCreatedBy(user.getName());
-        modelDO.setUpdatedBy(user.getName());
-        modelDO.setCreatedAt(new Date());
-        modelDO.setUpdatedAt(new Date());
-        modelDO.setAdmin(String.join(",", model.getAdmins()));
-        modelDO.setAdminOrg(String.join(",", model.getAdminOrgs()));
-        modelDO.setViewer(String.join(",", model.getViewers()));
-        modelDO.setViewOrg(String.join(",", model.getViewOrgs()));
-        modelDO.setEntity(JsonUtil.toString(model.getEntity()));
-        modelDO.setDrillDownDimensions(JsonUtil.toString(model.getDrillDownDimensions()));
+        BeanMapper.mapper(modelReq, modelDO);
+        modelDO.setEntity(JsonUtil.toString(modelReq.getEntity()));
+        modelDO.setDrillDownDimensions(JsonUtil.toString(modelReq.getDrillDownDimensions()));
+        modelDO.setStatus(StatusEnum.ONLINE.getCode());
         return modelDO;
     }
 

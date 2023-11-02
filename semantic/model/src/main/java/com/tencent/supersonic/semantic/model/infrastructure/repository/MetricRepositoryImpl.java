@@ -1,14 +1,11 @@
 package com.tencent.supersonic.semantic.model.infrastructure.repository;
 
-import com.google.common.collect.Lists;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
-import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDOExample;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.MetricRepository;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.MetricDOCustomMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.MetricDOMapper;
 import java.util.List;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 
@@ -39,37 +36,12 @@ public class MetricRepositoryImpl implements MetricRepository {
 
     @Override
     public void updateMetric(MetricDO metricDO) {
-        metricDOMapper.updateByPrimaryKeyWithBLOBs(metricDO);
+        metricDOMapper.updateByPrimaryKeySelective(metricDO);
     }
 
     @Override
-    public List<MetricDO> getMetricList(Long modelId) {
-        MetricDOExample metricDOExample = new MetricDOExample();
-        metricDOExample.createCriteria().andModelIdEqualTo(modelId);
-        return metricDOMapper.selectByExampleWithBLOBs(metricDOExample);
-    }
-
-    @Override
-    public List<MetricDO> getMetricList(List<Long> modelIds) {
-        if (CollectionUtils.isEmpty(modelIds)) {
-            return Lists.newArrayList();
-        }
-        MetricDOExample metricDOExample = new MetricDOExample();
-        metricDOExample.createCriteria().andModelIdIn(modelIds);
-        return metricDOMapper.selectByExampleWithBLOBs(metricDOExample);
-    }
-
-    @Override
-    public List<MetricDO> getMetricList() {
-        MetricDOExample metricDOExample = new MetricDOExample();
-        return metricDOMapper.selectByExampleWithBLOBs(metricDOExample);
-    }
-
-    @Override
-    public List<MetricDO> getMetricListByIds(List<Long> ids) {
-        MetricDOExample metricDOExample = new MetricDOExample();
-        metricDOExample.createCriteria().andIdIn(ids);
-        return metricDOMapper.selectByExampleWithBLOBs(metricDOExample);
+    public void batchUpdateStatus(List<MetricDO> metricDOS) {
+        metricDOCustomMapper.batchUpdateStatus(metricDOS);
     }
 
     @Override
@@ -78,19 +50,8 @@ public class MetricRepositoryImpl implements MetricRepository {
     }
 
     @Override
-    public List<MetricDO> getAllMetricList() {
-        return metricDOMapper.selectByExampleWithBLOBs(new MetricDOExample());
-    }
-
-    @Override
     public List<MetricDO> getMetric(MetricFilter metricFilter) {
         return metricDOCustomMapper.query(metricFilter);
     }
-
-    @Override
-    public void deleteMetric(Long id) {
-        metricDOMapper.deleteByPrimaryKey(id);
-    }
-
 
 }
