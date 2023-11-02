@@ -116,6 +116,18 @@ export function updateExprMetric(data: any): Promise<any> {
   });
 }
 
+export function batchUpdateMetricStatus(data: any): Promise<any> {
+  return request.post(`${process.env.API_BASE_URL}metric/batchUpdateStatus`, {
+    data,
+  });
+}
+
+export function batchUpdateDimensionStatus(data: any): Promise<any> {
+  return request.post(`${process.env.API_BASE_URL}dimension/batchUpdateStatus`, {
+    data,
+  });
+}
+
 export function mockMetricAlias(data: any): Promise<any> {
   return request.post(`${process.env.API_BASE_URL}metric/mockMetricAlias`, {
     data,
@@ -124,6 +136,12 @@ export function mockMetricAlias(data: any): Promise<any> {
 
 export function getMetricTags(): Promise<any> {
   return request.get(`${process.env.API_BASE_URL}metric/getMetricTags`);
+}
+
+export function getDrillDownDimension(metricId: number): Promise<any> {
+  return request.get(`${process.env.API_BASE_URL}metric/getDrillDownDimension`, {
+    params: { metricId },
+  });
 }
 
 export function getMeasureListByModelId(modelId: number): Promise<any> {
@@ -380,6 +398,13 @@ const downloadStruct = (blob: Blob) => {
   document.body.removeChild(link);
 };
 
+export function queryDimValue(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}query/queryDimValue`, {
+    method: 'POST',
+    data,
+  });
+}
+
 export async function queryStruct({
   modelId,
   bizName,
@@ -387,6 +412,8 @@ export async function queryStruct({
   startDate,
   endDate,
   download = false,
+  groups = [],
+  dimensionFilters = [],
 }: {
   modelId: number;
   bizName: string;
@@ -394,6 +421,8 @@ export async function queryStruct({
   startDate: string;
   endDate: string;
   download?: boolean;
+  groups?: string[];
+  dimensionFilters?: string[];
 }): Promise<any> {
   const response = await request(
     `${process.env.API_BASE_URL}query/${download ? 'download/' : ''}struct`,
@@ -402,7 +431,8 @@ export async function queryStruct({
       ...(download ? { responseType: 'blob', getResponse: true } : {}),
       data: {
         modelId,
-        groups: [dateField],
+        groups: [dateField, ...groups],
+        dimensionFilters,
         aggregators: [
           {
             column: bizName,
@@ -412,7 +442,6 @@ export async function queryStruct({
           },
         ],
         orders: [],
-        dimensionFilters: [],
         metricFilters: [],
         params: [],
         dateInfo: {

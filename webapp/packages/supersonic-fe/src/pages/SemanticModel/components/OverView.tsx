@@ -10,6 +10,7 @@ import type { StateType } from '../model';
 import { formatNumber } from '../../../utils/utils';
 import { deleteModel } from '../service';
 import ModelCreateFormModal from './ModelCreateFormModal';
+import ModelTable from './ModelTable';
 import styles from './style.less';
 
 type Props = {
@@ -26,85 +27,86 @@ const OverView: React.FC<Props> = ({
   onModelChange,
   domainManger,
 }) => {
-  const { selectDomainId, selectModelId } = domainManger;
-  const [currentModel, setCurrentModel] = useState<any>({});
-  const [modelCreateFormModalVisible, setModelCreateFormModalVisible] = useState<boolean>(false);
+  // const { selectDomainId, selectModelId } = domainManger;
+  // const [currentModel, setCurrentModel] = useState<any>({});
+  // const [modelCreateFormModalVisible, setModelCreateFormModalVisible] = useState<boolean>(false);
 
-  const descNode = (model: ISemantic.IDomainItem) => {
-    const { metricCnt, dimensionCnt } = model;
-    return (
-      <div className={styles.overviewExtraContainer}>
-        <div className={styles.extraWrapper}>
-          <div className={styles.extraStatistic}>
-            <div className={styles.extraTitle}>维度数</div>
-            <div className={styles.extraValue}>
-              <span className="ant-statistic-content-value">{formatNumber(dimensionCnt || 0)}</span>
-            </div>
-          </div>
-        </div>
-        <div className={styles.extraWrapper}>
-          <div className={styles.extraStatistic}>
-            <div className={styles.extraTitle}>指标数</div>
-            <div className={styles.extraValue}>
-              <span className="ant-statistic-content-value">{formatNumber(metricCnt || 0)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  // const descNode = (model: ISemantic.IDomainItem) => {
+  //   const { metricCnt, dimensionCnt } = model;
+  //   return (
+  //     <div className={styles.overviewExtraContainer}>
+  //       <div className={styles.extraWrapper}>
+  //         <div className={styles.extraStatistic}>
+  //           <div className={styles.extraTitle}>维度数</div>
+  //           <div className={styles.extraValue}>
+  //             <span className="ant-statistic-content-value">{formatNumber(dimensionCnt || 0)}</span>
+  //           </div>
+  //         </div>
+  //       </div>
+  //       <div className={styles.extraWrapper}>
+  //         <div className={styles.extraStatistic}>
+  //           <div className={styles.extraTitle}>指标数</div>
+  //           <div className={styles.extraValue}>
+  //             <span className="ant-statistic-content-value">{formatNumber(metricCnt || 0)}</span>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
 
-  const extraNode = (model: ISemantic.IDomainItem) => {
-    return (
-      <Dropdown
-        placement="top"
-        menu={{
-          onClick: ({ key, domEvent }) => {
-            domEvent.stopPropagation();
-            if (key === 'edit') {
-              setCurrentModel(model);
-              setModelCreateFormModalVisible(true);
-            }
-          },
-          items: [
-            {
-              label: '编辑',
-              key: 'edit',
-            },
-            {
-              label: (
-                <Popconfirm
-                  title="确认删除？"
-                  okText="是"
-                  cancelText="否"
-                  onConfirm={async () => {
-                    const { code, msg } = await deleteModel(model.id);
-                    if (code === 200) {
-                      onModelChange?.();
-                    } else {
-                      message.error(msg);
-                    }
-                  }}
-                >
-                  <a key="modelDeleteBtn">删除</a>
-                </Popconfirm>
-              ),
-              key: 'delete',
-            },
-          ],
-        }}
-      >
-        <EllipsisOutlined
-          style={{ fontSize: 22, color: 'rgba(0,0,0,0.5)' }}
-          onClick={(e) => e.stopPropagation()}
-        />
-      </Dropdown>
-    );
-  };
+  // const extraNode = (model: ISemantic.IDomainItem) => {
+  //   return (
+  //     <Dropdown
+  //       placement="top"
+  //       menu={{
+  //         onClick: ({ key, domEvent }) => {
+  //           domEvent.stopPropagation();
+  //           if (key === 'edit') {
+  //             setCurrentModel(model);
+  //             setModelCreateFormModalVisible(true);
+  //           }
+  //         },
+  //         items: [
+  //           {
+  //             label: '编辑',
+  //             key: 'edit',
+  //           },
+  //           {
+  //             label: (
+  //               <Popconfirm
+  //                 title="确认删除？"
+  //                 okText="是"
+  //                 cancelText="否"
+  //                 onConfirm={async () => {
+  //                   const { code, msg } = await deleteModel(model.id);
+  //                   if (code === 200) {
+  //                     onModelChange?.();
+  //                   } else {
+  //                     message.error(msg);
+  //                   }
+  //                 }}
+  //               >
+  //                 <a key="modelDeleteBtn">删除</a>
+  //               </Popconfirm>
+  //             ),
+  //             key: 'delete',
+  //           },
+  //         ],
+  //       }}
+  //     >
+  //       <EllipsisOutlined
+  //         style={{ fontSize: 22, color: 'rgba(0,0,0,0.5)' }}
+  //         onClick={(e) => e.stopPropagation()}
+  //       />
+  //     </Dropdown>
+  //   );
+  // };
 
   return (
     <div style={{ padding: '0px 20px 20px' }}>
-      {!disabledEdit && (
+      <ModelTable modelList={modelList} disabledEdit={disabledEdit} onModelChange={onModelChange} />
+      {/* {!disabledEdit && (
         <div style={{ paddingBottom: '20px' }}>
           <Button
             onClick={() => {
@@ -135,8 +137,8 @@ const OverView: React.FC<Props> = ({
               />
             );
           })}
-      </CheckCard.Group>
-      {modelCreateFormModalVisible && (
+      </CheckCard.Group> */}
+      {/* {modelCreateFormModalVisible && (
         <ModelCreateFormModal
           domainId={selectDomainId}
           basicInfo={currentModel}
@@ -148,7 +150,7 @@ const OverView: React.FC<Props> = ({
             setModelCreateFormModalVisible(false);
           }}
         />
-      )}
+      )} */}
     </div>
   );
 };
