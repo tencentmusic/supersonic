@@ -14,16 +14,17 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
@@ -195,11 +196,17 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         }
 
         QueryResult queryResult = new QueryResult();
-        QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByStruct(convertQueryStruct(), user);
+        QueryStructReq queryStructReq = convertQueryStruct();
+
+        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
+        queryStructReq.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
+
+        QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
 
         if (queryResp != null) {
             queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
         }
+
         String sql = queryResp == null ? null : queryResp.getSql();
         List<Map<String, Object>> resultList = queryResp == null ? new ArrayList<>()
                 : queryResp.getResultList();

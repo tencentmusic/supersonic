@@ -8,7 +8,6 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @Data
 @PropertySource("classpath:optimization.properties")
-//@ComponentScan(basePackages = "com.tencent.supersonic.chat")
 public class OptimizationConfig {
 
     @Value("${one.detection.size}")
@@ -39,5 +38,8 @@ public class OptimizationConfig {
 
     @Value("${candidate.threshold}")
     private Double candidateThreshold;
+
+    @Value("${user.s2ql.switch:false}")
+    private boolean useS2qlSwitch;
 
 }
