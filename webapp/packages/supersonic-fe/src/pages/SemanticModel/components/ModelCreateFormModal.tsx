@@ -3,7 +3,9 @@ import { Form, Button, Modal, Input, Switch, Select } from 'antd';
 import styles from './style.less';
 import { message } from 'antd';
 import { formLayout } from '@/components/FormHelper/utils';
-import { createModel, updateModel } from '../service';
+import FormItemTitle from '@/components/FormHelper/FormItemTitle';
+import { createModel, updateModel, getDimensionList } from '../service';
+import { ISemantic } from '../data';
 
 const FormItem = Form.Item;
 
@@ -17,24 +19,59 @@ export type ModelCreateFormModalProps = {
 const ModelCreateFormModal: React.FC<ModelCreateFormModalProps> = (props) => {
   const { basicInfo, domainId, onCancel, onSubmit } = props;
 
-  const [formVals, setFormVals] = useState<any>(basicInfo);
-  const [saveLoading, setSaveLoading] = useState(false);
+  const [formVals, setFormVals] = useState<ISemantic.IModelItem>(basicInfo);
+  const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [form] = Form.useForm();
 
+  const [dimensionOptions, setDimensionOptions] = useState<{ label: string; value: number }[]>([]);
+
+  useEffect(() => {
+    if (basicInfo?.id) {
+      queryDimensionList();
+    }
+  }, []);
+
+  const queryDimensionList = async () => {
+    const { code, data, msg } = await getDimensionList({ modelId: basicInfo.id });
+    if (code === 200 && Array.isArray(data?.list)) {
+      setDimensionOptions(
+        data.list.map((item: ISemantic.IDimensionItem) => {
+          return {
+            label: item.name,
+            value: item.id,
+          };
+        }),
+      );
+    } else {
+      message.error(msg);
+    }
+  };
   useEffect(() => {
     form.setFieldsValue({
       ...basicInfo,
       alias: basicInfo?.alias && basicInfo.alias.trim() ? basicInfo.alias.split(',') : [],
+      drillDownDimensionsIds: Array.isArray(basicInfo?.drillDownDimensions)
+        ? basicInfo.drillDownDimensions.map(
+            (item: ISemantic.IDrillDownDimensionItem) => item.dimensionId,
+          )
+        : [],
     });
   }, [basicInfo]);
 
   const handleConfirm = async () => {
     const fieldsValue = await form.validateFields();
     const columnsValue = { ...fieldsValue, isUnique: 1, domainId };
-    const submitData = {
+    const submitData: ISemantic.IModelItem = {
       ...formVals,
       ...columnsValue,
       alias: Array.isArray(fieldsValue.alias) ? fieldsValue.alias.join(',') : '',
+      drillDownDimensions: Array.isArray(fieldsValue.drillDownDimensionsIds)
+        ? fieldsValue.drillDownDimensionsIds.map((id: number) => {
+            return {
+              dimensionId: id,
+            };
+          })
+        : [],
     };
     setFormVals(submitData);
     setSaveLoading(true);
@@ -98,6 +135,22 @@ const ModelCreateFormModal: React.FC<ModelCreateFormModalProps> = (props) => {
         </FormItem>
         <FormItem name="description" label="模型描述">
           <Input.TextArea placeholder="模型描述" />
+        </FormItem>
+        <FormItem
+          name="drillDownDimensionsIds"
+          label={
+            <FormItemTitle
+              title={'默认下钻维度'}
+              subTitle={'配置之后,可在指标主页和问答指标卡处选择用来对指标进行下钻和过滤'}
+            />
+          }
+        >
+          <Select
+            mode="multiple"
+            options={dimensionOptions}
+            placeholder="请选择默认下钻维度"
+            maxTagCount={9}
+          />
         </FormItem>
         <FormItem name="isUnique" label="是否唯一" hidden={true}>
           <Switch size="small" checked={true} />

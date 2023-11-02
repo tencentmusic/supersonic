@@ -1,17 +1,17 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Space, Popconfirm, Tag, Spin } from 'antd';
+import { message, Space, Popconfirm, Tag, Spin, Dropdown } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { connect, history, useModel } from 'umi';
 import type { StateType } from '../model';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
-import { queryMetric, deleteMetric } from '../service';
+import { queryMetric, deleteMetric, batchUpdateMetricStatus } from '../service';
 import MetricFilter from './components/MetricFilter';
 import MetricInfoCreateForm from '../components/MetricInfoCreateForm';
 import MetricCardList from './components/MetricCardList';
 import NodeInfoDrawer from '../SemanticGraph/components/NodeInfoDrawer';
-import { SemanticNodeType } from '../enum';
+import { SemanticNodeType, StatusEnum } from '../enum';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
@@ -46,6 +46,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [dataSource, setDataSource] = useState<ISemantic.IMetricItem[]>([]);
   const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [filterParams, setFilterParams] = useState<Record<string, any>>({
     showType: localStorage.getItem('metricMarketShowType') === '1' ? true : false,
   });
@@ -55,6 +56,21 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   useEffect(() => {
     queryMetricList(filterParams);
   }, []);
+
+  const queryBatchUpdateStatus = async (ids: React.Key[], status: StatusEnum) => {
+    if (Array.isArray(ids) && ids.length === 0) {
+      return;
+    }
+    const { code, msg } = await batchUpdateMetricStatus({
+      ids,
+      status,
+    });
+    if (code === 200) {
+      queryMetricList(filterParams);
+      return;
+    }
+    message.error(msg);
+  };
 
   const queryMetricList = async (params: QueryMetricListParams = {}, disabledLoading = false) => {
     if (!disabledLoading) {
@@ -156,6 +172,26 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       valueEnum: SENSITIVE_LEVEL_ENUM,
     },
     {
+      dataIndex: 'status',
+      title: '状态',
+      width: 80,
+      search: false,
+      render: (status) => {
+        switch (status) {
+          case StatusEnum.ONLINE:
+            return <Tag color="success">已启用</Tag>;
+          case StatusEnum.OFFLINE:
+            return <Tag color="warning">未启用</Tag>;
+          case StatusEnum.INITIALIZED:
+            return <Tag color="processing">初始化</Tag>;
+          case StatusEnum.DELETED:
+            return <Tag color="default">已删除</Tag>;
+          default:
+            return <Tag color="default">未知</Tag>;
+        }
+      },
+    },
+    {
       dataIndex: 'createdBy',
       title: '创建人',
       search: false,
@@ -209,7 +245,14 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
                 编辑
               </a>
 
-              <Popconfirm title="确认删除？" okText="是" cancelText="否" onConfirm={() => {}}>
+              <Popconfirm
+                title="确认删除？"
+                okText="是"
+                cancelText="否"
+                onConfirm={async () => {
+                  deleteMetricQuery(record.id);
+                }}
+              >
                 <a
                   key="metricDeleteBtn"
                   onClick={() => {
@@ -244,6 +287,52 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     await queryMetricList(params, filterParams.key ? false : true);
   };
 
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[]) => {
+      setSelectedRowKeys(selectedRowKeys);
+    },
+    getCheckboxProps: (record: ISemantic.IMetricItem) => ({
+      disabled: !record.hasAdminRes,
+    }),
+  };
+
+  const dropdownButtonItems = [
+    {
+      key: 'batchStart',
+      label: '批量启用',
+    },
+    {
+      key: 'batchStop',
+      label: '批量禁用',
+    },
+    {
+      key: 'batchDelete',
+      label: (
+        <Popconfirm
+          title="确定批量删除吗？"
+          onConfirm={() => {
+            queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
+          }}
+        >
+          <a>批量删除</a>
+        </Popconfirm>
+      ),
+    },
+  ];
+
+  const onMenuClick = ({ key }: { key: string }) => {
+    switch (key) {
+      case 'batchStart':
+        queryBatchUpdateStatus(selectedRowKeys, StatusEnum.ONLINE);
+        break;
+      case 'batchStop':
+        queryBatchUpdateStatus(selectedRowKeys, StatusEnum.OFFLINE);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <>
       <div className={styles.metricFilterWrapper}>
@@ -264,14 +353,14 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             <MetricCardList
               metricList={dataSource}
               disabledEdit={true}
-              onMetricChange={(metricItem) => {
+              onMetricChange={(metricItem: ISemantic.IMetricItem) => {
                 setInfoDrawerVisible(true);
                 setMetricItem(metricItem);
               }}
-              onDeleteBtnClick={(metricItem) => {
+              onDeleteBtnClick={(metricItem: ISemantic.IMetricItem) => {
                 deleteMetricQuery(metricItem.id);
               }}
-              onEditBtnClick={(metricItem) => {
+              onEditBtnClick={(metricItem: ISemantic.IMetricItem) => {
                 setMetricItem(metricItem);
                 setCreateModalVisible(true);
               }}
@@ -289,6 +378,18 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             tableAlertRender={() => {
               return false;
             }}
+            rowSelection={{
+              type: 'checkbox',
+              ...rowSelection,
+            }}
+            toolBarRender={() => [
+              <Dropdown.Button
+                key="ctrlBtnList"
+                menu={{ items: dropdownButtonItems, onClick: onMenuClick }}
+              >
+                批量操作
+              </Dropdown.Button>,
+            ]}
             loading={loading}
             onChange={(data: any) => {
               const { current, pageSize, total } = data;
