@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
@@ -25,18 +24,22 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
+/***
+ * A mapper capable of prefix and suffix similarity parsing for
+ * domain names, dimension values, metric names, and dimension names.
+ */
 @Slf4j
-public class HanlpDictMapper implements SchemaMapper {
+public class HanlpDictMapper extends BaseMapper {
 
     @Override
-    public void map(QueryContext queryContext) {
+    public void work(QueryContext queryContext) {
 
         String queryText = queryContext.getRequest().getQueryText();
         List<Term> terms = HanlpHelper.getTerms(queryText);
 
         QueryMatchStrategy matchStrategy = ContextUtils.getBean(QueryMatchStrategy.class);
-        MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
-        Set<Long> detectModelIds = mapperHelper.getModelIds(queryContext.getRequest());
+
+        Set<Long> detectModelIds = ContextUtils.getBean(MapperHelper.class).getModelIds(queryContext.getRequest());
 
         terms = filterByModelIds(terms, detectModelIds);
 
@@ -46,8 +49,6 @@ public class HanlpDictMapper implements SchemaMapper {
         List<MapResult> matches = getMatches(matchResult);
 
         HanlpHelper.transLetterOriginal(matches);
-
-        log.info("queryContext:{},matches:{}", queryContext, matches);
 
         convertTermsToSchemaMapInfo(matches, queryContext.getMapInfo(), terms);
     }
@@ -121,13 +122,7 @@ public class HanlpDictMapper implements SchemaMapper {
                         .detectWord(mapResult.getDetectWord())
                         .build();
 
-                Map<Long, List<SchemaElementMatch>> modelElementMatches = schemaMap.getModelElementMatches();
-                List<SchemaElementMatch> schemaElementMatches = modelElementMatches.putIfAbsent(modelId,
-                        new ArrayList<>());
-                if (schemaElementMatches == null) {
-                    schemaElementMatches = modelElementMatches.get(modelId);
-                }
-                schemaElementMatches.add(schemaElementMatch);
+                addToSchemaMap(schemaMap, modelId, schemaElementMatch);
             }
         }
     }
