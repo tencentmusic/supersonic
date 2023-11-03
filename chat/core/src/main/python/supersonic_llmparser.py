@@ -14,7 +14,7 @@ from fastapi import FastAPI, HTTPException
 from config.config_parse import LLMPARSER_HOST, LLMPARSER_PORT
 
 from services_router import (query2sql_service, preset_query_service,
-                            solved_query_service, plugin_call_service)
+                            solved_query_service, plugin_call_service, retriever_service)
 
 
 app = FastAPI()
@@ -27,6 +27,7 @@ app.include_router(preset_query_service.router)
 app.include_router(solved_query_service.router)
 app.include_router(query2sql_service.router)
 app.include_router(plugin_call_service.router)
+app.include_router(retriever_service.router)
 
 if __name__ == "__main__":
     uvicorn.run(app, host=LLMPARSER_HOST, port=LLMPARSER_PORT)
