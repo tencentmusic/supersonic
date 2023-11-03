@@ -42,4 +42,9 @@ public class OptimizationConfig {
     @Value("${user.s2ql.switch:false}")
     private boolean useS2qlSwitch;
 
+    @Value("${embedding.mapper.number:10}")
+    private int embeddingMapperNumber;
+
+    @Value("${embedding.mapper.distance.threshold:0.5}")
+    private Double embeddingMapperDistanceThreshold;
 }

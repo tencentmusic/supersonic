@@ -1,13 +1,11 @@
 package com.tencent.supersonic.chat.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
-import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.knowledge.dictionary.MapResult;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
@@ -21,8 +19,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 
 /***
  * A mapper capable of prefix and suffix similarity parsing for
@@ -54,9 +50,7 @@ public class HanlpDictMapper extends BaseMapper {
     }
 
     private List<Term> filterByModelIds(List<Term> terms, Set<Long> detectModelIds) {
-        for (Term term : terms) {
-            log.info("before word:{},nature:{},frequency:{}", term.word, term.nature.toString(), term.getFrequency());
-        }
+        logTerms(terms);
         if (CollectionUtils.isNotEmpty(detectModelIds)) {
             terms = terms.stream().filter(term -> {
                 Long modelId = NatureHelper.getModelId(term.getNature().toString());
@@ -65,10 +59,8 @@ public class HanlpDictMapper extends BaseMapper {
                 }
                 return false;
             }).collect(Collectors.toList());
-        }
-        for (Term term : terms) {
-            log.info("after filter word:{},nature:{},frequency:{}", term.word, term.nature.toString(),
-                    term.getFrequency());
+            log.info("terms filter by modelIds:{}", detectModelIds);
+            logTerms(terms);
         }
         return terms;
     }
@@ -93,27 +85,15 @@ public class HanlpDictMapper extends BaseMapper {
                 if (Objects.isNull(elementType)) {
                     continue;
                 }
-
-                SemanticService schemaService = ContextUtils.getBean(SemanticService.class);
-                ModelSchema modelSchema = schemaService.getModelSchema(modelId);
-                if (Objects.isNull(modelSchema)) {
-                    return;
-                }
-
                 Long elementID = NatureHelper.getElementID(nature);
-                Long frequency = wordNatureToFrequency.get(mapResult.getName() + nature);
-
-                SchemaElement elementDb = modelSchema.getElement(elementType, elementID);
-                if (Objects.isNull(elementDb)) {
-                    log.info("element is null, elementType:{},elementID:{}", elementType, elementID);
+                SchemaElement element = getSchemaElement(modelId, elementType, elementID);
+                if (element == null) {
                     continue;
                 }
-                SchemaElement element = new SchemaElement();
-                BeanUtils.copyProperties(elementDb, element);
-                element.setAlias(getAlias(elementDb));
                 if (element.getType().equals(SchemaElementType.VALUE)) {
                     element.setName(mapResult.getName());
                 }
+                Long frequency = wordNatureToFrequency.get(mapResult.getName() + nature);
                 SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
                         .element(element)
                         .frequency(frequency)
@@ -126,6 +106,7 @@ public class HanlpDictMapper extends BaseMapper {
             }
         }
     }
+
 
     private List<MapResult> getMatches(Map<MatchText, List<MapResult>> matchResult) {
         List<MapResult> matches = new ArrayList<>();
@@ -142,15 +123,4 @@ public class HanlpDictMapper extends BaseMapper {
         return matches;
     }
 
-    public List<String> getAlias(SchemaElement element) {
-        if (!SchemaElementType.VALUE.equals(element.getType())) {
-            return element.getAlias();
-        }
-        if (CollectionUtils.isNotEmpty(element.getAlias()) && StringUtils.isNotEmpty(element.getName())) {
-            return element.getAlias().stream()
-                    .filter(aliasItem -> aliasItem.contains(element.getName()))
-                    .collect(Collectors.toList());
-        }
-        return element.getAlias();
-    }
 }
