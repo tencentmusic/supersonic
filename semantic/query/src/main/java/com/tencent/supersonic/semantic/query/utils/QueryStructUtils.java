@@ -137,6 +137,12 @@ public class QueryStructUtils {
         if (Objects.isNull(dateInfo) || Objects.isNull(dateInfo.getDateMode())) {
             return "";
         }
+        if (dateInfo.getDateMode().equals(DateMode.RECENT)) {
+            if (dateInfo.getUnit() <= 0) {
+                return "";
+            }
+        }
+
         List<Long> dimensionIds = getDimensionIds(queryStructCmd);
         List<Long> metricIds = getMetricIds(queryStructCmd);
 
@@ -177,7 +183,7 @@ public class QueryStructUtils {
             return whereClauseFromFilter;
         } else if (Strings.isNotEmpty(whereFromDate) && Strings.isEmpty(whereClauseFromFilter)) {
             return whereFromDate;
-        } else if (Strings.isEmpty(whereFromDate) && Strings.isEmpty(whereClauseFromFilter)) {
+        } else if (Objects.isNull(whereFromDate) && Strings.isEmpty(whereClauseFromFilter)) {
             log.info("the current date information is empty, enter the date initialization logic");
             return dateModeUtils.defaultRecentDateInfo(queryStructCmd.getDateInfo());
         }
