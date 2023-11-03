@@ -242,10 +242,10 @@ public class QueryServiceImpl implements QueryService {
             }
             chatCtx.setQueryText(queryReq.getQueryText());
             chatCtx.setUser(queryReq.getUser().getName());
-            chatService.updateQuery(queryReq.getQueryId(), queryResult, chatCtx);
             for (ExecuteResponder executeResponder : executeResponders) {
                 executeResponder.fillResponse(queryResult, parseInfo, queryReq);
             }
+            chatService.updateQuery(queryReq.getQueryId(), queryResult, chatCtx);
         } else {
             chatService.deleteChatQuery(queryReq.getQueryId());
         }
