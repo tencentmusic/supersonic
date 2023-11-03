@@ -67,7 +67,7 @@ public class DictQueryHelper {
                     defaultMetricDesc.getBizName(), dim4Dict);
             if (!CollectionUtils.isEmpty(data)) {
                 int size = (data.size() > printDataShow) ? printDataShow : data.size();
-                log.info("data:{}", data.subList(0, size - 1));
+                log.info("data:{}", data.subList(0, size));
             } else {
                 log.warn("data is empty. nature:{}", nature);
                 if (Objects.nonNull(queryResultWithColumns)) {
@@ -178,6 +178,7 @@ public class DictQueryHelper {
 
         DateConf dateInfo = new DateConf();
         dateInfo.setDateMode(DateConf.DateMode.RECENT);
+        log.debug("defaultMetric unit():{}", defaultMetricDesc.getUnit());
         dateInfo.setUnit(defaultMetricDesc.getUnit());
         queryStructCmd.setDateInfo(dateInfo);
 
