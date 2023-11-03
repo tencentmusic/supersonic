@@ -1,4 +1,5 @@
 import { TreeGraphData } from '@antv/g6-core';
+import { StatusEnum } from './enum';
 
 export type ISODateString =
   `${number}-${number}-${number}T${number}:${number}:${number}.${number}+${number}:${number}`;
@@ -105,7 +106,7 @@ export declare namespace ISemantic {
     name: string;
     bizName: string;
     description: any;
-    status?: number;
+    status?: StatusEnum;
     typeEnum?: any;
     sensitiveLevel?: number;
     parentId: number;
@@ -118,6 +119,7 @@ export declare namespace ISemantic {
     entity?: { entityId: number; names: string[] };
     dimensionCnt?: number;
     metricCnt?: number;
+    drillDownDimensions: IDrillDownDimensionItem[];
   }
 
   interface IDimensionItem {
@@ -169,7 +171,7 @@ export declare namespace ISemantic {
 
   interface IDrillDownDimensionItem {
     dimensionId: number;
-    necessary: boolean;
+    necessary?: boolean;
   }
 
   interface IRelateDimension {
@@ -185,13 +187,14 @@ export declare namespace ISemantic {
     name: string;
     bizName: string;
     description: string;
-    status: number;
+    status: StatusEnum;
     typeEnum: string;
     sensitiveLevel: number;
     domainId: number;
     domainName: string;
     modelName: string;
     modelId: number;
+    hasAdminRes?: boolean;
     type: string;
     typeParams: ITypeParams;
     fullPath: string;

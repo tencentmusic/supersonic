@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.parser.plugin.embedding;
+package com.tencent.supersonic.common.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;

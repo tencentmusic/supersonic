@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
 import com.google.common.base.Objects;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import lombok.Data;
 import lombok.ToString;
 

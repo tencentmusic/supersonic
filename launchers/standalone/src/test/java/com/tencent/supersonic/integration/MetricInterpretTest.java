@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.StandaloneLauncher;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingConfig;
+import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.chat.plugin.PluginManager;
 import com.tencent.supersonic.chat.query.llm.interpret.LLmAnswerResp;
 import com.tencent.supersonic.chat.service.AgentService;

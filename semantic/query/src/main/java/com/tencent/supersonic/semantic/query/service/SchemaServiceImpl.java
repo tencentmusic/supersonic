@@ -118,8 +118,8 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
-    public PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricCmd, User user) {
-        return metricService.queryMetric(pageMetricCmd, user);
+    public PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user) {
+        return metricService.queryMetric(pageMetricReq, user);
     }
 
     @Override

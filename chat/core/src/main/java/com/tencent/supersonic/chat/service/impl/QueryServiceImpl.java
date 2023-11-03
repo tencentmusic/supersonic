@@ -20,6 +20,7 @@ import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
@@ -53,7 +54,7 @@ import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -659,6 +660,9 @@ public class QueryServiceImpl implements QueryService {
         groups.add(dimensionValueReq.getBizName());
         queryStructReq.setGroups(groups);
         SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
+
+        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
+        queryStructReq.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
         QueryResultWithSchemaResp queryResultWithSchemaResp = semanticInterpreter.queryByStruct(queryStructReq, user);
         return queryResultWithSchemaResp;
     }

@@ -1,16 +1,12 @@
 package com.tencent.supersonic.semantic.model.infrastructure.repository;
 
-import com.google.common.collect.Lists;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
-import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDOExample;
 import com.tencent.supersonic.semantic.model.domain.repository.DimensionRepository;
 import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOCustomMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOMapper;
 import java.util.List;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
-
 
 @Service
 public class DimensionRepositoryImpl implements DimensionRepository {
@@ -19,13 +15,11 @@ public class DimensionRepositoryImpl implements DimensionRepository {
 
     private DimensionDOCustomMapper dimensionDOCustomMapper;
 
-
     public DimensionRepositoryImpl(DimensionDOMapper dimensionDOMapper,
                                    DimensionDOCustomMapper dimensionDOCustomMapper) {
         this.dimensionDOMapper = dimensionDOMapper;
         this.dimensionDOCustomMapper = dimensionDOCustomMapper;
     }
-
 
     @Override
     public void createDimension(DimensionDO dimensionDO) {
@@ -39,44 +33,12 @@ public class DimensionRepositoryImpl implements DimensionRepository {
 
     @Override
     public void updateDimension(DimensionDO dimensionDO) {
-        dimensionDOMapper.updateByPrimaryKeyWithBLOBs(dimensionDO);
+        dimensionDOMapper.updateByPrimaryKeySelective(dimensionDO);
     }
 
     @Override
-    public List<DimensionDO> getDimensionListOfDatasource(Long datasourceId) {
-        DimensionDOExample dimensionDOExample = new DimensionDOExample();
-        dimensionDOExample.createCriteria().andDatasourceIdEqualTo(datasourceId);
-        return dimensionDOMapper.selectByExampleWithBLOBs(dimensionDOExample);
-    }
-
-    @Override
-    public List<DimensionDO> getDimensionListOfmodel(Long modelId) {
-        DimensionDOExample dimensionDOExample = new DimensionDOExample();
-        dimensionDOExample.createCriteria().andModelIdEqualTo(modelId);
-        return dimensionDOMapper.selectByExampleWithBLOBs(dimensionDOExample);
-    }
-
-    @Override
-    public List<DimensionDO> getDimensionListOfmodelIds(List<Long> modelIds) {
-        if (CollectionUtils.isEmpty(modelIds)) {
-            return Lists.newArrayList();
-        }
-        DimensionDOExample dimensionDOExample = new DimensionDOExample();
-        dimensionDOExample.createCriteria().andModelIdIn(modelIds);
-        return dimensionDOMapper.selectByExampleWithBLOBs(dimensionDOExample);
-    }
-
-    @Override
-    public List<DimensionDO> getDimensionList() {
-        DimensionDOExample dimensionDOExample = new DimensionDOExample();
-        return dimensionDOMapper.selectByExampleWithBLOBs(dimensionDOExample);
-    }
-
-    @Override
-    public List<DimensionDO> getDimensionListByIds(List<Long> ids) {
-        DimensionDOExample dimensionDOExample = new DimensionDOExample();
-        dimensionDOExample.createCriteria().andIdIn(ids);
-        return dimensionDOMapper.selectByExampleWithBLOBs(dimensionDOExample);
+    public void batchUpdateStatus(List<DimensionDO> dimensionDOS) {
+        dimensionDOCustomMapper.batchUpdateStatus(dimensionDOS);
     }
 
     @Override
@@ -85,21 +47,8 @@ public class DimensionRepositoryImpl implements DimensionRepository {
     }
 
     @Override
-    public List<DimensionDO> getAllDimensionList() {
-        DimensionDOExample dimensionDOExample = new DimensionDOExample();
-        return dimensionDOMapper.selectByExampleWithBLOBs(dimensionDOExample);
-    }
-
-
-    @Override
     public List<DimensionDO> getDimension(DimensionFilter dimensionFilter) {
         return dimensionDOCustomMapper.query(dimensionFilter);
-    }
-
-
-    @Override
-    public void deleteDimension(Long id) {
-        dimensionDOMapper.deleteByPrimaryKey(id);
     }
 
 }

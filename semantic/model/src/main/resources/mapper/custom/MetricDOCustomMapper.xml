@@ -62,7 +62,7 @@
         type_params
     </sql>
 
-    <insert id="batchInsert" parameterType="java.util.List">
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         insert into s2_metric (model_id, name,
         biz_name, description, type,status,sensitive_level,
         created_at, created_by, updated_at,
@@ -100,10 +100,20 @@
         </foreach>
     </update>
 
+    <update id="batchUpdateStatus" parameterType="java.util.List">
+        <foreach collection="list" item="metric" separator=";">
+            update s2_metric
+            set status = #{metric.status,jdbcType=INTEGER},
+            updated_at = #{metric.updatedAt,jdbcType=TIMESTAMP},
+            updated_by = #{metric.updatedBy,jdbcType=VARCHAR}
+            where id = #{metric.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
     <select id="query" resultMap="ResultMapWithBLOBs">
          select *
          from s2_metric
-         where 1=1
+         where status != 3
         <if test="type != null and type != ''">
             and type = #{type}
         </if>
@@ -127,11 +137,21 @@
         <if test="sensitiveLevel != null">
             and sensitive_level = #{sensitiveLevel}
         </if>
+        <if test="status != null">
+            and status = #{status}
+        </if>
         <if test="modelIds != null and modelIds.size >0">
             and model_id in
             <foreach collection="modelIds" index="index" item="model" open="(" close=")"
                      separator=",">
                 #{model}
+            </foreach>
+        </if>
+        <if test="ids != null and ids.size >0">
+            and id in
+            <foreach collection="ids" index="index" item="id" open="(" close=")"
+                     separator=",">
+                #{id}
             </foreach>
         </if>
         <if test="createdBy != null">

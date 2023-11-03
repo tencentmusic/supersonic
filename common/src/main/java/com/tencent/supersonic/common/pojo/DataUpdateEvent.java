@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.pojo;
 
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import org.springframework.context.ApplicationEvent;
 
 public class DataUpdateEvent extends ApplicationEvent {
@@ -8,9 +9,9 @@ public class DataUpdateEvent extends ApplicationEvent {
     private String newName;
     private Long modelId;
     private Long id;
-    private String type;
+    private TypeEnums type;
 
-    public DataUpdateEvent(Object source, String name, String newName, Long modelId, Long id, String type) {
+    public DataUpdateEvent(Object source, String name, String newName, Long modelId, Long id, TypeEnums type) {
         super(source);
         this.name = name;
         this.newName = newName;
@@ -51,11 +52,11 @@ public class DataUpdateEvent extends ApplicationEvent {
         this.modelId = modelId;
     }
 
-    public void setType(String type) {
+    public void setType(TypeEnums type) {
         this.type = type;
     }
 
-    public String getType() {
+    public TypeEnums getType() {
         return type;
     }
 }

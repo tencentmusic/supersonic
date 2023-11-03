@@ -1,13 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SemanticNodeType } from '../../enum';
 import moment from 'moment';
-import { message, Row, Col, Button } from 'antd';
-import { queryStruct, downloadCosFile } from '@/pages/SemanticModel/service';
+import { message, Row, Col, Button, Space, Select, Form } from 'antd';
+import {
+  queryStruct,
+  downloadCosFile,
+  getDrillDownDimension,
+  getDimensionList,
+} from '@/pages/SemanticModel/service';
 import TrendChart from '@/pages/SemanticModel/Metric/components/MetricTrend';
+import MetricTrendDimensionFilter from './MetricTrendDimensionFilter';
 import MDatePicker from '@/components/MDatePicker';
 import { useModel } from 'umi';
 import { DateRangeType, DateSettingType } from '@/components/MDatePicker/type';
+
+import StandardFormRow from '@/components/StandardFormRow';
+
 import { ISemantic } from '../../data';
+
+const FormItem = Form.Item;
 
 type Props = {
   nodeData: any;
@@ -26,6 +37,10 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
   const [metricColumnConfig, setMetricColumnConfig] = useState<ISemantic.IMetricTrendColumn>();
   const [authMessage, setAuthMessage] = useState<string>('');
   const [downloadLoding, setDownloadLoding] = useState<boolean>(false);
+  const [relationDimensionOptions, setRelationDimensionOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [queryParams, setQueryParams] = useState<any>({});
   const [downloadBtnDisabledState, setDownloadBtnDisabledState] = useState<boolean>(true);
   const [periodDate, setPeriodDate] = useState<{
     startDate: string;
@@ -37,7 +52,8 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
     dateField: dateFieldMap[DateRangeType.DAY],
   });
 
-  const getMetricTrendData = async (download = false) => {
+  const getMetricTrendData = async (params: any = { download: false }) => {
+    const { download, dimensionGroup, dimensionFilters } = params;
     if (download) {
       setDownloadLoding(true);
     } else {
@@ -49,6 +65,8 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
     const res = await queryStruct({
       modelId,
       bizName,
+      groups: dimensionGroup,
+      dimensionFilters,
       dateField: periodDate.dateField,
       startDate: periodDate.startDate,
       endDate: periodDate.endDate,
@@ -86,15 +104,103 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
     }
   };
 
+  const queryDimensionList = async (modelId: number) => {
+    const { code, data, msg } = await getDimensionList({ modelId });
+    if (code === 200 && Array.isArray(data?.list)) {
+      return data.list;
+    }
+    message.error(msg);
+    return [];
+  };
+
+  const queryDrillDownDimension = async (metricId: number) => {
+    const { code, data, msg } = await getDrillDownDimension(metricId);
+    if (code === 200 && Array.isArray(data)) {
+      return data;
+    }
+    message.error(msg);
+    return [];
+  };
+
+  const initDimensionData = async (metricItem: ISemantic.IMetricItem) => {
+    const dimensionList = await queryDimensionList(metricItem.modelId);
+    const drillDownDimension = await queryDrillDownDimension(metricItem.id);
+    const drillDownDimensionIds = drillDownDimension.map(
+      (item: ISemantic.IDrillDownDimensionItem) => item.dimensionId,
+    );
+    const drillDownDimensionList = dimensionList.filter((metricItem: ISemantic.IMetricItem) => {
+      return drillDownDimensionIds.includes(metricItem.id);
+    });
+    setRelationDimensionOptions(
+      drillDownDimensionList.map((item: ISemantic.IMetricItem) => {
+        return { label: item.name, value: item.bizName };
+      }),
+    );
+  };
+
   useEffect(() => {
-    if (nodeData.id && nodeData?.nodeType === SemanticNodeType.METRIC) {
+    if (nodeData?.id && nodeData?.nodeType === SemanticNodeType.METRIC) {
       getMetricTrendData();
+      initDimensionData(nodeData);
     }
   }, [nodeData, periodDate]);
 
   return (
     <>
-      <div style={{ marginBottom: 5 }}>
+      <div style={{ marginBottom: 5, display: 'grid', gap: 10 }}>
+        {/* <StandardFormRow key="showType" title="维度下钻" block>
+          <FormItem name="showType" valuePropName="checked">
+            <Select
+              style={{ minWidth: 150 }}
+              options={relationDimensionOptions}
+              showSearch
+              filterOption={(input, option) =>
+                ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase())
+              }
+              mode="multiple"
+              placeholder="请选择下钻维度"
+              onChange={(value) => {
+                const params = { ...queryParams, dimensionGroup: value || [] };
+                setQueryParams(params);
+                getMetricTrendData({ ...params });
+              }}
+            />
+          </FormItem>
+        </StandardFormRow> */}
+        {/* <Row>
+          <Col flex="1 1 200px">
+            <Space>
+              <span>维度下钻: </span>
+              <Select
+                style={{ minWidth: 150 }}
+                options={relationDimensionOptions}
+                showSearch
+                filterOption={(input, option) =>
+                  ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase())
+                }
+                mode="multiple"
+                placeholder="请选择下钻维度"
+                onChange={(value) => {
+                  const params = { ...queryParams, dimensionGroup: value || [] };
+                  setQueryParams(params);
+                  getMetricTrendData({ ...params });
+                }}
+              />
+            </Space>
+          </Col>
+        </Row>
+        <Row>
+          <Col flex="1 1 200px">
+            <Space>
+              <span>维度筛选: </span>
+              <MetricTrendDimensionFilter
+                modelId={nodeData.modelId}
+                dimensionOptions={relationDimensionOptions}
+                onFiltersChange={() => {}}
+              />
+            </Space>
+          </Col>
+        </Row> */}
         <Row>
           <Col flex="1 1 200px">
             <MDatePicker
@@ -126,6 +232,36 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
               }}
               disabledAdvanceSetting={true}
             />
+            {/* <Select
+                style={{ minWidth: 150 }}
+                options={relationDimensionOptions}
+                showSearch
+                filterOption={(input, option) =>
+                  ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase())
+                }
+                mode="multiple"
+                placeholder="请选择下钻维度"
+                onChange={(value) => {
+                  const params = { ...queryParams, dimensionGroup: value || [] };
+                  setQueryParams(params);
+                  getMetricTrendData({ ...params });
+                }}
+              />
+              <Select
+                style={{ minWidth: 150 }}
+                options={relationDimensionOptions}
+                showSearch
+                filterOption={(input, option) =>
+                  ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase())
+                }
+                mode="multiple"
+                placeholder="请选择筛选维度"
+                onChange={(value) => {
+                  const params = { ...queryParams, dimensionFilters: value || [] };
+                  setQueryParams(params);
+                  getMetricTrendData({ ...params });
+                }}
+              /> */}
           </Col>
           <Col flex="0 1">
             <Button
@@ -133,7 +269,7 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
               loading={downloadLoding}
               disabled={downloadBtnDisabledState}
               onClick={() => {
-                getMetricTrendData(true);
+                getMetricTrendData({ download: true, ...queryParams });
               }}
             >
               下载

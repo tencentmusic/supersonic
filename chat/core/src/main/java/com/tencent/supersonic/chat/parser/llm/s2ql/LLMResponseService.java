@@ -22,7 +22,7 @@ import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
-import com.tencent.supersonic.semantic.api.query.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

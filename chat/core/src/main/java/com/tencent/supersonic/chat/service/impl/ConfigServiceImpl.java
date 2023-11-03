@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.service.impl;
 
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
@@ -38,10 +39,12 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,16 +146,19 @@ public class ConfigServiceImpl implements ConfigService {
         List<Long> filterMetricIdList = blackMetricIdList.stream().distinct().collect(Collectors.toList());
 
         ItemNameVisibilityInfo itemNameVisibility = new ItemNameVisibilityInfo();
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setModelIds(Lists.newArrayList(modelId));
         if (!CollectionUtils.isEmpty(blackDimIdList)) {
-            List<DimensionResp> dimensionRespList = dimensionService.getDimensions(modelId);
+            List<DimensionResp> dimensionRespList = dimensionService.getDimensions(metaFilter);
             List<String> blackDimNameList = dimensionRespList.stream().filter(o -> filterDimIdList.contains(o.getId()))
-                    .map(o -> o.getName()).collect(Collectors.toList());
+                    .map(SchemaItem::getName).collect(Collectors.toList());
             itemNameVisibility.setBlackDimNameList(blackDimNameList);
         }
         if (!CollectionUtils.isEmpty(blackMetricIdList)) {
-            List<MetricResp> metricRespList = metricService.getMetrics(modelId);
+
+            List<MetricResp> metricRespList = metricService.getMetrics(metaFilter);
             List<String> blackMetricList = metricRespList.stream().filter(o -> filterMetricIdList.contains(o.getId()))
-                    .map(o -> o.getName()).collect(Collectors.toList());
+                    .map(SchemaItem::getName).collect(Collectors.toList());
             itemNameVisibility.setBlackMetricNameList(blackMetricList);
         }
         return itemNameVisibility;

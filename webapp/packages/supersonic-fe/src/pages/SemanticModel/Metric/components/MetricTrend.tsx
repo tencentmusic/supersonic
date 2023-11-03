@@ -145,7 +145,7 @@ const TrendChart: React.FC<Props> = ({
       },
       tooltip: {
         trigger: 'axis',
-        formatter: function (params: any[]) {
+        formatter: function (params: any) {
           const param = params[0];
           const valueLabels = params
             .map(

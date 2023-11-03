@@ -31,6 +31,7 @@ public class DatasourceDOExample {
     protected Integer limitEnd;
 
     /**
+     *
      * @mbg.generated
      */
     public DatasourceDOExample() {
@@ -38,6 +39,7 @@ public class DatasourceDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setOrderByClause(String orderByClause) {
@@ -45,6 +47,7 @@ public class DatasourceDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public String getOrderByClause() {
@@ -52,6 +55,7 @@ public class DatasourceDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setDistinct(boolean distinct) {
@@ -59,6 +63,7 @@ public class DatasourceDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public boolean isDistinct() {
@@ -66,6 +71,7 @@ public class DatasourceDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public List<Criteria> getOredCriteria() {
@@ -73,6 +79,7 @@ public class DatasourceDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void or(Criteria criteria) {
@@ -80,6 +87,7 @@ public class DatasourceDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Criteria or() {
@@ -89,6 +97,7 @@ public class DatasourceDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Criteria createCriteria() {
@@ -100,6 +109,7 @@ public class DatasourceDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     protected Criteria createCriteriaInternal() {
@@ -108,6 +118,7 @@ public class DatasourceDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void clear() {
@@ -117,13 +128,15 @@ public class DatasourceDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setLimitStart(Integer limitStart) {
-        this.limitStart = limitStart;
+        this.limitStart=limitStart;
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Integer getLimitStart() {
@@ -131,13 +144,15 @@ public class DatasourceDOExample {
     }
 
     /**
+     *
      * @mbg.generated
      */
     public void setLimitEnd(Integer limitEnd) {
-        this.limitEnd = limitEnd;
+        this.limitEnd=limitEnd;
     }
 
     /**
+     *
      * @mbg.generated
      */
     public Integer getLimitEnd() {
@@ -578,6 +593,66 @@ public class DatasourceDOExample {
             return (Criteria) this;
         }
 
+        public Criteria andStatusIsNull() {
+            addCriterion("status is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusIsNotNull() {
+            addCriterion("status is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusEqualTo(Integer value) {
+            addCriterion("status =", value, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusNotEqualTo(Integer value) {
+            addCriterion("status <>", value, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusGreaterThan(Integer value) {
+            addCriterion("status >", value, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusGreaterThanOrEqualTo(Integer value) {
+            addCriterion("status >=", value, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusLessThan(Integer value) {
+            addCriterion("status <", value, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusLessThanOrEqualTo(Integer value) {
+            addCriterion("status <=", value, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusIn(List<Integer> values) {
+            addCriterion("status in", values, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusNotIn(List<Integer> values) {
+            addCriterion("status not in", values, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusBetween(Integer value1, Integer value2) {
+            addCriterion("status between", value1, value2, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusNotBetween(Integer value1, Integer value2) {
+            addCriterion("status not between", value1, value2, "status");
+            return (Criteria) this;
+        }
+
         public Criteria andCreatedAtIsNull() {
             addCriterion("created_at is null");
             return (Criteria) this;
@@ -869,6 +944,38 @@ public class DatasourceDOExample {
 
         private String typeHandler;
 
+        public String getCondition() {
+            return condition;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Object getSecondValue() {
+            return secondValue;
+        }
+
+        public boolean isNoValue() {
+            return noValue;
+        }
+
+        public boolean isSingleValue() {
+            return singleValue;
+        }
+
+        public boolean isBetweenValue() {
+            return betweenValue;
+        }
+
+        public boolean isListValue() {
+            return listValue;
+        }
+
+        public String getTypeHandler() {
+            return typeHandler;
+        }
+
         protected Criterion(String condition) {
             super();
             this.condition = condition;
@@ -903,38 +1010,6 @@ public class DatasourceDOExample {
 
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
-        }
-
-        public String getCondition() {
-            return condition;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public Object getSecondValue() {
-            return secondValue;
-        }
-
-        public boolean isNoValue() {
-            return noValue;
-        }
-
-        public boolean isSingleValue() {
-            return singleValue;
-        }
-
-        public boolean isBetweenValue() {
-            return betweenValue;
-        }
-
-        public boolean isListValue() {
-            return listValue;
-        }
-
-        public String getTypeHandler() {
-            return typeHandler;
         }
     }
 }
