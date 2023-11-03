@@ -1,12 +1,11 @@
-package com.tencent.supersonic.chat.responder.parse;
+package com.tencent.supersonic.chat.responder.execute;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
-import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
+import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.embedding.EmbeddingUtils;
@@ -15,6 +14,7 @@ import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.semantic.model.domain.listener.MetaEmbeddingListener;
 import org.springframework.util.CollectionUtils;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -22,15 +22,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SimilarMetricParseResponder implements ParseResponder {
+public class SimilarMetricExecuteResponder implements ExecuteResponder {
 
 
     @Override
-    public void fillResponse(ParseResp parseResp, QueryContext queryContext, List<ChatParseDO> chatParseDOS) {
-        if (CollectionUtils.isEmpty(parseResp.getSelectedParses())) {
-            return;
-        }
-        fillSimilarMetric(parseResp.getSelectedParses().iterator().next());
+    public void fillResponse(QueryResult queryResult, SemanticParseInfo semanticParseInfo, ExecuteQueryReq queryReq) {
+        fillSimilarMetric(queryResult.getChatContext());
     }
 
     private void fillSimilarMetric(SemanticParseInfo parseInfo) {
@@ -38,8 +35,7 @@ public class SimilarMetricParseResponder implements ParseResponder {
                 || CollectionUtils.isEmpty(parseInfo.getMetrics())) {
             return;
         }
-        List<String> metricNames = parseInfo.getMetrics().stream()
-                .map(SchemaElement::getName).collect(Collectors.toList());
+        List<String> metricNames = Collections.singletonList(parseInfo.getMetrics().iterator().next().getName());
         Map<String, String> filterCondition = new HashMap<>();
         filterCondition.put("modelId", parseInfo.getModelId().toString());
         filterCondition.put("type", SchemaElementType.METRIC.name());
@@ -47,7 +43,7 @@ public class SimilarMetricParseResponder implements ParseResponder {
                 .filterCondition(filterCondition).queryEmbeddings(null).build();
         EmbeddingUtils embeddingUtils = ContextUtils.getBean(EmbeddingUtils.class);
         List<RetrieveQueryResult> retrieveQueryResults = embeddingUtils.retrieveQuery(
-                MetaEmbeddingListener.COLLECTION_NAME, retrieveQuery, 10);
+                MetaEmbeddingListener.COLLECTION_NAME, retrieveQuery, 5);
         if (CollectionUtils.isEmpty(retrieveQueryResults)) {
             return;
         }
