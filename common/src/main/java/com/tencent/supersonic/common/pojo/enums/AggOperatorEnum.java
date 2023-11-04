@@ -43,8 +43,8 @@ public enum AggOperatorEnum {
 
     /**
      * Determine if aggType is count_Distinct type
-     * COUNT_DISTINCT needs special handling when sql correction.
-     * Also when generating tableSql, count_distinct(field) needs to be parsed to count(distinct field).
+     * 1.outer SQL parses the count_distinct(field) operator as count(DISTINCT field).
+     * 2.tableSQL generates aggregation that ignores the count_distinct operator.
      * @param aggType aggType
      * @return is count_Distinct type or not
      */
