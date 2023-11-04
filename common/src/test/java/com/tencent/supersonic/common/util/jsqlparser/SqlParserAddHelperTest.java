@@ -217,6 +217,106 @@ class SqlParserAddHelperTest {
                 replaceSql);
     }
 
+
+    @Test
+    void addAggregateToCountDiscountMetricField() {
+        String sql = "select department, uv from t_1 where sys_imp_date = '2023-09-11' order by uv desc limit 10";
+
+        Map<String, String> filedNameToAggregate = new HashMap<>();
+        filedNameToAggregate.put("uv", "count_distinct");
+
+        Set<String> groupByFields = new HashSet<>();
+        groupByFields.add("department");
+
+        String replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
+                        + "GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, uv from t_1 where sys_imp_date = '2023-09-11' and uv >1  "
+                + "order by uv desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
+                        + "AND count(DISTINCT uv) > 1 GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, uv from t_1 where uv >1  order by uv desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE count(DISTINCT uv) > 1 "
+                        + "GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, uv from t_1 where count(DISTINCT uv) >1  order by uv desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE count(DISTINCT uv) > 1 "
+                        + "GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, count(DISTINCT uv) from t_1 where sys_imp_date = '2023-09-11' and count(DISTINCT uv) >1 "
+                + "GROUP BY department order by count(DISTINCT uv) desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
+                        + "AND count(DISTINCT uv) > 1 GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, uv from t_1 where sys_imp_date = '2023-09-11' and uv >1 "
+                + "GROUP BY department order by count(DISTINCT uv) desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
+                        + "AND count(DISTINCT uv) > 1 GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, uv from t_1 where sys_imp_date = '2023-09-11' and uv >1 and department = 'HR' "
+                + "GROUP BY department order by uv desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE sys_imp_date = '2023-09-11' AND count(DISTINCT uv) > 1 "
+                        + "AND department = 'HR' GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, uv from t_1 where (uv >1 and department = 'HR') "
+                + " and sys_imp_date = '2023-09-11' GROUP BY department order by uv desc limit 10";
+        replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE (count(DISTINCT uv) > 1 AND department = 'HR') AND "
+                        + "sys_imp_date = '2023-09-11' GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select department, count(DISTINCT uv) as uv from t_1 where sys_imp_date = '2023-09-11' GROUP BY "
+                + "department order by uv desc limit 10";
+        replaceSql = SqlParserReplaceHelper.replaceAlias(sql);
+        replaceSql = SqlParserAddHelper.addAggregateToField(replaceSql, filedNameToAggregate);
+        replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
+
+        Assert.assertEquals(
+                "SELECT department, count(DISTINCT uv) AS uv "
+                        + "FROM t_1 WHERE sys_imp_date = '2023-09-11' GROUP BY department "
+                        + "ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                replaceSql);
+    }
+
     @Test
     void addGroupBy() {
         String sql = "select department, sum(pv) from t_1 where sys_imp_date = '2023-09-11' "
