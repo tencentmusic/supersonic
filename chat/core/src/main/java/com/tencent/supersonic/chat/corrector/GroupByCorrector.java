@@ -2,7 +2,6 @@ package com.tencent.supersonic.chat.corrector;
 
 import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
-import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
@@ -61,22 +60,9 @@ public class GroupByCorrector extends BaseSemanticCorrector {
             return;
         }
 
-        final List<String> countDistinctList = semanticSchema.getMetrics(modelId).stream()
-                .filter(schemaElement -> AggOperatorEnum.isCountDistinct(schemaElement.getDefaultAgg()))
-                .flatMap(
-                        schemaElement -> {
-                            Set<String> elements = new HashSet<>();
-                            elements.add(schemaElement.getName());
-                            if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {
-                                elements.addAll(schemaElement.getAlias());
-                            }
-                            return elements.stream();
-                        }
-                ).collect(Collectors.toList());
-
         List<String> aggregateFields = SqlParserSelectHelper.getAggregateFields(sql);
         Set<String> groupByFields = selectFields.stream()
-                .filter(field -> dimensions.contains(field) || countDistinctList.contains(field))
+                .filter(field -> dimensions.contains(field))
                 .filter(field -> {
                     if (!CollectionUtils.isEmpty(aggregateFields) && aggregateFields.contains(field)) {
                         return false;

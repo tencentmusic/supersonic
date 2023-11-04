@@ -4,7 +4,6 @@ import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
-import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
@@ -75,8 +74,6 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         List<SchemaElement> metrics = getMetricElements(modelId);
 
         Map<String, String> metricToAggregate = metrics.stream()
-                //skip count_distinct metric
-                .filter(schemaElement -> !AggOperatorEnum.isCountDistinct(schemaElement.getDefaultAgg()))
                 .map(schemaElement -> {
                     if (Objects.isNull(schemaElement.getDefaultAgg())) {
                         schemaElement.setDefaultAgg(AggregateTypeEnum.SUM.name());
