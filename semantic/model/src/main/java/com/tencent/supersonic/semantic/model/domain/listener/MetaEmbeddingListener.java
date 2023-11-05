@@ -2,6 +2,7 @@ package com.tencent.supersonic.semantic.model.domain.listener;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.common.pojo.DataEvent;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.util.embedding.EmbeddingQuery;
 import com.tencent.supersonic.common.util.embedding.EmbeddingUtils;
@@ -32,7 +33,8 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
                 .stream()
                 .map(dataItem -> {
                     EmbeddingQuery embeddingQuery = new EmbeddingQuery();
-                    embeddingQuery.setQueryId(dataItem.getId().toString());
+                    embeddingQuery.setQueryId(
+                            dataItem.getId().toString() + DictWordType.NATURE_SPILT + dataItem.getType().getName());
                     embeddingQuery.setQuery(dataItem.getName());
                     Map meta = JSONObject.parseObject(JSONObject.toJSONString(dataItem), Map.class);
                     embeddingQuery.setMetadata(meta);

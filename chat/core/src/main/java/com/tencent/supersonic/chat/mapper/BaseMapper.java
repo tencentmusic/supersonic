@@ -10,10 +10,12 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,12 +32,17 @@ public abstract class BaseMapper implements SchemaMapper {
     public void map(QueryContext queryContext) {
 
         String simpleName = this.getClass().getSimpleName();
-
+        long startTime = System.currentTimeMillis();
         log.info("before {},mapInfo:{}", simpleName, queryContext.getMapInfo());
 
-        work(queryContext);
+        try {
+            work(queryContext);
+        } catch (Exception e) {
+            log.error("work error", e);
+        }
 
-        log.info("after {},mapInfo:{}", simpleName, queryContext.getMapInfo());
+        long cost = System.currentTimeMillis() - startTime;
+        log.info("after {},cost:{},mapInfo:{}", simpleName, cost, queryContext.getMapInfo());
     }
 
     public abstract void work(QueryContext queryContext);
@@ -48,6 +55,26 @@ public abstract class BaseMapper implements SchemaMapper {
             schemaElementMatches = modelElementMatches.get(modelId);
         }
         schemaElementMatches.add(schemaElementMatch);
+    }
+
+    public Set<Long> getModelIds(QueryContext queryContext) {
+        return ContextUtils.getBean(MapperHelper.class).getModelIds(queryContext.getRequest());
+    }
+
+    public List<Term> filterByModelIds(List<Term> terms, Set<Long> detectModelIds) {
+        logTerms(terms);
+        if (CollectionUtils.isNotEmpty(detectModelIds)) {
+            terms = terms.stream().filter(term -> {
+                Long modelId = NatureHelper.getModelId(term.getNature().toString());
+                if (Objects.nonNull(modelId)) {
+                    return detectModelIds.contains(modelId);
+                }
+                return false;
+            }).collect(Collectors.toList());
+            log.info("terms filter by modelIds:{}", detectModelIds);
+            logTerms(terms);
+        }
+        return terms;
     }
 
     public void logTerms(List<Term> terms) {

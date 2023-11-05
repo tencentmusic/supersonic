@@ -57,7 +57,7 @@ public class SimilarMetricExecuteResponder implements ExecuteResponder {
             metric.setOrder(metricOrder++);
         }
         for (Retrieval retrieval : retrievals) {
-            if (!metricIds.contains(retrieval.getId())) {
+            if (!metricIds.contains(Retrieval.getLongId(retrieval.getId()))) {
                 SchemaElement schemaElement = JSONObject.parseObject(JSONObject.toJSONString(retrieval.getMetadata()),
                         SchemaElement.class);
                 if (retrieval.getMetadata().containsKey("modelId")) {

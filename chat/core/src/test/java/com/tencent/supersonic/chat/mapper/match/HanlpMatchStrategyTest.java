@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 /**
  * MatchStrategyImplTest
  */
-class QueryMatchStrategyTest extends ContextTest {
+class HanlpMatchStrategyTest extends ContextTest {
 
     @Test
     void match() {
