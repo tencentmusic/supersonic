@@ -264,7 +264,8 @@ class SqlParserAddHelperTest {
                         + "GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
                 replaceSql);
 
-        sql = "select department, count(DISTINCT uv) from t_1 where sys_imp_date = '2023-09-11' and count(DISTINCT uv) >1 "
+        sql = "select department, count(DISTINCT uv) from t_1 where sys_imp_date = '2023-09-11'"
+                + " and count(DISTINCT uv) >1 "
                 + "GROUP BY department order by count(DISTINCT uv) desc limit 10";
         replaceSql = SqlParserAddHelper.addAggregateToField(sql, filedNameToAggregate);
         replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
@@ -290,7 +291,8 @@ class SqlParserAddHelperTest {
         replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
 
         Assert.assertEquals(
-                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE sys_imp_date = '2023-09-11' AND count(DISTINCT uv) > 1 "
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE sys_imp_date = "
+                        + "'2023-09-11' AND count(DISTINCT uv) > 1 "
                         + "AND department = 'HR' GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
                 replaceSql);
 
@@ -300,8 +302,10 @@ class SqlParserAddHelperTest {
         replaceSql = SqlParserAddHelper.addGroupBy(replaceSql, groupByFields);
 
         Assert.assertEquals(
-                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE (count(DISTINCT uv) > 1 AND department = 'HR') AND "
-                        + "sys_imp_date = '2023-09-11' GROUP BY department ORDER BY count(DISTINCT uv) DESC LIMIT 10",
+                "SELECT department, count(DISTINCT uv) FROM t_1 WHERE (count(DISTINCT uv) > "
+                        + "1 AND department = 'HR') AND "
+                        + "sys_imp_date = '2023-09-11' GROUP BY department ORDER BY "
+                        + "count(DISTINCT uv) DESC LIMIT 10",
                 replaceSql);
 
         sql = "select department, count(DISTINCT uv) as uv from t_1 where sys_imp_date = '2023-09-11' GROUP BY "
