@@ -252,23 +252,17 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
                 type="link"
                 key="editStatusOfflineBtn"
                 onClick={() => {
-                  updateDimensionStatus({
-                    ...record,
-                    status: StatusEnum.OFFLINE,
-                  });
+                  queryBatchUpdateStatus([record.id], StatusEnum.OFFLINE);
                 }}
               >
-                禁用
+                停用
               </Button>
             ) : (
               <Button
                 type="link"
                 key="editStatusOnlineBtn"
                 onClick={() => {
-                  updateDimensionStatus({
-                    ...record,
-                    status: StatusEnum.ONLINE,
-                  });
+                  queryBatchUpdateStatus([record.id], StatusEnum.ONLINE);
                 }}
               >
                 启用
@@ -317,7 +311,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
     {
       key: 'batchStop',
-      label: '批量禁用',
+      label: '批量停用',
     },
     {
       key: 'batchDelete',
