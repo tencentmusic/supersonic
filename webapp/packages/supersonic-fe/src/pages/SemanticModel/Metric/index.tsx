@@ -303,7 +303,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
     {
       key: 'batchStop',
-      label: '批量禁用',
+      label: '批量停用',
     },
     {
       key: 'batchDelete',

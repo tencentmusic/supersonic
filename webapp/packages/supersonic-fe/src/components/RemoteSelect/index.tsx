@@ -80,6 +80,7 @@ const DebounceSelect = forwardRef(
       if (disabledSearch) {
         return;
       }
+      console.log(!allowEmptyValue && !value, value, allowEmptyValue, 333);
       if (!allowEmptyValue && !value) return;
       fetchRef.current += 1;
       const fetchId = fetchRef.current;
@@ -116,9 +117,13 @@ const DebounceSelect = forwardRef(
         showSearch
         allowClear
         mode="multiple"
-        onClear={() => {
-          setOptions([]);
-        }}
+        // onClear={() => {
+        //   if (autoInit) {
+        //     loadOptions('', true);
+        //   } else {
+        //     setOptions([]);
+        //   }
+        // }}
         onSearch={debounceFetcher}
         {...props}
         filterOption={false} // 保持对props中filterOption属性的复写，不可变更位置
