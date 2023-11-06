@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.mapper;
 
 import com.google.common.collect.Lists;
 import com.hankcs.hanlp.seg.common.Term;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.HanlpMapResult;
@@ -25,8 +26,9 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     private static final int SEARCH_SIZE = 3;
 
     @Override
-    public Map<MatchText, List<HanlpMapResult>> match(QueryReq queryReq, List<Term> originals,
+    public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<Term> originals,
             Set<Long> detectModelIds) {
+        QueryReq queryReq = queryContext.getRequest();
         String text = queryReq.getQueryText();
         Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(originals);
 
@@ -87,7 +89,7 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     }
 
     @Override
-    public void detectByStep(QueryReq queryReq, Set<HanlpMapResult> results, Set<Long> detectModelIds,
+    public void detectByStep(QueryContext queryContext, Set<HanlpMapResult> results, Set<Long> detectModelIds,
             Integer startIndex,
             Integer i, int offset) {
 

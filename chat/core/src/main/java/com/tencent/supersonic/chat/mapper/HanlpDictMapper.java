@@ -13,7 +13,6 @@ import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -33,11 +32,7 @@ public class HanlpDictMapper extends BaseMapper {
 
         HanlpMatchStrategy matchStrategy = ContextUtils.getBean(HanlpMatchStrategy.class);
 
-        Set<Long> detectModelIds = getModelIds(queryContext);
-
-        terms = filterByModelIds(terms, detectModelIds);
-
-        List<HanlpMapResult> matches = matchStrategy.getMatches(queryContext.getRequest(), terms, detectModelIds);
+        List<HanlpMapResult> matches = matchStrategy.getMatches(queryContext, terms);
 
         HanlpHelper.transLetterOriginal(matches);
 
