@@ -27,11 +27,11 @@ public class FuzzyNameMapper extends BaseMapper {
 
         List<Term> terms = HanlpHelper.getTerms(queryContext.getRequest().getQueryText());
 
-        FuzzyMatchStrategy fuzzyMatchStrategy = ContextUtils.getBean(FuzzyMatchStrategy.class);
+        FuzzyNameMatchStrategy fuzzyNameMatchStrategy = ContextUtils.getBean(FuzzyNameMatchStrategy.class);
 
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
 
-        List<FuzzyResult> matches = fuzzyMatchStrategy.getMatches(queryContext, terms);
+        List<FuzzyResult> matches = fuzzyNameMatchStrategy.getMatches(queryContext, terms);
 
         for (FuzzyResult match : matches) {
             SchemaElement schemaElement = match.getSchemaElement();

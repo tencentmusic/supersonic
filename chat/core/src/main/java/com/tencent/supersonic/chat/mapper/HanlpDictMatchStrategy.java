@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
-public class HanlpMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
+public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
     @Autowired
     private MapperHelper mapperHelper;
@@ -71,8 +71,8 @@ public class HanlpMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
                 detectModelIds).stream().collect(Collectors.toCollection(LinkedHashSet::new));
         // step2. suffix search
         LinkedHashSet<HanlpMapResult> suffixHanlpMapResults = SearchService.suffixSearch(detectSegment,
-                oneDetectionMaxSize,
-                agentId, detectModelIds).stream().collect(Collectors.toCollection(LinkedHashSet::new));
+                        oneDetectionMaxSize, agentId, detectModelIds).stream()
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
         hanlpMapResults.addAll(suffixHanlpMapResults);
 
