@@ -34,3 +34,9 @@ export enum StatusEnum {
   DELETED = 3,
   UNKNOWN = -1,
 }
+
+export enum OperatorEnum {
+  EQUAL = '=',
+  IN = 'IN',
+  LIKE = 'LIKE',
+}

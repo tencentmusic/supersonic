@@ -9,17 +9,16 @@ import com.hankcs.hanlp.seg.Segment;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
+import com.tencent.supersonic.knowledge.dictionary.HadoopFileIOAdapter;
+import com.tencent.supersonic.knowledge.dictionary.MapResult;
+import com.tencent.supersonic.knowledge.dictionary.MultiCustomDictionary;
+import com.tencent.supersonic.knowledge.service.SearchService;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.tencent.supersonic.knowledge.dictionary.MapResult;
-import com.tencent.supersonic.knowledge.dictionary.HadoopFileIOAdapter;
-import com.tencent.supersonic.knowledge.service.SearchService;
-import com.tencent.supersonic.knowledge.dictionary.MultiCustomDictionary;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -186,11 +185,11 @@ public class HanlpHelper {
         }
     }
 
-    public static void transLetterOriginal(List<MapResult> mapResults) {
+    public static <T extends MapResult> void transLetterOriginal(List<T> mapResults) {
         if (CollectionUtils.isEmpty(mapResults)) {
             return;
         }
-        for (MapResult mapResult : mapResults) {
+        for (T mapResult : mapResults) {
             if (MultiCustomDictionary.isLowerLetter(mapResult.getName())) {
                 if (CustomDictionary.contains(mapResult.getName())) {
                     CoreDictionary.Attribute attribute = CustomDictionary.get(mapResult.getName());

@@ -47,7 +47,7 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.knowledge.dictionary.MapResult;
+import com.tencent.supersonic.knowledge.dictionary.HanlpMapResult;
 import com.tencent.supersonic.knowledge.dictionary.MultiCustomDictionary;
 import com.tencent.supersonic.knowledge.service.SearchService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
@@ -628,10 +628,10 @@ public class QueryServiceImpl implements QueryService {
             return terms.stream().map(term -> term.getWord()).collect(Collectors.toList());
         }
         //search from prefixSearch
-        List<MapResult> mapResultList = SearchService.prefixSearch(dimensionValueReq.getValue(),
+        List<HanlpMapResult> hanlpMapResultList = SearchService.prefixSearch(dimensionValueReq.getValue(),
                 2000, dimensionValueReq.getAgentId(), detectModelIds);
-        HanlpHelper.transLetterOriginal(mapResultList);
-        return mapResultList.stream()
+        HanlpHelper.transLetterOriginal(hanlpMapResultList);
+        return hanlpMapResultList.stream()
                 .filter(o -> {
                     for (String nature : o.getNatures()) {
                         Long elementID = NatureHelper.getElementID(nature);

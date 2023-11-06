@@ -1,8 +1,7 @@
 package com.tencent.supersonic.chat.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.knowledge.dictionary.MapResult;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,8 +9,8 @@ import java.util.Set;
 /**
  * match strategy
  */
-public interface MatchStrategy {
+public interface MatchStrategy<T> {
 
-    Map<MatchText, List<MapResult>> match(QueryReq queryReq, List<Term> terms, Set<Long> detectModelId);
+    Map<MatchText, List<T>> match(QueryContext queryContext, List<Term> terms, Set<Long> detectModelId);
 
 }

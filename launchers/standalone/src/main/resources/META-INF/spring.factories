@@ -1,4 +1,5 @@
 com.tencent.supersonic.chat.api.component.SchemaMapper=\
+    com.tencent.supersonic.chat.mapper.EmbeddingMapper, \
     com.tencent.supersonic.chat.mapper.HanlpDictMapper, \
     com.tencent.supersonic.chat.mapper.FuzzyNameMapper, \
     com.tencent.supersonic.chat.mapper.QueryFilterMapper, \

@@ -41,5 +41,16 @@ public enum AggOperatorEnum {
         return AggOperatorEnum.UNKNOWN;
     }
 
+    /**
+     * Determine if aggType is count_Distinct type
+     * 1.outer SQL parses the count_distinct(field) operator as count(DISTINCT field).
+     * 2.tableSQL generates aggregation that ignores the count_distinct operator.
+     * @param aggType aggType
+     * @return is count_Distinct type or not
+     */
+    public static boolean isCountDistinct(String aggType) {
+        return null != aggType && aggType.toUpperCase().equals(COUNT_DISTINCT.getOperator());
+    }
+
 
 }

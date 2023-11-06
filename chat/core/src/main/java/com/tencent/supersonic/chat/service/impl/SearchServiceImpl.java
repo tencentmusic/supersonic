@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.collect.Lists;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.agent.Agent;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
@@ -24,7 +25,7 @@ import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.SearchService;
 import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
-import com.tencent.supersonic.knowledge.dictionary.MapResult;
+import com.tencent.supersonic.knowledge.dictionary.HanlpMapResult;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
@@ -94,11 +95,14 @@ public class SearchServiceImpl implements SearchService {
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
         Set<Long> detectModelIds = mapperHelper.getModelIds(queryReq);
 
-        Map<MatchText, List<MapResult>> regTextMap = searchMatchStrategy.match(queryReq, originals, detectModelIds);
+        QueryContext queryContext = new QueryContext();
+        queryContext.setRequest(queryReq);
+        Map<MatchText, List<HanlpMapResult>> regTextMap =
+                searchMatchStrategy.match(queryContext, originals, detectModelIds);
         regTextMap.entrySet().stream().forEach(m -> HanlpHelper.transLetterOriginal(m.getValue()));
 
         // 4.get the most matching data
-        Optional<Entry<MatchText, List<MapResult>>> mostSimilarSearchResult = regTextMap.entrySet()
+        Optional<Entry<MatchText, List<HanlpMapResult>>> mostSimilarSearchResult = regTextMap.entrySet()
                 .stream()
                 .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
                 .reduce((entry1, entry2) ->
@@ -109,7 +113,7 @@ public class SearchServiceImpl implements SearchService {
         if (!mostSimilarSearchResult.isPresent()) {
             return Lists.newArrayList();
         }
-        Map.Entry<MatchText, List<MapResult>> searchTextEntry = mostSimilarSearchResult.get();
+        Map.Entry<MatchText, List<HanlpMapResult>> searchTextEntry = mostSimilarSearchResult.get();
         log.info("searchTextEntry:{},queryReq:{}", searchTextEntry, queryReq);
 
         Set<SearchResult> searchResults = new LinkedHashSet();
@@ -275,9 +279,9 @@ public class SearchServiceImpl implements SearchService {
      * @param recommendTextListEntry
      * @return
      */
-    private Map<String, String> getNatureToNameMap(Map.Entry<MatchText, List<MapResult>> recommendTextListEntry,
+    private Map<String, String> getNatureToNameMap(Map.Entry<MatchText, List<HanlpMapResult>> recommendTextListEntry,
             Set<Long> possibleModels) {
-        List<MapResult> recommendValues = recommendTextListEntry.getValue();
+        List<HanlpMapResult> recommendValues = recommendTextListEntry.getValue();
         return recommendValues.stream()
                 .flatMap(entry -> entry.getNatures().stream()
                         .filter(nature -> {
@@ -288,26 +292,25 @@ public class SearchServiceImpl implements SearchService {
                             return possibleModels.contains(model);
                         })
                         .map(nature -> {
-                                    DictWord posDO = new DictWord();
-                                    posDO.setWord(entry.getName());
-                                    posDO.setNature(nature);
-                                    return posDO;
-                                    }
-                        )).sorted(Comparator.comparingInt(a -> a.getWord().length()))
+                            DictWord posDO = new DictWord();
+                            posDO.setWord(entry.getName());
+                            posDO.setNature(nature);
+                            return posDO;
+                        })).sorted(Comparator.comparingInt(a -> a.getWord().length()))
                 .collect(Collectors.toMap(DictWord::getNature, DictWord::getWord, (value1, value2) -> value1,
                         LinkedHashMap::new));
     }
 
     private boolean searchMetricAndDimension(Set<Long> possibleModels, Map<Long, String> modelToName,
-            Map.Entry<MatchText, List<MapResult>> searchTextEntry, Set<SearchResult> searchResults) {
+            Map.Entry<MatchText, List<HanlpMapResult>> searchTextEntry, Set<SearchResult> searchResults) {
         boolean existMetric = false;
         log.info("searchMetricAndDimension searchTextEntry:{}", searchTextEntry);
         MatchText matchText = searchTextEntry.getKey();
-        List<MapResult> mapResults = searchTextEntry.getValue();
+        List<HanlpMapResult> hanlpMapResults = searchTextEntry.getValue();
 
-        for (MapResult mapResult : mapResults) {
+        for (HanlpMapResult hanlpMapResult : hanlpMapResults) {
 
-            List<ModelWithSemanticType> dimensionMetricClassIds = mapResult.getNatures().stream()
+            List<ModelWithSemanticType> dimensionMetricClassIds = hanlpMapResult.getNatures().stream()
                     .map(nature -> new ModelWithSemanticType(NatureHelper.getModelId(nature),
                             NatureHelper.convertToElementType(nature)))
                     .filter(entry -> matchCondition(entry, possibleModels)).collect(Collectors.toList());
@@ -322,8 +325,8 @@ public class SearchServiceImpl implements SearchService {
                 SearchResult searchResult = SearchResult.builder()
                         .modelId(modelId)
                         .modelName(modelToName.get(modelId))
-                        .recommend(matchText.getRegText() + mapResult.getName())
-                        .subRecommend(mapResult.getName())
+                        .recommend(matchText.getRegText() + hanlpMapResult.getName())
+                        .subRecommend(hanlpMapResult.getName())
                         .schemaElementType(semanticType)
                         .build();
                 //visibility to filter  metrics
@@ -332,13 +335,13 @@ public class SearchServiceImpl implements SearchService {
                     visibility = configService.getVisibilityByModelId(modelId);
                     caffeineCache.put(modelId, visibility);
                 }
-                if (!visibility.getBlackMetricNameList().contains(mapResult.getName())
-                        && !visibility.getBlackDimNameList().contains(mapResult.getName())) {
+                if (!visibility.getBlackMetricNameList().contains(hanlpMapResult.getName())
+                        && !visibility.getBlackDimNameList().contains(hanlpMapResult.getName())) {
                     searchResults.add(searchResult);
                 }
             }
-            log.info("parseResult:{},dimensionMetricClassIds:{},possibleModels:{}", mapResult, dimensionMetricClassIds,
-                    possibleModels);
+            log.info("parseResult:{},dimensionMetricClassIds:{},possibleModels:{}", hanlpMapResult,
+                    dimensionMetricClassIds, possibleModels);
         }
         log.info("searchMetricAndDimension searchResults:{}", searchResults);
         return existMetric;

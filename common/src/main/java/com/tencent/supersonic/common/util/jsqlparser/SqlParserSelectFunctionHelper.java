@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -74,7 +76,12 @@ public class SqlParserSelectFunctionHelper {
             return null;
         }
         Function sumFunction = new Function();
-        sumFunction.setName(aggregateName);
+        if (AggOperatorEnum.isCountDistinct(aggregateName)) {
+            sumFunction.setName("count");
+            sumFunction.setDistinct(true);
+        } else {
+            sumFunction.setName(aggregateName);
+        }
         sumFunction.setParameters(new ExpressionList(expression));
         return sumFunction;
     }

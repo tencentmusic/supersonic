@@ -42,4 +42,18 @@ public class OptimizationConfig {
     @Value("${user.s2ql.switch:false}")
     private boolean useS2qlSwitch;
 
+    @Value("${embedding.mapper.word.min:2}")
+    private int embeddingMapperWordMin;
+
+    @Value("${embedding.mapper.number:10}")
+    private int embeddingMapperNumber;
+
+    @Value("${embedding.mapper.round.number:10}")
+    private int embeddingMapperRoundNumber;
+
+    @Value("${embedding.mapper.sum.number:10}")
+    private int embeddingMapperSumNumber;
+
+    @Value("${embedding.mapper.distance.threshold:0.3}")
+    private Double embeddingMapperDistanceThreshold;
 }

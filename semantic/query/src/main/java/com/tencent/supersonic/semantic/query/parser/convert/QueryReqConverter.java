@@ -125,7 +125,8 @@ public class QueryReqConverter {
         // if there is count() in S2QL,set MetricTable's aggOption to "NATIVE"
         String sql = databaseReq.getSql();
         if (!SqlParserSelectHelper.hasGroupBy(sql)
-                || SqlParserSelectFunctionHelper.hasFunction(sql, "count")) {
+                || SqlParserSelectFunctionHelper.hasFunction(sql, "count")
+                || SqlParserSelectFunctionHelper.hasFunction(sql, "count_distinct")) {
             return AggOption.NATIVE;
         }
         return AggOption.DEFAULT;
