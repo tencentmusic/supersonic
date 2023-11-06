@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
-import com.tencent.supersonic.knowledge.dictionary.MapResult;
+import com.tencent.supersonic.knowledge.dictionary.HanlpMapResult;
 import com.tencent.supersonic.knowledge.service.SearchService;
 import java.util.List;
 import java.util.Map;
@@ -20,17 +20,15 @@ import org.springframework.stereotype.Service;
  * match strategy implement
  */
 @Service
-public class SearchMatchStrategy implements MatchStrategy {
+public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
     private static final int SEARCH_SIZE = 3;
 
     @Override
-    public Map<MatchText, List<MapResult>> match(QueryReq queryReq, List<Term> originals, Set<Long> detectModelIds) {
+    public Map<MatchText, List<HanlpMapResult>> match(QueryReq queryReq, List<Term> originals,
+            Set<Long> detectModelIds) {
         String text = queryReq.getQueryText();
-        Map<Integer, Integer> regOffsetToLength = originals.stream()
-                .filter(entry -> !entry.nature.toString().startsWith(DictWordType.NATURE_SPILT))
-                .collect(Collectors.toMap(Term::getOffset, value -> value.word.length(),
-                        (value1, value2) -> value2));
+        Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(originals);
 
         List<Integer> detectIndexList = Lists.newArrayList();
 
@@ -46,19 +44,19 @@ public class SearchMatchStrategy implements MatchStrategy {
                 index++;
             }
         }
-        Map<MatchText, List<MapResult>> regTextMap = new ConcurrentHashMap<>();
+        Map<MatchText, List<HanlpMapResult>> regTextMap = new ConcurrentHashMap<>();
         detectIndexList.stream().parallel().forEach(detectIndex -> {
                     String regText = text.substring(0, detectIndex);
                     String detectSegment = text.substring(detectIndex);
 
                     if (StringUtils.isNotEmpty(detectSegment)) {
-                        List<MapResult> mapResults = SearchService.prefixSearch(detectSegment,
+                        List<HanlpMapResult> hanlpMapResults = SearchService.prefixSearch(detectSegment,
                                 SearchService.SEARCH_SIZE, queryReq.getAgentId(), detectModelIds);
-                        List<MapResult> suffixMapResults = SearchService.suffixSearch(detectSegment, SEARCH_SIZE,
-                                queryReq.getAgentId(), detectModelIds);
-                        mapResults.addAll(suffixMapResults);
+                        List<HanlpMapResult> suffixHanlpMapResults = SearchService.suffixSearch(
+                                detectSegment, SEARCH_SIZE, queryReq.getAgentId(), detectModelIds);
+                        hanlpMapResults.addAll(suffixHanlpMapResults);
                         // remove entity name where search
-                        mapResults = mapResults.stream().filter(entry -> {
+                        hanlpMapResults = hanlpMapResults.stream().filter(entry -> {
                             List<String> natures = entry.getNatures().stream()
                                     .filter(nature -> !nature.endsWith(DictWordType.ENTITY.getType()))
                                     .collect(Collectors.toList());
@@ -71,10 +69,27 @@ public class SearchMatchStrategy implements MatchStrategy {
                                 .regText(regText)
                                 .detectSegment(detectSegment)
                                 .build();
-                        regTextMap.put(matchText, mapResults);
+                        regTextMap.put(matchText, hanlpMapResults);
                     }
                 }
         );
         return regTextMap;
+    }
+
+    @Override
+    public boolean needDelete(HanlpMapResult oneRoundResult, HanlpMapResult existResult) {
+        return false;
+    }
+
+    @Override
+    public String getMapKey(HanlpMapResult a) {
+        return null;
+    }
+
+    @Override
+    public void detectByStep(QueryReq queryReq, Set<HanlpMapResult> results, Set<Long> detectModelIds,
+            Integer startIndex,
+            Integer i, int offset) {
+
     }
 }

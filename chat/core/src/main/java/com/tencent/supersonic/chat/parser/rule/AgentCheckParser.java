@@ -40,7 +40,8 @@ public class AgentCheckParser implements SemanticParser {
                 queries.stream().map(SemanticQuery::getQueryMode).collect(Collectors.toList()));
         queries.removeIf(query -> {
             for (RuleQueryTool tool : queryTools) {
-                if (!tool.getQueryModes().contains(query.getQueryMode())) {
+                if (CollectionUtils.isNotEmpty(tool.getQueryModes())
+                        && !tool.getQueryModes().contains(query.getQueryMode())) {
                     return true;
                 }
                 if (CollectionUtils.isEmpty(tool.getModelIds())) {

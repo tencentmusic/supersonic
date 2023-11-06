@@ -20,6 +20,7 @@ import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
@@ -46,7 +47,7 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.knowledge.dictionary.MapResult;
+import com.tencent.supersonic.knowledge.dictionary.HanlpMapResult;
 import com.tencent.supersonic.knowledge.dictionary.MultiCustomDictionary;
 import com.tencent.supersonic.knowledge.service.SearchService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
@@ -241,10 +242,10 @@ public class QueryServiceImpl implements QueryService {
             }
             chatCtx.setQueryText(queryReq.getQueryText());
             chatCtx.setUser(queryReq.getUser().getName());
-            chatService.updateQuery(queryReq.getQueryId(), queryResult, chatCtx);
             for (ExecuteResponder executeResponder : executeResponders) {
                 executeResponder.fillResponse(queryResult, parseInfo, queryReq);
             }
+            chatService.updateQuery(queryReq.getQueryId(), queryResult, chatCtx);
         } else {
             chatService.deleteChatQuery(queryReq.getQueryId());
         }
@@ -627,10 +628,10 @@ public class QueryServiceImpl implements QueryService {
             return terms.stream().map(term -> term.getWord()).collect(Collectors.toList());
         }
         //search from prefixSearch
-        List<MapResult> mapResultList = SearchService.prefixSearch(dimensionValueReq.getValue(),
+        List<HanlpMapResult> hanlpMapResultList = SearchService.prefixSearch(dimensionValueReq.getValue(),
                 2000, dimensionValueReq.getAgentId(), detectModelIds);
-        HanlpHelper.transLetterOriginal(mapResultList);
-        return mapResultList.stream()
+        HanlpHelper.transLetterOriginal(hanlpMapResultList);
+        return hanlpMapResultList.stream()
                 .filter(o -> {
                     for (String nature : o.getNatures()) {
                         Long elementID = NatureHelper.getElementID(nature);
@@ -659,6 +660,9 @@ public class QueryServiceImpl implements QueryService {
         groups.add(dimensionValueReq.getBizName());
         queryStructReq.setGroups(groups);
         SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
+
+        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
+        queryStructReq.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
         QueryResultWithSchemaResp queryResultWithSchemaResp = semanticInterpreter.queryByStruct(queryStructReq, user);
         return queryResultWithSchemaResp;
     }
