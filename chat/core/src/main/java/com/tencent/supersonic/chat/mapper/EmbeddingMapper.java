@@ -47,7 +47,9 @@ public class EmbeddingMapper extends BaseMapper {
             long modelId = Long.parseLong(modelIdStr);
 
             schemaElement = getSchemaElement(modelId, schemaElement.getType(), elementId);
-
+            if (schemaElement == null) {
+                continue;
+            }
             SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
                     .element(schemaElement)
                     .frequency(BaseWordBuilder.DEFAULT_FREQUENCY)

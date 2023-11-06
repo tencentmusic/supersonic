@@ -151,6 +151,13 @@
                 #{model}
             </foreach>
         </if>
+        <if test="ids != null and ids.size >0">
+            and id in
+            <foreach collection="ids" index="index" item="id" open="(" close=")"
+                     separator=",">
+                #{id}
+            </foreach>
+        </if>
         <if test="createdBy != null">
             and created_by = #{createdBy}
         </if>

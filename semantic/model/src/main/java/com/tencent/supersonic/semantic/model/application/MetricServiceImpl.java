@@ -43,7 +43,6 @@ import com.tencent.supersonic.semantic.model.domain.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -60,17 +59,18 @@ public class MetricServiceImpl implements MetricService {
 
     private ChatGptHelper chatGptHelper;
 
-    @Autowired
     private ApplicationEventPublisher eventPublisher;
 
     public MetricServiceImpl(MetricRepository metricRepository,
                              ModelService modelService,
                              DomainService domainService,
-                             ChatGptHelper chatGptHelper) {
+                             ChatGptHelper chatGptHelper,
+                             ApplicationEventPublisher eventPublisher) {
         this.domainService = domainService;
         this.metricRepository = metricRepository;
         this.modelService = modelService;
         this.chatGptHelper = chatGptHelper;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -274,6 +274,17 @@ public class MetricServiceImpl implements MetricService {
         }
         ModelResp modelResp = modelService.getModel(metricResp.getModelId());
         return modelResp.getDrillDownDimensions();
+    }
+
+    @Override
+    public List<DataItem> getDataItems(Long modelId) {
+        MetricFilter metaFilter = new MetricFilter();
+        metaFilter.setModelIds(Lists.newArrayList(modelId));
+        List<MetricDO> metricDOS = queryMetric(metaFilter);
+        if (CollectionUtils.isEmpty(metricDOS)) {
+            return Lists.newArrayList();
+        }
+        return metricDOS.stream().map(this::getDataItem).collect(Collectors.toList());
     }
 
     private void checkParam(MetricReq metricReq) {

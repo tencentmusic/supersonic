@@ -230,6 +230,9 @@ public class ConfigServiceImpl implements ConfigService {
         BeanUtils.copyProperties(chatConfigResp, chatConfigRich);
 
         ModelSchema modelSchema = semanticService.getModelSchema(modelId);
+        if (modelSchema == null) {
+            return chatConfigRich;
+        }
         chatConfigRich.setBizName(modelSchema.getModel().getBizName());
         chatConfigRich.setModelName(modelSchema.getModel().getName());
 

@@ -2,6 +2,7 @@ package com.tencent.supersonic.semantic.model.domain;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.request.DimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.MetaBatchReq;
@@ -30,6 +31,8 @@ public interface DimensionService {
     PageInfo<DimensionResp> queryDimension(PageDimensionReq pageDimensionReq);
 
     void deleteDimension(Long id, User user);
+
+    List<DataItem> getDataItems(Long modelId);
 
     List<String> mockAlias(DimensionReq dimensionReq, String mockType, User user);
 
