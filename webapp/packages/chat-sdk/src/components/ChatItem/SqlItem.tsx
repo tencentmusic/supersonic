@@ -11,9 +11,10 @@ import { SqlInfoType } from '../../common/type';
 type Props = {
   integrateSystem?: string;
   sqlInfo: SqlInfoType;
+  sqlTimeCost?: number;
 };
 
-const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
+const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo, sqlTimeCost }) => {
   const [sqlType, setSqlType] = useState('');
 
   const tipPrefixCls = `${PREFIX_CLS}-item`;
@@ -36,7 +37,11 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
       <div className={`${tipPrefixCls}-title-bar`}>
         <CheckCircleFilled className={`${tipPrefixCls}-step-icon`} />
         <div className={`${tipPrefixCls}-step-title`}>
-          SQL生成：
+          SQL生成
+          {sqlTimeCost && (
+            <span className={`${tipPrefixCls}-title-tip`}>(耗时: {sqlTimeCost}ms)</span>
+          )}
+          ：
           {sqlType && (
             <span className={`${prefixCls}-toggle-expand-btn`} onClick={onCollapse}>
               <UpOutlined />
@@ -53,7 +58,7 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
                 setSqlType(sqlType === 's2QL' ? '' : 's2QL');
               }}
             >
-              S2QL
+              解析S2QL
             </div>
           )}
           {sqlInfo.logicSql && (
@@ -65,7 +70,7 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
                 setSqlType(sqlType === 'logicSql' ? '' : 'logicSql');
               }}
             >
-              逻辑SQL
+              修正S2QL
             </div>
           )}
           {sqlInfo.querySql && (
@@ -77,7 +82,7 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
                 setSqlType(sqlType === 'querySql' ? '' : 'querySql');
               }}
             >
-              物理SQL
+              执行SQL
             </div>
           )}
         </div>
@@ -91,7 +96,7 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo }) => {
             : ''
         }`}
       >
-        {sqlType && (
+        {sqlType && sqlInfo[sqlType] && (
           <>
             <SyntaxHighlighter
               className={`${prefixCls}-code`}
