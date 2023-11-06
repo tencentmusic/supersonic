@@ -22,11 +22,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Fuzzy Match Strategy
+ * Fuzzy Name Match Strategy
  */
 @Service
 @Slf4j
-public class FuzzyMatchStrategy extends BaseMatchStrategy<FuzzyResult> {
+public class FuzzyNameMatchStrategy extends BaseMatchStrategy<FuzzyResult> {
 
     @Autowired
     private OptimizationConfig optimizationConfig;
@@ -59,7 +59,6 @@ public class FuzzyMatchStrategy extends BaseMatchStrategy<FuzzyResult> {
     public void detectByStep(QueryContext queryContext, Set<FuzzyResult> existResults, Set<Long> detectModelIds,
             Integer startIndex, Integer index, int offset) {
         String detectSegment = queryContext.getRequest().getQueryText().substring(startIndex, index);
-        // step1. build query params
         if (StringUtils.isBlank(detectSegment)) {
             return;
         }

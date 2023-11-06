@@ -11,6 +11,7 @@ import com.tencent.supersonic.knowledge.dictionary.HanlpMapResult;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -114,7 +115,7 @@ public class SearchService {
     }
 
     public static void put(String key, CoreDictionary.Attribute attribute) {
-        trie.put(key, Arrays.stream(attribute.nature).map(entry -> entry.toString()).collect(Collectors.toList()));
+        trie.put(key, getValue(attribute.nature));
     }
 
 
@@ -138,9 +139,23 @@ public class SearchService {
     }
 
     public static void putSuffix(String key, CoreDictionary.Attribute attribute) {
-        suffixTrie.put(key,
-                Arrays.stream(attribute.nature).map(entry -> entry.toString()).collect(Collectors.toList()));
+        Nature[] nature = attribute.nature;
+        suffixTrie.put(key, getValue(nature));
     }
 
+    private static List<String> getValue(Nature[] nature) {
+        return Arrays.stream(nature).map(entry -> entry.toString()).collect(Collectors.toList());
+    }
+
+    public static void remove(DictWord dictWord, Nature[] natures) {
+        trie.remove(dictWord.getWord());
+        if (Objects.nonNull(natures) && natures.length > 0) {
+            trie.put(dictWord.getWord(), getValue(natures));
+        }
+        if (dictWord.getNature().contains(DictWordType.METRIC.getType()) || dictWord.getNature()
+                .contains(DictWordType.DIMENSION.getType())) {
+            suffixTrie.remove(dictWord.getWord());
+        }
+    }
 }
 

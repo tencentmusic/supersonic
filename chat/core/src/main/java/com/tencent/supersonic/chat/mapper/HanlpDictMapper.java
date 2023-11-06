@@ -30,7 +30,7 @@ public class HanlpDictMapper extends BaseMapper {
         String queryText = queryContext.getRequest().getQueryText();
         List<Term> terms = HanlpHelper.getTerms(queryText);
 
-        HanlpMatchStrategy matchStrategy = ContextUtils.getBean(HanlpMatchStrategy.class);
+        HanlpDictMatchStrategy matchStrategy = ContextUtils.getBean(HanlpDictMatchStrategy.class);
 
         List<HanlpMapResult> matches = matchStrategy.getMatches(queryContext, terms);
 
