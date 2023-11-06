@@ -1,5 +1,5 @@
-import { Button, Spin } from 'antd';
-import { CheckCircleFilled, ReloadOutlined } from '@ant-design/icons';
+import { Spin } from 'antd';
+import { CheckCircleFilled } from '@ant-design/icons';
 import { PREFIX_CLS } from '../../common/constants';
 import { MsgDataType } from '../../common/type';
 import ChatMsg from '../ChatMsg';
@@ -17,7 +17,7 @@ type Props = {
   renderCustomExecuteNode?: boolean;
   data?: MsgDataType;
   triggerResize?: boolean;
-  onRefresh: () => void;
+  isDeveloper?: boolean;
 };
 
 const ExecuteItem: React.FC<Props> = ({
@@ -30,7 +30,7 @@ const ExecuteItem: React.FC<Props> = ({
   renderCustomExecuteNode,
   data,
   triggerResize,
-  onRefresh,
+  isDeveloper,
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
 
@@ -49,19 +49,20 @@ const ExecuteItem: React.FC<Props> = ({
     );
   };
 
-  const reloadNode = (
-    <Button className={`${prefixCls}-reload`} size="small" onClick={onRefresh}>
-      <ReloadOutlined />
-      重新查询
-    </Button>
-  );
-
   if (executeLoading) {
     return getNodeTip('数据查询中');
   }
 
   if (executeTip) {
-    return getNodeTip(<>数据查询失败：{reloadNode}</>, executeTip);
+    return getNodeTip(
+      <>
+        数据查询失败
+        {data?.queryTimeCost && isDeveloper && (
+          <span className={`${prefixCls}-title-tip`}>(耗时: {data.queryTimeCost}ms)</span>
+        )}
+      </>,
+      executeTip
+    );
   }
 
   if (!data) {
@@ -73,8 +74,10 @@ const ExecuteItem: React.FC<Props> = ({
       <div className={`${prefixCls}-title-bar`}>
         <CheckCircleFilled className={`${prefixCls}-step-icon`} />
         <div className={`${prefixCls}-step-title`}>
-          数据查询：
-          {reloadNode}
+          数据查询
+          {data?.queryTimeCost && isDeveloper && (
+            <span className={`${prefixCls}-title-tip`}>(耗时: {data.queryTimeCost}ms)</span>
+          )}
         </div>
       </div>
       <div className={`${prefixCls}-content-container`}>

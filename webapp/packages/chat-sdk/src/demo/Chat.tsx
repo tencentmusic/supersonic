@@ -60,7 +60,6 @@ const Chat = () => {
             agentId={5}
             conversationId={112211121}
             onMsgDataLoaded={onMsgDataLoaded}
-            isLastMessage
             triggerResize={triggerResize}
             integrateSystem="wiki"
             isDeveloper
