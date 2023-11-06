@@ -28,7 +28,7 @@ public class SchemaElement implements Serializable {
 
     private String defaultAgg;
 
-    private int order;
+    private double order;
 
     @Override
     public boolean equals(Object o) {

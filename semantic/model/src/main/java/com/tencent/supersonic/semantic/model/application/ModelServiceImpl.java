@@ -3,7 +3,9 @@ package com.tencent.supersonic.semantic.model.application;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -43,6 +45,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -59,12 +62,13 @@ public class ModelServiceImpl implements ModelService {
     private final UserService userService;
     private final DatabaseService databaseService;
     private final Catalog catalog;
+    private ApplicationEventPublisher eventPublisher;
 
     public ModelServiceImpl(ModelRepository modelRepository, @Lazy MetricService metricService,
             @Lazy DimensionService dimensionService, @Lazy DatasourceService datasourceService,
             @Lazy DomainService domainService, UserService userService,
             @Lazy DatabaseService databaseService,
-            @Lazy Catalog catalog) {
+            @Lazy Catalog catalog, ApplicationEventPublisher eventPublisher) {
         this.modelRepository = modelRepository;
         this.metricService = metricService;
         this.dimensionService = dimensionService;
@@ -73,6 +77,7 @@ public class ModelServiceImpl implements ModelService {
         this.userService = userService;
         this.databaseService = databaseService;
         this.catalog = catalog;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -86,6 +91,7 @@ public class ModelServiceImpl implements ModelService {
     public void updateModel(ModelReq modelReq, User user) {
         ModelDO modelDO = getModelDO(modelReq.getId());
         modelReq.updatedBy(user.getName());
+        int oldStatus = modelDO.getStatus();
         BeanMapper.mapper(modelReq, modelDO);
         if (modelReq.getEntity() != null) {
             modelDO.setEntity(JsonUtil.toString(modelReq.getEntity()));
@@ -94,6 +100,29 @@ public class ModelServiceImpl implements ModelService {
             modelDO.setDrillDownDimensions(JsonUtil.toString(modelReq.getDrillDownDimensions()));
         }
         modelRepository.updateModel(modelDO);
+        statusPublish(oldStatus, modelDO);
+    }
+
+    private void statusPublish(Integer oldStatus, ModelDO modelDO) {
+        if (oldStatus.equals(modelDO.getStatus())) {
+            return;
+        }
+        if (oldStatus.equals(StatusEnum.ONLINE.getCode())
+                && modelDO.getStatus().equals(StatusEnum.OFFLINE.getCode())) {
+            publishEvent(EventType.DELETE, modelDO);
+        } else if (oldStatus.equals(StatusEnum.OFFLINE.getCode())
+                && modelDO.getStatus().equals(StatusEnum.ONLINE.getCode())) {
+            publishEvent(EventType.ADD, modelDO);
+        }
+    }
+
+    private void publishEvent(EventType eventType, ModelDO modelDO) {
+        eventPublisher.publishEvent(
+                new DataEvent(this, metricService.getDataItems(modelDO.getId()),
+                        eventType));
+        eventPublisher.publishEvent(
+                new DataEvent(this, dimensionService.getDataItems(modelDO.getId()),
+                        eventType));
     }
 
     @Override

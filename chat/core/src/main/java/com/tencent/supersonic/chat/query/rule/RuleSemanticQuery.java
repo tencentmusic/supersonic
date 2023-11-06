@@ -109,6 +109,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
 
         for (SchemaElementMatch schemaMatch : parseInfo.getElementMatches()) {
             SchemaElement element = schemaMatch.getElement();
+            element.setOrder(1 - schemaMatch.getSimilarity());
             switch (element.getType()) {
                 case ID:
                     SchemaElement entityElement = modelSchema.getElement(SchemaElementType.ENTITY, element.getId());
