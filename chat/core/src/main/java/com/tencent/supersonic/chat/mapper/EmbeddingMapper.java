@@ -11,7 +11,6 @@ import com.tencent.supersonic.knowledge.dictionary.EmbeddingResult;
 import com.tencent.supersonic.knowledge.dictionary.builder.BaseWordBuilder;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import java.util.List;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -29,12 +28,7 @@ public class EmbeddingMapper extends BaseMapper {
         List<Term> terms = HanlpHelper.getTerms(queryText);
 
         EmbeddingMatchStrategy matchStrategy = ContextUtils.getBean(EmbeddingMatchStrategy.class);
-
-        Set<Long> detectModelIds = getModelIds(queryContext);
-
-        terms = filterByModelIds(terms, detectModelIds);
-
-        List<EmbeddingResult> matchResults = matchStrategy.getMatches(queryContext.getRequest(), terms, detectModelIds);
+        List<EmbeddingResult> matchResults = matchStrategy.getMatches(queryContext, terms);
 
         HanlpHelper.transLetterOriginal(matchResults);
 

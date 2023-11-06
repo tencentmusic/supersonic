@@ -6,18 +6,11 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
-import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
-import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.knowledge.service.SchemaService;
+import com.tencent.supersonic.knowledge.dictionary.FuzzyResult;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -34,145 +27,39 @@ public class FuzzyNameMapper extends BaseMapper {
 
         List<Term> terms = HanlpHelper.getTerms(queryContext.getRequest().getQueryText());
 
-        SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-
-        detectAndAddToSchema(queryContext, terms, semanticSchema.getDimensions(), SchemaElementType.DIMENSION);
-
-        detectAndAddToSchema(queryContext, terms, semanticSchema.getMetrics(), SchemaElementType.METRIC);
-
-    }
-
-    private void detectAndAddToSchema(QueryContext queryContext, List<Term> terms, List<SchemaElement> models,
-            SchemaElementType schemaElementType) {
-        try {
-
-            Map<String, Set<SchemaElement>> modelResultSet = getResultSet(queryContext, terms, models);
-
-            addToSchemaMapInfo(modelResultSet, queryContext.getMapInfo(), schemaElementType);
-
-        } catch (Exception e) {
-            log.error("detectAndAddToSchema error", e);
-        }
-    }
-
-    private Map<String, Set<SchemaElement>> getResultSet(QueryContext queryContext, List<Term> terms,
-            List<SchemaElement> models) {
-
-        String queryText = queryContext.getRequest().getQueryText();
+        FuzzyMatchStrategy fuzzyMatchStrategy = ContextUtils.getBean(FuzzyMatchStrategy.class);
 
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
-        Set<Long> modelIds = mapperHelper.getModelIds(queryContext.getRequest());
 
-        Double metricDimensionThresholdConfig = getThreshold(queryContext);
+        List<FuzzyResult> matches = fuzzyMatchStrategy.getMatches(queryContext, terms);
 
-        Map<String, Set<SchemaElement>> nameToItems = getNameToItems(models);
-
-        Map<Integer, Integer> regOffsetToLength = terms.stream().sorted(Comparator.comparing(Term::length))
-                .collect(Collectors.toMap(Term::getOffset, term -> term.word.length(), (value1, value2) -> value2));
-
-        Map<String, Set<SchemaElement>> modelResultSet = new HashMap<>();
-        for (Integer startIndex = 0; startIndex <= queryText.length() - 1; ) {
-            for (Integer endIndex = startIndex; endIndex <= queryText.length(); ) {
-                endIndex = mapperHelper.getStepIndex(regOffsetToLength, endIndex);
-                if (endIndex > queryText.length()) {
-                    continue;
-                }
-                String detectSegment = queryText.substring(startIndex, endIndex);
-
-                for (Entry<String, Set<SchemaElement>> entry : nameToItems.entrySet()) {
-                    String name = entry.getKey();
-                    Set<SchemaElement> schemaElements = entry.getValue();
-                    if (!name.contains(detectSegment)
-                            || mapperHelper.getSimilarity(detectSegment, name) < metricDimensionThresholdConfig) {
-                        continue;
-                    }
-                    if (!CollectionUtils.isEmpty(modelIds)) {
-                        schemaElements = schemaElements.stream()
-                                .filter(schemaElement -> modelIds.contains(schemaElement.getModel()))
-                                .collect(Collectors.toSet());
-                    }
-                    Set<SchemaElement> preSchemaElements = modelResultSet.putIfAbsent(detectSegment, schemaElements);
-                    if (Objects.nonNull(preSchemaElements)) {
-                        preSchemaElements.addAll(schemaElements);
-                    }
-                }
+        for (FuzzyResult match : matches) {
+            SchemaElement schemaElement = match.getSchemaElement();
+            Set<Long> regElementSet = getRegElementSet(queryContext.getMapInfo(), schemaElement);
+            if (regElementSet.contains(schemaElement.getId())) {
+                continue;
             }
-            startIndex = mapperHelper.getStepIndex(regOffsetToLength, startIndex);
-        }
-        return modelResultSet;
-    }
-
-    private Double getThreshold(QueryContext queryContext) {
-
-        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
-        Double metricDimensionThresholdConfig = optimizationConfig.getMetricDimensionThresholdConfig();
-        Double metricDimensionMinThresholdConfig = optimizationConfig.getMetricDimensionMinThresholdConfig();
-
-        Map<Long, List<SchemaElementMatch>> modelElementMatches = queryContext.getMapInfo()
-                .getModelElementMatches();
-        boolean existElement = modelElementMatches.entrySet().stream()
-                .anyMatch(entry -> entry.getValue().size() >= 1);
-
-        if (!existElement) {
-            double halfThreshold = metricDimensionThresholdConfig / 2;
-
-            metricDimensionThresholdConfig = halfThreshold >= metricDimensionMinThresholdConfig ? halfThreshold
-                    : metricDimensionMinThresholdConfig;
-            log.info("ModelElementMatches:{} , not exist Element metricDimensionThresholdConfig reduce by half:{}",
-                    modelElementMatches, metricDimensionThresholdConfig);
-        }
-        return metricDimensionThresholdConfig;
-    }
-
-    private Map<String, Set<SchemaElement>> getNameToItems(List<SchemaElement> models) {
-        return models.stream().collect(
-                Collectors.toMap(SchemaElement::getName, a -> {
-                    Set<SchemaElement> result = new HashSet<>();
-                    result.add(a);
-                    return result;
-                }, (k1, k2) -> {
-                    k1.addAll(k2);
-                    return k1;
-                }));
-    }
-
-    private void addToSchemaMapInfo(Map<String, Set<SchemaElement>> mapResultRowSet, SchemaMapInfo schemaMap,
-            SchemaElementType schemaElementType) {
-        if (Objects.isNull(mapResultRowSet) || mapResultRowSet.size() <= 0) {
-            return;
-        }
-        MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
-
-        for (Map.Entry<String, Set<SchemaElement>> entry : mapResultRowSet.entrySet()) {
-            String detectWord = entry.getKey();
-            Set<SchemaElement> schemaElements = entry.getValue();
-            for (SchemaElement schemaElement : schemaElements) {
-
-                Set<Long> regElementSet = getRegElementSet(schemaMap, schemaElementType, schemaElement);
-                if (regElementSet.contains(schemaElement.getId())) {
-                    continue;
-                }
-                SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
-                        .element(schemaElement)
-                        .word(schemaElement.getName())
-                        .detectWord(detectWord)
-                        .frequency(10000L)
-                        .similarity(mapperHelper.getSimilarity(detectWord, schemaElement.getName()))
-                        .build();
-                log.info("schemaElementType:{},add to schema, elementMatch {}", schemaElementType, schemaElementMatch);
-                addToSchemaMap(schemaMap, schemaElement.getModel(), schemaElementMatch);
-            }
+            SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
+                    .element(schemaElement)
+                    .word(schemaElement.getName())
+                    .detectWord(match.getDetectWord())
+                    .frequency(10000L)
+                    .similarity(mapperHelper.getSimilarity(match.getDetectWord(), schemaElement.getName()))
+                    .build();
+            log.info("add to schema, elementMatch {}", schemaElementMatch);
+            addToSchemaMap(queryContext.getMapInfo(), schemaElement.getModel(), schemaElementMatch);
         }
     }
 
-    private Set<Long> getRegElementSet(SchemaMapInfo schemaMap, SchemaElementType schemaElementType,
-            SchemaElement schemaElement) {
+    private Set<Long> getRegElementSet(SchemaMapInfo schemaMap, SchemaElement schemaElement) {
         List<SchemaElementMatch> elements = schemaMap.getMatchedElements(schemaElement.getModel());
         if (CollectionUtils.isEmpty(elements)) {
             return new HashSet<>();
         }
         return elements.stream()
-                .filter(elementMatch -> schemaElementType.equals(elementMatch.getElement().getType()))
+                .filter(elementMatch ->
+                        SchemaElementType.METRIC.equals(elementMatch.getElement().getType())
+                                || SchemaElementType.DIMENSION.equals(elementMatch.getElement().getType()))
                 .map(elementMatch -> elementMatch.getElement().getId())
                 .collect(Collectors.toSet());
     }

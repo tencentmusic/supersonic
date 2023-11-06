@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.mapper;
 
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.common.pojo.Constants;
@@ -46,8 +47,9 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
         return a.getName() + Constants.UNDERLINE + a.getId();
     }
 
-    public void detectByStep(QueryReq queryReq, Set<EmbeddingResult> existResults, Set<Long> detectModelIds,
+    public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults, Set<Long> detectModelIds,
             Integer startIndex, Integer index, int offset) {
+        QueryReq queryReq = queryContext.getRequest();
         String detectSegment = queryReq.getQueryText().substring(startIndex, index);
         // step1. build query params
         if (StringUtils.isBlank(detectSegment)

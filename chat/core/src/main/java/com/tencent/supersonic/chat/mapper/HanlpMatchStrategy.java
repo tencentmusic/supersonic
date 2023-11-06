@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.common.pojo.Constants;
@@ -33,7 +34,9 @@ public class HanlpMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     private OptimizationConfig optimizationConfig;
 
     @Override
-    public Map<MatchText, List<HanlpMapResult>> match(QueryReq queryReq, List<Term> terms, Set<Long> detectModelIds) {
+    public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<Term> terms,
+            Set<Long> detectModelIds) {
+        QueryReq queryReq = queryContext.getRequest();
         String text = queryReq.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
@@ -41,7 +44,7 @@ public class HanlpMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
         log.debug("retryCount:{},terms:{},,detectModelIds:{}", terms, detectModelIds);
 
-        List<HanlpMapResult> detects = detect(queryReq, terms, detectModelIds);
+        List<HanlpMapResult> detects = detect(queryContext, terms, detectModelIds);
         Map<MatchText, List<HanlpMapResult>> result = new HashMap<>();
 
         result.put(MatchText.builder().regText(text).detectSegment(text).build(), detects);
@@ -54,8 +57,9 @@ public class HanlpMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
                 && existResult.getDetectWord().length() < oneRoundResult.getDetectWord().length();
     }
 
-    public void detectByStep(QueryReq queryReq, Set<HanlpMapResult> existResults, Set<Long> detectModelIds,
+    public void detectByStep(QueryContext queryContext, Set<HanlpMapResult> existResults, Set<Long> detectModelIds,
             Integer startIndex, Integer index, int offset) {
+        QueryReq queryReq = queryContext.getRequest();
         String text = queryReq.getQueryText();
         Integer agentId = queryReq.getAgentId();
         String detectSegment = text.substring(startIndex, index);
