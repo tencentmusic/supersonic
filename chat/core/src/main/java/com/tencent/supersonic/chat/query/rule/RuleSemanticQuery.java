@@ -14,7 +14,9 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
+import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
+import com.tencent.supersonic.chat.corrector.CorrectorService;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
@@ -27,6 +29,7 @@ import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -201,7 +204,10 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
 
         OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
         queryStructReq.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
-
+        if (optimizationConfig.isUseS2qlSwitch()) {
+            CorrectorService correctorService = ContextUtils.getBean(CorrectorService.class);
+            correctorService.addS2QLAndLoginSql(queryStructReq, parseInfo);
+        }
         QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
 
         if (queryResp != null) {
@@ -221,20 +227,27 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         return queryResult;
     }
 
+
     @Override
-    public ExplainResp explain(User user) {
+    public SqlInfo explain(User user) {
+        SqlInfo sqlInfo = parseInfo.getSqlInfo();
         ExplainSqlReq explainSqlReq = null;
         try {
+            QueryStructReq queryStructReq = convertQueryStruct();
+            CorrectorService correctorService = ContextUtils.getBean(CorrectorService.class);
+            correctorService.addS2QLAndLoginSql(queryStructReq, parseInfo);
+
+            QueryS2QLReq queryS2QLReq = QueryReqBuilder.buildS2QLReq(sqlInfo.getLogicSql(), parseInfo.getModelId());
             explainSqlReq = ExplainSqlReq.builder()
-                    .queryTypeEnum(QueryTypeEnum.STRUCT)
-                    .queryReq(isMultiStructQuery()
-                            ? convertQueryMultiStruct() : convertQueryStruct())
+                    .queryTypeEnum(QueryTypeEnum.SQL)
+                    .queryReq(queryS2QLReq)
                     .build();
-            return semanticInterpreter.explain(explainSqlReq, user);
+            ExplainResp explain = semanticInterpreter.explain(explainSqlReq, user);
+            sqlInfo.setQuerySql(explain.getSql());
         } catch (Exception e) {
             log.error("explain error explainSqlReq:{}", explainSqlReq, e);
         }
-        return null;
+        return sqlInfo;
     }
 
     protected boolean isMultiStructQuery() {

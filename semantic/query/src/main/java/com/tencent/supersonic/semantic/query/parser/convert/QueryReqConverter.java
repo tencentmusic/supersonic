@@ -4,11 +4,10 @@ package com.tencent.supersonic.semantic.query.parser.convert;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
-import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.request.SqlExecuteReq;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
@@ -185,7 +184,14 @@ public class QueryReqConverter {
                 .flatMap(entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
                 .collect(Collectors.toMap(a -> a.getLeft(), a -> a.getRight(), (k1, k2) -> k1));
 
-        dimensionResults.put(DateUtils.DATE_FIELD, TimeDimensionEnum.DAY.getName());
+        dimensionResults.put(TimeDimensionEnum.DAY.getChName(), TimeDimensionEnum.DAY.getName());
+        dimensionResults.put(TimeDimensionEnum.MONTH.getChName(), TimeDimensionEnum.MONTH.getName());
+        dimensionResults.put(TimeDimensionEnum.WEEK.getChName(), TimeDimensionEnum.WEEK.getName());
+
+        dimensionResults.put(TimeDimensionEnum.DAY.getName(), TimeDimensionEnum.DAY.getName());
+        dimensionResults.put(TimeDimensionEnum.MONTH.getName(), TimeDimensionEnum.MONTH.getName());
+        dimensionResults.put(TimeDimensionEnum.WEEK.getName(), TimeDimensionEnum.WEEK.getName());
+
         dimensionResults.putAll(metricResults);
         return dimensionResults;
     }

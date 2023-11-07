@@ -1,7 +1,7 @@
 package com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter;
 
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 
 public class H2Adaptor extends EngineAdaptor {
 

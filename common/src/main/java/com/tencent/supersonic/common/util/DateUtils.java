@@ -15,8 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 public class DateUtils {
 
     public static final String DATE_FORMAT = "yyyy-MM-dd";
-
-    public static final String DATE_FIELD = "数据日期";
     public static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String FORMAT = "yyyyMMddHHmmss";
 
