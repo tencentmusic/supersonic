@@ -5,21 +5,29 @@ import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
+import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 @Component
 @Slf4j
-public class DictUpdateListener implements ApplicationListener<DataEvent> {
+public class SchemaDictUpdateListener implements ApplicationListener<DataEvent> {
 
+    @Autowired
+    private SchemaService schemaService;
+
+    @Async
     @Override
     public void onApplicationEvent(DataEvent dataEvent) {
         if (CollectionUtils.isEmpty(dataEvent.getDataItems())) {
             return;
         }
+        schemaService.getCache().invalidateAll();
         dataEvent.getDataItems().forEach(dataItem -> {
             DictWord dictWord = new DictWord();
             dictWord.setWord(dataItem.getName());

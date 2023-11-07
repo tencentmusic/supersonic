@@ -231,6 +231,17 @@ public class DimensionServiceImpl implements DimensionService {
     }
 
     @Override
+    public List<DataItem> getDataItems(Long modelId) {
+        DimensionFilter metaFilter = new DimensionFilter();
+        metaFilter.setModelIds(Lists.newArrayList(modelId));
+        List<DimensionDO> dimensionDOS = queryDimension(metaFilter);
+        if (CollectionUtils.isEmpty(dimensionDOS)) {
+            return Lists.newArrayList();
+        }
+        return dimensionDOS.stream().map(this::getDataItem).collect(Collectors.toList());
+    }
+
+    @Override
     public List<String> mockAlias(DimensionReq dimensionReq, String mockType, User user) {
         String mockAlias = chatGptHelper.mockAlias(mockType, dimensionReq.getName(), dimensionReq.getBizName(),
                 "", dimensionReq.getDescription(), false);
@@ -331,6 +342,12 @@ public class DimensionServiceImpl implements DimensionService {
     private void sendEvent(DataItem dataItem, EventType eventType) {
         eventPublisher.publishEvent(new DataEvent(this,
                 Lists.newArrayList(dataItem), eventType));
+    }
+
+    private DataItem getDataItem(DimensionDO dimensionDO) {
+        return DataItem.builder().id(dimensionDO.getId()).name(dimensionDO.getName())
+                .bizName(dimensionDO.getBizName())
+                .modelId(dimensionDO.getModelId()).type(TypeEnums.DIMENSION).build();
     }
 
 

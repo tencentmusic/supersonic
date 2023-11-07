@@ -36,6 +36,7 @@ import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
@@ -69,9 +70,11 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
 
     @Override
     public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user) {
-        QueryS2QLReq queryS2QLReq = queryStructReq.convert(queryStructReq);
-        if (queryStructReq.isUseS2qlSwitch() && StringUtils.isNotBlank(queryS2QLReq.getSql())) {
-            log.info("queryStructReq convert to sql:{},queryStructReq:{}", queryS2QLReq.getSql(), queryStructReq);
+        if (StringUtils.isNotBlank(queryStructReq.getLogicSql())) {
+            QueryS2QLReq queryS2QLReq = new QueryS2QLReq();
+            queryS2QLReq.setSql(queryStructReq.getLogicSql());
+            queryS2QLReq.setModelId(queryStructReq.getModelId());
+            queryS2QLReq.setVariables(new HashMap<>());
             return queryByS2QL(queryS2QLReq, user);
         }
 

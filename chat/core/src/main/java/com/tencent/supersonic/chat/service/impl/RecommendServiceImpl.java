@@ -51,6 +51,9 @@ public class RecommendServiceImpl implements RecommendService {
             return new RecommendResp();
         }
         ModelSchema modelSchema = semanticService.getModelSchema(modelId);
+        if (Objects.isNull(modelSchema)) {
+            return new RecommendResp();
+        }
         List<Long> drillDownDimensions = Lists.newArrayList();
         Set<SchemaElement> metricElements = modelSchema.getMetrics();
         if (recommendReq.getMetricId() != null && !CollectionUtils.isEmpty(metricElements)) {

@@ -68,4 +68,12 @@ public class SemanticSchema implements Serializable {
         modelSchemaList.stream().forEach(d -> entities.add(d.getEntity()));
         return entities;
     }
+
+    public Map<String, String> getBizNameToName(Long modelId) {
+        List<SchemaElement> allElements = new ArrayList<>();
+        allElements.addAll(getDimensions(modelId));
+        allElements.addAll(getMetrics(modelId));
+        return allElements.stream()
+                .collect(Collectors.toMap(a -> a.getBizName(), a -> a.getName(), (k1, k2) -> k1));
+    }
 }

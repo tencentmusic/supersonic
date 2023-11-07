@@ -36,7 +36,9 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, loading, onApplyAuth }
     const data = (queryResults || []).sort(
       (a: any, b: any) => b[metricColumnName] - a[metricColumnName]
     );
-    const xData = data.map(item => item[categoryColumnName]);
+    const xData = data.map(item =>
+      item[categoryColumnName] !== undefined ? item[categoryColumnName] : '未知'
+    );
     instanceObj.setOption({
       xAxis: {
         type: 'category',

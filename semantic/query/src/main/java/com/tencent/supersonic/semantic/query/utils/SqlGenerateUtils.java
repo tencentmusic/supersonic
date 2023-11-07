@@ -3,7 +3,7 @@ package com.tencent.supersonic.semantic.query.utils;
 import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
 
 import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;

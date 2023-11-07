@@ -1,7 +1,8 @@
 package com.tencent.supersonic.chat.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -28,26 +29,25 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
     @Autowired
     private MapperHelper mapperHelper;
 
-
     @Override
-    public Map<MatchText, List<T>> match(QueryReq queryReq, List<Term> terms, Set<Long> detectModelIds) {
-        String text = queryReq.getQueryText();
+    public Map<MatchText, List<T>> match(QueryContext queryContext, List<Term> terms, Set<Long> detectModelIds) {
+        String text = queryContext.getRequest().getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
         }
 
         log.debug("retryCount:{},terms:{},,detectModelIds:{}", terms, detectModelIds);
 
-        List<T> detects = detect(queryReq, terms, detectModelIds);
+        List<T> detects = detect(queryContext, terms, detectModelIds);
         Map<MatchText, List<T>> result = new HashMap<>();
 
         result.put(MatchText.builder().regText(text).detectSegment(text).build(), detects);
         return result;
     }
 
-    public List<T> detect(QueryReq queryReq, List<Term> terms, Set<Long> detectModelIds) {
+    public List<T> detect(QueryContext queryContext, List<Term> terms, Set<Long> detectModelIds) {
         Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(terms);
-        String text = queryReq.getQueryText();
+        String text = queryContext.getRequest().getQueryText();
         Set<T> results = new HashSet<>();
 
         for (Integer index = 0; index <= text.length() - 1; ) {
@@ -56,7 +56,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
                 int offset = mapperHelper.getStepOffset(terms, index);
                 i = mapperHelper.getStepIndex(regOffsetToLength, i);
                 if (i <= text.length()) {
-                    detectByStep(queryReq, results, detectModelIds, index, i, offset);
+                    detectByStep(queryContext, results, detectModelIds, index, i, offset);
                 }
             }
             index = mapperHelper.getStepIndex(regOffsetToLength, index);
@@ -94,8 +94,10 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         }
     }
 
-    public List<T> getMatches(QueryReq queryReq, List<Term> terms, Set<Long> detectModelIds) {
-        Map<MatchText, List<T>> matchResult = match(queryReq, terms, detectModelIds);
+    public List<T> getMatches(QueryContext queryContext, List<Term> terms) {
+        Set<Long> detectModelIds = mapperHelper.getModelIds(queryContext.getRequest());
+        terms = filterByModelIds(terms, detectModelIds);
+        Map<MatchText, List<T>> matchResult = match(queryContext, terms, detectModelIds);
         List<T> matches = new ArrayList<>();
         if (Objects.isNull(matchResult)) {
             return matches;
@@ -110,12 +112,37 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         return matches;
     }
 
+    public List<Term> filterByModelIds(List<Term> terms, Set<Long> detectModelIds) {
+        logTerms(terms);
+        if (CollectionUtils.isNotEmpty(detectModelIds)) {
+            terms = terms.stream().filter(term -> {
+                Long modelId = NatureHelper.getModelId(term.getNature().toString());
+                if (Objects.nonNull(modelId)) {
+                    return detectModelIds.contains(modelId);
+                }
+                return false;
+            }).collect(Collectors.toList());
+            log.info("terms filter by modelIds:{}", detectModelIds);
+            logTerms(terms);
+        }
+        return terms;
+    }
+
+    public void logTerms(List<Term> terms) {
+        if (CollectionUtils.isEmpty(terms)) {
+            return;
+        }
+        for (Term term : terms) {
+            log.info("word:{},nature:{},frequency:{}", term.word, term.nature.toString(), term.getFrequency());
+        }
+    }
+
     public abstract boolean needDelete(T oneRoundResult, T existResult);
 
     public abstract String getMapKey(T a);
 
-    public abstract void detectByStep(QueryReq queryReq, Set<T> results, Set<Long> detectModelIds, Integer startIndex,
-            Integer index, int offset);
+    public abstract void detectByStep(QueryContext queryContext, Set<T> results,
+            Set<Long> detectModelIds, Integer startIndex, Integer index, int offset);
 
 
 }

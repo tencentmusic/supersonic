@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.collect.Lists;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.agent.Agent;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
@@ -94,8 +95,10 @@ public class SearchServiceImpl implements SearchService {
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
         Set<Long> detectModelIds = mapperHelper.getModelIds(queryReq);
 
+        QueryContext queryContext = new QueryContext();
+        queryContext.setRequest(queryReq);
         Map<MatchText, List<HanlpMapResult>> regTextMap =
-                searchMatchStrategy.match(queryReq, originals, detectModelIds);
+                searchMatchStrategy.match(queryContext, originals, detectModelIds);
         regTextMap.entrySet().stream().forEach(m -> HanlpHelper.transLetterOriginal(m.getValue()));
 
         // 4.get the most matching data

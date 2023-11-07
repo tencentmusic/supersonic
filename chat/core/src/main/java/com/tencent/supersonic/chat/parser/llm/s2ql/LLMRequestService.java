@@ -18,6 +18,7 @@ import com.tencent.supersonic.chat.query.llm.s2ql.LLMResp;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.knowledge.service.SchemaService;
@@ -118,7 +119,7 @@ public class LLMRequestService {
         String priorExts = getPriorExts(modelId, fieldNameList);
         llmReq.setPriorExts(priorExts);
 
-        fieldNameList.add(DateUtils.DATE_FIELD);
+        fieldNameList.add(TimeDimensionEnum.DAY.getChName());
         llmSchema.setFieldNameList(fieldNameList);
         llmReq.setSchema(llmSchema);
 

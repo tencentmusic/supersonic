@@ -5,6 +5,7 @@ import {
   FilterItemType,
   MsgDataType,
   ParseStateEnum,
+  ParseTimeCostType,
   SimilarQuestionType,
 } from '../../common/type';
 import { useEffect, useState } from 'react';
@@ -27,8 +28,8 @@ type Props = {
   agentId?: number;
   score?: number;
   filter?: any[];
-  isLastMessage?: boolean;
   parseInfos?: ChatContextType[];
+  parseTimeCostValue?: ParseTimeCostType;
   msgData?: MsgDataType;
   triggerResize?: boolean;
   isDeveloper?: boolean;
@@ -47,9 +48,9 @@ const ChatItem: React.FC<Props> = ({
   agentId,
   score,
   filter,
-  isLastMessage,
   triggerResize,
   parseInfos,
+  parseTimeCostValue,
   msgData,
   isDeveloper,
   integrateSystem,
@@ -61,6 +62,7 @@ const ChatItem: React.FC<Props> = ({
 }) => {
   const [data, setData] = useState<MsgDataType>();
   const [parseLoading, setParseLoading] = useState(false);
+  const [parseTimeCost, setParseTimeCost] = useState<ParseTimeCostType>();
   const [parseInfo, setParseInfo] = useState<ChatContextType>();
   const [parseInfoOptions, setParseInfoOptions] = useState<ChatContextType[]>([]);
   const [parseTip, setParseTip] = useState('');
@@ -97,24 +99,50 @@ const ChatItem: React.FC<Props> = ({
     return true;
   };
 
-  const onExecute = async (parseInfoValue: ChatContextType) => {
+  const onExecute = async (
+    parseInfoValue: ChatContextType,
+    parseInfos?: ChatContextType[],
+    isSwitchParseInfo?: boolean
+  ) => {
     setExecuteMode(true);
-    setExecuteLoading(true);
+    if (isSwitchParseInfo) {
+      setEntitySwitchLoading(true);
+    } else {
+      setExecuteLoading(true);
+    }
     try {
       const res: any = await chatExecute(msg, conversationId!, parseInfoValue);
-      setExecuteLoading(false);
       const valid = updateData(res);
       onMsgDataLoaded?.(
         {
           ...res.data,
-          chatContext: parseInfoValue,
+          parseInfos,
+          queryId: parseInfoValue.queryId,
         },
         valid
       );
     } catch (e) {
-      setExecuteLoading(false);
       setExecuteTip(SEARCH_EXCEPTION_TIP);
     }
+    if (isSwitchParseInfo) {
+      setEntitySwitchLoading(false);
+    } else {
+      setExecuteLoading(false);
+    }
+  };
+
+  const updateDimensionFitlers = (filters: FilterItemType[]) => {
+    setDimensionFilters(
+      filters.sort((a, b) => {
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      })
+    );
   };
 
   const sendMsg = async () => {
@@ -122,7 +150,7 @@ const ChatItem: React.FC<Props> = ({
     const parseData: any = await chatParse(msg, conversationId, modelId, agentId, filter);
     setParseLoading(false);
     const { code, data } = parseData || {};
-    const { state, selectedParses, candidateParses, queryId } = data || {};
+    const { state, selectedParses, candidateParses, queryId, parseTimeCost } = data || {};
     if (
       code !== 200 ||
       state === ParseStateEnum.FAILED ||
@@ -143,10 +171,11 @@ const ChatItem: React.FC<Props> = ({
     setParseInfoOptions(parseInfos || []);
     const parseInfoValue = parseInfos[0];
     setParseInfo(parseInfoValue);
+    setParseTimeCost(parseTimeCost);
     setEntityInfo(parseInfoValue.entityInfo || {});
-    setDimensionFilters(parseInfoValue?.dimensionFilters || []);
+    updateDimensionFitlers(parseInfoValue?.dimensionFilters || []);
     setDateInfo(parseInfoValue?.dateInfo);
-    onExecute(parseInfoValue);
+    onExecute(parseInfoValue, parseInfos);
   };
 
   useEffect(() => {
@@ -161,7 +190,8 @@ const ChatItem: React.FC<Props> = ({
       const parseInfoValue = parseInfoOptionsValue[0];
       setParseInfoOptions(parseInfoOptionsValue);
       setParseInfo(parseInfoValue);
-      setDimensionFilters(parseInfoValue.dimensionFilters || []);
+      setParseTimeCost(parseTimeCostValue);
+      updateDimensionFitlers(parseInfoValue.dimensionFilters || []);
       setDateInfo(parseInfoValue.dateInfo);
       setExecuteMode(true);
       updateData({ code: 200, data: msgData, msg: 'success' });
@@ -179,7 +209,7 @@ const ChatItem: React.FC<Props> = ({
     const chatContextValue = { ...(chatContext || {}), queryId: parseInfo?.queryId };
     setParseInfo(chatContextValue);
     setEntityInfo(entityInfo);
-    setDimensionFilters(chatContextValue?.dimensionFilters || []);
+    updateDimensionFitlers(chatContextValue?.dimensionFilters || []);
     setDateInfo(chatContextValue?.dateInfo);
   };
 
@@ -213,7 +243,12 @@ const ChatItem: React.FC<Props> = ({
     if (res.code === 200) {
       const resChatContext = res.data?.chatContext;
       const contextValue = { ...(resChatContext || chatContextValue), queryId };
-      const dataValue = { ...res.data, chatContext: contextValue };
+      const dataValue = {
+        ...res.data,
+        chatContext: contextValue,
+        parseInfos: parseInfoOptions,
+        queryId,
+      };
       onMsgDataLoaded?.(dataValue, true, true);
       setData(dataValue);
       setParseInfo(contextValue);
@@ -227,13 +262,14 @@ const ChatItem: React.FC<Props> = ({
 
   const onSelectParseInfo = async (parseInfoValue: ChatContextType) => {
     setParseInfo(parseInfoValue);
-    setDimensionFilters(parseInfoValue.dimensionFilters || []);
+    updateDimensionFitlers(parseInfoValue.dimensionFilters || []);
     setDateInfo(parseInfoValue.dateInfo);
     if (parseInfoValue.entityInfo) {
       setEntityInfo(parseInfoValue.entityInfo);
     } else {
       getEntityInfo(parseInfoValue);
     }
+    onExecute(parseInfoValue, parseInfoOptions, true);
   };
 
   const onSelectQuestion = (question: SimilarQuestionType) => {
@@ -261,15 +297,22 @@ const ChatItem: React.FC<Props> = ({
             dateInfo={dateInfo}
             entityInfo={entityInfo}
             integrateSystem={integrateSystem}
+            parseTimeCost={parseTimeCost?.parseTime}
+            isDeveloper={isDeveloper}
             onSelectParseInfo={onSelectParseInfo}
             onSwitchEntity={onSwitchEntity}
             onFiltersChange={onFiltersChange}
             onDateInfoChange={onDateInfoChange}
+            onRefresh={onRefresh}
           />
           {executeMode && (
             <>
               {!isMobile && parseInfo?.sqlInfo && isDeveloper && integrateSystem !== 'c2' && (
-                <SqlItem integrateSystem={integrateSystem} sqlInfo={parseInfo.sqlInfo} />
+                <SqlItem
+                  integrateSystem={integrateSystem}
+                  sqlInfo={parseInfo.sqlInfo}
+                  sqlTimeCost={parseTimeCost?.sqlTime}
+                />
               )}
               <ExecuteItem
                 queryId={parseInfo?.queryId}
@@ -280,8 +323,8 @@ const ChatItem: React.FC<Props> = ({
                 data={data}
                 triggerResize={triggerResize}
                 executeItemNode={executeItemNode}
+                isDeveloper={isDeveloper}
                 renderCustomExecuteNode={renderCustomExecuteNode}
-                onRefresh={onRefresh}
               />
             </>
           )}
@@ -294,11 +337,9 @@ const ChatItem: React.FC<Props> = ({
             />
           )}
         </div>
-        {(parseTip !== '' || (executeMode && !executeLoading)) &&
-          integrateSystem !== 'c2' &&
-          integrateSystem !== 'showcase' && (
-            <Tools queryId={parseInfo?.queryId || 0} scoreValue={score} />
-          )}
+        {(parseTip !== '' || (executeMode && !executeLoading)) && integrateSystem !== 'c2' && (
+          <Tools queryId={parseInfo?.queryId || 0} scoreValue={score} />
+        )}
       </div>
     </div>
   );
