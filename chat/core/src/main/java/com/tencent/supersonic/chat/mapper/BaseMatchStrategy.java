@@ -50,18 +50,28 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         String text = queryContext.getRequest().getQueryText();
         Set<T> results = new HashSet<>();
 
-        for (Integer index = 0; index <= text.length() - 1; ) {
+        Set<String> detectSegments = new HashSet<>();
 
-            for (Integer i = index; i <= text.length(); ) {
-                int offset = mapperHelper.getStepOffset(terms, index);
-                i = mapperHelper.getStepIndex(regOffsetToLength, i);
-                if (i <= text.length()) {
-                    detectByStep(queryContext, results, detectModelIds, index, i, offset);
+        for (Integer startIndex = 0; startIndex <= text.length() - 1; ) {
+
+            for (Integer index = startIndex; index <= text.length(); ) {
+                int offset = mapperHelper.getStepOffset(terms, startIndex);
+                index = mapperHelper.getStepIndex(regOffsetToLength, index);
+                if (index <= text.length()) {
+                    String detectSegment = text.substring(startIndex, index);
+                    detectSegments.add(detectSegment);
+                    detectByStep(queryContext, results, detectModelIds, startIndex, index, offset);
                 }
             }
-            index = mapperHelper.getStepIndex(regOffsetToLength, index);
+            startIndex = mapperHelper.getStepIndex(regOffsetToLength, startIndex);
         }
+        detectByBatch(queryContext, results, detectModelIds, detectSegments);
         return new ArrayList<>(results);
+    }
+
+    protected void detectByBatch(QueryContext queryContext, Set<T> results, Set<Long> detectModelIds,
+            Set<String> detectSegments) {
+        return;
     }
 
     public Map<Integer, Integer> getRegOffsetToLength(List<Term> terms) {
