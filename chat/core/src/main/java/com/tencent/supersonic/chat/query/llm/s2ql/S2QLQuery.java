@@ -4,6 +4,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
+import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
@@ -42,7 +43,7 @@ public class S2QLQuery extends PluginSemanticQuery {
 
         long startTime = System.currentTimeMillis();
         String querySql = parseInfo.getSqlInfo().getLogicSql();
-        QueryS2QLReq queryS2QLReq = getQueryS2QLReq(querySql);
+        QueryS2QLReq queryS2QLReq = QueryReqBuilder.buildS2QLReq(querySql, parseInfo.getModelId());
         QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByS2QL(queryS2QLReq, user);
 
         log.info("queryByS2QL cost:{},querySql:{}", System.currentTimeMillis() - startTime, querySql);
@@ -64,22 +65,22 @@ public class S2QLQuery extends PluginSemanticQuery {
         return queryResult;
     }
 
-    private QueryS2QLReq getQueryS2QLReq(String sql) {
-        return QueryReqBuilder.buildS2QLReq(sql, parseInfo.getModelId());
-    }
 
     @Override
-    public ExplainResp explain(User user) {
+    public SqlInfo explain(User user) {
+        SqlInfo sqlInfo = parseInfo.getSqlInfo();
         ExplainSqlReq explainSqlReq = null;
         try {
+            QueryS2QLReq queryS2QLReq = QueryReqBuilder.buildS2QLReq(sqlInfo.getLogicSql(), parseInfo.getModelId());
             explainSqlReq = ExplainSqlReq.builder()
                     .queryTypeEnum(QueryTypeEnum.SQL)
-                    .queryReq(getQueryS2QLReq(parseInfo.getSqlInfo().getLogicSql()))
+                    .queryReq(queryS2QLReq)
                     .build();
-            return semanticInterpreter.explain(explainSqlReq, user);
+            ExplainResp explain = semanticInterpreter.explain(explainSqlReq, user);
+            sqlInfo.setQuerySql(explain.getSql());
         } catch (Exception e) {
             log.error("explain error explainSqlReq:{}", explainSqlReq, e);
         }
-        return null;
+        return sqlInfo;
     }
 }

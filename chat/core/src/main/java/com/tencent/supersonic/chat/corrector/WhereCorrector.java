@@ -7,8 +7,8 @@ import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.parser.llm.s2ql.S2QLDateHelper;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
@@ -71,11 +71,11 @@ public class WhereCorrector extends BaseSemanticCorrector {
     private void addDateIfNotExist(SemanticCorrectInfo semanticCorrectInfo) {
         String sql = semanticCorrectInfo.getSql();
         List<String> whereFields = SqlParserSelectHelper.getWhereFields(sql);
-        if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(DateUtils.DATE_FIELD)) {
+        if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(TimeDimensionEnum.DAY.getChName())) {
             String currentDate = S2QLDateHelper.getReferenceDate(semanticCorrectInfo.getParseInfo().getModelId());
             if (StringUtils.isNotBlank(currentDate)) {
                 sql = SqlParserAddHelper.addParenthesisToWhere(sql);
-                sql = SqlParserAddHelper.addWhere(sql, DateUtils.DATE_FIELD, currentDate);
+                sql = SqlParserAddHelper.addWhere(sql, TimeDimensionEnum.DAY.getChName(), currentDate);
             }
         }
         semanticCorrectInfo.setSql(sql);
