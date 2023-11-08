@@ -62,4 +62,14 @@ public class MetricResp extends SchemaItem {
         return relateDimension.getDrillDownDimensions().stream().filter(DrillDownDimension::isNecessary)
                .map(DrillDownDimension::getDimensionId).collect(Collectors.toSet());
     }
+
+    public String getRelaDimensionIdKey() {
+        if (relateDimension == null || CollectionUtils.isEmpty(relateDimension.getDrillDownDimensions())) {
+            return "";
+        }
+        return relateDimension.getDrillDownDimensions().stream()
+                .map(DrillDownDimension::getDimensionId)
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+    }
 }

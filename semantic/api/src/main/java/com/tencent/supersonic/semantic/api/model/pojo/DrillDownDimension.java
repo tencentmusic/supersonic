@@ -13,4 +13,7 @@ public class DrillDownDimension {
 
     private boolean necessary;
 
+    public DrillDownDimension(Long dimensionId) {
+        this.dimensionId = dimensionId;
+    }
 }
