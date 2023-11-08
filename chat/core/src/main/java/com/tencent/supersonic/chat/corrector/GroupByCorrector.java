@@ -2,8 +2,8 @@ package com.tencent.supersonic.chat.corrector;
 
 import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
@@ -44,7 +44,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                             return elements.stream();
                         }
                 ).collect(Collectors.toSet());
-        dimensions.add(DateUtils.DATE_FIELD);
+        dimensions.add(TimeDimensionEnum.DAY.getChName());
 
         List<String> selectFields = SqlParserSelectHelper.getSelectFields(sql);
 
@@ -52,7 +52,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
             return;
         }
         // if only date in select not add group by.
-        if (selectFields.size() == 1 && selectFields.contains(DateUtils.DATE_FIELD)) {
+        if (selectFields.size() == 1 && selectFields.contains(TimeDimensionEnum.DAY.getChName())) {
             return;
         }
         if (SqlParserSelectHelper.hasGroupBy(sql)) {

@@ -2,27 +2,27 @@ package com.tencent.supersonic.chat.parser.llm.s2ql;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.agent.tool.CommonAgentTool;
-import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
+import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
+import com.tencent.supersonic.chat.corrector.CorrectorService;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
-import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -41,11 +42,15 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class LLMResponseService {
 
+    @Autowired
+    private CorrectorService correctorService;
+
     public void addParseInfo(QueryContext queryCtx, ParseResult parseResult, String sql, Double weight) {
 
         SemanticParseInfo parseInfo = getParseInfo(queryCtx, parseResult, weight);
 
-        SemanticCorrectInfo semanticCorrectInfo = getCorrectorSql(queryCtx, parseInfo, sql);
+        QueryFilters queryFilters = queryCtx.getRequest().getQueryFilters();
+        SemanticCorrectInfo semanticCorrectInfo = correctorService.correctorSql(queryFilters, parseInfo, sql);
 
         parseInfo.getSqlInfo().setLogicSql(semanticCorrectInfo.getSql());
 
@@ -64,7 +69,7 @@ public class LLMResponseService {
             return new ArrayList<>();
         }
         return allFields.stream()
-                .filter(entry -> !DateUtils.DATE_FIELD.equalsIgnoreCase(entry))
+                .filter(entry -> !TimeDimensionEnum.DAY.getChName().equalsIgnoreCase(entry))
                 .collect(Collectors.toList());
     }
 
@@ -140,7 +145,7 @@ public class LLMResponseService {
 
     private DateConf getDateInfo(List<FilterExpression> filterExpressions) {
         List<FilterExpression> dateExpressions = filterExpressions.stream()
-                .filter(expression -> DateUtils.DATE_FIELD.equalsIgnoreCase(expression.getFieldName()))
+                .filter(expression -> TimeDimensionEnum.DAY.getChName().equalsIgnoreCase(expression.getFieldName()))
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dateExpressions)) {
             return new DateConf();
@@ -182,24 +187,6 @@ public class LLMResponseService {
         return dateExpressions.size() > 1 && Objects.nonNull(dateExpressions.get(1).getFieldValue());
     }
 
-    private SemanticCorrectInfo getCorrectorSql(QueryContext queryCtx, SemanticParseInfo parseInfo, String sql) {
-
-        SemanticCorrectInfo correctInfo = SemanticCorrectInfo.builder()
-                .queryFilters(queryCtx.getRequest().getQueryFilters()).sql(sql)
-                .parseInfo(parseInfo).build();
-
-        List<SemanticCorrector> corrections = ComponentFactory.getSqlCorrections();
-
-        corrections.forEach(correction -> {
-            try {
-                correction.correct(correctInfo);
-                log.info("sqlCorrection:{} sql:{}", correction.getClass().getSimpleName(), correctInfo.getSql());
-            } catch (Exception e) {
-                log.error(String.format("correct error,correctInfo:%s", correctInfo), e);
-            }
-        });
-        return correctInfo;
-    }
 
     private SemanticParseInfo getParseInfo(QueryContext queryCtx, ParseResult parseResult, Double weight) {
         if (Objects.isNull(weight)) {

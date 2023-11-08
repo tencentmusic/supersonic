@@ -10,6 +10,7 @@ import { PREFIX_CLS } from '../../common/constants';
 import Text from './Text';
 import DrillDownDimensions from '../DrillDownDimensions';
 import MetricOptions from '../MetricOptions';
+import { isMobile } from '../../utils/utils';
 
 type Props = {
   queryId?: number;
@@ -115,7 +116,11 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
         />
       );
     }
-    if (categoryField?.length > 0 && metricFields?.length > 0) {
+    if (
+      categoryField?.length > 0 &&
+      metricFields?.length > 0 &&
+      (isMobile ? dataSource?.length <= 20 : dataSource?.length <= 50)
+    ) {
       return (
         <Bar
           data={{ ...data, queryColumns: columns, queryResults: dataSource }}

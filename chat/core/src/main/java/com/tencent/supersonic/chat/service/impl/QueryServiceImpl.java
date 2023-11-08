@@ -20,6 +20,7 @@ import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
+import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
@@ -39,6 +40,8 @@ import com.tencent.supersonic.chat.utils.SolvedQueryManager;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -52,9 +55,8 @@ import com.tencent.supersonic.knowledge.dictionary.MultiCustomDictionary;
 import com.tencent.supersonic.knowledge.service.SearchService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import com.tencent.supersonic.knowledge.utils.NatureHelper;
-import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -65,8 +67,6 @@ import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -252,6 +252,7 @@ public class QueryServiceImpl implements QueryService {
         queryResult.setQueryTimeCost(System.currentTimeMillis() - executeTime);
         return queryResult;
     }
+
     // save time cost data
     public void saveInfo(List<StatisticsDO> timeCostDOList,
             String queryText, Long queryId,
@@ -329,6 +330,7 @@ public class QueryServiceImpl implements QueryService {
         ChatContext context = chatService.getOrCreateContext(queryCtx.getChatId());
         return context.getParseInfo();
     }
+
     //mainly used for executing after revising filters,for example:"fans_cnt>=100000"->"fans_cnt>500000",
     //"style='流行'"->"style in ['流行','爱国']"
     @Override
@@ -371,9 +373,9 @@ public class QueryServiceImpl implements QueryService {
             log.info("correctorSql after replacing:{}", correctorSql);
             parseInfo.getSqlInfo().setLogicSql(correctorSql);
             semanticQuery.setParseInfo(parseInfo);
-            ExplainResp explain = semanticQuery.explain(user);
-            if (!Objects.isNull(explain)) {
-                parseInfo.getSqlInfo().setQuerySql(explain.getSql());
+            SqlInfo sqlInfo = semanticQuery.explain(user);
+            if (!Objects.isNull(sqlInfo)) {
+                parseInfo.setSqlInfo(sqlInfo);
             }
         }
         semanticQuery.setParseInfo(parseInfo);
@@ -402,7 +404,7 @@ public class QueryServiceImpl implements QueryService {
             return;
         }
         Map<String, String> map = new HashMap<>();
-        String dateField = DateUtils.DATE_FIELD;
+        String dateField = TimeDimensionEnum.DAY.getChName();
         if (queryData.getDateInfo().getUnit() > 1) {
             queryData.getDateInfo().setStartDate(DateUtils.getBeforeDate(queryData.getDateInfo().getUnit() + 1));
             queryData.getDateInfo().setEndDate(DateUtils.getBeforeDate(1));
@@ -410,7 +412,7 @@ public class QueryServiceImpl implements QueryService {
         // startDate equals to endDate
         if (queryData.getDateInfo().getStartDate().equals(queryData.getDateInfo().getEndDate())) {
             for (FilterExpression filterExpression : filterExpressionList) {
-                if (DateUtils.DATE_FIELD.equals(filterExpression.getFieldName())) {
+                if (TimeDimensionEnum.DAY.getChName().equals(filterExpression.getFieldName())) {
                     //sql where condition exists 'equals' operator about date,just replace
                     if (filterExpression.getOperator().equals(FilterOperatorEnum.EQUALS)) {
                         dateField = filterExpression.getFieldName();
@@ -419,9 +421,9 @@ public class QueryServiceImpl implements QueryService {
                         filedNameToValueMap.put(dateField, map);
                     } else {
                         // first remove,then add
-                        removeFieldNames.add(DateUtils.DATE_FIELD);
+                        removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
                         EqualsTo equalsTo = new EqualsTo();
-                        Column column = new Column(DateUtils.DATE_FIELD);
+                        Column column = new Column(TimeDimensionEnum.DAY.getChName());
                         StringValue stringValue = new StringValue(queryData.getDateInfo().getStartDate());
                         equalsTo.setLeftExpression(column);
                         equalsTo.setRightExpression(stringValue);
@@ -432,7 +434,7 @@ public class QueryServiceImpl implements QueryService {
             }
         } else {
             for (FilterExpression filterExpression : filterExpressionList) {
-                if (DateUtils.DATE_FIELD.equals(filterExpression.getFieldName())) {
+                if (TimeDimensionEnum.DAY.getChName().equals(filterExpression.getFieldName())) {
                     dateField = filterExpression.getFieldName();
                     //just replace
                     if (FilterOperatorEnum.GREATER_THAN_EQUALS.getValue().equals(filterExpression.getOperator())
@@ -448,7 +450,7 @@ public class QueryServiceImpl implements QueryService {
                     filedNameToValueMap.put(dateField, map);
                     // first remove,then add
                     if (FilterOperatorEnum.EQUALS.getValue().equals(filterExpression.getOperator())) {
-                        removeFieldNames.add(DateUtils.DATE_FIELD);
+                        removeFieldNames.add(TimeDimensionEnum.DAY.getChName());
                         GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
                         addTimeFilters(queryData.getDateInfo().getStartDate(), greaterThanEquals, addConditions);
                         MinorThanEquals minorThanEquals = new MinorThanEquals();
@@ -463,7 +465,7 @@ public class QueryServiceImpl implements QueryService {
     public <T extends ComparisonOperator> void addTimeFilters(String date,
             T comparisonExpression,
             List<Expression> addConditions) {
-        Column column = new Column(DateUtils.DATE_FIELD);
+        Column column = new Column(TimeDimensionEnum.DAY.getChName());
         StringValue stringValue = new StringValue(date);
         comparisonExpression.setLeftExpression(column);
         comparisonExpression.setRightExpression(stringValue);
@@ -508,6 +510,7 @@ public class QueryServiceImpl implements QueryService {
             }
         }
     }
+
     // add in condition to sql where  condition
     public void addWhereInFilters(QueryFilter dslQueryFilter,
             InExpression inExpression,
@@ -536,6 +539,7 @@ public class QueryServiceImpl implements QueryService {
             }
         });
     }
+
     // add where filter
     public <T extends ComparisonOperator> void addWhereFilters(QueryFilter dslQueryFilter,
             T comparisonExpression,

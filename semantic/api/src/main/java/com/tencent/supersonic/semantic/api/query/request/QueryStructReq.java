@@ -1,25 +1,23 @@
 package com.tencent.supersonic.semantic.api.query.request;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.Filter;
+import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.semantic.api.query.pojo.Cache;
-import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.pojo.Param;
-import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.Order;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -49,6 +47,7 @@ public class QueryStructReq {
 
     private Long modelId;
 
+    private String modelName;
     private List<String> groups = new ArrayList<>();
     private List<Aggregator> aggregators = new ArrayList<>();
     private List<Order> orders = new ArrayList<>();
@@ -61,6 +60,15 @@ public class QueryStructReq {
     private Cache cacheInfo;
 
     private boolean useS2qlSwitch;
+
+    /**
+     * Later deleted for compatibility only
+     */
+    private String s2QL;
+    /**
+     * Later deleted for compatibility only
+     */
+    private String logicSql;
 
     public List<String> getGroups() {
         if (!CollectionUtils.isEmpty(this.groups)) {
@@ -203,6 +211,10 @@ public class QueryStructReq {
                         func = AggOperatorEnum.SUM;
                     }
                     sumFunction.setName(func.getOperator());
+                    if (AggOperatorEnum.COUNT_DISTINCT.equals(func)) {
+                        sumFunction.setName("count");
+                        sumFunction.setDistinct(true);
+                    }
                     sumFunction.setParameters(new ExpressionList(new Column(aggregator.getColumn())));
                     selectItems.add(new SelectExpressionItem(sumFunction));
                 }
@@ -210,7 +222,7 @@ public class QueryStructReq {
         }
         plainSelect.setSelectItems(selectItems);
         //2.Set the table name
-        Table table = new Table(Constants.TABLE_PREFIX + queryStructReq.getModelId());
+        Table table = new Table(queryStructReq.getModelName());
         plainSelect.setFromItem(table);
 
         //3.Set the order by clause
@@ -218,6 +230,9 @@ public class QueryStructReq {
         if (!CollectionUtils.isEmpty(orders)) {
             List<OrderByElement> orderByElements = new ArrayList<>();
             for (Order order : orders) {
+                if (StringUtils.isBlank(order.getColumn())) {
+                    continue;
+                }
                 OrderByElement orderByElement = new OrderByElement();
                 orderByElement.setExpression(new Column(order.getColumn()));
                 orderByElement.setAsc(false);
@@ -249,7 +264,7 @@ public class QueryStructReq {
         //6.Set where
         List<Filter> dimensionFilters = queryStructReq.getDimensionFilters();
         SqlFilterUtils sqlFilterUtils = ContextUtils.getBean(SqlFilterUtils.class);
-        String whereClause = sqlFilterUtils.getWhereClause(dimensionFilters);
+        String whereClause = sqlFilterUtils.getWhereClause(dimensionFilters, false);
 
         String sql = select.toString();
         if (StringUtils.isNotBlank(whereClause)) {

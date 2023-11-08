@@ -1,7 +1,7 @@
 package com.tencent.supersonic.semantic.model.domain.utils;
 
 import com.tencent.supersonic.semantic.api.model.enums.DimensionTypeEnum;
-import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.Dim;
 import com.tencent.supersonic.semantic.api.model.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter.EngineAdaptor;

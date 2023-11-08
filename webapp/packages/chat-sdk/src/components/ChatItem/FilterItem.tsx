@@ -1,15 +1,17 @@
-import { Select, Spin, InputNumber } from 'antd';
+import { Select, Spin, InputNumber, DatePicker } from 'antd';
 import { PREFIX_CLS } from '../../common/constants';
 import { ChatContextType, FilterItemType } from '../../common/type';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { queryDimensionValues } from '../../service';
 import { debounce, isArray } from 'lodash';
 import SwicthEntity from './SwitchEntity';
+import moment from 'moment';
 
 type Props = {
   modelId: number;
   filters: FilterItemType[];
   filter: FilterItemType;
+  index: number;
   chatContext: ChatContextType;
   agentId?: number;
   entityAlias?: string;
@@ -22,6 +24,7 @@ const FilterItem: React.FC<Props> = ({
   modelId,
   filters,
   filter,
+  index,
   chatContext,
   agentId,
   entityAlias,
@@ -44,7 +47,7 @@ const FilterItem: React.FC<Props> = ({
       ''
     );
     setOptions(
-      data?.resultList.map((item: any) => ({
+      data?.resultList?.map((item: any) => ({
         label: item[filter.bizName],
         value: item[filter.bizName],
       })) || []
@@ -87,8 +90,8 @@ const FilterItem: React.FC<Props> = ({
   }, [queryDimensionValues]);
 
   const onOperatorChange = (value: string) => {
-    const newFilters = filters.map(item => {
-      if (item.bizName === filter.bizName) {
+    const newFilters = filters.map((item, indexValue) => {
+      if (item.bizName === filter.bizName && index === indexValue) {
         item.operator = value;
       }
       return item;
@@ -97,8 +100,8 @@ const FilterItem: React.FC<Props> = ({
   };
 
   const onChange = (value: string | string[] | number | null) => {
-    const newFilters = filters.map(item => {
-      if (item.bizName === filter.bizName) {
+    const newFilters = filters.map((item, indexValue) => {
+      if (item.bizName === filter.bizName && index === indexValue) {
         item.value =
           typeof filter.value === 'number' || filter.value === null
             ? value
@@ -123,28 +126,46 @@ const FilterItem: React.FC<Props> = ({
     onFiltersChange(newFilters);
   };
 
+  const onDateChange = (_: any, date: string) => {
+    console.log('onDateChange', date);
+    const newFilters = filters.map((item, indexValue) => {
+      if (item.bizName === filter.bizName && index === indexValue) {
+        item.value = date;
+      }
+      return item;
+    });
+    onFiltersChange(newFilters);
+  };
+
   return (
     <span className={prefixCls}>
       <span className={`${prefixCls}-filter-name`}>{filter.name}：</span>
-      {(typeof filter.value === 'number' || filter.value === null) &&
-      !filter.bizName?.includes('_id') ? (
-        <>
+      {(typeof filter.value === 'number' ||
+        filter.value === null ||
+        (filter.operator && !['IN', '=', 'LIKE'].includes(filter.operator))) &&
+        !filter.bizName?.includes('_id') && (
           <Select
             options={[
+              { label: '大于等于', value: '>=' },
               { label: '大于', value: '>' },
               { label: '等于', value: '=' },
+              { label: '小于等于', value: '<=' },
               { label: '小于', value: '<' },
             ]}
             className={`${prefixCls}-operator-control`}
             value={filter.operator}
             onChange={onOperatorChange}
           />
-          <InputNumber
-            className={`${prefixCls}-input-number-control`}
-            value={filter.value}
-            onChange={onChange}
-          />
-        </>
+        )}
+      {(typeof filter.value === 'number' || filter.value === null) &&
+      !filter.bizName?.includes('_id') ? (
+        <InputNumber
+          className={`${prefixCls}-input-number-control`}
+          value={filter.value}
+          onChange={onChange}
+        />
+      ) : typeof filter.value === 'string' && moment(filter.value, 'YYYY-MM-DD').isValid() ? (
+        <DatePicker value={moment(filter.value)} onChange={onDateChange} allowClear={false} />
       ) : (typeof filter.value === 'string' || isArray(filter.value)) &&
         !filter.bizName?.includes('_id') ? (
         <Select
@@ -173,7 +194,9 @@ const FilterItem: React.FC<Props> = ({
           </span>
         </>
       ) : (
-        <span className={`${prefixCls}-filter-value`}>{filter.value}</span>
+        <span className={`${prefixCls}-filter-value`}>
+          {typeof filter.value !== 'object' ? filter.value : ''}
+        </span>
       )}
     </span>
   );
