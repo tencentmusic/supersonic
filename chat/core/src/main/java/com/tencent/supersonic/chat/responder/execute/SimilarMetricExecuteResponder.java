@@ -42,13 +42,13 @@ public class SimilarMetricExecuteResponder implements ExecuteResponder {
                 .filterCondition(filterCondition).queryEmbeddings(null).build();
         EmbeddingUtils embeddingUtils = ContextUtils.getBean(EmbeddingUtils.class);
         List<RetrieveQueryResult> retrieveQueryResults = embeddingUtils.retrieveQuery(
-                MetaEmbeddingListener.COLLECTION_NAME, retrieveQuery, METRIC_RECOMMEND_SIZE);
+                MetaEmbeddingListener.COLLECTION_NAME, retrieveQuery, METRIC_RECOMMEND_SIZE + 1);
         if (CollectionUtils.isEmpty(retrieveQueryResults)) {
             return;
         }
         List<Retrieval> retrievals = retrieveQueryResults.stream()
                 .flatMap(retrieveQueryResult -> retrieveQueryResult.getRetrieval().stream())
-                .sorted(Comparator.comparingDouble(Retrieval::getDistance).reversed())
+                .sorted(Comparator.comparingDouble(Retrieval::getDistance))
                 .distinct().collect(Collectors.toList());
         Set<Long> metricIds = parseInfo.getMetrics().stream().map(SchemaElement::getId).collect(Collectors.toSet());
         int metricOrder = 0;
@@ -62,7 +62,7 @@ public class SimilarMetricExecuteResponder implements ExecuteResponder {
                 if (retrieval.getMetadata().containsKey("modelId")) {
                     schemaElement.setModel(Long.parseLong(retrieval.getMetadata().get("modelId")));
                 }
-                schemaElement.setOrder(metricOrder++);
+                schemaElement.setOrder(++metricOrder);
                 parseInfo.getMetrics().add(schemaElement);
             }
         }
