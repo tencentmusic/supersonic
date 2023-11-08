@@ -8,6 +8,8 @@ public class LLMReq {
 
     private String queryText;
 
+    private FilterCondition filterCondition;
+
     private LLMSchema schema;
 
     private List<ElementValue> linking;
@@ -34,5 +36,11 @@ public class LLMReq {
 
         private List<String> fieldNameList;
 
+    }
+
+    @Data
+    public static class FilterCondition {
+
+        private String tableName;
     }
 }
