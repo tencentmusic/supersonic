@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.mapper;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.embedding.EmbeddingUtils;
@@ -10,7 +10,6 @@ import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.knowledge.dictionary.EmbeddingResult;
 import com.tencent.supersonic.semantic.model.domain.listener.MetaEmbeddingListener;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -47,19 +46,32 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
         return a.getName() + Constants.UNDERLINE + a.getId();
     }
 
-    public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults, Set<Long> detectModelIds,
-            Integer startIndex, Integer index, int offset) {
-        QueryReq queryReq = queryContext.getRequest();
-        String detectSegment = queryReq.getQueryText().substring(startIndex, index);
-        // step1. build query params
-        if (StringUtils.isBlank(detectSegment)
-                || detectSegment.length() <= optimizationConfig.getEmbeddingMapperWordMin()) {
-            return;
+
+    @Override
+    protected void detectByBatch(QueryContext queryContext, Set<EmbeddingResult> results, Set<Long> detectModelIds,
+            Set<String> detectSegments) {
+
+        List<String> queryTextsList = detectSegments.stream()
+                .map(detectSegment -> detectSegment.trim())
+                .filter(detectSegment -> StringUtils.isNotBlank(detectSegment)
+                        && detectSegment.length() >= optimizationConfig.getEmbeddingMapperWordMin()
+                        && detectSegment.length() <= optimizationConfig.getEmbeddingMapperWordMax())
+                .collect(Collectors.toList());
+
+        List<List<String>> queryTextsSubList = Lists.partition(queryTextsList,
+                optimizationConfig.getEmbeddingMapperBatch());
+
+        for (List<String> queryTextsSub : queryTextsSubList) {
+            detectByQueryTextsSub(results, detectModelIds, queryTextsSub);
         }
+    }
+
+    private void detectByQueryTextsSub(Set<EmbeddingResult> results, Set<Long> detectModelIds,
+            List<String> queryTextsSub) {
         int embeddingNumber = optimizationConfig.getEmbeddingMapperNumber();
         Double distance = optimizationConfig.getEmbeddingMapperDistanceThreshold();
         Map<String, String> filterCondition = null;
-
+        // step1. build query params
         // if only one modelId, add to filterCondition
         if (CollectionUtils.isNotEmpty(detectModelIds) && detectModelIds.size() == 1) {
             filterCondition = new HashMap<>();
@@ -67,7 +79,7 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
         }
 
         RetrieveQuery retrieveQuery = RetrieveQuery.builder()
-                .queryTextsList(Collections.singletonList(detectSegment))
+                .queryTextsList(queryTextsSub)
                 .filterCondition(filterCondition)
                 .queryEmbeddings(null)
                 .build();
@@ -101,18 +113,24 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
                         .map(retrieval -> {
                             EmbeddingResult embeddingResult = new EmbeddingResult();
                             BeanUtils.copyProperties(retrieval, embeddingResult);
-                            embeddingResult.setDetectWord(detectSegment);
+                            embeddingResult.setDetectWord(retrieveQueryResult.getQuery());
                             embeddingResult.setName(retrieval.getQuery());
                             return embeddingResult;
                         }))
                 .collect(Collectors.toList());
 
         // step4. select mapResul in one round
-        int roundNumber = optimizationConfig.getEmbeddingMapperRoundNumber();
+        int roundNumber = optimizationConfig.getEmbeddingMapperRoundNumber() * queryTextsSub.size();
         List<EmbeddingResult> oneRoundResults = collect.stream()
                 .sorted(Comparator.comparingDouble(EmbeddingResult::getDistance))
                 .limit(roundNumber)
                 .collect(Collectors.toList());
-        selectResultInOneRound(existResults, oneRoundResults);
+        selectResultInOneRound(results, oneRoundResults);
+    }
+
+    @Override
+    public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults, Set<Long> detectModelIds,
+            Integer startIndex, Integer index, int offset) {
+        return;
     }
 }

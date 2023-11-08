@@ -6,7 +6,6 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.embedding.EmbeddingUtils;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
@@ -24,6 +23,7 @@ import java.util.stream.Collectors;
 
 public class SimilarMetricExecuteResponder implements ExecuteResponder {
 
+    private static final int METRIC_RECOMMEND_SIZE = 5;
 
     @Override
     public void fillResponse(QueryResult queryResult, SemanticParseInfo semanticParseInfo, ExecuteQueryReq queryReq) {
@@ -31,8 +31,7 @@ public class SimilarMetricExecuteResponder implements ExecuteResponder {
     }
 
     private void fillSimilarMetric(SemanticParseInfo parseInfo) {
-        if (!QueryManager.isMetricQuery(parseInfo.getQueryMode())
-                || CollectionUtils.isEmpty(parseInfo.getMetrics())) {
+        if (CollectionUtils.isEmpty(parseInfo.getMetrics()) || parseInfo.getMetrics().size() >= METRIC_RECOMMEND_SIZE) {
             return;
         }
         List<String> metricNames = Collections.singletonList(parseInfo.getMetrics().iterator().next().getName());
@@ -43,7 +42,7 @@ public class SimilarMetricExecuteResponder implements ExecuteResponder {
                 .filterCondition(filterCondition).queryEmbeddings(null).build();
         EmbeddingUtils embeddingUtils = ContextUtils.getBean(EmbeddingUtils.class);
         List<RetrieveQueryResult> retrieveQueryResults = embeddingUtils.retrieveQuery(
-                MetaEmbeddingListener.COLLECTION_NAME, retrieveQuery, 5);
+                MetaEmbeddingListener.COLLECTION_NAME, retrieveQuery, METRIC_RECOMMEND_SIZE);
         if (CollectionUtils.isEmpty(retrieveQueryResults)) {
             return;
         }

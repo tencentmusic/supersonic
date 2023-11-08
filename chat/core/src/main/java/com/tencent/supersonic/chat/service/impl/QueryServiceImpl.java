@@ -35,6 +35,7 @@ import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.service.StatisticsService;
+import com.tencent.supersonic.chat.service.TimeCost;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.SolvedQueryManager;
 import com.tencent.supersonic.common.pojo.DateConf;
@@ -208,8 +209,8 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
+    @TimeCost
     public QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception {
-        Long executeTime = System.currentTimeMillis();
         ChatParseDO chatParseDO = chatService.getParseInfo(queryReq.getQueryId(),
                 queryReq.getParseId());
         ChatQueryDO chatQueryDO = chatService.getLastQuery(queryReq.getChatId());
@@ -249,7 +250,6 @@ public class QueryServiceImpl implements QueryService {
         } else {
             chatService.deleteChatQuery(queryReq.getQueryId());
         }
-        queryResult.setQueryTimeCost(System.currentTimeMillis() - executeTime);
         return queryResult;
     }
 
@@ -334,6 +334,7 @@ public class QueryServiceImpl implements QueryService {
     //mainly used for executing after revising filters,for example:"fans_cnt>=100000"->"fans_cnt>500000",
     //"style='流行'"->"style in ['流行','爱国']"
     @Override
+    @TimeCost
     public QueryResult executeDirectQuery(QueryDataReq queryData, User user) throws SqlParseException {
         ChatParseDO chatParseDO = chatService.getParseInfo(queryData.getQueryId(),
                 queryData.getParseId());

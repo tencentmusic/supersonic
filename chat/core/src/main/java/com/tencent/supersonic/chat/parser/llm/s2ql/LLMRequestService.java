@@ -110,6 +110,10 @@ public class LLMRequestService {
         LLMReq llmReq = new LLMReq();
         llmReq.setQueryText(queryText);
 
+        LLMReq.FilterCondition filterCondition = new LLMReq.FilterCondition();
+        filterCondition.setTableName(modelIdToName.get(modelId));
+        llmReq.setFilterCondition(filterCondition);
+
         LLMReq.LLMSchema llmSchema = new LLMReq.LLMSchema();
         llmSchema.setModelName(modelIdToName.get(modelId));
         llmSchema.setDomainName(modelIdToName.get(modelId));
