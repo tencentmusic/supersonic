@@ -10,7 +10,6 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.config.DefaultMetric;
 import com.tencent.supersonic.chat.config.Dim4Dict;
-import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
@@ -19,7 +18,6 @@ import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.util.ArrayList;
@@ -52,13 +50,10 @@ public class DictQueryHelper {
 
 
     public List<String> fetchDimValueSingle(Long modelId, DefaultMetric defaultMetricDesc, Dim4Dict dim4Dict,
-                                            User user) {
+            User user) {
         List<String> data = new ArrayList<>();
         QueryStructReq queryStructCmd = generateQueryStructCmd(modelId, defaultMetricDesc, dim4Dict);
         try {
-            OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
-            queryStructCmd.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
-
             QueryResultWithSchemaResp queryResultWithColumns = semanticInterpreter.queryByStruct(queryStructCmd, user);
 
             log.info("fetchDimValueSingle sql:{}", queryResultWithColumns.getSql());
@@ -100,7 +95,7 @@ public class DictQueryHelper {
     }
 
     private List<String> generateFileData(List<Map<String, Object>> resultList, String nature, String dimName,
-                                          String metricName, Dim4Dict dim4Dict) {
+            String metricName, Dim4Dict dim4Dict) {
         List<String> data = new ArrayList<>();
         if (CollectionUtils.isEmpty(resultList)) {
             return data;
@@ -125,7 +120,7 @@ public class DictQueryHelper {
     }
 
     private void constructDataLines(Map<String, Long> valueAndFrequencyPair, String nature,
-                                    List<String> data, Dim4Dict dim4Dict) {
+            List<String> data, Dim4Dict dim4Dict) {
         valueAndFrequencyPair.forEach((dimValue, metric) -> {
             if (metric > MAX_FREQUENCY) {
                 metric = MAX_FREQUENCY;

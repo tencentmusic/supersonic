@@ -29,7 +29,7 @@ public abstract class BaseMapper implements SchemaMapper {
 
         String simpleName = this.getClass().getSimpleName();
         long startTime = System.currentTimeMillis();
-        log.info("before {},mapInfo:{}", simpleName, queryContext.getMapInfo());
+        log.info("before {},mapInfo:{}", simpleName, queryContext.getMapInfo().getModelElementMatches());
 
         try {
             work(queryContext);
@@ -38,7 +38,7 @@ public abstract class BaseMapper implements SchemaMapper {
         }
 
         long cost = System.currentTimeMillis() - startTime;
-        log.info("after {},cost:{},mapInfo:{}", simpleName, cost, queryContext.getMapInfo());
+        log.info("after {},cost:{},mapInfo:{}", simpleName, cost, queryContext.getMapInfo().getModelElementMatches());
     }
 
     public abstract void work(QueryContext queryContext);
