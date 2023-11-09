@@ -38,6 +38,7 @@ public class QueryParser {
             if (semanticConverter.accept(queryStructReq)) {
                 log.info("SemanticConverter accept [{}]", semanticConverter.getClass().getName());
                 semanticConverter.converter(catalog, queryStructReq, parseSqlReq, metricReq);
+                log.info("SemanticConverter accept [{}]", semanticConverter.getClass().getName());
             }
         }
         log.info("SemanticConverter after {} {} {}", queryStructReq, metricReq, parseSqlReq);

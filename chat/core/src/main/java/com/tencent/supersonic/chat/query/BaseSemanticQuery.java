@@ -6,6 +6,7 @@ import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.Aggregator;
@@ -40,7 +41,8 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
         ExplainSqlReq explainSqlReq = null;
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
         try {
-            QueryS2SQLReq queryS2SQLReq = QueryReqBuilder.buildS2SQLReq(sqlInfo.getCorrectS2SQL(), parseInfo.getModelId());
+            QueryS2SQLReq queryS2SQLReq = QueryReqBuilder.buildS2SQLReq(sqlInfo.getCorrectS2SQL(),
+                    parseInfo.getModelId());
             explainSqlReq = ExplainSqlReq.builder()
                     .queryTypeEnum(QueryTypeEnum.SQL)
                     .queryReq(queryS2SQLReq)
@@ -103,6 +105,10 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
     }
 
     protected void initS2SqlByStruct() {
+        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
+        if (!optimizationConfig.isUseS2SqlSwitch()) {
+            return;
+        }
         QueryStructReq queryStructReq = convertQueryStruct();
         convertBizNameToName(queryStructReq);
         QueryS2SQLReq queryS2SQLReq = queryStructReq.convert(queryStructReq);
