@@ -3,23 +3,24 @@ package com.tencent.supersonic.knowledge.utils;
 import static com.hankcs.hanlp.HanLP.Config.CustomDictionaryPath;
 
 import com.hankcs.hanlp.HanLP;
+import com.hankcs.hanlp.corpus.tag.Nature;
 import com.hankcs.hanlp.dictionary.CoreDictionary;
 import com.hankcs.hanlp.dictionary.DynamicCustomDictionary;
 import com.hankcs.hanlp.seg.Segment;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
+import com.tencent.supersonic.knowledge.dictionary.HadoopFileIOAdapter;
+import com.tencent.supersonic.knowledge.dictionary.MapResult;
+import com.tencent.supersonic.knowledge.dictionary.MultiCustomDictionary;
+import com.tencent.supersonic.knowledge.service.SearchService;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.tencent.supersonic.knowledge.dictionary.MapResult;
-import com.tencent.supersonic.knowledge.dictionary.HadoopFileIOAdapter;
-import com.tencent.supersonic.knowledge.service.SearchService;
-import com.tencent.supersonic.knowledge.dictionary.MultiCustomDictionary;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -172,10 +173,12 @@ public class HanlpHelper {
         log.info("get attribute:{}", attribute);
         getDynamicCustomDictionary().remove(dictWord.getWord());
         StringBuilder sb = new StringBuilder();
+        List<Nature> natureList = new ArrayList<>();
         for (int i = 0; i < attribute.nature.length; i++) {
             if (!attribute.nature[i].toString().equals(dictWord.getNature())) {
                 sb.append(attribute.nature[i].toString() + " ");
                 sb.append(attribute.frequency[i] + " ");
+                natureList.add((attribute.nature[i]));
             }
         }
         String natureWithFrequency = sb.toString();
@@ -184,13 +187,14 @@ public class HanlpHelper {
         if (StringUtils.isNotBlank(natureWithFrequency)) {
             getDynamicCustomDictionary().add(dictWord.getWord(), natureWithFrequency.substring(0, len - 1));
         }
+        SearchService.remove(dictWord, natureList.toArray(new Nature[0]));
     }
 
-    public static void transLetterOriginal(List<MapResult> mapResults) {
+    public static <T extends MapResult> void transLetterOriginal(List<T> mapResults) {
         if (CollectionUtils.isEmpty(mapResults)) {
             return;
         }
-        for (MapResult mapResult : mapResults) {
+        for (T mapResult : mapResults) {
             if (MultiCustomDictionary.isLowerLetter(mapResult.getName())) {
                 if (CustomDictionary.contains(mapResult.getName())) {
                     CoreDictionary.Attribute attribute = CustomDictionary.get(mapResult.getName());

@@ -18,11 +18,11 @@ public class SchemaService {
 
 
     public static final String ALL_CACHE = "all";
-    private static final Integer META_CACHE_TIME = 2;
+    private static final Integer META_CACHE_TIME = 30;
     private SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
 
     private LoadingCache<String, SemanticSchema> cache = CacheBuilder.newBuilder()
-            .expireAfterWrite(META_CACHE_TIME, TimeUnit.MINUTES)
+            .expireAfterWrite(META_CACHE_TIME, TimeUnit.SECONDS)
             .build(
                     new CacheLoader<String, SemanticSchema>() {
                         @Override

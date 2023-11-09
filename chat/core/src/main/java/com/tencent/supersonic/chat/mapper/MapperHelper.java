@@ -1,11 +1,13 @@
 package com.tencent.supersonic.chat.mapper;
 
 import com.hankcs.hanlp.algorithm.EditDistance;
+import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.knowledge.utils.NatureHelper;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,10 +41,14 @@ public class MapperHelper {
         return index;
     }
 
-    public Integer getStepOffset(List<Integer> termList, Integer index) {
+
+    public Integer getStepOffset(List<Term> termList, Integer index) {
+        List<Integer> offsetList = termList.stream().sorted(Comparator.comparing(Term::getOffset))
+                .map(term -> term.getOffset()).collect(Collectors.toList());
+
         for (int j = 0; j < termList.size() - 1; j++) {
-            if (termList.get(j) <= index && termList.get(j + 1) > index) {
-                return termList.get(j);
+            if (offsetList.get(j) <= index && offsetList.get(j + 1) > index) {
+                return offsetList.get(j);
             }
         }
         return index;

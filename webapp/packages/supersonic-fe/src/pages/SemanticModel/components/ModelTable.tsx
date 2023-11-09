@@ -156,7 +156,7 @@ const ModelTable: React.FC<Props> = ({
                   });
                 }}
               >
-                禁用
+                停用
               </Button>
             ) : (
               <Button

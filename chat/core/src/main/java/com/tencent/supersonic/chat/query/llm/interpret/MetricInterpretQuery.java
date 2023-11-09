@@ -10,6 +10,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
+import com.tencent.supersonic.chat.corrector.CorrectorService;
 import com.tencent.supersonic.chat.plugin.PluginManager;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -39,6 +41,9 @@ public class MetricInterpretQuery extends PluginSemanticQuery {
 
 
     public static final String QUERY_MODE = "METRIC_INTERPRET";
+
+    @Autowired
+    private CorrectorService correctorService;
 
     public MetricInterpretQuery() {
         QueryManager.register(this);
@@ -58,6 +63,9 @@ public class MetricInterpretQuery extends PluginSemanticQuery {
 
         OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
         queryStructReq.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
+        if (optimizationConfig.isUseS2qlSwitch()) {
+            correctorService.addS2QLAndLoginSql(queryStructReq, parseInfo);
+        }
 
         QueryResultWithSchemaResp queryResultWithSchemaResp = semanticInterpreter.queryByStruct(queryStructReq, user);
         String text = generateTableText(queryResultWithSchemaResp);

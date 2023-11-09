@@ -7,10 +7,11 @@ import com.hankcs.hanlp.dictionary.CoreDictionary;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.knowledge.dictionary.DictionaryAttributeUtil;
-import com.tencent.supersonic.knowledge.dictionary.MapResult;
+import com.tencent.supersonic.knowledge.dictionary.HanlpMapResult;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -38,17 +39,17 @@ public class SearchService {
      * @param key
      * @return
      */
-    public static List<MapResult> prefixSearch(String key, int limit, Integer agentId, Set<Long> detectModelIds) {
+    public static List<HanlpMapResult> prefixSearch(String key, int limit, Integer agentId, Set<Long> detectModelIds) {
         return prefixSearch(key, limit, agentId, trie, detectModelIds);
     }
 
-    public static List<MapResult> prefixSearch(String key, int limit, Integer agentId, BinTrie<List<String>> binTrie,
-            Set<Long> detectModelIds) {
+    public static List<HanlpMapResult> prefixSearch(String key, int limit, Integer agentId,
+            BinTrie<List<String>> binTrie, Set<Long> detectModelIds) {
         Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie, agentId, detectModelIds);
         return result.stream().map(
                         entry -> {
                             String name = entry.getKey().replace("#", " ");
-                            return new MapResult(name, entry.getValue(), key);
+                            return new HanlpMapResult(name, entry.getValue(), key);
                         }
                 ).sorted((a, b) -> -(b.getName().length() - a.getName().length()))
                 .limit(SEARCH_SIZE)
@@ -60,13 +61,13 @@ public class SearchService {
      * @param key
      * @return
      */
-    public static List<MapResult> suffixSearch(String key, int limit, Integer agentId, Set<Long> detectModelIds) {
+    public static List<HanlpMapResult> suffixSearch(String key, int limit, Integer agentId, Set<Long> detectModelIds) {
         String reverseDetectSegment = StringUtils.reverse(key);
         return suffixSearch(reverseDetectSegment, limit, agentId, suffixTrie, detectModelIds);
     }
 
-    public static List<MapResult> suffixSearch(String key, int limit, Integer agentId, BinTrie<List<String>> binTrie,
-            Set<Long> detectModelIds) {
+    public static List<HanlpMapResult> suffixSearch(String key, int limit, Integer agentId,
+            BinTrie<List<String>> binTrie, Set<Long> detectModelIds) {
         Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie, agentId, detectModelIds);
         return result.stream().map(
                         entry -> {
@@ -75,7 +76,7 @@ public class SearchService {
                                     .map(nature -> nature.replaceAll(DictWordType.SUFFIX.getType(), ""))
                                     .collect(Collectors.toList());
                             name = StringUtils.reverse(name);
-                            return new MapResult(name, natures, key);
+                            return new HanlpMapResult(name, natures, key);
                         }
                 ).sorted((a, b) -> -(b.getName().length() - a.getName().length()))
                 .limit(SEARCH_SIZE)
@@ -114,7 +115,7 @@ public class SearchService {
     }
 
     public static void put(String key, CoreDictionary.Attribute attribute) {
-        trie.put(key, Arrays.stream(attribute.nature).map(entry -> entry.toString()).collect(Collectors.toList()));
+        trie.put(key, getValue(attribute.nature));
     }
 
 
@@ -138,9 +139,23 @@ public class SearchService {
     }
 
     public static void putSuffix(String key, CoreDictionary.Attribute attribute) {
-        suffixTrie.put(key,
-                Arrays.stream(attribute.nature).map(entry -> entry.toString()).collect(Collectors.toList()));
+        Nature[] nature = attribute.nature;
+        suffixTrie.put(key, getValue(nature));
     }
 
+    private static List<String> getValue(Nature[] nature) {
+        return Arrays.stream(nature).map(entry -> entry.toString()).collect(Collectors.toList());
+    }
+
+    public static void remove(DictWord dictWord, Nature[] natures) {
+        trie.remove(dictWord.getWord());
+        if (Objects.nonNull(natures) && natures.length > 0) {
+            trie.put(dictWord.getWord(), getValue(natures));
+        }
+        if (dictWord.getNature().contains(DictWordType.METRIC.getType()) || dictWord.getNature()
+                .contains(DictWordType.DIMENSION.getType())) {
+            suffixTrie.remove(dictWord.getWord());
+        }
+    }
 }
 

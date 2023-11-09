@@ -147,121 +147,103 @@ const MetricTrendSection: React.FC<Props> = ({ nodeData }) => {
 
   return (
     <>
-      <div style={{ marginBottom: 5, display: 'grid', gap: 10 }}>
-        {/* <StandardFormRow key="showType" title="维度下钻" block>
-          <FormItem name="showType" valuePropName="checked">
-            <Select
-              style={{ minWidth: 150 }}
-              options={relationDimensionOptions}
-              showSearch
-              filterOption={(input, option) =>
-                ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase())
-              }
-              mode="multiple"
-              placeholder="请选择下钻维度"
-              onChange={(value) => {
-                const params = { ...queryParams, dimensionGroup: value || [] };
-                setQueryParams(params);
-                getMetricTrendData({ ...params });
-              }}
-            />
-          </FormItem>
-        </StandardFormRow> */}
-        {/* <Row>
-          <Col flex="1 1 200px">
-            <Space>
-              <span>维度下钻: </span>
-              <Select
-                style={{ minWidth: 150 }}
-                options={relationDimensionOptions}
-                showSearch
-                filterOption={(input, option) =>
-                  ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase())
-                }
-                mode="multiple"
-                placeholder="请选择下钻维度"
-                onChange={(value) => {
-                  const params = { ...queryParams, dimensionGroup: value || [] };
-                  setQueryParams(params);
-                  getMetricTrendData({ ...params });
-                }}
-              />
-            </Space>
-          </Col>
-        </Row>
+      <div style={{ marginBottom: 25 }}>
         <Row>
           <Col flex="1 1 200px">
-            <Space>
-              <span>维度筛选: </span>
-              <MetricTrendDimensionFilter
-                modelId={nodeData.modelId}
-                dimensionOptions={relationDimensionOptions}
-                onFiltersChange={() => {}}
-              />
-            </Space>
-          </Col>
-        </Row> */}
-        <Row>
-          <Col flex="1 1 200px">
-            <MDatePicker
-              initialValues={{
-                dateSettingType: 'DYNAMIC',
-                dynamicParams: {
-                  number: 7,
-                  periodType: 'DAYS',
-                  includesCurrentPeriod: true,
-                  shortCutId: 'last7Days',
-                  dateRangeType: 'DAY',
-                  dynamicAdvancedConfigType: 'last',
-                  dateRangeStringDesc: '最近7天',
-                  dateSettingType: DateSettingType.DYNAMIC,
-                },
-                staticParams: {},
+            <Form
+              layout="inline"
+              // form={form}
+              colon={false}
+              onValuesChange={(value, values) => {
+                if (value.key) {
+                  return;
+                }
+                // handleValuesChange(value, values);
               }}
-              onDateRangeChange={(value, config) => {
-                const [startDate, endDate] = value;
-                const { dateSettingType, dynamicParams, staticParams } = config;
-                let dateField = dateFieldMap[DateRangeType.DAY];
-                if (DateSettingType.DYNAMIC === dateSettingType) {
-                  dateField = dateFieldMap[dynamicParams.dateRangeType];
-                }
-                if (DateSettingType.STATIC === dateSettingType) {
-                  dateField = dateFieldMap[staticParams.dateRangeType];
-                }
-                setPeriodDate({ startDate, endDate, dateField });
-              }}
-              disabledAdvanceSetting={true}
-            />
-            {/* <Select
-                style={{ minWidth: 150 }}
-                options={relationDimensionOptions}
-                showSearch
-                filterOption={(input, option) =>
-                  ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase())
-                }
-                mode="multiple"
-                placeholder="请选择下钻维度"
-                onChange={(value) => {
-                  const params = { ...queryParams, dimensionGroup: value || [] };
-                  setQueryParams(params);
-                  getMetricTrendData({ ...params });
-                }}
-              />
-              <Select
-                style={{ minWidth: 150 }}
-                options={relationDimensionOptions}
-                showSearch
-                filterOption={(input, option) =>
-                  ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase())
-                }
-                mode="multiple"
-                placeholder="请选择筛选维度"
-                onChange={(value) => {
-                  const params = { ...queryParams, dimensionFilters: value || [] };
-                  setQueryParams(params);
-                  getMetricTrendData({ ...params });
-                }}
-              /> */}
+            >
+              {/* <StandardFormRow key="dimensionSelected" title="维度下钻:">
+                <FormItem name="dimensionSelected">
+                  <Select
+                    style={{ minWidth: 150, maxWidth: 200 }}
+                    options={relationDimensionOptions}
+                    showSearch
+                    filterOption={(input, option) =>
+                      ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase())
+                    }
+                    mode="multiple"
+                    placeholder="请选择下钻维度"
+                    onChange={(value) => {
+                      const params = { ...queryParams, dimensionGroup: value || [] };
+                      setQueryParams(params);
+                      getMetricTrendData({ ...params });
+                    }}
+                  />
+                </FormItem>
+              </StandardFormRow>
+              <StandardFormRow key="dimensionFilter" title="维度筛选:">
+                <FormItem name="dimensionFilter">
+                  <MetricTrendDimensionFilter
+                    modelId={nodeData.modelId}
+                    dimensionOptions={relationDimensionOptions}
+                    onChange={(filterParams) => {
+                      const {
+                        dimensionBizName: bizName,
+                        dimensionValue: value,
+                        operator,
+                      } = filterParams;
+                      if (bizName && value && operator) {
+                        const params = {
+                          ...queryParams,
+                          dimensionFilters: [
+                            {
+                              bizName: 'user_name',
+                              value: ['williamhliu', 'leooonli'],
+                              operator: 'in',
+                            },
+                          ],
+                        };
+                        setQueryParams(params);
+                        getMetricTrendData({ ...params });
+                      }
+                    }}
+                  />
+                </FormItem>
+              </StandardFormRow> */}
+              <StandardFormRow key="metricDate" title="日期区间:">
+                <FormItem name="metricDate">
+                  <MDatePicker
+                    initialValues={{
+                      dateSettingType: 'DYNAMIC',
+                      dynamicParams: {
+                        number: 7,
+                        periodType: 'DAYS',
+                        includesCurrentPeriod: true,
+                        shortCutId: 'last7Days',
+                        dateRangeType: 'DAY',
+                        dynamicAdvancedConfigType: 'last',
+                        dateRangeStringDesc: '最近7天',
+                        dateSettingType: DateSettingType.DYNAMIC,
+                      },
+                      staticParams: {},
+                    }}
+                    showCurrentDataRangeString={false}
+                    onDateRangeChange={(value, config) => {
+                      const [startDate, endDate] = value;
+                      const { dateSettingType, dynamicParams, staticParams } = config;
+                      let dateField = dateFieldMap[DateRangeType.DAY];
+                      if (DateSettingType.DYNAMIC === dateSettingType) {
+                        dateField = dateFieldMap[dynamicParams.dateRangeType];
+                      }
+                      if (DateSettingType.STATIC === dateSettingType) {
+                        dateField = dateFieldMap[staticParams.dateRangeType];
+                      }
+                      setPeriodDate({ startDate, endDate, dateField });
+                    }}
+                    disabledAdvanceSetting={true}
+                  />
+                </FormItem>
+              </StandardFormRow>
+            </Form>
           </Col>
           <Col flex="0 1">
             <Button

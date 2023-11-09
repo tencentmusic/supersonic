@@ -264,8 +264,6 @@ public class SemanticService {
         QueryResultWithSchemaResp queryResultWithColumns = null;
         try {
             QueryStructReq queryStructReq = QueryReqBuilder.buildStructReq(semanticParseInfo);
-            OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
-            queryStructReq.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
             queryResultWithColumns = semanticInterpreter.queryByStruct(queryStructReq, user);
         } catch (Exception e) {
             log.warn("setMainModel queryByStruct error, e:", e);

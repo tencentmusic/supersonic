@@ -173,20 +173,22 @@ public class DictMetaHelper {
                     .forEach(knowledgeInfo -> {
                         SchemaElement dimensionDesc = dimIdAndDescPair.get(knowledgeInfo.getItemId());
 
-                        //default cnt
-                        if (Objects.isNull(chatDefaultConfig)
-                                || CollectionUtils.isEmpty(chatDefaultConfig.getMetrics())) {
-                            Long dimId = dimensionDesc.getId();
-                            if (Objects.nonNull(dimId)) {
-                                String datasourceBizName = queryDataSourceByDimId(dimId);
-                                String internalMetricName =
-                                        datasourceBizName + UNDERLINE + internalMetricNameSuffix;
-                                defaultMetricDescList.add(new DefaultMetric(internalMetricName,
-                                        internalMetricDays, DAY));
-                            }
+                        Long dimId = dimensionDesc.getId();
+                        String internalMetricName = "";
+                        if (Objects.nonNull(dimId)) {
+                            String datasourceBizName = queryDataSourceByDimId(dimId);
+                            internalMetricName = datasourceBizName + UNDERLINE + internalMetricNameSuffix;
+                        }
+
+                        if (Objects.isNull(chatDefaultConfig)) {
+                            defaultMetricDescList.add(new DefaultMetric(internalMetricName,
+                                    internalMetricDays, DAY));
                         } else {
-                            SchemaElement schemaItem = chatDefaultConfig.getMetrics().get(0);
-                            defaultMetricDescList.add(new DefaultMetric(schemaItem.getBizName(),
+                            String metric = internalMetricName;
+                            if (!CollectionUtils.isEmpty(chatDefaultConfig.getMetrics())) {
+                                metric = chatDefaultConfig.getMetrics().get(0).getBizName();
+                            }
+                            defaultMetricDescList.add(new DefaultMetric(metric,
                                     chatDefaultConfig.getUnit(), chatDefaultConfig.getPeriod()));
 
                         }

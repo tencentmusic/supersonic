@@ -24,6 +24,7 @@ import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.query.service.QueryService;
 import com.tencent.supersonic.semantic.query.service.SchemaService;
+import java.util.HashMap;
 import java.util.List;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -40,12 +41,13 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
     @SneakyThrows
     @Override
     public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user) {
-        QueryS2QLReq queryS2QLReq = queryStructReq.convert(queryStructReq);
-        if (queryStructReq.isUseS2qlSwitch() && StringUtils.isNotBlank(queryS2QLReq.getSql())) {
-            log.info("queryStructReq convert to sql:{},queryStructReq:{}", queryS2QLReq.getSql(), queryStructReq);
+        if (StringUtils.isNotBlank(queryStructReq.getLogicSql())) {
+            QueryS2QLReq queryS2QLReq = new QueryS2QLReq();
+            queryS2QLReq.setSql(queryStructReq.getLogicSql());
+            queryS2QLReq.setModelId(queryStructReq.getModelId());
+            queryS2QLReq.setVariables(new HashMap<>());
             return queryByS2QL(queryS2QLReq, user);
         }
-
         queryService = ContextUtils.getBean(QueryService.class);
         return queryService.queryByStructWithAuth(queryStructReq, user);
     }

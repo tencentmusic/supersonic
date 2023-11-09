@@ -1,4 +1,4 @@
-import { formatByDecimalPlaces, getFormattedValue } from '../../../utils/utils';
+import { formatByDecimalPlaces, getFormattedValue, isMobile } from '../../../utils/utils';
 import { Table as AntTable } from 'antd';
 import { MsgDataType } from '../../../common/type';
 import { CLS_PREFIX } from '../../../common/constants';
@@ -70,7 +70,13 @@ const Table: React.FC<Props> = ({ data, size, onApplyAuth }) => {
     <div className={prefixCls}>
       <AntTable
         pagination={
-          queryResults.length <= 10 ? false : { defaultPageSize: 10, position: ['bottomCenter'] }
+          queryResults.length <= 10
+            ? false
+            : {
+                defaultPageSize: 10,
+                position: ['bottomCenter'],
+                size: isMobile ? 'small' : 'default',
+              }
         }
         columns={tableColumns}
         dataSource={dataSource}

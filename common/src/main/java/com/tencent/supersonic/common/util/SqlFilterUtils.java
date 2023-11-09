@@ -55,15 +55,14 @@ public class SqlFilterUtils {
         return filterCols;
     }
 
-
-    public String getWhereClause(List<Filter> filters) {
+    public String getWhereClause(List<Filter> filters, boolean isBizName) {
         StringJoiner joiner = new StringJoiner(Constants.AND_UPPER);
 
         if (!CollectionUtils.isEmpty(filters)) {
             filters.stream()
                     .forEach(filter -> {
-                        if (Strings.isNotEmpty(dealFilter(filter))) {
-                            joiner.add(SPACE + dealFilter(filter) + SPACE);
+                        if (Strings.isNotEmpty(dealFilter(filter, isBizName))) {
+                            joiner.add(SPACE + dealFilter(filter, isBizName) + SPACE);
                         }
                     });
             log.info("getWhereClause, where sql : {}", joiner.toString());
@@ -73,7 +72,12 @@ public class SqlFilterUtils {
         return "";
     }
 
-    public String dealFilter(Filter filter) {
+
+    public String getWhereClause(List<Filter> filters) {
+        return getWhereClause(filters, true);
+    }
+
+    public String dealFilter(Filter filter, boolean isBizName) {
         if (Objects.isNull(filter)) {
             return "";
         }
@@ -82,14 +86,14 @@ public class SqlFilterUtils {
         }
         StringBuilder condition = new StringBuilder();
         if (Filter.Relation.FILTER.equals(filter.getRelation())) {
-            return dealSingleFilter(filter);
+            return dealSingleFilter(filter, isBizName);
         }
 
         List<Filter> children = filter.getChildren();
         condition.append(PARENTHESES_START);
         StringJoiner joiner = new StringJoiner(SPACE + filter.getRelation().name() + SPACE);
         for (Filter child : children) {
-            joiner.add(dealFilter(child));
+            joiner.add(dealFilter(child, isBizName));
         }
         condition.append(joiner.toString());
         condition.append(PARENTHESES_END);
@@ -97,8 +101,11 @@ public class SqlFilterUtils {
     }
 
     // todo deal metric filter
-    private String dealSingleFilter(Filter filter) {
+    private String dealSingleFilter(Filter filter, boolean isBizName) {
         String name = filter.getBizName();
+        if (!isBizName) {
+            name = filter.getName();
+        }
         Object value = filter.getValue();
         FilterOperatorEnum operator = filter.getOperator();
 
