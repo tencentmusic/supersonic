@@ -20,7 +20,7 @@ import org.springframework.util.CollectionUtils;
 public class GroupByCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void work(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
+    public void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
 
         addGroupByFields(semanticParseInfo);
 

@@ -11,12 +11,11 @@ com.tencent.supersonic.chat.api.component.SemanticParser=\
     com.tencent.supersonic.chat.parser.plugin.function.FunctionBasedParser
 
 com.tencent.supersonic.chat.api.component.SemanticCorrector=\
-    com.tencent.supersonic.chat.corrector.GlobalBeforeCorrector, \
+    com.tencent.supersonic.chat.corrector.SchemaCorrector, \
     com.tencent.supersonic.chat.corrector.SelectCorrector, \
     com.tencent.supersonic.chat.corrector.WhereCorrector, \
     com.tencent.supersonic.chat.corrector.GroupByCorrector, \
-    com.tencent.supersonic.chat.corrector.HavingCorrector, \
-    com.tencent.supersonic.chat.corrector.GlobalAfterCorrector
+    com.tencent.supersonic.chat.corrector.HavingCorrector
 
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.RemoteSemanticInterpreter

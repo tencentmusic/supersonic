@@ -21,7 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 public class EmbeddingMapper extends BaseMapper {
 
     @Override
-    public void work(QueryContext queryContext) {
+    public void doMap(QueryContext queryContext) {
         //1. query from embedding by queryText
 
         String queryText = queryContext.getRequest().getQueryText();
