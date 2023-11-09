@@ -31,6 +31,7 @@ import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
 import com.tencent.supersonic.chat.service.ChatService;
+import com.tencent.supersonic.chat.service.ParseInfoService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.service.StatisticsService;
@@ -58,7 +59,6 @@ import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -102,6 +102,8 @@ public class QueryServiceImpl implements QueryService {
     private StatisticsService statisticsService;
     @Autowired
     private SolvedQueryManager solvedQueryManager;
+    @Autowired
+    private ParseInfoService parseInfoService;
 
     @Value("${time.threshold: 100}")
     private Integer timeThreshold;
@@ -148,7 +150,6 @@ public class QueryServiceImpl implements QueryService {
                 semanticCorrectors.stream().forEach(correction -> {
                     correction.correct(queryReq, semanticQuery.getParseInfo());
                 });
-                semanticQuery.updateParseInfo();
             }
         }
 
@@ -156,15 +157,14 @@ public class QueryServiceImpl implements QueryService {
         ParseResp parseResult;
         List<ChatParseDO> chatParseDOS = Lists.newArrayList();
         if (candidateQueries.size() > 0) {
-            log.debug("pick before [{}]", candidateQueries.stream().collect(
-                    Collectors.toList()));
             List<SemanticQuery> selectedQueries = querySelector.select(candidateQueries, queryReq);
-            log.debug("pick after [{}]", selectedQueries.stream().collect(
-                    Collectors.toList()));
 
-            List<SemanticParseInfo> selectedParses = convertParseInfo(selectedQueries);
-            List<SemanticParseInfo> candidateParses = convertParseInfo(candidateQueries);
-            candidateParses = getTop5CandidateParseInfo(selectedParses, candidateParses);
+            candidateQueries.forEach(semanticQuery -> parseInfoService.updateParseInfo(semanticQuery.getParseInfo()));
+            List<SemanticParseInfo> selectedParses = parseInfoService.sortParseInfo(selectedQueries);
+            List<SemanticParseInfo> candidateParses = parseInfoService.sortParseInfo(candidateQueries);
+
+            candidateParses = parseInfoService.getTopCandidateParseInfo(selectedParses, candidateParses);
+
             parseResult = ParseResp.builder()
                     .chatId(queryReq.getChatId())
                     .queryText(queryReq.getQueryText())
@@ -172,7 +172,7 @@ public class QueryServiceImpl implements QueryService {
                     .selectedParses(selectedParses)
                     .candidateParses(candidateParses)
                     .build();
-            chatParseDOS = chatService.batchAddParse(chatCtx, queryReq, parseResult, candidateParses, selectedParses);
+            chatParseDOS = chatService.batchAddParse(chatCtx, queryReq, parseResult);
         } else {
             parseResult = ParseResp.builder()
                     .chatId(queryReq.getChatId())
@@ -198,35 +198,6 @@ public class QueryServiceImpl implements QueryService {
         return parseResult;
     }
 
-    private List<SemanticParseInfo> convertParseInfo(List<SemanticQuery> semanticQueries) {
-        return semanticQueries.stream()
-                .map(SemanticQuery::getParseInfo)
-                .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
-                .collect(Collectors.toList());
-    }
-
-    private List<SemanticParseInfo> getTop5CandidateParseInfo(List<SemanticParseInfo> selectedParses,
-            List<SemanticParseInfo> candidateParses) {
-        if (CollectionUtils.isEmpty(selectedParses) || CollectionUtils.isEmpty(candidateParses)) {
-            return candidateParses;
-        }
-        int selectParseSize = selectedParses.size();
-        Set<Double> selectParseScoreSet = selectedParses.stream()
-                .map(SemanticParseInfo::getScore).collect(Collectors.toSet());
-        int candidateParseSize = 5 - selectParseSize;
-        candidateParses = candidateParses.stream()
-                .filter(candidateParse -> !selectParseScoreSet.contains(candidateParse.getScore()))
-                .collect(Collectors.toList());
-        SemanticParseInfo semanticParseInfo = selectedParses.get(0);
-        Long modelId = semanticParseInfo.getModelId();
-        if (modelId == null || modelId <= 0) {
-            return candidateParses;
-        }
-        return candidateParses.stream()
-                .sorted(Comparator.comparing(parse -> !parse.getModelId().equals(modelId)))
-                .limit(candidateParseSize)
-                .collect(Collectors.toList());
-    }
 
     @Override
     @TimeCost

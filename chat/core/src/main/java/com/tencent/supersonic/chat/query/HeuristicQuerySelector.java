@@ -14,6 +14,7 @@ import java.util.OptionalDouble;
 import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.common.util.ContextUtils;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -22,6 +23,7 @@ public class HeuristicQuerySelector implements QuerySelector {
 
     @Override
     public List<SemanticQuery> select(List<SemanticQuery> candidateQueries, QueryReq queryReq) {
+        log.debug("pick before [{}]", candidateQueries.stream().collect(Collectors.toList()));
         List<SemanticQuery> selectedQueries = new ArrayList<>();
         OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
         Double candidateThreshold = optimizationConfig.getCandidateThreshold();
@@ -45,6 +47,7 @@ public class HeuristicQuerySelector implements QuerySelector {
                 });
             }
         }
+        log.debug("pick after [{}]", selectedQueries.stream().collect(Collectors.toList()));
         return selectedQueries;
     }
 
