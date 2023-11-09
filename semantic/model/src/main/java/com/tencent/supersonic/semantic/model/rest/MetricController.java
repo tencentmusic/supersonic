@@ -92,11 +92,18 @@ public class MetricController {
         return metricService.queryMetric(pageMetricReq, user);
     }
 
+    @Deprecated
     @GetMapping("getMetric/{modelId}/{bizName}")
     public MetricResp getMetric(@PathVariable("modelId") Long modelId, @PathVariable("bizName") String bizName) {
         return metricService.getMetric(modelId, bizName);
     }
 
+    @GetMapping("getMetric/{id}")
+    public MetricResp getMetric(@PathVariable("id") Long id,
+                                HttpServletRequest request, HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return metricService.getMetric(id, user);
+    }
 
     @DeleteMapping("deleteMetric/{id}")
     public Boolean deleteMetric(@PathVariable("id") Long id,
