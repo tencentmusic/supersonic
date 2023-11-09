@@ -202,8 +202,7 @@ public class QueryServiceImpl implements QueryService {
     @Override
     @TimeCost
     public QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception {
-        ChatParseDO chatParseDO = chatService.getParseInfo(queryReq.getQueryId(),
-                queryReq.getParseId());
+        ChatParseDO chatParseDO = chatService.getParseInfo(queryReq.getQueryId(), queryReq.getParseId());
         ChatQueryDO chatQueryDO = chatService.getLastQuery(queryReq.getChatId());
         List<StatisticsDO> timeCostDOList = new ArrayList<>();
         SemanticParseInfo parseInfo = JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
