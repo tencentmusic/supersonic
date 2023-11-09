@@ -6,7 +6,6 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.ParseTimeCostDO;
-import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -15,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 public class SqlInfoParseResponder implements ParseResponder {
@@ -64,11 +64,11 @@ public class SqlInfoParseResponder implements ParseResponder {
             return;
         }
         semanticQuery.setParseInfo(parseInfo);
-        SqlInfo sqlInfo = semanticQuery.explain(queryReq.getUser());
-        if (Objects.isNull(sqlInfo)) {
+        String explainSql = semanticQuery.explain(queryReq.getUser());
+        if (StringUtils.isBlank(explainSql)) {
             return;
         }
-        parseInfo.setSqlInfo(sqlInfo);
+        parseInfo.getSqlInfo().setQuerySql(explainSql);
     }
 
 }

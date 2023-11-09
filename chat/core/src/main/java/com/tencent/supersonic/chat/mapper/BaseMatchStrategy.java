@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * match strategy implement
+ * Base Match Strategy
  */
 @Service
 @Slf4j
@@ -36,7 +36,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
             return null;
         }
 
-        log.debug("retryCount:{},terms:{},,detectModelIds:{}", terms, detectModelIds);
+        log.debug("terms:{},,detectModelIds:{}", terms, detectModelIds);
 
         List<T> detects = detect(queryContext, terms, detectModelIds);
         Map<MatchText, List<T>> result = new HashMap<>();
@@ -143,7 +143,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
             return;
         }
         for (Term term : terms) {
-            log.info("word:{},nature:{},frequency:{}", term.word, term.nature.toString(), term.getFrequency());
+            log.debug("word:{},nature:{},frequency:{}", term.word, term.nature.toString(), term.getFrequency());
         }
     }
 
