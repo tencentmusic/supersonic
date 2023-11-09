@@ -30,7 +30,6 @@ import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.MetricInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ModelInfo;
 import com.tencent.supersonic.chat.config.AggregatorConfig;
-import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.DateConf;
@@ -426,9 +425,6 @@ public class SemanticService {
 
         queryStructReq.setGroups(new ArrayList<>(Arrays.asList(dateField)));
         queryStructReq.setDateInfo(getRatioDateConf(aggOperatorEnum, semanticParseInfo, results));
-
-        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
-        queryStructReq.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
 
         QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
 

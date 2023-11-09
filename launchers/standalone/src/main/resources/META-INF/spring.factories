@@ -6,16 +6,18 @@ com.tencent.supersonic.chat.api.component.SchemaMapper=\
     com.tencent.supersonic.chat.mapper.EntityMapper
 
 com.tencent.supersonic.chat.api.component.SemanticParser=\
-    com.tencent.supersonic.chat.parser.rule.QueryModeParser, \
-    com.tencent.supersonic.chat.parser.rule.ContextInheritParser, \
-    com.tencent.supersonic.chat.parser.rule.AgentCheckParser, \
-    com.tencent.supersonic.chat.parser.rule.MetricCheckParser, \
-    com.tencent.supersonic.chat.parser.rule.TimeRangeParser, \
-    com.tencent.supersonic.chat.parser.rule.AggregateTypeParser, \
+    com.tencent.supersonic.chat.parser.rule.RuleBasedParser, \
     com.tencent.supersonic.chat.parser.llm.s2ql.LLMS2QLParser, \
     com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingBasedParser, \
     com.tencent.supersonic.chat.parser.plugin.function.FunctionBasedParser
 
+com.tencent.supersonic.chat.api.component.SemanticCorrector=\
+    com.tencent.supersonic.chat.corrector.GlobalBeforeCorrector, \
+    com.tencent.supersonic.chat.corrector.SelectCorrector, \
+    com.tencent.supersonic.chat.corrector.WhereCorrector, \
+    com.tencent.supersonic.chat.corrector.GroupByCorrector, \
+    com.tencent.supersonic.chat.corrector.HavingCorrector, \
+    com.tencent.supersonic.chat.corrector.GlobalAfterCorrector
 
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.LocalSemanticInterpreter
@@ -31,14 +33,6 @@ com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor
 
 com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
-
-com.tencent.supersonic.chat.api.component.SemanticCorrector=\
-    com.tencent.supersonic.chat.corrector.GlobalBeforeCorrector, \
-    com.tencent.supersonic.chat.corrector.SelectCorrector, \
-    com.tencent.supersonic.chat.corrector.WhereCorrector, \
-    com.tencent.supersonic.chat.corrector.GroupByCorrector, \
-    com.tencent.supersonic.chat.corrector.HavingCorrector, \
-    com.tencent.supersonic.chat.corrector.GlobalAfterCorrector
 
 com.tencent.supersonic.chat.responder.parse.ParseResponder=\
     com.tencent.supersonic.chat.responder.parse.EntityInfoParseResponder, \

@@ -1,7 +1,8 @@
 package com.tencent.supersonic.chat.corrector;
 
-import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
@@ -14,13 +15,10 @@ import org.springframework.util.CollectionUtils;
 public class HavingCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void correct(SemanticCorrectInfo semanticCorrectInfo) {
-
-        super.correct(semanticCorrectInfo);
+    public void work(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
 
         //add aggregate to all metric
-        semanticCorrectInfo.setPreSql(semanticCorrectInfo.getSql());
-        Long modelId = semanticCorrectInfo.getParseInfo().getModel().getModel();
+        Long modelId = semanticParseInfo.getModel().getModel();
 
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
 
@@ -30,8 +28,8 @@ public class HavingCorrector extends BaseSemanticCorrector {
         if (CollectionUtils.isEmpty(metrics)) {
             return;
         }
-        String havingSql = SqlParserAddHelper.addHaving(semanticCorrectInfo.getSql(), metrics);
-        semanticCorrectInfo.setSql(havingSql);
+        String havingSql = SqlParserAddHelper.addHaving(semanticParseInfo.getSqlInfo().getLogicSql(), metrics);
+        semanticParseInfo.getSqlInfo().setLogicSql(havingSql);
     }
 
 }

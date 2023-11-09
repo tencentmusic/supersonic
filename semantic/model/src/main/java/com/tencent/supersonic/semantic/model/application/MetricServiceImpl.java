@@ -235,6 +235,16 @@ public class MetricServiceImpl implements MetricService {
         return metricResps.get(0);
     }
 
+    @Override
+    public MetricResp getMetric(Long id, User user) {
+        MetricResp metricResp = getMetric(id);
+        if (metricResp == null) {
+            return null;
+        }
+        fillAdminRes(Lists.newArrayList(metricResp), user);
+        return metricResp;
+    }
+
     private MetricResp getMetric(Long id) {
         MetricDO metricDO = metricRepository.getMetricById(id);
         if (metricDO == null) {

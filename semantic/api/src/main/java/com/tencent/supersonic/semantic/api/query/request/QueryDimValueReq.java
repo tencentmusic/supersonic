@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.api.query.request;
 
+import com.tencent.supersonic.common.pojo.DateConf;
 import lombok.Data;
 import lombok.ToString;
 
@@ -10,5 +11,6 @@ public class QueryDimValueReq {
     private Long modelId;
     private String dimensionBizName;
     private String value;
+    private DateConf dateInfo;
 
 }

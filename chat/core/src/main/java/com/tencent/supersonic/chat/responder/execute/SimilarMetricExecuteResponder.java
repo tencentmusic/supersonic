@@ -6,7 +6,6 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.embedding.EmbeddingUtils;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
@@ -24,6 +23,7 @@ import java.util.stream.Collectors;
 
 public class SimilarMetricExecuteResponder implements ExecuteResponder {
 
+    private static final int METRIC_RECOMMEND_SIZE = 5;
 
     @Override
     public void fillResponse(QueryResult queryResult, SemanticParseInfo semanticParseInfo, ExecuteQueryReq queryReq) {
@@ -31,8 +31,7 @@ public class SimilarMetricExecuteResponder implements ExecuteResponder {
     }
 
     private void fillSimilarMetric(SemanticParseInfo parseInfo) {
-        if (!QueryManager.isMetricQuery(parseInfo.getQueryMode())
-                || CollectionUtils.isEmpty(parseInfo.getMetrics())) {
+        if (CollectionUtils.isEmpty(parseInfo.getMetrics()) || parseInfo.getMetrics().size() >= METRIC_RECOMMEND_SIZE) {
             return;
         }
         List<String> metricNames = Collections.singletonList(parseInfo.getMetrics().iterator().next().getName());
@@ -43,13 +42,13 @@ public class SimilarMetricExecuteResponder implements ExecuteResponder {
                 .filterCondition(filterCondition).queryEmbeddings(null).build();
         EmbeddingUtils embeddingUtils = ContextUtils.getBean(EmbeddingUtils.class);
         List<RetrieveQueryResult> retrieveQueryResults = embeddingUtils.retrieveQuery(
-                MetaEmbeddingListener.COLLECTION_NAME, retrieveQuery, 5);
+                MetaEmbeddingListener.COLLECTION_NAME, retrieveQuery, METRIC_RECOMMEND_SIZE + 1);
         if (CollectionUtils.isEmpty(retrieveQueryResults)) {
             return;
         }
         List<Retrieval> retrievals = retrieveQueryResults.stream()
                 .flatMap(retrieveQueryResult -> retrieveQueryResult.getRetrieval().stream())
-                .sorted(Comparator.comparingDouble(Retrieval::getDistance).reversed())
+                .sorted(Comparator.comparingDouble(Retrieval::getDistance))
                 .distinct().collect(Collectors.toList());
         Set<Long> metricIds = parseInfo.getMetrics().stream().map(SchemaElement::getId).collect(Collectors.toSet());
         int metricOrder = 0;
@@ -63,7 +62,7 @@ public class SimilarMetricExecuteResponder implements ExecuteResponder {
                 if (retrieval.getMetadata().containsKey("modelId")) {
                     schemaElement.setModel(Long.parseLong(retrieval.getMetadata().get("modelId")));
                 }
-                schemaElement.setOrder(metricOrder++);
+                schemaElement.setOrder(++metricOrder);
                 parseInfo.getMetrics().add(schemaElement);
             }
         }

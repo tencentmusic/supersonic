@@ -1,7 +1,9 @@
 package com.tencent.supersonic.chat.corrector;
 
-import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
@@ -18,19 +20,18 @@ import org.springframework.util.CollectionUtils;
 public class GroupByCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void correct(SemanticCorrectInfo semanticCorrectInfo) {
+    public void work(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
 
-        super.correct(semanticCorrectInfo);
-
-        addGroupByFields(semanticCorrectInfo);
+        addGroupByFields(semanticParseInfo);
 
     }
 
-    private void addGroupByFields(SemanticCorrectInfo semanticCorrectInfo) {
-        Long modelId = semanticCorrectInfo.getParseInfo().getModel().getModel();
+    private void addGroupByFields(SemanticParseInfo semanticParseInfo) {
+        Long modelId = semanticParseInfo.getModel().getModel();
 
         //add dimension group by
-        String sql = semanticCorrectInfo.getSql();
+        SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
+        String logicSql = sqlInfo.getLogicSql();
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         //add alias field name
         Set<String> dimensions = semanticSchema.getDimensions(modelId).stream()
@@ -46,7 +47,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                 ).collect(Collectors.toSet());
         dimensions.add(TimeDimensionEnum.DAY.getChName());
 
-        List<String> selectFields = SqlParserSelectHelper.getSelectFields(sql);
+        List<String> selectFields = SqlParserSelectHelper.getSelectFields(logicSql);
 
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(dimensions)) {
             return;
@@ -55,12 +56,12 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         if (selectFields.size() == 1 && selectFields.contains(TimeDimensionEnum.DAY.getChName())) {
             return;
         }
-        if (SqlParserSelectHelper.hasGroupBy(sql)) {
-            log.info("not add group by ,exist group by in sql:{}", sql);
+        if (SqlParserSelectHelper.hasGroupBy(logicSql)) {
+            log.info("not add group by ,exist group by in logicSql:{}", logicSql);
             return;
         }
 
-        List<String> aggregateFields = SqlParserSelectHelper.getAggregateFields(sql);
+        List<String> aggregateFields = SqlParserSelectHelper.getAggregateFields(logicSql);
         Set<String> groupByFields = selectFields.stream()
                 .filter(field -> dimensions.contains(field))
                 .filter(field -> {
@@ -70,16 +71,17 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                     return true;
                 })
                 .collect(Collectors.toSet());
-        semanticCorrectInfo.setSql(SqlParserAddHelper.addGroupBy(sql, groupByFields));
+        semanticParseInfo.getSqlInfo().setLogicSql(SqlParserAddHelper.addGroupBy(logicSql, groupByFields));
 
-        addAggregate(semanticCorrectInfo);
+        addAggregate(semanticParseInfo);
     }
 
-    private void addAggregate(SemanticCorrectInfo semanticCorrectInfo) {
-        List<String> sqlGroupByFields = SqlParserSelectHelper.getGroupByFields(semanticCorrectInfo.getSql());
+    private void addAggregate(SemanticParseInfo semanticParseInfo) {
+        List<String> sqlGroupByFields = SqlParserSelectHelper.getGroupByFields(
+                semanticParseInfo.getSqlInfo().getLogicSql());
         if (CollectionUtils.isEmpty(sqlGroupByFields)) {
             return;
         }
-        addAggregateToMetric(semanticCorrectInfo);
+        addAggregateToMetric(semanticParseInfo);
     }
 }
