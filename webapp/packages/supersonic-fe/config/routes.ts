@@ -35,23 +35,10 @@ const ROUTES = [
     envEnableList: [ENV_KEY.CHAT],
   },
   {
-    path: '/model',
+    path: '/model/:domainId?/:modelId?/:menuKey?',
+    component: './SemanticModel/DomainManager',
     name: 'semanticModel',
     envEnableList: [ENV_KEY.SEMANTIC],
-    routes: [
-      {
-        path: '/model/:domainId?/:modelId?/:menuKey?',
-        component: './SemanticModel/DomainManager',
-        name: 'model',
-        envEnableList: [ENV_KEY.SEMANTIC],
-      },
-      {
-        path: '/database',
-        name: 'database',
-        component: './SemanticModel/components/Database/DatabaseTable',
-        envEnableList: [ENV_KEY.SEMANTIC],
-      },
-    ],
   },
 
   {
@@ -66,6 +53,25 @@ const ROUTES = [
     name: 'metric',
     component: './SemanticModel/Metric',
     envEnableList: [ENV_KEY.SEMANTIC],
+    routes: [
+      {
+        path: '/metric',
+        redirect: '/metric/market',
+      },
+      {
+        path: '/metric/market',
+        component: './SemanticModel/Metric/Market',
+        hideInMenu: true,
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+      {
+        path: '/metric/detail/:metricId',
+        name: 'metricDetail',
+        hideInMenu: true,
+        component: './SemanticModel/Metric/Detail',
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+    ],
   },
   {
     path: '/plugin',

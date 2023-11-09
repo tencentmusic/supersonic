@@ -24,6 +24,7 @@ type Props = {
   showCurrentDataRangeString?: boolean;
   onDateRangeChange: (value: string[], from: any) => void;
   onDateRangeTypeChange?: (dateRangeType: DateRangeType) => void;
+  onInit?: (params: { dateStringRange: string[] }) => void;
 };
 
 const { CheckableTag } = Tag;
@@ -33,6 +34,7 @@ const MDatePicker: React.FC<Props> = ({
   showCurrentDataRangeString = true,
   onDateRangeChange,
   onDateRangeTypeChange,
+  onInit,
 }: any) => {
   const getDynamicDefaultConfig = (dateRangeType: DateRangeType) => {
     const dynamicDefaultConfig = {
@@ -151,6 +153,10 @@ const MDatePicker: React.FC<Props> = ({
       }
     }
   }
+  useEffect(() => {
+    onInit?.({ dateRange: currentDateRange });
+  }, []);
+
   useEffect(() => {
     setSelectedDateRangeString(getSelectedDateRangeString());
   }, [staticParams, dynamicParams, currentDateRange]);

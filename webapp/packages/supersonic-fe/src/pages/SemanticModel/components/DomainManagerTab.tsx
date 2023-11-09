@@ -6,7 +6,6 @@ import ClassDataSourceTable from './ClassDataSourceTable';
 import ClassDimensionTable from './ClassDimensionTable';
 import ClassMetricTable from './ClassMetricTable';
 import PermissionSection from './Permission/PermissionSection';
-// import DatabaseSection from './Database/DatabaseSection';
 import EntitySettingSection from './Entity/EntitySettingSection';
 import ChatSettingSection from '../ChatSetting/ChatSettingSection';
 import OverView from './OverView';
@@ -16,6 +15,7 @@ import { LeftOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
 import SemanticGraphCanvas from '../SemanticGraphCanvas';
 import RecommendedQuestionsSection from '../components/Entity/RecommendedQuestionsSection';
+import DatabaseTable from '../components/Database/DatabaseTable';
 
 import type { Dispatch } from 'umi';
 
@@ -39,10 +39,10 @@ const DomainManagerTab: React.FC<Props> = ({
   onMenuChange,
 }) => {
   const defaultTabKey = 'xflow';
-  const { selectDomainId, domainList } = domainManger;
+  const { selectDomainId, domainList, selectModelId } = domainManger;
   const tabItem = [
     {
-      label: '模型',
+      label: '模型管理',
       key: 'overview',
       children: (
         <OverView
@@ -53,15 +53,15 @@ const DomainManagerTab: React.FC<Props> = ({
         />
       ),
     },
-    // {
-    //   label: '数据库',
-    //   key: 'dataBase',
-    //   children: <DatabaseSection />,
-    // },
     {
       label: '权限管理',
       key: 'permissonSetting',
       children: <PermissionSection permissionTarget={'domain'} />,
+    },
+    {
+      label: '数据库管理',
+      key: 'database',
+      children: <DatabaseTable />,
     },
   ].filter((item) => {
     const target = domainList.find((domain) => domain.id === selectDomainId);
@@ -76,7 +76,7 @@ const DomainManagerTab: React.FC<Props> = ({
       label: '画布',
       key: 'xflow',
       children: (
-        <div style={{ width: '100%', marginTop: -20 }}>
+        <div style={{ width: '100%' }}>
           <SemanticGraphCanvas />
         </div>
       ),
@@ -131,20 +131,35 @@ const DomainManagerTab: React.FC<Props> = ({
         items={!isModel ? tabItem : isModelItem}
         activeKey={activeKey || defaultTabKey}
         destroyInactiveTabPane
-        tabBarExtraContent={
-          isModel ? (
-            <Button
-              type="primary"
-              icon={<LeftOutlined />}
-              onClick={() => {
-                onBackDomainBtnClick?.();
-              }}
-              style={{ marginRight: 10 }}
-            >
-              返回主题域
-            </Button>
-          ) : undefined
-        }
+        size="large"
+        tabBarExtraContent={{
+          left: (
+            <>
+              {!!selectModelId && (
+                <div
+                  className={styles.backBtn}
+                  onClick={() => {
+                    onBackDomainBtnClick?.();
+                  }}
+                >
+                  <LeftOutlined />
+                </div>
+              )}
+            </>
+          ),
+          // right: isModel ? (
+          //   <Button
+          //     type="primary"
+          //     icon={<LeftOutlined />}
+          //     onClick={() => {
+          //       onBackDomainBtnClick?.();
+          //     }}
+          //     style={{ marginRight: 10, marginBottom: 5 }}
+          //   >
+          //     返回主题域
+          //   </Button>
+          // ) : undefined,
+        }}
         onChange={(menuKey: string) => {
           onMenuChange?.(menuKey);
         }}

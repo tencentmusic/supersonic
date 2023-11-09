@@ -35,7 +35,7 @@ const ChatSettingSection: React.FC<Props> = () => {
   // ];
 
   return (
-    <div style={{ width: 900, margin: '0 auto' }}>
+    <div style={{ width: 900, margin: '20px auto' }}>
       {/* <Tabs
         className={styles.chatSettingSectionTab}
         items={isModelItem}

@@ -138,6 +138,10 @@ export function getMetricTags(): Promise<any> {
   return request.get(`${process.env.API_BASE_URL}metric/getMetricTags`);
 }
 
+export function getMetricData(metricId: string | number): Promise<any> {
+  return request.get(`${process.env.API_BASE_URL}metric/getMetric/${metricId}`);
+}
+
 export function getDrillDownDimension(metricId: number): Promise<any> {
   return request.get(`${process.env.API_BASE_URL}metric/getDrillDownDimension`, {
     params: { metricId },
@@ -453,7 +457,7 @@ export async function queryStruct({
           period: 'DAY',
           text: 'null',
         },
-        limit: 365,
+        limit: 2000,
         nativeQuery: false,
       },
     },
