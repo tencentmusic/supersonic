@@ -12,7 +12,6 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from instances.logging_instance import logger
 
-
 from sql.constructor import FewShotPromptTemplate2
 from sql.output_parser import  schema_link_parse, combo_schema_link_parse, combo_sql_parse
 
@@ -25,12 +24,25 @@ class Text2DSLAgent(object):
             self.sql_example_prompter = sql_example_prompter
             self.llm = llm
 
-        def update_examples(self, sql_examplars, num_fewshots):
+        def reload_setting(self, sql_example_ids: List[str], sql_example_units: List[Mapping[str,str]], num_fewshots: int):
             self.num_fewshots = num_fewshots
-            self.sql_example_prompter.reload_few_shot_example(sql_examplars)
+            
+            self.sql_example_prompter.reload_few_shot_example(sql_example_ids, sql_example_units)
 
-        def get_fewshot_examples(self, query_text: str)->List[Mapping[str, str]]:
-            few_shot_example_meta_list = self.sql_example_prompter.retrieve_few_shot_example(query_text, self.num_fewshots)
+        def add_examples(self, sql_example_ids: List[str], sql_example_units: List[Mapping[str,str]]):
+                self.sql_example_prompter.add_few_shot_example(sql_example_ids, sql_example_units)
+
+        def update_examples(self, sql_example_ids: List[str], sql_example_units: List[Mapping[str,str]]):
+            self.sql_example_prompter.update_few_shot_example(sql_example_ids, sql_example_units)
+
+        def delete_examples(self, sql_example_ids: List[str]):
+            self.sql_example_prompter.delete_few_shot_example(sql_example_ids)
+
+        def count_examples(self):
+            return self.sql_example_prompter.count_few_shot_example()
+
+        def get_fewshot_examples(self, query_text: str, filter_condition: Mapping[str,str])->List[Mapping[str, str]]:
+            few_shot_example_meta_list = self.sql_example_prompter.retrieve_few_shot_example(query_text, self.num_fewshots, filter_condition)
 
             return few_shot_example_meta_list
 
@@ -41,14 +53,14 @@ class Text2DSLAgent(object):
 
             instruction = "# 根据数据库的表结构,参考先验信息,找出为每个问题生成SQL查询语句的schema_links"
             
-            schema_linking_example_keys = ["table_name", "fields_list", "prior_schema_links", "question", "analysis", "schema_links"]
-            schema_linking_example_template = "Table {table_name}, columns = {fields_list}, prior_schema_links = {prior_schema_links}\n问题:{question}\n分析:{analysis} 所以Schema_links是:\nSchema_links:{schema_links}"
+            schema_linking_example_keys = ["tableName", "fieldsList", "priorSchemaLinks", "question", "analysis", "schemaLinks"]
+            schema_linking_example_template = "Table {tableName}, columns = {fieldsList}, prior_schema_links = {priorSchemaLinks}\n问题:{question}\n分析:{analysis} 所以Schema_links是:\nSchema_links:{schemaLinks}"
             schema_linking_fewshot_prompt = self.sql_example_prompter.make_few_shot_example_prompt(few_shot_template=schema_linking_example_template, 
                                                                                             example_keys=schema_linking_example_keys,
                                                                                             few_shot_example_meta_list=fewshot_example_list)
 
-            new_case_template = "Table {table_name}, columns = {fields_list}, prior_schema_links = {prior_schema_links}\n问题:{question}\n分析: 让我们一步一步地思考。"
-            new_case_prompt = new_case_template.format(table_name=domain_name, fields_list=fields_list, prior_schema_links=prior_schema_links_str, question=user_query)
+            new_case_template = "Table {tableName}, columns = {fieldsList}, prior_schema_links = {priorSchemaLinks}\n问题:{question}\n分析: 让我们一步一步地思考。"
+            new_case_prompt = new_case_template.format(tableName=domain_name, fieldsList=fields_list, priorSchemaLinks=prior_schema_links_str, question=user_query)
 
             schema_linking_prompt = instruction + '\n\n' + schema_linking_fewshot_prompt + '\n\n' + new_case_prompt
             return schema_linking_prompt
@@ -57,16 +69,15 @@ class Text2DSLAgent(object):
                             schema_link_str: str, data_date: str, 
                             fewshot_example_list:List[Mapping[str, str]])-> str:
             instruction = "# 根据schema_links为每个问题生成SQL查询语句"
-            sql_example_keys = ["question", "current_date", "table_name", "schema_links", "sql"]
-            sql_example_template = "问题:{question}\nCurrent_date:{current_date}\nTable {table_name}\nSchema_links:{schema_links}\nSQL:{sql}"
-
+            sql_example_keys = ["question", "currentDate", "tableName", "schemaLinks", "sql"]
+            sql_example_template = "问题:{question}\nCurrent_date:{currentDate}\nTable {tableName}\nSchema_links:{schemaLinks}\nSQL:{sql}"
 
             sql_example_fewshot_prompt = self.sql_example_prompter.make_few_shot_example_prompt(few_shot_template=sql_example_template, 
                                                                                             example_keys=sql_example_keys,
                                                                                             few_shot_example_meta_list=fewshot_example_list)
 
-            new_case_template = "问题:{question}\nCurrent_date:{current_date}\nTable {table_name}\nSchema_links:{schema_links}\nSQL:"
-            new_case_prompt = new_case_template.format(question=user_query, current_date=data_date, table_name=domain_name, schema_links=schema_link_str)
+            new_case_template = "问题:{question}\nCurrent_date:{currentDate}\nTable {tableName}\nSchema_links:{schemaLinks}\nSQL:"
+            new_case_prompt = new_case_template.format(question=user_query, currentDate=data_date, tableName=domain_name, schemaLinks=schema_link_str)
 
             sql_example_prompt = instruction + '\n\n' + sql_example_fewshot_prompt + '\n\n' + new_case_prompt
 
@@ -83,20 +94,20 @@ class Text2DSLAgent(object):
 
             instruction = "# 根据数据库的表结构,参考先验信息,找出为每个问题生成SQL查询语句的schema_links,再根据schema_links为每个问题生成SQL查询语句"
 
-            example_keys = ["table_name", "fields_list", "prior_schema_links", "current_date", "question", "analysis", "schema_links", "sql"]
-            example_template = "Table {table_name}, columns = {fields_list}, prior_schema_links = {prior_schema_links}\nCurrent_date:{current_date}\n问题:{question}\n分析:{analysis} 所以Schema_links是:\nSchema_links:{schema_links}\nSQL:{sql}"
+            example_keys = ["tableName", "fieldsList", "priorSchemaLinks", "currentDate", "question", "analysis", "schemaLinks", "sql"]
+            example_template = "Table {tableName}, columns = {fieldsList}, prior_schema_links = {priorSchemaLinks}\nCurrent_date:{currentDate}\n问题:{question}\n分析:{analysis} 所以Schema_links是:\nSchema_links:{schemaLinks}\nSQL:{sql}"
             fewshot_prompt = self.sql_example_prompter.make_few_shot_example_prompt(few_shot_template=example_template, 
                                                                                     example_keys=example_keys,
                                                                                     few_shot_example_meta_list=fewshot_example_list)
 
-            new_case_template = "Table {table_name}, columns = {fields_list}, prior_schema_links = {prior_schema_links}\nCurrent_date:{current_date}\n问题:{question}\n分析: 让我们一步一步地思考。"
-            new_case_prompt = new_case_template.format(table_name=domain_name, fields_list=fields_list, prior_schema_links=prior_schema_links_str, current_date=data_date, question=user_query)
+            new_case_template = "Table {tableName}, columns = {fieldsList}, prior_schema_links = {priorSchemaLinks}\nCurrent_date:{currentDate}\n问题:{question}\n分析: 让我们一步一步地思考。"
+            new_case_prompt = new_case_template.format(tableName=domain_name, fieldsList=fields_list, priorSchemaLinks=prior_schema_links_str, currentDate=data_date, question=user_query)
 
             prompt = instruction + '\n\n' + fewshot_prompt + '\n\n' + new_case_prompt
 
             return prompt
 
-        async def async_query2sql(self, query_text: str, 
+        async def async_query2sql(self, query_text: str, filter_condition: Mapping[str,str],
                     model_name: str, fields_list: List[str],
                     data_date: str, prior_schema_links: Mapping[str,str], prior_exts: str):
             logger.info("query_text: {}".format(query_text))
@@ -106,10 +117,11 @@ class Text2DSLAgent(object):
             logger.info("prior_schema_links: {}".format(prior_schema_links))
             logger.info("prior_exts: {}".format(prior_exts))
 
-            query_text = query_text + ' 备注:'+prior_exts
+            if prior_exts != '':
+                query_text = query_text + ' 备注:'+prior_exts
             logger.info("query_text_prior_exts: {}".format(query_text))
 
-            fewshot_example_meta_list = self.get_fewshot_examples(query_text)
+            fewshot_example_meta_list = self.get_fewshot_examples(query_text, filter_condition)
             schema_linking_prompt = self.generate_schema_linking_prompt(query_text, model_name, fields_list, prior_schema_links, fewshot_example_meta_list)
             logger.debug("schema_linking_prompt->{}".format(schema_linking_prompt))
             schema_link_output = await self.llm._call_async(schema_linking_prompt)
@@ -136,7 +148,7 @@ class Text2DSLAgent(object):
 
             return resp
 
-        async def async_query2sql_shortcut(self, query_text: str, 
+        async def async_query2sql_shortcut(self, query_text: str, filter_condition: Mapping[str,str],
                     model_name: str, fields_list: List[str],
                     data_date: str, prior_schema_links: Mapping[str,str], prior_exts: str):
             logger.info("query_text: {}".format(query_text))
@@ -146,10 +158,11 @@ class Text2DSLAgent(object):
             logger.info("prior_schema_links: {}".format(prior_schema_links))
             logger.info("prior_exts: {}".format(prior_exts))
 
-            query_text = query_text + ' 备注:'+prior_exts
+            if prior_exts != '':
+                query_text = query_text + ' 备注:'+prior_exts
             logger.info("query_text_prior_exts: {}".format(query_text))
             
-            fewshot_example_meta_list = self.get_fewshot_examples(query_text)
+            fewshot_example_meta_list = self.get_fewshot_examples(query_text, filter_condition)
             schema_linking_sql_shortcut_prompt = self.generate_schema_linking_sql_prompt(query_text, model_name, data_date, fields_list, prior_schema_links, fewshot_example_meta_list)
             logger.debug("schema_linking_sql_shortcut_prompt->{}".format(schema_linking_sql_shortcut_prompt))
             schema_linking_sql_shortcut_output = await self.llm._call_async(schema_linking_sql_shortcut_prompt)
@@ -183,16 +196,28 @@ class Text2DSLAgentConsistency(object):
         self.llm = llm
         self.sql_example_prompter = sql_example_prompter
 
-    def update_examples(self, sql_examplars, num_examples, num_fewshots, num_self_consistency):
+    def reload_setting(self, sql_example_ids:List[str], sql_example_units: List[Mapping[str, str]], num_examples:int, num_fewshots:int, num_self_consistency:int):
         self.num_fewshots = num_fewshots
         self.num_examples = num_examples
         assert self.num_fewshots <= self.num_examples
         self.num_self_consistency = num_self_consistency
         assert self.num_self_consistency >= 1
-        self.sql_example_prompter.reload_few_shot_example(sql_examplars)
+        self.sql_example_prompter.reload_few_shot_example(sql_example_ids, sql_example_units)
 
-    def get_examples_candidates(self, query_text: str)->List[Mapping[str, str]]:
-        few_shot_example_meta_list = self.sql_example_prompter.retrieve_few_shot_example(query_text, self.num_examples)
+    def add_examples(self, sql_example_ids:List[str], sql_example_units: List[Mapping[str, str]]):
+        self.sql_example_prompter.add_few_shot_example(sql_example_ids, sql_example_units)
+
+    def update_examples(self, sql_example_ids:List[str], sql_example_units: List[Mapping[str, str]]):
+        self.sql_example_prompter.update_few_shot_example(sql_example_ids, sql_example_units)
+
+    def delete_examples(self, sql_example_ids:List[str]):
+        self.sql_example_prompter.delete_few_shot_example(sql_example_ids)
+
+    def count_examples(self):
+        return self.sql_example_prompter.count_few_shot_example()
+
+    def get_examples_candidates(self, query_text: str, filter_condition: Mapping[str, str])->List[Mapping[str, str]]:
+        few_shot_example_meta_list = self.sql_example_prompter.retrieve_few_shot_example(query_text, self.num_examples, filter_condition)
 
         return few_shot_example_meta_list
         
@@ -211,14 +236,14 @@ class Text2DSLAgentConsistency(object):
 
         instruction = "# 根据数据库的表结构,参考先验信息,找出为每个问题生成SQL查询语句的schema_links"
         
-        schema_linking_example_keys = ["table_name", "fields_list", "prior_schema_links", "question", "analysis", "schema_links"]
-        schema_linking_example_template = "Table {table_name}, columns = {fields_list}, prior_schema_links = {prior_schema_links}\n问题:{question}\n分析:{analysis} 所以Schema_links是:\nSchema_links:{schema_links}"
+        schema_linking_example_keys = ["tableName", "fieldsList", "priorSchemaLinks", "question", "analysis", "schemaLinks"]
+        schema_linking_example_template = "Table {tableName}, columns = {fieldsList}, prior_schema_links = {priorSchemaLinks}\n问题:{question}\n分析:{analysis} 所以Schema_links是:\nSchema_links:{schemaLinks}"
         schema_linking_fewshot_prompt = self.sql_example_prompter.make_few_shot_example_prompt(few_shot_template=schema_linking_example_template, 
                                                                                         example_keys=schema_linking_example_keys,
                                                                                         few_shot_example_meta_list=fewshot_example_list)
 
-        new_case_template = "Table {table_name}, columns = {fields_list}, prior_schema_links = {prior_schema_links}\n问题:{question}\n分析: 让我们一步一步地思考。"
-        new_case_prompt = new_case_template.format(table_name=domain_name, fields_list=fields_list, prior_schema_links=prior_schema_links_str, question=user_query)
+        new_case_template = "Table {tableName}, columns = {fieldsList}, prior_schema_links = {priorSchemaLinks}\n问题:{question}\n分析: 让我们一步一步地思考。"
+        new_case_prompt = new_case_template.format(tableName=domain_name, fieldsList=fields_list, priorSchemaLinks=prior_schema_links_str, question=user_query)
 
         schema_linking_prompt = instruction + '\n\n' + schema_linking_fewshot_prompt + '\n\n' + new_case_prompt
         return schema_linking_prompt
@@ -236,16 +261,15 @@ class Text2DSLAgentConsistency(object):
                             schema_link_str: str, data_date: str, 
                             fewshot_example_list:List[Mapping[str, str]])-> str:
         instruction = "# 根据schema_links为每个问题生成SQL查询语句"
-        sql_example_keys = ["question", "current_date", "table_name", "schema_links", "sql"]
-        sql_example_template = "问题:{question}\nCurrent_date:{current_date}\nTable {table_name}\nSchema_links:{schema_links}\nSQL:{sql}"
-
+        sql_example_keys = ["question", "currentDate", "tableName", "schemaLinks", "sql"]
+        sql_example_template = "问题:{question}\nCurrent_date:{currentDate}\nTable {tableName}\nSchema_links:{schemaLinks}\nSQL:{sql}"
 
         sql_example_fewshot_prompt = self.sql_example_prompter.make_few_shot_example_prompt(few_shot_template=sql_example_template, 
                                                                                         example_keys=sql_example_keys,
                                                                                         few_shot_example_meta_list=fewshot_example_list)
 
-        new_case_template = "问题:{question}\nCurrent_date:{current_date}\nTable {table_name}\nSchema_links:{schema_links}\nSQL:"
-        new_case_prompt = new_case_template.format(question=user_query, current_date=data_date, table_name=domain_name, schema_links=schema_link_str)
+        new_case_template = "问题:{question}\nCurrent_date:{currentDate}\nTable {tableName}\nSchema_links:{schemaLinks}\nSQL:"
+        new_case_prompt = new_case_template.format(question=user_query, currentDate=data_date, tableName=domain_name, schemaLinks=schema_link_str)
 
         sql_example_prompt = instruction + '\n\n' + sql_example_fewshot_prompt + '\n\n' + new_case_prompt
 
@@ -302,7 +326,7 @@ class Text2DSLAgentConsistency(object):
 
         return sql_output_res_pool
     
-    async def tasks_run(self, user_query: str, domain_name: str, fields_list: List[str], prior_schema_links: Mapping[str,str], data_date: str, prior_exts: str):
+    async def tasks_run(self, user_query: str, filter_condition: Mapping[str, str], domain_name: str, fields_list: List[str], prior_schema_links: Mapping[str,str], data_date: str, prior_exts: str):
         logger.info("user_query: {}".format(user_query))
         logger.info("domain_name: {}".format(domain_name))
         logger.info("fields_list: {}".format(fields_list))
@@ -310,10 +334,11 @@ class Text2DSLAgentConsistency(object):
         logger.info("prior_schema_links: {}".format(prior_schema_links))
         logger.info("prior_exts: {}".format(prior_exts))
 
-        user_query = user_query + ' 备注:'+prior_exts
+        if prior_exts != '':
+            user_query = user_query + ' 备注:'+prior_exts
         logger.info("user_query_prior_exts: {}".format(user_query))
 
-        fewshot_example_meta_list = self.get_examples_candidates(user_query)
+        fewshot_example_meta_list = self.get_examples_candidates(user_query, filter_condition)
         fewshot_example_list_combo = self.get_fewshot_example_combos(fewshot_example_meta_list)
 
         schema_linking_output_candidates = await self.generate_schema_linking_tasks(user_query, domain_name, fields_list, prior_schema_links, fewshot_example_list_combo)
@@ -354,20 +379,20 @@ class Text2DSLAgentWrapper(object):
         self.is_shortcut = is_shortcut
         self.is_self_consistency = is_self_consistency
 
-    async def async_query2sql(self, query_text: str, 
+    async def async_query2sql(self, query_text: str, filter_condition: Mapping[str,str],
                     model_name: str, fields_list: List[str],
                     data_date: str, prior_schema_links: Mapping[str,str], prior_exts: str):
         if self.is_self_consistency:
             logger.info("sql wrapper: self_consistency")
-            resp = await self.sql_agent_cs.tasks_run(user_query=query_text, domain_name=model_name, fields_list=fields_list, prior_schema_links=prior_schema_links, data_date=data_date, prior_exts=prior_exts)
+            resp = await self.sql_agent_cs.tasks_run(user_query=query_text, filter_condition=filter_condition, domain_name=model_name, fields_list=fields_list, prior_schema_links=prior_schema_links, data_date=data_date, prior_exts=prior_exts)
             return resp
         elif self.is_shortcut:
             logger.info("sql wrapper: shortcut")
-            resp = await self.sql_agent.async_query2sql_shortcut(query_text=query_text, model_name=model_name, fields_list=fields_list, data_date=data_date, prior_schema_links=prior_schema_links, prior_exts=prior_exts)
+            resp = await self.sql_agent.async_query2sql_shortcut(query_text=query_text, filter_condition=filter_condition, model_name=model_name, fields_list=fields_list, data_date=data_date, prior_schema_links=prior_schema_links, prior_exts=prior_exts)
             return resp
         else:
             logger.info("sql wrapper: normal")
-            resp = await self.sql_agent.async_query2sql(query_text=query_text, model_name=model_name, fields_list=fields_list, data_date=data_date, prior_schema_links=prior_schema_links, prior_exts=prior_exts)
+            resp = await self.sql_agent.async_query2sql(query_text=query_text, filter_condition=filter_condition, model_name=model_name, fields_list=fields_list, data_date=data_date, prior_schema_links=prior_schema_links, prior_exts=prior_exts)
             return resp
     
     def update_configs(self, is_shortcut, is_self_consistency, 
