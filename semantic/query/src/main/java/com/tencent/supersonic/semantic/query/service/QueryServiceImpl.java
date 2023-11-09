@@ -375,10 +375,12 @@ public class QueryServiceImpl implements QueryService {
         }
         List<Aggregator> aggregators = new ArrayList<>();
         queryStructReq.setAggregators(aggregators);
-
-        DateConf dateInfo = new DateConf();
-        dateInfo.setDateMode(DateConf.DateMode.RECENT);
-        dateInfo.setUnit(1);
+        DateConf dateInfo = queryDimValueReq.getDateInfo();
+        if (dateInfo == null) {
+            dateInfo = new DateConf();
+            dateInfo.setDateMode(DateConf.DateMode.RECENT);
+            dateInfo.setUnit(1);
+        }
         queryStructReq.setDateInfo(dateInfo);
         return queryStructReq;
     }
