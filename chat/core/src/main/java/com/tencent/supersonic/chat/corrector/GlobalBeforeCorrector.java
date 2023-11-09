@@ -3,9 +3,9 @@ package com.tencent.supersonic.chat.corrector;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
-import com.tencent.supersonic.chat.parser.llm.s2ql.ParseResult;
-import com.tencent.supersonic.chat.query.llm.s2ql.LLMReq;
-import com.tencent.supersonic.chat.query.llm.s2ql.LLMReq.ElementValue;
+import com.tencent.supersonic.chat.parser.llm.s2sql.ParseResult;
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
@@ -34,15 +34,15 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
 
     private void replaceAlias(SemanticParseInfo semanticParseInfo) {
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String replaceAlias = SqlParserReplaceHelper.replaceAlias(sqlInfo.getLogicSql());
-        sqlInfo.setLogicSql(replaceAlias);
+        String replaceAlias = SqlParserReplaceHelper.replaceAlias(sqlInfo.getCorrectS2SQL());
+        sqlInfo.setCorrectS2SQL(replaceAlias);
     }
 
     private void correctFieldName(SemanticParseInfo semanticParseInfo) {
         Map<String, String> fieldNameMap = getFieldNameMap(semanticParseInfo.getModelId());
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String sql = SqlParserReplaceHelper.replaceFields(sqlInfo.getLogicSql(), fieldNameMap);
-        sqlInfo.setLogicSql(sql);
+        String sql = SqlParserReplaceHelper.replaceFields(sqlInfo.getCorrectS2SQL(), fieldNameMap);
+        sqlInfo.setCorrectS2SQL(sql);
     }
 
     private void updateFieldNameByLinkingValue(SemanticParseInfo semanticParseInfo) {
@@ -57,8 +57,8 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
 
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
 
-        String sql = SqlParserReplaceHelper.replaceFieldNameByValue(sqlInfo.getLogicSql(), fieldValueToFieldNames);
-        sqlInfo.setLogicSql(sql);
+        String sql = SqlParserReplaceHelper.replaceFieldNameByValue(sqlInfo.getCorrectS2SQL(), fieldValueToFieldNames);
+        sqlInfo.setCorrectS2SQL(sql);
     }
 
     private List<ElementValue> getLinkingValues(SemanticParseInfo semanticParseInfo) {
@@ -91,7 +91,7 @@ public class GlobalBeforeCorrector extends BaseSemanticCorrector {
                         )));
 
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String sql = SqlParserReplaceHelper.replaceValue(sqlInfo.getLogicSql(), filedNameToValueMap, false);
-        sqlInfo.setLogicSql(sql);
+        String sql = SqlParserReplaceHelper.replaceValue(sqlInfo.getCorrectS2SQL(), filedNameToValueMap, false);
+        sqlInfo.setCorrectS2SQL(sql);
     }
 }

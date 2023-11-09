@@ -9,7 +9,7 @@ import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +25,7 @@ import org.mockito.Mockito;
 class QueryReqBuilderTest {
 
     @Test
-    void buildS2QLReq() {
+    void buildS2SQLReq() {
         init();
         QueryStructReq queryStructReq = new QueryStructReq();
         queryStructReq.setModelId(1L);
@@ -50,17 +50,17 @@ class QueryReqBuilderTest {
         orders.add(order);
         queryStructReq.setOrders(orders);
 
-        QueryS2QLReq queryS2QLReq = queryStructReq.convert(queryStructReq);
+        QueryS2SQLReq queryS2SQLReq = queryStructReq.convert(queryStructReq);
         Assert.assertEquals(
                 "SELECT department, SUM(pv) FROM 内容库 WHERE (sys_imp_date IN ('2023-08-01')) "
-                        + "GROUP BY department ORDER BY uv LIMIT 2000", queryS2QLReq.getSql());
+                        + "GROUP BY department ORDER BY uv LIMIT 2000", queryS2SQLReq.getSql());
 
         queryStructReq.setNativeQuery(true);
-        queryS2QLReq = queryStructReq.convert(queryStructReq);
+        queryS2SQLReq = queryStructReq.convert(queryStructReq);
         Assert.assertEquals(
                 "SELECT department, pv FROM 内容库 WHERE (sys_imp_date IN ('2023-08-01')) "
                         + "ORDER BY uv LIMIT 2000",
-                queryS2QLReq.getSql());
+                queryS2SQLReq.getSql());
 
     }
 

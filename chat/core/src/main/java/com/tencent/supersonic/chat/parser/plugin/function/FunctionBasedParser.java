@@ -8,7 +8,7 @@ import com.tencent.supersonic.chat.plugin.Plugin;
 import com.tencent.supersonic.chat.plugin.PluginManager;
 import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.plugin.PluginRecallResult;
-import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
+import com.tencent.supersonic.chat.query.llm.s2sql.S2SQLQuery;
 import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import java.net.URI;
@@ -101,7 +101,7 @@ public class FunctionBasedParser extends PluginParser {
         log.info("user decide Model:{}", modelId);
         List<Plugin> plugins = getPluginList(queryContext);
         List<PluginParseConfig> functionDOList = plugins.stream().filter(plugin -> {
-            if (S2QLQuery.QUERY_MODE.equalsIgnoreCase(plugin.getType())) {
+            if (S2SQLQuery.QUERY_MODE.equalsIgnoreCase(plugin.getType())) {
                 return false;
             }
             if (plugin.getParseModeConfig() == null) {

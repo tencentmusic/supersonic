@@ -73,7 +73,7 @@ public class ParserInfoServiceImpl implements ParseInfoService {
 
     public void updateParseInfo(SemanticParseInfo parseInfo) {
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
-        String logicSql = sqlInfo.getLogicSql();
+        String logicSql = sqlInfo.getCorrectS2SQL();
         if (StringUtils.isBlank(logicSql)) {
             return;
         }
@@ -103,20 +103,20 @@ public class ParserInfoServiceImpl implements ParseInfoService {
         if (Objects.isNull(semanticSchema)) {
             return;
         }
-        List<String> allFields = getFieldsExceptDate(SqlParserSelectHelper.getAllFields(sqlInfo.getLogicSql()));
+        List<String> allFields = getFieldsExceptDate(SqlParserSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
 
         Set<SchemaElement> metrics = getElements(parseInfo.getModelId(), allFields, semanticSchema.getMetrics());
         parseInfo.setMetrics(metrics);
 
-        if (SqlParserSelectFunctionHelper.hasAggregateFunction(sqlInfo.getLogicSql())) {
+        if (SqlParserSelectFunctionHelper.hasAggregateFunction(sqlInfo.getCorrectS2SQL())) {
             parseInfo.setNativeQuery(false);
-            List<String> groupByFields = SqlParserSelectHelper.getGroupByFields(sqlInfo.getLogicSql());
+            List<String> groupByFields = SqlParserSelectHelper.getGroupByFields(sqlInfo.getCorrectS2SQL());
             List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
             parseInfo.setDimensions(
                     getElements(parseInfo.getModelId(), groupByDimensions, semanticSchema.getDimensions()));
         } else {
             parseInfo.setNativeQuery(true);
-            List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getLogicSql());
+            List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getCorrectS2SQL());
             List<String> selectDimensions = getFieldsExceptDate(selectFields);
             parseInfo.setDimensions(
                     getElements(parseInfo.getModelId(), selectDimensions, semanticSchema.getDimensions()));

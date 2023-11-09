@@ -27,7 +27,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
     public void correct(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
         try {
-            if (StringUtils.isBlank(semanticParseInfo.getSqlInfo().getLogicSql())) {
+            if (StringUtils.isBlank(semanticParseInfo.getSqlInfo().getCorrectS2SQL())) {
                 return;
             }
             work(queryReq, semanticParseInfo);
@@ -83,12 +83,12 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         needAddFields.removeAll(selectFields);
         needAddFields.remove(TimeDimensionEnum.DAY.getChName());
         String replaceFields = SqlParserAddHelper.addFieldsToSelect(logicSql, new ArrayList<>(needAddFields));
-        semanticParseInfo.getSqlInfo().setLogicSql(replaceFields);
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(replaceFields);
     }
 
     protected void addAggregateToMetric(SemanticParseInfo semanticParseInfo) {
         //add aggregate to all metric
-        String logicSql = semanticParseInfo.getSqlInfo().getLogicSql();
+        String logicSql = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         Long modelId = semanticParseInfo.getModel().getModel();
 
         List<SchemaElement> metrics = getMetricElements(modelId);
@@ -105,7 +105,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
             return;
         }
         String aggregateSql = SqlParserAddHelper.addAggregateToField(logicSql, metricToAggregate);
-        semanticParseInfo.getSqlInfo().setLogicSql(aggregateSql);
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(aggregateSql);
     }
 
     protected List<SchemaElement> getMetricElements(Long modelId) {

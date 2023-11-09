@@ -15,14 +15,14 @@ public class GlobalAfterCorrector extends BaseSemanticCorrector {
     @Override
     public void work(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
 
-        String logicSql = semanticParseInfo.getSqlInfo().getLogicSql();
+        String logicSql = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         if (!SqlParserSelectFunctionHelper.hasAggregateFunction(logicSql)) {
             return;
         }
         Expression havingExpression = SqlParserSelectHelper.getHavingExpression(logicSql);
         if (Objects.nonNull(havingExpression)) {
             String replaceSql = SqlParserAddHelper.addFunctionToSelect(logicSql, havingExpression);
-            semanticParseInfo.getSqlInfo().setLogicSql(replaceSql);
+            semanticParseInfo.getSqlInfo().setCorrectS2SQL(replaceSql);
         }
         return;
     }

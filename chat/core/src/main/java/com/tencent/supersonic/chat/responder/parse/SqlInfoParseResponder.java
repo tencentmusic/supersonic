@@ -68,7 +68,7 @@ public class SqlInfoParseResponder implements ParseResponder {
         if (StringUtils.isBlank(explainSql)) {
             return;
         }
-        parseInfo.getSqlInfo().setQuerySql(explainSql);
+        parseInfo.getSqlInfo().setQuerySQL(explainSql);
     }
 
 }

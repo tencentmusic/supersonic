@@ -31,7 +31,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
 
         //add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String logicSql = sqlInfo.getLogicSql();
+        String logicSql = sqlInfo.getCorrectS2SQL();
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         //add alias field name
         Set<String> dimensions = semanticSchema.getDimensions(modelId).stream()
@@ -71,14 +71,14 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                     return true;
                 })
                 .collect(Collectors.toSet());
-        semanticParseInfo.getSqlInfo().setLogicSql(SqlParserAddHelper.addGroupBy(logicSql, groupByFields));
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(SqlParserAddHelper.addGroupBy(logicSql, groupByFields));
 
         addAggregate(semanticParseInfo);
     }
 
     private void addAggregate(SemanticParseInfo semanticParseInfo) {
         List<String> sqlGroupByFields = SqlParserSelectHelper.getGroupByFields(
-                semanticParseInfo.getSqlInfo().getLogicSql());
+                semanticParseInfo.getSqlInfo().getCorrectS2SQL());
         if (CollectionUtils.isEmpty(sqlGroupByFields)) {
             return;
         }
