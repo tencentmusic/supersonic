@@ -11,7 +11,7 @@ import org.springframework.util.CollectionUtils;
 public class SelectCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void work(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
+    public void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
         String logicSql = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         List<String> aggregateFields = SqlParserSelectHelper.getAggregateFields(logicSql);
         List<String> selectFields = SqlParserSelectHelper.getSelectFields(logicSql);

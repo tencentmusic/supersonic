@@ -18,10 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
-public class GlobalBeforeCorrector extends BaseSemanticCorrector {
+public class SchemaCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void work(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
+    public void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
 
         replaceAlias(semanticParseInfo);
 

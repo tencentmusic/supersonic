@@ -32,7 +32,7 @@ import org.springframework.util.CollectionUtils;
 public class WhereCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void work(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
+    public void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
 
         addDateIfNotExist(semanticParseInfo);
 

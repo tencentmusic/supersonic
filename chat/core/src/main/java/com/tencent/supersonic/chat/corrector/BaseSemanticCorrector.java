@@ -30,7 +30,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
             if (StringUtils.isBlank(semanticParseInfo.getSqlInfo().getCorrectS2SQL())) {
                 return;
             }
-            work(queryReq, semanticParseInfo);
+            doCorrect(queryReq, semanticParseInfo);
             log.info("sqlCorrection:{} sql:{}", this.getClass().getSimpleName(), semanticParseInfo.getSqlInfo());
         } catch (Exception e) {
             log.error(String.format("correct error,sqlInfo:%s", semanticParseInfo.getSqlInfo()), e);
@@ -38,7 +38,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
     }
 
 
-    public abstract void work(QueryReq queryReq, SemanticParseInfo semanticParseInfo);
+    public abstract void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo);
 
     protected Map<String, String> getFieldNameMap(Long modelId) {
 
