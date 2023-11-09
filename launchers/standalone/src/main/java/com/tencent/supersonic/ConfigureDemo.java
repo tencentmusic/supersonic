@@ -66,7 +66,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         queryRequest.setUser(User.getFakeUser());
         ParseResp parseResp = queryService.performParsing(queryRequest);
 
-        ExecuteQueryReq executeReq = new ExecuteQueryReq();
+        ExecuteQueryReq executeReq = ExecuteQueryReq.builder().build();
         executeReq.setQueryId(parseResp.getQueryId());
         executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());
         executeReq.setQueryText(queryRequest.getQueryText());
