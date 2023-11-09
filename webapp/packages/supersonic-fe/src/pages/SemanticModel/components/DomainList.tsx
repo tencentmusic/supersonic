@@ -1,5 +1,5 @@
 import { DownOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Input, message, Tree, Popconfirm, Space, Tooltip, Row, Col } from 'antd';
+import { Input, message, Tree, Popconfirm, Space, Tooltip, Row, Col, Button } from 'antd';
 import type { DataNode } from 'antd/lib/tree';
 import { useEffect, useState } from 'react';
 import type { FC, Key } from 'react';
@@ -119,7 +119,7 @@ const DomainListTree: FC<DomainListProps> = ({
     return (
       <div className={styles.projectItem}>
         <span
-          className={styles.title}
+          className={styles.projectItemTitle}
           onClick={() => {
             handleSelect(id, name);
           }}
@@ -180,17 +180,31 @@ const DomainListTree: FC<DomainListProps> = ({
   return (
     <div className={styles.domainList}>
       <Row>
-        <Col flex="1 1 200px">
+        <Col flex="1 1 auto">
+          {/* <Space> */}
           <Search
             allowClear
             className={styles.search}
             placeholder="请输入主题域名称进行查询"
             onSearch={onSearch}
           />
+          {/* </Space> */}
         </Col>
         {createDomainBtnVisible && (
-          <Col flex="0 1 50px">
+          <Col flex="0 0 40px" style={{ display: 'flex', alignItems: 'center' }}>
             <Tooltip title="新增顶级域">
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                size="small"
+                onClick={() => {
+                  setProjectInfoParams({ type: 'top', modelType: 'add' });
+                  setProjectInfoModalVisible(true);
+                  onCreateDomainBtnClick?.();
+                }}
+              />
+            </Tooltip>
+            {/* <Tooltip title="新增顶级域">
               <PlusCircleOutlined
                 onClick={() => {
                   setProjectInfoParams({ type: 'top', modelType: 'add' });
@@ -199,7 +213,7 @@ const DomainListTree: FC<DomainListProps> = ({
                 }}
                 className={styles.addBtn}
               />
-            </Tooltip>
+            </Tooltip> */}
           </Col>
         )}
       </Row>

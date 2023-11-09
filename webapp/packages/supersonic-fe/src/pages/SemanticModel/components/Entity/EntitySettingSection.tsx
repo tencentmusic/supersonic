@@ -43,7 +43,7 @@ const EntitySettingSection: React.FC<Props> = ({ domainManger }) => {
   }, [modelId]);
 
   return (
-    <div style={{ width: 800, margin: '0 auto' }}>
+    <div style={{ width: 800, margin: '20px auto' }}>
       <Space direction="vertical" style={{ width: '100%' }} size={20}>
         {
           <ProCard title="实体" bordered>

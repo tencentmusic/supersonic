@@ -9,6 +9,7 @@ import { DownloadOutlined } from '@ant-design/icons';
 import type { ECharts } from 'echarts';
 import * as echarts from 'echarts';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { groupBy, sum } from 'lodash';
 import styles from '../style.less';
 import moment from 'moment';
 
@@ -17,8 +18,6 @@ type Props = {
   tip?: string;
   data: any[];
   fields: any[];
-  // columnFieldName: string;
-  // valueFieldName: string;
   loading: boolean;
   isPer?: boolean;
   isPercent?: boolean;
@@ -27,6 +26,8 @@ type Props = {
   height?: number;
   renderType?: string;
   decimalPlaces?: number;
+  rowNumber?: number;
+  groupByDimensionFieldName?: string;
   onDownload?: () => void;
 };
 
@@ -38,9 +39,10 @@ const TrendChart: React.FC<Props> = ({
   loading,
   isPer,
   isPercent,
-  dateFieldName,
+  dateFieldName = 'sys_imp_date',
   // columnFieldName,
-  // valueFieldName,
+  rowNumber = 0,
+  groupByDimensionFieldName,
   dateFormat,
   height,
   renderType,
@@ -64,32 +66,67 @@ const TrendChart: React.FC<Props> = ({
       new Set(
         data
           .map((item) =>
-            moment(`${(dateFieldName && item[dateFieldName]) || item.sys_imp_date}`).format(
-              dateFormat ?? 'YYYY-MM-DD',
-            ),
+            moment(`${dateFieldName && item[dateFieldName]}`).format(dateFormat ?? 'YYYY-MM-DD'),
           )
           .sort((a, b) => {
             return moment(a).valueOf() - moment(b).valueOf();
           }),
       ),
     );
-    const seriesData = fields.map((field) => {
-      const fieldData = {
-        type: 'line',
-        name: field.name,
-        symbol: 'circle',
-        showSymbol: data.length === 1,
-        smooth: true,
-        data: data.reduce((itemData, item) => {
-          const target = item[field.column];
-          if (target) {
-            itemData.push(target);
-          }
-          return itemData;
-        }, []),
-      };
-      return fieldData;
-    });
+
+    const formatterSeriesData = () => {
+      if (groupByDimensionFieldName) {
+        const groupByMap = groupBy(data, groupByDimensionFieldName);
+
+        const seriesData = Object.keys(groupByMap).map((fieldKey: string) => {
+          const dimensionDataList = groupByMap[fieldKey];
+          const dimensionDataMapByDate = dimensionDataList.reduce((itemMap, item) => {
+            itemMap[item[dateFieldName]] = { ...item };
+            return itemMap;
+          }, {});
+          const dataList = xData.reduce((itemData: any[], dateString) => {
+            const dimensionDataMapItem = dimensionDataMapByDate[dateString];
+            if (dimensionDataMapItem) {
+              itemData.push(dimensionDataMapItem[fields?.[0]?.column]);
+            } else {
+              itemData.push(0);
+            }
+            return itemData;
+          }, []);
+          return {
+            type: 'line',
+            name: fieldKey,
+            symbol: 'circle',
+            smooth: true,
+            sortNum: sum(dataList),
+            data: dataList,
+          };
+        });
+        if (rowNumber) {
+          return seriesData.sort((a, b) => b.sortNum - a.sortNum).slice(0, rowNumber);
+        }
+        return seriesData;
+      }
+      const seriesData = fields.map((field) => {
+        const fieldData = {
+          type: 'line',
+          name: field.name,
+          symbol: 'circle',
+          showSymbol: data.length === 1,
+          smooth: true,
+          data: data.reduce((itemData, item) => {
+            const target = item[field.column];
+            if (target) {
+              itemData.push(target);
+            }
+            return itemData;
+          }, []),
+        };
+        return fieldData;
+      });
+      return seriesData;
+    };
+    const seriesData = formatterSeriesData();
 
     instanceObj.setOption({
       legend: {
@@ -178,7 +215,18 @@ const TrendChart: React.FC<Props> = ({
       series: seriesData,
     });
     instanceObj.resize();
-  }, [data, fields, instance, isPer, isPercent, dateFieldName, decimalPlaces, renderType]);
+  }, [
+    data,
+    fields,
+    instance,
+    isPer,
+    isPercent,
+    dateFieldName,
+    decimalPlaces,
+    renderType,
+    rowNumber,
+    groupByDimensionFieldName,
+  ]);
 
   useEffect(() => {
     if (!loading) {
@@ -203,7 +251,7 @@ const TrendChart: React.FC<Props> = ({
       <Skeleton
         className={styles.chart}
         style={{ height, display: loading ? 'table' : 'none' }}
-        paragraph={{ rows: height && height > 300 ? 9 : 6 }}
+        paragraph={{ rows: height && height > 300 ? 15 : 6 }}
       />
       <div
         className={styles.chart}
