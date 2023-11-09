@@ -254,7 +254,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     // save time cost data
-    public void saveInfo(List<StatisticsDO> timeCostDOList,
+    private void saveInfo(List<StatisticsDO> timeCostDOList,
             String queryText, Long queryId,
             String userName, Long chatId) {
         List<StatisticsDO> list = timeCostDOList.stream()
@@ -282,47 +282,6 @@ public class QueryServiceImpl implements QueryService {
                 .agentId(chatQueryDO.getAgentId())
                 .modelId(parseInfo.getModelId())
                 .queryText(queryReq.getQueryText()).build());
-    }
-
-    @Override
-    public QueryResult executeQuery(QueryReq queryReq) throws Exception {
-        QueryContext queryCtx = new QueryContext(queryReq);
-        // in order to support multi-turn conversation, chat context is needed
-        ChatContext chatCtx = chatService.getOrCreateContext(queryReq.getChatId());
-
-        schemaMappers.stream().forEach(mapper -> {
-            mapper.map(queryCtx);
-            log.info("{} result:{}", mapper.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
-        });
-
-        semanticParsers.stream().forEach(parser -> {
-            parser.parse(queryCtx, chatCtx);
-            log.info("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
-        });
-
-        QueryResult queryResult = null;
-        if (queryCtx.getCandidateQueries().size() > 0) {
-            log.info("pick before [{}]", queryCtx.getCandidateQueries().stream().collect(
-                    Collectors.toList()));
-            List<SemanticQuery> selectedQueries = querySelector.select(queryCtx.getCandidateQueries(), queryReq);
-            log.info("pick after [{}]", selectedQueries.stream().collect(
-                    Collectors.toList()));
-
-            SemanticQuery semanticQuery = selectedQueries.get(0);
-            queryResult = semanticQuery.execute(queryReq.getUser());
-            if (queryResult != null) {
-                chatCtx.setQueryText(queryReq.getQueryText());
-                // update chat context after a successful semantic query
-                if (queryReq.isSaveAnswer() && QueryState.SUCCESS.equals(queryResult.getQueryState())) {
-                    chatCtx.setParseInfo(semanticQuery.getParseInfo());
-                    chatService.updateContext(chatCtx);
-                }
-                queryResult.setChatContext(chatCtx.getParseInfo());
-                chatService.addQuery(queryResult, chatCtx);
-            }
-        }
-
-        return queryResult;
     }
 
     @Override
@@ -463,7 +422,7 @@ public class QueryServiceImpl implements QueryService {
         parseInfo.setDateInfo(queryData.getDateInfo());
     }
 
-    public <T extends ComparisonOperator> void addTimeFilters(String date,
+    private <T extends ComparisonOperator> void addTimeFilters(String date,
             T comparisonExpression,
             List<Expression> addConditions) {
         Column column = new Column(TimeDimensionEnum.DAY.getChName());
@@ -513,7 +472,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     // add in condition to sql where  condition
-    public void addWhereInFilters(QueryFilter dslQueryFilter,
+    private void addWhereInFilters(QueryFilter dslQueryFilter,
             InExpression inExpression,
             Set<QueryFilter> contextMetricFilters,
             List<Expression> addConditions) {
@@ -542,7 +501,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     // add where filter
-    public <T extends ComparisonOperator> void addWhereFilters(QueryFilter dslQueryFilter,
+    private <T extends ComparisonOperator> void addWhereFilters(QueryFilter dslQueryFilter,
             T comparisonExpression,
             Set<QueryFilter> contextMetricFilters,
             List<Expression> addConditions) {
