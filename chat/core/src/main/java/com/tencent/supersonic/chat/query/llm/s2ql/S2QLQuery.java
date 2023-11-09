@@ -10,10 +10,7 @@ import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
-import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,22 +62,9 @@ public class S2QLQuery extends PluginSemanticQuery {
         return queryResult;
     }
 
-
     @Override
-    public SqlInfo explain(User user) {
+    public void initS2Sql(User user) {
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
-        ExplainSqlReq explainSqlReq = null;
-        try {
-            QueryS2QLReq queryS2QLReq = QueryReqBuilder.buildS2QLReq(sqlInfo.getLogicSql(), parseInfo.getModelId());
-            explainSqlReq = ExplainSqlReq.builder()
-                    .queryTypeEnum(QueryTypeEnum.SQL)
-                    .queryReq(queryS2QLReq)
-                    .build();
-            ExplainResp explain = semanticInterpreter.explain(explainSqlReq, user);
-            sqlInfo.setQuerySql(explain.getSql());
-        } catch (Exception e) {
-            log.error("explain error explainSqlReq:{}", explainSqlReq, e);
-        }
-        return sqlInfo;
+        sqlInfo.setLogicSql(sqlInfo.getS2QL());
     }
 }

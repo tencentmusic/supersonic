@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.api.component;
 
-import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
-import net.sf.jsqlparser.JSQLParserException;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 
 /**
  * A semantic corrector checks validity of extracted semantic information and
@@ -9,5 +9,5 @@ import net.sf.jsqlparser.JSQLParserException;
  */
 public interface SemanticCorrector {
 
-    void correct(SemanticCorrectInfo semanticCorrectInfo) throws JSQLParserException;
+    void correct(QueryReq queryReq, SemanticParseInfo semanticParseInfo);
 }

@@ -59,8 +59,6 @@ public class QueryStructReq {
     private Boolean nativeQuery = false;
     private Cache cacheInfo;
 
-    private boolean useS2qlSwitch;
-
     /**
      * Later deleted for compatibility only
      */

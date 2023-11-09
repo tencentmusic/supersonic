@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.corrector;
 
-import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
@@ -12,17 +13,16 @@ import net.sf.jsqlparser.expression.Expression;
 public class GlobalAfterCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void correct(SemanticCorrectInfo semanticCorrectInfo) {
+    public void work(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
 
-        super.correct(semanticCorrectInfo);
-        String sql = semanticCorrectInfo.getSql();
-        if (!SqlParserSelectFunctionHelper.hasAggregateFunction(sql)) {
+        String logicSql = semanticParseInfo.getSqlInfo().getLogicSql();
+        if (!SqlParserSelectFunctionHelper.hasAggregateFunction(logicSql)) {
             return;
         }
-        Expression havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        Expression havingExpression = SqlParserSelectHelper.getHavingExpression(logicSql);
         if (Objects.nonNull(havingExpression)) {
-            String replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpression);
-            semanticCorrectInfo.setSql(replaceSql);
+            String replaceSql = SqlParserAddHelper.addFunctionToSelect(logicSql, havingExpression);
+            semanticParseInfo.getSqlInfo().setLogicSql(replaceSql);
         }
         return;
     }
