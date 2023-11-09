@@ -117,7 +117,6 @@ const ParseTip: React.FC<Props> = ({
 
   const getTipNode = () => {
     const dimensionItems = dimensions?.filter(item => item.type === 'DIMENSION');
-    const metric = metrics?.[0];
 
     const itemValueClass = `${prefixCls}-tip-item-value`;
     const entityId = dimensionFilters?.length > 0 ? dimensionFilters[0].value : undefined;
@@ -153,11 +152,14 @@ const ParseTip: React.FC<Props> = ({
               </div>
             )}
             {!queryMode?.includes('ENTITY') &&
-              metric &&
+              metrics &&
+              metrics.length > 0 &&
               !dimensions?.some(item => item.bizName?.includes('_id')) && (
                 <div className={`${prefixCls}-tip-item`}>
                   <div className={`${prefixCls}-tip-item-name`}>指标：</div>
-                  <div className={itemValueClass}>{metric.name}</div>
+                  <div className={itemValueClass}>
+                    {metrics.map(metric => metric.name).join('、')}
+                  </div>
                 </div>
               )}
             {['METRIC_GROUPBY', 'METRIC_ORDERBY', 'ENTITY_DETAIL', 'LLM_S2QL'].includes(

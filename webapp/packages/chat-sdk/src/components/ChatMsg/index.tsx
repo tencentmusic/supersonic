@@ -205,7 +205,14 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
 
   const existDrillDownDimension = queryMode.includes('METRIC') && !isText && !isEntityMode;
 
-  const isMultipleMetric = queryMode.includes('METRIC') && chatContext?.metrics?.length > 1;
+  const recommendMetrics = chatContext?.metrics?.filter(metric =>
+    queryColumns.every(queryColumn => queryColumn.nameEn !== metric.bizName)
+  );
+
+  const isMultipleMetric =
+    (queryMode.includes('METRIC') || queryMode === 'LLM_S2QL') &&
+    recommendMetrics?.length > 0 &&
+    queryColumns?.filter(column => column.showType === 'NUMBER').length === 1;
 
   return (
     <div className={chartMsgClass}>
@@ -222,7 +229,8 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
             >
               {isMultipleMetric && (
                 <MetricOptions
-                  metrics={chatContext.metrics}
+                  // metrics={chatContext.metrics}
+                  metrics={recommendMetrics}
                   defaultMetric={defaultMetricField}
                   currentMetric={activeMetricField}
                   onSelectMetric={onSwitchMetric}
