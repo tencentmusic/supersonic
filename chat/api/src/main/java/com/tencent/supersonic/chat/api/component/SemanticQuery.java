@@ -20,7 +20,5 @@ public interface SemanticQuery {
 
     SemanticParseInfo getParseInfo();
 
-    void updateParseInfo();
-
     void setParseInfo(SemanticParseInfo parseInfo);
 }
