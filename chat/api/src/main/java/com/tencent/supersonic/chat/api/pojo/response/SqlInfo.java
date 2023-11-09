@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class SqlInfo {
 
-    private String s2QL;
-    private String logicSql;
-    private String querySql;
+    private String s2SQL;
+    private String correctS2SQL;
+    private String querySQL;
 }

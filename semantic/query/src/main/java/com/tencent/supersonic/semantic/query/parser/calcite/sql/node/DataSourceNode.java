@@ -3,9 +3,9 @@ package com.tencent.supersonic.semantic.query.parser.calcite.sql.node;
 
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.query.parser.calcite.Configuration;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Constants;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataSource;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Dimension;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Constants;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DataSource;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.extend.LateralViewExplodeNode;
 import java.util.ArrayList;

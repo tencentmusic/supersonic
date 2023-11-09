@@ -28,8 +28,8 @@ public class HavingCorrector extends BaseSemanticCorrector {
         if (CollectionUtils.isEmpty(metrics)) {
             return;
         }
-        String havingSql = SqlParserAddHelper.addHaving(semanticParseInfo.getSqlInfo().getLogicSql(), metrics);
-        semanticParseInfo.getSqlInfo().setLogicSql(havingSql);
+        String havingSql = SqlParserAddHelper.addHaving(semanticParseInfo.getSqlInfo().getCorrectS2SQL(), metrics);
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(havingSql);
     }
 
 }
