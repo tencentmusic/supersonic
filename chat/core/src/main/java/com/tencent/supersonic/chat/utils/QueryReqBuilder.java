@@ -11,7 +11,7 @@ import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
-import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
@@ -141,8 +142,14 @@ public class QueryReqBuilder {
     private static List<Aggregator> getAggregatorByMetric(AggregateTypeEnum aggregateType, SchemaElement metric) {
         List<Aggregator> aggregators = new ArrayList<>();
         if (metric != null) {
-            String agg = (aggregateType == null || aggregateType.equals(AggregateTypeEnum.NONE)) ? ""
-                    : aggregateType.name();
+            String agg = "";
+            if (Objects.isNull(aggregateType) || aggregateType.equals(AggregateTypeEnum.NONE)) {
+                if (StringUtils.isNotBlank(metric.getDefaultAgg())) {
+                    agg = metric.getDefaultAgg();
+                }
+            } else {
+                agg = aggregateType.name();
+            }
             aggregators.add(new Aggregator(metric.getBizName(), AggOperatorEnum.of(agg)));
         }
         return aggregators;

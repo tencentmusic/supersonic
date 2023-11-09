@@ -20,8 +20,6 @@ public interface QueryService {
 
     QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception;
 
-    QueryResult executeQuery(QueryReq queryReq) throws Exception;
-
     SemanticParseInfo queryContext(QueryReq queryReq);
 
     QueryResult executeDirectQuery(QueryDataReq queryData, User user) throws SqlParseException;

@@ -51,13 +51,14 @@ public class BaseQueryTest {
     protected QueryResult submitMultiTurnChat(String queryText) throws Exception {
         ParseResp parseResp = submitParse(queryText);
 
-        ExecuteQueryReq request = new ExecuteQueryReq();
-        request.setQueryId(parseResp.getQueryId());
-        request.setParseId(parseResp.getSelectedParses().get(0).getId());
-        request.setChatId(parseResp.getChatId());
-        request.setQueryText(parseResp.getQueryText());
-        request.setUser(DataUtils.getUser());
-        request.setParseInfo(parseResp.getSelectedParses().get(0));
+        ExecuteQueryReq request = ExecuteQueryReq.builder()
+                .queryId(parseResp.getQueryId())
+                .parseId(parseResp.getSelectedParses().get(0).getId())
+                .chatId(parseResp.getChatId())
+                .queryText(parseResp.getQueryText())
+                .user(DataUtils.getUser())
+                .parseInfo(parseResp.getSelectedParses().get(0))
+                .build();
 
         return queryService.performExecution(request);
     }
@@ -65,13 +66,14 @@ public class BaseQueryTest {
     protected QueryResult submitNewChat(String queryText) throws Exception {
         ParseResp parseResp = submitParse(queryText);
 
-        ExecuteQueryReq request = new ExecuteQueryReq();
-        request.setQueryId(parseResp.getQueryId());
-        request.setParseId(parseResp.getSelectedParses().get(0).getId());
-        request.setChatId(parseResp.getChatId());
-        request.setQueryText(parseResp.getQueryText());
-        request.setUser(DataUtils.getUser());
-        request.setParseInfo(parseResp.getSelectedParses().get(0));
+        ExecuteQueryReq request = ExecuteQueryReq.builder()
+                .queryId(parseResp.getQueryId())
+                .parseId(parseResp.getSelectedParses().get(0).getId())
+                .chatId(parseResp.getChatId())
+                .queryText(parseResp.getQueryText())
+                .user(DataUtils.getUser())
+                .parseInfo(parseResp.getSelectedParses().get(0))
+                .build();
 
         QueryResult result = queryService.performExecution(request);
 

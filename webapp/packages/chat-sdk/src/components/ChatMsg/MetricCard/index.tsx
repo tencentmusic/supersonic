@@ -52,7 +52,9 @@ const MetricCard: React.FC<Props> = ({ data, loading, onApplyAuth }) => {
           ) : (
             <div style={{ display: 'flex', alignItems: 'flex-end' }}>
               <div className={`${prefixCls}-indicator-value`}>
-                {dataFormatType === 'percent' || dataFormatType === 'decimal'
+                {typeof value === 'string' && isNaN(+value)
+                  ? value
+                  : dataFormatType === 'percent' || dataFormatType === 'decimal'
                   ? `${formatByDecimalPlaces(
                       dataFormat?.needMultiply100 ? +value * 100 : value,
                       dataFormat?.decimalPlaces || 2

@@ -30,6 +30,7 @@ class QueryReqBuilderTest {
         QueryStructReq queryStructReq = new QueryStructReq();
         queryStructReq.setModelId(1L);
         queryStructReq.setNativeQuery(false);
+        queryStructReq.setModelName("内容库");
 
         Aggregator aggregator = new Aggregator();
         aggregator.setFunc(AggOperatorEnum.UNKNOWN);
@@ -51,13 +52,13 @@ class QueryReqBuilderTest {
 
         QueryS2QLReq queryS2QLReq = queryStructReq.convert(queryStructReq);
         Assert.assertEquals(
-                "SELECT department, SUM(pv) FROM t_1 WHERE (sys_imp_date IN ('2023-08-01')) "
+                "SELECT department, SUM(pv) FROM 内容库 WHERE (sys_imp_date IN ('2023-08-01')) "
                         + "GROUP BY department ORDER BY uv LIMIT 2000", queryS2QLReq.getSql());
 
         queryStructReq.setNativeQuery(true);
         queryS2QLReq = queryStructReq.convert(queryStructReq);
         Assert.assertEquals(
-                "SELECT department, pv FROM t_1 WHERE (sys_imp_date IN ('2023-08-01')) "
+                "SELECT department, pv FROM 内容库 WHERE (sys_imp_date IN ('2023-08-01')) "
                         + "ORDER BY uv LIMIT 2000",
                 queryS2QLReq.getSql());
 

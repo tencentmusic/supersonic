@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.query.rule;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
-import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
@@ -15,6 +14,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
+import com.tencent.supersonic.chat.query.BaseSemanticQuery;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
@@ -22,13 +22,9 @@ import com.tencent.supersonic.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
-import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,9 +37,8 @@ import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @ToString
-public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
+public abstract class RuleSemanticQuery extends BaseSemanticQuery {
 
-    protected SemanticParseInfo parseInfo = new SemanticParseInfo();
     protected QueryMatcher queryMatcher = new QueryMatcher();
     protected SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
 
@@ -54,6 +49,11 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
             QueryContext queryCtx) {
         return queryMatcher.match(candidateElementMatches);
+    }
+
+    @Override
+    public void initS2Sql(User user) {
+        initS2SqlByStruct();
     }
 
     public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {
@@ -109,6 +109,7 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
 
         for (SchemaElementMatch schemaMatch : parseInfo.getElementMatches()) {
             SchemaElement element = schemaMatch.getElement();
+            element.setOrder(1 - schemaMatch.getSimilarity());
             switch (element.getType()) {
                 case ID:
                     SchemaElement entityElement = modelSchema.getElement(SchemaElementType.ENTITY, element.getId());
@@ -199,8 +200,10 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         QueryStructReq queryStructReq = convertQueryStruct();
 
         OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
-        queryStructReq.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
-
+        if (optimizationConfig.isUseS2qlSwitch()) {
+            queryStructReq.setS2QL(parseInfo.getSqlInfo().getS2QL());
+            queryStructReq.setLogicSql(parseInfo.getSqlInfo().getLogicSql());
+        }
         QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
 
         if (queryResp != null) {
@@ -218,22 +221,6 @@ public abstract class RuleSemanticQuery implements SemanticQuery, Serializable {
         queryResult.setQueryState(QueryState.SUCCESS);
 
         return queryResult;
-    }
-
-    @Override
-    public ExplainResp explain(User user) {
-        ExplainSqlReq explainSqlReq = null;
-        try {
-            explainSqlReq = ExplainSqlReq.builder()
-                    .queryTypeEnum(QueryTypeEnum.STRUCT)
-                    .queryReq(isMultiStructQuery()
-                            ? convertQueryMultiStruct() : convertQueryStruct())
-                    .build();
-            return semanticInterpreter.explain(explainSqlReq, user);
-        } catch (Exception e) {
-            log.error("explain error explainSqlReq:{}", explainSqlReq, e);
-        }
-        return null;
     }
 
     protected boolean isMultiStructQuery() {

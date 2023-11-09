@@ -2,7 +2,9 @@ package com.tencent.supersonic.integration;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.StandaloneLauncher;
+import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.chat.plugin.PluginManager;
@@ -49,7 +51,15 @@ public class MetricInterpretTest {
                 ResponseEntity.ok(JSONObject.toJSONString(lLmAnswerResp)));
         QueryReq queryReq = DataUtils.getQueryReqWithAgent(1000, "能不能帮我解读分析下最近alice在超音数的访问情况",
                 DataUtils.getAgent().getId());
-        QueryResult queryResult = queryService.executeQuery(queryReq);
+
+        ParseResp parseResp = queryService.performParsing(queryReq);
+        ExecuteQueryReq executeReq = ExecuteQueryReq.builder().user(queryReq.getUser())
+                .chatId(parseResp.getChatId())
+                .queryId(parseResp.getQueryId())
+                .queryText(parseResp.getQueryText())
+                .parseInfo(parseResp.getSelectedParses().get(0))
+                .build();
+        QueryResult queryResult = queryService.performExecution(executeReq);
         Assert.assertEquals(queryResult.getQueryResults().get(0).get("answer"), lLmAnswerResp.getAssistantMessage());
     }
 

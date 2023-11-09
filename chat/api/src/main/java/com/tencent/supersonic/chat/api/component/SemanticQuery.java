@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.api.component;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import org.apache.calcite.sql.parser.SqlParseException;
 
 /**
@@ -15,7 +14,9 @@ public interface SemanticQuery {
 
     QueryResult execute(User user) throws SqlParseException;
 
-    ExplainResp explain(User user);
+    void initS2Sql(User user);
+
+    String explain(User user);
 
     SemanticParseInfo getParseInfo();
 

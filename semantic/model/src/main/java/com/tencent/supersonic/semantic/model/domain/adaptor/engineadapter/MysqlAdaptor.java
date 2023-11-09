@@ -1,6 +1,6 @@
 package com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter;
 
-import com.tencent.supersonic.semantic.api.model.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.Constants;
 
 
@@ -16,7 +16,7 @@ public class MysqlAdaptor extends EngineAdaptor {
             if (TimeDimensionEnum.MONTH.name().equalsIgnoreCase(dateType)) {
                 return "DATE_FORMAT(%s, '%Y-%m')".replace("%s", column);
             } else if (TimeDimensionEnum.WEEK.name().equalsIgnoreCase(dateType)) {
-                return "to_monday(from_unixtime(unix_timestamp(%s), 'yyyy-MM-dd'))".replace("%s", column);
+                return "DATE_FORMAT(DATE_SUB(%s, INTERVAL (DAYOFWEEK(%s) - 2) DAY), '%Y-%m-%d')".replace("%s", column);
             } else {
                 return "date_format(str_to_date(%s, '%Y%m%d'),'%Y-%m-%d')".replace("%s", column);
             }
@@ -24,7 +24,7 @@ public class MysqlAdaptor extends EngineAdaptor {
             if (TimeDimensionEnum.MONTH.name().equalsIgnoreCase(dateType)) {
                 return "DATE_FORMAT(%s, '%Y-%m') ".replace("%s", column);
             } else if (TimeDimensionEnum.WEEK.name().equalsIgnoreCase(dateType)) {
-                return "to_monday(from_unixtime(unix_timestamp(%s), 'yyyy-MM-dd'))".replace("%s", column);
+                return "DATE_FORMAT(DATE_SUB(%s, INTERVAL (DAYOFWEEK(%s) - 2) DAY), '%Y-%m-%d')".replace("%s", column);
             } else {
                 return column;
             }

@@ -40,6 +40,7 @@ public class MetricInterpretQuery extends PluginSemanticQuery {
 
     public static final String QUERY_MODE = "METRIC_INTERPRET";
 
+
     public MetricInterpretQuery() {
         QueryManager.register(this);
     }
@@ -51,13 +52,14 @@ public class MetricInterpretQuery extends PluginSemanticQuery {
 
     @Override
     public QueryResult execute(User user) throws SqlParseException {
-        QueryStructReq queryStructReq = QueryReqBuilder.buildStructReq(parseInfo);
-        fillAggregator(queryStructReq, parseInfo.getMetrics());
-        queryStructReq.setNativeQuery(true);
+        QueryStructReq queryStructReq = convertQueryStruct();
         SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
 
         OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
-        queryStructReq.setUseS2qlSwitch(optimizationConfig.isUseS2qlSwitch());
+        if (optimizationConfig.isUseS2qlSwitch()) {
+            queryStructReq.setS2QL(parseInfo.getSqlInfo().getS2QL());
+            queryStructReq.setS2QL(parseInfo.getSqlInfo().getQuerySql());
+        }
 
         QueryResultWithSchemaResp queryResultWithSchemaResp = semanticInterpreter.queryByStruct(queryStructReq, user);
         String text = generateTableText(queryResultWithSchemaResp);
@@ -77,6 +79,18 @@ public class MetricInterpretQuery extends PluginSemanticQuery {
         queryResult.setQueryMode(getQueryMode());
         queryResult.setQueryState(QueryState.SUCCESS);
         return queryResult;
+    }
+
+    @Override
+    public void initS2Sql(User user) {
+        initS2SqlByStruct();
+    }
+
+    protected QueryStructReq convertQueryStruct() {
+        QueryStructReq queryStructReq = QueryReqBuilder.buildStructReq(parseInfo);
+        fillAggregator(queryStructReq, parseInfo.getMetrics());
+        queryStructReq.setNativeQuery(true);
+        return queryStructReq;
     }
 
     private String replaceText(String text, List<SchemaElementMatch> schemaElementMatches,

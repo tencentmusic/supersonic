@@ -1,5 +1,6 @@
 package com.tencent.supersonic.integration.plugin;
 
+import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
@@ -37,7 +38,16 @@ public class PluginRecognizeTest extends BasePluginTest {
         MockConfiguration.mockEmbeddingRecognize(pluginManager, "alice最近的访问情况怎么样", "1");
         MockConfiguration.mockEmbeddingUrl(embeddingConfig);
         QueryReq queryContextReq = DataUtils.getQueryReqWithAgent(1000, "alice最近的访问情况怎么样", 1);
-        QueryResult queryResult = queryService.executeQuery(queryContextReq);
+
+        ParseResp parseResp = queryService.performParsing(queryContextReq);
+        ExecuteQueryReq executeReq = ExecuteQueryReq.builder().user(queryContextReq.getUser())
+                .chatId(parseResp.getChatId())
+                .queryId(parseResp.getQueryId())
+                .queryText(parseResp.getQueryText())
+                .parseInfo(parseResp.getSelectedParses().get(0))
+                .build();
+        QueryResult queryResult = queryService.performExecution(executeReq);
+
         assertPluginRecognizeResult(queryResult);
     }
 
@@ -53,7 +63,16 @@ public class PluginRecognizeTest extends BasePluginTest {
         queryRequest.setModelId(1L);
         queryFilters.getFilters().add(queryFilter);
         queryRequest.setQueryFilters(queryFilters);
-        QueryResult queryResult = queryService.executeQuery(queryRequest);
+
+        ParseResp parseResp = queryService.performParsing(queryRequest);
+        ExecuteQueryReq executeReq = ExecuteQueryReq.builder().user(queryRequest.getUser())
+                .chatId(parseResp.getChatId())
+                .queryId(parseResp.getQueryId())
+                .queryText(parseResp.getQueryText())
+                .parseInfo(parseResp.getSelectedParses().get(0))
+                .build();
+        QueryResult queryResult = queryService.performExecution(executeReq);
+
         assertPluginRecognizeResult(queryResult);
     }
 

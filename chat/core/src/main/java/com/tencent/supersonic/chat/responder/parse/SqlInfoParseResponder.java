@@ -9,23 +9,23 @@ import com.tencent.supersonic.chat.api.pojo.response.ParseTimeCostDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
-import org.springframework.util.CollectionUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
-public class ExplainSqlParseResponder implements ParseResponder {
+public class SqlInfoParseResponder implements ParseResponder {
 
     @Override
     public void fillResponse(ParseResp parseResp, QueryContext queryContext,
-                             List<ChatParseDO> chatParseDOS) {
+            List<ChatParseDO> chatParseDOS) {
         QueryReq queryReq = queryContext.getRequest();
         Long startTime = System.currentTimeMillis();
-        addExplainSql(queryReq, parseResp.getSelectedParses());
-        addExplainSql(queryReq, parseResp.getCandidateParses());
+        addSqlInfo(queryReq, parseResp.getSelectedParses());
+        addSqlInfo(queryReq, parseResp.getCandidateParses());
         parseResp.setParseTimeCost(new ParseTimeCostDO());
         parseResp.getParseTimeCost().setSqlTime(System.currentTimeMillis() - startTime);
         if (!CollectionUtils.isEmpty(chatParseDOS)) {
@@ -49,26 +49,26 @@ public class ExplainSqlParseResponder implements ParseResponder {
         }
     }
 
-    private void addExplainSql(QueryReq queryReq, List<SemanticParseInfo> semanticParseInfos) {
+    private void addSqlInfo(QueryReq queryReq, List<SemanticParseInfo> semanticParseInfos) {
         if (CollectionUtils.isEmpty(semanticParseInfos)) {
             return;
         }
         semanticParseInfos.forEach(parseInfo -> {
-            addExplainSql(queryReq, parseInfo);
+            addSqlInfo(queryReq, parseInfo);
         });
     }
 
-    private void addExplainSql(QueryReq queryReq, SemanticParseInfo parseInfo) {
+    private void addSqlInfo(QueryReq queryReq, SemanticParseInfo parseInfo) {
         SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
         if (Objects.isNull(semanticQuery)) {
             return;
         }
         semanticQuery.setParseInfo(parseInfo);
-        ExplainResp explain = semanticQuery.explain(queryReq.getUser());
-        if (Objects.isNull(explain)) {
+        String explainSql = semanticQuery.explain(queryReq.getUser());
+        if (StringUtils.isBlank(explainSql)) {
             return;
         }
-        parseInfo.getSqlInfo().setQuerySql(explain.getSql());
+        parseInfo.getSqlInfo().setQuerySql(explainSql);
     }
 
 }
