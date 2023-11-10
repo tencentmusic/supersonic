@@ -159,12 +159,10 @@ public class QueryServiceImpl implements QueryService {
         List<ChatParseDO> chatParseDOS = Lists.newArrayList();
         if (candidateQueries.size() > 0) {
             List<SemanticQuery> selectedQueries = querySelector.select(candidateQueries, queryReq);
-
-            candidateQueries.forEach(semanticQuery -> parseInfoService.updateParseInfo(semanticQuery.getParseInfo()));
             List<SemanticParseInfo> selectedParses = parseInfoService.sortParseInfo(selectedQueries);
             List<SemanticParseInfo> candidateParses = parseInfoService.sortParseInfo(candidateQueries);
-
             candidateParses = parseInfoService.getTopCandidateParseInfo(selectedParses, candidateParses);
+            candidateQueries.forEach(semanticQuery -> parseInfoService.updateParseInfo(semanticQuery.getParseInfo()));
 
             parseResult = ParseResp.builder()
                     .chatId(queryReq.getChatId())
