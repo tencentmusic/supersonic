@@ -1,6 +1,10 @@
 package com.tencent.supersonic.common.pojo;
 
+import static java.util.stream.Collectors.toMap;
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 
 public class Constants {
@@ -65,5 +69,13 @@ public class Constants {
     public static final Long DEFAULT_FREQUENCY = 100000L;
 
     public static final String TABLE_PREFIX = "t_";
-
+    public static final Map<String, String> aggregateMap = Stream.of(
+                    new AbstractMap.SimpleEntry<>("平均", "avg"),
+                    new AbstractMap.SimpleEntry<>("最大", "max"),
+                    new AbstractMap.SimpleEntry<>("最多", "max"),
+                    new AbstractMap.SimpleEntry<>("最高", "max"),
+                    new AbstractMap.SimpleEntry<>("最小", "min"),
+                    new AbstractMap.SimpleEntry<>("最少", "min"),
+                    new AbstractMap.SimpleEntry<>("最低", "min"))
+            .collect(toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
 }
