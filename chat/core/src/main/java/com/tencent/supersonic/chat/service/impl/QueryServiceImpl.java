@@ -288,7 +288,7 @@ public class QueryServiceImpl implements QueryService {
         SemanticParseInfo parseInfo = getSemanticParseInfo(queryData, chatParseDO);
 
         SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
-
+        semanticQuery.setParseInfo(parseInfo);
         if (S2SQLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
             Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
             Map<String, Map<String, String>> havingFiledNameToValueMap = new HashMap<>();
@@ -325,21 +325,19 @@ public class QueryServiceImpl implements QueryService {
             if (StringUtils.isNotBlank(explainSql)) {
                 parseInfo.getSqlInfo().setQuerySQL(explainSql);
             }
+        } else {
+            //init s2sql
+            semanticQuery.initS2Sql(user);
+            QueryReq queryReq = new QueryReq();
+            queryReq.setQueryFilters(new QueryFilters());
+            queryReq.setUser(user);
+            //correct s2sql
+            semanticCorrectors.stream().forEach(correction -> {
+                correction.correct(queryReq, semanticQuery.getParseInfo());
+            });
+            //update parserInfo
+            parseInfoService.updateParseInfo(semanticQuery.getParseInfo());
         }
-        semanticQuery.setParseInfo(parseInfo);
-        //init s2sql
-        semanticQuery.initS2Sql(user);
-        QueryReq queryReq = new QueryReq();
-        queryReq.setQueryFilters(new QueryFilters());
-        queryReq.setUser(user);
-
-        //correct s2sql
-        semanticCorrectors.stream().forEach(correction -> {
-            correction.correct(queryReq, semanticQuery.getParseInfo());
-        });
-        //update parserInfo
-        parseInfoService.updateParseInfo(semanticQuery.getParseInfo());
-
         QueryResult queryResult = semanticQuery.execute(user);
         queryResult.setChatContext(semanticQuery.getParseInfo());
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
