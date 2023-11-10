@@ -27,7 +27,7 @@ import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.QuerySelector;
-import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
+import com.tencent.supersonic.chat.query.llm.s2sql.S2SQLQuery;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
 import com.tencent.supersonic.chat.service.ChatService;
@@ -202,8 +202,7 @@ public class QueryServiceImpl implements QueryService {
     @Override
     @TimeCost
     public QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception {
-        ChatParseDO chatParseDO = chatService.getParseInfo(queryReq.getQueryId(),
-                queryReq.getParseId());
+        ChatParseDO chatParseDO = chatService.getParseInfo(queryReq.getQueryId(), queryReq.getParseId());
         ChatQueryDO chatQueryDO = chatService.getLastQuery(queryReq.getChatId());
         List<StatisticsDO> timeCostDOList = new ArrayList<>();
         SemanticParseInfo parseInfo = JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
@@ -292,11 +291,11 @@ public class QueryServiceImpl implements QueryService {
 
         SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
 
-        if (S2QLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
+        if (S2SQLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
             Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
             Map<String, Map<String, String>> havingFiledNameToValueMap = new HashMap<>();
 
-            String correctorSql = parseInfo.getSqlInfo().getLogicSql();
+            String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
             log.info("correctorSql before replacing:{}", correctorSql);
             // get where filter and having filter
             List<FilterExpression> whereExpressionList = SqlParserSelectHelper.getWhereExpressions(correctorSql);
@@ -322,11 +321,11 @@ public class QueryServiceImpl implements QueryService {
             correctorSql = SqlParserAddHelper.addHaving(correctorSql, addHavingConditions);
 
             log.info("correctorSql after replacing:{}", correctorSql);
-            parseInfo.getSqlInfo().setLogicSql(correctorSql);
+            parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
             semanticQuery.setParseInfo(parseInfo);
             String explainSql = semanticQuery.explain(user);
             if (StringUtils.isNotBlank(explainSql)) {
-                parseInfo.getSqlInfo().setQuerySql(explainSql);
+                parseInfo.getSqlInfo().setQuerySQL(explainSql);
             }
         }
         semanticQuery.setParseInfo(parseInfo);
@@ -523,7 +522,7 @@ public class QueryServiceImpl implements QueryService {
 
     private SemanticParseInfo getSemanticParseInfo(QueryDataReq queryData, ChatParseDO chatParseDO) {
         SemanticParseInfo parseInfo = JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
-        if (S2QLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
+        if (S2SQLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
             return parseInfo;
         }
         if (CollectionUtils.isNotEmpty(queryData.getDimensions())) {

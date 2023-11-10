@@ -32,7 +32,7 @@ public abstract class BaseMapper implements SchemaMapper {
         log.info("before {},mapInfo:{}", simpleName, queryContext.getMapInfo().getModelElementMatches());
 
         try {
-            work(queryContext);
+            doMap(queryContext);
         } catch (Exception e) {
             log.error("work error", e);
         }
@@ -41,7 +41,7 @@ public abstract class BaseMapper implements SchemaMapper {
         log.info("after {},cost:{},mapInfo:{}", simpleName, cost, queryContext.getMapInfo().getModelElementMatches());
     }
 
-    public abstract void work(QueryContext queryContext);
+    public abstract void doMap(QueryContext queryContext);
 
 
     public void addToSchemaMap(SchemaMapInfo schemaMap, Long modelId, SchemaElementMatch schemaElementMatch) {

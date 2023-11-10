@@ -28,7 +28,7 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo, sqlTimeCost }) => 
     setSqlType('');
   };
 
-  if (!sqlInfo.s2QL && !sqlInfo.logicSql && !sqlInfo.querySql) {
+  if (!sqlInfo.s2SQL && !sqlInfo.correctS2SQL && !sqlInfo.querySQL) {
     return null;
   }
 
@@ -49,37 +49,37 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo, sqlTimeCost }) => 
           )}
         </div>
         <div className={`${tipPrefixCls}-content-options`}>
-          {sqlInfo.s2QL && (
+          {sqlInfo.s2SQL && (
             <div
               className={`${tipPrefixCls}-content-option ${
-                sqlType === 's2QL' ? `${tipPrefixCls}-content-option-active` : ''
+                sqlType === 's2SQL' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
-                setSqlType(sqlType === 's2QL' ? '' : 's2QL');
+                setSqlType(sqlType === 's2SQL' ? '' : 's2SQL');
               }}
             >
-              解析S2QL
+              解析S2SQL
             </div>
           )}
-          {sqlInfo.logicSql && (
+          {sqlInfo.correctS2SQL && (
             <div
               className={`${tipPrefixCls}-content-option ${
-                sqlType === 'logicSql' ? `${tipPrefixCls}-content-option-active` : ''
+                sqlType === 'correctS2SQL' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
-                setSqlType(sqlType === 'logicSql' ? '' : 'logicSql');
+                setSqlType(sqlType === 'correctS2SQL' ? '' : 'correctS2SQL');
               }}
             >
-              修正S2QL
+              修正S2SQL
             </div>
           )}
-          {sqlInfo.querySql && (
+          {sqlInfo.querySQL && (
             <div
               className={`${tipPrefixCls}-content-option ${
-                sqlType === 'querySql' ? `${tipPrefixCls}-content-option-active` : ''
+                sqlType === 'querySQL' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
-                setSqlType(sqlType === 'querySql' ? '' : 'querySql');
+                setSqlType(sqlType === 'querySQL' ? '' : 'querySQL');
               }}
             >
               执行SQL

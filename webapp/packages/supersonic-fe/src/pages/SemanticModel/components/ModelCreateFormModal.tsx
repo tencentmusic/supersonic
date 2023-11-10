@@ -144,6 +144,7 @@ const ModelCreateFormModal: React.FC<ModelCreateFormModalProps> = (props) => {
               subTitle={'配置之后,可在指标主页和问答指标卡处选择用来对指标进行下钻和过滤'}
             />
           }
+          hidden={!basicInfo?.id}
         >
           <Select
             mode="multiple"

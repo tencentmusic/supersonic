@@ -115,3 +115,80 @@
         }
     }
 }
+
+.metricDetail {
+    height: calc(100vh - 50px);
+    .title {
+        margin-bottom: 0;
+        // padding: 20px;
+        font-size: 20px;
+        line-height: 34px;
+        border-bottom: 1px solid #d9d9d9;
+        display: flex;
+        .titleLeft {
+            display: flex;
+            flex: 1 1 auto;
+            .navContainer {
+                // display: flex;
+                padding: 20px;
+                padding-left: 30px;
+                .description {
+                    font-size: 12px;
+                    line-height: 12px;
+                    padding-top: 12px;
+                    color: #546174
+                }
+            }
+            .backBtn {
+                background-color: #f8f8f8;
+                padding: 5px;
+                color: #b0b4bc;
+                cursor: pointer;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+                &:hover {
+                    background-color: #7599e5;
+                    color: #fff;
+                }
+            }
+        }
+        .titleRight {
+            display: flex;
+            flex: 0 1 200px;
+            .info {
+                margin: 15px;
+            }
+        }
+    }
+
+    .tabContainer {
+        background-color: #fff;
+        padding: 0px 40px;
+    }
+    .metricInfoContent {
+        padding:25px;
+        .title {
+            margin-bottom: 12px;
+            font-size: 16px;
+            color: #0e73ff;
+            font-weight: bold;
+            position: relative;
+            &::before {
+                display: block;
+                position: absolute;
+                content: "";
+                left: -10px;
+                top: 10px;
+                height: 14px;
+                width: 3px;
+                font-size: 0;
+                background: #0e73ff;
+                border-radius: 2px;
+                border: 1px solid #0e73ff;
+            }
+        }
+    }
+}
+

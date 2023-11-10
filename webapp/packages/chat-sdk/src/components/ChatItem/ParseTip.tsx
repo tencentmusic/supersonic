@@ -117,7 +117,6 @@ const ParseTip: React.FC<Props> = ({
 
   const getTipNode = () => {
     const dimensionItems = dimensions?.filter(item => item.type === 'DIMENSION');
-    const metric = metrics?.[0];
 
     const itemValueClass = `${prefixCls}-tip-item-value`;
     const entityId = dimensionFilters?.length > 0 ? dimensionFilters[0].value : undefined;
@@ -131,14 +130,14 @@ const ParseTip: React.FC<Props> = ({
 
     return (
       <div className={`${prefixCls}-tip-content`}>
-        {!!agentType && queryMode !== 'LLM_S2QL' ? (
+        {!!agentType && queryMode !== 'LLM_S2SQL' ? (
           <div className={`${prefixCls}-tip-item`}>
             将由{agentType === 'plugin' ? '插件' : '内置'}工具
             <span className={itemValueClass}>{agentName}</span>来解答
           </div>
         ) : (
           <>
-            {(queryMode?.includes('ENTITY') || queryMode === 'LLM_S2QL') &&
+            {(queryMode?.includes('ENTITY') || queryMode === 'LLM_S2SQL') &&
             typeof entityId === 'string' &&
             !!entityAlias &&
             !!entityName ? (
@@ -153,21 +152,24 @@ const ParseTip: React.FC<Props> = ({
               </div>
             )}
             {!queryMode?.includes('ENTITY') &&
-              metric &&
+              metrics &&
+              metrics.length > 0 &&
               !dimensions?.some(item => item.bizName?.includes('_id')) && (
                 <div className={`${prefixCls}-tip-item`}>
                   <div className={`${prefixCls}-tip-item-name`}>指标：</div>
-                  <div className={itemValueClass}>{metric.name}</div>
+                  <div className={itemValueClass}>
+                    {metrics.map(metric => metric.name).join('、')}
+                  </div>
                 </div>
               )}
-            {['METRIC_GROUPBY', 'METRIC_ORDERBY', 'ENTITY_DETAIL', 'LLM_S2QL'].includes(
+            {['METRIC_GROUPBY', 'METRIC_ORDERBY', 'ENTITY_DETAIL', 'LLM_S2SQL'].includes(
               queryMode!
             ) &&
               fields &&
               fields.length > 0 && (
                 <div className={`${prefixCls}-tip-item`}>
                   <div className={`${prefixCls}-tip-item-name`}>
-                    {queryMode === 'LLM_S2QL'
+                    {queryMode === 'LLM_S2SQL'
                       ? nativeQuery
                         ? '查询字段'
                         : '下钻维度'
@@ -273,7 +275,7 @@ const ParseTip: React.FC<Props> = ({
   const tipNode = (
     <div className={`${prefixCls}-tip`}>
       {getTipNode()}
-      {!(!!agentType && queryMode !== 'LLM_S2QL') && getFiltersNode()}
+      {!(!!agentType && queryMode !== 'LLM_S2SQL') && getFiltersNode()}
     </div>
   );
 

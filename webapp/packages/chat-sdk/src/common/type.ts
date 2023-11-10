@@ -71,9 +71,9 @@ export type EntityDimensionType = {
 }
 
 export type SqlInfoType = {
-  s2QL: string;
-  logicSql: string;
-  querySql: string;
+  s2SQL: string;
+  correctS2SQL: string;
+  querySQL: string;
 }
 
 export type ChatContextType = {

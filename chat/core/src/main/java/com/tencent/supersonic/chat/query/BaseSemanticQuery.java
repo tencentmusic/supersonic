@@ -6,6 +6,7 @@ import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.Aggregator;
@@ -16,7 +17,7 @@ import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.io.Serializable;
 import java.util.List;
@@ -40,10 +41,11 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
         ExplainSqlReq explainSqlReq = null;
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
         try {
-            QueryS2QLReq queryS2QLReq = QueryReqBuilder.buildS2QLReq(sqlInfo.getLogicSql(), parseInfo.getModelId());
+            QueryS2SQLReq queryS2SQLReq = QueryReqBuilder.buildS2SQLReq(sqlInfo.getCorrectS2SQL(),
+                    parseInfo.getModelId());
             explainSqlReq = ExplainSqlReq.builder()
                     .queryTypeEnum(QueryTypeEnum.SQL)
-                    .queryReq(queryS2QLReq)
+                    .queryReq(queryS2SQLReq)
                     .build();
             ExplainResp explain = semanticInterpreter.explain(explainSqlReq, user);
             if (Objects.nonNull(explain)) {
@@ -103,11 +105,15 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
     }
 
     protected void initS2SqlByStruct() {
+        OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
+        if (!optimizationConfig.isUseS2SqlSwitch()) {
+            return;
+        }
         QueryStructReq queryStructReq = convertQueryStruct();
         convertBizNameToName(queryStructReq);
-        QueryS2QLReq queryS2QLReq = queryStructReq.convert(queryStructReq);
-        parseInfo.getSqlInfo().setS2QL(queryS2QLReq.getSql());
-        parseInfo.getSqlInfo().setLogicSql(queryS2QLReq.getSql());
+        QueryS2SQLReq queryS2SQLReq = queryStructReq.convert(queryStructReq);
+        parseInfo.getSqlInfo().setS2SQL(queryS2SQLReq.getSql());
+        parseInfo.getSqlInfo().setCorrectS2SQL(queryS2SQLReq.getSql());
     }
 
 }

@@ -113,7 +113,7 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
         <FormItem name="name" label="名称">
           <Input placeholder="请输入工具名称" />
         </FormItem>
-        {(toolType === AgentToolTypeEnum.RULE || toolType === AgentToolTypeEnum.LLM_S2QL) && (
+        {(toolType === AgentToolTypeEnum.RULE || toolType === AgentToolTypeEnum.LLM_S2SQL) && (
           <FormItem name="modelIds" label="主题域">
             <Select
               options={modelList.map((model) => ({ label: model.name, value: model.id }))}
@@ -122,7 +122,7 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
             />
           </FormItem>
         )}
-        {toolType === AgentToolTypeEnum.LLM_S2QL && (
+        {toolType === AgentToolTypeEnum.LLM_S2SQL && (
           <FormItem name="exampleQuestions" label="示例问题">
             <div className={styles.paramsSection}>
               {examples.map((example) => {

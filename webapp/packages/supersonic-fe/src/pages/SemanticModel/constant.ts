@@ -1,17 +1,23 @@
 import { SemanticNodeType } from './enum';
 
+export enum SENSITIVE_LEVEL {
+  LOW = 0,
+  MID = 1,
+  HIGH = 2,
+}
+
 export const SENSITIVE_LEVEL_OPTIONS = [
   {
     label: '低',
-    value: 0,
+    value: SENSITIVE_LEVEL.LOW,
   },
   {
     label: '中',
-    value: 1,
+    value: SENSITIVE_LEVEL.MID,
   },
   {
     label: '高',
-    value: 2,
+    value: SENSITIVE_LEVEL.HIGH,
   },
 ];
 
@@ -23,6 +29,12 @@ export const SENSITIVE_LEVEL_ENUM = SENSITIVE_LEVEL_OPTIONS.reduce(
   },
   {},
 );
+
+export const SENSITIVE_LEVEL_COLOR = {
+  [SENSITIVE_LEVEL.LOW]: 'lime',
+  [SENSITIVE_LEVEL.MID]: 'warning',
+  [SENSITIVE_LEVEL.HIGH]: 'error',
+};
 
 export const SEMANTIC_NODE_TYPE_CONFIG = {
   [SemanticNodeType.DATASOURCE]: {

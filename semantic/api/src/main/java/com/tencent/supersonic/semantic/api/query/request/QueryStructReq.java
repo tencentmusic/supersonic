@@ -62,11 +62,11 @@ public class QueryStructReq {
     /**
      * Later deleted for compatibility only
      */
-    private String s2QL;
+    private String s2SQL;
     /**
      * Later deleted for compatibility only
      */
-    private String logicSql;
+    private String correctS2SQL;
 
     public List<String> getGroups() {
         if (!CollectionUtils.isEmpty(this.groups)) {
@@ -171,7 +171,7 @@ public class QueryStructReq {
      * @param queryStructReq
      * @return
      */
-    public QueryS2QLReq convert(QueryStructReq queryStructReq) {
+    public QueryS2SQLReq convert(QueryStructReq queryStructReq) {
         String sql = null;
         try {
             sql = buildSql(queryStructReq);
@@ -179,7 +179,7 @@ public class QueryStructReq {
             log.error("buildSql error", e);
         }
 
-        QueryS2QLReq result = new QueryS2QLReq();
+        QueryS2SQLReq result = new QueryS2SQLReq();
         result.setSql(sql);
         result.setModelId(queryStructReq.getModelId());
         result.setVariables(new HashMap<>());

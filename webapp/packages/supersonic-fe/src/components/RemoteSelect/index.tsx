@@ -80,7 +80,6 @@ const DebounceSelect = forwardRef(
       if (disabledSearch) {
         return;
       }
-      console.log(!allowEmptyValue && !value, value, allowEmptyValue, 333);
       if (!allowEmptyValue && !value) return;
       fetchRef.current += 1;
       const fetchId = fetchRef.current;

@@ -66,7 +66,7 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
             List<Expression> expressions = rightExpressionList.getExpressions();
             if (CollectionUtils.isNotEmpty(expressions)) {
                 for (Expression expression : expressions) {
-                    result.add(expression.toString());
+                    result.add(getFieldValue(expression));
                 }
             }
         }

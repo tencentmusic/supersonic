@@ -17,7 +17,7 @@ import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
@@ -41,12 +41,12 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
     @SneakyThrows
     @Override
     public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user) {
-        if (StringUtils.isNotBlank(queryStructReq.getLogicSql())) {
-            QueryS2QLReq queryS2QLReq = new QueryS2QLReq();
-            queryS2QLReq.setSql(queryStructReq.getLogicSql());
-            queryS2QLReq.setModelId(queryStructReq.getModelId());
-            queryS2QLReq.setVariables(new HashMap<>());
-            return queryByS2QL(queryS2QLReq, user);
+        if (StringUtils.isNotBlank(queryStructReq.getCorrectS2SQL())) {
+            QueryS2SQLReq queryS2SQLReq = new QueryS2SQLReq();
+            queryS2SQLReq.setSql(queryStructReq.getCorrectS2SQL());
+            queryS2SQLReq.setModelId(queryStructReq.getModelId());
+            queryS2SQLReq.setVariables(new HashMap<>());
+            return queryByS2SQL(queryS2SQLReq, user);
         }
         queryService = ContextUtils.getBean(QueryService.class);
         return queryService.queryByStructWithAuth(queryStructReq, user);
@@ -65,9 +65,9 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
 
     @Override
     @SneakyThrows
-    public QueryResultWithSchemaResp queryByS2QL(QueryS2QLReq queryS2QLReq, User user) {
+    public QueryResultWithSchemaResp queryByS2SQL(QueryS2SQLReq queryS2SQLReq, User user) {
         queryService = ContextUtils.getBean(QueryService.class);
-        Object object = queryService.queryBySql(queryS2QLReq, user);
+        Object object = queryService.queryBySql(queryS2SQLReq, user);
         return JsonUtil.toObject(JsonUtil.toString(object), QueryResultWithSchemaResp.class);
     }
 
