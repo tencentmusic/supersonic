@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @ToString
@@ -39,19 +40,30 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
     @Override
     public String explain(User user) {
         ExplainSqlReq explainSqlReq = null;
-        SqlInfo sqlInfo = parseInfo.getSqlInfo();
         try {
-            QueryS2SQLReq queryS2SQLReq = QueryReqBuilder.buildS2SQLReq(sqlInfo.getCorrectS2SQL(),
-                    parseInfo.getModelId());
-            explainSqlReq = ExplainSqlReq.builder()
-                    .queryTypeEnum(QueryTypeEnum.SQL)
-                    .queryReq(queryS2SQLReq)
-                    .build();
-            ExplainResp explain = semanticInterpreter.explain(explainSqlReq, user);
+            ExplainResp explain = null;
+            SqlInfo sqlInfo = parseInfo.getSqlInfo();
+            if (StringUtils.isNotBlank(sqlInfo.getCorrectS2SQL())) {
+                //sql
+                QueryS2SQLReq queryS2SQLReq = QueryReqBuilder.buildS2SQLReq(sqlInfo.getCorrectS2SQL(),
+                        parseInfo.getModelId());
+                explainSqlReq = ExplainSqlReq.builder()
+                        .queryTypeEnum(QueryTypeEnum.SQL)
+                        .queryReq(queryS2SQLReq)
+                        .build();
+                explain = semanticInterpreter.explain(explainSqlReq, user);
+            } else {
+                //struct
+                QueryStructReq queryStructReq = QueryReqBuilder.buildStructReq(parseInfo);
+                explainSqlReq = ExplainSqlReq.builder()
+                        .queryTypeEnum(QueryTypeEnum.STRUCT)
+                        .queryReq(queryStructReq)
+                        .build();
+                explain = semanticInterpreter.explain(explainSqlReq, user);
+            }
             if (Objects.nonNull(explain)) {
                 return explain.getSql();
             }
-            return explain.getSql();
         } catch (Exception e) {
             log.error("explain error explainSqlReq:{}", explainSqlReq, e);
         }

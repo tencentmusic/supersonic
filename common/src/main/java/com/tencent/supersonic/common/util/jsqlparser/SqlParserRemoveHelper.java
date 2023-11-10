@@ -54,7 +54,7 @@ public class SqlParserRemoveHelper {
         }
         removeWhereExpression(whereExpression, removeFieldNames);
     }
-    private static String removeWhereCondition(String sql) {
+    public static String removeWhereCondition(String sql) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
 
