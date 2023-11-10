@@ -125,13 +125,11 @@ const SqlItem: React.FC<Props> = ({ llmReq, integrateSystem, sqlInfo, sqlTimeCos
               <div className={`${prefixCls}-schema-row`}>
                 <div className={`${prefixCls}-schema-title`}>取值：</div>
                 <div className={`${prefixCls}-schema-content`}>
-                  {linking.map((item: any) => {
-                    return (
-                      <span>
-                        {item.fieldName}: {item.fieldValue}
-                      </span>
-                    );
-                  })}
+                  {linking
+                    .map((item: any) => {
+                      return `${item.fieldName}: ${item.fieldValue}`;
+                    })
+                    .join('、')}
                 </div>
               </div>
             )}
