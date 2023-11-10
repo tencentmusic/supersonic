@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.api.pojo.response;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import lombok.Data;
 import lombok.Getter;
@@ -19,8 +20,8 @@ public class ParseResp {
     private String queryText;
     private Long queryId;
     private ParseState state;
-    private List<SemanticParseInfo> selectedParses;
-    private List<SemanticParseInfo> candidateParses;
+    private List<SemanticParseInfo> selectedParses = Lists.newArrayList();
+    private List<SemanticParseInfo> candidateParses = Lists.newArrayList();
     private List<SolvedQueryRecallResp> similarSolvedQuery;
     private ParseTimeCostDO parseTimeCost;
 
@@ -28,5 +29,12 @@ public class ParseResp {
         COMPLETED,
         PENDING,
         FAILED
+    }
+
+    public List<SemanticParseInfo> getSelectedParses() {
+        selectedParses = Lists.newArrayList();
+        selectedParses.addAll(candidateParses);
+        candidateParses.clear();
+        return selectedParses;
     }
 }

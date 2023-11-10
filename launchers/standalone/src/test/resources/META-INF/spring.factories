@@ -12,9 +12,6 @@ com.tencent.supersonic.chat.api.component.QueryProcessor=\
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.LocalSemanticInterpreter
 
-com.tencent.supersonic.chat.query.QuerySelector=\
-   com.tencent.supersonic.chat.query.HeuristicQuerySelector
-
 com.tencent.supersonic.chat.application.query.DomainResolver=\
   com.tencent.supersonic.chat.application.query.HeuristicDomainResolver
 

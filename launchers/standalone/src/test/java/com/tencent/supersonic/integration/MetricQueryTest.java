@@ -58,8 +58,8 @@ public class MetricQueryTest extends BaseQueryTest {
         //agent only support METRIC_ENTITY, METRIC_FILTER
         MockConfiguration.mockAgent(agentService);
         ParseResp parseResp = submitParseWithAgent("alice的访问次数", DataUtils.getAgent().getId());
-        Assert.assertNotNull(parseResp.getSelectedParses());
-        List<String> queryModes = parseResp.getSelectedParses().stream()
+        Assert.assertNotNull(parseResp.getCandidateParses());
+        List<String> queryModes = parseResp.getCandidateParses().stream()
                 .map(SemanticParseInfo::getQueryMode).collect(Collectors.toList());
         Assert.assertTrue(queryModes.contains("METRIC_FILTER"));
     }
@@ -88,7 +88,7 @@ public class MetricQueryTest extends BaseQueryTest {
         //agent only support METRIC_ENTITY, METRIC_FILTER
         MockConfiguration.mockAgent(agentService);
         ParseResp parseResp = submitParseWithAgent("超音数的访问次数", DataUtils.getAgent().getId());
-        List<String> queryModes = parseResp.getSelectedParses().stream()
+        List<String> queryModes = parseResp.getCandidateParses().stream()
                 .map(SemanticParseInfo::getQueryMode).collect(Collectors.toList());
         Assert.assertTrue(queryModes.contains("METRIC_MODEL"));
     }
