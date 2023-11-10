@@ -15,6 +15,7 @@ import com.tencent.supersonic.chat.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
+import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.SolvedQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
@@ -329,6 +330,19 @@ public class QueryServiceImpl implements QueryService {
             }
         }
         semanticQuery.setParseInfo(parseInfo);
+        //init s2sql
+        semanticQuery.initS2Sql(user);
+        QueryReq queryReq = new QueryReq();
+        queryReq.setQueryFilters(new QueryFilters());
+        queryReq.setUser(user);
+
+        //correct s2sql
+        semanticCorrectors.stream().forEach(correction -> {
+            correction.correct(queryReq, semanticQuery.getParseInfo());
+        });
+        //update parserInfo
+        parseInfoService.updateParseInfo(semanticQuery.getParseInfo());
+
         QueryResult queryResult = semanticQuery.execute(user);
         queryResult.setChatContext(semanticQuery.getParseInfo());
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
@@ -518,7 +532,6 @@ public class QueryServiceImpl implements QueryService {
             }
         });
     }
-
 
     private SemanticParseInfo getSemanticParseInfo(QueryDataReq queryData, ChatParseDO chatParseDO) {
         SemanticParseInfo parseInfo = JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
