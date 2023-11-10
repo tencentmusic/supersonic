@@ -307,6 +307,7 @@ const ChatItem: React.FC<Props> = ({
             <>
               {!isMobile && parseInfo?.sqlInfo && isDeveloper && integrateSystem !== 'c2' && (
                 <SqlItem
+                  llmReq={parseInfo?.properties?.CONTEXT?.llmReq}
                   integrateSystem={integrateSystem}
                   sqlInfo={parseInfo.sqlInfo}
                   sqlTimeCost={parseTimeCost?.sqlTime}
