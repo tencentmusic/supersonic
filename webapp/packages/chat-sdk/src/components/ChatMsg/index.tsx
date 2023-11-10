@@ -60,7 +60,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
   const metricFields = columns.filter(item => item.showType === 'NUMBER');
 
   const isDslMetricCard =
-    queryMode === 'LLM_S2QL' && singleData && metricFields.length === 1 && columns.length === 1;
+    queryMode === 'LLM_S2SQL' && singleData && metricFields.length === 1 && columns.length === 1;
 
   const isMetricCard = (queryMode.includes('METRIC') || isDslMetricCard) && singleData;
 
@@ -210,7 +210,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
   );
 
   const isMultipleMetric =
-    (queryMode.includes('METRIC') || queryMode === 'LLM_S2QL') &&
+    (queryMode.includes('METRIC') || queryMode === 'LLM_S2SQL') &&
     recommendMetrics?.length > 0 &&
     queryColumns?.filter(column => column.showType === 'NUMBER').length === 1;
 

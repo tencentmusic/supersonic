@@ -130,14 +130,14 @@ const ParseTip: React.FC<Props> = ({
 
     return (
       <div className={`${prefixCls}-tip-content`}>
-        {!!agentType && queryMode !== 'LLM_S2QL' ? (
+        {!!agentType && queryMode !== 'LLM_S2SQL' ? (
           <div className={`${prefixCls}-tip-item`}>
             将由{agentType === 'plugin' ? '插件' : '内置'}工具
             <span className={itemValueClass}>{agentName}</span>来解答
           </div>
         ) : (
           <>
-            {(queryMode?.includes('ENTITY') || queryMode === 'LLM_S2QL') &&
+            {(queryMode?.includes('ENTITY') || queryMode === 'LLM_S2SQL') &&
             typeof entityId === 'string' &&
             !!entityAlias &&
             !!entityName ? (
@@ -162,14 +162,14 @@ const ParseTip: React.FC<Props> = ({
                   </div>
                 </div>
               )}
-            {['METRIC_GROUPBY', 'METRIC_ORDERBY', 'ENTITY_DETAIL', 'LLM_S2QL'].includes(
+            {['METRIC_GROUPBY', 'METRIC_ORDERBY', 'ENTITY_DETAIL', 'LLM_S2SQL'].includes(
               queryMode!
             ) &&
               fields &&
               fields.length > 0 && (
                 <div className={`${prefixCls}-tip-item`}>
                   <div className={`${prefixCls}-tip-item-name`}>
-                    {queryMode === 'LLM_S2QL'
+                    {queryMode === 'LLM_S2SQL'
                       ? nativeQuery
                         ? '查询字段'
                         : '下钻维度'
@@ -275,7 +275,7 @@ const ParseTip: React.FC<Props> = ({
   const tipNode = (
     <div className={`${prefixCls}-tip`}>
       {getTipNode()}
-      {!(!!agentType && queryMode !== 'LLM_S2QL') && getFiltersNode()}
+      {!(!!agentType && queryMode !== 'LLM_S2SQL') && getFiltersNode()}
     </div>
   );
 
