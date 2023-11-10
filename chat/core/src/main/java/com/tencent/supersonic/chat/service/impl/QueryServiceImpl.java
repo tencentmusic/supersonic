@@ -131,7 +131,6 @@ public class QueryServiceImpl implements QueryService {
             mapper.map(queryCtx);
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(mapper.getClass().getSimpleName()).type(CostType.MAPPER.getType()).build());
-            log.info("{} result:{}", mapper.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
 
         //3. parser
