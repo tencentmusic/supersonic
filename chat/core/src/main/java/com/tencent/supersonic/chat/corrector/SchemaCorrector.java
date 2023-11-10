@@ -22,7 +22,9 @@ public class SchemaCorrector extends BaseSemanticCorrector {
 
     @Override
     public void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
-
+        String sql = SqlParserReplaceHelper.replaceFunction(semanticParseInfo.getSqlInfo().getCorrectS2SQL(),
+                Constants.aggregateMap);
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(sql);
         replaceAlias(semanticParseInfo);
 
         updateFieldNameByLinkingValue(semanticParseInfo);

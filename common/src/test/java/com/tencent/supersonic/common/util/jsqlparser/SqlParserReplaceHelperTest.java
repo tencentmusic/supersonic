@@ -352,6 +352,8 @@ class SqlParserReplaceHelperTest {
         map.put("最大", "max");
         sql = SqlParserReplaceHelper.replaceFunction(sql, map);
         System.out.println(sql);
+        Assert.assertEquals("SELECT 公司名称, avg(注册资本), 总部地点 FROM 互联网企业 WHERE 年营业额 >= 28800000000 AND "
+                + "max(注册资本) > 10000 GROUP BY 公司名称 HAVING avg(注册资本) > 10000 ORDER BY avg(注册资本) DESC LIMIT 5", sql);
 
         sql = "select MONTH(数据日期) as 月份, avg(访问次数) as 平均访问次数 from 内容库产品 where"
                 + " datediff('month', 数据日期, '2023-09-02') <= 6 group by MONTH(数据日期)";
