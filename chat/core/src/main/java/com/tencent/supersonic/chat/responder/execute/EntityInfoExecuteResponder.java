@@ -24,7 +24,8 @@ public class EntityInfoExecuteResponder implements ExecuteResponder {
             return;
         }
         String queryMode = semanticParseInfo.getQueryMode();
-        if (QueryManager.containsPluginQuery(queryMode) || MetricInterpretQuery.QUERY_MODE.equalsIgnoreCase(queryMode)) {
+        if (QueryManager.containsPluginQuery(queryMode) || MetricInterpretQuery.QUERY_MODE.equalsIgnoreCase(
+                queryMode)) {
             return;
         }
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
