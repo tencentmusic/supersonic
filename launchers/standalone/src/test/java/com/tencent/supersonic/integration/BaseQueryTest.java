@@ -58,6 +58,7 @@ public class BaseQueryTest {
                 .queryText(parseResp.getQueryText())
                 .user(DataUtils.getUser())
                 .parseInfo(parseResp.getSelectedParses().get(0))
+                .saveAnswer(true)
                 .build();
 
         return queryService.performExecution(request);
@@ -73,6 +74,7 @@ public class BaseQueryTest {
                 .queryText(parseResp.getQueryText())
                 .user(DataUtils.getUser())
                 .parseInfo(parseResp.getSelectedParses().get(0))
+                .saveAnswer(true)
                 .build();
 
         QueryResult result = queryService.performExecution(request);

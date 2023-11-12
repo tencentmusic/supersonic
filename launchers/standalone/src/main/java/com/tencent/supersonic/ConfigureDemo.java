@@ -74,6 +74,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         executeReq.setChatId(parseResp.getChatId());
         executeReq.setUser(queryRequest.getUser());
         executeReq.setAgentId(1);
+        executeReq.setSaveAnswer(true);
         queryService.performExecution(executeReq);
     }
 
