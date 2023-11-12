@@ -19,7 +19,7 @@ public class EntityInfoParseResponder implements ParseResponder {
     @Override
     public void fillResponse(ParseResp parseResp, QueryContext queryContext,
             List<ChatParseDO> chatParseDOS) {
-        List<SemanticParseInfo> selectedParses = parseResp.getSelectedParses();
+        List<SemanticParseInfo> selectedParses = parseResp.getCandidateParses();
         if (CollectionUtils.isEmpty(selectedParses)) {
             return;
         }

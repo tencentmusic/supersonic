@@ -57,8 +57,8 @@ public class MetricInterpretTest {
                 .chatId(parseResp.getChatId())
                 .queryId(parseResp.getQueryId())
                 .queryText(parseResp.getQueryText())
-                .parseInfo(parseResp.getSelectedParses().get(0))
-                .parseId(parseResp.getSelectedParses().get(0).getId())
+                .parseInfo(parseResp.getCandidateParses().get(0))
+                .parseId(parseResp.getCandidateParses().get(0).getId())
                 .build();
         QueryResult queryResult = queryService.performExecution(executeReq);
         Assert.assertEquals(queryResult.getQueryResults().get(0).get("answer"), lLmAnswerResp.getAssistantMessage());

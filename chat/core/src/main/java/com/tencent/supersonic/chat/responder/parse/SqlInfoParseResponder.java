@@ -24,7 +24,6 @@ public class SqlInfoParseResponder implements ParseResponder {
             List<ChatParseDO> chatParseDOS) {
         QueryReq queryReq = queryContext.getRequest();
         Long startTime = System.currentTimeMillis();
-        addSqlInfo(queryReq, parseResp.getSelectedParses());
         addSqlInfo(queryReq, parseResp.getCandidateParses());
         parseResp.setParseTimeCost(new ParseTimeCostDO());
         parseResp.getParseTimeCost().setSqlTime(System.currentTimeMillis() - startTime);
@@ -32,7 +31,6 @@ public class SqlInfoParseResponder implements ParseResponder {
             Map<Integer, ChatParseDO> chatParseDOMap = chatParseDOS.stream()
                     .collect(Collectors.toMap(ChatParseDO::getParseId,
                             Function.identity(), (oldValue, newValue) -> newValue));
-            updateParseInfo(chatParseDOMap, parseResp.getSelectedParses());
             updateParseInfo(chatParseDOMap, parseResp.getCandidateParses());
         }
     }

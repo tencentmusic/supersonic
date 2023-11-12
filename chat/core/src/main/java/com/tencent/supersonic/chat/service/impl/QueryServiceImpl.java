@@ -27,7 +27,7 @@ import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.query.QuerySelector;
+import com.tencent.supersonic.chat.query.QueryRanker;
 import com.tencent.supersonic.chat.query.llm.s2sql.S2SQLQuery;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
@@ -105,13 +105,14 @@ public class QueryServiceImpl implements QueryService {
     private SolvedQueryManager solvedQueryManager;
     @Autowired
     private ParseInfoService parseInfoService;
+    @Autowired
+    private QueryRanker queryRanker;
 
     @Value("${time.threshold: 100}")
     private Integer timeThreshold;
 
     private List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
     private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
-    private QuerySelector querySelector = ComponentFactory.getQuerySelector();
     private List<ParseResponder> parseResponders = ComponentFactory.getParseResponders();
     private List<ExecuteResponder> executeResponders = ComponentFactory.getExecuteResponders();
     private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSqlCorrections();
@@ -157,18 +158,12 @@ public class QueryServiceImpl implements QueryService {
         ParseResp parseResult;
         List<ChatParseDO> chatParseDOS = Lists.newArrayList();
         if (candidateQueries.size() > 0) {
-            List<SemanticQuery> selectedQueries = querySelector.select(candidateQueries, queryReq);
-            List<SemanticParseInfo> selectedParses = parseInfoService.sortParseInfo(selectedQueries);
-            List<SemanticParseInfo> candidateParses = parseInfoService.sortParseInfo(candidateQueries);
-            candidateParses = parseInfoService.getTopCandidateParseInfo(selectedParses, candidateParses);
-            candidateQueries.forEach(semanticQuery -> parseInfoService.updateParseInfo(semanticQuery.getParseInfo()));
-
-            parseResult = ParseResp.builder()
-                    .chatId(queryReq.getChatId())
-                    .queryText(queryReq.getQueryText())
-                    .state(selectedParses.size() > 1 ? ParseResp.ParseState.PENDING : ParseResp.ParseState.COMPLETED)
-                    .selectedParses(selectedParses)
-                    .candidateParses(candidateParses)
+            candidateQueries = queryRanker.rank(candidateQueries);
+            List<SemanticParseInfo> candidateParses = candidateQueries.stream()
+                    .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
+            candidateParses.forEach(parseInfo -> parseInfoService.updateParseInfo(parseInfo));
+            parseResult = ParseResp.builder().chatId(queryReq.getChatId()).queryText(queryReq.getQueryText())
+                    .state(ParseResp.ParseState.COMPLETED).candidateParses(candidateParses)
                     .build();
             chatParseDOS = chatService.batchAddParse(chatCtx, queryReq, parseResult);
         } else {

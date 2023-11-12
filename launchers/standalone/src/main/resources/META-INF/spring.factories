@@ -21,9 +21,6 @@ com.tencent.supersonic.chat.api.component.SemanticCorrector=\
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.LocalSemanticInterpreter
 
-com.tencent.supersonic.chat.query.QuerySelector=\
-   com.tencent.supersonic.chat.query.HeuristicQuerySelector
-
 com.tencent.supersonic.chat.parser.llm.s2sql.ModelResolver=\
   com.tencent.supersonic.chat.parser.llm.s2sql.HeuristicModelResolver
 
