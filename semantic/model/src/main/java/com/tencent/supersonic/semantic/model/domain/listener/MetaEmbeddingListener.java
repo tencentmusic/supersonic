@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -24,6 +25,7 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
     @Autowired
     private EmbeddingUtils embeddingUtils;
 
+    @Async
     @Override
     public void onApplicationEvent(DataEvent event) {
         if (CollectionUtils.isEmpty(event.getDataItems())) {

@@ -123,7 +123,7 @@ public class MetricQueryTest extends BaseQueryTest {
 
         expectedResult.setQueryMode(MetricFilterQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
-
+        expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户名"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
 
         List<String> list = new ArrayList<>();

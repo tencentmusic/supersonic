@@ -81,9 +81,11 @@ public class ParserInfoServiceImpl implements ParseInfoService {
         List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(logicSql);
         //set dataInfo
         try {
-            if (!org.springframework.util.CollectionUtils.isEmpty(expressions)) {
+            if (!CollectionUtils.isEmpty(expressions)) {
                 DateConf dateInfo = getDateInfo(expressions);
-                parseInfo.setDateInfo(dateInfo);
+                if (dateInfo != null && parseInfo.getDateInfo() == null) {
+                    parseInfo.setDateInfo(dateInfo);
+                }
             }
         } catch (Exception e) {
             log.error("set dateInfo error :", e);
@@ -103,10 +105,10 @@ public class ParserInfoServiceImpl implements ParseInfoService {
         if (Objects.isNull(semanticSchema)) {
             return;
         }
-        List<String> allFields = getFieldsExceptDate(SqlParserSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
-
-        Set<SchemaElement> metrics = getElements(parseInfo.getModelId(), allFields, semanticSchema.getMetrics());
-        parseInfo.setMetrics(metrics);
+        //cannot use metrics in sql to override parse info
+        //List<String> allFields = getFieldsExceptDate(SqlParserSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
+        //Set<SchemaElement> metrics = getElements(parseInfo.getModelId(), allFields, semanticSchema.getMetrics());
+        //parseInfo.setMetrics(metrics);
 
         if (SqlParserSelectFunctionHelper.hasAggregateFunction(sqlInfo.getCorrectS2SQL())) {
             parseInfo.setNativeQuery(false);
@@ -167,8 +169,8 @@ public class ParserInfoServiceImpl implements ParseInfoService {
         List<FilterExpression> dateExpressions = filterExpressions.stream()
                 .filter(expression -> TimeDimensionEnum.DAY.getChName().equalsIgnoreCase(expression.getFieldName()))
                 .collect(Collectors.toList());
-        if (org.springframework.util.CollectionUtils.isEmpty(dateExpressions)) {
-            return new DateConf();
+        if (CollectionUtils.isEmpty(dateExpressions)) {
+            return null;
         }
         DateConf dateInfo = new DateConf();
         dateInfo.setDateMode(DateMode.BETWEEN);
