@@ -151,23 +151,21 @@ const ChatItem: React.FC<Props> = ({
     setParseLoading(false);
     const { code, data } = parseData || {};
     const { state, selectedParses, candidateParses, queryId, parseTimeCost } = data || {};
+    const parses = selectedParses?.concat(candidateParses || []) || [];
     if (
       code !== 200 ||
       state === ParseStateEnum.FAILED ||
-      !selectedParses?.length ||
-      (!selectedParses[0]?.properties?.type && !selectedParses[0]?.queryMode)
+      !parses.length ||
+      (!parses[0]?.properties?.type && !parses[0]?.queryMode)
     ) {
       setParseTip(PARSE_ERROR_TIP);
       return;
     }
     onUpdateMessageScroll?.();
-    const parseInfos = selectedParses
-      .concat(candidateParses || [])
-      .slice(0, 5)
-      .map((item: any) => ({
-        ...item,
-        queryId,
-      }));
+    const parseInfos = parses.slice(0, 5).map((item: any) => ({
+      ...item,
+      queryId,
+    }));
     setParseInfoOptions(parseInfos || []);
     const parseInfoValue = parseInfos[0];
     setParseInfo(parseInfoValue);
@@ -309,6 +307,7 @@ const ChatItem: React.FC<Props> = ({
             <>
               {!isMobile && parseInfo?.sqlInfo && isDeveloper && integrateSystem !== 'c2' && (
                 <SqlItem
+                  llmReq={parseInfo?.properties?.CONTEXT?.llmReq}
                   integrateSystem={integrateSystem}
                   sqlInfo={parseInfo.sqlInfo}
                   sqlTimeCost={parseTimeCost?.sqlTime}

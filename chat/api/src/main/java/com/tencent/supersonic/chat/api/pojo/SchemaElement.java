@@ -41,13 +41,13 @@ public class SchemaElement implements Serializable {
         SchemaElement schemaElement = (SchemaElement) o;
         return Objects.equal(model, schemaElement.model) && Objects.equal(id,
                 schemaElement.id) && Objects.equal(name, schemaElement.name)
-                && Objects.equal(bizName, schemaElement.bizName) && Objects.equal(
-                useCnt, schemaElement.useCnt) && Objects.equal(type, schemaElement.type);
+                && Objects.equal(bizName, schemaElement.bizName)
+                && Objects.equal(type, schemaElement.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(model, id, name, bizName, useCnt, type);
+        return Objects.hashCode(model, id, name, bizName, type);
     }
 
 }

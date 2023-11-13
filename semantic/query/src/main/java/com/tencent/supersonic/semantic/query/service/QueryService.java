@@ -7,22 +7,18 @@ import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
-
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public interface QueryService {
 
-    Object queryBySql(QueryS2QLReq querySqlCmd, User user) throws Exception;
+    Object queryBySql(QueryS2SQLReq querySqlCmd, User user) throws Exception;
 
     QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructCmd, User user) throws Exception;
-
-    void downloadByStruct(QueryStructReq queryStructReq, User user, HttpServletResponse response) throws Exception;
 
     QueryResultWithSchemaResp queryByStructWithAuth(QueryStructReq queryStructCmd, User user)
             throws Exception;

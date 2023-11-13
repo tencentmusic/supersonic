@@ -77,3 +77,6 @@ update s2_model set status = 1;
 update s2_datasource set status = 1;
 update s2_metric set status = 1;
 update s2_dimension set status = 1;
+
+--20231110
+UPDATE `s2_agent` SET `config` = replace (`config`,'LLM_S2QL','LLM_S2SQL') WHERE `config` LIKE '%LLM_S2QL%';

@@ -223,11 +223,9 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public List<ChatParseDO> batchAddParse(ChatContext chatCtx, QueryReq queryReq,
-            ParseResp parseResult,
-            List<SemanticParseInfo> candidateParses,
-            List<SemanticParseInfo> selectedParses) {
-        return chatQueryRepository.batchSaveParseInfo(chatCtx, queryReq, parseResult, candidateParses, selectedParses);
+    public List<ChatParseDO> batchAddParse(ChatContext chatCtx, QueryReq queryReq, ParseResp parseResult) {
+        List<SemanticParseInfo> candidateParses = parseResult.getCandidateParses();
+        return chatQueryRepository.batchSaveParseInfo(chatCtx, queryReq, parseResult, candidateParses);
     }
 
     @Override

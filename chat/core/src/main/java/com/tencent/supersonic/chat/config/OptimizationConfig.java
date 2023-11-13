@@ -39,10 +39,10 @@ public class OptimizationConfig {
     @Value("${candidate.threshold}")
     private Double candidateThreshold;
 
-    @Value("${user.s2ql.switch:false}")
-    private boolean useS2qlSwitch;
+    @Value("${user.s2SQL.switch:false}")
+    private boolean useS2SqlSwitch;
 
-    @Value("${embedding.mapper.word.min:3}")
+    @Value("${embedding.mapper.word.min:4}")
     private int embeddingMapperWordMin;
 
     @Value("${embedding.mapper.word.max:5}")
@@ -57,6 +57,6 @@ public class OptimizationConfig {
     @Value("${embedding.mapper.round.number:10}")
     private int embeddingMapperRoundNumber;
 
-    @Value("${embedding.mapper.distance.threshold:0.52}")
+    @Value("${embedding.mapper.distance.threshold:0.58}")
     private Double embeddingMapperDistanceThreshold;
 }

@@ -22,7 +22,7 @@ import org.springframework.util.CollectionUtils;
 public class EntityMapper extends BaseMapper {
 
     @Override
-    public void work(QueryContext queryContext) {
+    public void doMap(QueryContext queryContext) {
         SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
         for (Long modelId : schemaMapInfo.getMatchedModels()) {
             List<SchemaElementMatch> schemaElementMatchList = schemaMapInfo.getMatchedElements(modelId);

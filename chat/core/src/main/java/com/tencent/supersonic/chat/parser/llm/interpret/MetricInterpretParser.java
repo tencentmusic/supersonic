@@ -7,33 +7,32 @@ import com.tencent.supersonic.chat.agent.tool.AgentToolType;
 import com.tencent.supersonic.chat.agent.tool.MetricInterpretTool;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
-import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.ModelSchema;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
-import com.tencent.supersonic.chat.query.llm.interpret.MetricInterpretQuery;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
+import com.tencent.supersonic.chat.query.llm.LLMSemanticQuery;
+import com.tencent.supersonic.chat.query.llm.interpret.MetricInterpretQuery;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
-
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashMap;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class MetricInterpretParser implements SemanticParser {
@@ -71,7 +70,7 @@ public class MetricInterpretParser implements SemanticParser {
 
     private void buildQuery(Long modelId, QueryContext queryContext,
                             List<Long> metricIds, List<SchemaElementMatch> schemaElementMatches, String toolName) {
-        PluginSemanticQuery metricInterpretQuery = QueryManager.createPluginQuery(MetricInterpretQuery.QUERY_MODE);
+        LLMSemanticQuery metricInterpretQuery = QueryManager.createLLMQuery(MetricInterpretQuery.QUERY_MODE);
         Set<SchemaElement> metrics = getMetrics(metricIds, modelId);
         SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(modelId, queryContext.getRequest(),
                 metrics, schemaElementMatches, toolName);

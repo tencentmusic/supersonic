@@ -15,7 +15,7 @@ import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
@@ -56,7 +56,7 @@ public class QueryReqConverter {
     @Autowired
     private Catalog catalog;
 
-    public QueryStatement convert(QueryS2QLReq databaseReq, ModelSchemaResp modelSchemaResp) throws Exception {
+    public QueryStatement convert(QueryS2SQLReq databaseReq, ModelSchemaResp modelSchemaResp) throws Exception {
 
         if (Objects.isNull(modelSchemaResp)) {
             return new QueryStatement();
@@ -119,9 +119,9 @@ public class QueryReqConverter {
         return queryStatement;
     }
 
-    private AggOption getAggOption(QueryS2QLReq databaseReq) {
-        // if there is no group by in S2QL,set MetricTable's aggOption to "NATIVE"
-        // if there is count() in S2QL,set MetricTable's aggOption to "NATIVE"
+    private AggOption getAggOption(QueryS2SQLReq databaseReq) {
+        // if there is no group by in S2SQL,set MetricTable's aggOption to "NATIVE"
+        // if there is count() in S2SQL,set MetricTable's aggOption to "NATIVE"
         String sql = databaseReq.getSql();
         if (!SqlParserSelectHelper.hasGroupBy(sql)
                 || SqlParserSelectFunctionHelper.hasFunction(sql, "count")
@@ -131,7 +131,7 @@ public class QueryReqConverter {
         return AggOption.DEFAULT;
     }
 
-    private void convertNameToBizName(QueryS2QLReq databaseReq, ModelSchemaResp modelSchemaResp) {
+    private void convertNameToBizName(QueryS2SQLReq databaseReq, ModelSchemaResp modelSchemaResp) {
         Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(modelSchemaResp);
         String sql = databaseReq.getSql();
         log.info("convert name to bizName before:{}", sql);
@@ -158,7 +158,7 @@ public class QueryReqConverter {
         return metrics;
     }
 
-    private void functionNameCorrector(QueryS2QLReq databaseReq) {
+    private void functionNameCorrector(QueryS2SQLReq databaseReq) {
         DatabaseResp database = catalog.getDatabaseByModelId(databaseReq.getModelId());
         if (Objects.isNull(database) || Objects.isNull(database.getType())) {
             return;
@@ -208,7 +208,7 @@ public class QueryReqConverter {
         return elements.stream();
     }
 
-    public void correctTableName(QueryS2QLReq databaseReq) {
+    public void correctTableName(QueryS2SQLReq databaseReq) {
         String sql = SqlParserReplaceHelper.replaceTable(databaseReq.getSql(),
                 Constants.TABLE_PREFIX + databaseReq.getModelId());
         databaseReq.setSql(sql);

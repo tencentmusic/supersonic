@@ -3,6 +3,7 @@ package com.tencent.supersonic.semantic.query.utils;
 import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
 
 import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.util.stream.Collectors;
@@ -54,6 +55,9 @@ public class SqlGenerateUtils {
     }
 
     public String getSelectField(final Aggregator agg) {
+        if (AggOperatorEnum.COUNT_DISTINCT.equals(agg.getFunc())) {
+            return "count(distinct " + agg.getColumn() + " ) AS " + agg.getColumn() + " ";
+        }
         if (CollectionUtils.isEmpty(agg.getArgs())) {
             return agg.getFunc() + "( " + agg.getColumn() + " ) AS " + agg.getColumn() + " ";
         }

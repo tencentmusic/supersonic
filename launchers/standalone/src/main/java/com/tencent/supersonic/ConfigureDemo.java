@@ -66,14 +66,15 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         queryRequest.setUser(User.getFakeUser());
         ParseResp parseResp = queryService.performParsing(queryRequest);
 
-        ExecuteQueryReq executeReq = new ExecuteQueryReq();
+        ExecuteQueryReq executeReq = ExecuteQueryReq.builder().build();
         executeReq.setQueryId(parseResp.getQueryId());
-        executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());
+        executeReq.setParseId(parseResp.getCandidateParses().get(0).getId());
         executeReq.setQueryText(queryRequest.getQueryText());
-        executeReq.setParseInfo(parseResp.getSelectedParses().get(0));
+        executeReq.setParseInfo(parseResp.getCandidateParses().get(0));
         executeReq.setChatId(parseResp.getChatId());
         executeReq.setUser(queryRequest.getUser());
         executeReq.setAgentId(1);
+        executeReq.setSaveAnswer(true);
         queryService.performExecution(executeReq);
     }
 
@@ -230,7 +231,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.LLM_S2QL);
+        llmParserTool.setType(AgentToolType.LLM_S2SQL);
         llmParserTool.setModelIds(Lists.newArrayList(-1L));
         agentConfig.getTools().add(llmParserTool);
 
@@ -257,7 +258,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.LLM_S2QL);
+        llmParserTool.setType(AgentToolType.LLM_S2SQL);
         llmParserTool.setModelIds(Lists.newArrayList(-1L));
         agentConfig.getTools().add(llmParserTool);
 
@@ -279,7 +280,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.LLM_S2QL);
+        llmParserTool.setType(AgentToolType.LLM_S2SQL);
         llmParserTool.setModelIds(Lists.newArrayList(3L));
         agentConfig.getTools().add(llmParserTool);
 

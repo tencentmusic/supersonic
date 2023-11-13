@@ -9,8 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.tencent.supersonic.chat.parser.llm.s2ql.ModelResolver;
-import com.tencent.supersonic.chat.query.QuerySelector;
+import com.tencent.supersonic.chat.parser.llm.s2sql.ModelResolver;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
 import org.apache.commons.collections.CollectionUtils;
@@ -20,11 +19,10 @@ public class ComponentFactory {
 
     private static List<SchemaMapper> schemaMappers = new ArrayList<>();
     private static List<SemanticParser> semanticParsers = new ArrayList<>();
-    private static List<SemanticCorrector> s2QLCorrections = new ArrayList<>();
+    private static List<SemanticCorrector> s2SQLCorrections = new ArrayList<>();
     private static SemanticInterpreter semanticInterpreter;
     private static List<ParseResponder> parseResponders = new ArrayList<>();
     private static List<ExecuteResponder> executeResponders = new ArrayList<>();
-    private static QuerySelector querySelector;
     private static ModelResolver modelResolver;
     public static List<SchemaMapper> getSchemaMappers() {
         return CollectionUtils.isEmpty(schemaMappers) ? init(SchemaMapper.class, schemaMappers) : schemaMappers;
@@ -35,8 +33,8 @@ public class ComponentFactory {
     }
 
     public static List<SemanticCorrector> getSqlCorrections() {
-        return CollectionUtils.isEmpty(s2QLCorrections) ? init(SemanticCorrector.class,
-                s2QLCorrections) : s2QLCorrections;
+        return CollectionUtils.isEmpty(s2SQLCorrections) ? init(SemanticCorrector.class,
+                s2SQLCorrections) : s2SQLCorrections;
     }
 
     public static List<ParseResponder> getParseResponders() {
@@ -59,12 +57,6 @@ public class ComponentFactory {
         semanticInterpreter = layer;
     }
 
-    public static QuerySelector getQuerySelector() {
-        if (Objects.isNull(querySelector)) {
-            querySelector = init(QuerySelector.class);
-        }
-        return querySelector;
-    }
 
     public static ModelResolver getModelResolver() {
         if (Objects.isNull(modelResolver)) {
