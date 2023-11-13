@@ -11,6 +11,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.config.LLMParserConfig;
+import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
@@ -59,9 +60,10 @@ public class LLMRequestService {
     private AgentService agentService;
     @Autowired
     private SchemaService schemaService;
-
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private OptimizationConfig optimizationConfig;
 
     public boolean check(QueryContext queryCtx) {
         QueryReq request = queryCtx.getRequest();
@@ -128,7 +130,9 @@ public class LLMRequestService {
         llmReq.setSchema(llmSchema);
 
         List<ElementValue> linking = new ArrayList<>();
-        linking.addAll(getValueList(queryCtx, modelId, semanticSchema));
+        if (optimizationConfig.isUseLinkingValueSwitch()) {
+            linking.addAll(getValueList(queryCtx, modelId, semanticSchema));
+        }
         llmReq.setLinking(linking);
 
         String currentDate = S2SQLDateHelper.getReferenceDate(modelId);
