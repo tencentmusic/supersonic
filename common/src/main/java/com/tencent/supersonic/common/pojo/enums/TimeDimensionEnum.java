@@ -1,5 +1,7 @@
 package com.tencent.supersonic.common.pojo.enums;
 
+import cn.hutool.core.collection.CollectionUtil;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -36,5 +38,19 @@ public enum TimeDimensionEnum {
 
     public String getChName() {
         return chName;
+    }
+
+    /**
+     * Determine if a time dimension field is included in a Chinese text field
+     * @param fields field
+     * @return true/fase
+     */
+    public static boolean containsZhTimeDimension(List<String> fields) {
+        if (CollectionUtil.isEmpty(fields)) {
+            return false;
+        }
+        return fields.contains(TimeDimensionEnum.DAY.getChName())
+                || fields.contains(TimeDimensionEnum.WEEK.getChName())
+                || fields.contains(TimeDimensionEnum.MONTH.getChName());
     }
 }
