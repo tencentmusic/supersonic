@@ -1,14 +1,19 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Parenthesis;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
@@ -48,6 +53,21 @@ public class SqlParserRemoveHelper {
             return;
         }
         removeWhereExpression(whereExpression, removeFieldNames);
+    }
+    public static String removeWhereCondition(String sql) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        Expression where = ((PlainSelect) selectBody).getWhere();
+        Expression having = ((PlainSelect) selectBody).getHaving();
+        where = filteredWhereExpression(where);
+        having = filteredWhereExpression(having);
+        ((PlainSelect) selectBody).setWhere(where);
+        ((PlainSelect) selectBody).setHaving(having);
+        return selectStatement.toString();
     }
 
     private static void removeWhereExpression(Expression whereExpression, Set<String> removeFieldNames) {
@@ -169,6 +189,79 @@ public class SqlParserRemoveHelper {
             plainSelect.setWhere(where);
         }
         return selectStatement.toString();
+    }
+
+    private static Expression filteredWhereExpression(Expression where) {
+        if (Objects.isNull(where)) {
+            return null;
+        }
+        if (where instanceof Parenthesis) {
+            Expression expression = filteredWhereExpression(((Parenthesis) where).getExpression());
+            if (expression != null) {
+                try {
+                    Expression parseExpression = CCJSqlParserUtil.parseExpression("(" + expression + ")");
+                    return parseExpression;
+                } catch (JSQLParserException jsqlParserException) {
+                    log.info("jsqlParser has an exception:{}", jsqlParserException.toString());
+                }
+            } else {
+                return expression;
+            }
+        } else if (where instanceof AndExpression) {
+            AndExpression andExpression = (AndExpression) where;
+            return filteredNumberExpression(andExpression);
+        } else if (where instanceof OrExpression) {
+            OrExpression orExpression = (OrExpression) where;
+            return filteredNumberExpression(orExpression);
+        } else {
+            return replaceComparisonOperatorFunction(where);
+        }
+        return where;
+    }
+
+    private static <T extends BinaryExpression> Expression filteredNumberExpression(T binaryExpression) {
+        Expression leftExpression = filteredWhereExpression(binaryExpression.getLeftExpression());
+        Expression rightExpression = filteredWhereExpression(binaryExpression.getRightExpression());
+        if (leftExpression != null && rightExpression != null) {
+            binaryExpression.setLeftExpression(leftExpression);
+            binaryExpression.setRightExpression(rightExpression);
+            return binaryExpression;
+        } else if (leftExpression != null && rightExpression == null) {
+            return leftExpression;
+        } else if (leftExpression == null && rightExpression != null) {
+            return rightExpression;
+        } else {
+            return null;
+        }
+    }
+
+    private static Expression replaceComparisonOperatorFunction(Expression expression) {
+        if (Objects.isNull(expression)) {
+            return null;
+        }
+        if (expression instanceof GreaterThanEquals) {
+            return removeSingleFilter((GreaterThanEquals) expression);
+        } else if (expression instanceof GreaterThan) {
+            return removeSingleFilter((GreaterThan) expression);
+        } else if (expression instanceof MinorThan) {
+            return removeSingleFilter((MinorThan) expression);
+        } else if (expression instanceof MinorThanEquals) {
+            return removeSingleFilter((MinorThanEquals) expression);
+        } else if (expression instanceof EqualsTo) {
+            return removeSingleFilter((EqualsTo) expression);
+        } else if (expression instanceof NotEqualsTo) {
+            return removeSingleFilter((NotEqualsTo) expression);
+        }
+        return expression;
+    }
+
+    private static <T extends ComparisonOperator> Expression removeSingleFilter(T comparisonExpression) {
+        Expression leftExpression = comparisonExpression.getLeftExpression();
+        if (leftExpression instanceof LongValue) {
+            return null;
+        } else {
+            return comparisonExpression;
+        }
     }
 
 }
