@@ -65,5 +65,4 @@ public class Constants {
     public static final Long DEFAULT_FREQUENCY = 100000L;
 
     public static final String TABLE_PREFIX = "t_";
-
 }
