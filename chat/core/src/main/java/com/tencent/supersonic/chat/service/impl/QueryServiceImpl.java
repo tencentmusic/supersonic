@@ -331,12 +331,6 @@ public class QueryServiceImpl implements QueryService {
             QueryReq queryReq = new QueryReq();
             queryReq.setQueryFilters(new QueryFilters());
             queryReq.setUser(user);
-            //correct s2sql
-            semanticCorrectors.stream().forEach(correction -> {
-                correction.correct(queryReq, semanticQuery.getParseInfo());
-            });
-            //update parserInfo
-            parseInfoService.updateParseInfo(semanticQuery.getParseInfo());
         }
         QueryResult queryResult = semanticQuery.execute(user);
         queryResult.setChatContext(semanticQuery.getParseInfo());

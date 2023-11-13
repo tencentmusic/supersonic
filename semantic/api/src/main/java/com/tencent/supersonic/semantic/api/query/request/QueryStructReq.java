@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
@@ -200,8 +201,9 @@ public class QueryStructReq {
         List<Aggregator> aggregators = queryStructReq.getAggregators();
         if (!CollectionUtils.isEmpty(aggregators)) {
             for (Aggregator aggregator : aggregators) {
+                String columnName = aggregator.getColumn();
                 if (queryStructReq.getNativeQuery()) {
-                    selectItems.add(new SelectExpressionItem(new Column(aggregator.getColumn())));
+                    selectItems.add(new SelectExpressionItem(new Column(columnName)));
                 } else {
                     Function sumFunction = new Function();
                     AggOperatorEnum func = aggregator.getFunc();
@@ -213,8 +215,10 @@ public class QueryStructReq {
                         sumFunction.setName("count");
                         sumFunction.setDistinct(true);
                     }
-                    sumFunction.setParameters(new ExpressionList(new Column(aggregator.getColumn())));
-                    selectItems.add(new SelectExpressionItem(sumFunction));
+                    sumFunction.setParameters(new ExpressionList(new Column(columnName)));
+                    SelectExpressionItem selectExpressionItem = new SelectExpressionItem(sumFunction);
+                    selectExpressionItem.setAlias(new Alias(columnName));
+                    selectItems.add(selectExpressionItem);
                 }
             }
         }
