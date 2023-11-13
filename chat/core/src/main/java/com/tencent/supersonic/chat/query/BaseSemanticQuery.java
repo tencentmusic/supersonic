@@ -41,26 +41,24 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
     public String explain(User user) {
         ExplainSqlReq explainSqlReq = null;
         try {
-            ExplainResp explain = null;
             SqlInfo sqlInfo = parseInfo.getSqlInfo();
+
             if (StringUtils.isNotBlank(sqlInfo.getCorrectS2SQL())) {
                 //sql
-                QueryS2SQLReq queryS2SQLReq = QueryReqBuilder.buildS2SQLReq(sqlInfo.getCorrectS2SQL(),
-                        parseInfo.getModelId());
                 explainSqlReq = ExplainSqlReq.builder()
                         .queryTypeEnum(QueryTypeEnum.SQL)
-                        .queryReq(queryS2SQLReq)
+                        .queryReq(QueryReqBuilder.buildS2SQLReq(
+                                sqlInfo.getCorrectS2SQL(), parseInfo.getModelId()
+                        ))
                         .build();
-                explain = semanticInterpreter.explain(explainSqlReq, user);
             } else {
                 //struct
-                QueryStructReq queryStructReq = QueryReqBuilder.buildStructReq(parseInfo);
                 explainSqlReq = ExplainSqlReq.builder()
                         .queryTypeEnum(QueryTypeEnum.STRUCT)
-                        .queryReq(queryStructReq)
+                        .queryReq(QueryReqBuilder.buildStructReq(parseInfo))
                         .build();
-                explain = semanticInterpreter.explain(explainSqlReq, user);
             }
+            ExplainResp explain = semanticInterpreter.explain(explainSqlReq, user);
             if (Objects.nonNull(explain)) {
                 return explain.getSql();
             }
