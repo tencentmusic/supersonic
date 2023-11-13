@@ -527,3 +527,9 @@ CREATE TABLE s2_materialization_record
     PRIMARY KEY (`id`)
 );
 
+CREATE TABLE s2_sys_parameter
+(
+    id  INT PRIMARY KEY AUTO_INCREMENT,
+    admin varchar(500),
+    parameters text null
+);
