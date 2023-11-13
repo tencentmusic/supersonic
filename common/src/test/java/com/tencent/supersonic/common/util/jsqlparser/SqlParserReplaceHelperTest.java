@@ -1,8 +1,11 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.*;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Collections;
+import java.util.Map;
+import java.util.HashMap;
 
-import net.sf.jsqlparser.statement.select.*;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -10,38 +13,6 @@ import org.junit.jupiter.api.Test;
  * SqlParserReplaceHelperTest
  */
 class SqlParserReplaceHelperTest {
-    @Test
-    void replaceValue11() {
-        String sql="select a.品牌名称,a.法定代表人,b.公司名称,b.总部地点" +
-                " from 互联网企业 a join ( select 公司名称,avg(注册资本) as 平均注册资本 from 互联网企业" +
-                " group by 公司名称) b on a.公司名称 = b.公司名称" +
-                " where a.注册资本 < b.平均注册资本";
-        //String sql="select 品牌名称,法定代表人,公司名称,总部地点 as 平均注册资本 from 互联网企业";
-        Map<String, String> fieldToBizName = new HashMap<>();
-        fieldToBizName.put("品牌名称", "brand_name");
-        fieldToBizName.put("法定代表人", "le");
-        fieldToBizName.put("公司名称", "company_name");
-        fieldToBizName.put("总部地点", "address");
-        fieldToBizName.put("注册资本", "pv");
-        fieldToBizName.put("歌曲名", "song_name");
-        fieldToBizName.put("歌手名", "singer_name");
-        fieldToBizName.put("播放", "play_count");
-        fieldToBizName.put("歌曲发布时间", "song_publis_date");
-        sql = SqlParserReplaceHelper.replaceFields(sql, fieldToBizName);
-        sql = SqlParserReplaceHelper.replaceTable(sql, "internet");
-        System.out.println(sql);
-
-//        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
-//        SelectBody selectBody = selectStatement.getSelectBody();
-//        PlainSelect plainSelect = (PlainSelect) selectBody;
-//        System.out.println(plainSelect.getFromItem());
-//        System.out.println(plainSelect.getJoins());
-//        List<Join> joinList=plainSelect.getJoins();
-//        for (Join join : joinList) {
-//            System.out.println(join.getOnExpression());
-//            System.out.println(((SubSelect) join.getRightItem()).getSelectBody());
-//        }
-    }
 
     @Test
     void replaceValue() {

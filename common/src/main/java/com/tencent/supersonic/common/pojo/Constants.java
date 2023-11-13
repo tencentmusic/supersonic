@@ -1,10 +1,6 @@
 package com.tencent.supersonic.common.pojo;
 
-import static java.util.stream.Collectors.toMap;
-import java.util.AbstractMap;
-import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 
 public class Constants {

@@ -293,11 +293,12 @@ public class SqlParserReplaceHelper {
                             plainSelect.getFromItem().accept(new TableNameReplaceVisitor(tableName));
                         }
                     });
-            List<Join> joins=painSelect.getJoins();
-            if(!CollectionUtils.isEmpty(joins)){
-                for(Join join:joins){
+            List<Join> joins = painSelect.getJoins();
+            if (!CollectionUtils.isEmpty(joins)) {
+                for (Join join : joins) {
                     SelectBody subSelectBody = ((SubSelect) join.getRightItem()).getSelectBody();
-                    List<PlainSelect> subPlainSelects = SqlParserSelectHelper.getPlainSelects((PlainSelect) subSelectBody);
+                    List<PlainSelect> subPlainSelects = SqlParserSelectHelper.getPlainSelects(
+                            (PlainSelect) subSelectBody);
                     for (PlainSelect subPlainSelect : subPlainSelects) {
                         subPlainSelect.getFromItem().accept(new TableNameReplaceVisitor(tableName));
                     }
