@@ -27,7 +27,7 @@ import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.query.QuerySelector;
+import com.tencent.supersonic.chat.query.QueryRanker;
 import com.tencent.supersonic.chat.query.llm.s2sql.S2SQLQuery;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
@@ -105,13 +105,14 @@ public class QueryServiceImpl implements QueryService {
     private SolvedQueryManager solvedQueryManager;
     @Autowired
     private ParseInfoService parseInfoService;
+    @Autowired
+    private QueryRanker queryRanker;
 
     @Value("${time.threshold: 100}")
     private Integer timeThreshold;
 
     private List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
     private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
-    private QuerySelector querySelector = ComponentFactory.getQuerySelector();
     private List<ParseResponder> parseResponders = ComponentFactory.getParseResponders();
     private List<ExecuteResponder> executeResponders = ComponentFactory.getExecuteResponders();
     private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSqlCorrections();
@@ -131,7 +132,6 @@ public class QueryServiceImpl implements QueryService {
             mapper.map(queryCtx);
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(mapper.getClass().getSimpleName()).type(CostType.MAPPER.getType()).build());
-            log.info("{} result:{}", mapper.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
 
         //3. parser
@@ -158,18 +158,12 @@ public class QueryServiceImpl implements QueryService {
         ParseResp parseResult;
         List<ChatParseDO> chatParseDOS = Lists.newArrayList();
         if (candidateQueries.size() > 0) {
-            List<SemanticQuery> selectedQueries = querySelector.select(candidateQueries, queryReq);
-            List<SemanticParseInfo> selectedParses = parseInfoService.sortParseInfo(selectedQueries);
-            List<SemanticParseInfo> candidateParses = parseInfoService.sortParseInfo(candidateQueries);
-            candidateParses = parseInfoService.getTopCandidateParseInfo(selectedParses, candidateParses);
-            candidateQueries.forEach(semanticQuery -> parseInfoService.updateParseInfo(semanticQuery.getParseInfo()));
-
-            parseResult = ParseResp.builder()
-                    .chatId(queryReq.getChatId())
-                    .queryText(queryReq.getQueryText())
-                    .state(selectedParses.size() > 1 ? ParseResp.ParseState.PENDING : ParseResp.ParseState.COMPLETED)
-                    .selectedParses(selectedParses)
-                    .candidateParses(candidateParses)
+            candidateQueries = queryRanker.rank(candidateQueries);
+            List<SemanticParseInfo> candidateParses = candidateQueries.stream()
+                    .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
+            candidateParses.forEach(parseInfo -> parseInfoService.updateParseInfo(parseInfo));
+            parseResult = ParseResp.builder().chatId(queryReq.getChatId()).queryText(queryReq.getQueryText())
+                    .state(ParseResp.ParseState.COMPLETED).candidateParses(candidateParses)
                     .build();
             chatParseDOS = chatService.batchAddParse(chatCtx, queryReq, parseResult);
         } else {
@@ -289,7 +283,7 @@ public class QueryServiceImpl implements QueryService {
         SemanticParseInfo parseInfo = getSemanticParseInfo(queryData, chatParseDO);
 
         SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
-
+        semanticQuery.setParseInfo(parseInfo);
         if (S2SQLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
             Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
             Map<String, Map<String, String>> havingFiledNameToValueMap = new HashMap<>();
@@ -326,21 +320,19 @@ public class QueryServiceImpl implements QueryService {
             if (StringUtils.isNotBlank(explainSql)) {
                 parseInfo.getSqlInfo().setQuerySQL(explainSql);
             }
+        } else {
+            //init s2sql
+            semanticQuery.initS2Sql(user);
+            QueryReq queryReq = new QueryReq();
+            queryReq.setQueryFilters(new QueryFilters());
+            queryReq.setUser(user);
+            //correct s2sql
+            semanticCorrectors.stream().forEach(correction -> {
+                correction.correct(queryReq, semanticQuery.getParseInfo());
+            });
+            //update parserInfo
+            parseInfoService.updateParseInfo(semanticQuery.getParseInfo());
         }
-        semanticQuery.setParseInfo(parseInfo);
-        //init s2sql
-        semanticQuery.initS2Sql(user);
-        QueryReq queryReq = new QueryReq();
-        queryReq.setQueryFilters(new QueryFilters());
-        queryReq.setUser(user);
-
-        //correct s2sql
-        semanticCorrectors.stream().forEach(correction -> {
-            correction.correct(queryReq, semanticQuery.getParseInfo());
-        });
-        //update parserInfo
-        parseInfoService.updateParseInfo(semanticQuery.getParseInfo());
-
         QueryResult queryResult = semanticQuery.execute(user);
         queryResult.setChatContext(semanticQuery.getParseInfo());
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);

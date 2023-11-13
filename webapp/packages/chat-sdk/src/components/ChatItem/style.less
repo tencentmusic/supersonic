@@ -447,6 +447,26 @@
     color: var(--chat-blue);
     cursor: pointer;
   }
+
+  &-schema-row {
+    display: flex;
+    margin-top: 10px;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  &-schema-title {
+    width: 50px;
+    color: var(--text-color);
+    font-weight: 500;
+  }
+
+  &-schema-content {
+    flex: 1;
+    color: var(--text-color);
+  }
 }
 
 .@{sql-item-prefix-cls}-copilot {

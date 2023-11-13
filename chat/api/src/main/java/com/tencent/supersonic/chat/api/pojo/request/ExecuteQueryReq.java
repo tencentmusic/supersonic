@@ -13,8 +13,8 @@ public class ExecuteQueryReq {
     private Integer agentId;
     private Integer chatId;
     private String queryText;
-    private Long queryId = 7L;
-    private Integer parseId = 2;
+    private Long queryId;
+    private Integer parseId;
     private SemanticParseInfo parseInfo;
-    private boolean saveAnswer = true;
+    private boolean saveAnswer;
 }

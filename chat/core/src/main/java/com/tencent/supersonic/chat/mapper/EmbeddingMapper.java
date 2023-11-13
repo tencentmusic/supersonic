@@ -33,18 +33,16 @@ public class EmbeddingMapper extends BaseMapper {
         HanlpHelper.transLetterOriginal(matchResults);
 
         //2. build SchemaElementMatch by info
-        MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
         for (EmbeddingResult matchResult : matchResults) {
             Long elementId = Retrieval.getLongId(matchResult.getId());
 
             SchemaElement schemaElement = JSONObject.parseObject(JSONObject.toJSONString(matchResult.getMetadata()),
                     SchemaElement.class);
 
-            String modelIdStr = matchResult.getMetadata().get("modelId");
-            if (StringUtils.isBlank(modelIdStr)) {
+            if (StringUtils.isBlank(matchResult.getMetadata().get("modelId"))) {
                 continue;
             }
-            long modelId = Long.parseLong(modelIdStr);
+            long modelId = Long.parseLong(matchResult.getMetadata().get("modelId"));
 
             schemaElement = getSchemaElement(modelId, schemaElement.getType(), elementId);
             if (schemaElement == null) {
@@ -54,7 +52,7 @@ public class EmbeddingMapper extends BaseMapper {
                     .element(schemaElement)
                     .frequency(BaseWordBuilder.DEFAULT_FREQUENCY)
                     .word(matchResult.getName())
-                    .similarity(mapperHelper.getSimilarity(matchResult.getName(), matchResult.getDetectWord()))
+                    .similarity(1 - matchResult.getDistance())
                     .detectWord(matchResult.getDetectWord())
                     .build();
             //3. add to mapInfo

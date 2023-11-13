@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Objects;
 
 import com.tencent.supersonic.chat.parser.llm.s2sql.ModelResolver;
-import com.tencent.supersonic.chat.query.QuerySelector;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
 import org.apache.commons.collections.CollectionUtils;
@@ -24,7 +23,6 @@ public class ComponentFactory {
     private static SemanticInterpreter semanticInterpreter;
     private static List<ParseResponder> parseResponders = new ArrayList<>();
     private static List<ExecuteResponder> executeResponders = new ArrayList<>();
-    private static QuerySelector querySelector;
     private static ModelResolver modelResolver;
     public static List<SchemaMapper> getSchemaMappers() {
         return CollectionUtils.isEmpty(schemaMappers) ? init(SchemaMapper.class, schemaMappers) : schemaMappers;
@@ -59,12 +57,6 @@ public class ComponentFactory {
         semanticInterpreter = layer;
     }
 
-    public static QuerySelector getQuerySelector() {
-        if (Objects.isNull(querySelector)) {
-            querySelector = init(QuerySelector.class);
-        }
-        return querySelector;
-    }
 
     public static ModelResolver getModelResolver() {
         if (Objects.isNull(modelResolver)) {
