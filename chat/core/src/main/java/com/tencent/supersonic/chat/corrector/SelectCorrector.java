@@ -12,15 +12,15 @@ public class SelectCorrector extends BaseSemanticCorrector {
 
     @Override
     public void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
-        String logicSql = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
-        List<String> aggregateFields = SqlParserSelectHelper.getAggregateFields(logicSql);
-        List<String> selectFields = SqlParserSelectHelper.getSelectFields(logicSql);
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        List<String> aggregateFields = SqlParserSelectHelper.getAggregateFields(correctS2SQL);
+        List<String> selectFields = SqlParserSelectHelper.getSelectFields(correctS2SQL);
         // If the number of aggregated fields is equal to the number of queried fields, do not add fields to select.
         if (!CollectionUtils.isEmpty(aggregateFields)
                 && !CollectionUtils.isEmpty(selectFields)
                 && aggregateFields.size() == selectFields.size()) {
             return;
         }
-        addFieldsToSelect(semanticParseInfo, logicSql);
+        addFieldsToSelect(semanticParseInfo, correctS2SQL);
     }
 }

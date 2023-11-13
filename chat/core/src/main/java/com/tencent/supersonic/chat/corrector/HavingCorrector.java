@@ -44,13 +44,13 @@ public class HavingCorrector extends BaseSemanticCorrector {
     }
 
     private void addHavingToSelect(SemanticParseInfo semanticParseInfo) {
-        String logicSql = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
-        if (!SqlParserSelectFunctionHelper.hasAggregateFunction(logicSql)) {
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        if (!SqlParserSelectFunctionHelper.hasAggregateFunction(correctS2SQL)) {
             return;
         }
-        Expression havingExpression = SqlParserSelectHelper.getHavingExpression(logicSql);
+        Expression havingExpression = SqlParserSelectHelper.getHavingExpression(correctS2SQL);
         if (Objects.nonNull(havingExpression)) {
-            String replaceSql = SqlParserAddHelper.addFunctionToSelect(logicSql, havingExpression);
+            String replaceSql = SqlParserAddHelper.addFunctionToSelect(correctS2SQL, havingExpression);
             semanticParseInfo.getSqlInfo().setCorrectS2SQL(replaceSql);
         }
         return;

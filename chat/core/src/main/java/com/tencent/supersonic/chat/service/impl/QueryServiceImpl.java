@@ -29,6 +29,7 @@ import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.QueryRanker;
 import com.tencent.supersonic.chat.query.llm.s2sql.S2SQLQuery;
+import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
 import com.tencent.supersonic.chat.service.ChatService;
@@ -148,6 +149,10 @@ public class QueryServiceImpl implements QueryService {
         if (CollectionUtils.isNotEmpty(candidateQueries)) {
             for (SemanticQuery semanticQuery : candidateQueries) {
                 semanticQuery.initS2Sql(queryReq.getUser());
+                // rule
+                if (semanticQuery instanceof RuleSemanticQuery) {
+                    continue;
+                }
                 semanticCorrectors.stream().forEach(correction -> {
                     correction.correct(queryReq, semanticQuery.getParseInfo());
                 });
