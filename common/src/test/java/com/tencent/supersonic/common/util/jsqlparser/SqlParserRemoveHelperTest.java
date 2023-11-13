@@ -14,7 +14,7 @@ class SqlParserRemoveHelperTest {
     void removeWhereHavingCondition() {
         String sql = "select 歌曲名 from 歌曲库 where sum(粉丝数) > 20000 and  2>1 and "
                 + "sum(播放量) > 20000 and 1=1  HAVING sum(播放量) > 20000 and 3>1";
-        sql = SqlParserRemoveHelper.removeWhereCondition(sql);
+        sql = SqlParserRemoveHelper.removeNumberCondition(sql);
         System.out.println(sql);
         Assert.assertEquals(
                 "SELECT 歌曲名 FROM 歌曲库 WHERE sum(粉丝数) > 20000 AND sum(播放量) > 20000 HAVING sum(播放量) > 20000",
@@ -22,7 +22,7 @@ class SqlParserRemoveHelperTest {
         sql = "SELECT 歌曲,sum(播放量) FROM 歌曲库\n"
                 + "WHERE (歌手名 = '张三' AND 2 > 1) AND 数据日期 = '2023-11-07'\n"
                 + "GROUP BY 歌曲名 HAVING sum(播放量) > 100000";
-        sql = SqlParserRemoveHelper.removeWhereCondition(sql);
+        sql = SqlParserRemoveHelper.removeNumberCondition(sql);
         System.out.println(sql);
         Assert.assertEquals(
                 "SELECT 歌曲, sum(播放量) FROM 歌曲库 WHERE (歌手名 = '张三') "
@@ -31,7 +31,7 @@ class SqlParserRemoveHelperTest {
         sql = "SELECT 歌曲名,sum(播放量) FROM 歌曲库 WHERE (1 = 1 AND 1 = 1 AND 2 > 1 )"
                 + "AND 1 = 1 AND 歌曲类型 IN ('类型一', '类型二') AND 歌手名 IN ('林俊杰', '周杰伦')"
                 + "AND 数据日期 = '2023-11-07' GROUP BY 歌曲名 HAVING 2 > 1 AND SUM(播放量) >= 1000";
-        sql = SqlParserRemoveHelper.removeWhereCondition(sql);
+        sql = SqlParserRemoveHelper.removeNumberCondition(sql);
         System.out.println(sql);
         Assert.assertEquals(
                 "SELECT 歌曲名, sum(播放量) FROM 歌曲库 WHERE 歌曲类型 IN ('类型一', '类型二') "
@@ -41,7 +41,7 @@ class SqlParserRemoveHelperTest {
 
         sql = "SELECT 品牌名称,法人 FROM 互联网企业 WHERE (2 > 1 AND 1 = 1) AND 数据日期 = '2023-10-31'"
                 + "GROUP BY 品牌名称, 法人 HAVING 2 > 1 AND sum(注册资本) > 100000000 AND sum(营收占比) = 0.5 and 1 = 1";
-        sql = SqlParserRemoveHelper.removeWhereCondition(sql);
+        sql = SqlParserRemoveHelper.removeNumberCondition(sql);
         System.out.println(sql);
         Assert.assertEquals(
                 "SELECT 品牌名称, 法人 FROM 互联网企业 WHERE 数据日期 = '2023-10-31' GROUP BY "
