@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.common.util.jsqlparser.AggregateEnum;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
     @Override
     public void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
         String sql = SqlParserReplaceHelper.replaceFunction(semanticParseInfo.getSqlInfo().getCorrectS2SQL(),
-                Constants.aggregateMap);
+                AggregateEnum.getAggregateEnum());
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(sql);
         replaceAlias(semanticParseInfo);
 

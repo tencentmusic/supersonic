@@ -204,6 +204,7 @@ public class SqlParserRemoveHelper {
                 } catch (JSQLParserException jsqlParserException) {
                     log.info("jsqlParser has an exception:{}", jsqlParserException.toString());
                 }
+            } else {
                 return expression;
             }
         } else if (where instanceof AndExpression) {

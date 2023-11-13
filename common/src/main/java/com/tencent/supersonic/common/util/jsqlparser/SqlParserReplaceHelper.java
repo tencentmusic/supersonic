@@ -20,6 +20,8 @@ import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
@@ -118,6 +120,17 @@ public class SqlParserReplaceHelper {
         Expression having = plainSelect.getHaving();
         if (Objects.nonNull(having)) {
             having.accept(visitor);
+        }
+        List<Join> joins = plainSelect.getJoins();
+        if (!CollectionUtils.isEmpty(joins)) {
+            for (Join join : joins) {
+                join.getOnExpression().accept(visitor);
+                SelectBody subSelectBody = ((SubSelect) join.getRightItem()).getSelectBody();
+                List<PlainSelect> subPlainSelects = SqlParserSelectHelper.getPlainSelects((PlainSelect) subSelectBody);
+                for (PlainSelect subPlainSelect : subPlainSelects) {
+                    replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace, subPlainSelect);
+                }
+            }
         }
     }
 
@@ -280,6 +293,16 @@ public class SqlParserReplaceHelper {
                             plainSelect.getFromItem().accept(new TableNameReplaceVisitor(tableName));
                         }
                     });
+            List<Join> joins=painSelect.getJoins();
+            if(!CollectionUtils.isEmpty(joins)){
+                for(Join join:joins){
+                    SelectBody subSelectBody = ((SubSelect) join.getRightItem()).getSelectBody();
+                    List<PlainSelect> subPlainSelects = SqlParserSelectHelper.getPlainSelects((PlainSelect) subSelectBody);
+                    for (PlainSelect subPlainSelect : subPlainSelects) {
+                        subPlainSelect.getFromItem().accept(new TableNameReplaceVisitor(tableName));
+                    }
+                }
+            }
         }
         return selectStatement.toString();
     }
