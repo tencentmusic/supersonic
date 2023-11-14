@@ -23,6 +23,8 @@ public class ChatConfigResp {
 
     private List<RecommendedQuestionReq> recommendedQuestions;
 
+    private String llmExamples;
+
     /**
      * available status
      */

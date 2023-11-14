@@ -33,6 +33,11 @@ public class ChatConfigBaseReq {
     private List<RecommendedQuestionReq> recommendedQuestions;
 
     /**
+     *  the llm examples about the model
+     */
+    private String llmExamples;
+
+    /**
      * available status
      */
     private StatusEnum status;
