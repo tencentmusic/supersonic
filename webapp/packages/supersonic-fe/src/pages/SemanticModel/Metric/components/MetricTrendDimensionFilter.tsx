@@ -5,13 +5,13 @@ import RemoteSelect, { RemoteSelectImperativeHandle } from '@/components/RemoteS
 import { queryDimValue } from '@/pages/SemanticModel/service';
 import { OperatorEnum } from '@/pages/SemanticModel/enum';
 import { isString } from 'lodash';
-import styles from '../style.less';
 
 const FormItem = Form.Item;
 
 type Props = {
-  dimensionOptions: { value: string; label: string }[];
+  dimensionOptions: OptionsItem[];
   modelId: number;
+  periodDate?: { startDate: string; endDate: string; dateField: string };
   value?: FormData;
   onChange?: (value: FormData) => void;
 };
@@ -19,20 +19,19 @@ type Props = {
 export type FormData = {
   dimensionBizName: string;
   operator: OperatorEnum;
-  dimensionValue: string | string[];
+  dimensionValue?: string | string[];
 };
 
 const MetricTrendDimensionFilter: React.FC<Props> = ({
   dimensionOptions,
   modelId,
   value,
+  periodDate,
   onChange,
 }) => {
   const [form] = Form.useForm();
-
   const dimensionValueSearchRef = useRef<RemoteSelectImperativeHandle>();
   const queryParams = useRef<{ dimensionBizName?: string }>({});
-
   const [formData, setFormData] = useState<FormData>({ operator: OperatorEnum.IN } as FormData);
 
   useEffect(() => {
@@ -47,6 +46,11 @@ const MetricTrendDimensionFilter: React.FC<Props> = ({
     if (formData.dimensionBizName) {
       queryParams.current = { dimensionBizName: formData.dimensionBizName };
       dimensionValueSearchRef.current?.emitSearch('');
+      form.setFieldValue('dimensionValue', undefined);
+      setFormData({
+        ...formData,
+        dimensionValue: undefined,
+      });
     }
   }, [formData.dimensionBizName]);
 
@@ -59,7 +63,17 @@ const MetricTrendDimensionFilter: React.FC<Props> = ({
       ...queryParams.current,
       value: searchValue,
       modelId,
+      // dateInfo: {},
       limit: 50,
+      ...(periodDate?.startDate
+        ? {
+            dateInfo: {
+              dateMode: 'BETWEEN',
+              startDate: periodDate.startDate,
+              endDate: periodDate.endDate,
+            },
+          }
+        : {}),
     });
     if (code === 200 && Array.isArray(data?.resultList)) {
       return data.resultList.slice(0, 50).map((item: any) => ({
@@ -109,7 +123,7 @@ const MetricTrendDimensionFilter: React.FC<Props> = ({
             placeholder="请选择筛选维度"
           />
         </FormItem>
-        <Tag color="processing" style={{ margin: 0, padding: 0 }}>
+        <Tag color="processing" style={{ margin: 0, padding: 0, height: 32 }}>
           <FormItem name="operator" noStyle>
             <Select
               style={{ minWidth: 72 }}

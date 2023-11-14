@@ -25,7 +25,7 @@ import org.apache.commons.collections.CollectionUtils;
 public class HanlpDictMapper extends BaseMapper {
 
     @Override
-    public void work(QueryContext queryContext) {
+    public void doMap(QueryContext queryContext) {
 
         String queryText = queryContext.getRequest().getQueryText();
         List<Term> terms = HanlpHelper.getTerms(queryText);

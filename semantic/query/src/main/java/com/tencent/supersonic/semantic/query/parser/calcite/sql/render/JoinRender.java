@@ -1,15 +1,15 @@
 package com.tencent.supersonic.semantic.query.parser.calcite.sql.render;
 
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Constants;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataSource;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Dimension;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Identify;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Constants;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DataSource;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Dimension;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Identify;
 
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Identify.Type;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Materialization.TimePartType;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Identify.Type;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Materialization.TimePartType;
 
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Metric;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Metric;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.Renderer;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.TableView;

@@ -11,7 +11,7 @@ import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.Filter;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import java.util.ArrayList;
@@ -55,9 +55,9 @@ public class DimValueAspect {
             return queryResultWithColumns;
         }
         Object[] args = joinPoint.getArgs();
-        QueryS2QLReq queryS2QLReq = (QueryS2QLReq) args[0];
-        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(queryS2QLReq.getModelId()));
-        String sql = queryS2QLReq.getSql();
+        QueryS2SQLReq queryS2SQLReq = (QueryS2SQLReq) args[0];
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(queryS2SQLReq.getModelId()));
+        String sql = queryS2SQLReq.getSql();
         log.info("correctorSql before replacing:{}", sql);
         // if dimensionvalue is alias,consider the true dimensionvalue.
         List<FilterExpression> filterExpressionList = SqlParserSelectHelper.getWhereExpressions(sql);
@@ -88,7 +88,7 @@ public class DimValueAspect {
         log.info("filedNameToValueMap:{}", filedNameToValueMap);
         sql = SqlParserReplaceHelper.replaceValue(sql, filedNameToValueMap);
         log.info("correctorSql after replacing:{}", sql);
-        queryS2QLReq.setSql(sql);
+        queryS2SQLReq.setSql(sql);
         Map<String, Map<String, String>> techNameToBizName = getTechNameToBizName(dimensions);
 
         QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) joinPoint.proceed();

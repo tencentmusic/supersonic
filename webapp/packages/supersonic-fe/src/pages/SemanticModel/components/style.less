@@ -10,9 +10,79 @@
     min-height: calc(100vh - 48px);
     // background: #f8f9fb;
     background-color: #fff;
+    display: flex;
     position: relative;
+    .sider {
+      flex: 0 0 350px;
+      border-right: 5px solid #eee;
 
+      .domainTitle {
+        margin-bottom: 0;
+        font-size: 20px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        font-weight: 500;
+        padding: 12px 0 12px 35px;
+      }
 
+      .addBtn {
+        cursor: pointer;
+        width: 100%;
+        font-size: 18px;
+        margin-top: 18px;
+        &:hover {
+          color: #296DF3;
+        }
+      }
+      .treeTitle {
+        margin-bottom: 0;
+        padding: 20px;
+        line-height: 34px;
+        text-align: right;
+        background: #fff;
+        // border-bottom: 1px solid #d9d9d9;
+    
+        .title {
+          float: left;
+        }
+    
+    
+      }
+    
+      .search {
+        width: calc(100% - 60px);
+        margin: 10px 0 10px 35px;
+      }
+    
+      .tree {
+        flex: 1;
+        padding: 10px;
+    
+        .projectItem {
+          display: flex;
+          width: 100%;
+          cursor: auto;
+          line-height: 30px;
+          height: 30px;
+          .projectItemTitle {
+            font-size: 16px;
+            flex: 1;
+            cursor: pointer;
+
+          }
+    
+          .operation {
+            .icon {
+              margin-left: 6px;
+              cursor: pointer;
+            }
+          }
+        }
+      }
+    }
+    .content {
+      flex: 1 1 auto;
+    }
     .collapseLeftBtn {
       position: absolute;
       top: calc(50% + 45px);
@@ -41,20 +111,20 @@
       padding: 20px;
       padding-left: 30px;
     }
-    .backBtn {
-      background-color: #f8f8f8;
-      padding: 5px;
-      color: #b0b4bc;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-      &:hover {
-        background-color: #7599e5;
-        color: #fff;
-      }
-    }
+    // .backBtn {
+    //   background-color: #f8f8f8;
+    //   padding: 5px;
+    //   color: #b0b4bc;
+    //   cursor: pointer;
+    //   display: flex;
+    //   justify-content: center;
+    //   align-items: center;
+    //   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    //   &:hover {
+    //     background-color: #7599e5;
+    //     color: #fff;
+    //   }
+    // }
     .tab {
       :global {
         .ant-tabs-tab-btn {
@@ -65,6 +135,24 @@
         }
         .ant-tabs-nav {
           margin-bottom: 0;
+        }
+        .ant-tabs-tab {
+          padding-bottom:15px;
+        }
+      }
+      .backBtn {
+        height: 56px;
+        background-color: #f8f8f8;
+        padding: 5px;
+        color: #b0b4bc;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+        &:hover {
+          background-color: #7599e5;
+          color: #fff;
         }
       }
     }
@@ -87,164 +175,42 @@
       .ant-card-body {
         padding: 0 !important;
       }
-      .ant-tabs-content-holder {
-        padding-top: 20px;
-      }
     }
 
-    .resource {
-      display: flex;
 
-      .tree {
-        flex: 1;
-
-        .headOperation {
-          .btn {
-            margin-right: 18px;
-          }
-        }
-
-        .resourceSearch {
-          margin: 10px 0;
-        }
-      }
-
-      .view {
-        width: 480px;
-        padding-left: 20px;
-      }
-
-      .selectTypesBtn {
-        margin-right: 8px;
-      }
-    }
   }
 }
 
-.domainTreeSelect {
-  // width: 300px;
-}
+
 
 .domainList {
   display: flex;
   flex-direction: column;
-  width: 400px;
+  // width: 400px;
+  width: 100%;
   overflow: hidden;
-  // min-height: calc(100vh - 48px);
-  .addBtn {
-    cursor: pointer;
-    width: 100%;
-    font-size: 18px;
-    margin-top: 18px;
-    &:hover {
-      color: #296DF3;
-    }
-  }
-  .treeTitle {
-    margin-bottom: 0;
-    padding: 20px;
-    line-height: 34px;
-    text-align: right;
-    background: #fff;
-    border-bottom: 1px solid #d9d9d9;
 
-    .title {
-      float: left;
-    }
-
-
-  }
-
-  .search {
-    width: calc(100% - 20px);
-    margin: 10px;
-  }
-
-  .tree {
-    flex: 1;
-    padding: 10px;
-
-    .projectItem {
-      display: flex;
-      width: 100%;
-      cursor: auto;
-
-      .title {
-        flex: 1;
-        cursor: pointer;
-      }
-
-      .operation {
-        .icon {
-          margin-left: 6px;
-          cursor: pointer;
-        }
-      }
-    }
-  }
 }
 
-.user {
-  display: grid;
-}
+// .user {
+//   display: grid;
+// }
 
-.search{
-  width: 50%;
-  margin-bottom: 20px;
-}
-
-.paramsName{
-  margin-right: 10px;
-}
-
-.deleteBtn{
-  margin-left: 5px;
-}
-
-.authBtn{
-  cursor: pointer;
-}
-
-.selectedResource{
-  font-size: 12px;
-  color: darkgrey;
-  margin-top: 4px;
-}
+// .search{
+//   width: 50%;
+//   margin-bottom: 20px;
+// }
 
 
-.switch{
-  // min-width: 900px;
-  // max-width: 1200px;
-  // width: 100%;
-  display: flex;
-  justify-content: flex-start;
-  .switchUser {
-    width: 200px;
-    margin-left: 33px;
-    :global {
-      .ant-select {
-        width: 100% !important;
-      }
-    }
-  }
-}
 
-.dimensionIntentionForm {
-  margin-bottom: -24px !important;
-  margin-top: 10px;
-  margin-left: 26px;
-}
+// .authBtn{
+//   cursor: pointer;
+// }
 
 .classTable {
   :global {
     .ant-pro-table-search-query-filter {
       padding-left: 0 !important;
-      // padding-bottom: 24px !important;
-      .ant-pro-form-query-filter {
-        .ant-form-item {
-          // margin-bottom: 0;
-        }
-      }
     }
     .ant-table-tbody > tr.ant-table-row-selected > td {
       background: none;
@@ -275,8 +241,6 @@
   padding: 0 11px;
   cursor: pointer;
   position: relative;
-  // background-color: #fff;
-  // border: 1px solid #d9d9d9;
   border-radius: 4px;
   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
   color: #000a24d9;

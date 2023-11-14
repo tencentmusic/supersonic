@@ -1,10 +1,11 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.Collections;
+import java.util.Map;
+import java.util.HashMap;
+
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -343,7 +344,19 @@ class SqlParserReplaceHelperTest {
     @Test
     void replaceFunctionName() {
 
-        String sql = "select MONTH(数据日期) as 月份, avg(访问次数) as 平均访问次数 from 内容库产品 where"
+        String sql = "select 公司名称,平均(注册资本),总部地点 from 互联网企业 where\n"
+                + "年营业额 >= 28800000000 and 最大(注册资本)>10000 \n"
+                + "  group by  公司名称 having 平均(注册资本)>10000  order by \n"
+                + "平均(注册资本) desc limit 5";
+        Map<String, String> map = new HashMap<>();
+        map.put("平均", "avg");
+        map.put("最大", "max");
+        sql = SqlParserReplaceHelper.replaceFunction(sql, map);
+        System.out.println(sql);
+        Assert.assertEquals("SELECT 公司名称, avg(注册资本), 总部地点 FROM 互联网企业 WHERE 年营业额 >= 28800000000 AND "
+                + "max(注册资本) > 10000 GROUP BY 公司名称 HAVING avg(注册资本) > 10000 ORDER BY avg(注册资本) DESC LIMIT 5", sql);
+
+        sql = "select MONTH(数据日期) as 月份, avg(访问次数) as 平均访问次数 from 内容库产品 where"
                 + " datediff('month', 数据日期, '2023-09-02') <= 6 group by MONTH(数据日期)";
         Map<String, String> functionMap = new HashMap<>();
         functionMap.put("MONTH".toLowerCase(), "toMonth");

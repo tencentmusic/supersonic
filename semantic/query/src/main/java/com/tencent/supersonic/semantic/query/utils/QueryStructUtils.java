@@ -27,7 +27,7 @@ import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
@@ -199,8 +199,8 @@ public class QueryStructUtils {
         return resNameEnSet;
     }
 
-    public Set<String> getResName(QueryS2QLReq queryS2QLReq) {
-        Set<String> resNameSet = SqlParserSelectHelper.getAllFields(queryS2QLReq.getSql())
+    public Set<String> getResName(QueryS2SQLReq queryS2SQLReq) {
+        Set<String> resNameSet = SqlParserSelectHelper.getAllFields(queryS2SQLReq.getSql())
                 .stream().collect(Collectors.toSet());
         return resNameSet;
     }
@@ -210,11 +210,11 @@ public class QueryStructUtils {
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 
-    public Set<String> getResNameEnExceptInternalCol(QueryS2QLReq queryS2QLReq, User user) {
-        Set<String> resNameSet = getResName(queryS2QLReq);
+    public Set<String> getResNameEnExceptInternalCol(QueryS2SQLReq queryS2SQLReq, User user) {
+        Set<String> resNameSet = getResName(queryS2SQLReq);
         Set<String> resNameEnSet = new HashSet<>();
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
-        List<Long> modelIds = Lists.newArrayList(queryS2QLReq.getModelId());
+        List<Long> modelIds = Lists.newArrayList(queryS2SQLReq.getModelId());
         filter.setModelIds(modelIds);
         List<ModelSchemaResp> modelSchemaRespList = schemaService.fetchModelSchema(filter, user);
         if (!CollectionUtils.isEmpty(modelSchemaRespList)) {
@@ -245,8 +245,8 @@ public class QueryStructUtils {
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 
-    public Set<String> getFilterResNameEnExceptInternalCol(QueryS2QLReq queryS2QLReq) {
-        String sql = queryS2QLReq.getSql();
+    public Set<String> getFilterResNameEnExceptInternalCol(QueryS2SQLReq queryS2SQLReq) {
+        String sql = queryS2SQLReq.getSql();
         Set<String> resNameEnSet = SqlParserSelectHelper.getWhereFields(sql).stream().collect(Collectors.toSet());
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }

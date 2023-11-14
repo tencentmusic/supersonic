@@ -27,10 +27,10 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
     public void correct(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
         try {
-            if (StringUtils.isBlank(semanticParseInfo.getSqlInfo().getLogicSql())) {
+            if (StringUtils.isBlank(semanticParseInfo.getSqlInfo().getCorrectS2SQL())) {
                 return;
             }
-            work(queryReq, semanticParseInfo);
+            doCorrect(queryReq, semanticParseInfo);
             log.info("sqlCorrection:{} sql:{}", this.getClass().getSimpleName(), semanticParseInfo.getSqlInfo());
         } catch (Exception e) {
             log.error(String.format("correct error,sqlInfo:%s", semanticParseInfo.getSqlInfo()), e);
@@ -38,7 +38,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
     }
 
 
-    public abstract void work(QueryReq queryReq, SemanticParseInfo semanticParseInfo);
+    public abstract void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo);
 
     protected Map<String, String> getFieldNameMap(Long modelId) {
 
@@ -71,10 +71,10 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         return result;
     }
 
-    protected void addFieldsToSelect(SemanticParseInfo semanticParseInfo, String logicSql) {
-        Set<String> selectFields = new HashSet<>(SqlParserSelectHelper.getSelectFields(logicSql));
-        Set<String> needAddFields = new HashSet<>(SqlParserSelectHelper.getGroupByFields(logicSql));
-        needAddFields.addAll(SqlParserSelectHelper.getOrderByFields(logicSql));
+    protected void addFieldsToSelect(SemanticParseInfo semanticParseInfo, String correctS2SQL) {
+        Set<String> selectFields = new HashSet<>(SqlParserSelectHelper.getSelectFields(correctS2SQL));
+        Set<String> needAddFields = new HashSet<>(SqlParserSelectHelper.getGroupByFields(correctS2SQL));
+        needAddFields.addAll(SqlParserSelectHelper.getOrderByFields(correctS2SQL));
 
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(needAddFields)) {
             return;
@@ -82,13 +82,13 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
         needAddFields.removeAll(selectFields);
         needAddFields.remove(TimeDimensionEnum.DAY.getChName());
-        String replaceFields = SqlParserAddHelper.addFieldsToSelect(logicSql, new ArrayList<>(needAddFields));
-        semanticParseInfo.getSqlInfo().setLogicSql(replaceFields);
+        String replaceFields = SqlParserAddHelper.addFieldsToSelect(correctS2SQL, new ArrayList<>(needAddFields));
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(replaceFields);
     }
 
     protected void addAggregateToMetric(SemanticParseInfo semanticParseInfo) {
         //add aggregate to all metric
-        String logicSql = semanticParseInfo.getSqlInfo().getLogicSql();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         Long modelId = semanticParseInfo.getModel().getModel();
 
         List<SchemaElement> metrics = getMetricElements(modelId);
@@ -104,8 +104,8 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         if (CollectionUtils.isEmpty(metricToAggregate)) {
             return;
         }
-        String aggregateSql = SqlParserAddHelper.addAggregateToField(logicSql, metricToAggregate);
-        semanticParseInfo.getSqlInfo().setLogicSql(aggregateSql);
+        String aggregateSql = SqlParserAddHelper.addAggregateToField(correctS2SQL, metricToAggregate);
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(aggregateSql);
     }
 
     protected List<SchemaElement> getMetricElements(Long modelId) {

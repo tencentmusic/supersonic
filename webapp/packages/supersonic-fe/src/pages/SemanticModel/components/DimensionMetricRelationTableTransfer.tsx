@@ -33,7 +33,7 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
   onChange,
 }) => {
   const [targetKeys, setTargetKeys] = useState<string[]>([]);
-  const { selectModelId: modelId, selectDomainId } = domainManger;
+  const { selectModelId: modelId } = domainManger;
   const [checkedMap, setCheckedMap] = useState<Record<string, ISemantic.IDrillDownDimensionItem>>(
     {},
   );
@@ -42,7 +42,7 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
 
   useEffect(() => {
     queryDimensionList();
-  }, []);
+  }, [metricItem, relationsInitialValue]);
 
   const queryDimensionList = async () => {
     const { code, data, msg } = await getDimensionList({ modelId: metricItem?.modelId || modelId });

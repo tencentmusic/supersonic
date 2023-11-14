@@ -133,13 +133,10 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     @Override
     public List<ChatParseDO> batchSaveParseInfo(ChatContext chatCtx, QueryReq queryReq,
                                       ParseResp parseResult,
-                                      List<SemanticParseInfo> candidateParses,
-                                      List<SemanticParseInfo> selectedParses) {
+                                      List<SemanticParseInfo> candidateParses) {
         Long queryId = createChatParse(parseResult, chatCtx, queryReq);
         List<ChatParseDO> chatParseDOList = new ArrayList<>();
-        log.info("candidateParses size:{},selectedParses size:{}", candidateParses.size(), selectedParses.size());
-        getChatParseDO(chatCtx, queryReq, queryId, 0, 1, candidateParses, chatParseDOList);
-        getChatParseDO(chatCtx, queryReq, queryId, candidateParses.size(), 0, selectedParses, chatParseDOList);
+        getChatParseDO(chatCtx, queryReq, queryId, 0, candidateParses, chatParseDOList);
         chatParseMapper.batchSaveParseInfo(chatParseDOList);
         return chatParseDOList;
     }
@@ -151,7 +148,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         }
     }
 
-    public void getChatParseDO(ChatContext chatCtx, QueryReq queryReq, Long queryId, int base, int isCandidate,
+    public void getChatParseDO(ChatContext chatCtx, QueryReq queryReq, Long queryId, int base,
                                List<SemanticParseInfo> parses, List<ChatParseDO> chatParseDOList) {
         for (int i = 0; i < parses.size(); i++) {
             ChatParseDO chatParseDO = new ChatParseDO();
@@ -160,7 +157,10 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
             chatParseDO.setQuestionId(queryId);
             chatParseDO.setQueryText(queryReq.getQueryText());
             chatParseDO.setParseInfo(JsonUtil.toString(parses.get(i)));
-            chatParseDO.setIsCandidate(isCandidate);
+            chatParseDO.setIsCandidate(1);
+            if (i == 0) {
+                chatParseDO.setIsCandidate(0);
+            }
             chatParseDO.setParseId(base + i + 1);
             chatParseDO.setCreateTime(new java.util.Date());
             chatParseDO.setUserName(queryReq.getUser().getName());

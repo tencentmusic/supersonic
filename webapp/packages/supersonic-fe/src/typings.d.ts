@@ -57,3 +57,8 @@ type PaginationResponse<T> = Result<{
   pageSize: number;
   total: number;
 }>;
+
+type OptionsItem = {
+  value: string | number;
+  label: string;
+};

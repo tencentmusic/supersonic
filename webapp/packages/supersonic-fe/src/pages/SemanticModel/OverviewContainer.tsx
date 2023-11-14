@@ -202,109 +202,77 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
     <div className={styles.projectBody}>
       <Helmet title={'语义模型-超音数'} />
       <div className={styles.projectManger}>
-        <h2 className={styles.title}>
-          {!!selectModelId && (
-            <div
-              className={styles.backBtn}
-              onClick={() => {
-                cleanModelInfo(selectDomainId);
-              }}
-            >
-              <LeftOutlined />
-            </div>
-          )}
-
-          <div className={styles.navContainer}>
-            <Popover
-              zIndex={1000}
-              overlayInnerStyle={{
-                overflow: 'scroll',
-                maxHeight: '800px',
-              }}
-              content={
-                <DomainListTree
-                  createDomainBtnVisible={mode === 'domain' ? true : false}
-                  onTreeSelected={(domainData) => {
-                    setOpen(false);
-                    const { id, name } = domainData;
-                    cleanModelInfo(id);
-                    dispatch({
-                      type: 'domainManger/setSelectDomain',
-                      selectDomainId: id,
-                      selectDomainName: name,
-                      domainData,
-                    });
+        <div className={styles.sider}>
+          <div className={styles.domainTitle}>
+            <Space>
+              {selectDomainName ? `${selectDomainName}` : '主题域信息'}
+              {selectModelName && (
+                <>
+                  <span style={{ position: 'relative' }}> | </span>
+                  <span style={{ fontSize: 16, color: '#296DF3' }}>{selectModelName}</span>
+                </>
+              )}
+            </Space>
+          </div>
+          <DomainListTree
+            createDomainBtnVisible={mode === 'domain' ? true : false}
+            onTreeSelected={(domainData) => {
+              setOpen(false);
+              const { id, name } = domainData;
+              cleanModelInfo(id);
+              dispatch({
+                type: 'domainManger/setSelectDomain',
+                selectDomainId: id,
+                selectDomainName: name,
+                domainData,
+              });
+            }}
+            onTreeDataUpdate={() => {
+              initProjectTree();
+            }}
+          />
+        </div>
+        <div className={styles.content}>
+          {selectDomainId ? (
+            <>
+              {mode === 'domain' ? (
+                <DomainManagerTab
+                  isModel={isModel}
+                  activeKey={activeKey}
+                  modelList={modelList}
+                  handleModelChange={(model) => {
+                    handleModelChange(model);
                   }}
-                  onTreeDataUpdate={() => {
-                    initProjectTree();
+                  onBackDomainBtnClick={() => {
+                    cleanModelInfo(selectDomainId);
+                  }}
+                  onMenuChange={(menuKey) => {
+                    setActiveKey(menuKey);
+                    pushUrlMenu(selectDomainId, selectModelId, menuKey);
                   }}
                 />
-              }
-              trigger="click"
-              open={selectModelId ? false : open}
-              onOpenChange={handleOpenChange}
-            >
-              <div className={styles.domainSelector}>
-                <span className={styles.domainTitle}>
-                  <Space>
-                    {selectDomainName ? `${selectDomainName}` : '主题域信息'}
-                    {selectModelName && (
-                      <>
-                        <span style={{ position: 'relative', top: '-2px' }}> | </span>
-                        <span style={{ fontSize: 16, color: '#296DF3' }}>{selectModelName}</span>
-                      </>
-                    )}
-                  </Space>
-                </span>
-                {!selectModelId && (
-                  <span className={styles.downIcon}>
-                    <DownOutlined />
-                  </span>
-                )}
-              </div>
-            </Popover>
-          </div>
-        </h2>
-
-        {selectDomainId ? (
-          <>
-            {mode === 'domain' ? (
-              <DomainManagerTab
-                isModel={isModel}
-                activeKey={activeKey}
-                modelList={modelList}
-                handleModelChange={(model) => {
-                  handleModelChange(model);
-                }}
-                onBackDomainBtnClick={() => {
-                  cleanModelInfo(selectDomainId);
-                }}
-                onMenuChange={(menuKey) => {
-                  setActiveKey(menuKey);
-                  pushUrlMenu(selectDomainId, selectModelId, menuKey);
-                }}
-              />
-            ) : (
-              <ChatSettingTab
-                isModel={isModel}
-                activeKey={activeKey}
-                modelList={modelList}
-                handleModelChange={(model) => {
-                  handleModelChange(model);
-                }}
-                onBackDomainBtnClick={() => {
-                  cleanModelInfo(selectDomainId);
-                }}
-                onMenuChange={(menuKey) => {
-                  setActiveKey(menuKey);
-                  pushUrlMenu(selectDomainId, selectModelId, menuKey);
-                }}
-              />
-            )}
-          </>
-        ) : (
-          <h2 className={styles.mainTip}>请选择项目</h2>
-        )}
+              ) : (
+                <ChatSettingTab
+                  isModel={isModel}
+                  activeKey={activeKey}
+                  modelList={modelList}
+                  handleModelChange={(model) => {
+                    handleModelChange(model);
+                  }}
+                  onBackDomainBtnClick={() => {
+                    cleanModelInfo(selectDomainId);
+                  }}
+                  onMenuChange={(menuKey) => {
+                    setActiveKey(menuKey);
+                    pushUrlMenu(selectDomainId, selectModelId, menuKey);
+                  }}
+                />
+              )}
+            </>
+          ) : (
+            <h2 className={styles.mainTip}>请选择项目</h2>
+          )}
+        </div>
       </div>
     </div>
   );

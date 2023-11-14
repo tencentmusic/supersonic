@@ -5,15 +5,28 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
+import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.statement.select.GroupByElement;
+import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
+import net.sf.jsqlparser.statement.select.SubSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -91,6 +104,7 @@ public class SqlParserReplaceHelper {
         //2. replace select fields
         for (SelectItem selectItem : plainSelect.getSelectItems()) {
             selectItem.accept(visitor);
+            replaceAsName(fieldNameMap, selectItem);
         }
 
         //3. replace oder by fields
@@ -109,6 +123,32 @@ public class SqlParserReplaceHelper {
         Expression having = plainSelect.getHaving();
         if (Objects.nonNull(having)) {
             having.accept(visitor);
+        }
+        List<Join> joins = plainSelect.getJoins();
+        if (!CollectionUtils.isEmpty(joins)) {
+            for (Join join : joins) {
+                join.getOnExpression().accept(visitor);
+                SelectBody subSelectBody = ((SubSelect) join.getRightItem()).getSelectBody();
+                List<PlainSelect> subPlainSelects = SqlParserSelectHelper.getPlainSelects((PlainSelect) subSelectBody);
+                for (PlainSelect subPlainSelect : subPlainSelects) {
+                    replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace, subPlainSelect);
+                }
+            }
+        }
+    }
+
+    private static void replaceAsName(Map<String, String> fieldNameMap, SelectItem selectItem) {
+        if (selectItem instanceof SelectExpressionItem) {
+            SelectExpressionItem expressionItem = (SelectExpressionItem) selectItem;
+            Alias alias = expressionItem.getAlias();
+            if (Objects.isNull(alias)) {
+                return;
+            }
+            String aliasName = alias.getName();
+            String replaceFieldName = fieldNameMap.get(aliasName);
+            if (StringUtils.isNotBlank(replaceFieldName)) {
+                alias.setName(replaceFieldName);
+            }
         }
     }
 
@@ -143,6 +183,12 @@ public class SqlParserReplaceHelper {
         for (SelectItem selectItem : plainSelect.getSelectItems()) {
             selectItem.accept(visitor);
         }
+        Expression having = plainSelect.getHaving();
+        if (Objects.nonNull(having)) {
+            replaceHavingFunction(functionMap, having);
+        }
+        List<OrderByElement> orderByElementList = plainSelect.getOrderByElements();
+        replaceOrderByFunction(functionMap, orderByElementList);
     }
 
     public static String replaceFunction(String sql) {
@@ -170,6 +216,67 @@ public class SqlParserReplaceHelper {
         //2. add Waiting Expression
         List<Expression> waitingForAdds = visitor.getWaitingForAdds();
         addWaitingExpression(plainSelect, where, waitingForAdds);
+    }
+
+    private static void replaceHavingFunction(Map<String, String> functionMap, Expression having) {
+        if (Objects.nonNull(having)) {
+            if (having instanceof AndExpression) {
+                AndExpression andExpression = (AndExpression) having;
+                replaceHavingFunction(functionMap, andExpression.getLeftExpression());
+                replaceHavingFunction(functionMap, andExpression.getRightExpression());
+            } else if (having instanceof OrExpression) {
+                OrExpression orExpression = (OrExpression) having;
+                replaceHavingFunction(functionMap, orExpression.getLeftExpression());
+                replaceHavingFunction(functionMap, orExpression.getRightExpression());
+            } else {
+                replaceComparisonOperatorFunction(functionMap, having);
+            }
+        }
+    }
+
+    private static void replaceComparisonOperatorFunction(Map<String, String> functionMap, Expression expression) {
+        if (Objects.isNull(expression)) {
+            return;
+        }
+        if (expression instanceof GreaterThanEquals) {
+            replaceFilterFunction(functionMap, (GreaterThanEquals) expression);
+        } else if (expression instanceof GreaterThan) {
+            replaceFilterFunction(functionMap, (GreaterThan) expression);
+        } else if (expression instanceof MinorThan) {
+            replaceFilterFunction(functionMap, (MinorThan) expression);
+        } else if (expression instanceof MinorThanEquals) {
+            replaceFilterFunction(functionMap, (MinorThanEquals) expression);
+        } else if (expression instanceof EqualsTo) {
+            replaceFilterFunction(functionMap, (EqualsTo) expression);
+        } else if (expression instanceof NotEqualsTo) {
+            replaceFilterFunction(functionMap, (NotEqualsTo) expression);
+        }
+    }
+
+    private static void replaceOrderByFunction(Map<String, String> functionMap,
+            List<OrderByElement> orderByElementList) {
+        if (Objects.isNull(orderByElementList)) {
+            return;
+        }
+        for (OrderByElement orderByElement : orderByElementList) {
+            if (orderByElement.getExpression() instanceof Function) {
+                Function function = (Function) orderByElement.getExpression();
+                if (functionMap.containsKey(function.getName())) {
+                    function.setName(functionMap.get(function.getName()));
+                }
+            }
+        }
+    }
+
+    private static <T extends ComparisonOperator> void replaceFilterFunction(
+            Map<String, String> functionMap, T comparisonExpression) {
+        Expression expression = comparisonExpression.getLeftExpression();
+        if (expression instanceof Function) {
+            Function function = (Function) expression;
+            if (functionMap.containsKey(function.getName())) {
+                function.setName(functionMap.get(function.getName()));
+            }
+        }
     }
 
     private static void addWaitingExpression(PlainSelect plainSelect, Expression where,
@@ -204,6 +311,17 @@ public class SqlParserReplaceHelper {
                             plainSelect.getFromItem().accept(new TableNameReplaceVisitor(tableName));
                         }
                     });
+            List<Join> joins = painSelect.getJoins();
+            if (!CollectionUtils.isEmpty(joins)) {
+                for (Join join : joins) {
+                    SelectBody subSelectBody = ((SubSelect) join.getRightItem()).getSelectBody();
+                    List<PlainSelect> subPlainSelects = SqlParserSelectHelper.getPlainSelects(
+                            (PlainSelect) subSelectBody);
+                    for (PlainSelect subPlainSelect : subPlainSelects) {
+                        subPlainSelect.getFromItem().accept(new TableNameReplaceVisitor(tableName));
+                    }
+                }
+            }
         }
         return selectStatement.toString();
     }
