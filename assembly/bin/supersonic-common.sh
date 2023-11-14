@@ -83,8 +83,16 @@ function runJavaService {
 function runPythonService {
   pythonRunDir=${runtimeDir}/supersonic-${model_name}/llmparser
     cd $pythonRunDir
-    # create a virtual environment
-    ${python_path} -m venv venv
+    # check if venv is available
+    if ! ${python_path} -c "import venv" &> /dev/null; then
+        echo "venv not found, installing virtualenv via pip..."
+        pip install virtualenv
+        # create a virtual environment using virtualenv
+        virtualenv venv
+    else
+        # create a virtual environment using venv
+        ${python_path} -m venv venv
+    fi
     # activate the virtual environment
     source venv/bin/activate
     # install dependencies
