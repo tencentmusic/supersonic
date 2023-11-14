@@ -278,10 +278,11 @@ export declare namespace IChatConfig {
 
   interface IConfig {
     id: any;
-    domainId: number;
-    domainName: string;
+    modelId: number;
+    modelName: string;
     chatAggRichConfig: IChatRichConfig;
     chatDetailRichConfig: IChatRichConfig;
+    recommendedQuestions: { question: string }[];
     bizName: string;
     statusEnum: string;
     createdBy: string;

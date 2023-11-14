@@ -423,6 +423,12 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           open={dimensionValueSettingModalVisible}
           dimensionItem={dimensionItem}
           onCancel={() => {
+            dispatch({
+              type: 'domainManger/queryDimensionList',
+              payload: {
+                modelId,
+              },
+            });
             setDimensionValueSettingModalVisible(false);
           }}
           onSubmit={() => {

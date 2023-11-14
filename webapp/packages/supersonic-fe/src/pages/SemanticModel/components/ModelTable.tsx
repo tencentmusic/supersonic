@@ -57,7 +57,7 @@ const ModelTable: React.FC<Props> = ({
     },
     {
       dataIndex: 'name',
-      title: '指标名称',
+      title: '模型名称',
       search: false,
       render: (_, record) => {
         return (
@@ -73,9 +73,9 @@ const ModelTable: React.FC<Props> = ({
     },
     {
       dataIndex: 'key',
-      title: '指标搜索',
+      title: '模型搜索',
       hideInTable: true,
-      renderFormItem: () => <Input placeholder="请输入ID/指标名称/字段名称/标签" />,
+      renderFormItem: () => <Input placeholder="请输入ID/模型名称/字段名称/标签" />,
     },
     {
       dataIndex: 'alias',

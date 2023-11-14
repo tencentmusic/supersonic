@@ -37,96 +37,96 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
   onKnowledgeInfosMapChange,
   ...restProps
 }) => {
-  const { selectModelId: modelId } = domainManger;
-  const [dimensionValueSettingModalVisible, setDimensionValueSettingModalVisible] =
-    useState<boolean>(false);
-  const [currentRecord, setCurrentRecord] = useState<RecordType>({} as RecordType);
-  const [currentDimensionSettingFormData, setCurrentDimensionSettingFormData] =
-    useState<IChatConfig.IKnowledgeConfig>();
+  // const { selectModelId: modelId } = domainManger;
+  // const [dimensionValueSettingModalVisible, setDimensionValueSettingModalVisible] =
+  //   useState<boolean>(false);
+  // const [currentRecord, setCurrentRecord] = useState<RecordType>({} as RecordType);
+  // const [currentDimensionSettingFormData, setCurrentDimensionSettingFormData] =
+  //   useState<IChatConfig.IKnowledgeConfig>();
 
-  const [recordLoadingMap, setRecordLoadingMap] = useState<Record<string, boolean>>({});
+  // const [recordLoadingMap, setRecordLoadingMap] = useState<Record<string, boolean>>({});
 
-  const [taskStateMap, setTaskStateMap] = useState<TaskStateMap>({});
+  // const [taskStateMap, setTaskStateMap] = useState<TaskStateMap>({});
 
-  useEffect(() => {
-    queryDictLatestTaskList();
-  }, []);
+  // useEffect(() => {
+  //   queryDictLatestTaskList();
+  // }, []);
 
-  const updateKnowledgeInfosMap = (record: RecordType, updateData: Record<string, any>) => {
-    const { bizName, id } = record;
-    const knowledgeMap = {
-      ...knowledgeInfosMap,
-    };
-    const target = knowledgeMap[bizName];
-    if (target) {
-      knowledgeMap[bizName] = {
-        ...target,
-        ...updateData,
-      };
-    } else {
-      knowledgeMap[bizName] = {
-        itemId: id,
-        bizName,
-        ...updateData,
-      };
-    }
-    onKnowledgeInfosMapChange?.(knowledgeMap);
-  };
+  // const updateKnowledgeInfosMap = (record: RecordType, updateData: Record<string, any>) => {
+  //   const { bizName, id } = record;
+  //   const knowledgeMap = {
+  //     ...knowledgeInfosMap,
+  //   };
+  //   const target = knowledgeMap[bizName];
+  //   if (target) {
+  //     knowledgeMap[bizName] = {
+  //       ...target,
+  //       ...updateData,
+  //     };
+  //   } else {
+  //     knowledgeMap[bizName] = {
+  //       itemId: id,
+  //       bizName,
+  //       ...updateData,
+  //     };
+  //   }
+  //   onKnowledgeInfosMapChange?.(knowledgeMap);
+  // };
 
-  const queryDictLatestTaskList = async () => {
-    const { code, data } = await searchDictLatestTaskList({
-      modelId,
-    });
-    if (code !== 200) {
-      message.error('获取字典导入任务失败!');
-      return;
-    }
-    const tastMap = data.reduce(
-      (stateMap: TaskStateMap, item: { dimId: number; status: DictTaskState }) => {
-        const { dimId, status } = item;
-        stateMap[dimId] = status;
-        return stateMap;
-      },
-      {},
-    );
-    setTaskStateMap(tastMap);
-  };
+  // const queryDictLatestTaskList = async () => {
+  //   const { code, data } = await searchDictLatestTaskList({
+  //     modelId,
+  //   });
+  //   if (code !== 200) {
+  //     message.error('获取字典导入任务失败!');
+  //     return;
+  //   }
+  //   const tastMap = data.reduce(
+  //     (stateMap: TaskStateMap, item: { dimId: number; status: DictTaskState }) => {
+  //       const { dimId, status } = item;
+  //       stateMap[dimId] = status;
+  //       return stateMap;
+  //     },
+  //     {},
+  //   );
+  //   setTaskStateMap(tastMap);
+  // };
 
-  const createDictTaskQuery = async (recordData: RecordType) => {
-    setRecordLoadingMap({
-      ...recordLoadingMap,
-      [recordData.id]: true,
-    });
-    const { code } = await createDictTask({
-      updateMode: 'REALTIME_ADD',
-      modelAndDimPair: {
-        [modelId]: [recordData.id],
-      },
-    });
-    setRecordLoadingMap({
-      ...recordLoadingMap,
-      [recordData.id]: false,
-    });
-    if (code !== 200) {
-      message.error('字典导入任务创建失败!');
-      return;
-    }
-    setTimeout(() => {
-      queryDictLatestTaskList();
-    }, 2000);
-  };
+  // const createDictTaskQuery = async (recordData: RecordType) => {
+  //   setRecordLoadingMap({
+  //     ...recordLoadingMap,
+  //     [recordData.id]: true,
+  //   });
+  //   const { code } = await createDictTask({
+  //     updateMode: 'REALTIME_ADD',
+  //     modelAndDimPair: {
+  //       [modelId]: [recordData.id],
+  //     },
+  //   });
+  //   setRecordLoadingMap({
+  //     ...recordLoadingMap,
+  //     [recordData.id]: false,
+  //   });
+  //   if (code !== 200) {
+  //     message.error('字典导入任务创建失败!');
+  //     return;
+  //   }
+  //   setTimeout(() => {
+  //     queryDictLatestTaskList();
+  //   }, 2000);
+  // };
 
-  const deleteDictTask = async (recordData: RecordType) => {
-    const { code } = await createDictTask({
-      updateMode: 'REALTIME_DELETE',
-      modelAndDimPair: {
-        [modelId]: [recordData.id],
-      },
-    });
-    if (code !== 200) {
-      message.error('删除字典导入任务创建失败!');
-    }
-  };
+  // const deleteDictTask = async (recordData: RecordType) => {
+  //   const { code } = await createDictTask({
+  //     updateMode: 'REALTIME_DELETE',
+  //     modelAndDimPair: {
+  //       [modelId]: [recordData.id],
+  //     },
+  //   });
+  //   if (code !== 200) {
+  //     message.error('删除字典导入任务创建失败!');
+  //   }
+  // };
 
   let rightColumns: ColumnsType<RecordType> = [
     {
@@ -141,104 +141,104 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
         return <TransTypeTag type={type} />;
       },
     },
-    {
-      dataIndex: 'y',
-      title: (
-        <TableTitleTooltips
-          title="维度值可见"
-          tooltips="勾选可见后，维度值将在搜索时可以被联想出来"
-        />
-      ),
-      width: 120,
-      render: (_: any, record: RecordType) => {
-        const { type, bizName } = record;
-        return type === TransType.DIMENSION ? (
-          <Checkbox
-            checked={knowledgeInfosMap?.[bizName]?.searchEnable}
-            onChange={(e: CheckboxChangeEvent) => {
-              updateKnowledgeInfosMap(record, { searchEnable: e.target.checked });
-              if (!e.target.checked) {
-                deleteDictTask(record);
-              }
-            }}
-            onClick={(event) => {
-              event.stopPropagation();
-            }}
-          />
-        ) : (
-          <></>
-        );
-      },
-    },
-    {
-      dataIndex: 'taskState',
-      width: 130,
-      title: (
-        <Space>
-          导入字典状态
-          <span
-            className={styles.taskStateRefreshIcon}
-            onClick={() => {
-              queryDictLatestTaskList();
-            }}
-          >
-            <Tooltip title="刷新字典任务状态">
-              <RedoOutlined />
-            </Tooltip>
-          </span>
-        </Space>
-      ),
-      render: (_, record) => {
-        const { id, type } = record;
-        const target = taskStateMap[id];
-        if (type === TransType.DIMENSION && target) {
-          return DictTaskState[target] || '未知状态';
-        }
-        return '--';
-      },
-    },
-    {
-      title: '操作',
-      dataIndex: 'x',
-      render: (_: any, record: RecordType) => {
-        const { type, bizName, id } = record;
-        return type === TransType.DIMENSION ? (
-          <Space>
-            <Button
-              style={{ padding: 0 }}
-              key="importDictBtn"
-              type="link"
-              disabled={!knowledgeInfosMap?.[bizName]?.searchEnable}
-              loading={!!recordLoadingMap[id]}
-              onClick={(event) => {
-                createDictTaskQuery(record);
-                event.stopPropagation();
-              }}
-            >
-              导入字典
-            </Button>
-            <Button
-              style={{ padding: 0 }}
-              key="editable"
-              type="link"
-              disabled={!knowledgeInfosMap?.[bizName]?.searchEnable}
-              onClick={(event) => {
-                setCurrentRecord(record);
-                setCurrentDimensionSettingFormData(
-                  knowledgeInfosMap?.[bizName]?.knowledgeAdvancedConfig,
-                );
-                setDimensionValueSettingModalVisible(true);
-                event.stopPropagation();
-              }}
-            >
-              可见维度值设置
-            </Button>
-          </Space>
-        ) : (
-          <></>
-        );
-      },
-    },
+    // {
+    //   dataIndex: 'y',
+    //   title: (
+    //     <TableTitleTooltips
+    //       title="维度值可见"
+    //       tooltips="勾选可见后，维度值将在搜索时可以被联想出来"
+    //     />
+    //   ),
+    //   width: 120,
+    //   render: (_: any, record: RecordType) => {
+    //     const { type, bizName } = record;
+    //     return type === TransType.DIMENSION ? (
+    //       <Checkbox
+    //         checked={knowledgeInfosMap?.[bizName]?.searchEnable}
+    //         onChange={(e: CheckboxChangeEvent) => {
+    //           updateKnowledgeInfosMap(record, { searchEnable: e.target.checked });
+    //           if (!e.target.checked) {
+    //             deleteDictTask(record);
+    //           }
+    //         }}
+    //         onClick={(event) => {
+    //           event.stopPropagation();
+    //         }}
+    //       />
+    //     ) : (
+    //       <></>
+    //     );
+    //   },
+    // },
+    // {
+    //   dataIndex: 'taskState',
+    //   width: 130,
+    //   title: (
+    //     <Space>
+    //       导入字典状态
+    //       <span
+    //         className={styles.taskStateRefreshIcon}
+    //         onClick={() => {
+    //           queryDictLatestTaskList();
+    //         }}
+    //       >
+    //         <Tooltip title="刷新字典任务状态">
+    //           <RedoOutlined />
+    //         </Tooltip>
+    //       </span>
+    //     </Space>
+    //   ),
+    //   render: (_, record) => {
+    //     const { id, type } = record;
+    //     const target = taskStateMap[id];
+    //     if (type === TransType.DIMENSION && target) {
+    //       return DictTaskState[target] || '未知状态';
+    //     }
+    //     return '--';
+    //   },
+    // },
+    // {
+    //   title: '操作',
+    //   dataIndex: 'x',
+    //   render: (_: any, record: RecordType) => {
+    //     const { type, bizName, id } = record;
+    //     return type === TransType.DIMENSION ? (
+    //       <Space>
+    //         <Button
+    //           style={{ padding: 0 }}
+    //           key="importDictBtn"
+    //           type="link"
+    //           disabled={!knowledgeInfosMap?.[bizName]?.searchEnable}
+    //           loading={!!recordLoadingMap[id]}
+    //           onClick={(event) => {
+    //             createDictTaskQuery(record);
+    //             event.stopPropagation();
+    //           }}
+    //         >
+    //           导入字典
+    //         </Button>
+    //         <Button
+    //           style={{ padding: 0 }}
+    //           key="editable"
+    //           type="link"
+    //           disabled={!knowledgeInfosMap?.[bizName]?.searchEnable}
+    //           onClick={(event) => {
+    //             setCurrentRecord(record);
+    //             setCurrentDimensionSettingFormData(
+    //               knowledgeInfosMap?.[bizName]?.knowledgeAdvancedConfig,
+    //             );
+    //             setDimensionValueSettingModalVisible(true);
+    //             event.stopPropagation();
+    //           }}
+    //         >
+    //           可见维度值设置
+    //         </Button>
+    //       </Space>
+    //     ) : (
+    //       <></>
+    //     );
+    //   },
+    // },
   ];
 
   const leftColumns: ColumnsType<RecordType> = [
@@ -299,7 +299,7 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
           );
         }}
       </Transfer>
-      <DimensionValueSettingModal
+      {/* <DimensionValueSettingModal
         visible={dimensionValueSettingModalVisible}
         initialValues={currentDimensionSettingFormData}
         onSubmit={(formValues) => {
@@ -309,12 +309,11 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
         onCancel={() => {
           setDimensionValueSettingModalVisible(false);
         }}
-      />
+      /> */}
     </>
   );
 };
 
-// export default DimensionMetricVisibleTableTransfer;
 export default connect(({ domainManger }: { domainManger: StateType }) => ({
   domainManger,
 }))(DimensionMetricVisibleTableTransfer);

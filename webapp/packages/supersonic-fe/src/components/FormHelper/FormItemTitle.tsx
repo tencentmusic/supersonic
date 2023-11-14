@@ -1,6 +1,7 @@
 import { Space } from 'antd';
+import { ReactNode } from 'react';
 export interface IProps {
-  title: string;
+  title: string | ReactNode;
   subTitle?: string;
 }
 
