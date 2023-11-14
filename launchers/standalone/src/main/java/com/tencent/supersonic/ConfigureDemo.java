@@ -99,11 +99,11 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         parseAndExecute(2, "访问次数最高的部门");
     }
 
-    public void addChatParameter() {
-        SysParameter chatParameter = new SysParameter();
-        chatParameter.setId(1);
-        chatParameter.init();
-        sysParameterService.save(chatParameter);
+    public void addSysParameter() {
+        SysParameter sysParameter = new SysParameter();
+        sysParameter.setId(1);
+        sysParameter.init();
+        sysParameterService.save(sysParameter);
     }
 
     public void addDemoChatConfig_1() {
@@ -306,7 +306,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             return;
         }
         try {
-            addChatParameter();
+            addSysParameter();
             addDemoChatConfig_1();
             addDemoChatConfig_2();
             addPlugin_1();

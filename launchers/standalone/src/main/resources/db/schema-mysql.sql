@@ -63,6 +63,7 @@ CREATE TABLE `s2_chat_config` (
                                   `created_by` varchar(100) NOT NULL COMMENT '创建人',
                                   `updated_by` varchar(100) NOT NULL COMMENT '更新人',
                                   `status` int(10) NOT NULL COMMENT '主题域扩展信息状态, 0-删除，1-生效',
+                                  `llm_examples` text COMMENT 'llm examples',
                                   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='主题域扩展信息表';
 
