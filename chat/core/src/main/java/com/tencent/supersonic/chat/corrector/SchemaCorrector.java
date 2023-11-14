@@ -4,7 +4,6 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.parser.llm.s2sql.ParseResult;
-import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -23,9 +22,9 @@ public class SchemaCorrector extends BaseSemanticCorrector {
 
     @Override
     public void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
-        String sql = SqlParserReplaceHelper.replaceFunction(semanticParseInfo.getSqlInfo().getCorrectS2SQL(),
-                AggregateEnum.getAggregateEnum());
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(sql);
+
+        correctAggFunction(semanticParseInfo);
+
         replaceAlias(semanticParseInfo);
 
         updateFieldNameByLinkingValue(semanticParseInfo);
@@ -33,6 +32,13 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         updateFieldValueByLinkingValue(semanticParseInfo);
 
         correctFieldName(semanticParseInfo);
+    }
+
+    private void correctAggFunction(SemanticParseInfo semanticParseInfo) {
+        Map<String, String> aggregateEnum = AggregateEnum.getAggregateEnum();
+        SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
+        String sql = SqlParserReplaceHelper.replaceFunction(sqlInfo.getCorrectS2SQL(), aggregateEnum);
+        sqlInfo.setCorrectS2SQL(sql);
     }
 
     private void replaceAlias(SemanticParseInfo semanticParseInfo) {
@@ -74,8 +80,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         if (Objects.isNull(parseResult) || Objects.isNull(parseResult.getLlmReq())) {
             return null;
         }
-        LLMReq llmReq = parseResult.getLlmReq();
-        return llmReq.getLinking();
+        return parseResult.getLinkingValues();
     }
 
 

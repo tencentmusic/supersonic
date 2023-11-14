@@ -74,7 +74,8 @@ public class WhereCorrector extends BaseSemanticCorrector {
             String currentDate = S2SQLDateHelper.getReferenceDate(semanticParseInfo.getModelId());
             if (StringUtils.isNotBlank(currentDate)) {
                 correctS2SQL = SqlParserAddHelper.addParenthesisToWhere(correctS2SQL);
-                correctS2SQL = SqlParserAddHelper.addWhere(correctS2SQL, TimeDimensionEnum.DAY.getChName(), currentDate);
+                correctS2SQL = SqlParserAddHelper.addWhere(correctS2SQL, TimeDimensionEnum.DAY.getChName(),
+                        currentDate);
             }
         }
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
