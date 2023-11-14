@@ -41,6 +41,7 @@ public enum TimeDimensionEnum {
 
     /**
      * Determine if a time dimension field is included in a Chinese text field
+     *
      * @param fields field
      * @return true/false
      */
