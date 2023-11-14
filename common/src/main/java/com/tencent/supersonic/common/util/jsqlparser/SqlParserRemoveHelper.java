@@ -251,16 +251,28 @@ public class SqlParserRemoveHelper {
             return removeSingleFilter((EqualsTo) expression);
         } else if (expression instanceof NotEqualsTo) {
             return removeSingleFilter((NotEqualsTo) expression);
+        } else if (expression instanceof InExpression) {
+            InExpression inExpression = (InExpression) expression;
+            Expression leftExpression = inExpression.getLeftExpression();
+            return distinguishNumberCondition(leftExpression, expression);
+        } else if (expression instanceof LikeExpression) {
+            LikeExpression likeExpression = (LikeExpression) expression;
+            Expression leftExpression = likeExpression.getLeftExpression();
+            return distinguishNumberCondition(leftExpression, expression);
         }
         return expression;
     }
 
     private static <T extends ComparisonOperator> Expression removeSingleFilter(T comparisonExpression) {
         Expression leftExpression = comparisonExpression.getLeftExpression();
+        return distinguishNumberCondition(leftExpression, comparisonExpression);
+    }
+
+    public static Expression distinguishNumberCondition(Expression leftExpression, Expression expression) {
         if (leftExpression instanceof LongValue) {
             return null;
         } else {
-            return comparisonExpression;
+            return expression;
         }
     }
 
