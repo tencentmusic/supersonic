@@ -1,7 +1,6 @@
 package com.tencent.supersonic.common.pojo.enums;
 
 import cn.hutool.core.collection.CollectionUtil;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +42,7 @@ public enum TimeDimensionEnum {
     /**
      * Determine if a time dimension field is included in a Chinese text field
      * @param fields field
-     * @return true/fase
+     * @return true/false
      */
     public static boolean containsZhTimeDimension(List<String> fields) {
         if (CollectionUtil.isEmpty(fields)) {
