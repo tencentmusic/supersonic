@@ -23,7 +23,7 @@ import org.springframework.util.CollectionUtils;
 public class FuzzyNameMapper extends BaseMapper {
 
     @Override
-    public void work(QueryContext queryContext) {
+    public void doMap(QueryContext queryContext) {
 
         List<Term> terms = HanlpHelper.getTerms(queryContext.getRequest().getQueryText());
 

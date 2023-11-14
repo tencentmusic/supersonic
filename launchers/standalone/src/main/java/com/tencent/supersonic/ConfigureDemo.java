@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.agent.AgentConfig;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
 import com.tencent.supersonic.chat.agent.tool.LLMParserTool;
 import com.tencent.supersonic.chat.agent.tool.RuleQueryTool;
+import com.tencent.supersonic.common.pojo.SysParameter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
@@ -23,6 +24,7 @@ import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.chat.service.AgentService;
+import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.PluginService;
@@ -55,6 +57,9 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
     private PluginService pluginService;
     @Autowired
     private AgentService agentService;
+    @Autowired
+    private SysParameterService sysParameterService;
+
     @Value("${spring.h2.demo.enabled:false}")
     private boolean demoEnable;
 
@@ -68,12 +73,13 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         ExecuteQueryReq executeReq = ExecuteQueryReq.builder().build();
         executeReq.setQueryId(parseResp.getQueryId());
-        executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());
+        executeReq.setParseId(parseResp.getCandidateParses().get(0).getId());
         executeReq.setQueryText(queryRequest.getQueryText());
-        executeReq.setParseInfo(parseResp.getSelectedParses().get(0));
+        executeReq.setParseInfo(parseResp.getCandidateParses().get(0));
         executeReq.setChatId(parseResp.getChatId());
         executeReq.setUser(queryRequest.getUser());
         executeReq.setAgentId(1);
+        executeReq.setSaveAnswer(true);
         queryService.performExecution(executeReq);
     }
 
@@ -91,6 +97,13 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         parseAndExecute(2, "alice 停留时长");
         parseAndExecute(2, "对比alice和lucy的访问次数");
         parseAndExecute(2, "访问次数最高的部门");
+    }
+
+    public void addSysParameter() {
+        SysParameter sysParameter = new SysParameter();
+        sysParameter.setId(1);
+        sysParameter.init();
+        sysParameterService.save(sysParameter);
     }
 
     public void addDemoChatConfig_1() {
@@ -230,7 +243,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.LLM_S2QL);
+        llmParserTool.setType(AgentToolType.LLM_S2SQL);
         llmParserTool.setModelIds(Lists.newArrayList(-1L));
         agentConfig.getTools().add(llmParserTool);
 
@@ -257,7 +270,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.LLM_S2QL);
+        llmParserTool.setType(AgentToolType.LLM_S2SQL);
         llmParserTool.setModelIds(Lists.newArrayList(-1L));
         agentConfig.getTools().add(llmParserTool);
 
@@ -279,7 +292,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.LLM_S2QL);
+        llmParserTool.setType(AgentToolType.LLM_S2SQL);
         llmParserTool.setModelIds(Lists.newArrayList(3L));
         agentConfig.getTools().add(llmParserTool);
 
@@ -293,6 +306,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             return;
         }
         try {
+            addSysParameter();
             addDemoChatConfig_1();
             addDemoChatConfig_2();
             addPlugin_1();

@@ -200,9 +200,9 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         QueryStructReq queryStructReq = convertQueryStruct();
 
         OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);
-        if (optimizationConfig.isUseS2qlSwitch()) {
-            queryStructReq.setS2QL(parseInfo.getSqlInfo().getS2QL());
-            queryStructReq.setLogicSql(parseInfo.getSqlInfo().getLogicSql());
+        if (optimizationConfig.isUseS2SqlSwitch()) {
+            queryStructReq.setS2SQL(parseInfo.getSqlInfo().getS2SQL());
+            queryStructReq.setCorrectS2SQL(parseInfo.getSqlInfo().getCorrectS2SQL());
         }
         QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
 

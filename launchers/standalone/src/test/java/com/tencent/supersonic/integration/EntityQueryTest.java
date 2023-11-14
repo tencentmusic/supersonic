@@ -1,5 +1,7 @@
 package com.tencent.supersonic.integration;
 
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -7,12 +9,12 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.query.rule.entity.EntityFilterQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
-import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+import org.junit.Test;
 
 public class EntityQueryTest extends BaseQueryTest {
 
@@ -33,7 +35,7 @@ public class EntityQueryTest extends BaseQueryTest {
         SchemaElement metric = SchemaElement.builder().name("播放量").build();
         expectedParseInfo.getMetrics().add(metric);
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, 7, period, startDay, endDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateMode.BETWEEN, 1, period, startDay, endDay));
         expectedParseInfo.setNativeQuery(false);
 
         assertQueryResult(expectedResult, actualResult);

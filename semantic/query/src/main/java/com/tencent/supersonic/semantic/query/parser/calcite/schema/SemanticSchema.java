@@ -1,11 +1,11 @@
 package com.tencent.supersonic.semantic.query.parser.calcite.schema;
 
 
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataSource;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Dimension;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Materialization;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Metric;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.SemanticModel;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DataSource;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Dimension;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Materialization;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Metric;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.SemanticModel;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
@@ -62,11 +63,11 @@ public class QueryStructReq {
     /**
      * Later deleted for compatibility only
      */
-    private String s2QL;
+    private String s2SQL;
     /**
      * Later deleted for compatibility only
      */
-    private String logicSql;
+    private String correctS2SQL;
 
     public List<String> getGroups() {
         if (!CollectionUtils.isEmpty(this.groups)) {
@@ -171,7 +172,7 @@ public class QueryStructReq {
      * @param queryStructReq
      * @return
      */
-    public QueryS2QLReq convert(QueryStructReq queryStructReq) {
+    public QueryS2SQLReq convert(QueryStructReq queryStructReq) {
         String sql = null;
         try {
             sql = buildSql(queryStructReq);
@@ -179,7 +180,7 @@ public class QueryStructReq {
             log.error("buildSql error", e);
         }
 
-        QueryS2QLReq result = new QueryS2QLReq();
+        QueryS2SQLReq result = new QueryS2SQLReq();
         result.setSql(sql);
         result.setModelId(queryStructReq.getModelId());
         result.setVariables(new HashMap<>());
@@ -200,8 +201,9 @@ public class QueryStructReq {
         List<Aggregator> aggregators = queryStructReq.getAggregators();
         if (!CollectionUtils.isEmpty(aggregators)) {
             for (Aggregator aggregator : aggregators) {
+                String columnName = aggregator.getColumn();
                 if (queryStructReq.getNativeQuery()) {
-                    selectItems.add(new SelectExpressionItem(new Column(aggregator.getColumn())));
+                    selectItems.add(new SelectExpressionItem(new Column(columnName)));
                 } else {
                     Function sumFunction = new Function();
                     AggOperatorEnum func = aggregator.getFunc();
@@ -213,8 +215,10 @@ public class QueryStructReq {
                         sumFunction.setName("count");
                         sumFunction.setDistinct(true);
                     }
-                    sumFunction.setParameters(new ExpressionList(new Column(aggregator.getColumn())));
-                    selectItems.add(new SelectExpressionItem(sumFunction));
+                    sumFunction.setParameters(new ExpressionList(new Column(columnName)));
+                    SelectExpressionItem selectExpressionItem = new SelectExpressionItem(sumFunction);
+                    selectExpressionItem.setAlias(new Alias(columnName));
+                    selectItems.add(selectExpressionItem);
                 }
             }
         }

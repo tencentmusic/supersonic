@@ -2,7 +2,6 @@
 package com.tencent.supersonic.chat.service.impl;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
@@ -20,7 +19,6 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,59 +29,32 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 public class ParserInfoServiceImpl implements ParseInfoService {
 
-    @Value("${candidate.top.size:5}")
-    private int candidateTopSize;
-
-    public List<SemanticParseInfo> getTopCandidateParseInfo(List<SemanticParseInfo> selectedParses,
-            List<SemanticParseInfo> candidateParses) {
-        if (CollectionUtils.isEmpty(selectedParses) || CollectionUtils.isEmpty(candidateParses)) {
-            return candidateParses;
-        }
-        int selectParseSize = selectedParses.size();
-        Set<Double> selectParseScoreSet = selectedParses.stream()
-                .map(SemanticParseInfo::getScore).collect(Collectors.toSet());
-        int candidateParseSize = candidateTopSize - selectParseSize;
-        candidateParses = candidateParses.stream()
-                .filter(candidateParse -> !selectParseScoreSet.contains(candidateParse.getScore()))
-                .collect(Collectors.toList());
-        SemanticParseInfo semanticParseInfo = selectedParses.get(0);
-        Long modelId = semanticParseInfo.getModelId();
-        if (modelId == null || modelId <= 0) {
-            return candidateParses;
-        }
-        return candidateParses.stream()
-                .sorted(Comparator.comparing(parse -> !parse.getModelId().equals(modelId)))
-                .limit(candidateParseSize)
-                .collect(Collectors.toList());
-    }
-
-    public List<SemanticParseInfo> sortParseInfo(List<SemanticQuery> semanticQueries) {
-        return semanticQueries.stream()
-                .map(SemanticQuery::getParseInfo)
-                .sorted(Comparator.comparingDouble(SemanticParseInfo::getScore).reversed())
-                .collect(Collectors.toList());
-    }
 
     public void updateParseInfo(SemanticParseInfo parseInfo) {
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
-        String logicSql = sqlInfo.getLogicSql();
-        if (StringUtils.isBlank(logicSql)) {
+        String correctS2SQL = sqlInfo.getCorrectS2SQL();
+        if (StringUtils.isBlank(correctS2SQL)) {
+            return;
+        }
+        // if S2SQL equals correctS2SQL, than not update the parseInfo.
+        if (correctS2SQL.equals(sqlInfo.getS2SQL())) {
             return;
         }
 
-        List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(logicSql);
+        List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctS2SQL);
         //set dataInfo
         try {
-            if (!org.springframework.util.CollectionUtils.isEmpty(expressions)) {
+            if (!CollectionUtils.isEmpty(expressions)) {
                 DateConf dateInfo = getDateInfo(expressions);
-                parseInfo.setDateInfo(dateInfo);
+                if (dateInfo != null && parseInfo.getDateInfo() == null) {
+                    parseInfo.setDateInfo(dateInfo);
+                }
             }
         } catch (Exception e) {
             log.error("set dateInfo error :", e);
@@ -103,20 +74,19 @@ public class ParserInfoServiceImpl implements ParseInfoService {
         if (Objects.isNull(semanticSchema)) {
             return;
         }
-        List<String> allFields = getFieldsExceptDate(SqlParserSelectHelper.getAllFields(sqlInfo.getLogicSql()));
-
+        List<String> allFields = getFieldsExceptDate(SqlParserSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
         Set<SchemaElement> metrics = getElements(parseInfo.getModelId(), allFields, semanticSchema.getMetrics());
         parseInfo.setMetrics(metrics);
 
-        if (SqlParserSelectFunctionHelper.hasAggregateFunction(sqlInfo.getLogicSql())) {
+        if (SqlParserSelectFunctionHelper.hasAggregateFunction(sqlInfo.getCorrectS2SQL())) {
             parseInfo.setNativeQuery(false);
-            List<String> groupByFields = SqlParserSelectHelper.getGroupByFields(sqlInfo.getLogicSql());
+            List<String> groupByFields = SqlParserSelectHelper.getGroupByFields(sqlInfo.getCorrectS2SQL());
             List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
             parseInfo.setDimensions(
                     getElements(parseInfo.getModelId(), groupByDimensions, semanticSchema.getDimensions()));
         } else {
             parseInfo.setNativeQuery(true);
-            List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getLogicSql());
+            List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getCorrectS2SQL());
             List<String> selectDimensions = getFieldsExceptDate(selectFields);
             parseInfo.setDimensions(
                     getElements(parseInfo.getModelId(), selectDimensions, semanticSchema.getDimensions()));
@@ -167,8 +137,8 @@ public class ParserInfoServiceImpl implements ParseInfoService {
         List<FilterExpression> dateExpressions = filterExpressions.stream()
                 .filter(expression -> TimeDimensionEnum.DAY.getChName().equalsIgnoreCase(expression.getFieldName()))
                 .collect(Collectors.toList());
-        if (org.springframework.util.CollectionUtils.isEmpty(dateExpressions)) {
-            return new DateConf();
+        if (CollectionUtils.isEmpty(dateExpressions)) {
+            return null;
         }
         DateConf dateInfo = new DateConf();
         dateInfo.setDateMode(DateMode.BETWEEN);

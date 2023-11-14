@@ -25,6 +25,8 @@ public class ChatConfigDO {
 
     private Integer status;
 
+    private String llmExamples;
+
     /**
      * record info
      */
