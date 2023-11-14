@@ -135,14 +135,16 @@ public class DateUtils {
 
         List<String> datesInRange = new ArrayList<>();
         LocalDate currentDate = startDate;
-
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
         while (!currentDate.isAfter(endDate)) {
-            datesInRange.add(currentDate.format(DateTimeFormatter.ISO_DATE));
             if (Constants.MONTH.equals(period)) {
+                datesInRange.add(currentDate.format(formatter));
                 currentDate = currentDate.plusMonths(1);
             } else if (Constants.WEEK.equals(period)) {
+                datesInRange.add(currentDate.format(DateTimeFormatter.ISO_DATE));
                 currentDate = currentDate.plusWeeks(1);
             } else {
+                datesInRange.add(currentDate.format(DateTimeFormatter.ISO_DATE));
                 currentDate = currentDate.plusDays(1);
             }
         }

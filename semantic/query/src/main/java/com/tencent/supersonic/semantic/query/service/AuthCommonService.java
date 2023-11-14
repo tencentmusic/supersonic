@@ -106,29 +106,31 @@ public class AuthCommonService {
         return highSensitiveCols;
     }
 
-    public AuthorizedResourceResp getAuthorizedResource(User user, Long domainId,
+    public AuthorizedResourceResp getAuthorizedResource(User user, Long modelId,
                                                            Set<String> sensitiveResReq) {
         List<AuthRes> resourceReqList = new ArrayList<>();
-        sensitiveResReq.forEach(res -> resourceReqList.add(new AuthRes(domainId.toString(), res)));
+        sensitiveResReq.forEach(res -> resourceReqList.add(new AuthRes(modelId, res)));
         QueryAuthResReq queryAuthResReq = new QueryAuthResReq();
         queryAuthResReq.setResources(resourceReqList);
-        queryAuthResReq.setModelId(domainId + "");
+        queryAuthResReq.setModelId(modelId);
         AuthorizedResourceResp authorizedResource = fetchAuthRes(queryAuthResReq, user);
-        log.info("user:{}, domainId:{}, after queryAuthorizedResources:{}", user.getName(), domainId,
+        log.info("user:{}, domainId:{}, after queryAuthorizedResources:{}", user.getName(), modelId,
                 authorizedResource);
         return authorizedResource;
     }
+
     private AuthorizedResourceResp fetchAuthRes(QueryAuthResReq queryAuthResReq, User user) {
         log.info("queryAuthResReq:{}", queryAuthResReq);
         return authService.queryAuthorizedResources(queryAuthResReq, user);
     }
-    public Set<String> getAuthResNameSet(AuthorizedResourceResp authorizedResource, Long domainId) {
+
+    public Set<String> getAuthResNameSet(AuthorizedResourceResp authorizedResource, Long modelId) {
         Set<String> resAuthName = new HashSet<>();
         List<AuthResGrp> authResGrpList = authorizedResource.getResources();
         authResGrpList.stream().forEach(authResGrp -> {
             List<AuthRes> cols = authResGrp.getGroup();
             if (!CollectionUtils.isEmpty(cols)) {
-                cols.stream().filter(col -> domainId.equals(Long.parseLong(col.getModelId())))
+                cols.stream().filter(col -> modelId.equals(col.getModelId()))
                         .forEach(col -> resAuthName.add(col.getName()));
             }
 
@@ -136,6 +138,7 @@ public class AuthCommonService {
         log.info("resAuthName:{}", resAuthName);
         return resAuthName;
     }
+
     public boolean allSensitiveResReqIsOk(Set<String> sensitiveResReq, Set<String> resAuthSet) {
         if (resAuthSet.containsAll(sensitiveResReq)) {
             return true;
