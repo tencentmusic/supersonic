@@ -4,10 +4,11 @@ import SqlSide from './components/SqlSide';
 import Pane from 'react-split-pane/lib/Pane';
 import styles from './style.less';
 import { RightOutlined, LeftOutlined } from '@ant-design/icons';
+import { DataSourceSubmitData } from './components/SqlDetail';
 
 type Props = {
   initialValues: any;
-  onSubmitSuccess?: (dataSourceInfo: any) => void;
+  onSubmitSuccess?: (dataSourceInfo: DataSourceSubmitData) => void;
 };
 
 const DEFAULT_RIGHT_SIZE = '300px';

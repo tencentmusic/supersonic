@@ -28,7 +28,7 @@
     "prettier": "prettier -c --write \"src/**/*\"",
     "start": "npm run start:osdev",
     "start:dev": "cross-env REACT_APP_ENV=dev MOCK=none APP_TARGET=inner umi dev",
-    "start:osdev": "cross-env REACT_APP_ENV=dev PORT=9000 MOCK=none APP_TARGET=opensource umi dev",
+    "start:osdev": "cross-env NODE_OPTIONS=--openssl-legacy-provider REACT_APP_ENV=dev PORT=9000 MOCK=none APP_TARGET=opensource umi dev",
     "start:no-mock": "cross-env MOCK=none umi dev",
     "start:no-ui": "cross-env UMI_UI=none umi dev",
     "start:pre": "cross-env REACT_APP_ENV=pre umi dev",

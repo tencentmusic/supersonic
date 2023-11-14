@@ -1,6 +1,4 @@
 import request from 'umi-request';
-import axios from 'axios';
-import { AUTH_TOKEN_KEY } from '@/common/constants';
 import moment from 'moment';
 
 const getRunningEnv = () => {
@@ -126,6 +124,16 @@ export function batchUpdateDimensionStatus(data: any): Promise<any> {
   return request.post(`${process.env.API_BASE_URL}dimension/batchUpdateStatus`, {
     data,
   });
+}
+
+export async function batchDownloadMetric(data: any): Promise<any> {
+  const response = await request.post(`${process.env.API_BASE_URL}query/download/batch`, {
+    responseType: 'blob',
+    getResponse: true,
+    data,
+  });
+
+  downloadStruct(response.data);
 }
 
 export function mockMetricAlias(data: any): Promise<any> {

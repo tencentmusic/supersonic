@@ -1,25 +1,49 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Space, Popconfirm, Tag, Spin, Dropdown } from 'antd';
+import {
+  message,
+  Space,
+  Popconfirm,
+  Tag,
+  Spin,
+  Dropdown,
+  DatePicker,
+  Popover,
+  Button,
+  Radio,
+} from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { connect, history, useModel } from 'umi';
 import type { StateType } from '../model';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
-import { queryMetric, deleteMetric, batchUpdateMetricStatus } from '../service';
+import {
+  queryMetric,
+  deleteMetric,
+  batchUpdateMetricStatus,
+  batchDownloadMetric,
+} from '../service';
 import MetricFilter from './components/MetricFilter';
 import MetricInfoCreateForm from '../components/MetricInfoCreateForm';
 import MetricCardList from './components/MetricCardList';
 import NodeInfoDrawer from '../SemanticGraph/components/NodeInfoDrawer';
 import { SemanticNodeType, StatusEnum } from '../enum';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
+import {
+  PlaySquareOutlined,
+  StopOutlined,
+  CloudDownloadOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons';
 
 type Props = {
   dispatch: Dispatch;
   domainManger: StateType;
 };
+
+const { RangePicker } = DatePicker;
 
 type QueryMetricListParams = {
   id?: string;
@@ -51,6 +75,12 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     showType: localStorage.getItem('metricMarketShowType') === '1' ? true : false,
   });
   const [infoDrawerVisible, setInfoDrawerVisible] = useState<boolean>(false);
+  const [popoverOpenState, setPopoverOpenState] = useState<boolean>(false);
+  const [pickerType, setPickerType] = useState<string>('day');
+
+  const dateRangeRef = useRef<any>([]);
+  const [downloadLoading, setDownloadLoading] = useState<boolean>(false);
+
   const actionRef = useRef<ActionType>();
 
   useEffect(() => {
@@ -122,6 +152,24 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     }
   };
 
+  const downloadMetricQuery = async (ids: React.Key[], dateStringList: string[]) => {
+    if (Array.isArray(ids) && ids.length > 0) {
+      setDownloadLoading(true);
+      const [startDate, endDate] = dateStringList;
+      await batchDownloadMetric({
+        metricIds: ids,
+        dateInfo: {
+          dateMode: 'BETWEEN',
+          startDate,
+          endDate,
+          period: pickerType.toUpperCase(),
+        },
+      });
+      setDownloadLoading(false);
+      setPopoverOpenState(false);
+    }
+  };
+
   const handleMetricEdit = (metricItem: ISemantic.IMetricItem) => {
     setMetricItem(metricItem);
     setCreateModalVisible(true);
@@ -139,8 +187,6 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         return (
           <a
             onClick={() => {
-              // setMetricItem(record);
-              // setInfoDrawerVisible(true);
               history.push(`/metric/detail/${record.id}`);
             }}
           >
@@ -297,14 +343,25 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     }),
   };
 
-  const dropdownButtonItems = [
+  const dropdownButtonItems: any[] = [
     {
       key: 'batchStart',
       label: '批量启用',
+      icon: <PlaySquareOutlined />,
     },
     {
       key: 'batchStop',
       label: '批量停用',
+      icon: <StopOutlined />,
+    },
+    {
+      key: 'batchDownload',
+      // label: '批量下载',
+      label: <a>批量下载</a>,
+      icon: <CloudDownloadOutlined />,
+    },
+    {
+      type: 'divider',
     },
     {
       key: 'batchDelete',
@@ -318,6 +375,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           <a>批量删除</a>
         </Popconfirm>
       ),
+      icon: <DeleteOutlined />,
     },
   ];
 
@@ -329,11 +387,69 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       case 'batchStop':
         queryBatchUpdateStatus(selectedRowKeys, StatusEnum.OFFLINE);
         break;
+      case 'batchDownload':
+        setPopoverOpenState(true);
       default:
         break;
     }
   };
-
+  const popoverConfig = {
+    title: '选择下载区间',
+    content: (
+      <Space direction="vertical">
+        <Radio.Group
+          size="small"
+          value={pickerType}
+          onChange={(e) => {
+            setPickerType(e.target.value);
+          }}
+        >
+          <Radio.Button value="day">按日</Radio.Button>
+          <Radio.Button value="week">按周</Radio.Button>
+          <Radio.Button value="month">按月</Radio.Button>
+        </Radio.Group>
+        <RangePicker
+          style={{ paddingBottom: 5 }}
+          onChange={(date) => {
+            dateRangeRef.current = date;
+            return;
+          }}
+          picker={pickerType as any}
+          allowClear={true}
+        />
+        <div style={{ marginTop: 20 }}>
+          <Space>
+            <Button
+              type="primary"
+              loading={downloadLoading}
+              onClick={() => {
+                const [startMoment, endMoment] = dateRangeRef.current;
+                let searchDateRange = [
+                  startMoment?.format('YYYY-MM-DD'),
+                  endMoment?.format('YYYY-MM-DD'),
+                ];
+                if (pickerType === 'week') {
+                  searchDateRange = [
+                    startMoment?.startOf('isoWeek').format('YYYY-MM-DD'),
+                    endMoment?.startOf('isoWeek').format('YYYY-MM-DD'),
+                  ];
+                }
+                if (pickerType === 'month') {
+                  searchDateRange = [
+                    startMoment?.startOf('month').format('YYYY-MM-DD'),
+                    endMoment?.startOf('month').format('YYYY-MM-DD'),
+                  ];
+                }
+                downloadMetricQuery(selectedRowKeys, searchDateRange);
+              }}
+            >
+              下载
+            </Button>
+          </Space>
+        </div>
+      </Space>
+    ),
+  };
   return (
     <>
       <div className={styles.metricFilterWrapper}>
@@ -383,12 +499,21 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               ...rowSelection,
             }}
             toolBarRender={() => [
-              <Dropdown.Button
+              <Popover
+                content={popoverConfig?.content}
+                title={popoverConfig?.title}
+                trigger="click"
                 key="ctrlBtnList"
-                menu={{ items: dropdownButtonItems, onClick: onMenuClick }}
+                open={popoverOpenState}
+                placement="bottomLeft"
+                onOpenChange={(open: boolean) => {
+                  setPopoverOpenState(open);
+                }}
               >
-                批量操作
-              </Dropdown.Button>,
+                <Dropdown.Button menu={{ items: dropdownButtonItems, onClick: onMenuClick }}>
+                  批量操作
+                </Dropdown.Button>
+              </Popover>,
             ]}
             loading={loading}
             onChange={(data: any) => {
