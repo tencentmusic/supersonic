@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.api.pojo.response;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import lombok.Data;
@@ -33,8 +34,10 @@ public class ParseResp {
 
     public List<SemanticParseInfo> getSelectedParses() {
         selectedParses = Lists.newArrayList();
-        selectedParses.addAll(candidateParses);
-        candidateParses.clear();
+        if (CollectionUtil.isNotEmpty(candidateParses)) {
+            selectedParses.addAll(candidateParses);
+            candidateParses.clear();
+        }
         return selectedParses;
     }
 }
