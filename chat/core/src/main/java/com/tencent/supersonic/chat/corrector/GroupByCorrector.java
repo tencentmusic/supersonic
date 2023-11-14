@@ -31,7 +31,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
 
         //add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String logicSql = sqlInfo.getCorrectS2SQL();
+        String correctS2SQL = sqlInfo.getCorrectS2SQL();
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         //add alias field name
         Set<String> dimensions = semanticSchema.getDimensions(modelId).stream()
@@ -47,7 +47,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                 ).collect(Collectors.toSet());
         dimensions.add(TimeDimensionEnum.DAY.getChName());
 
-        List<String> selectFields = SqlParserSelectHelper.getSelectFields(logicSql);
+        List<String> selectFields = SqlParserSelectHelper.getSelectFields(correctS2SQL);
 
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(dimensions)) {
             return;
@@ -56,12 +56,12 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         if (selectFields.size() == 1 && selectFields.contains(TimeDimensionEnum.DAY.getChName())) {
             return;
         }
-        if (SqlParserSelectHelper.hasGroupBy(logicSql)) {
-            log.info("not add group by ,exist group by in logicSql:{}", logicSql);
+        if (SqlParserSelectHelper.hasGroupBy(correctS2SQL)) {
+            log.info("not add group by ,exist group by in correctS2SQL:{}", correctS2SQL);
             return;
         }
 
-        List<String> aggregateFields = SqlParserSelectHelper.getAggregateFields(logicSql);
+        List<String> aggregateFields = SqlParserSelectHelper.getAggregateFields(correctS2SQL);
         Set<String> groupByFields = selectFields.stream()
                 .filter(field -> dimensions.contains(field))
                 .filter(field -> {
@@ -71,7 +71,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                     return true;
                 })
                 .collect(Collectors.toSet());
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(SqlParserAddHelper.addGroupBy(logicSql, groupByFields));
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(SqlParserAddHelper.addGroupBy(correctS2SQL, groupByFields));
 
         addAggregate(semanticParseInfo);
     }

@@ -39,7 +39,7 @@ public class OptimizationConfig {
     @Value("${candidate.threshold}")
     private Double candidateThreshold;
 
-    @Value("${user.s2SQL.switch:false}")
+    @Value("${use.s2SQL.switch:false}")
     private boolean useS2SqlSwitch;
 
     @Value("${embedding.mapper.word.min:4}")
@@ -59,4 +59,7 @@ public class OptimizationConfig {
 
     @Value("${embedding.mapper.distance.threshold:0.58}")
     private Double embeddingMapperDistanceThreshold;
+
+    @Value("${use.linking.value.switch:true}")
+    private boolean useLinkingValueSwitch;
 }

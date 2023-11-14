@@ -38,12 +38,16 @@ public class ParserInfoServiceImpl implements ParseInfoService {
 
     public void updateParseInfo(SemanticParseInfo parseInfo) {
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
-        String logicSql = sqlInfo.getCorrectS2SQL();
-        if (StringUtils.isBlank(logicSql)) {
+        String correctS2SQL = sqlInfo.getCorrectS2SQL();
+        if (StringUtils.isBlank(correctS2SQL)) {
+            return;
+        }
+        // if S2SQL equals correctS2SQL, than not update the parseInfo.
+        if (correctS2SQL.equals(sqlInfo.getS2SQL())) {
             return;
         }
 
-        List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(logicSql);
+        List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctS2SQL);
         //set dataInfo
         try {
             if (!CollectionUtils.isEmpty(expressions)) {
@@ -70,10 +74,9 @@ public class ParserInfoServiceImpl implements ParseInfoService {
         if (Objects.isNull(semanticSchema)) {
             return;
         }
-        //cannot use metrics in sql to override parse info
-        //List<String> allFields = getFieldsExceptDate(SqlParserSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
-        //Set<SchemaElement> metrics = getElements(parseInfo.getModelId(), allFields, semanticSchema.getMetrics());
-        //parseInfo.setMetrics(metrics);
+        List<String> allFields = getFieldsExceptDate(SqlParserSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
+        Set<SchemaElement> metrics = getElements(parseInfo.getModelId(), allFields, semanticSchema.getMetrics());
+        parseInfo.setMetrics(metrics);
 
         if (SqlParserSelectFunctionHelper.hasAggregateFunction(sqlInfo.getCorrectS2SQL())) {
             parseInfo.setNativeQuery(false);

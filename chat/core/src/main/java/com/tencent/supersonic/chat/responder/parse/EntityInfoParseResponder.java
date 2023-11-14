@@ -26,8 +26,8 @@ public class EntityInfoParseResponder implements ParseResponder {
         QueryReq queryReq = queryContext.getRequest();
         selectedParses.forEach(parseInfo -> {
             String queryMode = parseInfo.getQueryMode();
-            if (QueryManager.containsPluginQuery(queryMode) || MetricInterpretQuery.QUERY_MODE.equalsIgnoreCase(
-                    queryMode)) {
+            if (QueryManager.containsPluginQuery(queryMode)
+                    || MetricInterpretQuery.QUERY_MODE.equalsIgnoreCase(queryMode)) {
                 return;
             }
             //1. set entity info
