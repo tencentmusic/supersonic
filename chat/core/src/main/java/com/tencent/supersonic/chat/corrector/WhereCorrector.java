@@ -70,7 +70,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
     private void addDateIfNotExist(SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         List<String> whereFields = SqlParserSelectHelper.getWhereFields(correctS2SQL);
-        if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(TimeDimensionEnum.DAY.getChName())) {
+        if (CollectionUtils.isEmpty(whereFields) || !TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
             String currentDate = S2SQLDateHelper.getReferenceDate(semanticParseInfo.getModelId());
             if (StringUtils.isNotBlank(currentDate)) {
                 correctS2SQL = SqlParserAddHelper.addParenthesisToWhere(correctS2SQL);

@@ -80,3 +80,11 @@ update s2_dimension set status = 1;
 
 --20231110
 UPDATE `s2_agent` SET `config` = replace (`config`,'LLM_S2QL','LLM_S2SQL') WHERE `config` LIKE '%LLM_S2QL%';
+
+--20231113
+CREATE TABLE s2_sys_parameter
+(
+    id  int primary key AUTO_INCREMENT COMMENT '主键id',
+    admin varchar(500) COMMENT '系统管理员',
+    parameters text null COMMENT '配置项'
+);

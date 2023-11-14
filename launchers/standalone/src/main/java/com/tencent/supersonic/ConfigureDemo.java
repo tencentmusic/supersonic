@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.agent.AgentConfig;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
 import com.tencent.supersonic.chat.agent.tool.LLMParserTool;
 import com.tencent.supersonic.chat.agent.tool.RuleQueryTool;
+import com.tencent.supersonic.common.pojo.SysParameter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
@@ -23,6 +24,7 @@ import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.chat.service.AgentService;
+import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.PluginService;
@@ -55,6 +57,9 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
     private PluginService pluginService;
     @Autowired
     private AgentService agentService;
+    @Autowired
+    private SysParameterService sysParameterService;
+
     @Value("${spring.h2.demo.enabled:false}")
     private boolean demoEnable;
 
@@ -92,6 +97,13 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         parseAndExecute(2, "alice 停留时长");
         parseAndExecute(2, "对比alice和lucy的访问次数");
         parseAndExecute(2, "访问次数最高的部门");
+    }
+
+    public void addChatParameter() {
+        SysParameter chatParameter = new SysParameter();
+        chatParameter.setId(1);
+        chatParameter.init();
+        sysParameterService.save(chatParameter);
     }
 
     public void addDemoChatConfig_1() {
@@ -294,6 +306,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             return;
         }
         try {
+            addChatParameter();
             addDemoChatConfig_1();
             addDemoChatConfig_2();
             addPlugin_1();

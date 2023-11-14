@@ -445,3 +445,9 @@ CREATE TABLE `s2_materialization_record`
     UNIQUE KEY `uq_id` (`materialization_id`,`element_type`,`element_id`,`data_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+CREATE TABLE s2_sys_parameter
+(
+    id  int primary key AUTO_INCREMENT COMMENT '主键id',
+    admin varchar(500) COMMENT '系统管理员',
+    parameters text null COMMENT '配置项'
+);

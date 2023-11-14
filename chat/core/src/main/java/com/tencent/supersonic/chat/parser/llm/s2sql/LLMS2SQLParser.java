@@ -6,8 +6,10 @@ import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.common.util.ContextUtils;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +38,8 @@ public class LLMS2SQLParser implements SemanticParser {
                 return;
             }
             //4.construct a request, call the API for the large model, and retrieve the results.
-            LLMReq llmReq = requestService.getLlmReq(queryCtx, modelId);
+            List<ElementValue> linkingValues = requestService.getValueList(queryCtx, modelId);
+            LLMReq llmReq = requestService.getLlmReq(queryCtx, modelId, linkingValues);
             LLMResp llmResp = requestService.requestLLM(llmReq, modelId);
 
             if (Objects.isNull(llmResp)) {
@@ -49,7 +52,9 @@ public class LLMS2SQLParser implements SemanticParser {
                     .modelId(modelId)
                     .commonAgentTool(commonAgentTool)
                     .llmReq(llmReq)
-                    .llmResp(llmResp).build();
+                    .llmResp(llmResp)
+                    .linkingValues(linkingValues)
+                    .build();
 
             LLMResponseService responseService = ContextUtils.getBean(LLMResponseService.class);
 
