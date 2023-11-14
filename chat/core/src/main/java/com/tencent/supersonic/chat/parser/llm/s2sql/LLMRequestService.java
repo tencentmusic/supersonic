@@ -104,7 +104,7 @@ public class LLMRequestService {
         return llmParserTool.orElse(null);
     }
 
-    public LLMReq getLlmReq(QueryContext queryCtx, Long modelId) {
+    public LLMReq getLlmReq(QueryContext queryCtx, Long modelId, List<ElementValue> linkingValues) {
         SemanticSchema semanticSchema = schemaService.getSemanticSchema();
         Map<Long, String> modelIdToName = semanticSchema.getModelIdToName();
         String queryText = queryCtx.getRequest().getQueryText();
@@ -120,7 +120,7 @@ public class LLMRequestService {
         llmSchema.setModelName(modelIdToName.get(modelId));
         llmSchema.setDomainName(modelIdToName.get(modelId));
 
-        List<String> fieldNameList = getFieldNameList(queryCtx, modelId, semanticSchema, llmParserConfig);
+        List<String> fieldNameList = getFieldNameList(queryCtx, modelId, llmParserConfig);
 
         String priorExts = getPriorExts(modelId, fieldNameList);
         llmReq.setPriorExts(priorExts);
@@ -131,7 +131,7 @@ public class LLMRequestService {
 
         List<ElementValue> linking = new ArrayList<>();
         if (optimizationConfig.isUseLinkingValueSwitch()) {
-            linking.addAll(getValueList(queryCtx, modelId, semanticSchema));
+            linking.addAll(linkingValues);
         }
         llmReq.setLinking(linking);
 
@@ -155,7 +155,7 @@ public class LLMRequestService {
                     LLMResp.class);
 
             log.info("requestLLM response,cost:{}, questUrl:{} \n entity:{} \n body:{}",
-                    System.currentTimeMillis() - startTime, url.toString(), entity, responseEntity.getBody());
+                    System.currentTimeMillis() - startTime, url, entity, responseEntity.getBody());
             return responseEntity.getBody();
         } catch (Exception e) {
             log.error("requestLLM error", e);
@@ -163,12 +163,11 @@ public class LLMRequestService {
         return null;
     }
 
-    protected List<String> getFieldNameList(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema,
-            LLMParserConfig llmParserConfig) {
+    protected List<String> getFieldNameList(QueryContext queryCtx, Long modelId, LLMParserConfig llmParserConfig) {
 
-        Set<String> results = getTopNFieldNames(modelId, semanticSchema, llmParserConfig);
+        Set<String> results = getTopNFieldNames(modelId, llmParserConfig);
 
-        Set<String> fieldNameList = getMatchedFieldNames(queryCtx, modelId, semanticSchema);
+        Set<String> fieldNameList = getMatchedFieldNames(queryCtx, modelId);
 
         results.addAll(fieldNameList);
         return new ArrayList<>(results);
@@ -210,8 +209,8 @@ public class LLMRequestService {
     }
 
 
-    protected List<ElementValue> getValueList(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema) {
-        Map<Long, String> itemIdToName = getItemIdToName(modelId, semanticSchema);
+    protected List<ElementValue> getValueList(QueryContext queryCtx, Long modelId) {
+        Map<Long, String> itemIdToName = getItemIdToName(modelId);
 
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(modelId);
         if (CollectionUtils.isEmpty(matchedElements)) {
@@ -233,14 +232,15 @@ public class LLMRequestService {
         return new ArrayList<>(valueMatches);
     }
 
-    protected Map<Long, String> getItemIdToName(Long modelId, SemanticSchema semanticSchema) {
+    protected Map<Long, String> getItemIdToName(Long modelId) {
+        SemanticSchema semanticSchema = schemaService.getSemanticSchema();
         return semanticSchema.getDimensions(modelId).stream()
                 .collect(Collectors.toMap(SchemaElement::getId, SchemaElement::getName, (value1, value2) -> value2));
     }
 
 
-    private Set<String> getTopNFieldNames(Long modelId, SemanticSchema semanticSchema,
-            LLMParserConfig llmParserConfig) {
+    private Set<String> getTopNFieldNames(Long modelId, LLMParserConfig llmParserConfig) {
+        SemanticSchema semanticSchema = schemaService.getSemanticSchema();
         Set<String> results = semanticSchema.getDimensions(modelId).stream()
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                 .limit(llmParserConfig.getDimensionTopN())
@@ -258,8 +258,8 @@ public class LLMRequestService {
     }
 
 
-    protected Set<String> getMatchedFieldNames(QueryContext queryCtx, Long modelId, SemanticSchema semanticSchema) {
-        Map<Long, String> itemIdToName = getItemIdToName(modelId, semanticSchema);
+    protected Set<String> getMatchedFieldNames(QueryContext queryCtx, Long modelId) {
+        Map<Long, String> itemIdToName = getItemIdToName(modelId);
         List<SchemaElementMatch> matchedElements = queryCtx.getMapInfo().getMatchedElements(modelId);
         if (CollectionUtils.isEmpty(matchedElements)) {
             return new HashSet<>();
