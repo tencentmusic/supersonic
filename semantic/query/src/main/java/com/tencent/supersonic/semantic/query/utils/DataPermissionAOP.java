@@ -244,13 +244,13 @@ public class DataPermissionAOP {
         return false;
     }
 
-    private Set<String> getAuthResNameSet(AuthorizedResourceResp authorizedResource, Long domainId) {
+    private Set<String> getAuthResNameSet(AuthorizedResourceResp authorizedResource, Long modelId) {
         Set<String> resAuthName = new HashSet<>();
         List<AuthResGrp> authResGrpList = authorizedResource.getResources();
         authResGrpList.stream().forEach(authResGrp -> {
             List<AuthRes> cols = authResGrp.getGroup();
             if (!CollectionUtils.isEmpty(cols)) {
-                cols.stream().filter(col -> domainId.equals(Long.parseLong(col.getModelId())))
+                cols.stream().filter(col -> modelId.equals(col.getModelId()))
                         .forEach(col -> resAuthName.add(col.getName()));
             }
 
@@ -262,10 +262,10 @@ public class DataPermissionAOP {
     private AuthorizedResourceResp getAuthorizedResource(User user, Long domainId,
             Set<String> sensitiveResReq) {
         List<AuthRes> resourceReqList = new ArrayList<>();
-        sensitiveResReq.forEach(res -> resourceReqList.add(new AuthRes(domainId.toString(), res)));
+        sensitiveResReq.forEach(res -> resourceReqList.add(new AuthRes(domainId, res)));
         QueryAuthResReq queryAuthResReq = new QueryAuthResReq();
         queryAuthResReq.setResources(resourceReqList);
-        queryAuthResReq.setModelId(domainId + "");
+        queryAuthResReq.setModelId(domainId);
         AuthorizedResourceResp authorizedResource = fetchAuthRes(queryAuthResReq, user);
         log.info("user:{}, domainId:{}, after queryAuthorizedResources:{}", user.getName(), domainId,
                 authorizedResource);

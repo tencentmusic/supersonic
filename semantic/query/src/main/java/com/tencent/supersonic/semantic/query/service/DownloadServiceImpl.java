@@ -149,7 +149,7 @@ public class DownloadServiceImpl implements DownloadService {
         List<String> groups = dimensions.stream().map(DimensionResp::getBizName).collect(Collectors.toList());
         List<String> dateList = getDateList(dateConf);
         List<Map<String, Object>> dataTransformed = DataTransformUtils.transform(queryResult.getResultList(), dateList,
-                metricSchemaResp.getBizName(), groups);
+                metricSchemaResp.getBizName(), groups, dateConf);
         List<List<String>> headers = buildHeader(dimensions, dateList);
         List<List<String>> data = buildData(headers, getDimensionNameMap(dimensions),
                 dataTransformed, metricSchemaResp);
@@ -202,7 +202,7 @@ public class DownloadServiceImpl implements DownloadService {
         queryStructReq.setAggregators(Lists.newArrayList(aggregator));
         queryStructReq.setDateInfo(dateConf);
         queryStructReq.setModelId(metricResp.getModelId());
-        return queryService.queryByStruct(queryStructReq, user);
+        return queryService.queryByStructWithAuth(queryStructReq, user);
     }
 
     private String getTimeDimension(DateConf dateConf) {

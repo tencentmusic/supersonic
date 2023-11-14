@@ -88,3 +88,6 @@ CREATE TABLE s2_sys_parameter
     admin varchar(500) COMMENT '系统管理员',
     parameters text null COMMENT '配置项'
 );
+
+--20231114
+alter table s2_chat_config add column `llm_examples` text COMMENT 'llm examples';

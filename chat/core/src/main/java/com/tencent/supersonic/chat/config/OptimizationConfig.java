@@ -24,9 +24,6 @@ public class OptimizationConfig {
     @Value("${dimension.value.threshold}")
     private Double dimensionValueThresholdConfig;
 
-    @Value("${function.bonus.threshold}")
-    private Double functionBonusThreshold;
-
     @Value("${long.text.threshold}")
     private Double longTextThreshold;
 
@@ -35,9 +32,6 @@ public class OptimizationConfig {
 
     @Value("${query.text.length.threshold}")
     private Integer queryTextLengthThreshold;
-
-    @Value("${candidate.threshold}")
-    private Double candidateThreshold;
 
     @Value("${use.s2SQL.switch:false}")
     private boolean useS2SqlSwitch;

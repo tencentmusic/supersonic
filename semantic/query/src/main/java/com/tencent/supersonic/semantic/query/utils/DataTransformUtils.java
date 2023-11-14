@@ -1,6 +1,8 @@
 package com.tencent.supersonic.semantic.query.utils;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
@@ -12,7 +14,8 @@ import java.util.stream.Collectors;
 public class DataTransformUtils {
 
     public static List<Map<String, Object>> transform(List<Map<String, Object>> originalData,
-                                               List<String> dateList, String metric, List<String> groups) {
+                                                      List<String> dateList, String metric, List<String> groups,
+                                                      DateConf dateConf) {
         List<Map<String, Object>> transposedData = new ArrayList<>();
         for (Map<String, Object> originalRow : originalData) {
             Map<String, Object> transposedRow = new HashMap<>();
@@ -21,7 +24,7 @@ public class DataTransformUtils {
                     transposedRow.put(key, originalRow.get(key));
                 }
             }
-            transposedRow.put(String.valueOf(originalRow.get(TimeDimensionEnum.DAY.getName())),
+            transposedRow.put(String.valueOf(originalRow.get(getTimeDimension(dateConf))),
                     originalRow.get(metric));
             transposedData.add(transposedRow);
         }
@@ -53,6 +56,16 @@ public class DataTransformUtils {
             }
         }
         return StringUtils.join(values, "_");
+    }
+
+    private static String getTimeDimension(DateConf dateConf) {
+        if (Constants.MONTH.equals(dateConf.getPeriod())) {
+            return TimeDimensionEnum.MONTH.getName();
+        } else if (Constants.WEEK.equals(dateConf.getPeriod())) {
+            return TimeDimensionEnum.WEEK.getName();
+        } else {
+            return TimeDimensionEnum.DAY.getName();
+        }
     }
 
 }
