@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_config` (
     `created_by` varchar(100) NOT NULL   ,
     `updated_by` varchar(100) NOT NULL   ,
     `status` INT NOT NULL  DEFAULT '0' , -- domain extension information status : 0 is normal, 1 is off the shelf, 2 is deleted
+    `llm_examples` TEXT,
     PRIMARY KEY (`id`)
     ) ;
 COMMENT ON TABLE s2_chat_config IS 'chat config information table ';

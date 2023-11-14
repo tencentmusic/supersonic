@@ -28,6 +28,8 @@ public class Measure {
 
     private Long datasourceId;
 
+    private String datasourceName;
+
     public Measure(String name, String bizName, String agg, Integer isCreateMetric) {
         this.name = name;
         this.agg = agg;

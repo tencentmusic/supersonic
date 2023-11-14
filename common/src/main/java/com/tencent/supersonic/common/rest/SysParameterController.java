@@ -23,7 +23,7 @@ public class SysParameterController {
     }
 
     @GetMapping
-    SysParameter get() {
+    public SysParameter get() {
         return sysParameterService.getSysParameter();
     }
 

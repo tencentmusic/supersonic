@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.service.impl;
+package com.tencent.supersonic.common.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

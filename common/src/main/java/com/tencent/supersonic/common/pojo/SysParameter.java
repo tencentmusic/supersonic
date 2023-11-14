@@ -34,6 +34,8 @@ public class SysParameter {
     public void init() {
         parameters = Lists.newArrayList();
         admins = Lists.newArrayList("admin");
+        parameters.add(new Parameter("llm.model.name", "gpt4", "模型名称", "string"));
+        parameters.add(new Parameter("llm.api.key", "sk-afdasdasd", "模型密钥", "string"));
         parameters.add(new Parameter("one.detection.size", "8", "一次探测个数", "number"));
         parameters.add(new Parameter("one.detection.max.size", "20", "阈值", "number"));
         parameters.add(new Parameter("metric.dimension.min.threshold", "0.3", "指标名、维度名最小文本相似度", "number"));
@@ -44,6 +46,7 @@ public class SysParameter {
         parameters.add(new Parameter("embedding.mapper.batch", "0.3", "批量向量召回文本请求个数", "number"));
         parameters.add(new Parameter("embedding.mapper.number", "0.3", "批量向量召回文本返回结果个数", "number"));
         parameters.add(new Parameter("embedding.mapper.distance.threshold", "0.3", "Mapper阶段向量召回相似度阈值", "number"));
+        parameters.add(new Parameter("use.s2SQL.switch", "true", "是否打开S2SQL开关", "bool"));
     }
 
 }

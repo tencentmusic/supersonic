@@ -382,15 +382,17 @@ public class SemanticService {
                 Optional<String> lastDayOp = result.getResultList().stream().filter(r -> r.containsKey(dateField))
                         .map(r -> r.get(dateField).toString())
                         .sorted(Comparator.reverseOrder()).findFirst();
-                if (lastDayOp.isPresent()) {
-                    Optional<Map<String, Object>> lastValue = result.getResultList().stream()
-                            .filter(r -> r.get(dateField).toString().equals(lastDayOp.get())).findFirst();
-                    if (lastValue.isPresent() && lastValue.get().containsKey(ratioMetric.get().getBizName())) {
-                        DecimalFormat df = new DecimalFormat("#.####");
-                        metricInfo.setValue(df.format(lastValue.get().get(ratioMetric.get().getBizName())));
-                    }
-                    metricInfo.setDate(lastValue.get().get(dateField).toString());
+                if (!lastDayOp.isPresent()) {
+                    return new AggregateInfo();
                 }
+                Optional<Map<String, Object>> lastValue = result.getResultList().stream()
+                        .filter(r -> r.get(dateField).toString().equals(lastDayOp.get())).findFirst();
+                if (lastValue.isPresent() && lastValue.get().containsKey(ratioMetric.get().getBizName())) {
+                    DecimalFormat df = new DecimalFormat("#.####");
+                    metricInfo.setValue(df.format(lastValue.get().get(ratioMetric.get().getBizName())));
+                }
+                metricInfo.setDate(lastValue.get().get(dateField).toString());
+
                 CompletableFuture<MetricInfo> metricInfoRoll = CompletableFuture
                         .supplyAsync(() -> {
                             return queryRatio(user, semanticParseInfo, ratioMetric.get(), AggOperatorEnum.RATIO_ROLL,
