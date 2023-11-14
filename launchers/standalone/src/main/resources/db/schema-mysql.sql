@@ -63,6 +63,7 @@ CREATE TABLE `s2_chat_config` (
                                   `created_by` varchar(100) NOT NULL COMMENT '创建人',
                                   `updated_by` varchar(100) NOT NULL COMMENT '更新人',
                                   `status` int(10) NOT NULL COMMENT '主题域扩展信息状态, 0-删除，1-生效',
+                                  `llm_examples` text COMMENT 'llm examples',
                                   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='主题域扩展信息表';
 
@@ -445,3 +446,9 @@ CREATE TABLE `s2_materialization_record`
     UNIQUE KEY `uq_id` (`materialization_id`,`element_type`,`element_id`,`data_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+CREATE TABLE s2_sys_parameter
+(
+    id  int primary key AUTO_INCREMENT COMMENT '主键id',
+    admin varchar(500) COMMENT '系统管理员',
+    parameters text null COMMENT '配置项'
+);

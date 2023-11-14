@@ -20,9 +20,11 @@ import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
 import com.tencent.supersonic.semantic.api.model.request.MetaBatchReq;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
+import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
@@ -57,6 +59,8 @@ public class MetricServiceImpl implements MetricService {
 
     private DomainService domainService;
 
+    private DatasourceService datasourceService;
+
     private ChatGptHelper chatGptHelper;
 
     private ApplicationEventPublisher eventPublisher;
@@ -64,11 +68,13 @@ public class MetricServiceImpl implements MetricService {
     public MetricServiceImpl(MetricRepository metricRepository,
                              ModelService modelService,
                              DomainService domainService,
+                             DatasourceService datasourceService,
                              ChatGptHelper chatGptHelper,
                              ApplicationEventPublisher eventPublisher) {
         this.domainService = domainService;
         this.metricRepository = metricRepository;
         this.modelService = modelService;
+        this.datasourceService = datasourceService;
         this.chatGptHelper = chatGptHelper;
         this.eventPublisher = eventPublisher;
     }
@@ -222,6 +228,7 @@ public class MetricServiceImpl implements MetricService {
         }
     }
 
+    @Deprecated
     @Override
     public MetricResp getMetric(Long modelId, String bizName) {
         MetricFilter metricFilter = new MetricFilter();
@@ -250,7 +257,20 @@ public class MetricServiceImpl implements MetricService {
         if (metricDO == null) {
             return null;
         }
-        return MetricConverter.convert2MetricResp(metricDO, new HashMap<>());
+        MetricResp metricResp = MetricConverter.convert2MetricResp(metricDO, new HashMap<>());
+        List<Measure> measures = metricResp.getMeasures();
+        if (CollectionUtils.isEmpty(measures)) {
+            return metricResp;
+        }
+        Map<Long, DatasourceResp> datasourceResps = datasourceService.getDatasourceList().stream()
+                .collect(Collectors.toMap(DatasourceResp::getId, datasourceResp -> datasourceResp));
+        measures.forEach(measure -> {
+            DatasourceResp datasourceResp = datasourceResps.get(measure.getDatasourceId());
+            if (datasourceResp != null) {
+                measure.setDatasourceName(datasourceResp.getName());
+            }
+        });
+        return metricResp;
     }
 
     @Override

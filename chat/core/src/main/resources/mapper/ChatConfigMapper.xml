@@ -13,6 +13,7 @@
         <result column="chat_agg_config" property="chatAggConfig"/>
         <result column="recommended_questions" property="recommendedQuestions"/>
         <result column="status" property="status"/>
+        <result column="llm_examples" property="llmExamples"/>
         <result column="created_by" property="createdBy"/>
         <result column="updated_by" property="updatedBy"/>
         <result column="created_at" property="createdAt"/>
@@ -24,11 +25,11 @@
             useGeneratedKeys="true" keyProperty="id">
     insert into s2_chat_config
     (
-        model_id, `chat_detail_config`, chat_agg_config,  recommended_questions, status, created_by, updated_by, created_at, updated_at
+        model_id, `chat_detail_config`, chat_agg_config,  recommended_questions, status, llm_examples, created_by, updated_by, created_at, updated_at
     )
     values
     (
-        #{modelId}, #{chatDetailConfig}, #{chatAggConfig}, #{recommendedQuestions}, #{status}, #{createdBy}, #{updatedBy}, #{createdAt}, #{updatedAt}
+        #{modelId}, #{chatDetailConfig}, #{chatAggConfig}, #{recommendedQuestions}, #{status}, #{llmExamples}, #{createdBy}, #{updatedBy}, #{createdAt}, #{updatedAt}
     )
     </insert>
 
@@ -51,6 +52,9 @@
             </if>
             <if test="updatedBy != null and updatedBy != ''">
                 updated_by = #{updatedBy} ,
+            </if>
+            <if test="llmExamples != null and llmExamples != ''">
+                llm_examples = #{llmExamples} ,
             </if>
         </set>
 
