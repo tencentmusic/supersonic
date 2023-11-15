@@ -132,15 +132,33 @@ public class DownloadServiceImpl implements DownloadService {
             MetricSchemaResp metricSchemaResp = metrics.get(0);
             List<DimSchemaResp> dimensions = getMetricRelaDimensions(metricSchemaResp, dimensionRespMap);
             for (MetricSchemaResp metric : metrics) {
-                DataDownload downloadData = getSingleMetricDownloadData(metric, dimensions,
-                        batchDownloadReq.getDateInfo(), user);
-                WriteSheet writeSheet = EasyExcel.writerSheet("Sheet" + sheetCount)
-                        .head(downloadData.getHeaders()).build();
-                excelWriter.write(downloadData.getData(), writeSheet);
+                try {
+                    DataDownload downloadData = getSingleMetricDownloadData(metric, dimensions,
+                            batchDownloadReq.getDateInfo(), user);
+                    WriteSheet writeSheet = EasyExcel.writerSheet("Sheet" + sheetCount)
+                            .head(downloadData.getHeaders()).build();
+                    excelWriter.write(downloadData.getData(), writeSheet);
+                } catch (RuntimeException e) {
+                    EasyExcel.write(file).sheet("Sheet1").head(buildErrMessageHead())
+                            .doWrite(buildErrMessageData(e.getMessage()));
+                    return;
+                }
             }
             sheetCount++;
         }
         excelWriter.finish();
+    }
+
+    private List<List<String>> buildErrMessageHead() {
+        List<List<String>> headers = Lists.newArrayList();
+        headers.add(Lists.newArrayList("异常提示"));
+        return headers;
+    }
+
+    private List<List<String>> buildErrMessageData(String errMsg) {
+        List<List<String>> data = Lists.newArrayList();
+        data.add(Lists.newArrayList(errMsg));
+        return data;
     }
 
     public DataDownload getSingleMetricDownloadData(MetricSchemaResp metricSchemaResp, List<DimSchemaResp> dimensions,
@@ -202,6 +220,7 @@ public class DownloadServiceImpl implements DownloadService {
         queryStructReq.setAggregators(Lists.newArrayList(aggregator));
         queryStructReq.setDateInfo(dateConf);
         queryStructReq.setModelId(metricResp.getModelId());
+        queryStructReq.setLimit(10000L);
         return queryService.queryByStructWithAuth(queryStructReq, user);
     }
 
