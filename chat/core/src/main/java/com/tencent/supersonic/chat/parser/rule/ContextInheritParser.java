@@ -28,6 +28,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * ContextInheritParser tries to inherit certain schema elements from context
+ * so that in multi-turn conversations users don't need to mention some keyword
+ * repeatedly.
+ */
 @Slf4j
 public class ContextInheritParser implements SemanticParser {
 

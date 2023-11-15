@@ -24,6 +24,13 @@ import com.xkzhangsan.time.nlp.TimeNLPUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 
+/**
+ * TimeRangeParser extracts time range specified in the user query
+ * based on keyword matching.
+ * Currently, it supports two kinds of expression:
+ * 1. Recent unit: 近N天/周/月/年、过去N天/周/月/年
+ * 2. Concrete date: 2023年11月15日、20231115
+ */
 @Slf4j
 public class TimeRangeParser implements SemanticParser {
 
