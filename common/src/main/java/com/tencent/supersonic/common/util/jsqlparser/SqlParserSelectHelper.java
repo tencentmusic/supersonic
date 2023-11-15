@@ -166,7 +166,7 @@ public class SqlParserSelectHelper {
         return new ArrayList<>(results);
     }
 
-    private static ArrayList<String> getFieldsByPlainSelect(PlainSelect plainSelect) {
+    private static List<String> getFieldsByPlainSelect(PlainSelect plainSelect) {
         if (Objects.isNull(plainSelect)) {
             return new ArrayList<>();
         }
@@ -396,9 +396,7 @@ public class SqlParserSelectHelper {
         }
         SelectBody selectBody = selectStatement.getSelectBody();
         PlainSelect plainSelect = (PlainSelect) selectBody;
-
-        Table table = (Table) plainSelect.getFromItem();
-        return table;
+        return (Table) plainSelect.getFromItem();
     }
 
     public static String getDbTableName(String sql) {
@@ -406,5 +404,12 @@ public class SqlParserSelectHelper {
         return table.getFullyQualifiedName();
     }
 
+    public static String getNormalizedSql(String sql) {
+        Select selectStatement = getSelect(sql);
+        if (selectStatement == null) {
+            return null;
+        }
+        return selectStatement.toString();
+    }
 }
 

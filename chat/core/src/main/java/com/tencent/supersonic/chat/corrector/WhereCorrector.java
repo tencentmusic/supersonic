@@ -28,6 +28,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
 
+/**
+ * Perform SQL corrections on the "Where" section in S2SQL.
+ */
 @Slf4j
 public class WhereCorrector extends BaseSemanticCorrector {
 
@@ -110,7 +113,6 @@ public class WhereCorrector extends BaseSemanticCorrector {
         String correctS2SQL = SqlParserReplaceHelper.replaceValue(semanticParseInfo.getSqlInfo().getCorrectS2SQL(),
                 aliasAndBizNameToTechName);
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
-        return;
     }
 
     private Map<String, Map<String, String>> getAliasAndBizNameToTechName(List<SchemaElement> dimensions) {

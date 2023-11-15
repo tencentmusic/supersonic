@@ -22,6 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
+/**
+ *  basic semantic correction functionality, offering common methods and an
+ *  abstract method called doCorrect
+ */
 @Slf4j
 public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
