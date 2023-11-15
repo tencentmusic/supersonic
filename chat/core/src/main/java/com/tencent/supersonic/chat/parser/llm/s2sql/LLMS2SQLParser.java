@@ -45,7 +45,7 @@ public class LLMS2SQLParser implements SemanticParser {
             if (Objects.isNull(llmResp)) {
                 return;
             }
-            //5. get and update parserInfo and corrector sql
+            //5. get and update parserInfo
             Map<String, Double> sqlWeight = llmResp.getSqlWeight();
             ParseResult parseResult = ParseResult.builder()
                     .request(request)
