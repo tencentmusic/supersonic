@@ -14,7 +14,7 @@ import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.StringUtil;
-import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
+import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
@@ -424,13 +424,13 @@ public class QueryStructUtils {
     }
 
     public DateConf getDateConfBySql(String sql) {
-        List<FilterExpression> filterExpressions = SqlParserSelectHelper.getFilterExpression(sql);
-        if (!CollectionUtils.isEmpty(filterExpressions)) {
+        List<FieldExpression> fieldExpressions = SqlParserSelectHelper.getFilterExpression(sql);
+        if (!CollectionUtils.isEmpty(fieldExpressions)) {
             Set<String> dateList = new HashSet<>();
             String startDate = "";
             String endDate = "";
             String period = "";
-            for (FilterExpression f : filterExpressions) {
+            for (FieldExpression f : fieldExpressions) {
                 if (Objects.isNull(f.getFieldName()) || !internalCols.contains(f.getFieldName().toLowerCase())) {
                     continue;
                 }

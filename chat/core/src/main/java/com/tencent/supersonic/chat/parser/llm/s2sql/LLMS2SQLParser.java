@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 
 @Slf4j
 public class LLMS2SQLParser implements SemanticParser {
@@ -45,8 +46,9 @@ public class LLMS2SQLParser implements SemanticParser {
             if (Objects.isNull(llmResp)) {
                 return;
             }
-            //5. get and update parserInfo
-            Map<String, Double> sqlWeight = llmResp.getSqlWeight();
+            //5. deduplicate the SQL result list and build parserInfo
+            LLMResponseService responseService = ContextUtils.getBean(LLMResponseService.class);
+            Map<String, Double> deduplicationSqlWeight = responseService.getDeduplicationSqlWeight(llmResp);
             ParseResult parseResult = ParseResult.builder()
                     .request(request)
                     .modelId(modelId)
@@ -56,12 +58,10 @@ public class LLMS2SQLParser implements SemanticParser {
                     .linkingValues(linkingValues)
                     .build();
 
-            LLMResponseService responseService = ContextUtils.getBean(LLMResponseService.class);
-
-            if (Objects.isNull(sqlWeight) || sqlWeight.isEmpty()) {
+            if (MapUtils.isEmpty(deduplicationSqlWeight)) {
                 responseService.addParseInfo(queryCtx, parseResult, llmResp.getSqlOutput(), 1D);
             } else {
-                sqlWeight.forEach((sql, weight) -> {
+                deduplicationSqlWeight.forEach((sql, weight) -> {
                     responseService.addParseInfo(queryCtx, parseResult, sql, weight);
                 });
             }

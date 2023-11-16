@@ -13,7 +13,7 @@ import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
+import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
@@ -47,7 +47,7 @@ public class ParserInfoServiceImpl implements ParseInfoService {
             return;
         }
 
-        List<FilterExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctS2SQL);
+        List<FieldExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctS2SQL);
         //set dataInfo
         try {
             if (!CollectionUtils.isEmpty(expressions)) {
@@ -112,9 +112,9 @@ public class ParserInfoServiceImpl implements ParseInfoService {
 
 
     private List<QueryFilter> getDimensionFilter(Map<String, SchemaElement> fieldNameToElement,
-            List<FilterExpression> filterExpressions) {
+            List<FieldExpression> fieldExpressions) {
         List<QueryFilter> result = Lists.newArrayList();
-        for (FilterExpression expression : filterExpressions) {
+        for (FieldExpression expression : fieldExpressions) {
             QueryFilter dimensionFilter = new QueryFilter();
             dimensionFilter.setValue(expression.getFieldValue());
             SchemaElement schemaElement = fieldNameToElement.get(expression.getFieldName());
@@ -133,8 +133,8 @@ public class ParserInfoServiceImpl implements ParseInfoService {
         return result;
     }
 
-    private DateConf getDateInfo(List<FilterExpression> filterExpressions) {
-        List<FilterExpression> dateExpressions = filterExpressions.stream()
+    private DateConf getDateInfo(List<FieldExpression> fieldExpressions) {
+        List<FieldExpression> dateExpressions = fieldExpressions.stream()
                 .filter(expression -> TimeDimensionEnum.DAY.getChName().equalsIgnoreCase(expression.getFieldName()))
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dateExpressions)) {
@@ -142,7 +142,7 @@ public class ParserInfoServiceImpl implements ParseInfoService {
         }
         DateConf dateInfo = new DateConf();
         dateInfo.setDateMode(DateMode.BETWEEN);
-        FilterExpression firstExpression = dateExpressions.get(0);
+        FieldExpression firstExpression = dateExpressions.get(0);
 
         FilterOperatorEnum firstOperator = FilterOperatorEnum.getSqlOperator(firstExpression.getOperator());
         if (FilterOperatorEnum.EQUALS.equals(firstOperator) && Objects.nonNull(firstExpression.getFieldValue())) {
@@ -168,12 +168,12 @@ public class ParserInfoServiceImpl implements ParseInfoService {
         return dateInfo;
     }
 
-    private boolean containOperators(FilterExpression expression, FilterOperatorEnum firstOperator,
+    private boolean containOperators(FieldExpression expression, FilterOperatorEnum firstOperator,
             FilterOperatorEnum... operatorEnums) {
         return (Arrays.asList(operatorEnums).contains(firstOperator) && Objects.nonNull(expression.getFieldValue()));
     }
 
-    private boolean hasSecondDate(List<FilterExpression> dateExpressions) {
+    private boolean hasSecondDate(List<FieldExpression> dateExpressions) {
         return dateExpressions.size() > 1 && Objects.nonNull(dateExpressions.get(1).getFieldValue());
     }
 
