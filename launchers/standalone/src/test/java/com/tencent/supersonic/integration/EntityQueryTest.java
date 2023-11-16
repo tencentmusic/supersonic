@@ -10,6 +10,7 @@ import com.tencent.supersonic.chat.query.rule.entity.EntityFilterQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class EntityQueryTest extends BaseQueryTest {
         expectedParseInfo.getMetrics().add(metric);
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateMode.BETWEEN, 1, period, startDay, endDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -71,7 +72,7 @@ public class EntityQueryTest extends BaseQueryTest {
         expectedParseInfo.getDimensions().add(dim4);
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, startDay, startDay));
-        expectedParseInfo.setNativeQuery(true);
+        expectedParseInfo.setQueryType(QueryType.ENTITY);
 
         assertQueryResult(expectedResult, actualResult);
     }

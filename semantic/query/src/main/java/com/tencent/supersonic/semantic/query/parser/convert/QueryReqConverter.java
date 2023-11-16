@@ -3,6 +3,7 @@ package com.tencent.supersonic.semantic.query.parser.convert;
 
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
@@ -112,7 +113,7 @@ public class QueryReqConverter {
         //5.physicalSql by ParseSqlReq
         queryStructCmd.setDateInfo(queryStructUtils.getDateConfBySql(databaseReq.getSql()));
         queryStructCmd.setModelId(databaseReq.getModelId());
-        queryStructCmd.setNativeQuery(!AggOption.isAgg(aggOption));
+        queryStructCmd.setQueryType(getQueryType(aggOption));
         log.info("QueryReqConverter queryStructCmd[{}]", queryStructCmd);
         QueryStatement queryStatement = parserService.physicalSql(queryStructCmd, result);
         queryStatement.setSql(String.format(SqlExecuteReq.LIMIT_WRAPPER, queryStatement.getSql()));
@@ -146,18 +147,16 @@ public class QueryReqConverter {
         Map<String, String> internalLowerToNameMap = QueryStructUtils.internalCols.stream()
                 .collect(Collectors.toMap(a -> a.toLowerCase(), a -> a));
         dimensionLowerToNameMap.putAll(internalLowerToNameMap);
-        Set<String> collect = allFields.stream()
+        return allFields.stream()
                 .filter(entry -> dimensionLowerToNameMap.containsKey(entry.toLowerCase()))
                 .map(entry -> dimensionLowerToNameMap.get(entry.toLowerCase())).collect(Collectors.toSet());
-        return collect;
     }
 
     private List<String> getMetrics(ModelSchemaResp modelSchemaResp, List<String> allFields) {
         Map<String, String> metricLowerToNameMap = modelSchemaResp.getMetrics().stream()
                 .collect(Collectors.toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry.getBizName()));
-        List<String> metrics = allFields.stream().filter(entry -> metricLowerToNameMap.containsKey(entry.toLowerCase()))
+        return allFields.stream().filter(entry -> metricLowerToNameMap.containsKey(entry.toLowerCase()))
                 .map(entry -> metricLowerToNameMap.get(entry.toLowerCase())).collect(Collectors.toList());
-        return metrics;
     }
 
     private void functionNameCorrector(QueryS2SQLReq databaseReq) {
@@ -174,7 +173,6 @@ public class QueryReqConverter {
             databaseReq.setSql(functionNameCorrector);
         }
     }
-
 
     protected Map<String, String> getFieldNameToBizNameMap(ModelSchemaResp modelSchemaResp) {
         // support fieldName and field alias to bizName
@@ -214,6 +212,15 @@ public class QueryReqConverter {
         String sql = SqlParserReplaceHelper.replaceTable(databaseReq.getSql(),
                 Constants.TABLE_PREFIX + databaseReq.getModelId());
         databaseReq.setSql(sql);
+    }
+
+    private QueryType getQueryType(AggOption aggOption) {
+        boolean isAgg = AggOption.isAgg(aggOption);
+        QueryType queryType = QueryType.ENTITY;
+        if (isAgg) {
+            queryType = QueryType.METRIC;
+        }
+        return queryType;
     }
 
 }

@@ -14,6 +14,7 @@ import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
@@ -233,7 +234,7 @@ public class SemanticService {
         modelInfo.setEntityId(entities.get(0));
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setModel(modelSchema.getModel());
-        semanticParseInfo.setNativeQuery(true);
+        semanticParseInfo.setQueryType(QueryType.ENTITY);
         semanticParseInfo.setMetrics(getMetrics(modelInfo));
         semanticParseInfo.setDimensions(getDimensions(modelInfo));
         DateConf dateInfo = new DateConf();

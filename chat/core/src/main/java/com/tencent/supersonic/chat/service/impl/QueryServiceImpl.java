@@ -42,6 +42,7 @@ import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.SolvedQueryManager;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -609,7 +610,7 @@ public class QueryServiceImpl implements QueryService {
         queryStructReq.setDateInfo(dateConf);
         queryStructReq.setLimit(20L);
         queryStructReq.setModelId(dimensionValueReq.getModelId());
-        queryStructReq.setNativeQuery(false);
+        queryStructReq.setQueryType(QueryType.OTHER);
         List<String> groups = new ArrayList<>();
         groups.add(dimensionValueReq.getBizName());
         queryStructReq.setGroups(groups);

@@ -1,32 +1,33 @@
 package com.tencent.supersonic.integration;
 
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
+import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
+import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
-import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
-import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
-import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricFilterQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricGroupByQuery;
+import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricTopNQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.BeanUtils;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.stream.Collectors;
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
 
 
 public class MetricQueryTest extends BaseQueryTest {
@@ -48,7 +49,7 @@ public class MetricQueryTest extends BaseQueryTest {
                 FilterOperatorEnum.EQUALS, "alice", "用户名", 2L));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -78,7 +79,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -108,7 +109,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -133,7 +134,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -153,7 +154,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户名"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(3, DateConf.DateMode.RECENT, "DAY"));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -172,7 +173,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -198,7 +199,7 @@ public class MetricQueryTest extends BaseQueryTest {
                 FilterOperatorEnum.EQUALS, "alice", "用户名", 2L));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, 1, period, startDay, startDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -225,7 +226,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
 

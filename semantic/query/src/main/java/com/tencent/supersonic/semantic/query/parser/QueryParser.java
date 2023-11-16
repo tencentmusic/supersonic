@@ -44,7 +44,8 @@ public class QueryParser {
         if (!parseSqlReq.getSql().isEmpty()) {
             return parser(parseSqlReq);
         }
-        metricReq.setNativeQuery(queryStructReq.getNativeQuery());
+
+        metricReq.setNativeQuery(queryStructReq.getQueryType().isNativeAggQuery());
         return parser(metricReq);
     }
 
