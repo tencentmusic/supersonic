@@ -3,7 +3,7 @@ package com.tencent.supersonic.common.util.jsqlparser;
 import lombok.Data;
 
 @Data
-public class FilterExpression {
+public class FieldExpression {
 
     private String operator;
 

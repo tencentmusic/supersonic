@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -40,12 +41,12 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class SqlParserSelectHelper {
 
-    public static List<FilterExpression> getFilterExpression(String sql) {
+    public static List<FieldExpression> getFilterExpression(String sql) {
         PlainSelect plainSelect = getPlainSelect(sql);
         if (Objects.isNull(plainSelect)) {
             return new ArrayList<>();
         }
-        Set<FilterExpression> result = new HashSet<>();
+        Set<FieldExpression> result = new HashSet<>();
         Expression where = plainSelect.getWhere();
         if (Objects.nonNull(where)) {
             where.accept(new FieldAndValueAcquireVisitor(result));
@@ -208,12 +209,12 @@ public class SqlParserSelectHelper {
         return null;
     }
 
-    public static List<FilterExpression> getWhereExpressions(String sql) {
+    public static List<FieldExpression> getWhereExpressions(String sql) {
         PlainSelect plainSelect = getPlainSelect(sql);
         if (Objects.isNull(plainSelect)) {
             return new ArrayList<>();
         }
-        Set<FilterExpression> result = new HashSet<>();
+        Set<FieldExpression> result = new HashSet<>();
         Expression where = plainSelect.getWhere();
         if (Objects.nonNull(where)) {
             where.accept(new FieldAndValueAcquireVisitor(result));
@@ -221,12 +222,12 @@ public class SqlParserSelectHelper {
         return new ArrayList<>(result);
     }
 
-    public static List<FilterExpression> getHavingExpressions(String sql) {
+    public static List<FieldExpression> getHavingExpressions(String sql) {
         PlainSelect plainSelect = getPlainSelect(sql);
         if (Objects.isNull(plainSelect)) {
             return new ArrayList<>();
         }
-        Set<FilterExpression> result = new HashSet<>();
+        Set<FieldExpression> result = new HashSet<>();
         Expression having = plainSelect.getHaving();
         if (Objects.nonNull(having)) {
             having.accept(new FieldAndValueAcquireVisitor(result));
@@ -244,13 +245,31 @@ public class SqlParserSelectHelper {
         return new ArrayList<>(result);
     }
 
-    private static void getOrderByFields(PlainSelect plainSelect, Set<String> result) {
+    private static Set<FieldExpression> getOrderByFields(PlainSelect plainSelect) {
+        Set<FieldExpression> result = new HashSet<>();
         List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
         if (!CollectionUtils.isEmpty(orderByElements)) {
             for (OrderByElement orderByElement : orderByElements) {
                 orderByElement.accept(new OrderByAcquireVisitor(result));
             }
         }
+        return result;
+    }
+
+    private static void getOrderByFields(PlainSelect plainSelect, Set<String> result) {
+        Set<FieldExpression> orderByFieldExpressions = getOrderByFields(plainSelect);
+        Set<String> collect = orderByFieldExpressions.stream()
+                .map(fieldExpression -> fieldExpression.getFieldName())
+                .collect(Collectors.toSet());
+        result.addAll(collect);
+    }
+
+    public static List<FieldExpression> getOrderByExpressions(String sql) {
+        PlainSelect plainSelect = getPlainSelect(sql);
+        if (Objects.isNull(plainSelect)) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(getOrderByFields(plainSelect));
     }
 
     public static List<String> getGroupByFields(String sql) {

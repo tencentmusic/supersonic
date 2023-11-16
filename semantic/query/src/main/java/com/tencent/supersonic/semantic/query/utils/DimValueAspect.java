@@ -3,7 +3,7 @@ package com.tencent.supersonic.semantic.query.utils;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
+import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
@@ -60,11 +60,11 @@ public class DimValueAspect {
         String sql = queryS2SQLReq.getSql();
         log.info("correctorSql before replacing:{}", sql);
         // if dimensionvalue is alias,consider the true dimensionvalue.
-        List<FilterExpression> filterExpressionList = SqlParserSelectHelper.getWhereExpressions(sql);
+        List<FieldExpression> fieldExpressionList = SqlParserSelectHelper.getWhereExpressions(sql);
         List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
         Set<String> fieldNames = dimensions.stream().map(o -> o.getName()).collect(Collectors.toSet());
         Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
-        filterExpressionList.stream().forEach(expression -> {
+        fieldExpressionList.stream().forEach(expression -> {
             if (fieldNames.contains(expression.getFieldName())) {
                 dimensions.stream().forEach(dimension -> {
                     if (expression.getFieldName().equals(dimension.getName())
@@ -98,7 +98,7 @@ public class DimValueAspect {
         return queryResultWithColumns;
     }
 
-    public void replaceInCondition(FilterExpression expression, DimensionResp dimension,
+    public void replaceInCondition(FieldExpression expression, DimensionResp dimension,
                                    Map<String, Map<String, String>> filedNameToValueMap) {
         if (expression.getOperator().equals(FilterOperatorEnum.IN.getValue())) {
             String fieldValue = JsonUtil.toString(expression.getFieldValue());
