@@ -36,6 +36,34 @@ class SqlParserEqualHelperTest {
         sql2 = "SELECT d,c,b,f FROM table1 WHERE column2 = 2 AND column1 = 1 order by a";
         Assert.equals(SqlParserEqualHelper.equals(sql1, sql2), false);
 
+        sql1 = "SELECT\n"
+                + "页面,\n"
+                + "SUM(访问次数)\n"
+                + "FROM\n"
+                + "超音数\n"
+                + "WHERE\n"
+                + "数据日期 >= '2023-10-26'\n"
+                + "AND 数据日期 <= '2023-11-09'\n"
+                + "AND department = \"HR\"\n"
+                + "GROUP BY\n"
+                + "页面\n"
+                + "LIMIT\n"
+                + "365";
 
+        sql2 = "SELECT\n"
+                + "页面,\n"
+                + "SUM(访问次数)\n"
+                + "FROM\n"
+                + "超音数\n"
+                + "WHERE\n"
+                + "department = \"HR\"\n"
+                + "AND 数据日期 >= '2023-10-26'\n"
+                + "AND 数据日期 <= '2023-11-09'\n"
+                + "GROUP BY\n"
+                + "页面\n"
+                + "LIMIT\n"
+                + "365";
+
+        Assert.equals(SqlParserEqualHelper.equals(sql1, sql2), true);
     }
 }
