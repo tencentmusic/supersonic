@@ -14,11 +14,9 @@ import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
 import com.tencent.supersonic.semantic.api.model.request.DatasourceReq;
 import com.tencent.supersonic.semantic.api.model.request.DimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
-import com.tencent.supersonic.semantic.api.model.response.DatasourceRelaResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO;
-import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Datasource;
 import java.util.Date;
 import java.util.List;
@@ -32,61 +30,32 @@ import org.springframework.util.CollectionUtils;
 public class DatasourceConverter {
 
 
-    public static Datasource convert(DatasourceReq datasourceReq) {
-        Datasource datasource = new Datasource();
-        DatasourceDetail datasourceDetail = new DatasourceDetail();
+    public static DatasourceDO convert(DatasourceReq datasourceReq, User user) {
+        DatasourceDO datasource = new DatasourceDO();
+        DatasourceDetail datasourceDetail = getDatasourceDetail(datasourceReq);
+        datasourceReq.createdBy(user.getName());
         BeanMapper.mapper(datasourceReq, datasource);
-        BeanMapper.mapper(datasourceReq, datasourceDetail);
-        List<Measure> measures = datasourceDetail.getMeasures();
-        for (Measure measure : measures) {
-            if (StringUtils.isBlank(measure.getExpr())) {
-                measure.setExpr(measure.getBizName());
-            }
-            if (StringUtils.isBlank(measure.getConstraint())) {
-                measure.setConstraint(null);
-            }
-            if (StringUtils.isBlank(measure.getAlias())) {
-                measure.setAlias(null);
-            }
-            measure.setBizName(String.format("%s_%s", datasource.getBizName(), measure.getBizName()));
-        }
         datasource.setStatus(StatusEnum.ONLINE.getCode());
-        datasource.setDatasourceDetail(datasourceDetail);
+        datasource.setDatasourceDetail(JSONObject.toJSONString(datasourceDetail));
         return datasource;
     }
 
-    public static DatasourceRelaResp convert(DatasourceRelaDO datasourceRelaDO) {
-        DatasourceRelaResp datasourceRelaResp = new DatasourceRelaResp();
-        BeanUtils.copyProperties(datasourceRelaDO, datasourceRelaResp);
-        return datasourceRelaResp;
-    }
 
-
-    public static DatasourceDO convert(DatasourceDO datasourceDO, Datasource datasource) {
-        BeanMapper.mapper(datasource, datasourceDO);
-        datasourceDO.setDatasourceDetail(JSONObject.toJSONString((datasource.getDatasourceDetail())));
-        return datasourceDO;
-    }
-
-
-    public static DatasourceDO convert(Datasource datasource, User user) {
-        DatasourceDO datasourceDO = new DatasourceDO();
-        BeanMapper.mapper(datasource, datasourceDO);
-        datasourceDO.setDatasourceDetail(JSONObject.toJSONString(datasource.getDatasourceDetail()));
+    public static DatasourceDO convert(DatasourceDO datasourceDO, DatasourceReq datasourceReq, User user) {
+        DatasourceDetail datasourceDetail = getDatasourceDetail(datasourceReq);
+        BeanMapper.mapper(datasourceReq, datasourceDO);
+        datasourceDO.setDatasourceDetail(JSONObject.toJSONString((datasourceDetail)));
         datasourceDO.setUpdatedBy(user.getName());
         datasourceDO.setUpdatedAt(new Date());
-        datasourceDO.setCreatedBy(user.getName());
-        datasourceDO.setCreatedAt(new Date());
         return datasourceDO;
     }
 
-
     public static DatasourceResp convert(DatasourceDO datasourceDO) {
-        DatasourceResp datasourceDesc = new DatasourceResp();
-        BeanUtils.copyProperties(datasourceDO, datasourceDesc);
-        datasourceDesc.setDatasourceDetail(
+        DatasourceResp datasourceResp = new DatasourceResp();
+        BeanUtils.copyProperties(datasourceDO, datasourceResp);
+        datasourceResp.setDatasourceDetail(
                 JSONObject.parseObject(datasourceDO.getDatasourceDetail(), DatasourceDetail.class));
-        return datasourceDesc;
+        return datasourceResp;
     }
 
     public static MeasureResp convert(Measure measure, DatasourceResp datasourceResp) {
@@ -99,27 +68,27 @@ public class DatasourceConverter {
         return measureResp;
     }
 
-    public static DimensionReq convert(Dim dim, Datasource datasource) {
+    public static DimensionReq convert(Dim dim, DatasourceDO datasourceDO) {
         DimensionReq dimensionReq = new DimensionReq();
         dimensionReq.setName(dim.getName());
         dimensionReq.setBizName(dim.getBizName());
         dimensionReq.setDescription(dim.getName());
         dimensionReq.setSemanticType("CATEGORY");
-        dimensionReq.setDatasourceId(datasource.getId());
-        dimensionReq.setModelId(datasource.getModelId());
+        dimensionReq.setDatasourceId(datasourceDO.getId());
+        dimensionReq.setModelId(datasourceDO.getModelId());
         dimensionReq.setExpr(dim.getBizName());
         dimensionReq.setType("categorical");
         dimensionReq.setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
         return dimensionReq;
     }
 
-    public static MetricReq convert(Measure measure, Datasource datasource) {
-        measure.setDatasourceId(datasource.getId());
+    public static MetricReq convert(Measure measure, DatasourceDO datasourceDO) {
+        measure.setDatasourceId(datasourceDO.getId());
         MetricReq metricReq = new MetricReq();
         metricReq.setName(measure.getName());
-        metricReq.setBizName(measure.getBizName().replaceFirst(datasource.getBizName() + "_", ""));
+        metricReq.setBizName(measure.getBizName().replaceFirst(datasourceDO.getBizName() + "_", ""));
         metricReq.setDescription(measure.getName());
-        metricReq.setModelId(datasource.getModelId());
+        metricReq.setModelId(datasourceDO.getModelId());
         metricReq.setMetricType(MetricTypeEnum.ATOMIC);
         MetricTypeParams exprTypeParams = new MetricTypeParams();
         exprTypeParams.setExpr(measure.getBizName());
@@ -128,14 +97,14 @@ public class DatasourceConverter {
         return metricReq;
     }
 
-    public static DimensionReq convert(Identify identify, Datasource datasource) {
+    public static DimensionReq convert(Identify identify, DatasourceDO datasourceDO) {
         DimensionReq dimensionReq = new DimensionReq();
         dimensionReq.setName(identify.getName());
         dimensionReq.setBizName(identify.getBizName());
         dimensionReq.setDescription(identify.getName());
         dimensionReq.setSemanticType("CATEGORY");
-        dimensionReq.setDatasourceId(datasource.getId());
-        dimensionReq.setModelId(datasource.getModelId());
+        dimensionReq.setDatasourceId(datasourceDO.getId());
+        dimensionReq.setModelId(datasourceDO.getModelId());
         dimensionReq.setExpr(identify.getBizName());
         dimensionReq.setType(identify.getType());
         return dimensionReq;
@@ -161,48 +130,71 @@ public class DatasourceConverter {
                 && StringUtils.isNotBlank(measure.getName());
     }
 
-    public static List<Dim> getDimToCreateDimension(Datasource datasource) {
-        return datasource.getDatasourceDetail().getDimensions().stream()
+    public static List<Dim> getDimToCreateDimension(DatasourceDetail datasourceDetail) {
+        return datasourceDetail.getDimensions().stream()
                 .filter(DatasourceConverter::isCreateDimension)
                 .collect(Collectors.toList());
     }
 
-    public static List<Measure> getMeasureToCreateMetric(Datasource datasource) {
-        return datasource.getDatasourceDetail().getMeasures().stream()
+    public static List<Measure> getMeasureToCreateMetric(DatasourceDetail datasourceDetail) {
+        return datasourceDetail.getMeasures().stream()
                 .filter(DatasourceConverter::isCreateMetric)
                 .collect(Collectors.toList());
     }
 
-    public static List<DimensionReq> convertDimensionList(Datasource datasource) {
+    public static List<DimensionReq> convertDimensionList(DatasourceDO datasourceDO) {
         List<DimensionReq> dimensionReqs = Lists.newArrayList();
-        List<Dim> dims = getDimToCreateDimension(datasource);
+        DatasourceDetail datasourceDetail = JSONObject.parseObject(datasourceDO.getDatasourceDetail(),
+                DatasourceDetail.class);
+        List<Dim> dims = getDimToCreateDimension(datasourceDetail);
         if (!CollectionUtils.isEmpty(dims)) {
             dimensionReqs = dims.stream().filter(dim -> StringUtils.isNotBlank(dim.getName()))
-                    .map(dim -> convert(dim, datasource)).collect(Collectors.toList());
+                    .map(dim -> convert(dim, datasourceDO)).collect(Collectors.toList());
         }
-        List<Identify> identifies = datasource.getDatasourceDetail().getIdentifiers();
+        List<Identify> identifies = datasourceDetail.getIdentifiers();
         if (CollectionUtils.isEmpty(identifies)) {
             return dimensionReqs;
         }
         dimensionReqs.addAll(identifies.stream()
                 .filter(i -> i.getType().equalsIgnoreCase("primary"))
                 .filter(i -> StringUtils.isNotBlank(i.getName()))
-                .map(identify -> convert(identify, datasource)).collect(Collectors.toList()));
+                .map(identify -> convert(identify, datasourceDO)).collect(Collectors.toList()));
         return dimensionReqs;
     }
 
 
-    public static List<MetricReq> convertMetricList(Datasource datasource) {
-        List<Measure> measures = getMeasureToCreateMetric(datasource);
+    public static List<MetricReq> convertMetricList(DatasourceDO datasourceDO) {
+        DatasourceDetail datasourceDetail = JSONObject.parseObject(datasourceDO.getDatasourceDetail(),
+                DatasourceDetail.class);
+        List<Measure> measures = getMeasureToCreateMetric(datasourceDetail);
         if (CollectionUtils.isEmpty(measures)) {
             return Lists.newArrayList();
         }
-        return measures.stream().map(measure -> convert(measure, datasource)).collect(Collectors.toList());
+        return measures.stream().map(measure -> convert(measure, datasourceDO)).collect(Collectors.toList());
     }
 
     public static Datasource datasourceInfo2Datasource(DatasourceResp datasourceResp) {
         Datasource datasource = new Datasource();
         BeanUtils.copyProperties(datasourceResp, datasource);
         return datasource;
+    }
+
+    private static DatasourceDetail getDatasourceDetail(DatasourceReq datasourceReq) {
+        DatasourceDetail datasourceDetail = new DatasourceDetail();
+        BeanMapper.mapper(datasourceReq, datasourceDetail);
+        List<Measure> measures = datasourceDetail.getMeasures();
+        for (Measure measure : measures) {
+            if (StringUtils.isBlank(measure.getExpr())) {
+                measure.setExpr(measure.getBizName());
+            }
+            if (StringUtils.isBlank(measure.getConstraint())) {
+                measure.setConstraint(null);
+            }
+            if (StringUtils.isBlank(measure.getAlias())) {
+                measure.setAlias(null);
+            }
+            measure.setBizName(String.format("%s_%s", datasourceReq.getBizName(), measure.getBizName()));
+        }
+        return datasourceDetail;
     }
 }

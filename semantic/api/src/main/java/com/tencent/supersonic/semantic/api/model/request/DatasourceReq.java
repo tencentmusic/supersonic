@@ -32,6 +32,8 @@ public class DatasourceReq extends SchemaItem {
 
     private List<Measure> measures;
 
+    private String filterSql;
+
 
 
     public List<Dim> getTimeDimension() {

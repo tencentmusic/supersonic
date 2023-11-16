@@ -144,6 +144,7 @@ CREATE TABLE `s2_datasource` (
                                  `datasource_detail` mediumtext NOT NULL COMMENT '数据源配置',
                                  `status` int(11) DEFAULT NULL ,
                                  `depends` text DEFAULT NULL COMMENT '上游依赖标识',
+                                 `filter_sql` varchar(1000) DEFAULT NULL ,
                                  `created_at` datetime NOT NULL COMMENT '创建时间',
                                  `created_by` varchar(100) NOT NULL COMMENT '创建人',
                                  `updated_at` datetime NOT NULL COMMENT '更新时间',

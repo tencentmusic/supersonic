@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.materialization.application;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
@@ -309,7 +310,7 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
             modelFilter.setModelIds(Arrays.asList(materializationResp.getModelId()));
             List<ModelSchemaResp> modelSchemaRespList = modelService.fetchModelSchema(modelFilter);
             List<MeasureResp> measureRespList = datasourceService.getMeasureListOfModel(
-                    materializationResp.getModelId());
+                    Lists.newArrayList(materializationResp.getModelId()));
             Map<String, DimSchemaResp> dimSchemaRespMap = new HashMap<>();
             Map<String, MetricSchemaResp> metricSchemaRespHashMap = new HashMap<>();
             if (!CollectionUtils.isEmpty(modelSchemaRespList)) {
@@ -379,7 +380,7 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
             ModelSchemaFilterReq modelSchemaFilterReq = new ModelSchemaFilterReq();
             modelSchemaFilterReq.setModelIds(Arrays.asList(modelId));
             List<ModelSchemaResp> modelSchemaRespList = modelService.fetchModelSchema(modelSchemaFilterReq);
-            List<MeasureResp> measureRespList = datasourceService.getMeasureListOfModel(modelId);
+            List<MeasureResp> measureRespList = datasourceService.getMeasureListOfModel(Lists.newArrayList(modelId));
             Set<Long> dimensionIds = new HashSet<>();
             Set<Long> metricIds = new HashSet<>();
             materializationElementRespList.stream().forEach(e -> {
