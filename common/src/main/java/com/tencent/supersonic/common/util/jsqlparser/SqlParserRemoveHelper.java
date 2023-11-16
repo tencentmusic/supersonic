@@ -21,16 +21,42 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
+import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
 /**
  * Sql Parser remove Helper
  */
 @Slf4j
 public class SqlParserRemoveHelper {
+
+    public static String removeSelect(String sql, List<String> filteredMetrics) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        List<SelectItem> selectItemList = ((PlainSelect) selectBody).getSelectItems();
+        selectItemList.removeIf(o -> {
+            Expression expression = ((SelectExpressionItem) o).getExpression();
+            if (expression instanceof Column) {
+                Column column = (Column) expression;
+                String columnName = column.getColumnName();
+                if (filteredMetrics.contains(columnName)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+        ((PlainSelect) selectBody).setSelectItems(selectItemList);
+        return selectStatement.toString();
+    }
 
     public static String removeWhereCondition(String sql, Set<String> removeFieldNames) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);

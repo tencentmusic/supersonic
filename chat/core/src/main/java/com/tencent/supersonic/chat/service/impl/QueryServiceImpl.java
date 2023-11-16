@@ -290,6 +290,7 @@ public class QueryServiceImpl implements QueryService {
         SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
         semanticQuery.setParseInfo(parseInfo);
         if (S2SQLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
+            log.info("begin revise filters!");
             Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
             Map<String, Map<String, String>> havingFiledNameToValueMap = new HashMap<>();
 
