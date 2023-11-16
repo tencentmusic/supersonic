@@ -61,7 +61,7 @@ const CommonEditList: React.FC<Props> = ({ title, defaultCollapse = false, value
             activeKey ? (
               <Button
                 key="saveBtn"
-                type="primary"
+                type="link"
                 onClick={() => {
                   if (!currentRecord && !currentSql) {
                     setActiveKey(undefined);
@@ -98,7 +98,7 @@ const CommonEditList: React.FC<Props> = ({ title, defaultCollapse = false, value
               </Button>
             ) : (
               <Button
-                type="primary"
+                type="link"
                 key="createBtn"
                 onClick={() => {
                   setCurrentRecord(undefined);

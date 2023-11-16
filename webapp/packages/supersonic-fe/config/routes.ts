@@ -22,12 +22,12 @@ const ROUTES = [
     component: './ChatPage',
     envEnableList: [ENV_KEY.CHAT],
   },
-  {
-    path: '/chatSetting/model/:domainId?/:modelId?/:menuKey?',
-    component: './SemanticModel/ChatSetting/ChatSetting',
-    name: 'chatSetting',
-    envEnableList: [ENV_KEY.CHAT],
-  },
+  // {
+  //   path: '/chatSetting/model/:domainId?/:modelId?/:menuKey?',
+  //   component: './SemanticModel/ChatSetting/ChatSetting',
+  //   name: 'chatSetting',
+  //   envEnableList: [ENV_KEY.CHAT],
+  // },
   {
     path: '/agent',
     name: 'agent',
@@ -40,7 +40,6 @@ const ROUTES = [
     name: 'semanticModel',
     envEnableList: [ENV_KEY.SEMANTIC],
   },
-
   {
     path: '/database',
     name: 'database',
@@ -85,6 +84,12 @@ const ROUTES = [
     layout: false,
     hideInMenu: true,
     component: './Login',
+  },
+  {
+    path: '/system',
+    name: 'system',
+    hideInMenu: true,
+    component: './System',
   },
   {
     path: '/',

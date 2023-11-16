@@ -28,38 +28,38 @@ import org.apache.commons.collections.CollectionUtils;
 
 public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
 
-    private Set<FilterExpression> filterExpressions;
+    private Set<FieldExpression> fieldExpressions;
 
-    public FieldAndValueAcquireVisitor(Set<FilterExpression> filterExpressions) {
-        this.filterExpressions = filterExpressions;
+    public FieldAndValueAcquireVisitor(Set<FieldExpression> fieldExpressions) {
+        this.fieldExpressions = fieldExpressions;
     }
 
     public void visit(LikeExpression expr) {
         Expression leftExpression = expr.getLeftExpression();
         Expression rightExpression = expr.getRightExpression();
 
-        FilterExpression filterExpression = new FilterExpression();
+        FieldExpression fieldExpression = new FieldExpression();
         String columnName = null;
         if (leftExpression instanceof Column) {
             Column column = (Column) leftExpression;
             columnName = column.getColumnName();
-            filterExpression.setFieldName(columnName);
+            fieldExpression.setFieldName(columnName);
         }
-        filterExpression.setFieldValue(getFieldValue(rightExpression));
-        filterExpression.setOperator(expr.getStringExpression());
-        filterExpressions.add(filterExpression);
+        fieldExpression.setFieldValue(getFieldValue(rightExpression));
+        fieldExpression.setOperator(expr.getStringExpression());
+        fieldExpressions.add(fieldExpression);
     }
 
     public void visit(InExpression expr) {
-        FilterExpression filterExpression = new FilterExpression();
+        FieldExpression fieldExpression = new FieldExpression();
         Expression leftExpression = expr.getLeftExpression();
         if (!(leftExpression instanceof Column)) {
             return;
         }
-        filterExpression.setFieldName(((Column) leftExpression).getColumnName());
-        filterExpression.setOperator(JsqlConstants.IN);
+        fieldExpression.setFieldName(((Column) leftExpression).getColumnName());
+        fieldExpression.setOperator(JsqlConstants.IN);
         ItemsList rightItemsList = expr.getRightItemsList();
-        filterExpression.setFieldValue(rightItemsList);
+        fieldExpression.setFieldValue(rightItemsList);
         List<Object> result = new ArrayList<>();
         if (rightItemsList instanceof ExpressionList) {
             ExpressionList rightExpressionList = (ExpressionList) rightItemsList;
@@ -70,78 +70,78 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
                 }
             }
         }
-        filterExpression.setFieldValue(result);
-        filterExpressions.add(filterExpression);
+        fieldExpression.setFieldValue(result);
+        fieldExpressions.add(fieldExpression);
     }
 
     @Override
     public void visit(MinorThan expr) {
-        FilterExpression filterExpression = getFilterExpression(expr);
-        filterExpressions.add(filterExpression);
+        FieldExpression fieldExpression = getFilterExpression(expr);
+        fieldExpressions.add(fieldExpression);
     }
 
     @Override
     public void visit(EqualsTo expr) {
-        FilterExpression filterExpression = getFilterExpression(expr);
-        filterExpressions.add(filterExpression);
+        FieldExpression fieldExpression = getFilterExpression(expr);
+        fieldExpressions.add(fieldExpression);
     }
 
 
     @Override
     public void visit(MinorThanEquals expr) {
-        FilterExpression filterExpression = getFilterExpression(expr);
-        filterExpressions.add(filterExpression);
+        FieldExpression fieldExpression = getFilterExpression(expr);
+        fieldExpressions.add(fieldExpression);
     }
 
 
     @Override
     public void visit(GreaterThan expr) {
-        FilterExpression filterExpression = getFilterExpression(expr);
-        filterExpressions.add(filterExpression);
+        FieldExpression fieldExpression = getFilterExpression(expr);
+        fieldExpressions.add(fieldExpression);
     }
 
     @Override
     public void visit(GreaterThanEquals expr) {
-        FilterExpression filterExpression = getFilterExpression(expr);
-        filterExpressions.add(filterExpression);
+        FieldExpression fieldExpression = getFilterExpression(expr);
+        fieldExpressions.add(fieldExpression);
     }
 
-    private FilterExpression getFilterExpression(ComparisonOperator expr) {
+    private FieldExpression getFilterExpression(ComparisonOperator expr) {
         Expression leftExpression = expr.getLeftExpression();
         Expression rightExpression = expr.getRightExpression();
 
-        FilterExpression filterExpression = new FilterExpression();
+        FieldExpression fieldExpression = new FieldExpression();
         String columnName = null;
         if (leftExpression instanceof Column) {
             Column column = (Column) leftExpression;
             columnName = column.getColumnName();
-            filterExpression.setFieldName(columnName);
+            fieldExpression.setFieldName(columnName);
         }
         if (leftExpression instanceof Function) {
             Function leftExpressionFunction = (Function) leftExpression;
             Column field = getColumn(leftExpressionFunction);
             if (Objects.isNull(field)) {
-                return filterExpression;
+                return fieldExpression;
             }
             String functionName = leftExpressionFunction.getName().toUpperCase();
-            filterExpression.setFieldName(field.getColumnName());
-            filterExpression.setFunction(functionName);
-            filterExpression.setOperator(expr.getStringExpression());
+            fieldExpression.setFieldName(field.getColumnName());
+            fieldExpression.setFunction(functionName);
+            fieldExpression.setOperator(expr.getStringExpression());
             //deal with DAY/WEEK function
             List<DatePeriodEnum> collect = Arrays.stream(DatePeriodEnum.values()).collect(Collectors.toList());
             DatePeriodEnum periodEnum = DatePeriodEnum.get(functionName);
             if (Objects.nonNull(periodEnum) && collect.contains(periodEnum)) {
-                filterExpression.setFieldValue(getFieldValue(rightExpression) + periodEnum.getChName());
-                return filterExpression;
+                fieldExpression.setFieldValue(getFieldValue(rightExpression) + periodEnum.getChName());
+                return fieldExpression;
             } else {
                 //deal with aggregate function
-                filterExpression.setFieldValue(getFieldValue(rightExpression));
-                return filterExpression;
+                fieldExpression.setFieldValue(getFieldValue(rightExpression));
+                return fieldExpression;
             }
         }
-        filterExpression.setFieldValue(getFieldValue(rightExpression));
-        filterExpression.setOperator(expr.getStringExpression());
-        return filterExpression;
+        fieldExpression.setFieldValue(getFieldValue(rightExpression));
+        fieldExpression.setOperator(expr.getStringExpression());
+        return fieldExpression;
     }
 
     private Column getColumn(Function leftExpressionFunction) {

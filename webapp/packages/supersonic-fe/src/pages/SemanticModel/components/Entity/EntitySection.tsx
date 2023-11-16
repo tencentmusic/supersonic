@@ -8,7 +8,6 @@ import ProCard from '@ant-design/pro-card';
 
 import DefaultSettingForm from './DefaultSettingForm';
 import type { IChatConfig } from '../../data';
-import DimensionMetricVisibleForm from './DimensionMetricVisibleForm';
 import { ChatConfigType } from '../../enum';
 
 type Props = {
@@ -19,7 +18,6 @@ type Props = {
 
 const EntitySection: React.FC<Props> = ({
   domainManger,
-  dispatch,
   chatConfigType = ChatConfigType.DETAIL,
 }) => {
   const { selectDomainId, selectModelId: modelId, dimensionList, metricList } = domainManger;
@@ -59,28 +57,6 @@ const EntitySection: React.FC<Props> = ({
   return (
     <div style={{ width: 800, margin: '0 auto' }}>
       <Space direction="vertical" style={{ width: '100%' }} size={20}>
-        <ProCard bordered title="问答可见">
-          <DimensionMetricVisibleForm
-            chatConfigKey={
-              chatConfigType === ChatConfigType.DETAIL ? 'chatDetailConfig' : 'chatAggConfig'
-            }
-            entityData={entityData || {}}
-            domainId={Number(selectDomainId)}
-            metricList={metricList}
-            dimensionList={dimensionList}
-            onSubmit={(params: any = {}) => {
-              if (params.from === 'dimensionSearchVisible') {
-                dispatch({
-                  type: 'domainManger/queryDimensionList',
-                  payload: {
-                    domainId: selectDomainId,
-                  },
-                });
-              }
-              queryThemeListData();
-            }}
-          />
-        </ProCard>
         <ProCard bordered title="默认设置">
           <DefaultSettingForm
             domainId={Number(selectDomainId)}

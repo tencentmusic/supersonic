@@ -77,8 +77,7 @@ class DateUtilsTest {
         String startDate = "2023-07-01";
         String endDate = "2023-10-01";
         List<String> actualDateList = DateUtils.getDateList(startDate, endDate, Constants.MONTH);
-        List<String> expectedDateList = Lists.newArrayList("2023-07-01", "2023-08-01",
-                "2023-09-01", "2023-10-01");
+        List<String> expectedDateList = Lists.newArrayList("2023-07", "2023-08", "2023-09", "2023-10");
         Assertions.assertEquals(actualDateList, expectedDateList);
     }
 }

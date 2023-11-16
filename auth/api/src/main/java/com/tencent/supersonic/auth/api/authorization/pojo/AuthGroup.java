@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class AuthGroup {
 
-    private String modelId;
+    private Long modelId;
     private String name;
     private Integer groupId;
     private List<AuthRule> authRules;

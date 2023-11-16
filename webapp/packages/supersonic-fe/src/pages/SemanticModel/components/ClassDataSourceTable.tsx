@@ -146,7 +146,7 @@ const ClassDataSourceTable: React.FC<Props> = ({ dispatch, domainManger }) => {
           </Button>,
         ]}
       />
-      {
+      {createDataSourceModalOpen && (
         <ClassDataSourceTypeModal
           open={createDataSourceModalOpen}
           onCancel={() => {
@@ -157,7 +157,7 @@ const ClassDataSourceTable: React.FC<Props> = ({ dispatch, domainManger }) => {
             actionRef.current?.reload();
           }}
         />
-      }
+      )}
     </>
   );
 };

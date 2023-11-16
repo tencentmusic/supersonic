@@ -141,20 +141,22 @@ public class QueryReqConverter {
     }
 
     private Set<String> getDimensions(ModelSchemaResp modelSchemaResp, List<String> allFields) {
-        Set<String> allDimensions = modelSchemaResp.getDimensions().stream()
-                .map(entry -> entry.getBizName().toLowerCase())
-                .collect(Collectors.toSet());
-        allDimensions.addAll(QueryStructUtils.internalCols);
-        Set<String> collect = allFields.stream().filter(entry -> allDimensions.contains(entry.toLowerCase()))
-                .map(String::toLowerCase).collect(Collectors.toSet());
+        Map<String, String> dimensionLowerToNameMap = modelSchemaResp.getDimensions().stream()
+                .collect(Collectors.toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry.getBizName()));
+        Map<String, String> internalLowerToNameMap = QueryStructUtils.internalCols.stream()
+                .collect(Collectors.toMap(a -> a.toLowerCase(), a -> a));
+        dimensionLowerToNameMap.putAll(internalLowerToNameMap);
+        Set<String> collect = allFields.stream()
+                .filter(entry -> dimensionLowerToNameMap.containsKey(entry.toLowerCase()))
+                .map(entry -> dimensionLowerToNameMap.get(entry.toLowerCase())).collect(Collectors.toSet());
         return collect;
     }
 
     private List<String> getMetrics(ModelSchemaResp modelSchemaResp, List<String> allFields) {
-        Set<String> allMetrics = modelSchemaResp.getMetrics().stream().map(entry -> entry.getBizName().toLowerCase())
-                .collect(Collectors.toSet());
-        List<String> metrics = allFields.stream().filter(entry -> allMetrics.contains(entry.toLowerCase()))
-                .map(String::toLowerCase).collect(Collectors.toList());
+        Map<String, String> metricLowerToNameMap = modelSchemaResp.getMetrics().stream()
+                .collect(Collectors.toMap(entry -> entry.getBizName().toLowerCase(), entry -> entry.getBizName()));
+        List<String> metrics = allFields.stream().filter(entry -> metricLowerToNameMap.containsKey(entry.toLowerCase()))
+                .map(entry -> metricLowerToNameMap.get(entry.toLowerCase())).collect(Collectors.toList());
         return metrics;
     }
 

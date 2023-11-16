@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import { Form, Button, Modal, Steps, message } from 'antd';
 import DataSourceBasicForm from './DataSourceBasicForm';
 import FieldForm from './DataSourceFieldForm';
 import { formLayout } from '@/components/FormHelper/utils';
 import { EnumDataSourceType } from '../constants';
-// import type { DataInstanceItem } from '../data';
 import styles from '../style.less';
 import { createDatasource, updateDatasource, getColumns } from '../../service';
 import type { Dispatch } from 'umi';
@@ -17,13 +16,15 @@ export type CreateFormProps = {
   dispatch: Dispatch;
   createModalVisible: boolean;
   sql?: string;
-  databaseItem?: any;
+  databaseId?: number;
   dataSourceItem: IDataSource.IDataSourceItem;
   onCancel?: () => void;
   onSubmit?: (dataSourceInfo: any) => void;
   scriptColumns?: any[] | undefined;
   basicInfoFormMode?: 'normal' | 'fast';
   onDataBaseTableChange?: (tableName: string) => void;
+  onDataSourceBtnClick?: () => void;
+  // modalSolt: ReactNode;
 };
 const { Step } = Steps;
 
@@ -41,8 +42,10 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   sql = '',
   onSubmit,
   dataSourceItem,
-  databaseItem,
+  databaseId,
   basicInfoFormMode,
+  onDataSourceBtnClick,
+  children,
 }) => {
   const isEdit = !!dataSourceItem?.id;
   const [fields, setFields] = useState<any[]>([]);
@@ -145,7 +148,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     );
     return classify;
   };
-  const handleNext = async () => {
+  const handleNext = async (saveState: boolean = false) => {
     const fieldsValue = await form.validateFields();
 
     const fieldsClassify = getFieldsClassify(fields);
@@ -155,7 +158,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       ...fieldsClassify,
     };
     updateFormVal(submitForm);
-    if (currentStep < 1) {
+    if (!saveState && currentStep < 1) {
       forward();
     } else {
       setSaveLoading(true);
@@ -163,7 +166,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       const queryParams = {
         ...submitForm,
         sqlQuery: sql,
-        databaseId: databaseItem?.key || dataSourceItem?.databaseId || formDatabaseId,
+        databaseId: databaseId || dataSourceItem?.databaseId || formDatabaseId,
         queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
         tableQuery: dbName && tableName ? `${dbName}.${tableName}` : '',
         modelId: isEdit ? dataSourceItem.modelId : modelId,
@@ -191,7 +194,6 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       return {
         ...oldItem,
         bizName: nameEn,
-        // name,
         sqlType: type,
       };
     });
@@ -264,7 +266,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     } else {
       initFields([], fieldColumns);
     }
-  }, [dataSourceItem]);
+  }, [dataSourceItem, fieldColumns]);
 
   const handleFieldChange = (fieldName: string, data: any) => {
     const result = fields.map((field) => {
@@ -285,7 +287,6 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     const { code, data, msg } = await getColumns(databaseId, dbName, tableName);
     if (code === 200) {
       const list = data?.resultList || [];
-      // setTableNameList(list);
       const columns = list.map((item: any) => {
         const { dataType, name } = item;
         return {
@@ -293,7 +294,6 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           type: dataType,
         };
       });
-      // setFields(columns);
       initFields([], columns);
       setFieldColumns(columns);
       return columns;
@@ -327,14 +327,25 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           <Button style={{ float: 'left' }} onClick={backward}>
             上一步
           </Button>
-          <Button onClick={onCancel}>取消</Button>
+          <Button onClick={onCancel}>取 消</Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              onDataSourceBtnClick?.();
+            }}
+          >
+            数据源编辑
+          </Button>
+
           <Button
             type="primary"
             loading={saveLoading}
-            onClick={handleNext}
+            onClick={() => {
+              handleNext(true);
+            }}
             disabled={hasEmptyNameField}
           >
-            完成
+            保 存
           </Button>
         </>
       );
@@ -342,9 +353,26 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     return (
       <>
         <Button onClick={onCancel}>取消</Button>
-        <Button type="primary" onClick={handleNext}>
+        <Button
+          type="primary"
+          onClick={() => {
+            handleNext();
+          }}
+        >
           下一步
         </Button>
+        {isEdit && (
+          <Button
+            type="primary"
+            loading={saveLoading}
+            onClick={() => {
+              handleNext(true);
+            }}
+            // disabled={hasEmptyNameField}
+          >
+            保 存
+          </Button>
+        )}
       </>
     );
   };
@@ -383,6 +411,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       >
         {renderContent()}
       </Form>
+      {children}
     </Modal>
   );
 };

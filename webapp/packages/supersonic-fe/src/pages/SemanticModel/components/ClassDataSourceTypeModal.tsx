@@ -2,8 +2,9 @@ import { Button, Drawer, Result, Modal, Card, Row, Col } from 'antd';
 import { ConsoleSqlOutlined, CoffeeOutlined } from '@ant-design/icons';
 import React, { useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
-import { history, connect } from 'umi';
+import { connect } from 'umi';
 import DataSourceCreateForm from '../Datasource/components/DataSourceCreateForm';
+import { excuteSql } from '../service';
 import type { StateType } from '../model';
 import DataSource from '../Datasource';
 import { IDataSource } from '../data';
@@ -33,8 +34,12 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
 
   const [dataSourceModalVisible, setDataSourceModalVisible] = useState(false);
   const [fastModeSql, setFastModeSql] = useState<string>('');
+  const [sql, setSql] = useState<string>('');
 
-  const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
+  const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState<boolean>(false);
+  const [dataSourceEditOpen, setDataSourceEditOpen] = useState<boolean>(false);
+  const [currentDatabaseId, setCurrentDatabaseId] = useState<number>();
+  const [scriptColumns, setScriptColumns] = useState<any[]>([]);
 
   useEffect(() => {
     if (!dataSourceItem || !open) {
@@ -63,6 +68,28 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
   };
   const handleCancel = () => {
     onCancel?.();
+  };
+
+  useEffect(() => {
+    queryTableColumnListByScript(dataSourceItem);
+  }, [dataSourceItem]);
+
+  const fetchTaskResult = (params) => {
+    setScriptColumns(params.columns);
+  };
+
+  const queryTableColumnListByScript = async (dataSource: IDataSource.IDataSourceItem) => {
+    if (!dataSource) {
+      return;
+    }
+    const { code, data, msg } = await excuteSql({
+      sql: dataSource.datasourceDetail?.sqlQuery,
+      id: dataSource.databaseId,
+    });
+    if (code === 200) {
+      fetchTaskResult(data);
+      setSql(dataSource?.datasourceDetail?.sqlQuery);
+    }
   };
 
   return (
@@ -140,25 +167,47 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
         />
       )}
       {createModalVisible && (
-        <Drawer
-          width={'100%'}
-          destroyOnClose
-          title="数据源编辑"
-          open={true}
-          onClose={() => {
+        <DataSourceCreateForm
+          sql={sql}
+          databaseId={currentDatabaseId}
+          basicInfoFormMode="normal"
+          dataSourceItem={dataSourceItem}
+          scriptColumns={scriptColumns}
+          onCancel={() => {
             setCreateModalVisible(false);
             handleCancel();
           }}
-          footer={null}
+          onSubmit={() => {
+            setCreateModalVisible(false);
+            onSubmit?.();
+          }}
+          createModalVisible={createModalVisible}
+          onDataSourceBtnClick={() => {
+            setDataSourceEditOpen(true);
+          }}
         >
-          <DataSource
-            initialValues={dataSourceItem}
-            onSubmitSuccess={() => {
-              setCreateModalVisible(false);
-              onSubmit?.();
+          <Drawer
+            width={'100%'}
+            title="数据源编辑"
+            open={dataSourceEditOpen}
+            onClose={() => {
+              setDataSourceEditOpen(false);
             }}
-          />
-        </Drawer>
+            footer={null}
+          >
+            <DataSource
+              initialValues={dataSourceItem}
+              onSubmitSuccess={(dataSourceInfo) => {
+                const { columns, sql, databaseId } = dataSourceInfo;
+                setSql(sql);
+                setScriptColumns(columns);
+                setCurrentDatabaseId(databaseId);
+                onSubmit?.();
+                setDataSourceEditOpen(false);
+              }}
+            />
+          </Drawer>
+        </DataSourceCreateForm>
       )}
     </>
   );

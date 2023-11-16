@@ -15,5 +15,5 @@ public class QueryAuthResReq {
 
     private List<AuthRes> resources;
 
-    private String modelId;
+    private Long modelId;
 }

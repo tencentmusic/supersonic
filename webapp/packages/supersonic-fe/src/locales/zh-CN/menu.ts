@@ -14,6 +14,7 @@ export default {
   'menu.chatSetting': '问答设置',
   'menu.plugin': '插件市场',
   'menu.login': '登录',
+  'menu.system': '系统设置',
   'menu.chat': '问答对话',
   'menu.agent': '智能助理',
 };

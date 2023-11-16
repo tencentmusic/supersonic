@@ -13,4 +13,5 @@ public class Parameter {
     private String value;
     private String comment;
     private String dataType;
+    private String module;
 }

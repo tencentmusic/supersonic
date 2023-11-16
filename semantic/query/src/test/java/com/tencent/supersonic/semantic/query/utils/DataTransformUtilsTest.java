@@ -1,6 +1,7 @@
 package com.tencent.supersonic.semantic.query.utils;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.DateConf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
@@ -23,7 +24,8 @@ class DataTransformUtilsTest {
         List<String> dateList = Lists.newArrayList("2023/10/11", "2023/10/12",
                 "2023/10/13", "2023/10/14", "2023/10/15");
         String metric = "m1";
-        List<Map<String, Object>> resultData = DataTransformUtils.transform(inputData, dateList, metric, groups);
+        List<Map<String, Object>> resultData = DataTransformUtils.transform(inputData, dateList,
+                metric, groups, new DateConf());
         Assertions.assertEquals(3, resultData.size());
     }
 

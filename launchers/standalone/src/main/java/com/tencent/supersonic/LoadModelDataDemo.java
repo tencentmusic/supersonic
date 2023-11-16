@@ -300,7 +300,7 @@ public class LoadModelDataDemo implements CommandLineRunner {
 
     public void addAuthGroup_1() {
         AuthGroup authGroupReq = new AuthGroup();
-        authGroupReq.setModelId("1");
+        authGroupReq.setModelId(1L);
         authGroupReq.setName("admin-permission");
 
         List<AuthRule> authRules = new ArrayList<>();
@@ -317,7 +317,7 @@ public class LoadModelDataDemo implements CommandLineRunner {
 
     public void addAuthGroup_2() {
         AuthGroup authGroupReq = new AuthGroup();
-        authGroupReq.setModelId("1");
+        authGroupReq.setModelId(1L);
         authGroupReq.setName("tom_sales_permission");
 
         List<AuthRule> authRules = new ArrayList<>();

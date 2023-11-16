@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
+/**
+ * Perform schema corrections on the Schema information in S2QL.
+ */
 @Slf4j
 public class SchemaCorrector extends BaseSemanticCorrector {
 
