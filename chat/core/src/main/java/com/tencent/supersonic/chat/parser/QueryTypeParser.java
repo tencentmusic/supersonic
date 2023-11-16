@@ -58,12 +58,14 @@ public class QueryTypeParser implements SemanticParser {
             // get primaryEntityBizName
             SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
             EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, user);
-            String primaryEntityBizName = semanticService.getPrimaryEntityBizName(entityInfo);
-            if (StringUtils.isNotEmpty(primaryEntityBizName)) {
-                //if exist primaryEntityBizName in parseInfo's dimensions, set nativeQuery to true
-                boolean existPrimaryEntityBizName = parseInfo.getDimensions().stream()
-                        .anyMatch(schemaElement -> primaryEntityBizName.equalsIgnoreCase(schemaElement.getBizName()));
-                if (existPrimaryEntityBizName) {
+            if (Objects.nonNull(entityInfo) && Objects.nonNull(entityInfo.getModelInfo()) && StringUtils.isNotEmpty(
+                    entityInfo.getModelInfo().getPrimaryEntityName())) {
+                String primaryEntityName = entityInfo.getModelInfo().getPrimaryEntityName();
+                //if exist primaryEntityName in S2SQL select.
+                List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getS2SQL());
+                boolean existPrimaryEntityName = selectFields.stream()
+                        .anyMatch(fieldName -> primaryEntityName.equalsIgnoreCase(fieldName));
+                if (existPrimaryEntityName) {
                     return QueryType.ENTITY;
                 }
             }
