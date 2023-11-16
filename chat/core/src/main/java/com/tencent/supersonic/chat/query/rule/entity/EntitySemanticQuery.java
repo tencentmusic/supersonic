@@ -1,7 +1,12 @@
 package com.tencent.supersonic.chat.query.rule.entity;
 
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
@@ -11,17 +16,12 @@ import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.util.ContextUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 
 @Slf4j
 public abstract class EntitySemanticQuery extends RuleSemanticQuery {
@@ -81,7 +81,7 @@ public abstract class EntitySemanticQuery extends RuleSemanticQuery {
     public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {
         super.fillParseInfo(modelId, queryContext, chatContext);
 
-        parseInfo.setNativeQuery(true);
+        parseInfo.setQueryType(QueryType.ENTITY);
         parseInfo.setLimit(ENTITY_MAX_RESULTS);
         if (parseInfo.getDateInfo() == null) {
             ConfigService configService = ContextUtils.getBean(ConfigService.class);

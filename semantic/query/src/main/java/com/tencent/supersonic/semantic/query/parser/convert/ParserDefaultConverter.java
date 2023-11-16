@@ -62,7 +62,7 @@ public class ParserDefaultConverter implements SemanticConverter {
 
         // todo tmp delete
         // support detail query
-        if (queryStructCmd.getNativeQuery() && CollectionUtils.isEmpty(sqlCommend.getMetrics())) {
+        if (queryStructCmd.getQueryType().isNativeAggQuery() && CollectionUtils.isEmpty(sqlCommend.getMetrics())) {
             String internalMetricName = queryStructUtils.generateInternalMetricName(
                     queryStructCmd.getModelId(), queryStructCmd.getGroups());
             sqlCommend.getMetrics().add(internalMetricName);

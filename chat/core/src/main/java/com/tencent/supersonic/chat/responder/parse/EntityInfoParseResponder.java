@@ -11,7 +11,6 @@ import com.tencent.supersonic.chat.query.llm.interpret.MetricInterpretQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 public class EntityInfoParseResponder implements ParseResponder {
@@ -36,14 +35,6 @@ public class EntityInfoParseResponder implements ParseResponder {
             if (QueryManager.isEntityQuery(queryMode)
                     || QueryManager.isMetricQuery(queryMode)) {
                 parseInfo.setEntityInfo(entityInfo);
-            }
-            //2. set native value
-            String primaryEntityBizName = semanticService.getPrimaryEntityBizName(entityInfo);
-            if (StringUtils.isNotEmpty(primaryEntityBizName)) {
-                //if exist primaryEntityBizName in parseInfo's dimensions, set nativeQuery to true
-                boolean existPrimaryEntityBizName = parseInfo.getDimensions().stream()
-                        .anyMatch(schemaElement -> primaryEntityBizName.equalsIgnoreCase(schemaElement.getBizName()));
-                parseInfo.setNativeQuery(existPrimaryEntityBizName);
             }
         });
     }

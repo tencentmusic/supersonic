@@ -9,6 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.integration.BaseQueryTest;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
@@ -38,7 +39,7 @@ public class MapperTest extends BaseQueryTest {
         expectedParseInfo.getMetrics().add(metric);
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, 7, period, startDay, endDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }

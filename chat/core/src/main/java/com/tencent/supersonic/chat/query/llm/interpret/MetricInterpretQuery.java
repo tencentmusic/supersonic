@@ -17,6 +17,7 @@ import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
@@ -89,7 +90,7 @@ public class MetricInterpretQuery extends LLMSemanticQuery {
     protected QueryStructReq convertQueryStruct() {
         QueryStructReq queryStructReq = QueryReqBuilder.buildStructReq(parseInfo);
         fillAggregator(queryStructReq, parseInfo.getMetrics());
-        queryStructReq.setNativeQuery(true);
+        queryStructReq.setQueryType(QueryType.ENTITY);
         return queryStructReq;
     }
 

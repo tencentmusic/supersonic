@@ -266,7 +266,8 @@ public class MaterializationQuery implements QueryOptimizer {
         getTimeRanges(queryStructReq, queryStatement);
         removeDefaultMetric(queryStructReq, queryStatement.getMetricReq());
         MaterializationPlanner materializationPlanner = new MaterializationPlanner(schema);
-        materializationPlanner.explain(queryStatement, AggOption.getAggregation(queryStructReq.getNativeQuery()));
+        materializationPlanner.explain(queryStatement,
+                AggOption.getAggregation(queryStructReq.getQueryType().isNativeAggQuery()));
         log.info("optimize {}", materializationPlanner.findBest().getDatasource());
         SemanticSchema semanticSchema = materializationPlanner.findBest();
         if (!CollectionUtils.isEmpty(semanticSchema.getDatasource())) {
@@ -278,7 +279,8 @@ public class MaterializationQuery implements QueryOptimizer {
                 doSingleZipperSource(queryStructReq, queryStatement);
             }
             AggPlanner aggBuilder = new AggPlanner(semanticSchema);
-            aggBuilder.explain(queryStatement, AggOption.getAggregation(queryStructReq.getNativeQuery()));
+            aggBuilder.explain(queryStatement,
+                    AggOption.getAggregation(queryStructReq.getQueryType().isNativeAggQuery()));
             log.debug("optimize before {} sql {}", queryStatement.getSourceId(), queryStatement.getSql());
             log.debug("optimize after {} sql {}", aggBuilder.getSourceId(), aggBuilder.getSql());
             queryStatement.setSourceId(aggBuilder.getSourceId());

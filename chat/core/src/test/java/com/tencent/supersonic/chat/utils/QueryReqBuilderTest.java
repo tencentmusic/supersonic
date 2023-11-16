@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.Order;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
@@ -29,7 +30,7 @@ class QueryReqBuilderTest {
         init();
         QueryStructReq queryStructReq = new QueryStructReq();
         queryStructReq.setModelId(1L);
-        queryStructReq.setNativeQuery(false);
+        queryStructReq.setQueryType(QueryType.METRIC);
         queryStructReq.setModelName("内容库");
 
         Aggregator aggregator = new Aggregator();
@@ -55,7 +56,7 @@ class QueryReqBuilderTest {
                 "SELECT department, SUM(pv) FROM 内容库 WHERE (sys_imp_date IN ('2023-08-01')) "
                         + "GROUP BY department ORDER BY uv LIMIT 2000", queryS2SQLReq.getSql());
 
-        queryStructReq.setNativeQuery(true);
+        queryStructReq.setQueryType(QueryType.ENTITY);
         queryS2SQLReq = queryStructReq.convert(queryStructReq);
         Assert.assertEquals(
                 "SELECT department, pv FROM 内容库 WHERE (sys_imp_date IN ('2023-08-01')) "

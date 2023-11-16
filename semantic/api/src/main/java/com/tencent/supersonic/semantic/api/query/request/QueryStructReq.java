@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
@@ -57,7 +58,7 @@ public class QueryStructReq {
     private List<Param> params = new ArrayList<>();
     private DateConf dateInfo;
     private Long limit = 2000L;
-    private Boolean nativeQuery = false;
+    private QueryType queryType = QueryType.OTHER;
     private Cache cacheInfo;
 
     /**
@@ -121,8 +122,6 @@ public class QueryStructReq {
                 .append(params);
         stringBuilder.append(",\"limit\":")
                 .append(limit);
-        stringBuilder.append(",\"nativeQuery\":")
-                .append(nativeQuery);
         stringBuilder.append('}');
         return stringBuilder.toString();
     }
@@ -157,8 +156,6 @@ public class QueryStructReq {
                 .append(dateInfo);
         sb.append(",\"limit\":")
                 .append(limit);
-        sb.append(",\"nativeQuery\":")
-                .append(nativeQuery);
         sb.append(",\"cacheInfo\":")
                 .append(cacheInfo);
         sb.append('}');
@@ -202,7 +199,7 @@ public class QueryStructReq {
         if (!CollectionUtils.isEmpty(aggregators)) {
             for (Aggregator aggregator : aggregators) {
                 String columnName = aggregator.getColumn();
-                if (queryStructReq.getNativeQuery()) {
+                if (queryStructReq.getQueryType().isNativeAggQuery()) {
                     selectItems.add(new SelectExpressionItem(new Column(columnName)));
                 } else {
                     Function sumFunction = new Function();
@@ -247,7 +244,7 @@ public class QueryStructReq {
         }
 
         //4.Set the group by clause
-        if (!CollectionUtils.isEmpty(groups) && !queryStructReq.getNativeQuery()) {
+        if (!CollectionUtils.isEmpty(groups) && !queryStructReq.getQueryType().isNativeAggQuery()) {
             GroupByElement groupByElement = new GroupByElement();
             for (String group : groups) {
                 groupByElement.addGroupByExpression(new Column(group));
