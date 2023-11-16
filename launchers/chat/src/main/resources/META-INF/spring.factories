@@ -8,7 +8,9 @@ com.tencent.supersonic.chat.api.component.SchemaMapper=\
 com.tencent.supersonic.chat.api.component.SemanticParser=\
     com.tencent.supersonic.chat.parser.rule.RuleBasedParser, \
     com.tencent.supersonic.chat.parser.llm.s2sql.LLMS2SQLParser, \
-    com.tencent.supersonic.chat.parser.plugin.function.FunctionBasedParser
+    com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingBasedParser, \
+    com.tencent.supersonic.chat.parser.plugin.function.FunctionBasedParser, \
+    com.tencent.supersonic.chat.parser.QueryTypeParser
 
 com.tencent.supersonic.chat.api.component.SemanticCorrector=\
     com.tencent.supersonic.chat.corrector.SchemaCorrector, \

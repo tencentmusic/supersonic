@@ -40,6 +40,7 @@ public class SemanticParseInfo {
     private Map<String, Object> properties = new HashMap<>();
     private EntityInfo entityInfo;
     private SqlInfo sqlInfo = new SqlInfo();
+    private QueryType queryType = QueryType.OTHER;
 
     public Long getModelId() {
         return model != null ? model.getId() : 0L;

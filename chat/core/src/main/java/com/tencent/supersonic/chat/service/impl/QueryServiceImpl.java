@@ -148,8 +148,7 @@ public class QueryServiceImpl implements QueryService {
         List<SemanticQuery> candidateQueries = queryCtx.getCandidateQueries();
         if (CollectionUtils.isNotEmpty(candidateQueries)) {
             for (SemanticQuery semanticQuery : candidateQueries) {
-                semanticQuery.initS2Sql(queryReq.getUser());
-                // rule
+                // the rules are not being corrected.
                 if (semanticQuery instanceof RuleSemanticQuery) {
                     continue;
                 }

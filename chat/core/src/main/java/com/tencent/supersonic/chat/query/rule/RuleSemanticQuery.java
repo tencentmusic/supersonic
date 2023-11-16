@@ -257,11 +257,6 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     @Override
-    public SemanticParseInfo getParseInfo() {
-        return parseInfo;
-    }
-
-    @Override
     public void setParseInfo(SemanticParseInfo parseInfo) {
         this.parseInfo = parseInfo;
     }
