@@ -18,7 +18,11 @@ public class SysParameterServiceImpl
     public SysParameter getSysParameter() {
         List<SysParameterDO> list = list();
         if (CollectionUtils.isEmpty(list)) {
-            return new SysParameter();
+            SysParameter sysParameter = new SysParameter();
+            sysParameter.setId(1);
+            sysParameter.init();
+            save(sysParameter);
+            return sysParameter;
         }
         return convert(list.iterator().next());
     }
