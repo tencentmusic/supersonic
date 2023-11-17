@@ -7,13 +7,13 @@ import lombok.ToString;
 @ToString
 public class AuthRes {
 
-    private String modelId;
+    private Long modelId;
     private String name;
 
     public AuthRes() {
     }
 
-    public AuthRes(String modelId, String name) {
+    public AuthRes(Long modelId, String name) {
         this.modelId = modelId;
         this.name = name;
     }

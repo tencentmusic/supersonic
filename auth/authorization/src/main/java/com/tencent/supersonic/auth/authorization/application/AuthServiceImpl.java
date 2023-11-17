@@ -13,7 +13,6 @@ import com.tencent.supersonic.auth.api.authorization.service.AuthService;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthGroup;
 import com.tencent.supersonic.auth.api.authorization.pojo.AuthRule;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -80,17 +79,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthorizedResourceResp queryAuthorizedResources(QueryAuthResReq req, User user) {
         Set<String> userOrgIds = userService.getUserAllOrgId(user.getName());
-        if (!CollectionUtils.isEmpty(userOrgIds)) {
-            req.setDepartmentIds(new ArrayList<>(userOrgIds));
-        }
-        List<AuthGroup> groups = getAuthGroups(req, user.getName());
+        List<AuthGroup> groups = getAuthGroups(req.getModelId(), user.getName(), new ArrayList<>(userOrgIds));
         AuthorizedResourceResp resource = new AuthorizedResourceResp();
-        Map<String, List<AuthGroup>> authGroupsByModelId = groups.stream()
+        Map<Long, List<AuthGroup>> authGroupsByModelId = groups.stream()
                 .collect(Collectors.groupingBy(AuthGroup::getModelId));
-        Map<String, List<AuthRes>> reqAuthRes = req.getResources().stream()
+        Map<Long, List<AuthRes>> reqAuthRes = req.getResources().stream()
                 .collect(Collectors.groupingBy(AuthRes::getModelId));
 
-        for (String modelId : reqAuthRes.keySet()) {
+        for (Long modelId : reqAuthRes.keySet()) {
             List<AuthRes> reqResourcesList = reqAuthRes.get(modelId);
             AuthResGrp rg = new AuthResGrp();
             if (authGroupsByModelId.containsKey(modelId)) {
@@ -113,7 +109,7 @@ public class AuthServiceImpl implements AuthService {
             }
         }
 
-        if (StringUtils.isNotEmpty(req.getModelId())) {
+        if (req.getModelId() != null) {
             List<AuthGroup> authGroups = authGroupsByModelId.get(req.getModelId());
             if (!CollectionUtils.isEmpty(authGroups)) {
                 for (AuthGroup group : authGroups) {
@@ -130,17 +126,17 @@ public class AuthServiceImpl implements AuthService {
         return resource;
     }
 
-    private List<AuthGroup> getAuthGroups(QueryAuthResReq req, String userName) {
+    private List<AuthGroup> getAuthGroups(Long modelId, String userName, List<String> departmentIds) {
         List<AuthGroup> groups = load().stream()
                 .filter(group -> {
-                    if (!Objects.equals(group.getModelId(), req.getModelId())) {
+                    if (modelId != null && Objects.equals(group.getModelId(), modelId)) {
                         return false;
                     }
                     if (!CollectionUtils.isEmpty(group.getAuthorizedUsers()) && group.getAuthorizedUsers()
                             .contains(userName)) {
                         return true;
                     }
-                    for (String departmentId : req.getDepartmentIds()) {
+                    for (String departmentId : departmentIds) {
                         if (!CollectionUtils.isEmpty(group.getAuthorizedDepartmentIds())
                                 && group.getAuthorizedDepartmentIds().contains(departmentId)) {
                             return true;
@@ -148,7 +144,7 @@ public class AuthServiceImpl implements AuthService {
                     }
                     return false;
                 }).collect(Collectors.toList());
-        log.info("user:{} department:{} authGroups:{}", userName, req.getDepartmentIds(), groups);
+        log.info("user:{} department:{} authGroups:{}", userName, departmentIds, groups);
         return groups;
     }
 

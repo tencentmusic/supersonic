@@ -17,15 +17,14 @@ import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.chat.service.AgentService;
+import com.tencent.supersonic.chat.service.LLMParserLayer;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
-import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -40,14 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Service
@@ -61,9 +54,9 @@ public class LLMRequestService {
     @Autowired
     private SchemaService schemaService;
     @Autowired
-    private RestTemplate restTemplate;
-    @Autowired
     private OptimizationConfig optimizationConfig;
+    @Autowired
+    private LLMParserLayer llmParserLayer;
 
     public boolean check(QueryContext queryCtx) {
         QueryReq request = queryCtx.getRequest();
@@ -144,23 +137,7 @@ public class LLMRequestService {
     }
 
     public LLMResp requestLLM(LLMReq llmReq, Long modelId) {
-        long startTime = System.currentTimeMillis();
-        log.info("requestLLM request, modelId:{},llmReq:{}", modelId, llmReq);
-        try {
-            URL url = new URL(new URL(llmParserConfig.getUrl()), llmParserConfig.getQueryToSqlPath());
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<String> entity = new HttpEntity<>(JsonUtil.toString(llmReq), headers);
-            ResponseEntity<LLMResp> responseEntity = restTemplate.exchange(url.toString(), HttpMethod.POST, entity,
-                    LLMResp.class);
-
-            log.info("requestLLM response,cost:{}, questUrl:{} \n entity:{} \n body:{}",
-                    System.currentTimeMillis() - startTime, url, entity, responseEntity.getBody());
-            return responseEntity.getBody();
-        } catch (Exception e) {
-            log.error("requestLLM error", e);
-        }
-        return null;
+        return llmParserLayer.query2sql(llmReq, modelId);
     }
 
     protected List<String> getFieldNameList(QueryContext queryCtx, Long modelId, LLMParserConfig llmParserConfig) {

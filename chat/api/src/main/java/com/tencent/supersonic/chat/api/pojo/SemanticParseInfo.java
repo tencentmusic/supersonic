@@ -6,6 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Order;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,12 +35,12 @@ public class SemanticParseInfo {
     private Set<Order> orders = new LinkedHashSet();
     private DateConf dateInfo;
     private Long limit;
-    private Boolean nativeQuery = false;
     private double score;
     private List<SchemaElementMatch> elementMatches = new ArrayList<>();
     private Map<String, Object> properties = new HashMap<>();
     private EntityInfo entityInfo;
     private SqlInfo sqlInfo = new SqlInfo();
+    private QueryType queryType = QueryType.OTHER;
 
     public Long getModelId() {
         return model != null ? model.getId() : 0L;

@@ -1,19 +1,19 @@
 package com.tencent.supersonic.integration;
 
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.query.rule.metric.MetricFilterQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricGroupByQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
-import org.junit.Test;
-import org.junit.jupiter.api.Order;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+import org.junit.Test;
+import org.junit.jupiter.api.Order;
 
 public class MultiTurnsTest extends BaseQueryTest {
 
@@ -35,7 +35,7 @@ public class MultiTurnsTest extends BaseQueryTest {
                 FilterOperatorEnum.EQUALS, "alice", "用户名", 2L));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -58,7 +58,7 @@ public class MultiTurnsTest extends BaseQueryTest {
                 FilterOperatorEnum.EQUALS, "alice", "用户名", 2L));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -81,7 +81,7 @@ public class MultiTurnsTest extends BaseQueryTest {
                 FilterOperatorEnum.EQUALS, "lucy", "用户名", 2L));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -102,7 +102,7 @@ public class MultiTurnsTest extends BaseQueryTest {
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -125,7 +125,7 @@ public class MultiTurnsTest extends BaseQueryTest {
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, 1, period, startDay, startDay));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }
@@ -146,7 +146,7 @@ public class MultiTurnsTest extends BaseQueryTest {
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(30, DateConf.DateMode.RECENT, "DAY"));
-        expectedParseInfo.setNativeQuery(false);
+        expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
     }

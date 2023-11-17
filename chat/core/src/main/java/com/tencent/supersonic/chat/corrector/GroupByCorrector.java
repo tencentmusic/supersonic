@@ -16,6 +16,9 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
+/**
+ * Perform SQL corrections on the "group by" section in S2SQL.
+ */
 @Slf4j
 public class GroupByCorrector extends BaseSemanticCorrector {
 

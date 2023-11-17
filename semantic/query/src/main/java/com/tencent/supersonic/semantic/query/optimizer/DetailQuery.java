@@ -32,7 +32,7 @@ public class DetailQuery implements QueryOptimizer {
     }
 
     public boolean isDetailQuery(QueryStructReq queryStructCmd) {
-        return Objects.nonNull(queryStructCmd) && queryStructCmd.getNativeQuery() && CollectionUtils.isEmpty(
-                queryStructCmd.getMetrics());
+        return Objects.nonNull(queryStructCmd) && queryStructCmd.getQueryType().isNativeAggQuery()
+                && CollectionUtils.isEmpty(queryStructCmd.getMetrics());
     }
 }

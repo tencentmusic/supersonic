@@ -7,6 +7,9 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
+/**
+ * Perform SQL corrections on the "Select" section in S2SQL.
+ */
 @Slf4j
 public class SelectCorrector extends BaseSemanticCorrector {
 

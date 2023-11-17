@@ -8,6 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * RuleBasedParser acts as a container that incorporates a group of
+ * rule-based semantic parsers.
+ */
 @Slf4j
 public class RuleBasedParser implements SemanticParser {
 

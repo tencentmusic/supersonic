@@ -27,6 +27,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * AggregateTypeParser extracts aggregation type specified in the user query
+ * based on keyword matching.
+ * Currently, it supports 7 types of aggregation: max, min, sum, avg, topN,
+ * distinct count, count.
+ */
 @Slf4j
 public class AggregateTypeParser implements SemanticParser {
 
