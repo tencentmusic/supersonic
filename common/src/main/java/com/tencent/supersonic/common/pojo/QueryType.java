@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.api.pojo;
+package com.tencent.supersonic.common.pojo;
 
 /***
  * Query Type
@@ -15,5 +15,9 @@ public enum QueryType {
     /**
      * the other queries
      */
-    OTHER
+    OTHER;
+
+    public boolean isNativeAggQuery() {
+        return ENTITY.equals(this);
+    }
 }

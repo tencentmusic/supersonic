@@ -9,12 +9,6 @@ import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.llm.interpret.MetricInterpretQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 public class EntityInfoExecuteResponder implements ExecuteResponder {
 
@@ -33,29 +27,6 @@ public class EntityInfoExecuteResponder implements ExecuteResponder {
         EntityInfo entityInfo = semanticService.getEntityInfo(semanticParseInfo, user);
         queryResult.setEntityInfo(entityInfo);
 
-        String primaryEntityBizName = semanticService.getPrimaryEntityBizName(entityInfo);
-        if (StringUtils.isEmpty(primaryEntityBizName)
-                || CollectionUtils.isEmpty(queryResult.getQueryColumns())) {
-            return;
-        }
-        boolean existPrimaryEntityName = queryResult.getQueryColumns().stream()
-                .anyMatch(queryColumn -> primaryEntityBizName.equals(queryColumn.getNameEn()));
-
-        semanticParseInfo.setNativeQuery(existPrimaryEntityName);
-
-        if (!existPrimaryEntityName) {
-            return;
-        }
-        List<Map<String, Object>> queryResults = queryResult.getQueryResults();
-        List<String> entities = queryResults.stream()
-                .map(entry -> entry.get(primaryEntityBizName))
-                .filter(Objects::nonNull)
-                .map(String::valueOf)
-                .collect(Collectors.toList());
-
-        if (CollectionUtils.isEmpty(entities)) {
-            return;
-        }
     }
 
 }

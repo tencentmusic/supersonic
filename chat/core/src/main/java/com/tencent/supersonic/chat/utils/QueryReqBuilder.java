@@ -9,6 +9,7 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -36,7 +37,7 @@ public class QueryReqBuilder {
     public static QueryStructReq buildStructReq(SemanticParseInfo parseInfo) {
         QueryStructReq queryStructCmd = new QueryStructReq();
         queryStructCmd.setModelId(parseInfo.getModelId());
-        queryStructCmd.setNativeQuery(parseInfo.getNativeQuery());
+        queryStructCmd.setQueryType(parseInfo.getQueryType());
         queryStructCmd.setDateInfo(rewrite2Between(parseInfo.getDateInfo()));
 
         List<Filter> dimensionFilters = parseInfo.getDimensionFilters().stream()
@@ -231,7 +232,7 @@ public class QueryReqBuilder {
     public static QueryStructReq buildStructRatioReq(SemanticParseInfo parseInfo, SchemaElement metric,
             AggOperatorEnum aggOperatorEnum) {
         QueryStructReq queryStructCmd = buildStructReq(parseInfo);
-        queryStructCmd.setNativeQuery(false);
+        queryStructCmd.setQueryType(QueryType.METRIC);
         queryStructCmd.setOrders(new ArrayList<>());
         List<Aggregator> aggregators = new ArrayList<>();
         Aggregator ratioRoll = new Aggregator(metric.getBizName(), aggOperatorEnum);

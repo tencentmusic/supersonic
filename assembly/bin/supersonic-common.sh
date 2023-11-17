@@ -82,39 +82,25 @@ function runJavaService {
 # run python service
 function runPythonService {
   pythonRunDir=${runtimeDir}/supersonic-${model_name}/llmparser
-    cd $pythonRunDir
-    # check if venv is available
-    if ! ${python_path} -c "import venv" &> /dev/null; then
-        echo "venv not found, installing virtualenv via pip..."
-        pip install virtualenv
-        # create a virtual environment using virtualenv
-        virtualenv venv
+  cd $pythonRunDir
+  nohup ${python_path} supersonic_llmparser.py  > $pythonRunDir/llmparser.log  2>&1   &
+  # add health check
+  for i in {1..10}
+  do
+    echo "llmparser health check attempt $i..."
+    response=$(curl -s http://${LLMPARSER_HOST}:${LLMPARSER_PORT}/health)
+    echo "llmparser health check response: $response"
+    status_ok="Healthy"
+    if [[ $response == *$status_ok* ]] ; then
+      echo "llmparser Health check passed."
+      break
     else
-        # create a virtual environment using venv
-        ${python_path} -m venv venv
-    fi
-    # activate the virtual environment
-    source venv/bin/activate
-    # install dependencies
-    pip install --upgrade -r requirements.txt
-    nohup ${python_path} supersonic_llmparser.py  > $pythonRunDir/llmparser.log  2>&1   &
-    # add health check
-    for i in {1..10}
-    do
-      echo "llmparser health check attempt $i..."
-      response=$(curl -s http://${LLMPARSER_HOST}:${LLMPARSER_PORT}/health)
-      echo "llmparser health check response: $response"
-      status_ok="Healthy"
-      if [[ $response == *$status_ok* ]] ; then
-        echo "llmparser Health check passed."
-        break
-      else
-        if [ "$i" -eq 10 ]; then
-          echo "llmparser Health check failed after 10 attempts."
-          echo "May still downloading model files. Please check llmparser.log in runtime directory."
-        fi
-        echo "Retrying after 5 seconds..."
-        sleep 5
+      if [ "$i" -eq 10 ]; then
+        echo "llmparser Health check failed after 10 attempts."
+        echo "May still downloading model files. Please check llmparser.log in runtime directory."
       fi
-    done
+      echo "Retrying after 5 seconds..."
+      sleep 5
+    fi
+  done
 }

@@ -144,7 +144,7 @@ public class StatUtils {
                     .setQueryStructCmd(queryStructCmd.toString())
                     .setQueryStructCmdMd5(DigestUtils.md5Hex(queryStructCmd.toString()))
                     .setStartTime(System.currentTimeMillis())
-                    .setNativeQuery(queryStructCmd.getNativeQuery())
+                    .setNativeQuery(queryStructCmd.getQueryType().isNativeAggQuery())
                     .setGroupByCols(objectMapper.writeValueAsString(queryStructCmd.getGroups()))
                     .setAggCols(objectMapper.writeValueAsString(queryStructCmd.getAggregators()))
                     .setOrderByCols(objectMapper.writeValueAsString(queryStructCmd.getOrders()))

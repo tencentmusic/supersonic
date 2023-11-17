@@ -24,7 +24,7 @@ public class MetricCheckConverter implements SemanticConverter {
 
     @Override
     public boolean accept(QueryStructReq queryStructCmd) {
-        if (queryStructCmd.getNativeQuery()) {
+        if (queryStructCmd.getQueryType().isNativeAggQuery()) {
             return false;
         }
         return !CollectionUtils.isEmpty(queryStructCmd.getAggregators());
