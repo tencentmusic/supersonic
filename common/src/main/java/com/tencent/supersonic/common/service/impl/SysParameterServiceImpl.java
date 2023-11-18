@@ -39,7 +39,9 @@ public class SysParameterServiceImpl
     private SysParameter convert(SysParameterDO sysParameterDO) {
         SysParameter sysParameter = new SysParameter();
         sysParameter.setId(sysParameterDO.getId());
-        List<Parameter> parameters = JsonUtil.toObject(sysParameterDO.getParameters(), new TypeReference<List<Parameter>>() {});
+        List<Parameter> parameters = JsonUtil.toObject(sysParameterDO.getParameters(),
+                new TypeReference<List<Parameter>>() {
+                });
         sysParameter.setParameters(parameters);
         sysParameter.setAdminList(sysParameterDO.getAdmin());
         return sysParameter;
