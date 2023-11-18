@@ -71,6 +71,8 @@ public class DimensionConverter {
         if (dimensionDO.getDefaultValues() != null) {
             dimensionResp.setDefaultValues(JSONObject.parseObject(dimensionDO.getDefaultValues(), List.class));
         }
+        dimensionResp.setDatasourceFilterSql(
+                datasourceRespMap.getOrDefault(dimensionResp.getDatasourceId(), new DatasourceResp()).getFilterSql());
         if (Strings.isNotEmpty(dimensionDO.getDimValueMaps())) {
             dimensionResp.setDimValueMaps(JsonUtil.toList(dimensionDO.getDimValueMaps(), DimValueMap.class));
         }

@@ -28,6 +28,8 @@ public class DimensionResp extends SchemaItem {
     private String datasourceName;
 
     private String datasourceBizName;
+
+    private String datasourceFilterSql;
     //DATE ID CATEGORY
     private String semanticType;
 
