@@ -4,6 +4,12 @@ import lombok.Data;
 
 @Data
 public class ParseTimeCostDO {
+
+    private Long parseStartTime;
     private Long parseTime;
     private Long sqlTime;
+
+    public ParseTimeCostDO() {
+        this.parseStartTime = System.currentTimeMillis();
+    }
 }
