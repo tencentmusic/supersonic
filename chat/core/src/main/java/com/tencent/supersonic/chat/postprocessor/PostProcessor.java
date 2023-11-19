@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.postprocess;
+package com.tencent.supersonic.chat.postprocessor;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 
 /**

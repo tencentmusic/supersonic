@@ -5,7 +5,7 @@ import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.parser.llm.s2sql.ModelResolver;
-import com.tencent.supersonic.chat.postprocess.PostProcessor;
+import com.tencent.supersonic.chat.postprocessor.PostProcessor;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
 import org.apache.commons.collections.CollectionUtils;
