@@ -1,13 +1,13 @@
 package com.tencent.supersonic.common.pojo;
 
 import com.google.common.collect.Lists;
+import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 
 @Data
 public class SysParameter {
@@ -50,7 +50,7 @@ public class SysParameter {
                 "模型名称", "list", "大语言模型相关配置");
         parameter.setCandidateValues(Lists.newArrayList("gpt3.5", "gpt3.5-16k"));
         parameters.add(parameter);
-        parameters.add(new Parameter("llm.api.key", "sk-afdasdasd",
+        parameters.add(new Parameter("llm.api.key", "sk-secret",
                 "模型密钥", "string", "大语言模型相关配置"));
         parameters.add(new Parameter("llm.temperature", "0.0",
                 "温度值", "number", "大语言模型相关配置"));
@@ -89,11 +89,13 @@ public class SysParameter {
 
         //skip config
         parameters.add(new Parameter("query.text.length.threshold", "10",
-                "文本长短阈值", "number", "是否跳过当前parser相关配置"));
-        parameters.add(new Parameter("short.text.threshold", "5",
-                "短文本匹配阈值", "number", "是否跳过当前parser相关配置"));
+                "文本长短阈值", "文本超过该阈值为长文本", "number", "是否跳过当前parser相关配置"));
+        parameters.add(new Parameter("short.text.threshold", "0.5",
+                "短文本匹配阈值", "如果是短文本, 若query得分/文本长度>该阈值, 则跳过当前parser",
+                "number", "是否跳过当前parser相关配置"));
         parameters.add(new Parameter("long.text.threshold", "0.8",
-                "长文本匹配阈值", "number", "是否跳过当前parser相关配置"));
+                "长文本匹配阈值", "如果是长文本, 若query得分/文本长度>该阈值, 则跳过当前parser",
+                "number", "是否跳过当前parser相关配置"));
     }
 
 }
