@@ -4,11 +4,10 @@ package com.tencent.supersonic.semantic.api.model.response;
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
-
-import java.util.List;
-
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.List;
 
 
 @Data
@@ -40,5 +39,7 @@ public class DimensionResp extends SchemaItem {
     private List<DimValueMap> dimValueMaps;
 
     private DataTypeEnums dataType;
+
+    private int isTag;
 
 }
