@@ -164,7 +164,7 @@ public class QueryServiceImpl implements QueryService {
                     .type(CostType.POSTPROCESSOR.getType()).build());
         });
 
-        //6. responders
+        //6. responder
         parseResponders.forEach(parseResponder -> {
             long startTime = System.currentTimeMillis();
             parseResponder.fillResponse(parseResult, queryCtx, chatCtx);

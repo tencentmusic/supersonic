@@ -5,9 +5,9 @@ import { Button, DatePicker } from 'antd';
 import { CheckCircleFilled, ReloadOutlined } from '@ant-design/icons';
 import Loading from './Loading';
 import FilterItem from './FilterItem';
-import moment from 'moment';
 import classNames from 'classnames';
 import { isMobile } from '../../utils/utils';
+import dayjs from 'dayjs';
 
 const { RangePicker } = DatePicker;
 
@@ -52,7 +52,7 @@ const ParseTip: React.FC<Props> = ({
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
 
-  const getNode = (tipTitle: ReactNode, tipNode?: ReactNode, parseSucceed?: boolean) => {
+  const getNode = (tipTitle: ReactNode, tipNode?: ReactNode) => {
     return (
       <div className={`${prefixCls}-parse-tip`}>
         <div className={`${prefixCls}-title-bar`}>
@@ -227,7 +227,7 @@ const ParseTip: React.FC<Props> = ({
             </span>
           ) : (
             <RangePicker
-              value={[moment(startDate), moment(endDate)]}
+              value={[dayjs(startDate), dayjs(endDate)]}
               onChange={onDateInfoChange}
               getPopupContainer={trigger => trigger.parentNode as HTMLElement}
               allowClear={false}
@@ -306,8 +306,7 @@ const ParseTip: React.FC<Props> = ({
         </div>
       )}
     </div>,
-    tipNode,
-    true
+    tipNode
   );
 };
 
