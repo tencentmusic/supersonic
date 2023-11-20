@@ -27,8 +27,6 @@ import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
-import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -61,6 +59,27 @@ public class SqlParserRemoveHelper {
             return false;
         });
         ((PlainSelect) selectBody).setSelectItems(selectItemList);
+        return selectStatement.toString();
+    }
+
+    public static String removeSelect(String sql, Set<String> fields) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        if (selectStatement == null) {
+            return sql;
+        }
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        List<SelectItem> selectItems = ((PlainSelect) selectBody).getSelectItems();
+        selectItems.removeIf(selectItem -> {
+            if (selectItem instanceof SelectExpressionItem) {
+                SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
+                String columnName = SqlParserSelectHelper.getColumnName(selectExpressionItem.getExpression());
+                return fields.contains(columnName);
+            }
+            return false;
+        });
         return selectStatement.toString();
     }
 
@@ -223,28 +242,6 @@ public class SqlParserRemoveHelper {
             where.accept(new FilterRemoveVisitor(fields));
             plainSelect.setWhere(where);
         }
-        return selectStatement.toString();
-    }
-
-
-    public static String removeSelect(String sql, Set<String> fields) {
-        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
-        if (selectStatement == null) {
-            return sql;
-        }
-        SelectBody selectBody = selectStatement.getSelectBody();
-        if (!(selectBody instanceof PlainSelect)) {
-            return sql;
-        }
-        List<SelectItem> selectItems = ((PlainSelect) selectBody).getSelectItems();
-        selectItems.removeIf(selectItem -> {
-            if (selectItem instanceof SelectExpressionItem) {
-                SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
-                String columnName = SqlParserSelectHelper.getColumnName(selectExpressionItem.getExpression());
-                return fields.contains(columnName);
-            }
-            return false;
-        });
         return selectStatement.toString();
     }
 
