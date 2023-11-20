@@ -27,6 +27,8 @@ import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
+import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -38,6 +40,29 @@ import java.util.Set;
  */
 @Slf4j
 public class SqlParserRemoveHelper {
+
+    public static String removeSelect(String sql, List<String> filteredMetrics) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        List<SelectItem> selectItemList = ((PlainSelect) selectBody).getSelectItems();
+        selectItemList.removeIf(o -> {
+            Expression expression = ((SelectExpressionItem) o).getExpression();
+            if (expression instanceof Column) {
+                Column column = (Column) expression;
+                String columnName = column.getColumnName();
+                if (filteredMetrics.contains(columnName)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+        ((PlainSelect) selectBody).setSelectItems(selectItemList);
+        return selectStatement.toString();
+    }
 
     public static String removeWhereCondition(String sql, Set<String> removeFieldNames) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
@@ -310,16 +335,28 @@ public class SqlParserRemoveHelper {
             return removeSingleFilter((EqualsTo) expression);
         } else if (expression instanceof NotEqualsTo) {
             return removeSingleFilter((NotEqualsTo) expression);
+        } else if (expression instanceof InExpression) {
+            InExpression inExpression = (InExpression) expression;
+            Expression leftExpression = inExpression.getLeftExpression();
+            return distinguishNumberCondition(leftExpression, expression);
+        } else if (expression instanceof LikeExpression) {
+            LikeExpression likeExpression = (LikeExpression) expression;
+            Expression leftExpression = likeExpression.getLeftExpression();
+            return distinguishNumberCondition(leftExpression, expression);
         }
         return expression;
     }
 
     private static <T extends ComparisonOperator> Expression removeSingleFilter(T comparisonExpression) {
         Expression leftExpression = comparisonExpression.getLeftExpression();
+        return distinguishNumberCondition(leftExpression, comparisonExpression);
+    }
+
+    public static Expression distinguishNumberCondition(Expression leftExpression, Expression expression) {
         if (leftExpression instanceof LongValue) {
             return null;
         } else {
-            return comparisonExpression;
+            return expression;
         }
     }
 
