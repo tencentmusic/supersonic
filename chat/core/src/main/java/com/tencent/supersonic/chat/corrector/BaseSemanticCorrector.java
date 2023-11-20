@@ -9,6 +9,7 @@ import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import java.util.ArrayList;
@@ -23,8 +24,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
- *  basic semantic correction functionality, offering common methods and an
- *  abstract method called doCorrect
+ * basic semantic correction functionality, offering common methods and an
+ * abstract method called doCorrect
  */
 @Slf4j
 public abstract class BaseSemanticCorrector implements SemanticCorrector {
@@ -80,12 +81,21 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         Set<String> needAddFields = new HashSet<>(SqlParserSelectHelper.getGroupByFields(correctS2SQL));
         needAddFields.addAll(SqlParserSelectHelper.getOrderByFields(correctS2SQL));
 
+        // If there is no aggregate function in the S2SQL statement and
+        // there is a data field in 'WHERE' statement, add the field to the 'SELECT' statement.
+        if (!SqlParserSelectFunctionHelper.hasAggregateFunction(correctS2SQL)) {
+            List<String> whereFields = SqlParserSelectHelper.getWhereFields(correctS2SQL);
+            List<String> timeChNameList = TimeDimensionEnum.getChNameList();
+            Set<String> timeFields = whereFields.stream().filter(field -> timeChNameList.contains(field))
+                    .collect(Collectors.toSet());
+            needAddFields.addAll(timeFields);
+        }
+
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(needAddFields)) {
             return;
         }
 
         needAddFields.removeAll(selectFields);
-        needAddFields.remove(TimeDimensionEnum.DAY.getChName());
         String replaceFields = SqlParserAddHelper.addFieldsToSelect(correctS2SQL, new ArrayList<>(needAddFields));
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(replaceFields);
     }

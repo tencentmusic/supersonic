@@ -27,6 +27,10 @@ public enum TimeDimensionEnum {
         return Arrays.stream(TimeDimensionEnum.values()).map(TimeDimensionEnum::getName).collect(Collectors.toList());
     }
 
+    public static List<String> getChNameList() {
+        return Arrays.stream(TimeDimensionEnum.values()).map(TimeDimensionEnum::getChName).collect(Collectors.toList());
+    }
+
     public String getName() {
         return name;
     }

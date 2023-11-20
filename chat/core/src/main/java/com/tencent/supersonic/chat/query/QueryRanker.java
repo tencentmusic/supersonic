@@ -4,13 +4,13 @@ import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -30,6 +30,7 @@ public class QueryRanker {
         } else {
             selectedQueries = getTopCandidateQuery(candidateQueries);
         }
+        generateParseInfoId(selectedQueries);
         log.debug("pick after [{}]", selectedQueries);
         return selectedQueries;
     }
@@ -46,6 +47,13 @@ public class QueryRanker {
                     return 0;
                 }).limit(candidateTopSize)
                 .collect(Collectors.toList());
+    }
+
+    private void generateParseInfoId(List<SemanticQuery> semanticQueries) {
+        for (int i = 0; i < semanticQueries.size(); i++) {
+            SemanticQuery query = semanticQueries.get(i);
+            query.getParseInfo().setId(i + 1);
+        }
     }
 
     private boolean checkFullyInherited(SemanticQuery query) {

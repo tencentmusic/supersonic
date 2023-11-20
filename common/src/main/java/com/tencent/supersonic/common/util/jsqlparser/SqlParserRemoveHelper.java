@@ -1,30 +1,37 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Sql Parser remove Helper
@@ -56,6 +63,9 @@ public class SqlParserRemoveHelper {
     }
     public static String removeNumberCondition(String sql) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        if (selectStatement == null) {
+            return sql;
+        }
         SelectBody selectBody = selectStatement.getSelectBody();
 
         if (!(selectBody instanceof PlainSelect)) {
@@ -187,6 +197,55 @@ public class SqlParserRemoveHelper {
         } else {
             where.accept(new FilterRemoveVisitor(fields));
             plainSelect.setWhere(where);
+        }
+        return selectStatement.toString();
+    }
+
+
+    public static String removeSelect(String sql, Set<String> fields) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        if (selectStatement == null) {
+            return sql;
+        }
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        List<SelectItem> selectItems = ((PlainSelect) selectBody).getSelectItems();
+        selectItems.removeIf(selectItem -> {
+            if (selectItem instanceof SelectExpressionItem) {
+                SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
+                String columnName = SqlParserSelectHelper.getColumnName(selectExpressionItem.getExpression());
+                return fields.contains(columnName);
+            }
+            return false;
+        });
+        return selectStatement.toString();
+    }
+
+    public static String removeGroupBy(String sql, Set<String> fields) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        if (selectStatement == null) {
+            return sql;
+        }
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        GroupByElement groupByElement = ((PlainSelect) selectBody).getGroupBy();
+        if (groupByElement == null) {
+            return sql;
+        }
+        ExpressionList groupByExpressionList = groupByElement.getGroupByExpressionList();
+        groupByExpressionList.getExpressions().removeIf(expression -> {
+            if (expression instanceof Column) {
+                Column column = (Column) expression;
+                return fields.contains(column.getColumnName());
+            }
+            return false;
+        });
+        if (CollectionUtils.isEmpty(groupByExpressionList.getExpressions())) {
+            ((PlainSelect) selectBody).setGroupByElement(null);
         }
         return selectStatement.toString();
     }

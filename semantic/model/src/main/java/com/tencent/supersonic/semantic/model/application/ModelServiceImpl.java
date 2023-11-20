@@ -349,7 +349,7 @@ public class ModelServiceImpl implements ModelService {
     private List<MetricSchemaResp> generateMetricSchema(Long modelId, ModelResp modelResp) {
         List<MetricSchemaResp> metricSchemaDescList = new ArrayList<>();
         List<MetricResp> metricResps = metricService.getMetrics(new MetaFilter(Lists.newArrayList(modelId)));
-        List<MeasureResp> measureResps = datasourceService.getMeasureListOfModel(modelId);
+        List<MeasureResp> measureResps = datasourceService.getMeasureListOfModel(Lists.newArrayList(modelId));
         metricResps.stream().forEach(metricResp ->
                 metricSchemaDescList.add(convert(metricResp, metricResps, measureResps, modelResp)));
         return metricSchemaDescList;

@@ -2,13 +2,16 @@ package com.tencent.supersonic.common.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.tencent.supersonic.common.pojo.SysParameter;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.tencent.supersonic.common.persistence.dataobject.SysParameterDO;
 import com.tencent.supersonic.common.persistence.mapper.SysParameterMapper;
+import com.tencent.supersonic.common.pojo.Parameter;
+import com.tencent.supersonic.common.pojo.SysParameter;
 import com.tencent.supersonic.common.service.SysParameterService;
+import com.tencent.supersonic.common.util.JsonUtil;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import java.util.List;
 
 @Service
 public class SysParameterServiceImpl
@@ -18,7 +21,11 @@ public class SysParameterServiceImpl
     public SysParameter getSysParameter() {
         List<SysParameterDO> list = list();
         if (CollectionUtils.isEmpty(list)) {
-            return new SysParameter();
+            SysParameter sysParameter = new SysParameter();
+            sysParameter.setId(1);
+            sysParameter.init();
+            save(sysParameter);
+            return sysParameter;
         }
         return convert(list.iterator().next());
     }
@@ -32,7 +39,10 @@ public class SysParameterServiceImpl
     private SysParameter convert(SysParameterDO sysParameterDO) {
         SysParameter sysParameter = new SysParameter();
         sysParameter.setId(sysParameterDO.getId());
-        sysParameter.setParameters(JSONObject.parseObject(sysParameterDO.getParameters(), List.class));
+        List<Parameter> parameters = JsonUtil.toObject(sysParameterDO.getParameters(),
+                new TypeReference<List<Parameter>>() {
+                });
+        sysParameter.setParameters(parameters);
         sysParameter.setAdminList(sysParameterDO.getAdmin());
         return sysParameter;
     }
