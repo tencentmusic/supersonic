@@ -1,19 +1,47 @@
 com.tencent.supersonic.chat.api.component.SchemaMapper=\
-    com.tencent.supersonic.chat.mapper.HanlpDictMapper
+    com.tencent.supersonic.chat.mapper.EmbeddingMapper, \
+    com.tencent.supersonic.chat.mapper.HanlpDictMapper, \
+    com.tencent.supersonic.chat.mapper.FuzzyNameMapper, \
+    com.tencent.supersonic.chat.mapper.QueryFilterMapper, \
+    com.tencent.supersonic.chat.mapper.EntityMapper
 
 com.tencent.supersonic.chat.api.component.SemanticParser=\
     com.tencent.supersonic.chat.parser.rule.RuleBasedParser, \
-    com.tencent.supersonic.chat.parser.llm.interpret.MetricInterpretParser
-#    com.tencent.supersonic.chat.parser.llm.DSLQueryFunction
+    com.tencent.supersonic.chat.parser.llm.s2sql.LLMS2SQLParser, \
+    com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingBasedParser, \
+    com.tencent.supersonic.chat.parser.plugin.function.FunctionBasedParser, \
+    com.tencent.supersonic.chat.parser.QueryTypeParser
 
-com.tencent.supersonic.chat.api.component.QueryProcessor=\
-    com.tencent.supersonic.chat.application.processor.SemanticQueryProcessor
+com.tencent.supersonic.chat.api.component.SemanticCorrector=\
+    com.tencent.supersonic.chat.corrector.SchemaCorrector, \
+    com.tencent.supersonic.chat.corrector.SelectCorrector, \
+    com.tencent.supersonic.chat.corrector.WhereCorrector, \
+    com.tencent.supersonic.chat.corrector.GroupByCorrector, \
+    com.tencent.supersonic.chat.corrector.HavingCorrector
 
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.LocalSemanticInterpreter
 
-com.tencent.supersonic.chat.application.query.DomainResolver=\
-  com.tencent.supersonic.chat.application.query.HeuristicDomainResolver
+com.tencent.supersonic.chat.parser.llm.s2sql.ModelResolver=\
+  com.tencent.supersonic.chat.parser.llm.s2sql.HeuristicModelResolver
 
 com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\
     com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor
+
+com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
+    com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
+
+com.tencent.supersonic.chat.postprocessor.PostProcessor=\
+    com.tencent.supersonic.chat.postprocessor.MetricCheckPostProcessor, \
+    com.tencent.supersonic.chat.postprocessor.ParseInfoUpdateProcessor
+
+com.tencent.supersonic.chat.responder.parse.ParseResponder=\
+    com.tencent.supersonic.chat.responder.parse.QueryRankParseResponder, \
+    com.tencent.supersonic.chat.responder.parse.EntityInfoParseResponder, \
+    com.tencent.supersonic.chat.responder.parse.SqlInfoParseResponder, \
+    com.tencent.supersonic.chat.responder.parse.ParseTimeParseResponder, \
+    com.tencent.supersonic.chat.responder.parse.ParseRespBuildParseResponder
+
+com.tencent.supersonic.chat.responder.execute.ExecuteResponder=\
+    com.tencent.supersonic.chat.responder.execute.EntityInfoExecuteResponder, \
+    com.tencent.supersonic.chat.responder.execute.SimilarMetricExecuteResponder

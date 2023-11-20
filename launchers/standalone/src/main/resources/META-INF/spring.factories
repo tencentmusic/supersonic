@@ -31,9 +31,16 @@ com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor
 com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
 
+com.tencent.supersonic.chat.postprocessor.PostProcessor=\
+    com.tencent.supersonic.chat.postprocessor.MetricCheckPostProcessor, \
+    com.tencent.supersonic.chat.postprocessor.ParseInfoUpdateProcessor
+
 com.tencent.supersonic.chat.responder.parse.ParseResponder=\
+    com.tencent.supersonic.chat.responder.parse.QueryRankParseResponder, \
     com.tencent.supersonic.chat.responder.parse.EntityInfoParseResponder, \
-    com.tencent.supersonic.chat.responder.parse.SqlInfoParseResponder
+    com.tencent.supersonic.chat.responder.parse.SqlInfoParseResponder, \
+    com.tencent.supersonic.chat.responder.parse.ParseTimeParseResponder, \
+    com.tencent.supersonic.chat.responder.parse.ParseRespBuildParseResponder
 
 com.tencent.supersonic.chat.responder.execute.ExecuteResponder=\
     com.tencent.supersonic.chat.responder.execute.EntityInfoExecuteResponder, \

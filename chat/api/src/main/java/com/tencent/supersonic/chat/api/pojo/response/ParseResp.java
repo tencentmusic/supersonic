@@ -1,21 +1,11 @@
 package com.tencent.supersonic.chat.api.pojo.response;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
 import java.util.List;
 
 @Data
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class ParseResp {
     private Integer chatId;
     private String queryText;
@@ -23,8 +13,7 @@ public class ParseResp {
     private ParseState state;
     private List<SemanticParseInfo> selectedParses = Lists.newArrayList();
     private List<SemanticParseInfo> candidateParses = Lists.newArrayList();
-    private List<SolvedQueryRecallResp> similarSolvedQuery;
-    private ParseTimeCostDO parseTimeCost;
+    private ParseTimeCostDO parseTimeCost = new ParseTimeCostDO();
 
     public enum ParseState {
         COMPLETED,
@@ -32,12 +21,4 @@ public class ParseResp {
         FAILED
     }
 
-    public List<SemanticParseInfo> getSelectedParses() {
-        selectedParses = Lists.newArrayList();
-        if (CollectionUtil.isNotEmpty(candidateParses)) {
-            selectedParses.addAll(candidateParses);
-            candidateParses.clear();
-        }
-        return selectedParses;
-    }
 }

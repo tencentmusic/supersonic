@@ -26,14 +26,13 @@ import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
+import com.tencent.supersonic.chat.postprocessor.PostProcessor;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.query.QueryRanker;
 import com.tencent.supersonic.chat.query.llm.s2sql.S2SQLQuery;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
 import com.tencent.supersonic.chat.service.ChatService;
-import com.tencent.supersonic.chat.service.ParseInfoService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.service.StatisticsService;
@@ -61,15 +60,6 @@ import com.tencent.supersonic.knowledge.utils.HanlpHelper;
 import com.tencent.supersonic.knowledge.utils.NatureHelper;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.PriorityQueue;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -85,13 +75,22 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Component("chatQueryService")
@@ -105,23 +104,20 @@ public class QueryServiceImpl implements QueryService {
     private StatisticsService statisticsService;
     @Autowired
     private SolvedQueryManager solvedQueryManager;
-    @Autowired
-    private ParseInfoService parseInfoService;
-    @Autowired
-    private QueryRanker queryRanker;
 
     @Value("${time.threshold: 100}")
     private Integer timeThreshold;
 
     private List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
     private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
+    private List<PostProcessor> postProcessors = ComponentFactory.getPostProcessors();
     private List<ParseResponder> parseResponders = ComponentFactory.getParseResponders();
     private List<ExecuteResponder> executeResponders = ComponentFactory.getExecuteResponders();
     private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSqlCorrections();
 
     @Override
     public ParseResp performParsing(QueryReq queryReq) {
-        Long parseTime = System.currentTimeMillis();
+        ParseResp parseResult = new ParseResp();
         //1. build queryContext and chatContext
         QueryContext queryCtx = new QueryContext(queryReq);
         // in order to support multi-turn conversation, chat context is needed
@@ -129,16 +125,16 @@ public class QueryServiceImpl implements QueryService {
         List<StatisticsDO> timeCostDOList = new ArrayList<>();
 
         //2. mapper
-        schemaMappers.stream().forEach(mapper -> {
-            Long startTime = System.currentTimeMillis();
+        schemaMappers.forEach(mapper -> {
+            long startTime = System.currentTimeMillis();
             mapper.map(queryCtx);
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(mapper.getClass().getSimpleName()).type(CostType.MAPPER.getType()).build());
         });
 
         //3. parser
-        semanticParsers.stream().forEach(parser -> {
-            Long startTime = System.currentTimeMillis();
+        semanticParsers.forEach(parser -> {
+            long startTime = System.currentTimeMillis();
             parser.parse(queryCtx, chatCtx);
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(parser.getClass().getSimpleName()).type(CostType.PARSER.getType()).build());
@@ -153,46 +149,34 @@ public class QueryServiceImpl implements QueryService {
                 if (semanticQuery instanceof RuleSemanticQuery) {
                     continue;
                 }
-                semanticCorrectors.stream().forEach(correction -> {
+                semanticCorrectors.forEach(correction -> {
                     correction.correct(queryReq, semanticQuery.getParseInfo());
                 });
             }
         }
 
-        //5. generate parsing results.
-        ParseResp parseResult;
-        List<ChatParseDO> chatParseDOS = Lists.newArrayList();
-        if (candidateQueries.size() > 0) {
-            candidateQueries = queryRanker.rank(candidateQueries);
-            List<SemanticParseInfo> candidateParses = candidateQueries.stream()
-                    .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
-            candidateParses.forEach(parseInfo -> parseInfoService.updateParseInfo(parseInfo));
-            parseResult = ParseResp.builder().chatId(queryReq.getChatId()).queryText(queryReq.getQueryText())
-                    .state(ParseResp.ParseState.COMPLETED).candidateParses(candidateParses)
-                    .build();
-            chatParseDOS = chatService.batchAddParse(chatCtx, queryReq, parseResult);
-        } else {
-            parseResult = ParseResp.builder()
-                    .chatId(queryReq.getChatId())
-                    .queryText(queryReq.getQueryText())
-                    .state(ParseResp.ParseState.FAILED)
-                    .build();
-        }
+        //5. postProcessor
+        postProcessors.forEach(postProcessor -> {
+            long startTime = System.currentTimeMillis();
+            postProcessor.process(queryCtx);
+            timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
+                    .interfaceName(postProcessor.getClass().getSimpleName())
+                    .type(CostType.POSTPROCESSOR.getType()).build());
+        });
+
         //6. responders
-        for (ParseResponder parseResponder : parseResponders) {
-            Long startTime = System.currentTimeMillis();
-            parseResponder.fillResponse(parseResult, queryCtx, chatParseDOS);
+        parseResponders.forEach(parseResponder -> {
+            long startTime = System.currentTimeMillis();
+            parseResponder.fillResponse(parseResult, queryCtx, chatCtx);
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(parseResponder.getClass().getSimpleName())
                     .type(CostType.PARSERRESPONDER.getType()).build());
-        }
+        });
+
         if (Objects.nonNull(parseResult.getQueryId()) && timeCostDOList.size() > 0) {
-            saveInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
+            saveTimeCostInfo(timeCostDOList, queryReq.getQueryText(), parseResult.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
         }
-        chatService.updateChatParse(chatParseDOS);
-        parseResult.getParseTimeCost().setParseTime(
-                System.currentTimeMillis() - parseTime - parseResult.getParseTimeCost().getSqlTime());
         return parseResult;
     }
 
@@ -220,7 +204,7 @@ public class QueryServiceImpl implements QueryService {
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(semanticQuery.getClass().getSimpleName()).type(CostType.QUERY.getType()).build());
             queryResult.setQueryTimeCost(timeCostDOList.get(0).getCost().longValue());
-            saveInfo(timeCostDOList, queryReq.getQueryText(), queryReq.getQueryId(),
+            saveTimeCostInfo(timeCostDOList, queryReq.getQueryText(), queryReq.getQueryId(),
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
             queryResult.setChatContext(parseInfo);
             // update chat context after a successful semantic query
@@ -242,7 +226,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     // save time cost data
-    private void saveInfo(List<StatisticsDO> timeCostDOList,
+    private void saveTimeCostInfo(List<StatisticsDO> timeCostDOList,
             String queryText, Long queryId,
             String userName, Long chatId) {
         List<StatisticsDO> list = timeCostDOList.stream()
