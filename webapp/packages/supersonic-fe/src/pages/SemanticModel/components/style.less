@@ -2,13 +2,12 @@
   display: flex;
   flex-direction: row;
   background-color: #fff;
-  height: calc(100vh - 48px);
+  height: calc(100vh - 56px);
 
 
   .projectManger {
     width: 100%;
-    min-height: calc(100vh - 48px);
-    // background: #f8f9fb;
+    min-height: calc(100vh - 56px);
     background-color: #fff;
     display: flex;
     position: relative;
@@ -126,6 +125,8 @@
     //   }
     // }
     .tab {
+      border-top: 1px solid #eee;
+      margin-top: 10px;
       :global {
         .ant-tabs-tab-btn {
           font-size: 16px;
@@ -186,31 +187,18 @@
 .domainList {
   display: flex;
   flex-direction: column;
-  // width: 400px;
   width: 100%;
   overflow: hidden;
-
+  .searchContainer {
+    padding:3px 0;
+    border-bottom: 1px solid #eee;
+  }
 }
 
-// .user {
-//   display: grid;
-// }
-
-// .search{
-//   width: 50%;
-//   margin-bottom: 20px;
-// }
-
-
-
-// .authBtn{
-//   cursor: pointer;
-// }
 
 .classTable {
   :global {
     .ant-pro-table-search-query-filter {
-      // padding-left: 0 !important;
       margin-bottom: 0;
     }
     .ant-pro-table-list-toolbar-container {
@@ -333,6 +321,19 @@
   :global {
     .ant-btn-link {
       padding: 0;
+    }
+  }
+}
+
+.breadcrumb{
+  font-size: 18px;
+  margin: 20px 0 0 20px;
+  :global {
+    .ant-breadcrumb-link {
+      height: 28px;
+    }
+    .anticon {
+      font-size: 18px;
     }
   }
 }

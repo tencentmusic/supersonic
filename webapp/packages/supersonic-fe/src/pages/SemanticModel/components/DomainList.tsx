@@ -179,32 +179,33 @@ const DomainListTree: FC<DomainListProps> = ({
 
   return (
     <div className={styles.domainList}>
-      <Row>
-        <Col flex="1 1 auto">
-          {/* <Space> */}
-          <Search
-            allowClear
-            className={styles.search}
-            placeholder="请输入主题域名称进行查询"
-            onSearch={onSearch}
-          />
-          {/* </Space> */}
-        </Col>
-        {createDomainBtnVisible && (
-          <Col flex="0 0 40px" style={{ display: 'flex', alignItems: 'center' }}>
-            <Tooltip title="新增顶级域">
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                size="small"
-                onClick={() => {
-                  setProjectInfoParams({ type: 'top', modelType: 'add' });
-                  setProjectInfoModalVisible(true);
-                  onCreateDomainBtnClick?.();
-                }}
-              />
-            </Tooltip>
-            {/* <Tooltip title="新增顶级域">
+      <div className={styles.searchContainer}>
+        <Row>
+          <Col flex="1 1 auto">
+            {/* <Space> */}
+            <Search
+              allowClear
+              className={styles.search}
+              placeholder="请输入主题域名称进行查询"
+              onSearch={onSearch}
+            />
+            {/* </Space> */}
+          </Col>
+          {createDomainBtnVisible && (
+            <Col flex="0 0 40px" style={{ display: 'flex', alignItems: 'center' }}>
+              <Tooltip title="新增顶级域">
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  size="small"
+                  onClick={() => {
+                    setProjectInfoParams({ type: 'top', modelType: 'add' });
+                    setProjectInfoModalVisible(true);
+                    onCreateDomainBtnClick?.();
+                  }}
+                />
+              </Tooltip>
+              {/* <Tooltip title="新增顶级域">
               <PlusCircleOutlined
                 onClick={() => {
                   setProjectInfoParams({ type: 'top', modelType: 'add' });
@@ -214,10 +215,10 @@ const DomainListTree: FC<DomainListProps> = ({
                 className={styles.addBtn}
               />
             </Tooltip> */}
-          </Col>
-        )}
-      </Row>
-
+            </Col>
+          )}
+        </Row>
+      </div>
       <Tree
         expandedKeys={expandedKeys}
         onExpand={handleExpand}

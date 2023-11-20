@@ -1,4 +1,4 @@
-@import '~antd/es/style/themes/default.less';
+
 
 :root:root {
   --primary-color: #f87653;
@@ -30,6 +30,7 @@ body,
   height: 100%;
   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Microsoft YaHei,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
   -webkit-font-smoothing:antialiased;
+  margin: 0;
 }
 
 .colorWeak {
@@ -55,7 +56,7 @@ ol {
   list-style: none;
 }
 
-@media (max-width: @screen-xs) {
+@media (max-width: 480px) {
   .ant-table {
     width: 100%;
     overflow-x: auto;
@@ -111,26 +112,46 @@ ol {
   .ant-spin-spinning {
     max-height: none !important;
   }
-
   .loadingPlaceholder {
     height: 100vh;
   }
 }
+
+.ant-pro-layout .ant-pro-layout-content {
+  padding: 0;
+  background-color: #f0f2f5;
+}
+
 
 .ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.ant-menu-dark.ant-menu-horizontal>.ant-menu-item,
-.ant-menu-dark.ant-menu-horizontal>.ant-menu-submenu {
+.ant-pro-top-nav-header-menu {
+  padding: 0!important;
+  line-height: unset!important;
+}
+
+.ant-menu-root>.ant-menu-item,
+.ant-menu-root>.ant-menu-submenu {
   font-weight: bold;
   font-size: 14px;
-
   &>span>a,
   &>a {
     color: white;
+    &:hover {
+      color: white;
+    }
   }
+  &:hover {
+    background-color: #296DF3!important;
+  }
+}
+
+.ant-menu-root>.ant-menu-item.ant-menu-item-selected {
+  background-color: #296DF3!important;
+  color: white;
 }
 
 .ant-pro-top-nav-header-logo h1 {
@@ -143,63 +164,19 @@ ol {
   backdrop-filter: blur(10px) !important;
 }
 
-.ant-menu.ant-menu-dark {
-  color: #fff;
-}
 
-.ant-menu-submenu-selected {
-  background-color: #296DF3 !important;
-}
 
-.ant-menu.ant-menu-dark .ant-menu-sub {
-  background-color: #fff;
-  .ant-menu-item-selected {
-    background-color: #296DF3;
-    .ant-pro-menu-item-title {
-      color: #fff;
-    }
-  }
-  .ant-menu-item {
-    &:hover {
-      background-color: #e3e3e3;
-
-      .ant-menu-item-selected {
-        background-color: #e3e3e3;
-        .ant-pro-menu-item-title {
-          color: #181a1a !important;
-        }
-      }
-      .ant-pro-menu-item-title {
-        color: #181a1a !important;
-      }
-    }
-    & > span > a {
-      color: #181a1a;
-      &:hover {
-        color: #181a1a;
-      }
-    }
-  }
-}
-.ant-menu-item:active {
-  background: inherit
-}
-// .ant-menu-dark .ant-menu-item > span > a {
-//   color: #181a1a;
-//   &:hover {
-//     color: #fff;
-//   }
-// }
-// .ant-menu-dark.ant-menu-dark:not(.ant-menu-horizontal) .ant-menu-item-selected  {
-//   // color: #fff;
-//   background-color: #1b4aef;
-
+// .ant-menu-submenu-selected {
+//   background-color: #296DF3 !important;
 // }
 
-.customizeHeader {
-  background-color: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
-}
+
+
+// .ant-menu-item:active {
+//   background: inherit
+// }
+
+
 
 .ant-pro-top-nav-header-main-left {
   min-width: 100px !important;
@@ -210,64 +187,31 @@ ol {
 }
 
 
-.link {
-  color: #296df3;
-  cursor: pointer;
-}
+// .link {
+//   color: #296df3;
+//   cursor: pointer;
+// }
 
-.closeTab {
-  position: relative;
-  width: 10px;
-  height: 10px;
-  // opacity: 0;
-}
 
-.closeTab::before,
-.closeTab::after {
-  position: absolute;
-  top: -2px;
-  left: 0;
-  width: 1px;
-  height: 10px;
-  background-color: rgb(50, 50, 50);
-  content: ' ';
-}
-
-.closeTab::before {
-  transform: rotate(45deg);
-}
-
-.closeTab::after {
-  transform: rotate(-45deg);
-}
-
-.dot {
-  float: right;
-  width: 8px;
-  height: 8px;
-  background: #bfbfbf;
-  border-radius: 100%;
-}
-
-.bdWrapper {
-  margin: -24px;
-  .ant-layout-sider {
-    top: 48px !important;
-  }
-}
+// .dot {
+//   float: right;
+//   width: 8px;
+//   height: 8px;
+//   background: #bfbfbf;
+//   border-radius: 100%;
+// }
 
 .logo {
   position: relative;
-  padding-bottom: 5px;
   color: #fff;
   font-size: 20px;
   font-weight: 700;
   padding-right: 50px;
 }
 
-.ant-notification-topRight {
-  right: 240px !important;
-}
+// .ant-notification-topRight {
+//   right: 240px !important;
+// }
 
 
 .g6ContextMenuContainer {

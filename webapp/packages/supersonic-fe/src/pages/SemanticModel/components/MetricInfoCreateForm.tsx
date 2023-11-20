@@ -455,7 +455,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       forceRender
       width={1300}
       style={{ top: 48 }}
-      bodyStyle={{ padding: '32px 40px 48px' }}
+      styles={{ padding: '32px 40px 48px' }}
       destroyOnClose
       title={`${isEdit ? '编辑' : '新建'}指标`}
       maskClosable={false}

@@ -18,6 +18,7 @@ import DimensionValueSettingModal from './DimensionValueSettingModal';
 import { updateDimension } from '../service';
 import { ISemantic, IDataSource } from '../data';
 import moment from 'moment';
+import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import styles from './style.less';
 
 type Props = {
@@ -328,7 +329,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
   ];
 
-  const onMenuClick = ({ key }: { key: string }) => {
+  const onMenuClick = (key: string) => {
     switch (key) {
       case 'batchStart':
         queryBatchUpdateStatus(selectedRowKeys, StatusEnum.ONLINE);
@@ -386,12 +387,14 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           >
             创建维度
           </Button>,
-          <Dropdown.Button
+          <BatchCtrlDropDownButton
             key="ctrlBtnList"
-            menu={{ items: dropdownButtonItems, onClick: onMenuClick }}
-          >
-            批量操作
-          </Dropdown.Button>,
+            onDeleteConfirm={() => {
+              queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
+            }}
+            hiddenList={['batchDownload']}
+            onMenuClick={onMenuClick}
+          />,
         ]}
       />
 

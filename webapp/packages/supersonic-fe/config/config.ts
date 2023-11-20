@@ -61,6 +61,9 @@ export default defineConfig({
   theme: {
     ...themeSettings,
   },
+  alias: {
+    'antd/es/style': '@/assets/style',
+  },
   esbuild: {},
   title: false,
   ignoreMomentLocale: true,

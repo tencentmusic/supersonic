@@ -118,7 +118,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
               cover={
                 <CoffeeOutlined
                   width={240}
-                  style={{ paddingTop: '45px', height: 120, fontSize: '48px', color: '#1890ff' }}
+                  style={{ paddingTop: '45px', height: 75, fontSize: '48px', color: '#1890ff' }}
                 />
               }
             >
@@ -137,7 +137,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
               style={{ height: 220 }}
               cover={
                 <ConsoleSqlOutlined
-                  style={{ paddingTop: '45px', height: 120, fontSize: '48px', color: '#1890ff' }}
+                  style={{ paddingTop: '45px', height: 75, fontSize: '48px', color: '#1890ff' }}
                 />
               }
             >
@@ -183,6 +183,9 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
           }}
           createModalVisible={createModalVisible}
           onDataSourceBtnClick={() => {
+            setDataSourceEditOpen(true);
+          }}
+          onOpenDataSourceEdit={() => {
             setDataSourceEditOpen(true);
           }}
         >

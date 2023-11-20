@@ -203,7 +203,7 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
       <Helmet title={'语义模型-超音数'} />
       <div className={styles.projectManger}>
         <div className={styles.sider}>
-          <div className={styles.domainTitle}>
+          {/* <div className={styles.domainTitle}>
             <Space>
               {selectDomainName ? `${selectDomainName}` : '主题域信息'}
               {selectModelName && (
@@ -213,7 +213,7 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
                 </>
               )}
             </Space>
-          </div>
+          </div> */}
           <DomainListTree
             createDomainBtnVisible={mode === 'domain' ? true : false}
             onTreeSelected={(domainData) => {
