@@ -289,8 +289,20 @@ public class QueryServiceImpl implements QueryService {
 
         SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
         semanticQuery.setParseInfo(parseInfo);
-        if (S2SQLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
-            log.info("begin revise filters!");
+        List<String> metrics = queryData.getMetrics().stream().map(o -> o.getName()).collect(Collectors.toList());
+        List<String> fields = new ArrayList<>();
+        if (Objects.nonNull(parseInfo.getSqlInfo())
+                && StringUtils.isNotBlank(parseInfo.getSqlInfo().getCorrectS2SQL())) {
+            String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
+            fields = SqlParserSelectHelper.getAllFields(correctorSql);
+        }
+        if (CollectionUtils.isNotEmpty(fields) && !fields.containsAll(metrics)
+                && CollectionUtils.isNotEmpty(queryData.getMetrics())) {
+            //replace metrics
+            log.info("llm begin replace metrics!");
+            replaceMetrics(parseInfo, metrics);
+        } else if (S2SQLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
+            log.info("llm begin revise filters!");
             String correctorSql = reviseCorrectS2SQL(queryData, parseInfo);
             parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
             semanticQuery.setParseInfo(parseInfo);
@@ -299,6 +311,7 @@ public class QueryServiceImpl implements QueryService {
                 parseInfo.getSqlInfo().setQuerySQL(explainSql);
             }
         } else {
+            log.info("rule begin replace metrics and revise filters!");
             //remove unvalid filters
             validFilter(semanticQuery.getParseInfo().getDimensionFilters());
             validFilter(semanticQuery.getParseInfo().getMetricFilters());
@@ -347,6 +360,17 @@ public class QueryServiceImpl implements QueryService {
         log.info("correctorSql after replacing:{}", correctorSql);
         correctorSql = SqlParserRemoveHelper.removeNumberCondition(correctorSql);
         return correctorSql;
+    }
+
+    private void replaceMetrics(SemanticParseInfo parseInfo, List<String> metrics) {
+        List<String> filteredMetrics = parseInfo.getMetrics().stream()
+                .map(o -> o.getName()).collect(Collectors.toList());
+        String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
+        log.info("before replaceMetrics:{}", correctorSql);
+        correctorSql = SqlParserAddHelper.addFieldsToSelect(correctorSql, metrics);
+        correctorSql = SqlParserRemoveHelper.removeSelect(correctorSql, filteredMetrics);
+        log.info("after replaceMetrics:{}", correctorSql);
+        parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
     }
 
     @Override

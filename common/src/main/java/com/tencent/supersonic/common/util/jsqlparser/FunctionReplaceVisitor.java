@@ -9,6 +9,7 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
@@ -97,19 +98,19 @@ public class FunctionReplaceVisitor extends ExpressionVisitorAdapter {
 
             String startDataCondExpr =
                     columnName + StringUtil.getSpaceWrap(startDateOperator) + StringUtil.getCommaWrap(startDateValue);
-
             if (JsqlConstants.EQUAL.equalsIgnoreCase(endDateOperator)) {
                 result.add(CCJSqlParserUtil.parseCondExpression(condExpr));
                 expression = (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(JsqlConstants.EQUAL_CONSTANT);
             }
-            comparisonOperator.setLeftExpression(null);
-            comparisonOperator.setRightExpression(null);
-            comparisonOperator.setASTNode(null);
-
-            comparisonOperator.setLeftExpression(expression.getLeftExpression());
-            comparisonOperator.setRightExpression(expression.getRightExpression());
-            comparisonOperator.setASTNode(expression.getASTNode());
-
+            if (startDateOperator.equals("<=") || startDateOperator.equals("<")) {
+                comparisonOperator.setLeftExpression(new Column("1"));
+                comparisonOperator.setRightExpression(new LongValue(1));
+                comparisonOperator.setASTNode(null);
+            } else {
+                comparisonOperator.setLeftExpression(expression.getLeftExpression());
+                comparisonOperator.setRightExpression(expression.getRightExpression());
+                comparisonOperator.setASTNode(expression.getASTNode());
+            }
             result.add(CCJSqlParserUtil.parseCondExpression(startDataCondExpr));
             return result;
         } catch (JSQLParserException e) {
