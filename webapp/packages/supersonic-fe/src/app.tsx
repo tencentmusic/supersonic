@@ -133,7 +133,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
         >
           {dom}
           {history.location.pathname !== '/chat' && !isMobile && (
-            <Copilot token={getToken() || ''} isDeveloper />
+            <Copilot token={getAuthToken() || ''} isDeveloper />
           )}
         </div>
       );

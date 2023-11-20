@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Form, Input, Spin, Select, message } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import { getDbNames, getTables } from '../../service';
+import SqlEditor from '@/components/SqlEditor';
 import { ISemantic } from '../../data';
 
 const FormItem = Form.Item;
@@ -123,6 +124,13 @@ const DataSourceBasicForm: React.FC<Props> = ({ isEdit, databaseConfigList, mode
       <FormItem name="description" label="数据源描述">
         <TextArea placeholder="请输入数据源描述" />
       </FormItem>
+      {/* <FormItem
+        name="filterSql"
+        label="过滤SQL"
+        tooltip="主要用于词典导入场景, 对维度值进行过滤 格式: field1 = 'xxx' and field2 = 'yyy'"
+      >
+        <SqlEditor height={'150px'} />
+      </FormItem> */}
     </Spin>
   );
 };

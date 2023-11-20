@@ -8,15 +8,15 @@ export enum SENSITIVE_LEVEL {
 
 export const SENSITIVE_LEVEL_OPTIONS = [
   {
-    label: '低',
+    label: '普通',
     value: SENSITIVE_LEVEL.LOW,
   },
   {
-    label: '中',
+    label: '重要',
     value: SENSITIVE_LEVEL.MID,
   },
   {
-    label: '高',
+    label: '核心',
     value: SENSITIVE_LEVEL.HIGH,
   },
 ];

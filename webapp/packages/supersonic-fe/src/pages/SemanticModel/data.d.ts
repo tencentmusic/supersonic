@@ -202,6 +202,7 @@ export declare namespace ISemantic {
     dataFormat: string;
     alias: string;
     useCnt: number;
+    isCollect: boolean;
     relateDimension?: IRelateDimension;
   }
 

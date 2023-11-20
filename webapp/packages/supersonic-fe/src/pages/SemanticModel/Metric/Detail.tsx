@@ -15,6 +15,7 @@ import MetricTrendSection from '@/pages/SemanticModel/Metric/components/MetricTr
 import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_COLOR } from '../constant';
 import type { TabsProps } from 'antd';
 import { ISemantic } from '../data';
+import MetricStar from './components/MetricStar';
 
 const { Content } = Layout;
 type Props = {
@@ -31,20 +32,6 @@ interface DescriptionItemProps {
   icon: ReactNode;
 }
 
-// type InfoListItemChildrenItem = {
-//   label: string;
-//   value: string;
-//   content?: ReactNode;
-//   hideItem?: boolean;
-// };
-
-// type InfoListItem = {
-//   title: string;
-//   hideItem?: boolean;
-//   render?: () => ReactNode;
-//   children?: InfoListItemChildrenItem[];
-// };
-
 const DescriptionItem = ({ title, content, icon }: DescriptionItemProps) => (
   <Tooltip title={title}>
     <div style={{ width: 'max-content', fontSize: 14, color: '#546174' }}>
@@ -59,10 +46,7 @@ const DescriptionItem = ({ title, content, icon }: DescriptionItemProps) => (
 const MetricDetail: React.FC<Props> = ({ domainManger }) => {
   const params: any = useParams();
   const metricId = params.metricId;
-  // const bizName = params.bizName;
 
-  // const [infoList, setInfoList] = useState<InfoListItem[]>([]);
-  // const { selectModelName } = domainManger;
   const [metircData, setMetircData] = useState<ISemantic.IMetricItem>();
   useEffect(() => {
     queryMetricData(metricId);
@@ -77,111 +61,19 @@ const MetricDetail: React.FC<Props> = ({ domainManger }) => {
     message.error(msg);
   };
 
-  // useEffect(() => {
-  //   if (!metircData) {
-  //     return;
-  //   }
-  //   const {
-  //     alias,
-  //     bizName,
-  //     createdBy,
-  //     createdAt,
-  //     updatedAt,
-  //     description,
-  //     sensitiveLevel,
-  //     modelName,
-  //   } = metircData;
-
-  //   const list = [
-  //     {
-  //       title: '基本信息',
-  //       children: [
-  //         {
-  //           label: '字段名称',
-  //           value: bizName,
-  //         },
-  //         {
-  //           label: '别名',
-  //           hideItem: !alias,
-  //           value: alias || '-',
-  //         },
-  //         {
-  //           label: '所属模型',
-  //           value: modelName,
-  //           content: <Tag>{modelName || selectModelName}</Tag>,
-  //         },
-
-  //         {
-  //           label: '描述',
-  //           value: description,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       title: '应用信息',
-  //       children: [
-  //         {
-  //           label: '敏感度',
-  //           value: SENSITIVE_LEVEL_ENUM[sensitiveLevel],
-  //         },
-  //       ],
-  //     },
-  //     // {
-  //     //   title: '指标趋势',
-  //     //   render: () => (
-  //     //     <Row key={`metricTrendSection`} style={{ marginBottom: 10, display: 'flex' }}>
-  //     //       <Col span={24}>
-  //     //         <MetricTrendSection nodeData={metircData} />
-  //     //       </Col>
-  //     //     </Row>
-  //     //   ),
-  //     // },
-  //     {
-  //       title: '创建信息',
-  //       children: [
-  //         {
-  //           label: '创建人',
-  //           value: createdBy,
-  //         },
-  //         {
-  //           label: '创建时间',
-  //           value: createdAt ? moment(createdAt).format('YYYY-MM-DD HH:mm:ss') : '',
-  //         },
-  //         {
-  //           label: '更新时间',
-  //           value: updatedAt ? moment(updatedAt).format('YYYY-MM-DD HH:mm:ss') : '',
-  //         },
-  //       ],
-  //     },
-  //   ];
-
-  //   setInfoList(list);
-  // }, [metircData]);
-
   const tabItems: TabsProps['items'] = [
     {
       key: 'metricTrend',
       label: '图表',
       children: <MetricTrendSection metircData={metircData} />,
     },
-    // {
-    //   key: '2',
-    //   label: 'Tab 2',
-    //   children: 'Content of Tab Pane 2',
-    // },
   ];
 
   const contentStyle: React.CSSProperties = {
     minHeight: 120,
     color: '#fff',
-    // marginRight: 15,
     backgroundColor: '#fff',
   };
-
-  // const siderStyle: React.CSSProperties = {
-  //   width: '300px',
-  //   backgroundColor: '#fff',
-  // };
 
   return (
     <Layout className={styles.metricDetail}>
@@ -200,20 +92,21 @@ const MetricDetail: React.FC<Props> = ({ domainManger }) => {
 
               <div className={styles.navContainer}>
                 <Space>
+                  <MetricStar metricId={metricId} initState={metircData?.isCollect} />
                   <span style={{ color: '#296DF3' }}>
                     {metircData?.name}
                     {metircData?.alias && `[${metircData.alias}]`}
                   </span>
                   {metircData?.name && (
                     <>
-                      <span style={{ position: 'relative', top: '-2px' }}> | </span>
+                      <span style={{ position: 'relative', top: '-2px', color: '#c3c3c3' }}>|</span>
                       <span style={{ fontSize: 16, color: '#296DF3' }}>{metircData?.bizName}</span>
                     </>
                   )}
                   {metircData?.sensitiveLevel !== undefined && (
                     <span style={{ position: 'relative', top: '-2px' }}>
                       <Tag color={SENSITIVE_LEVEL_COLOR[metircData.sensitiveLevel]}>
-                        {SENSITIVE_LEVEL_ENUM[metircData.sensitiveLevel]}敏感度
+                        {SENSITIVE_LEVEL_ENUM[metircData.sensitiveLevel]}
                       </Tag>
                     </span>
                   )}
@@ -235,19 +128,6 @@ const MetricDetail: React.FC<Props> = ({ domainManger }) => {
             <div className={styles.titleRight}>
               {metircData?.createdBy ? (
                 <>
-                  {/* <div className={styles.info}>
-                    <DescriptionItem
-                      title="所属模型"
-                      icon={<UserOutlined />}
-                      content={metircData?.modelName}
-                    />
-
-                    <DescriptionItem
-                      title="更新时间"
-                      icon={<CalendarOutlined />}
-                      content={metircData?.description}
-                    />
-                  </div> */}
                   <div className={styles.info}>
                     <DescriptionItem
                       title="创建人"
@@ -272,41 +152,6 @@ const MetricDetail: React.FC<Props> = ({ domainManger }) => {
           </div>
         </Content>
       </Layout>
-      {/* <Sider style={siderStyle} width={400}>
-        <>
-          <div key={metircData?.id} className={styles.metricInfoContent}>
-            {infoList.map((item) => {
-              const { children, title, render } = item;
-              return (
-                <div key={title} style={{ display: item.hideItem ? 'none' : 'block' }}>
-                  <p className={styles.title}>{title}</p>
-                  {render?.() ||
-                    (Array.isArray(children) &&
-                      children.map((childrenItem) => {
-                        return (
-                          <Row
-                            key={`${childrenItem.label}-${childrenItem.value}`}
-                            style={{
-                              marginBottom: 10,
-                              display: childrenItem.hideItem ? 'none' : 'flex',
-                            }}
-                          >
-                            <Col span={24}>
-                              <DescriptionItem
-                                title={childrenItem.label}
-                                content={childrenItem.content || childrenItem.value}
-                              />
-                            </Col>
-                          </Row>
-                        );
-                      }))}
-                  <Divider />
-                </div>
-              );
-            })}
-          </div>
-        </>
-      </Sider> */}
     </Layout>
   );
 };
