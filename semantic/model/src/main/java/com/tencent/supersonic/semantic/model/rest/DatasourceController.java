@@ -1,17 +1,15 @@
 package com.tencent.supersonic.semantic.model.rest;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.semantic.api.model.request.DatasourceRelaReq;
 import com.tencent.supersonic.semantic.api.model.request.DatasourceReq;
-import com.tencent.supersonic.semantic.api.model.response.DatasourceRelaResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
 import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.tencent.supersonic.semantic.model.domain.pojo.Datasource;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +30,7 @@ public class DatasourceController {
     }
 
     @PostMapping("/createDatasource")
-    public Datasource createDatasource(@RequestBody DatasourceReq datasourceReq,
+    public DatasourceResp createDatasource(@RequestBody DatasourceReq datasourceReq,
                                        HttpServletRequest request,
                                        HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
@@ -40,7 +38,7 @@ public class DatasourceController {
     }
 
     @PostMapping("/updateDatasource")
-    public Datasource updateDatasource(@RequestBody DatasourceReq datasourceReq,
+    public DatasourceResp updateDatasource(@RequestBody DatasourceReq datasourceReq,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
@@ -54,7 +52,7 @@ public class DatasourceController {
 
     @GetMapping("/getMeasureListOfModel/{modelId}")
     public List<MeasureResp> getMeasureListOfModel(@PathVariable("modelId") Long modelId) {
-        return datasourceService.getMeasureListOfModel(modelId);
+        return datasourceService.getMeasureListOfModel(Lists.newArrayList(modelId));
     }
 
     @DeleteMapping("deleteDatasource/{id}")
@@ -65,24 +63,4 @@ public class DatasourceController {
         return true;
     }
 
-    /**
-     * @param datasourceRelaReq
-     * @return
-     */
-    @PostMapping("/createOrUpdateDatasourceRela")
-    public DatasourceRelaResp createOrUpdateDatasourceRela(@RequestBody DatasourceRelaReq datasourceRelaReq,
-            HttpServletRequest request, HttpServletResponse response) {
-        User user = UserHolder.findUser(request, response);
-        return datasourceService.createOrUpdateDatasourceRela(datasourceRelaReq, user);
-    }
-
-    @GetMapping("/getDatasourceRelaList/{modelId}")
-    public List<DatasourceRelaResp> getDatasourceRelaList(@PathVariable("modelId") Long modelId) {
-        return datasourceService.getDatasourceRelaList(modelId);
-    }
-
-    @DeleteMapping("/deleteDatasourceRela/{id}")
-    public void deleteDatasourceRela(@PathVariable("id") Long id) {
-        datasourceService.deleteDatasourceRela(id);
-    }
 }

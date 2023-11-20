@@ -6,22 +6,19 @@ import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
 import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
-import com.tencent.supersonic.semantic.api.model.request.DatasourceRelaReq;
 import com.tencent.supersonic.semantic.api.model.request.DatasourceReq;
-import com.tencent.supersonic.semantic.api.model.response.DatasourceRelaResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
-import com.tencent.supersonic.semantic.model.domain.pojo.Datasource;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public interface DatasourceService {
 
-    Datasource createDatasource(DatasourceReq datasourceReq, User user) throws Exception;
+    DatasourceResp createDatasource(DatasourceReq datasourceReq, User user) throws Exception;
 
-    Datasource updateDatasource(DatasourceReq datasourceReq, User user) throws Exception;
+    DatasourceResp updateDatasource(DatasourceReq datasourceReq, User user) throws Exception;
 
     List<DatasourceResp> getDatasourceListNoMeasurePrefix(Long modelId);
 
@@ -35,15 +32,7 @@ public interface DatasourceService {
 
     void deleteDatasource(Long id, User user);
 
-    DatasourceRelaResp createOrUpdateDatasourceRela(DatasourceRelaReq datasourceRelaReq, User user);
-
-    List<DatasourceRelaResp> getDatasourceRelaList(Long modelId);
-
-    void deleteDatasourceRela(Long id);
-
     ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric);
-
-    List<MeasureResp> getMeasureListOfModel(Long modelId);
 
     List<MeasureResp> getMeasureListOfModel(List<Long> modelIds);
 

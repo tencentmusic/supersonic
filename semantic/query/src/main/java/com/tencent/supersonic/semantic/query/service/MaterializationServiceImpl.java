@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.query.service;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.semantic.api.materialization.request.MaterializationSourceReq;
 import com.tencent.supersonic.semantic.api.materialization.response.MaterializationSourceResp;
@@ -72,7 +73,7 @@ public class MaterializationServiceImpl implements MaterializationService {
                 modelFilter.setModelIds(Arrays.asList(materializationSourceResp.getModelId()));
                 List<ModelSchemaResp> modelSchemaRespList = modelService.fetchModelSchema(modelFilter);
                 List<MeasureResp> measureRespList = datasourceService.getMeasureListOfModel(
-                        materializationSourceResp.getModelId());
+                        Lists.newArrayList(materializationSourceResp.getModelId()));
                 modelSchemaRespList.stream().forEach(m -> {
                     m.getDimensions().stream()
                             .filter(mm -> mm.getDatasourceId().equals(materializationSourceReq.getDataSourceId())

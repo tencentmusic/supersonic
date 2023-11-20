@@ -180,6 +180,7 @@ CREATE TABLE  IF NOT EXISTS  `s2_datasource` (
     `depends` varchar(500) DEFAULT  NULL ,
     `datasource_detail` LONGVARCHAR NOT  NULL ,
     `status` int(11) DEFAULT NULL ,
+    `filter_sql` varchar(1000) DEFAULT NULL ,
     `created_at` TIMESTAMP NOT  NULL ,
     `created_by` varchar(100) NOT  NULL ,
     `updated_at` TIMESTAMP NOT  NULL ,

@@ -44,4 +44,33 @@ public class ModelSchema {
         }
     }
 
+    public SchemaElement getElement(SchemaElementType elementType, String name) {
+        Optional<SchemaElement> element = Optional.empty();
+
+        switch (elementType) {
+            case ENTITY:
+                element = Optional.ofNullable(entity);
+                break;
+            case MODEL:
+                element = Optional.of(model);
+                break;
+            case METRIC:
+                element = metrics.stream().filter(e -> name.equals(e.getName())).findFirst();
+                break;
+            case DIMENSION:
+                element = dimensions.stream().filter(e -> name.equals(e.getName())).findFirst();
+                break;
+            case VALUE:
+                element = dimensionValues.stream().filter(e -> name.equals(e.getName())).findFirst();
+                break;
+            default:
+        }
+
+        if (element.isPresent()) {
+            return element.get();
+        } else {
+            return null;
+        }
+    }
+
 }

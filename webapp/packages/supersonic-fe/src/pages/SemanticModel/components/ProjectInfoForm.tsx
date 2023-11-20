@@ -62,7 +62,7 @@ const ProjectInfoForm: React.FC<ProjectInfoFormProps> = (props) => {
   return (
     <Modal
       width={640}
-      bodyStyle={{ padding: '32px 40px 48px' }}
+      styles={{ padding: '32px 40px 48px' }}
       destroyOnClose
       title={titleRender()}
       open={true}

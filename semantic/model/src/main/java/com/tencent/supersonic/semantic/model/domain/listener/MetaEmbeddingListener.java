@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,9 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
 
     @Autowired
     private EmbeddingUtils embeddingUtils;
+
+    @Value("${embedding.operation.sleep.time:3000}")
+    private Integer embeddingOperationSleepTime;
 
     @Async
     @Override
@@ -45,6 +49,11 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
                 }).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(embeddingQueries)) {
             return;
+        }
+        try {
+            Thread.sleep(embeddingOperationSleepTime);
+        } catch (InterruptedException e) {
+            log.error("", e);
         }
         embeddingUtils.addCollection(COLLECTION_NAME);
         if (event.getEventType().equals(EventType.ADD)) {

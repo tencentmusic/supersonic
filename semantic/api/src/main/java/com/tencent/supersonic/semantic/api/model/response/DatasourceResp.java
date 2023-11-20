@@ -15,6 +15,6 @@ public class DatasourceResp extends SchemaItem {
 
     private String depends;
 
-
+    private String filterSql;
 
 }

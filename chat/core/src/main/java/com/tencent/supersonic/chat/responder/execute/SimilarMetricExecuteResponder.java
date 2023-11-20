@@ -6,6 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.embedding.EmbeddingUtils;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
@@ -31,7 +32,8 @@ public class SimilarMetricExecuteResponder implements ExecuteResponder {
     }
 
     private void fillSimilarMetric(SemanticParseInfo parseInfo) {
-        if (CollectionUtils.isEmpty(parseInfo.getMetrics()) || parseInfo.getMetrics().size() >= METRIC_RECOMMEND_SIZE) {
+        if (!parseInfo.getQueryType().equals(QueryType.METRIC)
+                && parseInfo.getMetrics().size() > METRIC_RECOMMEND_SIZE) {
             return;
         }
         List<String> metricNames = Collections.singletonList(parseInfo.getMetrics().iterator().next().getName());

@@ -13,13 +13,11 @@ import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
-import com.tencent.supersonic.semantic.api.model.request.DatasourceRelaReq;
 import com.tencent.supersonic.semantic.api.model.request.DatasourceReq;
 import com.tencent.supersonic.semantic.api.model.request.DateInfoReq;
 import com.tencent.supersonic.semantic.api.model.request.DimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
-import com.tencent.supersonic.semantic.api.model.response.DatasourceRelaResp;
 import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
@@ -30,12 +28,10 @@ import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO;
-import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceRelaDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DateInfoDO;
 import com.tencent.supersonic.semantic.model.domain.manager.DatasourceYamlManager;
 import com.tencent.supersonic.semantic.model.domain.manager.DimensionYamlManager;
 import com.tencent.supersonic.semantic.model.domain.manager.MetricYamlManager;
-import com.tencent.supersonic.semantic.model.domain.pojo.Datasource;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.DatasourceRepository;
 import com.tencent.supersonic.semantic.model.domain.repository.DateInfoRepository;
@@ -89,50 +85,26 @@ public class DatasourceServiceImpl implements DatasourceService {
 
     @Override
     @Transactional
-    public Datasource createDatasource(DatasourceReq datasourceReq, User user) throws Exception {
+    public DatasourceResp createDatasource(DatasourceReq datasourceReq, User user) throws Exception {
         checkName(datasourceReq);
         checkExist(datasourceReq);
-        Datasource datasource = DatasourceConverter.convert(datasourceReq);
-        saveDatasource(datasource, user);
-        batchCreateDimension(datasource, user);
-        batchCreateMetric(datasource, user);
-        return datasource;
+        DatasourceDO datasourceDO = DatasourceConverter.convert(datasourceReq, user);
+        datasourceRepository.createDatasource(datasourceDO);
+        batchCreateDimension(datasourceDO, user);
+        batchCreateMetric(datasourceDO, user);
+        return DatasourceConverter.convert(datasourceDO);
     }
 
     @Override
     @Transactional
-    public Datasource updateDatasource(DatasourceReq datasourceReq, User user) throws Exception {
+    public DatasourceResp updateDatasource(DatasourceReq datasourceReq, User user) throws Exception {
         checkName(datasourceReq);
-        Datasource datasource = DatasourceConverter.convert(datasourceReq);
-        updateDatasource(datasource, user);
-        batchCreateDimension(datasource, user);
-        batchCreateMetric(datasource, user);
-        return datasource;
-    }
-
-    private DatasourceDO updateDatasource(Datasource datasource, User user) {
-        DatasourceDO datasourceDO = datasourceRepository.getDatasourceById(datasource.getId());
-        datasource.updatedBy(user.getName());
-        datasourceRepository.updateDatasource(DatasourceConverter.convert(datasourceDO, datasource));
-        return datasourceDO;
-    }
-
-    @Override
-    public List<MeasureResp> getMeasureListOfModel(Long modelId) {
-        List<DatasourceResp> datasourceResps = getDatasourceList(modelId);
-        List<MeasureResp> measureResps = Lists.newArrayList();
-        if (!CollectionUtils.isEmpty(datasourceResps)) {
-            for (DatasourceResp datasourceDesc : datasourceResps) {
-                DatasourceDetail datasourceDetail = datasourceDesc.getDatasourceDetail();
-                List<Measure> measures = datasourceDetail.getMeasures();
-                if (!CollectionUtils.isEmpty(measures)) {
-                    measureResps.addAll(
-                            measures.stream().map(measure -> DatasourceConverter.convert(measure, datasourceDesc))
-                                    .collect(Collectors.toList()));
-                }
-            }
-        }
-        return measureResps;
+        DatasourceDO datasourceDO = datasourceRepository.getDatasourceById(datasourceReq.getId());
+        DatasourceConverter.convert(datasourceDO, datasourceReq, user);
+        datasourceRepository.updateDatasource(datasourceDO);
+        batchCreateDimension(datasourceDO, user);
+        batchCreateMetric(datasourceDO, user);
+        return DatasourceConverter.convert(datasourceDO);
     }
 
     @Override
@@ -157,13 +129,13 @@ public class DatasourceServiceImpl implements DatasourceService {
         return measureResps;
     }
 
-    private void batchCreateDimension(Datasource datasource, User user) throws Exception {
-        List<DimensionReq> dimensionReqs = DatasourceConverter.convertDimensionList(datasource);
+    private void batchCreateDimension(DatasourceDO datasourceDO, User user) throws Exception {
+        List<DimensionReq> dimensionReqs = DatasourceConverter.convertDimensionList(datasourceDO);
         dimensionService.createDimensionBatch(dimensionReqs, user);
     }
 
-    private void batchCreateMetric(Datasource datasource, User user) throws Exception {
-        List<MetricReq> exprMetricReqs = DatasourceConverter.convertMetricList(datasource);
+    private void batchCreateMetric(DatasourceDO datasourceDO, User user) throws Exception {
+        List<MetricReq> exprMetricReqs = DatasourceConverter.convertMetricList(datasourceDO);
         metricService.createMetricBatch(exprMetricReqs, user);
     }
 
@@ -178,13 +150,6 @@ public class DatasourceServiceImpl implements DatasourceService {
             }
         }
         return Optional.empty();
-    }
-
-    //保存并获取自增ID
-    private void saveDatasource(Datasource datasource, User user) {
-        DatasourceDO datasourceDO = DatasourceConverter.convert(datasource, user);
-        datasourceRepository.createDatasource(datasourceDO);
-        datasource.setId(datasourceDO.getId());
     }
 
     private void checkName(DatasourceReq datasourceReq) {
@@ -303,50 +268,6 @@ public class DatasourceServiceImpl implements DatasourceService {
             throw new RuntimeException("存在基于该数据源创建的指标和维度, 暂不能删除, 请确认");
         }
     }
-
-
-    private List<DatasourceRelaResp> convertDatasourceRelaList(List<DatasourceRelaDO> datasourceRelaDOS) {
-        List<DatasourceRelaResp> datasourceRelaResps = Lists.newArrayList();
-        if (CollectionUtils.isEmpty(datasourceRelaDOS)) {
-            return datasourceRelaResps;
-        }
-        return datasourceRelaDOS.stream().map(DatasourceConverter::convert).collect(Collectors.toList());
-    }
-
-
-    @Override
-
-    public DatasourceRelaResp createOrUpdateDatasourceRela(DatasourceRelaReq datasourceRelaReq, User user) {
-        if (datasourceRelaReq.getId() == null) {
-            DatasourceRelaDO datasourceRelaDO = new DatasourceRelaDO();
-            BeanUtils.copyProperties(datasourceRelaReq, datasourceRelaDO);
-            datasourceRelaDO.setCreatedAt(new Date());
-            datasourceRelaDO.setCreatedBy(user.getName());
-            datasourceRelaDO.setUpdatedAt(new Date());
-            datasourceRelaDO.setUpdatedBy(user.getName());
-            datasourceRepository.createDatasourceRela(datasourceRelaDO);
-            return DatasourceConverter.convert(datasourceRelaDO);
-        }
-        Long id = datasourceRelaReq.getId();
-        DatasourceRelaDO datasourceRelaDO = datasourceRepository.getDatasourceRelaById(id);
-        BeanUtils.copyProperties(datasourceRelaDO, datasourceRelaReq);
-        datasourceRelaDO.setUpdatedAt(new Date());
-        datasourceRelaDO.setUpdatedBy(user.getName());
-        datasourceRepository.updateDatasourceRela(datasourceRelaDO);
-        return DatasourceConverter.convert(datasourceRelaDO);
-    }
-
-    @Override
-    public List<DatasourceRelaResp> getDatasourceRelaList(Long modelId) {
-        return convertDatasourceRelaList(datasourceRepository.getDatasourceRelaList(modelId));
-    }
-
-
-    @Override
-    public void deleteDatasourceRela(Long id) {
-        datasourceRepository.deleteDatasourceRela(id);
-    }
-
 
     @Override
     public ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric) {

@@ -19,7 +19,6 @@ public class RuleBasedParser implements SemanticParser {
             new QueryModeParser(),
             new ContextInheritParser(),
             new AgentCheckParser(),
-            new MetricCheckParser(),
             new TimeRangeParser(),
             new AggregateTypeParser()
     );

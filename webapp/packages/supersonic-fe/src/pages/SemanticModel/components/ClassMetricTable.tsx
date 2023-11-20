@@ -1,16 +1,21 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Button, Space, Popconfirm, Input, Tag, Dropdown } from 'antd';
+import { message, Button, Space, Popconfirm, Input, Tag } from 'antd';
 import React, { useRef, useState } from 'react';
 import type { Dispatch } from 'umi';
 import { StatusEnum } from '../enum';
 import { connect } from 'umi';
 import type { StateType } from '../model';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
-import { queryMetric, deleteMetric, updateExprMetric, batchUpdateMetricStatus } from '../service';
+import {
+  queryMetric,
+  deleteMetric,
+  batchUpdateMetricStatus,
+  batchDownloadMetric,
+} from '../service';
 
 import MetricInfoCreateForm from './MetricInfoCreateForm';
-
+import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
@@ -32,20 +37,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   });
   const actionRef = useRef<ActionType>();
 
-  const updateStatus = async (data: ISemantic.IMetricItem) => {
-    const { code, msg } = await updateExprMetric(data);
-    if (code === 200) {
-      actionRef?.current?.reload();
-      dispatch({
-        type: 'domainManger/queryMetricList',
-        payload: {
-          modelId,
-        },
-      });
-      return;
-    }
-    message.error(msg);
-  };
+  const [downloadLoading, setDownloadLoading] = useState<boolean>(false);
 
   const queryBatchUpdateStatus = async (ids: React.Key[], status: StatusEnum) => {
     if (Array.isArray(ids) && ids.length === 0) {
@@ -268,31 +260,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
   };
 
-  const dropdownButtonItems = [
-    {
-      key: 'batchStart',
-      label: '批量启用',
-    },
-    {
-      key: 'batchStop',
-      label: '批量停用',
-    },
-    {
-      key: 'batchDelete',
-      label: (
-        <Popconfirm
-          title="确定批量删除吗？"
-          onConfirm={() => {
-            queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
-          }}
-        >
-          <a>批量删除</a>
-        </Popconfirm>
-      ),
-    },
-  ];
-
-  const onMenuClick = ({ key }: { key: string }) => {
+  const onMenuClick = (key: string) => {
     switch (key) {
       case 'batchStart':
         queryBatchUpdateStatus(selectedRowKeys, StatusEnum.ONLINE);
@@ -302,6 +270,27 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         break;
       default:
         break;
+    }
+  };
+
+  const downloadMetricQuery = async (
+    ids: React.Key[],
+    dateStringList: string[],
+    pickerType: string,
+  ) => {
+    if (Array.isArray(ids) && ids.length > 0) {
+      setDownloadLoading(true);
+      const [startDate, endDate] = dateStringList;
+      await batchDownloadMetric({
+        metricIds: ids,
+        dateInfo: {
+          dateMode: 'BETWEEN',
+          startDate,
+          endDate,
+          period: pickerType.toUpperCase(),
+        },
+      });
+      setDownloadLoading(false);
     }
   };
 
@@ -350,12 +339,17 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           >
             创建指标
           </Button>,
-          <Dropdown.Button
+          <BatchCtrlDropDownButton
             key="ctrlBtnList"
-            menu={{ items: dropdownButtonItems, onClick: onMenuClick }}
-          >
-            批量操作
-          </Dropdown.Button>,
+            downloadLoading={downloadLoading}
+            onDeleteConfirm={() => {
+              queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
+            }}
+            onMenuClick={onMenuClick}
+            onDownloadDateRangeChange={(searchDateRange, pickerType) => {
+              downloadMetricQuery(selectedRowKeys, searchDateRange, pickerType);
+            }}
+          />,
         ]}
       />
       {createModalVisible && (

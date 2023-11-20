@@ -1,19 +1,18 @@
 package com.tencent.supersonic.chat.utils;
 
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
+import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
-
-import com.tencent.supersonic.chat.api.component.SemanticCorrector;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import com.tencent.supersonic.chat.parser.llm.s2sql.ModelResolver;
+import com.tencent.supersonic.chat.postprocessor.PostProcessor;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
 import com.tencent.supersonic.chat.responder.parse.ParseResponder;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class ComponentFactory {
 
@@ -21,6 +20,7 @@ public class ComponentFactory {
     private static List<SemanticParser> semanticParsers = new ArrayList<>();
     private static List<SemanticCorrector> s2SQLCorrections = new ArrayList<>();
     private static SemanticInterpreter semanticInterpreter;
+    private static List<PostProcessor> postProcessors = new ArrayList<>();
     private static List<ParseResponder> parseResponders = new ArrayList<>();
     private static List<ExecuteResponder> executeResponders = new ArrayList<>();
     private static ModelResolver modelResolver;
@@ -35,6 +35,10 @@ public class ComponentFactory {
     public static List<SemanticCorrector> getSqlCorrections() {
         return CollectionUtils.isEmpty(s2SQLCorrections) ? init(SemanticCorrector.class,
                 s2SQLCorrections) : s2SQLCorrections;
+    }
+
+    public static List<PostProcessor> getPostProcessors() {
+        return CollectionUtils.isEmpty(postProcessors) ? init(PostProcessor.class, postProcessors) : postProcessors;
     }
 
     public static List<ParseResponder> getParseResponders() {

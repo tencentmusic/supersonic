@@ -1,6 +1,6 @@
-import { Tabs, Button } from 'antd';
+import { Tabs, Breadcrumb, Space } from 'antd';
 import React from 'react';
-import { connect } from 'umi';
+import { connect, history } from 'umi';
 
 import ClassDataSourceTable from './ClassDataSourceTable';
 import ClassDimensionTable from './ClassDimensionTable';
@@ -11,7 +11,7 @@ import ChatSettingSection from '../ChatSetting/ChatSettingSection';
 import OverView from './OverView';
 import styles from './style.less';
 import type { StateType } from '../model';
-import { LeftOutlined } from '@ant-design/icons';
+import { HomeOutlined, FundViewOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
 import SemanticGraphCanvas from '../SemanticGraphCanvas';
 import RecommendedQuestionsSection from '../components/Entity/RecommendedQuestionsSection';
@@ -39,7 +39,9 @@ const DomainManagerTab: React.FC<Props> = ({
   onMenuChange,
 }) => {
   const defaultTabKey = 'xflow';
-  const { selectDomainId, domainList, selectModelId } = domainManger;
+  const { selectDomainId, domainList, selectModelId, selectModelName, selectDomainName } =
+    domainManger;
+
   const tabItem = [
     {
       label: '模型管理',
@@ -126,40 +128,49 @@ const DomainManagerTab: React.FC<Props> = ({
 
   return (
     <>
+      <Breadcrumb
+        className={styles.breadcrumb}
+        separator=""
+        items={[
+          {
+            path: `/webapp/model/${selectDomainId}/0/overview`,
+            title: (
+              <Space
+                onClick={() => {
+                  onBackDomainBtnClick?.();
+                }}
+                style={selectModelName ? {} : { color: '#296df3', fontWeight: 'bold' }}
+              >
+                <HomeOutlined />
+                <span>{selectDomainName}</span>
+              </Space>
+            ),
+          },
+          {
+            type: 'separator',
+            separator: selectModelName ? '/' : '',
+          },
+          {
+            title: selectModelName ? (
+              <Space
+                onClick={() => {
+                  history.push(`/model/${selectDomainId}/${selectModelId}/`);
+                }}
+                style={{ color: '#296df3' }}
+              >
+                <FundViewOutlined style={{ position: 'relative', top: '2px' }} />
+                <span>{selectModelName}</span>
+              </Space>
+            ) : undefined,
+          },
+        ]}
+      />
       <Tabs
         className={styles.tab}
         items={!isModel ? tabItem : isModelItem}
         activeKey={activeKey || defaultTabKey}
         destroyInactiveTabPane
         size="large"
-        tabBarExtraContent={{
-          left: (
-            <>
-              {!!selectModelId && (
-                <div
-                  className={styles.backBtn}
-                  onClick={() => {
-                    onBackDomainBtnClick?.();
-                  }}
-                >
-                  <LeftOutlined />
-                </div>
-              )}
-            </>
-          ),
-          // right: isModel ? (
-          //   <Button
-          //     type="primary"
-          //     icon={<LeftOutlined />}
-          //     onClick={() => {
-          //       onBackDomainBtnClick?.();
-          //     }}
-          //     style={{ marginRight: 10, marginBottom: 5 }}
-          //   >
-          //     返回主题域
-          //   </Button>
-          // ) : undefined,
-        }}
         onChange={(menuKey: string) => {
           onMenuChange?.(menuKey);
         }}

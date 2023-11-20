@@ -1,4 +1,4 @@
-@import '~antd/es/style/themes/default.less';
+
 
 @pro-header-hover-bg: rgba(0, 0, 0, 0.025);
 
@@ -26,14 +26,16 @@
     padding: 0 12px;
     cursor: pointer;
     transition: all 0.3s;
-
+    color: #fff;
     >span {
       vertical-align: middle;
     }
 
+
     &:hover {
-      background: @pro-header-hover-bg;
+      background: #296df3;
     }
+
 
     &:global(.opened) {
       background: @pro-header-hover-bg;
@@ -57,49 +59,3 @@
     }
   }
 }
-
-.dark {
-  .action {
-    .download {
-      display: flex;
-      align-items: center;
-    }
-
-    .menuName {
-      margin-left: 5px;
-      color: #fff;
-      font-size: 13px;
-    }
-
-    &:hover {
-      background: #296df3;
-    }
-
-    &:global(.opened) {
-      background: #252a3d;
-    }
-  }
-}
-
-.actionIcon {
-  font-size: 20px;
-}
-
-
-
-.tooltip {
-  padding-top: 0 !important;
-  font-size: 12px !important;
-
-  :global {
-    .ant-tooltip-arrow {
-      display: none;
-    }
-
-    .ant-tooltip-inner {
-      min-height: 0 !important;
-      padding: 3px 6px !important;
-    }
-  }
-}
-

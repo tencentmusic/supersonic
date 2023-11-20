@@ -476,3 +476,17 @@ export async function queryStruct({
     return response;
   }
 }
+
+export function metricStarState(data: { id: number; state: boolean }): Promise<any> {
+  const { id, state } = data;
+  if (state) {
+    return request(`${process.env.API_BASE_URL}collect/createCollectionIndicators`, {
+      method: 'POST',
+      data: { id },
+    });
+  } else {
+    return request(`${process.env.API_BASE_URL}collect/deleteCollectionIndicators/${id}`, {
+      method: 'DELETE',
+    });
+  }
+}

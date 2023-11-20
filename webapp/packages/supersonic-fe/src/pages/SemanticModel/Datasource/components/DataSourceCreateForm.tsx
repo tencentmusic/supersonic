@@ -24,7 +24,7 @@ export type CreateFormProps = {
   basicInfoFormMode?: 'normal' | 'fast';
   onDataBaseTableChange?: (tableName: string) => void;
   onDataSourceBtnClick?: () => void;
-  // modalSolt: ReactNode;
+  onOpenDataSourceEdit?: () => void;
 };
 const { Step } = Steps;
 
@@ -45,6 +45,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   databaseId,
   basicInfoFormMode,
   onDataSourceBtnClick,
+  onOpenDataSourceEdit,
   children,
 }) => {
   const isEdit = !!dataSourceItem?.id;
@@ -59,7 +60,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const updateFormVal = (val: any) => {
     formValRef.current = val;
   };
-
+  const [sqlFilter, setSqlFilter] = useState<string>('');
   useEffect(() => {
     const hasEmpty = fields.some((item) => {
       const { name, isCreateDimension, isCreateMetric } = item;
@@ -170,6 +171,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
         queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
         tableQuery: dbName && tableName ? `${dbName}.${tableName}` : '',
         modelId: isEdit ? dataSourceItem.modelId : modelId,
+        filterSql: sqlFilter,
       };
       const queryDatasource = isEdit ? updateDatasource : createDatasource;
       const { code, msg, data } = await queryDatasource(queryParams);
@@ -221,7 +223,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const initData = async () => {
     const { queryType, tableQuery } = dataSourceItem.datasourceDetail;
     let tableQueryInitValue = {};
-    let columns = fieldColumns;
+    let columns = fieldColumns || [];
     if (queryType === 'table_query') {
       const tableQueryString = tableQuery || '';
       const [dbName, tableName] = tableQueryString.split('.');
@@ -235,7 +237,8 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const formatterInitData = (columns: any[], extendParams: Record<string, any> = {}) => {
-    const { id, name, bizName, description, datasourceDetail, databaseId } = dataSourceItem as any;
+    const { id, name, bizName, description, datasourceDetail, databaseId, filterSql } =
+      dataSourceItem as any;
     const { dimensions, identifiers, measures } = datasourceDetail;
     const initValue = {
       id,
@@ -243,6 +246,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       bizName,
       description,
       databaseId,
+      filterSql,
       ...extendParams,
       // ...tableQueryInitValue,
     };
@@ -250,6 +254,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       ...formValRef.current,
       ...initValue,
     };
+    setSqlFilter(filterSql);
     updateFormVal(editInitFormVal);
     form.setFieldsValue(initValue);
     const formatFields = [
@@ -261,10 +266,24 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   useEffect(() => {
-    if (isEdit) {
-      initData();
-    } else {
-      initFields([], fieldColumns);
+    const { queryType } = dataSourceItem?.datasourceDetail || {};
+    if (queryType === 'table_query') {
+      if (isEdit) {
+        initData();
+      } else {
+        initFields([], fieldColumns);
+      }
+    }
+  }, [dataSourceItem]);
+
+  useEffect(() => {
+    const { queryType } = dataSourceItem?.datasourceDetail || {};
+    if (queryType !== 'table_query') {
+      if (isEdit) {
+        initData();
+      } else {
+        initFields([], fieldColumns);
+      }
     }
   }, [dataSourceItem, fieldColumns]);
 
@@ -306,7 +325,14 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     return (
       <>
         <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
-          <FieldForm fields={fields} onFieldChange={handleFieldChange} />
+          <FieldForm
+            fields={fields}
+            onFieldChange={handleFieldChange}
+            onSqlChange={(sql) => {
+              setSqlFilter(sql);
+            }}
+            sql={sqlFilter}
+          />
         </div>
         <div style={{ display: currentStep !== 1 ? 'block' : 'none' }}>
           <DataSourceBasicForm
@@ -357,6 +383,9 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           type="primary"
           onClick={() => {
             handleNext();
+            if (!isEdit && Array.isArray(fields) && fields.length === 0) {
+              onOpenDataSourceEdit?.();
+            }
           }}
         >
           下一步
@@ -381,7 +410,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     <Modal
       forceRender
       width={1300}
-      bodyStyle={{ padding: '32px 40px 48px' }}
+      styles={{ padding: '32px 40px 48px' }}
       destroyOnClose
       title={`${isEdit ? '编辑' : '新建'}数据源`}
       maskClosable={false}

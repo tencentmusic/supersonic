@@ -1,16 +1,34 @@
 import styles from './style.less';
-import { Button, Form, Input, InputNumber, message, Space, Switch, Divider } from 'antd';
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  message,
+  Space,
+  Switch,
+  Select,
+  Divider,
+  Anchor,
+  Row,
+  Col,
+} from 'antd';
 import React, { useState, useEffect } from 'react';
 import { getSystemConfig, saveSystemConfig } from '@/services/user';
 import ProCard from '@ant-design/pro-card';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
 import { SystemConfigParametersItem, SystemConfig } from './types';
+import { groupBy } from 'lodash';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
 const System: React.FC = () => {
-  const [systemConfig, setSystemConfig] = useState<SystemConfigParametersItem[]>([]);
-
+  const [systemConfig, setSystemConfig] = useState<Record<string, SystemConfigParametersItem[]>>(
+    {},
+  );
+  const [anchorItems, setAnchorItems] = useState<{ key: string; href: string; title: string }[]>(
+    [],
+  );
   const [configSource, setConfigSource] = useState<SystemConfig>();
 
   useEffect(() => {
@@ -21,7 +39,16 @@ const System: React.FC = () => {
     const { code, data, msg } = await getSystemConfig();
     if (code === 200) {
       const { parameters, admins } = data;
-      setSystemConfig(parameters);
+      const groupByConfig = groupBy(parameters, 'module');
+      const anchor = Object.keys(groupByConfig).map((key: string) => {
+        return {
+          key,
+          href: `#${key}`,
+          title: key,
+        };
+      });
+      setAnchorItems(anchor);
+      setSystemConfig(groupByConfig);
       setInitData(admins, parameters);
       setConfigSource(data);
     } else {
@@ -29,8 +56,8 @@ const System: React.FC = () => {
     }
   };
 
-  const setInitData = (admins: string[], systemConfig: SystemConfigParametersItem[]) => {
-    const fieldsValue = systemConfig.reduce(
+  const setInitData = (admins: string[], systemConfigParameters: SystemConfigParametersItem[]) => {
+    const fieldsValue = systemConfigParameters.reduce(
       (fields, item) => {
         const { name, value } = item;
         return {
@@ -48,7 +75,7 @@ const System: React.FC = () => {
     const { code, msg } = await saveSystemConfig({
       ...configSource,
       admins: submitData.admins,
-      parameters: systemConfig.map((item) => {
+      parameters: configSource!.parameters.map((item) => {
         const { name } = item;
         if (submitData[name] !== undefined) {
           return {
@@ -68,68 +95,99 @@ const System: React.FC = () => {
 
   return (
     <>
-      <div style={{ margin: '40px auto', width: 800 }}>
-        <ProCard
-          title="系统设置"
-          extra={
-            <Space>
-              <Button
-                type="primary"
-                onClick={() => {
-                  querySaveSystemConfig();
-                }}
-              >
-                保 存
-              </Button>
-            </Space>
-          }
-        >
-          <Form form={form} layout="vertical" className={styles.form}>
-            <FormItem name="admins" label="管理员">
-              <SelectTMEPerson placeholder="请邀请团队成员" />
-            </FormItem>
-            <Divider />
-            {systemConfig.map((item: SystemConfigParametersItem) => {
-              const { dataType, name, comment } = item;
-              let defaultItem = <Input />;
-              switch (dataType) {
-                case 'string':
-                  defaultItem = <TextArea placeholder="" style={{ height: 100 }} />;
-                  break;
-                case 'number':
-                  defaultItem = <InputNumber style={{ width: '100%' }} />;
-                  break;
-                case 'bool':
-                  return (
-                    <FormItem
-                      name={name}
-                      label={comment}
-                      key={name}
-                      valuePropName="checked"
-                      getValueFromEvent={(value) => {
-                        return value === true ? 'true' : 'false';
-                      }}
-                      getValueProps={(value) => {
-                        return {
-                          checked: value === 'true',
-                        };
-                      }}
-                    >
-                      <Switch />
-                    </FormItem>
-                  );
-                default:
-                  defaultItem = <Input />;
-                  break;
+      <div style={{ margin: '40px auto', width: 1200 }}>
+        <Row>
+          <Col span={18}>
+            <ProCard
+              title="系统设置"
+              extra={
+                <Space>
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      querySaveSystemConfig();
+                    }}
+                  >
+                    保 存
+                  </Button>
+                </Space>
               }
-              return (
-                <FormItem name={name} label={comment} key={name}>
-                  {defaultItem}
+            >
+              <Form form={form} layout="vertical" className={styles.form}>
+                <FormItem name="admins" label="管理员">
+                  <SelectTMEPerson placeholder="请邀请团队成员" />
                 </FormItem>
-              );
-            })}
-          </Form>
-        </ProCard>
+                <Divider />
+                <Space direction="vertical" style={{ width: '100%' }} size={35}>
+                  {Object.keys(systemConfig).map((key: string) => {
+                    const itemList = systemConfig[key];
+                    return (
+                      <ProCard
+                        title={<span style={{ color: '#296df3' }}>{key}</span>}
+                        key={key}
+                        bordered
+                        id={key}
+                      >
+                        {itemList.map((item) => {
+                          const { dataType, name, comment } = item;
+                          let defaultItem = <Input />;
+                          switch (dataType) {
+                            case 'string':
+                              defaultItem = <TextArea placeholder="" style={{ height: 100 }} />;
+                              break;
+                            case 'number':
+                              defaultItem = <InputNumber style={{ width: '100%' }} />;
+                              break;
+                            case 'bool':
+                              return (
+                                <FormItem
+                                  name={name}
+                                  label={comment}
+                                  key={name}
+                                  valuePropName="checked"
+                                  getValueFromEvent={(value) => {
+                                    return value === true ? 'true' : 'false';
+                                  }}
+                                  getValueProps={(value) => {
+                                    return {
+                                      checked: value === 'true',
+                                    };
+                                  }}
+                                >
+                                  <Switch />
+                                </FormItem>
+                              );
+                            case 'list': {
+                              const { candidateValues } = item;
+                              const options = candidateValues.map((value) => {
+                                return { label: value, value };
+                              });
+                              defaultItem = <Select style={{ width: '100%' }} options={options} />;
+                              break;
+                            }
+                            default:
+                              defaultItem = <Input />;
+                              break;
+                          }
+                          return (
+                            <FormItem name={name} label={comment} key={name}>
+                              {defaultItem}
+                            </FormItem>
+                          );
+                        })}
+                      </ProCard>
+                    );
+                  })}
+                </Space>
+              </Form>
+            </ProCard>
+          </Col>
+          <Col span={6} style={{ background: '#fff' }}>
+            <div style={{ marginTop: 20 }}>
+              <Anchor items={anchorItems} />
+            </div>
+          </Col>
+        </Row>
       </div>
     </>
   );
