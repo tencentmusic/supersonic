@@ -172,6 +172,10 @@ export function getChartLightenColor(col) {
 
 export const isMobile = window.navigator.userAgent.match(/(iPhone|iPod|Android|ios)/i);
 
+export const isIOS = window.navigator.userAgent.match(/(iPhone|iPod|ios)/i);
+
+export const isAndroid = window.navigator.userAgent.match(/(Android)/i);
+
 
 export function isProd() {
   return process.env.NODE_ENV === 'production';
