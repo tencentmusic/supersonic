@@ -2,7 +2,6 @@ package com.tencent.supersonic.chat.query.rule.tag;
 
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
-import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
@@ -12,16 +11,17 @@ import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.util.ContextUtils;
+import org.apache.commons.collections.CollectionUtils;
+
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-import org.apache.commons.collections.CollectionUtils;
 
 public abstract class TagListQuery extends TagSemanticQuery {
 
     @Override
-    public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {
-        super.fillParseInfo(modelId, queryContext, chatContext);
+    public void fillParseInfo(ChatContext chatContext) {
+        super.fillParseInfo(chatContext);
         this.addEntityDetailAndOrderByMetric(parseInfo);
     }
 
@@ -29,13 +29,12 @@ public abstract class TagListQuery extends TagSemanticQuery {
         Long modelId = parseInfo.getModelId();
         if (Objects.nonNull(modelId) && modelId > 0L) {
             ConfigService configService = ContextUtils.getBean(ConfigService.class);
-            ChatConfigRichResp chaConfigRichDesc = configService.getConfigRichInfo(parseInfo.getModelId());
+            ChatConfigRichResp chaConfigRichDesc = configService.getConfigRichInfo(modelId);
             SemanticService schemaService = ContextUtils.getBean(SemanticService.class);
-            ModelSchema modelSchema = schemaService.getModelSchema(modelId);
-
+            ModelSchema modelSchema = schemaService.getModelSchema(parseInfo.getModelId());
             if (chaConfigRichDesc != null && chaConfigRichDesc.getChatDetailRichConfig() != null
                     && Objects.nonNull(modelSchema) && Objects.nonNull(modelSchema.getEntity())) {
-                Set<SchemaElement> dimensions = new LinkedHashSet();
+                Set<SchemaElement> dimensions = new LinkedHashSet<>();
                 Set<SchemaElement> metrics = new LinkedHashSet();
                 Set<Order> orders = new LinkedHashSet();
                 ChatDefaultRichConfigResp chatDefaultConfig = chaConfigRichDesc
@@ -52,9 +51,7 @@ public abstract class TagListQuery extends TagSemanticQuery {
                         chatDefaultConfig.getDimensions().stream()
                                 .forEach(dimension -> dimensions.add(dimension));
                     }
-
                 }
-
                 parseInfo.setDimensions(dimensions);
                 parseInfo.setMetrics(metrics);
                 parseInfo.setOrders(orders);

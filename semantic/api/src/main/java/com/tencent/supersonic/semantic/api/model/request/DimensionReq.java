@@ -18,9 +18,6 @@ public class DimensionReq extends SchemaItem {
     @NotNull(message = "expr can not be null")
     private String expr;
 
-
-    private Long datasourceId;
-
     //DATE ID CATEGORY
     private String semanticType = "CATEGORY";
 

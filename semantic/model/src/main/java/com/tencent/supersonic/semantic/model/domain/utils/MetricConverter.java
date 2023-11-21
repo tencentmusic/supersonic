@@ -4,24 +4,24 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DataFormat;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
 import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
+import com.tencent.supersonic.semantic.api.model.request.MetricReq;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
-import com.tencent.supersonic.semantic.api.model.request.MetricReq;
-import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Metric;
+import org.springframework.beans.BeanUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.springframework.beans.BeanUtils;
 
 public class MetricConverter {
 

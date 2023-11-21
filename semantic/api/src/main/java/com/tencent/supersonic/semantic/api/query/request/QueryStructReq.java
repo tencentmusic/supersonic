@@ -14,11 +14,6 @@ import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.semantic.api.query.pojo.Cache;
 import com.tencent.supersonic.semantic.api.query.pojo.Param;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -42,12 +37,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 @Data
 @Slf4j
 public class QueryStructReq {
 
-    private Long modelId;
+    private Set<Long> modelIds;
 
     private String modelName;
     private List<String> groups = new ArrayList<>();
@@ -69,6 +72,19 @@ public class QueryStructReq {
      * Later deleted for compatibility only
      */
     private String correctS2SQL;
+
+    public void setModelId(Long modelId) {
+        modelIds = new HashSet<>();
+        modelIds.add(modelId);
+    }
+
+    public List<Long> getModelIds() {
+        return Lists.newArrayList(modelIds);
+    }
+
+    public Set<Long> getModelIdSet() {
+        return modelIds;
+    }
 
     public List<String> getGroups() {
         if (!CollectionUtils.isEmpty(this.groups)) {
@@ -107,7 +123,7 @@ public class QueryStructReq {
     public String toCustomizedString() {
         StringBuilder stringBuilder = new StringBuilder("{");
         stringBuilder.append("\"modelId\":")
-                .append(modelId);
+                .append(modelIds);
         stringBuilder.append(",\"groups\":")
                 .append(groups);
         stringBuilder.append(",\"aggregators\":")
@@ -139,7 +155,7 @@ public class QueryStructReq {
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
         sb.append("\"modelId\":")
-                .append(modelId);
+                .append(modelIds);
         sb.append(",\"groups\":")
                 .append(groups);
         sb.append(",\"aggregators\":")
@@ -179,7 +195,7 @@ public class QueryStructReq {
 
         QueryS2SQLReq result = new QueryS2SQLReq();
         result.setSql(sql);
-        result.setModelId(queryStructReq.getModelId());
+        result.setModelIds(queryStructReq.getModelIdSet());
         result.setVariables(new HashMap<>());
         return result;
     }

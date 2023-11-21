@@ -11,7 +11,7 @@ import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 public interface LLMInterpreter {
 
 
-    LLMResp query2sql(LLMReq llmReq, Long modelId);
+    LLMResp query2sql(LLMReq llmReq, String modelClusterKey);
 
     FunctionResp requestFunction(FunctionReq functionReq);
 

@@ -16,6 +16,12 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,18 +31,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class QueryReqBuilder {
 
     public static QueryStructReq buildStructReq(SemanticParseInfo parseInfo) {
         QueryStructReq queryStructCmd = new QueryStructReq();
-        queryStructCmd.setModelId(parseInfo.getModelId());
+        queryStructCmd.setModelIds(parseInfo.getModel().getModelIds());
         queryStructCmd.setQueryType(parseInfo.getQueryType());
         queryStructCmd.setDateInfo(rewrite2Between(parseInfo.getDateInfo()));
 
@@ -128,15 +129,15 @@ public class QueryReqBuilder {
      * convert to QueryS2SQLReq
      *
      * @param querySql
-     * @param modelId
+     * @param modelIds
      * @return
      */
-    public static QueryS2SQLReq buildS2SQLReq(String querySql, Long modelId) {
+    public static QueryS2SQLReq buildS2SQLReq(String querySql, Set<Long> modelIds) {
         QueryS2SQLReq queryS2SQLReq = new QueryS2SQLReq();
         if (Objects.nonNull(querySql)) {
             queryS2SQLReq.setSql(querySql);
         }
-        queryS2SQLReq.setModelId(modelId);
+        queryS2SQLReq.setModelIds(modelIds);
         return queryS2SQLReq;
     }
 

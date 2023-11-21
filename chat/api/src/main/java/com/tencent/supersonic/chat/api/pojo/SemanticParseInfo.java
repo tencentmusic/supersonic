@@ -5,9 +5,13 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.ModelCluster;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterType;
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -16,15 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import com.tencent.supersonic.common.pojo.enums.FilterType;
-import lombok.Data;
 
 @Data
 public class SemanticParseInfo {
 
     private Integer id;
     private String queryMode;
-    private SchemaElement model;
+    private ModelCluster model = new ModelCluster();
     private Set<SchemaElement> metrics = new TreeSet<>(new SchemaNameLengthComparator());
     private Set<SchemaElement> dimensions = new LinkedHashSet();
     private SchemaElement entity;
@@ -42,12 +44,18 @@ public class SemanticParseInfo {
     private SqlInfo sqlInfo = new SqlInfo();
     private QueryType queryType = QueryType.OTHER;
 
-    public Long getModelId() {
-        return model != null ? model.getId() : 0L;
+    public String getModelClusterKey() {
+        if (model == null) {
+            return "";
+        }
+        return model.getKey();
     }
 
     public String getModelName() {
-        return model != null ? model.getName() : "null";
+        if (model == null) {
+            return "";
+        }
+        return model.getName();
     }
 
     private static class SchemaNameLengthComparator implements Comparator<SchemaElement> {
@@ -76,6 +84,28 @@ public class SemanticParseInfo {
         metricSet.addAll(metrics);
         metrics = metricSet;
         return metrics;
+    }
+
+    private Map<Long, Integer> getModelElementCountMap() {
+        Map<Long, Integer> elementCountMap = new HashMap<>();
+        elementMatches.forEach(element -> {
+            int count = elementCountMap.getOrDefault(element.getElement().getModel(), 0);
+            elementCountMap.put(element.getElement().getModel(), count + 1);
+        });
+        return elementCountMap;
+    }
+
+    public Long getModelId() {
+        Map<Long, Integer> elementCountMap = getModelElementCountMap();
+        Long modelId = -1L;
+        int maxCnt = 0;
+        for (Long model : elementCountMap.keySet()) {
+            if (elementCountMap.get(model) > maxCnt) {
+                maxCnt = elementCountMap.get(model);
+                modelId = model;
+            }
+        }
+        return modelId;
     }
 
 }

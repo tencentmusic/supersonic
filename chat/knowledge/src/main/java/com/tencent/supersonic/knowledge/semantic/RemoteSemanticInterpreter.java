@@ -1,10 +1,5 @@
 package com.tencent.supersonic.knowledge.semantic;
 
-import static com.tencent.supersonic.common.pojo.Constants.LIST_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.PAGESIZE_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.TOTAL_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.TRUE_LOWER;
-
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.google.gson.Gson;
@@ -31,15 +26,9 @@ import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
-import java.net.URI;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -52,6 +41,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
+
+import static com.tencent.supersonic.common.pojo.Constants.LIST_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.PAGESIZE_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.TOTAL_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.TRUE_LOWER;
 
 @Slf4j
 public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
@@ -73,7 +74,7 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
         if (StringUtils.isNotBlank(queryStructReq.getCorrectS2SQL())) {
             QueryS2SQLReq queryS2SQLReq = new QueryS2SQLReq();
             queryS2SQLReq.setSql(queryStructReq.getCorrectS2SQL());
-            queryS2SQLReq.setModelId(queryStructReq.getModelId());
+            queryS2SQLReq.setModelIds(queryStructReq.getModelIdSet());
             queryS2SQLReq.setVariables(new HashMap<>());
             return queryByS2SQL(queryS2SQLReq, user);
         }

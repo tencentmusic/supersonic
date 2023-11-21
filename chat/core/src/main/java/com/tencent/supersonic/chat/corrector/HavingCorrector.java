@@ -10,12 +10,13 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import org.springframework.util.CollectionUtils;
+
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Perform SQL corrections on the "Having" section in S2SQL.
@@ -37,11 +38,11 @@ public class HavingCorrector extends BaseSemanticCorrector {
     }
 
     private void addHaving(SemanticParseInfo semanticParseInfo) {
-        Long modelId = semanticParseInfo.getModel().getModel();
+        Set<Long> modelIds = semanticParseInfo.getModel().getModelIds();
 
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
 
-        Set<String> metrics = semanticSchema.getMetrics(modelId).stream()
+        Set<String> metrics = semanticSchema.getMetrics(modelIds).stream()
                 .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());
 
         if (CollectionUtils.isEmpty(metrics)) {

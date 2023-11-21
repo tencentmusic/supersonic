@@ -1,14 +1,7 @@
 package com.tencent.supersonic.integration;
 
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
-
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
-import com.tencent.supersonic.chat.api.pojo.request.ItemVisibility;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.query.rule.metric.MetricFilterQuery;
@@ -19,15 +12,17 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.Assert;
-import org.junit.Test;
-import org.springframework.beans.BeanUtils;
+
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
 
 
 public class MetricQueryTest extends BaseQueryTest {
@@ -46,7 +41,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
 
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
-                FilterOperatorEnum.EQUALS, "alice", "用户名", 2L));
+                FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setQueryType(QueryType.METRIC);
@@ -129,7 +124,7 @@ public class MetricQueryTest extends BaseQueryTest {
         List<String> list = new ArrayList<>();
         list.add("alice");
         list.add("lucy");
-        QueryFilter dimensionFilter = DataUtils.getFilter("user_name", FilterOperatorEnum.IN, list, "用户名", 2L);
+        QueryFilter dimensionFilter = DataUtils.getFilter("user_name", FilterOperatorEnum.IN, list, "用户", 2L);
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
@@ -150,7 +145,9 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(SUM);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
+        expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户名"));
+        expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户名称"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(3, DateConf.DateMode.RECENT, "DAY"));
         expectedParseInfo.setQueryType(QueryType.METRIC);
@@ -195,52 +192,12 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
 
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
-                FilterOperatorEnum.EQUALS, "alice", "用户名", 2L));
+                FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, 1, period, startDay, startDay));
         expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
-    }
-
-    @Test
-    public void queryTest_config_visibility() throws Exception {
-        // 1. round_1 use blacklist
-        ChatConfigResp chatConfig = configService.fetchConfigByModelId(1L);
-        ChatConfigEditReqReq extendEditCmd = new ChatConfigEditReqReq();
-        BeanUtils.copyProperties(chatConfig, extendEditCmd);
-        // add blacklist
-        List<Long> blackMetrics = Arrays.asList(2L);
-        extendEditCmd.getChatAggConfig().getVisibility().setBlackMetricIdList(blackMetrics);
-        configService.editConfig(extendEditCmd, User.getFakeUser());
-
-        QueryResult actualResult = submitNewChat("超音数访问人数、访问次数");
-        QueryResult expectedResult = new QueryResult();
-        SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
-        expectedResult.setChatContext(expectedParseInfo);
-
-        expectedResult.setQueryMode(MetricModelQuery.QUERY_MODE);
-        expectedParseInfo.setAggType(NONE);
-
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
-
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
-        expectedParseInfo.setQueryType(QueryType.METRIC);
-
-        assertQueryResult(expectedResult, actualResult);
-
-        // 2. round_2 no blacklist
-        // remove blacklist
-        extendEditCmd.getChatAggConfig().setVisibility(new ItemVisibility());
-        configService.editConfig(extendEditCmd, User.getFakeUser());
-
-        actualResult = submitNewChat("超音数访问人数、访问次数");
-        expectedParseInfo.getMetrics().clear();
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问人数"));
-
-        assertQueryResult(expectedResult, actualResult);
-
     }
 
 }

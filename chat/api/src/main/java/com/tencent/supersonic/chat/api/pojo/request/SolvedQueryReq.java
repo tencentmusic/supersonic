@@ -18,7 +18,7 @@ public class SolvedQueryReq {
 
     private String queryText;
 
-    private Long modelId;
+    private String modelId;
 
     private Integer agentId;
 

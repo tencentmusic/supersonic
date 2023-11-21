@@ -27,8 +27,6 @@ public class MetaFilter {
 
     private List<Long> ids;
 
-    private Long datasourceId;
-
     public MetaFilter(List<Long> modelIds) {
         this.modelIds = modelIds;
     }

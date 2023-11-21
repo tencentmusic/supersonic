@@ -3,7 +3,9 @@ package com.tencent.supersonic.semantic.query.parser.calcite;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
+import com.tencent.supersonic.common.pojo.ModelRela;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.semantic.api.model.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.IdentifyYamlTpl;
@@ -17,12 +19,14 @@ import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DataType;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DimensionTimeTypeParams;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Identify;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Measure;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Metric;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.MetricTypeParams;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.SemanticModel;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -34,6 +38,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
@@ -57,20 +62,27 @@ public class SemanticSchemaManager {
     public SemanticModel reload(String rootPath) {
         SemanticModel semanticModel = new SemanticModel();
         semanticModel.setRootPath(rootPath);
-        Map<Long, String> modelFullPathMap = catalog.getModelFullPath();
-        log.info("modelFullPathMap {}", modelFullPathMap);
-        Set<Long> modelIds = modelFullPathMap.entrySet().stream().filter(e -> e.getValue().startsWith(rootPath))
-                .map(Entry::getKey).collect(Collectors.toSet());
+        //Map<Long, String> modelFullPathMap = catalog.getModelFullPath();
+        //log.info("modelFullPathMap {}", modelFullPathMap);
+        //Set<Long> modelIds = modelFullPathMap.entrySet().stream().filter(e -> e.getValue().startsWith(rootPath))
+        //        .map(Entry::getKey).collect(Collectors.toSet());
+        Set<Long> modelIds = Arrays.stream(rootPath.split(",")).map(s -> Long.parseLong(s.trim()))
+                .collect(Collectors.toSet());
         if (modelIds.isEmpty()) {
             log.error("get modelIds empty {}", rootPath);
             return semanticModel;
         }
         Map<String, List<DimensionYamlTpl>> dimensionYamlTpls = new HashMap<>();
-        List<DatasourceYamlTpl> datasourceYamlTpls = new ArrayList<>();
+        List<DataModelYamlTpl> dataModelYamlTpls = new ArrayList<>();
         List<MetricYamlTpl> metricYamlTpls = new ArrayList<>();
-        catalog.getModelYamlTplByModelIds(modelIds, dimensionYamlTpls, datasourceYamlTpls, metricYamlTpls);
-        if (!datasourceYamlTpls.isEmpty()) {
-            Map<String, DataSource> dataSourceMap = datasourceYamlTpls.stream().map(d -> getDatasource(d))
+        Map<Long, String> modelIdName = new HashMap<>();
+        catalog.getModelYamlTplByModelIds(modelIds, dimensionYamlTpls, dataModelYamlTpls, metricYamlTpls, modelIdName);
+        List<ModelRela> modelRelas = catalog.getModelRela(new ArrayList<>(modelIds));
+        if (!CollectionUtils.isEmpty(modelRelas)) {
+            semanticModel.setJoinRelations(getJoinRelation(modelRelas, modelIdName));
+        }
+        if (!dataModelYamlTpls.isEmpty()) {
+            Map<String, DataSource> dataSourceMap = dataModelYamlTpls.stream().map(d -> getDatasource(d))
                     .collect(Collectors.toMap(DataSource::getName, item -> item, (k1, k2) -> k1));
             semanticModel.setDatasourceMap(dataSourceMap);
         }
@@ -107,7 +119,7 @@ public class SemanticSchemaManager {
     }
 
 
-    public static DataSource getDatasource(final DatasourceYamlTpl d) {
+    public static DataSource getDatasource(final DataModelYamlTpl d) {
         DataSource datasource = DataSource.builder().sourceId(d.getSourceId()).sqlQuery(d.getSqlQuery())
                 .name(d.getName()).tableQuery(d.getTableQuery()).identifiers(getIdentify(d.getIdentifiers()))
                 .measures(getMeasures(d.getMeasures())).dimensions(getDimensions(d.getDimensions())).build();
@@ -198,6 +210,25 @@ public class SemanticSchemaManager {
             identifies.add(identify);
         }
         return identifies;
+    }
+
+    private static List<JoinRelation> getJoinRelation(List<ModelRela> modelRelas, Map<Long, String> modelIdName) {
+        List<JoinRelation> joinRelations = new ArrayList<>();
+        modelRelas.stream().forEach(r -> {
+            if (modelIdName.containsKey(r.getFromModelId()) && modelIdName.containsKey(r.getToModelId())) {
+                JoinRelation joinRelation = JoinRelation.builder().left(modelIdName.get(r.getFromModelId()))
+                        .right(modelIdName.get(r.getToModelId())).joinType(r.getJoinType()).build();
+                List<Triple<String, String, String>> conditions = new ArrayList<>();
+                r.getJoinConditions().stream().forEach(rr -> {
+                    if (FilterOperatorEnum.isValueCompare(rr.getOperator())) {
+                        conditions.add(Triple.of(rr.getLeftField(), rr.getOperator().getValue(), rr.getRightField()));
+                    }
+                });
+                joinRelation.setJoinCondition(conditions);
+                joinRelations.add(joinRelation);
+            }
+        });
+        return joinRelations;
     }
 
 

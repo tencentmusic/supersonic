@@ -46,8 +46,6 @@ public class MetricResp extends SchemaItem {
 
     private boolean hasAdminRes = false;
 
-    private String defaultAgg;
-
     public void setTag(String tag) {
         if (StringUtils.isBlank(tag)) {
             tags = Lists.newArrayList();
@@ -79,5 +77,9 @@ public class MetricResp extends SchemaItem {
             return Lists.newArrayList();
         }
         return typeParams.getMeasures();
+    }
+
+    public String getDefaultAgg() {
+        return typeParams.getMeasures().get(0).getAgg();
     }
 }

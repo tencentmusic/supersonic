@@ -22,13 +22,11 @@ public class DimensionResp extends SchemaItem {
 
     private String fullPath;
 
-    private Long datasourceId;
+    private String modelName;
 
-    private String datasourceName;
+    private String modelBizName;
 
-    private String datasourceBizName;
-
-    private String datasourceFilterSql;
+    private String modelFilterSql;
     //DATE ID CATEGORY
     private String semanticType;
 

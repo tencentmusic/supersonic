@@ -25,7 +25,7 @@ import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNum
 @Component
 public class MetricTagQuery extends MetricSemanticQuery {
 
-    public static final String QUERY_MODE = "TAG_ENTITY";
+    public static final String QUERY_MODE = "METRIC_ENTITY";
 
     public MetricTagQuery() {
         super();

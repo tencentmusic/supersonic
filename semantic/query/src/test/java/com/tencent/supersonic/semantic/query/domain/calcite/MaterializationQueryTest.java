@@ -10,8 +10,9 @@ import com.tencent.supersonic.semantic.query.parser.QueryParser;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.utils.ComponentFactory;
 import com.tencent.supersonic.semantic.query.utils.QueryUtils;
-import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Arrays;
 
 @Slf4j
 public class MaterializationQueryTest {
@@ -43,7 +44,7 @@ public class MaterializationQueryTest {
         try {
             QueryStatement queryStatement = queryParser.logicSql(queryStructReq);
             queryUtils.checkSqlParse(queryStatement);
-            queryStatement.setModelId(queryStructReq.getModelId());
+            queryStatement.setModelIds(queryStructReq.getModelIds());
             log.info("queryStatement:{}", queryStatement);
             for (QueryOptimizer queryOptimizer : ComponentFactory.getQueryOptimizers()) {
                 queryOptimizer.rewrite(queryStructReq, queryStatement);

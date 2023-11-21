@@ -4,12 +4,12 @@ package com.tencent.supersonic.chat.query.rule;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
@@ -19,21 +19,25 @@ import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
+import com.tencent.supersonic.common.pojo.ModelCluster;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @ToString
@@ -56,13 +60,13 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         initS2SqlByStruct();
     }
 
-    public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {
+    public void fillParseInfo(ChatContext chatContext) {
         parseInfo.setQueryMode(getQueryMode());
 
         SemanticService schemaService = ContextUtils.getBean(SemanticService.class);
-        ModelSchema modelSchema = schemaService.getModelSchema(modelId);
+        SemanticSchema semanticSchema = schemaService.getSemanticSchema();
 
-        fillSchemaElement(parseInfo, modelSchema);
+        fillSchemaElement(parseInfo, semanticSchema);
         fillScore(parseInfo);
         fillDateConf(parseInfo, chatContext.getParseInfo());
     }
@@ -101,9 +105,12 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         parseInfo.setScore(parseInfo.getScore() + totalScore);
     }
 
-    private void fillSchemaElement(SemanticParseInfo parseInfo, ModelSchema modelSchema) {
-        parseInfo.setModel(modelSchema.getModel());
-
+    private void fillSchemaElement(SemanticParseInfo parseInfo, SemanticSchema semanticSchema) {
+        Set<Long> modelIds = parseInfo.getElementMatches().stream().map(SchemaElementMatch::getElement)
+                        .map(SchemaElement::getModel).collect(Collectors.toSet());
+        ModelCluster modelCluster = ModelCluster.build(modelIds);
+        modelCluster.buildName(semanticSchema.getModelIdToName());
+        parseInfo.setModel(modelCluster);
         Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
         Map<Long, List<SchemaElementMatch>> id2Values = new HashMap<>();
 
@@ -112,7 +119,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
             element.setOrder(1 - schemaMatch.getSimilarity());
             switch (element.getType()) {
                 case ID:
-                    SchemaElement entityElement = modelSchema.getElement(SchemaElementType.ENTITY, element.getId());
+                    SchemaElement entityElement = semanticSchema.getElement(SchemaElementType.ENTITY, element.getId());
                     if (entityElement != null) {
                         if (id2Values.containsKey(element.getId())) {
                             id2Values.get(element.getId()).add(schemaMatch);
@@ -122,7 +129,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
                     }
                     break;
                 case VALUE:
-                    SchemaElement dimElement = modelSchema.getElement(SchemaElementType.DIMENSION, element.getId());
+                    SchemaElement dimElement = semanticSchema.getElement(SchemaElementType.DIMENSION, element.getId());
                     if (dimElement != null) {
                         if (dim2Values.containsKey(element.getId())) {
                             dim2Values.get(element.getId()).add(schemaMatch);
@@ -146,20 +153,20 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
 
         if (!id2Values.isEmpty()) {
             for (Map.Entry<Long, List<SchemaElementMatch>> entry : id2Values.entrySet()) {
-                addFilters(parseInfo, modelSchema, entry, SchemaElementType.ENTITY);
+                addFilters(parseInfo, semanticSchema, entry, SchemaElementType.ENTITY);
             }
         }
 
         if (!dim2Values.isEmpty()) {
             for (Map.Entry<Long, List<SchemaElementMatch>> entry : dim2Values.entrySet()) {
-                addFilters(parseInfo, modelSchema, entry, SchemaElementType.DIMENSION);
+                addFilters(parseInfo, semanticSchema, entry, SchemaElementType.DIMENSION);
             }
         }
     }
 
-    private void addFilters(SemanticParseInfo parseInfo, ModelSchema modelSchema,
-            Entry<Long, List<SchemaElementMatch>> entry, SchemaElementType dimension1) {
-        SchemaElement dimension = modelSchema.getElement(dimension1, entry.getKey());
+    private void addFilters(SemanticParseInfo parseInfo, SemanticSchema semanticSchema,
+            Entry<Long, List<SchemaElementMatch>> entry, SchemaElementType elementType) {
+        SchemaElement dimension = semanticSchema.getElement(elementType, entry.getKey());
 
         if (entry.getValue().size() == 1) {
             SchemaElementMatch schemaMatch = entry.getValue().get(0);
@@ -170,7 +177,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
             dimensionFilter.setOperator(FilterOperatorEnum.EQUALS);
             dimensionFilter.setElementID(schemaMatch.getElement().getId());
             parseInfo.getDimensionFilters().add(dimensionFilter);
-            parseInfo.setEntity(modelSchema.getEntity());
+            parseInfo.setEntity(semanticSchema.getElement(SchemaElementType.ENTITY, entry.getKey()));
         } else {
             QueryFilter dimensionFilter = new QueryFilter();
             List<String> vals = new ArrayList<>();
@@ -189,7 +196,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     public QueryResult execute(User user) {
         String queryMode = parseInfo.getQueryMode();
 
-        if (parseInfo.getModelId() < 0 || StringUtils.isEmpty(queryMode)
+        if (StringUtils.isBlank(parseInfo.getModelClusterKey()) || StringUtils.isEmpty(queryMode)
                 || !QueryManager.containsRuleQuery(queryMode)) {
             // reach here some error may happen
             log.error("not find QueryMode");
@@ -230,7 +237,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     public QueryResult multiStructExecute(User user) {
         String queryMode = parseInfo.getQueryMode();
 
-        if (parseInfo.getModelId() < 0 || StringUtils.isEmpty(queryMode)
+        if (StringUtils.isBlank(parseInfo.getModelClusterKey()) || StringUtils.isEmpty(queryMode)
                 || !QueryManager.containsRuleQuery(queryMode)) {
             // reach here some error may happen
             log.error("not find QueryMode");

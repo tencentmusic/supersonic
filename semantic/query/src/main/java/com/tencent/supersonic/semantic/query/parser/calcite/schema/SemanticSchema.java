@@ -3,16 +3,18 @@ package com.tencent.supersonic.semantic.query.parser.calcite.schema;
 
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Dimension;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Materialization;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Metric;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.SemanticModel;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.calcite.schema.Schema;
 import org.apache.calcite.schema.SchemaVersion;
 import org.apache.calcite.schema.Table;
 import org.apache.calcite.schema.impl.AbstractSchema;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SemanticSchema extends AbstractSchema {
 
@@ -20,6 +22,8 @@ public class SemanticSchema extends AbstractSchema {
     private final Map<String, Table> tableMap;
 
     private SemanticModel semanticModel = new SemanticModel();
+
+    private List<JoinRelation> joinRelations;
 
 
     private SemanticSchema(String rootPath, Map<String, Table> tableMap) {
@@ -82,6 +86,14 @@ public class SemanticSchema extends AbstractSchema {
     }
     public List<Materialization> getMaterializationList() {
         return semanticModel.getMaterializationList();
+    }
+
+    public void setJoinRelations(List<JoinRelation> joinRelations) {
+        this.joinRelations = joinRelations;
+    }
+
+    public List<JoinRelation> getJoinRelations() {
+        return joinRelations;
     }
 
 

@@ -7,7 +7,6 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
-import com.tencent.supersonic.semantic.api.model.pojo.Entity;
 import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
@@ -20,8 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,6 +35,7 @@ public class ModelSchemaBuilder {
                 .alias(SchemaItem.getAliasList(resp.getAlias()))
                 .build();
         modelSchema.setModel(domain);
+        modelSchema.setModelRelas(resp.getModelRelas());
 
         Set<SchemaElement> metrics = new HashSet<>();
         for (MetricSchemaResp metric : resp.getMetrics()) {
@@ -124,23 +122,19 @@ public class ModelSchemaBuilder {
         modelSchema.getDimensionValues().addAll(dimensionValues);
         modelSchema.getTags().addAll(tags);
 
-        Entity entity = resp.getEntity();
-        if (Objects.nonNull(entity)) {
-            SchemaElement entityElement = new SchemaElement();
-
-            if (!CollectionUtils.isEmpty(entity.getNames()) && Objects.nonNull(entity.getEntityId())) {
-                Map<Long, SchemaElement> idAndDimPair = dimensions.stream()
-                        .collect(
-                                Collectors.toMap(SchemaElement::getId, schemaElement -> schemaElement, (k1, k2) -> k2));
-                if (idAndDimPair.containsKey(entity.getEntityId())) {
-                    BeanUtils.copyProperties(idAndDimPair.get(entity.getEntityId()), entityElement);
-                    entityElement.setType(SchemaElementType.ENTITY);
-                }
-                entityElement.setAlias(entity.getNames());
-                modelSchema.setEntity(entityElement);
-            }
+        DimSchemaResp dim = resp.getPrimaryKey();
+        if (dim != null) {
+            SchemaElement entity = SchemaElement.builder()
+                    .model(resp.getId())
+                    .id(dim.getId())
+                    .name(dim.getName())
+                    .bizName(dim.getBizName())
+                    .type(SchemaElementType.ENTITY)
+                    .useCnt(dim.getUseCnt())
+                    .alias(dim.getEntityAlias())
+                    .build();
+            modelSchema.setEntity(entity);
         }
-
         return modelSchema;
     }
 

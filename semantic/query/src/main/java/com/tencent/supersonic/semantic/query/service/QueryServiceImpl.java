@@ -4,42 +4,43 @@ import com.google.common.cache.CacheBuilder;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.Filter;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.cache.CacheUtils;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.query.pojo.Cache;
-import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
-import com.tencent.supersonic.semantic.query.utils.S2SQLPermissionAnnotation;
 import com.tencent.supersonic.semantic.query.executor.QueryExecutor;
 import com.tencent.supersonic.semantic.query.parser.convert.QueryReqConverter;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.utils.QueryUtils;
+import com.tencent.supersonic.semantic.query.utils.S2SQLPermissionAnnotation;
 import com.tencent.supersonic.semantic.query.utils.StatUtils;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -75,11 +76,11 @@ public class QueryServiceImpl implements QueryService {
     @Override
     @S2SQLPermissionAnnotation
     @SneakyThrows
-    public Object queryBySql(QueryS2SQLReq querySqlCmd, User user) {
-        statUtils.initStatInfo(querySqlCmd, user);
+    public Object queryBySql(QueryS2SQLReq queryS2SQLReq, User user) {
+        statUtils.initStatInfo(queryS2SQLReq, user);
         QueryStatement queryStatement = new QueryStatement();
         try {
-            queryStatement = convertToQueryStatement(querySqlCmd, user);
+            queryStatement = convertToQueryStatement(queryS2SQLReq, user);
         } catch (Exception e) {
             log.info("convertToQueryStatement has a exception:{}", e.toString());
         }
@@ -95,18 +96,11 @@ public class QueryServiceImpl implements QueryService {
 
     private QueryStatement convertToQueryStatement(QueryS2SQLReq querySqlCmd, User user) throws Exception {
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
-        List<Long> modelIds = new ArrayList<>();
-        modelIds.add(querySqlCmd.getModelId());
-
-        filter.setModelIds(modelIds);
+        filter.setModelIds(querySqlCmd.getModelIds());
         SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
-        List<ModelSchemaResp> domainSchemas = schemaService.fetchModelSchema(filter, user);
-        ModelSchemaResp domainSchema = null;
-        if (CollectionUtils.isNotEmpty(domainSchemas)) {
-            domainSchema = domainSchemas.get(0);
-        }
-        QueryStatement queryStatement = queryReqConverter.convert(querySqlCmd, domainSchema);
-        queryStatement.setModelId(querySqlCmd.getModelId());
+        List<ModelSchemaResp> modelSchemaResps = schemaService.fetchModelSchema(filter, user);
+        QueryStatement queryStatement = queryReqConverter.convert(querySqlCmd, modelSchemaResps);
+        queryStatement.setModelIds(querySqlCmd.getModelIds());
         return queryStatement;
     }
 
@@ -116,7 +110,7 @@ public class QueryServiceImpl implements QueryService {
         log.info("[queryStructCmd:{}]", queryStructCmd);
         try {
             statUtils.initStatInfo(queryStructCmd, user);
-            String cacheKey = cacheUtils.generateCacheKey(queryStructCmd.getModelId().toString(),
+            String cacheKey = cacheUtils.generateCacheKey(getKeyByModelIds(queryStructCmd.getModelIds()),
                     queryStructCmd.generateCommandMd5());
             handleGlobalCacheDisable(queryStructCmd);
             boolean isCache = isCache(queryStructCmd);
@@ -160,7 +154,7 @@ public class QueryServiceImpl implements QueryService {
             throws Exception {
         statUtils.initStatInfo(queryMultiStructReq.getQueryStructReqs().get(0), user);
         String cacheKey = cacheUtils.generateCacheKey(
-                queryMultiStructReq.getQueryStructReqs().get(0).getModelId().toString(),
+                getKeyByModelIds(queryMultiStructReq.getQueryStructReqs().get(0).getModelIds()),
                 queryMultiStructReq.generateCommandMd5());
         boolean isCache = isCache(queryMultiStructReq);
         QueryResultWithSchemaResp queryResultWithColumns;
@@ -321,6 +315,10 @@ public class QueryServiceImpl implements QueryService {
         }
         queryStructReq.setDateInfo(dateInfo);
         return queryStructReq;
+    }
+
+    private String getKeyByModelIds(List<Long> modelIds) {
+        return String.join(",", modelIds.stream().map(Object::toString).collect(Collectors.toList()));
     }
 
 

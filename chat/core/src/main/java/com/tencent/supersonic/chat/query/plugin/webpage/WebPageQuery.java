@@ -2,7 +2,6 @@ package com.tencent.supersonic.chat.query.plugin.webpage;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -17,17 +16,15 @@ import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.chat.query.plugin.WebBaseResult;
-import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 @Slf4j
 @Component
@@ -53,9 +50,6 @@ public class WebPageQuery extends PluginSemanticQuery {
                 PluginParseResult.class);
         WebPageResponse webPageResponse = buildResponse(pluginParseResult);
         queryResult.setResponse(webPageResponse);
-        SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
-        ModelSchema modelSchema = semanticService.getModelSchema(parseInfo.getModelId());
-        parseInfo.setModel(modelSchema.getModel());
         queryResult.setQueryState(QueryState.SUCCESS);
         return queryResult;
     }
@@ -79,7 +73,8 @@ public class WebPageQuery extends PluginSemanticQuery {
         List<ParamOption> paramOptions = Lists.newArrayList();
         if (!CollectionUtils.isEmpty(webPage.getParamOptions()) && !CollectionUtils.isEmpty(elementValueMap)) {
             for (ParamOption paramOption : webPage.getParamOptions()) {
-                if (paramOption.getModelId() != null && !paramOption.getModelId().equals(parseInfo.getModelId())) {
+                if (paramOption.getModelId() != null
+                        && !parseInfo.getModel().getModelIds().contains(paramOption.getModelId())) {
                     continue;
                 }
                 paramOptions.add(paramOption);

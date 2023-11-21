@@ -14,7 +14,7 @@ public class EntityInfoExecuteResponder implements ExecuteResponder {
 
     @Override
     public void fillResponse(QueryResult queryResult, SemanticParseInfo semanticParseInfo, ExecuteQueryReq queryReq) {
-        if (semanticParseInfo == null || semanticParseInfo.getModelId() <= 0L) {
+        if (semanticParseInfo == null) {
             return;
         }
         String queryMode = semanticParseInfo.getQueryMode();

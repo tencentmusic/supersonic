@@ -7,6 +7,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.semantic.api.model.enums.QueryOptMode;
 import com.tencent.supersonic.semantic.api.model.enums.QueryTypeBackEnum;
 import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.QueryStat;
@@ -17,22 +18,19 @@ import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
-import com.tencent.supersonic.semantic.api.model.enums.QueryOptMode;
-
 import com.tencent.supersonic.semantic.query.persistence.repository.StatRepository;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -91,23 +89,20 @@ public class StatUtils {
     public void initStatInfo(QueryS2SQLReq queryS2SQLReq, User facadeUser) {
         QueryStat queryStatInfo = new QueryStat();
         List<String> allFields = SqlParserSelectHelper.getAllFields(queryS2SQLReq.getSql());
-        queryStatInfo.setModelId(queryS2SQLReq.getModelId());
-        ModelSchemaResp modelSchemaResp = modelService.fetchSingleModelSchema(queryS2SQLReq.getModelId());
+        queryStatInfo.setModelId(queryS2SQLReq.getModelIds().get(0));
+        ModelSchemaResp modelSchemaResp = modelService.fetchSingleModelSchema(queryS2SQLReq.getModelIds().get(0));
 
         List<String> dimensions = new ArrayList<>();
-        if (Objects.nonNull(modelSchemaResp)) {
-            dimensions = getFieldNames(allFields, modelSchemaResp.getDimensions());
-        }
-
         List<String> metrics = new ArrayList<>();
         if (Objects.nonNull(modelSchemaResp)) {
+            dimensions = getFieldNames(allFields, modelSchemaResp.getDimensions());
             metrics = getFieldNames(allFields, modelSchemaResp.getMetrics());
         }
 
         String userName = getUserName(facadeUser);
         try {
             queryStatInfo.setTraceId("")
-                    .setModelId(queryS2SQLReq.getModelId())
+                    .setModelId(queryS2SQLReq.getModelIds().get(0))
                     .setUser(userName)
                     .setQueryType(QueryTypeEnum.SQL.getValue())
                     .setQueryTypeBack(QueryTypeBackEnum.NORMAL.getState())
@@ -137,7 +132,7 @@ public class StatUtils {
 
         try {
             queryStatInfo.setTraceId(traceId)
-                    .setModelId(queryStructCmd.getModelId())
+                    .setModelId(1L)
                     .setUser(user)
                     .setQueryType(QueryTypeEnum.STRUCT.getValue())
                     .setQueryTypeBack(QueryTypeBackEnum.NORMAL.getState())

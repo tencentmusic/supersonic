@@ -12,10 +12,13 @@ import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.materialization.domain.MaterializationConfService;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
-import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -24,9 +27,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service("MaterializationService")
 @Slf4j
@@ -34,19 +34,17 @@ public class MaterializationServiceImpl implements MaterializationService {
 
     protected final MaterializationConfService materializationConfService;
     protected final ModelService modelService;
-    protected final DatasourceService datasourceService;
     protected final Catalog catalog;
     protected final QueryStructUtils queryStructUtils;
     protected final QueryService queryService;
 
     public MaterializationServiceImpl(
             MaterializationConfService materializationConfService,
-            ModelService modelService, DatasourceService datasourceService,
+            ModelService modelService,
             Catalog catalog, QueryStructUtils queryStructUtils,
             QueryService queryService) {
         this.materializationConfService = materializationConfService;
         this.modelService = modelService;
-        this.datasourceService = datasourceService;
         this.catalog = catalog;
         this.queryStructUtils = queryStructUtils;
         this.queryService = queryService;
@@ -72,11 +70,12 @@ public class MaterializationServiceImpl implements MaterializationService {
                 ModelSchemaFilterReq modelFilter = new ModelSchemaFilterReq();
                 modelFilter.setModelIds(Arrays.asList(materializationSourceResp.getModelId()));
                 List<ModelSchemaResp> modelSchemaRespList = modelService.fetchModelSchema(modelFilter);
-                List<MeasureResp> measureRespList = datasourceService.getMeasureListOfModel(
+                //todo
+                List<MeasureResp> measureRespList = modelService.getMeasureListOfModel(
                         Lists.newArrayList(materializationSourceResp.getModelId()));
                 modelSchemaRespList.stream().forEach(m -> {
                     m.getDimensions().stream()
-                            .filter(mm -> mm.getDatasourceId().equals(materializationSourceReq.getDataSourceId())
+                            .filter(mm -> mm.getModelId().equals(materializationSourceReq.getDataSourceId())
                                     && materializationSourceResp.getDimensions().keySet().contains(mm.getId())
                             ).forEach(mm -> {
                                 dimensionFields.add(mm.getBizName());
