@@ -69,7 +69,7 @@
         description, status, model_id,
         type, type_params, expr,
         datasource_id, created_at, created_by,
-        updated_by, updated_at, semantic_type,sensitive_level)
+        updated_by, updated_at, semantic_type,sensitive_level, is_tag)
         values
         <foreach collection="list" item="dimension" separator=",">
             (#{dimension.name,jdbcType=VARCHAR}, #{dimension.bizName,jdbcType=VARCHAR},
@@ -81,7 +81,7 @@
             #{dimension.createdBy,jdbcType=VARCHAR},
             #{dimension.updatedBy,jdbcType=VARCHAR}, #{dimension.updatedAt,jdbcType=TIMESTAMP},
             #{dimension.semanticType,jdbcType=VARCHAR},
-            #{dimension.sensitiveLevel,jdbcType=INTEGER})
+            #{dimension.sensitiveLevel,jdbcType=INTEGER}, #{dimension.isTag, jdbcType=INTEGER})
         </foreach>
     </insert>
 

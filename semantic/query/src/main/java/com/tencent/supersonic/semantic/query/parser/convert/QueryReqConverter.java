@@ -184,14 +184,9 @@ public class QueryReqConverter {
                 .flatMap(entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
                 .collect(Collectors.toMap(a -> a.getLeft(), a -> a.getRight(), (k1, k2) -> k1));
 
-        dimensionResults.put(TimeDimensionEnum.DAY.getChName(), TimeDimensionEnum.DAY.getName());
-        dimensionResults.put(TimeDimensionEnum.MONTH.getChName(), TimeDimensionEnum.MONTH.getName());
-        dimensionResults.put(TimeDimensionEnum.WEEK.getChName(), TimeDimensionEnum.WEEK.getName());
 
-        dimensionResults.put(TimeDimensionEnum.DAY.getName(), TimeDimensionEnum.DAY.getName());
-        dimensionResults.put(TimeDimensionEnum.MONTH.getName(), TimeDimensionEnum.MONTH.getName());
-        dimensionResults.put(TimeDimensionEnum.WEEK.getName(), TimeDimensionEnum.WEEK.getName());
-
+        dimensionResults.putAll(TimeDimensionEnum.getChNameToNameMap());
+        dimensionResults.putAll(TimeDimensionEnum.getNameToNameMap());
         dimensionResults.putAll(metricResults);
         return dimensionResults;
     }
