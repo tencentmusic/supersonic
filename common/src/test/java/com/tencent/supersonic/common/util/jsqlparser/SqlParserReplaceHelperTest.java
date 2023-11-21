@@ -15,6 +15,27 @@ import org.junit.jupiter.api.Test;
 class SqlParserReplaceHelperTest {
 
     @Test
+    void replaceSelectField() {
+
+        String sql = "SELECT 维度1,sum(播放量) FROM 数据库 "
+                + "WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1";
+        Map<String, String> fieldMap = new HashMap<>();
+        fieldMap.put("播放量", "播放量1");
+        sql = SqlParserReplaceHelper.replaceSelectFields(sql, fieldMap);
+        System.out.println(sql);
+        Assert.assertEquals("SELECT 维度1, sum(播放量1) FROM 数据库 "
+                + "WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1", sql);
+
+        sql = "SELECT 维度1,播放量 FROM 数据库 "
+                + "WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1";
+        fieldMap = new HashMap<>();
+        fieldMap.put("播放量", "播放量1");
+        sql = SqlParserReplaceHelper.replaceSelectFields(sql, fieldMap);
+        System.out.println(sql);
+        Assert.assertEquals("SELECT 维度1, 播放量1 FROM 数据库 WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1", sql);
+    }
+
+    @Test
     void replaceValue() {
 
         String replaceSql = "select 歌曲名 from 歌曲库 where datediff('day', 发布日期, '2023-08-09') <= 1 "

@@ -352,7 +352,11 @@ public class QueryServiceImpl implements QueryService {
         String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
         log.info("before replaceMetrics:{}", correctorSql);
         correctorSql = SqlParserAddHelper.addFieldsToSelect(correctorSql, metrics);
-        correctorSql = SqlParserRemoveHelper.removeSelect(correctorSql, filteredMetrics);
+        Map<String, String> fieldMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(filteredMetrics) && CollectionUtils.isNotEmpty(metrics)) {
+            fieldMap.put(filteredMetrics.get(0), metrics.get(0));
+            correctorSql = SqlParserReplaceHelper.replaceSelectFields(correctorSql, fieldMap);
+        }
         log.info("after replaceMetrics:{}", correctorSql);
         parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
     }

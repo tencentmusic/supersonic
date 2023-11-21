@@ -39,29 +39,6 @@ import java.util.Set;
 @Slf4j
 public class SqlParserRemoveHelper {
 
-    public static String removeSelect(String sql, List<String> filteredMetrics) {
-        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
-        SelectBody selectBody = selectStatement.getSelectBody();
-
-        if (!(selectBody instanceof PlainSelect)) {
-            return sql;
-        }
-        List<SelectItem> selectItemList = ((PlainSelect) selectBody).getSelectItems();
-        selectItemList.removeIf(o -> {
-            Expression expression = ((SelectExpressionItem) o).getExpression();
-            if (expression instanceof Column) {
-                Column column = (Column) expression;
-                String columnName = column.getColumnName();
-                if (filteredMetrics.contains(columnName)) {
-                    return true;
-                }
-            }
-            return false;
-        });
-        ((PlainSelect) selectBody).setSelectItems(selectItemList);
-        return selectStatement.toString();
-    }
-
     public static String removeSelect(String sql, Set<String> fields) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         if (selectStatement == null) {
