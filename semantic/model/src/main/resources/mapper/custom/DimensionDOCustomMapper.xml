@@ -164,6 +164,9 @@
         <if test="datasourceId != null">
             and datasource_id = #{datasourceId}
         </if>
+        <if test="isTag != null">
+            and is_tag = #{isTag}
+        </if>
     </select>
 
 
