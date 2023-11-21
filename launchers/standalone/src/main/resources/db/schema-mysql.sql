@@ -219,6 +219,7 @@ CREATE TABLE `s2_dimension` (
                                 `alias` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
                                 `default_values` varchar(500) DEFAULT NULL,
                                 `dim_value_maps` varchar(5000) DEFAULT NULL,
+                                `is_tag` int(10) DEFAULT NULL,
                                 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='维度表';
 
