@@ -2,9 +2,7 @@
 
 # environment parameters
 python_path=${PYTHON_PATH:-"python3"}
-python_path="/usr/local/bin/python3.9"
 pip_path=${PIP_PATH:-"pip3"}
-pip_path="/usr/local/bin/pip3.9"
 
 sbinDir=$(cd "$(dirname "$0")"; pwd)
 baseDir=$(cd "$sbinDir/.." && pwd -P)
