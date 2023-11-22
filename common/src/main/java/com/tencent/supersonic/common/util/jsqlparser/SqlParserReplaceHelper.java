@@ -47,11 +47,13 @@ public class SqlParserReplaceHelper {
         }
         ((PlainSelect) selectBody).getSelectItems().stream().forEach(o -> {
             SelectExpressionItem selectExpressionItem = (SelectExpressionItem) o;
+            String alias = "";
             if (selectExpressionItem.getExpression() instanceof Function) {
                 Function function = (Function) selectExpressionItem.getExpression();
                 Column column = (Column) function.getParameters().getExpressions().get(0);
                 if (fieldNameMap.containsKey(column.getColumnName())) {
                     String value = fieldNameMap.get(column.getColumnName());
+                    alias = value;
                     List<Expression> expressions = new ArrayList<>();
                     expressions.add(new Column(value));
                     function.getParameters().setExpressions(expressions);
@@ -62,10 +64,14 @@ public class SqlParserReplaceHelper {
                 String columnName = column.getColumnName();
                 if (fieldNameMap.containsKey(columnName)) {
                     String value = fieldNameMap.get(columnName);
+                    alias = value;
                     if (StringUtils.isNotBlank(value)) {
                         selectExpressionItem.setExpression(new Column(value));
                     }
                 }
+            }
+            if (Objects.nonNull(selectExpressionItem.getAlias()) && StringUtils.isNotBlank(alias)) {
+                selectExpressionItem.getAlias().setName(alias);
             }
         });
         return selectStatement.toString();
