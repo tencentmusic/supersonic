@@ -154,7 +154,6 @@ public class QueryServiceImpl implements QueryService {
                 });
             }
         }
-
         //5. postProcessor
         postProcessors.forEach(postProcessor -> {
             long startTime = System.currentTimeMillis();
@@ -163,7 +162,6 @@ public class QueryServiceImpl implements QueryService {
                     .interfaceName(postProcessor.getClass().getSimpleName())
                     .type(CostType.POSTPROCESSOR.getType()).build());
         });
-
         //6. responder
         parseResponders.forEach(parseResponder -> {
             long startTime = System.currentTimeMillis();
@@ -351,8 +349,12 @@ public class QueryServiceImpl implements QueryService {
                 .map(o -> o.getName()).collect(Collectors.toList());
         String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
         log.info("before replaceMetrics:{}", correctorSql);
-        correctorSql = SqlParserAddHelper.addFieldsToSelect(correctorSql, metrics);
-        correctorSql = SqlParserRemoveHelper.removeSelect(correctorSql, filteredMetrics);
+        log.info("filteredMetrics:{},metrics:{}", filteredMetrics, metrics);
+        Map<String, String> fieldMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(filteredMetrics) && CollectionUtils.isNotEmpty(metrics)) {
+            fieldMap.put(filteredMetrics.get(0), metrics.get(0));
+            correctorSql = SqlParserReplaceHelper.replaceSelectFields(correctorSql, fieldMap);
+        }
         log.info("after replaceMetrics:{}", correctorSql);
         parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
     }
@@ -547,9 +549,9 @@ public class QueryServiceImpl implements QueryService {
         if (CollectionUtils.isNotEmpty(queryData.getDimensions())) {
             parseInfo.setDimensions(queryData.getDimensions());
         }
-        if (CollectionUtils.isNotEmpty(queryData.getMetrics())) {
-            parseInfo.setMetrics(queryData.getMetrics());
-        }
+        //if (CollectionUtils.isNotEmpty(queryData.getMetrics())) {
+        //    parseInfo.setMetrics(queryData.getMetrics());
+        //}
         if (CollectionUtils.isNotEmpty(queryData.getDimensionFilters())) {
             parseInfo.setDimensionFilters(queryData.getDimensionFilters());
         }
