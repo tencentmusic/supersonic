@@ -18,7 +18,9 @@ import com.tencent.supersonic.knowledge.service.SchemaService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,6 +34,7 @@ public class MetricCheckPostProcessor implements PostProcessor {
     @Override
     public void process(QueryContext queryContext) {
         List<SemanticQuery> semanticQueries = queryContext.getCandidateQueries();
+        Map<Long, ModelSchema> modelSchemaMap = new HashMap<>();
         for (SemanticQuery semanticQuery : semanticQueries) {
             SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
             if (!QueryType.METRIC.equals(parseInfo.getQueryType())) {
@@ -39,8 +42,9 @@ public class MetricCheckPostProcessor implements PostProcessor {
             }
             SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
             ModelSchema modelSchema = schemaService.getModelSchema(parseInfo.getModelId());
-            String correctSqlProcessed = processCorrectSql(parseInfo.getSqlInfo().getCorrectS2SQL(), modelSchema);
-            parseInfo.getSqlInfo().setCorrectS2SQL(correctSqlProcessed);
+            String processedSql = processCorrectSql(parseInfo.getSqlInfo().getCorrectS2SQL(), modelSchema);
+            parseInfo.getSqlInfo().setCorrectS2SQL(processedSql);
+            modelSchemaMap.put(modelSchema.getModel().getModel(), modelSchema);
         }
         semanticQueries.removeIf(semanticQuery -> {
             if (!QueryType.METRIC.equals(semanticQuery.getParseInfo().getQueryType())) {
@@ -50,13 +54,14 @@ public class MetricCheckPostProcessor implements PostProcessor {
             if (StringUtils.isBlank(correctSql)) {
                 return false;
             }
-            return CollectionUtils.isEmpty(SqlParserSelectHelper.getAggregateFields(correctSql));
+            return !checkHasMetric(correctSql, modelSchemaMap.get(semanticQuery.getParseInfo().getModelId()));
         });
     }
 
     public String processCorrectSql(String correctSql, ModelSchema modelSchema) {
         List<String> groupByFields = SqlParserSelectHelper.getGroupByFields(correctSql);
-        List<String> metricFields = SqlParserSelectHelper.getAggregateFields(correctSql);
+        List<String> metricFields = SqlParserSelectHelper.getAggregateFields(correctSql)
+                .stream().filter(metricField -> !metricField.equals("*")).collect(Collectors.toList());
         List<String> whereFields = SqlParserSelectHelper.getWhereFields(correctSql);
         List<String> dimensionFields = getDimensionFields(groupByFields, whereFields);
         if (CollectionUtils.isEmpty(metricFields) || StringUtils.isBlank(correctSql)) {
@@ -189,6 +194,19 @@ public class MetricCheckPostProcessor implements PostProcessor {
     private boolean checkInModelSchema(String name, SchemaElementType type, ModelSchema modelSchema) {
         SchemaElement schemaElement = modelSchema.getElement(type, name);
         return schemaElement != null;
+    }
+
+    private boolean checkHasMetric(String correctSql, ModelSchema modelSchema) {
+        List<String> selectFields = SqlParserSelectHelper.getSelectFields(correctSql);
+        List<String> aggFields = SqlParserSelectHelper.getAggregateFields(correctSql);
+        List<String> collect = modelSchema.getMetrics().stream()
+                .map(SchemaElement::getName).collect(Collectors.toList());
+        for (String field : selectFields) {
+            if (collect.contains(field)) {
+                return true;
+            }
+        }
+        return !CollectionUtils.isEmpty(aggFields);
     }
 
     private static String removeFieldInSql(String sql, Set<String> metricToRemove,

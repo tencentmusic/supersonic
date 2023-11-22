@@ -161,6 +161,7 @@ public class QueryServiceImpl implements QueryService {
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(postProcessor.getClass().getSimpleName())
                     .type(CostType.POSTPROCESSOR.getType()).build());
+            log.info("{} result:{}", postProcessor.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
         //6. responder
         parseResponders.forEach(parseResponder -> {
@@ -169,6 +170,7 @@ public class QueryServiceImpl implements QueryService {
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(parseResponder.getClass().getSimpleName())
                     .type(CostType.PARSERRESPONDER.getType()).build());
+            log.info("{} result:{}", parseResponder.getClass().getSimpleName(), JsonUtil.toString(parseResult));
         });
 
         if (Objects.nonNull(parseResult.getQueryId()) && timeCostDOList.size() > 0) {
