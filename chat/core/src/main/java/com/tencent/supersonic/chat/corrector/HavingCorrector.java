@@ -3,10 +3,8 @@ package com.tencent.supersonic.chat.corrector;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
@@ -32,8 +30,6 @@ public class HavingCorrector extends BaseSemanticCorrector {
         //add having expression filed to select
         addHavingToSelect(semanticParseInfo);
 
-        //remove number condition
-        removeNumberCondition(semanticParseInfo);
     }
 
     private void addHaving(SemanticParseInfo semanticParseInfo) {
@@ -64,10 +60,5 @@ public class HavingCorrector extends BaseSemanticCorrector {
         return;
     }
 
-    private void removeNumberCondition(SemanticParseInfo semanticParseInfo) {
-        SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String correctorSql = SqlParserRemoveHelper.removeNumberCondition(sqlInfo.getCorrectS2SQL());
-        sqlInfo.setCorrectS2SQL(correctorSql);
-    }
 
 }

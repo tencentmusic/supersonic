@@ -360,7 +360,7 @@ class SqlParserAddHelperTest {
         String replaceSql = SqlParserAddHelper.addHaving(sql, fieldNames);
 
         Assert.assertEquals(
-                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' AND 2 > 1 "
+                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
                         + "GROUP BY department HAVING sum(pv) > 2000 ORDER BY sum(pv) DESC LIMIT 10",
                 replaceSql);
 
@@ -370,7 +370,7 @@ class SqlParserAddHelperTest {
         replaceSql = SqlParserAddHelper.addHaving(sql, fieldNames);
 
         Assert.assertEquals(
-                "SELECT department, sum(pv) FROM t_1 WHERE (2 > 1) AND sys_imp_date = '2023-09-11' "
+                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
                         + "GROUP BY department HAVING sum(pv) > 2000 ORDER BY sum(pv) DESC LIMIT 10",
                 replaceSql);
     }
