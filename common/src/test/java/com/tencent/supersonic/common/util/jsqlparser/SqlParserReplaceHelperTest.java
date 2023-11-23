@@ -15,6 +15,27 @@ import org.junit.jupiter.api.Test;
 class SqlParserReplaceHelperTest {
 
     @Test
+    void replaceSelectField() {
+
+        String sql = "SELECT 维度1,sum(播放量) FROM 数据库 "
+                + "WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1";
+        Map<String, String> fieldMap = new HashMap<>();
+        fieldMap.put("播放量", "播放量1");
+        sql = SqlParserReplaceHelper.replaceSelectFields(sql, fieldMap);
+        System.out.println(sql);
+        Assert.assertEquals("SELECT 维度1, sum(播放量1) FROM 数据库 "
+                + "WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1", sql);
+
+        sql = "SELECT 维度1,播放量 FROM 数据库 "
+                + "WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1";
+        fieldMap = new HashMap<>();
+        fieldMap.put("播放量", "播放量1");
+        sql = SqlParserReplaceHelper.replaceSelectFields(sql, fieldMap);
+        System.out.println(sql);
+        Assert.assertEquals("SELECT 维度1, 播放量1 FROM 数据库 WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1", sql);
+    }
+
+    @Test
     void replaceValue() {
 
         String replaceSql = "select 歌曲名 from 歌曲库 where datediff('day', 发布日期, '2023-08-09') <= 1 "
@@ -155,6 +176,12 @@ class SqlParserReplaceHelperTest {
                         + "song_publis_date = '2023-08-01' AND publish_date >= '2023-08-08' "
                         + "ORDER BY play_count DESC LIMIT 11", replaceSql);
 
+        replaceSql = "select 品牌名称 from 互联网企业 where datediff('year', 品牌成立时间, '2023-11-04') > 17 and 注册资本 = 50000000";
+        replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
+        replaceSql = SqlParserRemoveHelper.removeNumberCondition(replaceSql);
+        Assert.assertEquals(
+                "SELECT 品牌名称 FROM 互联网企业 WHERE 注册资本 = 50000000 AND 品牌成立时间 < '2006-11-04'", replaceSql);
+
         replaceSql = "select MONTH(数据日期), sum(访问次数) from 内容库产品 "
                 + "where datediff('year', 数据日期, '2023-09-03') <= 0.5 "
                 + "group by MONTH(数据日期) order by sum(访问次数) desc limit 1";
@@ -250,11 +277,11 @@ class SqlParserReplaceHelperTest {
                 "select 歌曲名 from 歌曲库 where datediff('year', 发布日期, '2023-08-09') >= 0.5 "
                         + "and 歌手名 = '邓紫棋' and 数据日期 = '2023-08-09' order by 播放量 desc limit 11", fieldToBizName);
         replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
-
+        replaceSql = SqlParserRemoveHelper.removeNumberCondition(replaceSql);
         Assert.assertEquals(
-                "SELECT song_name FROM 歌曲库 WHERE publish_date >= '2023-08-09' "
-                        + "AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' "
-                        + "AND publish_date <= '2023-02-09' ORDER BY play_count DESC LIMIT 11", replaceSql);
+                "SELECT song_name FROM 歌曲库 WHERE singer_name = '邓紫棋' "
+                        + "AND sys_imp_date = '2023-08-09' AND publish_date <= '2023-02-09'"
+                        + " ORDER BY play_count DESC LIMIT 11", replaceSql);
 
         replaceSql = SqlParserReplaceHelper.replaceFields(
                 "select 部门,用户 from 超音数 where 数据日期 = '2023-08-08' and 用户 ='alice'"

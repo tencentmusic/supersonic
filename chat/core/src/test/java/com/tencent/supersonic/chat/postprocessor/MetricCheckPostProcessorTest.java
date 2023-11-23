@@ -78,6 +78,26 @@ class MetricCheckPostProcessorTest {
         Assertions.assertEquals(expectedProcessedSql, actualProcessedSql);
     }
 
+    @Test
+    void testProcessCorrectSql_noDrillDownDimensionSetting_noAgg() {
+        MetricCheckPostProcessor metricCheckPostProcessor = new MetricCheckPostProcessor();
+        String correctSql = "select 访问次数 from 超音数";
+        String actualProcessedSql = metricCheckPostProcessor.processCorrectSql(correctSql,
+                mockModelSchemaNoDimensionSetting());
+        String expectedProcessedSql = "select 访问次数 from 超音数";
+        Assertions.assertEquals(expectedProcessedSql, actualProcessedSql);
+    }
+
+    @Test
+    void testProcessCorrectSql_noDrillDownDimensionSetting_count() {
+        MetricCheckPostProcessor metricCheckPostProcessor = new MetricCheckPostProcessor();
+        String correctSql = "select 部门, count(*) from 超音数 group by 部门";
+        String actualProcessedSql = metricCheckPostProcessor.processCorrectSql(correctSql,
+                mockModelSchemaNoDimensionSetting());
+        String expectedProcessedSql = "select 部门, count(*) from 超音数 group by 部门";
+        Assertions.assertEquals(expectedProcessedSql, actualProcessedSql);
+    }
+
     /**
      * 访问次数 drill down dimension is 用户名 and 部门
      * 访问用户数 drill down dimension is 部门, and 部门 is necessary, 部门 need in select and group by or where expressions

@@ -3,11 +3,9 @@ package com.tencent.supersonic.semantic.api.model.request;
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
-
-import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -33,4 +31,6 @@ public class DimensionReq extends SchemaItem {
     private List<DimValueMap> dimValueMaps;
 
     private DataTypeEnums dataType;
+
+    private int isTag;
 }

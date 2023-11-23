@@ -33,7 +33,8 @@ public class SimilarMetricExecuteResponder implements ExecuteResponder {
 
     private void fillSimilarMetric(SemanticParseInfo parseInfo) {
         if (!parseInfo.getQueryType().equals(QueryType.METRIC)
-                && parseInfo.getMetrics().size() > METRIC_RECOMMEND_SIZE) {
+                || parseInfo.getMetrics().size() > METRIC_RECOMMEND_SIZE
+                || CollectionUtils.isEmpty(parseInfo.getMetrics())) {
             return;
         }
         List<String> metricNames = Collections.singletonList(parseInfo.getMetrics().iterator().next().getName());

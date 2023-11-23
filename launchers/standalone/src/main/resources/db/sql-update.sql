@@ -94,3 +94,6 @@ alter table s2_chat_config add column `llm_examples` text COMMENT 'llm examples'
 
 --20231116
 alter table s2_datasource add column `filter_sql` varchar(1000) COMMENT 'filter_sql' after depends;
+
+--20231120
+alter table s2_dimension add column `is_tag` int(10) DEFAULT NULL;

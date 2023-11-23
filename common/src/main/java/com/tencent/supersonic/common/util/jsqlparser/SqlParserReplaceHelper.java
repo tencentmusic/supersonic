@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.ArrayList;
+
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
@@ -17,6 +19,7 @@ import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.OrderByElement;
@@ -35,6 +38,44 @@ import org.springframework.util.CollectionUtils;
  */
 @Slf4j
 public class SqlParserReplaceHelper {
+
+    public static String replaceSelectFields(String sql, Map<String, String> fieldNameMap) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        ((PlainSelect) selectBody).getSelectItems().stream().forEach(o -> {
+            SelectExpressionItem selectExpressionItem = (SelectExpressionItem) o;
+            String alias = "";
+            if (selectExpressionItem.getExpression() instanceof Function) {
+                Function function = (Function) selectExpressionItem.getExpression();
+                Column column = (Column) function.getParameters().getExpressions().get(0);
+                if (fieldNameMap.containsKey(column.getColumnName())) {
+                    String value = fieldNameMap.get(column.getColumnName());
+                    alias = value;
+                    List<Expression> expressions = new ArrayList<>();
+                    expressions.add(new Column(value));
+                    function.getParameters().setExpressions(expressions);
+                }
+            }
+            if (selectExpressionItem.getExpression() instanceof Column) {
+                Column column = (Column) selectExpressionItem.getExpression();
+                String columnName = column.getColumnName();
+                if (fieldNameMap.containsKey(columnName)) {
+                    String value = fieldNameMap.get(columnName);
+                    alias = value;
+                    if (StringUtils.isNotBlank(value)) {
+                        selectExpressionItem.setExpression(new Column(value));
+                    }
+                }
+            }
+            if (Objects.nonNull(selectExpressionItem.getAlias()) && StringUtils.isNotBlank(alias)) {
+                selectExpressionItem.getAlias().setName(alias);
+            }
+        });
+        return selectStatement.toString();
+    }
 
     public static String replaceValue(String sql, Map<String, Map<String, String>> filedNameToValueMap) {
         return replaceValue(sql, filedNameToValueMap, true);

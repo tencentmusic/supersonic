@@ -39,6 +39,27 @@ import java.util.Set;
 @Slf4j
 public class SqlParserRemoveHelper {
 
+    public static String removeSelect(String sql, Set<String> fields) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        if (selectStatement == null) {
+            return sql;
+        }
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        List<SelectItem> selectItems = ((PlainSelect) selectBody).getSelectItems();
+        selectItems.removeIf(selectItem -> {
+            if (selectItem instanceof SelectExpressionItem) {
+                SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
+                String columnName = SqlParserSelectHelper.getColumnName(selectExpressionItem.getExpression());
+                return fields.contains(columnName);
+            }
+            return false;
+        });
+        return selectStatement.toString();
+    }
+
     public static String removeWhereCondition(String sql, Set<String> removeFieldNames) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
@@ -201,28 +222,6 @@ public class SqlParserRemoveHelper {
         return selectStatement.toString();
     }
 
-
-    public static String removeSelect(String sql, Set<String> fields) {
-        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
-        if (selectStatement == null) {
-            return sql;
-        }
-        SelectBody selectBody = selectStatement.getSelectBody();
-        if (!(selectBody instanceof PlainSelect)) {
-            return sql;
-        }
-        List<SelectItem> selectItems = ((PlainSelect) selectBody).getSelectItems();
-        selectItems.removeIf(selectItem -> {
-            if (selectItem instanceof SelectExpressionItem) {
-                SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
-                String columnName = SqlParserSelectHelper.getColumnName(selectExpressionItem.getExpression());
-                return fields.contains(columnName);
-            }
-            return false;
-        });
-        return selectStatement.toString();
-    }
-
     public static String removeGroupBy(String sql, Set<String> fields) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         if (selectStatement == null) {
@@ -310,16 +309,28 @@ public class SqlParserRemoveHelper {
             return removeSingleFilter((EqualsTo) expression);
         } else if (expression instanceof NotEqualsTo) {
             return removeSingleFilter((NotEqualsTo) expression);
+        } else if (expression instanceof InExpression) {
+            InExpression inExpression = (InExpression) expression;
+            Expression leftExpression = inExpression.getLeftExpression();
+            return distinguishNumberCondition(leftExpression, expression);
+        } else if (expression instanceof LikeExpression) {
+            LikeExpression likeExpression = (LikeExpression) expression;
+            Expression leftExpression = likeExpression.getLeftExpression();
+            return distinguishNumberCondition(leftExpression, expression);
         }
         return expression;
     }
 
     private static <T extends ComparisonOperator> Expression removeSingleFilter(T comparisonExpression) {
         Expression leftExpression = comparisonExpression.getLeftExpression();
+        return distinguishNumberCondition(leftExpression, comparisonExpression);
+    }
+
+    public static Expression distinguishNumberCondition(Expression leftExpression, Expression expression) {
         if (leftExpression instanceof LongValue) {
             return null;
         } else {
-            return comparisonExpression;
+            return expression;
         }
     }
 

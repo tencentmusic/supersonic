@@ -12,6 +12,7 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
@@ -67,6 +68,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
     private void parserDateDiffFunction(SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         correctS2SQL = SqlParserReplaceHelper.replaceFunction(correctS2SQL);
+        correctS2SQL = SqlParserRemoveHelper.removeNumberCondition(correctS2SQL);
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
     }
 
@@ -77,8 +79,8 @@ public class WhereCorrector extends BaseSemanticCorrector {
             String currentDate = S2SQLDateHelper.getReferenceDate(semanticParseInfo.getModelId());
             if (StringUtils.isNotBlank(currentDate)) {
                 correctS2SQL = SqlParserAddHelper.addParenthesisToWhere(correctS2SQL);
-                correctS2SQL = SqlParserAddHelper.addWhere(correctS2SQL, TimeDimensionEnum.DAY.getChName(),
-                        currentDate);
+                correctS2SQL = SqlParserAddHelper.addWhere(
+                        correctS2SQL, TimeDimensionEnum.DAY.getChName(), currentDate);
             }
         }
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);

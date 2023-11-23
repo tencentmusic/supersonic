@@ -12,6 +12,7 @@ import com.tencent.supersonic.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
@@ -86,6 +87,8 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
         SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
         Map<String, String> bizNameToName = schemaService.getSemanticSchema()
                 .getBizNameToName(queryStructReq.getModelId());
+        bizNameToName.putAll(TimeDimensionEnum.getNameToNameMap());
+
         List<Order> orders = queryStructReq.getOrders();
         if (CollectionUtils.isNotEmpty(orders)) {
             for (Order order : orders) {

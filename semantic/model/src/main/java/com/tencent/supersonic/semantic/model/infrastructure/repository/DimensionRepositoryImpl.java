@@ -1,12 +1,12 @@
 package com.tencent.supersonic.semantic.model.infrastructure.repository;
 
 import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
-import com.tencent.supersonic.semantic.model.domain.repository.DimensionRepository;
 import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
+import com.tencent.supersonic.semantic.model.domain.repository.DimensionRepository;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOCustomMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DimensionDOMapper;
-import java.util.List;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 public class DimensionRepositoryImpl implements DimensionRepository {
@@ -33,7 +33,7 @@ public class DimensionRepositoryImpl implements DimensionRepository {
 
     @Override
     public void updateDimension(DimensionDO dimensionDO) {
-        dimensionDOMapper.updateByPrimaryKeySelective(dimensionDO);
+        dimensionDOMapper.updateById(dimensionDO);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class DimensionRepositoryImpl implements DimensionRepository {
 
     @Override
     public DimensionDO getDimensionById(Long id) {
-        return dimensionDOMapper.selectByPrimaryKey(id);
+        return dimensionDOMapper.selectById(id);
     }
 
     @Override

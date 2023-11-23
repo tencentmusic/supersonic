@@ -234,7 +234,9 @@ public class LoadModelDataDemo implements CommandLineRunner {
         datasourceReq.setDatabaseId(1L);
 
         List<Identify> identifiers = new ArrayList<>();
-        identifiers.add(new Identify("歌手名", IdentifyTypeEnum.primary.name(), "singer_name"));
+        Identify identify = new Identify("歌手名", IdentifyTypeEnum.primary.name(), "singer_name");
+        identify.setEntityNames(Lists.newArrayList("歌手", "艺人"));
+        identifiers.add(identify);
         datasourceReq.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
@@ -242,11 +244,11 @@ public class LoadModelDataDemo implements CommandLineRunner {
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         dimensions.add(new Dim("活跃区域", "act_area",
-                DimensionTypeEnum.categorical.name(), 1));
+                DimensionTypeEnum.categorical.name(), 1, 1));
         dimensions.add(new Dim("代表作", "song_name",
                 DimensionTypeEnum.categorical.name(), 1));
         dimensions.add(new Dim("风格", "genre",
-                DimensionTypeEnum.categorical.name(), 1));
+                DimensionTypeEnum.categorical.name(), 1, 1));
         datasourceReq.setDimensions(dimensions);
 
         Measure measure1 = new Measure("播放量", "js_play_cnt", "sum", 1);

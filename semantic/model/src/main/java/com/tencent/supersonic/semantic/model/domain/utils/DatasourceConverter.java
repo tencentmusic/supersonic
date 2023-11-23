@@ -18,13 +18,13 @@ import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatasourceDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Datasource;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.CollectionUtils;
 
 
 public class DatasourceConverter {
@@ -79,6 +79,7 @@ public class DatasourceConverter {
         dimensionReq.setExpr(dim.getBizName());
         dimensionReq.setType("categorical");
         dimensionReq.setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
+        dimensionReq.setIsTag(dim.getIsTag());
         return dimensionReq;
     }
 
