@@ -41,7 +41,7 @@ const ChatSetting: React.FC<Props> = ({
       children: <EntitySection chatConfigType={ChatConfigType.AGG} />,
     },
     {
-      label: '实体模式',
+      label: '标签模式',
       key: 'dimenstion',
       children: <EntitySection chatConfigType={ChatConfigType.DETAIL} />,
     },

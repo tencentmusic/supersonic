@@ -133,6 +133,7 @@ const ModelTable: React.FC<Props> = ({
       title: '操作',
       dataIndex: 'x',
       valueType: 'option',
+      width: 150,
       render: (_, record) => {
         return (
           <Space className={styles.ctrlBtnContainer}>

@@ -55,6 +55,7 @@ const ClassDataSourceTable: React.FC<Props> = ({ dispatch, domainManger }) => {
       title: '操作',
       dataIndex: 'x',
       valueType: 'option',
+      width: 100,
       render: (_, record) => {
         return (
           <Space>

@@ -30,6 +30,11 @@ export const SENSITIVE_LEVEL_ENUM = SENSITIVE_LEVEL_OPTIONS.reduce(
   {},
 );
 
+export const IS_TAG_ENUM = {
+  1: '是',
+  0: '否',
+};
+
 export const SENSITIVE_LEVEL_COLOR = {
   [SENSITIVE_LEVEL.LOW]: 'lime',
   [SENSITIVE_LEVEL.MID]: 'warning',
