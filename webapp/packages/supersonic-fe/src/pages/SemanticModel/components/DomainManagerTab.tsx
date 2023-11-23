@@ -6,7 +6,7 @@ import ClassDataSourceTable from './ClassDataSourceTable';
 import ClassDimensionTable from './ClassDimensionTable';
 import ClassMetricTable from './ClassMetricTable';
 import PermissionSection from './Permission/PermissionSection';
-import EntitySettingSection from './Entity/EntitySettingSection';
+// import EntitySettingSection from './Entity/EntitySettingSection';
 import ChatSettingSection from '../ChatSetting/ChatSettingSection';
 import OverView from './OverView';
 import styles from './style.less';
@@ -99,11 +99,11 @@ const DomainManagerTab: React.FC<Props> = ({
       key: 'metric',
       children: <ClassMetricTable />,
     },
-    {
-      label: '实体',
-      key: 'entity',
-      children: <EntitySettingSection />,
-    },
+    // {
+    //   label: '实体',
+    //   key: 'entity',
+    //   children: <EntitySettingSection />,
+    // },
     {
       label: '权限管理',
       key: 'permissonSetting',

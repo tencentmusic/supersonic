@@ -5,7 +5,7 @@ import DomainListTree from './components/DomainList';
 
 import styles from './components/style.less';
 import type { StateType } from './model';
-import { DownOutlined, LeftOutlined } from '@ant-design/icons';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { ISemantic } from './data';
 import { getDomainList, getModelList } from './service';
 import ChatSettingTab from './ChatSetting/ChatSettingTab';
@@ -24,16 +24,11 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
   const modelId = params.modelId;
 
   const menuKey = params.menuKey ? params.menuKey : !Number(modelId) ? 'overview' : '';
-  const { selectDomainId, selectModelId, selectDomainName, selectModelName, domainList } =
-    domainManger;
+  const { selectDomainId, selectModelId, domainList } = domainManger;
   const [modelList, setModelList] = useState<ISemantic.IModelItem[]>([]);
   const [isModel, setIsModel] = useState<boolean>(false);
-  const [open, setOpen] = useState(false);
+  const [collapsedState, setCollapsedState] = useState(true);
   const [activeKey, setActiveKey] = useState<string>(menuKey);
-
-  const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen);
-  };
 
   const initSelectedDomain = (domainList: ISemantic.IDomainItem[]) => {
     const targetNode = domainList.filter((item: any) => {
@@ -198,39 +193,43 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
     });
   };
 
+  const handleCollapsedBtn = () => {
+    setCollapsedState(!collapsedState);
+  };
+
   return (
     <div className={styles.projectBody}>
       <Helmet title={'语义模型-超音数'} />
       <div className={styles.projectManger}>
-        <div className={styles.sider}>
-          {/* <div className={styles.domainTitle}>
-            <Space>
-              {selectDomainName ? `${selectDomainName}` : '主题域信息'}
-              {selectModelName && (
-                <>
-                  <span style={{ position: 'relative' }}> | </span>
-                  <span style={{ fontSize: 16, color: '#296DF3' }}>{selectModelName}</span>
-                </>
-              )}
-            </Space>
-          </div> */}
-          <DomainListTree
-            createDomainBtnVisible={mode === 'domain' ? true : false}
-            onTreeSelected={(domainData) => {
-              setOpen(false);
-              const { id, name } = domainData;
-              cleanModelInfo(id);
-              dispatch({
-                type: 'domainManger/setSelectDomain',
-                selectDomainId: id,
-                selectDomainName: name,
-                domainData,
-              });
+        <div className={`${styles.sider} ${!collapsedState ? styles.siderCollapsed : ''}`}>
+          <div className={styles.treeContainer}>
+            <DomainListTree
+              createDomainBtnVisible={mode === 'domain' ? true : false}
+              onTreeSelected={(domainData) => {
+                const { id, name } = domainData;
+                cleanModelInfo(id);
+                dispatch({
+                  type: 'domainManger/setSelectDomain',
+                  selectDomainId: id,
+                  selectDomainName: name,
+                  domainData,
+                });
+              }}
+              onTreeDataUpdate={() => {
+                initProjectTree();
+              }}
+            />
+          </div>
+
+          <div
+            className={styles.siderCollapsedButton}
+            onClick={() => {
+              handleCollapsedBtn();
             }}
-            onTreeDataUpdate={() => {
-              initProjectTree();
-            }}
-          />
+          >
+            {collapsedState ? <LeftOutlined /> : <RightOutlined />}
+          </div>
+          {/* <RightOutlined /> */}
         </div>
         <div className={styles.content}>
           {selectDomainId ? (

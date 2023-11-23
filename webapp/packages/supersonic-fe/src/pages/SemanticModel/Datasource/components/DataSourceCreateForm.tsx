@@ -1,7 +1,7 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Form, Button, Modal, Steps, message } from 'antd';
 import DataSourceBasicForm from './DataSourceBasicForm';
-import FieldForm from './DataSourceFieldForm';
+import DataSourceFieldForm from './DataSourceFieldForm';
 import { formLayout } from '@/components/FormHelper/utils';
 import { EnumDataSourceType } from '../constants';
 import styles from '../style.less';
@@ -94,6 +94,8 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           name,
           isCreateMetric: createMetric,
           dateFormat,
+          entityNames,
+          isTag,
         } = item;
         const isCreateDimension = createDimension ? 1 : 0;
         const isCreateMetric = createMetric ? 1 : 0;
@@ -104,6 +106,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
               type,
               isCreateDimension,
               name,
+              isTag: isTag ? 1 : 0,
             });
             break;
           case EnumDataSourceType.TIME:
@@ -125,6 +128,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
               bizName,
               name,
               type,
+              entityNames,
             });
             break;
           case EnumDataSourceType.MEASURES:
@@ -325,7 +329,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     return (
       <>
         <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
-          <FieldForm
+          <DataSourceFieldForm
             fields={fields}
             onFieldChange={handleFieldChange}
             onSqlChange={(sql) => {
@@ -410,7 +414,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     <Modal
       forceRender
       width={1300}
-      styles={{ padding: '32px 40px 48px' }}
+      // styles={{ padding: '32px 40px 48px' }}
       destroyOnClose
       title={`${isEdit ? '编辑' : '新建'}数据源`}
       maskClosable={false}

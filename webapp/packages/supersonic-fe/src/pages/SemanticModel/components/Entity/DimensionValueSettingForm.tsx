@@ -209,7 +209,7 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
         className={styles.form}
       >
         <FormItem
-          style={{ marginTop: 15, marginBottom: -30 }}
+          style={{ marginTop: 15 }}
           label={
             <FormItemTitle
               title={
@@ -272,11 +272,11 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
         </FormItem>
         {dimensionVisible && (
           <>
-            <Divider
+            {/* <Divider
               style={{
                 marginBottom: 35,
               }}
-            />
+            /> */}
             <div style={{ padding: 20, border: '1px solid #eee', borderRadius: 10 }}>
               <div
                 style={{

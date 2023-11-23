@@ -72,6 +72,7 @@ const DatabaseTable: React.FC<Props> = ({}) => {
       title: '操作',
       dataIndex: 'x',
       valueType: 'option',
+      width: 100,
       render: (_, record) => {
         if (!record.hasEditPermission) {
           return <></>;

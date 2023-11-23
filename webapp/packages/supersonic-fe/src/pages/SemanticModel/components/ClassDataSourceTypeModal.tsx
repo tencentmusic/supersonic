@@ -8,6 +8,7 @@ import { excuteSql } from '../service';
 import type { StateType } from '../model';
 import DataSource from '../Datasource';
 import { IDataSource } from '../data';
+import styles from './style.less';
 
 const { Meta } = Card;
 type Props = {
@@ -95,6 +96,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
   return (
     <>
       <Modal
+        className={styles.classDataSourceTypeModal}
         open={createDataSourceModalOpen}
         onCancel={() => {
           setCreateDataSourceModalOpen(false);

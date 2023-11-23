@@ -12,9 +12,45 @@
     display: flex;
     position: relative;
     .sider {
-      flex: 0 0 350px;
+      flex: 0 0 auto;
+      width: 285px;
       border-right: 5px solid #eee;
-
+      position: relative;
+      transition: all 0.2s,background 0s;
+      .treeContainer {
+        width: 100%;
+        opacity: 1;
+        transition: all 0.2s,background 0s;
+      }
+      &.siderCollapsed {
+        width: 20px;
+        & .treeContainer{
+          opacity: 0;
+        }
+      }
+      .siderCollapsedButton {
+        position: absolute;
+        inset-block-start: 17px;
+        border: 1px solid #eee;
+        cursor: pointer;
+        z-index: 101;
+        width: 24px;
+        height: 24px;
+        text-align: center;
+        border-radius: 40px;
+        inset-inline-end: -13px;
+        transition: transform 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: rgba(0, 0, 0, 0.25);
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px -2px rgba(0,0,0,0.05), 0 1px 4px -1px rgba(25,15,15,0.07), 0 0 1px 0 rgba(0,0,0,0.08);
+        &:hover {
+          color: rgba(0, 0, 0, 0.75);
+        }
+      }
       .domainTitle {
         margin-bottom: 0;
         font-size: 20px;
@@ -49,8 +85,9 @@
       }
     
       .search {
-        width: calc(100% - 60px);
-        margin: 10px 0 10px 35px;
+        // width: calc(100% - 100px);
+        width: 100%;
+        margin: 10px 0 10px 10px;
       }
     
       .tree {
@@ -190,6 +227,7 @@
   width: 100%;
   overflow: hidden;
   .searchContainer {
+    width: 280px;
     padding:3px 0;
     border-bottom: 1px solid #eee;
   }
@@ -327,13 +365,22 @@
 
 .breadcrumb{
   font-size: 18px;
-  margin: 20px 0 0 20px;
+  margin: 17px 0 0 20px;
+  padding-bottom: 3px;
   :global {
     .ant-breadcrumb-link {
       height: 28px;
     }
     .anticon {
       font-size: 18px;
+    }
+  }
+}
+
+.classDataSourceTypeModal {
+  :global {
+    .ant-modal-body{
+      padding: 0px;
     }
   }
 }

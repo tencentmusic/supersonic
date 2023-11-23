@@ -1,6 +1,6 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Button, Space, Popconfirm, Input, Tag, Dropdown } from 'antd';
+import { message, Button, Space, Popconfirm, Input, Tag, Select } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
@@ -169,6 +169,31 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       valueEnum: SENSITIVE_LEVEL_ENUM,
     },
     {
+      dataIndex: 'isTag',
+      title: '是否为标签',
+      // search: false,
+      renderFormItem: () => (
+        <Select
+          placeholder="请选择标签状态"
+          allowClear
+          options={[
+            { value: 1, label: '是' },
+            { value: 0, label: '否' },
+          ]}
+        />
+      ),
+      render: (isTag) => {
+        switch (isTag) {
+          case 0:
+            return '否';
+          case 1:
+            return <span style={{ color: '#1677ff' }}>是</span>;
+          default:
+            return <Tag color="default">未知</Tag>;
+        }
+      },
+    },
+    {
       dataIndex: 'status',
       title: '状态',
       width: 80,
@@ -220,6 +245,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '操作',
       dataIndex: 'x',
       valueType: 'option',
+      width: 200,
       render: (_, record) => {
         return (
           <Space className={styles.ctrlBtnContainer}>
