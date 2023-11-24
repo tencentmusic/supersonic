@@ -234,7 +234,7 @@ public class SemanticService {
         modelInfo.setEntityId(entities.get(0));
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setModel(modelSchema.getModel());
-        semanticParseInfo.setQueryType(QueryType.ENTITY);
+        semanticParseInfo.setQueryType(QueryType.TAG);
         semanticParseInfo.setMetrics(getMetrics(modelInfo));
         semanticParseInfo.setDimensions(getDimensions(modelInfo));
         DateConf dateInfo = new DateConf();

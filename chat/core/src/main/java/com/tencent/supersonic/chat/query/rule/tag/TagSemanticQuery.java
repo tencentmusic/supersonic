@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.query.rule.entity;
+package com.tencent.supersonic.chat.query.rule.tag;
 
 import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
 import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
@@ -24,11 +24,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 
 @Slf4j
-public abstract class EntitySemanticQuery extends RuleSemanticQuery {
+public abstract class TagSemanticQuery extends RuleSemanticQuery {
 
-    private static final Long ENTITY_MAX_RESULTS = 500L;
+    private static final Long TAG_MAX_RESULTS = 500L;
 
-    public EntitySemanticQuery() {
+    public TagSemanticQuery() {
         super();
         queryMatcher.addOption(ENTITY, REQUIRED, AT_LEAST, 1);
     }
@@ -81,8 +81,8 @@ public abstract class EntitySemanticQuery extends RuleSemanticQuery {
     public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {
         super.fillParseInfo(modelId, queryContext, chatContext);
 
-        parseInfo.setQueryType(QueryType.ENTITY);
-        parseInfo.setLimit(ENTITY_MAX_RESULTS);
+        parseInfo.setQueryType(QueryType.TAG);
+        parseInfo.setLimit(TAG_MAX_RESULTS);
         if (parseInfo.getDateInfo() == null) {
             ConfigService configService = ContextUtils.getBean(ConfigService.class);
             ChatConfigRichResp chatConfig = configService.getConfigRichInfo(parseInfo.getModelId());

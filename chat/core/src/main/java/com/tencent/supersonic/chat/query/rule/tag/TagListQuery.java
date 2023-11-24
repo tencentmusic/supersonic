@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.query.rule.entity;
+package com.tencent.supersonic.chat.query.rule.tag;
 
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
@@ -17,7 +17,7 @@ import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 
-public abstract class EntityListQuery extends EntitySemanticQuery {
+public abstract class TagListQuery extends TagSemanticQuery {
 
     @Override
     public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {

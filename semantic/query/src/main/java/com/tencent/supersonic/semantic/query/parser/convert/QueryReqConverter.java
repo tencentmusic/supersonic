@@ -211,7 +211,7 @@ public class QueryReqConverter {
 
     private QueryType getQueryType(AggOption aggOption) {
         boolean isAgg = AggOption.isAgg(aggOption);
-        QueryType queryType = QueryType.ENTITY;
+        QueryType queryType = QueryType.TAG;
         if (isAgg) {
             queryType = QueryType.METRIC;
         }
