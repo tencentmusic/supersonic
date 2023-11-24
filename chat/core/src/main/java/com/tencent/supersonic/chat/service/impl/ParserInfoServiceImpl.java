@@ -86,7 +86,7 @@ public class ParserInfoServiceImpl implements ParseInfoService {
             parseInfo.setDimensions(
                     getElements(parseInfo.getModelId(), groupByDimensions, semanticSchema.getDimensions()));
         } else {
-            parseInfo.setQueryType(QueryType.ENTITY);
+            parseInfo.setQueryType(QueryType.TAG);
             List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getCorrectS2SQL());
             List<String> selectDimensions = getFieldsExceptDate(selectFields);
             parseInfo.setDimensions(

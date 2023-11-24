@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.query.rule.entity;
+package com.tencent.supersonic.chat.query.rule.tag;
 
 import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.VALUE;
 import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class EntityFilterQuery extends EntityListQuery {
+public class TagFilterQuery extends TagListQuery {
 
-    public static final String QUERY_MODE = "ENTITY_LIST_FILTER";
+    public static final String QUERY_MODE = "TAG_LIST_FILTER";
 
-    public EntityFilterQuery() {
+    public TagFilterQuery() {
         super();
         queryMatcher.addOption(VALUE, REQUIRED, AT_LEAST, 1);
     }

@@ -6,8 +6,8 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.query.rule.entity.EntityFilterQuery;
-import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
+import com.tencent.supersonic.chat.query.rule.tag.TagFilterQuery;
+import com.tencent.supersonic.chat.query.rule.metric.MetricTagQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.QueryType;
@@ -17,17 +17,17 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 
-public class EntityQueryTest extends BaseQueryTest {
+public class TagQueryTest extends BaseQueryTest {
 
     @Test
-    public void queryTest_metric_entity_query() throws Exception {
+    public void queryTest_metric_tag_query() throws Exception {
         QueryResult actualResult = submitNewChat("艺人周杰伦的播放量");
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
         expectedResult.setChatContext(expectedParseInfo);
 
-        expectedResult.setQueryMode(MetricEntityQuery.QUERY_MODE);
+        expectedResult.setQueryMode(MetricTagQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
 
         QueryFilter dimensionFilter = DataUtils.getFilter("singer_name", FilterOperatorEnum.EQUALS, "周杰伦", "歌手名", 7L);
@@ -43,14 +43,14 @@ public class EntityQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_entity_list_filter() throws Exception {
+    public void queryTest_tag_list_filter() throws Exception {
         QueryResult actualResult = submitNewChat("爱情、流行类型的艺人");
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
         expectedResult.setChatContext(expectedParseInfo);
 
-        expectedResult.setQueryMode(EntityFilterQuery.QUERY_MODE);
+        expectedResult.setQueryMode(TagFilterQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
 
         List<String> list = new ArrayList<>();
@@ -72,7 +72,7 @@ public class EntityQueryTest extends BaseQueryTest {
         expectedParseInfo.getDimensions().add(dim4);
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, startDay, startDay));
-        expectedParseInfo.setQueryType(QueryType.ENTITY);
+        expectedParseInfo.setQueryType(QueryType.TAG);
 
         assertQueryResult(expectedResult, actualResult);
     }

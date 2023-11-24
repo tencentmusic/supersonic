@@ -15,7 +15,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.chat.query.rule.metric.MetricEntityQuery;
+import com.tencent.supersonic.chat.query.rule.metric.MetricTagQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricSemanticQuery;
 import java.util.AbstractMap;
@@ -94,7 +94,7 @@ public class ContextInheritParser implements SemanticParser {
         return matches.stream().anyMatch(m -> {
             SchemaElementType type = m.getElement().getType();
             if (Objects.nonNull(ruleQuery) && ruleQuery instanceof MetricSemanticQuery
-                    && !(ruleQuery instanceof MetricEntityQuery)) {
+                    && !(ruleQuery instanceof MetricTagQuery)) {
                 return types.contains(type);
             }
             return type.equals(matchType);

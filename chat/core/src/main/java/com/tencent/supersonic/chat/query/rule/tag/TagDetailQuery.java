@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.query.rule.entity;
+package com.tencent.supersonic.chat.query.rule.tag;
 
 import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.DIMENSION;
 import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ID;
@@ -8,11 +8,11 @@ import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType
 import org.springframework.stereotype.Component;
 
 @Component
-public class EntityDetailQuery extends EntitySemanticQuery {
+public class TagDetailQuery extends TagSemanticQuery {
 
-    public static final String QUERY_MODE = "ENTITY_DETAIL";
+    public static final String QUERY_MODE = "TAG_DETAIL";
 
-    public EntityDetailQuery() {
+    public TagDetailQuery() {
         super();
         queryMatcher.addOption(DIMENSION, REQUIRED, AT_LEAST, 1)
                 .addOption(ID, REQUIRED, AT_LEAST, 1);

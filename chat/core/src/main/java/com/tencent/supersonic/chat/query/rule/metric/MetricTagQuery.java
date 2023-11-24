@@ -23,11 +23,11 @@ import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNum
 
 @Slf4j
 @Component
-public class MetricEntityQuery extends MetricSemanticQuery {
+public class MetricTagQuery extends MetricSemanticQuery {
 
-    public static final String QUERY_MODE = "METRIC_ENTITY";
+    public static final String QUERY_MODE = "TAG_ENTITY";
 
-    public MetricEntityQuery() {
+    public MetricTagQuery() {
         super();
         queryMatcher.addOption(ID, REQUIRED, AT_LEAST, 1)
                 .addOption(ENTITY, REQUIRED, AT_LEAST, 1);

@@ -4,7 +4,7 @@ import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.query.llm.LLMSemanticQuery;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.chat.query.rule.entity.EntitySemanticQuery;
+import com.tencent.supersonic.chat.query.rule.tag.TagSemanticQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricSemanticQuery;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +83,7 @@ public class QueryManager {
         if (queryMode == null || !ruleQueryMap.containsKey(queryMode)) {
             return false;
         }
-        return ruleQueryMap.get(queryMode) instanceof EntitySemanticQuery;
+        return ruleQueryMap.get(queryMode) instanceof TagSemanticQuery;
     }
 
     public static boolean containsPluginQuery(String queryMode) {

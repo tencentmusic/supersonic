@@ -9,15 +9,15 @@ public enum QueryType {
      */
     METRIC,
     /**
-     * queries with entity unique key included in the select statement
+     * queries with only tag included in the select statement
      */
-    ENTITY,
+    TAG,
     /**
      * the other queries
      */
     OTHER;
 
     public boolean isNativeAggQuery() {
-        return ENTITY.equals(this);
+        return TAG.equals(this);
     }
 }
