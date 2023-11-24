@@ -13,6 +13,8 @@ public class ModelSchema {
     private Set<SchemaElement> metrics = new HashSet<>();
     private Set<SchemaElement> dimensions = new HashSet<>();
     private Set<SchemaElement> dimensionValues = new HashSet<>();
+    private Set<SchemaElement> tags = new HashSet<>();
+    @Deprecated
     private SchemaElement entity = new SchemaElement();
 
     public SchemaElement getElement(SchemaElementType elementType, long elementID) {
