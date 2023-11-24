@@ -13,6 +13,9 @@ import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,9 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.CollectionUtils;
 
 public class ModelSchemaBuilder {
 
@@ -62,6 +62,7 @@ public class ModelSchemaBuilder {
 
         Set<SchemaElement> dimensions = new HashSet<>();
         Set<SchemaElement> dimensionValues = new HashSet<>();
+        Set<SchemaElement> tags = new HashSet<>();
         for (DimSchemaResp dim : resp.getDimensions()) {
 
             List<String> alias = SchemaItem.getAliasList(dim.getAlias());
@@ -105,9 +106,23 @@ public class ModelSchemaBuilder {
                     .alias(new ArrayList<>(Arrays.asList(dimValueAlias.toArray(new String[0]))))
                     .build();
             dimensionValues.add(dimValueToAdd);
+            if (dim.getIsTag() == 1) {
+                SchemaElement tagToAdd = SchemaElement.builder()
+                        .model(resp.getId())
+                        .id(dim.getId())
+                        .name(dim.getName())
+                        .bizName(dim.getBizName())
+                        .type(SchemaElementType.TAG)
+                        .useCnt(dim.getUseCnt())
+                        .alias(alias)
+                        .schemaValueMaps(schemaValueMaps)
+                        .build();
+                tags.add(tagToAdd);
+            }
         }
         modelSchema.getDimensions().addAll(dimensions);
         modelSchema.getDimensionValues().addAll(dimensionValues);
+        modelSchema.getTags().addAll(tags);
 
         Entity entity = resp.getEntity();
         if (Objects.nonNull(entity)) {
