@@ -17,7 +17,7 @@ import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.chat.service.AgentService;
-import com.tencent.supersonic.chat.service.LLMParserLayer;
+import com.tencent.supersonic.chat.llm.LLMInterpreter;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -46,6 +46,8 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class LLMRequestService {
 
+    protected LLMInterpreter llmInterpreter = ComponentFactory.getLLMInterpreter();
+
     protected SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
     @Autowired
     private LLMParserConfig llmParserConfig;
@@ -55,8 +57,7 @@ public class LLMRequestService {
     private SchemaService schemaService;
     @Autowired
     private OptimizationConfig optimizationConfig;
-    @Autowired
-    private LLMParserLayer llmParserLayer;
+
 
     public boolean check(QueryContext queryCtx) {
         QueryReq request = queryCtx.getRequest();
@@ -137,7 +138,7 @@ public class LLMRequestService {
     }
 
     public LLMResp requestLLM(LLMReq llmReq, Long modelId) {
-        return llmParserLayer.query2sql(llmReq, modelId);
+        return llmInterpreter.query2sql(llmReq, modelId);
     }
 
     protected List<String> getFieldNameList(QueryContext queryCtx, Long modelId, LLMParserConfig llmParserConfig) {
