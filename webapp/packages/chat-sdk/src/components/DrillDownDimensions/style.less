@@ -4,23 +4,15 @@
 
 .@{drill-down-dimensions-prefix-cls} {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  column-gap: 12px;
 
   &-section {
-    width: 100%;
+    // width: 100%;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     column-gap: 6px;
-  }
-
-  &-metric-card {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
-    border-radius: 8px;
-    background-color: #fff;
-    width: fit-content;
-    padding: 2px 4px;
-    font-size: 12px;
   }
 
   &-title {
