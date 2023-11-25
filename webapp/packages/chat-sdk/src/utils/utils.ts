@@ -89,7 +89,7 @@ export const formatNumberWithCN = (num: number) => {
   if (num >= 10000) {
     return (num / 10000).toFixed(1) + "万";
   } else {
-    return num;
+    return formatByDecimalPlaces(num, 2);
   }
 }
 
