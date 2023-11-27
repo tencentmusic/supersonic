@@ -18,7 +18,7 @@ export type CreateFormProps = {
 };
 
 const BindMeasuresTable: React.FC<CreateFormProps> = ({
-  measuresList,
+  measuresList = [],
   selectedMeasuresList = [],
   onSubmit,
   onCancel,
@@ -105,7 +105,7 @@ const BindMeasuresTable: React.FC<CreateFormProps> = ({
         columns={columns}
         params={{ ...searchParams }}
         pagination={false}
-        dataSource={measuresList}
+        dataSource={measuresList || []}
         size="small"
         search={false}
         options={false}
