@@ -113,7 +113,6 @@ public class LLMRequestService {
         llmReq.setQueryText(queryText);
         Long firstModelId = modelCluster.getFirstModel();
         LLMReq.FilterCondition filterCondition = new LLMReq.FilterCondition();
-        filterCondition.setTableName(modelIdToName.get(firstModelId));
         llmReq.setFilterCondition(filterCondition);
 
         LLMReq.LLMSchema llmSchema = new LLMReq.LLMSchema();
