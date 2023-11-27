@@ -3,24 +3,23 @@ package com.tencent.supersonic.chat.postprocessor;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.RelateSchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
+import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.knowledge.service.SchemaService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
+
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,17 +33,15 @@ public class MetricCheckPostProcessor implements PostProcessor {
     @Override
     public void process(QueryContext queryContext) {
         List<SemanticQuery> semanticQueries = queryContext.getCandidateQueries();
-        Map<Long, ModelSchema> modelSchemaMap = new HashMap<>();
+        SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
+        SemanticSchema semanticSchema = semanticService.getSemanticSchema();
         for (SemanticQuery semanticQuery : semanticQueries) {
             SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
             if (!QueryType.METRIC.equals(parseInfo.getQueryType())) {
                 continue;
             }
-            SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
-            ModelSchema modelSchema = schemaService.getModelSchema(parseInfo.getModelId());
-            String processedSql = processCorrectSql(parseInfo.getSqlInfo().getCorrectS2SQL(), modelSchema);
-            parseInfo.getSqlInfo().setCorrectS2SQL(processedSql);
-            modelSchemaMap.put(modelSchema.getModel().getModel(), modelSchema);
+            String correctSqlProcessed = processCorrectSql(parseInfo, semanticSchema);
+            parseInfo.getSqlInfo().setCorrectS2SQL(correctSqlProcessed);
         }
         semanticQueries.removeIf(semanticQuery -> {
             if (!QueryType.METRIC.equals(semanticQuery.getParseInfo().getQueryType())) {
@@ -54,14 +51,14 @@ public class MetricCheckPostProcessor implements PostProcessor {
             if (StringUtils.isBlank(correctSql)) {
                 return false;
             }
-            return !checkHasMetric(correctSql, modelSchemaMap.get(semanticQuery.getParseInfo().getModelId()));
+            return !checkHasMetric(correctSql, semanticSchema);
         });
     }
 
-    public String processCorrectSql(String correctSql, ModelSchema modelSchema) {
+    public String processCorrectSql(SemanticParseInfo parseInfo, SemanticSchema semanticSchema) {
+        String correctSql = parseInfo.getSqlInfo().getCorrectS2SQL();
         List<String> groupByFields = SqlParserSelectHelper.getGroupByFields(correctSql);
-        List<String> metricFields = SqlParserSelectHelper.getAggregateFields(correctSql)
-                .stream().filter(metricField -> !metricField.equals("*")).collect(Collectors.toList());
+        List<String> metricFields = SqlParserSelectHelper.getAggregateFields(correctSql);
         List<String> whereFields = SqlParserSelectHelper.getWhereFields(correctSql);
         List<String> dimensionFields = getDimensionFields(groupByFields, whereFields);
         if (CollectionUtils.isEmpty(metricFields) || StringUtils.isBlank(correctSql)) {
@@ -71,35 +68,33 @@ public class MetricCheckPostProcessor implements PostProcessor {
         Set<String> groupByToRemove = Sets.newHashSet();
         Set<String> whereFieldsToRemove = Sets.newHashSet();
         for (String metricName : metricFields) {
-            SchemaElement metricElement = modelSchema.getElement(SchemaElementType.METRIC, metricName);
+            SchemaElement metricElement = semanticSchema.getElementByName(SchemaElementType.METRIC, metricName);
             if (metricElement == null) {
                 metricToRemove.add(metricName);
             }
-            if (!checkNecessaryDimension(metricElement, modelSchema, dimensionFields)) {
+            if (!checkNecessaryDimension(metricElement, semanticSchema, dimensionFields)) {
                 metricToRemove.add(metricName);
             }
         }
         for (String dimensionName : whereFields) {
-            if (TimeDimensionEnum.getNameList().contains(dimensionName)
-                    || TimeDimensionEnum.getChNameList().contains(dimensionName)) {
+            if (TimeDimensionEnum.getNameList().contains(dimensionName)) {
                 continue;
             }
-            if (!checkInModelSchema(dimensionName, SchemaElementType.DIMENSION, modelSchema)) {
+            if (!checkInModelSchema(dimensionName, SchemaElementType.DIMENSION, semanticSchema)) {
                 whereFieldsToRemove.add(dimensionName);
             }
-            if (!checkDrillDownDimension(dimensionName, metricFields, modelSchema)) {
+            if (!checkDrillDownDimension(dimensionName, metricFields, semanticSchema)) {
                 whereFieldsToRemove.add(dimensionName);
             }
         }
         for (String dimensionName : groupByFields) {
-            if (TimeDimensionEnum.getNameList().contains(dimensionName)
-                    || TimeDimensionEnum.getChNameList().contains(dimensionName)) {
+            if (TimeDimensionEnum.getNameList().contains(dimensionName)) {
                 continue;
             }
-            if (!checkInModelSchema(dimensionName, SchemaElementType.DIMENSION, modelSchema)) {
+            if (!checkInModelSchema(dimensionName, SchemaElementType.DIMENSION, semanticSchema)) {
                 groupByToRemove.add(dimensionName);
             }
-            if (!checkDrillDownDimension(dimensionName, metricFields, modelSchema)) {
+            if (!checkDrillDownDimension(dimensionName, metricFields, semanticSchema)) {
                 groupByToRemove.add(dimensionName);
             }
         }
@@ -111,9 +106,9 @@ public class MetricCheckPostProcessor implements PostProcessor {
      * To check whether the dimension bound to the metric exists,
      * eg: metric like UV is calculated in a certain dimension, it cannot be used on other dimensions.
      */
-    private boolean checkNecessaryDimension(SchemaElement metric, ModelSchema modelSchema,
+    private boolean checkNecessaryDimension(SchemaElement metric, SemanticSchema semanticSchema,
                                             List<String> dimensionFields) {
-        List<String> necessaryDimensions = getNecessaryDimensionNames(metric, modelSchema);
+        List<String> necessaryDimensions = getNecessaryDimensionNames(metric, semanticSchema);
         if (CollectionUtils.isEmpty(necessaryDimensions)) {
             return true;
         }
@@ -130,8 +125,8 @@ public class MetricCheckPostProcessor implements PostProcessor {
      * eg: some descriptive dimensions are not suitable as drill-down dimensions
      */
     private boolean checkDrillDownDimension(String dimensionName, List<String> metrics,
-                                            ModelSchema modelSchema) {
-        List<SchemaElement> metricElements = modelSchema.getMetrics().stream()
+                                            SemanticSchema semanticSchema) {
+        List<SchemaElement> metricElements = semanticSchema.getMetrics().stream()
                 .filter(schemaElement -> metrics.contains(schemaElement.getName()))
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(metricElements)) {
@@ -142,7 +137,7 @@ public class MetricCheckPostProcessor implements PostProcessor {
                 .map(schemaElement -> schemaElement.getRelateSchemaElements().stream()
                         .map(RelateSchemaElement::getDimensionId).collect(Collectors.toList()))
                 .flatMap(Collection::stream)
-                .map(id -> convertDimensionIdToName(id, modelSchema))
+                .map(id -> convertDimensionIdToName(id, semanticSchema))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         //if no metric has drill down dimension, return true
@@ -153,9 +148,9 @@ public class MetricCheckPostProcessor implements PostProcessor {
         return relateDimensions.contains(dimensionName);
     }
 
-    private List<String> getNecessaryDimensionNames(SchemaElement metric, ModelSchema modelSchema) {
+    private List<String> getNecessaryDimensionNames(SchemaElement metric, SemanticSchema semanticSchema) {
         List<Long> necessaryDimensionIds = getNecessaryDimensions(metric);
-        return necessaryDimensionIds.stream().map(id -> convertDimensionIdToName(id, modelSchema))
+        return necessaryDimensionIds.stream().map(id -> convertDimensionIdToName(id, semanticSchema))
                 .filter(Objects::nonNull).collect(Collectors.toList());
     }
 
@@ -183,23 +178,23 @@ public class MetricCheckPostProcessor implements PostProcessor {
         return dimensionFields;
     }
 
-    private String convertDimensionIdToName(Long id, ModelSchema modelSchema) {
-        SchemaElement schemaElement = modelSchema.getElement(SchemaElementType.DIMENSION, id);
+    private String convertDimensionIdToName(Long id, SemanticSchema semanticSchema) {
+        SchemaElement schemaElement = semanticSchema.getElement(SchemaElementType.DIMENSION, id);
         if (schemaElement == null) {
             return null;
         }
         return schemaElement.getName();
     }
 
-    private boolean checkInModelSchema(String name, SchemaElementType type, ModelSchema modelSchema) {
-        SchemaElement schemaElement = modelSchema.getElement(type, name);
+    private boolean checkInModelSchema(String name, SchemaElementType type, SemanticSchema semanticSchema) {
+        SchemaElement schemaElement = semanticSchema.getElementByName(type, name);
         return schemaElement != null;
     }
 
-    private boolean checkHasMetric(String correctSql, ModelSchema modelSchema) {
+    private boolean checkHasMetric(String correctSql, SemanticSchema semanticSchema) {
         List<String> selectFields = SqlParserSelectHelper.getSelectFields(correctSql);
         List<String> aggFields = SqlParserSelectHelper.getAggregateFields(correctSql);
-        List<String> collect = modelSchema.getMetrics().stream()
+        List<String> collect = semanticSchema.getMetrics().stream()
                 .map(SchemaElement::getName).collect(Collectors.toList());
         for (String field : selectFields) {
             if (collect.contains(field)) {

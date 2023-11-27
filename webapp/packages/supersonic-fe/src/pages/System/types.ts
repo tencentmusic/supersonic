@@ -4,6 +4,7 @@ export type SystemConfigParametersItem = {
   comment: string;
   value: string;
   candidateValues: string[];
+  description: string;
 };
 
 export type SystemConfig = {

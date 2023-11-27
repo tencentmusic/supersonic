@@ -252,7 +252,7 @@ public class QueryServiceImpl implements QueryService {
         solvedQueryManager.saveSolvedQuery(SolvedQueryReq.builder().parseId(queryReq.getParseId())
                 .queryId(queryReq.getQueryId())
                 .agentId(chatQueryDO.getAgentId())
-                .modelId(parseInfo.getModelId())
+                .modelId(parseInfo.getModelClusterKey())
                 .queryText(queryReq.getQueryText()).build());
     }
 

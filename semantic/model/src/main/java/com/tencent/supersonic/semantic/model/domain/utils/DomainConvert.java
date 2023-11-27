@@ -6,39 +6,25 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.semantic.api.model.request.DomainReq;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO;
-import com.tencent.supersonic.semantic.model.domain.pojo.Domain;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 public class DomainConvert {
 
-    public static Domain convert(DomainReq domainReq) {
-        Domain domain = new Domain();
-        BeanUtils.copyProperties(domainReq, domain);
-        domain.setStatus(StatusEnum.ONLINE.getCode());
-        return domain;
-    }
-
-    public static DomainDO convert(Domain domain, User user) {
+    public static DomainDO convert(DomainReq domainReq, User user) {
         DomainDO domainDO = new DomainDO();
-        BeanUtils.copyProperties(domain, domainDO);
-        domainDO.setCreatedBy(user.getName());
-        domainDO.setUpdatedBy(user.getName());
-        domainDO.setCreatedAt(new Date());
-        domainDO.setUpdatedAt(new Date());
-        domainDO.setAdmin(String.join(",", domain.getAdmins()));
-        domainDO.setAdminOrg(String.join(",", domain.getAdminOrgs()));
-        domainDO.setViewer(String.join(",", domain.getViewers()));
-        domainDO.setViewOrg(String.join(",", domain.getViewOrgs()));
+        domainReq.createdBy(user.getName());
+        BeanUtils.copyProperties(domainReq, domainDO);
+        domainDO.setAdmin(String.join(",", domainReq.getAdmins()));
+        domainDO.setAdminOrg(String.join(",", domainReq.getAdminOrgs()));
+        domainDO.setViewer(String.join(",", domainReq.getViewers()));
+        domainDO.setViewOrg(String.join(",", domainReq.getViewOrgs()));
         return domainDO;
     }
 

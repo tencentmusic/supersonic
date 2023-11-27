@@ -18,6 +18,7 @@ import { getSystemConfig, saveSystemConfig } from '@/services/user';
 import ProCard from '@ant-design/pro-card';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
 import { SystemConfigParametersItem, SystemConfig } from './types';
+import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import { groupBy } from 'lodash';
 
 const FormItem = Form.Item;
@@ -30,6 +31,7 @@ const System: React.FC = () => {
     [],
   );
   const [configSource, setConfigSource] = useState<SystemConfig>();
+  const [paramDescMap, setParamDescMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     querySystemConfig();
@@ -37,8 +39,8 @@ const System: React.FC = () => {
   const [form] = Form.useForm();
   const querySystemConfig = async () => {
     const { code, data, msg } = await getSystemConfig();
-    if (code === 200) {
-      const { parameters, admins } = data;
+    if (code === 200 && data) {
+      const { parameters = [], admins = [] } = data;
       const groupByConfig = groupBy(parameters, 'module');
       const anchor = Object.keys(groupByConfig).map((key: string) => {
         return {
@@ -50,10 +52,22 @@ const System: React.FC = () => {
       setAnchorItems(anchor);
       setSystemConfig(groupByConfig);
       setInitData(admins, parameters);
+      initDescMap(parameters);
       setConfigSource(data);
     } else {
       message.error(msg);
     }
+  };
+
+  const initDescMap = (systemConfigParameters: SystemConfigParametersItem[]) => {
+    const descData = systemConfigParameters.reduce(
+      (descMap: Record<string, string>, item: SystemConfigParametersItem) => {
+        descMap[item.name] = item.description;
+        return descMap;
+      },
+      {},
+    );
+    setParamDescMap(descData);
   };
 
   const setInitData = (admins: string[], systemConfigParameters: SystemConfigParametersItem[]) => {
@@ -81,6 +95,7 @@ const System: React.FC = () => {
           return {
             ...item,
             value: submitData[name],
+            description: paramDescMap[name],
           };
         }
         return item;
@@ -158,7 +173,7 @@ const System: React.FC = () => {
                                 </FormItem>
                               );
                             case 'list': {
-                              const { candidateValues } = item;
+                              const { candidateValues = [] } = item;
                               const options = candidateValues.map((value) => {
                                 return { label: value, value };
                               });
@@ -170,7 +185,23 @@ const System: React.FC = () => {
                               break;
                           }
                           return (
-                            <FormItem name={name} label={comment} key={name}>
+                            <FormItem
+                              name={name}
+                              key={name}
+                              label={
+                                <FormItemTitle
+                                  title={comment}
+                                  subTitle={paramDescMap[name]}
+                                  // subTitleEditable={true}
+                                  onSubTitleChange={(title) => {
+                                    setParamDescMap({
+                                      ...paramDescMap,
+                                      [name]: title,
+                                    });
+                                  }}
+                                />
+                              }
+                            >
                               {defaultItem}
                             </FormItem>
                           );

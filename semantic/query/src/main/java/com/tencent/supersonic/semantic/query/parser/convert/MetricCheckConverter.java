@@ -33,9 +33,8 @@ public class MetricCheckConverter implements SemanticConverter {
     @Override
     public void converter(Catalog catalog, QueryStructReq queryStructReq, ParseSqlReq sqlCommend,
             MetricReq metricCommand) throws Exception {
-        Long modelId = queryStructReq.getModelId();
-        List<MetricResp> metricResps = catalog.getMetrics(modelId);
-        List<DimensionResp> dimensionResps = catalog.getDimensions(modelId);
+        List<MetricResp> metricResps = catalog.getMetrics(queryStructReq.getModelIds());
+        List<DimensionResp> dimensionResps = catalog.getDimensions(queryStructReq.getModelIds());
         Map<Long, DimensionResp> dimensionMap = dimensionResps.stream()
                 .collect(Collectors.toMap(DimensionResp::getId, d -> d));
         List<String> metricBizNames = queryStructReq.getMetrics();

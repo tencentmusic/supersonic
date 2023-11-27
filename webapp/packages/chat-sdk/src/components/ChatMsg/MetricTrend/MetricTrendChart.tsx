@@ -23,6 +23,7 @@ type Props = {
   resultList: any[];
   triggerResize?: boolean;
   onApplyAuth?: (model: string) => void;
+  chartType?: string;
 };
 
 const MetricTrendChart: React.FC<Props> = ({
@@ -33,6 +34,7 @@ const MetricTrendChart: React.FC<Props> = ({
   resultList,
   triggerResize,
   onApplyAuth,
+  chartType,
 }) => {
   const chartRef = useRef<any>();
   const [instance, setInstance] = useState<ECharts>();
@@ -173,7 +175,7 @@ const MetricTrendChart: React.FC<Props> = ({
       series: sortedGroupKeys.slice(0, 20).map((category, index) => {
         const data = groupData[category];
         return {
-          type: 'line',
+          type: chartType,
           name: categoryColumnName ? category : metricField.name,
           symbol: 'circle',
           showSymbol: data.length === 1,
@@ -197,7 +199,7 @@ const MetricTrendChart: React.FC<Props> = ({
     if (metricField.authorized) {
       renderChart();
     }
-  }, [resultList, metricField]);
+  }, [resultList, metricField, chartType]);
 
   useEffect(() => {
     if (triggerResize && instance) {

@@ -1,11 +1,11 @@
 package com.tencent.supersonic.semantic.model.domain.manager;
 
-import com.tencent.supersonic.semantic.api.model.pojo.DatasourceDetail;
+import com.tencent.supersonic.semantic.api.model.pojo.ModelDetail;
 import com.tencent.supersonic.semantic.api.model.pojo.Dim;
 import com.tencent.supersonic.semantic.api.model.pojo.Identify;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
-import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
+import com.tencent.supersonic.semantic.api.model.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.IdentifyYamlTpl;
@@ -27,27 +27,27 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class DatasourceYamlManager {
 
-    public static DatasourceYamlTpl convert2YamlObj(Datasource datasource, DatabaseResp databaseResp) {
-        DatasourceDetail datasourceDetail = datasource.getDatasourceDetail();
+    public static DataModelYamlTpl convert2YamlObj(Datasource datasource, DatabaseResp databaseResp) {
+        ModelDetail datasourceDetail = datasource.getDatasourceDetail();
         EngineAdaptor engineAdaptor = EngineAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         SysTimeDimensionBuilder.addSysTimeDimension(datasourceDetail.getDimensions(), engineAdaptor);
         addInterCntMetric(datasource.getBizName(), datasourceDetail);
-        DatasourceYamlTpl datasourceYamlTpl = new DatasourceYamlTpl();
-        BeanUtils.copyProperties(datasourceDetail, datasourceYamlTpl);
-        datasourceYamlTpl.setIdentifiers(datasourceDetail.getIdentifiers().stream().map(DatasourceYamlManager::convert)
+        DataModelYamlTpl dataModelYamlTpl = new DataModelYamlTpl();
+        BeanUtils.copyProperties(datasourceDetail, dataModelYamlTpl);
+        dataModelYamlTpl.setIdentifiers(datasourceDetail.getIdentifiers().stream().map(DatasourceYamlManager::convert)
                 .collect(Collectors.toList()));
-        datasourceYamlTpl.setDimensions(datasourceDetail.getDimensions().stream().map(DatasourceYamlManager::convert)
+        dataModelYamlTpl.setDimensions(datasourceDetail.getDimensions().stream().map(DatasourceYamlManager::convert)
                 .collect(Collectors.toList()));
-        datasourceYamlTpl.setMeasures(datasourceDetail.getMeasures().stream().map(DatasourceYamlManager::convert)
+        dataModelYamlTpl.setMeasures(datasourceDetail.getMeasures().stream().map(DatasourceYamlManager::convert)
                 .collect(Collectors.toList()));
-        datasourceYamlTpl.setName(datasource.getBizName());
-        datasourceYamlTpl.setSourceId(datasource.getDatabaseId());
+        dataModelYamlTpl.setName(datasource.getBizName());
+        dataModelYamlTpl.setSourceId(datasource.getDatabaseId());
         if (datasourceDetail.getQueryType().equalsIgnoreCase(DatasourceQueryEnum.SQL_QUERY.getName())) {
-            datasourceYamlTpl.setSqlQuery(datasourceDetail.getSqlQuery());
+            dataModelYamlTpl.setSqlQuery(datasourceDetail.getSqlQuery());
         } else {
-            datasourceYamlTpl.setTableQuery(datasourceDetail.getTableQuery());
+            dataModelYamlTpl.setTableQuery(datasourceDetail.getTableQuery());
         }
-        return datasourceYamlTpl;
+        return dataModelYamlTpl;
     }
 
     public static DimensionYamlTpl convert(Dim dim) {
@@ -81,7 +81,7 @@ public class DatasourceYamlManager {
     }
 
 
-    private static void addInterCntMetric(String datasourceEnName, DatasourceDetail datasourceDetail) {
+    private static void addInterCntMetric(String datasourceEnName, ModelDetail datasourceDetail) {
         Measure measure = new Measure();
         measure.setExpr("1");
         if (!CollectionUtils.isEmpty(datasourceDetail.getIdentifiers())) {

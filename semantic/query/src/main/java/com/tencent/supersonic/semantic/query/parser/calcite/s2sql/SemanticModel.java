@@ -14,4 +14,5 @@ public class SemanticModel {
     private Map<String, DataSource> datasourceMap = new HashMap<>();
     private Map<String, List<Dimension>> dimensionMap = new HashMap<>();
     private List<Materialization> materializationList = new ArrayList<>();
+    private List<JoinRelation> joinRelations;
 }

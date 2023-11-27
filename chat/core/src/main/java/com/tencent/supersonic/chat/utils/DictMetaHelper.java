@@ -1,8 +1,5 @@
 package com.tencent.supersonic.chat.utils;
 
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
-import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
-
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
@@ -11,12 +8,20 @@ import com.tencent.supersonic.chat.api.pojo.request.KnowledgeAdvancedConfig;
 import com.tencent.supersonic.chat.api.pojo.request.KnowledgeInfoReq;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
-import com.tencent.supersonic.chat.config.Dim4Dict;
 import com.tencent.supersonic.chat.config.DefaultMetric;
-import com.tencent.supersonic.chat.service.ConfigService;
+import com.tencent.supersonic.chat.config.Dim4Dict;
 import com.tencent.supersonic.chat.persistence.dataobject.DimValueDO;
+import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.knowledge.dictionary.DictUpdateMode;
 import com.tencent.supersonic.knowledge.dictionary.DimValue2DictCommand;
+import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,14 +33,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
-import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+import static com.tencent.supersonic.common.pojo.Constants.DAY;
+import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
 
 @Component
 public class DictMetaHelper {
@@ -202,7 +201,7 @@ public class DictMetaHelper {
                             if (Objects.nonNull(dimIdAndRespPair)
                                     && dimIdAndRespPair.containsKey(dim4Dict.getDimId())) {
                                 String datasourceFilterSql = dimIdAndRespPair.get(
-                                        dim4Dict.getDimId()).getDatasourceFilterSql();
+                                        dim4Dict.getDimId()).getModelFilterSql();
                                 if (StringUtils.isNotEmpty(datasourceFilterSql)) {
                                     dim4Dict.getRuleList().add(datasourceFilterSql);
                                 }
@@ -241,7 +240,7 @@ public class DictMetaHelper {
         PageInfo<DimensionResp> dimensionPage = semanticInterpreter.getDimensionPage(pageDimensionCmd);
         if (Objects.nonNull(dimensionPage) && !CollectionUtils.isEmpty(dimensionPage.getList())) {
             List<DimensionResp> list = dimensionPage.getList();
-            return list.get(0).getDatasourceBizName();
+            return list.get(0).getModelBizName();
         }
         return "";
     }

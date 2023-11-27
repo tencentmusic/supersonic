@@ -59,6 +59,19 @@ public class OptimizationConfig {
 
     @Value("${s2SQL.use.switch:true}")
     private boolean useS2SqlSwitch;
+
+    @Value("${text2sql.example.num:10}")
+    private int text2sqlExampleNum;
+
+    @Value("${text2sql.fewShots.num:10}")
+    private int text2sqlFewShotsNum;
+
+    @Value("${text2sql.self.consistency.num:5}")
+    private int text2sqlSelfConsistencyNum;
+
+    @Value("${text2sql.collection.name:text2dsl_agent_collection}")
+    private String text2sqlCollectionName;
+
     @Autowired
     private SysParameterService sysParameterService;
 

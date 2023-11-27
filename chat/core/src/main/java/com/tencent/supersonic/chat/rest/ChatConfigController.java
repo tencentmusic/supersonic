@@ -9,6 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
+import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
@@ -17,12 +18,6 @@ import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
-import com.tencent.supersonic.chat.service.ConfigService;
-
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +26,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 
 @RestController

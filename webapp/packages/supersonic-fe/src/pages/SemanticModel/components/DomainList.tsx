@@ -10,7 +10,6 @@ import { createDomain, updateDomain, deleteDomain } from '../service';
 import { treeParentKeyLists } from '../utils';
 import ProjectInfoFormProps from './ProjectInfoForm';
 import { constructorClassTreeFromList, addPathInTreeData } from '../utils';
-import { PlusCircleOutlined } from '@ant-design/icons';
 
 import styles from './style.less';
 import { ISemantic } from '../data';
@@ -180,19 +179,17 @@ const DomainListTree: FC<DomainListProps> = ({
   return (
     <div className={styles.domainList}>
       <div className={styles.searchContainer}>
-        <Row>
-          <Col flex="1 1 auto">
-            {/* <Space> */}
+        <Row style={{ gap: 20 }}>
+          <Col flex="1 1 215px">
             <Search
               allowClear
               className={styles.search}
-              placeholder="请输入主题域名称进行查询"
+              placeholder="请输入主题域名称"
               onSearch={onSearch}
             />
-            {/* </Space> */}
           </Col>
           {createDomainBtnVisible && (
-            <Col flex="0 0 40px" style={{ display: 'flex', alignItems: 'center' }}>
+            <Col flex="0 0 45px" style={{ display: 'flex', alignItems: 'center' }}>
               <Tooltip title="新增顶级域">
                 <Button
                   type="primary"
@@ -205,16 +202,6 @@ const DomainListTree: FC<DomainListProps> = ({
                   }}
                 />
               </Tooltip>
-              {/* <Tooltip title="新增顶级域">
-              <PlusCircleOutlined
-                onClick={() => {
-                  setProjectInfoParams({ type: 'top', modelType: 'add' });
-                  setProjectInfoModalVisible(true);
-                  onCreateDomainBtnClick?.();
-                }}
-                className={styles.addBtn}
-              />
-            </Tooltip> */}
             </Col>
           )}
         </Row>

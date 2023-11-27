@@ -1,38 +1,37 @@
 package com.tencent.supersonic.semantic.model.application;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
-import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.semantic.api.model.request.DomainReq;
 import com.tencent.supersonic.semantic.api.model.request.DomainUpdateReq;
-import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO;
-import com.tencent.supersonic.semantic.model.domain.pojo.Domain;
 import com.tencent.supersonic.semantic.model.domain.repository.DomainRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.DomainConvert;
-import java.util.List;
-import java.util.Date;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Queue;
-import java.util.LinkedList;
-import java.util.Objects;
-import java.util.Comparator;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Sets;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -54,22 +53,16 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public void createDomain(DomainReq domainReq, User user) {
-        log.info("[create domain] cmd : {}", JSONObject.toJSONString(domainReq));
-        Domain domain = DomainConvert.convert(domainReq);
-        log.info("[create domain] object:{}", JSONObject.toJSONString(domainReq));
-        saveDomain(domain, user);
+        DomainDO domainDO = DomainConvert.convert(domainReq, user);
+        domainDO.setStatus(StatusEnum.ONLINE.getCode());
+        domainRepository.createDomain(domainDO);
     }
 
     @Override
     public void updateDomain(DomainUpdateReq domainUpdateReq, User user) {
+        domainUpdateReq.updatedBy(user.getName());
         DomainDO domainDO = getDomainDO(domainUpdateReq.getId());
-        domainDO.setUpdatedAt(new Date());
-        domainDO.setUpdatedBy(user.getName());
         BeanMapper.mapper(domainUpdateReq, domainDO);
-        domainDO.setAdmin(String.join(",", domainUpdateReq.getAdmins()));
-        domainDO.setAdminOrg(String.join(",", domainUpdateReq.getAdminOrgs()));
-        domainDO.setViewer(String.join(",", domainUpdateReq.getViewers()));
-        domainDO.setViewOrg(String.join(",", domainUpdateReq.getViewOrgs()));
         domainRepository.updateDomain(domainDO);
     }
 
@@ -159,13 +152,6 @@ public class DomainServiceImpl implements DomainService {
     @Override
     public Map<Long, String> getDomainFullPath() {
         return getDomainFullPathMap();
-    }
-
-    //保存并获取自增ID
-    private void saveDomain(Domain domain, User user) {
-        DomainDO domainDO = DomainConvert.convert(domain, user);
-        domainRepository.createDomain(domainDO);
-        domain.setId(domainDO.getId());
     }
 
     private List<DomainResp> convertList(List<DomainDO> domainDOS) {

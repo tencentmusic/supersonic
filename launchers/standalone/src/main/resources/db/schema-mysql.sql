@@ -454,3 +454,13 @@ CREATE TABLE s2_sys_parameter
     admin varchar(500) COMMENT '系统管理员',
     parameters text null COMMENT '配置项'
 );
+
+CREATE TABLE s2_model_rela
+(
+    id             bigint primary key AUTO_INCREMENT,
+    domain_id       bigint,
+    from_model_id    bigint,
+    to_model_id      bigint,
+    join_type       VARCHAR(255),
+    join_condition  VARCHAR(255)
+);

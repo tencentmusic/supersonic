@@ -4,6 +4,7 @@ import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
+import com.tencent.supersonic.chat.llm.LLMInterpreter;
 import com.tencent.supersonic.chat.parser.llm.s2sql.ModelResolver;
 import com.tencent.supersonic.chat.postprocessor.PostProcessor;
 import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
@@ -20,10 +21,13 @@ public class ComponentFactory {
     private static List<SemanticParser> semanticParsers = new ArrayList<>();
     private static List<SemanticCorrector> s2SQLCorrections = new ArrayList<>();
     private static SemanticInterpreter semanticInterpreter;
+
+    private static LLMInterpreter llmInterpreter;
     private static List<PostProcessor> postProcessors = new ArrayList<>();
     private static List<ParseResponder> parseResponders = new ArrayList<>();
     private static List<ExecuteResponder> executeResponders = new ArrayList<>();
     private static ModelResolver modelResolver;
+
     public static List<SchemaMapper> getSchemaMappers() {
         return CollectionUtils.isEmpty(schemaMappers) ? init(SchemaMapper.class, schemaMappers) : schemaMappers;
     }
@@ -61,6 +65,13 @@ public class ComponentFactory {
         semanticInterpreter = layer;
     }
 
+
+    public static LLMInterpreter getLLMInterpreter() {
+        if (Objects.isNull(llmInterpreter)) {
+            llmInterpreter = init(LLMInterpreter.class);
+        }
+        return llmInterpreter;
+    }
 
     public static ModelResolver getModelResolver() {
         if (Objects.isNull(modelResolver)) {

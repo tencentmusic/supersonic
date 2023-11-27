@@ -5,10 +5,9 @@ import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Identify;
-
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Identify.Type;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Materialization.TimePartType;
-
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Metric;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.Renderer;
@@ -19,6 +18,18 @@ import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.FilterNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.IdentifyNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.MetricNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.SemanticNode;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.calcite.sql.JoinConditionType;
+import org.apache.calcite.sql.SqlBasicCall;
+import org.apache.calcite.sql.SqlJoin;
+import org.apache.calcite.sql.SqlLiteral;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.fun.SqlStdOperatorTable;
+import org.apache.calcite.sql.parser.SqlParserPos;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
+import org.apache.commons.lang3.tuple.Triple;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,21 +39,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.calcite.sql.JoinConditionType;
-import org.apache.calcite.sql.JoinType;
-import org.apache.calcite.sql.SqlBasicCall;
-import org.apache.calcite.sql.SqlJoin;
-import org.apache.calcite.sql.SqlLiteral;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.fun.SqlStdOperatorTable;
-import org.apache.calcite.sql.parser.SqlParserPos;
-import org.apache.calcite.sql.validate.SqlValidatorScope;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class JoinRender extends Renderer {
@@ -51,7 +52,7 @@ public class JoinRender extends Renderer {
     public void render(MetricReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
             SemanticSchema schema, boolean nonAgg) throws Exception {
         String queryWhere = metricCommand.getWhere();
-        dataSources = getOrderSource(dataSources);
+        //dataSources = getOrderSource(dataSources);
         Set<String> whereFields = new HashSet<>();
         List<String> fieldWhere = new ArrayList<>();
         if (queryWhere != null && !queryWhere.isEmpty()) {
@@ -68,6 +69,7 @@ public class JoinRender extends Renderer {
         TableView filterView = new TableView();
         Map<String, SqlNode> innerSelect = new HashMap<>();
         Set<String> filterDimension = new HashSet<>();
+        Map<String, String> beforeSources = new HashMap<>();
 
         for (int i = 0; i < dataSources.size(); i++) {
             final DataSource dataSource = dataSources.get(i);
@@ -112,18 +114,12 @@ public class JoinRender extends Renderer {
             if (left == null) {
                 leftTable = tableView;
                 left = SemanticNode.buildAs(tableView.getAlias(), getTable(tableView, scope));
+                beforeSources.put(dataSource.getName(), leftTable.getAlias());
                 continue;
             }
-
-            left = new SqlJoin(
-                    SqlParserPos.ZERO,
-                    left,
-                    SqlLiteral.createBoolean(false, SqlParserPos.ZERO),
-                    SqlLiteral.createSymbol(JoinType.INNER, SqlParserPos.ZERO),
-                    SemanticNode.buildAs(tableView.getAlias(), getTable(tableView, scope)),
-                    SqlLiteral.createSymbol(JoinConditionType.ON, SqlParserPos.ZERO),
-                    getCondition(leftTable, tableView, dataSource, schema, scope));
+            left = buildJoin(left, leftTable, tableView, beforeSources, dataSource, schema, scope);
             leftTable = tableView;
+            beforeSources.put(dataSource.getName(), tableView.getAlias());
         }
 
         for (Map.Entry<String, SqlNode> entry : innerSelect.entrySet()) {
@@ -258,6 +254,76 @@ public class JoinRender extends Renderer {
         return SemanticNode.getTable(tableView.getTable());
     }
 
+    private SqlNode buildJoin(SqlNode left, TableView leftTable, TableView tableView, Map<String, String> before,
+            DataSource dataSource,
+            SemanticSchema schema, SqlValidatorScope scope)
+            throws Exception {
+        SqlNode condition = getCondition(leftTable, tableView, dataSource, schema, scope);
+        SqlLiteral sqlLiteral = SemanticNode.getJoinSqlLiteral("");
+        if (!TimePartType.ZIPPER.equals(leftTable.getDataSource().getTimePartType()) && !TimePartType.ZIPPER.equals(
+                tableView.getDataSource().getTimePartType())) {
+            JoinRelation matchJoinRelation = getMatchJoinRelation(before, tableView, schema);
+            if (!CollectionUtils.isEmpty(matchJoinRelation.getJoinCondition())) {
+                sqlLiteral = SemanticNode.getJoinSqlLiteral(matchJoinRelation.getJoinType());
+                condition = getCondition(matchJoinRelation, scope);
+            }
+        }
+        return new SqlJoin(
+                SqlParserPos.ZERO,
+                left,
+                SqlLiteral.createBoolean(false, SqlParserPos.ZERO),
+                sqlLiteral,
+                SemanticNode.buildAs(tableView.getAlias(), getTable(tableView, scope)),
+                SqlLiteral.createSymbol(JoinConditionType.ON, SqlParserPos.ZERO),
+                condition
+        );
+    }
+
+    private JoinRelation getMatchJoinRelation(Map<String, String> before, TableView tableView, SemanticSchema schema) {
+        JoinRelation matchJoinRelation = JoinRelation.builder().build();
+        if (!CollectionUtils.isEmpty(schema.getJoinRelations())) {
+            for (JoinRelation joinRelation : schema.getJoinRelations()) {
+                if (joinRelation.getRight().equalsIgnoreCase(tableView.getDataSource().getName())
+                        && before.containsKey(joinRelation.getLeft())) {
+                    matchJoinRelation.setJoinCondition(joinRelation.getJoinCondition().stream()
+                            .map(r -> Triple.of(before.get(joinRelation.getLeft()) + "." + r.getLeft(),
+                                    r.getMiddle(), tableView.getAlias() + "." + r.getRight())).collect(
+                                    Collectors.toList()));
+                    matchJoinRelation.setJoinType(joinRelation.getJoinType());
+                }
+            }
+
+        }
+        return matchJoinRelation;
+    }
+
+
+    private SqlNode getCondition(JoinRelation joinRelation,
+            SqlValidatorScope scope) throws Exception {
+        SqlNode condition = null;
+        for (Triple<String, String, String> con : joinRelation.getJoinCondition()) {
+            List<SqlNode> ons = new ArrayList<>();
+            ons.add(SemanticNode.parse(con.getLeft(), scope));
+            ons.add(SemanticNode.parse(con.getRight(), scope));
+            if (Objects.isNull(condition)) {
+                condition = new SqlBasicCall(
+                        SemanticNode.getBinaryOperator(con.getMiddle()),
+                        ons,
+                        SqlParserPos.ZERO, null);
+                continue;
+            }
+            SqlNode addCondition = new SqlBasicCall(
+                    SemanticNode.getBinaryOperator(con.getMiddle()),
+                    ons,
+                    SqlParserPos.ZERO, null);
+            condition = new SqlBasicCall(
+                    SqlStdOperatorTable.AND,
+                    new ArrayList<>(Arrays.asList(condition, addCondition)),
+                    SqlParserPos.ZERO, null);
+        }
+        return condition;
+    }
+
     private SqlNode getCondition(TableView left, TableView right, DataSource dataSource, SemanticSchema schema,
             SqlValidatorScope scope) throws Exception {
         if (TimePartType.ZIPPER.equals(left.getDataSource().getTimePartType()) || TimePartType.ZIPPER.equals(
@@ -318,8 +384,7 @@ public class JoinRender extends Renderer {
         });
         int cnt = dataSources.size();
         List<Map.Entry<String, List<Identify>>> dataSourceIdentifyList = dataSourceIdentifies.entrySet().stream()
-                .collect(
-                        Collectors.toList());
+                .collect(Collectors.toList());
         for (int i = 0; i < cnt; i++) {
             for (int j = i + 1; j < cnt; j++) {
                 Set<String> primaries = IdentifyNode.getIdentifyNames(dataSourceIdentifyList.get(i).getValue(),
@@ -384,6 +449,7 @@ public class JoinRender extends Renderer {
         orders.poll();
         visited.put(id, false);
     }
+
     private void addZipperField(DataSource dataSource, List<String> fields) {
         if (TimePartType.ZIPPER.equals(dataSource.getTimePartType())) {
             dataSource.getDimensions().stream()

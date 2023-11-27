@@ -1,7 +1,8 @@
 package com.tencent.supersonic.chat.parser.plugin.function;
 
-import com.alibaba.fastjson.JSON;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.llm.HttpLLMInterpreter;
+import com.tencent.supersonic.chat.llm.LLMInterpreter;
 import com.tencent.supersonic.chat.parser.ParseMode;
 import com.tencent.supersonic.chat.parser.plugin.PluginParser;
 import com.tencent.supersonic.chat.plugin.Plugin;
@@ -10,34 +11,29 @@ import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.query.llm.s2sql.S2SQLQuery;
 import com.tencent.supersonic.chat.service.PluginService;
+import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.util.ContextUtils;
-import java.net.URI;
+import com.tencent.supersonic.common.util.JsonUtil;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 public class FunctionBasedParser extends PluginParser {
+
+    protected LLMInterpreter llmInterpreter = ComponentFactory.getLLMInterpreter();
 
     @Override
     public boolean checkPreCondition(QueryContext queryContext) {
         FunctionCallConfig functionCallConfig = ContextUtils.getBean(FunctionCallConfig.class);
         String functionUrl = functionCallConfig.getUrl();
-        if (StringUtils.isBlank(functionUrl)) {
+        if (StringUtils.isBlank(functionUrl) && llmInterpreter instanceof HttpLLMInterpreter) {
             log.info("functionUrl:{}, skip function parser, queryText:{}", functionUrl,
                     queryContext.getRequest().getQueryText());
             return false;
@@ -88,7 +84,7 @@ public class FunctionBasedParser extends PluginParser {
             FunctionReq functionReq = FunctionReq.builder()
                     .queryText(queryContext.getRequest().getQueryText())
                     .pluginConfigs(pluginToFunctionCall).build();
-            functionResp = requestFunction(functionReq);
+            functionResp = llmInterpreter.requestFunction(functionReq);
         }
         return functionResp;
     }
@@ -131,25 +127,4 @@ public class FunctionBasedParser extends PluginParser {
         return functionDOList;
     }
 
-    public FunctionResp requestFunction(FunctionReq functionReq) {
-        FunctionCallConfig functionCallInfoConfig = ContextUtils.getBean(FunctionCallConfig.class);
-        String url = functionCallInfoConfig.getUrl() + functionCallInfoConfig.getPluginSelectPath();
-        HttpHeaders headers = new HttpHeaders();
-        long startTime = System.currentTimeMillis();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<>(JSON.toJSONString(functionReq), headers);
-        URI requestUrl = UriComponentsBuilder.fromHttpUrl(url).build().encode().toUri();
-        RestTemplate restTemplate = ContextUtils.getBean(RestTemplate.class);
-        try {
-            log.info("requestFunction functionReq:{}", JsonUtil.toString(functionReq));
-            ResponseEntity<FunctionResp> responseEntity = restTemplate.exchange(requestUrl, HttpMethod.POST, entity,
-                    FunctionResp.class);
-            log.info("requestFunction responseEntity:{},cost:{}", responseEntity,
-                    System.currentTimeMillis() - startTime);
-            return responseEntity.getBody();
-        } catch (Exception e) {
-            log.error("requestFunction error", e);
-        }
-        return null;
-    }
 }

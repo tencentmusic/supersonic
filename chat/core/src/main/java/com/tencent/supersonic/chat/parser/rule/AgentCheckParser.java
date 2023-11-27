@@ -9,10 +9,14 @@ import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.service.AgentService;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,10 +48,22 @@ public class AgentCheckParser implements SemanticParser {
                         && !tool.getQueryModes().contains(query.getQueryMode())) {
                     return true;
                 }
+                if (CollectionUtils.isNotEmpty(tool.getQueryTypes())) {
+                    if (QueryManager.isTagQuery(query.getQueryMode())) {
+                        return !tool.getQueryTypes().contains(QueryType.TAG.name());
+                    }
+                    if (QueryManager.isMetricQuery(query.getQueryMode())) {
+                        return !tool.getQueryTypes().contains(QueryType.METRIC.name());
+                    }
+                }
                 if (CollectionUtils.isEmpty(tool.getModelIds())) {
                     return true;
                 }
-                if (tool.isContainsAllModel() || tool.getModelIds().contains(query.getParseInfo().getModelId())) {
+                if (tool.isContainsAllModel()) {
+                    return false;
+                }
+                if (new HashSet<>(tool.getModelIds())
+                        .containsAll(query.getParseInfo().getModel().getModelIds())) {
                     return false;
                 }
             }

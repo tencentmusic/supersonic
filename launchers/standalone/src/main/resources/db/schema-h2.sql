@@ -133,6 +133,10 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
     `view_org` varchar(3000) DEFAULT NULL  , -- domain available organization
     `entity` varchar(500) DEFAULT NULL  , -- domain entity info
     `drill_down_dimensions` varchar(500) DEFAULT NULL  , -- drill down dimensions info
+    `database_id` INT NOT  NULL ,
+    `model_detail` LONGVARCHAR NOT  NULL ,
+    `depends` varchar(500) DEFAULT NULL ,
+    `filter_sql` varchar(1000) DEFAULT NULL ,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_model IS 'model information';
@@ -156,16 +160,12 @@ CREATE TABLE `s2_database` (
 COMMENT ON TABLE s2_database IS 'database instance table';
 
 CREATE TABLE  IF NOT EXISTS  `s2_datasource` (
-                                                 `id` INT NOT NULL AUTO_INCREMENT,
-                                                 `model_id` INT NOT  NULL ,
-                                                 `name` varchar(255) NOT  NULL ,
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `model_id` INT NOT  NULL ,
+    `name` varchar(255) NOT  NULL ,
     `biz_name` varchar(255) NOT  NULL ,
     `description` varchar(500) DEFAULT  NULL ,
-    `database_id` INT NOT  NULL ,
-    `datasource_detail` LONGVARCHAR NOT  NULL ,
-    `status` int(11) DEFAULT NULL ,
-    `depends` varchar(500) DEFAULT NULL ,
-    `filter_sql` varchar(1000) DEFAULT NULL ,
+
     `created_at` TIMESTAMP NOT  NULL ,
     `created_by` varchar(100) NOT  NULL ,
     `updated_at` TIMESTAMP NOT  NULL ,
@@ -208,7 +208,6 @@ COMMENT ON TABLE s2_metric IS 'metric information table';
 CREATE TABLE IF NOT EXISTS `s2_dimension` (
                                               `id` INT NOT NULL  AUTO_INCREMENT ,
                                               `model_id` INT NOT NULL ,
-                                              `datasource_id` INT  NOT NULL ,
                                               `name` varchar(255) NOT NULL ,
     `biz_name` varchar(255)  NOT NULL ,
     `description` varchar(500) NOT NULL ,
@@ -231,20 +230,16 @@ CREATE TABLE IF NOT EXISTS `s2_dimension` (
     );
 COMMENT ON TABLE s2_dimension IS 'dimension information table';
 
-create table s2_datasource_rela
+CREATE TABLE s2_model_rela
 (
-    id              INT AUTO_INCREMENT,
-    model_id       INT       null,
-    datasource_from INT       null,
-    datasource_to   INT       null,
-    join_key        varchar(100) null,
-    created_at      TIMESTAMP     null,
-    created_by      varchar(100) null,
-    updated_at      TIMESTAMP     null,
-    updated_by      varchar(100) null,
+    id             BIGINT AUTO_INCREMENT,
+    domain_id       BIGINT,
+    from_model_id    BIGINT,
+    to_model_id      BIGINT,
+    join_type       VARCHAR(255),
+    join_condition  VARCHAR(255),
     PRIMARY KEY (`id`)
 );
-COMMENT ON TABLE s2_datasource_rela IS 'data source association table';
 
 create table s2_view_info
 (
@@ -536,3 +531,4 @@ CREATE TABLE s2_sys_parameter
     admin varchar(500),
     parameters text null
 );
+

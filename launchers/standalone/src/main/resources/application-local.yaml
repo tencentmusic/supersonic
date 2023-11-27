@@ -40,3 +40,18 @@ embedding:
   url: http://127.0.0.1:9092
 functionCall:
   url: http://127.0.0.1:9092
+
+
+langchain4j:
+  chat-model:
+    provider: open_ai
+    openai:
+      api-key: api_key
+      model-name: gpt-3.5-turbo
+      temperature: 0.0
+      timeout: PT60S
+
+logging:
+  level:
+    dev.langchain4j: DEBUG
+    dev.ai4j.openai4j: DEBUG

@@ -5,7 +5,6 @@
     <resultMap id="BaseResultMap" type="com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO">
         <id column="id" jdbcType="BIGINT" property="id" />
         <result column="model_id" jdbcType="BIGINT" property="modelId" />
-        <result column="datasource_id" jdbcType="BIGINT" property="datasourceId" />
         <result column="name" jdbcType="VARCHAR" property="name" />
         <result column="biz_name" jdbcType="VARCHAR" property="bizName" />
         <result column="description" jdbcType="VARCHAR" property="description" />
@@ -67,8 +66,7 @@
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         insert into s2_dimension (name, biz_name,
         description, status, model_id,
-        type, type_params, expr,
-        datasource_id, created_at, created_by,
+        type, type_params, expr,created_at, created_by,
         updated_by, updated_at, semantic_type,sensitive_level, is_tag)
         values
         <foreach collection="list" item="dimension" separator=",">
@@ -76,8 +74,7 @@
             #{dimension.description,jdbcType=VARCHAR}, #{dimension.status,jdbcType=INTEGER},
             #{dimension.modelId,jdbcType=BIGINT},
             #{dimension.type,jdbcType=VARCHAR}, #{dimension.typeParams,jdbcType=VARCHAR},
-            #{dimension.expr,jdbcType=VARCHAR},
-            #{dimension.datasourceId,jdbcType=BIGINT}, #{dimension.createdAt,jdbcType=TIMESTAMP},
+            #{dimension.expr,jdbcType=VARCHAR}, #{dimension.createdAt,jdbcType=TIMESTAMP},
             #{dimension.createdBy,jdbcType=VARCHAR},
             #{dimension.updatedBy,jdbcType=VARCHAR}, #{dimension.updatedAt,jdbcType=TIMESTAMP},
             #{dimension.semanticType,jdbcType=VARCHAR},
@@ -160,9 +157,6 @@
         </if>
         <if test="createdBy != null">
             and created_by = #{createdBy}
-        </if>
-        <if test="datasourceId != null">
-            and datasource_id = #{datasourceId}
         </if>
         <if test="isTag != null and isTag == 1">
             and is_tag = 1

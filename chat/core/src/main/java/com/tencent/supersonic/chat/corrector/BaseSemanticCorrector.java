@@ -12,6 +12,10 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -19,9 +23,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 
 /**
  * basic semantic correction functionality, offering common methods and an
@@ -45,7 +46,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
     public abstract void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo);
 
-    protected Map<String, String> getFieldNameMap(Long modelId) {
+    protected Map<String, String> getFieldNameMap(Set<Long> modelIds) {
 
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
 
@@ -55,7 +56,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
         // support fieldName and field alias
         Map<String, String> result = dbAllFields.stream()
-                .filter(entry -> entry.getModel().equals(modelId))
+                .filter(entry -> modelIds.contains(entry.getModel()))
                 .flatMap(schemaElement -> {
                     Set<String> elements = new HashSet<>();
                     elements.add(schemaElement.getName());
@@ -103,9 +104,9 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
     protected void addAggregateToMetric(SemanticParseInfo semanticParseInfo) {
         //add aggregate to all metric
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
-        Long modelId = semanticParseInfo.getModel().getModel();
+        Set<Long> modelIds = semanticParseInfo.getModel().getModelIds();
 
-        List<SchemaElement> metrics = getMetricElements(modelId);
+        List<SchemaElement> metrics = getMetricElements(modelIds);
 
         Map<String, String> metricToAggregate = metrics.stream()
                 .map(schemaElement -> {
@@ -122,9 +123,9 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(aggregateSql);
     }
 
-    protected List<SchemaElement> getMetricElements(Long modelId) {
+    protected List<SchemaElement> getMetricElements(Set<Long> modelIds) {
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-        return semanticSchema.getMetrics(modelId);
+        return semanticSchema.getMetrics(modelIds);
     }
 
 }

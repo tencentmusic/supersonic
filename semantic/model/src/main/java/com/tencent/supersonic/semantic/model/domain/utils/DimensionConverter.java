@@ -3,24 +3,23 @@ package com.tencent.supersonic.semantic.model.domain.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
-import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.semantic.api.model.request.DimensionReq;
-import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.common.util.BeanMapper;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Dimension;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.CollectionUtils;
 
 public class DimensionConverter {
 
@@ -57,22 +56,18 @@ public class DimensionConverter {
     }
 
     public static DimensionResp convert2DimensionResp(DimensionDO dimensionDO,
-                                                      Map<Long, String> fullPathMap,
-                                                      Map<Long, DatasourceResp> datasourceRespMap) {
+                                                      Map<Long, ModelResp> modelRespMap) {
         DimensionResp dimensionResp = new DimensionResp();
         BeanUtils.copyProperties(dimensionDO, dimensionResp);
-        dimensionResp.setFullPath(fullPathMap.get(dimensionDO.getModelId()) + "/" + dimensionDO.getBizName());
-        dimensionResp.setDatasourceId(
-                datasourceRespMap.getOrDefault(dimensionResp.getDatasourceId(), new DatasourceResp()).getId());
-        dimensionResp.setDatasourceName(
-                datasourceRespMap.getOrDefault(dimensionResp.getDatasourceId(), new DatasourceResp()).getName());
-        dimensionResp.setDatasourceBizName(
-                datasourceRespMap.getOrDefault(dimensionResp.getDatasourceId(), new DatasourceResp()).getBizName());
+        dimensionResp.setModelName(
+                modelRespMap.getOrDefault(dimensionResp.getModelId(), new ModelResp()).getName());
+        dimensionResp.setModelBizName(
+                modelRespMap.getOrDefault(dimensionResp.getModelId(), new ModelResp()).getBizName());
         if (dimensionDO.getDefaultValues() != null) {
             dimensionResp.setDefaultValues(JSONObject.parseObject(dimensionDO.getDefaultValues(), List.class));
         }
-        dimensionResp.setDatasourceFilterSql(
-                datasourceRespMap.getOrDefault(dimensionResp.getDatasourceId(), new DatasourceResp()).getFilterSql());
+        dimensionResp.setModelFilterSql(
+                modelRespMap.getOrDefault(dimensionResp.getModelId(), new ModelResp()).getFilterSql());
         if (Strings.isNotEmpty(dimensionDO.getDimValueMaps())) {
             dimensionResp.setDimValueMaps(JsonUtil.toList(dimensionDO.getDimValueMaps(), DimValueMap.class));
         }

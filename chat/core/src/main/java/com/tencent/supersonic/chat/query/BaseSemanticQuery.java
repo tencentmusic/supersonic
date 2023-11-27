@@ -20,15 +20,16 @@ import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @ToString
@@ -49,7 +50,7 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
                 explainSqlReq = ExplainSqlReq.builder()
                         .queryTypeEnum(QueryTypeEnum.SQL)
                         .queryReq(QueryReqBuilder.buildS2SQLReq(
-                                sqlInfo.getCorrectS2SQL(), parseInfo.getModelId()
+                                sqlInfo.getCorrectS2SQL(), parseInfo.getModel().getModelIds()
                         ))
                         .build();
             } else {
@@ -86,7 +87,7 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
     protected void convertBizNameToName(QueryStructReq queryStructReq) {
         SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
         Map<String, String> bizNameToName = schemaService.getSemanticSchema()
-                .getBizNameToName(queryStructReq.getModelId());
+                .getBizNameToName(queryStructReq.getModelIdSet());
         bizNameToName.putAll(TimeDimensionEnum.getNameToNameMap());
 
         List<Order> orders = queryStructReq.getOrders();

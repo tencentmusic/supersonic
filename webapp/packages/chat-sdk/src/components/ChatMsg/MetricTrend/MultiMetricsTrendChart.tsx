@@ -12,6 +12,7 @@ type Props = {
   metricFields: ColumnType[];
   resultList: any[];
   triggerResize?: boolean;
+  chartType?: string;
 };
 
 const MultiMetricsTrendChart: React.FC<Props> = ({
@@ -19,6 +20,7 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
   metricFields,
   resultList,
   triggerResize,
+  chartType,
 }) => {
   const chartRef = useRef<any>();
   const [instance, setInstance] = useState<ECharts>();
@@ -110,7 +112,7 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
       },
       series: metricFields.map((metricField, index) => {
         return {
-          type: 'line',
+          type: chartType,
           name: metricField.name,
           symbol: 'circle',
           showSymbol: resultList.length === 1,
@@ -132,7 +134,7 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
 
   useEffect(() => {
     renderChart();
-  }, [resultList]);
+  }, [resultList, chartType]);
 
   useEffect(() => {
     if (triggerResize && instance) {

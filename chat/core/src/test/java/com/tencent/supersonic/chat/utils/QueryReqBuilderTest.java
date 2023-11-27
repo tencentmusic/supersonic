@@ -56,7 +56,7 @@ class QueryReqBuilderTest {
                 "SELECT department, SUM(pv) FROM 内容库 WHERE (sys_imp_date IN ('2023-08-01')) "
                         + "GROUP BY department ORDER BY uv LIMIT 2000", queryS2SQLReq.getSql());
 
-        queryStructReq.setQueryType(QueryType.ENTITY);
+        queryStructReq.setQueryType(QueryType.TAG);
         queryS2SQLReq = queryStructReq.convert(queryStructReq);
         Assert.assertEquals(
                 "SELECT department, pv FROM 内容库 WHERE (sys_imp_date IN ('2023-08-01')) "

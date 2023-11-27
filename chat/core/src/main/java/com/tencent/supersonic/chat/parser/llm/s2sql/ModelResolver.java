@@ -7,6 +7,6 @@ import java.util.Set;
 
 public interface ModelResolver {
 
-    Long resolve(QueryContext queryContext, ChatContext chatCtx, Set<Long> restrictiveModels);
+    String resolve(QueryContext queryContext, ChatContext chatCtx, Set<Long> restrictiveModels);
 
 }

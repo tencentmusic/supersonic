@@ -3,24 +3,26 @@ package com.tencent.supersonic.semantic.model.application;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.semantic.api.model.request.DatabaseReq;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
-import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.model.domain.DatasourceService;
+import com.tencent.supersonic.semantic.model.domain.DatabaseService;
+import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter.EngineAdaptor;
 import com.tencent.supersonic.semantic.model.domain.adaptor.engineadapter.EngineAdaptorFactory;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatabaseDO;
+import com.tencent.supersonic.semantic.model.domain.pojo.Database;
+import com.tencent.supersonic.semantic.model.domain.pojo.ModelFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.DatabaseRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.DatabaseConverter;
 import com.tencent.supersonic.semantic.model.domain.utils.JdbcDataSourceUtils;
 import com.tencent.supersonic.semantic.model.domain.utils.SqlUtils;
-import com.tencent.supersonic.semantic.model.domain.DatabaseService;
-import com.tencent.supersonic.semantic.model.domain.pojo.Database;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -29,11 +31,11 @@ public class DatabaseServiceImpl implements DatabaseService {
 
     private final SqlUtils sqlUtils;
     private DatabaseRepository databaseRepository;
-    private DatasourceService datasourceService;
+    private ModelService datasourceService;
 
     public DatabaseServiceImpl(DatabaseRepository databaseRepository,
                                SqlUtils sqlUtils,
-                               @Lazy DatasourceService datasourceService) {
+                               @Lazy ModelService datasourceService) {
         this.databaseRepository = databaseRepository;
         this.sqlUtils = sqlUtils;
         this.datasourceService = datasourceService;
@@ -88,11 +90,13 @@ public class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public void deleteDatabase(Long databaseId) {
-        List<DatasourceResp> datasourceResps = datasourceService.getDatasourceByDatabase(databaseId);
-        if (!CollectionUtils.isEmpty(datasourceResps)) {
-            List<String> datasourceNames = datasourceResps.stream()
-                    .map(DatasourceResp::getName).collect(Collectors.toList());
-            String message = String.format("该数据库被数据源%s使用，无法删除", datasourceNames);
+        ModelFilter modelFilter = new ModelFilter();
+        modelFilter.setDatabaseId(databaseId);
+        List<ModelResp> modelResps = datasourceService.getModelList(modelFilter);
+        if (!CollectionUtils.isEmpty(modelResps)) {
+            List<String> datasourceNames = modelResps.stream()
+                    .map(ModelResp::getName).collect(Collectors.toList());
+            String message = String.format("该数据库被模型%s使用，无法删除", datasourceNames);
             throw new RuntimeException(message);
         }
         databaseRepository.deleteDatabase(databaseId);

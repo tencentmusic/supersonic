@@ -1,20 +1,24 @@
 package com.tencent.supersonic.semantic.query.utils;
 
-import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
-import static com.tencent.supersonic.common.pojo.Constants.UNIONALL;
-
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.cache.CacheUtils;
 import com.tencent.supersonic.semantic.api.model.enums.SemanticTypeEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,12 +30,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
+import static com.tencent.supersonic.common.pojo.Constants.UNIONALL;
 
 
 @Slf4j
@@ -67,9 +68,9 @@ public class QueryUtils {
         }
     }
 
-    public void fillItemNameInfo(QueryResultWithSchemaResp queryResultWithColumns, Long modelId) {
-        List<MetricResp> metricDescList = catalog.getMetrics(modelId);
-        List<DimensionResp> dimensionDescList = catalog.getDimensions(modelId);
+    public void fillItemNameInfo(QueryResultWithSchemaResp queryResultWithColumns, List<Long> modelIds) {
+        List<MetricResp> metricDescList = catalog.getMetrics(modelIds);
+        List<DimensionResp> dimensionDescList = catalog.getDimensions(modelIds);
         Map<String, MetricResp> metricRespMap =
                 metricDescList.stream().collect(Collectors.toMap(MetricResp::getBizName, a -> a, (k1, k2) -> k1));
         Map<String, String> namePair = new HashMap<>();

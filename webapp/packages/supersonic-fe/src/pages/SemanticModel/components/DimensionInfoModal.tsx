@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Modal, Select, Row, Col, Space, Tooltip } from 'antd';
+import { Button, Form, Input, Modal, Select, Row, Col, Space, Tooltip, Switch } from 'antd';
 import { SENSITIVE_LEVEL_OPTIONS } from '../constant';
 import { formLayout } from '@/components/FormHelper/utils';
 import SqlEditor from '@/components/SqlEditor';
@@ -7,6 +7,7 @@ import InfoTagList from './InfoTagList';
 import { ISemantic } from '../data';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { createDimension, updateDimension, mockDimensionAlias } from '../service';
+import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 
 import { message } from 'antd';
 
@@ -231,6 +232,26 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
         <FormItem name="defaultValues" label="默认值">
           <InfoTagList />
         </FormItem>
+        <Form.Item
+          label={
+            <FormItemTitle
+              title={`设为标签`}
+              subTitle={`如果勾选，代表维度的取值都是一种'标签'，可用作对实体的圈选`}
+            />
+          }
+          name="isTag"
+          valuePropName="checked"
+          getValueFromEvent={(value) => {
+            return value === true ? 1 : 0;
+          }}
+          getValueProps={(value) => {
+            return {
+              checked: value === 1,
+            };
+          }}
+        >
+          <Switch />
+        </Form.Item>
         <FormItem
           name="description"
           label="维度描述"

@@ -129,7 +129,7 @@ public class SqlParserSelectHelper {
         try {
             statement = CCJSqlParserUtil.parse(sql);
         } catch (JSQLParserException e) {
-            log.error("parse error", e);
+            log.error("parse error, sql:{}", sql, e);
             return null;
         }
 
@@ -417,7 +417,7 @@ public class SqlParserSelectHelper {
     }
 
     public static Expression getTimeFilter(List<ImmutablePair<String, String>> times, String columnBegin,
-                                           String columnEnd) {
+            String columnEnd) {
         Expression expression = null;
         for (ImmutablePair<String, String> t : times) {
             Expression expr = null;
