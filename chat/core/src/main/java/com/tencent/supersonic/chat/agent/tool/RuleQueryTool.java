@@ -12,6 +12,8 @@ public class RuleQueryTool extends CommonAgentTool {
 
     private List<String> queryModes;
 
+    private List<String> queryTypes;
+
     public boolean isContainsAllModel() {
         return CollectionUtils.isNotEmpty(modelIds) && modelIds.contains(-1L);
     }
