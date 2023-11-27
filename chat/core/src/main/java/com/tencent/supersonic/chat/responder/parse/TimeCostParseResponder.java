@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ParseTimeParseResponder implements ParseResponder {
+public class TimeCostParseResponder implements ParseResponder {
 
 
     @Override
