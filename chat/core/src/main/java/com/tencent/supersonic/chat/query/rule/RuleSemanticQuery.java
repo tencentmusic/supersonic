@@ -51,7 +51,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-            QueryContext queryCtx) {
+                                          QueryContext queryCtx) {
         return queryMatcher.match(candidateElementMatches);
     }
 
@@ -76,8 +76,8 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
             return;
         }
 
-        if ((QueryManager.isEntityQuery(queryParseInfo.getQueryMode())
-                && QueryManager.isEntityQuery(chatParseInfo.getQueryMode()))
+        if ((QueryManager.isTagQuery(queryParseInfo.getQueryMode())
+                && QueryManager.isTagQuery(chatParseInfo.getQueryMode()))
                 || (QueryManager.isMetricQuery(queryParseInfo.getQueryMode())
                 && QueryManager.isMetricQuery(chatParseInfo.getQueryMode()))) {
             // inherit date info from context

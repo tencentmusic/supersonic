@@ -27,6 +27,7 @@ import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.chat.service.QueryService;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.SysParameter;
 import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -263,10 +264,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         ruleQueryTool.setType(AgentToolType.RULE);
         ruleQueryTool.setId("0");
         ruleQueryTool.setModelIds(Lists.newArrayList(-1L));
-        ruleQueryTool.setQueryModes(Lists.newArrayList(
-                "METRIC_ENTITY", "METRIC_FILTER", "METRIC_GROUPBY",
-                "METRIC_MODEL", "METRIC_ORDERBY"
-        ));
+        ruleQueryTool.setQueryTypes(Lists.newArrayList(QueryType.METRIC.name()));
         agentConfig.getTools().add(ruleQueryTool);
 
         LLMParserTool llmParserTool = new LLMParserTool();
@@ -292,8 +290,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         ruleQueryTool.setId("0");
         ruleQueryTool.setType(AgentToolType.RULE);
         ruleQueryTool.setModelIds(Lists.newArrayList(-1L));
-        ruleQueryTool.setQueryModes(Lists.newArrayList(
-                "TAG_DETAIL", "TAG_LIST_FILTER", "TAG_ID"));
+        ruleQueryTool.setQueryTypes(Lists.newArrayList(QueryType.TAG.name()));
         agentConfig.getTools().add(ruleQueryTool);
 
         LLMParserTool llmParserTool = new LLMParserTool();
