@@ -5,7 +5,7 @@ import DataSourceFieldForm from './DataSourceFieldForm';
 import { formLayout } from '@/components/FormHelper/utils';
 import { EnumDataSourceType } from '../constants';
 import styles from '../style.less';
-import { createDatasource, updateDatasource, getColumns } from '../../service';
+import { updateModel, createModel, getColumns } from '../../service';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
 import { connect } from 'umi';
@@ -29,9 +29,9 @@ export type CreateFormProps = {
 const { Step } = Steps;
 
 const initFormVal = {
-  name: '', // 数据源名称
-  bizName: '', // 数据源英文名
-  description: '', // 数据源描述
+  name: '', // 模型名称
+  bizName: '', // 模型英文名
+  description: '', // 模型描述
 };
 
 const DataSourceCreateForm: React.FC<CreateFormProps> = ({
@@ -56,7 +56,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const [formDatabaseId, setFormDatabaseId] = useState<number>();
   const formValRef = useRef(initFormVal as any);
   const [form] = Form.useForm();
-  const { databaseConfigList, selectModelId: modelId } = domainManger;
+  const { databaseConfigList, selectModelId: modelId, selectDomainId } = domainManger;
   const updateFormVal = (val: any) => {
     formValRef.current = val;
   };
@@ -170,18 +170,22 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       const { dbName, tableName } = submitForm;
       const queryParams = {
         ...submitForm,
-        sqlQuery: sql,
         databaseId: databaseId || dataSourceItem?.databaseId || formDatabaseId,
-        queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
-        tableQuery: dbName && tableName ? `${dbName}.${tableName}` : '',
         modelId: isEdit ? dataSourceItem.modelId : modelId,
         filterSql: sqlFilter,
+        domainId: isEdit ? dataSourceItem.domainId : selectDomainId,
+        modelDetail: {
+          ...submitForm,
+          queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
+          tableQuery: dbName && tableName ? `${dbName}.${tableName}` : '',
+          sqlQuery: sql,
+        },
       };
-      const queryDatasource = isEdit ? updateDatasource : createDatasource;
+      const queryDatasource = isEdit ? updateModel : createModel;
       const { code, msg, data } = await queryDatasource(queryParams);
       setSaveLoading(false);
       if (code === 200) {
-        message.success('保存数据源成功！');
+        message.success('保存模型成功！');
         onSubmit?.({
           ...queryParams,
           ...data,
@@ -196,7 +200,13 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const initFields = (fieldsClassifyList: any[], columns: any[]) => {
     const columnFields: any[] = columns.map((item: any) => {
       const { type, nameEn } = item;
-      const oldItem = fieldsClassifyList.find((oItem) => oItem.bizName === item.nameEn) || {};
+      const oldItem =
+        fieldsClassifyList.find((oItem) => {
+          if (oItem.type === EnumDataSourceType.MEASURES) {
+            return oItem.expr === item.nameEn;
+          }
+          return oItem.bizName === item.nameEn;
+        }) || {};
       return {
         ...oldItem,
         bizName: nameEn,
@@ -225,7 +235,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const initData = async () => {
-    const { queryType, tableQuery } = dataSourceItem.datasourceDetail;
+    const { queryType, tableQuery } = dataSourceItem?.modelDetail || {};
     let tableQueryInitValue = {};
     let columns = fieldColumns || [];
     if (queryType === 'table_query') {
@@ -241,9 +251,9 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const formatterInitData = (columns: any[], extendParams: Record<string, any> = {}) => {
-    const { id, name, bizName, description, datasourceDetail, databaseId, filterSql } =
+    const { id, name, bizName, description, modelDetail, databaseId, filterSql, alias } =
       dataSourceItem as any;
-    const { dimensions, identifiers, measures } = datasourceDetail;
+    const { dimensions, identifiers, measures } = modelDetail || {};
     const initValue = {
       id,
       name,
@@ -251,8 +261,8 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       description,
       databaseId,
       filterSql,
+      alias,
       ...extendParams,
-      // ...tableQueryInitValue,
     };
     const editInitFormVal = {
       ...formValRef.current,
@@ -270,7 +280,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   useEffect(() => {
-    const { queryType } = dataSourceItem?.datasourceDetail || {};
+    const { queryType } = dataSourceItem?.modelDetail || {};
     if (queryType === 'table_query') {
       if (isEdit) {
         initData();
@@ -281,7 +291,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   }, [dataSourceItem]);
 
   useEffect(() => {
-    const { queryType } = dataSourceItem?.datasourceDetail || {};
+    const { queryType } = dataSourceItem?.modelDetail || {};
     if (queryType !== 'table_query') {
       if (isEdit) {
         initData();
@@ -358,14 +368,17 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
             上一步
           </Button>
           <Button onClick={onCancel}>取 消</Button>
-          <Button
-            type="primary"
-            onClick={() => {
-              onDataSourceBtnClick?.();
-            }}
-          >
-            数据源编辑
-          </Button>
+          {(dataSourceItem?.modelDetail?.queryType === 'sql_query' ||
+            basicInfoFormMode !== 'fast') && (
+            <Button
+              type="primary"
+              onClick={() => {
+                onDataSourceBtnClick?.();
+              }}
+            >
+              数据源编辑
+            </Button>
+          )}
 
           <Button
             type="primary"
@@ -385,11 +398,12 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
         <Button onClick={onCancel}>取消</Button>
         <Button
           type="primary"
-          onClick={() => {
-            handleNext();
+          onClick={async () => {
             if (!isEdit && Array.isArray(fields) && fields.length === 0) {
+              await form.validateFields();
               onOpenDataSourceEdit?.();
             }
+            handleNext();
           }}
         >
           下一步
@@ -401,7 +415,6 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
             onClick={() => {
               handleNext(true);
             }}
-            // disabled={hasEmptyNameField}
           >
             保 存
           </Button>
@@ -414,9 +427,8 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     <Modal
       forceRender
       width={1300}
-      // styles={{ padding: '32px 40px 48px' }}
       destroyOnClose
-      title={`${isEdit ? '编辑' : '新建'}数据源`}
+      title={`${isEdit ? '编辑' : '新建'}模型`}
       maskClosable={false}
       open={createModalVisible}
       footer={renderFooter()}

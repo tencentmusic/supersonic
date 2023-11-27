@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import moment from 'moment';
 import { message, Row, Col, Button, Space, Select, Form, Tooltip, Radio } from 'antd';
 import {
   queryStruct,
@@ -20,7 +19,7 @@ import { DateRangeType, DateSettingType } from '@/components/MDatePicker/type';
 import StandardFormRow from '@/components/StandardFormRow';
 import MetricTable from './Table';
 import { ColumnConfig } from '../data';
-
+import dayjs from 'dayjs';
 import { ISemantic } from '../../data';
 
 const FormItem = Form.Item;
@@ -50,6 +49,7 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
   const [relationDimensionOptions, setRelationDimensionOptions] = useState<
     { value: string; label: string }[]
   >([]);
+  const [dimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>([]);
   const [queryParams, setQueryParams] = useState<any>({});
   const [downloadBtnDisabledState, setDownloadBtnDisabledState] = useState<boolean>(true);
   // const [showDimensionOptions, setShowDimensionOptions] = useState<any[]>([]);
@@ -58,8 +58,8 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
     endDate: string;
     dateField: string;
   }>({
-    startDate: moment().subtract('6', 'days').format('YYYY-MM-DD'),
-    endDate: moment().format('YYYY-MM-DD'),
+    startDate: dayjs().subtract(6, 'days').format('YYYY-MM-DD'),
+    endDate: dayjs().format('YYYY-MM-DD'),
     dateField: dateFieldMap[DateRangeType.DAY],
   });
   const [rowNumber, setRowNumber] = useState<number>(5);
@@ -69,7 +69,7 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
   const [groupByDimensionFieldName, setGroupByDimensionFieldName] = useState<string>();
 
   const getMetricTrendData = async (params: any = { download: false }) => {
-    const { download, dimensionGroup, dimensionFilters } = params;
+    const { download, dimensionGroup = [], dimensionFilters = [] } = params;
     if (download) {
       setDownloadLoding(true);
     } else {
@@ -80,8 +80,26 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
     }
     const { modelId, bizName, name } = metircData;
     indicatorFields.current = [{ name, column: bizName }];
+
+    const dimensionFiltersBizNameList = dimensionFilters.map((item) => {
+      return item.bizName;
+    });
+
+    const bizNameList = Array.from(new Set([...dimensionFiltersBizNameList, ...dimensionGroup]));
+
+    const modelIds = dimensionList.reduce(
+      (idList: number[], item: ISemantic.IDimensionItem) => {
+        if (bizNameList.includes(item.bizName)) {
+          idList.push(item.modelId);
+        }
+        return idList;
+      },
+      [modelId],
+    );
+
     const res = await queryStruct({
-      modelId,
+      // modelId,
+      modelIds: Array.from(new Set(modelIds)),
       bizName,
       groups: dimensionGroup,
       dimensionFilters,
@@ -123,9 +141,15 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
     }
   };
 
-  const queryDimensionList = async (modelId: number) => {
-    const { code, data, msg } = await getDimensionList({ modelId });
+  const queryDimensionList = async (ids: number[]) => {
+    const { code, data, msg } = await getDimensionList({ ids });
     if (code === 200 && Array.isArray(data?.list)) {
+      setDimensionList(data.list);
+      setRelationDimensionOptions(
+        data.list.map((item: ISemantic.IMetricItem) => {
+          return { label: item.name, value: item.bizName };
+        }),
+      );
       return data.list;
     }
     message.error(msg);
@@ -135,26 +159,18 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
   const queryDrillDownDimension = async (metricId: number) => {
     const { code, data, msg } = await getDrillDownDimension(metricId);
     if (code === 200 && Array.isArray(data)) {
+      const ids = data.map((item) => item.dimensionId);
+      queryDimensionList(ids);
       return data;
     }
-    message.error(msg);
+    if (code !== 200) {
+      message.error(msg);
+    }
     return [];
   };
 
   const initDimensionData = async (metricItem: ISemantic.IMetricItem) => {
-    const dimensionList = await queryDimensionList(metricItem.modelId);
-    const drillDownDimension = await queryDrillDownDimension(metricItem.id);
-    const drillDownDimensionIds = drillDownDimension.map(
-      (item: ISemantic.IDrillDownDimensionItem) => item.dimensionId,
-    );
-    const drillDownDimensionList = dimensionList.filter((metricItem: ISemantic.IMetricItem) => {
-      return drillDownDimensionIds.includes(metricItem.id);
-    });
-    setRelationDimensionOptions(
-      drillDownDimensionList.map((item: ISemantic.IMetricItem) => {
-        return { label: item.name, value: item.bizName };
-      }),
-    );
+    await queryDrillDownDimension(metricItem.id);
   };
 
   useEffect(() => {
@@ -163,7 +179,7 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
       initDimensionData(metircData);
       setDrillDownDimensions(metircData?.relateDimension?.drillDownDimensions || []);
     }
-  }, [metircData, periodDate]);
+  }, [metircData?.id, periodDate]);
 
   return (
     <div style={{ backgroundColor: '#fff', marginTop: 20 }}>

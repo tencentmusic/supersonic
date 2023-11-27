@@ -7,7 +7,6 @@ import type { StateType } from '../../model';
 import moment from 'moment';
 import styles from '../style.less';
 import TransTypeTag from '../../components/TransTypeTag';
-import MetricTrendSection from '@/pages/SemanticModel/Metric/components/MetricTrendSection';
 import { SENSITIVE_LEVEL_ENUM } from '../../constant';
 
 type Props = {
@@ -105,16 +104,6 @@ const NodeInfoDrawer: React.FC<Props> = ({
             value: SENSITIVE_LEVEL_ENUM[sensitiveLevel],
           },
         ],
-      },
-      {
-        title: '指标趋势',
-        render: () => (
-          <Row key={`metricTrendSection`} style={{ marginBottom: 10, display: 'flex' }}>
-            <Col span={24}>
-              <MetricTrendSection nodeData={nodeData} />
-            </Col>
-          </Row>
-        ),
       },
       {
         title: '创建信息',

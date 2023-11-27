@@ -22,7 +22,7 @@ import { SENSITIVE_LEVEL_OPTIONS } from '../constant';
 import { formLayout } from '@/components/FormHelper/utils';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import styles from './style.less';
-import { getMeasureListByModelId } from '../service';
+import { getMeasureListByModelId, getModelDetail } from '../service';
 import DimensionAndMetricRelationModal from './DimensionAndMetricRelationModal';
 import TableTitleTooltips from '../components/TableTitleTooltips';
 import { creatExprMetric, updateExprMetric, mockMetricAlias, getMetricTags } from '../service';
@@ -88,16 +88,19 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   const backward = () => setCurrentStep(currentStep - 1);
 
   const queryClassMeasureList = async () => {
-    const { code, data } = await getMeasureListByModelId(modelId);
+    // const { code, data } = await getMeasureListByModelId(modelId);
+    const { code, data } = await getModelDetail({ modelId });
     if (code === 200) {
-      setClassMeasureList(data);
-      if (datasourceId) {
-        const hasMeasures = data.some(
-          (item: ISemantic.IMeasure) => item.datasourceId === datasourceId,
-        );
-        setHasMeasuresState(hasMeasures);
+      if (Array.isArray(data?.modelDetail?.measures)) {
+        setClassMeasureList(data);
+        if (datasourceId) {
+          const hasMeasures = data.some(
+            (item: ISemantic.IMeasure) => item.datasourceId === datasourceId,
+          );
+          setHasMeasuresState(hasMeasures);
+        }
+        return;
       }
-      return;
     }
     setClassMeasureList([]);
   };

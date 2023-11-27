@@ -72,8 +72,8 @@ export const formatterRelationData = (params: {
   const { type, dataSourceList, limit, showDataSourceId } = params;
   const relationData = dataSourceList.reduce(
     (relationList: TreeGraphData[], item: ISemantic.IDomainSchemaRelaItem) => {
-      const { datasource, dimensions, metrics } = item;
-      const { id } = datasource;
+      const { model, dimensions, metrics } = item;
+      const { id } = model;
       const dataSourceNodeId = `${SemanticNodeType.DATASOURCE}-${id}`;
       let childrenList = [];
       if (type === SemanticNodeType.METRIC) {
@@ -89,7 +89,7 @@ export const formatterRelationData = (params: {
       }
       if (!showDataSourceId || showDataSourceId.includes(dataSourceNodeId)) {
         relationList.push({
-          ...datasource,
+          ...model,
           legendType: dataSourceNodeId,
           id: dataSourceNodeId,
           uid: id,
@@ -130,6 +130,24 @@ export const getNodeConfigByType = (nodeData: any, defaultConfig = {}) => {
       return {
         ...defaultConfig,
         labelCfg: { position: 'bottom', ...labelCfg },
+        // type: 'rect',
+        size: [80, 40],
+        // linkPoints: {
+        //   // top: true,
+        //   right: true,
+        //   // bottom: true,
+        //   left: true,
+        //   /* linkPoints' size, 8 by default */
+        //   //   size: 5,
+        //   /* linkPoints' style */
+        //   //   fill: '#ccc',
+        //   //   stroke: '#333',
+        //   //   lineWidth: 2,
+        // },
+        // style: {
+        //   fill: '#eee',
+        //   stroke: '#ccc',
+        // },
       };
     }
     case SemanticNodeType.DIMENSION:

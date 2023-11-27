@@ -68,10 +68,6 @@ const BindMeasuresTable: React.FC<CreateFormProps> = ({
       dataIndex: 'agg',
       title: '算子类型',
     },
-    {
-      dataIndex: 'datasourceName',
-      title: '所属数据源',
-    },
   ];
   const renderFooter = () => {
     return (

@@ -21,10 +21,16 @@ export const getMenuConfig = (props?: InitContextMenuProps) => {
         <li title='编辑' key='edit' >编辑</li>
         <li title='删除' key='delete' >删除</li>
      `;
+        // if (nodeType === SemanticNodeType.DATASOURCE) {
+        //   ulNode = `
+        //       <li title='新增维度' key='createDimension' >新增维度</li>
+        //       <li title='新增指标' key='createMetric' >新增指标</li>
+        //       <li title='编辑' key='editDatasource' >编辑</li>
+        //       <li title='删除' key='deleteDatasource' >删除</li>
+        //     `;
+        // }
         if (nodeType === SemanticNodeType.DATASOURCE) {
           ulNode = `
-              <li title='新增维度' key='createDimension' >新增维度</li>
-              <li title='新增指标' key='createMetric' >新增指标</li>
               <li title='编辑' key='editDatasource' >编辑</li>
               <li title='删除' key='deleteDatasource' >删除</li>
             `;

@@ -1,4 +1,4 @@
-import { Button, Drawer, Result, Modal, Card, Row, Col } from 'antd';
+import { Drawer, Modal, Card, Row, Col } from 'antd';
 import { ConsoleSqlOutlined, CoffeeOutlined } from '@ant-design/icons';
 import React, { useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
@@ -47,7 +47,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
       setCreateDataSourceModalOpen(open);
       return;
     }
-    if (dataSourceItem?.datasourceDetail?.queryType === 'table_query') {
+    if (dataSourceItem?.modelDetail?.queryType === 'table_query') {
       setDataSourceModalVisible(true);
     } else {
       setCreateModalVisible(true);
@@ -80,16 +80,16 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
   };
 
   const queryTableColumnListByScript = async (dataSource: IDataSource.IDataSourceItem) => {
-    if (!dataSource) {
+    if (!dataSource?.modelDetail?.sqlQuery) {
       return;
     }
-    const { code, data, msg } = await excuteSql({
-      sql: dataSource.datasourceDetail?.sqlQuery,
+    const { code, data } = await excuteSql({
+      sql: dataSource.modelDetail?.sqlQuery,
       id: dataSource.databaseId,
     });
     if (code === 200) {
       fetchTaskResult(data);
-      setSql(dataSource?.datasourceDetail?.sqlQuery);
+      setSql(dataSource?.modelDetail?.sqlQuery);
     }
   };
 
@@ -124,7 +124,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
                 />
               }
             >
-              <Meta title="快速创建" description="自动进行数据源可视化创建" />
+              <Meta title="快速创建" description="自动进行模型可视化创建" />
             </Card>
           </Col>
           <Col span={12}>
@@ -143,7 +143,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
                 />
               }
             >
-              <Meta title="SQL脚本" description="自定义SQL脚本创建数据源" />
+              <Meta title="SQL脚本" description="自定义SQL脚本创建模型" />
             </Card>
           </Col>
         </Row>
@@ -207,7 +207,6 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
                 setSql(sql);
                 setScriptColumns(columns);
                 setCurrentDatabaseId(databaseId);
-                onSubmit?.();
                 setDataSourceEditOpen(false);
               }}
             />
