@@ -52,7 +52,7 @@ public class ParseInfoUpdateProcessor implements PostProcessor {
         if (StringUtils.isBlank(correctS2SQL)) {
             return;
         }
-        // if S2SQL equals correctS2SQL, than not update the parseInfo.
+        // if S2SQL equals correctS2SQL, then not update the parseInfo.
         if (correctS2SQL.equals(sqlInfo.getS2SQL())) {
             return;
         }

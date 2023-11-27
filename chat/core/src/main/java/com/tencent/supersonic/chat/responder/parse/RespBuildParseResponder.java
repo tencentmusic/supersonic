@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class ParseRespBuildParseResponder implements ParseResponder {
+public class RespBuildParseResponder implements ParseResponder {
 
     @Override
     public void fillResponse(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
