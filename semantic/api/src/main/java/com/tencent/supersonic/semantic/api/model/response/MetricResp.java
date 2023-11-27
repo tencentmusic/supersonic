@@ -46,6 +46,8 @@ public class MetricResp extends SchemaItem {
 
     private boolean hasAdminRes = false;
 
+    private Boolean isCollect;
+
     public void setTag(String tag) {
         if (StringUtils.isBlank(tag)) {
             tags = Lists.newArrayList();

@@ -2,7 +2,7 @@ package com.tencent.supersonic.knowledge.semantic;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
-import com.tencent.supersonic.chat.api.pojo.RelateSchemaElement;
+import com.tencent.supersonic.chat.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
@@ -50,7 +50,7 @@ public class ModelSchemaBuilder {
                     .type(SchemaElementType.METRIC)
                     .useCnt(metric.getUseCnt())
                     .alias(alias)
-                    .relateSchemaElements(getRelateSchemaElement(metric))
+                    .relatedSchemaElements(getRelateSchemaElement(metric))
                     .defaultAgg(metric.getDefaultAgg())
                     .build();
             metrics.add(metricToAdd);
@@ -138,13 +138,13 @@ public class ModelSchemaBuilder {
         return modelSchema;
     }
 
-    private static List<RelateSchemaElement> getRelateSchemaElement(MetricSchemaResp metricSchemaResp) {
+    private static List<RelatedSchemaElement> getRelateSchemaElement(MetricSchemaResp metricSchemaResp) {
         RelateDimension relateDimension = metricSchemaResp.getRelateDimension();
         if (relateDimension == null || CollectionUtils.isEmpty(relateDimension.getDrillDownDimensions())) {
             return Lists.newArrayList();
         }
         return relateDimension.getDrillDownDimensions().stream().map(dimension -> {
-            RelateSchemaElement relateSchemaElement = new RelateSchemaElement();
+            RelatedSchemaElement relateSchemaElement = new RelatedSchemaElement();
             BeanUtils.copyProperties(dimension, relateSchemaElement);
             return relateSchemaElement;
         }).collect(Collectors.toList());

@@ -363,7 +363,7 @@ CREATE TABLE `s2_semantic_pasre_info` (
 
 CREATE TABLE `s2_view_info` (
                                 `id` bigint(20) NOT NULL AUTO_INCREMENT,
-                                `model_id` bigint(20) DEFAULT NULL,
+                                `domain_id` bigint(20) DEFAULT NULL,
                                 `type` varchar(20) DEFAULT NULL COMMENT 'datasource、dimension、metric',
                                 `config` text COMMENT 'config detail',
                                 `created_at` datetime DEFAULT NULL,

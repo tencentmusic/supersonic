@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.postprocessor;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
-import com.tencent.supersonic.chat.api.pojo.RelateSchemaElement;
+import com.tencent.supersonic.chat.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
@@ -118,10 +118,10 @@ class MetricCheckPostProcessorTest {
         ModelSchema modelSchema = new ModelSchema();
         Set<SchemaElement> metrics = Sets.newHashSet(
                 mockElement(1L, "访问次数", SchemaElementType.METRIC,
-                        Lists.newArrayList(RelateSchemaElement.builder().dimensionId(2L).isNecessary(false).build(),
-                                RelateSchemaElement.builder().dimensionId(1L).isNecessary(false).build())),
+                        Lists.newArrayList(RelatedSchemaElement.builder().dimensionId(2L).isNecessary(false).build(),
+                                RelatedSchemaElement.builder().dimensionId(1L).isNecessary(false).build())),
                 mockElement(2L, "访问用户数", SchemaElementType.METRIC,
-                        Lists.newArrayList(RelateSchemaElement.builder().dimensionId(2L).isNecessary(true).build()))
+                        Lists.newArrayList(RelatedSchemaElement.builder().dimensionId(2L).isNecessary(true).build()))
         );
         modelSchema.setMetrics(metrics);
         modelSchema.setDimensions(mockDimensions());
@@ -148,9 +148,9 @@ class MetricCheckPostProcessorTest {
     }
 
     private SchemaElement mockElement(Long id, String name, SchemaElementType type,
-                                      List<RelateSchemaElement> relateSchemaElements) {
+                                      List<RelatedSchemaElement> relateSchemaElements) {
         return SchemaElement.builder().id(id).name(name).type(type)
-                .relateSchemaElements(relateSchemaElements).build();
+                .relatedSchemaElements(relateSchemaElements).build();
     }
 
     private SemanticParseInfo mockParseInfo(String correctSql) {

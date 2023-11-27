@@ -17,4 +17,5 @@ public class PageSchemaItemReq extends PageBaseReq {
     private Integer sensitiveLevel;
     private Integer status;
     private String key;
+    private List<Long> ids;
 }

@@ -23,9 +23,11 @@ import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.model.domain.CollectService;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
+import com.tencent.supersonic.semantic.model.domain.dataobject.CollectDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
@@ -58,18 +60,22 @@ public class MetricServiceImpl implements MetricService {
 
     private ChatGptHelper chatGptHelper;
 
+    private CollectService collectService;
+
     private ApplicationEventPublisher eventPublisher;
 
     public MetricServiceImpl(MetricRepository metricRepository,
                              ModelService modelService,
                              DomainService domainService,
                              ChatGptHelper chatGptHelper,
+                             CollectService collectService,
                              ApplicationEventPublisher eventPublisher) {
         this.domainService = domainService;
         this.metricRepository = metricRepository;
         this.modelService = modelService;
         this.chatGptHelper = chatGptHelper;
         this.eventPublisher = eventPublisher;
+        this.collectService = collectService;
     }
 
     @Override
@@ -177,7 +183,9 @@ public class MetricServiceImpl implements MetricService {
                 .doSelectPageInfo(() -> queryMetric(metricFilter));
         PageInfo<MetricResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(metricDOPageInfo, pageInfo);
-        List<MetricResp> metricResps = convertList(metricDOPageInfo.getList());
+        List<CollectDO> collectList = collectService.getCollectList(user.getName());
+        List<Long> collect = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
+        List<MetricResp> metricResps = convertList(metricDOPageInfo.getList(),collect);
         fillAdminRes(metricResps, user);
         pageInfo.setList(metricResps);
         return pageInfo;
@@ -191,7 +199,7 @@ public class MetricServiceImpl implements MetricService {
     public List<MetricResp> getMetrics(MetaFilter metaFilter) {
         MetricFilter metricFilter = new MetricFilter();
         BeanUtils.copyProperties(metaFilter, metricFilter);
-        return convertList(queryMetric(metricFilter));
+        return convertList(queryMetric(metricFilter), Lists.newArrayList());
     }
 
     private void fillAdminRes(List<MetricResp> metricResps, User user) {
@@ -236,7 +244,7 @@ public class MetricServiceImpl implements MetricService {
         if (metricDO == null) {
             return null;
         }
-        return MetricConverter.convert2MetricResp(metricDO, new HashMap<>());
+        return MetricConverter.convert2MetricResp(metricDO, new HashMap<>(), Lists.newArrayList());
     }
 
     @Override
@@ -333,15 +341,23 @@ public class MetricServiceImpl implements MetricService {
         return getMetrics(new MetaFilter(modelIds));
     }
 
-    private List<MetricResp> convertList(List<MetricDO> metricDOS) {
+    private List<MetricResp> convertList(List<MetricDO> metricDOS, List<Long> collect) {
         List<MetricResp> metricResps = Lists.newArrayList();
         Map<Long, ModelResp> modelMap = modelService.getModelMap();
         if (!CollectionUtils.isEmpty(metricDOS)) {
             metricResps = metricDOS.stream()
-                    .map(metricDO -> MetricConverter.convert2MetricResp(metricDO, modelMap))
+                    .map(metricDO -> MetricConverter.convert2MetricResp(metricDO, modelMap, collect))
                     .collect(Collectors.toList());
         }
         return metricResps;
+    }
+
+    @Override
+    public void sendMetricEventBatch(List<Long> modelIds, EventType eventType) {
+        MetricFilter metricFilter = new MetricFilter();
+        metricFilter.setModelIds(modelIds);
+        List<MetricDO> metricDOS = queryMetric(metricFilter);
+        sendEventBatch(metricDOS, eventType);
     }
 
     private void sendEventBatch(List<MetricDO> metricDOS, EventType eventType) {

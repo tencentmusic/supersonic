@@ -4,10 +4,8 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
 import com.tencent.supersonic.chat.api.pojo.response.AggregateInfo;
-import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
@@ -18,10 +16,8 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,46 +38,8 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
     @Override
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
                                           QueryContext queryCtx) {
-        candidateElementMatches = filterElementMatches(candidateElementMatches);
         return super.match(candidateElementMatches, queryCtx);
     }
-
-    private List<SchemaElementMatch> filterElementMatches(List<SchemaElementMatch> candidateElementMatches) {
-        List<SchemaElementMatch> filteredMatches = new ArrayList<>();
-        if (CollectionUtils.isEmpty(candidateElementMatches)
-                || Objects.isNull(candidateElementMatches.get(0).getElement().getModel())) {
-            return candidateElementMatches;
-        }
-
-        Long modelId = candidateElementMatches.get(0).getElement().getModel();
-        ConfigService configService = ContextUtils.getBean(ConfigService.class);
-        ChatConfigResp chatConfig = configService.fetchConfigByModelId(modelId);
-
-        List<Long> blackDimIdList = new ArrayList<>();
-        List<Long> blackMetricIdList = new ArrayList<>();
-        if (Objects.nonNull(chatConfig.getChatAggConfig())
-                && Objects.nonNull(chatConfig.getChatAggConfig().getVisibility())) {
-            blackDimIdList = chatConfig.getChatAggConfig().getVisibility().getBlackDimIdList();
-            blackMetricIdList = chatConfig.getChatAggConfig().getVisibility().getBlackMetricIdList();
-        }
-
-        for (SchemaElementMatch schemaElementMatch : candidateElementMatches) {
-            SchemaElementType type = schemaElementMatch.getElement().getType();
-            if (SchemaElementType.DIMENSION.equals(type) || SchemaElementType.VALUE.equals(type)) {
-                if (!blackDimIdList.contains(schemaElementMatch.getElement().getId())) {
-                    filteredMatches.add(schemaElementMatch);
-                }
-            } else if (SchemaElementType.METRIC.equals(type)) {
-                if (!blackMetricIdList.contains(schemaElementMatch.getElement().getId())) {
-                    filteredMatches.add(schemaElementMatch);
-                }
-            } else {
-                filteredMatches.add(schemaElementMatch);
-            }
-        }
-        return filteredMatches;
-    }
-
 
     @Override
     public void fillParseInfo(ChatContext chatContext) {

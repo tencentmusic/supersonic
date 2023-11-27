@@ -244,7 +244,7 @@ CREATE TABLE s2_model_rela
 create table s2_view_info
 (
     id         INT auto_increment,
-    model_id  INT       null,
+    domain_id  INT       null,
     type       varchar(20)  null comment 'datasource、dimension、metric',
     config     LONGVARCHAR   null comment 'config detail',
     created_at TIMESTAMP     null,
@@ -532,3 +532,12 @@ CREATE TABLE s2_sys_parameter
     parameters text null
 );
 
+CREATE TABLE `s2_collect` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `type` varchar(20) NOT NULL,
+    `username` varchar(20) NOT NULL,
+    `collect_id` bigint NOT NULL,
+    `create_time` TIMESTAMP,
+    `update_time` TIMESTAMP,
+    PRIMARY KEY (`id`)
+);

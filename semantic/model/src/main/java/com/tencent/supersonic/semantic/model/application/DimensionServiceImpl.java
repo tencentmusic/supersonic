@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.DataItem;
+import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
@@ -25,6 +26,7 @@ import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.model.domain.DatabaseService;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
+import com.tencent.supersonic.semantic.model.domain.ModelRelaService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
@@ -46,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
 @Service
 @Slf4j
 public class DimensionServiceImpl implements DimensionService {
@@ -60,6 +61,8 @@ public class DimensionServiceImpl implements DimensionService {
 
     private DatabaseService databaseService;
 
+    private ModelRelaService modelRelaService;
+
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
@@ -67,11 +70,13 @@ public class DimensionServiceImpl implements DimensionService {
     public DimensionServiceImpl(DimensionRepository dimensionRepository,
                                 ModelService modelService,
                                 ChatGptHelper chatGptHelper,
-                                DatabaseService databaseService) {
+                                DatabaseService databaseService,
+                                ModelRelaService modelRelaService) {
         this.modelService = modelService;
         this.dimensionRepository = dimensionRepository;
         this.chatGptHelper = chatGptHelper;
         this.databaseService = databaseService;
+        this.modelRelaService = modelRelaService;
     }
 
     @Override
@@ -213,6 +218,21 @@ public class DimensionServiceImpl implements DimensionService {
         return getDimensions(new MetaFilter(Lists.newArrayList(modelId)));
     }
 
+    @Override
+    public List<DimensionResp> getDimensionInModelCluster(Long modelId) {
+        ModelResp modelResp = modelService.getModel(modelId);
+        List<ModelRela> modelRelas = modelRelaService.getModelRelaList(modelResp.getDomainId());
+        List<Long> modelIds = new ArrayList<>();
+        modelIds.add(modelId);
+        for (ModelRela modelRela : modelRelas) {
+            modelIds.add(modelRela.getFromModelId());
+            modelIds.add(modelRela.getToModelId());
+        }
+        DimensionFilter dimensionFilter = new DimensionFilter();
+        dimensionFilter.setModelIds(modelIds);
+        return getDimensions(dimensionFilter);
+    }
+
     private List<DimensionResp> convertList(List<DimensionDO> dimensionDOS,
                                             Map<Long, ModelResp> modelRespMap) {
         List<DimensionResp> dimensionResps = Lists.newArrayList();
@@ -287,10 +307,17 @@ public class DimensionServiceImpl implements DimensionService {
         return dimValueMapsResp;
     }
 
+    private List<DimensionResp> getDimensionInSameDomain(Long modelId) {
+        ModelResp modelResp = modelService.getModel(modelId);
+        Long domainId = modelResp.getDomainId();
+        List<ModelResp> modelResps = modelService.getModelByDomainIds(Lists.newArrayList(domainId));
+        List<Long> modelIds = modelResps.stream().map(ModelResp::getId).collect(Collectors.toList());
+        return getDimensions(new MetaFilter(modelIds));
+    }
 
     private void checkExist(List<DimensionReq> dimensionReqs) {
         Long modelId = dimensionReqs.get(0).getModelId();
-        List<DimensionResp> dimensionResps = getDimensions(modelId);
+        List<DimensionResp> dimensionResps = getDimensionInSameDomain(modelId);
         Map<String, DimensionResp> bizNameMap = dimensionResps.stream()
                 .collect(Collectors.toMap(DimensionResp::getBizName, a -> a, (k1, k2) -> k1));
         Map<String, DimensionResp> nameMap = dimensionResps.stream()
@@ -314,6 +341,14 @@ public class DimensionServiceImpl implements DimensionService {
                 }
             }
         }
+    }
+
+    @Override
+    public void sendDimensionEventBatch(List<Long> modelIds, EventType eventType) {
+        DimensionFilter dimensionFilter = new DimensionFilter();
+        dimensionFilter.setModelIds(modelIds);
+        List<DimensionDO> dimensionDOS = queryDimension(dimensionFilter);
+        sendEventBatch(dimensionDOS, eventType);
     }
 
     private void sendEventBatch(List<DimensionDO> dimensionDOS, EventType eventType) {

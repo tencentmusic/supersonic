@@ -42,6 +42,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -65,7 +66,7 @@ public class DownloadServiceImpl implements DownloadService {
         List<List<String>> data = new ArrayList<>();
         List<List<String>> header = org.assertj.core.util.Lists.newArrayList();
         for (QueryColumn column : queryResultWithSchemaResp.getColumns()) {
-            header.add(org.assertj.core.util.Lists.newArrayList(column.getName()));
+            header.add(Lists.newArrayList(column.getName()));
         }
         for (Map<String, Object> row : queryResultWithSchemaResp.getResultList()) {
             List<String> rowData = new ArrayList<>();
@@ -212,6 +213,8 @@ public class DownloadServiceImpl implements DownloadService {
 
     private QueryResultWithSchemaResp getQueryResult(List<DimSchemaResp> dimensionResps, MetricResp metricResp,
                                                      DateConf dateConf, User user) throws Exception {
+        Set<Long> modelIds = dimensionResps.stream().map(DimSchemaResp::getModelId).collect(Collectors.toSet());
+        modelIds.add(metricResp.getModelId());
         QueryStructReq queryStructReq = new QueryStructReq();
         queryStructReq.setGroups(dimensionResps.stream().map(DimSchemaResp::getBizName).collect(Collectors.toList()));
         queryStructReq.getGroups().add(0, getTimeDimension(dateConf));
@@ -219,7 +222,7 @@ public class DownloadServiceImpl implements DownloadService {
         aggregator.setColumn(metricResp.getBizName());
         queryStructReq.setAggregators(Lists.newArrayList(aggregator));
         queryStructReq.setDateInfo(dateConf);
-        queryStructReq.setModelId(metricResp.getModelId());
+        queryStructReq.setModelIds(modelIds);
         queryStructReq.setLimit(10000L);
         return queryService.queryByStructWithAuth(queryStructReq, user);
     }

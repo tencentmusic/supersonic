@@ -37,9 +37,9 @@ public class ViewInfoController {
         return viewInfoServiceImpl.createOrUpdateViewInfo(viewInfoReq, user);
     }
 
-    @GetMapping("/getViewInfoList/{modelId}")
-    public List<ViewInfoDO> getViewInfoList(@PathVariable("modelId") Long modelId) {
-        return viewInfoServiceImpl.getViewInfoList(modelId);
+    @GetMapping("/getViewInfoList/{domainId}")
+    public List<ViewInfoDO> getViewInfoList(@PathVariable("domainId") Long domainId) {
+        return viewInfoServiceImpl.getViewInfoList(domainId);
     }
 
     @DeleteMapping("/deleteViewInfo/{id}")
