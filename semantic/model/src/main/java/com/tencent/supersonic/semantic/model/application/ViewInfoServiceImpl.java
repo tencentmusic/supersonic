@@ -40,8 +40,8 @@ public class ViewInfoServiceImpl {
         this.modelService = modelService;
     }
 
-    public List<ViewInfoDO> getViewInfoList(Long modelId) {
-        return viewInfoRepository.getViewInfoList(modelId);
+    public List<ViewInfoDO> getViewInfoList(Long domainId) {
+        return viewInfoRepository.getViewInfoList(domainId);
     }
 
     public List<ModelSchemaRelaResp> getDomainSchema(Long domainId) {

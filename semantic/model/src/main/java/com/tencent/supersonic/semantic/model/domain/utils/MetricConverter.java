@@ -56,7 +56,7 @@ public class MetricConverter {
         return measureYamlTpl;
     }
 
-    public static MetricResp convert2MetricResp(MetricDO metricDO, Map<Long, ModelResp> modelMap) {
+    public static MetricResp convert2MetricResp(MetricDO metricDO, Map<Long, ModelResp> modelMap, List<Long> collect) {
         MetricResp metricResp = new MetricResp();
         BeanUtils.copyProperties(metricDO, metricResp);
         metricResp.setTypeParams(JSONObject.parseObject(metricDO.getTypeParams(), MetricTypeParams.class));
@@ -65,6 +65,11 @@ public class MetricConverter {
         if (modelResp != null) {
             metricResp.setModelName(modelResp.getName());
             metricResp.setDomainId(modelResp.getDomainId());
+        }
+        if (collect != null && collect.contains(metricDO.getId())){
+            metricResp.setIsCollect(true);
+        }else {
+            metricResp.setIsCollect(false);
         }
         metricResp.setTag(metricDO.getTags());
         metricResp.setRelateDimension(JSONObject.parseObject(metricDO.getRelateDimensions(),

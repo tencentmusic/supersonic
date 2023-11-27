@@ -6,6 +6,7 @@ import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -130,11 +131,30 @@ public class ModelServiceImpl implements ModelService {
     public ModelResp updateModel(ModelReq modelReq, User user) throws Exception {
         checkName(modelReq);
         ModelDO modelDO = modelRepository.getModelById(modelReq.getId());
+        int oldStatus = modelDO.getStatus();
         ModelConverter.convert(modelDO, modelReq, user);
         modelRepository.updateModel(modelDO);
         batchCreateDimension(modelDO, user);
         batchCreateMetric(modelDO, user);
+        statusPublish(oldStatus, modelDO);
         return ModelConverter.convert(modelDO);
+    }
+
+    private void statusPublish(Integer oldStatus, ModelDO modelDO) {
+        if (oldStatus.equals(modelDO.getStatus())) {
+            return;
+        }
+        EventType eventType = null;
+        if (oldStatus.equals(StatusEnum.ONLINE.getCode())
+                && modelDO.getStatus().equals(StatusEnum.OFFLINE.getCode())) {
+            eventType = EventType.DELETE;
+        } else if (oldStatus.equals(StatusEnum.OFFLINE.getCode())
+                && modelDO.getStatus().equals(StatusEnum.ONLINE.getCode())) {
+            eventType = EventType.ADD;
+        }
+        log.info("model:{} status from {} to {}", modelDO.getId(), oldStatus, modelDO.getStatus());
+        metricService.sendMetricEventBatch(Lists.newArrayList(modelDO.getId()), eventType);
+        dimensionService.sendDimensionEventBatch(Lists.newArrayList(modelDO.getId()), eventType);
     }
 
     @Override

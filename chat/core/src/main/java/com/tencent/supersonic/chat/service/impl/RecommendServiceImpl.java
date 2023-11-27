@@ -2,23 +2,13 @@ package com.tencent.supersonic.chat.service.impl;
 
 
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
-import com.tencent.supersonic.chat.api.pojo.RelateSchemaElement;
+import com.tencent.supersonic.chat.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.request.RecommendReq;
-import com.tencent.supersonic.chat.api.pojo.response.RecommendQuestionResp;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
+import com.tencent.supersonic.chat.api.pojo.request.RecommendReq;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
-import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
+import com.tencent.supersonic.chat.api.pojo.response.RecommendQuestionResp;
 import com.tencent.supersonic.chat.api.pojo.response.RecommendResp;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.RecommendService;
 import com.tencent.supersonic.chat.service.SemanticService;
@@ -27,6 +17,14 @@ import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /***
  * Recommend Service impl
@@ -59,11 +57,11 @@ public class RecommendServiceImpl implements RecommendService {
         if (recommendReq.getMetricId() != null && !CollectionUtils.isEmpty(metricElements)) {
             Optional<SchemaElement> metric = metricElements.stream().filter(schemaElement ->
                             recommendReq.getMetricId().equals(schemaElement.getId())
-                                    && !CollectionUtils.isEmpty(schemaElement.getRelateSchemaElements()))
+                                    && !CollectionUtils.isEmpty(schemaElement.getRelatedSchemaElements()))
                     .findFirst();
             if (metric.isPresent()) {
-                drillDownDimensions = metric.get().getRelateSchemaElements().stream()
-                        .map(RelateSchemaElement::getDimensionId).collect(Collectors.toList());
+                drillDownDimensions = metric.get().getRelatedSchemaElements().stream()
+                        .map(RelatedSchemaElement::getDimensionId).collect(Collectors.toList());
             }
         }
         final List<Long> drillDownDimensionsFinal = drillDownDimensions;
@@ -112,25 +110,7 @@ public class RecommendServiceImpl implements RecommendService {
 
     @Override
     public RecommendResp recommendMetricMode(RecommendReq recommendReq, Long limit) {
-        RecommendResp recommendResponse = recommend(recommendReq, limit);
-        // filter black Item
-        if (Objects.isNull(recommendResponse)) {
-            return recommendResponse;
-        }
-
-        ChatConfigRichResp chatConfigRich = configService.getConfigRichInfo(recommendReq.getModelId());
-        if (Objects.nonNull(chatConfigRich) && Objects.nonNull(chatConfigRich.getChatAggRichConfig())
-                && Objects.nonNull(chatConfigRich.getChatAggRichConfig().getVisibility())) {
-            List<Long> blackMetricIdList = chatConfigRich.getChatAggRichConfig().getVisibility().getBlackMetricIdList();
-            List<SchemaElement> metrics = filterBlackItem(recommendResponse.getMetrics(), blackMetricIdList);
-            recommendResponse.setMetrics(metrics);
-
-            List<Long> blackDimIdList = chatConfigRich.getChatAggRichConfig().getVisibility().getBlackDimIdList();
-            List<SchemaElement> dimensions = filterBlackItem(recommendResponse.getDimensions(), blackDimIdList);
-            recommendResponse.setDimensions(dimensions);
-        }
-
-        return recommendResponse;
+        return recommend(recommendReq, limit);
     }
 
     @Override

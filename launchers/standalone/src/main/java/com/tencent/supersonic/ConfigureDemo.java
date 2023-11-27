@@ -111,6 +111,45 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
     public void addDemoChatConfig_1() {
         ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
+        chatConfigBaseReq.setModelId(1L);
+
+        ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
+        ChatDefaultConfigReq chatDefaultConfigDetail = new ChatDefaultConfigReq();
+        List<Long> dimensionIds0 = Collections.singletonList(1L);
+        List<Long> metricIds0 = Lists.newArrayList();
+        chatDefaultConfigDetail.setDimensionIds(dimensionIds0);
+        chatDefaultConfigDetail.setMetricIds(metricIds0);
+        chatDefaultConfigDetail.setUnit(7);
+        chatDefaultConfigDetail.setPeriod("DAY");
+        chatDetailConfig.setChatDefaultConfig(chatDefaultConfigDetail);
+        ItemVisibility visibility0 = new ItemVisibility();
+        chatDetailConfig.setVisibility(visibility0);
+        chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
+
+        ChatAggConfigReq chatAggConfig = new ChatAggConfigReq();
+        ChatDefaultConfigReq chatDefaultConfigAgg = new ChatDefaultConfigReq();
+        List<Long> dimensionIds1 = Arrays.asList(1L);
+        List<Long> metricIds1 = Lists.newArrayList();
+        chatDefaultConfigAgg.setDimensionIds(dimensionIds1);
+        chatDefaultConfigAgg.setMetricIds(metricIds1);
+        chatDefaultConfigAgg.setUnit(7);
+        chatDefaultConfigAgg.setPeriod("DAY");
+        chatDefaultConfigAgg.setTimeMode(ChatDefaultConfigReq.TimeMode.RECENT);
+        chatAggConfig.setChatDefaultConfig(chatDefaultConfigAgg);
+        ItemVisibility visibility1 = new ItemVisibility();
+        chatAggConfig.setVisibility(visibility1);
+        List<KnowledgeInfoReq> knowledgeInfos = new ArrayList<>();
+        KnowledgeInfoReq knowledgeInfoReq = new KnowledgeInfoReq();
+        knowledgeInfoReq.setItemId(3L);
+        knowledgeInfoReq.setSearchEnable(true);
+        knowledgeInfos.add(knowledgeInfoReq);
+        chatAggConfig.setKnowledgeInfos(knowledgeInfos);
+        chatConfigBaseReq.setChatAggConfig(chatAggConfig);
+        configService.addConfig(chatConfigBaseReq, user);
+    }
+
+    public void addDemoChatConfig_2() {
+        ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
         chatConfigBaseReq.setModelId(2L);
 
         ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
@@ -148,7 +187,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         configService.addConfig(chatConfigBaseReq, user);
     }
 
-    public void addDemoChatConfig_2() {
+    public void addDemoChatConfig_3() {
         ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
         chatConfigBaseReq.setModelId(3L);
 
@@ -187,7 +226,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         configService.addConfig(chatConfigBaseReq, user);
     }
 
-    public void addDemoChatConfig_3() {
+    public void addDemoChatConfig_4() {
         ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
         chatConfigBaseReq.setModelId(4L);
 
@@ -335,6 +374,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             addDemoChatConfig_1();
             addDemoChatConfig_2();
             addDemoChatConfig_3();
+            addDemoChatConfig_4();
             addPlugin_1();
             addAgent1();
             addAgent2();

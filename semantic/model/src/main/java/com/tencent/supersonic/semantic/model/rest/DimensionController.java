@@ -11,11 +11,6 @@ import com.tencent.supersonic.semantic.api.model.request.MetaBatchReq;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
-
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,6 +20,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 
 @RestController
@@ -93,6 +92,11 @@ public class DimensionController {
         DimensionFilter dimensionFilter = new DimensionFilter();
         dimensionFilter.setModelIds(Lists.newArrayList(modelId));
         return dimensionService.getDimensions(dimensionFilter);
+    }
+
+    @GetMapping("/getDimensionInModelCluster/{modelId}")
+    public List<DimensionResp> getDimensionInModelCluster(@PathVariable("modelId") Long modelId) {
+        return dimensionService.getDimensionInModelCluster(modelId);
     }
 
 

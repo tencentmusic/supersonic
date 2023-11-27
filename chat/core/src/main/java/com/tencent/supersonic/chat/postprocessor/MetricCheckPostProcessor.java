@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.RelateSchemaElement;
+import com.tencent.supersonic.chat.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
@@ -133,9 +133,9 @@ public class MetricCheckPostProcessor implements PostProcessor {
             return false;
         }
         List<String> relateDimensions = metricElements.stream()
-                .filter(schemaElement -> !CollectionUtils.isEmpty(schemaElement.getRelateSchemaElements()))
-                .map(schemaElement -> schemaElement.getRelateSchemaElements().stream()
-                        .map(RelateSchemaElement::getDimensionId).collect(Collectors.toList()))
+                .filter(schemaElement -> !CollectionUtils.isEmpty(schemaElement.getRelatedSchemaElements()))
+                .map(schemaElement -> schemaElement.getRelatedSchemaElements().stream()
+                        .map(RelatedSchemaElement::getDimensionId).collect(Collectors.toList()))
                 .flatMap(Collection::stream)
                 .map(id -> convertDimensionIdToName(id, semanticSchema))
                 .filter(Objects::nonNull)
@@ -158,12 +158,12 @@ public class MetricCheckPostProcessor implements PostProcessor {
         if (metric == null) {
             return Lists.newArrayList();
         }
-        List<RelateSchemaElement> relateSchemaElements = metric.getRelateSchemaElements();
+        List<RelatedSchemaElement> relateSchemaElements = metric.getRelatedSchemaElements();
         if (CollectionUtils.isEmpty(relateSchemaElements)) {
             return Lists.newArrayList();
         }
         return relateSchemaElements.stream()
-                .filter(RelateSchemaElement::isNecessary).map(RelateSchemaElement::getDimensionId)
+                .filter(RelatedSchemaElement::isNecessary).map(RelatedSchemaElement::getDimensionId)
                 .collect(Collectors.toList());
     }
 

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RelateSchemaElement {
+public class RelatedSchemaElement {
 
     private Long dimensionId;
 

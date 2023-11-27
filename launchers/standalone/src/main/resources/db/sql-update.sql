@@ -114,3 +114,5 @@ CREATE TABLE s2_model_rela
     join_condition  VARCHAR(255),
     PRIMARY KEY (`id`)
 );
+
+alter table s2_view_info change model_id domain_id bigint;
