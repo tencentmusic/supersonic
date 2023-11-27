@@ -246,9 +246,9 @@ class SqlParserSelectHelperTest {
 
         String sql = "SELECT user_name FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
                 + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        Expression leftExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        List<Expression> leftExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        Assert.assertEquals(leftExpression.toString(), "sum(pv)");
+        Assert.assertEquals(leftExpressionList.get(0).toString(), "sum(pv)");
 
     }
 

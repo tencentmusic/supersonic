@@ -342,7 +342,6 @@ public class QueryServiceImpl implements QueryService {
         correctorSql = SqlParserAddHelper.addWhere(correctorSql, addWhereConditions);
         correctorSql = SqlParserAddHelper.addHaving(correctorSql, addHavingConditions);
         log.info("correctorSql after replacing:{}", correctorSql);
-        correctorSql = SqlParserRemoveHelper.removeNumberCondition(correctorSql);
         return correctorSql;
     }
 

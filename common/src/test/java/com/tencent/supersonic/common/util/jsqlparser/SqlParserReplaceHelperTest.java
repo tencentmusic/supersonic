@@ -160,6 +160,20 @@ class SqlParserReplaceHelperTest {
     }
 
     @Test
+    void replaceUnionFields() {
+        Map<String, String> fieldToBizName1 = new HashMap<>();
+        fieldToBizName1.put("公司成立时间", "company_established_time");
+        fieldToBizName1.put("年营业额", "annual_turnover");
+        String replaceSql = "SELECT * FROM 互联网企业 ORDER BY 公司成立时间 DESC LIMIT 3 "
+                + "UNION SELECT * FROM 互联网企业 ORDER BY 年营业额 DESC LIMIT 5";
+        replaceSql = SqlParserReplaceHelper.replaceFields(replaceSql, fieldToBizName1);
+        replaceSql = SqlParserReplaceHelper.replaceTable(replaceSql, "internet");
+        Assert.assertEquals(
+                "SELECT * FROM internet ORDER BY company_established_time DESC LIMIT 3 "
+                        + "UNION SELECT * FROM internet ORDER BY annual_turnover DESC LIMIT 5", replaceSql);
+    }
+
+    @Test
     void replaceFields() {
 
         Map<String, String> fieldToBizName = initParams();
@@ -347,6 +361,12 @@ class SqlParserReplaceHelperTest {
         Assert.assertEquals(
                 "SELECT 部门, sum(访问次数) FROM s2 WHERE 数据日期 = '2023-08-08' "
                         + "AND 用户 = alice AND 发布日期 = '11' GROUP BY 部门 LIMIT 1", replaceSql);
+
+        sql = "select * from 互联网企业 order by 公司成立时间 desc limit 3 union select * from 互联网企业 order by 年营业额 desc limit 5";
+        replaceSql = SqlParserReplaceHelper.replaceTable(sql, "internet");
+        Assert.assertEquals(
+                "SELECT * FROM internet ORDER BY 公司成立时间 DESC LIMIT 3 "
+                        + "UNION SELECT * FROM internet ORDER BY 年营业额 DESC LIMIT 5", replaceSql);
 
         sql = "SELECT * FROM CSpider音乐 WHERE (评分 < (SELECT min(评分) "
                 + "FROM CSpider音乐 WHERE 语种 = '英文')) AND 数据日期 = '2023-10-11'";
