@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.llm;
+package com.tencent.supersonic.chat.parser;
 
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionReq;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionResp;
