@@ -241,7 +241,7 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
           </FormItem>
         )}
         {toolType === AgentToolTypeEnum.RULE && (
-          <FormItem name="queryModes" label="查询模式">
+          <FormItem name="queryTypes" label="查询模式">
             <Select
               placeholder="请选择查询模式"
               options={QUERY_MODE_LIST}

@@ -94,6 +94,7 @@ const ParseTip: React.FC<Props> = ({
     metrics,
     aggType,
     queryMode,
+    queryType,
     properties,
     entity,
     elementMatches,
@@ -149,6 +150,14 @@ const ParseTip: React.FC<Props> = ({
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>数据模型：</div>
                 <div className={itemValueClass}>{modelName}</div>
+              </div>
+            )}
+            {(queryType === 'METRIC' || queryType === 'TAG') && (
+              <div className={`${prefixCls}-tip-item`}>
+                <div className={`${prefixCls}-tip-item-name`}>查询模式：</div>
+                <div className={itemValueClass}>
+                  {queryType === 'METRIC' ? '指标模式' : '标签模式'}
+                </div>
               </div>
             )}
             {!queryMode?.includes('ENTITY') &&
