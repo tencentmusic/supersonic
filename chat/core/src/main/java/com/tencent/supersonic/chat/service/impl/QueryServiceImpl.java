@@ -10,7 +10,9 @@ import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
@@ -580,8 +582,12 @@ public class QueryServiceImpl implements QueryService {
     @Override
     public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
         QueryResultWithSchemaResp queryResultWithSchemaResp = new QueryResultWithSchemaResp();
+        SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
+        SemanticSchema semanticSchema = semanticService.getSemanticSchema();
+        SchemaElement schemaElement = semanticSchema.getDimensions(dimensionValueReq.getElementID());
         Set<Long> detectModelIds = new HashSet<>();
-        detectModelIds.add(dimensionValueReq.getModelId());
+        detectModelIds.add(schemaElement.getModel());
+        dimensionValueReq.setModelId(schemaElement.getModel());
         List<String> dimensionValues = getDimensionValues(dimensionValueReq, detectModelIds);
         // if the search results is null,search dimensionValue from database
         if (CollectionUtils.isEmpty(dimensionValues)) {
