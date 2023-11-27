@@ -25,6 +25,10 @@ const DimensionSection: React.FC<Props> = ({
 
   const defaultDimensions = dimensions.slice(0, DEFAULT_DIMENSION_COUNT);
 
+  if (defaultDimensions.length === 0) {
+    return null;
+  }
+
   return (
     <div className={`${prefixCls}-section`}>
       <div className={`${prefixCls}-title`}>{isSecondDrillDown ? '二级' : '推荐'}下钻维度：</div>

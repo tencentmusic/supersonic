@@ -11,17 +11,6 @@ export enum AgentToolTypeEnum {
   INTERPRET = 'INTERPRET'
 }
 
-export enum QueryModeEnum {
-  ENTITY_DETAIL = 'ENTITY_DETAIL',
-  ENTITY_LIST_FILTER = 'ENTITY_LIST_FILTER',
-  ENTITY_ID = 'ENTITY_ID',
-  METRIC_ENTITY = 'METRIC_ENTITY',
-  METRIC_FILTER = 'METRIC_FILTER',
-  METRIC_GROUPBY = 'METRIC_GROUPBY',
-  METRIC_MODEL = 'METRIC_MODEL',
-  METRIC_ORDERBY = 'METRIC_ORDERBY'
-}
-
 export const AGENT_TOOL_TYPE_LIST = [
   {
     label: '规则语义解析',
@@ -41,38 +30,19 @@ export const AGENT_TOOL_TYPE_LIST = [
   },
 ]
 
+export enum QueryModeEnum {
+  METRIC = 'METRIC',
+  TAG = 'TAG'
+}
+
 export const QUERY_MODE_LIST = [
   {
-    label: '实体明细(查询维度信息)',
-    value: QueryModeEnum.ENTITY_DETAIL
+    label: '指标模式',
+    value: QueryModeEnum.METRIC
   },
   {
-    label: '实体圈选',
-    value: QueryModeEnum.ENTITY_LIST_FILTER
-  },
-  {
-    label: '实体查询(按ID查询)',
-    value: QueryModeEnum.ENTITY_ID
-  },
-  {
-    label: '指标查询(带实体)',
-    value: QueryModeEnum.METRIC_ENTITY
-  },
-  {
-    label: '指标查询(带条件)',
-    value: QueryModeEnum.METRIC_FILTER
-  },
-  {
-    label: '指标查询(按维度分组)',
-    value: QueryModeEnum.METRIC_GROUPBY
-  },
-  {
-    label: '指标查询(不带条件)',
-    value: QueryModeEnum.METRIC_MODEL
-  },
-  {
-    label: '按指标排序',
-    value: QueryModeEnum.METRIC_ORDERBY
+    label: '标签模式',
+    value: QueryModeEnum.TAG
   }
 ];
 
