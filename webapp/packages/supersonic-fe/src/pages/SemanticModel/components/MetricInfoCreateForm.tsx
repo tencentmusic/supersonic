@@ -92,7 +92,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     const { code, data } = await getModelDetail({ modelId });
     if (code === 200) {
       if (Array.isArray(data?.modelDetail?.measures)) {
-        setClassMeasureList(data);
+        setClassMeasureList(data.modelDetail.measures);
         if (datasourceId) {
           const hasMeasures = data.some(
             (item: ISemantic.IMeasure) => item.datasourceId === datasourceId,

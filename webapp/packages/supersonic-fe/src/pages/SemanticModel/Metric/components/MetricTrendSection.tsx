@@ -47,7 +47,7 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
   const [authMessage, setAuthMessage] = useState<string>('');
   const [downloadLoding, setDownloadLoding] = useState<boolean>(false);
   const [relationDimensionOptions, setRelationDimensionOptions] = useState<
-    { value: string; label: string }[]
+    { value: string; label: string; modelId: number }[]
   >([]);
   const [dimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>([]);
   const [queryParams, setQueryParams] = useState<any>({});
@@ -147,7 +147,7 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
       setDimensionList(data.list);
       setRelationDimensionOptions(
         data.list.map((item: ISemantic.IMetricItem) => {
-          return { label: item.name, value: item.bizName };
+          return { label: item.name, value: item.bizName, modelId: item.modelId };
         }),
       );
       return data.list;
