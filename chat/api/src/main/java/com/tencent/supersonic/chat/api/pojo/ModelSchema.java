@@ -41,6 +41,9 @@ public class ModelSchema {
             case VALUE:
                 element = dimensionValues.stream().filter(e -> e.getId() == elementID).findFirst();
                 break;
+            case TAG:
+                element = tags.stream().filter(e -> e.getId() == elementID).findFirst();
+                break;
             default:
         }
 

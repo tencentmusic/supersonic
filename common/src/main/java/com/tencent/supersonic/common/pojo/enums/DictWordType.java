@@ -20,6 +20,8 @@ public enum DictWordType {
 
     NUMBER("m"),
 
+    TAG("tag"),
+
     SUFFIX("suffix");
 
     public static final String NATURE_SPILT = "_";
