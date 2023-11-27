@@ -155,20 +155,6 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
         >
           <Input placeholder="名称不可重复" disabled={isEdit} />
         </FormItem>
-        <FormItem
-          hidden={isEdit}
-          name="datasourceId"
-          label="所属数据源"
-          rules={[{ required: true, message: '请选择所属数据源' }]}
-        >
-          <Select placeholder="请选择数据源" disabled={isEdit}>
-            {dataSourceList.map((item) => (
-              <Option key={item.id} value={item.id}>
-                {item.name}
-              </Option>
-            ))}
-          </Select>
-        </FormItem>
         <FormItem label="别名">
           <Row>
             <Col flex="1 1 200px">

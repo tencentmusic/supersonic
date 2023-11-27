@@ -63,7 +63,7 @@ const SqlSide: React.FC<Props> = ({ initialValues, onSubmitSuccess }) => {
 
   useEffect(() => {
     if (initialValues) {
-      updateTabSql(initialValues?.datasourceDetail?.sqlQuery || '', '数据源查询');
+      updateTabSql(initialValues?.modelDetail?.sqlQuery || '', '数据源查询');
     }
   }, [initialValues]);
 

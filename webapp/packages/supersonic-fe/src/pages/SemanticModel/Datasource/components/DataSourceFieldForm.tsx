@@ -14,6 +14,7 @@ import {
 import styles from '../style.less';
 
 type FieldItem = {
+  expr?: string;
   bizName: string;
   sqlType: string;
   name: string;
@@ -144,7 +145,7 @@ const FieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSqlChange })
           );
         }
         if (type === EnumDataSourceType.MEASURES) {
-          const agg = fields.find((field) => field.bizName === record.bizName)?.agg;
+          const agg = fields.find((field) => field.expr === record.expr)?.agg;
           return (
             <Select
               placeholder="度量算子"
