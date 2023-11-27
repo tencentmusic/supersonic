@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class SqlInfoParseResponder implements ParseResponder {
+public class SqlOutputParseResponder implements ParseResponder {
 
     @Override
     public void fillResponse(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
