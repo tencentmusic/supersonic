@@ -34,7 +34,7 @@ import {
   DatePicker,
 } from 'antd';
 
-import moment from 'moment';
+import dayjs from 'dayjs';
 import styles from './style.less';
 
 const { CheckableTag } = Tag;
@@ -154,7 +154,7 @@ const DynamicDate: React.FC<Props> = ({
       [DynamicAdvancedConfigType.FROM_DATE_PERIOD]: {
         perPeriodType: PerDatePeriodType.PERDAY,
       },
-      [DynamicAdvancedConfigType.FROM_DATE]: { date: moment() },
+      [DynamicAdvancedConfigType.FROM_DATE]: { date: dayjs() },
     };
     if (advancedPanelFormData) {
       defaultConfig = { ...advancedPanelFormData };
@@ -237,7 +237,7 @@ const DynamicDate: React.FC<Props> = ({
     const { dateRangeString, dateRangeStringDesc } = getDynamicDateRangeStringByParams(
       mergeConfigTypeData,
       configType,
-      { maxPartition: moment().format('YYYY-MM-DD') },
+      { maxPartition: dayjs().format('YYYY-MM-DD') },
     );
     mergeConfigTypeData.dateRangeStringDesc = dateRangeStringDesc;
     onDateRangeStringAndDescChange?.({ dateRangeString, dateRangeStringDesc });
@@ -505,11 +505,11 @@ const DynamicDate: React.FC<Props> = ({
                         disabled={isAdvancedConfigTypeRadioDisabled(
                           DynamicAdvancedConfigType.FROM_DATE,
                         )}
-                        value={moment(
+                        value={dayjs(
                           advancedPanelFormData[DynamicAdvancedConfigType.FROM_DATE].date,
                         )}
                         disabledDate={(current) => {
-                          return current && current > moment().endOf('day');
+                          return current && current > dayjs().endOf('day');
                         }}
                         picker={DateRangeTypeToPickerMap[dateRangeTypeProps]}
                         onChange={(date, dateString) => {
