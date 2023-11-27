@@ -14,7 +14,7 @@ public interface CollectService {
 
     Boolean createCollectionIndicators(User user, Long id);
 
-    Boolean deleteCollectionIndicators(User user,Long id);
+    Boolean deleteCollectionIndicators(User user, Long id);
 
     List<CollectDO> getCollectList(String username);
 

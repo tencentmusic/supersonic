@@ -30,8 +30,8 @@ public class CollectController {
 
     @PostMapping("/createCollectionIndicators")
     public boolean createCollectionIndicators(@RequestBody CollectDO collectDO,
-                                              HttpServletRequest request,
-                                              HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return collectService.createCollectionIndicators(user, collectDO.getId());
     }
@@ -39,10 +39,10 @@ public class CollectController {
 
     @DeleteMapping("/deleteCollectionIndicators/{id}")
     public boolean deleteCollectionIndicators(@PathVariable Long id,
-                                              HttpServletRequest request,
-                                              HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return collectService.deleteCollectionIndicators(user,id);
+        return collectService.deleteCollectionIndicators(user, id);
     }
 
 }

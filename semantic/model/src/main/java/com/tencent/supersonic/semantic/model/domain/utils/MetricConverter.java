@@ -66,9 +66,9 @@ public class MetricConverter {
             metricResp.setModelName(modelResp.getName());
             metricResp.setDomainId(modelResp.getDomainId());
         }
-        if (collect != null && collect.contains(metricDO.getId())){
+        if (collect != null && collect.contains(metricDO.getId())) {
             metricResp.setIsCollect(true);
-        }else {
+        } else {
             metricResp.setIsCollect(false);
         }
         metricResp.setTag(metricDO.getTags());

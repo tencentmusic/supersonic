@@ -65,11 +65,11 @@ public class MetricServiceImpl implements MetricService {
     private ApplicationEventPublisher eventPublisher;
 
     public MetricServiceImpl(MetricRepository metricRepository,
-                             ModelService modelService,
-                             DomainService domainService,
-                             ChatGptHelper chatGptHelper,
-                             CollectService collectService,
-                             ApplicationEventPublisher eventPublisher) {
+            ModelService modelService,
+            DomainService domainService,
+            ChatGptHelper chatGptHelper,
+            CollectService collectService,
+            ApplicationEventPublisher eventPublisher) {
         this.domainService = domainService;
         this.metricRepository = metricRepository;
         this.modelService = modelService;
@@ -185,7 +185,7 @@ public class MetricServiceImpl implements MetricService {
         BeanUtils.copyProperties(metricDOPageInfo, pageInfo);
         List<CollectDO> collectList = collectService.getCollectList(user.getName());
         List<Long> collect = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
-        List<MetricResp> metricResps = convertList(metricDOPageInfo.getList(),collect);
+        List<MetricResp> metricResps = convertList(metricDOPageInfo.getList(), collect);
         fillAdminRes(metricResps, user);
         pageInfo.setList(metricResps);
         return pageInfo;
