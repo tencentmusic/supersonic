@@ -95,11 +95,10 @@ public class ParseInfoUpdateProcessor implements PostProcessor {
         }
     }
 
-    private Set<SchemaElement> getElements
-            (Set<Long> modelIds, List<String> allFields, List<SchemaElement> elements) {
+    private Set<SchemaElement> getElements(Set<Long> modelIds, List<String> allFields, List<SchemaElement> elements) {
         return elements.stream()
-                .filter(schemaElement -> modelIds.contains(schemaElement.getModel())
-                        && allFields.contains(schemaElement.getName())
+                .filter(schemaElement -> modelIds.contains(schemaElement.getModel()) && allFields.contains(
+                        schemaElement.getName())
                 ).collect(Collectors.toSet());
     }
 
