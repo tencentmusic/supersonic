@@ -115,6 +115,13 @@ public class SemanticSchema implements Serializable {
         return tags;
     }
 
+    public List<SchemaElement> getTags(Set<Long> modelIds) {
+        List<SchemaElement> tags = new ArrayList<>();
+        modelSchemaList.stream().filter(schemaElement -> modelIds.contains(schemaElement.getModel()))
+                .forEach(d -> tags.addAll(d.getTags()));
+        return tags;
+    }
+
     public List<SchemaElement> getMetrics() {
         List<SchemaElement> metrics = new ArrayList<>();
         modelSchemaList.stream().forEach(d -> metrics.addAll(d.getMetrics()));
@@ -169,6 +176,6 @@ public class SemanticSchema implements Serializable {
             return new HashMap<>();
         }
         return modelSchemaList.stream().collect(Collectors.toMap(modelSchema
-                        -> modelSchema.getModel().getModel(), modelSchema -> modelSchema));
+                -> modelSchema.getModel().getModel(), modelSchema -> modelSchema));
     }
 }
