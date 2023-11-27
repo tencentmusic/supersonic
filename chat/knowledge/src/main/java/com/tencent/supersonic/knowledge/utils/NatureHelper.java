@@ -43,6 +43,9 @@ public class NatureHelper {
             case VALUE:
                 result = SchemaElementType.VALUE;
                 break;
+            case TAG:
+                result = SchemaElementType.TAG;
+                break;
             default:
                 break;
         }
