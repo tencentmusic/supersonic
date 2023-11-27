@@ -8,9 +8,11 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
-import java.util.Objects;
+
 import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import org.springframework.util.CollectionUtils;
@@ -52,9 +54,9 @@ public class HavingCorrector extends BaseSemanticCorrector {
         if (!SqlParserSelectFunctionHelper.hasAggregateFunction(correctS2SQL)) {
             return;
         }
-        Expression havingExpression = SqlParserSelectHelper.getHavingExpression(correctS2SQL);
-        if (Objects.nonNull(havingExpression)) {
-            String replaceSql = SqlParserAddHelper.addFunctionToSelect(correctS2SQL, havingExpression);
+        List<Expression> havingExpressionList = SqlParserSelectHelper.getHavingExpression(correctS2SQL);
+        if (!CollectionUtils.isEmpty(havingExpressionList)) {
+            String replaceSql = SqlParserAddHelper.addFunctionToSelect(correctS2SQL, havingExpressionList);
             semanticParseInfo.getSqlInfo().setCorrectS2SQL(replaceSql);
         }
         return;
