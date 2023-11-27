@@ -15,18 +15,19 @@ import com.tencent.supersonic.semantic.query.parser.calcite.sql.render.FilterRen
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.render.OutputRender;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.render.SourceRender;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Stack;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.validate.SqlValidatorScope;
 
 public class AggPlanner implements Planner {
 
-    private MetricReq metricCommand;
+    private MetricReq metricReq;
     private SemanticSchema schema;
     private SqlValidatorScope scope;
     private Stack<TableView> dataSets = new Stack<>();
@@ -61,13 +62,13 @@ public class AggPlanner implements Planner {
         while (it.hasNext()) {
             Renderer renderer = it.next();
             if (previous != null) {
-                previous.render(metricCommand, datasource, scope, schema, !isAgg);
+                previous.render(metricReq, datasource, scope, schema, !isAgg);
                 renderer.setTable(previous.builderAs(DataSourceNode.getNames(datasource) + "_" + String.valueOf(i)));
                 i++;
             }
             previous = renderer;
         }
-        builders.getLast().render(metricCommand, datasource, scope, schema, !isAgg);
+        builders.getLast().render(metricReq, datasource, scope, schema, !isAgg);
         parserNode = builders.getLast().builder();
 
 
@@ -75,7 +76,7 @@ public class AggPlanner implements Planner {
 
 
     private List<DataSource> getMatchDataSource(SqlValidatorScope scope) throws Exception {
-        return DataSourceNode.getMatchDataSources(scope, schema, metricCommand);
+        return DataSourceNode.getMatchDataSources(scope, schema, metricReq);
     }
 
     private boolean getAgg(DataSource dataSource) {
@@ -85,7 +86,7 @@ public class AggPlanner implements Planner {
         // default by dataSource time aggregation
         if (Objects.nonNull(dataSource.getAggTime()) && !dataSource.getAggTime().equalsIgnoreCase(
                 Constants.DIMENSION_TYPE_TIME_GRANULARITY_NONE)) {
-            if (!metricCommand.isNativeQuery()) {
+            if (!metricReq.isNativeQuery()) {
                 return true;
             }
         }
@@ -95,15 +96,15 @@ public class AggPlanner implements Planner {
 
     @Override
     public void explain(QueryStatement queryStatement, AggOption aggOption) throws Exception {
-        this.metricCommand = queryStatement.getMetricReq();
-        if (metricCommand.getMetrics() == null) {
-            metricCommand.setMetrics(new ArrayList<>());
+        this.metricReq = queryStatement.getMetricReq();
+        if (metricReq.getMetrics() == null) {
+            metricReq.setMetrics(new ArrayList<>());
         }
-        if (metricCommand.getDimensions() == null) {
-            metricCommand.setDimensions(new ArrayList<>());
+        if (metricReq.getDimensions() == null) {
+            metricReq.setDimensions(new ArrayList<>());
         }
-        if (metricCommand.getLimit() == null) {
-            metricCommand.setLimit(0L);
+        if (metricReq.getLimit() == null) {
+            metricReq.setLimit(0L);
         }
         this.aggOption = aggOption;
         // build a parse Node

@@ -2,7 +2,7 @@ package com.tencent.supersonic.semantic.query.domain.calcite;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.semantic.api.model.response.SqlParserResp;
-import com.tencent.supersonic.semantic.api.model.yaml.DatasourceYamlTpl;
+import com.tencent.supersonic.semantic.api.model.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.IdentifyYamlTpl;
@@ -53,7 +53,7 @@ class SemanticParserServiceTest {
 
     public void test() throws Exception {
 
-        DatasourceYamlTpl datasource = new DatasourceYamlTpl();
+        DataModelYamlTpl datasource = new DataModelYamlTpl();
         datasource.setName("s2_pv_uv_statis");
         datasource.setSourceId(1L);
         datasource.setSqlQuery("SELECT imp_date, user_name,page,1 as pv, user_name as uv FROM s2_pv_uv_statis");
@@ -195,7 +195,7 @@ class SemanticParserServiceTest {
 
 
     private static void addDepartment(SemanticSchema semanticSchema) {
-        DatasourceYamlTpl datasource = new DatasourceYamlTpl();
+        DataModelYamlTpl datasource = new DataModelYamlTpl();
         datasource.setName("user_department");
         datasource.setSourceId(1L);
         datasource.setSqlQuery("SELECT imp_date,user_name,department FROM s2_user_department");

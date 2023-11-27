@@ -97,3 +97,20 @@ alter table s2_datasource add column `filter_sql` varchar(1000) COMMENT 'filter_
 
 --20231120
 alter table s2_dimension add column `is_tag` int(10) DEFAULT NULL;
+
+--20231125
+alter table s2_model add column `database_id` INT NOT NULL;
+alter table s2_model add column `model_detail` text NOT  NULL;
+alter table s2_model add column `depends` varchar(500) DEFAULT NULL;
+alter table s2_model add column `filter_sql` varchar(1000) DEFAULT NULL;
+
+CREATE TABLE s2_model_rela
+(
+    id             BIGINT AUTO_INCREMENT,
+    domain_id       BIGINT,
+    from_model_id    BIGINT,
+    to_model_id      BIGINT,
+    join_type       VARCHAR(255),
+    join_condition  VARCHAR(255),
+    PRIMARY KEY (`id`)
+);

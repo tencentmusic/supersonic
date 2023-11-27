@@ -9,12 +9,13 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Perform SQL corrections on the "group by" section in S2SQL.
@@ -30,14 +31,14 @@ public class GroupByCorrector extends BaseSemanticCorrector {
     }
 
     private void addGroupByFields(SemanticParseInfo semanticParseInfo) {
-        Long modelId = semanticParseInfo.getModel().getModel();
+        Set<Long> modelIds = semanticParseInfo.getModel().getModelIds();
 
         //add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectS2SQL();
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         //add alias field name
-        Set<String> dimensions = semanticSchema.getDimensions(modelId).stream()
+        Set<String> dimensions = semanticSchema.getDimensions(modelIds).stream()
                 .flatMap(
                         schemaElement -> {
                             Set<String> elements = new HashSet<>();

@@ -7,11 +7,10 @@ import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.plugin.Plugin;
 import com.tencent.supersonic.chat.plugin.PluginManager;
 import com.tencent.supersonic.chat.plugin.PluginParseResult;
@@ -19,8 +18,10 @@ import com.tencent.supersonic.chat.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.ModelCluster;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import org.springframework.util.CollectionUtils;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +59,10 @@ public abstract class PluginParser implements SemanticParser {
         }
         for (Long modelId : modelIds) {
             PluginSemanticQuery pluginQuery = QueryManager.createPluginQuery(plugin.getType());
-            SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(modelId, plugin, queryContext.getRequest(),
-                    queryContext.getMapInfo().getMatchedElements(modelId), pluginRecallResult.getDistance());
+            SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(modelId, plugin,
+                    queryContext.getRequest(),
+                    queryContext.getModelClusterMapInfo().getMatchedElements(modelId),
+                    pluginRecallResult.getDistance());
             semanticParseInfo.setQueryMode(pluginQuery.getQueryMode());
             semanticParseInfo.setScore(pluginRecallResult.getScore());
             pluginQuery.setParseInfo(semanticParseInfo);
@@ -79,12 +82,9 @@ public abstract class PluginParser implements SemanticParser {
         if (schemaElementMatches == null) {
             schemaElementMatches = Lists.newArrayList();
         }
-        SchemaElement model = new SchemaElement();
-        model.setModel(modelId);
-        model.setId(modelId);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setElementMatches(schemaElementMatches);
-        semanticParseInfo.setModel(model);
+        semanticParseInfo.setModel(ModelCluster.build(Sets.newHashSet(modelId)));
         Map<String, Object> properties = new HashMap<>();
         PluginParseResult pluginParseResult = new PluginParseResult();
         pluginParseResult.setPlugin(plugin);

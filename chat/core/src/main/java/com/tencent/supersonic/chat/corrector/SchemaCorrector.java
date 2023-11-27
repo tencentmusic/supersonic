@@ -51,7 +51,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
     }
 
     private void correctFieldName(SemanticParseInfo semanticParseInfo) {
-        Map<String, String> fieldNameMap = getFieldNameMap(semanticParseInfo.getModelId());
+        Map<String, String> fieldNameMap = getFieldNameMap(semanticParseInfo.getModel().getModelIds());
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String sql = SqlParserReplaceHelper.replaceFields(sqlInfo.getCorrectS2SQL(), fieldNameMap);
         sqlInfo.setCorrectS2SQL(sql);

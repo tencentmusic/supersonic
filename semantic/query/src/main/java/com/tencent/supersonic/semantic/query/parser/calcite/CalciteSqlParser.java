@@ -41,6 +41,7 @@ public class CalciteSqlParser implements SqlParser {
         semanticSchema.setDatasource(semanticModel.getDatasourceMap());
         semanticSchema.setDimension(semanticModel.getDimensionMap());
         semanticSchema.setMetric(semanticModel.getMetrics());
+        semanticSchema.setJoinRelations(semanticModel.getJoinRelations());
         return semanticSchema;
     }
 }

@@ -2,24 +2,21 @@ package com.tencent.supersonic.semantic.query.parser.calcite.sql.node;
 
 
 import com.tencent.supersonic.semantic.query.parser.calcite.Configuration;
-import com.tencent.supersonic.semantic.query.parser.calcite.sql.Optimization;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSqlDialect;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
+import com.tencent.supersonic.semantic.query.parser.calcite.sql.Optimization;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.sql.JoinType;
 import org.apache.calcite.sql.SqlAsOperator;
 import org.apache.calcite.sql.SqlBasicCall;
+import org.apache.calcite.sql.SqlBinaryOperator;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlKind;
+import org.apache.calcite.sql.SqlLiteral;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.SqlWriterConfig;
+import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserPos;
@@ -28,6 +25,15 @@ import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 public abstract class SemanticNode {
 
@@ -128,6 +134,46 @@ public abstract class SemanticNode {
         SqlValidator sqlValidator = Configuration.getSqlValidator(rootSchema);
         return sqlToRelConverter.convertQuery(
                 sqlValidator.validate(SqlParser.create(sql, SqlParser.Config.DEFAULT).parseStmt()), false, true).rel;
+    }
+
+    public static SqlBinaryOperator getBinaryOperator(String val) {
+        if (val.equals("=")) {
+            return SqlStdOperatorTable.EQUALS;
+        }
+        if (val.equals(">")) {
+            return SqlStdOperatorTable.GREATER_THAN;
+        }
+        if (val.equals(">=")) {
+            return SqlStdOperatorTable.GREATER_THAN_OR_EQUAL;
+        }
+        if (val.equals("<")) {
+            return SqlStdOperatorTable.LESS_THAN;
+        }
+        if (val.equals("<=")) {
+            return SqlStdOperatorTable.LESS_THAN_OR_EQUAL;
+        }
+        if (val.equals("!=")) {
+            return SqlStdOperatorTable.NOT_EQUALS;
+        }
+        return SqlStdOperatorTable.EQUALS;
+    }
+
+    public static SqlLiteral getJoinSqlLiteral(String joinType) {
+        if (Objects.nonNull(joinType) && !joinType.isEmpty()) {
+            if (joinType.toLowerCase().contains(JoinType.INNER.lowerName)) {
+                return SqlLiteral.createSymbol(JoinType.INNER, SqlParserPos.ZERO);
+            }
+            if (joinType.toLowerCase().contains(JoinType.LEFT.lowerName)) {
+                return SqlLiteral.createSymbol(JoinType.LEFT, SqlParserPos.ZERO);
+            }
+            if (joinType.toLowerCase().contains(JoinType.RIGHT.lowerName)) {
+                return SqlLiteral.createSymbol(JoinType.RIGHT, SqlParserPos.ZERO);
+            }
+            if (joinType.toLowerCase().contains(JoinType.FULL.lowerName)) {
+                return SqlLiteral.createSymbol(JoinType.FULL, SqlParserPos.ZERO);
+            }
+        }
+        return SqlLiteral.createSymbol(JoinType.INNER, SqlParserPos.ZERO);
     }
 
     public void accept(Optimization optimization) {

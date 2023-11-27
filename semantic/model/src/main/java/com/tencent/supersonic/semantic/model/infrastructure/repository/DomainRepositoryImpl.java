@@ -1,13 +1,13 @@
 package com.tencent.supersonic.semantic.model.infrastructure.repository;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DomainDO;
-import com.tencent.supersonic.semantic.model.domain.dataobject.DomainDOExample;
 import com.tencent.supersonic.semantic.model.domain.repository.DomainRepository;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.DomainDOMapper;
-import java.util.List;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 
 @Component
@@ -27,23 +27,22 @@ public class DomainRepositoryImpl implements DomainRepository {
 
     @Override
     public void updateDomain(DomainDO metaDomainDO) {
-        domainDOMapper.updateByPrimaryKey(metaDomainDO);
+        domainDOMapper.updateById(metaDomainDO);
     }
 
     @Override
     public void deleteDomain(Long id) {
-        domainDOMapper.deleteByPrimaryKey(id);
+        domainDOMapper.deleteById(id);
     }
 
     @Override
     public List<DomainDO> getDomainList() {
-        DomainDOExample metaDomainDOExample = new DomainDOExample();
-        return domainDOMapper.selectByExample(metaDomainDOExample);
+        return domainDOMapper.selectList(Wrappers.emptyWrapper());
     }
 
     @Override
     public DomainDO getDomainById(Long id) {
-        return domainDOMapper.selectByPrimaryKey(id);
+        return domainDOMapper.selectById(id);
     }
 
 

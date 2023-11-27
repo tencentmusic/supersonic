@@ -1,12 +1,7 @@
 package com.tencent.supersonic.chat.query.rule.tag;
 
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
-
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
@@ -15,13 +10,19 @@ import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
+
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
 
 @Slf4j
 public abstract class TagSemanticQuery extends RuleSemanticQuery {
@@ -78,8 +79,8 @@ public abstract class TagSemanticQuery extends RuleSemanticQuery {
     }
 
     @Override
-    public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {
-        super.fillParseInfo(modelId, queryContext, chatContext);
+    public void fillParseInfo(ChatContext chatContext) {
+        super.fillParseInfo(chatContext);
 
         parseInfo.setQueryType(QueryType.TAG);
         parseInfo.setLimit(TAG_MAX_RESULTS);

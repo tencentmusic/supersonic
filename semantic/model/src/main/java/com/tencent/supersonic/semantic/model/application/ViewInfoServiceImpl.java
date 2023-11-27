@@ -1,63 +1,64 @@
 package com.tencent.supersonic.semantic.model.application;
 
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.semantic.api.model.request.ViewInfoReq;
-import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelSchemaRelaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.model.domain.dataobject.ViewInfoDO;
-import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
-import com.tencent.supersonic.semantic.model.domain.repository.ViewInfoRepository;
-import com.tencent.supersonic.semantic.model.domain.DatasourceService;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaRelaResp;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
+import com.tencent.supersonic.semantic.model.domain.ModelService;
+import com.tencent.supersonic.semantic.model.domain.dataobject.ViewInfoDO;
+import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
+import com.tencent.supersonic.semantic.model.domain.pojo.ModelFilter;
+import com.tencent.supersonic.semantic.model.domain.repository.ViewInfoRepository;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import org.assertj.core.util.Lists;
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
 
 @Service
 public class ViewInfoServiceImpl {
 
     private ViewInfoRepository viewInfoRepository;
 
-    private DatasourceService datasourceService;
+    private ModelService modelService;
 
     private DimensionService dimensionService;
 
     private MetricService metricService;
 
-    public ViewInfoServiceImpl(ViewInfoRepository viewInfoRepository, DatasourceService datasourceService,
+    public ViewInfoServiceImpl(ViewInfoRepository viewInfoRepository, ModelService modelService,
             MetricService metricService, DimensionService dimensionService) {
         this.viewInfoRepository = viewInfoRepository;
         this.dimensionService = dimensionService;
         this.metricService = metricService;
-        this.datasourceService = datasourceService;
+        this.modelService = modelService;
     }
 
     public List<ViewInfoDO> getViewInfoList(Long modelId) {
         return viewInfoRepository.getViewInfoList(modelId);
     }
 
-    public List<ModelSchemaRelaResp> getDomainSchema(Long modelId) {
+    public List<ModelSchemaRelaResp> getDomainSchema(Long domainId) {
         List<ModelSchemaRelaResp> domainSchemaRelaResps = Lists.newArrayList();
-        List<DatasourceResp> datasourceResps = datasourceService.getDatasourceList(modelId);
-        for (DatasourceResp datasourceResp : datasourceResps) {
+        ModelFilter modelFilter = new ModelFilter();
+        modelFilter.setDomainIds(Lists.newArrayList(domainId));
+        List<ModelResp> modelResps = modelService.getModelList(modelFilter);
+        for (ModelResp modelResp : modelResps) {
             ModelSchemaRelaResp domainSchemaRelaResp = new ModelSchemaRelaResp();
-            Long datasourceId = datasourceResp.getId();
             MetaFilter metaFilter = new MetaFilter();
-            metaFilter.setModelIds(Lists.newArrayList(modelId));
-            metaFilter.setDatasourceId(datasourceId);
+            metaFilter.setModelIds(Lists.newArrayList(modelResp.getId()));
             List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
             List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
-            domainSchemaRelaResp.setDatasource(datasourceResp);
+            domainSchemaRelaResp.setModel(modelResp);
             domainSchemaRelaResp.setDimensions(dimensionResps);
             domainSchemaRelaResp.setMetrics(metricResps);
-            domainSchemaRelaResp.setDomainId(modelId);
+            domainSchemaRelaResp.setDomainId(domainId);
             domainSchemaRelaResps.add(domainSchemaRelaResp);
         }
         return domainSchemaRelaResps;

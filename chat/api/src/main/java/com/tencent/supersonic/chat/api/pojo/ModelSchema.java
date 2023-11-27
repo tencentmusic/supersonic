@@ -1,8 +1,13 @@
 package com.tencent.supersonic.chat.api.pojo;
 
+import com.google.common.collect.Sets;
+import com.tencent.supersonic.common.pojo.ModelRela;
 import lombok.Data;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -14,8 +19,8 @@ public class ModelSchema {
     private Set<SchemaElement> dimensions = new HashSet<>();
     private Set<SchemaElement> dimensionValues = new HashSet<>();
     private Set<SchemaElement> tags = new HashSet<>();
-    @Deprecated
     private SchemaElement entity = new SchemaElement();
+    private List<ModelRela> modelRelas = new ArrayList<>();
 
     public SchemaElement getElement(SchemaElementType elementType, long elementID) {
         Optional<SchemaElement> element = Optional.empty();
@@ -73,6 +78,18 @@ public class ModelSchema {
         } else {
             return null;
         }
+    }
+
+    public Set<Long> getModelClusterSet() {
+        if (CollectionUtils.isEmpty(modelRelas)) {
+            return Sets.newHashSet();
+        }
+        Set<Long> modelClusterSet = new HashSet<>();
+        modelRelas.forEach(modelRela -> {
+            modelClusterSet.add(modelRela.getToModelId());
+            modelClusterSet.add(modelRela.getFromModelId());
+        });
+        return modelClusterSet;
     }
 
 }

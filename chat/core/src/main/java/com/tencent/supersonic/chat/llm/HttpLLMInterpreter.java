@@ -9,8 +9,6 @@ import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import java.net.URI;
-import java.net.URL;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,14 +17,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import java.net.URI;
+import java.net.URL;
 
 @Slf4j
 public class HttpLLMInterpreter implements LLMInterpreter {
 
-    public LLMResp query2sql(LLMReq llmReq, Long modelId) {
+    public LLMResp query2sql(LLMReq llmReq, String modelClusterKey) {
 
         long startTime = System.currentTimeMillis();
-        log.info("requestLLM request, modelId:{},llmReq:{}", modelId, llmReq);
+        log.info("requestLLM request, modelId:{},llmReq:{}", modelClusterKey, llmReq);
         try {
             LLMParserConfig llmParserConfig = ContextUtils.getBean(LLMParserConfig.class);
 

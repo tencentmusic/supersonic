@@ -7,37 +7,30 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.DataEvent;
+import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.ChatGptHelper;
-import com.tencent.supersonic.semantic.api.model.pojo.DatasourceDetail;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
+import com.tencent.supersonic.semantic.api.model.pojo.ModelDetail;
 import com.tencent.supersonic.semantic.api.model.request.DimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.MetaBatchReq;
 import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
-import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.model.domain.DatabaseService;
+import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DimensionDO;
+import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.DimensionRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.DimensionConverter;
-import com.tencent.supersonic.semantic.model.domain.DatasourceService;
-import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.stream.Collectors;
 import com.tencent.supersonic.semantic.model.domain.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -46,6 +39,13 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 
 @Service
 @Slf4j
@@ -53,8 +53,6 @@ public class DimensionServiceImpl implements DimensionService {
 
 
     private DimensionRepository dimensionRepository;
-
-    private DatasourceService datasourceService;
 
     private ModelService modelService;
 
@@ -68,12 +66,10 @@ public class DimensionServiceImpl implements DimensionService {
 
     public DimensionServiceImpl(DimensionRepository dimensionRepository,
                                 ModelService modelService,
-                                DatasourceService datasourceService,
                                 ChatGptHelper chatGptHelper,
                                 DatabaseService databaseService) {
         this.modelService = modelService;
         this.dimensionRepository = dimensionRepository;
-        this.datasourceService = datasourceService;
         this.chatGptHelper = chatGptHelper;
         this.databaseService = databaseService;
     }
@@ -185,7 +181,7 @@ public class DimensionServiceImpl implements DimensionService {
     @Override
     public DimensionResp getDimension(Long id) {
         DimensionDO dimensionDO = dimensionRepository.getDimensionById(id);
-        return DimensionConverter.convert2DimensionResp(dimensionDO, new HashMap<>(), new HashMap<>());
+        return DimensionConverter.convert2DimensionResp(dimensionDO, new HashMap<>());
     }
 
     @Override
@@ -198,7 +194,7 @@ public class DimensionServiceImpl implements DimensionService {
                 .doSelectPageInfo(() -> queryDimension(dimensionFilter));
         PageInfo<DimensionResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(dimensionDOPageInfo, pageInfo);
-        pageInfo.setList(convertList(dimensionDOPageInfo.getList(), datasourceService.getDatasourceMap()));
+        pageInfo.setList(convertList(dimensionDOPageInfo.getList(), modelService.getModelMap()));
         return pageInfo;
     }
 
@@ -210,7 +206,7 @@ public class DimensionServiceImpl implements DimensionService {
     public List<DimensionResp> getDimensions(MetaFilter metaFilter) {
         DimensionFilter dimensionFilter = new DimensionFilter();
         BeanUtils.copyProperties(metaFilter, dimensionFilter);
-        return convertList(dimensionRepository.getDimension(dimensionFilter), datasourceService.getDatasourceMap());
+        return convertList(dimensionRepository.getDimension(dimensionFilter), modelService.getModelMap());
     }
 
     private List<DimensionResp> getDimensions(Long modelId) {
@@ -218,13 +214,11 @@ public class DimensionServiceImpl implements DimensionService {
     }
 
     private List<DimensionResp> convertList(List<DimensionDO> dimensionDOS,
-                                            Map<Long, DatasourceResp> datasourceRespMap) {
+                                            Map<Long, ModelResp> modelRespMap) {
         List<DimensionResp> dimensionResps = Lists.newArrayList();
-        Map<Long, String> modelFullPathMap = modelService.getModelFullPathMap();
         if (!CollectionUtils.isEmpty(dimensionDOS)) {
             dimensionResps = dimensionDOS.stream()
-                    .map(dimensionDO -> DimensionConverter.convert2DimensionResp(dimensionDO, modelFullPathMap,
-                            datasourceRespMap))
+                    .map(dimensionDO -> DimensionConverter.convert2DimensionResp(dimensionDO, modelRespMap))
                     .collect(Collectors.toList());
         }
         return dimensionResps;
@@ -251,19 +245,10 @@ public class DimensionServiceImpl implements DimensionService {
 
     @Override
     public List<DimValueMap> mockDimensionValueAlias(DimensionReq dimensionReq, User user) {
-
-        List<DatasourceResp> datasourceList = datasourceService.getDatasourceList();
-        List<DatasourceResp> collect = datasourceList.stream().filter(datasourceResp ->
-                datasourceResp.getId().equals(dimensionReq.getDatasourceId())).collect(Collectors.toList());
-
-        if (collect.isEmpty()) {
-            return null;
-        }
-        DatasourceResp datasourceResp = collect.get(0);
-        DatasourceDetail datasourceDetail = datasourceResp.getDatasourceDetail();
-        String sqlQuery = datasourceDetail.getSqlQuery();
-
-        DatabaseResp database = databaseService.getDatabase(datasourceResp.getDatabaseId());
+        ModelResp modelResp = modelService.getModel(dimensionReq.getModelId());
+        ModelDetail modelDetail = modelResp.getModelDetail();
+        String sqlQuery = modelDetail.getSqlQuery();
+        DatabaseResp database = databaseService.getDatabase(modelResp.getDatabaseId());
 
         String sql = "select ai_talk." + dimensionReq.getBizName() + " from (" + sqlQuery
                 + ") as ai_talk group by ai_talk." + dimensionReq.getBizName();

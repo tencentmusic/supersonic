@@ -17,18 +17,19 @@ import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.query.service.QueryService;
 import com.tencent.supersonic.semantic.query.service.SchemaService;
-import java.util.HashMap;
-import java.util.List;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
@@ -44,7 +45,7 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
         if (StringUtils.isNotBlank(queryStructReq.getCorrectS2SQL())) {
             QueryS2SQLReq queryS2SQLReq = new QueryS2SQLReq();
             queryS2SQLReq.setSql(queryStructReq.getCorrectS2SQL());
-            queryS2SQLReq.setModelId(queryStructReq.getModelId());
+            queryS2SQLReq.setModelIds(queryStructReq.getModelIdSet());
             queryS2SQLReq.setVariables(new HashMap<>());
             return queryByS2SQL(queryS2SQLReq, user);
         }

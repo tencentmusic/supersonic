@@ -17,15 +17,16 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class EmbedLLMInterpreter implements LLMInterpreter {
 
-    public LLMResp query2sql(LLMReq llmReq, Long modelId) {
+    public LLMResp query2sql(LLMReq llmReq, String modelClusterKey) {
 
         ChatLanguageModel chatLanguageModel = ContextUtils.getBean(ChatLanguageModel.class);
 

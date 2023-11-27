@@ -16,11 +16,6 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -28,6 +23,13 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Perform SQL corrections on the "Where" section in S2SQL.
@@ -102,10 +104,8 @@ public class WhereCorrector extends BaseSemanticCorrector {
 
     private void updateFieldValueByTechName(SemanticParseInfo semanticParseInfo) {
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-        Long modelId = semanticParseInfo.getModel().getId();
-        List<SchemaElement> dimensions = semanticSchema.getDimensions().stream()
-                .filter(schemaElement -> modelId.equals(schemaElement.getModel()))
-                .collect(Collectors.toList());
+        Set<Long> modelIds = semanticParseInfo.getModel().getModelIds();
+        List<SchemaElement> dimensions = semanticSchema.getDimensions(modelIds);
 
         if (CollectionUtils.isEmpty(dimensions)) {
             return;

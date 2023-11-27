@@ -26,7 +26,7 @@ public class DefaultDimValueConverter implements SemanticConverter {
     @Override
     public void converter(Catalog catalog, QueryStructReq queryStructCmd,
                           ParseSqlReq sqlCommend, MetricReq metricCommand) throws Exception {
-        List<DimensionResp> dimensionResps = catalog.getDimensions(queryStructCmd.getModelId());
+        List<DimensionResp> dimensionResps = catalog.getDimensions(queryStructCmd.getModelIds());
         //dimension which has default values
         dimensionResps = dimensionResps.stream()
                 .filter(dimensionResp -> !CollectionUtils.isEmpty(dimensionResp.getDefaultValues()))

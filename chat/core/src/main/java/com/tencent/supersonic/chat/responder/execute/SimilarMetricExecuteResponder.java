@@ -39,7 +39,7 @@ public class SimilarMetricExecuteResponder implements ExecuteResponder {
         }
         List<String> metricNames = Collections.singletonList(parseInfo.getMetrics().iterator().next().getName());
         Map<String, String> filterCondition = new HashMap<>();
-        filterCondition.put("modelId", parseInfo.getModelId().toString());
+        filterCondition.put("modelId", parseInfo.getMetrics().iterator().next().getModel().toString());
         filterCondition.put("type", SchemaElementType.METRIC.name());
         RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(metricNames)
                 .filterCondition(filterCondition).queryEmbeddings(null).build();

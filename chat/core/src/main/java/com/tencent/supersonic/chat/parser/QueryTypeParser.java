@@ -4,7 +4,6 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
@@ -17,13 +16,14 @@ import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Query type parser, determine if the query is a metric query, an entity query,
@@ -58,11 +58,10 @@ public class QueryTypeParser implements SemanticParser {
             //If all the fields in the SELECT statement are of tag type.
             List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getS2SQL());
             SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
-            ModelSchema modelSchema = semanticService.getModelSchema(parseInfo.getModelId());
+            SemanticSchema semanticSchema = semanticService.getSemanticSchema();
 
-            if (CollectionUtils.isNotEmpty(selectFields) && Objects.nonNull(modelSchema) && CollectionUtils.isNotEmpty(
-                    modelSchema.getTags())) {
-                Set<String> tags = modelSchema.getTags().stream().map(schemaElement -> schemaElement.getName())
+            if (CollectionUtils.isNotEmpty(selectFields)) {
+                Set<String> tags = semanticSchema.getTags().stream().map(SchemaElement::getName)
                         .collect(Collectors.toSet());
                 if (tags.containsAll(selectFields)) {
                     return QueryType.TAG;
@@ -72,10 +71,10 @@ public class QueryTypeParser implements SemanticParser {
         //2. metric queryType
         List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getS2SQL());
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-        List<SchemaElement> metrics = semanticSchema.getMetrics(parseInfo.getModelId());
+        List<SchemaElement> metrics = semanticSchema.getMetrics(parseInfo.getModel().getModelIds());
         if (CollectionUtils.isNotEmpty(metrics)) {
-            Set<String> metricNameSet = metrics.stream().map(metric -> metric.getName()).collect(Collectors.toSet());
-            boolean containMetric = selectFields.stream().anyMatch(selectField -> metricNameSet.contains(selectField));
+            Set<String> metricNameSet = metrics.stream().map(SchemaElement::getName).collect(Collectors.toSet());
+            boolean containMetric = selectFields.stream().anyMatch(metricNameSet::contains);
             if (containMetric) {
                 return QueryType.METRIC;
             }

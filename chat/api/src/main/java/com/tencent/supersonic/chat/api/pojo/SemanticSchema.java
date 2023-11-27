@@ -1,9 +1,14 @@
 package com.tencent.supersonic.chat.api.pojo;
 
+import org.springframework.util.CollectionUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SemanticSchema implements Serializable {
@@ -16,6 +21,64 @@ public class SemanticSchema implements Serializable {
 
     public void add(ModelSchema schema) {
         modelSchemaList.add(schema);
+    }
+
+    public SchemaElement getElement(SchemaElementType elementType, long elementID) {
+        Optional<SchemaElement> element = Optional.empty();
+
+        switch (elementType) {
+            case ENTITY:
+                element = getElementsById(elementID, getEntities());
+                break;
+            case MODEL:
+                element = getElementsById(elementID, getModels());
+                break;
+            case METRIC:
+                element = getElementsById(elementID, getMetrics());
+                break;
+            case DIMENSION:
+                element = getElementsById(elementID, getDimensions());
+                break;
+            case VALUE:
+                element = getElementsById(elementID, getDimensionValues());
+                break;
+            default:
+        }
+
+        if (element.isPresent()) {
+            return element.get();
+        } else {
+            return null;
+        }
+    }
+
+    public SchemaElement getElementByName(SchemaElementType elementType, String name) {
+        Optional<SchemaElement> element = Optional.empty();
+
+        switch (elementType) {
+            case ENTITY:
+                element = getElementsByName(name, getEntities());
+                break;
+            case MODEL:
+                element = getElementsByName(name, getModels());
+                break;
+            case METRIC:
+                element = getElementsByName(name, getMetrics());
+                break;
+            case DIMENSION:
+                element = getElementsByName(name, getDimensions());
+                break;
+            case VALUE:
+                element = getElementsByName(name, getDimensionValues());
+                break;
+            default:
+        }
+
+        if (element.isPresent()) {
+            return element.get();
+        } else {
+            return null;
+        }
     }
 
     public Map<Long, String> getModelIdToName() {
@@ -35,9 +98,21 @@ public class SemanticSchema implements Serializable {
         return dimensions;
     }
 
-    public List<SchemaElement> getDimensions(Long modelId) {
+    public List<SchemaElement> getDimensions(Set<Long> modelIds) {
         List<SchemaElement> dimensions = getDimensions();
-        return getElementsByModelId(modelId, dimensions);
+        return getElementsByModelId(modelIds, dimensions);
+    }
+
+    public SchemaElement getDimensions(Long id) {
+        List<SchemaElement> dimensions = getDimensions();
+        Optional<SchemaElement> dimension = getElementsById(id, dimensions);
+        return dimension.orElse(null);
+    }
+
+    public List<SchemaElement> getTags() {
+        List<SchemaElement> tags = new ArrayList<>();
+        modelSchemaList.stream().forEach(d -> tags.addAll(d.getTags()));
+        return tags;
     }
 
     public List<SchemaElement> getMetrics() {
@@ -46,21 +121,9 @@ public class SemanticSchema implements Serializable {
         return metrics;
     }
 
-    public List<SchemaElement> getMetrics(Long modelId) {
+    public List<SchemaElement> getMetrics(Set<Long> modelIds) {
         List<SchemaElement> metrics = getMetrics();
-        return getElementsByModelId(modelId, metrics);
-    }
-
-    private List<SchemaElement> getElementsByModelId(Long modelId, List<SchemaElement> elements) {
-        return elements.stream()
-                .filter(schemaElement -> modelId.equals(schemaElement.getModel()))
-                .collect(Collectors.toList());
-    }
-
-    public List<SchemaElement> getModels() {
-        List<SchemaElement> models = new ArrayList<>();
-        modelSchemaList.stream().forEach(d -> models.add(d.getModel()));
-        return models;
+        return getElementsByModelId(modelIds, metrics);
     }
 
     public List<SchemaElement> getEntities() {
@@ -69,11 +132,43 @@ public class SemanticSchema implements Serializable {
         return entities;
     }
 
-    public Map<String, String> getBizNameToName(Long modelId) {
+    private List<SchemaElement> getElementsByModelId(Set<Long> modelIds, List<SchemaElement> elements) {
+        return elements.stream()
+                .filter(schemaElement -> modelIds.contains(schemaElement.getModel()))
+                .collect(Collectors.toList());
+    }
+
+    private Optional<SchemaElement> getElementsById(Long id, List<SchemaElement> elements) {
+        return elements.stream()
+                .filter(schemaElement -> id.equals(schemaElement.getId()))
+                .findFirst();
+    }
+
+    private Optional<SchemaElement> getElementsByName(String name, List<SchemaElement> elements) {
+        return elements.stream()
+                .filter(schemaElement -> name.equals(schemaElement.getName()))
+                .findFirst();
+    }
+
+    public List<SchemaElement> getModels() {
+        List<SchemaElement> models = new ArrayList<>();
+        modelSchemaList.stream().forEach(d -> models.add(d.getModel()));
+        return models;
+    }
+
+    public Map<String, String> getBizNameToName(Set<Long> modelIds) {
         List<SchemaElement> allElements = new ArrayList<>();
-        allElements.addAll(getDimensions(modelId));
-        allElements.addAll(getMetrics(modelId));
+        allElements.addAll(getDimensions(modelIds));
+        allElements.addAll(getMetrics(modelIds));
         return allElements.stream()
-                .collect(Collectors.toMap(a -> a.getBizName(), a -> a.getName(), (k1, k2) -> k1));
+                .collect(Collectors.toMap(SchemaElement::getBizName, SchemaElement::getName, (k1, k2) -> k1));
+    }
+
+    public Map<Long, ModelSchema> getModelSchemaMap() {
+        if (CollectionUtils.isEmpty(modelSchemaList)) {
+            return new HashMap<>();
+        }
+        return modelSchemaList.stream().collect(Collectors.toMap(modelSchema
+                        -> modelSchema.getModel().getModel(), modelSchema -> modelSchema));
     }
 }

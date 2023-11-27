@@ -40,6 +40,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -109,12 +110,12 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
     public void addDemoChatConfig_1() {
         ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
-        chatConfigBaseReq.setModelId(1L);
+        chatConfigBaseReq.setModelId(2L);
 
         ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
         ChatDefaultConfigReq chatDefaultConfigDetail = new ChatDefaultConfigReq();
-        List<Long> dimensionIds0 = Arrays.asList(1L, 2L);
-        List<Long> metricIds0 = Arrays.asList(1L);
+        List<Long> dimensionIds0 = Collections.singletonList(3L);
+        List<Long> metricIds0 = Arrays.asList(1L, 2L);
         chatDefaultConfigDetail.setDimensionIds(dimensionIds0);
         chatDefaultConfigDetail.setMetricIds(metricIds0);
         chatDefaultConfigDetail.setUnit(7);
@@ -126,8 +127,8 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         ChatAggConfigReq chatAggConfig = new ChatAggConfigReq();
         ChatDefaultConfigReq chatDefaultConfigAgg = new ChatDefaultConfigReq();
-        List<Long> dimensionIds1 = Arrays.asList(1L, 2L);
-        List<Long> metricIds1 = Arrays.asList(1L);
+        List<Long> dimensionIds1 = Arrays.asList(3L);
+        List<Long> metricIds1 = Arrays.asList(1L, 2L);
         chatDefaultConfigAgg.setDimensionIds(dimensionIds1);
         chatDefaultConfigAgg.setMetricIds(metricIds1);
         chatDefaultConfigAgg.setUnit(7);
@@ -138,34 +139,60 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         chatAggConfig.setVisibility(visibility1);
         List<KnowledgeInfoReq> knowledgeInfos = new ArrayList<>();
         KnowledgeInfoReq knowledgeInfoReq = new KnowledgeInfoReq();
-        knowledgeInfoReq.setItemId(1L);
+        knowledgeInfoReq.setItemId(3L);
         knowledgeInfoReq.setSearchEnable(true);
         knowledgeInfos.add(knowledgeInfoReq);
-        KnowledgeInfoReq knowledgeInfoReq2 = new KnowledgeInfoReq();
-        knowledgeInfoReq2.setItemId(2L);
-        knowledgeInfoReq2.setSearchEnable(true);
-        knowledgeInfos.add(knowledgeInfoReq2);
         chatAggConfig.setKnowledgeInfos(knowledgeInfos);
         chatConfigBaseReq.setChatAggConfig(chatAggConfig);
-
-        List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
-        recommendedQuestions.add(new RecommendedQuestionReq("超音数访问次数"));
-        recommendedQuestions.add(new RecommendedQuestionReq("近15天超音数访问次数汇总"));
-        recommendedQuestions.add(new RecommendedQuestionReq("按部门统计超音数的访问人数"));
-        recommendedQuestions.add(new RecommendedQuestionReq("对比alice和lucy的停留时长"));
-        recommendedQuestions.add(new RecommendedQuestionReq("超音数访问次数最高的部门"));
-        chatConfigBaseReq.setRecommendedQuestions(recommendedQuestions);
-
         configService.addConfig(chatConfigBaseReq, user);
     }
 
     public void addDemoChatConfig_2() {
         ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
-        chatConfigBaseReq.setModelId(2L);
+        chatConfigBaseReq.setModelId(3L);
 
         ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
         ChatDefaultConfigReq chatDefaultConfigDetail = new ChatDefaultConfigReq();
-        List<Long> dimensionIds0 = Arrays.asList(4L, 5L, 6L, 7L);
+        List<Long> dimensionIds0 = Arrays.asList(4L, 5L);
+        List<Long> metricIds0 = Arrays.asList(3L);
+        chatDefaultConfigDetail.setDimensionIds(dimensionIds0);
+        chatDefaultConfigDetail.setMetricIds(metricIds0);
+        chatDefaultConfigDetail.setUnit(7);
+        chatDefaultConfigDetail.setPeriod("DAY");
+        chatDetailConfig.setChatDefaultConfig(chatDefaultConfigDetail);
+        ItemVisibility visibility0 = new ItemVisibility();
+        chatDetailConfig.setVisibility(visibility0);
+        chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
+
+        ChatAggConfigReq chatAggConfig = new ChatAggConfigReq();
+        ChatDefaultConfigReq chatDefaultConfigAgg = new ChatDefaultConfigReq();
+        List<Long> dimensionIds1 = Arrays.asList(4L, 5L);
+        List<Long> metricIds1 = Arrays.asList(3L);
+        chatDefaultConfigAgg.setDimensionIds(dimensionIds1);
+        chatDefaultConfigAgg.setMetricIds(metricIds1);
+        chatDefaultConfigAgg.setUnit(7);
+        chatDefaultConfigAgg.setPeriod("DAY");
+        chatDefaultConfigAgg.setTimeMode(ChatDefaultConfigReq.TimeMode.RECENT);
+        chatAggConfig.setChatDefaultConfig(chatDefaultConfigAgg);
+        ItemVisibility visibility1 = new ItemVisibility();
+        chatAggConfig.setVisibility(visibility1);
+        List<KnowledgeInfoReq> knowledgeInfos = new ArrayList<>();
+        KnowledgeInfoReq knowledgeInfoReq = new KnowledgeInfoReq();
+        knowledgeInfoReq.setItemId(5L);
+        knowledgeInfoReq.setSearchEnable(true);
+        knowledgeInfos.add(knowledgeInfoReq);
+        chatAggConfig.setKnowledgeInfos(knowledgeInfos);
+        chatConfigBaseReq.setChatAggConfig(chatAggConfig);
+        configService.addConfig(chatConfigBaseReq, user);
+    }
+
+    public void addDemoChatConfig_3() {
+        ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
+        chatConfigBaseReq.setModelId(4L);
+
+        ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
+        ChatDefaultConfigReq chatDefaultConfigDetail = new ChatDefaultConfigReq();
+        List<Long> dimensionIds0 = Arrays.asList(6L, 7L, 8L, 9L);
         List<Long> metricIds0 = Arrays.asList(4L);
         chatDefaultConfigDetail.setDimensionIds(dimensionIds0);
         chatDefaultConfigDetail.setMetricIds(metricIds0);
@@ -178,7 +205,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         ChatAggConfigReq chatAggConfig = new ChatAggConfigReq();
         ChatDefaultConfigReq chatDefaultConfigAgg = new ChatDefaultConfigReq();
-        List<Long> dimensionIds1 = Arrays.asList(4L, 5L, 6L, 7L);
+        List<Long> dimensionIds1 = Arrays.asList(6L, 7L, 8L, 9L);
         List<Long> metricIds1 = Arrays.asList(4L);
         chatDefaultConfigAgg.setDimensionIds(dimensionIds1);
         chatDefaultConfigAgg.setMetricIds(metricIds1);
@@ -255,8 +282,8 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
     private void addAgent2() {
         Agent agent = new Agent();
         agent.setId(2);
-        agent.setName("圈实体");
-        agent.setDescription("帮助您用自然语言圈选实体，支持多条件组合筛选");
+        agent.setName("标签圈选");
+        agent.setDescription("帮助您用自然语言进行圈选，支持多条件组合筛选");
         agent.setStatus(1);
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList("国风风格艺人", "港台地区的艺人", "风格为流行的艺人"));
@@ -266,7 +293,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         ruleQueryTool.setType(AgentToolType.RULE);
         ruleQueryTool.setModelIds(Lists.newArrayList(-1L));
         ruleQueryTool.setQueryModes(Lists.newArrayList(
-                "ENTITY_DETAIL", "ENTITY_LIST_FILTER", "ENTITY_ID"));
+                "TAG_DETAIL", "TAG_LIST_FILTER", "TAG_ID"));
         agentConfig.getTools().add(ruleQueryTool);
 
         LLMParserTool llmParserTool = new LLMParserTool();
@@ -310,6 +337,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             addSysParameter();
             addDemoChatConfig_1();
             addDemoChatConfig_2();
+            addDemoChatConfig_3();
             addPlugin_1();
             addAgent1();
             addAgent2();

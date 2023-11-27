@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.query.enums.AggOption;
 import com.tencent.supersonic.semantic.api.query.pojo.MetricTable;
@@ -15,19 +16,19 @@ import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
 import com.tencent.supersonic.semantic.query.parser.SemanticConverter;
 import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
-import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
 import com.tencent.supersonic.semantic.query.utils.SqlGenerateUtils;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 @Component("CalculateAggConverter")
@@ -66,7 +67,7 @@ public class CalculateAggConverter implements SemanticConverter {
             return generateRatioSqlCommand(queryStructCmd, engineTypeEnum, version);
         }
         ParseSqlReq sqlCommand = new ParseSqlReq();
-        sqlCommand.setRootPath(catalog.getModelFullPath(queryStructCmd.getModelId()));
+        sqlCommand.setRootPath(catalog.getModelFullPath(queryStructCmd.getModelIds()));
         String metricTableName = "v_metric_tb_tmp";
         MetricTable metricTable = new MetricTable();
         metricTable.setAlias(metricTableName);
@@ -120,7 +121,7 @@ public class CalculateAggConverter implements SemanticConverter {
     @Override
     public void converter(Catalog catalog, QueryStructReq queryStructCmd, ParseSqlReq sqlCommend,
             MetricReq metricCommand) throws Exception {
-        DatabaseResp databaseResp = catalog.getDatabaseByModelId(queryStructCmd.getModelId());
+        DatabaseResp databaseResp = catalog.getDatabaseByModelId(queryStructCmd.getModelIds().get(0));
         ParseSqlReq parseSqlReq = generateSqlCommend(queryStructCmd,
                 EngineTypeEnum.valueOf(databaseResp.getType().toUpperCase()), databaseResp.getVersion());
         sqlCommend.setSql(parseSqlReq.getSql());
@@ -150,7 +151,7 @@ public class CalculateAggConverter implements SemanticConverter {
             throws Exception {
         check(queryStructCmd);
         ParseSqlReq sqlCommand = new ParseSqlReq();
-        sqlCommand.setRootPath(catalog.getModelFullPath(queryStructCmd.getModelId()));
+        sqlCommand.setRootPath(catalog.getModelFullPath(queryStructCmd.getModelIds()));
         String metricTableName = "v_metric_tb_tmp";
         MetricTable metricTable = new MetricTable();
         metricTable.setAlias(metricTableName);

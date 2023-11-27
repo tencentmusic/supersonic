@@ -5,7 +5,7 @@ import lombok.Data;
 
 
 @Data
-public class DatasourceYamlTpl {
+public class DataModelYamlTpl {
 
     private String name;
 

@@ -14,21 +14,27 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SearchResult;
 import com.tencent.supersonic.chat.mapper.MapperHelper;
-import com.tencent.supersonic.chat.service.ConfigService;
-import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.knowledge.dictionary.ModelInfoStat;
-import com.tencent.supersonic.chat.mapper.ModelWithSemanticType;
 import com.tencent.supersonic.chat.mapper.MatchText;
+import com.tencent.supersonic.chat.mapper.ModelWithSemanticType;
 import com.tencent.supersonic.chat.mapper.SearchMatchStrategy;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.service.ChatService;
+import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.SearchService;
-import com.tencent.supersonic.knowledge.utils.NatureHelper;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.knowledge.dictionary.DictWord;
 import com.tencent.supersonic.knowledge.dictionary.HanlpMapResult;
-import com.tencent.supersonic.common.pojo.enums.DictWordType;
+import com.tencent.supersonic.knowledge.dictionary.ModelInfoStat;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.knowledge.utils.HanlpHelper;
+import com.tencent.supersonic.knowledge.utils.NatureHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -41,11 +47,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
 
 
 /**
@@ -152,15 +153,13 @@ public class SearchServiceImpl implements SearchService {
 
         List<Long> possibleModels = NatureHelper.selectPossibleModels(originals);
 
-        Long contextModel = chatService.getContextModel(queryCtx.getChatId());
+        Set<Long> contextModel = chatService.getContextModel(queryCtx.getChatId());
 
         log.debug("possibleModels:{},modelStat:{},contextModel:{}", possibleModels, modelStat, contextModel);
 
         // If nothing is recognized or only metric are present, then add the contextModel.
-        if (nothingOrOnlyMetric(modelStat) && effectiveModel(contextModel)) {
-            List<Long> result = new ArrayList<>();
-            result.add(contextModel);
-            return result;
+        if (nothingOrOnlyMetric(modelStat)) {
+            return contextModel.stream().filter(modelId -> modelId > 0).collect(Collectors.toList());
         }
         return possibleModels;
     }

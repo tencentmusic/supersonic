@@ -5,10 +5,8 @@ import com.google.common.collect.Sets;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.tool.AgentToolType;
 import com.tencent.supersonic.chat.agent.tool.MetricInterpretTool;
-import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
@@ -21,18 +19,19 @@ import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.llm.LLMSemanticQuery;
 import com.tencent.supersonic.chat.query.llm.interpret.MetricInterpretQuery;
 import com.tencent.supersonic.chat.service.AgentService;
-import com.tencent.supersonic.chat.utils.ComponentFactory;
+import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.ModelCluster;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class MetricInterpretParser implements SemanticParser {
@@ -81,9 +80,8 @@ public class MetricInterpretParser implements SemanticParser {
     }
 
     public Set<SchemaElement> getMetrics(List<Long> metricIds, Long modelId) {
-        SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
-        ModelSchema modelSchema = semanticInterpreter.getModelSchema(modelId, true);
-        Set<SchemaElement> metrics = modelSchema.getMetrics();
+        SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
+        List<SchemaElement> metrics = semanticService.getSemanticSchema().getMetrics();
         return metrics.stream().filter(schemaElement -> metricIds.contains(schemaElement.getId()))
                 .collect(Collectors.toSet());
     }
@@ -112,16 +110,13 @@ public class MetricInterpretParser implements SemanticParser {
 
     private SemanticParseInfo buildSemanticParseInfo(Long modelId, QueryReq queryReq, Set<SchemaElement> metrics,
                                                      List<SchemaElementMatch> schemaElementMatches, String toolName) {
-        SchemaElement model = new SchemaElement();
-        model.setModel(modelId);
-        model.setId(modelId);
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setMetrics(metrics);
         SchemaElement dimension = new SchemaElement();
         dimension.setBizName(TimeDimensionEnum.DAY.getName());
         semanticParseInfo.setDimensions(Sets.newHashSet(dimension));
         semanticParseInfo.setElementMatches(schemaElementMatches);
-        semanticParseInfo.setModel(model);
+        semanticParseInfo.setModel(ModelCluster.build(Sets.newHashSet(modelId)));
         semanticParseInfo.setScore(queryReq.getQueryText().length());
         DateConf dateConf = new DateConf();
         dateConf.setDateMode(DateConf.DateMode.RECENT);

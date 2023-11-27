@@ -13,6 +13,8 @@ import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,7 +49,11 @@ public class AgentCheckParser implements SemanticParser {
                 if (CollectionUtils.isEmpty(tool.getModelIds())) {
                     return true;
                 }
-                if (tool.isContainsAllModel() || tool.getModelIds().contains(query.getParseInfo().getModelId())) {
+                if (tool.isContainsAllModel()) {
+                    return false;
+                }
+                if (new HashSet<>(tool.getModelIds())
+                        .containsAll(query.getParseInfo().getModel().getModelIds())) {
                     return false;
                 }
             }

@@ -3,7 +3,8 @@ com.tencent.supersonic.chat.api.component.SchemaMapper=\
     com.tencent.supersonic.chat.mapper.HanlpDictMapper, \
     com.tencent.supersonic.chat.mapper.FuzzyNameMapper, \
     com.tencent.supersonic.chat.mapper.QueryFilterMapper, \
-    com.tencent.supersonic.chat.mapper.EntityMapper
+    com.tencent.supersonic.chat.mapper.EntityMapper, \
+    com.tencent.supersonic.chat.mapper.ModelClusterMapper
 
 com.tencent.supersonic.chat.api.component.SemanticParser=\
     com.tencent.supersonic.chat.parser.rule.RuleBasedParser, \
@@ -17,7 +18,8 @@ com.tencent.supersonic.chat.api.component.SemanticCorrector=\
     com.tencent.supersonic.chat.corrector.SelectCorrector, \
     com.tencent.supersonic.chat.corrector.WhereCorrector, \
     com.tencent.supersonic.chat.corrector.GroupByCorrector, \
-    com.tencent.supersonic.chat.corrector.HavingCorrector
+    com.tencent.supersonic.chat.corrector.HavingCorrector, \
+    com.tencent.supersonic.chat.corrector.FromCorrector
 
 com.tencent.supersonic.chat.llm.LLMInterpreter=\
   com.tencent.supersonic.chat.llm.HttpLLMInterpreter

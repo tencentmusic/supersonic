@@ -1,13 +1,11 @@
 package com.tencent.supersonic.semantic.api.model.request;
 
 
-
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import lombok.Data;
 
 
 @Data
@@ -24,4 +22,22 @@ public class DomainReq extends SchemaItem {
     private List<String> admins = new ArrayList<>();
 
     private List<String> adminOrgs = new ArrayList<>();
+
+    public String getViewer() {
+        return String.join(",", viewers);
+    }
+
+    public String getViewOrg() {
+        return String.join(",", viewOrgs);
+    }
+
+
+    public String getAdmin() {
+        return String.join(",", admins);
+    }
+
+    public String getAdminOrg() {
+        return String.join(",", adminOrgs);
+    }
+
 }

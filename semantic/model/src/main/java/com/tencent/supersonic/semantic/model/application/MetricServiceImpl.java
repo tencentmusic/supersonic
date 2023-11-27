@@ -6,8 +6,8 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.DataEvent;
+import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
@@ -20,27 +20,17 @@ import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
 import com.tencent.supersonic.semantic.api.model.request.MetaBatchReq;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
-import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DomainResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
-import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
+import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.MetricRepository;
 import com.tencent.supersonic.semantic.model.domain.utils.MetricConverter;
-import com.tencent.supersonic.semantic.model.domain.MetricService;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import com.tencent.supersonic.semantic.model.domain.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +38,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -59,8 +56,6 @@ public class MetricServiceImpl implements MetricService {
 
     private DomainService domainService;
 
-    private DatasourceService datasourceService;
-
     private ChatGptHelper chatGptHelper;
 
     private ApplicationEventPublisher eventPublisher;
@@ -68,13 +63,11 @@ public class MetricServiceImpl implements MetricService {
     public MetricServiceImpl(MetricRepository metricRepository,
                              ModelService modelService,
                              DomainService domainService,
-                             DatasourceService datasourceService,
                              ChatGptHelper chatGptHelper,
                              ApplicationEventPublisher eventPublisher) {
         this.domainService = domainService;
         this.metricRepository = metricRepository;
         this.modelService = modelService;
-        this.datasourceService = datasourceService;
         this.chatGptHelper = chatGptHelper;
         this.eventPublisher = eventPublisher;
     }
@@ -198,21 +191,7 @@ public class MetricServiceImpl implements MetricService {
     public List<MetricResp> getMetrics(MetaFilter metaFilter) {
         MetricFilter metricFilter = new MetricFilter();
         BeanUtils.copyProperties(metaFilter, metricFilter);
-        List<MetricResp> metricResps = convertList(queryMetric(metricFilter));
-        if (metricFilter.getDatasourceId() != null) {
-            return filterByDatasource(metricFilter.getDatasourceId(), metricResps);
-        }
-        return metricResps;
-    }
-
-    private List<MetricResp> filterByDatasource(Long datasourceId, List<MetricResp> metricResps) {
-        return metricResps.stream().filter(metricResp -> {
-            Set<Long> datasourceIdSet = metricResp.getTypeParams().getMeasures().stream()
-                    .map(Measure::getDatasourceId)
-                    .filter(Objects::nonNull).collect(Collectors.toSet());
-            return !CollectionUtils.isEmpty(datasourceIdSet)
-                    && datasourceIdSet.contains(datasourceId);
-        }).collect(Collectors.toList());
+        return convertList(queryMetric(metricFilter));
     }
 
     private void fillAdminRes(List<MetricResp> metricResps, User user) {
@@ -257,20 +236,7 @@ public class MetricServiceImpl implements MetricService {
         if (metricDO == null) {
             return null;
         }
-        MetricResp metricResp = MetricConverter.convert2MetricResp(metricDO, new HashMap<>());
-        List<Measure> measures = metricResp.getMeasures();
-        if (CollectionUtils.isEmpty(measures)) {
-            return metricResp;
-        }
-        Map<Long, DatasourceResp> datasourceResps = datasourceService.getDatasourceList().stream()
-                .collect(Collectors.toMap(DatasourceResp::getId, datasourceResp -> datasourceResp));
-        measures.forEach(measure -> {
-            DatasourceResp datasourceResp = datasourceResps.get(measure.getDatasourceId());
-            if (datasourceResp != null) {
-                measure.setDatasourceName(datasourceResp.getName());
-            }
-        });
-        return metricResp;
+        return MetricConverter.convert2MetricResp(metricDO, new HashMap<>());
     }
 
     @Override
