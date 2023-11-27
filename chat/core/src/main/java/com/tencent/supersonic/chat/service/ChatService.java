@@ -14,6 +14,7 @@ import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import java.util.List;
+import java.util.Set;
 
 public interface ChatService {
 
@@ -22,7 +23,7 @@ public interface ChatService {
      * @param chatId
      * @return
      */
-    Long getContextModel(Integer chatId);
+    Set<Long> getContextModel(Integer chatId);
 
     ChatContext getOrCreateContext(int chatId);
 

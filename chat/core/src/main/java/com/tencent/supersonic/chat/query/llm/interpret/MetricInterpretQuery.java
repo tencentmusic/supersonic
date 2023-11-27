@@ -90,7 +90,7 @@ public class MetricInterpretQuery extends LLMSemanticQuery {
     protected QueryStructReq convertQueryStruct() {
         QueryStructReq queryStructReq = QueryReqBuilder.buildStructReq(parseInfo);
         fillAggregator(queryStructReq, parseInfo.getMetrics());
-        queryStructReq.setQueryType(QueryType.ENTITY);
+        queryStructReq.setQueryType(QueryType.TAG);
         return queryStructReq;
     }
 

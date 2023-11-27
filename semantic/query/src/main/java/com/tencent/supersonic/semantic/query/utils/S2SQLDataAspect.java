@@ -1,8 +1,7 @@
 package com.tencent.supersonic.semantic.query.utils;
 
-import static com.tencent.supersonic.common.pojo.Constants.MINUS;
-
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
 import com.tencent.supersonic.common.pojo.Constants;
@@ -15,14 +14,8 @@ import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
+import com.tencent.supersonic.semantic.model.domain.pojo.ModelFilter;
 import com.tencent.supersonic.semantic.query.service.AuthCommonService;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -37,6 +30,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+
+import static com.tencent.supersonic.common.pojo.Constants.MINUS;
 
 @Component
 @Aspect
@@ -72,29 +75,29 @@ public class S2SQLDataAspect {
         if (Objects.isNull(user) || Strings.isNullOrEmpty(user.getName())) {
             throw new RuntimeException("please provide user information");
         }
-        Long modelId = queryS2SQLReq.getModelId();
+        List<Long> modelIds = queryS2SQLReq.getModelIds();
 
         //1. determine whether admin of the model
-        if (authCommonService.doModelAdmin(user, modelId)) {
+        if (authCommonService.doModelAdmin(user, modelIds)) {
             log.info("determine whether admin of the model!");
             return joinPoint.proceed();
         }
         // 2. determine whether the subject field is visible
-        authCommonService.doModelVisible(user, modelId);
+        authCommonService.doModelVisible(user, modelIds);
         // 3. fetch data permission meta information
         Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(queryS2SQLReq, user);
-        log.info("modelId:{}, res4Privilege:{}", modelId, res4Privilege);
+        log.info("modelId:{}, res4Privilege:{}", modelIds, res4Privilege);
 
-        Set<String> sensitiveResByModel = authCommonService.getHighSensitiveColsByModelId(modelId);
+        Set<String> sensitiveResByModel = authCommonService.getHighSensitiveColsByModelId(modelIds);
         Set<String> sensitiveResReq = res4Privilege.parallelStream()
                 .filter(sensitiveResByModel::contains).collect(Collectors.toSet());
-        log.info("this query domainId:{}, sensitiveResReq:{}", modelId, sensitiveResReq);
+        log.info("this query domainId:{}, sensitiveResReq:{}", modelIds, sensitiveResReq);
 
         // query user privilege info
         AuthorizedResourceResp authorizedResource = authCommonService
-                .getAuthorizedResource(user, modelId, sensitiveResReq);
+                .getAuthorizedResource(user, modelIds, sensitiveResReq);
         // get sensitiveRes that user has privilege
-        Set<String> resAuthSet = authCommonService.getAuthResNameSet(authorizedResource, modelId);
+        Set<String> resAuthSet = authCommonService.getAuthResNameSet(authorizedResource, modelIds);
 
         // 4.if sensitive fields without permission are involved in filter, thrown an exception
         doFilterCheckLogic(queryS2SQLReq, resAuthSet, sensitiveResReq);
@@ -109,7 +112,7 @@ public class S2SQLDataAspect {
                 .allSensitiveResReqIsOk(sensitiveResReq, resAuthSet)) {
             // if sensitiveRes is empty
             log.info("sensitiveResReq is empty");
-            return authCommonService.getQueryResultWithColumns(queryResultWithColumns, modelId, authorizedResource);
+            return authCommonService.getQueryResultWithColumns(queryResultWithColumns, modelIds, authorizedResource);
         }
 
         // 6.if the column has no permission, hit *
@@ -118,7 +121,7 @@ public class S2SQLDataAspect {
         log.info("need2Apply:{},sensitiveResReq:{},resAuthSet:{}", need2Apply, sensitiveResReq, resAuthSet);
         QueryResultWithSchemaResp queryResultAfterDesensitization = authCommonService
                 .desensitizationData(queryResultWithColumns, need2Apply);
-        authCommonService.addPromptInfoInfo(modelId, queryResultAfterDesensitization, authorizedResource, need2Apply);
+        authCommonService.addPromptInfoInfo(modelIds, queryResultAfterDesensitization, authorizedResource, need2Apply);
 
         return queryResultAfterDesensitization;
     }
@@ -163,9 +166,10 @@ public class S2SQLDataAspect {
                 .filter(res -> !resAuthName.contains(res) && sensitiveResReq.contains(res)).collect(Collectors.toSet());
         Set<String> nameCnSet = new HashSet<>();
 
-        List<Long> modelIds = new ArrayList<>();
-        modelIds.add(queryS2SQLReq.getModelId());
-        List<ModelResp> modelInfos = modelService.getModelList(modelIds);
+        List<Long> modelIds = Lists.newArrayList(queryS2SQLReq.getModelIds());
+        ModelFilter modelFilter = new ModelFilter();
+        modelFilter.setModelIds(modelIds);
+        List<ModelResp> modelInfos = modelService.getModelList(modelFilter);
         String modelNameCn = Constants.EMPTY;
         if (!CollectionUtils.isEmpty(modelInfos)) {
             modelNameCn = modelInfos.get(0).getName();

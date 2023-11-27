@@ -94,6 +94,7 @@ const ParseTip: React.FC<Props> = ({
     metrics,
     aggType,
     queryMode,
+    queryType,
     properties,
     entity,
     elementMatches,
@@ -126,7 +127,7 @@ const ParseTip: React.FC<Props> = ({
     const { type: agentType, name: agentName } = properties || {};
 
     const fields =
-      queryMode === 'ENTITY_DETAIL' ? dimensionItems?.concat(metrics || []) : dimensionItems;
+      queryMode === 'TAG_DETAIL' ? dimensionItems?.concat(metrics || []) : dimensionItems;
 
     return (
       <div className={`${prefixCls}-tip-content`}>
@@ -151,6 +152,14 @@ const ParseTip: React.FC<Props> = ({
                 <div className={itemValueClass}>{modelName}</div>
               </div>
             )}
+            {(queryType === 'METRIC' || queryType === 'TAG') && (
+              <div className={`${prefixCls}-tip-item`}>
+                <div className={`${prefixCls}-tip-item-name`}>查询模式：</div>
+                <div className={itemValueClass}>
+                  {queryType === 'METRIC' ? '指标模式' : '标签模式'}
+                </div>
+              </div>
+            )}
             {!queryMode?.includes('ENTITY') &&
               metrics &&
               metrics.length > 0 &&
@@ -162,9 +171,7 @@ const ParseTip: React.FC<Props> = ({
                   </div>
                 </div>
               )}
-            {['METRIC_GROUPBY', 'METRIC_ORDERBY', 'ENTITY_DETAIL', 'LLM_S2SQL'].includes(
-              queryMode!
-            ) &&
+            {['METRIC_GROUPBY', 'METRIC_ORDERBY', 'TAG_DETAIL', 'LLM_S2SQL'].includes(queryMode!) &&
               fields &&
               fields.length > 0 && (
                 <div className={`${prefixCls}-tip-item`}>
@@ -173,7 +180,7 @@ const ParseTip: React.FC<Props> = ({
                       ? nativeQuery
                         ? '查询字段'
                         : '下钻维度'
-                      : queryMode === 'ENTITY_DETAIL'
+                      : queryMode === 'TAG_DETAIL'
                       ? '查询字段'
                       : '下钻维度'}
                     ：
@@ -187,7 +194,7 @@ const ParseTip: React.FC<Props> = ({
                   </div>
                 </div>
               )}
-            {queryMode !== 'ENTITY_ID' &&
+            {queryMode !== 'TAG_ID' &&
               !dimensions?.some(item => item.bizName?.includes('_id')) &&
               entityDimensions
                 ?.filter(dimension => dimension.value != null)

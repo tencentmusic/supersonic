@@ -4,8 +4,10 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
 import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
@@ -13,11 +15,18 @@ import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.QueryDO;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
-import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.persistence.repository.ChatContextRepository;
 import com.tencent.supersonic.chat.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.persistence.repository.ChatRepository;
+import com.tencent.supersonic.chat.service.ChatService;
+import com.tencent.supersonic.chat.utils.SolvedQueryManager;
+import com.tencent.supersonic.common.util.JsonUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,14 +37,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import com.tencent.supersonic.chat.service.ChatService;
-import com.tencent.supersonic.chat.utils.SolvedQueryManager;
-import com.tencent.supersonic.common.util.JsonUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.Lists;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service("ChatService")
 @Primary
@@ -56,7 +57,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Long getContextModel(Integer chatId) {
+    public Set<Long> getContextModel(Integer chatId) {
         if (Objects.isNull(chatId)) {
             return null;
         }
@@ -65,8 +66,8 @@ public class ChatServiceImpl implements ChatService {
             return null;
         }
         SemanticParseInfo originalSemanticParse = chatContext.getParseInfo();
-        if (Objects.nonNull(originalSemanticParse) && Objects.nonNull(originalSemanticParse.getModelId())) {
-            return originalSemanticParse.getModelId();
+        if (Objects.nonNull(originalSemanticParse) && Objects.nonNull(originalSemanticParse.getModel().getModelIds())) {
+            return originalSemanticParse.getModel().getModelIds();
         }
         return null;
     }

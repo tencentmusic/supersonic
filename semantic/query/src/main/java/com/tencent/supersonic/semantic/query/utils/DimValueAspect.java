@@ -1,7 +1,9 @@
 package com.tencent.supersonic.semantic.query.utils;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
@@ -9,19 +11,9 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +25,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Aspect
 @Component
@@ -56,7 +56,7 @@ public class DimValueAspect {
         }
         Object[] args = joinPoint.getArgs();
         QueryS2SQLReq queryS2SQLReq = (QueryS2SQLReq) args[0];
-        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(queryS2SQLReq.getModelId()));
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(queryS2SQLReq.getModelIds()));
         String sql = queryS2SQLReq.getSql();
         log.info("correctorSql before replacing:{}", sql);
         // if dimensionvalue is alias,consider the true dimensionvalue.
@@ -147,8 +147,7 @@ public class DimValueAspect {
 
         Object[] args = joinPoint.getArgs();
         QueryStructReq queryStructReq = (QueryStructReq) args[0];
-        Long modelId = queryStructReq.getModelId();
-        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(modelId));
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(queryStructReq.getModelIds()));
         List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
         Map<String, Map<String, String>> dimAndAliasAndTechNamePair = getAliasAndBizNameToTechName(dimensions);
         Map<String, Map<String, String>> dimAndTechNameAndBizNamePair = getTechNameToBizName(dimensions);

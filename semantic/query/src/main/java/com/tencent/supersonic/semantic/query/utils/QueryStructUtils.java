@@ -1,15 +1,11 @@
 package com.tencent.supersonic.semantic.query.utils;
 
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH;
-import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
-import static com.tencent.supersonic.common.pojo.Constants.WEEK;
-
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
+import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
@@ -23,7 +19,6 @@ import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
@@ -33,6 +28,14 @@ import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.service.SchemaService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -46,14 +49,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.logging.log4j.util.Strings;
-import org.assertj.core.util.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.common.pojo.Constants.DAY;
+import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH;
+import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
+import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
 
 @Slf4j
@@ -95,7 +96,7 @@ public class QueryStructUtils {
 
     private List<Long> getDimensionIds(QueryStructReq queryStructCmd) {
         List<Long> dimensionIds = new ArrayList<>();
-        List<DimensionResp> dimensions = catalog.getDimensions(queryStructCmd.getModelId());
+        List<DimensionResp> dimensions = catalog.getDimensions(queryStructCmd.getModelIds());
         Map<String, List<DimensionResp>> pair = dimensions.stream()
                 .collect(Collectors.groupingBy(DimensionResp::getBizName));
         for (String group : queryStructCmd.getGroups()) {
@@ -116,7 +117,7 @@ public class QueryStructUtils {
 
     private List<Long> getMetricIds(QueryStructReq queryStructCmd) {
         List<Long> metricIds = new ArrayList<>();
-        List<MetricResp> metrics = catalog.getMetrics(queryStructCmd.getModelId());
+        List<MetricResp> metrics = catalog.getMetrics(queryStructCmd.getModelIds());
         Map<String, List<MetricResp>> pair = metrics.stream().collect(Collectors.groupingBy(SchemaItem::getBizName));
         for (Aggregator agg : queryStructCmd.getAggregators()) {
             if (pair.containsKey(agg.getColumn())) {
@@ -214,7 +215,7 @@ public class QueryStructUtils {
         Set<String> resNameSet = getResName(queryS2SQLReq);
         Set<String> resNameEnSet = new HashSet<>();
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
-        List<Long> modelIds = Lists.newArrayList(queryS2SQLReq.getModelId());
+        List<Long> modelIds = Lists.newArrayList(queryS2SQLReq.getModelIds());
         filter.setModelIds(modelIds);
         List<ModelSchemaResp> modelSchemaRespList = schemaService.fetchModelSchema(filter, user);
         if (!CollectionUtils.isEmpty(modelSchemaRespList)) {
@@ -256,14 +257,16 @@ public class QueryStructUtils {
         if (CollectionUtils.isEmpty(groups)) {
             log.warn("group is empty!");
         } else {
-            String group = groups.get(0).equalsIgnoreCase("sys_imp_date")
-                    ? groups.get(1) : groups.get(0);
-            DimensionResp dimension = catalog.getDimension(group, modelId);
-            String datasourceBizName = dimension.getDatasourceBizName();
-            if (Strings.isNotEmpty(datasourceBizName)) {
-                internalMetricNamePrefix = datasourceBizName + UNDERLINE;
+            for (int i = 0; i < groups.size(); i++) {
+                if (groups.get(i).equalsIgnoreCase("sys_imp_date")) {
+                    continue;
+                }
+                DimensionResp dimension = catalog.getDimension(groups.get(i), modelId);
+                if (Objects.nonNull(dimension) && Strings.isNotEmpty(dimension.getModelBizName())) {
+                    internalMetricNamePrefix = dimension.getModelBizName() + UNDERLINE;
+                    break;
+                }
             }
-
         }
         String internalMetricName = internalMetricNamePrefix + internalMetricNameSuffix;
         return internalMetricName;

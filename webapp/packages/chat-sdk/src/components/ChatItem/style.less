@@ -57,6 +57,10 @@
     align-items: center;
     column-gap: 13px;
     margin-left: -10px;
+
+    &.mobile {
+      flex-wrap: wrap;
+    }
   }
 
   &-content-option {
@@ -357,6 +361,20 @@
     white-space: pre-wrap;
     overflow-wrap: break-word;
     user-select: text;
+  }
+  &-toggle-expand-btn {
+    margin-left: 4px;
+    color: var(--text-color-fourth);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  &-step-item {
+    position: relative;
+    margin: 2px 0 2px 7px;
+    padding: 2px 0 8px 18px;
+    border-left: 1px solid var(--green);
+    overflow: auto;
   }
 }
 

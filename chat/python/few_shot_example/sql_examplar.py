@@ -329,7 +329,7 @@ examplars= [
 “月度总访问量超过 2万的月份”，所以我们需要column=[访问次数], cell values = [20000],所以有[访问次数:(20000)]
 ”超音速 近7个月“，所以我们需要column=[数据日期], cell values = [7],所以有[数据日期:(7)]""",
         "schemaLinks":"""["访问次数":(20000), "数据日期":(7)]""",
-        "sql":"""select MONTH(数据日期) from 内容库产品 where datediff('day', 数据日期, '2023-09-10') <= 7 group by MONTH(数据日期) having sum(访问次数) > 20000"""
+        "sql":"""select MONTH(数据日期) from 内容库产品 where datediff('month', 数据日期, '2023-09-10') <= 7 group by MONTH(数据日期) having sum(访问次数) > 20000"""
         },
     {
         "currentDate":"2023-09-10",

@@ -91,6 +91,7 @@ export type ChatContextType = {
   elementMatches: any[];
   nativeQuery: boolean;
   queryMode: string;
+  queryType: 'METRIC' | 'TAG' | 'OTHER'; 
   dimensionFilters: FilterItemType[];
   properties: any;
   sqlInfo: SqlInfoType;

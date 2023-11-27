@@ -15,6 +15,7 @@ public class QueryContext {
     private QueryReq request;
     private List<SemanticQuery> candidateQueries = new ArrayList<>();
     private SchemaMapInfo mapInfo = new SchemaMapInfo();
+    private SchemaModelClusterMapInfo modelClusterMapInfo = new SchemaModelClusterMapInfo();
 
     public QueryContext(QueryReq request) {
         this.request = request;

@@ -1,13 +1,26 @@
 package com.tencent.supersonic.semantic.query.parser.calcite.sql.node;
 
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.query.parser.calcite.Configuration;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Dimension;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.extend.LateralViewExplodeNode;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.calcite.sql.SqlBasicCall;
+import org.apache.calcite.sql.SqlDataTypeSpec;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.SqlUserDefinedTypeNameSpec;
+import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.parser.SqlParserPos;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -19,16 +32,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.calcite.sql.SqlBasicCall;
-import org.apache.calcite.sql.SqlDataTypeSpec;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlNodeList;
-import org.apache.calcite.sql.SqlUserDefinedTypeNameSpec;
-import org.apache.calcite.sql.parser.SqlParser;
-import org.apache.calcite.sql.parser.SqlParserPos;
-import org.apache.calcite.sql.validate.SqlValidatorScope;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class DataSourceNode extends SemanticNode {
@@ -159,21 +162,26 @@ public class DataSourceNode extends SemanticNode {
                 return dataSources;
             }
             // find all dataSource has the same identifiers
-            Set<String> baseIdentifiers = baseDataSource.getIdentifiers().stream().map(i -> i.getName())
-                    .collect(Collectors.toSet());
-            if (baseIdentifiers.isEmpty()) {
-                throw new Exception("datasource error : " + baseDataSource.getName() + " miss identifier");
-            }
-            List<DataSource> linkDataSources = getLinkDataSources(baseIdentifiers, queryDimension, measures,
+            List<DataSource> linkDataSources = getLinkDataSourcesByJoinRelation(queryDimension, measures,
                     baseDataSource, schema);
-            if (linkDataSources.isEmpty()) {
-                throw new Exception(
-                        String.format("not find the match datasource : dimension[%s],measure[%s]", queryDimension,
-                                measures));
+            if (CollectionUtils.isEmpty(linkDataSources)) {
+                log.info("baseDataSource  get by identifiers ");
+                Set<String> baseIdentifiers = baseDataSource.getIdentifiers().stream().map(i -> i.getName())
+                        .collect(Collectors.toSet());
+                if (baseIdentifiers.isEmpty()) {
+                    throw new Exception("datasource error : " + baseDataSource.getName() + " miss identifier");
+                }
+                linkDataSources = getLinkDataSources(baseIdentifiers, queryDimension, measures,
+                        baseDataSource, schema);
+                if (linkDataSources.isEmpty()) {
+                    throw new Exception(
+                            String.format("not find the match datasource : dimension[%s],measure[%s]", queryDimension,
+                                    measures));
+                }
             }
             log.debug("linkDataSources {}", linkDataSources);
-
-            dataSources.addAll(linkDataSources);
+            return linkDataSources;
+            //dataSources.addAll(linkDataSources);
         }
 
         return dataSources;
@@ -206,6 +214,69 @@ public class DataSourceNode extends SemanticNode {
             FilterNode.getFilterField(sqlNode, whereFields);
         }
         return isAllMatch;
+    }
+
+    private static List<DataSource> getLinkDataSourcesByJoinRelation(Set<String> queryDimension, List<String> measures,
+            DataSource baseDataSource, SemanticSchema schema) {
+        Set<String> linkDataSourceName = new HashSet<>();
+        List<DataSource> linkDataSources = new ArrayList<>();
+        Set<String> before = new HashSet<>();
+        before.add(baseDataSource.getName());
+        if (!CollectionUtils.isEmpty(schema.getJoinRelations())) {
+            for (JoinRelation joinRelation : schema.getJoinRelations()) {
+                if (!before.contains(joinRelation.getLeft()) && !before.contains(joinRelation.getRight())) {
+                    continue;
+                }
+                boolean isMatch = false;
+                boolean isRight = before.contains(joinRelation.getLeft());
+                DataSource other = isRight ? schema.getDatasource().get(joinRelation.getRight())
+                        : schema.getDatasource().get(joinRelation.getLeft());
+                if (!queryDimension.isEmpty()) {
+                    Set<String> linkDimension = other.getDimensions().stream().map(dd -> dd.getName())
+                            .collect(Collectors.toSet());
+                    other.getIdentifiers().stream().forEach(i -> linkDimension.add(i.getName()));
+                    linkDimension.retainAll(queryDimension);
+                    if (!linkDimension.isEmpty()) {
+                        isMatch = true;
+                    }
+                }
+                Set<String> linkMeasure = other.getMeasures().stream().map(mm -> mm.getName())
+                        .collect(Collectors.toSet());
+                linkMeasure.retainAll(measures);
+                if (!linkMeasure.isEmpty()) {
+                    isMatch = true;
+                }
+                if (!isMatch && schema.getDimension().containsKey(other.getName())) {
+                    Set<String> linkDimension = schema.getDimension().get(other.getName()).stream()
+                            .map(dd -> dd.getName())
+                            .collect(Collectors.toSet());
+                    linkDimension.retainAll(queryDimension);
+                    if (!linkDimension.isEmpty()) {
+                        isMatch = true;
+                    }
+                }
+                if (isMatch) {
+                    linkDataSourceName.add(other.getName());
+                    before.add(other.getName());
+                }
+            }
+        }
+        if (!CollectionUtils.isEmpty(linkDataSourceName)) {
+            Map<String, Long> orders = new HashMap<>();
+            linkDataSourceName.add(baseDataSource.getName());
+            orders.put(baseDataSource.getName(), 0L);
+            for (JoinRelation joinRelation : schema.getJoinRelations()) {
+                if (linkDataSourceName.contains(joinRelation.getLeft()) && linkDataSourceName.contains(
+                        joinRelation.getRight())) {
+                    orders.put(joinRelation.getLeft(), 0L);
+                    orders.put(joinRelation.getRight(), 1L);
+                }
+            }
+            orders.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(d -> {
+                linkDataSources.add(schema.getDatasource().get(d.getKey()));
+            });
+        }
+        return linkDataSources;
     }
 
     private static List<DataSource> getLinkDataSources(Set<String> baseIdentifiers,
@@ -258,6 +329,12 @@ public class DataSourceNode extends SemanticNode {
         for (String linkName : linkDataSourceName) {
             linkDataSources.add(schema.getDatasource().get(linkName));
         }
-        return linkDataSources;
+        if (!CollectionUtils.isEmpty(linkDataSources)) {
+            List<DataSource> all = new ArrayList<>();
+            all.add(baseDataSource);
+            all.addAll(linkDataSources);
+            return all;
+        }
+        return Lists.newArrayList();
     }
 }

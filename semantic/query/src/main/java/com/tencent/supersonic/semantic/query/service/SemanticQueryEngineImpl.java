@@ -13,6 +13,7 @@ import com.tencent.supersonic.semantic.query.utils.ComponentFactory;
 import com.tencent.supersonic.semantic.query.utils.QueryUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Component
@@ -36,8 +37,8 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
         if (queryExecutor != null) {
             queryResultWithColumns = queryExecutor.execute(catalog, queryStatement);
             queryResultWithColumns.setSql(queryStatement.getSql());
-            if (queryStatement.getModelId() > 0) {
-                queryUtils.fillItemNameInfo(queryResultWithColumns, queryStatement.getModelId());
+            if (!CollectionUtils.isEmpty(queryStatement.getModelIds())) {
+                queryUtils.fillItemNameInfo(queryResultWithColumns, queryStatement.getModelIds());
             }
         }
         return queryResultWithColumns;
@@ -46,7 +47,7 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
     public QueryStatement plan(QueryStructReq queryStructCmd) throws Exception {
         QueryStatement queryStatement = queryParser.logicSql(queryStructCmd);
         queryUtils.checkSqlParse(queryStatement);
-        queryStatement.setModelId(queryStructCmd.getModelId());
+        queryStatement.setModelIds(queryStructCmd.getModelIds());
         log.info("queryStatement:{}", queryStatement);
         return optimize(queryStructCmd, queryStatement);
     }

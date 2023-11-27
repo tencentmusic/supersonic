@@ -47,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
     public List<AuthGroup> queryAuthGroups(String modelId, Integer groupId) {
         return load().stream()
                 .filter(group -> (Objects.isNull(groupId) || groupId.equals(group.getGroupId()))
-                        && modelId.equals(group.getModelId()))
+                        && modelId.equals(group.getModelId().toString()))
                 .collect(Collectors.toList());
     }
 
@@ -79,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthorizedResourceResp queryAuthorizedResources(QueryAuthResReq req, User user) {
         Set<String> userOrgIds = userService.getUserAllOrgId(user.getName());
-        List<AuthGroup> groups = getAuthGroups(req.getModelId(), user.getName(), new ArrayList<>(userOrgIds));
+        List<AuthGroup> groups = getAuthGroups(req.getModelIds(), user.getName(), new ArrayList<>(userOrgIds));
         AuthorizedResourceResp resource = new AuthorizedResourceResp();
         Map<Long, List<AuthGroup>> authGroupsByModelId = groups.stream()
                 .collect(Collectors.groupingBy(AuthGroup::getModelId));
@@ -126,10 +126,10 @@ public class AuthServiceImpl implements AuthService {
         return resource;
     }
 
-    private List<AuthGroup> getAuthGroups(Long modelId, String userName, List<String> departmentIds) {
+    private List<AuthGroup> getAuthGroups(List<Long> modelIds, String userName, List<String> departmentIds) {
         List<AuthGroup> groups = load().stream()
                 .filter(group -> {
-                    if (modelId != null && Objects.equals(group.getModelId(), modelId)) {
+                    if (CollectionUtils.isEmpty(modelIds) || !modelIds.contains(group.getModelId())) {
                         return false;
                     }
                     if (!CollectionUtils.isEmpty(group.getAuthorizedUsers()) && group.getAuthorizedUsers()

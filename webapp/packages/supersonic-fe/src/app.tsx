@@ -126,10 +126,10 @@ export const layout: RunTimeLayoutConfig = (params) => {
     rightContentRender: () => <RightContent />,
     disableContentMargin: true,
     menuHeaderRender: undefined,
-    childrenRender: (dom) => {
+    childrenRender: (dom: any) => {
       return (
         <div
-          style={{ height: location.pathname.includes('chat') ? 'calc(100vh - 48px)' : undefined }}
+          style={{ height: location.pathname.includes('chat') ? 'calc(100vh - 56px)' : undefined }}
         >
           {dom}
           {history.location.pathname !== '/chat' && !isMobile && (

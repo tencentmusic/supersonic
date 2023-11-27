@@ -85,8 +85,9 @@ public class MaterializationQuery implements QueryOptimizer {
             return;
         }
         try {
-            if (Objects.isNull(queryStructCmd) || Objects.isNull(queryStatement) || Objects.isNull(
-                    queryStructCmd.getModelId()) || Objects.isNull(
+            if (Objects.isNull(queryStructCmd) || Objects.isNull(queryStatement)
+                    || CollectionUtils.isEmpty(queryStructCmd.getModelIds())
+                    || Objects.isNull(
                     queryStructCmd.getDateInfo())) {
                 return;
             }
@@ -172,10 +173,11 @@ public class MaterializationQuery implements QueryOptimizer {
         ImmutablePair<String, String> timeRange = queryStructUtils.getBeginEndTime(queryStructReq);
         String start = timeRange.left;
         String end = timeRange.right;
-        Long modelId = queryStructReq.getModelId();
+        //todo
+        Long modelId = 1L;
         List<MaterializationResp> materializationResps = materializationConfService.getMaterializationByModel(modelId);
-        List<DimensionResp> dimensionResps = catalog.getDimensions(modelId);
-        List<MetricResp> metrics = catalog.getMetrics(modelId);
+        List<DimensionResp> dimensionResps = catalog.getDimensions(queryStructReq.getModelIds());
+        List<MetricResp> metrics = catalog.getMetrics(queryStructReq.getModelIds());
         Set<String> fields = new HashSet<>();
 
         if (Objects.nonNull(metricReq.getWhere()) && !metricReq.getWhere().isEmpty()) {
