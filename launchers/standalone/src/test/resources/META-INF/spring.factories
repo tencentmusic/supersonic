@@ -39,9 +39,9 @@ com.tencent.supersonic.chat.postprocessor.PostProcessor=\
 com.tencent.supersonic.chat.responder.parse.ParseResponder=\
     com.tencent.supersonic.chat.responder.parse.QueryRankParseResponder, \
     com.tencent.supersonic.chat.responder.parse.EntityInfoParseResponder, \
-    com.tencent.supersonic.chat.responder.parse.SqlInfoParseResponder, \
-    com.tencent.supersonic.chat.responder.parse.ParseTimeParseResponder, \
-    com.tencent.supersonic.chat.responder.parse.ParseRespBuildParseResponder
+    com.tencent.supersonic.chat.responder.parse.SqlOutputParseResponder, \
+    com.tencent.supersonic.chat.responder.parse.TimeCostParseResponder, \
+    com.tencent.supersonic.chat.responder.parse.RespBuildParseResponder
 
 com.tencent.supersonic.chat.responder.execute.ExecuteResponder=\
     com.tencent.supersonic.chat.responder.execute.EntityInfoExecuteResponder, \
