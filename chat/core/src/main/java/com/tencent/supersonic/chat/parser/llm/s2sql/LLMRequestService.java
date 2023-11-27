@@ -12,7 +12,7 @@ import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.config.LLMParserConfig;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
-import com.tencent.supersonic.chat.llm.LLMInterpreter;
+import com.tencent.supersonic.chat.parser.LLMInterpreter;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;

@@ -21,8 +21,8 @@ com.tencent.supersonic.chat.api.component.SemanticCorrector=\
     com.tencent.supersonic.chat.corrector.HavingCorrector, \
     com.tencent.supersonic.chat.corrector.FromCorrector
 
-com.tencent.supersonic.chat.llm.LLMInterpreter=\
-  com.tencent.supersonic.chat.llm.HttpLLMInterpreter
+com.tencent.supersonic.chat.parser.LLMInterpreter=\
+  com.tencent.supersonic.chat.parser.HttpLLMInterpreter
 
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.LocalSemanticInterpreter
@@ -50,5 +50,3 @@ com.tencent.supersonic.chat.responder.parse.ParseResponder=\
 com.tencent.supersonic.chat.responder.execute.ExecuteResponder=\
     com.tencent.supersonic.chat.responder.execute.EntityInfoExecuteResponder, \
     com.tencent.supersonic.chat.responder.execute.SimilarMetricExecuteResponder
-
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=dev.langchain4j.LangChain4jAutoConfiguration

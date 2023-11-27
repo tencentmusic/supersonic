@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.llm;
+package com.tencent.supersonic.chat.parser;
 
 import com.alibaba.fastjson.JSON;
 import com.tencent.supersonic.chat.config.LLMParserConfig;
@@ -9,6 +9,8 @@ import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
+import java.net.URI;
+import java.net.URL;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,8 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.net.URI;
-import java.net.URL;
 
 @Slf4j
 public class HttpLLMInterpreter implements LLMInterpreter {

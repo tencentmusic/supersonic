@@ -19,8 +19,8 @@ com.tencent.supersonic.chat.api.component.SemanticCorrector=\
     com.tencent.supersonic.chat.corrector.GroupByCorrector, \
     com.tencent.supersonic.chat.corrector.HavingCorrector
 
-com.tencent.supersonic.chat.llm.LLMInterpreter=\
-  com.tencent.supersonic.chat.llm.HttpLLMInterpreter
+com.tencent.supersonic.chat.parser.LLMInterpreter=\
+  com.tencent.supersonic.chat.parser.HttpLLMInterpreter
 
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.RemoteSemanticInterpreter

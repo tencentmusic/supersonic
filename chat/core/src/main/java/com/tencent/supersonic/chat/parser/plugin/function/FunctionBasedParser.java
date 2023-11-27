@@ -1,8 +1,8 @@
 package com.tencent.supersonic.chat.parser.plugin.function;
 
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.llm.HttpLLMInterpreter;
-import com.tencent.supersonic.chat.llm.LLMInterpreter;
+import com.tencent.supersonic.chat.parser.HttpLLMInterpreter;
+import com.tencent.supersonic.chat.parser.LLMInterpreter;
 import com.tencent.supersonic.chat.parser.ParseMode;
 import com.tencent.supersonic.chat.parser.plugin.PluginParser;
 import com.tencent.supersonic.chat.plugin.Plugin;
