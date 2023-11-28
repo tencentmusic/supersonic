@@ -474,7 +474,7 @@ CREATE TABLE `s2_collect` (
     `type` varchar(20) NOT NULL,
     `username` varchar(20) NOT NULL,
     `collect_id` bigint NOT NULL,
-    `create_time` TIMESTAMP,
-    `update_time` TIMESTAMP,
+    `create_time` datetime,
+    `update_time` datetime,
     PRIMARY KEY (`id`)
 );
