@@ -62,6 +62,8 @@ public class LoadBenchMarkDemo implements CommandLineRunner {
             addModelRela_1();
             addModelRela_2();
             addModelRela_3();
+            addModelRela_4();
+            addModelRela_5();
         } catch (Exception e) {
             log.error("Failed to add bench mark demo data", e);
         }
@@ -187,6 +189,9 @@ public class LoadBenchMarkDemo implements CommandLineRunner {
         List<Identify> identifiers = new ArrayList<>();
         identifiers.add(new Identify("歌曲名称", IdentifyTypeEnum.primary.name(), "song_name"));
         identifiers.add(new Identify("歌曲ID", IdentifyTypeEnum.foreign.name(), "f_id"));
+        identifiers.add(new Identify("艺术家名称", IdentifyTypeEnum.foreign.name(), "artist_name"));
+        identifiers.add(new Identify("艺术家名称", IdentifyTypeEnum.foreign.name(), "artist_name"));
+
         modelDetail.setIdentifiers(identifiers);
 
         List<Measure> measures = new ArrayList<>();
@@ -203,7 +208,7 @@ public class LoadBenchMarkDemo implements CommandLineRunner {
 
     public void addModelRela_1() {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(new JoinCondition("preferred_genre", "g_name", FilterOperatorEnum.EQUALS));
+        joinConditions.add(new JoinCondition("g_name", "g_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(3L);
         modelRelaReq.setFromModelId(6L);
@@ -215,11 +220,11 @@ public class LoadBenchMarkDemo implements CommandLineRunner {
 
     public void addModelRela_2() {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(new JoinCondition("f_id", "f_id", FilterOperatorEnum.EQUALS));
+        joinConditions.add(new JoinCondition("artist_name", "artist_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(3L);
-        modelRelaReq.setFromModelId(8L);
-        modelRelaReq.setToModelId(7L);
+        modelRelaReq.setFromModelId(7L);
+        modelRelaReq.setToModelId(6L);
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, user);
@@ -227,11 +232,35 @@ public class LoadBenchMarkDemo implements CommandLineRunner {
 
     public void addModelRela_3() {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(new JoinCondition("genre_is", "g_name", FilterOperatorEnum.EQUALS));
+        joinConditions.add(new JoinCondition("artist_name", "artist_name", FilterOperatorEnum.EQUALS));
+        ModelRela modelRelaReq = new ModelRela();
+        modelRelaReq.setDomainId(3L);
+        modelRelaReq.setFromModelId(8L);
+        modelRelaReq.setToModelId(6L);
+        modelRelaReq.setJoinType("left join");
+        modelRelaReq.setJoinConditions(joinConditions);
+        modelRelaService.save(modelRelaReq, user);
+    }
+
+    public void addModelRela_4() {
+        List<JoinCondition> joinConditions = Lists.newArrayList();
+        joinConditions.add(new JoinCondition("g_name", "g_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(3L);
         modelRelaReq.setFromModelId(8L);
         modelRelaReq.setToModelId(5L);
+        modelRelaReq.setJoinType("left join");
+        modelRelaReq.setJoinConditions(joinConditions);
+        modelRelaService.save(modelRelaReq, user);
+    }
+
+    public void addModelRela_5() {
+        List<JoinCondition> joinConditions = Lists.newArrayList();
+        joinConditions.add(new JoinCondition("f_id", "f_id", FilterOperatorEnum.EQUALS));
+        ModelRela modelRelaReq = new ModelRela();
+        modelRelaReq.setDomainId(3L);
+        modelRelaReq.setFromModelId(8L);
+        modelRelaReq.setToModelId(7L);
         modelRelaReq.setJoinType("left join");
         modelRelaReq.setJoinConditions(joinConditions);
         modelRelaService.save(modelRelaReq, user);
