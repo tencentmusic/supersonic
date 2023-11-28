@@ -357,7 +357,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
         llmParserTool.setType(AgentToolType.LLM_S2SQL);
-        llmParserTool.setModelIds(Lists.newArrayList(3L));
+        llmParserTool.setModelIds(Lists.newArrayList(5L,6L,7L,8L));
         agentConfig.getTools().add(llmParserTool);
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
