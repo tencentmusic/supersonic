@@ -201,7 +201,6 @@ CREATE TABLE `s2_dictionary_task` (
 CREATE TABLE `s2_dimension` (
                                 `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '维度ID',
                                 `model_id` bigint(20) DEFAULT NULL,
-                                `datasource_id` bigint(20) NOT NULL COMMENT '所属数据源id',
                                 `name` varchar(255) NOT NULL COMMENT '维度名称',
                                 `biz_name` varchar(255) NOT NULL COMMENT '字段名称',
                                 `description` varchar(500) NOT NULL COMMENT '描述',
