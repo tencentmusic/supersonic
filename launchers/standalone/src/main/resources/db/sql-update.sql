@@ -116,3 +116,4 @@ CREATE TABLE s2_model_rela
 );
 
 alter table s2_view_info change model_id domain_id bigint;
+alter table s2_dimension drop column datasource_id;

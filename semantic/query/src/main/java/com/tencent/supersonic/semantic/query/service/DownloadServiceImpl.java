@@ -28,6 +28,7 @@ import com.tencent.supersonic.semantic.query.utils.DataTransformUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -197,7 +198,12 @@ public class DownloadServiceImpl implements DownloadService {
                 if ("指标名".equals(head)) {
                     continue;
                 }
-                row.add(map.getOrDefault(nameMap.getOrDefault(head, head), "").toString());
+                Object object = map.getOrDefault(nameMap.getOrDefault(head, head), "");
+                if (object == null) {
+                    row.add("");
+                } else {
+                    row.add(String.valueOf(object));
+                }
             }
             row.add(metricSchemaResp.getName());
             data.add(row);
@@ -257,6 +263,10 @@ public class DownloadServiceImpl implements DownloadService {
 
     private List<DimSchemaResp> getMetricRelaDimensions(MetricSchemaResp metricSchemaResp,
                                                         Map<Long, DimSchemaResp> dimensionRespMap) {
+        if (metricSchemaResp.getRelateDimension() == null
+                || CollectionUtils.isEmpty(metricSchemaResp.getRelateDimension().getDrillDownDimensions())) {
+            return Lists.newArrayList();
+        }
         return metricSchemaResp.getRelateDimension().getDrillDownDimensions()
                 .stream().map(drillDownDimension -> dimensionRespMap.get(drillDownDimension.getDimensionId()))
                 .filter(Objects::nonNull)
