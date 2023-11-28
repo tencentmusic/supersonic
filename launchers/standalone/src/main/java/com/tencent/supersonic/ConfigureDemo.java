@@ -263,6 +263,23 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         configService.addConfig(chatConfigBaseReq, user);
     }
 
+    public void addDemoChatConfig_5(Long modelId) {
+        ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
+        chatConfigBaseReq.setModelId(modelId);
+
+        ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
+        ChatDefaultConfigReq chatDefaultConfigDetail = new ChatDefaultConfigReq();
+        chatDefaultConfigDetail.setUnit(-1);
+        chatDefaultConfigDetail.setPeriod("DAY");
+        chatDetailConfig.setChatDefaultConfig(chatDefaultConfigDetail);
+        ItemVisibility visibility0 = new ItemVisibility();
+        chatDetailConfig.setVisibility(visibility0);
+        chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
+        List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
+        chatConfigBaseReq.setRecommendedQuestions(recommendedQuestions);
+        configService.addConfig(chatConfigBaseReq, user);
+    }
+
 
     private void addPlugin_1() {
         Plugin plugin1 = new Plugin();
@@ -357,7 +374,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
         llmParserTool.setType(AgentToolType.LLM_S2SQL);
-        llmParserTool.setModelIds(Lists.newArrayList(5L,6L,7L,8L));
+        llmParserTool.setModelIds(Lists.newArrayList(5L, 6L, 7L, 8L));
         agentConfig.getTools().add(llmParserTool);
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
@@ -375,6 +392,10 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             addDemoChatConfig_2();
             addDemoChatConfig_3();
             addDemoChatConfig_4();
+            addDemoChatConfig_5(5L);
+            addDemoChatConfig_5(6L);
+            addDemoChatConfig_5(7L);
+            addDemoChatConfig_5(8L);
             addPlugin_1();
             addAgent1();
             addAgent2();
