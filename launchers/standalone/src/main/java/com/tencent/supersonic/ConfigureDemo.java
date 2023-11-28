@@ -263,10 +263,32 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         configService.addConfig(chatConfigBaseReq, user);
     }
 
-    public void addDemoChatConfig_5(Long modelId) {
+    public void addDemoChatConfig_5() {
         ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
-        chatConfigBaseReq.setModelId(modelId);
+        chatConfigBaseReq.setModelId(5L);
 
+        ChatDetailConfigReq chatDetailConfig = getChatDetailConfigReq();
+        List<KnowledgeInfoReq> knowledgeInfos = new ArrayList<>();
+        KnowledgeInfoReq knowledgeInfoReq = new KnowledgeInfoReq();
+        knowledgeInfoReq.setSearchEnable(true);
+        knowledgeInfoReq.setItemId(10L);
+        knowledgeInfoReq.setBizName("most_popular_in");
+        knowledgeInfos.add(knowledgeInfoReq);
+
+        KnowledgeInfoReq knowledgeInfoReq2 = new KnowledgeInfoReq();
+        knowledgeInfoReq2.setSearchEnable(true);
+        knowledgeInfoReq2.setItemId(11L);
+        knowledgeInfoReq2.setBizName("g_name");
+        knowledgeInfos.add(knowledgeInfoReq2);
+
+        chatDetailConfig.setKnowledgeInfos(knowledgeInfos);
+        chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
+        List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
+        chatConfigBaseReq.setRecommendedQuestions(recommendedQuestions);
+        configService.addConfig(chatConfigBaseReq, user);
+    }
+
+    private ChatDetailConfigReq getChatDetailConfigReq() {
         ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
         ChatDefaultConfigReq chatDefaultConfigDetail = new ChatDefaultConfigReq();
         chatDefaultConfigDetail.setUnit(-1);
@@ -274,6 +296,79 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         chatDetailConfig.setChatDefaultConfig(chatDefaultConfigDetail);
         ItemVisibility visibility0 = new ItemVisibility();
         chatDetailConfig.setVisibility(visibility0);
+        return chatDetailConfig;
+    }
+
+
+    public void addDemoChatConfig_6() {
+        ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
+        chatConfigBaseReq.setModelId(6L);
+
+        ChatDetailConfigReq chatDetailConfig = getChatDetailConfigReq();
+        List<KnowledgeInfoReq> knowledgeInfos = new ArrayList<>();
+        KnowledgeInfoReq knowledgeInfoReq = new KnowledgeInfoReq();
+        knowledgeInfoReq.setSearchEnable(true);
+        knowledgeInfoReq.setItemId(12L);
+        knowledgeInfoReq.setBizName("country");
+        knowledgeInfos.add(knowledgeInfoReq);
+
+        KnowledgeInfoReq knowledgeInfoReq2 = new KnowledgeInfoReq();
+        knowledgeInfoReq2.setSearchEnable(true);
+        knowledgeInfoReq2.setItemId(13L);
+        knowledgeInfoReq2.setBizName("gender");
+        knowledgeInfos.add(knowledgeInfoReq2);
+
+        chatDetailConfig.setKnowledgeInfos(knowledgeInfos);
+        chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
+        List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
+        chatConfigBaseReq.setRecommendedQuestions(recommendedQuestions);
+        configService.addConfig(chatConfigBaseReq, user);
+    }
+
+    public void addDemoChatConfig_7() {
+        ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
+        chatConfigBaseReq.setModelId(7L);
+
+        ChatDetailConfigReq chatDetailConfig = getChatDetailConfigReq();
+        List<KnowledgeInfoReq> knowledgeInfos = new ArrayList<>();
+        KnowledgeInfoReq knowledgeInfoReq = new KnowledgeInfoReq();
+        knowledgeInfoReq.setSearchEnable(true);
+        knowledgeInfoReq.setItemId(16L);
+        knowledgeInfoReq.setBizName("formats");
+        knowledgeInfos.add(knowledgeInfoReq);
+
+        chatDetailConfig.setKnowledgeInfos(knowledgeInfos);
+        chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
+        List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
+        chatConfigBaseReq.setRecommendedQuestions(recommendedQuestions);
+        configService.addConfig(chatConfigBaseReq, user);
+    }
+
+    public void addDemoChatConfig_8() {
+        ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
+        chatConfigBaseReq.setModelId(8L);
+
+        ChatDetailConfigReq chatDetailConfig = getChatDetailConfigReq();
+        List<KnowledgeInfoReq> knowledgeInfos = new ArrayList<>();
+        KnowledgeInfoReq knowledgeInfoReq = new KnowledgeInfoReq();
+        knowledgeInfoReq.setSearchEnable(true);
+        knowledgeInfoReq.setItemId(18L);
+        knowledgeInfoReq.setBizName("country");
+        knowledgeInfos.add(knowledgeInfoReq);
+
+        KnowledgeInfoReq knowledgeInfoReq2 = new KnowledgeInfoReq();
+        knowledgeInfoReq2.setSearchEnable(true);
+        knowledgeInfoReq2.setItemId(19L);
+        knowledgeInfoReq2.setBizName("languages");
+        knowledgeInfos.add(knowledgeInfoReq2);
+
+        KnowledgeInfoReq knowledgeInfoReq3 = new KnowledgeInfoReq();
+        knowledgeInfoReq3.setSearchEnable(true);
+        knowledgeInfoReq3.setItemId(21L);
+        knowledgeInfoReq3.setBizName("song_name");
+        knowledgeInfos.add(knowledgeInfoReq3);
+
+        chatDetailConfig.setKnowledgeInfos(knowledgeInfos);
         chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
         List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
         chatConfigBaseReq.setRecommendedQuestions(recommendedQuestions);
@@ -392,10 +487,10 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             addDemoChatConfig_2();
             addDemoChatConfig_3();
             addDemoChatConfig_4();
-            addDemoChatConfig_5(5L);
-            addDemoChatConfig_5(6L);
-            addDemoChatConfig_5(7L);
-            addDemoChatConfig_5(8L);
+            addDemoChatConfig_5();
+            addDemoChatConfig_6();
+            addDemoChatConfig_7();
+            addDemoChatConfig_8();
             addPlugin_1();
             addAgent1();
             addAgent2();

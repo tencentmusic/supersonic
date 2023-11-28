@@ -222,7 +222,10 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                             new BufferedOutputStream(IOUtil.newOutputStream(mainPath + ".bin")));
                     if (customNatureCollector.isEmpty()) {
                         for (int i = Nature.begin.ordinal() + 1; i < Nature.values().length; ++i) {
-                            customNatureCollector.add(Nature.values()[i]);
+                            Nature nature = Nature.values()[i];
+                            if(Objects.nonNull(nature)) {
+                                customNatureCollector.add(nature);
+                            }
                         }
                     }
 

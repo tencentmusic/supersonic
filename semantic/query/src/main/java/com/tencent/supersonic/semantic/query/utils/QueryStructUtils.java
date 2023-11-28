@@ -1,5 +1,11 @@
 package com.tencent.supersonic.semantic.query.utils;
 
+import static com.tencent.supersonic.common.pojo.Constants.DAY;
+import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH;
+import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
+import static com.tencent.supersonic.common.pojo.Constants.WEEK;
+
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
@@ -28,14 +34,6 @@ import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.service.SchemaService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -49,12 +47,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH;
-import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
-import static com.tencent.supersonic.common.pojo.Constants.WEEK;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 
 @Slf4j
@@ -254,22 +253,11 @@ public class QueryStructUtils {
 
     public String generateInternalMetricName(Long modelId, List<String> groups) {
         String internalMetricNamePrefix = "";
-        if (CollectionUtils.isEmpty(groups)) {
-            log.warn("group is empty!");
-        } else {
-            for (int i = 0; i < groups.size(); i++) {
-                if (groups.get(i).equalsIgnoreCase("sys_imp_date")) {
-                    continue;
-                }
-                DimensionResp dimension = catalog.getDimension(groups.get(i), modelId);
-                if (Objects.nonNull(dimension) && Strings.isNotEmpty(dimension.getModelBizName())) {
-                    internalMetricNamePrefix = dimension.getModelBizName() + UNDERLINE;
-                    break;
-                }
-            }
+        List<DimensionResp> dimensions = catalog.getDimensions(Collections.singletonList(modelId));
+        if (!CollectionUtils.isEmpty(dimensions)) {
+            internalMetricNamePrefix = dimensions.get(0).getModelBizName();
         }
-        String internalMetricName = internalMetricNamePrefix + internalMetricNameSuffix;
-        return internalMetricName;
+        return internalMetricNamePrefix + UNDERLINE + internalMetricNameSuffix;
     }
 
     public boolean isSupportWith(EngineTypeEnum engineTypeEnum, String version) {
