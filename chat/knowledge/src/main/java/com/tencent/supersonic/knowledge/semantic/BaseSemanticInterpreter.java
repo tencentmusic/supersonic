@@ -21,7 +21,10 @@ public abstract class BaseSemanticInterpreter implements SemanticInterpreter {
 
     @SneakyThrows
     public List<ModelSchemaResp> fetchModelSchema(List<Long> ids, Boolean cacheEnable) {
-        if (cacheEnable && !CollectionUtils.isEmpty(ids)) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return new ArrayList<>();
+        }
+        if (cacheEnable) {
             return modelSchemaCache.get(String.valueOf(ids), () -> {
                 List<ModelSchemaResp> data = doFetchModelSchema(ids);
                 modelSchemaCache.put(String.valueOf(ids), data);
