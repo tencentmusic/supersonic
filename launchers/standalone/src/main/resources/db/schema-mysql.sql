@@ -285,6 +285,10 @@ CREATE TABLE `s2_model` (
                             `updated_at` datetime DEFAULT NULL,
                             `entity` text COLLATE utf8_unicode_ci,
                             `drill_down_dimensions` varchar(500) DEFAULT NULL,
+                            `database_id` INT NOT  NULL ,
+                            `model_detail` text NOT  NULL ,
+                            `depends` varchar(500) DEFAULT NULL ,
+                            `filter_sql` varchar(1000) DEFAULT NULL ,
                             PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -463,4 +467,14 @@ CREATE TABLE s2_model_rela
     to_model_id      bigint,
     join_type       VARCHAR(255),
     join_condition  VARCHAR(255)
+);
+
+CREATE TABLE `s2_collect` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `type` varchar(20) NOT NULL,
+    `username` varchar(20) NOT NULL,
+    `collect_id` bigint NOT NULL,
+    `create_time` TIMESTAMP,
+    `update_time` TIMESTAMP,
+    PRIMARY KEY (`id`)
 );
