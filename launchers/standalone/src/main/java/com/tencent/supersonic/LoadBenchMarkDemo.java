@@ -1,7 +1,11 @@
 package com.tencent.supersonic;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.JoinCondition;
+import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.semantic.api.model.enums.DimensionTypeEnum;
 import com.tencent.supersonic.semantic.api.model.enums.IdentifyTypeEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.Dim;
@@ -12,6 +16,7 @@ import com.tencent.supersonic.semantic.api.model.pojo.ModelDetail;
 import com.tencent.supersonic.semantic.api.model.request.DomainReq;
 import com.tencent.supersonic.semantic.api.model.request.ModelReq;
 import com.tencent.supersonic.semantic.model.domain.DomainService;
+import com.tencent.supersonic.semantic.model.domain.ModelRelaService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,17 +45,23 @@ public class LoadBenchMarkDemo implements CommandLineRunner {
     @Autowired
     private ModelService modelService;
 
+    @Autowired
+    private ModelRelaService modelRelaService;
+
     @Override
     public void run(String... args) {
         if (!demoEnable) {
             return;
         }
         try {
-            //addDomain();
-            //addModel_1();
-            //addModel_2();
-            //addModel_3();
-            //addModel_4();
+            addDomain();
+            addModel_1();
+            addModel_2();
+            addModel_3();
+            addModel_4();
+            addModelRela_1();
+            addModelRela_2();
+            addModelRela_3();
         } catch (Exception e) {
             log.error("Failed to add bench mark demo data", e);
         }
@@ -76,6 +87,7 @@ public class LoadBenchMarkDemo implements CommandLineRunner {
         modelReq.setBizName("genre");
         modelReq.setDescription("艺术类型");
         modelReq.setDatabaseId(1L);
+        modelReq.setDomainId(3L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("admin"));
         modelReq.setAdmins(Collections.singletonList("admin"));
@@ -99,6 +111,7 @@ public class LoadBenchMarkDemo implements CommandLineRunner {
 
         modelDetail.setQueryType("sql_query");
         modelDetail.setSqlQuery("SELECT g_name, rating, most_popular_in FROM genre");
+        modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
     }
 
@@ -124,6 +137,7 @@ public class LoadBenchMarkDemo implements CommandLineRunner {
 
         modelDetail.setQueryType("sql_query");
         modelDetail.setSqlQuery("SELECT artist_name, country, gender, g_name FROM artist");
+        modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
     }
 
@@ -149,6 +163,7 @@ public class LoadBenchMarkDemo implements CommandLineRunner {
 
         modelDetail.setQueryType("sql_query");
         modelDetail.setSqlQuery("SELECT f_id, artist_name, file_size, duration, formats FROM files");
+        modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
     }
 
@@ -182,7 +197,43 @@ public class LoadBenchMarkDemo implements CommandLineRunner {
         modelDetail.setQueryType("sql_query");
         modelDetail.setSqlQuery("SELECT imp_date, song_name, artist_name, country, f_id, g_name, "
                 + " rating, languages, releasedate, resolution FROM song");
+        modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
     }
 
+    public void addModelRela_1() {
+        List<JoinCondition> joinConditions = Lists.newArrayList();
+        joinConditions.add(new JoinCondition("preferred_genre", "g_name", FilterOperatorEnum.EQUALS));
+        ModelRela modelRelaReq = new ModelRela();
+        modelRelaReq.setDomainId(3L);
+        modelRelaReq.setFromModelId(6L);
+        modelRelaReq.setToModelId(5L);
+        modelRelaReq.setJoinType("left join");
+        modelRelaReq.setJoinConditions(joinConditions);
+        modelRelaService.save(modelRelaReq, user);
+    }
+
+    public void addModelRela_2() {
+        List<JoinCondition> joinConditions = Lists.newArrayList();
+        joinConditions.add(new JoinCondition("f_id", "f_id", FilterOperatorEnum.EQUALS));
+        ModelRela modelRelaReq = new ModelRela();
+        modelRelaReq.setDomainId(3L);
+        modelRelaReq.setFromModelId(8L);
+        modelRelaReq.setToModelId(7L);
+        modelRelaReq.setJoinType("left join");
+        modelRelaReq.setJoinConditions(joinConditions);
+        modelRelaService.save(modelRelaReq, user);
+    }
+
+    public void addModelRela_3() {
+        List<JoinCondition> joinConditions = Lists.newArrayList();
+        joinConditions.add(new JoinCondition("genre_is", "g_name", FilterOperatorEnum.EQUALS));
+        ModelRela modelRelaReq = new ModelRela();
+        modelRelaReq.setDomainId(3L);
+        modelRelaReq.setFromModelId(8L);
+        modelRelaReq.setToModelId(5L);
+        modelRelaReq.setJoinType("left join");
+        modelRelaReq.setJoinConditions(joinConditions);
+        modelRelaService.save(modelRelaReq, user);
+    }
 }

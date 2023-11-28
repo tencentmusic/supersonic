@@ -145,9 +145,10 @@ public class QueryReqConverter {
     }
 
     private Set<String> getDimensions(List<ModelSchemaResp> modelSchemaResps, List<String> allFields) {
-        Map<String, String> dimensionLowerToNameMap = modelSchemaResps.stream().flatMap(modelSchemaResp
-                        -> modelSchemaResp.getDimensions().stream())
-                .collect(Collectors.toMap(entry -> entry.getBizName().toLowerCase(), SchemaItem::getBizName));
+        Map<String, String> dimensionLowerToNameMap = modelSchemaResps.stream()
+                .flatMap(modelSchemaResp -> modelSchemaResp.getDimensions().stream())
+                .collect(Collectors.toMap(entry -> entry.getBizName().toLowerCase(), SchemaItem::getBizName,
+                        (k1, k2) -> k1));
         Map<String, String> internalLowerToNameMap = QueryStructUtils.internalCols.stream()
                 .collect(Collectors.toMap(String::toLowerCase, a -> a));
         dimensionLowerToNameMap.putAll(internalLowerToNameMap);
