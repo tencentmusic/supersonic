@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.agent;
 
-import com.tencent.supersonic.chat.parser.llm.interpret.MetricOption;
+import com.tencent.supersonic.chat.parser.llm.analytics.MetricOption;
 import lombok.Data;
 
 import java.util.List;

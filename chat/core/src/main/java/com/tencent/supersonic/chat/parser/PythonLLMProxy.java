@@ -20,8 +20,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+/**
+ * PythonLLMProxy sends requests to LangChain-based python service.
+ */
 @Slf4j
-public class HttpLLMInterpreter implements LLMInterpreter {
+public class PythonLLMProxy implements LLMProxy {
 
     public LLMResp query2sql(LLMReq llmReq, String modelClusterKey) {
 

@@ -2,8 +2,8 @@ package com.tencent.supersonic.chat.parser.plugin.embedding;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.parser.HttpLLMInterpreter;
-import com.tencent.supersonic.chat.parser.LLMInterpreter;
+import com.tencent.supersonic.chat.parser.PythonLLMProxy;
+import com.tencent.supersonic.chat.parser.LLMProxy;
 import com.tencent.supersonic.chat.parser.ParseMode;
 import com.tencent.supersonic.chat.parser.plugin.PluginParser;
 import com.tencent.supersonic.chat.plugin.Plugin;
@@ -25,12 +25,12 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class EmbeddingBasedParser extends PluginParser {
 
-    protected LLMInterpreter llmInterpreter = ComponentFactory.getLLMInterpreter();
+    protected LLMProxy llmInterpreter = ComponentFactory.getLLMProxy();
 
     @Override
     public boolean checkPreCondition(QueryContext queryContext) {
         EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
-        if (StringUtils.isBlank(embeddingConfig.getUrl()) && llmInterpreter instanceof HttpLLMInterpreter) {
+        if (StringUtils.isBlank(embeddingConfig.getUrl()) && llmInterpreter instanceof PythonLLMProxy) {
             return false;
         }
         List<Plugin> plugins = getPluginList(queryContext);

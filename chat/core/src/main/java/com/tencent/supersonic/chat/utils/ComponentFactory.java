@@ -4,7 +4,7 @@ import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
-import com.tencent.supersonic.chat.parser.LLMInterpreter;
+import com.tencent.supersonic.chat.parser.LLMProxy;
 import com.tencent.supersonic.chat.parser.llm.s2sql.ModelResolver;
 import com.tencent.supersonic.chat.processor.ResponseProcessor;
 import com.tencent.supersonic.chat.responder.QueryResponder;
@@ -21,7 +21,7 @@ public class ComponentFactory {
     private static List<SemanticCorrector> semanticCorrectors = new ArrayList<>();
     private static SemanticInterpreter semanticInterpreter;
 
-    private static LLMInterpreter llmInterpreter;
+    private static LLMProxy llmProxy;
     private static List<ResponseProcessor> responseProcessors = new ArrayList<>();
     private static List<QueryResponder> executeResponders = new ArrayList<>();
     private static ModelResolver modelResolver;
@@ -56,11 +56,11 @@ public class ComponentFactory {
         return semanticInterpreter;
     }
 
-    public static LLMInterpreter getLLMInterpreter() {
-        if (Objects.isNull(llmInterpreter)) {
-            llmInterpreter = init(LLMInterpreter.class);
+    public static LLMProxy getLLMProxy() {
+        if (Objects.isNull(llmProxy)) {
+            llmProxy = init(LLMProxy.class);
         }
-        return llmInterpreter;
+        return llmProxy;
     }
 
     public static ModelResolver getModelResolver() {

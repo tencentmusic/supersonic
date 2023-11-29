@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.parser.llm.interpret;
+package com.tencent.supersonic.chat.parser.llm.analytics;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Sets;
@@ -34,12 +34,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class MetricInterpretParser implements SemanticParser {
+public class MetricAnalyzeParser implements SemanticParser {
 
     @Override
     public void parse(QueryContext queryContext, ChatContext chatContext) {
         if (SatisfactionChecker.check(queryContext)) {
-            log.info("skip MetricInterpretParser");
+            log.info("skip MetricAnalyzeParser");
             return;
         }
         Map<Long, DataAnalyticsTool> metricInterpretToolMap =

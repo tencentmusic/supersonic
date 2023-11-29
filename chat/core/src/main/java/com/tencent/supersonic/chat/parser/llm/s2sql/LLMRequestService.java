@@ -12,7 +12,7 @@ import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.config.LLMParserConfig;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
-import com.tencent.supersonic.chat.parser.LLMInterpreter;
+import com.tencent.supersonic.chat.parser.LLMProxy;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 @Service
 public class LLMRequestService {
 
-    protected LLMInterpreter llmInterpreter = ComponentFactory.getLLMInterpreter();
+    protected LLMProxy llmProxy = ComponentFactory.getLLMProxy();
 
     protected SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
     @Autowired
@@ -143,7 +143,7 @@ public class LLMRequestService {
     }
 
     public LLMResp requestLLM(LLMReq llmReq, String modelClusterKey) {
-        return llmInterpreter.query2sql(llmReq, modelClusterKey);
+        return llmProxy.query2sql(llmReq, modelClusterKey);
     }
 
     protected List<String> getFieldNameList(QueryContext queryCtx, ModelCluster modelCluster,

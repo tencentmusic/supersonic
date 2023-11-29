@@ -6,10 +6,11 @@ import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 
 /**
- * Unified interpreter for invoking the llm layer.
+ * LLMProxy encapsulates functions performed by LLMs so that multiple
+ * orchestration frameworks (e.g. LangChain in python, LangChain4j in java)
+ * could be used.
  */
-public interface LLMInterpreter {
-
+public interface LLMProxy {
 
     LLMResp query2sql(LLMReq llmReq, String modelClusterKey);
 

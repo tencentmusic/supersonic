@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.parser.llm.interpret;
+package com.tencent.supersonic.chat.parser.llm.analytics;
 
 
 import lombok.AllArgsConstructor;
