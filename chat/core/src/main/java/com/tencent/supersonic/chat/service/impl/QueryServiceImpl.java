@@ -32,8 +32,7 @@ import com.tencent.supersonic.chat.postprocessor.PostProcessor;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.llm.s2sql.S2SQLQuery;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
-import com.tencent.supersonic.chat.responder.parse.ParseResponder;
+import com.tencent.supersonic.chat.responder.QueryResponder;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SemanticService;
@@ -113,8 +112,7 @@ public class QueryServiceImpl implements QueryService {
     private List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
     private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
     private List<PostProcessor> postProcessors = ComponentFactory.getPostProcessors();
-    private List<ParseResponder> parseResponders = ComponentFactory.getParseResponders();
-    private List<ExecuteResponder> executeResponders = ComponentFactory.getExecuteResponders();
+    private List<QueryResponder> executeResponders = ComponentFactory.getExecuteResponders();
     private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSqlCorrections();
 
     @Override
@@ -159,20 +157,11 @@ public class QueryServiceImpl implements QueryService {
         //5. postProcessor
         postProcessors.forEach(postProcessor -> {
             long startTime = System.currentTimeMillis();
-            postProcessor.process(queryCtx);
+            postProcessor.process(parseResult, queryCtx, chatCtx);
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(postProcessor.getClass().getSimpleName())
                     .type(CostType.POSTPROCESSOR.getType()).build());
             log.info("{} result:{}", postProcessor.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
-        });
-        //6. responder
-        parseResponders.forEach(parseResponder -> {
-            long startTime = System.currentTimeMillis();
-            parseResponder.fillResponse(parseResult, queryCtx, chatCtx);
-            timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
-                    .interfaceName(parseResponder.getClass().getSimpleName())
-                    .type(CostType.PARSERRESPONDER.getType()).build());
-            log.info("{} result:{}", parseResponder.getClass().getSimpleName(), JsonUtil.toString(parseResult));
         });
 
         if (Objects.nonNull(parseResult.getQueryId()) && timeCostDOList.size() > 0) {
@@ -217,7 +206,7 @@ public class QueryServiceImpl implements QueryService {
             }
             chatCtx.setQueryText(queryReq.getQueryText());
             chatCtx.setUser(queryReq.getUser().getName());
-            for (ExecuteResponder executeResponder : executeResponders) {
+            for (QueryResponder executeResponder : executeResponders) {
                 executeResponder.fillResponse(queryResult, parseInfo, queryReq);
             }
             chatService.updateQuery(queryReq.getQueryId(), queryResult, chatCtx);

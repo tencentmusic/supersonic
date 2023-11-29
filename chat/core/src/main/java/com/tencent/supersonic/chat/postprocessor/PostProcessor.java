@@ -1,5 +1,7 @@
 package com.tencent.supersonic.chat.postprocessor;
+import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 
 /**
  * A post processor do some logic after parser and corrector
@@ -7,6 +9,6 @@ import com.tencent.supersonic.chat.api.pojo.QueryContext;
 
 public interface PostProcessor {
 
-    void process(QueryContext queryContext);
+    void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext);
 
 }

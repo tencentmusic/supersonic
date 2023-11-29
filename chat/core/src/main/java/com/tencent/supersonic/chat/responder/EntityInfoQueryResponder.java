@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.responder.execute;
+package com.tencent.supersonic.chat.responder;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
@@ -10,7 +10,7 @@ import com.tencent.supersonic.chat.query.llm.interpret.MetricInterpretQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
 
-public class EntityInfoExecuteResponder implements ExecuteResponder {
+public class EntityInfoQueryResponder implements QueryResponder {
 
     @Override
     public void fillResponse(QueryResult queryResult, SemanticParseInfo semanticParseInfo, ExecuteQueryReq queryReq) {

@@ -2,11 +2,13 @@ package com.tencent.supersonic.chat.postprocessor;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
+import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
+import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryType;
@@ -16,6 +18,11 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -24,10 +31,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.util.CollectionUtils;
 
 /**
  * update parse info from correct sql
@@ -36,7 +39,7 @@ import org.springframework.util.CollectionUtils;
 public class ParseInfoUpdateProcessor implements PostProcessor {
 
     @Override
-    public void process(QueryContext queryContext) {
+    public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
         List<SemanticQuery> candidateQueries = queryContext.getCandidateQueries();
         if (CollectionUtils.isEmpty(candidateQueries)) {
             return;

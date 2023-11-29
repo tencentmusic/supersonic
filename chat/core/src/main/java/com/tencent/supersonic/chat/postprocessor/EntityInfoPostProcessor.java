@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.responder.parse;
+package com.tencent.supersonic.chat.postprocessor;
 
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
@@ -12,13 +12,14 @@ import com.tencent.supersonic.chat.query.llm.interpret.MetricInterpretQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import org.springframework.util.CollectionUtils;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class EntityInfoParseResponder implements ParseResponder {
+public class EntityInfoPostProcessor implements PostProcessor {
 
     @Override
-    public void fillResponse(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
+    public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
         List<SemanticQuery> semanticQueries = queryContext.getCandidateQueries();
         if (CollectionUtils.isEmpty(semanticQueries)) {
             return;
