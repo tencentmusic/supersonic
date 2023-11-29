@@ -223,7 +223,7 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                     if (customNatureCollector.isEmpty()) {
                         for (int i = Nature.begin.ordinal() + 1; i < Nature.values().length; ++i) {
                             Nature nature = Nature.values()[i];
-                            if(Objects.nonNull(nature)) {
+                            if (Objects.nonNull(nature)) {
                                 customNatureCollector.add(nature);
                             }
                         }
