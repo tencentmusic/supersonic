@@ -3,8 +3,8 @@ package com.tencent.supersonic.chat.parser.llm.interpret;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.chat.agent.Agent;
-import com.tencent.supersonic.chat.agent.tool.AgentToolType;
-import com.tencent.supersonic.chat.agent.tool.MetricInterpretTool;
+import com.tencent.supersonic.chat.agent.AgentToolType;
+import com.tencent.supersonic.chat.agent.DataAnalyticsTool;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
@@ -42,7 +42,7 @@ public class MetricInterpretParser implements SemanticParser {
             log.info("skip MetricInterpretParser");
             return;
         }
-        Map<Long, MetricInterpretTool> metricInterpretToolMap =
+        Map<Long, DataAnalyticsTool> metricInterpretToolMap =
                 getMetricInterpretTools(queryContext.getRequest().getAgentId());
         log.info("metric interpret tool : {}", metricInterpretToolMap);
         if (CollectionUtils.isEmpty(metricInterpretToolMap)) {
@@ -50,7 +50,7 @@ public class MetricInterpretParser implements SemanticParser {
         }
         Map<Long, List<SchemaElementMatch>> elementMatches = queryContext.getMapInfo().getModelElementMatches();
         for (Long modelId : elementMatches.keySet()) {
-            MetricInterpretTool metricInterpretTool = metricInterpretToolMap.get(modelId);
+            DataAnalyticsTool metricInterpretTool = metricInterpretToolMap.get(modelId);
             if (metricInterpretTool == null) {
                 continue;
             }
@@ -86,22 +86,22 @@ public class MetricInterpretParser implements SemanticParser {
                 .collect(Collectors.toSet());
     }
 
-    private Map<Long, MetricInterpretTool> getMetricInterpretTools(Integer agentId) {
+    private Map<Long, DataAnalyticsTool> getMetricInterpretTools(Integer agentId) {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         Agent agent = agentService.getAgent(agentId);
         if (agent == null) {
             return new HashMap<>();
         }
-        List<String> tools = agent.getTools(AgentToolType.INTERPRET);
+        List<String> tools = agent.getTools(AgentToolType.ANALYTICS);
         if (CollectionUtils.isEmpty(tools)) {
             return new HashMap<>();
         }
-        List<MetricInterpretTool> metricInterpretTools = tools.stream().map(tool ->
-                        JSONObject.parseObject(tool, MetricInterpretTool.class))
+        List<DataAnalyticsTool> metricInterpretTools = tools.stream().map(tool ->
+                        JSONObject.parseObject(tool, DataAnalyticsTool.class))
                 .filter(tool -> !CollectionUtils.isEmpty(tool.getMetricOptions()))
                 .collect(Collectors.toList());
-        Map<Long, MetricInterpretTool> metricInterpretToolMap = new HashMap<>();
-        for (MetricInterpretTool metricInterpretTool : metricInterpretTools) {
+        Map<Long, DataAnalyticsTool> metricInterpretToolMap = new HashMap<>();
+        for (DataAnalyticsTool metricInterpretTool : metricInterpretTools) {
             metricInterpretToolMap.putIfAbsent(metricInterpretTool.getModelId(),
                     metricInterpretTool);
         }

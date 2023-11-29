@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.parser.llm.s2sql;
 
-import com.tencent.supersonic.chat.agent.tool.AgentToolType;
-import com.tencent.supersonic.chat.agent.tool.CommonAgentTool;
+import com.tencent.supersonic.chat.agent.AgentToolType;
+import com.tencent.supersonic.chat.agent.NL2SQLTool;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
@@ -74,7 +74,7 @@ public class LLMRequestService {
     }
 
     public ModelCluster getModelCluster(QueryContext queryCtx, ChatContext chatCtx, Integer agentId) {
-        Set<Long> distinctModelIds = agentService.getModelIds(agentId, AgentToolType.LLM_S2SQL);
+        Set<Long> distinctModelIds = agentService.getModelIds(agentId, AgentToolType.NL2SQL_LLM);
         if (agentService.containsAllModel(distinctModelIds)) {
             distinctModelIds = new HashSet<>();
         }
@@ -84,10 +84,10 @@ public class LLMRequestService {
         return ModelCluster.build(modelCluster);
     }
 
-    public CommonAgentTool getParserTool(QueryReq request, Set<Long> modelIdSet) {
-        List<CommonAgentTool> commonAgentTools = agentService.getParserTools(request.getAgentId(),
-                AgentToolType.LLM_S2SQL);
-        Optional<CommonAgentTool> llmParserTool = commonAgentTools.stream()
+    public NL2SQLTool getParserTool(QueryReq request, Set<Long> modelIdSet) {
+        List<NL2SQLTool> commonAgentTools = agentService.getParserTools(request.getAgentId(),
+                AgentToolType.NL2SQL_LLM);
+        Optional<NL2SQLTool> llmParserTool = commonAgentTools.stream()
                 .filter(tool -> {
                     List<Long> modelIds = tool.getModelIds();
                     if (agentService.containsAllModel(new HashSet<>(modelIds))) {

@@ -3,8 +3,8 @@ package com.tencent.supersonic.chat.parser.rule;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.agent.Agent;
-import com.tencent.supersonic.chat.agent.tool.AgentToolType;
-import com.tencent.supersonic.chat.agent.tool.RuleQueryTool;
+import com.tencent.supersonic.chat.agent.AgentToolType;
+import com.tencent.supersonic.chat.agent.RuleParserTool;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
@@ -35,7 +35,7 @@ public class AgentCheckParser implements SemanticParser {
         if (agent == null) {
             return;
         }
-        List<RuleQueryTool> queryTools = getRuleTools(agentId);
+        List<RuleParserTool> queryTools = getRuleTools(agentId);
         if (CollectionUtils.isEmpty(queryTools)) {
             queries.clear();
             return;
@@ -43,7 +43,7 @@ public class AgentCheckParser implements SemanticParser {
         log.info("queries resolved:{} {}", agent.getName(),
                 queries.stream().map(SemanticQuery::getQueryMode).collect(Collectors.toList()));
         queries.removeIf(query -> {
-            for (RuleQueryTool tool : queryTools) {
+            for (RuleParserTool tool : queryTools) {
                 if (CollectionUtils.isNotEmpty(tool.getQueryModes())
                         && !tool.getQueryModes().contains(query.getQueryMode())) {
                     return true;
@@ -73,17 +73,17 @@ public class AgentCheckParser implements SemanticParser {
                 queries.stream().map(SemanticQuery::getQueryMode).collect(Collectors.toList()));
     }
 
-    private static List<RuleQueryTool> getRuleTools(Integer agentId) {
+    private static List<RuleParserTool> getRuleTools(Integer agentId) {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         Agent agent = agentService.getAgent(agentId);
         if (agent == null) {
             return Lists.newArrayList();
         }
-        List<String> tools = agent.getTools(AgentToolType.RULE);
+        List<String> tools = agent.getTools(AgentToolType.NL2SQL_RULE);
         if (CollectionUtils.isEmpty(tools)) {
             return Lists.newArrayList();
         }
-        return tools.stream().map(tool -> JSONObject.parseObject(tool, RuleQueryTool.class))
+        return tools.stream().map(tool -> JSONObject.parseObject(tool, RuleParserTool.class))
                 .collect(Collectors.toList());
     }
 

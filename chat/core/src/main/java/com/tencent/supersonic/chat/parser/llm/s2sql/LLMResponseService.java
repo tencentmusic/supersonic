@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.parser.llm.s2sql;
 
-import com.tencent.supersonic.chat.agent.tool.CommonAgentTool;
+import com.tencent.supersonic.chat.agent.NL2SQLTool;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.query.QueryManager;
@@ -28,7 +28,7 @@ public class LLMResponseService {
         LLMSemanticQuery semanticQuery = QueryManager.createLLMQuery(S2SQLQuery.QUERY_MODE);
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         parseInfo.setModel(parseResult.getModelCluster());
-        CommonAgentTool commonAgentTool = parseResult.getCommonAgentTool();
+        NL2SQLTool commonAgentTool = parseResult.getCommonAgentTool();
         parseInfo.getElementMatches().addAll(queryCtx.getModelClusterMapInfo()
                 .getMatchedElements(parseInfo.getModelClusterKey()));
 

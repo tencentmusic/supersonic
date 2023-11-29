@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.agent.tool;
+package com.tencent.supersonic.chat.agent;
 
 
 import java.util.List;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommonAgentTool extends AgentTool {
+public class NL2SQLTool extends AgentTool {
 
     protected List<Long> modelIds;
 

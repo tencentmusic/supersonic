@@ -5,10 +5,10 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.AgentConfig;
-import com.tencent.supersonic.chat.agent.tool.AgentToolType;
-import com.tencent.supersonic.chat.agent.tool.MetricInterpretTool;
-import com.tencent.supersonic.chat.agent.tool.PluginTool;
-import com.tencent.supersonic.chat.agent.tool.RuleQueryTool;
+import com.tencent.supersonic.chat.agent.AgentToolType;
+import com.tencent.supersonic.chat.agent.DataAnalyticsTool;
+import com.tencent.supersonic.chat.agent.PluginTool;
+import com.tencent.supersonic.chat.agent.RuleParserTool;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -161,9 +161,9 @@ public class DataUtils {
         return agent;
     }
 
-    private static RuleQueryTool getRuleQueryTool() {
-        RuleQueryTool ruleQueryTool = new RuleQueryTool();
-        ruleQueryTool.setType(AgentToolType.RULE);
+    private static RuleParserTool getRuleQueryTool() {
+        RuleParserTool ruleQueryTool = new RuleParserTool();
+        ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setModelIds(Lists.newArrayList(1L, 2L));
         ruleQueryTool.setQueryModes(Lists.newArrayList("METRIC_ENTITY", "METRIC_FILTER", "METRIC_MODEL"));
         return ruleQueryTool;
@@ -176,10 +176,10 @@ public class DataUtils {
         return pluginTool;
     }
 
-    private static MetricInterpretTool getMetricInterpretTool() {
-        MetricInterpretTool metricInterpretTool = new MetricInterpretTool();
+    private static DataAnalyticsTool getMetricInterpretTool() {
+        DataAnalyticsTool metricInterpretTool = new DataAnalyticsTool();
         metricInterpretTool.setModelId(1L);
-        metricInterpretTool.setType(AgentToolType.INTERPRET);
+        metricInterpretTool.setType(AgentToolType.ANALYTICS);
         metricInterpretTool.setMetricOptions(Lists.newArrayList(
                 new MetricOption(1L),
                 new MetricOption(2L),

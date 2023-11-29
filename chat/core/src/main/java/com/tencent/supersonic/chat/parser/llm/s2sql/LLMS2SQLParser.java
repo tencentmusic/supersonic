@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.parser.llm.s2sql;
 
-import com.tencent.supersonic.chat.agent.tool.CommonAgentTool;
+import com.tencent.supersonic.chat.agent.NL2SQLTool;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
@@ -39,7 +39,7 @@ public class LLMS2SQLParser implements SemanticParser {
                 return;
             }
             //3.get agent tool and determine whether to skip this parser.
-            CommonAgentTool commonAgentTool = requestService.getParserTool(request, modelCluster.getModelIds());
+            NL2SQLTool commonAgentTool = requestService.getParserTool(request, modelCluster.getModelIds());
             if (Objects.isNull(commonAgentTool)) {
                 log.info("no tool in this agent, skip {}", LLMS2SQLParser.class);
                 return;

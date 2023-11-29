@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.agent.tool;
+package com.tencent.supersonic.chat.agent;
 
 
 import lombok.Data;

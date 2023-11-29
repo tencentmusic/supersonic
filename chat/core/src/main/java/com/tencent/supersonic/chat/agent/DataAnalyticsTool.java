@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.agent.tool;
+package com.tencent.supersonic.chat.agent;
 
 import com.tencent.supersonic.chat.parser.llm.interpret.MetricOption;
 import lombok.Data;
@@ -7,7 +7,7 @@ import java.util.List;
 
 
 @Data
-public class MetricInterpretTool extends AgentTool {
+public class DataAnalyticsTool extends AgentTool {
 
     private Long modelId;
 

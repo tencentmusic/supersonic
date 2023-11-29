@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.agent;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.agent.tool.AgentToolType;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import java.util.Objects;
 import lombok.Data;
