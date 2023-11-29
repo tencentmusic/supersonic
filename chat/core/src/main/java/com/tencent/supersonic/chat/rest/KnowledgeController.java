@@ -5,7 +5,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.pojo.request.DictLatestTaskReq;
 import com.tencent.supersonic.chat.api.pojo.response.DictLatestTaskResp;
-import com.tencent.supersonic.chat.service.ChatKnowledgeService;
+import com.tencent.supersonic.chat.service.KnowledgeService;
 import com.tencent.supersonic.knowledge.listener.ApplicationStartedListener;
 import com.tencent.supersonic.chat.api.pojo.request.DictTaskFilterReq;
 import com.tencent.supersonic.knowledge.dictionary.DimValue2DictCommand;
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class KnowledgeController {
 
     @Autowired
-    private ChatKnowledgeService knowledgeService;
+    private KnowledgeService knowledgeService;
 
     @Autowired
     private ApplicationStartedListener applicationStartedListener;

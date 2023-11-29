@@ -5,8 +5,11 @@ import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * TimeCostProcessor adds time cost of parsing.
+ **/
 @Slf4j
-public class TimeCostProcessor implements ResponseProcessor {
+public class TimeCostProcessor implements ParseResultProcessor {
 
 
     @Override

@@ -13,7 +13,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class SqlInfoProcessor implements ResponseProcessor {
+/**
+ * SqlInfoProcessor adds S2SQL to the parsing results so that
+ * technical users could verify SQL by themselves.
+ **/
+public class SqlInfoProcessor implements ParseResultProcessor {
 
     @Override
     public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {

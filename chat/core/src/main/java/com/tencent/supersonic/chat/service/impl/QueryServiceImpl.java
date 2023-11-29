@@ -28,11 +28,11 @@ import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
-import com.tencent.supersonic.chat.processor.ResponseProcessor;
+import com.tencent.supersonic.chat.processor.ParseResultProcessor;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.query.llm.s2sql.S2SQLQuery;
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.chat.responder.QueryResponder;
+import com.tencent.supersonic.chat.query.QueryResponder;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SemanticService;
@@ -111,7 +111,7 @@ public class QueryServiceImpl implements QueryService {
 
     private List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
     private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
-    private List<ResponseProcessor> responseProcessors = ComponentFactory.getPostProcessors();
+    private List<ParseResultProcessor> responseProcessors = ComponentFactory.getPostProcessors();
     private List<QueryResponder> executeResponders = ComponentFactory.getExecuteResponders();
     private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSemanticCorrectors();
 
@@ -208,7 +208,7 @@ public class QueryServiceImpl implements QueryService {
             chatCtx.setQueryText(queryReq.getQueryText());
             chatCtx.setUser(queryReq.getUser().getName());
             for (QueryResponder executeResponder : executeResponders) {
-                executeResponder.fillResponse(queryResult, parseInfo, queryReq);
+                executeResponder.fillInfo(queryResult, parseInfo, queryReq);
             }
             chatService.updateQuery(queryReq.getQueryId(), queryResult, chatCtx);
         } else {
@@ -277,7 +277,7 @@ public class QueryServiceImpl implements QueryService {
             //replace metrics
             log.info("llm begin replace metrics!");
             replaceMetrics(parseInfo, metrics);
-        } else if (S2SQLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
+        } else if (LLMSqlQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
             log.info("llm begin revise filters!");
             String correctorSql = reviseCorrectS2SQL(queryData, parseInfo);
             parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
@@ -536,7 +536,7 @@ public class QueryServiceImpl implements QueryService {
 
     private SemanticParseInfo getSemanticParseInfo(QueryDataReq queryData, ChatParseDO chatParseDO) {
         SemanticParseInfo parseInfo = JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
-        if (S2SQLQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
+        if (LLMSqlQuery.QUERY_MODE.equals(parseInfo.getQueryMode())) {
             return parseInfo;
         }
         if (CollectionUtils.isNotEmpty(queryData.getDimensions())) {

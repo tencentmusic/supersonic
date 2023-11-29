@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.parser.llm.s2sql;
 
+import com.tencent.supersonic.chat.parser.sql.llm.LLMResponseService;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 import java.util.HashMap;
 import java.util.Map;

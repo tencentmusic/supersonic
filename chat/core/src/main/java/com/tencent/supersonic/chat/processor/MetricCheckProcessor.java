@@ -27,10 +27,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * MetricCheckProcessor used to verify whether the dimensions
+ * MetricCheckProcessor verifies whether the dimensions
  * involved in the query in metric mode can drill down on the metric.
  */
-public class MetricCheckProcessor implements ResponseProcessor {
+public class MetricCheckProcessor implements ParseResultProcessor {
 
     @Override
     public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {

@@ -12,8 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * RespBuildProcessor fill response object with parsing results.
+ **/
 @Slf4j
-public class RespBuildProcessor implements ResponseProcessor {
+public class RespBuildProcessor implements ParseResultProcessor {
 
     @Override
     public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {

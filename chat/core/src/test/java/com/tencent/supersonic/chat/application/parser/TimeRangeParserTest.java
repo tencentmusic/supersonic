@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.application.parser;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.parser.rule.TimeRangeParser;
+import com.tencent.supersonic.chat.parser.sql.rule.TimeRangeParser;
 import org.junit.jupiter.api.Test;
 
 

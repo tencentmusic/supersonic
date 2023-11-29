@@ -12,7 +12,7 @@ import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.AgentToolType;
 import com.tencent.supersonic.chat.agent.PluginTool;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingResp;
+import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrievalResp;
 import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrieval;
 import com.tencent.supersonic.chat.plugin.event.PluginAddEvent;
 import com.tencent.supersonic.chat.plugin.event.PluginDelEvent;
@@ -165,7 +165,7 @@ public class PluginManager {
         requestEmbeddingPluginAdd(convert(plugins));
     }
 
-    public EmbeddingResp recognize(String embeddingText) {
+    public RecallRetrievalResp recognize(String embeddingText) {
         String url = embeddingConfig.getUrl() + embeddingConfig.getRecognizePath() + "?n_results="
                 + embeddingConfig.getNResult();
         HttpHeaders headers = new HttpHeaders();
@@ -176,14 +176,14 @@ public class PluginManager {
         String jsonBody = JSONObject.toJSONString(Lists.newArrayList(embeddingText));
         HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
         log.info("[embedding] request body:{}, url:{}", jsonBody, url);
-        ResponseEntity<List<EmbeddingResp>> embeddingResponseEntity =
+        ResponseEntity<List<RecallRetrievalResp>> embeddingResponseEntity =
                 restTemplate.exchange(requestUrl, HttpMethod.POST, entity,
-                        new ParameterizedTypeReference<List<EmbeddingResp>>() {
+                        new ParameterizedTypeReference<List<RecallRetrievalResp>>() {
                         });
         log.info("[embedding] recognize result body:{}", embeddingResponseEntity);
-        List<EmbeddingResp> embeddingResps = embeddingResponseEntity.getBody();
+        List<RecallRetrievalResp> embeddingResps = embeddingResponseEntity.getBody();
         if (CollectionUtils.isNotEmpty(embeddingResps)) {
-            for (EmbeddingResp embeddingResp : embeddingResps) {
+            for (RecallRetrievalResp embeddingResp : embeddingResps) {
                 List<RecallRetrieval> embeddingRetrievals = embeddingResp.getRetrieval();
                 for (RecallRetrieval embeddingRetrieval : embeddingRetrievals) {
                     embeddingRetrieval.setId(getPluginIdFromEmbeddingId(embeddingRetrieval.getId()));

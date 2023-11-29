@@ -15,10 +15,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Rank queries by score.
- */
+ * QueryRankProcessor ranks candidate parsing results based on
+ * a heuristic scoring algorithm and then takes topN.
+ **/
 @Slf4j
-public class QueryRankProcessor implements ResponseProcessor {
+public class QueryRankProcessor implements ParseResultProcessor {
 
     private static final int candidateTopSize = 5;
 

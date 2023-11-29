@@ -8,7 +8,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.query.QueryManager;
-import com.tencent.supersonic.chat.query.llm.interpret.MetricInterpretQuery;
+import com.tencent.supersonic.chat.query.llm.analytics.MetricAnalyzeQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import org.springframework.util.CollectionUtils;
@@ -16,7 +16,11 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class EntityInfoProcessor implements ResponseProcessor {
+/**
+ * EntityInfoProcessor fills core attributes of an entity so that
+ * users get to know which entity is parsed out.
+ */
+public class EntityInfoProcessor implements ParseResultProcessor {
 
     @Override
     public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
@@ -30,7 +34,7 @@ public class EntityInfoProcessor implements ResponseProcessor {
         selectedParses.forEach(parseInfo -> {
             String queryMode = parseInfo.getQueryMode();
             if (QueryManager.containsPluginQuery(queryMode)
-                    || MetricInterpretQuery.QUERY_MODE.equalsIgnoreCase(queryMode)) {
+                    || MetricAnalyzeQuery.QUERY_MODE.equalsIgnoreCase(queryMode)) {
                 return;
             }
             //1. set entity info

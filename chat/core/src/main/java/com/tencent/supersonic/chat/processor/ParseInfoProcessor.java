@@ -33,10 +33,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * update parse info from correct sql
- */
+ * ParseInfoProcessor extracts structured info from S2SQL so that
+ * users get to know the details.
+ **/
 @Slf4j
-public class ParseInfoProcessor implements ResponseProcessor {
+public class ParseInfoProcessor implements ParseResultProcessor {
 
     @Override
     public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
@@ -71,6 +72,7 @@ public class ParseInfoProcessor implements ResponseProcessor {
         } catch (Exception e) {
             log.error("set dateInfo error :", e);
         }
+
         //set filter
         Set<Long> modelIds = parseInfo.getModel().getModelIds();
         try {
@@ -80,6 +82,7 @@ public class ParseInfoProcessor implements ResponseProcessor {
         } catch (Exception e) {
             log.error("set dimensionFilter error :", e);
         }
+
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
         if (Objects.isNull(semanticSchema)) {
             return;

@@ -5,9 +5,9 @@ import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.parser.LLMProxy;
-import com.tencent.supersonic.chat.parser.llm.s2sql.ModelResolver;
-import com.tencent.supersonic.chat.processor.ResponseProcessor;
-import com.tencent.supersonic.chat.responder.QueryResponder;
+import com.tencent.supersonic.chat.parser.sql.llm.ModelResolver;
+import com.tencent.supersonic.chat.processor.ParseResultProcessor;
+import com.tencent.supersonic.chat.query.QueryResponder;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class ComponentFactory {
     private static SemanticInterpreter semanticInterpreter;
 
     private static LLMProxy llmProxy;
-    private static List<ResponseProcessor> responseProcessors = new ArrayList<>();
+    private static List<ParseResultProcessor> responseProcessors = new ArrayList<>();
     private static List<QueryResponder> executeResponders = new ArrayList<>();
     private static ModelResolver modelResolver;
 
@@ -39,8 +39,8 @@ public class ComponentFactory {
                 semanticCorrectors) : semanticCorrectors;
     }
 
-    public static List<ResponseProcessor> getPostProcessors() {
-        return CollectionUtils.isEmpty(responseProcessors) ? init(ResponseProcessor.class,
+    public static List<ParseResultProcessor> getPostProcessors() {
+        return CollectionUtils.isEmpty(responseProcessors) ? init(ParseResultProcessor.class,
                 responseProcessors) : responseProcessors;
     }
 

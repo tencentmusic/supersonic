@@ -8,7 +8,7 @@ import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.chat.plugin.PluginManager;
-import com.tencent.supersonic.chat.query.llm.interpret.LLMAnswerResp;
+import com.tencent.supersonic.chat.query.llm.analytics.LLMAnswerResp;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.util.DataUtils;

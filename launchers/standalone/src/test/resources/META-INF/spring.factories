@@ -7,10 +7,10 @@ com.tencent.supersonic.chat.api.component.SchemaMapper=\
     com.tencent.supersonic.chat.mapper.ModelClusterMapper
 
 com.tencent.supersonic.chat.api.component.SemanticParser=\
-    com.tencent.supersonic.chat.parser.rule.RuleBasedParser, \
-    com.tencent.supersonic.chat.parser.llm.s2sql.LLMS2SQLParser, \
-    com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingBasedParser, \
-    com.tencent.supersonic.chat.parser.plugin.function.FunctionBasedParser, \
+    com.tencent.supersonic.chat.parser.sql.rule.RuleSqlParser, \
+    com.tencent.supersonic.chat.parser.sql.llm.LLMSqlParser, \
+    com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingRecallParser, \
+    com.tencent.supersonic.chat.parser.plugin.function.FunctionCallParser, \
     com.tencent.supersonic.chat.parser.QueryTypeParser
 
 com.tencent.supersonic.chat.api.component.SemanticCorrector=\
@@ -23,8 +23,8 @@ com.tencent.supersonic.chat.api.component.SemanticCorrector=\
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.LocalSemanticInterpreter
 
-com.tencent.supersonic.chat.parser.llm.s2sql.ModelResolver=\
-  com.tencent.supersonic.chat.parser.llm.s2sql.HeuristicModelResolver
+com.tencent.supersonic.chat.parser.sql.llm.ModelResolver=\
+  com.tencent.supersonic.chat.parser.sql.llm.HeuristicModelResolver
 
 com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\
     com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor
@@ -42,6 +42,6 @@ com.tencent.supersonic.chat.postprocessor.PostProcessor=\
     com.tencent.supersonic.chat.postprocessor.RespBuildPostProcessor
 
 
-com.tencent.supersonic.chat.responder.QueryResponder=\
-    com.tencent.supersonic.chat.responder.EntityInfoQueryResponder, \
-    com.tencent.supersonic.chat.responder.SimilarMetricQueryResponder
+com.tencent.supersonic.chat.query.QueryResponder=\
+    com.tencent.supersonic.chat.query.EntityInfoQueryResponder, \
+    com.tencent.supersonic.chat.query.SimilarMetricQueryResponder
