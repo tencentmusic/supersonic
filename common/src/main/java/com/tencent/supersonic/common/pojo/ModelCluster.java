@@ -16,6 +16,8 @@ public class ModelCluster {
 
     private Set<Long> modelIds = new LinkedHashSet<>();
 
+    private Set<String> modelNames = new LinkedHashSet<>();
+
     private String key;
 
     private String name;
@@ -35,9 +37,10 @@ public class ModelCluster {
     }
 
     public void buildName(Map<Long, String> modelNameMap) {
-        name = modelNameMap.entrySet().stream().filter(entry ->
-                modelIds.contains(entry.getKey())).map(Map.Entry::getValue)
-                .collect(Collectors.joining(split));
+        modelNames = modelNameMap.entrySet().stream().filter(entry ->
+                        modelIds.contains(entry.getKey())).map(Map.Entry::getValue)
+                .collect(Collectors.toSet());
+        name = String.join(split, modelNames);
     }
 
     public static Set<Long> getModelIdFromKey(String key) {
