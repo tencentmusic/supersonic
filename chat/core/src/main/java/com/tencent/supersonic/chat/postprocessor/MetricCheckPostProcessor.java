@@ -3,12 +3,14 @@ package com.tencent.supersonic.chat.postprocessor;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
+import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
+import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
@@ -31,7 +33,7 @@ import java.util.stream.Collectors;
 public class MetricCheckPostProcessor implements PostProcessor {
 
     @Override
-    public void process(QueryContext queryContext) {
+    public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
         List<SemanticQuery> semanticQueries = queryContext.getCandidateQueries();
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();

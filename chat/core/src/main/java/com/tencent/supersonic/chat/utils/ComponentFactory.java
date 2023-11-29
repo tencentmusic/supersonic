@@ -7,8 +7,7 @@ import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.parser.LLMInterpreter;
 import com.tencent.supersonic.chat.parser.llm.s2sql.ModelResolver;
 import com.tencent.supersonic.chat.postprocessor.PostProcessor;
-import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
-import com.tencent.supersonic.chat.responder.parse.ParseResponder;
+import com.tencent.supersonic.chat.responder.QueryResponder;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import java.util.ArrayList;
@@ -24,8 +23,7 @@ public class ComponentFactory {
 
     private static LLMInterpreter llmInterpreter;
     private static List<PostProcessor> postProcessors = new ArrayList<>();
-    private static List<ParseResponder> parseResponders = new ArrayList<>();
-    private static List<ExecuteResponder> executeResponders = new ArrayList<>();
+    private static List<QueryResponder> executeResponders = new ArrayList<>();
     private static ModelResolver modelResolver;
 
     public static List<SchemaMapper> getSchemaMappers() {
@@ -45,13 +43,9 @@ public class ComponentFactory {
         return CollectionUtils.isEmpty(postProcessors) ? init(PostProcessor.class, postProcessors) : postProcessors;
     }
 
-    public static List<ParseResponder> getParseResponders() {
-        return CollectionUtils.isEmpty(parseResponders) ? init(ParseResponder.class, parseResponders) : parseResponders;
-    }
-
-    public static List<ExecuteResponder> getExecuteResponders() {
+    public static List<QueryResponder> getExecuteResponders() {
         return CollectionUtils.isEmpty(executeResponders)
-                ? init(ExecuteResponder.class, executeResponders) : executeResponders;
+                ? init(QueryResponder.class, executeResponders) : executeResponders;
     }
 
     public static SemanticInterpreter getSemanticLayer() {

@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.responder.parse;
+package com.tencent.supersonic.chat.postprocessor;
 
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
  * Rank queries by score.
  */
 @Slf4j
-public class QueryRankParseResponder implements ParseResponder {
+public class QueryRankPostProcessor implements PostProcessor {
 
     private static final int candidateTopSize = 5;
 
     @Override
-    public void fillResponse(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
+    public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
         List<SemanticQuery> candidateQueries = queryContext.getCandidateQueries();
         candidateQueries = rank(candidateQueries);
         queryContext.setCandidateQueries(candidateQueries);

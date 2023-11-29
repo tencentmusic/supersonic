@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.responder.execute;
+package com.tencent.supersonic.chat.responder;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SimilarMetricExecuteResponder implements ExecuteResponder {
+public class SimilarMetricQueryResponder implements QueryResponder {
 
     private static final int METRIC_RECOMMEND_SIZE = 5;
 
