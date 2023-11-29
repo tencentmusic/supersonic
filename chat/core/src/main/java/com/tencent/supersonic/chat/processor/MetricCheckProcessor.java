@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.postprocessor;
+package com.tencent.supersonic.chat.processor;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -27,10 +27,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * MetricCheckPostProcessor used to verify whether the dimensions
+ * MetricCheckProcessor used to verify whether the dimensions
  * involved in the query in metric mode can drill down on the metric.
  */
-public class MetricCheckPostProcessor implements PostProcessor {
+public class MetricCheckProcessor implements ResponseProcessor {
 
     @Override
     public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {

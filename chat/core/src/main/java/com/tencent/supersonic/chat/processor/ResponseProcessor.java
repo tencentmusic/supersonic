@@ -1,13 +1,12 @@
-package com.tencent.supersonic.chat.postprocessor;
+package com.tencent.supersonic.chat.processor;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 
 /**
- * A post processor do some logic after parser and corrector
+ * A response processor wraps things up before responding to users.
  */
-
-public interface PostProcessor {
+public interface ResponseProcessor {
 
     void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext);
 

@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.postprocessor;
+package com.tencent.supersonic.chat.processor;
 
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class RespBuildPostProcessor implements PostProcessor {
+public class RespBuildProcessor implements ResponseProcessor {
 
     @Override
     public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {

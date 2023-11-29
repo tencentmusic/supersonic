@@ -5,7 +5,7 @@ public enum CostType {
     PARSER(2, "parser"),
     QUERY(3, "query"),
     PARSERRESPONDER(4, "responder"),
-    POSTPROCESSOR(5, "postprocessor");
+    PROCESSOR(5, "processor");
 
     private Integer type;
     private String name;

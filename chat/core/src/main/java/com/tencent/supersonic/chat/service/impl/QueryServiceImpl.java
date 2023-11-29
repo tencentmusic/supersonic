@@ -28,7 +28,7 @@ import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
-import com.tencent.supersonic.chat.postprocessor.PostProcessor;
+import com.tencent.supersonic.chat.processor.ResponseProcessor;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.llm.s2sql.S2SQLQuery;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
@@ -111,20 +111,20 @@ public class QueryServiceImpl implements QueryService {
 
     private List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
     private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
-    private List<PostProcessor> postProcessors = ComponentFactory.getPostProcessors();
+    private List<ResponseProcessor> responseProcessors = ComponentFactory.getPostProcessors();
     private List<QueryResponder> executeResponders = ComponentFactory.getExecuteResponders();
-    private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSqlCorrections();
+    private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSemanticCorrectors();
 
     @Override
     public ParseResp performParsing(QueryReq queryReq) {
         ParseResp parseResult = new ParseResp();
-        //1. build queryContext and chatContext
+        // build queryContext and chatContext
         QueryContext queryCtx = new QueryContext(queryReq);
         // in order to support multi-turn conversation, chat context is needed
         ChatContext chatCtx = chatService.getOrCreateContext(queryReq.getChatId());
         List<StatisticsDO> timeCostDOList = new ArrayList<>();
 
-        //2. mapper
+        // 1. mapper
         schemaMappers.forEach(mapper -> {
             long startTime = System.currentTimeMillis();
             mapper.map(queryCtx);
@@ -132,7 +132,7 @@ public class QueryServiceImpl implements QueryService {
                     .interfaceName(mapper.getClass().getSimpleName()).type(CostType.MAPPER.getType()).build());
         });
 
-        //3. parser
+        // 2. parser
         semanticParsers.forEach(parser -> {
             long startTime = System.currentTimeMillis();
             parser.parse(queryCtx, chatCtx);
@@ -141,7 +141,7 @@ public class QueryServiceImpl implements QueryService {
             log.info("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
 
-        //4. corrector
+        // 3. corrector
         List<SemanticQuery> candidateQueries = queryCtx.getCandidateQueries();
         if (CollectionUtils.isNotEmpty(candidateQueries)) {
             for (SemanticQuery semanticQuery : candidateQueries) {
@@ -154,14 +154,15 @@ public class QueryServiceImpl implements QueryService {
                 });
             }
         }
-        //5. postProcessor
-        postProcessors.forEach(postProcessor -> {
+
+        // 4. processor
+        responseProcessors.forEach(processor -> {
             long startTime = System.currentTimeMillis();
-            postProcessor.process(parseResult, queryCtx, chatCtx);
+            processor.process(parseResult, queryCtx, chatCtx);
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
-                    .interfaceName(postProcessor.getClass().getSimpleName())
-                    .type(CostType.POSTPROCESSOR.getType()).build());
-            log.info("{} result:{}", postProcessor.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
+                    .interfaceName(processor.getClass().getSimpleName())
+                    .type(CostType.PROCESSOR.getType()).build());
+            log.info("{} result:{}", processor.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
 
         if (Objects.nonNull(parseResult.getQueryId()) && timeCostDOList.size() > 0) {

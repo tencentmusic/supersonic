@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.postprocessor;
+package com.tencent.supersonic.chat.processor;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * update parse info from correct sql
  */
 @Slf4j
-public class ParseInfoUpdateProcessor implements PostProcessor {
+public class ParseInfoProcessor implements ResponseProcessor {
 
     @Override
     public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {

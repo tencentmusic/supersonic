@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.postprocessor;
+package com.tencent.supersonic.chat.processor;
 
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TimeCostPostProcessor implements PostProcessor {
+public class TimeCostProcessor implements ResponseProcessor {
 
 
     @Override

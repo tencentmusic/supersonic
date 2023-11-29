@@ -21,6 +21,15 @@ com.tencent.supersonic.chat.api.component.SemanticCorrector=\
     com.tencent.supersonic.chat.corrector.HavingCorrector, \
     com.tencent.supersonic.chat.corrector.FromCorrector
 
+com.tencent.supersonic.chat.processor.ResponseProcessor=\
+    com.tencent.supersonic.chat.processor.MetricCheckProcessor, \
+    com.tencent.supersonic.chat.processor.ParseInfoProcessor, \
+    com.tencent.supersonic.chat.processor.QueryRankProcessor, \
+    com.tencent.supersonic.chat.processor.EntityInfoProcessor, \
+    com.tencent.supersonic.chat.processor.SqlInfoProcessor, \
+    com.tencent.supersonic.chat.processor.TimeCostProcessor, \
+    com.tencent.supersonic.chat.processor.RespBuildProcessor
+
 com.tencent.supersonic.chat.parser.LLMInterpreter=\
   com.tencent.supersonic.chat.parser.HttpLLMInterpreter
 
@@ -35,15 +44,6 @@ com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor
 
 com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
-
-com.tencent.supersonic.chat.postprocessor.PostProcessor=\
-    com.tencent.supersonic.chat.postprocessor.MetricCheckPostProcessor, \
-    com.tencent.supersonic.chat.postprocessor.ParseInfoUpdateProcessor, \
-    com.tencent.supersonic.chat.postprocessor.QueryRankPostProcessor, \
-    com.tencent.supersonic.chat.postprocessor.EntityInfoPostProcessor, \
-    com.tencent.supersonic.chat.postprocessor.SqlOutputPostProcessor, \
-    com.tencent.supersonic.chat.postprocessor.TimeCostPostProcessor, \
-    com.tencent.supersonic.chat.postprocessor.RespBuildPostProcessor
 
 com.tencent.supersonic.chat.responder.QueryResponder=\
     com.tencent.supersonic.chat.responder.EntityInfoQueryResponder, \

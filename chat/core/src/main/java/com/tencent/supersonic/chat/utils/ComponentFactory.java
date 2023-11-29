@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.parser.LLMInterpreter;
 import com.tencent.supersonic.chat.parser.llm.s2sql.ModelResolver;
-import com.tencent.supersonic.chat.postprocessor.PostProcessor;
+import com.tencent.supersonic.chat.processor.ResponseProcessor;
 import com.tencent.supersonic.chat.responder.QueryResponder;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
@@ -18,11 +18,11 @@ public class ComponentFactory {
 
     private static List<SchemaMapper> schemaMappers = new ArrayList<>();
     private static List<SemanticParser> semanticParsers = new ArrayList<>();
-    private static List<SemanticCorrector> s2SQLCorrections = new ArrayList<>();
+    private static List<SemanticCorrector> semanticCorrectors = new ArrayList<>();
     private static SemanticInterpreter semanticInterpreter;
 
     private static LLMInterpreter llmInterpreter;
-    private static List<PostProcessor> postProcessors = new ArrayList<>();
+    private static List<ResponseProcessor> responseProcessors = new ArrayList<>();
     private static List<QueryResponder> executeResponders = new ArrayList<>();
     private static ModelResolver modelResolver;
 
@@ -34,13 +34,14 @@ public class ComponentFactory {
         return CollectionUtils.isEmpty(semanticParsers) ? init(SemanticParser.class, semanticParsers) : semanticParsers;
     }
 
-    public static List<SemanticCorrector> getSqlCorrections() {
-        return CollectionUtils.isEmpty(s2SQLCorrections) ? init(SemanticCorrector.class,
-                s2SQLCorrections) : s2SQLCorrections;
+    public static List<SemanticCorrector> getSemanticCorrectors() {
+        return CollectionUtils.isEmpty(semanticCorrectors) ? init(SemanticCorrector.class,
+                semanticCorrectors) : semanticCorrectors;
     }
 
-    public static List<PostProcessor> getPostProcessors() {
-        return CollectionUtils.isEmpty(postProcessors) ? init(PostProcessor.class, postProcessors) : postProcessors;
+    public static List<ResponseProcessor> getPostProcessors() {
+        return CollectionUtils.isEmpty(responseProcessors) ? init(ResponseProcessor.class,
+                responseProcessors) : responseProcessors;
     }
 
     public static List<QueryResponder> getExecuteResponders() {
@@ -54,11 +55,6 @@ public class ComponentFactory {
         }
         return semanticInterpreter;
     }
-
-    public static void setSemanticLayer(SemanticInterpreter layer) {
-        semanticInterpreter = layer;
-    }
-
 
     public static LLMInterpreter getLLMInterpreter() {
         if (Objects.isNull(llmInterpreter)) {

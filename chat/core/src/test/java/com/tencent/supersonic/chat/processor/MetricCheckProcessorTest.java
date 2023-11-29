@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.postprocessor;
+package com.tencent.supersonic.chat.processor;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -14,11 +14,11 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Set;
 
-class MetricCheckPostProcessorTest {
+class MetricCheckProcessorTest {
 
     @Test
     void testProcessCorrectSql_necessaryDimension_groupBy() {
-        MetricCheckPostProcessor metricCheckPostProcessor = new MetricCheckPostProcessor();
+        MetricCheckProcessor metricCheckPostProcessor = new MetricCheckProcessor();
         String correctSql = "select 用户名, sum(访问次数), count(distinct 访问用户数) from 超音数 group by 用户名";
         SemanticParseInfo parseInfo = mockParseInfo(correctSql);
         String actualProcessedSql = metricCheckPostProcessor.processCorrectSql(parseInfo, mockModelSchema());
@@ -28,7 +28,7 @@ class MetricCheckPostProcessorTest {
 
     @Test
     void testProcessCorrectSql_necessaryDimension_where() {
-        MetricCheckPostProcessor metricCheckPostProcessor = new MetricCheckPostProcessor();
+        MetricCheckProcessor metricCheckPostProcessor = new MetricCheckProcessor();
         String correctSql = "select 用户名, sum(访问次数), count(distinct 访问用户数) from 超音数 where 部门 = 'HR' group by 用户名";
         SemanticParseInfo parseInfo = mockParseInfo(correctSql);
         String actualProcessedSql = metricCheckPostProcessor.processCorrectSql(parseInfo, mockModelSchema());
@@ -39,7 +39,7 @@ class MetricCheckPostProcessorTest {
 
     @Test
     void testProcessCorrectSql_dimensionNotDrillDown_groupBy() {
-        MetricCheckPostProcessor metricCheckPostProcessor = new MetricCheckPostProcessor();
+        MetricCheckProcessor metricCheckPostProcessor = new MetricCheckProcessor();
         String correctSql = "select 页面, 部门, sum(访问次数), count(distinct 访问用户数) from 超音数 group by 页面, 部门";
         SemanticParseInfo parseInfo = mockParseInfo(correctSql);
         String actualProcessedSql = metricCheckPostProcessor.processCorrectSql(parseInfo, mockModelSchema());
@@ -49,7 +49,7 @@ class MetricCheckPostProcessorTest {
 
     @Test
     void testProcessCorrectSql_dimensionNotDrillDown_where() {
-        MetricCheckPostProcessor metricCheckPostProcessor = new MetricCheckPostProcessor();
+        MetricCheckProcessor metricCheckPostProcessor = new MetricCheckProcessor();
         String correctSql = "select 部门, sum(访问次数), count(distinct 访问用户数) from 超音数 where 页面 = 'P1' group by 部门";
         SemanticParseInfo parseInfo = mockParseInfo(correctSql);
         String actualProcessedSql = metricCheckPostProcessor.processCorrectSql(parseInfo, mockModelSchema());
@@ -59,7 +59,7 @@ class MetricCheckPostProcessorTest {
 
     @Test
     void testProcessCorrectSql_dimensionNotDrillDown_necessaryDimension() {
-        MetricCheckPostProcessor metricCheckPostProcessor = new MetricCheckPostProcessor();
+        MetricCheckProcessor metricCheckPostProcessor = new MetricCheckProcessor();
         String correctSql = "select 页面, sum(访问次数), count(distinct 访问用户数) from 超音数 group by 页面";
         SemanticParseInfo parseInfo = mockParseInfo(correctSql);
         String actualProcessedSql = metricCheckPostProcessor.processCorrectSql(parseInfo, mockModelSchema());
@@ -69,7 +69,7 @@ class MetricCheckPostProcessorTest {
 
     @Test
     void testProcessCorrectSql_dimensionDrillDown() {
-        MetricCheckPostProcessor metricCheckPostProcessor = new MetricCheckPostProcessor();
+        MetricCheckProcessor metricCheckPostProcessor = new MetricCheckProcessor();
         String correctSql = "select 用户名, 部门, sum(访问次数), count(distinct 访问用户数) from 超音数 group by 用户名, 部门";
         SemanticParseInfo parseInfo = mockParseInfo(correctSql);
         String actualProcessedSql = metricCheckPostProcessor.processCorrectSql(parseInfo, mockModelSchema());
@@ -79,7 +79,7 @@ class MetricCheckPostProcessorTest {
 
     @Test
     void testProcessCorrectSql_noDrillDownDimensionSetting() {
-        MetricCheckPostProcessor metricCheckPostProcessor = new MetricCheckPostProcessor();
+        MetricCheckProcessor metricCheckPostProcessor = new MetricCheckProcessor();
         String correctSql = "select 页面, 用户名, sum(访问次数), count(distinct 访问用户数) from 超音数 group by 页面, 用户名";
         SemanticParseInfo parseInfo = mockParseInfo(correctSql);
         String actualProcessedSql = metricCheckPostProcessor.processCorrectSql(parseInfo,
@@ -90,7 +90,7 @@ class MetricCheckPostProcessorTest {
 
     @Test
     void testProcessCorrectSql_noDrillDownDimensionSetting_noAgg() {
-        MetricCheckPostProcessor metricCheckPostProcessor = new MetricCheckPostProcessor();
+        MetricCheckProcessor metricCheckPostProcessor = new MetricCheckProcessor();
         String correctSql = "select 访问次数 from 超音数";
         SemanticParseInfo parseInfo = mockParseInfo(correctSql);
         String actualProcessedSql = metricCheckPostProcessor.processCorrectSql(parseInfo,
@@ -101,7 +101,7 @@ class MetricCheckPostProcessorTest {
 
     @Test
     void testProcessCorrectSql_noDrillDownDimensionSetting_count() {
-        MetricCheckPostProcessor metricCheckPostProcessor = new MetricCheckPostProcessor();
+        MetricCheckProcessor metricCheckPostProcessor = new MetricCheckProcessor();
         String correctSql = "select 部门, count(*) from 超音数 group by 部门";
         SemanticParseInfo parseInfo = mockParseInfo(correctSql);
         String actualProcessedSql = metricCheckPostProcessor.processCorrectSql(parseInfo,
