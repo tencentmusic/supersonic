@@ -7,7 +7,15 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.relational.*;
+import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 
 import java.util.Objects;
@@ -42,7 +50,7 @@ public abstract class SqlCorrecteBase {
         return where;
     }
 
-    private <T extends BinaryExpression> Expression filteredNumberExpression(T binaryExpression) throws Exception{
+    private <T extends BinaryExpression> Expression filteredNumberExpression(T binaryExpression) throws Exception {
         Expression leftExpression = filteredWhereExpression(binaryExpression.getLeftExpression());
         Expression rightExpression = filteredWhereExpression(binaryExpression.getRightExpression());
         if (leftExpression != null && rightExpression != null) {
@@ -58,7 +66,7 @@ public abstract class SqlCorrecteBase {
         }
     }
 
-    private Expression replaceComparisonOperatorFunction(Expression expression) throws Exception{
+    private Expression replaceComparisonOperatorFunction(Expression expression) throws Exception {
         if (Objects.isNull(expression)) {
             return null;
         }
@@ -86,10 +94,12 @@ public abstract class SqlCorrecteBase {
         return expression;
     }
 
-    private <T extends ComparisonOperator> Expression removeSingleFilter(T comparisonExpression) throws Exception{
+    private <T extends ComparisonOperator> Expression removeSingleFilter(T comparisonExpression) throws Exception {
         Expression leftExpression = comparisonExpression.getLeftExpression();
         return distinguishNumberCondition(leftExpression, comparisonExpression);
     }
 
-    public abstract Expression distinguishNumberCondition(Expression leftExpression, Expression expression) throws Exception;
+    public abstract Expression distinguishNumberCondition(Expression leftExpression, Expression expression)
+            throws Exception;
+
 }
