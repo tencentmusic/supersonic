@@ -201,7 +201,6 @@ CREATE TABLE `s2_dictionary_task` (
 CREATE TABLE `s2_dimension` (
                                 `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '维度ID',
                                 `model_id` bigint(20) DEFAULT NULL,
-                                `datasource_id` bigint(20) NOT NULL COMMENT '所属数据源id',
                                 `name` varchar(255) NOT NULL COMMENT '维度名称',
                                 `biz_name` varchar(255) NOT NULL COMMENT '字段名称',
                                 `description` varchar(500) NOT NULL COMMENT '描述',
@@ -285,6 +284,10 @@ CREATE TABLE `s2_model` (
                             `updated_at` datetime DEFAULT NULL,
                             `entity` text COLLATE utf8_unicode_ci,
                             `drill_down_dimensions` varchar(500) DEFAULT NULL,
+                            `database_id` INT NOT  NULL ,
+                            `model_detail` text NOT  NULL ,
+                            `depends` varchar(500) DEFAULT NULL ,
+                            `filter_sql` varchar(1000) DEFAULT NULL ,
                             PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -363,7 +366,7 @@ CREATE TABLE `s2_semantic_pasre_info` (
 
 CREATE TABLE `s2_view_info` (
                                 `id` bigint(20) NOT NULL AUTO_INCREMENT,
-                                `model_id` bigint(20) DEFAULT NULL,
+                                `domain_id` bigint(20) DEFAULT NULL,
                                 `type` varchar(20) DEFAULT NULL COMMENT 'datasource、dimension、metric',
                                 `config` text COMMENT 'config detail',
                                 `created_at` datetime DEFAULT NULL,
@@ -463,4 +466,14 @@ CREATE TABLE s2_model_rela
     to_model_id      bigint,
     join_type       VARCHAR(255),
     join_condition  VARCHAR(255)
+);
+
+CREATE TABLE `s2_collect` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `type` varchar(20) NOT NULL,
+    `username` varchar(20) NOT NULL,
+    `collect_id` bigint NOT NULL,
+    `create_time` datetime,
+    `update_time` datetime,
+    PRIMARY KEY (`id`)
 );

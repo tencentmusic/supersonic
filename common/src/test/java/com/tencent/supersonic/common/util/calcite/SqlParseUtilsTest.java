@@ -53,7 +53,6 @@ class SqlParseUtilsTest {
         Assert.assertTrue(addFieldToSql.toLowerCase().contains("pv"));
     }
 
-
     @Test
     void getSqlParseInfo() {
 
@@ -114,7 +113,6 @@ class SqlParseUtilsTest {
         Assert.assertTrue(!selectFields.contains("user_id"));
         Assert.assertTrue(!selectFields.contains("play_count"));
     }
-
 
     @Test
     void getWhereFieldTest() {

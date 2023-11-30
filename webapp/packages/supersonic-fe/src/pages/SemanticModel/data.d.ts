@@ -66,7 +66,7 @@ export declare namespace IDataSource {
     sensitiveLevel: SensitiveLevel;
     domainId: number;
     databaseId: number;
-    datasourceDetail: IDataSourceDetail;
+    modelDetail: IDataSourceDetail;
   }
   type IDataSourceList = IDataSourceItem[];
 }
@@ -237,7 +237,7 @@ export declare namespace ISemantic {
     domainId: number;
     dimensions: IDimensionList;
     metrics: IMetricList;
-    datasource: IDataSourceItem;
+    model: IDataSourceItem;
   }
   type IDomainSchemaRelaList = IDomainSchemaRelaItem[];
 

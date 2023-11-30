@@ -34,9 +34,9 @@ const GraphToolBar: React.FC<Props> = ({ onClick }) => {
             onClick?.({ eventName: 'createDatabase' });
           }}
         >
-          新建数据源
+          新建模型
         </Button>
-        <Button
+        {/* <Button
           key="createDimensionBtn"
           icon={<PlusOutlined />}
           size="small"
@@ -55,7 +55,7 @@ const GraphToolBar: React.FC<Props> = ({ onClick }) => {
           }}
         >
           新建指标
-        </Button>
+        </Button> */}
       </Space>
     </div>
   );

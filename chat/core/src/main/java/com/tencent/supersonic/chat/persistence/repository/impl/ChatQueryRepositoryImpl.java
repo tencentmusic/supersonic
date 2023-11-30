@@ -185,7 +185,6 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         return chatQueryDOMapper.updateByPrimaryKeyWithBLOBs(chatQueryDO);
     }
 
-
     public ChatParseDO getParseInfo(Long questionId, int parseId) {
         return chatParseMapper.getParseInfo(questionId, parseId);
     }

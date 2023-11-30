@@ -30,7 +30,6 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
         this.queryUtils = queryUtils;
     }
 
-
     public QueryResultWithSchemaResp execute(QueryStatement queryStatement) {
         QueryResultWithSchemaResp queryResultWithColumns = null;
         QueryExecutor queryExecutor = route(queryStatement);
@@ -68,14 +67,13 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
         return null;
     }
 
-
     @Override
     public QueryStatement physicalSql(QueryStructReq queryStructCmd, ParseSqlReq sqlCommend) throws Exception {
         return optimize(queryStructCmd, queryParser.parser(sqlCommend));
     }
 
-
     public QueryStatement physicalSql(QueryStructReq queryStructCmd, MetricReq metricCommand) throws Exception {
         return queryParser.parser(metricCommand);
     }
+
 }

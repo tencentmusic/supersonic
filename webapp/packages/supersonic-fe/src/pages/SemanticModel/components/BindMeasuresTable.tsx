@@ -18,7 +18,7 @@ export type CreateFormProps = {
 };
 
 const BindMeasuresTable: React.FC<CreateFormProps> = ({
-  measuresList,
+  measuresList = [],
   selectedMeasuresList = [],
   onSubmit,
   onCancel,
@@ -68,10 +68,6 @@ const BindMeasuresTable: React.FC<CreateFormProps> = ({
       dataIndex: 'agg',
       title: '算子类型',
     },
-    {
-      dataIndex: 'datasourceName',
-      title: '所属数据源',
-    },
   ];
   const renderFooter = () => {
     return (
@@ -109,7 +105,7 @@ const BindMeasuresTable: React.FC<CreateFormProps> = ({
         columns={columns}
         params={{ ...searchParams }}
         pagination={false}
-        dataSource={measuresList}
+        dataSource={measuresList || []}
         size="small"
         search={false}
         options={false}

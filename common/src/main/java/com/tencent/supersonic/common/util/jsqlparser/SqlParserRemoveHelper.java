@@ -73,7 +73,8 @@ public class SqlParserRemoveHelper {
                 removeWhereCondition(plainSelect.getWhere(), removeFieldNames);
             }
         });
-        return selectStatement.toString();
+        sql = removeNumberCondition(selectStatement.toString());
+        return sql;
     }
 
     private static void removeWhereCondition(Expression whereExpression, Set<String> removeFieldNames) {
@@ -82,6 +83,7 @@ public class SqlParserRemoveHelper {
         }
         removeWhereExpression(whereExpression, removeFieldNames);
     }
+
     public static String removeNumberCondition(String sql) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         if (selectStatement == null) {
@@ -201,7 +203,8 @@ public class SqlParserRemoveHelper {
                 removeWhereCondition(plainSelect.getHaving(), removeFieldNames);
             }
         });
-        return selectStatement.toString();
+        sql = removeNumberCondition(selectStatement.toString());
+        return sql;
     }
 
     public static String removeWhere(String sql, List<String> fields) {

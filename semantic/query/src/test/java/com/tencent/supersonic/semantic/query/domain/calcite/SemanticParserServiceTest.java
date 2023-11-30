@@ -193,7 +193,6 @@ class SemanticParserServiceTest {
 
     }
 
-
     private static void addDepartment(SemanticSchema semanticSchema) {
         DataModelYamlTpl datasource = new DataModelYamlTpl();
         datasource.setName("user_department");

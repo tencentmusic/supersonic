@@ -49,14 +49,13 @@ class SqlParserAddHelperTest {
 
     }
 
-
     @Test
     void addFunctionToSelect() {
         String sql = "SELECT user_name FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
                 + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        Expression havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        List<Expression> havingExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        String replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpression);
+        String replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpressionList);
         System.out.println(replaceSql);
         Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' "
                         + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
@@ -64,9 +63,9 @@ class SqlParserAddHelperTest {
 
         sql = "SELECT user_name,sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
                 + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        havingExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpression);
+        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpressionList);
         System.out.println(replaceSql);
         Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' "
                         + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
@@ -74,9 +73,9 @@ class SqlParserAddHelperTest {
 
         sql = "SELECT user_name,sum(pv) FROM 超音数 WHERE (sys_imp_date <= '2023-09-03') AND "
                 + "sys_imp_date = '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        havingExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpression);
+        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpressionList);
         System.out.println(replaceSql);
         Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE (sys_imp_date <= '2023-09-03') "
                         + "AND sys_imp_date = '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
@@ -88,9 +87,9 @@ class SqlParserAddHelperTest {
     void addAggregateToField() {
         String sql = "SELECT user_name FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
                 + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        Expression havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        List<Expression> havingExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        String replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpression);
+        String replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpressionList);
         System.out.println(replaceSql);
         Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' "
                         + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
@@ -98,9 +97,9 @@ class SqlParserAddHelperTest {
 
         sql = "SELECT user_name,sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' AND "
                 + "sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        havingExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpression);
+        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpressionList);
         System.out.println(replaceSql);
         Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE sys_imp_date <= '2023-09-03' "
                         + "AND sys_imp_date >= '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
@@ -108,15 +107,14 @@ class SqlParserAddHelperTest {
 
         sql = "SELECT user_name,sum(pv) FROM 超音数 WHERE (sys_imp_date <= '2023-09-03') AND "
                 + "sys_imp_date = '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000";
-        havingExpression = SqlParserSelectHelper.getHavingExpression(sql);
+        havingExpressionList = SqlParserSelectHelper.getHavingExpression(sql);
 
-        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpression);
+        replaceSql = SqlParserAddHelper.addFunctionToSelect(sql, havingExpressionList);
         System.out.println(replaceSql);
         Assert.assertEquals("SELECT user_name, sum(pv) FROM 超音数 WHERE (sys_imp_date <= '2023-09-03') "
                         + "AND sys_imp_date = '2023-08-04' GROUP BY user_name HAVING sum(pv) > 1000",
                 replaceSql);
     }
-
 
     @Test
     void addAggregateToMetricField() {
@@ -216,7 +214,6 @@ class SqlParserAddHelperTest {
                         + "ORDER BY sum(pv) DESC LIMIT 10",
                 replaceSql);
     }
-
 
     @Test
     void addAggregateToCountDiscountMetricField() {
@@ -360,7 +357,7 @@ class SqlParserAddHelperTest {
         String replaceSql = SqlParserAddHelper.addHaving(sql, fieldNames);
 
         Assert.assertEquals(
-                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' AND 2 > 1 "
+                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
                         + "GROUP BY department HAVING sum(pv) > 2000 ORDER BY sum(pv) DESC LIMIT 10",
                 replaceSql);
 
@@ -370,11 +367,10 @@ class SqlParserAddHelperTest {
         replaceSql = SqlParserAddHelper.addHaving(sql, fieldNames);
 
         Assert.assertEquals(
-                "SELECT department, sum(pv) FROM t_1 WHERE (2 > 1) AND sys_imp_date = '2023-09-11' "
+                "SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
                         + "GROUP BY department HAVING sum(pv) > 2000 ORDER BY sum(pv) DESC LIMIT 10",
                 replaceSql);
     }
-
 
     @Test
     void addParenthesisToWhere() {

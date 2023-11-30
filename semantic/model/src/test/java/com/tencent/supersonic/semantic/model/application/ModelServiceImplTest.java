@@ -60,7 +60,6 @@ class ModelServiceImplTest {
         Assertions.assertEquals("alice", actualModelResp.getUpdatedBy());
     }
 
-
     private ModelService mockModelService(ModelRepository modelRepository) {
         MetricService metricService = Mockito.mock(MetricService.class);
         DimensionService dimensionService = Mockito.mock(DimensionService.class);

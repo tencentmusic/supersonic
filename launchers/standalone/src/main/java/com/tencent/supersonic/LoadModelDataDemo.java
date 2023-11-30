@@ -321,7 +321,7 @@ public class LoadModelDataDemo implements CommandLineRunner {
 
     public void updateMetric() throws Exception {
         MetricReq metricReq = new MetricReq();
-        metricReq.setModelId(1L);
+        metricReq.setModelId(3L);
         metricReq.setId(3L);
         metricReq.setName("停留时长");
         metricReq.setBizName("stay_hours");

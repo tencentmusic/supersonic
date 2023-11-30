@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.request.SolvedQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingResp;
+import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrievalResp;
 import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrieval;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -82,15 +82,15 @@ public class SolvedQueryManager {
             HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
             log.info("[embedding] request body:{}, url:{}", jsonBody, url);
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<List<EmbeddingResp>> embeddingResponseEntity =
+            ResponseEntity<List<RecallRetrievalResp>> embeddingResponseEntity =
                     restTemplate.exchange(requestUrl, HttpMethod.POST, entity,
-                            new ParameterizedTypeReference<List<EmbeddingResp>>() {
+                            new ParameterizedTypeReference<List<RecallRetrievalResp>>() {
                             });
             log.info("[embedding] recognize result body:{}", embeddingResponseEntity);
-            List<EmbeddingResp> embeddingResps = embeddingResponseEntity.getBody();
+            List<RecallRetrievalResp> embeddingResps = embeddingResponseEntity.getBody();
             Set<String> querySet = new HashSet<>();
             if (CollectionUtils.isNotEmpty(embeddingResps)) {
-                for (EmbeddingResp embeddingResp : embeddingResps) {
+                for (RecallRetrievalResp embeddingResp : embeddingResps) {
                     List<RecallRetrieval> embeddingRetrievals = embeddingResp.getRetrieval();
                     for (RecallRetrieval embeddingRetrieval : embeddingRetrievals) {
                         if (queryText.equalsIgnoreCase(embeddingRetrieval.getQuery())) {

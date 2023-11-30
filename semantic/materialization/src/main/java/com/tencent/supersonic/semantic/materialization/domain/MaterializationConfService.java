@@ -19,7 +19,6 @@ public interface MaterializationConfService {
 
     List<MaterializationResp> getMaterializationResp(MaterializationFilter filter, User user);
 
-
     Boolean addMaterializationElementConf(MaterializationElementReq materializationElementReq, User user);
 
     Boolean updateMaterializationElementConf(MaterializationElementReq materializationElementReq, User user);
@@ -39,6 +38,5 @@ public interface MaterializationConfService {
     List<MaterializationSourceResp> getMaterializationSourceResp(Long materializationId);
 
     Long getSourceIdByMeasure(List<MeasureResp> measureRespList, String bizName);
-
 
 }

@@ -2,11 +2,9 @@ import { Tabs, Breadcrumb, Space } from 'antd';
 import React from 'react';
 import { connect, history } from 'umi';
 
-import ClassDataSourceTable from './ClassDataSourceTable';
 import ClassDimensionTable from './ClassDimensionTable';
 import ClassMetricTable from './ClassMetricTable';
 import PermissionSection from './Permission/PermissionSection';
-// import EntitySettingSection from './Entity/EntitySettingSection';
 import ChatSettingSection from '../ChatSetting/ChatSettingSection';
 import OverView from './OverView';
 import styles from './style.less';
@@ -38,7 +36,7 @@ const DomainManagerTab: React.FC<Props> = ({
   onBackDomainBtnClick,
   onMenuChange,
 }) => {
-  const defaultTabKey = 'xflow';
+  const defaultTabKey = 'dimenstion';
   const { selectDomainId, domainList, selectModelId, selectModelName, selectDomainName } =
     domainManger;
 
@@ -53,6 +51,15 @@ const DomainManagerTab: React.FC<Props> = ({
             handleModelChange(model);
           }}
         />
+      ),
+    },
+    {
+      label: '画布',
+      key: 'xflow',
+      children: (
+        <div style={{ width: '100%' }}>
+          <SemanticGraphCanvas />
+        </div>
       ),
     },
     {
@@ -75,21 +82,6 @@ const DomainManagerTab: React.FC<Props> = ({
 
   const isModelItem = [
     {
-      label: '画布',
-      key: 'xflow',
-      children: (
-        <div style={{ width: '100%' }}>
-          <SemanticGraphCanvas />
-        </div>
-      ),
-    },
-
-    {
-      label: '数据源',
-      key: 'dataSource',
-      children: <ClassDataSourceTable />,
-    },
-    {
       label: '维度',
       key: 'dimenstion',
       children: <ClassDimensionTable />,
@@ -99,11 +91,6 @@ const DomainManagerTab: React.FC<Props> = ({
       key: 'metric',
       children: <ClassMetricTable />,
     },
-    // {
-    //   label: '实体',
-    //   key: 'entity',
-    //   children: <EntitySettingSection />,
-    // },
     {
       label: '权限管理',
       key: 'permissonSetting',

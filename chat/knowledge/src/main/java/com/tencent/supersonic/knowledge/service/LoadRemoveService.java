@@ -21,7 +21,6 @@ public class LoadRemoveService {
     @Value("${mapper.remove.nature.prefix:}")
     private String mapperRemoveNaturePrefix;
 
-
     public List removeNatures(List value, Integer agentId, Set<Long> detectModelIds) {
         if (CollectionUtils.isEmpty(value)) {
             return value;

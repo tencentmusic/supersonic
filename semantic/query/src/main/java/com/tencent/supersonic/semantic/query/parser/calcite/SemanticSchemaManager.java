@@ -113,11 +113,9 @@ public class SemanticSchemaManager {
         return getMetricsByMetricYamlTpl(t);
     }
 
-
     public static List<Dimension> getDimensions(final List<DimensionYamlTpl> t) {
         return getDimension(t);
     }
-
 
     public static DataSource getDatasource(final DataModelYamlTpl d) {
         DataSource datasource = DataSource.builder().sourceId(d.getSourceId()).sqlQuery(d.getSqlQuery())
@@ -230,7 +228,6 @@ public class SemanticSchemaManager {
         });
         return joinRelations;
     }
-
 
     public static void update(SemanticSchema schema, List<Metric> metric) throws Exception {
         if (schema != null) {

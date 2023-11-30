@@ -28,6 +28,7 @@ import com.tencent.supersonic.semantic.query.utils.DataTransformUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -42,6 +43,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -65,7 +67,7 @@ public class DownloadServiceImpl implements DownloadService {
         List<List<String>> data = new ArrayList<>();
         List<List<String>> header = org.assertj.core.util.Lists.newArrayList();
         for (QueryColumn column : queryResultWithSchemaResp.getColumns()) {
-            header.add(org.assertj.core.util.Lists.newArrayList(column.getName()));
+            header.add(Lists.newArrayList(column.getName()));
         }
         for (Map<String, Object> row : queryResultWithSchemaResp.getResultList()) {
             List<String> rowData = new ArrayList<>();
@@ -196,7 +198,12 @@ public class DownloadServiceImpl implements DownloadService {
                 if ("指标名".equals(head)) {
                     continue;
                 }
-                row.add(map.getOrDefault(nameMap.getOrDefault(head, head), "").toString());
+                Object object = map.getOrDefault(nameMap.getOrDefault(head, head), "");
+                if (object == null) {
+                    row.add("");
+                } else {
+                    row.add(String.valueOf(object));
+                }
             }
             row.add(metricSchemaResp.getName());
             data.add(row);
@@ -212,6 +219,8 @@ public class DownloadServiceImpl implements DownloadService {
 
     private QueryResultWithSchemaResp getQueryResult(List<DimSchemaResp> dimensionResps, MetricResp metricResp,
                                                      DateConf dateConf, User user) throws Exception {
+        Set<Long> modelIds = dimensionResps.stream().map(DimSchemaResp::getModelId).collect(Collectors.toSet());
+        modelIds.add(metricResp.getModelId());
         QueryStructReq queryStructReq = new QueryStructReq();
         queryStructReq.setGroups(dimensionResps.stream().map(DimSchemaResp::getBizName).collect(Collectors.toList()));
         queryStructReq.getGroups().add(0, getTimeDimension(dateConf));
@@ -219,7 +228,7 @@ public class DownloadServiceImpl implements DownloadService {
         aggregator.setColumn(metricResp.getBizName());
         queryStructReq.setAggregators(Lists.newArrayList(aggregator));
         queryStructReq.setDateInfo(dateConf);
-        queryStructReq.setModelId(metricResp.getModelId());
+        queryStructReq.setModelIds(modelIds);
         queryStructReq.setLimit(10000L);
         return queryService.queryByStructWithAuth(queryStructReq, user);
     }
@@ -254,6 +263,10 @@ public class DownloadServiceImpl implements DownloadService {
 
     private List<DimSchemaResp> getMetricRelaDimensions(MetricSchemaResp metricSchemaResp,
                                                         Map<Long, DimSchemaResp> dimensionRespMap) {
+        if (metricSchemaResp.getRelateDimension() == null
+                || CollectionUtils.isEmpty(metricSchemaResp.getRelateDimension().getDrillDownDimensions())) {
+            return Lists.newArrayList();
+        }
         return metricSchemaResp.getRelateDimension().getDrillDownDimensions()
                 .stream().map(drillDownDimension -> dimensionRespMap.get(drillDownDimension.getDimensionId()))
                 .filter(Objects::nonNull)

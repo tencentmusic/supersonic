@@ -97,7 +97,6 @@ public class ConfigServiceImpl implements ConfigService {
         }
     }
 
-
     @Override
     public Long editConfig(ChatConfigEditReqReq configEditCmd, User user) {
         log.info("[edit model extend] object:{}", JsonUtil.toString(configEditCmd, true));
@@ -168,12 +167,10 @@ public class ConfigServiceImpl implements ConfigService {
         return chaConfigDescList;
     }
 
-
     @Override
     public ChatConfigResp fetchConfigByModelId(Long modelId) {
         return chatConfigRepository.getConfigByModelId(modelId);
     }
-
 
     private ItemVisibilityInfo fetchVisibilityDescByConfig(ItemVisibility visibility,
                                                            ModelSchema modelSchema) {
@@ -328,7 +325,6 @@ public class ConfigServiceImpl implements ConfigService {
         defaultRichConfig.setMetrics(metrics);
         return defaultRichConfig;
     }
-
 
     private List<KnowledgeInfoReq> fillKnowledgeBizName(List<KnowledgeInfoReq> knowledgeInfos,
                                                         ModelSchema modelSchema) {

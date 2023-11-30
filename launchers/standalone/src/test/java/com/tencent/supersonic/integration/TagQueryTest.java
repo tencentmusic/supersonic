@@ -1,21 +1,20 @@
 package com.tencent.supersonic.integration;
 
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
-
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.query.rule.tag.TagFilterQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricTagQuery;
+import com.tencent.supersonic.chat.query.rule.tag.TagFilterQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
+import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Test;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
 
 public class TagQueryTest extends BaseQueryTest {
 
@@ -30,13 +29,13 @@ public class TagQueryTest extends BaseQueryTest {
         expectedResult.setQueryMode(MetricTagQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
 
-        QueryFilter dimensionFilter = DataUtils.getFilter("singer_name", FilterOperatorEnum.EQUALS, "周杰伦", "歌手名", 7L);
+        QueryFilter dimensionFilter = DataUtils.getFilter("singer_name", FilterOperatorEnum.EQUALS, "周杰伦", "歌手名", 9L);
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         SchemaElement metric = SchemaElement.builder().name("播放量").build();
         expectedParseInfo.getMetrics().add(metric);
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateMode.BETWEEN, 1, period, startDay, endDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateMode.RECENT, 7, period, startDay, endDay));
         expectedParseInfo.setQueryType(QueryType.METRIC);
 
         assertQueryResult(expectedResult, actualResult);
@@ -54,9 +53,9 @@ public class TagQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(NONE);
 
         List<String> list = new ArrayList<>();
-        list.add("爱情");
         list.add("流行");
-        QueryFilter dimensionFilter = DataUtils.getFilter("genre", FilterOperatorEnum.IN, list, "风格", 6L);
+        QueryFilter dimensionFilter = DataUtils.getFilter("genre", FilterOperatorEnum.EQUALS,
+                "流行", "风格", 8L);
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         SchemaElement metric = SchemaElement.builder().name("播放量").build();

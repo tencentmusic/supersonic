@@ -15,7 +15,7 @@ import { DateSettingType, DateRangeParams, DynamicAdvancedConfigType } from './t
 import { LatestDateMap } from './type';
 import StaticDate from './StaticDate';
 import DynamicDate from './DynamicDate';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { ProCard } from '@ant-design/pro-card';
 
 type Props = {
@@ -90,7 +90,7 @@ const MDatePicker: React.FC<Props> = ({
   };
 
   const [latestDateMap, setLatestDateMap] = useState<LatestDateMap>({
-    maxPartition: moment().format('YYYY-MM-DD'),
+    maxPartition: dayjs().format('YYYY-MM-DD'),
   });
   const [dateRangesParams] = useState(() => {
     return initialValues ? generatorDateRangesParams(initialValues) : {};

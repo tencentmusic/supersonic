@@ -39,7 +39,6 @@ public class HanlpDictMapper extends BaseMapper {
         convertTermsToSchemaMapInfo(matches, queryContext.getMapInfo(), terms);
     }
 
-
     private void convertTermsToSchemaMapInfo(List<HanlpMapResult> hanlpMapResults, SchemaMapInfo schemaMap,
             List<Term> terms) {
         if (CollectionUtils.isEmpty(hanlpMapResults)) {
@@ -81,6 +80,5 @@ public class HanlpDictMapper extends BaseMapper {
             }
         }
     }
-
 
 }

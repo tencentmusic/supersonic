@@ -12,10 +12,6 @@ export function getDomainList(): Promise<any> {
   return request.get(`${process.env.API_BASE_URL}domain/getDomainList`);
 }
 
-export function getDatasourceList(data: any): Promise<any> {
-  return request.get(`${process.env.API_BASE_URL}datasource/getDatasourceList/${data.modelId}`);
-}
-
 export function getDomainDetail(data: any): Promise<any> {
   return request.get(`${process.env.API_BASE_URL}domain/getDomain/${data.modelId}`);
 }
@@ -59,6 +55,10 @@ export function getDimensionList(data: any): Promise<any> {
     return request.post(`${process.env.CHAT_API_BASE_URL}conf/dimension/page`, queryParams);
   }
   return request.post(`${process.env.API_BASE_URL}dimension/queryDimension`, queryParams);
+}
+
+export function getDimensionInModelCluster(modelId: number): Promise<any> {
+  return request.get(`${process.env.API_BASE_URL}dimension/getDimensionInModelCluster/${modelId}`);
 }
 
 export function createDimension(data: any): Promise<any> {
@@ -252,6 +252,29 @@ export function createOrUpdateDatasourceRela(data: any): Promise<any> {
   });
 }
 
+export function createOrUpdateModelRela(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}modelRela`, {
+    method: data?.id ? 'PUT' : 'POST',
+    data,
+  });
+}
+
+export function deleteModelRela(id: any): Promise<any> {
+  if (!id) {
+    return;
+  }
+  return request(`${process.env.API_BASE_URL}modelRela/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export function getModelRelaList(domainId: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}modelRela/list`, {
+    method: 'GET',
+    params: { domainId },
+  });
+}
+
 export function createOrUpdateViewInfo(data: any): Promise<any> {
   return request(`${process.env.API_BASE_URL}viewInfo/createOrUpdateViewInfo`, {
     method: 'POST',
@@ -262,6 +285,12 @@ export function createOrUpdateViewInfo(data: any): Promise<any> {
 export function getViewInfoList(domainId: number): Promise<any> {
   return request(`${process.env.API_BASE_URL}viewInfo/getViewInfoList/${domainId}`, {
     method: 'GET',
+  });
+}
+
+export function deleteViewInfo(recordId: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}viewInfo/deleteViewInfo/${recordId}`, {
+    method: 'DELETE',
   });
 }
 
@@ -418,7 +447,7 @@ export function queryDimValue(data: any): Promise<any> {
 }
 
 export async function queryStruct({
-  modelId,
+  modelIds,
   bizName,
   dateField = 'sys_imp_date',
   startDate,
@@ -427,7 +456,7 @@ export async function queryStruct({
   groups = [],
   dimensionFilters = [],
 }: {
-  modelId: number;
+  modelIds: number[];
   bizName: string;
   dateField: string;
   startDate: string;
@@ -442,7 +471,7 @@ export async function queryStruct({
       method: 'POST',
       ...(download ? { responseType: 'blob', getResponse: true } : {}),
       data: {
-        modelId,
+        modelIds,
         groups: [dateField, ...groups],
         dimensionFilters,
         aggregators: [

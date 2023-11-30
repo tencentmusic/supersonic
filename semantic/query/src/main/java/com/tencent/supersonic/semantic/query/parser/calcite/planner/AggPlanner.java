@@ -40,7 +40,6 @@ public class AggPlanner implements Planner {
         this.schema = schema;
     }
 
-
     public void parse() throws Exception {
         // find the match Datasource
         scope = SchemaBuilder.getScope(schema);
@@ -74,7 +73,6 @@ public class AggPlanner implements Planner {
 
     }
 
-
     private List<DataSource> getMatchDataSource(SqlValidatorScope scope) throws Exception {
         return DataSourceNode.getMatchDataSources(scope, schema, metricReq);
     }
@@ -92,7 +90,6 @@ public class AggPlanner implements Planner {
         }
         return isAgg;
     }
-
 
     @Override
     public void explain(QueryStatement queryStatement, AggOption aggOption) throws Exception {

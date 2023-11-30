@@ -27,7 +27,6 @@ public class ModelRepositoryImpl implements ModelRepository {
         this.modelDOCustomMapper = modelDOCustomMapper;
     }
 
-
     @Override
     public void createModel(ModelDO datasourceDO) {
         modelDOMapper.insert(datasourceDO);

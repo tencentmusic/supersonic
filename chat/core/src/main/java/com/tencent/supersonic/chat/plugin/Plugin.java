@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.plugin;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.parser.ParseMode;
+import com.tencent.supersonic.chat.parser.plugin.ParseMode;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;

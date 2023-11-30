@@ -20,7 +20,6 @@ public class QueryStatement {
     private Integer status = 0;
     private List<ImmutablePair<String, String>> timeRanges;
 
-
     public boolean isOk() {
         this.ok = "".equals(errMsg) && !"".equals(sql);
         return ok;

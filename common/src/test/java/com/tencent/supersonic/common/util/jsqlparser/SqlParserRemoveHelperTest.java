@@ -56,7 +56,7 @@ class SqlParserRemoveHelperTest {
         removeFieldNames.add("播放量");
         String replaceSql = SqlParserRemoveHelper.removeHavingCondition(sql, removeFieldNames);
         Assert.assertEquals(
-                "SELECT 歌曲名 FROM 歌曲库 WHERE 歌手名 = '周杰伦' HAVING 2 > 1",
+                "SELECT 歌曲名 FROM 歌曲库 WHERE 歌手名 = '周杰伦'",
                 replaceSql);
 
     }
@@ -74,7 +74,7 @@ class SqlParserRemoveHelperTest {
 
         Assert.assertEquals(
                 "SELECT 歌曲名 FROM 歌曲库 WHERE datediff('day', 发布日期, '2023-08-09') <= 1 "
-                        + "AND 1 = 1 AND 数据日期 = '2023-08-09' AND 歌曲发布时 = '2023-08-01' "
+                        + "AND 数据日期 = '2023-08-09' AND 歌曲发布时 = '2023-08-01' "
                         + "ORDER BY 播放量 DESC LIMIT 11",
                 replaceSql);
 
@@ -84,7 +84,7 @@ class SqlParserRemoveHelperTest {
         replaceSql = SqlParserRemoveHelper.removeWhereCondition(sql, removeFieldNames);
         Assert.assertEquals(
                 "SELECT 歌曲名 FROM 歌曲库 WHERE datediff('day', 发布日期, '2023-08-09') <= 1 "
-                        + "AND 1 IN (1) AND 1 IN (1) AND 数据日期 = '2023-08-09' AND "
+                        + "AND 数据日期 = '2023-08-09' AND "
                         + "歌曲发布时 = '2023-08-01' ORDER BY 播放量 DESC LIMIT 11",
                 replaceSql);
 
@@ -93,8 +93,8 @@ class SqlParserRemoveHelperTest {
                 + " order by 播放量 desc limit 11";
         replaceSql = SqlParserRemoveHelper.removeWhereCondition(sql, removeFieldNames);
         Assert.assertEquals(
-                "SELECT 歌曲名 FROM 歌曲库 WHERE (datediff('day', 发布日期, '2023-08-09') <= 1 "
-                        + "AND 1 IN (1) AND 1 IN (1)) AND 数据日期 = '2023-08-09' ORDER BY 播放量 DESC LIMIT 11",
+                "SELECT 歌曲名 FROM 歌曲库 WHERE (datediff('day', 发布日期, '2023-08-09') <= 1) "
+                        + "AND 数据日期 = '2023-08-09' ORDER BY 播放量 DESC LIMIT 11",
                 replaceSql);
     }
 

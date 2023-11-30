@@ -37,7 +37,6 @@ public class JdbcDataSourceUtils {
         this.jdbcDataSource = jdbcDataSource;
     }
 
-
     public static boolean testDatabase(Database database) {
 
         try {

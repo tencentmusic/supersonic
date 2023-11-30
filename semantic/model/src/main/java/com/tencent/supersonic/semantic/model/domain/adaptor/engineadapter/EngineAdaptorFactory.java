@@ -17,10 +17,8 @@ public class EngineAdaptorFactory {
         engineAdaptorMap.put(EngineTypeEnum.H2.getName(), new H2Adaptor());
     }
 
-
     public static EngineAdaptor getEngineAdaptor(String engineType) {
         return engineAdaptorMap.get(engineType);
     }
-
 
 }

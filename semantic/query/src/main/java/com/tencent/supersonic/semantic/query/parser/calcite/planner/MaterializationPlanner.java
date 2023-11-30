@@ -224,7 +224,6 @@ public class MaterializationPlanner implements Planner {
         return schema;
     }
 
-
     private void init() {
         viewSchema = SchemaBuilder.getMaterializationSchema();
         hepProgramBuilder = new HepProgramBuilder();
@@ -335,6 +334,5 @@ public class MaterializationPlanner implements Planner {
         relNode.accept(shuttle);
         return tableNames;
     }
-
 
 }

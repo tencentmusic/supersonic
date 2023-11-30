@@ -34,8 +34,8 @@ const DataSourceRelationFormDrawer: React.FC<DataSourceRelationFormDrawerProps> 
 
   useEffect(() => {
     const { sourceData, targetData } = nodeDataSource;
-    const dataSourceFromIdentifiers = sourceData?.datasourceDetail?.identifiers || [];
-    const dataSourceToIdentifiers = targetData?.datasourceDetail?.identifiers || [];
+    const dataSourceFromIdentifiers = sourceData?.modelDetail?.identifiers || [];
+    const dataSourceToIdentifiers = targetData?.modelDetail?.identifiers || [];
     const dataSourceToIdentifiersNames = dataSourceToIdentifiers.map((item) => {
       return item.bizName;
     });

@@ -3,6 +3,7 @@ package com.tencent.supersonic.semantic.model.application;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
@@ -45,9 +46,10 @@ public class ModelRelaServiceImpl
     public List<ModelRela> getModelRela(List<Long> modelIds) {
         QueryWrapper<ModelRelaDO> wrapper = new QueryWrapper<>();
         if (CollectionUtils.isEmpty(modelIds)) {
-            wrapper.lambda().in(ModelRelaDO::getFromModelId, modelIds).or()
-                    .in(ModelRelaDO::getToModelId, modelIds);
+            return Lists.newArrayList();
         }
+        wrapper.lambda().in(ModelRelaDO::getFromModelId, modelIds).or()
+                .in(ModelRelaDO::getToModelId, modelIds);
         return list(wrapper).stream().map(this::convert).collect(Collectors.toList());
     }
 

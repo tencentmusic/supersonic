@@ -29,7 +29,6 @@ public class ViewInfoController {
         this.viewInfoServiceImpl = viewInfoServiceImpl;
     }
 
-
     @PostMapping("/createOrUpdateViewInfo")
     public ViewInfoDO createOrUpdateViewInfo(@RequestBody ViewInfoReq viewInfoReq, HttpServletRequest request,
             HttpServletResponse response) {
@@ -37,9 +36,9 @@ public class ViewInfoController {
         return viewInfoServiceImpl.createOrUpdateViewInfo(viewInfoReq, user);
     }
 
-    @GetMapping("/getViewInfoList/{modelId}")
-    public List<ViewInfoDO> getViewInfoList(@PathVariable("modelId") Long modelId) {
-        return viewInfoServiceImpl.getViewInfoList(modelId);
+    @GetMapping("/getViewInfoList/{domainId}")
+    public List<ViewInfoDO> getViewInfoList(@PathVariable("domainId") Long domainId) {
+        return viewInfoServiceImpl.getViewInfoList(domainId);
     }
 
     @DeleteMapping("/deleteViewInfo/{id}")
@@ -51,6 +50,5 @@ public class ViewInfoController {
     public List<ModelSchemaRelaResp> getDomainSchema(@PathVariable("domainId") Long domainId) {
         return viewInfoServiceImpl.getDomainSchema(domainId);
     }
-
 
 }

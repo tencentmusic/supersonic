@@ -57,7 +57,6 @@ public class DateUtils {
         return DateTimeFormatter.ofPattern(formats[0]);
     }
 
-
     public static String getBeforeDate(int intervalDay) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -65,7 +64,6 @@ public class DateUtils {
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         return dateFormat.format(calendar.getTime());
     }
-
 
     public static String getBeforeDate(int intervalDay, DatePeriodEnum datePeriodEnum) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
@@ -106,7 +104,6 @@ public class DateUtils {
         }
         return null;
     }
-
 
     public static String format(Date date) {
         DateFormat dateFormat;

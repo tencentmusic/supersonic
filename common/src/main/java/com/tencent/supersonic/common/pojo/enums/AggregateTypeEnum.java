@@ -10,7 +10,6 @@ public enum AggregateTypeEnum {
     COUNT,
     NONE;
 
-
     public static AggregateTypeEnum of(String agg) {
         for (AggregateTypeEnum aggEnum : AggregateTypeEnum.values()) {
             if (aggEnum.name().equalsIgnoreCase(agg)) {

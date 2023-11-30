@@ -1,13 +1,14 @@
 package com.tencent.supersonic.chat.api.pojo;
 
 import com.google.common.base.Objects;
-import java.io.Serializable;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Getter
@@ -24,7 +25,7 @@ public class SchemaElement implements Serializable {
     private SchemaElementType type;
     private List<String> alias;
     private List<SchemaValueMap> schemaValueMaps;
-    private List<RelateSchemaElement> relateSchemaElements;
+    private List<RelatedSchemaElement> relatedSchemaElements;
 
     private String defaultAgg;
 

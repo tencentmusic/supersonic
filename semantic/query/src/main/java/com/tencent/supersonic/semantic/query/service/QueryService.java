@@ -25,7 +25,6 @@ public interface QueryService {
 
     QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructCmd, User user) throws Exception;
 
-
     QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user);
 
     Object queryByQueryStatement(QueryStatement queryStatement);
@@ -35,6 +34,5 @@ public interface QueryService {
     <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception;
 
     QueryStatement parseMetricReq(MetricReq metricReq) throws Exception;
-
 
 }

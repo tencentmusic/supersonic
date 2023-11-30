@@ -27,5 +27,4 @@ public class SysParameterController {
         return sysParameterService.getSysParameter();
     }
 
-
 }

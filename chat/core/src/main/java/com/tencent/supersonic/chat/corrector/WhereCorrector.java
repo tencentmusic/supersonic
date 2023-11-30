@@ -6,13 +6,12 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.parser.llm.s2sql.S2SQLDateHelper;
+import com.tencent.supersonic.chat.parser.sql.llm.S2SqlDateHelper;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
@@ -70,7 +69,6 @@ public class WhereCorrector extends BaseSemanticCorrector {
     private void parserDateDiffFunction(SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         correctS2SQL = SqlParserReplaceHelper.replaceFunction(correctS2SQL);
-        correctS2SQL = SqlParserRemoveHelper.removeNumberCondition(correctS2SQL);
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
     }
 
@@ -78,7 +76,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         List<String> whereFields = SqlParserSelectHelper.getWhereFields(correctS2SQL);
         if (CollectionUtils.isEmpty(whereFields) || !TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
-            String currentDate = S2SQLDateHelper.getReferenceDate(semanticParseInfo.getModelId());
+            String currentDate = S2SqlDateHelper.getReferenceDate(semanticParseInfo.getModelId());
             if (StringUtils.isNotBlank(currentDate)) {
                 correctS2SQL = SqlParserAddHelper.addParenthesisToWhere(correctS2SQL);
                 correctS2SQL = SqlParserAddHelper.addWhere(

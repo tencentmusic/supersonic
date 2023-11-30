@@ -40,8 +40,8 @@ public class ViewInfoServiceImpl {
         this.modelService = modelService;
     }
 
-    public List<ViewInfoDO> getViewInfoList(Long modelId) {
-        return viewInfoRepository.getViewInfoList(modelId);
+    public List<ViewInfoDO> getViewInfoList(Long domainId) {
+        return viewInfoRepository.getViewInfoList(domainId);
     }
 
     public List<ModelSchemaRelaResp> getDomainSchema(Long domainId) {
@@ -64,7 +64,6 @@ public class ViewInfoServiceImpl {
         return domainSchemaRelaResps;
     }
 
-
     public ViewInfoDO createOrUpdateViewInfo(ViewInfoReq viewInfoReq, User user) {
         if (viewInfoReq.getId() == null) {
             ViewInfoDO viewInfoDO = new ViewInfoDO();
@@ -84,7 +83,6 @@ public class ViewInfoServiceImpl {
         viewInfoRepository.updateViewInfo(viewInfoDO);
         return viewInfoDO;
     }
-
 
     public void deleteViewInfo(Long id) {
         viewInfoRepository.deleteViewInfo(id);

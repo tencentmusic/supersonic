@@ -72,5 +72,4 @@ public class MaterializationRecordController {
         return recordService.fetchMaterializationDate(filter, user);
     }
 
-
 }

@@ -61,7 +61,7 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
         if (!payload) {
           setCreateDataSourceModalOpen(true);
         } else {
-          if (payload?.datasourceDetail?.queryType === 'table_query') {
+          if (payload?.modelDetail?.queryType === 'table_query') {
             setDataSourceModalVisible(true);
           } else {
             setCreateModalVisible(true);

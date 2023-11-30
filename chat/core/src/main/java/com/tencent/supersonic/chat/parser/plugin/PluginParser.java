@@ -99,7 +99,6 @@ public abstract class PluginParser implements SemanticParser {
         return semanticParseInfo;
     }
 
-
     private void fillSemanticParseInfo(SemanticParseInfo semanticParseInfo) {
         List<SchemaElementMatch> schemaElementMatches = semanticParseInfo.getElementMatches();
         if (CollectionUtils.isEmpty(schemaElementMatches)) {

@@ -9,7 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
-import com.tencent.supersonic.chat.query.llm.s2sql.S2SQLQuery;
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.QueryType;
@@ -26,8 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Query type parser, determine if the query is a metric query, an entity query,
- * or another type of query.
+ * QueryTypeParser resolves query type as either METRIC or TAG, or OTHER.
  */
 @Slf4j
 public class QueryTypeParser implements SemanticParser {
@@ -54,16 +53,16 @@ public class QueryTypeParser implements SemanticParser {
             return QueryType.OTHER;
         }
         //1. entity queryType
-        if (semanticQuery instanceof RuleSemanticQuery || semanticQuery instanceof S2SQLQuery) {
+        Set<Long> modelIds = parseInfo.getModel().getModelIds();
+        if (semanticQuery instanceof RuleSemanticQuery || semanticQuery instanceof LLMSqlQuery) {
             //If all the fields in the SELECT statement are of tag type.
             List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getS2SQL());
             SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
             SemanticSchema semanticSchema = semanticService.getSemanticSchema();
-
             if (CollectionUtils.isNotEmpty(selectFields)) {
-                Set<String> tags = semanticSchema.getTags().stream().map(SchemaElement::getName)
+                Set<String> tags = semanticSchema.getTags(modelIds).stream().map(SchemaElement::getName)
                         .collect(Collectors.toSet());
-                if (tags.containsAll(selectFields)) {
+                if (CollectionUtils.isNotEmpty(tags) && tags.containsAll(selectFields)) {
                     return QueryType.TAG;
                 }
             }
@@ -71,7 +70,7 @@ public class QueryTypeParser implements SemanticParser {
         //2. metric queryType
         List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getS2SQL());
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-        List<SchemaElement> metrics = semanticSchema.getMetrics(parseInfo.getModel().getModelIds());
+        List<SchemaElement> metrics = semanticSchema.getMetrics(modelIds);
         if (CollectionUtils.isNotEmpty(metrics)) {
             Set<String> metricNameSet = metrics.stream().map(SchemaElement::getName).collect(Collectors.toSet());
             boolean containMetric = selectFields.stream().anyMatch(metricNameSet::contains);

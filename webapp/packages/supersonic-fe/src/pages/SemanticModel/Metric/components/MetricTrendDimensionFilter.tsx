@@ -59,10 +59,11 @@ const MetricTrendDimensionFilter: React.FC<Props> = ({
       return;
     }
     const { dimensionBizName } = queryParams.current;
+    const targetOptions = dimensionOptions.find((item) => item.value === dimensionBizName) || {};
     const { code, data } = await queryDimValue({
       ...queryParams.current,
       value: searchValue,
-      modelId,
+      modelId: targetOptions.modelId,
       // dateInfo: {},
       limit: 50,
       ...(periodDate?.startDate

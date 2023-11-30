@@ -33,7 +33,6 @@ public class ChatQueryController {
     @Autowired
     private SearchService searchService;
 
-
     @PostMapping("search")
     public Object search(@RequestBody QueryReq queryCtx, HttpServletRequest request,
                          HttpServletResponse response) {

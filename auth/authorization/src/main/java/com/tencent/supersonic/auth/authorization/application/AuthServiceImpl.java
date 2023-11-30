@@ -75,7 +75,6 @@ public class AuthServiceImpl implements AuthService {
         jdbcTemplate.update("delete from s2_auth_groups where group_id = ?", group.getGroupId());
     }
 
-
     @Override
     public AuthorizedResourceResp queryAuthorizedResources(QueryAuthResReq req, User user) {
         Set<String> userOrgIds = userService.getUserAllOrgId(user.getName());

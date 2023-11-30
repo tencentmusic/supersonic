@@ -8,14 +8,14 @@ import type { StateType } from '../model';
 import { StatusEnum } from '../enum';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
 import {
-  getDatasourceList,
+  getModelList,
   getDimensionList,
   deleteDimension,
   batchUpdateDimensionStatus,
 } from '../service';
 import DimensionInfoModal from './DimensionInfoModal';
 import DimensionValueSettingModal from './DimensionValueSettingModal';
-import { updateDimension } from '../service';
+// import { updateDimension } from '../service';
 import { ISemantic, IDataSource } from '../data';
 import moment from 'moment';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
@@ -27,7 +27,7 @@ type Props = {
 };
 
 const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
-  const { selectModelId: modelId } = domainManger;
+  const { selectModelId: modelId, selectDomainId: domainId } = domainManger;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [dimensionItem, setDimensionItem] = useState<ISemantic.IDimensionItem>();
   const [dataSourceList, setDataSourceList] = useState<IDataSource.IDataSourceItem[]>([]);
@@ -80,7 +80,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   };
 
   const queryDataSourceList = async () => {
-    const { code, data, msg } = await getDatasourceList({ modelId });
+    const { code, data, msg } = await getModelList(domainId);
     if (code === 200) {
       setDataSourceList(data);
     } else {
@@ -92,20 +92,20 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     queryDataSourceList();
   }, [modelId]);
 
-  const updateDimensionStatus = async (dimensionData: ISemantic.IDimensionItem) => {
-    const { code, msg } = await updateDimension(dimensionData);
-    if (code === 200) {
-      actionRef?.current?.reload();
-      dispatch({
-        type: 'domainManger/queryDimensionList',
-        payload: {
-          modelId,
-        },
-      });
-      return;
-    }
-    message.error(msg);
-  };
+  // const updateDimensionStatus = async (dimensionData: ISemantic.IDimensionItem) => {
+  //   const { code, msg } = await updateDimension(dimensionData);
+  //   if (code === 200) {
+  //     actionRef?.current?.reload();
+  //     dispatch({
+  //       type: 'domainManger/queryDimensionList',
+  //       payload: {
+  //         modelId,
+  //       },
+  //     });
+  //     return;
+  //   }
+  //   message.error(msg);
+  // };
 
   const queryBatchUpdateStatus = async (ids: React.Key[], status: StatusEnum) => {
     if (Array.isArray(ids) && ids.length === 0) {
@@ -214,11 +214,6 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       },
     },
     {
-      dataIndex: 'datasourceName',
-      title: '数据源名称',
-      search: false,
-    },
-    {
       dataIndex: 'createdBy',
       title: '创建人',
       width: 100,
@@ -299,6 +294,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               title="确认删除？"
               okText="是"
               cancelText="否"
+              placement="left"
               onConfirm={async () => {
                 const { code, msg } = await deleteDimension(record.id);
                 if (code === 200) {
@@ -331,29 +327,29 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
   };
 
-  const dropdownButtonItems = [
-    {
-      key: 'batchStart',
-      label: '批量启用',
-    },
-    {
-      key: 'batchStop',
-      label: '批量停用',
-    },
-    {
-      key: 'batchDelete',
-      label: (
-        <Popconfirm
-          title="确定批量删除吗？"
-          onConfirm={() => {
-            queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
-          }}
-        >
-          <a>批量删除</a>
-        </Popconfirm>
-      ),
-    },
-  ];
+  // const dropdownButtonItems = [
+  //   {
+  //     key: 'batchStart',
+  //     label: '批量启用',
+  //   },
+  //   {
+  //     key: 'batchStop',
+  //     label: '批量停用',
+  //   },
+  //   {
+  //     key: 'batchDelete',
+  //     label: (
+  //       <Popconfirm
+  //         title="确定批量删除吗？"
+  //         onConfirm={() => {
+  //           queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
+  //         }}
+  //       >
+  //         <a>批量删除</a>
+  //       </Popconfirm>
+  //     ),
+  //   },
+  // ];
 
   const onMenuClick = (key: string) => {
     switch (key) {

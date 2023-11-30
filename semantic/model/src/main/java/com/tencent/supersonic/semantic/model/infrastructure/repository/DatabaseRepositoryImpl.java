@@ -24,7 +24,6 @@ public class DatabaseRepositoryImpl implements DatabaseRepository {
         databaseDOMapper.insert(databaseDO);
     }
 
-
     @Override
     public void updateDatabase(DatabaseDO databaseDO) {
         databaseDOMapper.updateByPrimaryKeyWithBLOBs(databaseDO);

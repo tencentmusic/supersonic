@@ -41,7 +41,6 @@ public class MapperHelper {
         return index;
     }
 
-
     public Integer getStepOffset(List<Term> termList, Integer index) {
         List<Integer> offsetList = termList.stream().sorted(Comparator.comparing(Term::getOffset))
                 .map(term -> term.getOffset()).collect(Collectors.toList());

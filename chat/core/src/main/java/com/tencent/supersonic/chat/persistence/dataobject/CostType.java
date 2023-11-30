@@ -4,8 +4,7 @@ public enum CostType {
     MAPPER(1, "mapper"),
     PARSER(2, "parser"),
     QUERY(3, "query"),
-    PARSERRESPONDER(4, "responder"),
-    POSTPROCESSOR(5, "postprocessor");
+    PROCESSOR(4, "processor");
 
     private Integer type;
     private String name;

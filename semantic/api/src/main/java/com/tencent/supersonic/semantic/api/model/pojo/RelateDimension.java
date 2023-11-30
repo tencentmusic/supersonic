@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.api.model.pojo;
 
+import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,6 @@ import java.util.List;
 @Builder
 public class RelateDimension {
 
-    List<DrillDownDimension> drillDownDimensions;
+    List<DrillDownDimension> drillDownDimensions = Lists.newArrayList();
 
 }

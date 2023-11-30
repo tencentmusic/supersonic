@@ -5,9 +5,9 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.AgentConfig;
-import com.tencent.supersonic.chat.agent.tool.AgentToolType;
-import com.tencent.supersonic.chat.agent.tool.LLMParserTool;
-import com.tencent.supersonic.chat.agent.tool.RuleQueryTool;
+import com.tencent.supersonic.chat.agent.AgentToolType;
+import com.tencent.supersonic.chat.agent.LLMParserTool;
+import com.tencent.supersonic.chat.agent.RuleParserTool;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
@@ -111,6 +111,45 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
     public void addDemoChatConfig_1() {
         ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
+        chatConfigBaseReq.setModelId(1L);
+
+        ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
+        ChatDefaultConfigReq chatDefaultConfigDetail = new ChatDefaultConfigReq();
+        List<Long> dimensionIds0 = Collections.singletonList(1L);
+        List<Long> metricIds0 = Lists.newArrayList();
+        chatDefaultConfigDetail.setDimensionIds(dimensionIds0);
+        chatDefaultConfigDetail.setMetricIds(metricIds0);
+        chatDefaultConfigDetail.setUnit(7);
+        chatDefaultConfigDetail.setPeriod("DAY");
+        chatDetailConfig.setChatDefaultConfig(chatDefaultConfigDetail);
+        ItemVisibility visibility0 = new ItemVisibility();
+        chatDetailConfig.setVisibility(visibility0);
+        chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
+
+        ChatAggConfigReq chatAggConfig = new ChatAggConfigReq();
+        ChatDefaultConfigReq chatDefaultConfigAgg = new ChatDefaultConfigReq();
+        List<Long> dimensionIds1 = Arrays.asList(1L);
+        List<Long> metricIds1 = Lists.newArrayList();
+        chatDefaultConfigAgg.setDimensionIds(dimensionIds1);
+        chatDefaultConfigAgg.setMetricIds(metricIds1);
+        chatDefaultConfigAgg.setUnit(7);
+        chatDefaultConfigAgg.setPeriod("DAY");
+        chatDefaultConfigAgg.setTimeMode(ChatDefaultConfigReq.TimeMode.RECENT);
+        chatAggConfig.setChatDefaultConfig(chatDefaultConfigAgg);
+        ItemVisibility visibility1 = new ItemVisibility();
+        chatAggConfig.setVisibility(visibility1);
+        List<KnowledgeInfoReq> knowledgeInfos = new ArrayList<>();
+        KnowledgeInfoReq knowledgeInfoReq = new KnowledgeInfoReq();
+        knowledgeInfoReq.setItemId(3L);
+        knowledgeInfoReq.setSearchEnable(true);
+        knowledgeInfos.add(knowledgeInfoReq);
+        chatAggConfig.setKnowledgeInfos(knowledgeInfos);
+        chatConfigBaseReq.setChatAggConfig(chatAggConfig);
+        configService.addConfig(chatConfigBaseReq, user);
+    }
+
+    public void addDemoChatConfig_2() {
+        ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
         chatConfigBaseReq.setModelId(2L);
 
         ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
@@ -148,7 +187,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         configService.addConfig(chatConfigBaseReq, user);
     }
 
-    public void addDemoChatConfig_2() {
+    public void addDemoChatConfig_3() {
         ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
         chatConfigBaseReq.setModelId(3L);
 
@@ -187,7 +226,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         configService.addConfig(chatConfigBaseReq, user);
     }
 
-    public void addDemoChatConfig_3() {
+    public void addDemoChatConfig_4() {
         ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
         chatConfigBaseReq.setModelId(4L);
 
@@ -224,6 +263,116 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         configService.addConfig(chatConfigBaseReq, user);
     }
 
+    public void addDemoChatConfig_5() {
+        ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
+        chatConfigBaseReq.setModelId(5L);
+
+        ChatDetailConfigReq chatDetailConfig = getChatDetailConfigReq();
+        List<KnowledgeInfoReq> knowledgeInfos = new ArrayList<>();
+        KnowledgeInfoReq knowledgeInfoReq = new KnowledgeInfoReq();
+        knowledgeInfoReq.setSearchEnable(true);
+        knowledgeInfoReq.setItemId(10L);
+        knowledgeInfoReq.setBizName("most_popular_in");
+        knowledgeInfos.add(knowledgeInfoReq);
+
+        KnowledgeInfoReq knowledgeInfoReq2 = new KnowledgeInfoReq();
+        knowledgeInfoReq2.setSearchEnable(true);
+        knowledgeInfoReq2.setItemId(11L);
+        knowledgeInfoReq2.setBizName("g_name");
+        knowledgeInfos.add(knowledgeInfoReq2);
+
+        chatDetailConfig.setKnowledgeInfos(knowledgeInfos);
+        chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
+        List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
+        chatConfigBaseReq.setRecommendedQuestions(recommendedQuestions);
+        configService.addConfig(chatConfigBaseReq, user);
+    }
+
+    private ChatDetailConfigReq getChatDetailConfigReq() {
+        ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
+        ChatDefaultConfigReq chatDefaultConfigDetail = new ChatDefaultConfigReq();
+        chatDefaultConfigDetail.setUnit(-1);
+        chatDefaultConfigDetail.setPeriod("DAY");
+        chatDetailConfig.setChatDefaultConfig(chatDefaultConfigDetail);
+        ItemVisibility visibility0 = new ItemVisibility();
+        chatDetailConfig.setVisibility(visibility0);
+        return chatDetailConfig;
+    }
+
+    public void addDemoChatConfig_6() {
+        ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
+        chatConfigBaseReq.setModelId(6L);
+
+        ChatDetailConfigReq chatDetailConfig = getChatDetailConfigReq();
+        List<KnowledgeInfoReq> knowledgeInfos = new ArrayList<>();
+        KnowledgeInfoReq knowledgeInfoReq = new KnowledgeInfoReq();
+        knowledgeInfoReq.setSearchEnable(true);
+        knowledgeInfoReq.setItemId(12L);
+        knowledgeInfoReq.setBizName("country");
+        knowledgeInfos.add(knowledgeInfoReq);
+
+        KnowledgeInfoReq knowledgeInfoReq2 = new KnowledgeInfoReq();
+        knowledgeInfoReq2.setSearchEnable(true);
+        knowledgeInfoReq2.setItemId(13L);
+        knowledgeInfoReq2.setBizName("gender");
+        knowledgeInfos.add(knowledgeInfoReq2);
+
+        chatDetailConfig.setKnowledgeInfos(knowledgeInfos);
+        chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
+        List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
+        chatConfigBaseReq.setRecommendedQuestions(recommendedQuestions);
+        configService.addConfig(chatConfigBaseReq, user);
+    }
+
+    public void addDemoChatConfig_7() {
+        ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
+        chatConfigBaseReq.setModelId(7L);
+
+        ChatDetailConfigReq chatDetailConfig = getChatDetailConfigReq();
+        List<KnowledgeInfoReq> knowledgeInfos = new ArrayList<>();
+        KnowledgeInfoReq knowledgeInfoReq = new KnowledgeInfoReq();
+        knowledgeInfoReq.setSearchEnable(true);
+        knowledgeInfoReq.setItemId(16L);
+        knowledgeInfoReq.setBizName("formats");
+        knowledgeInfos.add(knowledgeInfoReq);
+
+        chatDetailConfig.setKnowledgeInfos(knowledgeInfos);
+        chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
+        List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
+        chatConfigBaseReq.setRecommendedQuestions(recommendedQuestions);
+        configService.addConfig(chatConfigBaseReq, user);
+    }
+
+    public void addDemoChatConfig_8() {
+        ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
+        chatConfigBaseReq.setModelId(8L);
+
+        ChatDetailConfigReq chatDetailConfig = getChatDetailConfigReq();
+        List<KnowledgeInfoReq> knowledgeInfos = new ArrayList<>();
+        KnowledgeInfoReq knowledgeInfoReq = new KnowledgeInfoReq();
+        knowledgeInfoReq.setSearchEnable(true);
+        knowledgeInfoReq.setItemId(18L);
+        knowledgeInfoReq.setBizName("country");
+        knowledgeInfos.add(knowledgeInfoReq);
+
+        KnowledgeInfoReq knowledgeInfoReq2 = new KnowledgeInfoReq();
+        knowledgeInfoReq2.setSearchEnable(true);
+        knowledgeInfoReq2.setItemId(19L);
+        knowledgeInfoReq2.setBizName("languages");
+        knowledgeInfos.add(knowledgeInfoReq2);
+
+        KnowledgeInfoReq knowledgeInfoReq3 = new KnowledgeInfoReq();
+        knowledgeInfoReq3.setSearchEnable(true);
+        knowledgeInfoReq3.setItemId(21L);
+        knowledgeInfoReq3.setBizName("song_name");
+        knowledgeInfos.add(knowledgeInfoReq3);
+
+        chatDetailConfig.setKnowledgeInfos(knowledgeInfos);
+        chatConfigBaseReq.setChatDetailConfig(chatDetailConfig);
+        List<RecommendedQuestionReq> recommendedQuestions = new ArrayList<>();
+        chatConfigBaseReq.setRecommendedQuestions(recommendedQuestions);
+        configService.addConfig(chatConfigBaseReq, user);
+    }
 
     private void addPlugin_1() {
         Plugin plugin1 = new Plugin();
@@ -260,8 +409,8 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         agent.setExamples(Lists.newArrayList("超音数访问次数", "近15天超音数访问次数汇总", "按部门统计超音数的访问人数",
                 "对比alice和lucy的停留时长", "超音数访问次数最高的部门"));
         AgentConfig agentConfig = new AgentConfig();
-        RuleQueryTool ruleQueryTool = new RuleQueryTool();
-        ruleQueryTool.setType(AgentToolType.RULE);
+        RuleParserTool ruleQueryTool = new RuleParserTool();
+        ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setId("0");
         ruleQueryTool.setModelIds(Lists.newArrayList(-1L));
         ruleQueryTool.setQueryTypes(Lists.newArrayList(QueryType.METRIC.name()));
@@ -269,7 +418,7 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.LLM_S2SQL);
+        llmParserTool.setType(AgentToolType.NL2SQL_LLM);
         llmParserTool.setModelIds(Lists.newArrayList(-1L));
         agentConfig.getTools().add(llmParserTool);
 
@@ -286,16 +435,16 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         agent.setEnableSearch(1);
         agent.setExamples(Lists.newArrayList("国风风格艺人", "港台地区的艺人", "风格为流行的艺人"));
         AgentConfig agentConfig = new AgentConfig();
-        RuleQueryTool ruleQueryTool = new RuleQueryTool();
+        RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setId("0");
-        ruleQueryTool.setType(AgentToolType.RULE);
+        ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setModelIds(Lists.newArrayList(-1L));
         ruleQueryTool.setQueryTypes(Lists.newArrayList(QueryType.TAG.name()));
         agentConfig.getTools().add(ruleQueryTool);
 
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.LLM_S2SQL);
+        llmParserTool.setType(AgentToolType.NL2SQL_LLM);
         llmParserTool.setModelIds(Lists.newArrayList(-1L));
         agentConfig.getTools().add(llmParserTool);
 
@@ -317,8 +466,8 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         LLMParserTool llmParserTool = new LLMParserTool();
         llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.LLM_S2SQL);
-        llmParserTool.setModelIds(Lists.newArrayList(3L));
+        llmParserTool.setType(AgentToolType.NL2SQL_LLM);
+        llmParserTool.setModelIds(Lists.newArrayList(5L, 6L, 7L, 8L));
         agentConfig.getTools().add(llmParserTool);
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
@@ -335,6 +484,11 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             addDemoChatConfig_1();
             addDemoChatConfig_2();
             addDemoChatConfig_3();
+            addDemoChatConfig_4();
+            addDemoChatConfig_5();
+            addDemoChatConfig_6();
+            addDemoChatConfig_7();
+            addDemoChatConfig_8();
             addPlugin_1();
             addAgent1();
             addAgent2();
@@ -345,6 +499,5 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             log.error("Failed to add sample chats", e);
         }
     }
-
 
 }
