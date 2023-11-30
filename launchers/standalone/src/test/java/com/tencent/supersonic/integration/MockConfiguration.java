@@ -3,7 +3,7 @@ package com.tencent.supersonic.integration;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingResp;
+import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrievalResp;
 import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrieval;
 import com.tencent.supersonic.chat.plugin.PluginManager;
 import com.tencent.supersonic.chat.service.AgentService;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 public class MockConfiguration {
 
     public static void mockEmbeddingRecognize(PluginManager pluginManager, String text, String id) {
-        EmbeddingResp embeddingResp = new EmbeddingResp();
+        RecallRetrievalResp embeddingResp = new RecallRetrievalResp();
         RecallRetrieval embeddingRetrieval = new RecallRetrieval();
         embeddingRetrieval.setId(id);
         embeddingRetrieval.setPresetId(id);

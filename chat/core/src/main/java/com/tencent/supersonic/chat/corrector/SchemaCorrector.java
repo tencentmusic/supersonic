@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.corrector;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
-import com.tencent.supersonic.chat.parser.llm.s2sql.ParseResult;
+import com.tencent.supersonic.chat.parser.sql.llm.ParseResult;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.JsonUtil;

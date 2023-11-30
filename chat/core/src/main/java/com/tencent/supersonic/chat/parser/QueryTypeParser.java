@@ -9,7 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
-import com.tencent.supersonic.chat.query.llm.s2sql.S2SQLQuery;
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.QueryType;
@@ -26,8 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Query type parser, determine if the query is a metric query, an entity query,
- * or another type of query.
+ * QueryTypeParser resolves query type as either METRIC or TAG, or OTHER.
  */
 @Slf4j
 public class QueryTypeParser implements SemanticParser {
@@ -55,7 +54,7 @@ public class QueryTypeParser implements SemanticParser {
         }
         //1. entity queryType
         Set<Long> modelIds = parseInfo.getModel().getModelIds();
-        if (semanticQuery instanceof RuleSemanticQuery || semanticQuery instanceof S2SQLQuery) {
+        if (semanticQuery instanceof RuleSemanticQuery || semanticQuery instanceof LLMSqlQuery) {
             //If all the fields in the SELECT statement are of tag type.
             List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getS2SQL());
             SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
