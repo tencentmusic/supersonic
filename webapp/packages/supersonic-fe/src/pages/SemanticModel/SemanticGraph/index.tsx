@@ -1070,7 +1070,8 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
           }}
         />
       )}
-      {
+
+      {createDataSourceModalOpen && (
         <ClassDataSourceTypeModal
           open={createDataSourceModalOpen}
           onCancel={() => {
@@ -1082,7 +1083,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
             updateGraphData();
           }}
         />
-      }
+      )}
       {
         <DeleteConfirmModal
           open={confirmModalOpenState}

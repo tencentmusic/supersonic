@@ -32,8 +32,7 @@ const DimensionAndMetricRelationModal: React.FC<Props> = ({
     };
     const { code, msg } = await updateExprMetric(queryParams);
     if (code === 200) {
-      // message.success('编辑指标成功');
-      // onSubmit?.(queryParams);
+      onSubmit(relationList);
       return;
     }
     message.error(msg);
@@ -46,7 +45,6 @@ const DimensionAndMetricRelationModal: React.FC<Props> = ({
         <Button
           type="primary"
           onClick={() => {
-            onSubmit(relationList);
             saveMetric(relationList);
           }}
         >
