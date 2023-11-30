@@ -9,8 +9,6 @@ import type { StateType } from '../model';
 import { deleteModel, updateModel } from '../service';
 import ClassDataSourceTypeModal from './ClassDataSourceTypeModal';
 
-import ModelCreateFormModal from './ModelCreateFormModal';
-
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
@@ -23,15 +21,7 @@ type Props = {
   domainManger: StateType;
 };
 
-const ModelTable: React.FC<Props> = ({
-  modelList,
-  domainManger,
-  disabledEdit = false,
-  onModelChange,
-  dispatch,
-}) => {
-  const { selectModelId: modelId, selectDomainId } = domainManger;
-  const [modelCreateFormModalVisible, setModelCreateFormModalVisible] = useState<boolean>(false);
+const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelChange }) => {
   const [modelItem, setModelItem] = useState<ISemantic.IModelItem>();
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
@@ -143,7 +133,6 @@ const ModelTable: React.FC<Props> = ({
               key="metricEditBtn"
               onClick={() => {
                 setModelItem(record);
-                // setModelCreateFormModalVisible(true);
                 setCreateDataSourceModalOpen(true);
               }}
             >
@@ -220,8 +209,6 @@ const ModelTable: React.FC<Props> = ({
                   type="primary"
                   onClick={() => {
                     setModelItem(undefined);
-                    // setModelCreateFormModalVisible(true);
-
                     setCreateDataSourceModalOpen(true);
                   }}
                 >
@@ -235,25 +222,11 @@ const ModelTable: React.FC<Props> = ({
           open={createDataSourceModalOpen}
           dataSourceItem={modelItem}
           onSubmit={() => {
-            // actionRef.current?.reload();
-            // setCreateDataSourceModalOpen(false);
             onModelChange?.();
+            setCreateDataSourceModalOpen(false);
           }}
           onCancel={() => {
             setCreateDataSourceModalOpen(false);
-          }}
-        />
-      )}
-      {modelCreateFormModalVisible && (
-        <ModelCreateFormModal
-          domainId={selectDomainId}
-          basicInfo={modelItem}
-          onSubmit={() => {
-            setModelCreateFormModalVisible(false);
-            onModelChange?.();
-          }}
-          onCancel={() => {
-            setModelCreateFormModalVisible(false);
           }}
         />
       )}

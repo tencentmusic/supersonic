@@ -142,6 +142,9 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
   };
 
   const queryDimensionList = async (ids: number[]) => {
+    if (!(Array.isArray(ids) && ids.length > 0)) {
+      return;
+    }
     const { code, data, msg } = await getDimensionList({ ids });
     if (code === 200 && Array.isArray(data?.list)) {
       setDimensionList(data.list);
@@ -162,6 +165,9 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
       const ids = data.map((item) => item.dimensionId);
       queryDimensionList(ids);
       return data;
+    } else {
+      setDimensionList([]);
+      setRelationDimensionOptions([]);
     }
     if (code !== 200) {
       message.error(msg);
