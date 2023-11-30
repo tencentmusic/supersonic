@@ -41,11 +41,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
@@ -89,17 +84,10 @@
             <groupId>com.tencent.supersonic</groupId>
             <artifactId>semantic-query</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
             <artifactId>chat-api</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.tencent.supersonic</groupId>
-            <artifactId>semantic-query</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>

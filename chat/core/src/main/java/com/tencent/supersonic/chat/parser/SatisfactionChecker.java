@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SatisfactionChecker {
 
     // check all the parse info in candidate
-    public static boolean check(QueryContext queryContext) {
+    public static boolean isSkip(QueryContext queryContext) {
         for (SemanticQuery query : queryContext.getCandidateQueries()) {
             if (query.getQueryMode().equals(LLMSqlQuery.QUERY_MODE)) {
                 continue;
