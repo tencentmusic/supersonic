@@ -140,14 +140,12 @@ public class QueryServiceImpl implements QueryService {
         }
     }
 
-
     @Override
     @DataPermission
     @SneakyThrows
     public QueryResultWithSchemaResp queryByStructWithAuth(QueryStructReq queryStructCmd, User user) {
         return queryByStruct(queryStructCmd, user);
     }
-
 
     @Override
     public QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user)
@@ -199,7 +197,6 @@ public class QueryServiceImpl implements QueryService {
         return queryByStruct(queryStructReq, user);
     }
 
-
     private void handleGlobalCacheDisable(QueryStructReq queryStructCmd) {
         if (!cacheEnable) {
             Cache cacheInfo = new Cache();
@@ -250,7 +247,6 @@ public class QueryServiceImpl implements QueryService {
         }
         return ExplainResp.builder().sql(sql).build();
     }
-
 
     public QueryStatement parseMetricReq(MetricReq metricReq) throws Exception {
         QueryStructReq queryStructCmd = new QueryStructReq();
@@ -320,6 +316,5 @@ public class QueryServiceImpl implements QueryService {
     private String getKeyByModelIds(List<Long> modelIds) {
         return String.join(",", modelIds.stream().map(Object::toString).collect(Collectors.toList()));
     }
-
 
 }

@@ -18,7 +18,6 @@ public class RecordInfo {
 
     private Date updatedAt;
 
-
     public RecordInfo createdBy(String userName) {
         this.createdBy = userName;
         this.createdAt = new Date();

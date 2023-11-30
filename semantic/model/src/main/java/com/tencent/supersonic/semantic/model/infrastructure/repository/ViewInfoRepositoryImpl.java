@@ -24,29 +24,24 @@ public class ViewInfoRepositoryImpl implements ViewInfoRepository {
         return viewInfoDOMapper.selectList(wrapper);
     }
 
-
     @Override
     public ViewInfoDO getViewInfoById(Long id) {
         return viewInfoDOMapper.selectById(id);
     }
-
 
     @Override
     public void deleteViewInfo(Long id) {
         viewInfoDOMapper.deleteById(id);
     }
 
-
     @Override
     public void createViewInfo(ViewInfoDO viewInfoDO) {
         viewInfoDOMapper.insert(viewInfoDO);
     }
 
-
     @Override
     public void updateViewInfo(ViewInfoDO viewInfoDO) {
         viewInfoDOMapper.updateById(viewInfoDO);
     }
-
 
 }

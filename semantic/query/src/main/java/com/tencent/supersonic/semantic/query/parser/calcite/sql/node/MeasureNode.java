@@ -25,7 +25,6 @@ public class MeasureNode extends SemanticNode {
         }
     }
 
-
     public static SqlNode buildNonAgg(String alias, Measure measure, SqlValidatorScope scope) throws Exception {
         return buildAs(measure.getName(), getExpr(measure, alias, scope));
     }
@@ -47,4 +46,5 @@ public class MeasureNode extends SemanticNode {
         }
         return parse(measure.getExpr(), scope);
     }
+
 }

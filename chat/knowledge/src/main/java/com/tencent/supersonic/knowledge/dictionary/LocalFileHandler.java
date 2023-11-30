@@ -106,7 +106,6 @@ public class LocalFileHandler implements FileHandler {
         return Paths.get(path).toAbsolutePath().toString();
     }
 
-
     @Override
     public String getDictRootPath() {
         return Paths.get(localFileConfig.getDictDirectoryLatest()).toAbsolutePath().toString();

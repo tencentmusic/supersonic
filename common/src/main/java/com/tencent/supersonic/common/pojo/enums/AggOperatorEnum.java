@@ -52,5 +52,4 @@ public enum AggOperatorEnum {
         return null != aggType && aggType.toUpperCase().equals(COUNT_DISTINCT.getOperator());
     }
 
-
 }

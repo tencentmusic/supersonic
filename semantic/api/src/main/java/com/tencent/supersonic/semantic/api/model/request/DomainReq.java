@@ -31,7 +31,6 @@ public class DomainReq extends SchemaItem {
         return String.join(",", viewOrgs);
     }
 
-
     public String getAdmin() {
         return String.join(",", admins);
     }

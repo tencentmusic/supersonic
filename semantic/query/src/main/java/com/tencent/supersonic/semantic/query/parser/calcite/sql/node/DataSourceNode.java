@@ -49,7 +49,6 @@ public class DataSourceNode extends SemanticNode {
         return buildAs(datasource.getName(), getTable(sqlTable, scope));
     }
 
-
     public static SqlNode buildExtend(DataSource datasource, Set<String> exprList,
             SqlValidatorScope scope)
             throws Exception {

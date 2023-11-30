@@ -103,7 +103,6 @@ public class MetricCheckProcessor implements ParseResultProcessor {
         return removeFieldInSql(correctSql, metricToRemove, groupByToRemove, whereFieldsToRemove);
     }
 
-
     /**
      * To check whether the dimension bound to the metric exists,
      * eg: metric like UV is calculated in a certain dimension, it cannot be used on other dimensions.

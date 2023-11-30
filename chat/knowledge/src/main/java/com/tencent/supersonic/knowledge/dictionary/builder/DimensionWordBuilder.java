@@ -22,7 +22,6 @@ public class DimensionWordBuilder extends BaseWordBuilder {
     @Value("${nlp.dimension.use.suffix:true}")
     private boolean nlpDimensionUseSuffix = true;
 
-
     @Override
     public List<DictWord> doGet(String word, SchemaElement schemaElement) {
         List<DictWord> result = Lists.newArrayList();

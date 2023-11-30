@@ -104,7 +104,6 @@ public class NatureHelper {
                 .build();
     }
 
-
     private static long getModelCount(List<Term> terms) {
         return terms.stream().filter(term -> isModelOrEntity(term, getModelByNature(term.nature))).count();
     }

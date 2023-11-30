@@ -180,5 +180,4 @@ public abstract class SemanticNode {
         optimization.visit(this);
     }
 
-
 }

@@ -73,7 +73,6 @@ public class PluginServiceImpl implements PluginService {
         }
     }
 
-
     @Override
     public List<Plugin> getPluginList() {
         List<Plugin> plugins = Lists.newArrayList();
@@ -89,7 +88,6 @@ public class PluginServiceImpl implements PluginService {
         List<PluginDO> pluginDOS = pluginRepository.fetchPluginDOs(queryText, type);
         return convertList(pluginDOS);
     }
-
 
     @Override
     public List<Plugin> query(PluginQueryReq pluginQueryReq) {

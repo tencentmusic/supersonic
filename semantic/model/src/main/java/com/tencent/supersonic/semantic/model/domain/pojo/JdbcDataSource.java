@@ -154,7 +154,6 @@ public class JdbcDataSource {
         }
     }
 
-
     public void removeDatasource(DatabaseResp jdbcSourceInfo) {
 
         String key = getDataSourceKey(jdbcSourceInfo);

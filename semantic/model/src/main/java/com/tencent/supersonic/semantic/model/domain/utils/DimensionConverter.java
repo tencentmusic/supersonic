@@ -77,7 +77,6 @@ public class DimensionConverter {
         return dimensionResp;
     }
 
-
     public static DimensionYamlTpl convert2DimensionYamlTpl(Dimension dimension) {
         DimensionYamlTpl dimensionYamlTpl = new DimensionYamlTpl();
         BeanUtils.copyProperties(dimension, dimensionYamlTpl);

@@ -44,7 +44,6 @@ public abstract class BaseMapper implements SchemaMapper {
 
     public abstract void doMap(QueryContext queryContext);
 
-
     public void addToSchemaMap(SchemaMapInfo schemaMap, Long modelId, SchemaElementMatch newElementMatch) {
         Map<Long, List<SchemaElementMatch>> modelElementMatches = schemaMap.getModelElementMatches();
         List<SchemaElementMatch> schemaElementMatches = modelElementMatches.putIfAbsent(modelId, new ArrayList<>());

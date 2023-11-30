@@ -10,5 +10,4 @@ public interface ModelDOCustomMapper {
 
     void batchUpdateStatus(List<ModelDO> modelDOS);
 
-
 }

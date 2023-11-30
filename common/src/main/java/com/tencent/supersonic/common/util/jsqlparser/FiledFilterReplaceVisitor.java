@@ -53,7 +53,6 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
         }
     }
 
-
     @Override
     public void visit(GreaterThan expr) {
         List<Expression> expressions = parserFilter(expr, JsqlConstants.GREATER_THAN_CONSTANT);
@@ -73,7 +72,6 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
     public List<Expression> getWaitingForAdds() {
         return waitingForAdds;
     }
-
 
     public List<Expression> parserFilter(ComparisonOperator comparisonOperator, String condExpr) {
         List<Expression> result = new ArrayList<>();

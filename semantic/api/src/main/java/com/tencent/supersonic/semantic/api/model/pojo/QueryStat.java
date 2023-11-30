@@ -51,7 +51,6 @@ public class QueryStat {
     private String resultCacheKey;
     private String queryOptMode;
 
-
     public QueryStat setQueryOptMode(String queryOptMode) {
         this.queryOptMode = queryOptMode;
         return this;
@@ -218,7 +217,6 @@ public class QueryStat {
         }
         return JSONObject.parseArray(metrics, String.class);
     }
-
 
     public List<String> getDimensionListBizName() {
         return JSONObject.parseArray(dimensions, String.class);

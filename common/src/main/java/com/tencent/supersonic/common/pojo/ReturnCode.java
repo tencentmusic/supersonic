@@ -15,7 +15,6 @@ public enum ReturnCode {
         this.message = message;
     }
 
-
     public int getCode() {
         return code;
     }

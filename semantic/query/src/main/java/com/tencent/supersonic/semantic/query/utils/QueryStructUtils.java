@@ -92,7 +92,6 @@ public class QueryStructUtils {
         this.catalog = catalog;
     }
 
-
     private List<Long> getDimensionIds(QueryStructReq queryStructCmd) {
         List<Long> dimensionIds = new ArrayList<>();
         List<DimensionResp> dimensions = catalog.getDimensions(queryStructCmd.getModelIds());
@@ -167,7 +166,6 @@ public class QueryStructUtils {
         log.info("dateDate:{}", dateDate);
         return dateModeUtils.getDateWhereStr(dateInfo, dateDate);
     }
-
 
     public String generateWhere(QueryStructReq queryStructCmd) {
         String whereClauseFromFilter = sqlFilterUtils.getWhereClause(queryStructCmd.getOriginalFilter());
@@ -298,7 +296,6 @@ public class QueryStructUtils {
         }
         return queryStatement.getSql();
     }
-
 
     public String getZipperDateWhereClause(QueryStructReq queryStructCmd) {
         List<ImmutablePair<String, String>> timeRanges = getTimeRanges(queryStructCmd);

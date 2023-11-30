@@ -285,7 +285,6 @@ public class PluginManager {
                 .collect(Collectors.toSet());
     }
 
-
     private static List<ParamOption> getSemanticOption(Plugin plugin) {
         WebBase webBase = JSONObject.parseObject(plugin.getConfig(), WebBase.class);
         if (Objects.isNull(webBase)) {

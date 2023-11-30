@@ -93,7 +93,6 @@ public class CalculateAggConverter implements SemanticConverter {
         return sqlCommand;
     }
 
-
     @Override
     public boolean accept(QueryStructReq queryStructCmd) {
         if (queryStructCmd.getQueryType().isNativeAggQuery()) {
@@ -130,7 +129,6 @@ public class CalculateAggConverter implements SemanticConverter {
         sqlCommend.setVariables(parseSqlReq.getVariables());
         sqlCommend.setSupportWith(parseSqlReq.isSupportWith());
     }
-
 
     /**
      * Ratio
@@ -388,7 +386,6 @@ public class CalculateAggConverter implements SemanticConverter {
         }
     }
 
-
     private String getAllJoinSelect(QueryStructReq queryStructCmd, String alias) {
         String aggStr = queryStructCmd.getAggregators().stream()
                 .map(f -> getSelectField(f, alias) + " as " + getSelectField(f, "")
@@ -402,7 +399,6 @@ public class CalculateAggConverter implements SemanticConverter {
                 : String.join(",", groups) + "," + aggStr;
 
     }
-
 
     private String getGroupDimWithOutTime(QueryStructReq queryStructCmd) {
         String timeDim = getTimeDim(queryStructCmd);
@@ -421,7 +417,6 @@ public class CalculateAggConverter implements SemanticConverter {
         }
         return "";
     }
-
 
     private String getAllSelect(QueryStructReq queryStructCmd, String alias) {
         String aggStr = queryStructCmd.getAggregators().stream().map(f -> getSelectField(f, alias))

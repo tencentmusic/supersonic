@@ -36,7 +36,6 @@ public class FuzzyNameMatchStrategy extends BaseMatchStrategy<FuzzyResult> {
     private SchemaService schemaService;
     private List<SchemaElement> allElements;
 
-
     @Override
     public Map<MatchText, List<FuzzyResult>> match(QueryContext queryContext, List<Term> terms,
             Set<Long> detectModelIds) {
@@ -96,7 +95,6 @@ public class FuzzyNameMatchStrategy extends BaseMatchStrategy<FuzzyResult> {
         allElements.addAll(schemaService.getSemanticSchema().getMetrics());
         return allElements;
     }
-
 
     private Double getThreshold(QueryContext queryContext) {
         Double metricDimensionThresholdConfig = optimizationConfig.getMetricDimensionThresholdConfig();

@@ -36,7 +36,6 @@ public enum DictWordType {
         return NATURE_SPILT + type;
     }
 
-
     public static DictWordType getNatureType(String nature) {
         if (StringUtils.isEmpty(nature) || !nature.startsWith(NATURE_SPILT)) {
             return null;

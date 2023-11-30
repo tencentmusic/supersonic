@@ -45,7 +45,6 @@ public class ChatContextRepositoryImpl implements ChatContextRepository {
         }
     }
 
-
     private ChatContext cast(ChatContextDO contextDO) {
         ChatContext chatContext = new ChatContext();
         chatContext.setChatId(contextDO.getChatId());

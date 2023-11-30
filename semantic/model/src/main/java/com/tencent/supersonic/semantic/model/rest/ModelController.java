@@ -64,7 +64,6 @@ public class ModelController {
         return modelService.getModelListWithAuth(user, domainId, AuthType.ADMIN);
     }
 
-
     @GetMapping("/getModel/{id}")
     public ModelResp getModel(@PathVariable("id") Long id) {
         return modelService.getModel(id);
@@ -82,7 +81,6 @@ public class ModelController {
     public DatabaseResp getModelDatabase(@PathVariable("modelId") Long modelId) {
         return modelService.getDatabaseByModelId(modelId);
     }
-
 
     @PostMapping("/batchUpdateStatus")
     public Boolean batchUpdateStatus(@RequestBody MetaBatchReq metaBatchReq,

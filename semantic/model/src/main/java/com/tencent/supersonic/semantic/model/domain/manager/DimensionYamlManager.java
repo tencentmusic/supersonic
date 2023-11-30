@@ -16,7 +16,6 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class DimensionYamlManager {
 
-
     public static List<DimensionYamlTpl> convert2DimensionYaml(List<Dimension> dimensions) {
         if (CollectionUtils.isEmpty(dimensions)) {
             return new ArrayList<>();
@@ -26,6 +25,5 @@ public class DimensionYamlManager {
                 .map(DimensionConverter::convert2DimensionYamlTpl).collect(Collectors.toList());
         return dimensionYamlTpls;
     }
-
 
 }

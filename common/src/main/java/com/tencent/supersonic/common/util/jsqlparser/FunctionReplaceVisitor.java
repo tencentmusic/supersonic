@@ -49,7 +49,6 @@ public class FunctionReplaceVisitor extends ExpressionVisitorAdapter {
         }
     }
 
-
     @Override
     public void visit(GreaterThan expr) {
         List<Expression> expressions = reparseDate(expr, "<");
@@ -69,7 +68,6 @@ public class FunctionReplaceVisitor extends ExpressionVisitorAdapter {
     public List<Expression> getWaitingForAdds() {
         return waitingForAdds;
     }
-
 
     public List<Expression> reparseDate(ComparisonOperator comparisonOperator, String startDateOperator) {
         List<Expression> result = new ArrayList<>();

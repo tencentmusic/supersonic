@@ -162,7 +162,6 @@ public class DatabaseServiceImpl implements DatabaseService {
         return queryWithColumns(metaQuerySql, databaseResp);
     }
 
-
     @Override
     public QueryResultWithSchemaResp getColumns(Long id, String db, String table) {
         DatabaseResp databaseResp = getDatabase(id);

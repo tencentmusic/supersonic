@@ -45,5 +45,4 @@ public class DomainRepositoryImpl implements DomainRepository {
         return domainDOMapper.selectById(id);
     }
 
-
 }

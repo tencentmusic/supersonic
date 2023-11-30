@@ -133,7 +133,6 @@ public class DimValueAspect {
         filedNameToValueMap.put(fieldName, map);
     }
 
-
     @Around("execution(* com.tencent.supersonic.semantic.query.rest.QueryController.queryByStruct(..))"
             + " || execution(* com.tencent.supersonic.semantic.query.service.QueryService.queryByStruct(..))"
             + " || execution(* com.tencent.supersonic.semantic.query.service.QueryService.queryByStructWithAuth(..))")
@@ -198,7 +197,6 @@ public class DimValueAspect {
         }
         return false;
     }
-
 
     private void rewriteFilter(List<Filter> dimensionFilters, Map<String, Map<String, String>> aliasAndTechNamePair) {
         for (Filter filter : dimensionFilters) {
@@ -277,7 +275,6 @@ public class DimValueAspect {
     private boolean needSkipDimValue(DimValueMap dimValueMap) {
         return Objects.isNull(dimValueMap) || Strings.isEmpty(dimValueMap.getTechName());
     }
-
 
     private Map<String, Map<String, String>> getTechNameToBizName(List<DimensionResp> dimensions) {
         if (CollectionUtils.isEmpty(dimensions)) {

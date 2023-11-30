@@ -191,7 +191,6 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
         }
     }
 
-
     @Override
     public QueryResult execute(User user) {
         String queryMode = parseInfo.getQueryMode();
@@ -284,7 +283,6 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
 
         return matchedQueries;
     }
-
 
     protected QueryStructReq convertQueryStruct() {
         return QueryReqBuilder.buildStructReq(parseInfo);

@@ -62,5 +62,4 @@ public class HavingCorrector extends BaseSemanticCorrector {
         return;
     }
 
-
 }

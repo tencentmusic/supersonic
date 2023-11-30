@@ -120,7 +120,6 @@ class SqlParserSelectHelperTest {
         System.out.println(fieldExpression);
     }
 
-
     @Test
     void getAllFields() {
 
@@ -172,7 +171,6 @@ class SqlParserSelectHelperTest {
 
         Assert.assertEquals(allFields.size(), 3);
     }
-
 
     @Test
     void getSelectFields() {

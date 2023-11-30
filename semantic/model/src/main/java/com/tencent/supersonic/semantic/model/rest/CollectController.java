@@ -27,7 +27,6 @@ public class CollectController {
         this.collectService = collectService;
     }
 
-
     @PostMapping("/createCollectionIndicators")
     public boolean createCollectionIndicators(@RequestBody CollectDO collectDO,
             HttpServletRequest request,
@@ -35,7 +34,6 @@ public class CollectController {
         User user = UserHolder.findUser(request, response);
         return collectService.createCollectionIndicators(user, collectDO.getId());
     }
-
 
     @DeleteMapping("/deleteCollectionIndicators/{id}")
     public boolean deleteCollectionIndicators(@PathVariable Long id,

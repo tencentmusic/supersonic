@@ -29,7 +29,6 @@ public abstract class AuthenticationInterceptor implements HandlerInterceptor {
 
     protected S2ThreadContext s2ThreadContext;
 
-
     protected boolean isExcludedUri(String uri) {
         String excludePathStr = authenticationConfig.getExcludePath();
         if (Strings.isEmpty(excludePathStr)) {
@@ -58,7 +57,6 @@ public abstract class AuthenticationInterceptor implements HandlerInterceptor {
         String internal = request.getHeader(UserConstants.INTERNAL);
         return "true".equalsIgnoreCase(internal);
     }
-
 
     protected void reflectSetparam(HttpServletRequest request, String key, String value) {
         try {

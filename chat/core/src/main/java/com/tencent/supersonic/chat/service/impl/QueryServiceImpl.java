@@ -172,7 +172,6 @@ public class QueryServiceImpl implements QueryService {
         return parseResult;
     }
 
-
     @Override
     @TimeCost
     public QueryResult performExecution(ExecuteQueryReq queryReq) throws Exception {

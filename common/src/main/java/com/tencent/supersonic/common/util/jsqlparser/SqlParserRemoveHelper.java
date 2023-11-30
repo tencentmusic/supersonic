@@ -83,6 +83,7 @@ public class SqlParserRemoveHelper {
         }
         removeWhereExpression(whereExpression, removeFieldNames);
     }
+
     public static String removeNumberCondition(String sql) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         if (selectStatement == null) {

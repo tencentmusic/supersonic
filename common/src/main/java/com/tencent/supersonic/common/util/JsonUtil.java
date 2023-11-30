@@ -171,7 +171,6 @@ public class JsonUtil {
         return INSTANCE.asmapToObject(map, clazz);
     }
 
-
     /**
      * 对象转json
      *
@@ -418,7 +417,6 @@ public class JsonUtil {
         });
     }
 
-
     /**
      * 对象转换成Map
      */
@@ -444,7 +442,6 @@ public class JsonUtil {
         }
         return objectMapper.convertValue(map, clazz);
     }
-
 
     /**
      * Json转换成ListMap

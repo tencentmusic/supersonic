@@ -79,5 +79,4 @@ public class LLMSqlParser implements SemanticParser {
         }
     }
 
-
 }

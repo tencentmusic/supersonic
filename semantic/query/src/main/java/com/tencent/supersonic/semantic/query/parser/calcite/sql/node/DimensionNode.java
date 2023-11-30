@@ -62,5 +62,4 @@ public class DimensionNode extends SemanticNode {
         return expand(dimension, scope);
     }
 
-
 }

@@ -32,7 +32,6 @@ public class ChatGptHelper {
     @Value("${llm.chatgpt.proxyPort:}")
     private Integer proxyPort;
 
-
     public ChatGPT getChatGPT() {
         Proxy proxy = null;
         if (!"default".equals(proxyIp)) {
@@ -75,7 +74,6 @@ public class ChatGptHelper {
         Message res = getChatCompletion(system, message);
         return res.getContent();
     }
-
 
     public String mockAlias(String mockType,
                             String name,
@@ -124,7 +122,6 @@ public class ChatGptHelper {
         return res.getContent();
     }
 
-
     public String mockDimensionValueAlias(String json) {
         String msg = "Assuming you are a professional data analyst specializing in indicators,for you a json list，"
                 + "the required content to follow is as follows: "
@@ -144,11 +141,9 @@ public class ChatGptHelper {
         return res.getContent();
     }
 
-
     public static void main(String[] args) {
         ChatGptHelper chatGptHelper = new ChatGptHelper();
         System.out.println(chatGptHelper.mockAlias("", "", "", "", "", false));
     }
-
 
 }

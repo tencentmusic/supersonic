@@ -80,7 +80,6 @@ public class DatasourceYamlManager {
         return identifyYamlTpl;
     }
 
-
     private static void addInterCntMetric(String datasourceEnName, ModelDetail datasourceDetail) {
         Measure measure = new Measure();
         measure.setExpr("1");
@@ -92,6 +91,5 @@ public class DatasourceYamlManager {
         measure.setCreateMetric("true");
         datasourceDetail.getMeasures().add(measure);
     }
-
 
 }

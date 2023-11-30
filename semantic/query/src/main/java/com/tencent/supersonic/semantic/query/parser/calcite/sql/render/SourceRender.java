@@ -320,5 +320,4 @@ public class SourceRender extends Renderer {
         super.tableView = joinRender.getTableView();
     }
 
-
 }

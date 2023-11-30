@@ -128,7 +128,6 @@ public class MaterializationServiceImpl implements MaterializationService {
         throw new Exception("cant find MaterializationSource");
     }
 
-
     protected List<String> getMetric(MetricSchemaResp metricSchemaResp) {
         if (Objects.nonNull(metricSchemaResp.getTypeParams()) && metricSchemaResp.getTypeParams().getExpr()
                 .contains(queryStructUtils.getVariablePrefix())) {
@@ -137,4 +136,5 @@ public class MaterializationServiceImpl implements MaterializationService {
         }
         return Arrays.asList(metricSchemaResp.getBizName());
     }
+
 }

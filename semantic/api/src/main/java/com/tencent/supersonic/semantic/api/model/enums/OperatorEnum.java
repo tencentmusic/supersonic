@@ -29,5 +29,4 @@ public enum OperatorEnum {
         return operator;
     }
 
-
 }
