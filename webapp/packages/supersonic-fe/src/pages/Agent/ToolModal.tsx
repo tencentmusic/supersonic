@@ -113,7 +113,8 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
         <FormItem name="name" label="名称">
           <Input placeholder="请输入工具名称" />
         </FormItem>
-        {(toolType === AgentToolTypeEnum.RULE || toolType === AgentToolTypeEnum.LLM_S2SQL) && (
+        {(toolType === AgentToolTypeEnum.NL2SQL_RULE ||
+          toolType === AgentToolTypeEnum.NL2SQL_LLM) && (
           <FormItem name="modelIds" label="主题域">
             <Select
               options={modelList.map((model) => ({ label: model.name, value: model.id }))}
@@ -122,7 +123,7 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
             />
           </FormItem>
         )}
-        {toolType === AgentToolTypeEnum.LLM_S2SQL && (
+        {toolType === AgentToolTypeEnum.NL2SQL_LLM && (
           <FormItem name="exampleQuestions" label="示例问题">
             <div className={styles.paramsSection}>
               {examples.map((example) => {
@@ -158,7 +159,7 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
             </div>
           </FormItem>
         )}
-        {toolType === AgentToolTypeEnum.INTERPRET && (
+        {toolType === AgentToolTypeEnum.ANALYTICS && (
           <>
             <FormItem name="modelId" label="主题域">
               <Select
@@ -240,7 +241,7 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
             />
           </FormItem>
         )}
-        {toolType === AgentToolTypeEnum.RULE && (
+        {toolType === AgentToolTypeEnum.NL2SQL_RULE && (
           <FormItem name="queryTypes" label="查询模式">
             <Select
               placeholder="请选择查询模式"
