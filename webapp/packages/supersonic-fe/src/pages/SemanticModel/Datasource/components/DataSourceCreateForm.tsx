@@ -432,7 +432,9 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       maskClosable={false}
       open={createModalVisible}
       footer={renderFooter()}
-      onCancel={onCancel}
+      onCancel={() => {
+        onCancel?.();
+      }}
     >
       <Steps style={{ marginBottom: 28 }} size="small" current={currentStep}>
         <Step title="基本信息" />

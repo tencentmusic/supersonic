@@ -11,4 +11,8 @@ public class WebBase {
 
     private List<ParamOption> paramOptions = Lists.newArrayList();
 
+    public List<ParamOption> getParams() {
+        return paramOptions;
+    }
+
 }

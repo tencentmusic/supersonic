@@ -43,8 +43,8 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
   const [scriptColumns, setScriptColumns] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!dataSourceItem || !open) {
-      setCreateDataSourceModalOpen(open);
+    if (!dataSourceItem?.id || !open) {
+      setCreateDataSourceModalOpen(true);
       return;
     }
     if (dataSourceItem?.modelDetail?.queryType === 'table_query') {
