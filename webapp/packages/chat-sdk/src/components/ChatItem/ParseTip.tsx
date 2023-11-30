@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { AGG_TYPE_MAP, PREFIX_CLS } from '../../common/constants';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
-import { Button, DatePicker } from 'antd';
+import { Button, DatePicker, Tag } from 'antd';
 import { CheckCircleFilled, ReloadOutlined } from '@ant-design/icons';
 import Loading from './Loading';
 import FilterItem from './FilterItem';
@@ -89,7 +89,7 @@ const ParseTip: React.FC<Props> = ({
 
   const {
     modelId,
-    modelName,
+    model,
     dimensions,
     metrics,
     aggType,
@@ -100,6 +100,8 @@ const ParseTip: React.FC<Props> = ({
     elementMatches,
     nativeQuery,
   } = currentParseInfo || {};
+
+  const { modelNames } = model || {};
 
   const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
 
@@ -149,7 +151,11 @@ const ParseTip: React.FC<Props> = ({
             ) : (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>数据模型：</div>
-                <div className={itemValueClass}>{modelName}</div>
+                <div className={itemValueClass}>
+                  {modelNames?.map(modelName => (
+                    <Tag key={modelName}>{modelName}</Tag>
+                  ))}
+                </div>
               </div>
             )}
             {(queryType === 'METRIC' || queryType === 'TAG') && (
