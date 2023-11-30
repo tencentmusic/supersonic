@@ -59,7 +59,6 @@ public class LLMRequestService {
     @Autowired
     private OptimizationConfig optimizationConfig;
 
-
     public boolean check(QueryContext queryCtx) {
         QueryReq request = queryCtx.getRequest();
         if (StringUtils.isEmpty(llmParserConfig.getUrl())) {
@@ -192,7 +191,6 @@ public class LLMRequestService {
         return extraInfoSb.toString();
     }
 
-
     protected List<ElementValue> getValueList(QueryContext queryCtx, ModelCluster modelCluster) {
         Map<Long, String> itemIdToName = getItemIdToName(modelCluster);
 
@@ -223,7 +221,6 @@ public class LLMRequestService {
                 .collect(Collectors.toMap(SchemaElement::getId, SchemaElement::getName, (value1, value2) -> value2));
     }
 
-
     private Set<String> getTopNFieldNames(ModelCluster modelCluster, LLMParserConfig llmParserConfig) {
         SemanticSchema semanticSchema = schemaService.getSemanticSchema();
         Set<String> results = semanticSchema.getDimensions(modelCluster.getModelIds()).stream()
@@ -241,7 +238,6 @@ public class LLMRequestService {
         results.addAll(metrics);
         return results;
     }
-
 
     protected Set<String> getMatchedFieldNames(QueryContext queryCtx, ModelCluster modelCluster) {
         Map<Long, String> itemIdToName = getItemIdToName(modelCluster);

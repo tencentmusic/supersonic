@@ -299,7 +299,6 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         return chatDetailConfig;
     }
 
-
     public void addDemoChatConfig_6() {
         ChatConfigBaseReq chatConfigBaseReq = new ChatConfigBaseReq();
         chatConfigBaseReq.setModelId(6L);
@@ -374,7 +373,6 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
         chatConfigBaseReq.setRecommendedQuestions(recommendedQuestions);
         configService.addConfig(chatConfigBaseReq, user);
     }
-
 
     private void addPlugin_1() {
         Plugin plugin1 = new Plugin();
@@ -501,6 +499,5 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
             log.error("Failed to add sample chats", e);
         }
     }
-
 
 }

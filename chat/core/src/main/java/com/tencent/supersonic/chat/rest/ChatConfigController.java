@@ -42,7 +42,6 @@ public class ChatConfigController {
 
     private SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
 
-
     @PostMapping
     public Long addChatConfig(@RequestBody ChatConfigBaseReq extendBaseCmd,
                               HttpServletRequest request,
@@ -59,7 +58,6 @@ public class ChatConfigController {
         return configService.editConfig(extendEditCmd, user);
     }
 
-
     @PostMapping("/search")
     public List<ChatConfigResp> search(@RequestBody ChatConfigFilter filter,
                                        HttpServletRequest request,
@@ -67,7 +65,6 @@ public class ChatConfigController {
         User user = UserHolder.findUser(request, response);
         return configService.search(filter, user);
     }
-
 
     @GetMapping("/richDesc/{modelId}")
     public ChatConfigRichResp getModelExtendRichInfo(@PathVariable("modelId") Long modelId) {
@@ -122,6 +119,5 @@ public class ChatConfigController {
         User user = UserHolder.findUser(request, response);
         return semanticInterpreter.getMetricPage(pageMetricReq, user);
     }
-
 
 }

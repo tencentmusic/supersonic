@@ -370,5 +370,4 @@ public class DimensionServiceImpl implements DimensionService {
                 .modelId(dimensionDO.getModelId()).type(TypeEnums.DIMENSION).build();
     }
 
-
 }

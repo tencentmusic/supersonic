@@ -76,5 +76,4 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
         s2ThreadContext.set(threadContext);
     }
 
-
 }

@@ -19,7 +19,6 @@ public interface FileHandler {
      */
     void createDir(String path);
 
-
     Boolean existPath(String path);
 
     /**

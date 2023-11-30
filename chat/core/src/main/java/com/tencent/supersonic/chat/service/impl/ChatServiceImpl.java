@@ -72,7 +72,6 @@ public class ChatServiceImpl implements ChatService {
         return null;
     }
 
-
     @Override
     public ChatContext getOrCreateContext(int chatId) {
         return chatContextRepository.getOrCreateContext(chatId);
@@ -89,7 +88,6 @@ public class ChatServiceImpl implements ChatService {
         log.debug("switchContext ChatContext {}", chatCtx);
         chatCtx.setParseInfo(new SemanticParseInfo());
     }
-
 
     @Override
     public Boolean addChat(User user, String chatName, Integer agentId) {
@@ -175,7 +173,6 @@ public class ChatServiceImpl implements ChatService {
         showCaseResp.setShowCaseMap(showCaseMap);
         return showCaseResp;
     }
-
 
     private void fillParseInfo(List<QueryResp> queryResps) {
         List<Long> queryIds = queryResps.stream()

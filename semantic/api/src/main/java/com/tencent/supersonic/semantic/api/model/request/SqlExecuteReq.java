@@ -23,5 +23,4 @@ public class SqlExecuteReq {
         return String.format(LIMIT_WRAPPER, sql);
     }
 
-
 }

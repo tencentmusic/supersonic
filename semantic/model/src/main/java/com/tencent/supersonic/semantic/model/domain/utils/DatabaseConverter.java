@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 public class DatabaseConverter {
 
-
     public static Database convert(DatabaseReq databaseReq) {
         Database database = new Database();
         BeanUtils.copyProperties(databaseReq, database);
@@ -36,7 +35,6 @@ public class DatabaseConverter {
         return databaseDO;
     }
 
-
     public static DatabaseDO convert(Database database) {
         DatabaseDO databaseDO = new DatabaseDO();
         BeanUtils.copyProperties(database, databaseDO);
@@ -45,7 +43,6 @@ public class DatabaseConverter {
         databaseDO.setViewer(String.join(",", database.getViewers()));
         return databaseDO;
     }
-
 
     public static DatabaseResp convert(DatabaseDO databaseDO) {
         DatabaseResp databaseResp = new DatabaseResp();
@@ -63,6 +60,5 @@ public class DatabaseConverter {
         }
         return databaseResp;
     }
-
 
 }

@@ -52,7 +52,6 @@ public class SchemaServiceImpl implements SchemaService {
         this.domainService = domainService;
     }
 
-
     @Override
     public List<ModelSchemaResp> fetchModelSchema(ModelSchemaFilterReq filter, User user) {
         List<ModelSchemaResp> domainSchemaDescList = modelService.fetchModelSchema(filter);
@@ -64,7 +63,6 @@ public class SchemaServiceImpl implements SchemaService {
         fillCnt(domainSchemaDescList, statInfos);
         return domainSchemaDescList;
     }
-
 
     private void fillCnt(List<ModelSchemaResp> domainSchemaDescList, List<ItemUseResp> statInfos) {
 

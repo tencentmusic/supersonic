@@ -11,7 +11,6 @@ import java.util.Map;
 
 class DataTransformUtilsTest {
 
-
     @Test
     public void testTransform() {
         List<Map<String, Object>> inputData = new ArrayList<>();

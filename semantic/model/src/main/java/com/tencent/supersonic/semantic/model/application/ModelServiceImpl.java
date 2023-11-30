@@ -580,7 +580,6 @@ public class ModelServiceImpl implements ModelService {
         return false;
     }
 
-
     @Override
     public void getModelYamlTplByModelIds(Set<Long> modelIds, Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
             List<DataModelYamlTpl> dataModelYamlTplList, List<MetricYamlTpl> metricYamlTplList,
@@ -616,6 +615,5 @@ public class ModelServiceImpl implements ModelService {
         datasource.setDatabaseId(modelResp.getDatabaseId());
         return datasource;
     }
-
 
 }

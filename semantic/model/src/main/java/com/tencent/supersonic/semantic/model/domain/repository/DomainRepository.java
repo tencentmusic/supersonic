@@ -8,7 +8,6 @@ import java.util.List;
 
 public interface DomainRepository {
 
-
     void createDomain(DomainDO metaDomainDO);
 
     void updateDomain(DomainDO metaDomainDO);

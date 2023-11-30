@@ -31,7 +31,6 @@ public class KnowledgeServiceImpl implements KnowledgeService {
         SearchService.loadSuffix(suffixes);
     }
 
-
     public void reloadAllData(List<DictWord> natures) {
         // 1. reload custom knowledge
         try {

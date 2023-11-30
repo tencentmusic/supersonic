@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 
 public class ModelConverter {
 
-
     public static ModelDO convert(ModelReq modelReq, User user) {
         ModelDO modelDO = new ModelDO();
         ModelDetail modelDetail = getModelDetail(modelReq);
@@ -71,8 +70,6 @@ public class ModelConverter {
         }
         return modelResp;
     }
-
-
 
     public static ModelDO convert(ModelDO modelDO, ModelReq modelReq, User user) {
         ModelDetail modelDetail = getModelDetail(modelReq);
@@ -142,7 +139,6 @@ public class ModelConverter {
         return modelDescs;
     }
 
-
     private static boolean isCreateDimension(Dim dim) {
         return dim.getIsCreateDimension() == 1
                 && StringUtils.isNotBlank(dim.getName())
@@ -185,7 +181,6 @@ public class ModelConverter {
                 .map(identify -> convert(identify, modelDO)).collect(Collectors.toList()));
         return dimensionReqs;
     }
-
 
     public static List<MetricReq> convertMetricList(ModelDO modelDO) {
         ModelDetail modelDetail = JSONObject.parseObject(modelDO.getModelDetail(),

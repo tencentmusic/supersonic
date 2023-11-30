@@ -51,7 +51,6 @@ public class DimensionController {
         return true;
     }
 
-
     @PostMapping("/updateDimension")
     public Boolean updateDimension(@RequestBody DimensionReq dimensionReq,
                                    HttpServletRequest request,
@@ -78,7 +77,6 @@ public class DimensionController {
         return dimensionService.mockAlias(dimensionReq, "dimension", user);
     }
 
-
     @PostMapping("/mockDimensionValuesAlias")
     public List<DimValueMap> mockDimensionValuesAlias(@RequestBody DimensionReq dimensionReq,
                                                       HttpServletRequest request,
@@ -99,19 +97,16 @@ public class DimensionController {
         return dimensionService.getDimensionInModelCluster(modelId);
     }
 
-
     @GetMapping("/{modelId}/{dimensionName}")
     public DimensionResp getDimensionDescByNameAndId(@PathVariable("modelId") Long modelId,
                                                      @PathVariable("dimensionName") String dimensionBizName) {
         return dimensionService.getDimension(dimensionBizName, modelId);
     }
 
-
     @PostMapping("/queryDimension")
     public PageInfo<DimensionResp> queryDimension(@RequestBody PageDimensionReq pageDimensionReq) {
         return dimensionService.queryDimension(pageDimensionReq);
     }
-
 
     @DeleteMapping("deleteDimension/{id}")
     public Boolean deleteDimension(@PathVariable("id") Long id,
@@ -122,13 +117,11 @@ public class DimensionController {
         return true;
     }
 
-
     @GetMapping("/getAllHighSensitiveDimension")
     public List<DimensionResp> getAllHighSensitiveDimension() {
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
         return dimensionService.getDimensions(metaFilter);
     }
-
 
 }

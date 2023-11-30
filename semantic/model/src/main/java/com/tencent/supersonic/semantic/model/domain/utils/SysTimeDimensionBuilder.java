@@ -25,7 +25,6 @@ public class SysTimeDimensionBuilder {
         log.debug("addSysTimeDimension after:{}, engineAdaptor:{}", dims, engineAdaptor);
     }
 
-
     private static Dim generateSysDayDimension(Dim timeDim, EngineAdaptor engineAdaptor) {
         Dim dim = new Dim();
         dim.setBizName(TimeDimensionEnum.DAY.getName());
@@ -76,6 +75,5 @@ public class SysTimeDimensionBuilder {
         }
         return null;
     }
-
 
 }

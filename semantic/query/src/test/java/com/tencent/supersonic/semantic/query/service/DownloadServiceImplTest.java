@@ -73,7 +73,6 @@ class DownloadServiceImplTest {
         return dimSchemaResp;
     }
 
-
     private MetricSchemaResp mockMetricPv() {
         return mockMetric(1L, "pv", "访问次数", Lists.newArrayList(1L, 2L));
     }

@@ -86,7 +86,6 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         return parseResult.getLinkingValues();
     }
 
-
     private void updateFieldValueByLinkingValue(SemanticParseInfo semanticParseInfo) {
         List<ElementValue> linking = getLinkingValues(semanticParseInfo);
         if (CollectionUtils.isEmpty(linking)) {

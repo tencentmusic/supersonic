@@ -54,7 +54,6 @@ public class FilterRemoveVisitor extends ExpressionVisitorAdapter {
         expr.setLeftExpression(new LongValue(0L));
     }
 
-
     @Override
     public void visit(MinorThanEquals expr) {
         if (!isRemove(expr.getLeftExpression())) {
@@ -63,7 +62,6 @@ public class FilterRemoveVisitor extends ExpressionVisitorAdapter {
         expr.setRightExpression(new LongValue(1L));
         expr.setLeftExpression(new LongValue(1L));
     }
-
 
     @Override
     public void visit(GreaterThan expr) {

@@ -86,7 +86,6 @@ public class HeuristicModelResolver implements ModelResolver {
         return null;
     }
 
-
     public static Map<String, ModelMatchResult> getModelTypeMap(SchemaModelClusterMapInfo schemaMap) {
         Map<String, ModelMatchResult> modelCount = new HashMap<>();
         for (Map.Entry<String, List<SchemaElementMatch>> entry : schemaMap.getModelElementMatches().entrySet()) {
@@ -113,7 +112,6 @@ public class HeuristicModelResolver implements ModelResolver {
         }
         return modelCount;
     }
-
 
     public String resolve(QueryContext queryContext, ChatContext chatCtx, Set<Long> restrictiveModels) {
         SchemaModelClusterMapInfo mapInfo = queryContext.getModelClusterMapInfo();

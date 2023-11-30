@@ -52,5 +52,4 @@ public class DomainConvert {
         return domainResp;
     }
 
-
 }

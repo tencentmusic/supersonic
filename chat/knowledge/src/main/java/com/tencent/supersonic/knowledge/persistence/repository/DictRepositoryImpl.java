@@ -44,7 +44,6 @@ public class DictRepositoryImpl implements DictRepository {
         return dictTaskDO.getId();
     }
 
-
     @Override
     public Boolean updateDictTaskStatus(Integer status, DictTaskDO dictTaskDO) {
         dictTaskDO.setStatus(status);

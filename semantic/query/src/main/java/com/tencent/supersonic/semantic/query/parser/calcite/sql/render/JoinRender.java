@@ -199,7 +199,6 @@ public class JoinRender extends Renderer {
                 Collectors.toSet());
     }
 
-
     private boolean getMatchMetric(SemanticSchema schema, Set<String> sourceMeasure, String m,
             List<String> queryMetrics) {
         Optional<Metric> metric = schema.getMetrics().stream().filter(mm -> mm.getName().equalsIgnoreCase(m))
@@ -296,7 +295,6 @@ public class JoinRender extends Renderer {
         }
         return matchJoinRelation;
     }
-
 
     private SqlNode getCondition(JoinRelation joinRelation,
             SqlValidatorScope scope) throws Exception {

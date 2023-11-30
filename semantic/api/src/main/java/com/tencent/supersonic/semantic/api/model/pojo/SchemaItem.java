@@ -30,7 +30,6 @@ public class SchemaItem extends RecordInfo {
 
     private Integer sensitiveLevel = SensitiveLevelEnum.LOW.getCode();
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {

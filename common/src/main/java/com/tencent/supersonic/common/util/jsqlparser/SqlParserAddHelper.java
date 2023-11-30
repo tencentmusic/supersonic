@@ -141,7 +141,6 @@ public class SqlParserAddHelper {
         return selectStatement.toString();
     }
 
-
     public static String addWhere(String sql, Expression expression) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();

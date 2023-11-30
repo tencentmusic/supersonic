@@ -43,7 +43,6 @@ class SqlParserSelectFunctionHelperTest {
         Assert.assertEquals(hasAggregateFunction, true);
     }
 
-
     @Test
     void hasFunction() throws JSQLParserException {
 

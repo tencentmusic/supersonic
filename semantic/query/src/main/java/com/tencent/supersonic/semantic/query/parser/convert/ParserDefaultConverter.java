@@ -42,7 +42,6 @@ public class ParserDefaultConverter implements SemanticConverter {
         BeanUtils.copyProperties(metricReq, metricCommand);
     }
 
-
     public MetricReq generateSqlCommand(Catalog catalog, QueryStructReq queryStructCmd) {
         MetricReq sqlCommend = new MetricReq();
         sqlCommend.setMetrics(queryStructCmd.getMetrics());
@@ -71,6 +70,5 @@ public class ParserDefaultConverter implements SemanticConverter {
 
         return sqlCommend;
     }
-
 
 }

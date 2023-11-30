@@ -104,7 +104,6 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
         return materializationRespList.get(0);
     }
 
-
     @Override
     public Boolean addMaterializationElementConf(MaterializationElementReq materializationElementReq, User user) {
         log.info("materializationElementReq:{}, user:{}", JsonUtil.toString(materializationElementReq),
@@ -292,7 +291,6 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
         return materializationElementRepository.cleanMaterializationElement(materializationId);
     }
 
-
     @Override
     public List<MaterializationElementModelResp> getMaterializationElementModels(Long materializationId, User user) {
         MaterializationResp materializationResp = materializationRepository.getMaterialization(materializationId);
@@ -473,7 +471,6 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
         }
     }
 
-
     private String getDataSourceMeasure(List<MeasureResp> measureRespList, String bizName) {
         if (!CollectionUtils.isEmpty(measureRespList)) {
             Optional<MeasureResp> measure = measureRespList.stream()
@@ -484,6 +481,5 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
         }
         return "";
     }
-
 
 }

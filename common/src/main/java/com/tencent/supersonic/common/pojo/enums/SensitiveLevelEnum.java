@@ -17,5 +17,4 @@ public enum SensitiveLevelEnum {
         return code;
     }
 
-
 }

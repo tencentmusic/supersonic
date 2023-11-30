@@ -5,7 +5,6 @@ import java.util.List;
 
 public interface DatabaseRepository {
 
-
     void createDatabase(DatabaseDO databaseDO);
 
     void updateDatabase(DatabaseDO databaseDO);

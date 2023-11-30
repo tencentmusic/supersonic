@@ -126,7 +126,6 @@ public class MetricAnalyzeQuery extends LLMSemanticQuery {
         }
     }
 
-
     private String replaceAnswer(String text, Map<String, String> replacedMap) {
         for (String key : replacedMap.keySet()) {
             text = text.replaceAll(key, replacedMap.get(key));
@@ -149,7 +148,6 @@ public class MetricAnalyzeQuery extends LLMSemanticQuery {
         return tableBuilder.toString();
     }
 
-
     public String fetchInterpret(String queryText, String dataText) {
         PluginManager pluginManager = ContextUtils.getBean(PluginManager.class);
         LLMAnswerReq lLmAnswerReq = new LLMAnswerReq();
@@ -163,6 +161,5 @@ public class MetricAnalyzeQuery extends LLMSemanticQuery {
         }
         return null;
     }
-
 
 }

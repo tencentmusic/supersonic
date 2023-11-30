@@ -20,7 +20,6 @@ public class UserRepositoryImpl implements UserRepository {
         this.userDOMapper = userDOMapper;
     }
 
-
     @Override
     public List<UserDO> getUserList() {
         return userDOMapper.selectByExample(new UserDOExample());
@@ -39,6 +38,5 @@ public class UserRepositoryImpl implements UserRepository {
         Optional<UserDO> userDOOptional = userDOS.stream().findFirst();
         return userDOOptional.orElse(null);
     }
-
 
 }

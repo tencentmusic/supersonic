@@ -43,7 +43,6 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         }
     }
 
-
     public abstract void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo);
 
     protected Map<String, String> getFieldNameMap(Set<Long> modelIds) {

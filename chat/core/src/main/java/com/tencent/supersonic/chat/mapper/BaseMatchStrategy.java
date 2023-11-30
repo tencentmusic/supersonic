@@ -154,5 +154,4 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
     public abstract void detectByStep(QueryContext queryContext, Set<T> results,
             Set<Long> detectModelIds, Integer startIndex, Integer index, int offset);
 
-
 }

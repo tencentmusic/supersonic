@@ -34,5 +34,4 @@ public class Domain extends SchemaItem {
         return domain;
     }
 
-
 }

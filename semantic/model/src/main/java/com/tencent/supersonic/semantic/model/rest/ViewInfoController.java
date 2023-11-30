@@ -29,7 +29,6 @@ public class ViewInfoController {
         this.viewInfoServiceImpl = viewInfoServiceImpl;
     }
 
-
     @PostMapping("/createOrUpdateViewInfo")
     public ViewInfoDO createOrUpdateViewInfo(@RequestBody ViewInfoReq viewInfoReq, HttpServletRequest request,
             HttpServletResponse response) {
@@ -51,6 +50,5 @@ public class ViewInfoController {
     public List<ModelSchemaRelaResp> getDomainSchema(@PathVariable("domainId") Long domainId) {
         return viewInfoServiceImpl.getDomainSchema(domainId);
     }
-
 
 }

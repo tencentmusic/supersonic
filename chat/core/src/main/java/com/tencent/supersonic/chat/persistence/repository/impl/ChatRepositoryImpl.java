@@ -30,7 +30,6 @@ public class ChatRepositoryImpl implements ChatRepository {
         return chatMapper.getAll(creator, agentId);
     }
 
-
     @Override
     public Boolean updateChatName(Long chatId, String chatName, String lastTime, String creator) {
         return chatMapper.updateChatName(chatId, chatName, lastTime, creator);
