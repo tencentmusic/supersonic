@@ -68,7 +68,7 @@ def query_chroma_collection(collection:Collection, query_texts:List[str]=None, q
     outer_opt = '$and'
     inner_opt = '$eq'
 
-    if filter_condition is not None:
+    if filter_condition is not None and len(filter_condition) > 0:
         if len(filter_condition)==1:
             outer_filter = filter_condition
         else:
@@ -79,10 +79,8 @@ def query_chroma_collection(collection:Collection, query_texts:List[str]=None, q
 
     logger.info('outer_filter: {}'.format(outer_filter))
 
-    res = collection.query(query_texts=query_texts, query_embeddings=query_embeddings, 
-                           n_results=n_results, where=outer_filter)
-    return res
-
+    return collection.query(query_texts=query_texts, query_embeddings=query_embeddings,
+                               n_results=n_results, where=outer_filter)
 
 def parse_retrieval_chroma_collection_query(res:List[Mapping[str, Any]]):
     parsed_res = [[] for _ in range(0, len(res['ids']))]

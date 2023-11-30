@@ -88,5 +88,4 @@ public class ComponentFactory {
         queryExecutors.add(ContextUtils.getContext().getBean("JdbcExecutor", JdbcExecutor.class));
     }
 
-
 }

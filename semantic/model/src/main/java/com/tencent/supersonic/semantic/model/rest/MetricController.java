@@ -40,7 +40,6 @@ public class MetricController {
         this.metricService = metricService;
     }
 
-
     @PostMapping("/creatExprMetric")
     public Boolean creatExprMetric(@RequestBody MetricReq metricReq,
             HttpServletRequest request,
@@ -68,7 +67,6 @@ public class MetricController {
         return true;
     }
 
-
     @PostMapping("/mockMetricAlias")
     public List<String> mockMetricAlias(@RequestBody MetricReq metricReq,
                                         HttpServletRequest request,
@@ -82,7 +80,6 @@ public class MetricController {
         MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(modelId));
         return metricService.getMetrics(metaFilter);
     }
-
 
     @PostMapping("/queryMetric")
     public PageInfo<MetricResp> queryMetric(@RequestBody PageMetricReq pageMetricReq,
@@ -121,12 +118,10 @@ public class MetricController {
         return metricService.getMetrics(metricFilter);
     }
 
-
     @GetMapping("/getMetricTags")
     public Set<String> getMetricTags() {
         return metricService.getMetricTags();
     }
-
 
     @GetMapping("/getDrillDownDimension")
     public List<DrillDownDimension> getDrillDownDimension(Long metricId) {

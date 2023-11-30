@@ -45,7 +45,6 @@ public class QueryController {
     @Autowired
     private DownloadService downloadService;
 
-
     @PostMapping("/sql")
     public Object queryBySql(@RequestBody QueryS2SQLReq queryS2SQLReq,
             HttpServletRequest request,

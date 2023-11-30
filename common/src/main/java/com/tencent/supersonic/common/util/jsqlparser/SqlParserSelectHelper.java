@@ -81,7 +81,6 @@ public class SqlParserSelectHelper {
         });
     }
 
-
     public static List<String> getSelectFields(String sql) {
         List<PlainSelect> plainSelectList = getPlainSelect(sql);
         if (CollectionUtils.isEmpty(plainSelectList)) {

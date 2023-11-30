@@ -84,6 +84,7 @@ public class SemanticSchema extends AbstractSchema {
     public void setMaterializationList(List<Materialization> materializationList) {
         semanticModel.setMaterializationList(materializationList);
     }
+
     public List<Materialization> getMaterializationList() {
         return semanticModel.getMaterializationList();
     }
@@ -120,9 +121,9 @@ public class SemanticSchema extends AbstractSchema {
             return this;
         }
 
-
         public SemanticSchema build() {
             return new SemanticSchema(rootPath, tableMap);
         }
     }
+
 }

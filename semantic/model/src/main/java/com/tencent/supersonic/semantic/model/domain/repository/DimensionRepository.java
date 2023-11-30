@@ -6,7 +6,6 @@ import java.util.List;
 
 public interface DimensionRepository {
 
-
     void createDimension(DimensionDO dimensionDO);
 
     void createDimensionBatch(List<DimensionDO> dimensionDOS);

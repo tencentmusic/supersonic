@@ -142,7 +142,6 @@ public class QueryStructReq {
         return stringBuilder.toString();
     }
 
-
     public String generateCommandMd5() {
         return DigestUtils.md5Hex(this.toCustomizedString());
     }
@@ -177,7 +176,6 @@ public class QueryStructReq {
         sb.append('}');
         return sb.toString();
     }
-
 
     /**
      * convert queryStructReq to QueryS2QLReq

@@ -4,11 +4,10 @@ import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
-import com.tencent.supersonic.chat.parser.LLMInterpreter;
-import com.tencent.supersonic.chat.parser.llm.s2sql.ModelResolver;
-import com.tencent.supersonic.chat.postprocessor.PostProcessor;
-import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
-import com.tencent.supersonic.chat.responder.parse.ParseResponder;
+import com.tencent.supersonic.chat.parser.LLMProxy;
+import com.tencent.supersonic.chat.parser.sql.llm.ModelResolver;
+import com.tencent.supersonic.chat.processor.ParseResultProcessor;
+import com.tencent.supersonic.chat.query.QueryResponder;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import java.util.ArrayList;
@@ -19,13 +18,12 @@ public class ComponentFactory {
 
     private static List<SchemaMapper> schemaMappers = new ArrayList<>();
     private static List<SemanticParser> semanticParsers = new ArrayList<>();
-    private static List<SemanticCorrector> s2SQLCorrections = new ArrayList<>();
+    private static List<SemanticCorrector> semanticCorrectors = new ArrayList<>();
     private static SemanticInterpreter semanticInterpreter;
 
-    private static LLMInterpreter llmInterpreter;
-    private static List<PostProcessor> postProcessors = new ArrayList<>();
-    private static List<ParseResponder> parseResponders = new ArrayList<>();
-    private static List<ExecuteResponder> executeResponders = new ArrayList<>();
+    private static LLMProxy llmProxy;
+    private static List<ParseResultProcessor> responseProcessors = new ArrayList<>();
+    private static List<QueryResponder> executeResponders = new ArrayList<>();
     private static ModelResolver modelResolver;
 
     public static List<SchemaMapper> getSchemaMappers() {
@@ -36,22 +34,19 @@ public class ComponentFactory {
         return CollectionUtils.isEmpty(semanticParsers) ? init(SemanticParser.class, semanticParsers) : semanticParsers;
     }
 
-    public static List<SemanticCorrector> getSqlCorrections() {
-        return CollectionUtils.isEmpty(s2SQLCorrections) ? init(SemanticCorrector.class,
-                s2SQLCorrections) : s2SQLCorrections;
+    public static List<SemanticCorrector> getSemanticCorrectors() {
+        return CollectionUtils.isEmpty(semanticCorrectors) ? init(SemanticCorrector.class,
+                semanticCorrectors) : semanticCorrectors;
     }
 
-    public static List<PostProcessor> getPostProcessors() {
-        return CollectionUtils.isEmpty(postProcessors) ? init(PostProcessor.class, postProcessors) : postProcessors;
+    public static List<ParseResultProcessor> getPostProcessors() {
+        return CollectionUtils.isEmpty(responseProcessors) ? init(ParseResultProcessor.class,
+                responseProcessors) : responseProcessors;
     }
 
-    public static List<ParseResponder> getParseResponders() {
-        return CollectionUtils.isEmpty(parseResponders) ? init(ParseResponder.class, parseResponders) : parseResponders;
-    }
-
-    public static List<ExecuteResponder> getExecuteResponders() {
+    public static List<QueryResponder> getExecuteResponders() {
         return CollectionUtils.isEmpty(executeResponders)
-                ? init(ExecuteResponder.class, executeResponders) : executeResponders;
+                ? init(QueryResponder.class, executeResponders) : executeResponders;
     }
 
     public static SemanticInterpreter getSemanticLayer() {
@@ -61,16 +56,11 @@ public class ComponentFactory {
         return semanticInterpreter;
     }
 
-    public static void setSemanticLayer(SemanticInterpreter layer) {
-        semanticInterpreter = layer;
-    }
-
-
-    public static LLMInterpreter getLLMInterpreter() {
-        if (Objects.isNull(llmInterpreter)) {
-            llmInterpreter = init(LLMInterpreter.class);
+    public static LLMProxy getLLMProxy() {
+        if (Objects.isNull(llmProxy)) {
+            llmProxy = init(LLMProxy.class);
         }
-        return llmInterpreter;
+        return llmProxy;
     }
 
     public static ModelResolver getModelResolver() {

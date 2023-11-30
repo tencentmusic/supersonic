@@ -105,7 +105,6 @@ public class DateModeUtils {
                 dateInfo.getEndDate());
     }
 
-
     public String generateMonthSql(LocalDate endData, Long unit, String dateFormatStr) {
         LocalDate dateMax = endData;
         List<String> months = generateMonthStr(dateMax, unit, dateFormatStr);
@@ -226,7 +225,6 @@ public class DateModeUtils {
         }
         return -1L;
     }
-
 
     public String recentDateStr(ItemDateResp dateDate, DateConf dateInfo) {
         if (Objects.isNull(dateDate)) {

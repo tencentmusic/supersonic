@@ -36,7 +36,6 @@ public interface Catalog {
             List<DataModelYamlTpl> dataModelYamlTplList, List<MetricYamlTpl> metricYamlTplList,
             Map<Long, String> modelIdName);
 
-
     ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric);
 
 }

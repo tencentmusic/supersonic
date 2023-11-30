@@ -142,7 +142,6 @@ public class DomainServiceImpl implements DomainService {
         return domainSet;
     }
 
-
     @Override
     public DomainResp getDomain(Long id) {
         Map<Long, String> fullDomainPathMap = getDomainFullPathMap();
@@ -220,11 +219,9 @@ public class DomainServiceImpl implements DomainService {
         return domainFullPathMap;
     }
 
-
     protected DomainDO getDomainDO(Long id) {
         return domainRepository.getDomainById(id);
     }
-
 
     private boolean checkAdminPermission(Set<String> orgIds, User user, DomainResp domainResp) {
         List<String> admins = domainResp.getAdmins();

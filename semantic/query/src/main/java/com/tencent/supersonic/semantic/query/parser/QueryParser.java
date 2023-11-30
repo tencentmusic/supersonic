@@ -49,7 +49,6 @@ public class QueryParser {
         return parser(metricReq);
     }
 
-
     public QueryStatement parser(ParseSqlReq sqlCommend) {
         log.info("parser MetricReq [{}] ", sqlCommend);
         QueryStatement queryStatement = new QueryStatement();
@@ -120,6 +119,5 @@ public class QueryParser {
         }
         return queryStatement;
     }
-
 
 }

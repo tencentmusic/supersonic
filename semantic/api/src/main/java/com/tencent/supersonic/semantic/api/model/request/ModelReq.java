@@ -40,7 +40,6 @@ public class ModelReq extends SchemaItem {
 
     private List<String> adminOrgs = new ArrayList<>();
 
-
     public List<Dim> getTimeDimension() {
         if (CollectionUtils.isEmpty(modelDetail.getDimensions())) {
             return Lists.newArrayList();
@@ -50,7 +49,6 @@ public class ModelReq extends SchemaItem {
                 .collect(Collectors.toList());
     }
 
-
     public String getViewer() {
         return String.join(",", viewers);
     }
@@ -59,7 +57,6 @@ public class ModelReq extends SchemaItem {
         return String.join(",", viewOrgs);
     }
 
-
     public String getAdmin() {
         return String.join(",", admins);
     }
@@ -67,6 +64,5 @@ public class ModelReq extends SchemaItem {
     public String getAdminOrg() {
         return String.join(",", adminOrgs);
     }
-
 
 }

@@ -55,7 +55,6 @@ public class MaterializationConfController {
         return confService.getMaterializationResp(filter, user);
     }
 
-
     @PostMapping("/element")
     public Boolean addMaterializationElementConf(@RequestBody MaterializationElementReq materializationElementReq,
             HttpServletRequest request,
@@ -106,6 +105,5 @@ public class MaterializationConfController {
         //User user = UserHolder.findUser(request, response);
         return confService.getMaterializationSourceResp(filter.getMaterializationId());
     }
-
 
 }

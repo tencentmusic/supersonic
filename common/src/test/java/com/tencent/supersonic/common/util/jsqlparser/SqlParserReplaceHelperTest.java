@@ -100,7 +100,6 @@ class SqlParserReplaceHelperTest {
                         + "ORDER BY 播放量 DESC LIMIT 11", replaceSql);
     }
 
-
     @Test
     void replaceFieldNameByValue() {
 
@@ -349,7 +348,6 @@ class SqlParserReplaceHelperTest {
                         + "FROM CSpider WHERE sys_imp_date = '2023-10-15' GROUP BY song_name HAVING "
                         + "sum(user_id) < (SELECT min(user_id) FROM CSpider WHERE user_id = '英文')", replaceSql);
     }
-
 
     @Test
     void replaceTable() {

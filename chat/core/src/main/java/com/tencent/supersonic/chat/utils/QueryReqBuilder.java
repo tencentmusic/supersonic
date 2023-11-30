@@ -242,5 +242,4 @@ public class QueryReqBuilder {
         return queryStructCmd;
     }
 
-
 }

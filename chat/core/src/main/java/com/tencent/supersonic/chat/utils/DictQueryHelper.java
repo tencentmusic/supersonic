@@ -48,7 +48,6 @@ public class DictQueryHelper {
     @Value("${dimension.white.weight:60000000}")
     private Long dimensionWhiteWeight;
 
-
     public List<String> fetchDimValueSingle(Long modelId, DefaultMetric defaultMetricDesc, Dim4Dict dim4Dict,
             User user) {
         List<String> data = new ArrayList<>();

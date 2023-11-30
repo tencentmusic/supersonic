@@ -48,5 +48,4 @@ public class DateFunctionHelper {
         return unit.getValue();
     }
 
-
 }

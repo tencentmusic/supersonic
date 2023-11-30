@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.response.DictLatestTaskResp;
 import com.tencent.supersonic.chat.config.DefaultMetric;
 import com.tencent.supersonic.chat.config.Dim4Dict;
 import com.tencent.supersonic.chat.persistence.dataobject.DimValueDO;
-import com.tencent.supersonic.chat.service.ChatKnowledgeService;
+import com.tencent.supersonic.chat.service.KnowledgeService;
 import com.tencent.supersonic.chat.utils.DictMetaHelper;
 import com.tencent.supersonic.chat.utils.DictQueryHelper;
 import com.tencent.supersonic.common.pojo.Constants;
@@ -42,7 +42,7 @@ import java.util.HashMap;
 
 @Slf4j
 @Service
-public class ChatKnowledgeServiceImpl implements ChatKnowledgeService {
+public class ChatKnowledgeServiceImpl implements KnowledgeService {
 
     private final DictMetaHelper metaUtils;
     private final DictQueryHelper dictQueryHelper;

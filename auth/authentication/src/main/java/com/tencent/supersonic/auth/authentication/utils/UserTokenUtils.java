@@ -58,7 +58,6 @@ public class UserTokenUtils {
         return generate(claims);
     }
 
-
     public User getUser(HttpServletRequest request) {
         String token = request.getHeader(authenticationConfig.getTokenHttpHeaderKey());
         final Claims claims = getClaims(token);
@@ -119,6 +118,5 @@ public class UserTokenUtils {
                         authenticationConfig.getTokenSecret().getBytes(StandardCharsets.UTF_8))
                 .compact();
     }
-
 
 }

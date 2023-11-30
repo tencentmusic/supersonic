@@ -85,7 +85,6 @@ public class StatUtils {
         return true;
     }
 
-
     public void initStatInfo(QueryS2SQLReq queryS2SQLReq, User facadeUser) {
         QueryStat queryStatInfo = new QueryStat();
         List<String> allFields = SqlParserSelectHelper.getAllFields(queryS2SQLReq.getSql());
@@ -118,8 +117,6 @@ public class StatUtils {
         }
         StatUtils.set(queryStatInfo);
     }
-
-
 
     public void initStatInfo(QueryStructReq queryStructCmd, User facadeUser) {
         QueryStat queryStatInfo = new QueryStat();

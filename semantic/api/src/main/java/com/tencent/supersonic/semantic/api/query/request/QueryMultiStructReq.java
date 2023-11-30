@@ -13,7 +13,6 @@ public class QueryMultiStructReq {
 
     List<QueryStructReq> queryStructReqs;
 
-
     public String toCustomizedString() {
         return JSONObject.toJSONString(queryStructReqs);
     }
@@ -21,4 +20,5 @@ public class QueryMultiStructReq {
     public String generateCommandMd5() {
         return DigestUtils.md5Hex(this.toCustomizedString());
     }
+
 }

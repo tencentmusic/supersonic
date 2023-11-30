@@ -81,7 +81,6 @@ public class CatalogImpl implements Catalog {
         return modelRelaService.getModelRela(modelIds);
     }
 
-
     @Override
     public List<DimensionResp> getDimensions(List<Long> modelIds) {
         MetaFilter metricFilter = new MetaFilter(modelIds);

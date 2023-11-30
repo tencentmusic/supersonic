@@ -12,6 +12,13 @@
         <property name="fileNamePattern" value=".*dataobject.*$"/>
     </module>
 
+    <module name="TreeWalker">
+        <module name="EmptyLineSeparator">
+            <property name="allowMultipleEmptyLines" value="false"/>
+            <property name="tokens" value="METHOD_DEF"/>
+        </module>
+    </module>
+
     <module name="SuppressionFilter">
         <property name="file" value="check/checkstyle/suppressions.xml"/>
         <property name="optional" value="true"/>

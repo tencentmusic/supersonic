@@ -118,7 +118,6 @@ public class QueryUtils {
         });
     }
 
-
     public void fillItemNameInfo(QueryResultWithSchemaResp queryResultWithColumns,
             QueryMultiStructReq queryMultiStructCmd) {
         List<Aggregator> aggregators = queryMultiStructCmd.getQueryStructReqs().stream()
@@ -205,14 +204,12 @@ public class QueryUtils {
         }
     }
 
-
     public void checkSqlParse(QueryStatement sqlParser) {
         if (com.google.common.base.Strings.isNullOrEmpty(sqlParser.getSql())
                 || com.google.common.base.Strings.isNullOrEmpty(sqlParser.getSourceId())) {
             throw new RuntimeException("parse Exception: " + sqlParser.getErrMsg());
         }
     }
-
 
     public QueryStatement sqlParserUnion(QueryMultiStructReq queryMultiStructCmd, List<QueryStatement> sqlParsers) {
         QueryStatement sqlParser = new QueryStatement();

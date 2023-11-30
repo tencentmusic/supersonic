@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface ModelRelaService {
 
-
     void save(ModelRela modelRela, User user);
 
     void update(ModelRela modelRela, User user);

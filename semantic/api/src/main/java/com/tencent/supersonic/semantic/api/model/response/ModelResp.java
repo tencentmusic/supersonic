@@ -43,7 +43,6 @@ public class ModelResp extends SchemaItem {
 
     private Integer metricCnt;
 
-
     public boolean openToAll() {
         return isOpen != null && isOpen == 1;
     }

@@ -29,5 +29,4 @@ public class BeanMapper<T> {
         return (String[]) emptyNames.toArray(result);
     }
 
-
 }

@@ -45,5 +45,4 @@ public class ModelRelaController {
         modelRelaService.delete(id);
     }
 
-
 }

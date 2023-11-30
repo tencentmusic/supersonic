@@ -31,5 +31,4 @@ public enum QueryTypeBackEnum {
         return state;
     }
 
-
 }

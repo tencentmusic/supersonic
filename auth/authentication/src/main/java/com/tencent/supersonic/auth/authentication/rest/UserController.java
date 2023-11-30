@@ -29,7 +29,6 @@ public class UserController {
         this.userService = userService;
     }
 
-
     @GetMapping("/getCurrentUser")
     public User getCurrentUser(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         return UserHolder.findUser(httpServletRequest, httpServletResponse);
@@ -69,6 +68,5 @@ public class UserController {
     public String login(@RequestBody UserReq userCmd) {
         return userService.login(userCmd);
     }
-
 
 }

@@ -55,8 +55,6 @@ public class Dim {
         this.bizName = bizName;
     }
 
-
-
     public static Dim getDefault() {
         return new Dim("日期", "time", "2023-05-28",
                 Constants.DAY_FORMAT,
