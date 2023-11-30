@@ -29,7 +29,7 @@ public class LLMSqlParser implements SemanticParser {
         LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
         //1.determine whether to skip this parser.
-        if (requestService.check(queryCtx)) {
+        if (requestService.isSkip(queryCtx)) {
             return;
         }
         try {

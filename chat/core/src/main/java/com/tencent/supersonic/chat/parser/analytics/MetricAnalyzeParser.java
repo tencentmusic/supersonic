@@ -38,7 +38,7 @@ public class MetricAnalyzeParser implements SemanticParser {
 
     @Override
     public void parse(QueryContext queryContext, ChatContext chatContext) {
-        if (SatisfactionChecker.check(queryContext)) {
+        if (SatisfactionChecker.isSkip(queryContext)) {
             log.info("skip MetricAnalyzeParser");
             return;
         }

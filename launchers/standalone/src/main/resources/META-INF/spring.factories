@@ -46,5 +46,4 @@ com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
 
 com.tencent.supersonic.chat.query.QueryResponder=\
-    com.tencent.supersonic.chat.query.EntityInfoQueryResponder, \
     com.tencent.supersonic.chat.query.SimilarMetricQueryResponder

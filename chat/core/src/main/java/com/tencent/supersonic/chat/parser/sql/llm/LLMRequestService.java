@@ -59,13 +59,13 @@ public class LLMRequestService {
     @Autowired
     private OptimizationConfig optimizationConfig;
 
-    public boolean check(QueryContext queryCtx) {
+    public boolean isSkip(QueryContext queryCtx) {
         QueryReq request = queryCtx.getRequest();
         if (StringUtils.isEmpty(llmParserConfig.getUrl())) {
             log.info("llm parser url is empty, skip {} , llmParserConfig:{}", LLMSqlParser.class, llmParserConfig);
             return true;
         }
-        if (SatisfactionChecker.check(queryCtx)) {
+        if (SatisfactionChecker.isSkip(queryCtx)) {
             log.info("skip {}, queryText:{}", LLMSqlParser.class, request.getQueryText());
             return true;
         }
