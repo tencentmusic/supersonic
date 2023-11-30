@@ -1,8 +1,6 @@
 export const PLUGIN_TYPE_MAP = {
   WEB_PAGE: 'Web页面',
   WEB_SERVICE: 'Web服务',
-  // LLM_S2SQL: 'LLM语义解析',
-  // CONTENT_INTERPRET: '内容解读',
 }
 
 export const PARSE_MODE_MAP = {
