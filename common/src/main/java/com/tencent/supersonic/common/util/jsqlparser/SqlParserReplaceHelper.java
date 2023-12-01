@@ -270,7 +270,7 @@ public class SqlParserReplaceHelper {
         Expression where = ((PlainSelect) selectBody).getWhere();
         SqlDateDiffBase sqlDateCorrecteBase = new SqlDateDiffBase();
         try {
-            ((PlainSelect) selectBody).setWhere(sqlDateCorrecteBase.filteredWhereExpression(where));
+            ((PlainSelect) selectBody).setWhere(sqlDateCorrecteBase.filteredExpression(where));
         } catch (Exception e) {
             log.info("replaceFunction has an exception:{}", e.toString());
         }

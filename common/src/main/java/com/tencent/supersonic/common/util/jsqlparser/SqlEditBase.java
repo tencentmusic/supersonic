@@ -19,7 +19,7 @@ import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 
 import java.util.Objects;
-// mainly edit sql for replacing and removing
+// mainly edit sql for replacing and removing filter in local place
 @Slf4j
 public abstract class SqlEditBase {
     public Expression filteredExpression(Expression where) throws Exception {
@@ -40,17 +40,17 @@ public abstract class SqlEditBase {
             }
         } else if (where instanceof AndExpression) {
             AndExpression andExpression = (AndExpression) where;
-            return filteredNumberExpression(andExpression);
+            return filteredLogicExpression(andExpression);
         } else if (where instanceof OrExpression) {
             OrExpression orExpression = (OrExpression) where;
-            return filteredNumberExpression(orExpression);
+            return filteredLogicExpression(orExpression);
         } else {
-            return replaceComparisonOperatorFunction(where);
+            return dealComparisonOperatorFilter(where);
         }
         return where;
     }
 
-    private <T extends BinaryExpression> Expression filteredNumberExpression(T binaryExpression) throws Exception {
+    private <T extends BinaryExpression> Expression filteredLogicExpression(T binaryExpression) throws Exception {
         Expression leftExpression = filteredExpression(binaryExpression.getLeftExpression());
         Expression rightExpression = filteredExpression(binaryExpression.getRightExpression());
         if (leftExpression != null && rightExpression != null) {
@@ -66,7 +66,7 @@ public abstract class SqlEditBase {
         }
     }
 
-    private Expression replaceComparisonOperatorFunction(Expression expression) throws Exception {
+    private Expression dealComparisonOperatorFilter(Expression expression) throws Exception {
         if (Objects.isNull(expression)) {
             return null;
         }

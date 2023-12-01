@@ -95,8 +95,8 @@ public class SqlParserRemoveHelper {
         //        where = filteredWhereExpression(where);
         //        having = filteredWhereExpression(having);
         try {
-            ((PlainSelect) selectBody).setWhere(sqlNumberCorrecteBase.filteredWhereExpression(where));
-            ((PlainSelect) selectBody).setHaving(sqlNumberCorrecteBase.filteredWhereExpression(having));
+            ((PlainSelect) selectBody).setWhere(sqlNumberCorrecteBase.filteredExpression(where));
+            ((PlainSelect) selectBody).setHaving(sqlNumberCorrecteBase.filteredExpression(having));
         } catch (Exception e) {
             log.info("replaceFunction has an exception:{}", e.toString());
         }
