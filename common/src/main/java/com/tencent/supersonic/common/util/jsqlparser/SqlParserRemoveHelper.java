@@ -4,10 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.Parenthesis;
-import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
-import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
@@ -17,7 +14,6 @@ import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.GroupByElement;
@@ -30,7 +26,6 @@ import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -96,10 +91,15 @@ public class SqlParserRemoveHelper {
         }
         Expression where = ((PlainSelect) selectBody).getWhere();
         Expression having = ((PlainSelect) selectBody).getHaving();
-        where = filteredWhereExpression(where);
-        having = filteredWhereExpression(having);
-        ((PlainSelect) selectBody).setWhere(where);
-        ((PlainSelect) selectBody).setHaving(having);
+        SqlNumberCorrecteBase sqlNumberCorrecteBase = new SqlNumberCorrecteBase();
+        //        where = filteredWhereExpression(where);
+        //        having = filteredWhereExpression(having);
+        try {
+            ((PlainSelect) selectBody).setWhere(sqlNumberCorrecteBase.filteredWhereExpression(where));
+            ((PlainSelect) selectBody).setHaving(sqlNumberCorrecteBase.filteredWhereExpression(having));
+        } catch (Exception e) {
+            log.info("replaceFunction has an exception:{}", e.toString());
+        }
         return selectStatement.toString();
     }
 
@@ -250,91 +250,6 @@ public class SqlParserRemoveHelper {
             ((PlainSelect) selectBody).setGroupByElement(null);
         }
         return selectStatement.toString();
-    }
-
-    private static Expression filteredWhereExpression(Expression where) {
-        if (Objects.isNull(where)) {
-            return null;
-        }
-        if (where instanceof Parenthesis) {
-            Expression expression = filteredWhereExpression(((Parenthesis) where).getExpression());
-            if (expression != null) {
-                try {
-                    Expression parseExpression = CCJSqlParserUtil.parseExpression("(" + expression + ")");
-                    return parseExpression;
-                } catch (JSQLParserException jsqlParserException) {
-                    log.info("jsqlParser has an exception:{}", jsqlParserException.toString());
-                }
-            } else {
-                return expression;
-            }
-        } else if (where instanceof AndExpression) {
-            AndExpression andExpression = (AndExpression) where;
-            return filteredNumberExpression(andExpression);
-        } else if (where instanceof OrExpression) {
-            OrExpression orExpression = (OrExpression) where;
-            return filteredNumberExpression(orExpression);
-        } else {
-            return replaceComparisonOperatorFunction(where);
-        }
-        return where;
-    }
-
-    private static <T extends BinaryExpression> Expression filteredNumberExpression(T binaryExpression) {
-        Expression leftExpression = filteredWhereExpression(binaryExpression.getLeftExpression());
-        Expression rightExpression = filteredWhereExpression(binaryExpression.getRightExpression());
-        if (leftExpression != null && rightExpression != null) {
-            binaryExpression.setLeftExpression(leftExpression);
-            binaryExpression.setRightExpression(rightExpression);
-            return binaryExpression;
-        } else if (leftExpression != null && rightExpression == null) {
-            return leftExpression;
-        } else if (leftExpression == null && rightExpression != null) {
-            return rightExpression;
-        } else {
-            return null;
-        }
-    }
-
-    private static Expression replaceComparisonOperatorFunction(Expression expression) {
-        if (Objects.isNull(expression)) {
-            return null;
-        }
-        if (expression instanceof GreaterThanEquals) {
-            return removeSingleFilter((GreaterThanEquals) expression);
-        } else if (expression instanceof GreaterThan) {
-            return removeSingleFilter((GreaterThan) expression);
-        } else if (expression instanceof MinorThan) {
-            return removeSingleFilter((MinorThan) expression);
-        } else if (expression instanceof MinorThanEquals) {
-            return removeSingleFilter((MinorThanEquals) expression);
-        } else if (expression instanceof EqualsTo) {
-            return removeSingleFilter((EqualsTo) expression);
-        } else if (expression instanceof NotEqualsTo) {
-            return removeSingleFilter((NotEqualsTo) expression);
-        } else if (expression instanceof InExpression) {
-            InExpression inExpression = (InExpression) expression;
-            Expression leftExpression = inExpression.getLeftExpression();
-            return distinguishNumberCondition(leftExpression, expression);
-        } else if (expression instanceof LikeExpression) {
-            LikeExpression likeExpression = (LikeExpression) expression;
-            Expression leftExpression = likeExpression.getLeftExpression();
-            return distinguishNumberCondition(leftExpression, expression);
-        }
-        return expression;
-    }
-
-    private static <T extends ComparisonOperator> Expression removeSingleFilter(T comparisonExpression) {
-        Expression leftExpression = comparisonExpression.getLeftExpression();
-        return distinguishNumberCondition(leftExpression, comparisonExpression);
-    }
-
-    public static Expression distinguishNumberCondition(Expression leftExpression, Expression expression) {
-        if (leftExpression instanceof LongValue) {
-            return null;
-        } else {
-            return expression;
-        }
     }
 
 }

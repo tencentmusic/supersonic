@@ -267,27 +267,15 @@ public class SqlParserReplaceHelper {
         if (!(selectBody instanceof PlainSelect)) {
             return sql;
         }
-        List<PlainSelect> plainSelectList = new ArrayList<>();
-        plainSelectList.add((PlainSelect) selectBody);
-        List<PlainSelect> plainSelects = SqlParserSelectHelper.getPlainSelects(plainSelectList);
-        for (PlainSelect plainSelect : plainSelects) {
-            replaceFunction(plainSelect);
+        Expression where = ((PlainSelect) selectBody).getWhere();
+        SqlDateCorrecteBase sqlDateCorrecteBase = new SqlDateCorrecteBase();
+        try {
+            ((PlainSelect) selectBody).setWhere(sqlDateCorrecteBase.filteredWhereExpression(where));
+        } catch (Exception e) {
+            log.info("replaceFunction has an exception:{}", e.toString());
         }
+
         return selectStatement.toString();
-    }
-
-    private static void replaceFunction(PlainSelect selectBody) {
-        PlainSelect plainSelect = selectBody;
-
-        //1. replace where dataDiff function
-        Expression where = plainSelect.getWhere();
-        FunctionReplaceVisitor visitor = new FunctionReplaceVisitor();
-        if (Objects.nonNull(where)) {
-            where.accept(visitor);
-        }
-        //2. add Waiting Expression
-        List<Expression> waitingForAdds = visitor.getWaitingForAdds();
-        addWaitingExpression(plainSelect, where, waitingForAdds);
     }
 
     private static void replaceHavingFunction(Map<String, String> functionMap, Expression having) {
@@ -349,21 +337,6 @@ public class SqlParserReplaceHelper {
                 function.setName(functionMap.get(function.getName()));
             }
         }
-    }
-
-    private static void addWaitingExpression(PlainSelect plainSelect, Expression where,
-                                             List<Expression> waitingForAdds) {
-        if (CollectionUtils.isEmpty(waitingForAdds)) {
-            return;
-        }
-        for (Expression expression : waitingForAdds) {
-            if (where == null) {
-                plainSelect.setWhere(expression);
-            } else {
-                where = new AndExpression(where, expression);
-            }
-        }
-        plainSelect.setWhere(where);
     }
 
     public static String replaceTable(String sql, String tableName) {
