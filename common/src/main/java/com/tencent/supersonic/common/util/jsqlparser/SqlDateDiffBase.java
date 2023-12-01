@@ -12,8 +12,10 @@ import net.sf.jsqlparser.schema.Column;
 
 import java.util.List;
 
+//mainly deal with datediff in s2sql
+
 @Slf4j
-public class SqlDateCorrecteBase extends SqlCorrecteBase {
+public class SqlDateDiffBase extends SqlEditBase {
     public Expression distinguishNumberCondition(Expression leftExpression, Expression expression) throws Exception {
         if (leftExpression instanceof Function) {
             Function function = (Function) leftExpression;

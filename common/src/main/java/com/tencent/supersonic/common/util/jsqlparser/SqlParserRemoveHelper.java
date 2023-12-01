@@ -91,7 +91,7 @@ public class SqlParserRemoveHelper {
         }
         Expression where = ((PlainSelect) selectBody).getWhere();
         Expression having = ((PlainSelect) selectBody).getHaving();
-        SqlNumberCorrecteBase sqlNumberCorrecteBase = new SqlNumberCorrecteBase();
+        SqlNumberFilterBase sqlNumberCorrecteBase = new SqlNumberFilterBase();
         //        where = filteredWhereExpression(where);
         //        having = filteredWhereExpression(having);
         try {

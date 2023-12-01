@@ -268,7 +268,7 @@ public class SqlParserReplaceHelper {
             return sql;
         }
         Expression where = ((PlainSelect) selectBody).getWhere();
-        SqlDateCorrecteBase sqlDateCorrecteBase = new SqlDateCorrecteBase();
+        SqlDateDiffBase sqlDateCorrecteBase = new SqlDateDiffBase();
         try {
             ((PlainSelect) selectBody).setWhere(sqlDateCorrecteBase.filteredWhereExpression(where));
         } catch (Exception e) {

@@ -19,9 +19,9 @@ import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 
 import java.util.Objects;
-
+// mainly edit sql for replacing and removing
 @Slf4j
-public abstract class SqlCorrecteBase {
+public abstract class SqlEditBase {
     public Expression filteredWhereExpression(Expression where) throws Exception {
         if (Objects.isNull(where)) {
             return null;
