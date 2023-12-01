@@ -22,12 +22,12 @@ import java.util.Objects;
 // mainly edit sql for replacing and removing
 @Slf4j
 public abstract class SqlEditBase {
-    public Expression filteredWhereExpression(Expression where) throws Exception {
+    public Expression filteredExpression(Expression where) throws Exception {
         if (Objects.isNull(where)) {
             return null;
         }
         if (where instanceof Parenthesis) {
-            Expression expression = filteredWhereExpression(((Parenthesis) where).getExpression());
+            Expression expression = filteredExpression(((Parenthesis) where).getExpression());
             if (expression != null) {
                 try {
                     Expression parseExpression = CCJSqlParserUtil.parseExpression("(" + expression + ")");
@@ -51,8 +51,8 @@ public abstract class SqlEditBase {
     }
 
     private <T extends BinaryExpression> Expression filteredNumberExpression(T binaryExpression) throws Exception {
-        Expression leftExpression = filteredWhereExpression(binaryExpression.getLeftExpression());
-        Expression rightExpression = filteredWhereExpression(binaryExpression.getRightExpression());
+        Expression leftExpression = filteredExpression(binaryExpression.getLeftExpression());
+        Expression rightExpression = filteredExpression(binaryExpression.getRightExpression());
         if (leftExpression != null && rightExpression != null) {
             binaryExpression.setLeftExpression(leftExpression);
             binaryExpression.setRightExpression(rightExpression);
@@ -85,21 +85,21 @@ public abstract class SqlEditBase {
         } else if (expression instanceof InExpression) {
             InExpression inExpression = (InExpression) expression;
             Expression leftExpression = inExpression.getLeftExpression();
-            return distinguishNumberCondition(leftExpression, expression);
+            return distinguishFilter(leftExpression, expression);
         } else if (expression instanceof LikeExpression) {
             LikeExpression likeExpression = (LikeExpression) expression;
             Expression leftExpression = likeExpression.getLeftExpression();
-            return distinguishNumberCondition(leftExpression, expression);
+            return distinguishFilter(leftExpression, expression);
         }
         return expression;
     }
 
     private <T extends ComparisonOperator> Expression removeSingleFilter(T comparisonExpression) throws Exception {
         Expression leftExpression = comparisonExpression.getLeftExpression();
-        return distinguishNumberCondition(leftExpression, comparisonExpression);
+        return distinguishFilter(leftExpression, comparisonExpression);
     }
 
-    public abstract Expression distinguishNumberCondition(Expression leftExpression, Expression expression)
+    public abstract Expression distinguishFilter(Expression leftExpression, Expression expression)
             throws Exception;
 
 }

@@ -16,7 +16,7 @@ import java.util.List;
 
 @Slf4j
 public class SqlDateDiffBase extends SqlEditBase {
-    public Expression distinguishNumberCondition(Expression leftExpression, Expression expression) throws Exception {
+    public Expression distinguishFilter(Expression leftExpression, Expression expression) throws Exception {
         if (leftExpression instanceof Function) {
             Function function = (Function) leftExpression;
             if (function.getName().equals(JsqlConstants.DATE_FUNCTION)) {
