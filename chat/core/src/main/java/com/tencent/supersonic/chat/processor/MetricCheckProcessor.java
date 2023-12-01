@@ -79,8 +79,7 @@ public class MetricCheckProcessor implements ParseResultProcessor {
             }
         }
         for (String dimensionName : whereFields) {
-            if (TimeDimensionEnum.getNameList().contains(dimensionName)
-                    || TimeDimensionEnum.getChNameList().contains(dimensionName)) {
+            if (TimeDimensionEnum.containsTimeDimension(dimensionName)) {
                 continue;
             }
             if (!checkInModelSchema(dimensionName, SchemaElementType.DIMENSION, semanticSchema)) {
@@ -91,8 +90,7 @@ public class MetricCheckProcessor implements ParseResultProcessor {
             }
         }
         for (String dimensionName : groupByFields) {
-            if (TimeDimensionEnum.getNameList().contains(dimensionName)
-                    || TimeDimensionEnum.getChNameList().contains(dimensionName)) {
+            if (TimeDimensionEnum.containsTimeDimension(dimensionName)) {
                 continue;
             }
             if (!checkInModelSchema(dimensionName, SchemaElementType.DIMENSION, semanticSchema)) {
@@ -110,7 +108,7 @@ public class MetricCheckProcessor implements ParseResultProcessor {
      * eg: metric like UV is calculated in a certain dimension, it cannot be used on other dimensions.
      */
     private boolean checkNecessaryDimension(SchemaElement metric, SemanticSchema semanticSchema,
-                                            List<String> dimensionFields) {
+            List<String> dimensionFields) {
         List<String> necessaryDimensions = getNecessaryDimensionNames(metric, semanticSchema);
         if (CollectionUtils.isEmpty(necessaryDimensions)) {
             return true;
@@ -128,7 +126,7 @@ public class MetricCheckProcessor implements ParseResultProcessor {
      * eg: some descriptive dimensions are not suitable as drill-down dimensions
      */
     private boolean checkDrillDownDimension(String dimensionName, List<String> metrics,
-                                            SemanticSchema semanticSchema) {
+            SemanticSchema semanticSchema) {
         List<SchemaElement> metricElements = semanticSchema.getMetrics().stream()
                 .filter(schemaElement -> metrics.contains(schemaElement.getName()))
                 .collect(Collectors.toList());
@@ -208,7 +206,7 @@ public class MetricCheckProcessor implements ParseResultProcessor {
     }
 
     private static String removeFieldInSql(String sql, Set<String> metricToRemove,
-                                    Set<String> dimensionByToRemove, Set<String> whereFieldsToRemove) {
+            Set<String> dimensionByToRemove, Set<String> whereFieldsToRemove) {
         sql = SqlParserRemoveHelper.removeWhereCondition(sql, whereFieldsToRemove);
         sql = SqlParserRemoveHelper.removeSelect(sql, metricToRemove);
         sql = SqlParserRemoveHelper.removeSelect(sql, dimensionByToRemove);
