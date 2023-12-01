@@ -79,7 +79,8 @@ public class MetricCheckProcessor implements ParseResultProcessor {
             }
         }
         for (String dimensionName : whereFields) {
-            if (TimeDimensionEnum.getNameList().contains(dimensionName)) {
+            if (TimeDimensionEnum.getNameList().contains(dimensionName)
+                    || TimeDimensionEnum.getChNameList().contains(dimensionName)) {
                 continue;
             }
             if (!checkInModelSchema(dimensionName, SchemaElementType.DIMENSION, semanticSchema)) {
@@ -90,7 +91,8 @@ public class MetricCheckProcessor implements ParseResultProcessor {
             }
         }
         for (String dimensionName : groupByFields) {
-            if (TimeDimensionEnum.getNameList().contains(dimensionName)) {
+            if (TimeDimensionEnum.getNameList().contains(dimensionName)
+                    || TimeDimensionEnum.getChNameList().contains(dimensionName)) {
                 continue;
             }
             if (!checkInModelSchema(dimensionName, SchemaElementType.DIMENSION, semanticSchema)) {

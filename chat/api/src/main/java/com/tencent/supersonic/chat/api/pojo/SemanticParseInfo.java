@@ -88,10 +88,11 @@ public class SemanticParseInfo {
 
     private Map<Long, Integer> getModelElementCountMap() {
         Map<Long, Integer> elementCountMap = new HashMap<>();
-        elementMatches.forEach(element -> {
-            int count = elementCountMap.getOrDefault(element.getElement().getModel(), 0);
-            elementCountMap.put(element.getElement().getModel(), count + 1);
-        });
+        elementMatches.stream().filter(element -> element.getElement().getModel() != null)
+                .forEach(element -> {
+                    int count = elementCountMap.getOrDefault(element.getElement().getModel(), 0);
+                    elementCountMap.put(element.getElement().getModel(), count + 1);
+                });
         return elementCountMap;
     }
 
