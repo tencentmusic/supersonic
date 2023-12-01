@@ -307,8 +307,8 @@ importers:
         specifier: ^2.0.4
         version: 2.0.4
       '@antv/g6':
-        specifier: ^4.8.14
-        version: 4.8.22
+        specifier: ^4.8.23
+        version: 4.8.23
       '@antv/g6-core':
         specifier: ^0.8.23
         version: 0.8.23
@@ -1152,21 +1152,6 @@ packages:
       lodash: 4.17.21
     dev: false
 
-  /@antv/g6-core@0.8.22:
-    resolution: {integrity: sha512-tH7fO/xCZQnkMqc3N3mkMMpYbOTrcnZChDoSCdDM8ttQ1imK0anObnhdnVkjess7zJ230ySsX8UaE+lzoKFSbg==}
-    dependencies:
-      '@antv/algorithm': 0.1.26
-      '@antv/dom-util': 2.0.4
-      '@antv/event-emitter': 0.1.3
-      '@antv/g-base': 0.5.15
-      '@antv/g-math': 0.1.9
-      '@antv/matrix-util': 3.1.0-beta.3
-      '@antv/path-util': 2.0.15
-      '@antv/util': 2.0.17
-      ml-matrix: 6.10.4
-      tslib: 2.6.2
-    dev: false
-
   /@antv/g6-core@0.8.23:
     resolution: {integrity: sha512-JWdnba5Bx4/hLhbIQeyvdgh68SDYZisveukuBifxLKODCNJNKTopmWf1w6tU+RxAT2k5ByXkTGWQE1IkIL8O+Q==}
     dependencies:
@@ -1182,16 +1167,16 @@ packages:
       tslib: 2.6.2
     dev: false
 
-  /@antv/g6-element@0.8.22:
-    resolution: {integrity: sha512-rTJgaFDeaiHEF5d+hdJEGbh+Z272bi+Zzu5aTDWCtFFgxtosdeOQGWdyhIEeLCstRvlP3RaaztBIsSZm5BWFsA==}
+  /@antv/g6-element@0.8.23:
+    resolution: {integrity: sha512-KdJOiu4D7UExsYjKOJUcd7YCD/gCfxqHOlS01zkyOqsaindWVLdshBAZWXc2zgzVwHS/fadxwUI+DcllsRkH0g==}
     dependencies:
       '@antv/g-base': 0.5.15
-      '@antv/g6-core': 0.8.22
+      '@antv/g6-core': 0.8.23
       '@antv/util': 2.0.17
     dev: false
 
-  /@antv/g6-pc@0.8.22:
-    resolution: {integrity: sha512-sG17yhA4lXyiLddL/IlCqysbxw3pRspukwaxJ6W5tfDAdM2o04Odf60ppvPekQh/EF6nIZ95qcDl03v3z6NXZw==}
+  /@antv/g6-pc@0.8.23:
+    resolution: {integrity: sha512-8H5n1U8T4pyBcoaEKB8g4TRKycHtONSA+qOeFMq7XIDh1DCn0tUF1uLvwj096Zp+/bUXtAfaRvg+n1KKyCVZ0w==}
     dependencies:
       '@ant-design/colors': 4.0.5
       '@antv/algorithm': 0.1.26
@@ -1202,8 +1187,8 @@ packages:
       '@antv/g-math': 0.1.9
       '@antv/g-svg': 0.5.7
       '@antv/g6-core': 0.8.23
-      '@antv/g6-element': 0.8.22
-      '@antv/g6-plugin': 0.8.22
+      '@antv/g6-element': 0.8.23
+      '@antv/g6-plugin': 0.8.23
       '@antv/hierarchy': 0.6.11
       '@antv/layout': 0.3.23(dagre@0.8.5)
       '@antv/matrix-util': 3.1.0-beta.3
@@ -1216,15 +1201,15 @@ packages:
       ml-matrix: 6.10.4
     dev: false
 
-  /@antv/g6-plugin@0.8.22:
-    resolution: {integrity: sha512-3Z9hnNYwkJ7BAMLRoymWgrgTRXG7EDC2OlDAoRBSUvv/0sLVu7/kvobN3cY3rJF5rNwYmyTYb43ZfbK2UV4GVQ==}
+  /@antv/g6-plugin@0.8.23:
+    resolution: {integrity: sha512-DwhSuUc0a0foIM4nrhXR/+ooZafkVve0IEErldhsygKWLDSz/c9HRLON66OEdzQX7Ed1uE0SMcBUsIDe+wPQrw==}
     dependencies:
       '@antv/dom-util': 2.0.4
       '@antv/g-base': 0.5.15
       '@antv/g-canvas': 0.5.14
       '@antv/g-svg': 0.5.7
-      '@antv/g6-core': 0.8.22
-      '@antv/g6-element': 0.8.22
+      '@antv/g6-core': 0.8.23
+      '@antv/g6-element': 0.8.23
       '@antv/matrix-util': 3.1.0-beta.3
       '@antv/path-util': 2.0.15
       '@antv/scale': 0.3.18
@@ -1232,10 +1217,10 @@ packages:
       insert-css: 2.0.0
     dev: false
 
-  /@antv/g6@4.8.22:
-    resolution: {integrity: sha512-ZbfmaK5H5vULGJUWZLIBJSorF3kSSeSZvvxbOJzzfB72zJ+Pjjtviq2BeiVV+HAZ3Ux7ogvIH6zcwRb1JrIO8g==}
+  /@antv/g6@4.8.23:
+    resolution: {integrity: sha512-tsnJzlZCiOKvwAULGom6ppARutRmoAgV1wZzkOmDRm8ZdokUkpEYfb3faV6802VMs82DLP0zZ0KavapoK1q8hQ==}
     dependencies:
-      '@antv/g6-pc': 0.8.22
+      '@antv/g6-pc': 0.8.23
     dev: false
 
   /@antv/graphlib@1.2.0:

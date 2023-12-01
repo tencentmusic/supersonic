@@ -24,6 +24,13 @@ public enum TimeDimensionEnum {
         this.chName = chName;
     }
 
+    public static boolean containsTimeDimension(String fieldName) {
+        if (getNameList().contains(fieldName) || getChNameList().contains(fieldName)) {
+            return true;
+        }
+        return false;
+    }
+
     public static List<String> getNameList() {
         return Arrays.stream(TimeDimensionEnum.values()).map(TimeDimensionEnum::getName).collect(Collectors.toList());
     }

@@ -146,7 +146,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
     );
   };
 
-  const onLoadData = async (value: any, extraFilter?: any) => {
+  const onLoadData = async (value: any) => {
     setLoading(true);
     const res: any = await queryData({
       ...chatContext,
