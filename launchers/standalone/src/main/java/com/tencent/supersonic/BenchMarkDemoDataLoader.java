@@ -20,9 +20,6 @@ import com.tencent.supersonic.semantic.model.domain.ModelRelaService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -32,27 +29,18 @@ import java.util.List;
 
 @Component
 @Slf4j
-@Order(2)
-public class LoadBenchMarkDemo implements CommandLineRunner {
+public class BenchMarkDemoDataLoader {
 
     private User user = User.getFakeUser();
-
-    @Value("${spring.h2.demo.enabled:false}")
-    private boolean demoEnable;
 
     @Autowired
     private DomainService domainService;
     @Autowired
     private ModelService modelService;
-
     @Autowired
     private ModelRelaService modelRelaService;
 
-    @Override
-    public void run(String... args) {
-        if (!demoEnable) {
-            return;
-        }
+    public void doRun() {
         try {
             addDomain();
             addModel_1();

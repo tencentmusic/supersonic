@@ -34,10 +34,10 @@ import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.ModelRelaService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.annotation.Order;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -47,14 +47,12 @@ import java.util.List;
 
 @Component
 @Slf4j
-@Order(1)
-public class LoadModelDataDemo implements CommandLineRunner {
+public class ModelDemoDataLoader {
 
     private User user = User.getFakeUser();
 
-    @Value("${spring.h2.demo.enabled:false}")
-    private boolean demoEnable;
-
+    @Value("${demo.dbType:mysql}")
+    private String demoDb;
     @Autowired
     private DatabaseService databaseService;
     @Autowired
@@ -69,12 +67,10 @@ public class LoadModelDataDemo implements CommandLineRunner {
     private MetricService metricService;
     @Autowired
     private AuthService authService;
+    @Autowired
+    private DataSourceProperties dataSourceProperties;
 
-    @Override
-    public void run(String... args) {
-        if (!demoEnable) {
-            return;
-        }
+    public void doRun() {
         try {
             addDatabase();
             addDomain();
@@ -96,13 +92,20 @@ public class LoadModelDataDemo implements CommandLineRunner {
     }
 
     public void addDatabase() {
+        String url = dataSourceProperties.getUrl();
         DatabaseReq databaseReq = new DatabaseReq();
-        databaseReq.setName("H2数据实例");
+        databaseReq.setName("数据实例");
         databaseReq.setDescription("样例数据库实例");
-        databaseReq.setType(DataTypeEnum.H2.getFeature());
-        databaseReq.setUrl("jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false");
-        databaseReq.setUsername("root");
-        databaseReq.setPassword("semantic");
+        if (StringUtils.isNotBlank(url)
+                && url.toLowerCase().contains(DataTypeEnum.MYSQL.getFeature().toLowerCase())) {
+            databaseReq.setType(DataTypeEnum.MYSQL.getFeature());
+            databaseReq.setVersion("5.7");
+        } else {
+            databaseReq.setType(DataTypeEnum.H2.getFeature());
+        }
+        databaseReq.setUrl(url);
+        databaseReq.setUsername(dataSourceProperties.getUsername());
+        databaseReq.setPassword(dataSourceProperties.getPassword());
         databaseService.createOrUpdateDatabase(databaseReq, user);
     }
 
@@ -141,8 +144,8 @@ public class LoadModelDataDemo implements CommandLineRunner {
         modelDetail.setDimensions(dimensions);
 
         modelDetail.setMeasures(Collections.emptyList());
-        modelDetail.setQueryType("table_query");
-        modelDetail.setSqlQuery("select user_name,department from PUBLIC.s2_user_department");
+        modelDetail.setQueryType("sql_query");
+        modelDetail.setSqlQuery("select user_name,department from s2_user_department");
         modelReq.setModelDetail(modelDetail);
         modelReq.setDomainId(1L);
         modelService.createModel(modelReq, user);
@@ -218,8 +221,8 @@ public class LoadModelDataDemo implements CommandLineRunner {
 
         modelDetail.setMeasures(measures);
         modelDetail.setSqlQuery(
-                "select imp_date,user_name as stay_hours_user_name,stay_hours,page from PUBLIC.s2_stay_time_statis");
-        modelDetail.setQueryType("table_query");
+                "select imp_date,user_name as stay_hours_user_name,stay_hours,page from s2_stay_time_statis");
+        modelDetail.setQueryType("sql_query");
         modelReq.setDomainId(1L);
         modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
@@ -296,8 +299,9 @@ public class LoadModelDataDemo implements CommandLineRunner {
         Measure measure2 = new Measure("下载量", "down_cnt", "sum", 1);
         Measure measure3 = new Measure("收藏量", "favor_cnt", "sum", 1);
         modelDetail.setMeasures(Lists.newArrayList(measure1, measure2, measure3));
-        modelDetail.setQueryType("table_query");
-        modelDetail.setTableQuery("PUBLIC.singer");
+        modelDetail.setQueryType("sql_query");
+        modelDetail.setSqlQuery("select imp_date, singer_name, act_area, song_name, genre, "
+                + "js_play_cnt, down_cnt, favor_cnt from singer");
         modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
     }
