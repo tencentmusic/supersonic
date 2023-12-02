@@ -36,8 +36,8 @@ public class DatabaseReq {
 
     private List<String> viewers = Lists.newArrayList();
 
-    public String getUrl() {
-        if (type.equalsIgnoreCase(DataTypeEnum.H2.getFeature())) {
+    public String getConnectUrl() {
+        if (StringUtils.isNotBlank(url)) {
             return url;
         }
         String databaseUrl = database;
