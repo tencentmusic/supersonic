@@ -189,7 +189,7 @@ class SqlParserReplaceHelperTest {
 
         replaceSql = "select 品牌名称 from 互联网企业 where datediff('year', 品牌成立时间, '2023-11-04') > 17 and 注册资本 = 50000000";
         replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
-        replaceSql = SqlParserRemoveHelper.removeNumberCondition(replaceSql);
+        replaceSql = SqlParserRemoveHelper.removeNumberFilter(replaceSql);
         Assert.assertEquals(
                 "SELECT 品牌名称 FROM 互联网企业 WHERE 品牌成立时间 < '2006-11-04' AND 注册资本 = 50000000", replaceSql);
 
@@ -289,7 +289,7 @@ class SqlParserReplaceHelperTest {
                 "select 歌曲名 from 歌曲库 where datediff('year', 发布日期, '2023-08-09') >= 0.5 "
                         + "and 歌手名 = '邓紫棋' and 数据日期 = '2023-08-09' order by 播放量 desc limit 11", fieldToBizName);
         replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
-        replaceSql = SqlParserRemoveHelper.removeNumberCondition(replaceSql);
+        replaceSql = SqlParserRemoveHelper.removeNumberFilter(replaceSql);
         Assert.assertEquals(
                 "SELECT song_name FROM 歌曲库 WHERE publish_date <= '2023-02-09' AND"
                         + " singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09'"

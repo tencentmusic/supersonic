@@ -342,7 +342,7 @@ public class SqlParserAddHelper {
                 }
             }
         }
-        sql = SqlParserRemoveHelper.removeNumberCondition(selectStatement.toString());
+        sql = SqlParserRemoveHelper.removeNumberFilter(selectStatement.toString());
         return sql;
     }
 
