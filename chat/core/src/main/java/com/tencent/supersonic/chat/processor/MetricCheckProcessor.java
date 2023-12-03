@@ -15,8 +15,10 @@ import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
  * MetricCheckProcessor verifies whether the dimensions
  * involved in the query in metric mode can drill down on the metric.
  */
+@Slf4j
 public class MetricCheckProcessor implements ParseResultProcessor {
 
     @Override
@@ -43,6 +46,7 @@ public class MetricCheckProcessor implements ParseResultProcessor {
                 continue;
             }
             String correctSqlProcessed = processCorrectSql(parseInfo, semanticSchema);
+            log.info("correct sql:{}", correctSqlProcessed);
             parseInfo.getSqlInfo().setCorrectS2SQL(correctSqlProcessed);
         }
         semanticQueries.removeIf(semanticQuery -> {
