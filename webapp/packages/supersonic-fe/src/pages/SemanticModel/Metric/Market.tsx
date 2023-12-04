@@ -60,6 +60,8 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   const [downloadLoading, setDownloadLoading] = useState<boolean>(false);
 
+  const [hasAllPermission, setHasAllPermission] = useState<boolean>(true);
+
   const actionRef = useRef<ActionType>();
 
   useEffect(() => {
@@ -322,11 +324,25 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   const rowSelection = {
     onChange: (selectedRowKeys: React.Key[]) => {
+      const permissionList: boolean[] = [];
+      selectedRowKeys.forEach((id: React.Key) => {
+        const target = dataSource.find((item) => {
+          return item.id === id;
+        });
+        if (target) {
+          permissionList.push(target.hasAdminRes);
+        }
+      });
+      if (permissionList.includes(false)) {
+        setHasAllPermission(false);
+      } else {
+        setHasAllPermission(true);
+      }
       setSelectedRowKeys(selectedRowKeys);
     },
-    getCheckboxProps: (record: ISemantic.IMetricItem) => ({
-      disabled: !record.hasAdminRes,
-    }),
+    // getCheckboxProps: (record: ISemantic.IMetricItem) => ({
+    //   disabled: !record.hasAdminRes,
+    // }),
   };
 
   const onMenuClick = (key: string) => {
@@ -397,6 +413,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
                 onDeleteConfirm={() => {
                   queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
                 }}
+                disabledList={hasAllPermission ? [] : ['batchStart', 'batchStop', 'batchDelete']}
                 onMenuClick={onMenuClick}
                 onDownloadDateRangeChange={(searchDateRange, pickerType) => {
                   downloadMetricQuery(selectedRowKeys, searchDateRange, pickerType);
