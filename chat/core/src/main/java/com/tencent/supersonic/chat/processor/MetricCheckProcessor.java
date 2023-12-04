@@ -215,7 +215,7 @@ public class MetricCheckProcessor implements ParseResultProcessor {
         sql = SqlParserRemoveHelper.removeSelect(sql, metricToRemove);
         sql = SqlParserRemoveHelper.removeSelect(sql, dimensionByToRemove);
         sql = SqlParserRemoveHelper.removeGroupBy(sql, dimensionByToRemove);
-        sql = SqlParserRemoveHelper.removeNumberCondition(sql);
+        sql = SqlParserRemoveHelper.removeNumberFilter(sql);
         return sql;
     }
 
