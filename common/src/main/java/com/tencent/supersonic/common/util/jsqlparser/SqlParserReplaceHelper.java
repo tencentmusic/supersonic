@@ -6,7 +6,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.ArrayList;
 
+import com.tencent.supersonic.common.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -19,6 +21,7 @@ import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
@@ -267,27 +270,15 @@ public class SqlParserReplaceHelper {
         if (!(selectBody instanceof PlainSelect)) {
             return sql;
         }
-        List<PlainSelect> plainSelectList = new ArrayList<>();
-        plainSelectList.add((PlainSelect) selectBody);
-        List<PlainSelect> plainSelects = SqlParserSelectHelper.getPlainSelects(plainSelectList);
-        for (PlainSelect plainSelect : plainSelects) {
-            replaceFunction(plainSelect);
+        Expression where = ((PlainSelect) selectBody).getWhere();
+        try {
+            Expression expression = SqlParserRemoveHelper.filteredExpression(where, SqlEditEnum.DATEDIFF);
+            ((PlainSelect) selectBody).setWhere(expression);
+        } catch (Exception e) {
+            log.info("replaceFunction has an exception:{}", e.toString());
         }
+
         return selectStatement.toString();
-    }
-
-    private static void replaceFunction(PlainSelect selectBody) {
-        PlainSelect plainSelect = selectBody;
-
-        //1. replace where dataDiff function
-        Expression where = plainSelect.getWhere();
-        FunctionReplaceVisitor visitor = new FunctionReplaceVisitor();
-        if (Objects.nonNull(where)) {
-            where.accept(visitor);
-        }
-        //2. add Waiting Expression
-        List<Expression> waitingForAdds = visitor.getWaitingForAdds();
-        addWaitingExpression(plainSelect, where, waitingForAdds);
     }
 
     private static void replaceHavingFunction(Map<String, String> functionMap, Expression having) {
@@ -349,21 +340,6 @@ public class SqlParserReplaceHelper {
                 function.setName(functionMap.get(function.getName()));
             }
         }
-    }
-
-    private static void addWaitingExpression(PlainSelect plainSelect, Expression where,
-                                             List<Expression> waitingForAdds) {
-        if (CollectionUtils.isEmpty(waitingForAdds)) {
-            return;
-        }
-        for (Expression expression : waitingForAdds) {
-            if (where == null) {
-                plainSelect.setWhere(expression);
-            } else {
-                where = new AndExpression(where, expression);
-            }
-        }
-        plainSelect.setWhere(where);
     }
 
     public static String replaceTable(String sql, String tableName) {
@@ -447,6 +423,47 @@ public class SqlParserReplaceHelper {
             having.accept(visitor);
         }
         return selectStatement.toString();
+    }
+
+    public static Expression distinguishDateDiffFilter(Expression leftExpression, Expression expression) {
+        if (leftExpression instanceof Function) {
+            Function function = (Function) leftExpression;
+            if (function.getName().equals(JsqlConstants.DATE_FUNCTION)) {
+                ComparisonOperator comparisonOperator = (ComparisonOperator) expression;
+                List<Expression> leftExpressions = function.getParameters().getExpressions();
+                Column field = (Column) function.getParameters().getExpressions().get(1);
+                String columnName = field.getColumnName();
+                try {
+                    String startDateValue = DateFunctionHelper.getStartDateStr(comparisonOperator, leftExpressions);
+                    String endDateValue = DateFunctionHelper.getEndDateValue(leftExpressions);
+                    String dateOperator = comparisonOperator.getStringExpression();
+                    String endDateOperator = JsqlConstants.rightMap.get(dateOperator);
+                    String startDateOperator = JsqlConstants.leftMap.get(dateOperator);
+
+                    String endDateCondExpr = columnName + endDateOperator + StringUtil.getCommaWrap(endDateValue);
+                    ComparisonOperator rightExpression = (ComparisonOperator)
+                            CCJSqlParserUtil.parseCondExpression(endDateCondExpr);
+
+                    String startDateCondExpr = columnName + StringUtil.getSpaceWrap(startDateOperator)
+                            + StringUtil.getCommaWrap(startDateValue);
+                    ComparisonOperator newLeftExpression = (ComparisonOperator)
+                            CCJSqlParserUtil.parseCondExpression(startDateCondExpr);
+
+                    AndExpression andExpression = new AndExpression(newLeftExpression, rightExpression);
+                    if (JsqlConstants.GREATER_THAN.equals(dateOperator)
+                            || JsqlConstants.GREATER_THAN_EQUALS.equals(dateOperator)) {
+                        return newLeftExpression;
+                    } else {
+                        return CCJSqlParserUtil.parseCondExpression("(" + andExpression.toString() + ")");
+                    }
+                } catch (JSQLParserException e) {
+                    log.error("JSQLParserException", e);
+                }
+            }
+            return expression;
+        } else {
+            return expression;
+        }
     }
 }
 

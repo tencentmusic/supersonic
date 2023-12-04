@@ -4,23 +4,23 @@ export type PluginConfigType = {
   paramOptions: any;
   valueParams: any;
   forwardParam: any;
-}
+};
 
 export enum PluginTypeEnum {
   WEB_PAGE = 'WEB_PAGE',
   WEB_SERVICE = 'WEB_SERVICE',
-  LLM_S2SQL = 'LLM_S2SQL'
+  NL2SQL_LLM = 'NL2SQL_LLM',
 }
 
 export enum ParseModeEnum {
   EMBEDDING_RECALL = 'EMBEDDING_RECALL',
-  FUNCTION_CALL = 'FUNCTION_CALL'
+  FUNCTION_CALL = 'FUNCTION_CALL',
 }
 
 export enum ParamTypeEnum {
   CUSTOM = 'CUSTOM',
   SEMANTIC = 'SEMANTIC',
-  FORWARD = 'FORWARD'
+  FORWARD = 'FORWARD',
 }
 
 export type PluginType = {
@@ -32,7 +32,7 @@ export type PluginType = {
   parseModeConfig: string;
   name: string;
   config: PluginConfigType;
-}
+};
 
 export type ModelType = {
   id: number | string;
@@ -49,20 +49,20 @@ export type DimensionType = {
 
 export type FunctionParamType = {
   type: string;
-  properties: Record<string, { type: string, description: string }>;
+  properties: Record<string, { type: string; description: string }>;
   required: string[];
-}
+};
 
 export type FunctionType = {
   name: string;
   description: string;
   parameters: FunctionParamType;
   examples: string[];
-}
+};
 
 export type FunctionParamFormItemType = {
   id: string;
   name?: string;
   type?: string;
   description?: string;
-}
+};

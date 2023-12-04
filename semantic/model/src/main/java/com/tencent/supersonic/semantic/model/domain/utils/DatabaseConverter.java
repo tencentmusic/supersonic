@@ -6,9 +6,9 @@ import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.model.domain.dataobject.DatabaseDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.ConnectInfo;
 import com.tencent.supersonic.semantic.model.domain.pojo.Database;
-import java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import java.util.Arrays;
 public class DatabaseConverter {
 
     public static Database convert(DatabaseReq databaseReq) {
@@ -17,7 +17,7 @@ public class DatabaseConverter {
         ConnectInfo connectInfo = new ConnectInfo();
         connectInfo.setUserName(databaseReq.getUsername());
         connectInfo.setPassword(databaseReq.getPassword());
-        connectInfo.setUrl(databaseReq.getUrl());
+        connectInfo.setUrl(databaseReq.getConnectUrl());
         connectInfo.setDatabase(databaseReq.getDatabase());
         database.setConnectInfo(connectInfo);
         database.setVersion(databaseReq.getVersion());

@@ -34,9 +34,6 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -46,7 +43,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent> {
+public class ChatDemoLoader {
 
     private User user = User.getFakeUser();
     @Qualifier("chatQueryService")
@@ -63,8 +60,27 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
     @Autowired
     private SysParameterService sysParameterService;
 
-    @Value("${spring.h2.demo.enabled:false}")
-    private boolean demoEnable;
+    public void doRun() {
+        try {
+            addSysParameter();
+            addDemoChatConfig_1();
+            addDemoChatConfig_2();
+            addDemoChatConfig_3();
+            addDemoChatConfig_4();
+            addDemoChatConfig_5();
+            addDemoChatConfig_6();
+            addDemoChatConfig_7();
+            addDemoChatConfig_8();
+            addPlugin_1();
+            addAgent1();
+            addAgent2();
+            addAgent3();
+            addSampleChats();
+            addSampleChats2();
+        } catch (Exception e) {
+            log.error("Failed to add sample chats", e);
+        }
+    }
 
     private void parseAndExecute(int chatId, String queryText) throws Exception {
         QueryReq queryRequest = new QueryReq();
@@ -472,32 +488,6 @@ public class ConfigureDemo implements ApplicationListener<ApplicationReadyEvent>
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());
-    }
-
-    @Override
-    public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-        if (!demoEnable) {
-            return;
-        }
-        try {
-            addSysParameter();
-            addDemoChatConfig_1();
-            addDemoChatConfig_2();
-            addDemoChatConfig_3();
-            addDemoChatConfig_4();
-            addDemoChatConfig_5();
-            addDemoChatConfig_6();
-            addDemoChatConfig_7();
-            addDemoChatConfig_8();
-            addPlugin_1();
-            addAgent1();
-            addAgent2();
-            addAgent3();
-            addSampleChats();
-            addSampleChats2();
-        } catch (Exception e) {
-            log.error("Failed to add sample chats", e);
-        }
     }
 
 }

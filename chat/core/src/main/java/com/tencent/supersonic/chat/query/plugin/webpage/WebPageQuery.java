@@ -15,7 +15,6 @@ import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
-import com.tencent.supersonic.chat.query.plugin.WebBaseResult;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -61,13 +60,13 @@ public class WebPageQuery extends PluginSemanticQuery {
         webPageResponse.setPluginId(plugin.getId());
         webPageResponse.setPluginType(plugin.getType());
         WebBase webPage = JsonUtil.toObject(plugin.getConfig(), WebBase.class);
-        WebBaseResult webBaseResult = buildWebPageResult(webPage, pluginParseResult);
-        webPageResponse.setWebPage(webBaseResult);
+        WebBase webBase = buildWebPageResult(webPage, pluginParseResult);
+        webPageResponse.setWebPage(webBase);
         return webPageResponse;
     }
 
-    private WebBaseResult buildWebPageResult(WebBase webPage, PluginParseResult pluginParseResult) {
-        WebBaseResult webBaseResult = new WebBaseResult();
+    private WebBase buildWebPageResult(WebBase webPage, PluginParseResult pluginParseResult) {
+        WebBase webBaseResult = new WebBase();
         webBaseResult.setUrl(webPage.getUrl());
         Map<String, Object> elementValueMap = getElementMap(pluginParseResult);
         List<ParamOption> paramOptions = Lists.newArrayList();
@@ -86,7 +85,7 @@ public class WebPageQuery extends PluginSemanticQuery {
                 paramOption.setValue(elementValue);
             }
         }
-        webBaseResult.setParams(paramOptions);
+        webBaseResult.setParamOptions(paramOptions);
         return webBaseResult;
     }
 

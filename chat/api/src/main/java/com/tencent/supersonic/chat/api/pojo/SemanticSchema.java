@@ -57,19 +57,19 @@ public class SemanticSchema implements Serializable {
 
         switch (elementType) {
             case ENTITY:
-                element = getElementsByName(name, getEntities());
+                element = getElementsByNameOrAlias(name, getEntities());
                 break;
             case MODEL:
-                element = getElementsByName(name, getModels());
+                element = getElementsByNameOrAlias(name, getModels());
                 break;
             case METRIC:
-                element = getElementsByName(name, getMetrics());
+                element = getElementsByNameOrAlias(name, getMetrics());
                 break;
             case DIMENSION:
-                element = getElementsByName(name, getDimensions());
+                element = getElementsByNameOrAlias(name, getDimensions());
                 break;
             case VALUE:
-                element = getElementsByName(name, getDimensionValues());
+                element = getElementsByNameOrAlias(name, getDimensionValues());
                 break;
             default:
         }
@@ -151,10 +151,11 @@ public class SemanticSchema implements Serializable {
                 .findFirst();
     }
 
-    private Optional<SchemaElement> getElementsByName(String name, List<SchemaElement> elements) {
+    private Optional<SchemaElement> getElementsByNameOrAlias(String name, List<SchemaElement> elements) {
         return elements.stream()
-                .filter(schemaElement -> name.equals(schemaElement.getName()))
-                .findFirst();
+                .filter(schemaElement ->
+                    name.equals(schemaElement.getName()) || schemaElement.getAlias().contains(name)
+                ).findFirst();
     }
 
     public List<SchemaElement> getModels() {

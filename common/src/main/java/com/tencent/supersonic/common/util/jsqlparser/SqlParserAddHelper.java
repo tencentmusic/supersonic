@@ -342,8 +342,7 @@ public class SqlParserAddHelper {
                 }
             }
         }
-        sql = SqlParserRemoveHelper.removeNumberCondition(selectStatement.toString());
-        return sql;
+        return SqlParserRemoveHelper.removeNumberFilter(selectStatement.toString());
     }
 
     public static String addHaving(String sql, List<Expression> expressionList) {

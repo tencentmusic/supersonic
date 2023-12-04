@@ -17,6 +17,7 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
  * MetricCheckProcessor verifies whether the dimensions
  * involved in the query in metric mode can drill down on the metric.
  */
+@Slf4j
 public class MetricCheckProcessor implements ParseResultProcessor {
 
     @Override
@@ -43,6 +45,7 @@ public class MetricCheckProcessor implements ParseResultProcessor {
                 continue;
             }
             String correctSqlProcessed = processCorrectSql(parseInfo, semanticSchema);
+            log.info("correct sql:{}", correctSqlProcessed);
             parseInfo.getSqlInfo().setCorrectS2SQL(correctSqlProcessed);
         }
         semanticQueries.removeIf(semanticQuery -> {
@@ -79,7 +82,7 @@ public class MetricCheckProcessor implements ParseResultProcessor {
             }
         }
         for (String dimensionName : whereFields) {
-            if (TimeDimensionEnum.getNameList().contains(dimensionName)) {
+            if (TimeDimensionEnum.containsTimeDimension(dimensionName)) {
                 continue;
             }
             if (!checkInModelSchema(dimensionName, SchemaElementType.DIMENSION, semanticSchema)) {
@@ -90,7 +93,7 @@ public class MetricCheckProcessor implements ParseResultProcessor {
             }
         }
         for (String dimensionName : groupByFields) {
-            if (TimeDimensionEnum.getNameList().contains(dimensionName)) {
+            if (TimeDimensionEnum.containsTimeDimension(dimensionName)) {
                 continue;
             }
             if (!checkInModelSchema(dimensionName, SchemaElementType.DIMENSION, semanticSchema)) {
@@ -108,7 +111,7 @@ public class MetricCheckProcessor implements ParseResultProcessor {
      * eg: metric like UV is calculated in a certain dimension, it cannot be used on other dimensions.
      */
     private boolean checkNecessaryDimension(SchemaElement metric, SemanticSchema semanticSchema,
-                                            List<String> dimensionFields) {
+            List<String> dimensionFields) {
         List<String> necessaryDimensions = getNecessaryDimensionNames(metric, semanticSchema);
         if (CollectionUtils.isEmpty(necessaryDimensions)) {
             return true;
@@ -126,7 +129,7 @@ public class MetricCheckProcessor implements ParseResultProcessor {
      * eg: some descriptive dimensions are not suitable as drill-down dimensions
      */
     private boolean checkDrillDownDimension(String dimensionName, List<String> metrics,
-                                            SemanticSchema semanticSchema) {
+            SemanticSchema semanticSchema) {
         List<SchemaElement> metricElements = semanticSchema.getMetrics().stream()
                 .filter(schemaElement -> metrics.contains(schemaElement.getName()))
                 .collect(Collectors.toList());
@@ -206,12 +209,12 @@ public class MetricCheckProcessor implements ParseResultProcessor {
     }
 
     private static String removeFieldInSql(String sql, Set<String> metricToRemove,
-                                    Set<String> dimensionByToRemove, Set<String> whereFieldsToRemove) {
+            Set<String> dimensionByToRemove, Set<String> whereFieldsToRemove) {
         sql = SqlParserRemoveHelper.removeWhereCondition(sql, whereFieldsToRemove);
         sql = SqlParserRemoveHelper.removeSelect(sql, metricToRemove);
         sql = SqlParserRemoveHelper.removeSelect(sql, dimensionByToRemove);
         sql = SqlParserRemoveHelper.removeGroupBy(sql, dimensionByToRemove);
-        sql = SqlParserRemoveHelper.removeNumberCondition(sql);
+        sql = SqlParserRemoveHelper.removeNumberFilter(sql);
         return sql;
     }
 
