@@ -15,7 +15,7 @@ public class Retrieval {
 
     protected String query;
 
-    protected Map<String, String> metadata;
+    protected Map<String, Object> metadata;
 
     public static Long getLongId(String id) {
         if (StringUtils.isBlank(id)) {

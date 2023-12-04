@@ -36,8 +36,40 @@ mybatis:
 
 llm:
   parser:
-    url:  http://127.0.0.1:9092
+    url:
 embedding:
   url: http://127.0.0.1:9092
 functionCall:
   url: http://127.0.0.1:9092
+
+#langchain4j config
+langchain4j:
+  #1.chat-model
+  chat-model:
+    provider: open_ai
+    openai:
+      api-key: api_key
+      model-name: gpt-3.5-turbo
+      temperature: 0.0
+      timeout: PT60S
+  #2.embedding-model
+  embedding-model:
+    provider: in_memory
+#  embedding-model:
+#    hugging-face:
+#      access-token: hg_access_token
+#      model-id: sentence-transformers/all-MiniLM-L6-v2
+#      timeout: 1h
+
+#  embedding-model:
+#    provider: open_ai
+#    openai:
+#      api-key: api_key
+#      modelName: all-minilm-l6-v2.onnx
+
+
+#langchain4j log
+logging:
+  level:
+    dev.langchain4j: DEBUG
+    dev.ai4j.openai4j: DEBUG

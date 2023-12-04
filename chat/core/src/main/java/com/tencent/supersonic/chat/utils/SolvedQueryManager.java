@@ -4,11 +4,12 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.request.SolvedQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
+import com.tencent.supersonic.common.util.ComponentFactory;
 import com.tencent.supersonic.common.util.embedding.EmbeddingQuery;
-import com.tencent.supersonic.common.util.embedding.EmbeddingUtils;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
+import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,11 +37,11 @@ public class SolvedQueryManager {
 
     private EmbeddingConfig embeddingConfig;
 
-    private EmbeddingUtils embeddingUtils;
+    private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
 
-    public SolvedQueryManager(EmbeddingConfig embeddingConfig, EmbeddingUtils embeddingUtils) {
+
+    public SolvedQueryManager(EmbeddingConfig embeddingConfig) {
         this.embeddingConfig = embeddingConfig;
-        this.embeddingUtils = embeddingUtils;
     }
 
     public void saveSolvedQuery(SolvedQueryReq solvedQueryReq) {
@@ -54,12 +55,12 @@ public class SolvedQueryManager {
             embeddingQuery.setQueryId(uniqueId);
             embeddingQuery.setQuery(queryText);
 
-            Map<String, String> metaData = new HashMap<>();
-            metaData.put("modelId", String.valueOf(solvedQueryReq.getModelId()));
-            metaData.put("agentId", String.valueOf(solvedQueryReq.getAgentId()));
+            Map<String, Object> metaData = new HashMap<>();
+            metaData.put("modelId", (solvedQueryReq.getModelId()));
+            metaData.put("agentId", solvedQueryReq.getAgentId());
             embeddingQuery.setMetadata(metaData);
             String solvedQueryCollection = embeddingConfig.getSolvedQueryCollection();
-            embeddingUtils.addQuery(solvedQueryCollection, Lists.newArrayList(embeddingQuery));
+            s2EmbeddingStore.addQuery(solvedQueryCollection, Lists.newArrayList(embeddingQuery));
         } catch (Exception e) {
             log.warn("save history question to embedding failed, queryText:{}", queryText, e);
         }
@@ -80,7 +81,7 @@ public class SolvedQueryManager {
                     .queryTextsList(Lists.newArrayList(queryText))
                     .filterCondition(filterCondition)
                     .build();
-            List<RetrieveQueryResult> resultList = embeddingUtils.retrieveQuery(solvedQueryCollection, retrieveQuery,
+            List<RetrieveQueryResult> resultList = s2EmbeddingStore.retrieveQuery(solvedQueryCollection, retrieveQuery,
                     solvedQueryResultNum);
 
             log.info("[embedding] recognize result body:{}", resultList);

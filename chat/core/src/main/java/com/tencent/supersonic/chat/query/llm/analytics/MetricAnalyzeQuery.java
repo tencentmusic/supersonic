@@ -1,6 +1,5 @@
 package com.tencent.supersonic.chat.query.llm.analytics;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
@@ -14,13 +13,11 @@ import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.llm.LLMSemanticQuery;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.utils.QueryReqBuilder;
-import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.embedding.EmbeddingUtils;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import java.util.HashMap;
@@ -31,8 +28,6 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -42,7 +37,6 @@ public class MetricAnalyzeQuery extends LLMSemanticQuery {
 
 
     public static final String QUERY_MODE = "METRIC_INTERPRET";
-
 
     public MetricAnalyzeQuery() {
         QueryManager.register(this);
@@ -151,23 +145,7 @@ public class MetricAnalyzeQuery extends LLMSemanticQuery {
     }
 
     public String fetchInterpret(String queryText, String dataText) {
-        LLMAnswerReq lLmAnswerReq = new LLMAnswerReq();
-        lLmAnswerReq.setQueryText(queryText);
-        lLmAnswerReq.setPluginOutput(dataText);
-        EmbeddingUtils embeddingUtils = ContextUtils.getBean(EmbeddingUtils.class);
-        EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
-        String metricAnalyzeQueryCollection = embeddingConfig.getMetricAnalyzeQueryCollection();
-
-        String url = String.format("%s/retrieve_query?collection_name=%s", embeddingConfig.getUrl(),
-                metricAnalyzeQueryCollection);
-
-        ResponseEntity<String> responseEntity = embeddingUtils.doRequest(url, JSONObject.toJSONString(lLmAnswerReq),
-                HttpMethod.POST);
-        LLMAnswerResp lLmAnswerResp = JSONObject.parseObject(responseEntity.getBody(), LLMAnswerResp.class);
-        if (lLmAnswerResp != null) {
-            return lLmAnswerResp.getAssistantMessage();
-        }
-        return null;
+        return "";
     }
 
 }
