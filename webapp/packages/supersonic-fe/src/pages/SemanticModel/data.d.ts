@@ -194,7 +194,7 @@ export declare namespace ISemantic {
     domainName: string;
     modelName: string;
     modelId: number;
-    hasAdminRes?: boolean;
+    hasAdminRes: boolean;
     type: string;
     typeParams: ITypeParams;
     fullPath: string;
