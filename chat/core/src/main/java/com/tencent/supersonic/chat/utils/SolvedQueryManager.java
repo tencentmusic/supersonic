@@ -1,13 +1,21 @@
 package com.tencent.supersonic.chat.utils;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.request.SolvedQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrievalResp;
-import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrieval;
+import com.tencent.supersonic.common.util.embedding.EmbeddingQuery;
+import com.tencent.supersonic.common.util.embedding.EmbeddingUtils;
+import com.tencent.supersonic.common.util.embedding.Retrieval;
+import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
+import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,13 +29,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @Component
@@ -35,8 +36,11 @@ public class SolvedQueryManager {
 
     private EmbeddingConfig embeddingConfig;
 
-    public SolvedQueryManager(EmbeddingConfig embeddingConfig) {
+    private EmbeddingUtils embeddingUtils;
+
+    public SolvedQueryManager(EmbeddingConfig embeddingConfig, EmbeddingUtils embeddingUtils) {
         this.embeddingConfig = embeddingConfig;
+        this.embeddingUtils = embeddingUtils;
     }
 
     public void saveSolvedQuery(SolvedQueryReq solvedQueryReq) {
@@ -46,15 +50,16 @@ public class SolvedQueryManager {
         String queryText = solvedQueryReq.getQueryText();
         try {
             String uniqueId = generateUniqueId(solvedQueryReq.getQueryId(), solvedQueryReq.getParseId());
-            Map<String, Object> requestMap = new HashMap<>();
-            requestMap.put("query", queryText);
-            requestMap.put("query_id", uniqueId);
-            Map<String, Object> metaData = new HashMap<>();
+            EmbeddingQuery embeddingQuery = new EmbeddingQuery();
+            embeddingQuery.setQueryId(uniqueId);
+            embeddingQuery.setQuery(queryText);
+
+            Map<String, String> metaData = new HashMap<>();
             metaData.put("modelId", String.valueOf(solvedQueryReq.getModelId()));
             metaData.put("agentId", String.valueOf(solvedQueryReq.getAgentId()));
-            requestMap.put("metadata", metaData);
-            doRequest(embeddingConfig.getSolvedQueryAddPath(),
-                    JSONObject.toJSONString(Lists.newArrayList(requestMap)));
+            embeddingQuery.setMetadata(metaData);
+            String solvedQueryCollection = embeddingConfig.getSolvedQueryCollection();
+            embeddingUtils.addQuery(solvedQueryCollection, Lists.newArrayList(embeddingQuery));
         } catch (Exception e) {
             log.warn("save history question to embedding failed, queryText:{}", queryText, e);
         }
@@ -66,49 +71,41 @@ public class SolvedQueryManager {
         }
         List<SolvedQueryRecallResp> solvedQueryRecallResps = Lists.newArrayList();
         try {
-            String url = embeddingConfig.getUrl() + embeddingConfig.getSolvedQueryRecallPath() + "?n_results="
-                    + embeddingConfig.getSolvedQueryResultNum();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setLocation(URI.create(url));
-            URI requestUrl = UriComponentsBuilder
-                    .fromHttpUrl(url).build().encode().toUri();
-            Map<String, Object> map = new HashMap<>();
-            map.put("queryTextsList", Lists.newArrayList(queryText));
-            Map<String, Object> filterCondition = new HashMap<>();
+            String solvedQueryCollection = embeddingConfig.getSolvedQueryCollection();
+            int solvedQueryResultNum = embeddingConfig.getSolvedQueryResultNum();
+
+            Map<String, String> filterCondition = new HashMap<>();
             filterCondition.put("agentId", String.valueOf(agentId));
-            map.put("filterCondition", filterCondition);
-            String jsonBody = JSONObject.toJSONString(map, SerializerFeature.WriteMapNullValue);
-            HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
-            log.info("[embedding] request body:{}, url:{}", jsonBody, url);
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<List<RecallRetrievalResp>> embeddingResponseEntity =
-                    restTemplate.exchange(requestUrl, HttpMethod.POST, entity,
-                            new ParameterizedTypeReference<List<RecallRetrievalResp>>() {
-                            });
-            log.info("[embedding] recognize result body:{}", embeddingResponseEntity);
-            List<RecallRetrievalResp> embeddingResps = embeddingResponseEntity.getBody();
+            RetrieveQuery retrieveQuery = RetrieveQuery.builder()
+                    .queryTextsList(Lists.newArrayList(queryText))
+                    .filterCondition(filterCondition)
+                    .build();
+            List<RetrieveQueryResult> resultList = embeddingUtils.retrieveQuery(solvedQueryCollection, retrieveQuery,
+                    solvedQueryResultNum);
+
+            log.info("[embedding] recognize result body:{}", resultList);
             Set<String> querySet = new HashSet<>();
-            if (CollectionUtils.isNotEmpty(embeddingResps)) {
-                for (RecallRetrievalResp embeddingResp : embeddingResps) {
-                    List<RecallRetrieval> embeddingRetrievals = embeddingResp.getRetrieval();
-                    for (RecallRetrieval embeddingRetrieval : embeddingRetrievals) {
-                        if (queryText.equalsIgnoreCase(embeddingRetrieval.getQuery())) {
+            if (CollectionUtils.isNotEmpty(resultList)) {
+                for (RetrieveQueryResult retrieveQueryResult : resultList) {
+                    List<Retrieval> retrievals = retrieveQueryResult.getRetrieval();
+                    for (Retrieval retrieval : retrievals) {
+                        if (queryText.equalsIgnoreCase(retrieval.getQuery())) {
                             continue;
                         }
-                        if (querySet.contains(embeddingRetrieval.getQuery())) {
+                        if (querySet.contains(retrieval.getQuery())) {
                             continue;
                         }
-                        String id = embeddingRetrieval.getId();
+                        String id = retrieval.getId();
                         SolvedQueryRecallResp solvedQueryRecallResp = SolvedQueryRecallResp.builder()
-                                .queryText(embeddingRetrieval.getQuery())
+                                .queryText(retrieval.getQuery())
                                 .queryId(getQueryId(id)).parseId(getParseId(id))
                                 .build();
                         solvedQueryRecallResps.add(solvedQueryRecallResp);
-                        querySet.add(embeddingRetrieval.getQuery());
+                        querySet.add(retrieval.getQuery());
                     }
                 }
             }
+
         } catch (Exception e) {
             log.warn("recall similar solved query failed, queryText:{}", queryText);
         }
@@ -146,7 +143,8 @@ public class SolvedQueryManager {
             log.info("[embedding] request body :{}, url:{}", jsonBody, url);
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> responseEntity = restTemplate.exchange(requestUrl,
-                    HttpMethod.POST, entity, new ParameterizedTypeReference<String>() {});
+                    HttpMethod.POST, entity, new ParameterizedTypeReference<String>() {
+                    });
             log.info("[embedding] result body:{}", responseEntity);
             return responseEntity;
         } catch (Exception e) {
