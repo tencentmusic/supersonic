@@ -20,10 +20,8 @@ class DataTransformUtilsTest {
         inputData.add(createMap("2023/10/14", "a", "c", "4"));
         inputData.add(createMap("2023/10/15", "b", "b", "5"));
         List<String> groups = Lists.newArrayList("d1", "d2");
-        List<String> dateList = Lists.newArrayList("2023/10/11", "2023/10/12",
-                "2023/10/13", "2023/10/14", "2023/10/15");
         String metric = "m1";
-        List<Map<String, Object>> resultData = DataTransformUtils.transform(inputData, dateList,
+        List<Map<String, Object>> resultData = DataTransformUtils.transform(inputData,
                 metric, groups, new DateConf());
         Assertions.assertEquals(3, resultData.size());
     }
