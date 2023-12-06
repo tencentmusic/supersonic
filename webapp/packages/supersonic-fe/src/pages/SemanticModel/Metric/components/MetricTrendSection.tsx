@@ -10,6 +10,7 @@ import {
   LineChartOutlined,
   TableOutlined,
   DownloadOutlined,
+  PoweroffOutlined,
 } from '@ant-design/icons';
 import DimensionAndMetricRelationModal from '../../components/DimensionAndMetricRelationModal';
 import TrendChart from '@/pages/SemanticModel/Metric/components/MetricTrend';
@@ -66,6 +67,8 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
   const [chartType, setChartType] = useState<'chart' | 'table'>('chart');
   const [tableColumnConfig, setTableColumnConfig] = useState<ColumnConfig[]>([]);
 
+  const [transformState, setTransformState] = useState<boolean>(false);
+
   const [groupByDimensionFieldName, setGroupByDimensionFieldName] = useState<string>();
 
   const getMetricTrendData = async (params: any = { download: false }) => {
@@ -107,6 +110,7 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
       startDate: periodDate.startDate,
       endDate: periodDate.endDate,
       download,
+      isTransform: transformState,
     });
     if (download) {
       setDownloadLoding(false);
@@ -301,20 +305,33 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
                   </Space>
                 </Button>
               )}
-              <Button
-                type="primary"
-                key="download"
-                loading={downloadLoding}
-                disabled={downloadBtnDisabledState}
-                onClick={() => {
-                  getMetricTrendData({ download: true, ...queryParams });
-                }}
-              >
-                <Space>
-                  <DownloadOutlined />
-                  下载
-                </Space>
-              </Button>
+
+              <Space.Compact block>
+                <Button
+                  type="primary"
+                  key="download"
+                  loading={downloadLoding}
+                  disabled={downloadBtnDisabledState}
+                  onClick={() => {
+                    getMetricTrendData({ download: true, ...queryParams });
+                  }}
+                >
+                  <Space>
+                    <DownloadOutlined />
+                    下载
+                  </Space>
+                </Button>
+
+                <Tooltip title="开启转置">
+                  <Button
+                    type={transformState ? 'primary' : 'default'}
+                    icon={<PoweroffOutlined />}
+                    onClick={() => {
+                      setTransformState(!transformState);
+                    }}
+                  />
+                </Tooltip>
+              </Space.Compact>
             </Space>
           </Col>
         </Row>
