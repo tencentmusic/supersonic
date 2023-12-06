@@ -1,9 +1,9 @@
 import React from 'react';
-import { Table, Select, Checkbox, Input, Alert, Space, Tooltip } from 'antd';
+import { Table, Select, Checkbox, Input, Alert, Space, Tooltip, Form, Switch } from 'antd';
 import TableTitleTooltips from '../../components/TableTitleTooltips';
 import { isUndefined } from 'lodash';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import Marquee from 'react-fast-marquee';
+import SqlEditor from '@/components/SqlEditor';
 import {
   TYPE_OPTIONS,
   DATE_FORMATTER,
@@ -14,6 +14,7 @@ import {
 import styles from '../style.less';
 
 type FieldItem = {
+  expr?: string;
   bizName: string;
   sqlType: string;
   name: string;
@@ -22,9 +23,15 @@ type FieldItem = {
   checked?: number;
   dateFormat?: string;
   timeGranularity?: string;
+  entityNames?: string[];
+  isTag?: number;
 };
 
+const FormItem = Form.Item;
+
 type Props = {
+  onSqlChange: (sql: string) => void;
+  sql: string;
   fields: FieldItem[];
   onFieldChange: (fieldName: string, data: Partial<FieldItem>) => void;
 };
@@ -38,10 +45,9 @@ const getCreateFieldName = (type: EnumDataSourceType) => {
     ? 'isCreateDimension'
     : 'isCreateMetric';
   return isCreateName;
-  // const editState = !isUndefined(record[isCreateName]) ? !!record[isCreateName] : true;
 };
 
-const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
+const FieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSqlChange }) => {
   const handleFieldChange = (record: FieldItem, fieldName: string, value: any) => {
     onFieldChange(record.bizName, {
       ...record,
@@ -113,11 +119,33 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
     {
       title: '扩展配置',
       dataIndex: 'extender',
-      width: 180,
+      width: 185,
       render: (_: any, record: FieldItem) => {
         const { type } = record;
+        if (type === EnumDataSourceType.PRIMARY) {
+          const entityNames =
+            fields.find((field) => field.bizName === record.bizName)?.entityNames || [];
+          return (
+            <Space>
+              <Select
+                style={{ minWidth: 345 }}
+                mode="tags"
+                value={entityNames}
+                placeholder="输入实体名称后回车确认，支持英文逗号自动分隔"
+                tokenSeparators={[',']}
+                onChange={(value) => {
+                  handleFieldChange(record, 'entityNames', value);
+                }}
+                maxTagCount={9}
+              />
+              <Tooltip title="主键可以作为一个实体，在此设置一个或多个实体名称">
+                <ExclamationCircleOutlined />
+              </Tooltip>
+            </Space>
+          );
+        }
         if (type === EnumDataSourceType.MEASURES) {
-          const agg = fields.find((field) => field.bizName === record.bizName)?.agg;
+          const agg = fields.find((field) => field.expr === record.expr)?.agg;
           return (
             <Select
               placeholder="度量算子"
@@ -134,6 +162,25 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
                 </Option>
               ))}
             </Select>
+          );
+        }
+        if (type === EnumDataSourceType.CATEGORICAL) {
+          const isTag = fields.find((field) => field.bizName === record.bizName)?.isTag;
+          return (
+            <Space>
+              <span>设为标签</span>
+              <Switch
+                defaultChecked
+                size="small"
+                checked={!!isTag}
+                onChange={(value) => {
+                  handleFieldChange(record, 'isTag', value);
+                }}
+              />
+              <Tooltip title="如果勾选，代表维度的取值都是一种“标签”，可用作对实体的圈选">
+                <ExclamationCircleOutlined />
+              </Tooltip>
+            </Space>
           );
         }
         if (type === EnumDataSourceType.TIME) {
@@ -218,7 +265,6 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
                     [isCreateName]: value,
                   });
                 } else {
-                  // handleFieldChange(record, isCreateName, value);
                   onFieldChange(record.bizName, {
                     ...record,
                     checked: value,
@@ -233,7 +279,6 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
                 disabled={!editState}
                 onChange={(e) => {
                   const value = e.target.value;
-                  // handleFieldChange(record, 'name', value);
                   onFieldChange(record.bizName, {
                     ...record,
                     name: value,
@@ -271,6 +316,14 @@ const FieldForm: React.FC<Props> = ({ fields, onFieldChange }) => {
         pagination={false}
         scroll={{ y: 500 }}
       />
+      <FormItem
+        style={{ marginTop: 40, marginBottom: 60 }}
+        name="filterSql"
+        label={<span style={{ fontSize: 14 }}>过滤SQL</span>}
+        tooltip="主要用于词典导入场景, 对维度值进行过滤 格式: field1 = 'xxx' and field2 = 'yyy'"
+      >
+        <SqlEditor height={'150px'} value={sql} onChange={onSqlChange} />
+      </FormItem>
     </>
   );
 };

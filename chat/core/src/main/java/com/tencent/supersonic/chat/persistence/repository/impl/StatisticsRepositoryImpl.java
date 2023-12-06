@@ -24,5 +24,4 @@ public class StatisticsRepositoryImpl implements StatisticsRepository {
         statisticsMapper.batchSaveStatistics(list);
     }
 
-
 }

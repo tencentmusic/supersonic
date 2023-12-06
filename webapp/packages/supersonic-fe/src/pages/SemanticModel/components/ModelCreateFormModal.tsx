@@ -96,7 +96,7 @@ const ModelCreateFormModal: React.FC<ModelCreateFormModalProps> = (props) => {
   return (
     <Modal
       width={640}
-      bodyStyle={{ padding: '32px 40px 48px' }}
+      // styles={{ padding: '32px 40px 48px' }}
       destroyOnClose
       title={'模型信息'}
       open={true}
@@ -125,7 +125,18 @@ const ModelCreateFormModal: React.FC<ModelCreateFormModalProps> = (props) => {
         >
           <Input placeholder="请输入模型英文名称" />
         </FormItem>
-        <FormItem name="alias" label="别名">
+        <FormItem
+          name="alias"
+          label="别名"
+          getValueFromEvent={(value) => {
+            return value.join(',');
+          }}
+          getValueProps={(value) => {
+            return {
+              value: value.split(','),
+            };
+          }}
+        >
           <Select
             mode="tags"
             placeholder="输入别名后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
@@ -144,6 +155,7 @@ const ModelCreateFormModal: React.FC<ModelCreateFormModalProps> = (props) => {
               subTitle={'配置之后,可在指标主页和问答指标卡处选择用来对指标进行下钻和过滤'}
             />
           }
+          hidden={!basicInfo?.id}
         >
           <Select
             mode="multiple"

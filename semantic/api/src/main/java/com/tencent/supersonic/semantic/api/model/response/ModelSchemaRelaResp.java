@@ -1,14 +1,15 @@
 package com.tencent.supersonic.semantic.api.model.response;
 
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class ModelSchemaRelaResp {
 
     private Long domainId;
 
-    private DatasourceResp datasource;
+    private ModelResp model;
 
     private List<MetricResp> metrics;
 

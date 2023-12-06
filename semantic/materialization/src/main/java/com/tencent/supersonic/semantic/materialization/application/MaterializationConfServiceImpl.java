@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.materialization.application;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
@@ -19,10 +20,10 @@ import com.tencent.supersonic.semantic.api.materialization.response.Materializat
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
-import com.tencent.supersonic.semantic.api.model.response.DatasourceResp;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.MeasureResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.materialization.domain.MaterializationConfService;
 import com.tencent.supersonic.semantic.materialization.domain.pojo.Materialization;
@@ -31,8 +32,11 @@ import com.tencent.supersonic.semantic.materialization.domain.repository.Materia
 import com.tencent.supersonic.semantic.materialization.domain.repository.MaterializationRepository;
 import com.tencent.supersonic.semantic.materialization.domain.utils.MaterializationConverter;
 import com.tencent.supersonic.semantic.materialization.domain.utils.MaterializationZipperUtils;
-import com.tencent.supersonic.semantic.model.domain.DatasourceService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,11 +49,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 
 @Slf4j
 @Service
@@ -58,18 +57,16 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
     private final MaterializationRepository materializationRepository;
     private final MaterializationElementRepository materializationElementRepository;
     private final ModelService modelService;
-    private final DatasourceService datasourceService;
     private final MaterializationZipperUtils materializationZipperUtils;
     private String typeAndIdSplit = "_";
 
     public MaterializationConfServiceImpl(MaterializationRepository materializationRepository,
                                           MaterializationElementRepository materializationElementRepository,
-                                          ModelService modelService, DatasourceService datasourceService,
+                                          ModelService modelService,
                                           MaterializationZipperUtils materializationZipperUtils) {
         this.materializationRepository = materializationRepository;
         this.materializationElementRepository = materializationElementRepository;
         this.modelService = modelService;
-        this.datasourceService = datasourceService;
         this.materializationZipperUtils = materializationZipperUtils;
     }
 
@@ -106,7 +103,6 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
         }
         return materializationRespList.get(0);
     }
-
 
     @Override
     public Boolean addMaterializationElementConf(MaterializationElementReq materializationElementReq, User user) {
@@ -295,7 +291,6 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
         return materializationElementRepository.cleanMaterializationElement(materializationId);
     }
 
-
     @Override
     public List<MaterializationElementModelResp> getMaterializationElementModels(Long materializationId, User user) {
         MaterializationResp materializationResp = materializationRepository.getMaterialization(materializationId);
@@ -308,8 +303,8 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
             ModelSchemaFilterReq modelFilter = new ModelSchemaFilterReq();
             modelFilter.setModelIds(Arrays.asList(materializationResp.getModelId()));
             List<ModelSchemaResp> modelSchemaRespList = modelService.fetchModelSchema(modelFilter);
-            List<MeasureResp> measureRespList = datasourceService.getMeasureListOfModel(
-                    materializationResp.getModelId());
+            List<MeasureResp> measureRespList = modelService.getMeasureListOfModel(
+                    Lists.newArrayList(materializationResp.getModelId()));
             Map<String, DimSchemaResp> dimSchemaRespMap = new HashMap<>();
             Map<String, MetricSchemaResp> metricSchemaRespHashMap = new HashMap<>();
             if (!CollectionUtils.isEmpty(modelSchemaRespList)) {
@@ -362,13 +357,11 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
     @Override
     public List<MaterializationSourceResp> getMaterializationSourceResp(
             Long materializationId) {
-
         MaterializationResp materializationResp = materializationRepository.getMaterialization(
                 materializationId);
         Long modelId = materializationResp.getModelId();
-        List<DatasourceResp> modelDataSources = datasourceService.getDatasourceList(modelId);
 
-        Set<Long> dataSourceIds = new HashSet<>();
+        Set<Long> modelIds = new HashSet<>();
         Map<Long, Map<Long, String>> dataSourceDimensions = new HashMap<>();
         Map<Long, Map<Long, String>> dataSourceMetrics = new HashMap<>();
         MaterializationConfFilter materializationConfFilter = new MaterializationConfFilter();
@@ -379,7 +372,7 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
             ModelSchemaFilterReq modelSchemaFilterReq = new ModelSchemaFilterReq();
             modelSchemaFilterReq.setModelIds(Arrays.asList(modelId));
             List<ModelSchemaResp> modelSchemaRespList = modelService.fetchModelSchema(modelSchemaFilterReq);
-            List<MeasureResp> measureRespList = datasourceService.getMeasureListOfModel(modelId);
+            List<MeasureResp> measureRespList = modelService.getMeasureListOfModel(Lists.newArrayList(modelId));
             Set<Long> dimensionIds = new HashSet<>();
             Set<Long> metricIds = new HashSet<>();
             materializationElementRespList.stream().forEach(e -> {
@@ -392,11 +385,11 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
             });
             modelSchemaRespList.stream().forEach(m -> {
                 m.getDimensions().stream().filter(mm -> dimensionIds.contains(mm.getId())).forEach(mm -> {
-                    if (!dataSourceDimensions.containsKey(mm.getDatasourceId())) {
-                        dataSourceDimensions.put(mm.getDatasourceId(), new HashMap<>());
+                    if (!dataSourceDimensions.containsKey(mm.getModelId())) {
+                        dataSourceDimensions.put(mm.getModelId(), new HashMap<>());
                     }
-                    dataSourceDimensions.get(mm.getDatasourceId()).put(mm.getId(), mm.getBizName());
-                    dataSourceIds.add(mm.getDatasourceId());
+                    dataSourceDimensions.get(mm.getModelId()).put(mm.getId(), mm.getBizName());
+                    modelIds.add(mm.getModelId());
                 });
                 m.getMetrics().stream().filter(mm -> metricIds.contains(mm.getId())).forEach(mm -> {
                     Long sourceId = 0L;
@@ -411,27 +404,29 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
                             dataSourceMetrics.put(sourceId, new HashMap<>());
                         }
                         dataSourceMetrics.get(sourceId).put(mm.getId(), mm.getBizName());
-                        dataSourceIds.add(sourceId);
+                        modelIds.add(sourceId);
                     }
                 });
             });
         }
         List<MaterializationSourceResp> materializationSourceResps = new ArrayList<>();
-        for (Long sourceId : dataSourceIds) {
-            Optional<DatasourceResp> datasourceResp = modelDataSources.stream().filter(d -> d.getId().equals(sourceId))
-                    .findFirst();
-            if (datasourceResp.isPresent()) {
+        for (Long sourceId : modelIds) {
+            //todo
+            //  Optional<ModelResp> modelResp = modelSchemaRespList.stream().filter(d -> d.getId().equals(sourceId))
+            //         .findFirst();
+            Optional<ModelResp> modelResp = Optional.empty();
+            if (modelResp.isPresent()) {
                 MaterializationSourceResp materializationSourceResp = MaterializationSourceResp.builder()
                         .dataSourceId(sourceId)
                         .materializationId(materializationId)
                         .modelId(modelId)
-                        .depends(datasourceResp.get().getDepends())
+                        .depends(modelResp.get().getDepends())
                         .materializedType(materializationResp.getMaterializedType())
                         .entities(materializationResp.getEntities())
                         .dateInfo(materializationResp.getDateInfo())
                         .updateCycle(materializationResp.getUpdateCycle())
                         .build();
-                setDataSourceDb(datasourceResp.get(), materializationSourceResp);
+                setDataSourceDb(modelResp.get(), materializationSourceResp);
                 materializationSourceResp.setMetrics(
                         dataSourceMetrics.containsKey(sourceId) ? dataSourceMetrics.get(sourceId)
                                 : new HashMap<>());
@@ -455,16 +450,16 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
         return 0L;
     }
 
-    private void setDataSourceDb(DatasourceResp datasourceResp, MaterializationSourceResp materializationSourceResp) {
-        if (Objects.nonNull(datasourceResp.getDatasourceDetail())) {
+    private void setDataSourceDb(ModelResp datasourceResp, MaterializationSourceResp materializationSourceResp) {
+        if (Objects.nonNull(datasourceResp.getModelDetail())) {
             String dbTable = "";
-            if (Objects.nonNull(datasourceResp.getDatasourceDetail().getTableQuery())
-                    && !datasourceResp.getDatasourceDetail().getTableQuery().isEmpty()) {
-                dbTable = datasourceResp.getDatasourceDetail().getTableQuery();
+            if (Objects.nonNull(datasourceResp.getModelDetail().getTableQuery())
+                    && !datasourceResp.getModelDetail().getTableQuery().isEmpty()) {
+                dbTable = datasourceResp.getModelDetail().getTableQuery();
             }
-            if (Objects.nonNull(datasourceResp.getDatasourceDetail().getSqlQuery())
-                    && !datasourceResp.getDatasourceDetail().getSqlQuery().isEmpty()) {
-                dbTable = SqlParserSelectHelper.getDbTableName(datasourceResp.getDatasourceDetail().getSqlQuery());
+            if (Objects.nonNull(datasourceResp.getModelDetail().getSqlQuery())
+                    && !datasourceResp.getModelDetail().getSqlQuery().isEmpty()) {
+                dbTable = SqlParserSelectHelper.getDbTableName(datasourceResp.getModelDetail().getSqlQuery());
             }
             if (!dbTable.isEmpty()) {
                 String[] db = dbTable.split("\\.");
@@ -476,7 +471,6 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
         }
     }
 
-
     private String getDataSourceMeasure(List<MeasureResp> measureRespList, String bizName) {
         if (!CollectionUtils.isEmpty(measureRespList)) {
             Optional<MeasureResp> measure = measureRespList.stream()
@@ -487,6 +481,5 @@ public class MaterializationConfServiceImpl implements MaterializationConfServic
         }
         return "";
     }
-
 
 }

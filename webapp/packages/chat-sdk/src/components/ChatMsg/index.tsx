@@ -27,6 +27,8 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
   const [referenceColumn, setReferenceColumn] = useState<ColumnType>();
   const [dataSource, setDataSource] = useState<any[]>(queryResults);
   const [drillDownDimension, setDrillDownDimension] = useState<DrillDownDimensionType>();
+  const [secondDrillDownDimension, setSecondDrillDownDimension] =
+    useState<DrillDownDimensionType>();
   const [loading, setLoading] = useState(false);
   const [defaultMetricField, setDefaultMetricField] = useState<FieldType>();
   const [activeMetricField, setActiveMetricField] = useState<FieldType>();
@@ -48,6 +50,8 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
     setActiveMetricField(chatContext?.metrics?.[0]);
     setDateModeValue(chatContext?.dateInfo?.dateMode);
     setCurrentDateOption(chatContext?.dateInfo?.unit);
+    setDrillDownDimension(undefined);
+    setSecondDrillDownDimension(undefined);
   }, [data]);
 
   if (!queryColumns || !queryResults || !columns) {
@@ -60,7 +64,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
   const metricFields = columns.filter(item => item.showType === 'NUMBER');
 
   const isDslMetricCard =
-    queryMode === 'LLM_S2QL' && singleData && metricFields.length === 1 && columns.length === 1;
+    queryMode === 'LLM_S2SQL' && singleData && metricFields.length === 1 && columns.length === 1;
 
   const isMetricCard = (queryMode.includes('METRIC') || isDslMetricCard) && singleData;
 
@@ -75,7 +79,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
     !isText &&
     !isMetricCard &&
     (categoryField.length > 1 ||
-      queryMode === 'ENTITY_DETAIL' ||
+      queryMode === 'TAG_DETAIL' ||
       queryMode === 'ENTITY_DIMENSION' ||
       (categoryField.length === 1 && metricFields.length === 0));
 
@@ -92,7 +96,12 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
       );
     }
     if (isTable) {
-      return <Table data={{ ...data, queryColumns: columns, queryResults: dataSource }} />;
+      return (
+        <Table
+          data={{ ...data, queryColumns: columns, queryResults: dataSource }}
+          loading={loading}
+        />
+      );
     }
     if (
       dateField &&
@@ -129,15 +138,21 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
         />
       );
     }
-    return <Table data={{ ...data, queryColumns: columns, queryResults: dataSource }} />;
+    return (
+      <Table
+        data={{ ...data, queryColumns: columns, queryResults: dataSource }}
+        loading={loading}
+      />
+    );
   };
 
   const onLoadData = async (value: any) => {
     setLoading(true);
     const res: any = await queryData({
+      ...chatContext,
+      ...value,
       queryId,
       parseId: chatContext.id,
-      ...value,
     });
     setLoading(false);
     if (res.code === 200) {
@@ -146,7 +161,8 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
     }
   };
 
-  const onSelectDimension = (dimension?: DrillDownDimensionType) => {
+  const onSelectDimension = async (dimension?: DrillDownDimensionType) => {
+    setLoading(true);
     setDrillDownDimension(dimension);
     onLoadData({
       dateInfo: {
@@ -157,6 +173,23 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
       dimensions: dimension
         ? [...(chatContext.dimensions || []), dimension]
         : chatContext.dimensions,
+      metrics: [activeMetricField || defaultMetricField],
+    });
+  };
+
+  const onSelectSecondDimension = (dimension?: DrillDownDimensionType) => {
+    setSecondDrillDownDimension(dimension);
+    onLoadData({
+      dateInfo: {
+        ...chatContext.dateInfo,
+        dateMode: dateModeValue,
+        unit: currentDateOption || chatContext.dateInfo.unit,
+      },
+      dimensions: [
+        ...(chatContext.dimensions || []),
+        ...(drillDownDimension ? [drillDownDimension] : []),
+        ...(dimension ? [dimension] : []),
+      ],
       metrics: [activeMetricField || defaultMetricField],
     });
   };
@@ -199,13 +232,20 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
     ?.name;
 
   const isEntityMode =
-    (queryMode === 'ENTITY_LIST_FILTER' || queryMode === 'METRIC_ENTITY') &&
+    (queryMode === 'TAG_LIST_FILTER' || queryMode === 'METRIC_TAG') &&
     typeof entityId === 'string' &&
     entityName !== undefined;
 
   const existDrillDownDimension = queryMode.includes('METRIC') && !isText && !isEntityMode;
 
-  const isMultipleMetric = queryMode.includes('METRIC') && chatContext?.metrics?.length > 1;
+  const recommendMetrics = chatContext?.metrics?.filter(metric =>
+    queryColumns.every(queryColumn => queryColumn.nameEn !== metric.bizName)
+  );
+
+  const isMultipleMetric =
+    (queryMode.includes('METRIC') || queryMode === 'LLM_S2SQL') &&
+    recommendMetrics?.length > 0 &&
+    queryColumns?.filter(column => column.showType === 'NUMBER').length === 1;
 
   return (
     <div className={chartMsgClass}>
@@ -218,7 +258,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
             <div
               className={`${prefixCls}-bottom-tools ${
                 isMetricCard ? `${prefixCls}-metric-card-tools` : ''
-              }`}
+              } ${isMobile ? 'mobile' : ''}`}
             >
               {isMultipleMetric && (
                 <MetricOptions
@@ -233,9 +273,11 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
                   modelId={chatContext.modelId}
                   metricId={activeMetricField?.id || defaultMetricField?.id}
                   drillDownDimension={drillDownDimension}
+                  secondDrillDownDimension={secondDrillDownDimension}
                   originDimensions={chatContext.dimensions}
                   dimensionFilters={chatContext.dimensionFilters}
                   onSelectDimension={onSelectDimension}
+                  onSelectSecondDimension={onSelectSecondDimension}
                 />
               )}
             </div>

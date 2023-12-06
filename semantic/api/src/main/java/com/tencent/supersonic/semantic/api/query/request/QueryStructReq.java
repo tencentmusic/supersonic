@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
@@ -13,14 +14,10 @@ import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.semantic.api.query.pojo.Cache;
 import com.tencent.supersonic.semantic.api.query.pojo.Param;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
@@ -40,12 +37,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 @Data
 @Slf4j
 public class QueryStructReq {
 
-    private Long modelId;
+    private Set<Long> modelIds;
 
     private String modelName;
     private List<String> groups = new ArrayList<>();
@@ -56,19 +61,30 @@ public class QueryStructReq {
     private List<Param> params = new ArrayList<>();
     private DateConf dateInfo;
     private Long limit = 2000L;
-    private Boolean nativeQuery = false;
+    private QueryType queryType = QueryType.OTHER;
     private Cache cacheInfo;
 
-    private boolean useS2qlSwitch;
+    /**
+     * Later deleted for compatibility only
+     */
+    private String s2SQL;
+    /**
+     * Later deleted for compatibility only
+     */
+    private String correctS2SQL;
 
-    /**
-     * Later deleted for compatibility only
-     */
-    private String s2QL;
-    /**
-     * Later deleted for compatibility only
-     */
-    private String logicSql;
+    public void setModelId(Long modelId) {
+        modelIds = new HashSet<>();
+        modelIds.add(modelId);
+    }
+
+    public List<Long> getModelIds() {
+        return Lists.newArrayList(modelIds);
+    }
+
+    public Set<Long> getModelIdSet() {
+        return modelIds;
+    }
 
     public List<String> getGroups() {
         if (!CollectionUtils.isEmpty(this.groups)) {
@@ -107,7 +123,7 @@ public class QueryStructReq {
     public String toCustomizedString() {
         StringBuilder stringBuilder = new StringBuilder("{");
         stringBuilder.append("\"modelId\":")
-                .append(modelId);
+                .append(modelIds);
         stringBuilder.append(",\"groups\":")
                 .append(groups);
         stringBuilder.append(",\"aggregators\":")
@@ -122,12 +138,9 @@ public class QueryStructReq {
                 .append(params);
         stringBuilder.append(",\"limit\":")
                 .append(limit);
-        stringBuilder.append(",\"nativeQuery\":")
-                .append(nativeQuery);
         stringBuilder.append('}');
         return stringBuilder.toString();
     }
-
 
     public String generateCommandMd5() {
         return DigestUtils.md5Hex(this.toCustomizedString());
@@ -141,7 +154,7 @@ public class QueryStructReq {
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
         sb.append("\"modelId\":")
-                .append(modelId);
+                .append(modelIds);
         sb.append(",\"groups\":")
                 .append(groups);
         sb.append(",\"aggregators\":")
@@ -158,14 +171,11 @@ public class QueryStructReq {
                 .append(dateInfo);
         sb.append(",\"limit\":")
                 .append(limit);
-        sb.append(",\"nativeQuery\":")
-                .append(nativeQuery);
         sb.append(",\"cacheInfo\":")
                 .append(cacheInfo);
         sb.append('}');
         return sb.toString();
     }
-
 
     /**
      * convert queryStructReq to QueryS2QLReq
@@ -173,7 +183,7 @@ public class QueryStructReq {
      * @param queryStructReq
      * @return
      */
-    public QueryS2QLReq convert(QueryStructReq queryStructReq) {
+    public QueryS2SQLReq convert(QueryStructReq queryStructReq) {
         String sql = null;
         try {
             sql = buildSql(queryStructReq);
@@ -181,9 +191,9 @@ public class QueryStructReq {
             log.error("buildSql error", e);
         }
 
-        QueryS2QLReq result = new QueryS2QLReq();
+        QueryS2SQLReq result = new QueryS2SQLReq();
         result.setSql(sql);
-        result.setModelId(queryStructReq.getModelId());
+        result.setModelIds(queryStructReq.getModelIdSet());
         result.setVariables(new HashMap<>());
         return result;
     }
@@ -202,8 +212,9 @@ public class QueryStructReq {
         List<Aggregator> aggregators = queryStructReq.getAggregators();
         if (!CollectionUtils.isEmpty(aggregators)) {
             for (Aggregator aggregator : aggregators) {
-                if (queryStructReq.getNativeQuery()) {
-                    selectItems.add(new SelectExpressionItem(new Column(aggregator.getColumn())));
+                String columnName = aggregator.getColumn();
+                if (queryStructReq.getQueryType().isNativeAggQuery()) {
+                    selectItems.add(new SelectExpressionItem(new Column(columnName)));
                 } else {
                     Function sumFunction = new Function();
                     AggOperatorEnum func = aggregator.getFunc();
@@ -215,8 +226,10 @@ public class QueryStructReq {
                         sumFunction.setName("count");
                         sumFunction.setDistinct(true);
                     }
-                    sumFunction.setParameters(new ExpressionList(new Column(aggregator.getColumn())));
-                    selectItems.add(new SelectExpressionItem(sumFunction));
+                    sumFunction.setParameters(new ExpressionList(new Column(columnName)));
+                    SelectExpressionItem selectExpressionItem = new SelectExpressionItem(sumFunction);
+                    selectExpressionItem.setAlias(new Alias(columnName));
+                    selectItems.add(selectExpressionItem);
                 }
             }
         }
@@ -245,7 +258,7 @@ public class QueryStructReq {
         }
 
         //4.Set the group by clause
-        if (!CollectionUtils.isEmpty(groups) && !queryStructReq.getNativeQuery()) {
+        if (!CollectionUtils.isEmpty(groups) && !queryStructReq.getQueryType().isNativeAggQuery()) {
             GroupByElement groupByElement = new GroupByElement();
             for (String group : groups) {
                 groupByElement.addGroupByExpression(new Column(group));

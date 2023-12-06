@@ -76,7 +76,6 @@ public class ContextUtils implements ApplicationContextAware {
         return context;
     }
 
-
     public static String getActiveProfile() {
         String activeProfile = context.getEnvironment().getActiveProfiles()[0];
         if (StringUtils.isEmpty(activeProfile)) {

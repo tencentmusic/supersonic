@@ -6,9 +6,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
+import com.tencent.supersonic.common.pojo.Constants;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -54,7 +57,6 @@ public class DateUtils {
         return DateTimeFormatter.ofPattern(formats[0]);
     }
 
-
     public static String getBeforeDate(int intervalDay) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -62,7 +64,6 @@ public class DateUtils {
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         return dateFormat.format(calendar.getTime());
     }
-
 
     public static String getBeforeDate(int intervalDay, DatePeriodEnum datePeriodEnum) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
@@ -104,7 +105,6 @@ public class DateUtils {
         return null;
     }
 
-
     public static String format(Date date) {
         DateFormat dateFormat;
         if (containsTime(date)) {
@@ -124,6 +124,28 @@ public class DateUtils {
         DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
         String timeString = timeFormat.format(date);
         return !timeString.equals("00:00:00");
+    }
+
+    public static List<String> getDateList(String startDateStr, String endDateStr, String period) {
+        LocalDate startDate = LocalDate.parse(startDateStr);
+        LocalDate endDate = LocalDate.parse(endDateStr);
+
+        List<String> datesInRange = new ArrayList<>();
+        LocalDate currentDate = startDate;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        while (!currentDate.isAfter(endDate)) {
+            if (Constants.MONTH.equals(period)) {
+                datesInRange.add(currentDate.format(formatter));
+                currentDate = currentDate.plusMonths(1);
+            } else if (Constants.WEEK.equals(period)) {
+                datesInRange.add(currentDate.format(DateTimeFormatter.ISO_DATE));
+                currentDate = currentDate.plusWeeks(1);
+            } else {
+                datesInRange.add(currentDate.format(DateTimeFormatter.ISO_DATE));
+                currentDate = currentDate.plusDays(1);
+            }
+        }
+        return datesInRange;
     }
 
 }

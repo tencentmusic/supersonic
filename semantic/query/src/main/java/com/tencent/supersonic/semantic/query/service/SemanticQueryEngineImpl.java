@@ -13,6 +13,7 @@ import com.tencent.supersonic.semantic.query.utils.ComponentFactory;
 import com.tencent.supersonic.semantic.query.utils.QueryUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Component
@@ -29,15 +30,14 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
         this.queryUtils = queryUtils;
     }
 
-
     public QueryResultWithSchemaResp execute(QueryStatement queryStatement) {
         QueryResultWithSchemaResp queryResultWithColumns = null;
         QueryExecutor queryExecutor = route(queryStatement);
         if (queryExecutor != null) {
             queryResultWithColumns = queryExecutor.execute(catalog, queryStatement);
             queryResultWithColumns.setSql(queryStatement.getSql());
-            if (queryStatement.getModelId() > 0) {
-                queryUtils.fillItemNameInfo(queryResultWithColumns, queryStatement.getModelId());
+            if (!CollectionUtils.isEmpty(queryStatement.getModelIds())) {
+                queryUtils.fillItemNameInfo(queryResultWithColumns, queryStatement.getModelIds());
             }
         }
         return queryResultWithColumns;
@@ -46,7 +46,7 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
     public QueryStatement plan(QueryStructReq queryStructCmd) throws Exception {
         QueryStatement queryStatement = queryParser.logicSql(queryStructCmd);
         queryUtils.checkSqlParse(queryStatement);
-        queryStatement.setModelId(queryStructCmd.getModelId());
+        queryStatement.setModelIds(queryStructCmd.getModelIds());
         log.info("queryStatement:{}", queryStatement);
         return optimize(queryStructCmd, queryStatement);
     }
@@ -67,14 +67,13 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
         return null;
     }
 
-
     @Override
     public QueryStatement physicalSql(QueryStructReq queryStructCmd, ParseSqlReq sqlCommend) throws Exception {
         return optimize(queryStructCmd, queryParser.parser(sqlCommend));
     }
 
-
     public QueryStatement physicalSql(QueryStructReq queryStructCmd, MetricReq metricCommand) throws Exception {
         return queryParser.parser(metricCommand);
     }
+
 }

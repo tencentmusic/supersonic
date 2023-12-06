@@ -5,7 +5,7 @@ import com.tencent.supersonic.chat.api.component.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
-import com.tencent.supersonic.chat.query.llm.s2ql.S2QLQuery;
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,9 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 public class SatisfactionChecker {
 
     // check all the parse info in candidate
-    public static boolean check(QueryContext queryContext) {
+    public static boolean isSkip(QueryContext queryContext) {
         for (SemanticQuery query : queryContext.getCandidateQueries()) {
-            if (query.getQueryMode().equals(S2QLQuery.QUERY_MODE)) {
+            if (query.getQueryMode().equals(LLMSqlQuery.QUERY_MODE)) {
                 continue;
             }
             if (checkThreshold(queryContext.getRequest().getQueryText(), query.getParseInfo())) {

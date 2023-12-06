@@ -338,7 +338,6 @@ public class HttpClientUtils {
         }
     }
 
-
     /**
      * @param headers
      * @param httpMethod
@@ -507,7 +506,6 @@ public class HttpClientUtils {
         return res;
     }
 
-
     /**
      * for us scheduling
      *
@@ -595,7 +593,6 @@ public class HttpClientUtils {
         return builder.build();
     }
 
-
     /**
      * for us scheduling， send delete
      *
@@ -658,7 +655,6 @@ public class HttpClientUtils {
             return METHOD_NAME;
         }
     }
-
 
     public static HttpClientResult doPutJson(String url, Map<String, String> headers, String req) {
         return RetryUtils.exec(() -> {

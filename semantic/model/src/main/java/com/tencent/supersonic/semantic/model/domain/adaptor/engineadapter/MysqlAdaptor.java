@@ -32,7 +32,6 @@ public class MysqlAdaptor extends EngineAdaptor {
         return column;
     }
 
-
     @Override
     public String getDbMetaQueryTpl() {
         return "select distinct TABLE_SCHEMA as name from information_schema.tables "
@@ -54,6 +53,5 @@ public class MysqlAdaptor extends EngineAdaptor {
         return "SELECT COLUMN_NAME as name, DATA_TYPE as dataType, COLUMN_COMMENT as comment "
                 + "FROM information_schema.columns WHERE table_schema ='%s' AND  table_name = '%s'";
     }
-
 
 }

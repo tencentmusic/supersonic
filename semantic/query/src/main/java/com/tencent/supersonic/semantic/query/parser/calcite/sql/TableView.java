@@ -1,6 +1,6 @@
 package com.tencent.supersonic.semantic.query.parser.calcite.sql;
 
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataSource;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

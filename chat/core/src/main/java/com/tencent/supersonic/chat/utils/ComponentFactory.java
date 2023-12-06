@@ -1,31 +1,31 @@
 package com.tencent.supersonic.chat.utils;
 
 import com.tencent.supersonic.chat.api.component.SchemaMapper;
+import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
-
-import com.tencent.supersonic.chat.api.component.SemanticCorrector;
+import com.tencent.supersonic.chat.parser.LLMProxy;
+import com.tencent.supersonic.chat.parser.sql.llm.ModelResolver;
+import com.tencent.supersonic.chat.processor.ParseResultProcessor;
+import com.tencent.supersonic.chat.query.QueryResponder;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import com.tencent.supersonic.chat.parser.llm.s2ql.ModelResolver;
-import com.tencent.supersonic.chat.query.QuerySelector;
-import com.tencent.supersonic.chat.responder.execute.ExecuteResponder;
-import com.tencent.supersonic.chat.responder.parse.ParseResponder;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.core.io.support.SpringFactoriesLoader;
 
 public class ComponentFactory {
 
     private static List<SchemaMapper> schemaMappers = new ArrayList<>();
     private static List<SemanticParser> semanticParsers = new ArrayList<>();
-    private static List<SemanticCorrector> s2QLCorrections = new ArrayList<>();
+    private static List<SemanticCorrector> semanticCorrectors = new ArrayList<>();
     private static SemanticInterpreter semanticInterpreter;
-    private static List<ParseResponder> parseResponders = new ArrayList<>();
-    private static List<ExecuteResponder> executeResponders = new ArrayList<>();
-    private static QuerySelector querySelector;
+
+    private static LLMProxy llmProxy;
+    private static List<ParseResultProcessor> responseProcessors = new ArrayList<>();
+    private static List<QueryResponder> executeResponders = new ArrayList<>();
     private static ModelResolver modelResolver;
+
     public static List<SchemaMapper> getSchemaMappers() {
         return CollectionUtils.isEmpty(schemaMappers) ? init(SchemaMapper.class, schemaMappers) : schemaMappers;
     }
@@ -34,18 +34,19 @@ public class ComponentFactory {
         return CollectionUtils.isEmpty(semanticParsers) ? init(SemanticParser.class, semanticParsers) : semanticParsers;
     }
 
-    public static List<SemanticCorrector> getSqlCorrections() {
-        return CollectionUtils.isEmpty(s2QLCorrections) ? init(SemanticCorrector.class,
-                s2QLCorrections) : s2QLCorrections;
+    public static List<SemanticCorrector> getSemanticCorrectors() {
+        return CollectionUtils.isEmpty(semanticCorrectors) ? init(SemanticCorrector.class,
+                semanticCorrectors) : semanticCorrectors;
     }
 
-    public static List<ParseResponder> getParseResponders() {
-        return CollectionUtils.isEmpty(parseResponders) ? init(ParseResponder.class, parseResponders) : parseResponders;
+    public static List<ParseResultProcessor> getPostProcessors() {
+        return CollectionUtils.isEmpty(responseProcessors) ? init(ParseResultProcessor.class,
+                responseProcessors) : responseProcessors;
     }
 
-    public static List<ExecuteResponder> getExecuteResponders() {
+    public static List<QueryResponder> getExecuteResponders() {
         return CollectionUtils.isEmpty(executeResponders)
-                ? init(ExecuteResponder.class, executeResponders) : executeResponders;
+                ? init(QueryResponder.class, executeResponders) : executeResponders;
     }
 
     public static SemanticInterpreter getSemanticLayer() {
@@ -55,15 +56,11 @@ public class ComponentFactory {
         return semanticInterpreter;
     }
 
-    public static void setSemanticLayer(SemanticInterpreter layer) {
-        semanticInterpreter = layer;
-    }
-
-    public static QuerySelector getQuerySelector() {
-        if (Objects.isNull(querySelector)) {
-            querySelector = init(QuerySelector.class);
+    public static LLMProxy getLLMProxy() {
+        if (Objects.isNull(llmProxy)) {
+            llmProxy = init(LLMProxy.class);
         }
-        return querySelector;
+        return llmProxy;
     }
 
     public static ModelResolver getModelResolver() {

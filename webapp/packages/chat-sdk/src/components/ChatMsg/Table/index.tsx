@@ -1,4 +1,4 @@
-import { formatByDecimalPlaces, getFormattedValue, isMobile } from '../../../utils/utils';
+import { formatByDecimalPlaces, getFormattedValue } from '../../../utils/utils';
 import { Table as AntTable } from 'antd';
 import { MsgDataType } from '../../../common/type';
 import { CLS_PREFIX } from '../../../common/constants';
@@ -9,10 +9,11 @@ import moment from 'moment';
 type Props = {
   data: MsgDataType;
   size?: SizeType;
+  loading?: boolean;
   onApplyAuth?: (model: string) => void;
 };
 
-const Table: React.FC<Props> = ({ data, size, onApplyAuth }) => {
+const Table: React.FC<Props> = ({ data, size, loading, onApplyAuth }) => {
   const { entityInfo, queryColumns, queryResults } = data;
 
   const prefixCls = `${CLS_PREFIX}-table`;
@@ -70,19 +71,14 @@ const Table: React.FC<Props> = ({ data, size, onApplyAuth }) => {
     <div className={prefixCls}>
       <AntTable
         pagination={
-          queryResults.length <= 10
-            ? false
-            : {
-                defaultPageSize: 10,
-                position: ['bottomCenter'],
-                size: isMobile ? 'small' : 'default',
-              }
+          queryResults.length <= 10 ? false : { defaultPageSize: 10, position: ['bottomCenter'] }
         }
         columns={tableColumns}
         dataSource={dataSource}
         style={{ width: '100%', overflowX: 'auto', overflowY: 'hidden' }}
         rowClassName={getRowClassName}
         size={size}
+        loading={loading}
       />
     </div>
   );

@@ -66,7 +66,7 @@ export declare namespace IDataSource {
     sensitiveLevel: SensitiveLevel;
     domainId: number;
     databaseId: number;
-    datasourceDetail: IDataSourceDetail;
+    modelDetail: IDataSourceDetail;
   }
   type IDataSourceList = IDataSourceItem[];
 }
@@ -194,7 +194,7 @@ export declare namespace ISemantic {
     domainName: string;
     modelName: string;
     modelId: number;
-    hasAdminRes?: boolean;
+    hasAdminRes: boolean;
     type: string;
     typeParams: ITypeParams;
     fullPath: string;
@@ -202,6 +202,7 @@ export declare namespace ISemantic {
     dataFormat: string;
     alias: string;
     useCnt: number;
+    isCollect: boolean;
     relateDimension?: IRelateDimension;
   }
 
@@ -236,7 +237,7 @@ export declare namespace ISemantic {
     domainId: number;
     dimensions: IDimensionList;
     metrics: IMetricList;
-    datasource: IDataSourceItem;
+    model: IDataSourceItem;
   }
   type IDomainSchemaRelaList = IDomainSchemaRelaItem[];
 
@@ -278,10 +279,11 @@ export declare namespace IChatConfig {
 
   interface IConfig {
     id: any;
-    domainId: number;
-    domainName: string;
+    modelId: number;
+    modelName: string;
     chatAggRichConfig: IChatRichConfig;
     chatDetailRichConfig: IChatRichConfig;
+    recommendedQuestions: { question: string }[];
     bizName: string;
     statusEnum: string;
     createdBy: string;

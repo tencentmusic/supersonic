@@ -2,17 +2,123 @@
   display: flex;
   flex-direction: row;
   background-color: #fff;
-  height: calc(100vh - 48px);
+  height: calc(100vh - 56px);
 
 
   .projectManger {
     width: 100%;
-    min-height: calc(100vh - 48px);
-    // background: #f8f9fb;
+    min-height: calc(100vh - 56px);
     background-color: #fff;
+    display: flex;
     position: relative;
+    .sider {
+      flex: 0 0 auto;
+      width: 285px;
+      border-right: 5px solid #eee;
+      position: relative;
+      transition: all 0.2s,background 0s;
+      .treeContainer {
+        width: 100%;
+        opacity: 1;
+        transition: all 0.2s,background 0s;
+      }
+      &.siderCollapsed {
+        width: 20px;
+        & .treeContainer{
+          opacity: 0;
+        }
+      }
+      .siderCollapsedButton {
+        position: absolute;
+        inset-block-start: 17px;
+        border: 1px solid #eee;
+        cursor: pointer;
+        z-index: 101;
+        width: 24px;
+        height: 24px;
+        text-align: center;
+        border-radius: 40px;
+        inset-inline-end: -13px;
+        transition: transform 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: rgba(0, 0, 0, 0.25);
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px -2px rgba(0,0,0,0.05), 0 1px 4px -1px rgba(25,15,15,0.07), 0 0 1px 0 rgba(0,0,0,0.08);
+        &:hover {
+          color: rgba(0, 0, 0, 0.75);
+        }
+      }
+      .domainTitle {
+        margin-bottom: 0;
+        font-size: 20px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        font-weight: 500;
+        padding: 12px 0 12px 35px;
+      }
 
+      .addBtn {
+        cursor: pointer;
+        width: 100%;
+        font-size: 18px;
+        margin-top: 18px;
+        &:hover {
+          color: #296DF3;
+        }
+      }
+      .treeTitle {
+        margin-bottom: 0;
+        padding: 20px;
+        line-height: 34px;
+        text-align: right;
+        background: #fff;
+        // border-bottom: 1px solid #d9d9d9;
+    
+        .title {
+          float: left;
+        }
+    
+    
+      }
+    
+      .search {
+        // width: calc(100% - 100px);
+        width: 100%;
+        margin: 10px 0 10px 10px;
+      }
+    
+      .tree {
+        flex: 1;
+        padding: 10px;
+    
+        .projectItem {
+          display: flex;
+          width: 100%;
+          cursor: auto;
+          line-height: 30px;
+          height: 30px;
+          .projectItemTitle {
+            font-size: 16px;
+            flex: 1;
+            cursor: pointer;
 
+          }
+    
+          .operation {
+            .icon {
+              margin-left: 6px;
+              cursor: pointer;
+            }
+          }
+        }
+      }
+    }
+    .content {
+      flex: 1 1 auto;
+    }
     .collapseLeftBtn {
       position: absolute;
       top: calc(50% + 45px);
@@ -41,21 +147,23 @@
       padding: 20px;
       padding-left: 30px;
     }
-    .backBtn {
-      background-color: #f8f8f8;
-      padding: 5px;
-      color: #b0b4bc;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-      &:hover {
-        background-color: #7599e5;
-        color: #fff;
-      }
-    }
+    // .backBtn {
+    //   background-color: #f8f8f8;
+    //   padding: 5px;
+    //   color: #b0b4bc;
+    //   cursor: pointer;
+    //   display: flex;
+    //   justify-content: center;
+    //   align-items: center;
+    //   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    //   &:hover {
+    //     background-color: #7599e5;
+    //     color: #fff;
+    //   }
+    // }
     .tab {
+      border-top: 1px solid #eee;
+      margin-top: 10px;
       :global {
         .ant-tabs-tab-btn {
           font-size: 16px;
@@ -65,6 +173,24 @@
         }
         .ant-tabs-nav {
           margin-bottom: 0;
+        }
+        .ant-tabs-tab {
+          padding-bottom:15px;
+        }
+      }
+      .backBtn {
+        height: 56px;
+        background-color: #f8f8f8;
+        padding: 5px;
+        color: #b0b4bc;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+        &:hover {
+          background-color: #7599e5;
+          color: #fff;
         }
       }
     }
@@ -87,164 +213,35 @@
       .ant-card-body {
         padding: 0 !important;
       }
-      .ant-tabs-content-holder {
-        padding-top: 20px;
-      }
     }
 
-    .resource {
-      display: flex;
 
-      .tree {
-        flex: 1;
-
-        .headOperation {
-          .btn {
-            margin-right: 18px;
-          }
-        }
-
-        .resourceSearch {
-          margin: 10px 0;
-        }
-      }
-
-      .view {
-        width: 480px;
-        padding-left: 20px;
-      }
-
-      .selectTypesBtn {
-        margin-right: 8px;
-      }
-    }
   }
 }
 
-.domainTreeSelect {
-  // width: 300px;
-}
+
 
 .domainList {
   display: flex;
   flex-direction: column;
-  width: 400px;
+  width: 100%;
   overflow: hidden;
-  // min-height: calc(100vh - 48px);
-  .addBtn {
-    cursor: pointer;
-    width: 100%;
-    font-size: 18px;
-    margin-top: 18px;
-    &:hover {
-      color: #296DF3;
-    }
-  }
-  .treeTitle {
-    margin-bottom: 0;
-    padding: 20px;
-    line-height: 34px;
-    text-align: right;
-    background: #fff;
-    border-bottom: 1px solid #d9d9d9;
-
-    .title {
-      float: left;
-    }
-
-
-  }
-
-  .search {
-    width: calc(100% - 20px);
-    margin: 10px;
-  }
-
-  .tree {
-    flex: 1;
-    padding: 10px;
-
-    .projectItem {
-      display: flex;
-      width: 100%;
-      cursor: auto;
-
-      .title {
-        flex: 1;
-        cursor: pointer;
-      }
-
-      .operation {
-        .icon {
-          margin-left: 6px;
-          cursor: pointer;
-        }
-      }
-    }
+  .searchContainer {
+    width: 280px;
+    padding:3px 0;
+    border-bottom: 1px solid #eee;
   }
 }
 
-.user {
-  display: grid;
-}
-
-.search{
-  width: 50%;
-  margin-bottom: 20px;
-}
-
-.paramsName{
-  margin-right: 10px;
-}
-
-.deleteBtn{
-  margin-left: 5px;
-}
-
-.authBtn{
-  cursor: pointer;
-}
-
-.selectedResource{
-  font-size: 12px;
-  color: darkgrey;
-  margin-top: 4px;
-}
-
-
-.switch{
-  // min-width: 900px;
-  // max-width: 1200px;
-  // width: 100%;
-  display: flex;
-  justify-content: flex-start;
-  .switchUser {
-    width: 200px;
-    margin-left: 33px;
-    :global {
-      .ant-select {
-        width: 100% !important;
-      }
-    }
-  }
-}
-
-.dimensionIntentionForm {
-  margin-bottom: -24px !important;
-  margin-top: 10px;
-  margin-left: 26px;
-}
 
 .classTable {
+  // padding: 0 20px;
   :global {
     .ant-pro-table-search-query-filter {
-      padding-left: 0 !important;
-      // padding-bottom: 24px !important;
-      .ant-pro-form-query-filter {
-        .ant-form-item {
-          // margin-bottom: 0;
-        }
-      }
+      margin-bottom: 0;
+    }
+    .ant-pro-table-list-toolbar-container {
+      padding-top: 0;
     }
     .ant-table-tbody > tr.ant-table-row-selected > td {
       background: none;
@@ -256,6 +253,9 @@
   :global {
     .ant-table-selection-column {
       text-align: left;
+    }
+    .ant-pro-card-body {
+      padding: 0;
     }
   }
 }
@@ -275,8 +275,6 @@
   padding: 0 11px;
   cursor: pointer;
   position: relative;
-  // background-color: #fff;
-  // border: 1px solid #d9d9d9;
   border-radius: 4px;
   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
   color: #000a24d9;
@@ -365,6 +363,32 @@
   :global {
     .ant-btn-link {
       padding: 0;
+    }
+  }
+}
+
+.breadcrumb{
+  font-size: 18px;
+  margin: 17px 0 0 20px;
+  padding-bottom: 3px;
+  :global {
+    .ant-breadcrumb-link {
+      height: 28px;
+      color: #709bf1;
+      &:hover{
+        color: #296df3;
+      }
+    }
+    .anticon {
+      font-size: 18px;
+    }
+  }
+}
+
+.classDataSourceTypeModal {
+  :global {
+    .ant-modal-body{
+      padding: 0px;
     }
   }
 }

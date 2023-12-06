@@ -1,31 +1,64 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.List;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.Parenthesis;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.Set;
+import java.util.Objects;
 
 /**
  * Sql Parser remove Helper
  */
 @Slf4j
 public class SqlParserRemoveHelper {
+
+    public static String removeSelect(String sql, Set<String> fields) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        if (selectStatement == null) {
+            return sql;
+        }
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        List<SelectItem> selectItems = ((PlainSelect) selectBody).getSelectItems();
+        selectItems.removeIf(selectItem -> {
+            if (selectItem instanceof SelectExpressionItem) {
+                SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
+                String columnName = SqlParserSelectHelper.getColumnName(selectExpressionItem.getExpression());
+                return fields.contains(columnName);
+            }
+            return false;
+        });
+        return selectStatement.toString();
+    }
 
     public static String removeWhereCondition(String sql, Set<String> removeFieldNames) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
@@ -40,7 +73,7 @@ public class SqlParserRemoveHelper {
                 removeWhereCondition(plainSelect.getWhere(), removeFieldNames);
             }
         });
-        return selectStatement.toString();
+        return removeNumberFilter(selectStatement.toString());
     }
 
     private static void removeWhereCondition(Expression whereExpression, Set<String> removeFieldNames) {
@@ -48,6 +81,27 @@ public class SqlParserRemoveHelper {
             return;
         }
         removeWhereExpression(whereExpression, removeFieldNames);
+    }
+
+    public static String removeNumberFilter(String sql) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        if (selectStatement == null) {
+            return sql;
+        }
+        SelectBody selectBody = selectStatement.getSelectBody();
+
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        Expression where = ((PlainSelect) selectBody).getWhere();
+        Expression having = ((PlainSelect) selectBody).getHaving();
+        try {
+            ((PlainSelect) selectBody).setWhere(filteredExpression(where, SqlEditEnum.NUMBER_FILTER));
+            ((PlainSelect) selectBody).setHaving(filteredExpression(having, SqlEditEnum.NUMBER_FILTER));
+        } catch (Exception e) {
+            log.info("replaceFunction has an exception:{}", e.toString());
+        }
+        return selectStatement.toString();
     }
 
     private static void removeWhereExpression(Expression whereExpression, Set<String> removeFieldNames) {
@@ -150,7 +204,7 @@ public class SqlParserRemoveHelper {
                 removeWhereCondition(plainSelect.getHaving(), removeFieldNames);
             }
         });
-        return selectStatement.toString();
+        return removeNumberFilter(selectStatement.toString());
     }
 
     public static String removeWhere(String sql, List<String> fields) {
@@ -169,6 +223,122 @@ public class SqlParserRemoveHelper {
             plainSelect.setWhere(where);
         }
         return selectStatement.toString();
+    }
+
+    public static String removeGroupBy(String sql, Set<String> fields) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        if (selectStatement == null) {
+            return sql;
+        }
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        GroupByElement groupByElement = ((PlainSelect) selectBody).getGroupBy();
+        if (groupByElement == null) {
+            return sql;
+        }
+        ExpressionList groupByExpressionList = groupByElement.getGroupByExpressionList();
+        groupByExpressionList.getExpressions().removeIf(expression -> {
+            if (expression instanceof Column) {
+                Column column = (Column) expression;
+                return fields.contains(column.getColumnName());
+            }
+            return false;
+        });
+        if (CollectionUtils.isEmpty(groupByExpressionList.getExpressions())) {
+            ((PlainSelect) selectBody).setGroupByElement(null);
+        }
+        return selectStatement.toString();
+    }
+
+    public static Expression filteredExpression(Expression where, SqlEditEnum sqlEditEnum) throws Exception {
+        if (Objects.isNull(where)) {
+            return null;
+        }
+        if (where instanceof Parenthesis) {
+            Expression expression = filteredExpression(((Parenthesis) where).getExpression(), sqlEditEnum);
+            if (expression != null) {
+                try {
+                    Expression parseExpression = CCJSqlParserUtil.parseExpression("(" + expression + ")");
+                    return parseExpression;
+                } catch (JSQLParserException jsqlParserException) {
+                    log.info("jsqlParser has an exception:{}", jsqlParserException.toString());
+                }
+            } else {
+                return expression;
+            }
+        } else if (where instanceof AndExpression) {
+            AndExpression andExpression = (AndExpression) where;
+            return filteredLogicExpression(andExpression, sqlEditEnum);
+        } else if (where instanceof OrExpression) {
+            OrExpression orExpression = (OrExpression) where;
+            return filteredLogicExpression(orExpression, sqlEditEnum);
+        } else {
+            return dealComparisonOperatorFilter(where, sqlEditEnum);
+        }
+        return where;
+    }
+
+    private static <T extends BinaryExpression> Expression filteredLogicExpression(
+            T binaryExpression, SqlEditEnum sqlEditEnum) throws Exception {
+        Expression leftExpression = filteredExpression(binaryExpression.getLeftExpression(), sqlEditEnum);
+        Expression rightExpression = filteredExpression(binaryExpression.getRightExpression(), sqlEditEnum);
+        if (leftExpression != null && rightExpression != null) {
+            binaryExpression.setLeftExpression(leftExpression);
+            binaryExpression.setRightExpression(rightExpression);
+            return binaryExpression;
+        } else if (leftExpression != null && rightExpression == null) {
+            return leftExpression;
+        } else if (leftExpression == null && rightExpression != null) {
+            return rightExpression;
+        } else {
+            return null;
+        }
+    }
+
+    private static Expression dealComparisonOperatorFilter(Expression expression, SqlEditEnum sqlEditEnum) {
+        if (Objects.isNull(expression)) {
+            return null;
+        }
+        if (expression instanceof GreaterThanEquals || expression instanceof GreaterThan
+                || expression instanceof MinorThan || expression instanceof MinorThanEquals
+                || expression instanceof EqualsTo || expression instanceof NotEqualsTo) {
+            return removeSingleFilter((ComparisonOperator) expression, sqlEditEnum);
+        } else if (expression instanceof InExpression) {
+            InExpression inExpression = (InExpression) expression;
+            Expression leftExpression = inExpression.getLeftExpression();
+            return recursionBase(leftExpression, expression, sqlEditEnum);
+        } else if (expression instanceof LikeExpression) {
+            LikeExpression likeExpression = (LikeExpression) expression;
+            Expression leftExpression = likeExpression.getLeftExpression();
+            return recursionBase(leftExpression, expression, sqlEditEnum);
+        }
+        return expression;
+    }
+
+    private static Expression removeSingleFilter(
+            ComparisonOperator comparisonExpression, SqlEditEnum sqlEditEnum) {
+        Expression leftExpression = comparisonExpression.getLeftExpression();
+        return recursionBase(leftExpression, comparisonExpression, sqlEditEnum);
+    }
+
+    private static Expression recursionBase(Expression leftExpression, Expression expression, SqlEditEnum sqlEditEnum) {
+        if (sqlEditEnum.equals(SqlEditEnum.NUMBER_FILTER)) {
+            return distinguishNumberFilter(leftExpression, expression);
+        }
+        if (sqlEditEnum.equals(SqlEditEnum.DATEDIFF)) {
+            return SqlParserReplaceHelper.distinguishDateDiffFilter(leftExpression, expression);
+        }
+        return expression;
+    }
+
+    private static Expression distinguishNumberFilter(Expression leftExpression, Expression expression) {
+        if (leftExpression instanceof LongValue) {
+            return null;
+        } else {
+            return expression;
+        }
     }
 
 }

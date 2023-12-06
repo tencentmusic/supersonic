@@ -1,6 +1,6 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Button, Space, Popconfirm, Input, Tag, Dropdown } from 'antd';
+import { message, Button, Space, Popconfirm, Input, Tag, Select } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
@@ -8,16 +8,17 @@ import type { StateType } from '../model';
 import { StatusEnum } from '../enum';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
 import {
-  getDatasourceList,
+  getModelList,
   getDimensionList,
   deleteDimension,
   batchUpdateDimensionStatus,
 } from '../service';
 import DimensionInfoModal from './DimensionInfoModal';
 import DimensionValueSettingModal from './DimensionValueSettingModal';
-import { updateDimension } from '../service';
+// import { updateDimension } from '../service';
 import { ISemantic, IDataSource } from '../data';
 import moment from 'moment';
+import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import styles from './style.less';
 
 type Props = {
@@ -26,7 +27,7 @@ type Props = {
 };
 
 const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
-  const { selectModelId: modelId } = domainManger;
+  const { selectModelId: modelId, selectDomainId: domainId } = domainManger;
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [dimensionItem, setDimensionItem] = useState<ISemantic.IDimensionItem>();
   const [dataSourceList, setDataSourceList] = useState<IDataSource.IDataSourceItem[]>([]);
@@ -79,7 +80,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   };
 
   const queryDataSourceList = async () => {
-    const { code, data, msg } = await getDatasourceList({ modelId });
+    const { code, data, msg } = await getModelList(domainId);
     if (code === 200) {
       setDataSourceList(data);
     } else {
@@ -91,20 +92,20 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     queryDataSourceList();
   }, [modelId]);
 
-  const updateDimensionStatus = async (dimensionData: ISemantic.IDimensionItem) => {
-    const { code, msg } = await updateDimension(dimensionData);
-    if (code === 200) {
-      actionRef?.current?.reload();
-      dispatch({
-        type: 'domainManger/queryDimensionList',
-        payload: {
-          modelId,
-        },
-      });
-      return;
-    }
-    message.error(msg);
-  };
+  // const updateDimensionStatus = async (dimensionData: ISemantic.IDimensionItem) => {
+  //   const { code, msg } = await updateDimension(dimensionData);
+  //   if (code === 200) {
+  //     actionRef?.current?.reload();
+  //     dispatch({
+  //       type: 'domainManger/queryDimensionList',
+  //       payload: {
+  //         modelId,
+  //       },
+  //     });
+  //     return;
+  //   }
+  //   message.error(msg);
+  // };
 
   const queryBatchUpdateStatus = async (ids: React.Key[], status: StatusEnum) => {
     if (Array.isArray(ids) && ids.length === 0) {
@@ -168,6 +169,31 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       valueEnum: SENSITIVE_LEVEL_ENUM,
     },
     {
+      dataIndex: 'isTag',
+      title: '是否为标签',
+      // search: false,
+      renderFormItem: () => (
+        <Select
+          placeholder="请选择标签状态"
+          allowClear
+          options={[
+            { value: 1, label: '是' },
+            { value: 0, label: '否' },
+          ]}
+        />
+      ),
+      render: (isTag) => {
+        switch (isTag) {
+          case 0:
+            return '否';
+          case 1:
+            return <span style={{ color: '#1677ff' }}>是</span>;
+          default:
+            return <Tag color="default">未知</Tag>;
+        }
+      },
+    },
+    {
       dataIndex: 'status',
       title: '状态',
       width: 80,
@@ -186,11 +212,6 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             return <Tag color="default">未知</Tag>;
         }
       },
-    },
-    {
-      dataIndex: 'datasourceName',
-      title: '数据源名称',
-      search: false,
     },
     {
       dataIndex: 'createdBy',
@@ -219,6 +240,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '操作',
       dataIndex: 'x',
       valueType: 'option',
+      width: 200,
       render: (_, record) => {
         return (
           <Space className={styles.ctrlBtnContainer}>
@@ -272,6 +294,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               title="确认删除？"
               okText="是"
               cancelText="否"
+              placement="left"
               onConfirm={async () => {
                 const { code, msg } = await deleteDimension(record.id);
                 if (code === 200) {
@@ -304,31 +327,31 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
   };
 
-  const dropdownButtonItems = [
-    {
-      key: 'batchStart',
-      label: '批量启用',
-    },
-    {
-      key: 'batchStop',
-      label: '批量停用',
-    },
-    {
-      key: 'batchDelete',
-      label: (
-        <Popconfirm
-          title="确定批量删除吗？"
-          onConfirm={() => {
-            queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
-          }}
-        >
-          <a>批量删除</a>
-        </Popconfirm>
-      ),
-    },
-  ];
+  // const dropdownButtonItems = [
+  //   {
+  //     key: 'batchStart',
+  //     label: '批量启用',
+  //   },
+  //   {
+  //     key: 'batchStop',
+  //     label: '批量停用',
+  //   },
+  //   {
+  //     key: 'batchDelete',
+  //     label: (
+  //       <Popconfirm
+  //         title="确定批量删除吗？"
+  //         onConfirm={() => {
+  //           queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
+  //         }}
+  //       >
+  //         <a>批量删除</a>
+  //       </Popconfirm>
+  //     ),
+  //   },
+  // ];
 
-  const onMenuClick = ({ key }: { key: string }) => {
+  const onMenuClick = (key: string) => {
     switch (key) {
       case 'batchStart':
         queryBatchUpdateStatus(selectedRowKeys, StatusEnum.ONLINE);
@@ -386,12 +409,14 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           >
             创建维度
           </Button>,
-          <Dropdown.Button
+          <BatchCtrlDropDownButton
             key="ctrlBtnList"
-            menu={{ items: dropdownButtonItems, onClick: onMenuClick }}
-          >
-            批量操作
-          </Dropdown.Button>,
+            onDeleteConfirm={() => {
+              queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
+            }}
+            hiddenList={['batchDownload']}
+            onMenuClick={onMenuClick}
+          />,
         ]}
       />
 
@@ -423,6 +448,12 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           open={dimensionValueSettingModalVisible}
           dimensionItem={dimensionItem}
           onCancel={() => {
+            dispatch({
+              type: 'domainManger/queryDimensionList',
+              payload: {
+                modelId,
+              },
+            });
             setDimensionValueSettingModalVisible(false);
           }}
           onSubmit={() => {

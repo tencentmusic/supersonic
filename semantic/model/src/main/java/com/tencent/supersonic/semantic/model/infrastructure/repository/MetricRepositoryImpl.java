@@ -5,8 +5,8 @@ import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.MetricRepository;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.MetricDOCustomMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.MetricDOMapper;
-import java.util.List;
 import org.springframework.stereotype.Component;
+import java.util.List;
 
 
 @Component
@@ -36,7 +36,7 @@ public class MetricRepositoryImpl implements MetricRepository {
 
     @Override
     public void updateMetric(MetricDO metricDO) {
-        metricDOMapper.updateByPrimaryKeySelective(metricDO);
+        metricDOMapper.updateById(metricDO);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class MetricRepositoryImpl implements MetricRepository {
 
     @Override
     public MetricDO getMetricById(Long id) {
-        return metricDOMapper.selectByPrimaryKey(id);
+        return metricDOMapper.selectById(id);
     }
 
     @Override

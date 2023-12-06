@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { queryDimensionValues } from '../../service';
 import { debounce, isArray } from 'lodash';
 import SwicthEntity from './SwitchEntity';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 type Props = {
   modelId: number;
@@ -127,7 +127,6 @@ const FilterItem: React.FC<Props> = ({
   };
 
   const onDateChange = (_: any, date: string) => {
-    console.log('onDateChange', date);
     const newFilters = filters.map((item, indexValue) => {
       if (item.bizName === filter.bizName && index === indexValue) {
         item.value = date;
@@ -164,8 +163,8 @@ const FilterItem: React.FC<Props> = ({
           value={filter.value}
           onChange={onChange}
         />
-      ) : typeof filter.value === 'string' && moment(filter.value, 'YYYY-MM-DD').isValid() ? (
-        <DatePicker value={moment(filter.value)} onChange={onDateChange} allowClear={false} />
+      ) : typeof filter.value === 'string' && dayjs(filter.value, 'YYYY-MM-DD').isValid() ? (
+        <DatePicker value={dayjs(filter.value)} onChange={onDateChange} allowClear={false} />
       ) : (typeof filter.value === 'string' || isArray(filter.value)) &&
         !filter.bizName?.includes('_id') ? (
         <Select

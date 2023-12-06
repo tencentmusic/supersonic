@@ -35,11 +35,7 @@ public class DateFunctionHelper {
     }
 
     public static String getEndDateOperator(ComparisonOperator comparisonOperator) {
-        String operator = comparisonOperator.getStringExpression();
-        if (JsqlConstants.EQUAL.equalsIgnoreCase(operator)) {
-            operator = "<=";
-        }
-        return operator;
+        return "<=";
     }
 
     public static String getEndDateValue(List<Expression> leftExpressions) {
@@ -51,6 +47,5 @@ public class DateFunctionHelper {
         StringValue unit = (StringValue) expressions.get(0);
         return unit.getValue();
     }
-
 
 }

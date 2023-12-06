@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class MetricYamlManager {
 
-
     public static List<MetricYamlTpl> convert2YamlObj(List<Metric> metrics) {
 
         List<MetricYamlTpl> metricYamlTpls = new ArrayList<>();

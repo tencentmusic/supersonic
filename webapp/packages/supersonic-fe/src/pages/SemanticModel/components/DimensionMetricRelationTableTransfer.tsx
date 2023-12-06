@@ -9,7 +9,7 @@ import type { StateType } from '../model';
 import TransTypeTag from './TransTypeTag';
 import TableTitleTooltips from '../components/TableTitleTooltips';
 import { ISemantic } from '../data';
-import { getDimensionList } from '../service';
+import { getDimensionList, getDimensionInModelCluster } from '../service';
 import { SemanticNodeType, TransType } from '../enum';
 
 interface RecordType {
@@ -33,7 +33,7 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
   onChange,
 }) => {
   const [targetKeys, setTargetKeys] = useState<string[]>([]);
-  const { selectModelId: modelId, selectDomainId } = domainManger;
+  const { selectModelId: modelId } = domainManger;
   const [checkedMap, setCheckedMap] = useState<Record<string, ISemantic.IDrillDownDimensionItem>>(
     {},
   );
@@ -42,12 +42,12 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
 
   useEffect(() => {
     queryDimensionList();
-  }, []);
+  }, [metricItem, relationsInitialValue]);
 
   const queryDimensionList = async () => {
-    const { code, data, msg } = await getDimensionList({ modelId: metricItem?.modelId || modelId });
-    if (code === 200 && Array.isArray(data?.list)) {
-      setDimensionList(data.list);
+    const { code, data, msg } = await getDimensionInModelCluster(metricItem?.modelId || modelId);
+    if (code === 200 && Array.isArray(data)) {
+      setDimensionList(data);
     } else {
       message.error(msg);
     }

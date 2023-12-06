@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Form, Button, Modal, Steps, message } from 'antd';
 import DataSourceBasicForm from './DataSourceBasicForm';
-import FieldForm from './DataSourceFieldForm';
+import DataSourceFieldForm from './DataSourceFieldForm';
 import { formLayout } from '@/components/FormHelper/utils';
 import { EnumDataSourceType } from '../constants';
-// import type { DataInstanceItem } from '../data';
 import styles from '../style.less';
-import { createDatasource, updateDatasource, getColumns } from '../../service';
+import { updateModel, createModel, getColumns } from '../../service';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
 import { connect } from 'umi';
@@ -17,20 +16,22 @@ export type CreateFormProps = {
   dispatch: Dispatch;
   createModalVisible: boolean;
   sql?: string;
-  databaseItem?: any;
+  databaseId?: number;
   dataSourceItem: IDataSource.IDataSourceItem;
   onCancel?: () => void;
   onSubmit?: (dataSourceInfo: any) => void;
   scriptColumns?: any[] | undefined;
   basicInfoFormMode?: 'normal' | 'fast';
   onDataBaseTableChange?: (tableName: string) => void;
+  onDataSourceBtnClick?: () => void;
+  onOpenDataSourceEdit?: () => void;
 };
 const { Step } = Steps;
 
 const initFormVal = {
-  name: '', // 数据源名称
-  bizName: '', // 数据源英文名
-  description: '', // 数据源描述
+  name: '', // 模型名称
+  bizName: '', // 模型英文名
+  description: '', // 模型描述
 };
 
 const DataSourceCreateForm: React.FC<CreateFormProps> = ({
@@ -41,8 +42,11 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   sql = '',
   onSubmit,
   dataSourceItem,
-  databaseItem,
+  databaseId,
   basicInfoFormMode,
+  onDataSourceBtnClick,
+  onOpenDataSourceEdit,
+  children,
 }) => {
   const isEdit = !!dataSourceItem?.id;
   const [fields, setFields] = useState<any[]>([]);
@@ -52,11 +56,11 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const [formDatabaseId, setFormDatabaseId] = useState<number>();
   const formValRef = useRef(initFormVal as any);
   const [form] = Form.useForm();
-  const { databaseConfigList, selectModelId: modelId } = domainManger;
+  const { databaseConfigList, selectModelId: modelId, selectDomainId } = domainManger;
   const updateFormVal = (val: any) => {
     formValRef.current = val;
   };
-
+  const [sqlFilter, setSqlFilter] = useState<string>('');
   useEffect(() => {
     const hasEmpty = fields.some((item) => {
       const { name, isCreateDimension, isCreateMetric } = item;
@@ -90,6 +94,8 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           name,
           isCreateMetric: createMetric,
           dateFormat,
+          entityNames,
+          isTag,
         } = item;
         const isCreateDimension = createDimension ? 1 : 0;
         const isCreateMetric = createMetric ? 1 : 0;
@@ -100,6 +106,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
               type,
               isCreateDimension,
               name,
+              isTag: isTag ? 1 : 0,
             });
             break;
           case EnumDataSourceType.TIME:
@@ -121,6 +128,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
               bizName,
               name,
               type,
+              entityNames,
             });
             break;
           case EnumDataSourceType.MEASURES:
@@ -145,7 +153,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     );
     return classify;
   };
-  const handleNext = async () => {
+  const handleNext = async (saveState: boolean = false) => {
     const fieldsValue = await form.validateFields();
 
     const fieldsClassify = getFieldsClassify(fields);
@@ -155,24 +163,29 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       ...fieldsClassify,
     };
     updateFormVal(submitForm);
-    if (currentStep < 1) {
+    if (!saveState && currentStep < 1) {
       forward();
     } else {
       setSaveLoading(true);
       const { dbName, tableName } = submitForm;
       const queryParams = {
         ...submitForm,
-        sqlQuery: sql,
-        databaseId: databaseItem?.key || dataSourceItem?.databaseId || formDatabaseId,
-        queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
-        tableQuery: dbName && tableName ? `${dbName}.${tableName}` : '',
+        databaseId: databaseId || dataSourceItem?.databaseId || formDatabaseId,
         modelId: isEdit ? dataSourceItem.modelId : modelId,
+        filterSql: sqlFilter,
+        domainId: isEdit ? dataSourceItem.domainId : selectDomainId,
+        modelDetail: {
+          ...submitForm,
+          queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
+          tableQuery: dbName && tableName ? `${dbName}.${tableName}` : '',
+          sqlQuery: sql,
+        },
       };
-      const queryDatasource = isEdit ? updateDatasource : createDatasource;
+      const queryDatasource = isEdit ? updateModel : createModel;
       const { code, msg, data } = await queryDatasource(queryParams);
       setSaveLoading(false);
       if (code === 200) {
-        message.success('保存数据源成功！');
+        message.success('保存模型成功！');
         onSubmit?.({
           ...queryParams,
           ...data,
@@ -187,11 +200,16 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const initFields = (fieldsClassifyList: any[], columns: any[]) => {
     const columnFields: any[] = columns.map((item: any) => {
       const { type, nameEn } = item;
-      const oldItem = fieldsClassifyList.find((oItem) => oItem.bizName === item.nameEn) || {};
+      const oldItem =
+        fieldsClassifyList.find((oItem) => {
+          if (oItem.type === EnumDataSourceType.MEASURES) {
+            return oItem.expr === item.nameEn;
+          }
+          return oItem.bizName === item.nameEn;
+        }) || {};
       return {
         ...oldItem,
         bizName: nameEn,
-        // name,
         sqlType: type,
       };
     });
@@ -217,9 +235,9 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const initData = async () => {
-    const { queryType, tableQuery } = dataSourceItem.datasourceDetail;
+    const { queryType, tableQuery } = dataSourceItem?.modelDetail || {};
     let tableQueryInitValue = {};
-    let columns = fieldColumns;
+    let columns = fieldColumns || [];
     if (queryType === 'table_query') {
       const tableQueryString = tableQuery || '';
       const [dbName, tableName] = tableQueryString.split('.');
@@ -233,21 +251,24 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const formatterInitData = (columns: any[], extendParams: Record<string, any> = {}) => {
-    const { id, name, bizName, description, datasourceDetail, databaseId } = dataSourceItem as any;
-    const { dimensions, identifiers, measures } = datasourceDetail;
+    const { id, name, bizName, description, modelDetail, databaseId, filterSql, alias } =
+      dataSourceItem as any;
+    const { dimensions, identifiers, measures } = modelDetail || {};
     const initValue = {
       id,
       name,
       bizName,
       description,
       databaseId,
+      filterSql,
+      alias,
       ...extendParams,
-      // ...tableQueryInitValue,
     };
     const editInitFormVal = {
       ...formValRef.current,
       ...initValue,
     };
+    setSqlFilter(filterSql);
     updateFormVal(editInitFormVal);
     form.setFieldsValue(initValue);
     const formatFields = [
@@ -259,12 +280,26 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   useEffect(() => {
-    if (isEdit) {
-      initData();
-    } else {
-      initFields([], fieldColumns);
+    const { queryType } = dataSourceItem?.modelDetail || {};
+    if (queryType === 'table_query') {
+      if (isEdit) {
+        initData();
+      } else {
+        initFields([], fieldColumns);
+      }
     }
   }, [dataSourceItem]);
+
+  useEffect(() => {
+    const { queryType } = dataSourceItem?.modelDetail || {};
+    if (queryType !== 'table_query') {
+      if (isEdit) {
+        initData();
+      } else {
+        initFields([], fieldColumns);
+      }
+    }
+  }, [dataSourceItem, fieldColumns]);
 
   const handleFieldChange = (fieldName: string, data: any) => {
     const result = fields.map((field) => {
@@ -285,7 +320,6 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     const { code, data, msg } = await getColumns(databaseId, dbName, tableName);
     if (code === 200) {
       const list = data?.resultList || [];
-      // setTableNameList(list);
       const columns = list.map((item: any) => {
         const { dataType, name } = item;
         return {
@@ -293,7 +327,6 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           type: dataType,
         };
       });
-      // setFields(columns);
       initFields([], columns);
       setFieldColumns(columns);
       return columns;
@@ -306,7 +339,14 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     return (
       <>
         <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
-          <FieldForm fields={fields} onFieldChange={handleFieldChange} />
+          <DataSourceFieldForm
+            fields={fields}
+            onFieldChange={handleFieldChange}
+            onSqlChange={(sql) => {
+              setSqlFilter(sql);
+            }}
+            sql={sqlFilter}
+          />
         </div>
         <div style={{ display: currentStep !== 1 ? 'block' : 'none' }}>
           <DataSourceBasicForm
@@ -327,14 +367,28 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           <Button style={{ float: 'left' }} onClick={backward}>
             上一步
           </Button>
-          <Button onClick={onCancel}>取消</Button>
+          <Button onClick={onCancel}>取 消</Button>
+          {(dataSourceItem?.modelDetail?.queryType === 'sql_query' ||
+            basicInfoFormMode !== 'fast') && (
+            <Button
+              type="primary"
+              onClick={() => {
+                onDataSourceBtnClick?.();
+              }}
+            >
+              数据源编辑
+            </Button>
+          )}
+
           <Button
             type="primary"
             loading={saveLoading}
-            onClick={handleNext}
+            onClick={() => {
+              handleNext(true);
+            }}
             disabled={hasEmptyNameField}
           >
-            完成
+            保 存
           </Button>
         </>
       );
@@ -342,9 +396,29 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     return (
       <>
         <Button onClick={onCancel}>取消</Button>
-        <Button type="primary" onClick={handleNext}>
+        <Button
+          type="primary"
+          onClick={async () => {
+            if (!isEdit && Array.isArray(fields) && fields.length === 0) {
+              await form.validateFields();
+              onOpenDataSourceEdit?.();
+            }
+            handleNext();
+          }}
+        >
           下一步
         </Button>
+        {isEdit && (
+          <Button
+            type="primary"
+            loading={saveLoading}
+            onClick={() => {
+              handleNext(true);
+            }}
+          >
+            保 存
+          </Button>
+        )}
       </>
     );
   };
@@ -353,13 +427,14 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     <Modal
       forceRender
       width={1300}
-      bodyStyle={{ padding: '32px 40px 48px' }}
       destroyOnClose
-      title={`${isEdit ? '编辑' : '新建'}数据源`}
+      title={`${isEdit ? '编辑' : '新建'}模型`}
       maskClosable={false}
       open={createModalVisible}
       footer={renderFooter()}
-      onCancel={onCancel}
+      onCancel={() => {
+        onCancel?.();
+      }}
     >
       <Steps style={{ marginBottom: 28 }} size="small" current={currentStep}>
         <Step title="基本信息" />
@@ -383,6 +458,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       >
         {renderContent()}
       </Form>
+      {children}
     </Modal>
   );
 };

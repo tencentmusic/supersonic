@@ -58,7 +58,6 @@ public class YamlUtils {
         return null;
     }
 
-
     public static String toYamlWithoutNull(Object object) {
         String jsonStr = JSONObject.toJSONString(object);
         if (object instanceof List) {

@@ -46,7 +46,6 @@ public class ChatConfigHelper {
         return chatConfig;
     }
 
-
     public ChatConfig editChatConfig(ChatConfigEditReqReq extendEditCmd, User facadeUser) {
         ChatConfig chatConfig = new ChatConfig();
 

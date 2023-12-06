@@ -15,7 +15,7 @@ import { DateSettingType, DateRangeParams, DynamicAdvancedConfigType } from './t
 import { LatestDateMap } from './type';
 import StaticDate from './StaticDate';
 import DynamicDate from './DynamicDate';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { ProCard } from '@ant-design/pro-card';
 
 type Props = {
@@ -24,6 +24,7 @@ type Props = {
   showCurrentDataRangeString?: boolean;
   onDateRangeChange: (value: string[], from: any) => void;
   onDateRangeTypeChange?: (dateRangeType: DateRangeType) => void;
+  onInit?: (params: { dateStringRange: string[] }) => void;
 };
 
 const { CheckableTag } = Tag;
@@ -33,6 +34,7 @@ const MDatePicker: React.FC<Props> = ({
   showCurrentDataRangeString = true,
   onDateRangeChange,
   onDateRangeTypeChange,
+  onInit,
 }: any) => {
   const getDynamicDefaultConfig = (dateRangeType: DateRangeType) => {
     const dynamicDefaultConfig = {
@@ -88,7 +90,7 @@ const MDatePicker: React.FC<Props> = ({
   };
 
   const [latestDateMap, setLatestDateMap] = useState<LatestDateMap>({
-    maxPartition: moment().format('YYYY-MM-DD'),
+    maxPartition: dayjs().format('YYYY-MM-DD'),
   });
   const [dateRangesParams] = useState(() => {
     return initialValues ? generatorDateRangesParams(initialValues) : {};
@@ -151,6 +153,10 @@ const MDatePicker: React.FC<Props> = ({
       }
     }
   }
+  useEffect(() => {
+    onInit?.({ dateRange: currentDateRange });
+  }, []);
+
   useEffect(() => {
     setSelectedDateRangeString(getSelectedDateRangeString());
   }, [staticParams, dynamicParams, currentDateRange]);

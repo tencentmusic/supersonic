@@ -1,12 +1,5 @@
 package com.tencent.supersonic.chat.query.rule.metric;
 
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.DIMENSION;
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.VALUE;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.OPTIONAL;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
-import static com.tencent.supersonic.common.pojo.Constants.DESC_UPPER;
-
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
@@ -19,6 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.DIMENSION;
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.VALUE;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.OPTIONAL;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+import static com.tencent.supersonic.common.pojo.Constants.DESC_UPPER;
 
 @Component
 public class MetricTopNQuery extends MetricSemanticQuery {
@@ -50,8 +50,8 @@ public class MetricTopNQuery extends MetricSemanticQuery {
     }
 
     @Override
-    public void fillParseInfo(Long modelId, QueryContext queryContext, ChatContext chatContext) {
-        super.fillParseInfo(modelId, queryContext, chatContext);
+    public void fillParseInfo(ChatContext chatContext) {
+        super.fillParseInfo(chatContext);
 
         parseInfo.setLimit(ORDERBY_MAX_RESULTS);
         parseInfo.setScore(parseInfo.getScore() + 2.0);

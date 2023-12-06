@@ -25,7 +25,7 @@ import org.apache.commons.collections.CollectionUtils;
 public class HanlpDictMapper extends BaseMapper {
 
     @Override
-    public void work(QueryContext queryContext) {
+    public void doMap(QueryContext queryContext) {
 
         String queryText = queryContext.getRequest().getQueryText();
         List<Term> terms = HanlpHelper.getTerms(queryText);
@@ -38,7 +38,6 @@ public class HanlpDictMapper extends BaseMapper {
 
         convertTermsToSchemaMapInfo(matches, queryContext.getMapInfo(), terms);
     }
-
 
     private void convertTermsToSchemaMapInfo(List<HanlpMapResult> hanlpMapResults, SchemaMapInfo schemaMap,
             List<Term> terms) {
@@ -81,6 +80,5 @@ public class HanlpDictMapper extends BaseMapper {
             }
         }
     }
-
 
 }

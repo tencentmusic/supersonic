@@ -4,8 +4,8 @@ const Settings: LayoutSettings & {
   pwa?: boolean;
   logo?: string;
 } = {
-  navTheme: 'dark',
-  primaryColor: '#296DF3',
+  navTheme: 'light',
+  colorPrimary: '#296DF3',
   layout: 'top',
   contentWidth: 'Fluid',
   fixedHeader: false,

@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { connect } from 'umi';
 import type { StateType } from '../model';
-// import { IGroup } from '@antv/g-base';
 import type { Dispatch } from 'umi';
 import {
   typeConfigs,
@@ -11,8 +10,15 @@ import {
   flatGraphDataNode,
 } from './utils';
 import { message } from 'antd';
-import { getDomainSchemaRela } from '../service';
-import { Item, TreeGraphData, NodeConfig, IItemBaseConfig } from '@antv/g6-core';
+import {
+  getDomainSchemaRela,
+  getModelRelaList,
+  getViewInfoList,
+  createOrUpdateViewInfo,
+  deleteViewInfo,
+} from '../service';
+import { jsonParse } from '@/utils/utils';
+import { Item, TreeGraphData, NodeConfig, IItemBaseConfig, EdgeConfig } from '@antv/g6-core';
 import initToolBar from './components/ToolBar';
 import initTooltips from './components/ToolTips';
 import initContextMenu from './components/ContextMenu';
@@ -28,21 +34,14 @@ import ClassDataSourceTypeModal from '../components/ClassDataSourceTypeModal';
 import GraphToolBar from './components/GraphToolBar';
 import GraphLegend from './components/GraphLegend';
 import GraphLegendVisibleModeItem from './components/GraphLegendVisibleModeItem';
-
-// import { cloneDeep } from 'lodash';
+import ModelRelationFormDrawer from './components/ModelRelationFormDrawer';
 
 type Props = {
-  // graphShowType?: SemanticNodeType;
   domainManger: StateType;
   dispatch: Dispatch;
 };
 
-const DomainManger: React.FC<Props> = ({
-  domainManger,
-  // graphShowType = SemanticNodeType.DIMENSION,
-  // graphShowType,
-  dispatch,
-}) => {
+const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
   const ref = useRef(null);
   const dataSourceRef = useRef<ISemantic.IDomainSchemaRelaList>([]);
   const [graphData, setGraphData] = useState<TreeGraphData>();
@@ -54,7 +53,7 @@ const DomainManger: React.FC<Props> = ({
 
   const legendDataRef = useRef<any[]>([]);
   const graphRef = useRef<any>(null);
-  // const legendDataFilterFunctions = useRef<any>({});
+
   const [dimensionItem, setDimensionItem] = useState<ISemantic.IDimensionItem>();
 
   const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
@@ -76,6 +75,21 @@ const DomainManger: React.FC<Props> = ({
 
   const graphShowTypeRef = useRef<SemanticNodeType>();
   const [graphShowTypeState, setGraphShowTypeState] = useState<SemanticNodeType>();
+
+  const [modelRelationDrawerOpen, setModelRelationDrawerOpen] = useState<boolean>(false);
+  const [nodeModel, setNodeModel] = useState<{
+    sourceData: ISemantic.IModelItem;
+    targetData: ISemantic.IModelItem;
+  }>({ sourceData: {} as ISemantic.IModelItem, targetData: {} as ISemantic.IModelItem });
+
+  // const [relationData, setRelationData] = useState<any[]>([]);
+  const relationDataListRef = useRef<any>([]);
+
+  const [relationConfig, setRelationConfig] = useState<any>({});
+
+  const [currentRelationDataItem, setCurrentRelationDataItem] = useState<any>({});
+
+  const [currentEdgeItem, setCurrentEdgeItem] = useState<any>();
 
   const graphLegendDataSourceIds = useRef<string[]>();
 
@@ -137,15 +151,15 @@ const DomainManger: React.FC<Props> = ({
   };
 
   const queryDataSourceList = async (params: {
-    modelId: number;
+    domainId: number;
     graphShowType?: SemanticNodeType;
   }) => {
-    const { code, data } = await getDomainSchemaRela(params.modelId);
+    const { code, data } = await getDomainSchemaRela(params.domainId);
     if (code === 200) {
       if (data) {
         setDataSourceInfoList(
           data.map((item: ISemantic.IDomainSchemaRelaItem) => {
-            return item.datasource;
+            return item.model;
           }),
         );
         const graphRootData = changeGraphData(data);
@@ -160,11 +174,69 @@ const DomainManger: React.FC<Props> = ({
     }
   };
 
+  const getRelationConfig = async (domainId: number) => {
+    const { code, data, msg } = await getViewInfoList(domainId);
+    if (code === 200) {
+      const target = data[0];
+      if (target) {
+        const { config } = target;
+        const parseConfig = jsonParse(config, []);
+        setRelationConfig(target);
+        parseConfig.forEach((item) => {
+          graphRef?.current?.addItem('edge', item);
+        });
+      }
+    } else {
+      message.error(msg);
+    }
+  };
+
+  const deleteRelationConfig = async (recordId: number) => {
+    const { code, data, msg } = await deleteViewInfo(recordId);
+    if (code === 200) {
+    } else {
+      message.error(msg);
+    }
+  };
+
+  const saveRelationConfig = async (domainId: number, graphData: any) => {
+    const { code, msg } = await createOrUpdateViewInfo({
+      id: relationConfig?.id,
+      // modelId: domainManger.selectModelId,
+      domainId: domainId,
+      type: 'modelEdgeRelation',
+      config: JSON.stringify(graphData),
+    });
+    if (code === 200) {
+      queryModelRelaList(selectDomainId);
+    } else {
+      message.error(msg);
+    }
+  };
+
+  const queryModelRelaList = async (domainId: number) => {
+    const { code, data, msg } = await getModelRelaList(domainId);
+    if (code === 200) {
+      // setRelationData(data);
+      relationDataListRef.current = data;
+    } else {
+      message.error(msg);
+    }
+  };
+
+  const handleDeleteEdge = () => {
+    graphRef.current.removeItem(currentEdgeItem);
+    setCurrentEdgeItem(undefined);
+    saveModelRelationEdges();
+  };
+
   useEffect(() => {
     graphLegendDataSourceIds.current = undefined;
     graphRef.current = null;
-    queryDataSourceList({ modelId });
-  }, [modelId]);
+    queryDataSourceList({ domainId: selectDomainId });
+    queryModelRelaList(selectDomainId);
+    // deleteRelationConfig(16);
+  }, [selectDomainId]);
 
   // const getLegendDataFilterFunctions = () => {
   //   legendDataRef.current.map((item: any) => {
@@ -310,6 +382,13 @@ const DomainManger: React.FC<Props> = ({
     }
   };
 
+  const modelRelationDataInit = (fromModelId: number, toModelId: number) => {
+    const targetData = relationDataListRef.current.find((item) => {
+      return item.fromModelId === fromModelId && item.toModelId === toModelId;
+    });
+    setCurrentRelationDataItem(targetData);
+  };
+
   const handleNodeTypeClick = (nodeData: any) => {
     setCurrentNodeData(nodeData);
     setInfoDrawerVisible(true);
@@ -399,7 +478,8 @@ const DomainManger: React.FC<Props> = ({
 
     if (!graph && graphData) {
       const graphNodeList = flatGraphDataNode(graphData.children);
-      const graphConfigKey = graphNodeList.length > 20 ? 'dendrogram' : 'mindmap';
+      // const graphConfigKey = graphNodeList.length > 20 ? 'dendrogram' : 'mindmap';
+      const graphConfigKey = 'dendrogram';
 
       // getLegendDataFilterFunctions();
       const toolbar = initToolBar({ onSearch: handleSeachNode, onClick: handleToolBarClick });
@@ -407,9 +487,158 @@ const DomainManger: React.FC<Props> = ({
       const contextMenu = initContextMenu({
         onMenuClick: handleContextMenuClick,
       });
-      // const legend = initLegend({
-      //   nodeData: legendDataRef.current,
-      //   filterFunctions: { ...legendDataFilterFunctions.current },
+
+      G6.registerNode(
+        'rect-node',
+        {
+          width: 220,
+          height: 80,
+          afterDraw(cfg, group) {
+            group.addShape('circle', {
+              attrs: {
+                r: 8,
+                x: 80 / 2,
+                y: 0,
+                fill: '#fff',
+                stroke: '#5F95FF',
+              },
+              // must be assigned in G6 3.3 and later versions. it can be any string you want, but should be unique in a custom item type
+              name: `anchor-point`, // the name, for searching by group.find(ele => ele.get('name') === 'anchor-point')
+              anchorPointIdx: 1, // flag the idx of the anchor-point circle
+              links: 0, // cache the number of edges connected to this shape
+              visible: false, // invisible by default, shows up when links > 1 or the node is in showAnchors state
+              draggable: true, // allow to catch the drag events on this shape
+            });
+
+            group.addShape('circle', {
+              attrs: {
+                r: 8,
+                x: -80 / 2,
+                y: 0,
+                fill: '#fff',
+                stroke: '#5F95FF',
+              },
+              // must be assigned in G6 3.3 and later versions. it can be any string you want, but should be unique in a custom item type
+              name: `anchor-point`, // the name, for searching by group.find(ele => ele.get('name') === 'anchor-point')
+              anchorPointIdx: 2, // flag the idx of the anchor-point circle
+              links: 0, // cache the number of edges connected to this shape
+              visible: false, // invisible by default, shows up when links > 1 or the node is in showAnchors state
+              draggable: true, // allow to catch the drag events on this shape
+            });
+          },
+          setState(name, value, item) {
+            if (name === 'showAnchors') {
+              const anchorPoints = item
+                .getContainer()
+                .findAll((ele) => ele.get('name') === 'anchor-point');
+              anchorPoints.forEach((point) => {
+                if (value || point.get('links') > 0) point.show();
+                else point.hide();
+              });
+            }
+          },
+        },
+        'rect',
+      );
+
+      let sourceAnchorIdx: any;
+      let targetAnchorIdx: any;
+
+      // graphRef.current = new G6.TreeGraph({
+      //   container: 'semanticGraph',
+      //   width,
+      //   height,
+      //   modes: {
+      //     default: [
+      //       // {
+      //       //   type: 'collapse-expand',
+      //       //   onChange: function onChange(item, collapsed) {
+      //       //     const data = item!.get('model');
+      //       //     data.collapsed = collapsed;
+      //       //     return true;
+      //       //   },
+      //       // },
+      //       // 'drag-node',
+      //       {
+      //         type: 'drag-node',
+      //         shouldBegin: (e) => {
+      //           if (e.target.get('name') === 'anchor-point') return false;
+      //           return true;
+      //         },
+      //       },
+      //       'drag-canvas',
+      //       {
+      //         type: 'create-edge',
+      //         trigger: 'drag', // set the trigger to be drag to make the create-edge triggered by drag
+      //         shouldBegin: (e) => {
+      //           // avoid beginning at other shapes on the node
+      //           if (e.target && e.target.get('name') !== 'anchor-point') return false;
+      //           sourceAnchorIdx = e.target.get('anchorPointIdx');
+      //           e.target.set('links', e.target.get('links') + 1); // cache the number of edge connected to this anchor-point circle
+      //           return true;
+      //         },
+      //         shouldEnd: (e) => {
+      //           // avoid ending at other shapes on the node
+      //           if (e.target && e.target.get('name') !== 'anchor-point') return false;
+      //           if (e.target) {
+      //             targetAnchorIdx = e.target.get('anchorPointIdx');
+      //             e.target.set('links', e.target.get('links') + 1); // cache the number of edge connected to this anchor-point circle
+      //             return true;
+      //           }
+      //           targetAnchorIdx = undefined;
+      //           return true;
+      //         },
+      //       },
+      //       // 'activate-relations',
+      //       {
+      //         type: 'zoom-canvas',
+      //         sensitivity: 0.3, // 设置缩放灵敏度，值越小，缩放越不敏感，默认值为 1
+      //       },
+      //       {
+      //         type: 'activate-relations',
+      //         trigger: 'mouseenter', // 触发方式，可以是 'mouseenter' 或 'click'
+      //         resetSelected: true, // 点击空白处时，是否取消高亮
+      //       },
+      //     ],
+      //   },
+      //   // defaultNode: {
+      //   //   size: 26,
+      //   //   anchorPoints: [
+      //   //     [0, 0.5],
+      //   //     [1, 0.5],
+      //   //   ],
+      //   //   labelCfg: {
+      //   //     position: 'right',
+      //   //     offset: 5,
+      //   //     style: {
+      //   //       stroke: '#fff',
+      //   //       lineWidth: 4,
+      //   //     },
+      //   //   },
+      //   // },
+
+      //   // defaultEdge: {
+      //   //   type: graphConfigMap[graphConfigKey].defaultEdge.type,
+      //   // },
+      //   defaultNode: {
+      //     type: 'rect-node',
+      //     style: {
+      //       fill: '#eee',
+      //       stroke: '#ccc',
+      //     },
+      //   },
+      //   defaultEdge: {
+      //     type: 'quadratic',
+      //     style: {
+      //       stroke: '#F6BD16',
+      //       lineWidth: 2,
+      //     },
+      //   },
+      //   layout: {
+      //     ...graphConfigMap[graphConfigKey].layout,
+      //   },
+      //   plugins: [tooltip, toolbar, contextMenu],
+      //   // plugins: [legend, tooltip, toolbar, contextMenu],
       // });
 
       graphRef.current = new G6.TreeGraph({
@@ -418,17 +647,38 @@ const DomainManger: React.FC<Props> = ({
         height,
         modes: {
           default: [
-            // {
-            //   type: 'collapse-expand',
-            //   onChange: function onChange(item, collapsed) {
-            //     const data = item!.get('model');
-            //     data.collapsed = collapsed;
-            //     return true;
-            //   },
-            // },
-            'drag-node',
+            // config the shouldBegin for drag-node to avoid node moving while dragging on the anchor-point circles
+            {
+              type: 'drag-node',
+              shouldBegin: (e) => {
+                if (e.target.get('name') === 'anchor-point') return false;
+                return true;
+              },
+            },
             'drag-canvas',
-            // 'activate-relations',
+            // config the shouldBegin and shouldEnd to make sure the create-edge is began and ended at anchor-point circles
+            {
+              type: 'create-edge',
+              trigger: 'drag', // set the trigger to be drag to make the create-edge triggered by drag
+              shouldBegin: (e) => {
+                // avoid beginning at other shapes on the node
+                if (e.target && e.target.get('name') !== 'anchor-point') return false;
+                sourceAnchorIdx = e.target.get('anchorPointIdx');
+                e.target.set('links', e.target.get('links') + 1); // cache the number of edge connected to this anchor-point circle
+                return true;
+              },
+              shouldEnd: (e) => {
+                // avoid ending at other shapes on the node
+                if (e.target && e.target.get('name') !== 'anchor-point') return false;
+                if (e.target) {
+                  targetAnchorIdx = e.target.get('anchorPointIdx');
+                  e.target.set('links', e.target.get('links') + 1); // cache the number of edge connected to this anchor-point circle
+                  return true;
+                }
+                targetAnchorIdx = undefined;
+                return true;
+              },
+            },
             {
               type: 'zoom-canvas',
               sensitivity: 0.3, // 设置缩放灵敏度，值越小，缩放越不敏感，默认值为 1
@@ -440,30 +690,23 @@ const DomainManger: React.FC<Props> = ({
             },
           ],
         },
+        layout: {
+          ...graphConfigMap[graphConfigKey].layout,
+        },
+        plugins: [tooltip, toolbar, contextMenu],
+
         defaultNode: {
-          size: 26,
-          anchorPoints: [
-            [0, 0.5],
-            [1, 0.5],
-          ],
-          labelCfg: {
-            position: 'right',
-            offset: 5,
-            style: {
-              stroke: '#fff',
-              lineWidth: 4,
-            },
+          type: 'rect-node',
+          style: {
+            fill: '#eee',
+            stroke: '#ccc',
           },
         },
         defaultEdge: {
           type: graphConfigMap[graphConfigKey].defaultEdge.type,
         },
-        layout: {
-          ...graphConfigMap[graphConfigKey].layout,
-        },
-        plugins: [tooltip, toolbar, contextMenu],
-        // plugins: [legend, tooltip, toolbar, contextMenu],
       });
+
       graphRef.current.set('initGraphData', graphData);
       graphRef.current.set('initDataSource', dataSourceRef.current);
 
@@ -496,6 +739,122 @@ const DomainManger: React.FC<Props> = ({
           label: node.name,
         });
       });
+
+      graphRef.current.on('aftercreateedge', (e) => {
+        // update the sourceAnchor and targetAnchor for the newly added edge
+        const model = e?.item?.getModel?.() || {};
+        const { targetAnchor, sourceAnchor } = model;
+        if (!targetAnchor && !sourceAnchor) {
+          graphRef.current.updateItem(e.edge, {
+            sourceAnchor: sourceAnchorIdx,
+            targetAnchor: targetAnchorIdx,
+            label: '模型关系编辑',
+            style: {
+              stroke: '#296df3',
+            },
+          });
+        }
+
+        // update the curveOffset for parallel edges
+        // const edges = graphRef.current.save().edges;
+
+        // const savedGraph = graphRef.current.save();
+        // const edges = [];
+
+        // // savedGraph.children.forEach((root) => {
+        // traverse(savedGraph, null);
+        // // });
+
+        // function traverse(node, parent) {
+        //   if (Array.isArray(node.children)) {
+        //     node.children.forEach((child) => {
+        //       if (child.type === 'edge') {
+        //         // 假设边的节点类型为 'edge'
+        //         edges.push({
+        //           source: parent ? parent.id : null,
+        //           target: child.id,
+        //           // 其他边的属性
+        //         });
+        //       }
+        //       traverse(child, node);
+        //     });
+        //   }
+        // }
+
+        // // processParallelEdgesOnAnchorPoint(edges);
+        // graphRef.current.getEdges().forEach((edge, i) => {
+        //   graphRef.current.updateItem(edge, {
+        //     curveOffset: edges[i].curveOffset,
+        //     curvePosition: edges[i].curvePosition,
+        //   });
+        // });
+      });
+
+      graphRef.current.on('afteradditem', (e) => {
+        const model = e!.item!.getModel();
+        const { sourceAnchor, targetAnchor } = model;
+        if (e.item && e.item.getType() === 'edge') {
+          if (!sourceAnchor) {
+            graphRef.current.updateItem(e.item, {
+              sourceAnchor: sourceAnchorIdx,
+            });
+          }
+          if (sourceAnchor && targetAnchor) {
+            graphRef.current.updateItem(e.item, {
+              label: '模型关系编辑',
+              style: {
+                stroke: '#296df3',
+              },
+            });
+          }
+        }
+      });
+
+      graphRef.current.on('afterremoveitem', (e) => {
+        if (e.item && e.item.source && e.item.target) {
+          const sourceNode = graphRef.current.findById(e.item.source);
+          const targetNode = graphRef.current.findById(e.item.target);
+          const { sourceAnchor, targetAnchor } = e.item;
+          if (sourceNode && !isNaN(sourceAnchor)) {
+            const sourceAnchorShape = sourceNode
+              .getContainer()
+              .find(
+                (ele) =>
+                  ele.get('name') === 'anchor-point' && ele.get('anchorPointIdx') === sourceAnchor,
+              );
+            sourceAnchorShape.set('links', sourceAnchorShape.get('links') - 1);
+          }
+          if (targetNode && !isNaN(targetAnchor)) {
+            const targetAnchorShape = targetNode
+              .getContainer()
+              .find(
+                (ele) =>
+                  ele.get('name') === 'anchor-point' && ele.get('anchorPointIdx') === targetAnchor,
+              );
+            targetAnchorShape.set('links', targetAnchorShape.get('links') - 1);
+          }
+        }
+      });
+
+      graphRef.current.on('node:mouseenter', (e) => {
+        graphRef.current.setItemState(e.item, 'showAnchors', true);
+      });
+      graphRef.current.on('node:mouseleave', (e) => {
+        graphRef.current.setItemState(e.item, 'showAnchors', false);
+      });
+      graphRef.current.on('node:dragenter', (e) => {
+        graphRef.current.setItemState(e.item, 'showAnchors', true);
+      });
+      graphRef.current.on('node:dragleave', (e) => {
+        graphRef.current.setItemState(e.item, 'showAnchors', false);
+      });
+      graphRef.current.on('node:dragstart', (e) => {
+        graphRef.current.setItemState(e.item, 'showAnchors', true);
+      });
+      graphRef.current.on('node:dragout', (e) => {
+        graphRef.current.setItemState(e.item, 'showAnchors', false);
+      });
+
       graphRef.current.data(graphData);
       graphRef.current.render();
 
@@ -524,12 +883,34 @@ const DomainManger: React.FC<Props> = ({
         }
       });
 
+      graphRef.current.on('edge:click', (e: any) => {
+        const model = e!.item!.getModel();
+        const eleType = e!.item!.getType();
+        const sourceNode = e.item.get('sourceNode');
+        const targetNode = e.item.get('targetNode');
+        if (eleType === 'node' || (eleType === 'edge' && model.sourceAnchor)) {
+          if (sourceNode && targetNode) {
+            const sourceData = sourceNode.getModel();
+            const targetData = targetNode.getModel();
+            setNodeModel({
+              sourceData,
+              targetData,
+            });
+            modelRelationDataInit(sourceData.uid, targetData.uid);
+          }
+          setCurrentEdgeItem(e.item);
+          setModelRelationDrawerOpen(true);
+        }
+      });
+
       graphRef.current.on('canvas:click', () => {
         setInfoDrawerVisible(false);
+        setModelRelationDrawerOpen(false);
       });
 
       const rootNode = graphRef.current.findById('root');
       graphRef.current.hideItem(rootNode);
+      getRelationConfig(selectDomainId);
       if (typeof window !== 'undefined')
         window.onresize = () => {
           if (!graphRef.current || graphRef.current.get('destroyed')) return;
@@ -541,7 +922,7 @@ const DomainManger: React.FC<Props> = ({
 
   const updateGraphData = async (params?: { graphShowType?: SemanticNodeType }) => {
     const graphRootData = await queryDataSourceList({
-      modelId,
+      domainId: selectDomainId,
       graphShowType: params?.graphShowType,
     });
     if (graphRootData) {
@@ -554,6 +935,15 @@ const DomainManger: React.FC<Props> = ({
     const rootNode = graphRef.current.findById('root');
     graphRef.current.hideItem(rootNode);
     graphRef.current.fitView();
+  };
+
+  const saveModelRelationEdges = () => {
+    const edges = graphRef.current.getEdges();
+    const edgesModel = edges.map((edge) => edge.getModel());
+    const modelRelationEdges = edgesModel.filter(
+      (edgeModel) => edgeModel.sourceAnchor && edgeModel.targetAnchor,
+    );
+    saveRelationConfig(selectDomainId, modelRelationEdges);
   };
 
   return (
@@ -680,7 +1070,8 @@ const DomainManger: React.FC<Props> = ({
           }}
         />
       )}
-      {
+
+      {createDataSourceModalOpen && (
         <ClassDataSourceTypeModal
           open={createDataSourceModalOpen}
           onCancel={() => {
@@ -692,7 +1083,7 @@ const DomainManger: React.FC<Props> = ({
             updateGraphData();
           }}
         />
-      }
+      )}
       {
         <DeleteConfirmModal
           open={confirmModalOpenState}
@@ -719,6 +1110,26 @@ const DomainManger: React.FC<Props> = ({
           nodeData={currentNodeData}
         />
       }
+      <ModelRelationFormDrawer
+        domainId={domainManger.selectDomainId}
+        nodeModel={nodeModel}
+        relationData={currentRelationDataItem}
+        onClose={() => {
+          setCurrentRelationDataItem({});
+          setModelRelationDrawerOpen(false);
+        }}
+        onSave={() => {
+          saveModelRelationEdges();
+          setCurrentRelationDataItem({});
+          setModelRelationDrawerOpen(false);
+        }}
+        onDelete={() => {
+          handleDeleteEdge();
+          setCurrentRelationDataItem({});
+          setModelRelationDrawerOpen(false);
+        }}
+        open={modelRelationDrawerOpen}
+      />
     </>
   );
 };

@@ -108,7 +108,6 @@ public class SqlUtils {
         return jdbcTemplate;
     }
 
-
     public void queryInternal(String sql, QueryResultWithSchemaResp queryResultWithColumns) {
         getResult(sql, queryResultWithColumns, jdbcTemplate());
     }

@@ -3,7 +3,7 @@ import { Space, DatePicker } from 'antd';
 import { DateMode, DateRangeType, DateRangePicker, DateRangeTypeToPickerMap } from './type';
 import { getDateStrings } from './utils';
 import { DateSettingType, StaticDateSelectMode } from './type';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const { RangePicker } = DatePicker;
 
@@ -22,7 +22,7 @@ const StaticDate: React.FC<Props> = ({
   onDateRangeChange,
 }: any) => {
   const [latestDateMap, setLatestDateMap] = useState<any>({
-    maxPartition: moment().format('YYYY-MM-DD'),
+    maxPartition: dayjs().format('YYYY-MM-DD'),
   });
 
   const [staticFormData, setStaticFormData] = useState<any>(() => {
@@ -70,14 +70,14 @@ const StaticDate: React.FC<Props> = ({
     const initDateRange = initialValues?.dateRange || [];
     const [startDate, endDate] = initDateRange;
     const { maxPartition } = latestDateMap;
-    let dateRangeMoment = [moment(), moment()];
+    let dateRangeMoment = [dayjs(), dayjs()];
     // 如果initialValues时间存在则按initialValues时间初始化
     if (startDate && endDate) {
-      dateRangeMoment = [moment(startDate), moment(endDate)];
+      dateRangeMoment = [dayjs(startDate), dayjs(endDate)];
     }
     // dateRangeValue未被初始化且maxPartition存在，则按maxPartition初始化
     if (dateRangeValue.length === 0 && !(startDate && endDate) && maxPartition) {
-      dateRangeMoment = [moment(maxPartition), moment(maxPartition)];
+      dateRangeMoment = [dayjs(maxPartition), dayjs(maxPartition)];
     }
     // 否则按当前时间初始化
     setDateRangeValue(dateRangeMoment);
@@ -122,7 +122,7 @@ const StaticDate: React.FC<Props> = ({
       isDateRangeChange,
     });
     if (dateStrings[0] && dateStrings[1]) {
-      setDateRangeValue([moment(dateStrings[0]), moment(dateStrings[1])]);
+      setDateRangeValue([dayjs(dateStrings[0]), dayjs(dateStrings[1])]);
       updateStaticFormData({
         dateMode,
         dateRangeType,

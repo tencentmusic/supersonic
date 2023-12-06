@@ -6,24 +6,27 @@ com.tencent.supersonic.chat.api.component.SchemaMapper=\
     com.tencent.supersonic.chat.mapper.EntityMapper
 
 com.tencent.supersonic.chat.api.component.SemanticParser=\
-    com.tencent.supersonic.chat.parser.rule.QueryModeParser, \
-    com.tencent.supersonic.chat.parser.rule.ContextInheritParser, \
-    com.tencent.supersonic.chat.parser.rule.AgentCheckParser, \
-    com.tencent.supersonic.chat.parser.rule.MetricCheckParser, \
-    com.tencent.supersonic.chat.parser.rule.TimeRangeParser, \
-    com.tencent.supersonic.chat.parser.rule.AggregateTypeParser, \
-    com.tencent.supersonic.chat.parser.llm.s2ql.LLMS2QLParser, \
-    com.tencent.supersonic.chat.parser.plugin.function.FunctionBasedParser
+    com.tencent.supersonic.chat.parser.sql.rule.RuleSqlParser, \
+    com.tencent.supersonic.chat.parser.sql.llm.LLMSqlParser, \
+    com.tencent.supersonic.chat.parser.plugin.embedding.EmbeddingRecallParser, \
+    com.tencent.supersonic.chat.parser.plugin.function.FunctionCallParser, \
+    com.tencent.supersonic.chat.parser.QueryTypeParser
 
+com.tencent.supersonic.chat.api.component.SemanticCorrector=\
+    com.tencent.supersonic.chat.corrector.SchemaCorrector, \
+    com.tencent.supersonic.chat.corrector.SelectCorrector, \
+    com.tencent.supersonic.chat.corrector.WhereCorrector, \
+    com.tencent.supersonic.chat.corrector.GroupByCorrector, \
+    com.tencent.supersonic.chat.corrector.HavingCorrector
+
+com.tencent.supersonic.chat.parser.LLMProxy=\
+  com.tencent.supersonic.chat.parser.PythonLLMProxy
 
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.RemoteSemanticInterpreter
 
-com.tencent.supersonic.chat.query.QuerySelector=\
-   com.tencent.supersonic.chat.query.HeuristicQuerySelector
-
-com.tencent.supersonic.chat.parser.llm.s2ql.ModelResolver=\
-  com.tencent.supersonic.chat.parser.llm.s2ql.HeuristicModelResolver
+com.tencent.supersonic.chat.parser.sql.llm.ModelResolver=\
+  com.tencent.supersonic.chat.parser.sql.llm.HeuristicModelResolver
 
 com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\
     com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor
@@ -31,18 +34,14 @@ com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor
 com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
 
+com.tencent.supersonic.chat.postprocessor.PostProcessor=\
+    com.tencent.supersonic.chat.postprocessor.MetricCheckPostProcessor, \
+    com.tencent.supersonic.chat.postprocessor.ParseInfoUpdateProcessor, \
+    com.tencent.supersonic.chat.postprocessor.QueryRankPostProcessor, \
+    com.tencent.supersonic.chat.postprocessor.EntityInfoPostProcessor, \
+    com.tencent.supersonic.chat.postprocessor.SqlOutputPostProcessor, \
+    com.tencent.supersonic.chat.postprocessor.TimeCostPostProcessor, \
+    com.tencent.supersonic.chat.postprocessor.RespBuildPostProcessor
 
-com.tencent.supersonic.chat.api.component.SemanticCorrector=\
-    com.tencent.supersonic.chat.corrector.GlobalBeforeCorrector, \
-    com.tencent.supersonic.chat.corrector.SelectCorrector, \
-    com.tencent.supersonic.chat.corrector.WhereCorrector, \
-    com.tencent.supersonic.chat.corrector.GroupByCorrector, \
-    com.tencent.supersonic.chat.corrector.HavingCorrector, \
-    com.tencent.supersonic.chat.corrector.GlobalAfterCorrector
-
-com.tencent.supersonic.chat.responder.parse.ParseResponder=\
-    com.tencent.supersonic.chat.responder.parse.EntityInfoParseResponder, \
-    com.tencent.supersonic.chat.responder.parse.SqlInfoParseResponder
-
-com.tencent.supersonic.chat.responder.execute.ExecuteResponder=\
-    com.tencent.supersonic.chat.responder.execute.EntityInfoExecuteResponder
+com.tencent.supersonic.chat.query.QueryResponder=\
+    com.tencent.supersonic.chat.query.SimilarMetricQueryResponder

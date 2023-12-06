@@ -1,5 +1,5 @@
 import { DownOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Input, message, Tree, Popconfirm, Space, Tooltip, Row, Col } from 'antd';
+import { Input, message, Tree, Popconfirm, Space, Tooltip, Row, Col, Button } from 'antd';
 import type { DataNode } from 'antd/lib/tree';
 import { useEffect, useState } from 'react';
 import type { FC, Key } from 'react';
@@ -10,7 +10,6 @@ import { createDomain, updateDomain, deleteDomain } from '../service';
 import { treeParentKeyLists } from '../utils';
 import ProjectInfoFormProps from './ProjectInfoForm';
 import { constructorClassTreeFromList, addPathInTreeData } from '../utils';
-import { PlusCircleOutlined } from '@ant-design/icons';
 
 import styles from './style.less';
 import { ISemantic } from '../data';
@@ -119,7 +118,7 @@ const DomainListTree: FC<DomainListProps> = ({
     return (
       <div className={styles.projectItem}>
         <span
-          className={styles.title}
+          className={styles.projectItemTitle}
           onClick={() => {
             handleSelect(id, name);
           }}
@@ -179,31 +178,34 @@ const DomainListTree: FC<DomainListProps> = ({
 
   return (
     <div className={styles.domainList}>
-      <Row>
-        <Col flex="1 1 200px">
-          <Search
-            allowClear
-            className={styles.search}
-            placeholder="请输入主题域名称进行查询"
-            onSearch={onSearch}
-          />
-        </Col>
-        {createDomainBtnVisible && (
-          <Col flex="0 1 50px">
-            <Tooltip title="新增顶级域">
-              <PlusCircleOutlined
-                onClick={() => {
-                  setProjectInfoParams({ type: 'top', modelType: 'add' });
-                  setProjectInfoModalVisible(true);
-                  onCreateDomainBtnClick?.();
-                }}
-                className={styles.addBtn}
-              />
-            </Tooltip>
+      <div className={styles.searchContainer}>
+        <Row style={{ gap: 20 }}>
+          <Col flex="1 1 215px">
+            <Search
+              allowClear
+              className={styles.search}
+              placeholder="请输入主题域名称"
+              onSearch={onSearch}
+            />
           </Col>
-        )}
-      </Row>
-
+          {createDomainBtnVisible && (
+            <Col flex="0 0 45px" style={{ display: 'flex', alignItems: 'center' }}>
+              <Tooltip title="新增顶级域">
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  size="small"
+                  onClick={() => {
+                    setProjectInfoParams({ type: 'top', modelType: 'add' });
+                    setProjectInfoModalVisible(true);
+                    onCreateDomainBtnClick?.();
+                  }}
+                />
+              </Tooltip>
+            </Col>
+          )}
+        </Row>
+      </div>
       <Tree
         expandedKeys={expandedKeys}
         onExpand={handleExpand}

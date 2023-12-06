@@ -14,9 +14,15 @@ import com.tencent.supersonic.chat.plugin.event.PluginDelEvent;
 import com.tencent.supersonic.chat.plugin.event.PluginUpdateEvent;
 import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
-import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -24,13 +30,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -74,7 +73,6 @@ public class PluginServiceImpl implements PluginService {
         }
     }
 
-
     @Override
     public List<Plugin> getPluginList() {
         List<Plugin> plugins = Lists.newArrayList();
@@ -90,7 +88,6 @@ public class PluginServiceImpl implements PluginService {
         List<PluginDO> pluginDOS = pluginRepository.fetchPluginDOs(queryText, type);
         return convertList(pluginDOS);
     }
-
 
     @Override
     public List<Plugin> query(PluginQueryReq pluginQueryReq) {

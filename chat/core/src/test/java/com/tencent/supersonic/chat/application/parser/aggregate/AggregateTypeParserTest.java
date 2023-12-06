@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.application.parser.aggregate;
 
 import static org.junit.Assert.assertEquals;
 
-import com.tencent.supersonic.chat.parser.rule.AggregateTypeParser;
+import com.tencent.supersonic.chat.parser.sql.rule.AggregateTypeParser;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import org.junit.jupiter.api.Test;
 

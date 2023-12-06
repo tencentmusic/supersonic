@@ -1,8 +1,8 @@
 package com.tencent.supersonic.semantic.query.parser.calcite.sql.node;
 
 
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Constants;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Dimension;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Constants;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Dimension;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -61,6 +61,5 @@ public class DimensionNode extends SemanticNode {
         }
         return expand(dimension, scope);
     }
-
 
 }

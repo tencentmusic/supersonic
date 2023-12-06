@@ -1,10 +1,11 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.Collections;
+import java.util.Map;
+import java.util.HashMap;
+
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,27 @@ import org.junit.jupiter.api.Test;
  * SqlParserReplaceHelperTest
  */
 class SqlParserReplaceHelperTest {
+
+    @Test
+    void replaceSelectField() {
+
+        String sql = "SELECT 维度1,sum(播放量) FROM 数据库 "
+                + "WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1";
+        Map<String, String> fieldMap = new HashMap<>();
+        fieldMap.put("播放量", "播放量1");
+        sql = SqlParserReplaceHelper.replaceSelectFields(sql, fieldMap);
+        System.out.println(sql);
+        Assert.assertEquals("SELECT 维度1, sum(播放量1) FROM 数据库 "
+                + "WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1", sql);
+
+        sql = "SELECT 维度1,播放量 FROM 数据库 "
+                + "WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1";
+        fieldMap = new HashMap<>();
+        fieldMap.put("播放量", "播放量1");
+        sql = SqlParserReplaceHelper.replaceSelectFields(sql, fieldMap);
+        System.out.println(sql);
+        Assert.assertEquals("SELECT 维度1, 播放量1 FROM 数据库 WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1", sql);
+    }
 
     @Test
     void replaceValue() {
@@ -78,7 +100,6 @@ class SqlParserReplaceHelperTest {
                         + "ORDER BY 播放量 DESC LIMIT 11", replaceSql);
     }
 
-
     @Test
     void replaceFieldNameByValue() {
 
@@ -138,6 +159,20 @@ class SqlParserReplaceHelperTest {
     }
 
     @Test
+    void replaceUnionFields() {
+        Map<String, String> fieldToBizName1 = new HashMap<>();
+        fieldToBizName1.put("公司成立时间", "company_established_time");
+        fieldToBizName1.put("年营业额", "annual_turnover");
+        String replaceSql = "SELECT * FROM 互联网企业 ORDER BY 公司成立时间 DESC LIMIT 3 "
+                + "UNION SELECT * FROM 互联网企业 ORDER BY 年营业额 DESC LIMIT 5";
+        replaceSql = SqlParserReplaceHelper.replaceFields(replaceSql, fieldToBizName1);
+        replaceSql = SqlParserReplaceHelper.replaceTable(replaceSql, "internet");
+        Assert.assertEquals(
+                "SELECT * FROM internet ORDER BY company_established_time DESC LIMIT 3 "
+                        + "UNION SELECT * FROM internet ORDER BY annual_turnover DESC LIMIT 5", replaceSql);
+    }
+
+    @Test
     void replaceFields() {
 
         Map<String, String> fieldToBizName = initParams();
@@ -147,12 +182,16 @@ class SqlParserReplaceHelperTest {
 
         replaceSql = SqlParserReplaceHelper.replaceFields(replaceSql, fieldToBizName);
         replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
-
         Assert.assertEquals(
-                "SELECT song_name FROM 歌曲库 WHERE publish_date <= '2023-08-09' "
-                        + "AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' AND "
-                        + "song_publis_date = '2023-08-01' AND publish_date >= '2023-08-08' "
-                        + "ORDER BY play_count DESC LIMIT 11", replaceSql);
+                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2023-08-08' AND publish_date <= '2023-08-09')"
+                        + " AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' AND song_publis_date = '2023-08-01'"
+                        + " ORDER BY play_count DESC LIMIT 11", replaceSql);
+
+        replaceSql = "select 品牌名称 from 互联网企业 where datediff('year', 品牌成立时间, '2023-11-04') > 17 and 注册资本 = 50000000";
+        replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
+        replaceSql = SqlParserRemoveHelper.removeNumberFilter(replaceSql);
+        Assert.assertEquals(
+                "SELECT 品牌名称 FROM 互联网企业 WHERE 品牌成立时间 < '2006-11-04' AND 注册资本 = 50000000", replaceSql);
 
         replaceSql = "select MONTH(数据日期), sum(访问次数) from 内容库产品 "
                 + "where datediff('year', 数据日期, '2023-09-03') <= 0.5 "
@@ -162,9 +201,9 @@ class SqlParserReplaceHelperTest {
         replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT MONTH(sys_imp_date), sum(pv) FROM 内容库产品 WHERE sys_imp_date <= '2023-09-03' "
-                        + "AND sys_imp_date >= '2023-03-03' "
-                        + "GROUP BY MONTH(sys_imp_date) ORDER BY sum(pv) DESC LIMIT 1", replaceSql);
+                "SELECT MONTH(sys_imp_date), sum(pv) FROM 内容库产品 WHERE (sys_imp_date >= '2023-03-03' "
+                        + "AND sys_imp_date <= '2023-09-03')"
+                        + " GROUP BY MONTH(sys_imp_date) ORDER BY sum(pv) DESC LIMIT 1", replaceSql);
 
         replaceSql = "select MONTH(数据日期), sum(访问次数) from 内容库产品 "
                 + "where datediff('year', 数据日期, '2023-09-03') <= 0.5 "
@@ -174,8 +213,8 @@ class SqlParserReplaceHelperTest {
         replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT MONTH(sys_imp_date), sum(pv) FROM 内容库产品 WHERE sys_imp_date <= '2023-09-03' "
-                        + "AND sys_imp_date >= '2023-03-03' GROUP BY MONTH(sys_imp_date) HAVING sum(pv) > 1000",
+                "SELECT MONTH(sys_imp_date), sum(pv) FROM 内容库产品 WHERE (sys_imp_date >= '2023-03-03' AND"
+                        + " sys_imp_date <= '2023-09-03') GROUP BY MONTH(sys_imp_date) HAVING sum(pv) > 1000",
                 replaceSql);
 
         replaceSql = "select YEAR(发行日期), count(歌曲名) from 歌曲库 where YEAR(发行日期) "
@@ -210,9 +249,10 @@ class SqlParserReplaceHelperTest {
         replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT song_name FROM 歌曲库 WHERE publish_date <= '2023-08-11' "
-                        + "AND play_count > 1000000 AND sys_imp_date <= '2023-08-11' AND "
-                        + "publish_date >= '2022-08-11' AND sys_imp_date >= '2023-07-12'", replaceSql);
+                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2022-08-11' "
+                        + "AND publish_date <= '2023-08-11') AND play_count > 1000000 AND "
+                        + "(sys_imp_date >= '2023-07-12' AND sys_imp_date <= '2023-08-11')",
+                replaceSql);
 
         replaceSql = SqlParserReplaceHelper.replaceFields(
                 "select 歌曲名 from 歌曲库 where datediff('day', 发布日期, '2023-08-09') <= 1 "
@@ -221,9 +261,9 @@ class SqlParserReplaceHelperTest {
         replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT song_name FROM 歌曲库 WHERE publish_date <= '2023-08-09' "
-                        + "AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' "
-                        + "AND publish_date >= '2023-08-08' ORDER BY play_count DESC LIMIT 11", replaceSql);
+                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2023-08-08' AND publish_date <= '2023-08-09')"
+                        + " AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' ORDER BY play_count DESC LIMIT 11",
+                replaceSql);
 
         replaceSql = SqlParserReplaceHelper.replaceFields(
                 "select 歌曲名 from 歌曲库 where datediff('year', 发布日期, '2023-08-09') = 0 "
@@ -231,9 +271,9 @@ class SqlParserReplaceHelperTest {
         replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT song_name FROM 歌曲库 WHERE 1 = 1 AND singer_name = '邓紫棋'"
-                        + " AND sys_imp_date = '2023-08-09' AND publish_date <= '2023-08-09' "
-                        + "AND publish_date >= '2023-01-01' ORDER BY play_count DESC LIMIT 11", replaceSql);
+                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2023-01-01' AND publish_date <= '2023-08-09')"
+                        + " AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' ORDER BY play_count DESC LIMIT 11",
+                replaceSql);
 
         replaceSql = SqlParserReplaceHelper.replaceFields(
                 "select 歌曲名 from 歌曲库 where datediff('year', 发布日期, '2023-08-09') <= 0.5 "
@@ -241,19 +281,19 @@ class SqlParserReplaceHelperTest {
         replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
 
         Assert.assertEquals(
-                "SELECT song_name FROM 歌曲库 WHERE publish_date <= '2023-08-09' "
-                        + "AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' "
-                        + "AND publish_date >= '2023-02-09' ORDER BY play_count DESC LIMIT 11", replaceSql);
+                "SELECT song_name FROM 歌曲库 WHERE (publish_date >= '2023-02-09' AND publish_date <= '2023-08-09')"
+                        + " AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' ORDER BY play_count DESC LIMIT 11",
+                replaceSql);
 
         replaceSql = SqlParserReplaceHelper.replaceFields(
                 "select 歌曲名 from 歌曲库 where datediff('year', 发布日期, '2023-08-09') >= 0.5 "
                         + "and 歌手名 = '邓紫棋' and 数据日期 = '2023-08-09' order by 播放量 desc limit 11", fieldToBizName);
         replaceSql = SqlParserReplaceHelper.replaceFunction(replaceSql);
-
+        replaceSql = SqlParserRemoveHelper.removeNumberFilter(replaceSql);
         Assert.assertEquals(
-                "SELECT song_name FROM 歌曲库 WHERE publish_date >= '2023-08-09' "
-                        + "AND singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09' "
-                        + "AND publish_date <= '2023-02-09' ORDER BY play_count DESC LIMIT 11", replaceSql);
+                "SELECT song_name FROM 歌曲库 WHERE publish_date <= '2023-02-09' AND"
+                        + " singer_name = '邓紫棋' AND sys_imp_date = '2023-08-09'"
+                        + " ORDER BY play_count DESC LIMIT 11", replaceSql);
 
         replaceSql = SqlParserReplaceHelper.replaceFields(
                 "select 部门,用户 from 超音数 where 数据日期 = '2023-08-08' and 用户 ='alice'"
@@ -308,7 +348,6 @@ class SqlParserReplaceHelperTest {
                         + "sum(user_id) < (SELECT min(user_id) FROM CSpider WHERE user_id = '英文')", replaceSql);
     }
 
-
     @Test
     void replaceTable() {
 
@@ -319,6 +358,12 @@ class SqlParserReplaceHelperTest {
         Assert.assertEquals(
                 "SELECT 部门, sum(访问次数) FROM s2 WHERE 数据日期 = '2023-08-08' "
                         + "AND 用户 = alice AND 发布日期 = '11' GROUP BY 部门 LIMIT 1", replaceSql);
+
+        sql = "select * from 互联网企业 order by 公司成立时间 desc limit 3 union select * from 互联网企业 order by 年营业额 desc limit 5";
+        replaceSql = SqlParserReplaceHelper.replaceTable(sql, "internet");
+        Assert.assertEquals(
+                "SELECT * FROM internet ORDER BY 公司成立时间 DESC LIMIT 3 "
+                        + "UNION SELECT * FROM internet ORDER BY 年营业额 DESC LIMIT 5", replaceSql);
 
         sql = "SELECT * FROM CSpider音乐 WHERE (评分 < (SELECT min(评分) "
                 + "FROM CSpider音乐 WHERE 语种 = '英文')) AND 数据日期 = '2023-10-11'";
@@ -343,7 +388,19 @@ class SqlParserReplaceHelperTest {
     @Test
     void replaceFunctionName() {
 
-        String sql = "select MONTH(数据日期) as 月份, avg(访问次数) as 平均访问次数 from 内容库产品 where"
+        String sql = "select 公司名称,平均(注册资本),总部地点 from 互联网企业 where\n"
+                + "年营业额 >= 28800000000 and 最大(注册资本)>10000 \n"
+                + "  group by  公司名称 having 平均(注册资本)>10000  order by \n"
+                + "平均(注册资本) desc limit 5";
+        Map<String, String> map = new HashMap<>();
+        map.put("平均", "avg");
+        map.put("最大", "max");
+        sql = SqlParserReplaceHelper.replaceFunction(sql, map);
+        System.out.println(sql);
+        Assert.assertEquals("SELECT 公司名称, avg(注册资本), 总部地点 FROM 互联网企业 WHERE 年营业额 >= 28800000000 AND "
+                + "max(注册资本) > 10000 GROUP BY 公司名称 HAVING avg(注册资本) > 10000 ORDER BY avg(注册资本) DESC LIMIT 5", sql);
+
+        sql = "select MONTH(数据日期) as 月份, avg(访问次数) as 平均访问次数 from 内容库产品 where"
                 + " datediff('month', 数据日期, '2023-09-02') <= 6 group by MONTH(数据日期)";
         Map<String, String> functionMap = new HashMap<>();
         functionMap.put("MONTH".toLowerCase(), "toMonth");

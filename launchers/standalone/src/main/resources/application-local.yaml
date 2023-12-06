@@ -4,8 +4,6 @@ spring:
       path: /h2-console/semantic
       # enabled web
       enabled: true
-    demo:
-      enabled: true
   datasource:
     driver-class-name: org.h2.Driver
     schema: classpath:db/schema-h2.sql
@@ -13,6 +11,9 @@ spring:
     url: jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false
     username: root
     password: semantic
+
+demo:
+  enabled: true
 
 server:
   port: 9080

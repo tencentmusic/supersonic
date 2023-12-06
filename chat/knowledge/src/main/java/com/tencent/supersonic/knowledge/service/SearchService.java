@@ -118,7 +118,6 @@ public class SearchService {
         trie.put(key, getValue(attribute.nature));
     }
 
-
     public static void loadSuffix(List<DictWord> suffixes) {
         if (CollectionUtils.isEmpty(suffixes)) {
             return;

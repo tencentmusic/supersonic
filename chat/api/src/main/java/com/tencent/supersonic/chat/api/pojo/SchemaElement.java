@@ -1,13 +1,14 @@
 package com.tencent.supersonic.chat.api.pojo;
 
 import com.google.common.base.Objects;
-import java.io.Serializable;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Getter
@@ -24,7 +25,7 @@ public class SchemaElement implements Serializable {
     private SchemaElementType type;
     private List<String> alias;
     private List<SchemaValueMap> schemaValueMaps;
-    private List<RelateSchemaElement> relateSchemaElements;
+    private List<RelatedSchemaElement> relatedSchemaElements;
 
     private String defaultAgg;
 
@@ -41,13 +42,13 @@ public class SchemaElement implements Serializable {
         SchemaElement schemaElement = (SchemaElement) o;
         return Objects.equal(model, schemaElement.model) && Objects.equal(id,
                 schemaElement.id) && Objects.equal(name, schemaElement.name)
-                && Objects.equal(bizName, schemaElement.bizName) && Objects.equal(
-                useCnt, schemaElement.useCnt) && Objects.equal(type, schemaElement.type);
+                && Objects.equal(bizName, schemaElement.bizName)
+                && Objects.equal(type, schemaElement.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(model, id, name, bizName, useCnt, type);
+        return Objects.hashCode(model, id, name, bizName, type);
     }
 
 }

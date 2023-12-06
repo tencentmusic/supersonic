@@ -27,11 +27,21 @@ public class Dim {
 
     private String description;
 
+    private int isTag;
+
     public Dim(String name, String bizName, String type, Integer isCreateDimension) {
         this.name = name;
         this.type = type;
         this.isCreateDimension = isCreateDimension;
         this.bizName = bizName;
+    }
+
+    public Dim(String name, String bizName, String type, Integer isCreateDimension, int isTag) {
+        this.name = name;
+        this.type = type;
+        this.isCreateDimension = isCreateDimension;
+        this.bizName = bizName;
+        this.isTag = isTag;
     }
 
     public Dim(String name, String type, String expr, String dateFormat, DimensionTimeTypeParams typeParams,

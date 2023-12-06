@@ -57,6 +57,10 @@
     align-items: center;
     column-gap: 13px;
     margin-left: -10px;
+
+    &.mobile {
+      flex-wrap: wrap;
+    }
   }
 
   &-content-option {
@@ -358,6 +362,20 @@
     overflow-wrap: break-word;
     user-select: text;
   }
+  &-toggle-expand-btn {
+    margin-left: 4px;
+    color: var(--text-color-fourth);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  &-step-item {
+    position: relative;
+    margin: 2px 0 2px 7px;
+    padding: 2px 0 8px 18px;
+    border-left: 1px solid var(--green);
+    overflow: auto;
+  }
 }
 
 .@{filter-item-prefix-cls} {
@@ -446,6 +464,26 @@
     border: 0 !important;
     color: var(--chat-blue);
     cursor: pointer;
+  }
+
+  &-schema-row {
+    display: flex;
+    margin-top: 10px;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  &-schema-title {
+    width: 50px;
+    color: var(--text-color);
+    font-weight: 500;
+  }
+
+  &-schema-content {
+    flex: 1;
+    color: var(--text-color);
   }
 }
 

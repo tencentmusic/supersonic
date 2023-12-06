@@ -7,15 +7,26 @@ const initTooltips = () => {
     offsetY: 10,
     fixToNode: [1, 0.5],
     // 允许出现 tooltip 的 item 类型
-    itemTypes: ['node'],
+    itemTypes: ['node', 'edge'],
+    shouldBegin: (e) => {
+      const model = e!.item!.getModel();
+      const eleType = e!.item!.getType();
+      if (eleType === 'node' || (eleType === 'edge' && model.sourceAnchor)) {
+        return true;
+      }
+      return false;
+    },
     // 自定义 tooltip 内容
     getContent: (e) => {
+      const eleType = e!.item!.getType();
       const outDiv = document.createElement('div');
       outDiv.style.width = 'fit-content';
       outDiv.style.height = 'fit-content';
       const model = e!.item!.getModel();
-
-      const { name, bizName, createdBy, updatedAt, description } = model;
+      const { name, bizName, createdBy, updatedAt, description, sourceAnchor } = model;
+      if (eleType === 'edge' && sourceAnchor) {
+        return '点击编辑模型关系';
+      }
       const list = [
         {
           label: '名称:',
@@ -41,7 +52,7 @@ const initTooltips = () => {
       const listHtml = list.reduce((htmlString, item) => {
         const { label, value } = item;
         if (value) {
-          htmlString += `<p style="margin-bottom:0">
+          htmlString += `<p style="margin-bottom:0;margin-top:0">
           <span>${label} </span>
           <span>${value}</span>
         </p>`;

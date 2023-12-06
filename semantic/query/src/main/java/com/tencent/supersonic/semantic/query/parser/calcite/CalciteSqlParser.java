@@ -5,7 +5,7 @@ import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.query.parser.SqlParser;
 import com.tencent.supersonic.semantic.query.parser.calcite.planner.AggPlanner;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.SemanticModel;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.SemanticModel;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import org.springframework.stereotype.Component;
@@ -41,6 +41,7 @@ public class CalciteSqlParser implements SqlParser {
         semanticSchema.setDatasource(semanticModel.getDatasourceMap());
         semanticSchema.setDimension(semanticModel.getDimensionMap());
         semanticSchema.setMetric(semanticModel.getMetrics());
+        semanticSchema.setJoinRelations(semanticModel.getJoinRelations());
         return semanticSchema;
     }
 }

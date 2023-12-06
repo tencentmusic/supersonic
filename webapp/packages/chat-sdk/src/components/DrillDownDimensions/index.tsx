@@ -2,32 +2,30 @@ import { useEffect, useState } from 'react';
 import { CLS_PREFIX } from '../../common/constants';
 import { DrillDownDimensionType, FilterItemType } from '../../common/type';
 import { queryDrillDownDimensions } from '../../service';
-import { Dropdown, Menu } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
-import classNames from 'classnames';
+import DimensionSection from './DimensionSection';
 
 type Props = {
   modelId: number;
   metricId?: number;
   drillDownDimension?: DrillDownDimensionType;
-  isMetricCard?: boolean;
+  secondDrillDownDimension?: DrillDownDimensionType;
   originDimensions?: DrillDownDimensionType[];
   dimensionFilters?: FilterItemType[];
   onSelectDimension: (dimension?: DrillDownDimensionType) => void;
+  onSelectSecondDimension: (dimension?: DrillDownDimensionType) => void;
 };
 
 const MAX_DIMENSION_COUNT = 20;
-
-const DEFAULT_DIMENSION_COUNT = 5;
 
 const DrillDownDimensions: React.FC<Props> = ({
   modelId,
   metricId,
   drillDownDimension,
-  isMetricCard,
+  secondDrillDownDimension,
   originDimensions,
   dimensionFilters,
   onSelectDimension,
+  onSelectSecondDimension,
 }) => {
   const [dimensions, setDimensions] = useState<DrillDownDimensionType[]>([]);
 
@@ -54,77 +52,27 @@ const DrillDownDimensions: React.FC<Props> = ({
     onSelectDimension(undefined);
   };
 
-  const defaultDimensions = dimensions.slice(0, DEFAULT_DIMENSION_COUNT);
-
-  const drillDownDimensionsSectionClass = classNames(`${prefixCls}-section`, {
-    [`${prefixCls}-metric-card`]: isMetricCard,
-  });
+  const cancelSecondDrillDown = () => {
+    onSelectSecondDimension(undefined);
+  };
 
   return (
     <div className={prefixCls}>
-      <div className={drillDownDimensionsSectionClass}>
-        <div className={`${prefixCls}-title`}>推荐下钻维度：</div>
-        <div className={`${prefixCls}-content`}>
-          {defaultDimensions.map((dimension, index) => {
-            const itemNameClass = classNames(`${prefixCls}-content-item-name`, {
-              [`${prefixCls}-content-item-active`]: drillDownDimension?.id === dimension.id,
-            });
-            return (
-              <div>
-                <span
-                  className={itemNameClass}
-                  onClick={() => {
-                    onSelectDimension(
-                      drillDownDimension?.id === dimension.id ? undefined : dimension
-                    );
-                  }}
-                >
-                  {dimension.name}
-                </span>
-                {index !== defaultDimensions.length - 1 && <span>、</span>}
-              </div>
-            );
-          })}
-          {dimensions.length > DEFAULT_DIMENSION_COUNT && (
-            <div>
-              <span>、</span>
-              <Dropdown
-                overlay={
-                  <Menu>
-                    {dimensions.slice(DEFAULT_DIMENSION_COUNT).map(dimension => {
-                      const itemNameClass = classNames({
-                        [`${prefixCls}-menu-item-active`]: drillDownDimension?.id === dimension.id,
-                      });
-                      return (
-                        <Menu.Item key={dimension.id}>
-                          <span
-                            className={itemNameClass}
-                            onClick={() => {
-                              onSelectDimension(dimension);
-                            }}
-                          >
-                            {dimension.name}
-                          </span>
-                        </Menu.Item>
-                      );
-                    })}
-                  </Menu>
-                }
-              >
-                <span>
-                  <span className={`${prefixCls}-content-item-name`}>更多</span>
-                  <DownOutlined className={`${prefixCls}-down-arrow`} />
-                </span>
-              </Dropdown>
-            </div>
-          )}
-          {drillDownDimension && (
-            <div className={`${prefixCls}-cancel-drill-down`} onClick={cancelDrillDown}>
-              取消下钻
-            </div>
-          )}
-        </div>
-      </div>
+      <DimensionSection
+        drillDownDimension={drillDownDimension}
+        dimensions={dimensions}
+        onSelectDimension={onSelectDimension}
+        onCancelDrillDown={cancelDrillDown}
+      />
+      {drillDownDimension && dimensions.length > 1 && (
+        <DimensionSection
+          drillDownDimension={secondDrillDownDimension}
+          dimensions={dimensions.filter(dimension => dimension.id !== drillDownDimension?.id)}
+          isSecondDrillDown
+          onSelectDimension={onSelectSecondDimension}
+          onCancelDrillDown={cancelSecondDrillDown}
+        />
+      )}
     </div>
   );
 };

@@ -4,24 +4,24 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DataFormat;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
 import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
+import com.tencent.supersonic.semantic.api.model.request.MetricReq;
+import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
-import com.tencent.supersonic.semantic.api.model.request.MetricReq;
-import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.Metric;
+import org.springframework.beans.BeanUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.springframework.beans.BeanUtils;
 
 public class MetricConverter {
 
@@ -56,7 +56,7 @@ public class MetricConverter {
         return measureYamlTpl;
     }
 
-    public static MetricResp convert2MetricResp(MetricDO metricDO, Map<Long, ModelResp> modelMap) {
+    public static MetricResp convert2MetricResp(MetricDO metricDO, Map<Long, ModelResp> modelMap, List<Long> collect) {
         MetricResp metricResp = new MetricResp();
         BeanUtils.copyProperties(metricDO, metricResp);
         metricResp.setTypeParams(JSONObject.parseObject(metricDO.getTypeParams(), MetricTypeParams.class));
@@ -65,6 +65,11 @@ public class MetricConverter {
         if (modelResp != null) {
             metricResp.setModelName(modelResp.getName());
             metricResp.setDomainId(modelResp.getDomainId());
+        }
+        if (collect != null && collect.contains(metricDO.getId())) {
+            metricResp.setIsCollect(true);
+        } else {
+            metricResp.setIsCollect(false);
         }
         metricResp.setTag(metricDO.getTags());
         metricResp.setRelateDimension(JSONObject.parseObject(metricDO.getRelateDimensions(),

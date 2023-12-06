@@ -9,18 +9,19 @@ import { CheckCircleFilled, UpOutlined } from '@ant-design/icons';
 import { SqlInfoType } from '../../common/type';
 
 type Props = {
+  llmReq?: any;
   integrateSystem?: string;
   sqlInfo: SqlInfoType;
   sqlTimeCost?: number;
 };
 
-const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo, sqlTimeCost }) => {
+const SqlItem: React.FC<Props> = ({ llmReq, integrateSystem, sqlInfo, sqlTimeCost }) => {
   const [sqlType, setSqlType] = useState('');
 
   const tipPrefixCls = `${PREFIX_CLS}-item`;
   const prefixCls = `${PREFIX_CLS}-sql-item`;
 
-  const handleCopy = (text, result) => {
+  const handleCopy = (_: string, result: any) => {
     result ? message.success('复制SQL成功', 1) : message.error('复制SQL失败', 1);
   };
 
@@ -28,9 +29,11 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo, sqlTimeCost }) => 
     setSqlType('');
   };
 
-  if (!sqlInfo.s2QL && !sqlInfo.logicSql && !sqlInfo.querySql) {
+  if (!llmReq && !sqlInfo.s2SQL && !sqlInfo.correctS2SQL && !sqlInfo.querySQL) {
     return null;
   }
+
+  const { schema, linking, priorExts } = llmReq || {};
 
   return (
     <div className={`${tipPrefixCls}-parse-tip`}>
@@ -49,37 +52,49 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo, sqlTimeCost }) => 
           )}
         </div>
         <div className={`${tipPrefixCls}-content-options`}>
-          {sqlInfo.s2QL && (
+          {llmReq && (
             <div
               className={`${tipPrefixCls}-content-option ${
-                sqlType === 's2QL' ? `${tipPrefixCls}-content-option-active` : ''
+                sqlType === 'schemaMap' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
-                setSqlType(sqlType === 's2QL' ? '' : 's2QL');
+                setSqlType(sqlType === 'schemaMap' ? '' : 'schemaMap');
               }}
             >
-              解析S2QL
+              Schema映射
             </div>
           )}
-          {sqlInfo.logicSql && (
+          {sqlInfo.s2SQL && (
             <div
               className={`${tipPrefixCls}-content-option ${
-                sqlType === 'logicSql' ? `${tipPrefixCls}-content-option-active` : ''
+                sqlType === 's2SQL' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
-                setSqlType(sqlType === 'logicSql' ? '' : 'logicSql');
+                setSqlType(sqlType === 's2SQL' ? '' : 's2SQL');
               }}
             >
-              修正S2QL
+              解析S2SQL
             </div>
           )}
-          {sqlInfo.querySql && (
+          {sqlInfo.correctS2SQL && (
             <div
               className={`${tipPrefixCls}-content-option ${
-                sqlType === 'querySql' ? `${tipPrefixCls}-content-option-active` : ''
+                sqlType === 'correctS2SQL' ? `${tipPrefixCls}-content-option-active` : ''
               }`}
               onClick={() => {
-                setSqlType(sqlType === 'querySql' ? '' : 'querySql');
+                setSqlType(sqlType === 'correctS2SQL' ? '' : 'correctS2SQL');
+              }}
+            >
+              修正S2SQL
+            </div>
+          )}
+          {sqlInfo.querySQL && (
+            <div
+              className={`${tipPrefixCls}-content-option ${
+                sqlType === 'querySQL' ? `${tipPrefixCls}-content-option-active` : ''
+              }`}
+              onClick={() => {
+                setSqlType(sqlType === 'querySQL' ? '' : 'querySQL');
               }}
             >
               执行SQL
@@ -96,6 +111,36 @@ const SqlItem: React.FC<Props> = ({ integrateSystem, sqlInfo, sqlTimeCost }) => 
             : ''
         }`}
       >
+        {sqlType === 'schemaMap' && (
+          <div className={`${prefixCls}-code`}>
+            {schema?.fieldNameList?.length > 0 && (
+              <div className={`${prefixCls}-schema-row`}>
+                <div className={`${prefixCls}-schema-title`}>名称：</div>
+                <div className={`${prefixCls}-schema-content`}>
+                  {schema.fieldNameList.join('、')}
+                </div>
+              </div>
+            )}
+            {linking?.length > 0 && (
+              <div className={`${prefixCls}-schema-row`}>
+                <div className={`${prefixCls}-schema-title`}>取值：</div>
+                <div className={`${prefixCls}-schema-content`}>
+                  {linking
+                    .map((item: any) => {
+                      return `${item.fieldName}: ${item.fieldValue}`;
+                    })
+                    .join('、')}
+                </div>
+              </div>
+            )}
+            {priorExts && (
+              <div className={`${prefixCls}-schema-row`}>
+                <div className={`${prefixCls}-schema-title`}>附加：</div>
+                <div className={`${prefixCls}-schema-content`}>{priorExts}</div>
+              </div>
+            )}
+          </div>
+        )}
         {sqlType && sqlInfo[sqlType] && (
           <>
             <SyntaxHighlighter

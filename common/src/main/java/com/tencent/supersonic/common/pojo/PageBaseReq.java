@@ -19,5 +19,4 @@ public class PageBaseReq {
         return this.pageSize;
     }
 
-
 }

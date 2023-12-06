@@ -192,24 +192,6 @@ const PermissionTable: React.FC<Props> = ({ domainManger }) => {
             >
               编辑
             </a>
-            {/* <a
-              key="dimensionEditBtn"
-              onClick={() => {
-                setPermissonData(record);
-                setDimensionModalVisible(true);
-              }}
-            >
-              维度授权
-            </a>
-            <a
-              key="metricEditBtn"
-              onClick={() => {
-                setPermissonData(record);
-                setMetricModalVisible(true);
-              }}
-            >
-              指标授权
-            </a> */}
             <Popconfirm
               title="确认删除？"
               okText="是"

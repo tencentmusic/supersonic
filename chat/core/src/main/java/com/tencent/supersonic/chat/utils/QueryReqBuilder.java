@@ -9,12 +9,19 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
+import com.tencent.supersonic.common.pojo.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,19 +31,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class QueryReqBuilder {
 
     public static QueryStructReq buildStructReq(SemanticParseInfo parseInfo) {
         QueryStructReq queryStructCmd = new QueryStructReq();
-        queryStructCmd.setModelId(parseInfo.getModelId());
-        queryStructCmd.setNativeQuery(parseInfo.getNativeQuery());
+        queryStructCmd.setModelIds(parseInfo.getModel().getModelIds());
+        queryStructCmd.setQueryType(parseInfo.getQueryType());
         queryStructCmd.setDateInfo(rewrite2Between(parseInfo.getDateInfo()));
 
         List<Filter> dimensionFilters = parseInfo.getDimensionFilters().stream()
@@ -124,19 +126,19 @@ public class QueryReqBuilder {
     }
 
     /**
-     * convert to QueryS2QLReq
+     * convert to QueryS2SQLReq
      *
      * @param querySql
-     * @param modelId
+     * @param modelIds
      * @return
      */
-    public static QueryS2QLReq buildS2QLReq(String querySql, Long modelId) {
-        QueryS2QLReq queryS2QLReq = new QueryS2QLReq();
+    public static QueryS2SQLReq buildS2SQLReq(String querySql, Set<Long> modelIds) {
+        QueryS2SQLReq queryS2SQLReq = new QueryS2SQLReq();
         if (Objects.nonNull(querySql)) {
-            queryS2QLReq.setSql(querySql);
+            queryS2SQLReq.setSql(querySql);
         }
-        queryS2QLReq.setModelId(modelId);
-        return queryS2QLReq;
+        queryS2SQLReq.setModelIds(modelIds);
+        return queryS2SQLReq;
     }
 
     private static List<Aggregator> getAggregatorByMetric(AggregateTypeEnum aggregateType, SchemaElement metric) {
@@ -231,7 +233,7 @@ public class QueryReqBuilder {
     public static QueryStructReq buildStructRatioReq(SemanticParseInfo parseInfo, SchemaElement metric,
             AggOperatorEnum aggOperatorEnum) {
         QueryStructReq queryStructCmd = buildStructReq(parseInfo);
-        queryStructCmd.setNativeQuery(false);
+        queryStructCmd.setQueryType(QueryType.METRIC);
         queryStructCmd.setOrders(new ArrayList<>());
         List<Aggregator> aggregators = new ArrayList<>();
         Aggregator ratioRoll = new Aggregator(metric.getBizName(), aggOperatorEnum);
@@ -239,6 +241,5 @@ public class QueryReqBuilder {
         queryStructCmd.setAggregators(aggregators);
         return queryStructCmd;
     }
-
 
 }

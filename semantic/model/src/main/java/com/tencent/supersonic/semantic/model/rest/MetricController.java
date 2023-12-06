@@ -40,7 +40,6 @@ public class MetricController {
         this.metricService = metricService;
     }
 
-
     @PostMapping("/creatExprMetric")
     public Boolean creatExprMetric(@RequestBody MetricReq metricReq,
             HttpServletRequest request,
@@ -68,7 +67,6 @@ public class MetricController {
         return true;
     }
 
-
     @PostMapping("/mockMetricAlias")
     public List<String> mockMetricAlias(@RequestBody MetricReq metricReq,
                                         HttpServletRequest request,
@@ -83,7 +81,6 @@ public class MetricController {
         return metricService.getMetrics(metaFilter);
     }
 
-
     @PostMapping("/queryMetric")
     public PageInfo<MetricResp> queryMetric(@RequestBody PageMetricReq pageMetricReq,
                                             HttpServletRequest request,
@@ -92,11 +89,18 @@ public class MetricController {
         return metricService.queryMetric(pageMetricReq, user);
     }
 
+    @Deprecated
     @GetMapping("getMetric/{modelId}/{bizName}")
     public MetricResp getMetric(@PathVariable("modelId") Long modelId, @PathVariable("bizName") String bizName) {
         return metricService.getMetric(modelId, bizName);
     }
 
+    @GetMapping("getMetric/{id}")
+    public MetricResp getMetric(@PathVariable("id") Long id,
+                                HttpServletRequest request, HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return metricService.getMetric(id, user);
+    }
 
     @DeleteMapping("deleteMetric/{id}")
     public Boolean deleteMetric(@PathVariable("id") Long id,
@@ -114,12 +118,10 @@ public class MetricController {
         return metricService.getMetrics(metricFilter);
     }
 
-
     @GetMapping("/getMetricTags")
     public Set<String> getMetricTags() {
         return metricService.getMetricTags();
     }
-
 
     @GetMapping("/getDrillDownDimension")
     public List<DrillDownDimension> getDrillDownDimension(Long metricId) {

@@ -46,7 +46,6 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
         return a.getName() + Constants.UNDERLINE + a.getId();
     }
 
-
     @Override
     protected void detectByBatch(QueryContext queryContext, Set<EmbeddingResult> results, Set<Long> detectModelIds,
             Set<String> detectSegments) {

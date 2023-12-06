@@ -20,6 +20,8 @@ public enum DictWordType {
 
     NUMBER("m"),
 
+    TAG("tag"),
+
     SUFFIX("suffix");
 
     public static final String NATURE_SPILT = "_";
@@ -33,7 +35,6 @@ public enum DictWordType {
     public String getType() {
         return NATURE_SPILT + type;
     }
-
 
     public static DictWordType getNatureType(String nature) {
         if (StringUtils.isEmpty(nature) || !nature.startsWith(NATURE_SPILT)) {

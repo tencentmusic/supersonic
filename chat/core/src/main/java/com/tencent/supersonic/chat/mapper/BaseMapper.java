@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -29,28 +30,45 @@ public abstract class BaseMapper implements SchemaMapper {
 
         String simpleName = this.getClass().getSimpleName();
         long startTime = System.currentTimeMillis();
-        log.info("before {},mapInfo:{}", simpleName, queryContext.getMapInfo());
+        log.info("before {},mapInfo:{}", simpleName, queryContext.getMapInfo().getModelElementMatches());
 
         try {
-            work(queryContext);
+            doMap(queryContext);
         } catch (Exception e) {
             log.error("work error", e);
         }
 
         long cost = System.currentTimeMillis() - startTime;
-        log.info("after {},cost:{},mapInfo:{}", simpleName, cost, queryContext.getMapInfo());
+        log.info("after {},cost:{},mapInfo:{}", simpleName, cost, queryContext.getMapInfo().getModelElementMatches());
     }
 
-    public abstract void work(QueryContext queryContext);
+    public abstract void doMap(QueryContext queryContext);
 
-
-    public void addToSchemaMap(SchemaMapInfo schemaMap, Long modelId, SchemaElementMatch schemaElementMatch) {
+    public void addToSchemaMap(SchemaMapInfo schemaMap, Long modelId, SchemaElementMatch newElementMatch) {
         Map<Long, List<SchemaElementMatch>> modelElementMatches = schemaMap.getModelElementMatches();
         List<SchemaElementMatch> schemaElementMatches = modelElementMatches.putIfAbsent(modelId, new ArrayList<>());
         if (schemaElementMatches == null) {
             schemaElementMatches = modelElementMatches.get(modelId);
         }
-        schemaElementMatches.add(schemaElementMatch);
+        //remove duplication
+        AtomicBoolean needAddNew = new AtomicBoolean(true);
+        schemaElementMatches.removeIf(
+                existElementMatch -> {
+                    SchemaElement existElement = existElementMatch.getElement();
+                    SchemaElement newElement = newElementMatch.getElement();
+                    if (existElement.equals(newElement)) {
+                        if (newElementMatch.getSimilarity() > existElementMatch.getSimilarity()) {
+                            return true;
+                        } else {
+                            needAddNew.set(false);
+                        }
+                    }
+                    return false;
+                }
+        );
+        if (needAddNew.get()) {
+            schemaElementMatches.add(newElementMatch);
+        }
     }
 
     public SchemaElement getSchemaElement(Long modelId, SchemaElementType elementType, Long elementID) {

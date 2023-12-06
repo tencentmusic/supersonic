@@ -41,5 +41,10 @@ public enum FilterOperatorEnum {
         return value;
     }
 
+    public static boolean isValueCompare(FilterOperatorEnum filterOperatorEnum) {
+        return EQUALS.equals(filterOperatorEnum) || GREATER_THAN.equals(filterOperatorEnum)
+                || GREATER_THAN_EQUALS.equals(filterOperatorEnum) || MINOR_THAN.equals(filterOperatorEnum)
+                || MINOR_THAN_EQUALS.equals(filterOperatorEnum) || NOT_EQUALS.equals(filterOperatorEnum);
+    }
 
 }

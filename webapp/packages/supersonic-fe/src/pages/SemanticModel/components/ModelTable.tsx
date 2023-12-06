@@ -7,8 +7,7 @@ import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../model';
 import { deleteModel, updateModel } from '../service';
-
-import ModelCreateFormModal from './ModelCreateFormModal';
+import ClassDataSourceTypeModal from './ClassDataSourceTypeModal';
 
 import moment from 'moment';
 import styles from './style.less';
@@ -22,17 +21,10 @@ type Props = {
   domainManger: StateType;
 };
 
-const ModelTable: React.FC<Props> = ({
-  modelList,
-  domainManger,
-  disabledEdit = false,
-  onModelChange,
-  dispatch,
-}) => {
-  const { selectModelId: modelId, selectDomainId } = domainManger;
-  const [modelCreateFormModalVisible, setModelCreateFormModalVisible] = useState<boolean>(false);
+const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelChange }) => {
   const [modelItem, setModelItem] = useState<ISemantic.IModelItem>();
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
+  const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
   const actionRef = useRef<ActionType>();
 
   const updateModelStatus = async (modelData: ISemantic.IModelItem) => {
@@ -57,7 +49,7 @@ const ModelTable: React.FC<Props> = ({
     },
     {
       dataIndex: 'name',
-      title: '指标名称',
+      title: '模型名称',
       search: false,
       render: (_, record) => {
         return (
@@ -73,9 +65,9 @@ const ModelTable: React.FC<Props> = ({
     },
     {
       dataIndex: 'key',
-      title: '指标搜索',
+      title: '模型搜索',
       hideInTable: true,
-      renderFormItem: () => <Input placeholder="请输入ID/指标名称/字段名称/标签" />,
+      renderFormItem: () => <Input placeholder="请输入ID/模型名称/字段名称/标签" />,
     },
     {
       dataIndex: 'alias',
@@ -133,6 +125,7 @@ const ModelTable: React.FC<Props> = ({
       title: '操作',
       dataIndex: 'x',
       valueType: 'option',
+      width: 150,
       render: (_, record) => {
         return (
           <Space className={styles.ctrlBtnContainer}>
@@ -140,7 +133,7 @@ const ModelTable: React.FC<Props> = ({
               key="metricEditBtn"
               onClick={() => {
                 setModelItem(record);
-                setModelCreateFormModalVisible(true);
+                setCreateDataSourceModalOpen(true);
               }}
             >
               编辑
@@ -216,7 +209,7 @@ const ModelTable: React.FC<Props> = ({
                   type="primary"
                   onClick={() => {
                     setModelItem(undefined);
-                    setModelCreateFormModalVisible(true);
+                    setCreateDataSourceModalOpen(true);
                   }}
                 >
                   创建模型
@@ -224,16 +217,16 @@ const ModelTable: React.FC<Props> = ({
               ]
         }
       />
-      {modelCreateFormModalVisible && (
-        <ModelCreateFormModal
-          domainId={selectDomainId}
-          basicInfo={modelItem}
+      {createDataSourceModalOpen && (
+        <ClassDataSourceTypeModal
+          open={createDataSourceModalOpen}
+          dataSourceItem={modelItem}
           onSubmit={() => {
-            setModelCreateFormModalVisible(false);
             onModelChange?.();
+            setCreateDataSourceModalOpen(false);
           }}
           onCancel={() => {
-            setModelCreateFormModalVisible(false);
+            setCreateDataSourceModalOpen(false);
           }}
         />
       )}

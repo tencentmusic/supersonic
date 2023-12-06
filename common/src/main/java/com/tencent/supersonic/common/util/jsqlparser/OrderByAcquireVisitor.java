@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
+import com.tencent.supersonic.common.pojo.Constants;
 import java.util.List;
 import java.util.Set;
 import net.sf.jsqlparser.expression.Expression;
@@ -10,27 +11,34 @@ import net.sf.jsqlparser.statement.select.OrderByVisitorAdapter;
 
 public class OrderByAcquireVisitor extends OrderByVisitorAdapter {
 
-    private Set<String> fields;
+    private Set<FieldExpression> fields;
 
-    public OrderByAcquireVisitor(Set<String> fields) {
+    public OrderByAcquireVisitor(Set<FieldExpression> fields) {
         this.fields = fields;
     }
 
     @Override
     public void visit(OrderByElement orderBy) {
         Expression expression = orderBy.getExpression();
+        FieldExpression fieldExpression = new FieldExpression();
         if (expression instanceof Column) {
-            fields.add(((Column) expression).getColumnName());
+            fieldExpression.setFieldName(((Column) expression).getColumnName());
         }
         if (expression instanceof Function) {
             Function function = (Function) expression;
             List<Expression> expressions = function.getParameters().getExpressions();
             for (Expression column : expressions) {
                 if (column instanceof Column) {
-                    fields.add(((Column) column).getColumnName());
+                    fieldExpression.setFieldName(((Column) column).getColumnName());
                 }
             }
         }
+        String operator = Constants.ASC_UPPER;
+        if (!orderBy.isAsc()) {
+            operator = Constants.DESC_UPPER;
+        }
+        fieldExpression.setOperator(operator);
+        fields.add(fieldExpression);
         super.visit(orderBy);
     }
 }

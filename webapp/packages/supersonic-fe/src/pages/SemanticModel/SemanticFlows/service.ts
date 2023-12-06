@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import type { IDataSource } from '../data';
 import { SemanticNodeType } from '../enum';
 import {
-  getDatasourceList,
+  getModelList,
   deleteDatasource,
   getDimensionList,
   createOrUpdateViewInfo,
@@ -84,8 +84,8 @@ export namespace GraphApi {
 
   export const loadDataSourceData = async (args: NsGraph.IGraphMeta) => {
     const { domainManger, graphConfig } = args.meta;
-    const { selectModelId } = domainManger;
-    const { code, data = [] } = await getDatasourceList({ modelId: selectModelId });
+    const { selectDomainId } = domainManger;
+    const { code, data = [] } = await getModelList(selectDomainId);
     const dataSourceMap = data.reduce(
       (itemMap: Record<string, IDataSource.IDataSourceItem>, item: IDataSource.IDataSourceItem) => {
         const { id, name } = item;

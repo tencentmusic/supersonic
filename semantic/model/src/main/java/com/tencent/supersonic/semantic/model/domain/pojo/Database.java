@@ -1,11 +1,10 @@
 package com.tencent.supersonic.semantic.model.domain.pojo;
 
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.RecordInfo;
-import lombok.Data;
-import org.assertj.core.util.Lists;
-
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class Database extends RecordInfo {

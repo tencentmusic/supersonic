@@ -77,3 +77,43 @@ update s2_model set status = 1;
 update s2_datasource set status = 1;
 update s2_metric set status = 1;
 update s2_dimension set status = 1;
+
+--20231110
+UPDATE `s2_agent` SET `config` = replace (`config`,'LLM_S2QL','LLM_S2SQL') WHERE `config` LIKE '%LLM_S2QL%';
+
+--20231113
+CREATE TABLE s2_sys_parameter
+(
+    id  int primary key AUTO_INCREMENT COMMENT '主键id',
+    admin varchar(500) COMMENT '系统管理员',
+    parameters text null COMMENT '配置项'
+);
+
+--20231114
+alter table s2_chat_config add column `llm_examples` text COMMENT 'llm examples';
+
+--20231116
+alter table s2_datasource add column `filter_sql` varchar(1000) COMMENT 'filter_sql' after depends;
+
+--20231120
+alter table s2_dimension add column `is_tag` int(10) DEFAULT NULL;
+
+--20231125
+alter table s2_model add column `database_id` INT NOT NULL;
+alter table s2_model add column `model_detail` text NOT  NULL;
+alter table s2_model add column `depends` varchar(500) DEFAULT NULL;
+alter table s2_model add column `filter_sql` varchar(1000) DEFAULT NULL;
+
+CREATE TABLE s2_model_rela
+(
+    id             BIGINT AUTO_INCREMENT,
+    domain_id       BIGINT,
+    from_model_id    BIGINT,
+    to_model_id      BIGINT,
+    join_type       VARCHAR(255),
+    join_condition  VARCHAR(255),
+    PRIMARY KEY (`id`)
+);
+
+alter table s2_view_info change model_id domain_id bigint;
+alter table s2_dimension drop column datasource_id;

@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_config` (
     `created_by` varchar(100) NOT NULL   ,
     `updated_by` varchar(100) NOT NULL   ,
     `status` INT NOT NULL  DEFAULT '0' , -- domain extension information status : 0 is normal, 1 is off the shelf, 2 is deleted
+    `llm_examples` TEXT,
     PRIMARY KEY (`id`)
     ) ;
 COMMENT ON TABLE s2_chat_config IS 'chat config information table ';
@@ -132,6 +133,10 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
     `view_org` varchar(3000) DEFAULT NULL  , -- domain available organization
     `entity` varchar(500) DEFAULT NULL  , -- domain entity info
     `drill_down_dimensions` varchar(500) DEFAULT NULL  , -- drill down dimensions info
+    `database_id` INT NOT  NULL ,
+    `model_detail` LONGVARCHAR NOT  NULL ,
+    `depends` varchar(500) DEFAULT NULL ,
+    `filter_sql` varchar(1000) DEFAULT NULL ,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_model IS 'model information';
@@ -155,15 +160,12 @@ CREATE TABLE `s2_database` (
 COMMENT ON TABLE s2_database IS 'database instance table';
 
 CREATE TABLE  IF NOT EXISTS  `s2_datasource` (
-                                                 `id` INT NOT NULL AUTO_INCREMENT,
-                                                 `model_id` INT NOT  NULL ,
-                                                 `name` varchar(255) NOT  NULL ,
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `model_id` INT NOT  NULL ,
+    `name` varchar(255) NOT  NULL ,
     `biz_name` varchar(255) NOT  NULL ,
     `description` varchar(500) DEFAULT  NULL ,
-    `database_id` INT NOT  NULL ,
-    `datasource_detail` LONGVARCHAR NOT  NULL ,
-    `status` int(11) DEFAULT NULL ,
-    `depends` varchar(500) DEFAULT NULL ,
+
     `created_at` TIMESTAMP NOT  NULL ,
     `created_by` varchar(100) NOT  NULL ,
     `updated_at` TIMESTAMP NOT  NULL ,
@@ -206,7 +208,6 @@ COMMENT ON TABLE s2_metric IS 'metric information table';
 CREATE TABLE IF NOT EXISTS `s2_dimension` (
                                               `id` INT NOT NULL  AUTO_INCREMENT ,
                                               `model_id` INT NOT NULL ,
-                                              `datasource_id` INT  NOT NULL ,
                                               `name` varchar(255) NOT NULL ,
     `biz_name` varchar(255)  NOT NULL ,
     `description` varchar(500) NOT NULL ,
@@ -224,29 +225,26 @@ CREATE TABLE IF NOT EXISTS `s2_dimension` (
     `alias` varchar(500) DEFAULT NULL,
     `default_values` varchar(500) DEFAULT NULL,
     `dim_value_maps` varchar(500) DEFAULT NULL,
+    `is_tag` INT DEFAULT NULL,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_dimension IS 'dimension information table';
 
-create table s2_datasource_rela
+CREATE TABLE s2_model_rela
 (
-    id              INT AUTO_INCREMENT,
-    model_id       INT       null,
-    datasource_from INT       null,
-    datasource_to   INT       null,
-    join_key        varchar(100) null,
-    created_at      TIMESTAMP     null,
-    created_by      varchar(100) null,
-    updated_at      TIMESTAMP     null,
-    updated_by      varchar(100) null,
+    id             BIGINT AUTO_INCREMENT,
+    domain_id       BIGINT,
+    from_model_id    BIGINT,
+    to_model_id      BIGINT,
+    join_type       VARCHAR(255),
+    join_condition  VARCHAR(255),
     PRIMARY KEY (`id`)
 );
-COMMENT ON TABLE s2_datasource_rela IS 'data source association table';
 
 create table s2_view_info
 (
     id         INT auto_increment,
-    model_id  INT       null,
+    domain_id  INT       null,
     type       varchar(20)  null comment 'datasource、dimension、metric',
     config     LONGVARCHAR   null comment 'config detail',
     created_at TIMESTAMP     null,
@@ -527,3 +525,19 @@ CREATE TABLE s2_materialization_record
     PRIMARY KEY (`id`)
 );
 
+CREATE TABLE s2_sys_parameter
+(
+    id  INT PRIMARY KEY AUTO_INCREMENT,
+    admin varchar(500),
+    parameters text null
+);
+
+CREATE TABLE `s2_collect` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `type` varchar(20) NOT NULL,
+    `username` varchar(20) NOT NULL,
+    `collect_id` bigint NOT NULL,
+    `create_time` TIMESTAMP,
+    `update_time` TIMESTAMP,
+    PRIMARY KEY (`id`)
+);

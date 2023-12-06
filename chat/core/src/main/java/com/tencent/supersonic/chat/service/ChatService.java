@@ -3,18 +3,18 @@ package com.tencent.supersonic.chat.service;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
 import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
-import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import java.util.List;
+import java.util.Set;
 
 public interface ChatService {
 
@@ -23,7 +23,7 @@ public interface ChatService {
      * @param chatId
      * @return
      */
-    Long getContextModel(Integer chatId);
+    Set<Long> getContextModel(Integer chatId);
 
     ChatContext getOrCreateContext(int chatId);
 
@@ -49,10 +49,7 @@ public interface ChatService {
 
     void addQuery(QueryResult queryResult, ChatContext chatCtx);
 
-    List<ChatParseDO> batchAddParse(ChatContext chatCtx, QueryReq queryReq,
-                         ParseResp parseResult,
-                         List<SemanticParseInfo> candidateParses,
-                         List<SemanticParseInfo> selectedParses);
+    List<ChatParseDO> batchAddParse(ChatContext chatCtx, QueryReq queryReq, ParseResp parseResult);
 
     void updateChatParse(List<ChatParseDO> chatParseDOS);
 

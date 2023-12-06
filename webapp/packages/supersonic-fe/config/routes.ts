@@ -22,12 +22,12 @@ const ROUTES = [
     component: './ChatPage',
     envEnableList: [ENV_KEY.CHAT],
   },
-  {
-    path: '/chatSetting/model/:domainId?/:modelId?/:menuKey?',
-    component: './SemanticModel/ChatSetting/ChatSetting',
-    name: 'chatSetting',
-    envEnableList: [ENV_KEY.CHAT],
-  },
+  // {
+  //   path: '/chatSetting/model/:domainId?/:modelId?/:menuKey?',
+  //   component: './SemanticModel/ChatSetting/ChatSetting',
+  //   name: 'chatSetting',
+  //   envEnableList: [ENV_KEY.CHAT],
+  // },
   {
     path: '/agent',
     name: 'agent',
@@ -35,25 +35,11 @@ const ROUTES = [
     envEnableList: [ENV_KEY.CHAT],
   },
   {
-    path: '/model',
+    path: '/model/:domainId?/:modelId?/:menuKey?',
+    component: './SemanticModel/DomainManager',
     name: 'semanticModel',
     envEnableList: [ENV_KEY.SEMANTIC],
-    routes: [
-      {
-        path: '/model/:domainId?/:modelId?/:menuKey?',
-        component: './SemanticModel/DomainManager',
-        name: 'model',
-        envEnableList: [ENV_KEY.SEMANTIC],
-      },
-      {
-        path: '/database',
-        name: 'database',
-        component: './SemanticModel/components/Database/DatabaseTable',
-        envEnableList: [ENV_KEY.SEMANTIC],
-      },
-    ],
   },
-
   {
     path: '/database',
     name: 'database',
@@ -66,6 +52,25 @@ const ROUTES = [
     name: 'metric',
     component: './SemanticModel/Metric',
     envEnableList: [ENV_KEY.SEMANTIC],
+    routes: [
+      {
+        path: '/metric',
+        redirect: '/metric/market',
+      },
+      {
+        path: '/metric/market',
+        component: './SemanticModel/Metric/Market',
+        hideInMenu: true,
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+      {
+        path: '/metric/detail/:metricId',
+        name: 'metricDetail',
+        hideInMenu: true,
+        component: './SemanticModel/Metric/Detail',
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+    ],
   },
   {
     path: '/plugin',
@@ -79,6 +84,12 @@ const ROUTES = [
     layout: false,
     hideInMenu: true,
     component: './Login',
+  },
+  {
+    path: '/system',
+    name: 'system',
+    hideInMenu: true,
+    component: './System',
   },
   {
     path: '/',

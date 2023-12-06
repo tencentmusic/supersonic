@@ -31,8 +31,7 @@ public interface ChatQueryRepository {
 
     List<ChatParseDO> batchSaveParseInfo(ChatContext chatCtx, QueryReq queryReq,
                                ParseResp parseResult,
-                               List<SemanticParseInfo> candidateParses,
-                               List<SemanticParseInfo> selectedParses);
+                               List<SemanticParseInfo> candidateParses);
 
     public ChatParseDO getParseInfo(Long questionId, int parseId);
 

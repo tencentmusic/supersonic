@@ -104,7 +104,7 @@ const MetricCardList: React.FC<Props> = ({
   };
 
   return (
-    <div style={{ padding: '0px 20px 20px' }}>
+    <div style={{ padding: '20px' }}>
       <CheckCard.Group value={currentNodeData.id} defaultValue={undefined}>
         {metricList &&
           metricList.map((metricItem: ISemantic.IMetricItem) => {

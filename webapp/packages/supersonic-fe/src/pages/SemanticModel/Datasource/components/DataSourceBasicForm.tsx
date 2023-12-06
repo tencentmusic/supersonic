@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Form, Input, Spin, Select, message } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import { getDbNames, getTables } from '../../service';
 import { ISemantic } from '../../data';
+import { isString } from 'lodash';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -108,20 +109,39 @@ const DataSourceBasicForm: React.FC<Props> = ({ isEdit, databaseConfigList, mode
 
       <FormItem
         name="name"
-        label="数据源中文名"
-        rules={[{ required: true, message: '请输入数据源中文名' }]}
+        label="模型中文名"
+        rules={[{ required: true, message: '请输入模型中文名' }]}
       >
         <Input placeholder="名称不可重复" />
       </FormItem>
       <FormItem
         name="bizName"
-        label="数据源英文名"
-        rules={[{ required: true, message: '请输入数据源英文名' }]}
+        label="模型英文名"
+        rules={[{ required: true, message: '请输入模型英文名' }]}
       >
         <Input placeholder="名称不可重复" disabled={isEdit} />
       </FormItem>
-      <FormItem name="description" label="数据源描述">
-        <TextArea placeholder="请输入数据源描述" />
+      <FormItem
+        name="alias"
+        label="别名"
+        getValueFromEvent={(value) => {
+          return value.join(',');
+        }}
+        getValueProps={(value) => {
+          return {
+            value: isString(value) ? value.split(',') : [],
+          };
+        }}
+      >
+        <Select
+          mode="tags"
+          placeholder="输入别名后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
+          tokenSeparators={[',']}
+          maxTagCount={9}
+        />
+      </FormItem>
+      <FormItem name="description" label="模型描述">
+        <TextArea placeholder="请输入模型描述" />
       </FormItem>
     </Spin>
   );

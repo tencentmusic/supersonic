@@ -9,11 +9,12 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A mapper capable of converting the VALUE of entity dimension values into ID types.
@@ -22,7 +23,7 @@ import org.springframework.util.CollectionUtils;
 public class EntityMapper extends BaseMapper {
 
     @Override
-    public void work(QueryContext queryContext) {
+    public void doMap(QueryContext queryContext) {
         SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
         for (Long modelId : schemaMapInfo.getMatchedModels()) {
             List<SchemaElementMatch> schemaElementMatchList = schemaMapInfo.getMatchedElements(modelId);
@@ -33,7 +34,8 @@ public class EntityMapper extends BaseMapper {
             if (entity == null || entity.getId() == null) {
                 continue;
             }
-            List<SchemaElementMatch> valueSchemaElements = schemaElementMatchList.stream().filter(schemaElementMatch ->
+            List<SchemaElementMatch> valueSchemaElements = schemaElementMatchList.stream()
+                    .filter(schemaElementMatch ->
                             SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType()))
                     .collect(Collectors.toList());
             for (SchemaElementMatch schemaElementMatch : valueSchemaElements) {

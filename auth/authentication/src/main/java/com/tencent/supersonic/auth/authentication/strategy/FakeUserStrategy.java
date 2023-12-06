@@ -20,5 +20,4 @@ public class FakeUserStrategy implements UserStrategy {
         return User.getFakeUser();
     }
 
-
 }

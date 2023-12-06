@@ -20,16 +20,16 @@ import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.query.parser.calcite.SemanticSchemaManager;
 import com.tencent.supersonic.semantic.query.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.semantic.query.parser.calcite.planner.MaterializationPlanner;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataSource;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.DataType;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Dimension;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Materialization;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Materialization.TimePartType;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.MaterializationElement;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Measure;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.Metric;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.SemanticModel;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2ql.TimeRange;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DataSource;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DataType;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Dimension;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Materialization;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Materialization.TimePartType;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.MaterializationElement;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Measure;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Metric;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.SemanticModel;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.TimeRange;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
@@ -85,8 +85,9 @@ public class MaterializationQuery implements QueryOptimizer {
             return;
         }
         try {
-            if (Objects.isNull(queryStructCmd) || Objects.isNull(queryStatement) || Objects.isNull(
-                    queryStructCmd.getModelId()) || Objects.isNull(
+            if (Objects.isNull(queryStructCmd) || Objects.isNull(queryStatement)
+                    || CollectionUtils.isEmpty(queryStructCmd.getModelIds())
+                    || Objects.isNull(
                     queryStructCmd.getDateInfo())) {
                 return;
             }
@@ -172,10 +173,11 @@ public class MaterializationQuery implements QueryOptimizer {
         ImmutablePair<String, String> timeRange = queryStructUtils.getBeginEndTime(queryStructReq);
         String start = timeRange.left;
         String end = timeRange.right;
-        Long modelId = queryStructReq.getModelId();
+        //todo
+        Long modelId = 1L;
         List<MaterializationResp> materializationResps = materializationConfService.getMaterializationByModel(modelId);
-        List<DimensionResp> dimensionResps = catalog.getDimensions(modelId);
-        List<MetricResp> metrics = catalog.getMetrics(modelId);
+        List<DimensionResp> dimensionResps = catalog.getDimensions(queryStructReq.getModelIds());
+        List<MetricResp> metrics = catalog.getMetrics(queryStructReq.getModelIds());
         Set<String> fields = new HashSet<>();
 
         if (Objects.nonNull(metricReq.getWhere()) && !metricReq.getWhere().isEmpty()) {
@@ -266,7 +268,8 @@ public class MaterializationQuery implements QueryOptimizer {
         getTimeRanges(queryStructReq, queryStatement);
         removeDefaultMetric(queryStructReq, queryStatement.getMetricReq());
         MaterializationPlanner materializationPlanner = new MaterializationPlanner(schema);
-        materializationPlanner.explain(queryStatement, AggOption.getAggregation(queryStructReq.getNativeQuery()));
+        materializationPlanner.explain(queryStatement,
+                AggOption.getAggregation(queryStructReq.getQueryType().isNativeAggQuery()));
         log.info("optimize {}", materializationPlanner.findBest().getDatasource());
         SemanticSchema semanticSchema = materializationPlanner.findBest();
         if (!CollectionUtils.isEmpty(semanticSchema.getDatasource())) {
@@ -278,7 +281,8 @@ public class MaterializationQuery implements QueryOptimizer {
                 doSingleZipperSource(queryStructReq, queryStatement);
             }
             AggPlanner aggBuilder = new AggPlanner(semanticSchema);
-            aggBuilder.explain(queryStatement, AggOption.getAggregation(queryStructReq.getNativeQuery()));
+            aggBuilder.explain(queryStatement,
+                    AggOption.getAggregation(queryStructReq.getQueryType().isNativeAggQuery()));
             log.debug("optimize before {} sql {}", queryStatement.getSourceId(), queryStatement.getSql());
             log.debug("optimize after {} sql {}", aggBuilder.getSourceId(), aggBuilder.getSql());
             queryStatement.setSourceId(aggBuilder.getSourceId());

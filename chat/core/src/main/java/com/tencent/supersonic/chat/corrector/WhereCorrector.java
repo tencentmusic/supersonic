@@ -2,10 +2,11 @@ package com.tencent.supersonic.chat.corrector;
 
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
-import com.tencent.supersonic.chat.api.pojo.SemanticCorrectInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.chat.parser.llm.s2ql.S2QLDateHelper;
+import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
+import com.tencent.supersonic.chat.parser.sql.llm.S2SqlDateHelper;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -14,11 +15,6 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -27,58 +23,67 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * Perform SQL corrections on the "Where" section in S2SQL.
+ */
 @Slf4j
 public class WhereCorrector extends BaseSemanticCorrector {
 
     @Override
-    public void correct(SemanticCorrectInfo semanticCorrectInfo) {
+    public void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
 
-        super.correct(semanticCorrectInfo);
+        addDateIfNotExist(semanticParseInfo);
 
-        addDateIfNotExist(semanticCorrectInfo);
+        parserDateDiffFunction(semanticParseInfo);
 
-        parserDateDiffFunction(semanticCorrectInfo);
+        addQueryFilter(queryReq, semanticParseInfo);
 
-        addQueryFilter(semanticCorrectInfo);
-
-        updateFieldValueByTechName(semanticCorrectInfo);
+        updateFieldValueByTechName(semanticParseInfo);
     }
 
-    private void addQueryFilter(SemanticCorrectInfo semanticCorrectInfo) {
-        String queryFilter = getQueryFilter(semanticCorrectInfo.getQueryFilters());
+    private void addQueryFilter(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
+        String queryFilter = getQueryFilter(queryReq.getQueryFilters());
 
-        String preSql = semanticCorrectInfo.getSql();
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
 
         if (StringUtils.isNotEmpty(queryFilter)) {
-            log.info("add queryFilter to preSql :{}", queryFilter);
+            log.info("add queryFilter to correctS2SQL :{}", queryFilter);
             Expression expression = null;
             try {
                 expression = CCJSqlParserUtil.parseCondExpression(queryFilter);
             } catch (JSQLParserException e) {
                 log.error("parseCondExpression", e);
             }
-            String sql = SqlParserAddHelper.addWhere(preSql, expression);
-            semanticCorrectInfo.setSql(sql);
+            correctS2SQL = SqlParserAddHelper.addWhere(correctS2SQL, expression);
+            semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
         }
     }
 
-    private void parserDateDiffFunction(SemanticCorrectInfo semanticCorrectInfo) {
-        String sql = semanticCorrectInfo.getSql();
-        sql = SqlParserReplaceHelper.replaceFunction(sql);
-        semanticCorrectInfo.setSql(sql);
+    private void parserDateDiffFunction(SemanticParseInfo semanticParseInfo) {
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        correctS2SQL = SqlParserReplaceHelper.replaceFunction(correctS2SQL);
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
     }
 
-    private void addDateIfNotExist(SemanticCorrectInfo semanticCorrectInfo) {
-        String sql = semanticCorrectInfo.getSql();
-        List<String> whereFields = SqlParserSelectHelper.getWhereFields(sql);
-        if (CollectionUtils.isEmpty(whereFields) || !whereFields.contains(TimeDimensionEnum.DAY.getChName())) {
-            String currentDate = S2QLDateHelper.getReferenceDate(semanticCorrectInfo.getParseInfo().getModelId());
+    private void addDateIfNotExist(SemanticParseInfo semanticParseInfo) {
+        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
+        List<String> whereFields = SqlParserSelectHelper.getWhereFields(correctS2SQL);
+        if (CollectionUtils.isEmpty(whereFields) || !TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
+            String currentDate = S2SqlDateHelper.getReferenceDate(semanticParseInfo.getModelId());
             if (StringUtils.isNotBlank(currentDate)) {
-                sql = SqlParserAddHelper.addParenthesisToWhere(sql);
-                sql = SqlParserAddHelper.addWhere(sql, TimeDimensionEnum.DAY.getChName(), currentDate);
+                correctS2SQL = SqlParserAddHelper.addParenthesisToWhere(correctS2SQL);
+                correctS2SQL = SqlParserAddHelper.addWhere(
+                        correctS2SQL, TimeDimensionEnum.DAY.getChName(), currentDate);
             }
         }
-        semanticCorrectInfo.setSql(sql);
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
     }
 
     private String getQueryFilter(QueryFilters queryFilters) {
@@ -95,21 +100,19 @@ public class WhereCorrector extends BaseSemanticCorrector {
                 .collect(Collectors.joining(Constants.AND_UPPER));
     }
 
-    private void updateFieldValueByTechName(SemanticCorrectInfo semanticCorrectInfo) {
+    private void updateFieldValueByTechName(SemanticParseInfo semanticParseInfo) {
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-        Long modelId = semanticCorrectInfo.getParseInfo().getModel().getId();
-        List<SchemaElement> dimensions = semanticSchema.getDimensions().stream()
-                .filter(schemaElement -> modelId.equals(schemaElement.getModel()))
-                .collect(Collectors.toList());
+        Set<Long> modelIds = semanticParseInfo.getModel().getModelIds();
+        List<SchemaElement> dimensions = semanticSchema.getDimensions(modelIds);
 
         if (CollectionUtils.isEmpty(dimensions)) {
             return;
         }
 
         Map<String, Map<String, String>> aliasAndBizNameToTechName = getAliasAndBizNameToTechName(dimensions);
-        String sql = SqlParserReplaceHelper.replaceValue(semanticCorrectInfo.getSql(), aliasAndBizNameToTechName);
-        semanticCorrectInfo.setSql(sql);
-        return;
+        String correctS2SQL = SqlParserReplaceHelper.replaceValue(semanticParseInfo.getSqlInfo().getCorrectS2SQL(),
+                aliasAndBizNameToTechName);
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
     }
 
     private Map<String, Map<String, String>> getAliasAndBizNameToTechName(List<SchemaElement> dimensions) {

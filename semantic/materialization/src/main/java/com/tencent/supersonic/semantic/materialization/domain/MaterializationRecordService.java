@@ -23,5 +23,4 @@ public interface MaterializationRecordService {
     List<MaterializationRecordResp> fetchMaterializationDate(List<Long> materializationIds, String elementName,
             String startTime, String endTime);
 
-
 }

@@ -1,12 +1,14 @@
-import { Button, Drawer, Result, Modal, Card, Row, Col } from 'antd';
+import { Drawer, Modal, Card, Row, Col } from 'antd';
 import { ConsoleSqlOutlined, CoffeeOutlined } from '@ant-design/icons';
 import React, { useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
-import { history, connect } from 'umi';
+import { connect } from 'umi';
 import DataSourceCreateForm from '../Datasource/components/DataSourceCreateForm';
+import { excuteSql } from '../service';
 import type { StateType } from '../model';
 import DataSource from '../Datasource';
 import { IDataSource } from '../data';
+import styles from './style.less';
 
 const { Meta } = Card;
 type Props = {
@@ -33,15 +35,19 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
 
   const [dataSourceModalVisible, setDataSourceModalVisible] = useState(false);
   const [fastModeSql, setFastModeSql] = useState<string>('');
+  const [sql, setSql] = useState<string>('');
 
-  const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
+  const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState<boolean>(false);
+  const [dataSourceEditOpen, setDataSourceEditOpen] = useState<boolean>(false);
+  const [currentDatabaseId, setCurrentDatabaseId] = useState<number>();
+  const [scriptColumns, setScriptColumns] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!dataSourceItem || !open) {
-      setCreateDataSourceModalOpen(open);
+    if (!dataSourceItem?.id || !open) {
+      setCreateDataSourceModalOpen(true);
       return;
     }
-    if (dataSourceItem?.datasourceDetail?.queryType === 'table_query') {
+    if (dataSourceItem?.modelDetail?.queryType === 'table_query') {
       setDataSourceModalVisible(true);
     } else {
       setCreateModalVisible(true);
@@ -65,9 +71,32 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
     onCancel?.();
   };
 
+  useEffect(() => {
+    queryTableColumnListByScript(dataSourceItem);
+  }, [dataSourceItem]);
+
+  const fetchTaskResult = (params) => {
+    setScriptColumns(params.columns);
+  };
+
+  const queryTableColumnListByScript = async (dataSource: IDataSource.IDataSourceItem) => {
+    if (!dataSource?.modelDetail?.sqlQuery) {
+      return;
+    }
+    const { code, data } = await excuteSql({
+      sql: dataSource.modelDetail?.sqlQuery,
+      id: dataSource.databaseId,
+    });
+    if (code === 200) {
+      fetchTaskResult(data);
+      setSql(dataSource?.modelDetail?.sqlQuery);
+    }
+  };
+
   return (
     <>
       <Modal
+        className={styles.classDataSourceTypeModal}
         open={createDataSourceModalOpen}
         onCancel={() => {
           setCreateDataSourceModalOpen(false);
@@ -91,11 +120,11 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
               cover={
                 <CoffeeOutlined
                   width={240}
-                  style={{ paddingTop: '45px', height: 120, fontSize: '48px', color: '#1890ff' }}
+                  style={{ paddingTop: '45px', height: 75, fontSize: '48px', color: '#1890ff' }}
                 />
               }
             >
-              <Meta title="快速创建" description="自动进行数据源可视化创建" />
+              <Meta title="快速创建" description="自动进行模型可视化创建" />
             </Card>
           </Col>
           <Col span={12}>
@@ -110,11 +139,11 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
               style={{ height: 220 }}
               cover={
                 <ConsoleSqlOutlined
-                  style={{ paddingTop: '45px', height: 120, fontSize: '48px', color: '#1890ff' }}
+                  style={{ paddingTop: '45px', height: 75, fontSize: '48px', color: '#1890ff' }}
                 />
               }
             >
-              <Meta title="SQL脚本" description="自定义SQL脚本创建数据源" />
+              <Meta title="SQL脚本" description="自定义SQL脚本创建模型" />
             </Card>
           </Col>
         </Row>
@@ -140,25 +169,49 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
         />
       )}
       {createModalVisible && (
-        <Drawer
-          width={'100%'}
-          destroyOnClose
-          title="数据源编辑"
-          open={true}
-          onClose={() => {
+        <DataSourceCreateForm
+          sql={sql}
+          databaseId={currentDatabaseId}
+          basicInfoFormMode="normal"
+          dataSourceItem={dataSourceItem}
+          scriptColumns={scriptColumns}
+          onCancel={() => {
             setCreateModalVisible(false);
             handleCancel();
           }}
-          footer={null}
+          onSubmit={() => {
+            setCreateModalVisible(false);
+            onSubmit?.();
+          }}
+          createModalVisible={createModalVisible}
+          onDataSourceBtnClick={() => {
+            setDataSourceEditOpen(true);
+          }}
+          onOpenDataSourceEdit={() => {
+            setDataSourceEditOpen(true);
+          }}
         >
-          <DataSource
-            initialValues={dataSourceItem}
-            onSubmitSuccess={() => {
-              setCreateModalVisible(false);
-              onSubmit?.();
+          <Drawer
+            width={'100%'}
+            title="数据源编辑"
+            open={dataSourceEditOpen}
+            onClose={() => {
+              setDataSourceEditOpen(false);
             }}
-          />
-        </Drawer>
+            footer={null}
+          >
+            <DataSource
+              initialValues={dataSourceItem}
+              onSubmitSuccess={(dataSourceInfo) => {
+                const { columns, sql, databaseId } = dataSourceInfo;
+                setSql(sql);
+                setScriptColumns(columns);
+                setCurrentDatabaseId(databaseId);
+                setDataSourceEditOpen(false);
+              }}
+            />
+          </Drawer>
+        </DataSourceCreateForm>
       )}
     </>
   );

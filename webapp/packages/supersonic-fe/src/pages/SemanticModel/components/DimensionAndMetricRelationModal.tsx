@@ -1,26 +1,42 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Button } from 'antd';
+import { Modal, Button, message } from 'antd';
 import DimensionMetricRelationTableTransfer from './DimensionMetricRelationTableTransfer';
 import { ISemantic } from '../data';
-
+import { updateExprMetric } from '../service';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 
 type Props = {
   onCancel: () => void;
   open: boolean;
-  metricItem: ISemantic.IMetricItem;
+  metricItem?: ISemantic.IMetricItem;
   relationsInitialValue?: ISemantic.IDrillDownDimensionItem[];
   onSubmit: (relations: ISemantic.IDrillDownDimensionItem[]) => void;
 };
 
 const DimensionAndMetricRelationModal: React.FC<Props> = ({
   open,
-  metricItem,
+  metricItem = {},
   relationsInitialValue,
   onCancel,
   onSubmit,
 }) => {
   const [relationList, setRelationList] = useState<ISemantic.IDrillDownDimensionItem[]>([]);
+
+  const saveMetric = async (relationList: any) => {
+    const queryParams = {
+      ...metricItem,
+      relateDimension: {
+        ...(metricItem?.relateDimension || {}),
+        drillDownDimensions: relationList,
+      },
+    };
+    const { code, msg } = await updateExprMetric(queryParams);
+    if (code === 200) {
+      onSubmit(relationList);
+      return;
+    }
+    message.error(msg);
+  };
 
   const renderFooter = () => {
     return (
@@ -29,7 +45,7 @@ const DimensionAndMetricRelationModal: React.FC<Props> = ({
         <Button
           type="primary"
           onClick={() => {
-            onSubmit(relationList);
+            saveMetric(relationList);
           }}
         >
           完成

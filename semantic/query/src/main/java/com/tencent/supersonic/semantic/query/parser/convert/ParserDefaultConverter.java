@@ -19,7 +19,6 @@ import org.springframework.util.CollectionUtils;
 public class ParserDefaultConverter implements SemanticConverter {
 
 
-
     private final CalculateAggConverter calculateCoverterAgg;
     private final QueryStructUtils queryStructUtils;
 
@@ -43,7 +42,6 @@ public class ParserDefaultConverter implements SemanticConverter {
         BeanUtils.copyProperties(metricReq, metricCommand);
     }
 
-
     public MetricReq generateSqlCommand(Catalog catalog, QueryStructReq queryStructCmd) {
         MetricReq sqlCommend = new MetricReq();
         sqlCommend.setMetrics(queryStructCmd.getMetrics());
@@ -57,20 +55,20 @@ public class ParserDefaultConverter implements SemanticConverter {
         sqlCommend.setVariables(queryStructCmd.getParams().stream()
                 .collect(Collectors.toMap(Param::getName, Param::getValue, (k1, k2) -> k1)));
         sqlCommend.setLimit(queryStructCmd.getLimit());
-        String rootPath = catalog.getModelFullPath(queryStructCmd.getModelId());
+        String rootPath = catalog.getModelFullPath(queryStructCmd.getModelIds());
         sqlCommend.setRootPath(rootPath);
 
         // todo tmp delete
         // support detail query
-        if (queryStructCmd.getNativeQuery() && CollectionUtils.isEmpty(sqlCommend.getMetrics())) {
-            String internalMetricName = queryStructUtils.generateInternalMetricName(
-                    queryStructCmd.getModelId(), queryStructCmd.getGroups());
-            sqlCommend.getMetrics().add(internalMetricName);
+        if (queryStructCmd.getQueryType().isNativeAggQuery() && CollectionUtils.isEmpty(sqlCommend.getMetrics())) {
+            for (Long modelId : queryStructCmd.getModelIds()) {
+                String internalMetricName = queryStructUtils.generateInternalMetricName(
+                        modelId, queryStructCmd.getGroups());
+                sqlCommend.getMetrics().add(internalMetricName);
+            }
         }
 
         return sqlCommend;
     }
-
-
 
 }

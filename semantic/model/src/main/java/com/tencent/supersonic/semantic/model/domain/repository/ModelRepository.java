@@ -1,6 +1,9 @@
 package com.tencent.supersonic.semantic.model.domain.repository;
 
+
 import com.tencent.supersonic.semantic.model.domain.dataobject.ModelDO;
+import com.tencent.supersonic.semantic.model.domain.pojo.ModelFilter;
+
 import java.util.List;
 
 public interface ModelRepository {
@@ -9,10 +12,9 @@ public interface ModelRepository {
 
     void updateModel(ModelDO modelDO);
 
-    void deleteModel(Long id);
-
-    List<ModelDO> getModelList();
+    List<ModelDO> getModelList(ModelFilter modelFilter);
 
     ModelDO getModelById(Long id);
 
+    void batchUpdate(List<ModelDO> modelDOS);
 }

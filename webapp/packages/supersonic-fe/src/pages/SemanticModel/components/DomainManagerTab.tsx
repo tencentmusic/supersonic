@@ -1,21 +1,19 @@
-import { Tabs, Button } from 'antd';
+import { Tabs, Breadcrumb, Space } from 'antd';
 import React from 'react';
-import { connect } from 'umi';
+import { connect, history } from 'umi';
 
-import ClassDataSourceTable from './ClassDataSourceTable';
 import ClassDimensionTable from './ClassDimensionTable';
 import ClassMetricTable from './ClassMetricTable';
 import PermissionSection from './Permission/PermissionSection';
-// import DatabaseSection from './Database/DatabaseSection';
-import EntitySettingSection from './Entity/EntitySettingSection';
 import ChatSettingSection from '../ChatSetting/ChatSettingSection';
 import OverView from './OverView';
 import styles from './style.less';
 import type { StateType } from '../model';
-import { LeftOutlined } from '@ant-design/icons';
+import { HomeOutlined, FundViewOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
 import SemanticGraphCanvas from '../SemanticGraphCanvas';
 import RecommendedQuestionsSection from '../components/Entity/RecommendedQuestionsSection';
+import DatabaseTable from '../components/Database/DatabaseTable';
 
 import type { Dispatch } from 'umi';
 
@@ -38,11 +36,13 @@ const DomainManagerTab: React.FC<Props> = ({
   onBackDomainBtnClick,
   onMenuChange,
 }) => {
-  const defaultTabKey = 'xflow';
-  const { selectDomainId, domainList } = domainManger;
+  const defaultTabKey = 'dimenstion';
+  const { selectDomainId, domainList, selectModelId, selectModelName, selectDomainName } =
+    domainManger;
+
   const tabItem = [
     {
-      label: '模型',
+      label: '模型管理',
       key: 'overview',
       children: (
         <OverView
@@ -53,15 +53,24 @@ const DomainManagerTab: React.FC<Props> = ({
         />
       ),
     },
-    // {
-    //   label: '数据库',
-    //   key: 'dataBase',
-    //   children: <DatabaseSection />,
-    // },
+    {
+      label: '画布',
+      key: 'xflow',
+      children: (
+        <div style={{ width: '100%' }}>
+          <SemanticGraphCanvas />
+        </div>
+      ),
+    },
     {
       label: '权限管理',
       key: 'permissonSetting',
       children: <PermissionSection permissionTarget={'domain'} />,
+    },
+    {
+      label: '数据库管理',
+      key: 'database',
+      children: <DatabaseTable />,
     },
   ].filter((item) => {
     const target = domainList.find((domain) => domain.id === selectDomainId);
@@ -73,21 +82,6 @@ const DomainManagerTab: React.FC<Props> = ({
 
   const isModelItem = [
     {
-      label: '画布',
-      key: 'xflow',
-      children: (
-        <div style={{ width: '100%', marginTop: -20 }}>
-          <SemanticGraphCanvas />
-        </div>
-      ),
-    },
-
-    {
-      label: '数据源',
-      key: 'dataSource',
-      children: <ClassDataSourceTable />,
-    },
-    {
       label: '维度',
       key: 'dimenstion',
       children: <ClassDimensionTable />,
@@ -96,11 +90,6 @@ const DomainManagerTab: React.FC<Props> = ({
       label: '指标',
       key: 'metric',
       children: <ClassMetricTable />,
-    },
-    {
-      label: '实体',
-      key: 'entity',
-      children: <EntitySettingSection />,
     },
     {
       label: '权限管理',
@@ -126,25 +115,49 @@ const DomainManagerTab: React.FC<Props> = ({
 
   return (
     <>
+      <Breadcrumb
+        className={styles.breadcrumb}
+        separator=""
+        items={[
+          {
+            path: `/webapp/model/${selectDomainId}/0/overview`,
+            title: (
+              <Space
+                onClick={() => {
+                  onBackDomainBtnClick?.();
+                }}
+                style={selectModelName ? {} : { color: '#296df3', fontWeight: 'bold' }}
+              >
+                <HomeOutlined />
+                <span>{selectDomainName}</span>
+              </Space>
+            ),
+          },
+          {
+            type: 'separator',
+            separator: selectModelName ? '/' : '',
+          },
+          {
+            title: selectModelName ? (
+              <Space
+                onClick={() => {
+                  history.push(`/model/${selectDomainId}/${selectModelId}/`);
+                }}
+                style={{ color: '#296df3' }}
+              >
+                <FundViewOutlined style={{ position: 'relative', top: '2px' }} />
+                <span>{selectModelName}</span>
+              </Space>
+            ) : undefined,
+          },
+        ]}
+      />
       <Tabs
         className={styles.tab}
         items={!isModel ? tabItem : isModelItem}
         activeKey={activeKey || defaultTabKey}
         destroyInactiveTabPane
-        tabBarExtraContent={
-          isModel ? (
-            <Button
-              type="primary"
-              icon={<LeftOutlined />}
-              onClick={() => {
-                onBackDomainBtnClick?.();
-              }}
-              style={{ marginRight: 10 }}
-            >
-              返回主题域
-            </Button>
-          ) : undefined
-        }
+        size="large"
         onChange={(menuKey: string) => {
           onMenuChange?.(menuKey);
         }}

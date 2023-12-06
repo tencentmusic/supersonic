@@ -1,27 +1,19 @@
 package com.tencent.supersonic.semantic.query.utils;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.util.jsqlparser.FilterExpression;
+import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.Filter;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2QLReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +25,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Aspect
 @Component
@@ -55,16 +55,16 @@ public class DimValueAspect {
             return queryResultWithColumns;
         }
         Object[] args = joinPoint.getArgs();
-        QueryS2QLReq queryS2QLReq = (QueryS2QLReq) args[0];
-        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(queryS2QLReq.getModelId()));
-        String sql = queryS2QLReq.getSql();
+        QueryS2SQLReq queryS2SQLReq = (QueryS2SQLReq) args[0];
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(queryS2SQLReq.getModelIds()));
+        String sql = queryS2SQLReq.getSql();
         log.info("correctorSql before replacing:{}", sql);
         // if dimensionvalue is alias,consider the true dimensionvalue.
-        List<FilterExpression> filterExpressionList = SqlParserSelectHelper.getWhereExpressions(sql);
+        List<FieldExpression> fieldExpressionList = SqlParserSelectHelper.getWhereExpressions(sql);
         List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
         Set<String> fieldNames = dimensions.stream().map(o -> o.getName()).collect(Collectors.toSet());
         Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
-        filterExpressionList.stream().forEach(expression -> {
+        fieldExpressionList.stream().forEach(expression -> {
             if (fieldNames.contains(expression.getFieldName())) {
                 dimensions.stream().forEach(dimension -> {
                     if (expression.getFieldName().equals(dimension.getName())
@@ -88,7 +88,7 @@ public class DimValueAspect {
         log.info("filedNameToValueMap:{}", filedNameToValueMap);
         sql = SqlParserReplaceHelper.replaceValue(sql, filedNameToValueMap);
         log.info("correctorSql after replacing:{}", sql);
-        queryS2QLReq.setSql(sql);
+        queryS2SQLReq.setSql(sql);
         Map<String, Map<String, String>> techNameToBizName = getTechNameToBizName(dimensions);
 
         QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) joinPoint.proceed();
@@ -98,7 +98,7 @@ public class DimValueAspect {
         return queryResultWithColumns;
     }
 
-    public void replaceInCondition(FilterExpression expression, DimensionResp dimension,
+    public void replaceInCondition(FieldExpression expression, DimensionResp dimension,
                                    Map<String, Map<String, String>> filedNameToValueMap) {
         if (expression.getOperator().equals(FilterOperatorEnum.IN.getValue())) {
             String fieldValue = JsonUtil.toString(expression.getFieldValue());
@@ -133,7 +133,6 @@ public class DimValueAspect {
         filedNameToValueMap.put(fieldName, map);
     }
 
-
     @Around("execution(* com.tencent.supersonic.semantic.query.rest.QueryController.queryByStruct(..))"
             + " || execution(* com.tencent.supersonic.semantic.query.service.QueryService.queryByStruct(..))"
             + " || execution(* com.tencent.supersonic.semantic.query.service.QueryService.queryByStructWithAuth(..))")
@@ -147,8 +146,7 @@ public class DimValueAspect {
 
         Object[] args = joinPoint.getArgs();
         QueryStructReq queryStructReq = (QueryStructReq) args[0];
-        Long modelId = queryStructReq.getModelId();
-        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(modelId));
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(queryStructReq.getModelIds()));
         List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
         Map<String, Map<String, String>> dimAndAliasAndTechNamePair = getAliasAndBizNameToTechName(dimensions);
         Map<String, Map<String, String>> dimAndTechNameAndBizNamePair = getTechNameToBizName(dimensions);
@@ -199,7 +197,6 @@ public class DimValueAspect {
         }
         return false;
     }
-
 
     private void rewriteFilter(List<Filter> dimensionFilters, Map<String, Map<String, String>> aliasAndTechNamePair) {
         for (Filter filter : dimensionFilters) {
@@ -278,7 +275,6 @@ public class DimValueAspect {
     private boolean needSkipDimValue(DimValueMap dimValueMap) {
         return Objects.isNull(dimValueMap) || Strings.isEmpty(dimValueMap.getTechName());
     }
-
 
     private Map<String, Map<String, String>> getTechNameToBizName(List<DimensionResp> dimensions) {
         if (CollectionUtils.isEmpty(dimensions)) {

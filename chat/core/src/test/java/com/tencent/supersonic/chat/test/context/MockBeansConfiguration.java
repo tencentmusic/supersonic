@@ -1,38 +1,38 @@
 package com.tencent.supersonic.chat.test.context;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
-
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.config.DefaultMetric;
 import com.tencent.supersonic.chat.config.DefaultMetricInfo;
 import com.tencent.supersonic.chat.config.EntityInternalDetail;
+import com.tencent.supersonic.chat.persistence.mapper.ChatContextMapper;
 import com.tencent.supersonic.chat.persistence.repository.impl.ChatContextRepositoryImpl;
+import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
+import com.tencent.supersonic.chat.service.impl.ConfigServiceImpl;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
-import com.tencent.supersonic.chat.service.impl.ConfigServiceImpl;
-import com.tencent.supersonic.chat.service.ChatService;
-import com.tencent.supersonic.chat.persistence.mapper.ChatContextMapper;
-import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
 @Configuration
 public class MockBeansConfiguration {
