@@ -19,7 +19,7 @@ import classNames from 'classnames';
 import Tools from '../Tools';
 import SqlItem from './SqlItem';
 import SimilarQuestionItem from './SimilarQuestionItem';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 type Props = {
   msg: string;
@@ -82,18 +82,18 @@ const ChatItem: React.FC<Props> = ({
   const updateData = (res: Result<MsgDataType>) => {
     let tip: string = '';
     let data: MsgDataType | undefined = undefined;
-    if (res.code === 401 || res.code === 412) {
-      tip = res.msg;
-    }
-    if (res.code !== 200) {
-      tip = SEARCH_EXCEPTION_TIP;
-    }
     const { queryColumns, queryResults, queryState, queryMode, response, chatContext } =
       res.data || {};
-    if (queryState !== 'SUCCESS') {
+    if (res.code === 401 || res.code === 412) {
+      tip = res.msg;
+    } else if (res.code !== 200) {
+      tip = SEARCH_EXCEPTION_TIP;
+    } else if (queryState !== 'SUCCESS') {
       tip = response && typeof response === 'string' ? response : SEARCH_EXCEPTION_TIP;
-    }
-    if ((queryColumns && queryColumns.length > 0 && queryResults) || queryMode === 'WEB_PAGE') {
+    } else if (
+      (queryColumns && queryColumns.length > 0 && queryResults) ||
+      queryMode === 'WEB_PAGE'
+    ) {
       data = res.data;
       tip = '';
     }
@@ -229,8 +229,8 @@ const ChatItem: React.FC<Props> = ({
   const onDateInfoChange = (dateRange: any) => {
     setDateInfo({
       ...(dateInfo || {}),
-      startDate: moment(dateRange[0]).format('YYYY-MM-DD'),
-      endDate: moment(dateRange[1]).format('YYYY-MM-DD'),
+      startDate: dayjs(dateRange[0]).format('YYYY-MM-DD'),
+      endDate: dayjs(dateRange[1]).format('YYYY-MM-DD'),
       dateMode: 'BETWEEN',
       unit: 0,
     });
