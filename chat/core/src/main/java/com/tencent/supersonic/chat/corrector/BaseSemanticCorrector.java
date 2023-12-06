@@ -14,6 +14,7 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -113,7 +114,15 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
                         schemaElement.setDefaultAgg(AggregateTypeEnum.SUM.name());
                     }
                     return schemaElement;
-                }).collect(Collectors.toMap(a -> a.getName(), a -> a.getDefaultAgg(), (k1, k2) -> k1));
+                }).flatMap(schemaElement -> {
+                    Set<String> elements = new HashSet<>();
+                    elements.add(schemaElement.getName());
+                    if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {
+                        elements.addAll(schemaElement.getAlias());
+                    }
+                    return elements.stream().map(element -> Pair.of(element, schemaElement.getDefaultAgg())
+                    );
+                }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
 
         if (CollectionUtils.isEmpty(metricToAggregate)) {
             return;
