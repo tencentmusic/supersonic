@@ -12,7 +12,7 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
-import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
+import com.tencent.supersonic.semantic.api.model.enums.SemanticTypeEnum;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
@@ -22,7 +22,7 @@ import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.pojo.DataDownload;
 import com.tencent.supersonic.semantic.api.query.request.BatchDownloadReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import com.tencent.supersonic.semantic.api.query.request.DownloadStructReq;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.query.utils.DataTransformUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +51,10 @@ import java.util.stream.Collectors;
 @Service
 public class DownloadServiceImpl implements DownloadService {
 
+    private static final String internMetricCol = "指标名称";
+
+    private static final long downloadSize = 10000;
+
     private ModelService modelService;
 
     private QueryService queryService;
@@ -61,50 +65,20 @@ public class DownloadServiceImpl implements DownloadService {
     }
 
     @Override
-    public void downloadByStruct(QueryStructReq queryStructReq,
+    public void downloadByStruct(DownloadStructReq downloadStructReq,
                                  User user, HttpServletResponse response) throws Exception {
-        QueryResultWithSchemaResp queryResultWithSchemaResp = queryService.queryByStruct(queryStructReq, user);
-        List<List<String>> data = new ArrayList<>();
-        List<List<String>> header = org.assertj.core.util.Lists.newArrayList();
-        for (QueryColumn column : queryResultWithSchemaResp.getColumns()) {
-            header.add(Lists.newArrayList(column.getName()));
-        }
-        for (Map<String, Object> row : queryResultWithSchemaResp.getResultList()) {
-            List<String> rowData = new ArrayList<>();
-            for (QueryColumn column : queryResultWithSchemaResp.getColumns()) {
-                rowData.add(String.valueOf(row.get(column.getNameEn())));
-            }
-            data.add(rowData);
-        }
         String fileName = String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
         File file = FileUtils.createTmpFile(fileName);
-        EasyExcel.write(file).sheet("Sheet1").head(header).doWrite(data);
-        downloadFile(response, file, fileName);
-    }
-
-    private void downloadFile(HttpServletResponse response, File file, String filename) {
         try {
-            byte[] buffer = readFileToByteArray(file);
-            response.reset();
-            response.setCharacterEncoding("UTF-8");
-            response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, "UTF-8"));
-            response.addHeader("Content-Length", "" + file.length());
-            try (OutputStream outputStream = new BufferedOutputStream(response.getOutputStream())) {
-                response.setContentType("application/octet-stream");
-                outputStream.write(buffer);
-                outputStream.flush();
-            }
-        } catch (Exception e) {
-            log.error("failed to download file", e);
+            QueryResultWithSchemaResp queryResultWithSchemaResp = queryService.queryByStruct(downloadStructReq, user);
+            DataDownload dataDownload = buildDataDownload(queryResultWithSchemaResp, downloadStructReq);
+            EasyExcel.write(file).sheet("Sheet1").head(dataDownload.getHeaders()).doWrite(dataDownload.getData());
+        } catch (RuntimeException e) {
+            EasyExcel.write(file).sheet("Sheet1").head(buildErrMessageHead())
+                    .doWrite(buildErrMessageData(e.getMessage()));
+            return;
         }
-    }
-
-    private byte[] readFileToByteArray(File file) throws IOException {
-        try (InputStream fis = new BufferedInputStream(Files.newInputStream(file.toPath()))) {
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer);
-            return buffer;
-        }
+        downloadFile(response, file, fileName);
     }
 
     @Override
@@ -135,11 +109,12 @@ public class DownloadServiceImpl implements DownloadService {
             List<DimSchemaResp> dimensions = getMetricRelaDimensions(metricSchemaResp, dimensionRespMap);
             for (MetricSchemaResp metric : metrics) {
                 try {
-                    DataDownload downloadData = getSingleMetricDownloadData(metric, dimensions,
-                            batchDownloadReq.getDateInfo(), user);
+                    DownloadStructReq downloadStructReq = buildDownloadStructReq(dimensions, metric, batchDownloadReq);
+                    QueryResultWithSchemaResp queryResult = queryService.queryByStructWithAuth(downloadStructReq, user);
+                    DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
                     WriteSheet writeSheet = EasyExcel.writerSheet("Sheet" + sheetCount)
-                            .head(downloadData.getHeaders()).build();
-                    excelWriter.write(downloadData.getData(), writeSheet);
+                            .head(dataDownload.getHeaders()).build();
+                    excelWriter.write(dataDownload.getData(), writeSheet);
                 } catch (RuntimeException e) {
                     EasyExcel.write(file).sheet("Sheet1").head(buildErrMessageHead())
                             .doWrite(buildErrMessageData(e.getMessage()));
@@ -163,39 +138,49 @@ public class DownloadServiceImpl implements DownloadService {
         return data;
     }
 
-    public DataDownload getSingleMetricDownloadData(MetricSchemaResp metricSchemaResp, List<DimSchemaResp> dimensions,
-                                                    DateConf dateConf, User user) throws Exception {
-        QueryResultWithSchemaResp queryResult = getQueryResult(dimensions, metricSchemaResp, dateConf, user);
-        List<String> groups = dimensions.stream().map(DimensionResp::getBizName).collect(Collectors.toList());
-        List<String> dateList = getDateList(dateConf);
-        List<Map<String, Object>> dataTransformed = DataTransformUtils.transform(queryResult.getResultList(), dateList,
-                metricSchemaResp.getBizName(), groups, dateConf);
-        List<List<String>> headers = buildHeader(dimensions, dateList);
-        List<List<String>> data = buildData(headers, getDimensionNameMap(dimensions),
-                dataTransformed, metricSchemaResp);
-        return DataDownload.builder().headers(headers).data(data).build();
+    private List<List<String>> buildHeader(QueryResultWithSchemaResp queryResultWithSchemaResp) {
+        List<List<String>> header = Lists.newArrayList();
+        for (QueryColumn column : queryResultWithSchemaResp.getColumns()) {
+            header.add(Lists.newArrayList(column.getName()));
+        }
+        return header;
     }
 
-    private List<List<String>> buildHeader(List<DimSchemaResp> dimensionResps, List<String> dateList) {
+    private List<List<String>> buildHeader(List<QueryColumn> queryColumns, List<String> dateList) {
         List<List<String>> headers = Lists.newArrayList();
-        for (DimensionResp dimensionResp : dimensionResps) {
-            headers.add(Lists.newArrayList(dimensionResp.getName()));
+        for (QueryColumn queryColumn : queryColumns) {
+            if (SemanticTypeEnum.DATE.name().equals(queryColumn.getShowType())) {
+                continue;
+            }
+            headers.add(Lists.newArrayList(queryColumn.getName()));
         }
         for (String date : dateList) {
             headers.add(Lists.newArrayList(date));
         }
-        headers.add(Lists.newArrayList("指标名"));
+        headers.add(Lists.newArrayList(internMetricCol));
         return headers;
     }
 
+    private List<List<String>> buildData(QueryResultWithSchemaResp queryResultWithSchemaResp) {
+        List<List<String>> data = new ArrayList<>();
+        for (Map<String, Object> row : queryResultWithSchemaResp.getResultList()) {
+            List<String> rowData = new ArrayList<>();
+            for (QueryColumn column : queryResultWithSchemaResp.getColumns()) {
+                rowData.add(String.valueOf(row.get(column.getNameEn())));
+            }
+            data.add(rowData);
+        }
+        return data;
+    }
+
     private List<List<String>> buildData(List<List<String>> headers, Map<String, String> nameMap,
-                                         List<Map<String, Object>> dataTransformed, MetricSchemaResp metricSchemaResp) {
+                                         List<Map<String, Object>> dataTransformed, String metricName) {
         List<List<String>> data = Lists.newArrayList();
         for (Map<String, Object> map : dataTransformed) {
             List<String> row = Lists.newArrayList();
             for (List<String> header : headers) {
                 String head = header.get(0);
-                if ("指标名".equals(head)) {
+                if (internMetricCol.equals(head)) {
                     continue;
                 }
                 Object object = map.getOrDefault(nameMap.getOrDefault(head, head), "");
@@ -205,32 +190,48 @@ public class DownloadServiceImpl implements DownloadService {
                     row.add(String.valueOf(object));
                 }
             }
-            row.add(metricSchemaResp.getName());
+            row.add(metricName);
             data.add(row);
         }
         return data;
     }
 
-    private List<String> getDateList(DateConf dateConf) {
-        String startDateStr = dateConf.getStartDate();
-        String endDateStr = dateConf.getEndDate();
-        return DateUtils.getDateList(startDateStr, endDateStr, dateConf.getPeriod());
+    private DataDownload buildDataDownload(QueryResultWithSchemaResp queryResult, DownloadStructReq downloadStructReq) {
+        List<QueryColumn> metricColumns = queryResult.getMetricColumns();
+        List<QueryColumn> dimensionColumns = queryResult.getDimensionColumns();
+        if (downloadStructReq.isTransform() && !CollectionUtils.isEmpty(metricColumns)) {
+            QueryColumn metric = metricColumns.get(0);
+            List<String> groups = downloadStructReq.getGroups();
+            List<Map<String, Object>> dataTransformed = DataTransformUtils.transform(queryResult.getResultList(),
+                    metric.getNameEn(), groups, downloadStructReq.getDateInfo());
+            List<List<String>> headers = buildHeader(dimensionColumns, downloadStructReq.getDateInfo().getDateList());
+            List<List<String>> data = buildData(headers, getDimensionNameMap(dimensionColumns),
+                    dataTransformed, metric.getName());
+            return DataDownload.builder().headers(headers).data(data).build();
+        } else {
+            List<List<String>> data = buildData(queryResult);
+            List<List<String>> header = buildHeader(queryResult);
+            return DataDownload.builder().data(data).headers(header).build();
+        }
     }
 
-    private QueryResultWithSchemaResp getQueryResult(List<DimSchemaResp> dimensionResps, MetricResp metricResp,
-                                                     DateConf dateConf, User user) throws Exception {
+    private DownloadStructReq buildDownloadStructReq(List<DimSchemaResp> dimensionResps, MetricResp metricResp,
+                                                     BatchDownloadReq batchDownloadReq) {
+        DateConf dateConf = batchDownloadReq.getDateInfo();
         Set<Long> modelIds = dimensionResps.stream().map(DimSchemaResp::getModelId).collect(Collectors.toSet());
         modelIds.add(metricResp.getModelId());
-        QueryStructReq queryStructReq = new QueryStructReq();
-        queryStructReq.setGroups(dimensionResps.stream().map(DimSchemaResp::getBizName).collect(Collectors.toList()));
-        queryStructReq.getGroups().add(0, getTimeDimension(dateConf));
+        DownloadStructReq downloadStructReq = new DownloadStructReq();
+        downloadStructReq.setGroups(dimensionResps.stream()
+                .map(DimSchemaResp::getBizName).collect(Collectors.toList()));
+        downloadStructReq.getGroups().add(0, getTimeDimension(dateConf));
         Aggregator aggregator = new Aggregator();
         aggregator.setColumn(metricResp.getBizName());
-        queryStructReq.setAggregators(Lists.newArrayList(aggregator));
-        queryStructReq.setDateInfo(dateConf);
-        queryStructReq.setModelIds(modelIds);
-        queryStructReq.setLimit(10000L);
-        return queryService.queryByStructWithAuth(queryStructReq, user);
+        downloadStructReq.setAggregators(Lists.newArrayList(aggregator));
+        downloadStructReq.setDateInfo(dateConf);
+        downloadStructReq.setModelIds(modelIds);
+        downloadStructReq.setLimit(downloadSize);
+        downloadStructReq.setIsTransform(batchDownloadReq.isTransform());
+        return downloadStructReq;
     }
 
     private String getTimeDimension(DateConf dateConf) {
@@ -257,8 +258,8 @@ public class DownloadServiceImpl implements DownloadService {
                 .collect(Collectors.toMap(DimensionResp::getId, dimensionResp -> dimensionResp));
     }
 
-    private Map<String, String> getDimensionNameMap(List<DimSchemaResp> dimensionResps) {
-        return dimensionResps.stream().collect(Collectors.toMap(DimensionResp::getName, SchemaItem::getBizName));
+    private Map<String, String> getDimensionNameMap(List<QueryColumn> queryColumns) {
+        return queryColumns.stream().collect(Collectors.toMap(QueryColumn::getName, QueryColumn::getNameEn));
     }
 
     private List<DimSchemaResp> getMetricRelaDimensions(MetricSchemaResp metricSchemaResp,
@@ -272,6 +273,32 @@ public class DownloadServiceImpl implements DownloadService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
+
+    private void downloadFile(HttpServletResponse response, File file, String filename) {
+        try {
+            byte[] buffer = readFileToByteArray(file);
+            response.reset();
+            response.setCharacterEncoding("UTF-8");
+            response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, "UTF-8"));
+            response.addHeader("Content-Length", "" + file.length());
+            try (OutputStream outputStream = new BufferedOutputStream(response.getOutputStream())) {
+                response.setContentType("application/octet-stream");
+                outputStream.write(buffer);
+                outputStream.flush();
+            }
+        } catch (Exception e) {
+            log.error("failed to download file", e);
+        }
+    }
+
+    private byte[] readFileToByteArray(File file) throws IOException {
+        try (InputStream fis = new BufferedInputStream(Files.newInputStream(file.toPath()))) {
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+            return buffer;
+        }
+    }
+
 }
 
 

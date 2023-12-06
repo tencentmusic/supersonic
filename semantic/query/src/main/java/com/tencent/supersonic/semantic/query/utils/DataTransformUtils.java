@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 
 public class DataTransformUtils {
 
-    public static List<Map<String, Object>> transform(List<Map<String, Object>> originalData,
-                                                      List<String> dateList, String metric, List<String> groups,
-                                                      DateConf dateConf) {
+    public static List<Map<String, Object>> transform(List<Map<String, Object>> originalData, String metric,
+                                                      List<String> groups, DateConf dateConf) {
+        List<String> dateList = dateConf.getDateList();
         List<Map<String, Object>> transposedData = new ArrayList<>();
         for (Map<String, Object> originalRow : originalData) {
             Map<String, Object> transposedRow = new HashMap<>();

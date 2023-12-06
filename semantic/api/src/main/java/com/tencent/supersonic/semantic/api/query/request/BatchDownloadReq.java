@@ -11,4 +11,6 @@ public class BatchDownloadReq {
 
     private DateConf dateInfo;
 
+    private boolean isTransform = true;
+
 }
