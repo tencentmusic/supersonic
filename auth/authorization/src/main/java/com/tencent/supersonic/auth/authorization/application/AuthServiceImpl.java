@@ -1,6 +1,7 @@
 package com.tencent.supersonic.auth.authorization.application;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
@@ -108,8 +109,11 @@ public class AuthServiceImpl implements AuthService {
             }
         }
 
-        if (req.getModelId() != null) {
-            List<AuthGroup> authGroups = authGroupsByModelId.get(req.getModelId());
+        if (!CollectionUtils.isEmpty(req.getModelIds())) {
+            List<AuthGroup> authGroups = Lists.newArrayList();
+            for (Long modelId : authGroupsByModelId.keySet()) {
+                authGroups.addAll(authGroupsByModelId.getOrDefault(modelId, Lists.newArrayList()));
+            }
             if (!CollectionUtils.isEmpty(authGroups)) {
                 for (AuthGroup group : authGroups) {
                     if (group.getDimensionFilters() != null

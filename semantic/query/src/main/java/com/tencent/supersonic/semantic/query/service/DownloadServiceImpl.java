@@ -70,8 +70,8 @@ public class DownloadServiceImpl implements DownloadService {
         String fileName = String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
         File file = FileUtils.createTmpFile(fileName);
         try {
-            QueryResultWithSchemaResp queryResultWithSchemaResp = queryService.queryByStruct(downloadStructReq, user);
-            DataDownload dataDownload = buildDataDownload(queryResultWithSchemaResp, downloadStructReq);
+            QueryResultWithSchemaResp queryResult = queryService.queryByStructWithAuth(downloadStructReq, user);
+            DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
             EasyExcel.write(file).sheet("Sheet1").head(dataDownload.getHeaders()).doWrite(dataDownload.getData());
         } catch (RuntimeException e) {
             EasyExcel.write(file).sheet("Sheet1").head(buildErrMessageHead())
