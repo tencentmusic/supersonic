@@ -455,6 +455,7 @@ export async function queryStruct({
   download = false,
   groups = [],
   dimensionFilters = [],
+  isTransform,
 }: {
   modelIds: number[];
   bizName: string;
@@ -464,6 +465,7 @@ export async function queryStruct({
   download?: boolean;
   groups?: string[];
   dimensionFilters?: string[];
+  isTransform: boolean;
 }): Promise<any> {
   const response = await request(
     `${process.env.API_BASE_URL}query/${download ? 'download/' : ''}struct`,
@@ -474,6 +476,7 @@ export async function queryStruct({
         modelIds,
         groups: [dateField, ...groups],
         dimensionFilters,
+        isTransform,
         aggregators: [
           {
             column: bizName,
