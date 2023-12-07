@@ -42,7 +42,7 @@ ${pip_path} install -r ${requirementPath}
 echo "install python modules success"
 
 #6. reset runtime
-rm -fr $runtimeDir/*
+rm -fr $runtimeDir/supersonic*
 moveAllToRuntime
 setEnvToWeb chat
 setEnvToWeb semantic
