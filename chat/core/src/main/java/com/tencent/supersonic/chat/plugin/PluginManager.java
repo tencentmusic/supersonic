@@ -3,17 +3,14 @@ package com.tencent.supersonic.chat.plugin;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.AgentToolType;
 import com.tencent.supersonic.chat.agent.PluginTool;
-import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrievalResp;
-import com.tencent.supersonic.chat.parser.plugin.embedding.RecallRetrieval;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.plugin.event.PluginAddEvent;
 import com.tencent.supersonic.chat.plugin.event.PluginDelEvent;
 import com.tencent.supersonic.chat.plugin.event.PluginUpdateEvent;
@@ -21,31 +18,28 @@ import com.tencent.supersonic.chat.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.service.PluginService;
+import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
-import java.net.URI;
-import java.util.List;
+import com.tencent.supersonic.common.util.embedding.EmbeddingQuery;
+import com.tencent.supersonic.common.util.embedding.EmbeddingUtils;
+import com.tencent.supersonic.common.util.embedding.Retrieval;
+import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
+import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
-import java.util.Optional;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @Component
@@ -55,9 +49,12 @@ public class PluginManager {
 
     private RestTemplate restTemplate;
 
-    public PluginManager(EmbeddingConfig embeddingConfig, RestTemplate restTemplate) {
+    private EmbeddingUtils embeddingUtils;
+
+    public PluginManager(EmbeddingConfig embeddingConfig, RestTemplate restTemplate, EmbeddingUtils embeddingUtils) {
         this.embeddingConfig = embeddingConfig;
         this.restTemplate = restTemplate;
+        this.embeddingUtils = embeddingUtils;
     }
 
     public static List<Plugin> getPluginAgentCanSupport(Integer agentId) {
@@ -124,96 +121,77 @@ public class PluginManager {
         }
     }
 
-    public void requestEmbeddingPluginDelete(Set<String> ids) {
-        if (CollectionUtils.isEmpty(ids)) {
+    public void requestEmbeddingPluginDelete(Set<String> queryIds) {
+        if (CollectionUtils.isEmpty(queryIds)) {
             return;
         }
-        doRequest(embeddingConfig.getDeletePath(), JSONObject.toJSONString(ids));
+        String presetCollection = embeddingConfig.getPresetCollection();
+
+        List<EmbeddingQuery> queries = new ArrayList<>();
+        for (String id : queryIds) {
+            EmbeddingQuery embeddingQuery = new EmbeddingQuery();
+            embeddingQuery.setQueryId(id);
+            queries.add(embeddingQuery);
+        }
+        embeddingUtils.deleteQuery(presetCollection, queries);
     }
 
-    public void requestEmbeddingPluginAdd(List<Map<String, String>> maps) {
-        if (CollectionUtils.isEmpty(maps)) {
+    public void requestEmbeddingPluginAdd(List<EmbeddingQuery> queries) {
+        if (CollectionUtils.isEmpty(queries)) {
             return;
         }
-        doRequest(embeddingConfig.getAddPath(), JSONObject.toJSONString(maps));
-    }
-
-    public ResponseEntity<String> doRequest(String path, String jsonBody) {
-        if (Strings.isEmpty(embeddingConfig.getUrl())) {
-            return ResponseEntity.of(Optional.empty());
-        }
-        String url = embeddingConfig.getUrl() + path;
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setLocation(URI.create(url));
-            URI requestUrl = UriComponentsBuilder
-                    .fromHttpUrl(url).build().encode().toUri();
-            HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
-            log.info("[embedding] equest body :{}, url:{}", jsonBody, url);
-            ResponseEntity<String> responseEntity = restTemplate.exchange(requestUrl,
-                    HttpMethod.POST, entity, new ParameterizedTypeReference<String>() {});
-            log.info("[embedding] result body:{}", responseEntity);
-            return responseEntity;
-        } catch (Throwable e) {
-            log.warn("connect to embedding service failed, url:{}", url);
-        }
-        return ResponseEntity.of(Optional.empty());
+        String presetCollection = embeddingConfig.getPresetCollection();
+        embeddingUtils.addQuery(presetCollection, queries);
     }
 
     public void requestEmbeddingPluginAddALL(List<Plugin> plugins) {
         requestEmbeddingPluginAdd(convert(plugins));
     }
 
-    public RecallRetrievalResp recognize(String embeddingText) {
-        String url = embeddingConfig.getUrl() + embeddingConfig.getRecognizePath() + "?n_results="
-                + embeddingConfig.getNResult();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setLocation(URI.create(url));
-        URI requestUrl = UriComponentsBuilder
-                .fromHttpUrl(url).build().encode().toUri();
-        String jsonBody = JSONObject.toJSONString(Lists.newArrayList(embeddingText));
-        HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
-        log.info("[embedding] request body:{}, url:{}", jsonBody, url);
-        ResponseEntity<List<RecallRetrievalResp>> embeddingResponseEntity =
-                restTemplate.exchange(requestUrl, HttpMethod.POST, entity,
-                        new ParameterizedTypeReference<List<RecallRetrievalResp>>() {
-                        });
-        log.info("[embedding] recognize result body:{}", embeddingResponseEntity);
-        List<RecallRetrievalResp> embeddingResps = embeddingResponseEntity.getBody();
-        if (CollectionUtils.isNotEmpty(embeddingResps)) {
-            for (RecallRetrievalResp embeddingResp : embeddingResps) {
-                List<RecallRetrieval> embeddingRetrievals = embeddingResp.getRetrieval();
-                for (RecallRetrieval embeddingRetrieval : embeddingRetrievals) {
+    public RetrieveQueryResult recognize(String embeddingText) {
+
+        EmbeddingUtils embeddingUtils = ContextUtils.getBean(EmbeddingUtils.class);
+
+        RetrieveQuery retrieveQuery = RetrieveQuery.builder()
+                .queryTextsList(Collections.singletonList(embeddingText))
+                .build();
+
+        List<RetrieveQueryResult> resultList = embeddingUtils.retrieveQuery(embeddingConfig.getPresetCollection(),
+                retrieveQuery, embeddingConfig.getNResult());
+
+
+        if (CollectionUtils.isNotEmpty(resultList)) {
+            for (RetrieveQueryResult embeddingResp : resultList) {
+                List<Retrieval> embeddingRetrievals = embeddingResp.getRetrieval();
+                for (Retrieval embeddingRetrieval : embeddingRetrievals) {
                     embeddingRetrieval.setId(getPluginIdFromEmbeddingId(embeddingRetrieval.getId()));
                 }
             }
-            return embeddingResps.get(0);
+            return resultList.get(0);
         }
         throw new RuntimeException("get embedding result failed");
     }
 
-    public List<Map<String, String>> convert(List<Plugin> plugins) {
-        List<Map<String, String>> maps = Lists.newArrayList();
+    public List<EmbeddingQuery> convert(List<Plugin> plugins) {
+        List<EmbeddingQuery> queries = Lists.newArrayList();
         for (Plugin plugin : plugins) {
             List<String> exampleQuestions = plugin.getExampleQuestionList();
             int num = 0;
             for (String pattern : exampleQuestions) {
-                Map<String, String> map = new HashMap<>();
-                map.put("preset_query_id", generateUniqueEmbeddingId(num, plugin.getId()));
-                map.put("preset_query", pattern);
-                maps.add(map);
+                EmbeddingQuery query = new EmbeddingQuery();
+                query.setQueryId(generateUniqueEmbeddingId(num, plugin.getId()));
+                query.setQuery(pattern);
+                queries.add(query);
                 num++;
             }
         }
-        return maps;
+        return queries;
     }
 
     private Set<String> getEmbeddingId(List<Plugin> plugins) {
         Set<String> embeddingIdSet = new HashSet<>();
-        for (Map<String, String> map : convert(plugins)) {
-            embeddingIdSet.add(map.get("preset_query_id"));
+        for (EmbeddingQuery query : convert(plugins)) {
+            embeddingIdSet.add(query.getQueryId());
         }
         return embeddingIdSet;
     }
@@ -243,7 +221,7 @@ public class PluginManager {
         }
         Set<Long> matchedModel = Sets.newHashSet();
         Map<Long, List<ParamOption>> paramOptionMap = paramOptions.stream()
-                        .collect(Collectors.groupingBy(ParamOption::getModelId));
+                .collect(Collectors.groupingBy(ParamOption::getModelId));
         for (Long modelId : paramOptionMap.keySet()) {
             List<ParamOption> params = paramOptionMap.get(modelId);
             if (CollectionUtils.isEmpty(params)) {

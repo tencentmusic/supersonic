@@ -8,21 +8,19 @@ import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.SqlParserResp;
 import com.tencent.supersonic.semantic.api.query.request.BatchDownloadReq;
+import com.tencent.supersonic.semantic.api.query.request.DownloadStructReq;
 import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.ItemUseReq;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.service.DownloadService;
 import com.tencent.supersonic.semantic.query.service.QueryService;
 import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +29,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/semantic/query")
@@ -64,11 +65,11 @@ public class QueryController {
     }
 
     @PostMapping("/download/struct")
-    public void downloadByStruct(@RequestBody QueryStructReq queryStructReq,
+    public void downloadByStruct(@RequestBody DownloadStructReq downloadStructReq,
                                 HttpServletRequest request,
                                 HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        downloadService.downloadByStruct(queryStructReq, user, response);
+        downloadService.downloadByStruct(downloadStructReq, user, response);
     }
 
     @PostMapping("/download/batch")

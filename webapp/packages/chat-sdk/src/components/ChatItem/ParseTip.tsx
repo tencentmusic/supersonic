@@ -101,8 +101,6 @@ const ParseTip: React.FC<Props> = ({
     nativeQuery,
   } = currentParseInfo || {};
 
-  const { modelNames } = model || {};
-
   const entityAlias = entity?.alias?.[0]?.split('.')?.[0];
 
   const entityDimensions = entityInfo?.dimensions?.filter(
@@ -152,9 +150,9 @@ const ParseTip: React.FC<Props> = ({
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>数据模型：</div>
                 <div className={itemValueClass}>
-                  {modelNames?.map(modelName => (
-                    <Tag key={modelName}>{modelName}</Tag>
-                  ))}
+                  {model?.modelNames?.length === 1
+                    ? model.modelNames[0]
+                    : model?.modelNames?.map(modelName => <Tag key={modelName}>{modelName}</Tag>)}
                 </div>
               </div>
             )}
@@ -166,14 +164,16 @@ const ParseTip: React.FC<Props> = ({
                 </div>
               </div>
             )}
-            {!queryMode?.includes('ENTITY') &&
+            {queryType !== 'TAG' &&
               metrics &&
               metrics.length > 0 &&
               !dimensions?.some(item => item.bizName?.includes('_id')) && (
                 <div className={`${prefixCls}-tip-item`}>
                   <div className={`${prefixCls}-tip-item-name`}>指标：</div>
                   <div className={itemValueClass}>
-                    {metrics.map(metric => metric.name).join('、')}
+                    {queryType === 'METRIC'
+                      ? metrics[0].name
+                      : metrics.map(metric => metric.name).join('、')}
                   </div>
                 </div>
               )}

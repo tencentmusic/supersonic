@@ -2,8 +2,8 @@ package com.tencent.supersonic.chat.parser.plugin.embedding;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.parser.PythonLLMProxy;
 import com.tencent.supersonic.chat.parser.LLMProxy;
+import com.tencent.supersonic.chat.parser.PythonLLMProxy;
 import com.tencent.supersonic.chat.parser.plugin.ParseMode;
 import com.tencent.supersonic.chat.parser.plugin.PluginParser;
 import com.tencent.supersonic.chat.plugin.Plugin;
@@ -12,6 +12,8 @@ import com.tencent.supersonic.chat.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.embedding.Retrieval;
+import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -40,13 +42,13 @@ public class EmbeddingRecallParser extends PluginParser {
     @Override
     public PluginRecallResult recallPlugin(QueryContext queryContext) {
         String text = queryContext.getRequest().getQueryText();
-        List<RecallRetrieval> embeddingRetrievals = embeddingRecall(text);
+        List<Retrieval> embeddingRetrievals = embeddingRecall(text);
         if (CollectionUtils.isEmpty(embeddingRetrievals)) {
             return null;
         }
         List<Plugin> plugins = getPluginList(queryContext);
         Map<Long, Plugin> pluginMap = plugins.stream().collect(Collectors.toMap(Plugin::getId, p -> p));
-        for (RecallRetrieval embeddingRetrieval : embeddingRetrievals) {
+        for (Retrieval embeddingRetrieval : embeddingRetrievals) {
             Plugin plugin = pluginMap.get(Long.parseLong(embeddingRetrieval.getId()));
             if (plugin == null) {
                 continue;
@@ -59,7 +61,7 @@ public class EmbeddingRecallParser extends PluginParser {
                     continue;
                 }
                 plugin.setParseMode(ParseMode.EMBEDDING_RECALL);
-                double distance = Double.parseDouble(embeddingRetrieval.getDistance());
+                double distance = embeddingRetrieval.getDistance();
                 double score = queryContext.getRequest().getQueryText().length() * (1 - distance);
                 return PluginRecallResult.builder()
                         .plugin(plugin).modelIds(modelList).score(score).distance(distance).build();
@@ -68,14 +70,15 @@ public class EmbeddingRecallParser extends PluginParser {
         return null;
     }
 
-    public List<RecallRetrieval> embeddingRecall(String embeddingText) {
+    public List<Retrieval> embeddingRecall(String embeddingText) {
         try {
             PluginManager pluginManager = ContextUtils.getBean(PluginManager.class);
-            RecallRetrievalResp embeddingResp = pluginManager.recognize(embeddingText);
-            List<RecallRetrieval> embeddingRetrievals = embeddingResp.getRetrieval();
+            RetrieveQueryResult embeddingResp = pluginManager.recognize(embeddingText);
+
+            List<Retrieval> embeddingRetrievals = embeddingResp.getRetrieval();
             if (!CollectionUtils.isEmpty(embeddingRetrievals)) {
                 embeddingRetrievals = embeddingRetrievals.stream().sorted(Comparator.comparingDouble(o ->
-                        Math.abs(Double.parseDouble(o.getDistance())))).collect(Collectors.toList());
+                        Math.abs(o.getDistance()))).collect(Collectors.toList());
                 embeddingResp.setRetrieval(embeddingRetrievals);
             }
             return embeddingRetrievals;
