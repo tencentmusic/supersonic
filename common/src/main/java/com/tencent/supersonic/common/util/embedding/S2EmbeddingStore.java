@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * Supersonic EmbeddingStore
- * Added the functionality of adding and querying collection names.
+ * Enhanced the functionality by enabling the addition and querying of collection names.
  */
 public interface S2EmbeddingStore {
 

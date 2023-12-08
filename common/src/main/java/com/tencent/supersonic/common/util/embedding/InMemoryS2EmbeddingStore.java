@@ -12,6 +12,9 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 
+/***
+ * Implementation of S2EmbeddingStore within the Java process's in-memory.
+ */
 @Slf4j
 public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
 

@@ -44,3 +44,7 @@ com.tencent.supersonic.chat.postprocessor.PostProcessor=\
 
 com.tencent.supersonic.chat.query.QueryResponder=\
     com.tencent.supersonic.chat.query.SimilarMetricQueryResponder
+
+
+com.tencent.supersonic.common.util.embedding.S2EmbeddingStore=\
+    com.tencent.supersonic.common.util.embedding.InMemoryS2EmbeddingStore
