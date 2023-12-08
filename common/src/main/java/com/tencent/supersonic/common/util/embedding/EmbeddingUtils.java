@@ -81,7 +81,7 @@ public class EmbeddingUtils {
         return embeddingCollections.stream().map(EmbeddingCollection::getName).collect(Collectors.toList());
     }
 
-    private ResponseEntity doRequest(String url, String jsonBody, HttpMethod httpMethod) {
+    public ResponseEntity doRequest(String url, String jsonBody, HttpMethod httpMethod) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -94,11 +94,12 @@ public class EmbeddingUtils {
                 entity = new HttpEntity<>(jsonBody, headers);
             }
             ResponseEntity<String> responseEntity = restTemplate.exchange(requestUrl,
-                    httpMethod, entity, new ParameterizedTypeReference<String>() {});
+                    httpMethod, entity, new ParameterizedTypeReference<String>() {
+                    });
             log.info("[embedding] url :{} result body:{}", url, responseEntity);
             return responseEntity;
         } catch (Throwable e) {
-            log.warn("connect to embedding service failed, url:{}", url);
+            log.warn("doRequest service failed, url:" + url, e);
         }
         return ResponseEntity.of(Optional.empty());
     }

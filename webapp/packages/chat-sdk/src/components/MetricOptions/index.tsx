@@ -29,6 +29,10 @@ const MetricOptions: React.FC<Props> = ({
     [`${prefixCls}-metric-card`]: isMetricCard,
   });
 
+  if (!defaultMetrics.length) {
+    return null;
+  }
+
   return (
     <div className={prefixCls}>
       <div className={sectionClass}>

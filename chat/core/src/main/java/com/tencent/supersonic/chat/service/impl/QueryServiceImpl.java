@@ -199,7 +199,7 @@ public class QueryServiceImpl implements QueryService {
                     queryReq.getUser().getName(), queryReq.getChatId().longValue());
             queryResult.setChatContext(parseInfo);
             // update chat context after a successful semantic query
-            if (queryReq.isSaveAnswer() && QueryState.SUCCESS.equals(queryResult.getQueryState())) {
+            if (QueryState.SUCCESS.equals(queryResult.getQueryState())) {
                 chatCtx.setParseInfo(parseInfo);
                 chatService.updateContext(chatCtx);
                 saveSolvedQuery(queryReq, parseInfo, chatQueryDO, queryResult);

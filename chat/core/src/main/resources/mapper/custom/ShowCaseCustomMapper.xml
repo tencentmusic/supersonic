@@ -61,16 +61,15 @@
             from (
                select *
                from s2_chat_query
-               where query_state = 1 and agent_id = ${agentId} and (score is null or score > 1)
+               where query_state = 1 and agent_id = ${agentId} and score = 5
                <if test="userName != null and userName != ''">
                      and user_name = #{userName}
                </if>
-               order by score, chat_id desc
+               order by chat_id desc
             ) a
             limit #{start}, #{limit}
         ) q2 on q1.chat_id = q2.chat_id
-        where agent_id = ${agentId} and (score is null or score > 1)
-        order by score desc
+        where agent_id = ${agentId} and score = 5
     </select>
 
 </mapper>
