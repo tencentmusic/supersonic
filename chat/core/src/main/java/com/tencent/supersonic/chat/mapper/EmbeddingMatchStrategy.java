@@ -4,10 +4,11 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.util.embedding.EmbeddingUtils;
+import com.tencent.supersonic.common.util.ComponentFactory;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
+import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
 import com.tencent.supersonic.knowledge.dictionary.EmbeddingResult;
 import com.tencent.supersonic.semantic.model.domain.listener.MetaEmbeddingListener;
 import java.util.Comparator;
@@ -32,8 +33,8 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
 
     @Autowired
     private OptimizationConfig optimizationConfig;
-    @Autowired
-    private EmbeddingUtils embeddingUtils;
+
+    private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
 
     @Override
     public boolean needDelete(EmbeddingResult oneRoundResult, EmbeddingResult existResult) {
@@ -83,7 +84,7 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
                 .queryEmbeddings(null)
                 .build();
         // step2. retrieveQuery by detectSegment
-        List<RetrieveQueryResult> retrieveQueryResults = embeddingUtils.retrieveQuery(
+        List<RetrieveQueryResult> retrieveQueryResults = s2EmbeddingStore.retrieveQuery(
                 MetaEmbeddingListener.COLLECTION_NAME, retrieveQuery, embeddingNumber);
 
         if (CollectionUtils.isEmpty(retrieveQueryResults)) {
@@ -97,7 +98,7 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
                         retrievals.removeIf(retrieval -> retrieval.getDistance() > distance.doubleValue());
                         if (CollectionUtils.isNotEmpty(detectModelIds)) {
                             retrievals.removeIf(retrieval -> {
-                                String modelIdStr = retrieval.getMetadata().get("modelId");
+                                String modelIdStr = retrieval.getMetadata().get("modelId").toString();
                                 if (StringUtils.isBlank(modelIdStr)) {
                                     return true;
                                 }

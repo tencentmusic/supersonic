@@ -13,7 +13,7 @@ public class EmbeddingQuery {
 
     private String query;
 
-    private Map<String, String> metadata;
+    private Map<String, Object> metadata;
 
     private List<Double> queryEmbedding;
 

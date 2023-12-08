@@ -4,13 +4,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
+import com.tencent.supersonic.common.util.ComponentFactory;
 import com.tencent.supersonic.common.util.embedding.EmbeddingQuery;
-import com.tencent.supersonic.common.util.embedding.EmbeddingUtils;
+import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
@@ -23,8 +23,7 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
 
     public static final String COLLECTION_NAME = "meta_collection";
 
-    @Autowired
-    private EmbeddingUtils embeddingUtils;
+    private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
 
     @Value("${embedding.operation.sleep.time:3000}")
     private Integer embeddingOperationSleepTime;
@@ -55,14 +54,14 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
         } catch (InterruptedException e) {
             log.error("", e);
         }
-        embeddingUtils.addCollection(COLLECTION_NAME);
+        s2EmbeddingStore.addCollection(COLLECTION_NAME);
         if (event.getEventType().equals(EventType.ADD)) {
-            embeddingUtils.addQuery(COLLECTION_NAME, embeddingQueries);
+            s2EmbeddingStore.addQuery(COLLECTION_NAME, embeddingQueries);
         } else if (event.getEventType().equals(EventType.DELETE)) {
-            embeddingUtils.deleteQuery(COLLECTION_NAME, embeddingQueries);
+            s2EmbeddingStore.deleteQuery(COLLECTION_NAME, embeddingQueries);
         } else if (event.getEventType().equals(EventType.UPDATE)) {
-            embeddingUtils.deleteQuery(COLLECTION_NAME, embeddingQueries);
-            embeddingUtils.addQuery(COLLECTION_NAME, embeddingQueries);
+            s2EmbeddingStore.deleteQuery(COLLECTION_NAME, embeddingQueries);
+            s2EmbeddingStore.addQuery(COLLECTION_NAME, embeddingQueries);
         }
     }
 

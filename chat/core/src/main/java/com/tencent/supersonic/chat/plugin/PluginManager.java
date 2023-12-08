@@ -19,12 +19,13 @@ import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.chat.service.AgentService;
 import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
+import com.tencent.supersonic.common.util.ComponentFactory;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.embedding.EmbeddingQuery;
-import com.tencent.supersonic.common.util.embedding.EmbeddingUtils;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
+import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,7 +40,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Component
@@ -47,14 +47,10 @@ public class PluginManager {
 
     private EmbeddingConfig embeddingConfig;
 
-    private RestTemplate restTemplate;
+    private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
 
-    private EmbeddingUtils embeddingUtils;
-
-    public PluginManager(EmbeddingConfig embeddingConfig, RestTemplate restTemplate, EmbeddingUtils embeddingUtils) {
+    public PluginManager(EmbeddingConfig embeddingConfig) {
         this.embeddingConfig = embeddingConfig;
-        this.restTemplate = restTemplate;
-        this.embeddingUtils = embeddingUtils;
     }
 
     public static List<Plugin> getPluginAgentCanSupport(Integer agentId) {
@@ -133,7 +129,7 @@ public class PluginManager {
             embeddingQuery.setQueryId(id);
             queries.add(embeddingQuery);
         }
-        embeddingUtils.deleteQuery(presetCollection, queries);
+        s2EmbeddingStore.deleteQuery(presetCollection, queries);
     }
 
     public void requestEmbeddingPluginAdd(List<EmbeddingQuery> queries) {
@@ -141,7 +137,7 @@ public class PluginManager {
             return;
         }
         String presetCollection = embeddingConfig.getPresetCollection();
-        embeddingUtils.addQuery(presetCollection, queries);
+        s2EmbeddingStore.addQuery(presetCollection, queries);
     }
 
     public void requestEmbeddingPluginAddALL(List<Plugin> plugins) {
@@ -150,13 +146,12 @@ public class PluginManager {
 
     public RetrieveQueryResult recognize(String embeddingText) {
 
-        EmbeddingUtils embeddingUtils = ContextUtils.getBean(EmbeddingUtils.class);
 
         RetrieveQuery retrieveQuery = RetrieveQuery.builder()
                 .queryTextsList(Collections.singletonList(embeddingText))
                 .build();
 
-        List<RetrieveQueryResult> resultList = embeddingUtils.retrieveQuery(embeddingConfig.getPresetCollection(),
+        List<RetrieveQueryResult> resultList = s2EmbeddingStore.retrieveQuery(embeddingConfig.getPresetCollection(),
                 retrieveQuery, embeddingConfig.getNResult());
 
 
