@@ -6,14 +6,12 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.agent.Agent;
 import com.tencent.supersonic.chat.agent.AgentConfig;
 import com.tencent.supersonic.chat.agent.AgentToolType;
-import com.tencent.supersonic.chat.agent.DataAnalyticsTool;
 import com.tencent.supersonic.chat.agent.PluginTool;
 import com.tencent.supersonic.chat.agent.RuleParserTool;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.parser.analytics.MetricOption;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 
@@ -155,7 +153,6 @@ public class DataUtils {
         AgentConfig agentConfig = new AgentConfig();
         agentConfig.getTools().add(getRuleQueryTool());
         agentConfig.getTools().add(getPluginTool());
-        agentConfig.getTools().add(getMetricInterpretTool());
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         return agent;
     }
@@ -173,17 +170,6 @@ public class DataUtils {
         pluginTool.setType(AgentToolType.PLUGIN);
         pluginTool.setPlugins(Lists.newArrayList(1L));
         return pluginTool;
-    }
-
-    private static DataAnalyticsTool getMetricInterpretTool() {
-        DataAnalyticsTool metricInterpretTool = new DataAnalyticsTool();
-        metricInterpretTool.setModelId(1L);
-        metricInterpretTool.setType(AgentToolType.ANALYTICS);
-        metricInterpretTool.setMetricOptions(Lists.newArrayList(
-                new MetricOption(1L),
-                new MetricOption(2L),
-                new MetricOption(3L)));
-        return metricInterpretTool;
     }
 
 }
