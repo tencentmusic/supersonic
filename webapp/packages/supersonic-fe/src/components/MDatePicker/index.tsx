@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { InfoCircleOutlined, CalendarOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Input, Tooltip, Popover, Space, Button, Select, Row, Col, Tag } from 'antd';
 import styles from './style.less';
@@ -36,6 +36,8 @@ const MDatePicker: React.FC<Props> = ({
   onDateRangeTypeChange,
   onInit,
 }: any) => {
+  const dynamicDateRef = useRef<any>({});
+
   const getDynamicDefaultConfig = (dateRangeType: DateRangeType) => {
     const dynamicDefaultConfig = {
       shortCutId: 'last7Days',
@@ -95,7 +97,6 @@ const MDatePicker: React.FC<Props> = ({
   const [dateRangesParams] = useState(() => {
     return initialValues ? generatorDateRangesParams(initialValues) : {};
   });
-  const [confirmBtnClickState, setConfirmBtnClickState] = useState(false);
 
   const [visible, setVisible] = useState(false);
 
@@ -153,9 +154,9 @@ const MDatePicker: React.FC<Props> = ({
       }
     }
   }
-  useEffect(() => {
-    onInit?.({ dateRange: currentDateRange });
-  }, []);
+  // useEffect(() => {
+  //   onInit?.({ dateRange: currentDateRange });
+  // }, []);
 
   useEffect(() => {
     setSelectedDateRangeString(getSelectedDateRangeString());
@@ -256,12 +257,6 @@ const MDatePicker: React.FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    if (visible) {
-      setConfirmBtnClickState(false);
-    }
-  }, [visible]);
-
-  useEffect(() => {
     const { dateRange } = dateRangesParams;
     setDateRangeStringShow(getDateRangeStringShow(dateRange));
   }, [dateRangesParams]);
@@ -310,7 +305,6 @@ const MDatePicker: React.FC<Props> = ({
           </Row>
         </div>
       </ProCard>
-
       <ProCard
         className={styles.dateProCard}
         title={'快捷选项'}
@@ -320,10 +314,10 @@ const MDatePicker: React.FC<Props> = ({
         // extra="2019年9月28日"
       >
         <DynamicDate
+          ref={dynamicDateRef}
           disabledAdvanceSetting={disabledAdvanceSetting}
           initialValues={dynamicParams}
           dateRangeTypeProps={dateRangeType}
-          submitFormDataState={confirmBtnClickState}
           onDateRangeChange={handleDateRangeChange}
           onDateRangeStringAndDescChange={({ dateRangeString }) => {
             setCurrentDateRange(dateRangeString);
@@ -333,7 +327,6 @@ const MDatePicker: React.FC<Props> = ({
           }}
         />
       </ProCard>
-
       <ProCard
         className={styles.dateProCard}
         title={
@@ -354,7 +347,6 @@ const MDatePicker: React.FC<Props> = ({
           onDateRangeChange={handleDateRangeChange}
         />
       </ProCard>
-
       <div
         style={{
           display: 'flex',
@@ -372,7 +364,7 @@ const MDatePicker: React.FC<Props> = ({
             type="primary"
             onClick={() => {
               if (currentDateSettingType === DateSettingType.DYNAMIC) {
-                setConfirmBtnClickState(true);
+                dynamicDateRef.current.dynamicDateUpdateAdvancedPanelFormData();
               }
               setVisible(false);
             }}
@@ -394,7 +386,7 @@ const MDatePicker: React.FC<Props> = ({
     <Space direction="vertical">
       <Popover
         content={content}
-        // destroyTooltipOnHide={true}
+        destroyTooltipOnHide={false}
         // title="Title"
         open={visible}
         trigger="click"
