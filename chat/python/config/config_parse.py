@@ -36,12 +36,12 @@ CHROMA_DB_PERSIST_DIR = config.get(chroma_db_section_name, 'CHROMA_DB_PERSIST_DI
 PRESET_QUERY_COLLECTION_NAME = config.get(chroma_db_section_name, 'PRESET_QUERY_COLLECTION_NAME')
 SOLVED_QUERY_COLLECTION_NAME = config.get(chroma_db_section_name, 'SOLVED_QUERY_COLLECTION_NAME')
 TEXT2DSLAGENT_COLLECTION_NAME = config.get(chroma_db_section_name, 'TEXT2DSLAGENT_COLLECTION_NAME')
-TEXT2DSLAGENTCS_COLLECTION_NAME = config.get(chroma_db_section_name, 'TEXT2DSLAGENTCS_COLLECTION_NAME')
+TEXT2DSLAGENTACT_COLLECTION_NAME = config.get(chroma_db_section_name, 'TEXT2DSLAGENTACT_COLLECTION_NAME')
 TEXT2DSL_EXAMPLE_NUM = int(config.get(chroma_db_section_name, 'TEXT2DSL_EXAMPLE_NUM')) 
 TEXT2DSL_FEWSHOTS_NUM = int(config.get(chroma_db_section_name, 'TEXT2DSL_FEWSHOTS_NUM')) 
 TEXT2DSL_SELF_CONSISTENCY_NUM = int(config.get(chroma_db_section_name, 'TEXT2DSL_SELF_CONSISTENCY_NUM')) 
-TEXT2DSL_IS_SHORTCUT = eval(config.get(chroma_db_section_name, 'TEXT2DSL_IS_SHORTCUT')) 
-TEXT2DSL_IS_SELF_CONSISTENCY = eval(config.get(chroma_db_section_name, 'TEXT2DSL_IS_SELF_CONSISTENCY'))
+ACT_MIN_WINDOWN_SIZE = int(config.get(chroma_db_section_name, 'ACT_MIN_WINDOWN_SIZE'))
+ACT_MAX_WINDOWN_SIZE = int(config.get(chroma_db_section_name, 'ACT_MAX_WINDOWN_SIZE'))
 CHROMA_DB_PERSIST_PATH = os.path.join(PROJECT_DIR_PATH, CHROMA_DB_PERSIST_DIR)
 
 text2vec_section_name = "Text2Vec"
@@ -63,8 +63,15 @@ if __name__ == "__main__":
     logger.info(f"LLMPARSER_HOST: {LLMPARSER_HOST}")
     logger.info(f"LLMPARSER_PORT: {LLMPARSER_PORT}")
     logger.info(f"llm_config_dict: {llm_config_dict}")
+    logger.info(f"LLM_PROVIDER_NAME: {LLM_PROVIDER_NAME}")
+    logger.info(f"PRESET_QUERY_COLLECTION_NAME: {PRESET_QUERY_COLLECTION_NAME}")
+    logger.info(f"SOLVED_QUERY_COLLECTION_NAME: {SOLVED_QUERY_COLLECTION_NAME}")
+    logger.info(f"TEXT2DSLAGENT_COLLECTION_NAME: {TEXT2DSLAGENT_COLLECTION_NAME}")
+    logger.info(f"TEXT2DSLAGENTACT_COLLECTION_NAME: {TEXT2DSLAGENTACT_COLLECTION_NAME}")
     logger.info(f"TEXT2DSL_EXAMPLE_NUM: {TEXT2DSL_EXAMPLE_NUM}")
     logger.info(f"TEXT2DSL_FEWSHOTS_NUM: {TEXT2DSL_FEWSHOTS_NUM}")
     logger.info(f"TEXT2DSL_SELF_CONSISTENCY_NUM: {TEXT2DSL_SELF_CONSISTENCY_NUM}")
-    logger.info(f"TEXT2DSL_IS_SHORTCUT: {TEXT2DSL_IS_SHORTCUT}")
-    logger.info(f"TEXT2DSL_IS_SELF_CONSISTENCY: {TEXT2DSL_IS_SELF_CONSISTENCY}")
+    logger.info(f"ACT_MIN_WINDOWN_SIZE: {ACT_MIN_WINDOWN_SIZE}")
+    logger.info(f"ACT_MAX_WINDOWN_SIZE: {ACT_MAX_WINDOWN_SIZE}")
+
+    
