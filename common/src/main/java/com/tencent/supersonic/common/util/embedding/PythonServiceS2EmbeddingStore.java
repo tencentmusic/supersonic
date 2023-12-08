@@ -20,8 +20,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+/***
+ * Implementation of calling the Python service S2EmbeddingStore.
+ */
 @Slf4j
-public class PythonS2EmbeddingStore implements S2EmbeddingStore {
+public class PythonServiceS2EmbeddingStore implements S2EmbeddingStore {
 
     @Autowired
     private EmbeddingConfig embeddingConfig;

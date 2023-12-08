@@ -104,19 +104,6 @@
             <version>${mockito-inline.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--langchain4j-->
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-open-ai</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-chroma</artifactId>
-        </dependency>
 
     </dependencies>
 

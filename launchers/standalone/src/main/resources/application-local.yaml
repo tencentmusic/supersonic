@@ -36,7 +36,7 @@ mybatis:
 
 llm:
   parser:
-    url:
+    url: http://127.0.0.1:9092
 embedding:
   url: http://127.0.0.1:9092
 functionCall:
