@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.parser;
 
 import com.alibaba.fastjson.JSON;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.config.LLMParserConfig;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionCallConfig;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionReq;
@@ -12,6 +13,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import java.net.URI;
 import java.net.URL;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -25,6 +27,16 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 @Slf4j
 public class PythonLLMProxy implements LLMProxy {
+
+    @Override
+    public boolean isSkip(QueryContext queryContext) {
+        LLMParserConfig llmParserConfig = ContextUtils.getBean(LLMParserConfig.class);
+        if (StringUtils.isEmpty(llmParserConfig.getUrl())) {
+            log.warn("llmParserUrl is empty, skip PythonLLMProxy, config:{}", llmParserConfig);
+            return true;
+        }
+        return false;
+    }
 
     public LLMResp query2sql(LLMReq llmReq, String modelClusterKey) {
 

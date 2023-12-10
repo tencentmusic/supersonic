@@ -60,13 +60,11 @@ public class LLMRequestService {
     private OptimizationConfig optimizationConfig;
 
     public boolean isSkip(QueryContext queryCtx) {
-        QueryReq request = queryCtx.getRequest();
-        if (StringUtils.isEmpty(llmParserConfig.getUrl())) {
-            log.info("llm parser url is empty, skip {} , llmParserConfig:{}", LLMSqlParser.class, llmParserConfig);
+        if (llmProxy.isSkip(queryCtx)) {
             return true;
         }
         if (SatisfactionChecker.isSkip(queryCtx)) {
-            log.info("skip {}, queryText:{}", LLMSqlParser.class, request.getQueryText());
+            log.info("skip {}, queryText:{}", LLMSqlParser.class, queryCtx.getRequest().getQueryText());
             return true;
         }
         return false;
@@ -104,7 +102,7 @@ public class LLMRequestService {
     }
 
     public LLMReq getLlmReq(QueryContext queryCtx, SemanticSchema semanticSchema,
-                            ModelCluster modelCluster, List<ElementValue> linkingValues) {
+            ModelCluster modelCluster, List<ElementValue> linkingValues) {
         Map<Long, String> modelIdToName = semanticSchema.getModelIdToName();
         String queryText = queryCtx.getRequest().getQueryText();
 
@@ -146,7 +144,7 @@ public class LLMRequestService {
     }
 
     protected List<String> getFieldNameList(QueryContext queryCtx, ModelCluster modelCluster,
-                                            LLMParserConfig llmParserConfig) {
+            LLMParserConfig llmParserConfig) {
 
         Set<String> results = getTopNFieldNames(modelCluster, llmParserConfig);
 
