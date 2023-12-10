@@ -18,6 +18,8 @@ public class LLMReq {
 
     private String priorExts;
 
+    private SqlGenerationMode sqlGenerationMode = SqlGenerationMode.TWO_STEPS;
+
     @Data
     public static class ElementValue {
 
@@ -42,5 +44,26 @@ public class LLMReq {
     public static class FilterCondition {
 
         private String tableName;
+    }
+
+    public enum SqlGenerationMode {
+
+        ONE_STEP("ONE_STEP"),
+
+        TWO_STEPS("TWO_STEPS"),
+
+        TWO_STEPS_WITH_CS("TWO_STEPS_WITH_CS");
+
+
+        private String name;
+
+        SqlGenerationMode(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
     }
 }

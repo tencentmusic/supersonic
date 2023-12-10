@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.parser;
 
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionReq;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionResp;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
@@ -11,6 +12,8 @@ import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
  * could be used.
  */
 public interface LLMProxy {
+
+    boolean isSkip(QueryContext queryContext);
 
     LLMResp query2sql(LLMReq llmReq, String modelClusterKey);
 

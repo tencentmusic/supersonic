@@ -53,20 +53,23 @@ langchain4j:
       temperature: 0.0
       timeout: PT60S
   #2.embedding-model
+  #2.1 in_memory
   embedding-model:
     provider: in_memory
-#  embedding-model:
-#    hugging-face:
-#      access-token: hg_access_token
-#      model-id: sentence-transformers/all-MiniLM-L6-v2
-#      timeout: 1h
-
+  #2.2 open_ai
 #  embedding-model:
 #    provider: open_ai
 #    openai:
 #      api-key: api_key
 #      modelName: all-minilm-l6-v2.onnx
 
+  #2.2 hugging_face
+#  embedding-model:
+#    provider: hugging_face
+#    hugging-face:
+#      access-token: hg_access_token
+#      model-id: sentence-transformers/all-MiniLM-L6-v2
+#      timeout: 1h
 
 #langchain4j log
 logging:
