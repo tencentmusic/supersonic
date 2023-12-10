@@ -129,6 +129,7 @@ public class S2LangChain4jAutoConfiguration {
                 }
                 return OpenAiLanguageModel.builder()
                         .apiKey(openAi.getApiKey())
+                        .baseUrl(openAi.getBaseUrl())
                         .modelName(openAi.getModelName())
                         .temperature(openAi.getTemperature())
                         .timeout(openAi.getTimeout())
@@ -202,6 +203,7 @@ public class S2LangChain4jAutoConfiguration {
                 }
                 return OpenAiEmbeddingModel.builder()
                         .apiKey(openAi.getApiKey())
+                        .baseUrl(openAi.getBaseUrl())
                         .modelName(openAi.getModelName())
                         .timeout(openAi.getTimeout())
                         .maxRetries(openAi.getMaxRetries())
