@@ -14,7 +14,7 @@ import chromadb
 from chromadb.config import Settings
 from chromadb.api import Collection, Documents, Embeddings
 
-from instances.text2vec import Text2VecEmbeddingFunction
+from utils.text2vec import Text2VecEmbeddingFunction
 from instances.chromadb_instance import client
 
 from config.config_parse import SOLVED_QUERY_COLLECTION_NAME, PRESET_QUERY_COLLECTION_NAME

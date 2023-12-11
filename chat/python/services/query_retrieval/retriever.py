@@ -22,7 +22,7 @@ from utils.chromadb_utils import (get_chroma_collection_size, query_chroma_colle
                                             add_chroma_collection, update_chroma_collection, delete_chroma_collection_by_ids,
                                             empty_chroma_collection_2)
 
-from instances.text2vec import Text2VecEmbeddingFunction
+from utils.text2vec import Text2VecEmbeddingFunction
 
 class ChromaCollectionRetriever(object):
     def __init__(self, collection:Collection):
