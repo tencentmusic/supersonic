@@ -19,6 +19,6 @@ public class OneStepsSqlGeneration implements SqlGeneration, InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        SqlGenerationFactory.addSqlGenerationForFactory(SqlGenerationMode.ONE_STEP, this);
+        SqlGenerationFactory.addSqlGenerationForFactory(SqlGenerationMode.ONE_STEP_AUTO_COT, this);
     }
 }
