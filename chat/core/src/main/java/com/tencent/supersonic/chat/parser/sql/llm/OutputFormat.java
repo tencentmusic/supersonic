@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.parser.sql.llm.prompt;
+package com.tencent.supersonic.chat.parser.sql.llm;
 
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionResp;
 import com.tencent.supersonic.common.util.JsonUtil;

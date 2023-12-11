@@ -32,7 +32,7 @@ public class PythonLLMProxy implements LLMProxy {
     public boolean isSkip(QueryContext queryContext) {
         LLMParserConfig llmParserConfig = ContextUtils.getBean(LLMParserConfig.class);
         if (StringUtils.isEmpty(llmParserConfig.getUrl())) {
-            log.warn("llmParserUrl is empty, skip PythonLLMProxy, config:{}", llmParserConfig);
+            log.warn("llmParserUrl is empty, skip :{}", PythonLLMProxy.class.getName());
             return true;
         }
         return false;

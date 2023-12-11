@@ -1,12 +1,12 @@
 package com.tencent.supersonic.chat.parser;
 
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.parser.plugin.function.FunctionCallPromptGenerator;
+import com.tencent.supersonic.chat.parser.plugin.function.FunctionPromptGenerator;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionReq;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionResp;
 import com.tencent.supersonic.chat.parser.sql.llm.SqlGeneration;
 import com.tencent.supersonic.chat.parser.sql.llm.SqlGenerationFactory;
-import com.tencent.supersonic.chat.parser.sql.llm.prompt.OutputFormat;
+import com.tencent.supersonic.chat.parser.sql.llm.OutputFormat;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -14,14 +14,17 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * LLMProxy based on langchain4j Java version.
+ */
 @Slf4j
-public class EmbedLLMProxy implements LLMProxy {
+public class JavaLLMProxy implements LLMProxy {
 
     @Override
     public boolean isSkip(QueryContext queryContext) {
         ChatLanguageModel chatLanguageModel = ContextUtils.getBean(ChatLanguageModel.class);
         if (Objects.isNull(chatLanguageModel)) {
-            log.warn("chatLanguageModel is null, skip EmbedLLMProxy");
+            log.warn("chatLanguageModel is null, skip :{}", JavaLLMProxy.class.getName());
             return true;
         }
         return false;
@@ -43,7 +46,7 @@ public class EmbedLLMProxy implements LLMProxy {
     @Override
     public FunctionResp requestFunction(FunctionReq functionReq) {
 
-        FunctionCallPromptGenerator promptGenerator = ContextUtils.getBean(FunctionCallPromptGenerator.class);
+        FunctionPromptGenerator promptGenerator = ContextUtils.getBean(FunctionPromptGenerator.class);
 
         String functionCallPrompt = promptGenerator.generateFunctionCallPrompt(functionReq.getQueryText(),
                 functionReq.getPluginConfigs());
