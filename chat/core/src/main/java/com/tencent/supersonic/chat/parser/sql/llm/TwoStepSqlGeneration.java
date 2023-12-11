@@ -65,6 +65,6 @@ public class TwoStepSqlGeneration implements SqlGeneration, InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        SqlGenerationFactory.addSqlGenerationForFactory(SqlGenerationMode.TWO_STEP, this);
+        SqlGenerationFactory.addSqlGenerationForFactory(SqlGenerationMode.TWO_STEP_AUTO_COT, this);
     }
 }

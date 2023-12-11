@@ -45,7 +45,7 @@ async def query2sql(query_body: Mapping[str, Any]):
     else:
         filter_condition = query_body['filterCondition']
 
-    if 'sql_generation_mode' not in query_body:
+    if 'sqlGenerationMode' not in query_body:
         raise HTTPException(status_code=400, detail="sql_generation_mode is not in query_body")
     else:
         sql_generation_mode = query_body['sql_generation_mode']

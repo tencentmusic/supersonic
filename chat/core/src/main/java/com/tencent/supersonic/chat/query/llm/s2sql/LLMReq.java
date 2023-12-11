@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.query.llm.s2sql;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.List;
 import lombok.Data;
 
@@ -18,7 +19,7 @@ public class LLMReq {
 
     private String priorExts;
 
-    private SqlGenerationMode sqlGenerationMode = SqlGenerationMode.TWO_STEP;
+    private SqlGenerationMode sqlGenerationMode = SqlGenerationMode.TWO_STEP_AUTO_COT_SELF_CONSISTENCY;
 
     @Data
     public static class ElementValue {
@@ -48,11 +49,13 @@ public class LLMReq {
 
     public enum SqlGenerationMode {
 
-        ONE_STEP("ONE_STEP"),
+        ONE_STEP_AUTO_COT("1_pass_auto_cot"),
 
-        TWO_STEP("TWO_STEP"),
+        ONE_STEP_AUTO_COT_SELF_CONSISTENCY("1_pass_auto_cot_self_consistency"),
 
-        TWO_STEP_CS("TWO_STEP_CS");
+        TWO_STEP_AUTO_COT("2_pass_auto_cot"),
+
+        TWO_STEP_AUTO_COT_SELF_CONSISTENCY("2_pass_auto_cot_self_consistency");
 
 
         private String name;
@@ -61,6 +64,7 @@ public class LLMReq {
             this.name = name;
         }
 
+        @JsonValue
         public String getName() {
             return name;
         }
