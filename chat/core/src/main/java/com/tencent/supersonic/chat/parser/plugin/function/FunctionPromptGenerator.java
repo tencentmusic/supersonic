@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.parser.plugin.function;
 
-import com.tencent.supersonic.chat.parser.sql.llm.prompt.InputFormat;
+import com.tencent.supersonic.chat.parser.sql.llm.InputFormat;
 import com.tencent.supersonic.chat.plugin.PluginParseConfig;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class FunctionCallPromptGenerator {
+public class FunctionPromptGenerator {
 
     public String generateFunctionCallPrompt(String queryText, List<PluginParseConfig> toolConfigList) {
         List<String> toolExplainList = toolConfigList.stream()

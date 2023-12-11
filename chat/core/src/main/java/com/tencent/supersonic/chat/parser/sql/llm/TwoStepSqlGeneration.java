@@ -2,9 +2,6 @@ package com.tencent.supersonic.chat.parser.sql.llm;
 
 
 import com.tencent.supersonic.chat.config.OptimizationConfig;
-import com.tencent.supersonic.chat.parser.sql.llm.prompt.OutputFormat;
-import com.tencent.supersonic.chat.parser.sql.llm.prompt.SqlExampleLoader;
-import com.tencent.supersonic.chat.parser.sql.llm.prompt.SqlPromptGenerator;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.SqlGenerationMode;
@@ -25,7 +22,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class TwoStepsSqlGeneration implements SqlGeneration, InitializingBean {
+public class TwoStepSqlGeneration implements SqlGeneration, InitializingBean {
 
     @Autowired
     private ChatLanguageModel chatLanguageModel;
@@ -68,6 +65,6 @@ public class TwoStepsSqlGeneration implements SqlGeneration, InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        SqlGenerationFactory.addSqlGenerationForFactory(SqlGenerationMode.TWO_STEPS, this);
+        SqlGenerationFactory.addSqlGenerationForFactory(SqlGenerationMode.TWO_STEP, this);
     }
 }

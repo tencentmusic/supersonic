@@ -31,7 +31,7 @@ com.tencent.supersonic.chat.processor.ParseResultProcessor=\
     com.tencent.supersonic.chat.processor.RespBuildProcessor
 
 com.tencent.supersonic.chat.parser.LLMProxy=\
-  com.tencent.supersonic.chat.parser.EmbedLLMProxy
+  com.tencent.supersonic.chat.parser.JavaLLMProxy
 
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.LocalSemanticInterpreter

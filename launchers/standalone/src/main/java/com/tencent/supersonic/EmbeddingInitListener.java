@@ -1,9 +1,9 @@
 package com.tencent.supersonic;
 
 import com.tencent.supersonic.chat.config.OptimizationConfig;
-import com.tencent.supersonic.chat.parser.sql.llm.prompt.SqlExample;
-import com.tencent.supersonic.chat.parser.sql.llm.prompt.SqlExampleLoader;
-import com.tencent.supersonic.chat.parser.EmbedLLMProxy;
+import com.tencent.supersonic.chat.parser.sql.llm.SqlExample;
+import com.tencent.supersonic.chat.parser.sql.llm.SqlExampleLoader;
+import com.tencent.supersonic.chat.parser.JavaLLMProxy;
 import com.tencent.supersonic.chat.parser.LLMProxy;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import java.util.List;
@@ -31,7 +31,7 @@ public class EmbeddingInitListener implements CommandLineRunner {
 
     public void initSqlExamples() {
         try {
-            if (llmProxy instanceof EmbedLLMProxy) {
+            if (llmProxy instanceof JavaLLMProxy) {
                 List<SqlExample> sqlExamples = sqlExampleLoader.getSqlExamples();
                 String collectionName = optimizationConfig.getText2sqlCollectionName();
                 sqlExampleLoader.addEmbeddingStore(sqlExamples, collectionName);

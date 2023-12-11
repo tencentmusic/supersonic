@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.parser.sql.llm.prompt;
+package com.tencent.supersonic.chat.parser.sql.llm;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;

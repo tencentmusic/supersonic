@@ -18,7 +18,7 @@ public class LLMReq {
 
     private String priorExts;
 
-    private SqlGenerationMode sqlGenerationMode = SqlGenerationMode.TWO_STEPS;
+    private SqlGenerationMode sqlGenerationMode = SqlGenerationMode.TWO_STEP;
 
     @Data
     public static class ElementValue {
@@ -50,9 +50,9 @@ public class LLMReq {
 
         ONE_STEP("ONE_STEP"),
 
-        TWO_STEPS("TWO_STEPS"),
+        TWO_STEP("TWO_STEP"),
 
-        TWO_STEPS_WITH_CS("TWO_STEPS_WITH_CS");
+        TWO_STEP_CS("TWO_STEP_CS");
 
 
         private String name;

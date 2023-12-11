@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.parser.sql.llm.prompt;
+package com.tencent.supersonic.chat.parser.sql.llm;
 
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
 import java.util.Arrays;
