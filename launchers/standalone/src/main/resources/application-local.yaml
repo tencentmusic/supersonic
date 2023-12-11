@@ -53,9 +53,7 @@ langchain4j:
       temperature: 0.0
       timeout: PT60S
   #2.embedding-model
-  #2.1 in_memory
-  embedding-model:
-    provider: in_memory
+  #2.1 in_memory(default)
   #2.2 open_ai
 #  embedding-model:
 #    provider: open_ai
