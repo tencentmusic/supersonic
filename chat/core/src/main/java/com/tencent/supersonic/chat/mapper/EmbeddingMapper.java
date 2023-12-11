@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 /***
- * A mapper that recognize elements through embedding.
+ * A mapper that recognizes schema elements with vector embedding.
  */
 @Slf4j
 public class EmbeddingMapper extends BaseMapper {

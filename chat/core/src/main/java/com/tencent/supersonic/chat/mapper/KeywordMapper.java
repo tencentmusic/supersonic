@@ -21,9 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 /***
- * A mapper that recognize elements through keyword.
- * It includes two recognition strategies: HanlpDictMatchStrategy and DatabaseMatchStrategy.
- *
+ * A mapper that recognizes schema elements with keyword.
+ * It leverages two matching strategies: HanlpDictMatchStrategy and DatabaseMatchStrategy.
  */
 @Slf4j
 public class KeywordMapper extends BaseMapper {

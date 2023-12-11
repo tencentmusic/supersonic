@@ -22,7 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Fuzzy Name Match Strategy
+ * DatabaseMatchStrategy uses SQL LIKE operator to match schema elements.
+ * It currently supports fuzzy matching against names and aliases.
  */
 @Service
 @Slf4j

@@ -25,7 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * match strategy implement
+ * EmbeddingMatchStrategy uses vector database to perform
+ * similarity search against the embeddings of schema elements.
  */
 @Service
 @Slf4j

@@ -18,7 +18,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
- * match strategy implement
+ * SearchMatchStrategy encapsulates a concrete matching algorithm
+ * executed during search process.
  */
 @Service
 public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
