@@ -73,7 +73,7 @@ const SqlItem: React.FC<Props> = ({ llmReq, integrateSystem, sqlInfo, sqlTimeCos
                 setSqlType(sqlType === 's2SQL' ? '' : 's2SQL');
               }}
             >
-              解析S2SQL
+              解析器S2SQL
             </div>
           )}
           {sqlInfo.correctS2SQL && (
@@ -85,7 +85,7 @@ const SqlItem: React.FC<Props> = ({ llmReq, integrateSystem, sqlInfo, sqlTimeCos
                 setSqlType(sqlType === 'correctS2SQL' ? '' : 'correctS2SQL');
               }}
             >
-              修正S2SQL
+              修正器S2SQL
             </div>
           )}
           {sqlInfo.querySQL && (
@@ -97,7 +97,7 @@ const SqlItem: React.FC<Props> = ({ llmReq, integrateSystem, sqlInfo, sqlTimeCos
                 setSqlType(sqlType === 'querySQL' ? '' : 'querySQL');
               }}
             >
-              执行SQL
+              最终执行SQL
             </div>
           )}
         </div>
