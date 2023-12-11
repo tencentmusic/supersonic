@@ -7,7 +7,7 @@ import lombok.ToString;
 
 @Data
 @ToString
-public class FuzzyResult extends MapResult {
+public class DatabaseMapResult extends MapResult {
 
     private SchemaElement schemaElement;
 
@@ -19,7 +19,7 @@ public class FuzzyResult extends MapResult {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        FuzzyResult that = (FuzzyResult) o;
+        DatabaseMapResult that = (DatabaseMapResult) o;
         return Objects.equal(name, that.name) && Objects.equal(schemaElement, that.schemaElement);
     }
 
