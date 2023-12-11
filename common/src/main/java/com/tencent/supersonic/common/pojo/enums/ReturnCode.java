@@ -1,4 +1,4 @@
-package com.tencent.supersonic.common.pojo;
+package com.tencent.supersonic.common.pojo.enums;
 
 public enum ReturnCode {
     SUCCESS(200, "success"),

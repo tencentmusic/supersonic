@@ -7,7 +7,7 @@ import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfi
 import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.ResultData;
-import com.tencent.supersonic.common.pojo.ReturnCode;
+import com.tencent.supersonic.common.pojo.enums.ReturnCode;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.exception.CommonException;
 import com.tencent.supersonic.common.util.ContextUtils;

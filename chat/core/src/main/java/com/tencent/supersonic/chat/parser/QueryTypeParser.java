@@ -12,7 +12,7 @@ import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
-import com.tencent.supersonic.common.pojo.QueryType;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
@@ -50,7 +50,7 @@ public class QueryTypeParser implements SemanticParser {
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
         if (Objects.isNull(sqlInfo) || StringUtils.isBlank(sqlInfo.getS2SQL())) {
-            return QueryType.OTHER;
+            return QueryType.ID;
         }
         //1. entity queryType
         Set<Long> modelIds = parseInfo.getModel().getModelIds();
@@ -78,7 +78,7 @@ public class QueryTypeParser implements SemanticParser {
                 return QueryType.METRIC;
             }
         }
-        return QueryType.OTHER;
+        return QueryType.ID;
     }
 
 }

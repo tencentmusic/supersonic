@@ -6,7 +6,7 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
-import com.tencent.supersonic.common.pojo.QueryType;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
@@ -61,7 +61,7 @@ public class QueryStructReq {
     private List<Param> params = new ArrayList<>();
     private DateConf dateInfo;
     private Long limit = 2000L;
-    private QueryType queryType = QueryType.OTHER;
+    private QueryType queryType = QueryType.ID;
     private Cache cacheInfo;
 
     /**
