@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.knowledge.dictionary.FuzzyResult;
+import com.tencent.supersonic.knowledge.dictionary.DatabaseMapResult;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,7 +26,7 @@ import org.springframework.util.CollectionUtils;
  */
 @Service
 @Slf4j
-public class FuzzyNameMatchStrategy extends BaseMatchStrategy<FuzzyResult> {
+public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> {
 
     @Autowired
     private OptimizationConfig optimizationConfig;
@@ -37,25 +37,25 @@ public class FuzzyNameMatchStrategy extends BaseMatchStrategy<FuzzyResult> {
     private List<SchemaElement> allElements;
 
     @Override
-    public Map<MatchText, List<FuzzyResult>> match(QueryContext queryContext, List<Term> terms,
+    public Map<MatchText, List<DatabaseMapResult>> match(QueryContext queryContext, List<Term> terms,
             Set<Long> detectModelIds) {
         this.allElements = getSchemaElements();
         return super.match(queryContext, terms, detectModelIds);
     }
 
     @Override
-    public boolean needDelete(FuzzyResult oneRoundResult, FuzzyResult existResult) {
+    public boolean needDelete(DatabaseMapResult oneRoundResult, DatabaseMapResult existResult) {
         return getMapKey(oneRoundResult).equals(getMapKey(existResult))
                 && existResult.getDetectWord().length() < oneRoundResult.getDetectWord().length();
     }
 
     @Override
-    public String getMapKey(FuzzyResult a) {
+    public String getMapKey(DatabaseMapResult a) {
         return a.getName() + Constants.UNDERLINE + a.getSchemaElement().getId()
                 + Constants.UNDERLINE + a.getSchemaElement().getName();
     }
 
-    public void detectByStep(QueryContext queryContext, Set<FuzzyResult> existResults, Set<Long> detectModelIds,
+    public void detectByStep(QueryContext queryContext, Set<DatabaseMapResult> existResults, Set<Long> detectModelIds,
             Integer startIndex, Integer index, int offset) {
         String detectSegment = queryContext.getRequest().getQueryText().substring(startIndex, index);
         if (StringUtils.isBlank(detectSegment)) {
@@ -80,11 +80,11 @@ public class FuzzyNameMatchStrategy extends BaseMatchStrategy<FuzzyResult> {
                         .collect(Collectors.toSet());
             }
             for (SchemaElement schemaElement : schemaElements) {
-                FuzzyResult fuzzyResult = new FuzzyResult();
-                fuzzyResult.setDetectWord(detectSegment);
-                fuzzyResult.setName(schemaElement.getName());
-                fuzzyResult.setSchemaElement(schemaElement);
-                existResults.add(fuzzyResult);
+                DatabaseMapResult databaseMapResult = new DatabaseMapResult();
+                databaseMapResult.setDetectWord(detectSegment);
+                databaseMapResult.setName(schemaElement.getName());
+                databaseMapResult.setSchemaElement(schemaElement);
+                existResults.add(databaseMapResult);
             }
         }
     }

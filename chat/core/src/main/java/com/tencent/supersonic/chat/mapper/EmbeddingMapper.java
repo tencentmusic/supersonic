@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 /***
- * A mapper that is capable of semantic understanding of text.
+ * A mapper that recognize elements through embedding.
  */
 @Slf4j
 public class EmbeddingMapper extends BaseMapper {
@@ -23,7 +23,6 @@ public class EmbeddingMapper extends BaseMapper {
     @Override
     public void doMap(QueryContext queryContext) {
         //1. query from embedding by queryText
-
         String queryText = queryContext.getRequest().getQueryText();
         List<Term> terms = HanlpHelper.getTerms(queryText);
 
@@ -39,11 +38,11 @@ public class EmbeddingMapper extends BaseMapper {
             SchemaElement schemaElement = JSONObject.parseObject(JSONObject.toJSONString(matchResult.getMetadata()),
                     SchemaElement.class);
 
-            if (StringUtils.isBlank(matchResult.getMetadata().get("modelId"))) {
+            String modelIdStr = matchResult.getMetadata().get("modelId");
+            if (StringUtils.isBlank(modelIdStr)) {
                 continue;
             }
-            long modelId = Long.parseLong(matchResult.getMetadata().get("modelId"));
-
+            long modelId = Long.parseLong(modelIdStr);
             schemaElement = getSchemaElement(modelId, schemaElement.getType(), elementId);
             if (schemaElement == null) {
                 continue;
