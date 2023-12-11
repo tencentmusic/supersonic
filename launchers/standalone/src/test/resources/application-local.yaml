@@ -45,8 +45,6 @@ langchain4j:
       temperature: 0.0
       timeout: PT60S
   #2.embedding-model
-  embedding-model:
-    provider: in_memory
 #  embedding-model:
 #    hugging-face:
 #      access-token: hg_access_token
