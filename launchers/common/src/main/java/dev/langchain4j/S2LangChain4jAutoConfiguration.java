@@ -19,6 +19,7 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiLanguageModel;
 import dev.langchain4j.model.openai.OpenAiModerationModel;
+import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -187,10 +188,10 @@ public class S2LangChain4jAutoConfiguration {
     @ConditionalOnMissingBean
     @Primary
     EmbeddingModel embeddingModel(LangChain4jProperties properties) {
-        if (properties.getEmbeddingModel() == null || properties.getEmbeddingModel().getProvider() == null) {
-            throw illegalConfiguration("\n\nPlease define 'langchain4j.embedding-model' properties, for example:\n"
-                    + "langchain4j.embedding-model.provider = openai\n"
-                    + "langchain4j.embedding-model.openai.api-key = sk-...\n");
+
+        if (properties.getEmbeddingModel() == null || !Arrays.stream(ModelProvider.values())
+                .anyMatch(provider -> provider.equals(properties.getEmbeddingModel().getProvider()))) {
+            return new AllMiniLmL6V2EmbeddingModel();
         }
 
         switch (properties.getEmbeddingModel().getProvider()) {
@@ -242,13 +243,8 @@ public class S2LangChain4jAutoConfiguration {
                         .logRequests(localAi.getLogRequests())
                         .logResponses(localAi.getLogResponses())
                         .build();
-            case IN_MEMORY:
-                return new AllMiniLmL6V2EmbeddingModel();
             default:
-                throw illegalConfiguration("Unsupported embedding model provider: %s",
-                        properties.getEmbeddingModel().getProvider());
-
-
+                return new AllMiniLmL6V2EmbeddingModel();
         }
     }
 
