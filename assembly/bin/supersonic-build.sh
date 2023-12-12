@@ -10,10 +10,13 @@ cd $baseDir
 #1. build backend java modules
 rm -fr ${buildDir}/*.tar.gz
 rm -fr dist
-
 set +x
-
 mvn -f $baseDir/../ clean package -DskipTests
+# check build result
+if [ $? -ne 0 ]; then
+    echo "Failed to build backend Java modules."
+    exit 1
+fi
 
 #2. move package to build
 cp $baseDir/../launchers/semantic/target/*.tar.gz ${buildDir}/supersonic-semantic.tar.gz
@@ -26,6 +29,11 @@ cd ../webapp
 sh ./start-fe-prod.sh
 cp -fr  ./supersonic-webapp.tar.gz ${buildDir}/
 
+# check build result
+if [ $? -ne 0 ]; then
+    echo "Failed to build frontend webapp."
+    exit 1
+fi
 #4. copy webapp to java classpath
 cd $buildDir
 tar xvf supersonic-webapp.tar.gz

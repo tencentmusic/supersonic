@@ -108,15 +108,10 @@ case "$command" in
         echo  "Start success"
         ;;
   stop)
-        if [ "$service" == $PYLLM_SERVICE ]; then
-          echo  "Stopping $app_name"
-          stop $app_name
-          echo  "Stopping $STANDALONE_APP_NAME"
-          stop $STANDALONE_APP_NAME
-        else
-          echo  "Stopping $app_name"
-          stop ${app_name}
-        fi
+        echo  "Stopping $app_name"
+        stop $app_name
+        echo  "Stopping $PYLLM_APP_NAME"
+        stop $PYLLM_APP_NAME
         echo  "Stop success"
         ;;
   reload)
