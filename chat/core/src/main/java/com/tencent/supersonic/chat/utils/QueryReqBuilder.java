@@ -118,6 +118,7 @@ public class QueryReqBuilder {
         for (Filter dimensionFilter : queryStructReq.getDimensionFilters()) {
             QueryStructReq req = new QueryStructReq();
             BeanUtils.copyProperties(queryStructReq, req);
+            req.setModelIds(new HashSet<>(queryStructReq.getModelIds()));
             req.setDimensionFilters(Lists.newArrayList(dimensionFilter));
             queryStructReqs.add(req);
         }

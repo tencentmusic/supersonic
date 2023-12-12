@@ -7,25 +7,26 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
+import com.tencent.supersonic.semantic.api.model.pojo.MetricQueryDefaultConfig;
 import com.tencent.supersonic.semantic.api.model.request.MetaBatchReq;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.model.domain.MetricService;
-import java.util.List;
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.Set;
 
 
 @RestController
@@ -127,4 +128,22 @@ public class MetricController {
     public List<DrillDownDimension> getDrillDownDimension(Long metricId) {
         return metricService.getDrillDownDimension(metricId);
     }
+
+    @PostMapping("/saveMetricQueryDefaultConfig")
+    public boolean saveMetricQueryDefaultConfig(@RequestBody MetricQueryDefaultConfig queryDefaultConfig,
+                                             HttpServletRequest request,
+                                             HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        metricService.saveOrUpdateMetricQueryDefaultConfig(queryDefaultConfig, user);
+        return true;
+    }
+
+    @RequestMapping("getMetricQueryDefaultConfig/{metricId}")
+    public MetricQueryDefaultConfig getMetricQueryDefaultConfig(@PathVariable("metricId") Long metricId,
+                                                                HttpServletRequest request,
+                                                                HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return metricService.getMetricQueryDefaultConfig(metricId, user);
+    }
+
 }

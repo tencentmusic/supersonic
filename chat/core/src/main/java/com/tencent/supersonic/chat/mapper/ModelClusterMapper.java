@@ -18,6 +18,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/***
+ * A mapper that forms a cluster from connectable models
+ */
 public class ModelClusterMapper implements SchemaMapper {
 
     @Override

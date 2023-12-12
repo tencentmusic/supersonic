@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -310,6 +311,7 @@ public class QueryServiceImpl implements QueryService {
             dateInfo.setUnit(1);
         }
         queryStructReq.setDateInfo(dateInfo);
+        queryStructReq.setQueryType(QueryType.TAG);
         return queryStructReq;
     }
 
