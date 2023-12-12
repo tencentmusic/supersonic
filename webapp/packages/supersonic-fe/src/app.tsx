@@ -11,7 +11,9 @@ import { queryCurrentUser } from './services/user';
 import { traverseRoutes, isMobile, getToken } from './utils/utils';
 import { publicPath } from '../config/defaultSettings';
 import { Copilot } from 'supersonic-chat-sdk';
+import { getSystemConfig } from '@/services/user';
 export { request } from './services/request';
+import { ROUTE_AUTH_CODES } from '../config/routes';
 
 const replaceRoute = '/';
 
@@ -37,8 +39,13 @@ export const initialStateConfig = {
   ),
 };
 
-const getAuthCodes = () => {
-  return [];
+const getAuthCodes = (params: any) => {
+  const { currentUser, systemConfigAdmins } = params;
+  const codes = [];
+  if (Array.isArray(systemConfigAdmins) && systemConfigAdmins.includes(currentUser?.staffName)) {
+    codes.push(ROUTE_AUTH_CODES.SYSTEM_ADMIN);
+  }
+  return codes;
 };
 
 export async function getInitialState(): Promise<{
@@ -58,6 +65,16 @@ export async function getInitialState(): Promise<{
     return undefined;
   };
 
+  const fetchSystemConfigPermission = async () => {
+    try {
+      const { code, data } = await getSystemConfig();
+      if (code === 200) {
+        const { admins } = data;
+        return [...admins];
+      }
+    } catch (error) {}
+    return [];
+  };
   let currentUser: any;
   if (!window.location.pathname.includes('login')) {
     currentUser = await fetchUserInfo();
@@ -70,7 +87,12 @@ export async function getInitialState(): Promise<{
     }
   }
 
-  const authCodes = getAuthCodes();
+  const systemConfigAdmins = await fetchSystemConfigPermission();
+
+  const authCodes = getAuthCodes({
+    currentUser,
+    systemConfigAdmins,
+  });
 
   return {
     fetchUserInfo,

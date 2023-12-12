@@ -423,6 +423,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       {createModalVisible && (
         <DimensionInfoModal
           modelId={modelId}
+          domainId={domainId}
           bindModalVisible={createModalVisible}
           dimensionItem={dimensionItem}
           dataSourceList={dataSourceList}
