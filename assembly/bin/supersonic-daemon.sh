@@ -22,8 +22,9 @@ app_name=$STANDALONE_APP_NAME
 main_class="com.tencent.supersonic.StandaloneLauncher"
 model_name=$service
 
-if [ "$service" == "llmparser" ]; then
+if [ "$service" == "pyllm" ]; then
   model_name=${STANDALONE_SERVICE}
+  export llmProxy=PythonLLMProxy
 fi
 
 cd $baseDir
@@ -43,14 +44,14 @@ function setAppName {
     app_name=$CHAT_APP_NAME
   elif [ "$service" == $SEMANTIC_SERVICE ]; then
     app_name=$SEMANTIC_APP_NAME
-  elif [ "$service" == $LLMPARSER_SERVICE ]; then
-    app_name=$LLMPARSER_APP_NAME
+  elif [ "$service" == $PYLLM_SERVICE ]; then
+    app_name=$PYLLM_APP_NAME
   fi
 }
 setAppName
 
 function reloadExamples {
-  pythonRunDir=${runtimeDir}/supersonic-${model_name}/llmparser
+  pythonRunDir=${runtimeDir}/supersonic-${model_name}/pyllm
   cd $pythonRunDir/sql
   ${python_path} examples_reload_run.py
 }
@@ -61,7 +62,7 @@ function start()
   local_app_name=$1
   pid=$(ps aux |grep ${local_app_name} | grep -v grep | awk '{print $2}')
   if [[ "$pid" == "" ]]; then
-    if [[ ${local_app_name} == $LLMPARSER_APP_NAME ]]; then
+    if [[ ${local_app_name} == $PYLLM_APP_NAME ]]; then
       runPythonService ${local_app_name}
     else
       runJavaService ${local_app_name}
@@ -87,7 +88,7 @@ function stop()
 
 function reload()
 {
-  if [[ $1 == $LLMPARSER_APP_NAME ]]; then
+  if [[ $1 == $PYLLM_APP_NAME ]]; then
     reloadExamples
   fi
 }
@@ -95,11 +96,11 @@ function reload()
 # 4. execute command operation
 case "$command" in
   start)
-        if [ "$service" == $STANDALONE_SERVICE ]; then
-          echo  "Starting $LLMPARSER_APP_NAME"
-          start $LLMPARSER_APP_NAME
+        if [ "$service" == $PYLLM_SERVICE ]; then
           echo  "Starting $app_name"
           start $app_name
+          echo  "Starting $STANDALONE_APP_NAME"
+          start $STANDALONE_APP_NAME
         else
           echo  "Starting $app_name"
           start $app_name
@@ -107,11 +108,11 @@ case "$command" in
         echo  "Start success"
         ;;
   stop)
-        if [ "$service" == $STANDALONE_SERVICE ]; then
-          echo  "Stopping $LLMPARSER_APP_NAME"
-          stop $LLMPARSER_APP_NAME
+        if [ "$service" == $PYLLM_SERVICE ]; then
           echo  "Stopping $app_name"
           stop $app_name
+          echo  "Stopping $STANDALONE_APP_NAME"
+          stop $STANDALONE_APP_NAME
         else
           echo  "Stopping $app_name"
           stop ${app_name}
@@ -124,15 +125,15 @@ case "$command" in
         echo  "Reload success"
         ;;
   restart)
-        if [ "$service" == $STANDALONE_SERVICE ]; then
+        if [ "$service" == $PYLLM_SERVICE ]; then
           echo  "Stopping ${app_name}"
           stop ${app_name}
-          echo  "Stopping ${LLMPARSER_APP_NAME}"
-          stop $LLMPARSER_APP_NAME
-          echo  "Starting ${LLMPARSER_APP_NAME}"
-          start $LLMPARSER_APP_NAME
+          echo  "Stopping ${STANDALONE_APP_NAME}"
+          stop $STANDALONE_APP_NAME
           echo  "Starting ${app_name}"
           start ${app_name}
+          echo  "Starting ${STANDALONE_APP_NAME}"
+          start $STANDALONE_APP_NAME
         else
           echo  "Stopping ${app_name}"
           stop ${app_name}

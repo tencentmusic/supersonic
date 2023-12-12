@@ -11,14 +11,14 @@ buildDir=$baseDir/build
 
 readonly CHAT_APP_NAME="supersonic_chat"
 readonly SEMANTIC_APP_NAME="supersonic_semantic"
-readonly LLMPARSER_APP_NAME="supersonic_llmparser"
+readonly PYLLM_APP_NAME="supersonic_pyllm"
 readonly STANDALONE_APP_NAME="supersonic_standalone"
 readonly CHAT_SERVICE="chat"
 readonly SEMANTIC_SERVICE="semantic"
-readonly LLMPARSER_SERVICE="llmparser"
+readonly PYLLM_SERVICE="pyllm"
 readonly STANDALONE_SERVICE="standalone"
-readonly LLMPARSER_HOST="127.0.0.1"
-readonly LLMPARSER_PORT="9092"
+readonly PYLLM_HOST="127.0.0.1"
+readonly PYLLM_PORT="9092"
 
 function setEnvToWeb {
    model_name=$1
@@ -81,23 +81,23 @@ function runJavaService {
 
 # run python service
 function runPythonService {
-  pythonRunDir=${runtimeDir}/supersonic-${model_name}/llmparser
+  pythonRunDir=${runtimeDir}/supersonic-${model_name}/pyllm
   cd $pythonRunDir
-  nohup ${python_path} supersonic_llmparser.py  > $pythonRunDir/llmparser.log  2>&1   &
+  nohup ${python_path} supersonic_pyllm.py  > $pythonRunDir/pyllm.log  2>&1   &
   # add health check
   for i in {1..10}
   do
-    echo "llmparser health check attempt $i..."
-    response=$(curl -s http://${LLMPARSER_HOST}:${LLMPARSER_PORT}/health)
-    echo "llmparser health check response: $response"
+    echo "pyllm health check attempt $i..."
+    response=$(curl -s http://${PYLLM_HOST}:${PYLLM_PORT}/health)
+    echo "pyllm health check response: $response"
     status_ok="Healthy"
     if [[ $response == *$status_ok* ]] ; then
-      echo "llmparser Health check passed."
+      echo "pyllm Health check passed."
       break
     else
       if [ "$i" -eq 10 ]; then
-        echo "llmparser Health check failed after 10 attempts."
-        echo "May still downloading model files. Please check llmparser.log in runtime directory."
+        echo "pyllm Health check failed after 10 attempts."
+        echo "May still downloading model files. Please check pyllm.log in runtime directory."
       fi
       echo "Retrying after 5 seconds..."
       sleep 5

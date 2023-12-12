@@ -4,16 +4,22 @@ import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
+import com.tencent.supersonic.chat.parser.JavaLLMProxy;
 import com.tencent.supersonic.chat.parser.LLMProxy;
 import com.tencent.supersonic.chat.parser.sql.llm.ModelResolver;
 import com.tencent.supersonic.chat.processor.ParseResultProcessor;
 import com.tencent.supersonic.chat.query.QueryResponder;
+import com.tencent.supersonic.common.util.ContextUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 
+@Slf4j
 public class ComponentFactory {
 
     private static List<SchemaMapper> schemaMappers = new ArrayList<>();
@@ -57,9 +63,21 @@ public class ComponentFactory {
     }
 
     public static LLMProxy getLLMProxy() {
-        if (Objects.isNull(llmProxy)) {
-            llmProxy = init(LLMProxy.class);
+        //1.Preferentially retrieve from environment variables
+        String llmProxyEnv = System.getenv("llmProxy");
+        if (StringUtils.isNotBlank(llmProxyEnv)) {
+            Map<String, LLMProxy> implementations = ContextUtils.getBeansOfType(LLMProxy.class);
+            llmProxy = implementations.entrySet().stream()
+                    .filter(entry -> entry.getKey().equalsIgnoreCase(llmProxyEnv))
+                    .map(Map.Entry::getValue)
+                    .findFirst()
+                    .orElse(null);
         }
+        //2.default JavaLLMProxy
+        if (Objects.isNull(llmProxy)) {
+            llmProxy = ContextUtils.getBean(JavaLLMProxy.class);
+        }
+        log.info("llmProxy:{}", llmProxy);
         return llmProxy;
     }
 

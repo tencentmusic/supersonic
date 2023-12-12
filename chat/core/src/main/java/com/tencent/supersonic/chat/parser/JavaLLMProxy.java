@@ -13,11 +13,13 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
  * LLMProxy based on langchain4j Java version.
  */
 @Slf4j
+@Component
 public class JavaLLMProxy implements LLMProxy {
 
     @Override

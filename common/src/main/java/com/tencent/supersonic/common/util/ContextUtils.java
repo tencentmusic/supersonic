@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.util;
 
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -74,6 +75,10 @@ public class ContextUtils implements ApplicationContextAware {
      */
     public static ApplicationContext getContext() {
         return context;
+    }
+
+    public static <T> Map<String, T> getBeansOfType(Class<T> requiredType) {
+        return context.getBeansOfType(requiredType);
     }
 
     public static String getActiveProfile() {
