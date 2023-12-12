@@ -7,7 +7,7 @@ import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.ModelCluster;
 import com.tencent.supersonic.common.pojo.Order;
-import com.tencent.supersonic.common.pojo.QueryType;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterType;
 import lombok.Data;
@@ -42,7 +42,7 @@ public class SemanticParseInfo {
     private Map<String, Object> properties = new HashMap<>();
     private EntityInfo entityInfo;
     private SqlInfo sqlInfo = new SqlInfo();
-    private QueryType queryType = QueryType.OTHER;
+    private QueryType queryType = QueryType.ID;
 
     public String getModelClusterKey() {
         if (model == null) {

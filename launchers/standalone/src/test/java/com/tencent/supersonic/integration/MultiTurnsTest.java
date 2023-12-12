@@ -7,7 +7,7 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.query.rule.metric.MetricFilterQuery;
 import com.tencent.supersonic.chat.query.rule.metric.MetricGroupByQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.QueryType;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
 import java.text.DateFormat;

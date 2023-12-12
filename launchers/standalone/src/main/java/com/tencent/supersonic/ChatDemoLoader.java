@@ -27,7 +27,7 @@ import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.chat.service.QueryService;
-import com.tencent.supersonic.common.pojo.QueryType;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.SysParameter;
 import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.common.util.JsonUtil;

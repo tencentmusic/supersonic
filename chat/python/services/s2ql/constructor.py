@@ -36,7 +36,10 @@ class FewShotPromptTemplate2(object):
         self.few_shot_retriever.update_queries(query_text_list=query_text_list, query_id_list=example_ids, metadatas=example_units)
 
     def delete_few_shot_example(self, example_ids: List[str])-> None:
-        self.few_shot_retriever.delete_queries_by_ids(query_ids=example_ids)    
+        self.few_shot_retriever.delete_queries_by_ids(query_ids=example_ids)  
+
+    def get_few_shot_example(self, example_ids: List[str]):
+        return self.few_shot_retriever.get_query_by_ids(query_ids=example_ids)  
 
     def count_few_shot_example(self)-> int:
         return self.few_shot_retriever.get_query_size()
@@ -73,3 +76,4 @@ class FewShotPromptTemplate2(object):
         few_shot_example_str = self.few_shot_seperator.join(few_shot_example_str_unit_list)
 
         return few_shot_example_str 
+

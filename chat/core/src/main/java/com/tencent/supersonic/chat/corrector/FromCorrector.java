@@ -4,7 +4,9 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import lombok.extern.slf4j.Slf4j;
-
+/**
+ * Perform SQL corrections on the "From" section in S2SQL.
+ */
 @Slf4j
 public class FromCorrector extends BaseSemanticCorrector {
 

@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.pojo;
 
+import com.tencent.supersonic.common.pojo.enums.ReturnCode;
 import com.tencent.supersonic.common.util.TraceIdUtil;
 import lombok.Data;
 import org.slf4j.MDC;

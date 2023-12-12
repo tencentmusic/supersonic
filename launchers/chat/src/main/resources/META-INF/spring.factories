@@ -1,7 +1,6 @@
 com.tencent.supersonic.chat.api.component.SchemaMapper=\
     com.tencent.supersonic.chat.mapper.EmbeddingMapper, \
-    com.tencent.supersonic.chat.mapper.HanlpDictMapper, \
-    com.tencent.supersonic.chat.mapper.FuzzyNameMapper, \
+    com.tencent.supersonic.chat.mapper.KeywordMapper, \
     com.tencent.supersonic.chat.mapper.QueryFilterMapper, \
     com.tencent.supersonic.chat.mapper.EntityMapper
 
@@ -18,9 +17,6 @@ com.tencent.supersonic.chat.api.component.SemanticCorrector=\
     com.tencent.supersonic.chat.corrector.WhereCorrector, \
     com.tencent.supersonic.chat.corrector.GroupByCorrector, \
     com.tencent.supersonic.chat.corrector.HavingCorrector
-
-com.tencent.supersonic.chat.parser.LLMProxy=\
-  com.tencent.supersonic.chat.parser.PythonLLMProxy
 
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.RemoteSemanticInterpreter

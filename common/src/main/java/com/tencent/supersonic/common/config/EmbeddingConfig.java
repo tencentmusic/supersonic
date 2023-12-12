@@ -29,6 +29,7 @@ public class EmbeddingConfig {
     @Value("${embedding.metric.analyzeQuery.collection:solved_query_collection}")
     private String metricAnalyzeQueryCollection;
 
-
+    @Value("${embedding.metric.analyzeQuery.nResult:5}")
+    private int metricAnalyzeQueryResultNum;
 
 }
