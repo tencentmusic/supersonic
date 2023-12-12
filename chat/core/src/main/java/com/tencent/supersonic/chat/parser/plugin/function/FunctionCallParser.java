@@ -2,7 +2,6 @@ package com.tencent.supersonic.chat.parser.plugin.function;
 
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.parser.PythonLLMProxy;
-import com.tencent.supersonic.chat.parser.LLMProxy;
 import com.tencent.supersonic.chat.parser.plugin.ParseMode;
 import com.tencent.supersonic.chat.parser.plugin.PluginParser;
 import com.tencent.supersonic.chat.plugin.Plugin;
@@ -27,13 +26,11 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class FunctionCallParser extends PluginParser {
 
-    protected LLMProxy llmInterpreter = ComponentFactory.getLLMProxy();
-
     @Override
     public boolean checkPreCondition(QueryContext queryContext) {
         FunctionCallConfig functionCallConfig = ContextUtils.getBean(FunctionCallConfig.class);
         String functionUrl = functionCallConfig.getUrl();
-        if (StringUtils.isBlank(functionUrl) && llmInterpreter instanceof PythonLLMProxy) {
+        if (StringUtils.isBlank(functionUrl) && ComponentFactory.getLLMProxy() instanceof PythonLLMProxy) {
             log.info("functionUrl:{}, skip function parser, queryText:{}", functionUrl,
                     queryContext.getRequest().getQueryText());
             return false;
@@ -84,7 +81,7 @@ public class FunctionCallParser extends PluginParser {
             FunctionReq functionReq = FunctionReq.builder()
                     .queryText(queryContext.getRequest().getQueryText())
                     .pluginConfigs(pluginToFunctionCall).build();
-            functionResp = llmInterpreter.requestFunction(functionReq);
+            functionResp = ComponentFactory.getLLMProxy().requestFunction(functionReq);
         }
         return functionResp;
     }

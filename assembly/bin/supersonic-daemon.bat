@@ -9,10 +9,10 @@ set "main_class=com.tencent.supersonic.StandaloneLauncher"
 set "python_path=python"
 set "pip_path=pip3"
 set "standalone_service=standalone"
-set "llmparser_service=llmparser"
+set "pyllm_service=pyllm"
 
 set "javaRunDir=%runtimeDir%\supersonic-standalone"
-set "pythonRunDir=%runtimeDir%\supersonic-standalone\llmparser"
+set "pythonRunDir=%runtimeDir%\supersonic-standalone\pyllm"
 
 set "command=%~1"
 set "service=%~2"
@@ -42,7 +42,7 @@ if "%command%"=="restart" (
 )
 
 :START
-    if "%service%"=="%llmparser_service%" (
+    if "%service%"=="%pyllm_service%" (
          call :START_PYTHON
          goto :EOF
     )
@@ -51,7 +51,7 @@ if "%command%"=="restart" (
     goto :EOF
 
 :STOP
-    if "%service%"=="%llmparser_service%" (
+    if "%service%"=="%pyllm_service%" (
         call :STOP_PYTHON
         goto :EOF
     )
@@ -60,9 +60,9 @@ if "%command%"=="restart" (
     goto :EOF
 
 :START_PYTHON
-   echo 'python service starting, see logs in llmparser/llmparser.log'
+   echo 'python service starting, see logs in pyllm/pyllm.log'
    cd "%pythonRunDir%"
-   start /B %python_path% supersonic_llmparser.py  > %pythonRunDir%\llmparser.log 2>&1
+   start /B %python_path% supersonic_pyllm.py  > %pythonRunDir%\pyllm.log 2>&1
    timeout /t 10 >nul
    echo 'python service started'
    goto :EOF
@@ -96,7 +96,7 @@ if "%command%"=="restart" (
    goto :EOF
 
 :RELOAD_EXAMPLE
-   cd "%runtimeDir%\supersonic-standalone\llmparser\sql"
+   cd "%runtimeDir%\supersonic-standalone\pyllm\sql"
    start  %python_path% examples_reload_run.py
    goto :EOF
 

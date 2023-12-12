@@ -12,7 +12,6 @@ import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.config.LLMParserConfig;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
-import com.tencent.supersonic.chat.parser.LLMProxy;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
@@ -26,13 +25,6 @@ import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.knowledge.service.SchemaService;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -42,12 +34,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
 public class LLMRequestService {
-
-    protected LLMProxy llmProxy = ComponentFactory.getLLMProxy();
 
     protected SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
     @Autowired
@@ -60,7 +56,7 @@ public class LLMRequestService {
     private OptimizationConfig optimizationConfig;
 
     public boolean isSkip(QueryContext queryCtx) {
-        if (llmProxy.isSkip(queryCtx)) {
+        if (ComponentFactory.getLLMProxy().isSkip(queryCtx)) {
             return true;
         }
         if (SatisfactionChecker.isSkip(queryCtx)) {
@@ -140,7 +136,7 @@ public class LLMRequestService {
     }
 
     public LLMResp requestLLM(LLMReq llmReq, String modelClusterKey) {
-        return llmProxy.query2sql(llmReq, modelClusterKey);
+        return ComponentFactory.getLLMProxy().query2sql(llmReq, modelClusterKey);
     }
 
     protected List<String> getFieldNameList(QueryContext queryCtx, ModelCluster modelCluster,

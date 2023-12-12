@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Perform SQL corrections on the "group by" section in S2SQL.
+ * Perform SQL corrections on the "Group by" section in S2SQL.
  */
 @Slf4j
 public class GroupByCorrector extends BaseSemanticCorrector {
