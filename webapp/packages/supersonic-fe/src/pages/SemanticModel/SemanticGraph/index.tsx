@@ -1029,6 +1029,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
       {createDimensionModalVisible && (
         <DimensionInfoModal
           modelId={modelId}
+          domainId={selectDomainId}
           bindModalVisible={createDimensionModalVisible}
           dimensionItem={dimensionItem}
           dataSourceList={nodeDataSource ? [nodeDataSource] : dataSourceInfoList}

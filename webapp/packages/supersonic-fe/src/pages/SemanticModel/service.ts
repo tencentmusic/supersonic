@@ -1,5 +1,6 @@
 import request from 'umi-request';
 import moment from 'moment';
+import { DatePeridMap } from '@/pages/SemanticModel/constant';
 
 const getRunningEnv = () => {
   return window.location.pathname.includes('/chatSetting/') ? 'chat' : 'semantic';
@@ -55,6 +56,28 @@ export function getDimensionList(data: any): Promise<any> {
     return request.post(`${process.env.CHAT_API_BASE_URL}conf/dimension/page`, queryParams);
   }
   return request.post(`${process.env.API_BASE_URL}dimension/queryDimension`, queryParams);
+}
+
+export function getCommonDimensionList(domainId: number): Promise<any> {
+  return request.get(`${process.env.API_BASE_URL}commonDimension/getList?domainId=${domainId}`);
+}
+
+export function saveCommonDimension(data: any): Promise<any> {
+  if (data.id) {
+    return request(`${process.env.API_BASE_URL}commonDimension`, {
+      method: 'PUT',
+      data,
+    });
+  }
+  return request.post(`${process.env.API_BASE_URL}commonDimension`, {
+    data,
+  });
+}
+
+export function deleteCommonDimension(id: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}commonDimension/${id}`, {
+    method: 'DELETE',
+  });
 }
 
 export function getDimensionInModelCluster(modelId: number): Promise<any> {
@@ -494,7 +517,8 @@ export async function queryStruct({
           endDate,
           dateList: [],
           unit: 7,
-          period: 'DAY',
+          // period: 'DAY',
+          period: DatePeridMap[dateField],
           text: 'null',
         },
         limit: 2000,

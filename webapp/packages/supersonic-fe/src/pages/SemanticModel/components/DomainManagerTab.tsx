@@ -13,6 +13,7 @@ import { HomeOutlined, FundViewOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
 import SemanticGraphCanvas from '../SemanticGraphCanvas';
 import RecommendedQuestionsSection from '../components/Entity/RecommendedQuestionsSection';
+import CommonDimensionTable from './CommonDimension/CommonDimensionTable';
 import DatabaseTable from '../components/Database/DatabaseTable';
 
 import type { Dispatch } from 'umi';
@@ -72,6 +73,11 @@ const DomainManagerTab: React.FC<Props> = ({
       key: 'database',
       children: <DatabaseTable />,
     },
+    // {
+    //   label: '公共维度',
+    //   key: 'commonDimension',
+    //   children: <CommonDimensionTable />,
+    // },
   ].filter((item) => {
     const target = domainList.find((domain) => domain.id === selectDomainId);
     if (target?.hasEditPermission) {

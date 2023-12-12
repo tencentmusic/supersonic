@@ -146,10 +146,14 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
   const saveEntity = async (searchEnable = dimensionVisible) => {
     setSaveLoading(true);
     const globalKnowledgeConfigFormFields: any = await getFormValidateFields();
+
     const tempData = { ...modelRichConfigData };
-    const targetKnowledgeInfos = modelRichConfigData?.chatAggRichConfig?.knowledgeInfos;
-    let knowledgeInfos: IChatConfig.IKnowledgeInfosItem[] = [];
-    if (Array.isArray(targetKnowledgeInfos)) {
+    const targetKnowledgeInfos = modelRichConfigData?.chatAggRichConfig?.knowledgeInfos || [];
+
+    const hasHistoryConfig = targetKnowledgeInfos.find((item) => item.itemId === dimensionItem.id);
+    let knowledgeInfos: IChatConfig.IKnowledgeInfosItem[] = targetKnowledgeInfos;
+
+    if (hasHistoryConfig) {
       knowledgeInfos = targetKnowledgeInfos.reduce(
         (
           knowledgeInfosList: IChatConfig.IKnowledgeInfosItem[],
@@ -173,6 +177,15 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
         },
         [],
       );
+    } else {
+      knowledgeInfos.push({
+        itemId: dimensionItem.id,
+        bizName: dimensionItem.bizName,
+        knowledgeAdvancedConfig: {
+          ...globalKnowledgeConfigFormFields,
+        },
+        searchEnable,
+      });
     }
 
     const { id, modelId, chatAggRichConfig } = tempData;
