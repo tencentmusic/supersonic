@@ -5,6 +5,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
+import com.tencent.supersonic.semantic.api.model.pojo.MetricQueryDefaultConfig;
 import com.tencent.supersonic.semantic.api.model.request.MetaBatchReq;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
 import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
@@ -40,6 +41,10 @@ public interface MetricService {
     List<DrillDownDimension> getDrillDownDimension(Long metricId);
 
     List<DataItem> getDataItems(Long modelId);
+
+    void saveOrUpdateMetricQueryDefaultConfig(MetricQueryDefaultConfig queryDefaultConfig, User user);
+
+    MetricQueryDefaultConfig getMetricQueryDefaultConfig(Long metricId, User user);
 
     void sendMetricEventBatch(List<Long> modelIds, EventType eventType);
 }

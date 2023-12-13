@@ -17,8 +17,6 @@ public interface DimensionService {
 
     List<DimensionResp> getDimensions(MetaFilter metaFilter);
 
-    DimensionResp getDimension(Long id);
-
     DimensionResp getDimension(String bizName, Long modelId);
 
     void batchUpdateStatus(MetaBatchReq metaBatchReq, User user);

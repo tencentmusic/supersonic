@@ -1,11 +1,15 @@
 package com.tencent.supersonic.semantic.model.infrastructure.repository;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
+import com.tencent.supersonic.semantic.model.domain.dataobject.MetricQueryDefaultConfigDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.MetricRepository;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.MetricDOCustomMapper;
 import com.tencent.supersonic.semantic.model.infrastructure.mapper.MetricDOMapper;
+import com.tencent.supersonic.semantic.model.infrastructure.mapper.MetricQueryDefaultConfigDOMapper;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 
@@ -17,10 +21,14 @@ public class MetricRepositoryImpl implements MetricRepository {
 
     private MetricDOCustomMapper metricDOCustomMapper;
 
+    private MetricQueryDefaultConfigDOMapper metricQueryDefaultConfigDOMapper;
+
     public MetricRepositoryImpl(MetricDOMapper metricDOMapper,
-                                MetricDOCustomMapper metricDOCustomMapper) {
+                                MetricDOCustomMapper metricDOCustomMapper,
+                                MetricQueryDefaultConfigDOMapper metricQueryDefaultConfigDOMapper) {
         this.metricDOMapper = metricDOMapper;
         this.metricDOCustomMapper = metricDOCustomMapper;
+        this.metricQueryDefaultConfigDOMapper = metricQueryDefaultConfigDOMapper;
     }
 
     @Override
@@ -52,6 +60,24 @@ public class MetricRepositoryImpl implements MetricRepository {
     @Override
     public List<MetricDO> getMetric(MetricFilter metricFilter) {
         return metricDOCustomMapper.query(metricFilter);
+    }
+
+    @Override
+    public void saveDefaultQueryConfig(MetricQueryDefaultConfigDO defaultConfigDO) {
+        metricQueryDefaultConfigDOMapper.insert(defaultConfigDO);
+    }
+
+    @Override
+    public void updateDefaultQueryConfig(MetricQueryDefaultConfigDO defaultConfigDO) {
+        metricQueryDefaultConfigDOMapper.updateById(defaultConfigDO);
+    }
+
+    @Override
+    public MetricQueryDefaultConfigDO getDefaultQueryConfig(Long metricId, String userName) {
+        QueryWrapper<MetricQueryDefaultConfigDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(MetricQueryDefaultConfigDO::getMetricId, metricId)
+                .eq(MetricQueryDefaultConfigDO::getCreatedBy, userName);
+        return metricQueryDefaultConfigDOMapper.selectOne(queryWrapper);
     }
 
 }

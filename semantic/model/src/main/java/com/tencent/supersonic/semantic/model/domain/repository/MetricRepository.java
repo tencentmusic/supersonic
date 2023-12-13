@@ -1,6 +1,7 @@
 package com.tencent.supersonic.semantic.model.domain.repository;
 
 
+import com.tencent.supersonic.semantic.model.domain.dataobject.MetricQueryDefaultConfigDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
 import java.util.List;
@@ -19,4 +20,10 @@ public interface MetricRepository {
     MetricDO getMetricById(Long id);
 
     List<MetricDO> getMetric(MetricFilter metricFilter);
+
+    void saveDefaultQueryConfig(MetricQueryDefaultConfigDO defaultConfigDO);
+
+    void updateDefaultQueryConfig(MetricQueryDefaultConfigDO defaultConfigDO);
+
+    MetricQueryDefaultConfigDO getDefaultQueryConfig(Long metricId, String userName);
 }

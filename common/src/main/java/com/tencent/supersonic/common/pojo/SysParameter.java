@@ -79,7 +79,7 @@ public class SysParameter {
 
         //llm config
         Parameter parameter = new Parameter("llm.model.name", "gpt3.5",
-                "模型名称", "","list", "Parser相关配置");
+                "模型名称", "", "list", "Parser相关配置");
         parameter.setCandidateValues(Lists.newArrayList("gpt3.5", "gpt3.5-16k"));
         parameters.add(parameter);
         parameters.add(new Parameter("llm.api.key", "sk-secret",

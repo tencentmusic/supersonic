@@ -211,8 +211,8 @@ public class ModelServiceImpl implements ModelService {
                 .stream().map(measure -> ModelConverter.convert(measure, modelResp))).collect(Collectors.toList());
     }
 
-    private void batchCreateDimension(ModelDO datasourceDO, User user) throws Exception {
-        List<DimensionReq> dimensionReqs = ModelConverter.convertDimensionList(datasourceDO);
+    private void batchCreateDimension(ModelDO modelDO, User user) throws Exception {
+        List<DimensionReq> dimensionReqs = ModelConverter.convertDimensionList(modelDO);
         dimensionService.createDimensionBatch(dimensionReqs, user);
     }
 
