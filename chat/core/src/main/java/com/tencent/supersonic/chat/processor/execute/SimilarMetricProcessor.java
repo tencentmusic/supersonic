@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.query;
+package com.tencent.supersonic.chat.processor.execute;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
@@ -13,6 +13,8 @@ import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
 import com.tencent.supersonic.semantic.model.domain.listener.MetaEmbeddingListener;
+import org.springframework.util.CollectionUtils;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -20,19 +22,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.util.CollectionUtils;
 
 /**
  * SimilarMetricQueryResponder fills recommended metrics based on embedding similarity.
  */
-public class SimilarMetricQueryResponder implements QueryResponder {
+public class SimilarMetricProcessor implements ExecuteResultProcessor {
 
     private static final int METRIC_RECOMMEND_SIZE = 5;
 
     private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
 
     @Override
-    public void fillInfo(QueryResult queryResult, SemanticParseInfo semanticParseInfo, ExecuteQueryReq queryReq) {
+    public void process(QueryResult queryResult, SemanticParseInfo semanticParseInfo, ExecuteQueryReq queryReq) {
         fillSimilarMetric(queryResult.getChatContext());
     }
 
