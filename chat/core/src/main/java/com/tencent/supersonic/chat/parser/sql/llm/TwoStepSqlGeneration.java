@@ -5,7 +5,6 @@ import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.SqlGenerationMode;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -33,6 +32,9 @@ public class TwoStepSqlGeneration implements SqlGeneration, InitializingBean {
     @Autowired
     private OptimizationConfig optimizationConfig;
 
+    @Autowired
+    private SqlPromptGenerator sqlPromptGenerator;
+
     @Override
     public String generation(LLMReq llmReq, String modelClusterKey) {
         String text2sqlCollectionName = optimizationConfig.getText2sqlCollectionName();
@@ -46,7 +48,6 @@ public class TwoStepSqlGeneration implements SqlGeneration, InitializingBean {
         List<String> fieldNameList = llmReq.getSchema().getFieldNameList();
         List<ElementValue> linking = llmReq.getLinking();
 
-        SqlPromptGenerator sqlPromptGenerator = ContextUtils.getBean(SqlPromptGenerator.class);
         String linkingPromptStr = sqlPromptGenerator.generateSchemaLinkingPrompt(queryText, modelName, fieldNameList,
                 linking, sqlExamples);
 
