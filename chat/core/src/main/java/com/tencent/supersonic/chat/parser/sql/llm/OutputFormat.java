@@ -24,11 +24,11 @@ public class OutputFormat {
             if (matcher.find()) {
                 schemaLinkOutput = matcher.group(1).trim();
             } else {
-                schemaLinkOutput = null;
+                schemaLinkOutput = "";
             }
         } catch (Exception e) {
             log.error("", e);
-            schemaLinkOutput = null;
+            schemaLinkOutput = "";
         }
         return schemaLinkOutput;
     }
