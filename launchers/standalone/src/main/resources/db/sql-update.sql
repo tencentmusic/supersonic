@@ -130,6 +130,8 @@ CREATE TABLE `s2_collect`
     PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+alter table s2_metric add column `ext` text DEFAULT NULL;
+
 CREATE TABLE `s2_metric_query_default_config`
 (
     `id`             bigint  NOT NULL PRIMARY KEY AUTO_INCREMENT,

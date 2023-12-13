@@ -296,6 +296,7 @@ CREATE TABLE `s2_metric` (
                              `alias` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
                              `tags` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
                              `relate_dimensions` varchar(500) DEFAULT NULL COMMENT '指标相关维度',
+                             `ext` text DEFAULT NULL  ,
                              PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='指标表';
 
