@@ -20,6 +20,7 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiLanguageModel;
 import dev.langchain4j.model.openai.OpenAiModerationModel;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -246,7 +247,7 @@ public class S2LangChain4jAutoConfiguration {
                         .build();
             case IN_PROCESS:
                 InProcess inProcess = properties.getEmbeddingModel().getInProcess();
-                if (isNullOrBlank(inProcess.getModelPath())) {
+                if (Objects.isNull(inProcess) || isNullOrBlank(inProcess.getModelPath())) {
                     return new AllMiniLmL6V2EmbeddingModel();
                 }
                 return new S2OnnxEmbeddingModel(inProcess.getModelPath(), inProcess.getVocabularyPath());
