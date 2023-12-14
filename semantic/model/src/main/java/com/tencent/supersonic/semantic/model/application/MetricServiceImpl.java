@@ -13,9 +13,11 @@ import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
+import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
+import com.tencent.supersonic.semantic.api.model.pojo.MetricQueryDefaultConfig;
 import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
 import com.tencent.supersonic.semantic.api.model.request.MetaBatchReq;
 import com.tencent.supersonic.semantic.api.model.request.MetricReq;
@@ -29,6 +31,7 @@ import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.CollectDO;
 import com.tencent.supersonic.semantic.model.domain.dataobject.MetricDO;
+import com.tencent.supersonic.semantic.model.domain.dataobject.MetricQueryDefaultConfigDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.MetricRepository;
@@ -289,6 +292,29 @@ public class MetricServiceImpl implements MetricService {
             return Lists.newArrayList();
         }
         return metricDOS.stream().map(this::getDataItem).collect(Collectors.toList());
+    }
+
+    @Override
+    public void saveOrUpdateMetricQueryDefaultConfig(MetricQueryDefaultConfig queryDefaultConfig, User user) {
+        MetricQueryDefaultConfigDO metricQueryDefaultConfigDO = new MetricQueryDefaultConfigDO();
+        if (queryDefaultConfig.getId() == null) {
+            queryDefaultConfig.createdBy(user.getName());
+            BeanMapper.mapper(queryDefaultConfig, metricQueryDefaultConfigDO);
+            metricRepository.saveDefaultQueryConfig(metricQueryDefaultConfigDO);
+        } else {
+            queryDefaultConfig.updatedBy(user.getName());
+            BeanMapper.mapper(queryDefaultConfig, metricQueryDefaultConfigDO);
+            metricRepository.updateDefaultQueryConfig(metricQueryDefaultConfigDO);
+        }
+    }
+
+    @Override
+    public MetricQueryDefaultConfig getMetricQueryDefaultConfig(Long metricId, User user) {
+        MetricQueryDefaultConfigDO metricQueryDefaultConfigDO =
+                metricRepository.getDefaultQueryConfig(metricId, user.getName());
+        MetricQueryDefaultConfig metricQueryDefaultConfig = new MetricQueryDefaultConfig();
+        BeanMapper.mapper(metricQueryDefaultConfigDO, metricQueryDefaultConfig);
+        return metricQueryDefaultConfig;
     }
 
     private void checkParam(MetricReq metricReq) {

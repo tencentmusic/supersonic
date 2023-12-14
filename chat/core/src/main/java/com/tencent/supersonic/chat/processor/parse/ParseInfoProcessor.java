@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.processor;
+package com.tencent.supersonic.chat.processor.parse;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.component.SemanticQuery;

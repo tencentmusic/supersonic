@@ -2,7 +2,9 @@ package com.tencent.supersonic.common.pojo;
 
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -49,7 +51,10 @@ public class ModelCluster {
     }
 
     public Long getFirstModel() {
-        return modelIds.stream().findFirst().orElse(null);
+        if (CollectionUtils.isEmpty(modelIds)) {
+            return -1L;
+        }
+        return new ArrayList<>(modelIds).get(0);
     }
 
 }

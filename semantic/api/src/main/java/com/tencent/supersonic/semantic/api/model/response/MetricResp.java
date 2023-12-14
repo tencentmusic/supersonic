@@ -14,7 +14,9 @@ import lombok.ToString;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,6 +49,8 @@ public class MetricResp extends SchemaItem {
     private boolean hasAdminRes = false;
 
     private Boolean isCollect;
+
+    private Map<String, Object> ext = new HashMap<>();
 
     public void setTag(String tag) {
         if (StringUtils.isBlank(tag)) {

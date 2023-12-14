@@ -7,17 +7,17 @@ import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.parser.JavaLLMProxy;
 import com.tencent.supersonic.chat.parser.LLMProxy;
 import com.tencent.supersonic.chat.parser.sql.llm.ModelResolver;
-import com.tencent.supersonic.chat.processor.ParseResultProcessor;
-import com.tencent.supersonic.chat.query.QueryResponder;
+import com.tencent.supersonic.chat.processor.execute.ExecuteResultProcessor;
+import com.tencent.supersonic.chat.processor.parse.ParseResultProcessor;
 import com.tencent.supersonic.common.util.ContextUtils;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 public class ComponentFactory {
@@ -28,8 +28,8 @@ public class ComponentFactory {
     private static SemanticInterpreter semanticInterpreter;
 
     private static LLMProxy llmProxy;
-    private static List<ParseResultProcessor> responseProcessors = new ArrayList<>();
-    private static List<QueryResponder> executeResponders = new ArrayList<>();
+    private static List<ParseResultProcessor> parseProcessors = new ArrayList<>();
+    private static List<ExecuteResultProcessor> executeProcessors = new ArrayList<>();
     private static ModelResolver modelResolver;
 
     public static List<SchemaMapper> getSchemaMappers() {
@@ -45,14 +45,14 @@ public class ComponentFactory {
                 semanticCorrectors) : semanticCorrectors;
     }
 
-    public static List<ParseResultProcessor> getPostProcessors() {
-        return CollectionUtils.isEmpty(responseProcessors) ? init(ParseResultProcessor.class,
-                responseProcessors) : responseProcessors;
+    public static List<ParseResultProcessor> getParseProcessors() {
+        return CollectionUtils.isEmpty(parseProcessors) ? init(ParseResultProcessor.class,
+                parseProcessors) : parseProcessors;
     }
 
-    public static List<QueryResponder> getExecuteResponders() {
-        return CollectionUtils.isEmpty(executeResponders)
-                ? init(QueryResponder.class, executeResponders) : executeResponders;
+    public static List<ExecuteResultProcessor> getExecuteProcessors() {
+        return CollectionUtils.isEmpty(executeProcessors)
+                ? init(ExecuteResultProcessor.class, executeProcessors) : executeProcessors;
     }
 
     public static SemanticInterpreter getSemanticLayer() {

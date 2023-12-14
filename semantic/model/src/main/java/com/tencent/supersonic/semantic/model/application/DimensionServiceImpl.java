@@ -43,7 +43,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -184,12 +183,6 @@ public class DimensionServiceImpl implements DimensionService {
     }
 
     @Override
-    public DimensionResp getDimension(Long id) {
-        DimensionDO dimensionDO = dimensionRepository.getDimensionById(id);
-        return DimensionConverter.convert2DimensionResp(dimensionDO, new HashMap<>());
-    }
-
-    @Override
     public PageInfo<DimensionResp> queryDimension(PageDimensionReq pageDimensionReq) {
         DimensionFilter dimensionFilter = new DimensionFilter();
         BeanUtils.copyProperties(pageDimensionReq, dimensionFilter);
@@ -211,7 +204,8 @@ public class DimensionServiceImpl implements DimensionService {
     public List<DimensionResp> getDimensions(MetaFilter metaFilter) {
         DimensionFilter dimensionFilter = new DimensionFilter();
         BeanUtils.copyProperties(metaFilter, dimensionFilter);
-        return convertList(dimensionRepository.getDimension(dimensionFilter), modelService.getModelMap());
+        List<DimensionDO> dimensionDOS = dimensionRepository.getDimension(dimensionFilter);
+        return convertList(dimensionDOS, modelService.getModelMap());
     }
 
     private List<DimensionResp> getDimensions(Long modelId) {
@@ -238,7 +232,8 @@ public class DimensionServiceImpl implements DimensionService {
         List<DimensionResp> dimensionResps = Lists.newArrayList();
         if (!CollectionUtils.isEmpty(dimensionDOS)) {
             dimensionResps = dimensionDOS.stream()
-                    .map(dimensionDO -> DimensionConverter.convert2DimensionResp(dimensionDO, modelRespMap))
+                    .map(dimensionDO -> DimensionConverter
+                            .convert2DimensionResp(dimensionDO, modelRespMap))
                     .collect(Collectors.toList());
         }
         return dimensionResps;

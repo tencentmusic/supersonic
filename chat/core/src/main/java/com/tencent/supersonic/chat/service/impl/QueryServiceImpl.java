@@ -28,11 +28,11 @@ import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.persistence.dataobject.CostType;
 import com.tencent.supersonic.chat.persistence.dataobject.StatisticsDO;
-import com.tencent.supersonic.chat.processor.ParseResultProcessor;
+import com.tencent.supersonic.chat.processor.parse.ParseResultProcessor;
 import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.chat.query.QueryResponder;
+import com.tencent.supersonic.chat.processor.execute.ExecuteResultProcessor;
 import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.SemanticService;
@@ -111,8 +111,8 @@ public class QueryServiceImpl implements QueryService {
 
     private List<SchemaMapper> schemaMappers = ComponentFactory.getSchemaMappers();
     private List<SemanticParser> semanticParsers = ComponentFactory.getSemanticParsers();
-    private List<ParseResultProcessor> responseProcessors = ComponentFactory.getPostProcessors();
-    private List<QueryResponder> executeResponders = ComponentFactory.getExecuteResponders();
+    private List<ParseResultProcessor> parseProcessors = ComponentFactory.getParseProcessors();
+    private List<ExecuteResultProcessor> executeProcessors = ComponentFactory.getExecuteProcessors();
     private List<SemanticCorrector> semanticCorrectors = ComponentFactory.getSemanticCorrectors();
 
     @Override
@@ -156,7 +156,7 @@ public class QueryServiceImpl implements QueryService {
         }
 
         // 4. processor
-        responseProcessors.forEach(processor -> {
+        parseProcessors.forEach(processor -> {
             long startTime = System.currentTimeMillis();
             processor.process(parseResult, queryCtx, chatCtx);
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
@@ -206,8 +206,8 @@ public class QueryServiceImpl implements QueryService {
             }
             chatCtx.setQueryText(queryReq.getQueryText());
             chatCtx.setUser(queryReq.getUser().getName());
-            for (QueryResponder executeResponder : executeResponders) {
-                executeResponder.fillInfo(queryResult, parseInfo, queryReq);
+            for (ExecuteResultProcessor executeResultProcessor : executeProcessors) {
+                executeResultProcessor.process(queryResult, parseInfo, queryReq);
             }
             chatService.updateQuery(queryReq.getQueryId(), queryResult, chatCtx);
         } else {

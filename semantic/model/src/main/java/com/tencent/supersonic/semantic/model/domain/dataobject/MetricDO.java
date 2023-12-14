@@ -98,4 +98,6 @@ public class MetricDO {
      */
     private String typeParams;
 
+    private String ext;
+
 }

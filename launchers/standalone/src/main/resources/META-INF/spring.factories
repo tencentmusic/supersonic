@@ -20,14 +20,14 @@ com.tencent.supersonic.chat.api.component.SemanticCorrector=\
     com.tencent.supersonic.chat.corrector.HavingCorrector, \
     com.tencent.supersonic.chat.corrector.FromCorrector
 
-com.tencent.supersonic.chat.processor.ParseResultProcessor=\
-    com.tencent.supersonic.chat.processor.MetricCheckProcessor, \
-    com.tencent.supersonic.chat.processor.ParseInfoProcessor, \
-    com.tencent.supersonic.chat.processor.QueryRankProcessor, \
-    com.tencent.supersonic.chat.processor.EntityInfoProcessor, \
-    com.tencent.supersonic.chat.processor.SqlInfoProcessor, \
-    com.tencent.supersonic.chat.processor.TimeCostProcessor, \
-    com.tencent.supersonic.chat.processor.RespBuildProcessor
+com.tencent.supersonic.chat.processor.parse.ParseResultProcessor=\
+    com.tencent.supersonic.chat.processor.parse.MetricCheckProcessor, \
+    com.tencent.supersonic.chat.processor.parse.ParseInfoProcessor, \
+    com.tencent.supersonic.chat.processor.parse.QueryRankProcessor, \
+    com.tencent.supersonic.chat.processor.parse.EntityInfoProcessor, \
+    com.tencent.supersonic.chat.processor.parse.SqlInfoProcessor, \
+    com.tencent.supersonic.chat.processor.parse.TimeCostProcessor, \
+    com.tencent.supersonic.chat.processor.parse.RespBuildProcessor
 
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.LocalSemanticInterpreter
@@ -41,8 +41,8 @@ com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor
 com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
 
-com.tencent.supersonic.chat.query.QueryResponder=\
-    com.tencent.supersonic.chat.query.SimilarMetricQueryResponder
+com.tencent.supersonic.chat.processor.execute.ExecuteResultProcessor=\
+    com.tencent.supersonic.chat.processor.execute.SimilarMetricProcessor
 
 com.tencent.supersonic.common.util.embedding.S2EmbeddingStore=\
     com.tencent.supersonic.common.util.embedding.InMemoryS2EmbeddingStore

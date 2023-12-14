@@ -34,6 +34,7 @@ public class MetricConverter {
         metricDO.setTags(metricReq.getTag());
         metricDO.setRelateDimensions(JSONObject.toJSONString(metricReq.getRelateDimension()));
         metricDO.setStatus(StatusEnum.ONLINE.getCode());
+        metricDO.setExt(JSONObject.toJSONString(metricReq.getExt()));
         return metricDO;
     }
 
@@ -47,6 +48,7 @@ public class MetricConverter {
             metricDO.setRelateDimensions(JSONObject.toJSONString(metricReq.getRelateDimension()));
         }
         metricDO.setTags(metricReq.getTag());
+        metricDO.setExt(JSONObject.toJSONString(metricReq.getExt()));
         return metricDO;
     }
 
@@ -74,6 +76,9 @@ public class MetricConverter {
         metricResp.setTag(metricDO.getTags());
         metricResp.setRelateDimension(JSONObject.parseObject(metricDO.getRelateDimensions(),
                 RelateDimension.class));
+        if (metricDO.getExt() != null) {
+            metricResp.setExt(JSONObject.parseObject(metricDO.getExt(), Map.class));
+        }
         return metricResp;
     }
 
