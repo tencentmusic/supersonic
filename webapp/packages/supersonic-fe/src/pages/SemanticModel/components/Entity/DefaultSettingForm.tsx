@@ -27,6 +27,12 @@ type Props = {
 const FormItem = Form.Item;
 const Option = Select.Option;
 
+const formDefaultValue = {
+  unit: 7,
+  period: 'DAY',
+  timeMode: 'LAST',
+};
+
 const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
   { metricList, dimensionList, entityData, chatConfigKey, chatConfigType, onSubmit },
   ref,
@@ -44,11 +50,12 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
 
   useEffect(() => {
     form.resetFields();
-    if (!entityData?.chatDefaultConfig) {
+    if (!(entityData?.id && entityData?.chatDefaultConfig)) {
       return;
     }
     const { chatDefaultConfig, id } = formatEntityData;
     form.setFieldsValue({
+      ...formDefaultValue,
       ...chatDefaultConfig,
       id,
     });
@@ -152,11 +159,7 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
         form={form}
         layout="vertical"
         className={styles.form}
-        initialValues={{
-          unit: 7,
-          period: 'DAY',
-          timeMode: 'LAST',
-        }}
+        initialValues={formDefaultValue}
       >
         <FormItem hidden={true} name="id" label="ID">
           <Input placeholder="id" />

@@ -126,6 +126,11 @@ export async function patchRoutes({ routes }) {
   }
 }
 
+export function onRouteChange() {
+  const title = window.document.title.split('-SuperSonic')[0];
+  window.document.title = `${title}-SuperSonic`;
+}
+
 export const layout: RunTimeLayoutConfig = (params) => {
   const { initialState } = params as any;
   return {
