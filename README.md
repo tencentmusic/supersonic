@@ -2,16 +2,16 @@
 
 # SuperSonic (超音数)
 
-**SuperSonic is an out-of-the-box yet highly extensible framework for building ChatBI**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to build logical semantic models (definition of metrics/dimensions/entities, along with their meaning, context and relationships) on top of physical data models, and no data modification or copying is required. Meanwhile, SuperSonic is designed to be pluggable, allowing new functionalities to be added through plugins and core components to be integrated with other systems.
+**SupeSonic is a new-generation data analytics platform that integrates ChatBI and HeadlessBI**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to build logical semantic models (definition of entities/metrics/dimensions/tags, along with their meaning, context and relationships) on top of physical data models, and **no data modification or copying** is required. Meanwhile, SuperSonic is designed to be **highly extensible**, allowing custom functionalities to be added and configured with Java SPI.
 
 <img src="./docs/images/supersonic_demo.gif" height="100%" width="100%" align="center"/>
 
 ## Motivation
 
-The emergence of Large Language Model (LLM) like ChatGPT is reshaping the way information is retrieved. In the field of data analytics, both academia and industry are primarily focused on leveraging LLM to convert natural language into SQL (so called text2sql or nl2sql). While some works exhibit promising results, their **reliability** is inadequate for real-world applications.  
+The emergence of Large Language Model (LLM) like ChatGPT is reshaping the way information is retrieved. In the field of data analytics, both academia and industry are primarily focused on leveraging LLM to convert natural language into SQL (so called Text2SQL or NL2SQL). While some works exhibit promising results, their **reliability** is inadequate for real-world applications.  
 
 From our perspective, the key to filling the real-world gap lies in three aspects: 
-1. Introduce a semantic layer encapsulating underlying data context(joins, formulas, etc) to reduce **complexity**.
+1. Introduce a semantic layer (so called HeadlessBI) encapsulating underlying data context(joins, formulas, etc) to reduce **complexity**.
 2. Augment the LLM with schema mappers(as a kind of preprocessor) and semantic correctors(as a kind of postprocessor) to mitigate **hallucination**.
 3. Utilize heuristic rules when necessary to improve **efficiency**(in terms of latency and cost).
 
@@ -19,8 +19,8 @@ With these ideas in mind, we develop SuperSonic as a practical reference impleme
 
 ## Out-of-the-box Features
 
-- Built-in CUI(Chat User Interface) for *business users* to enter data queries
-- Built-in GUI(Graphical User Interface) for *analytics engineers* to build semantic models
+- Built-in ChatBI interface for *business users* to enter natural language queries
+- Built-in HeadlessBI interface for *analytics engineers* to build semantic models
 - Built-in GUI for *system administrators* to manage chat agents and third-party plugins
 - Support input auto-completion as well as query recommendation
 - Support multi-turn conversation and history context management 
@@ -49,7 +49,7 @@ The high-level architecture and main process flow is as follows:
 SuperSonic comes with sample semantic models as well as chat conversations that can be used as a starting point. Please follow the steps: 
 
 - Download the latest prebuilt binary from the [release page](https://github.com/tencentmusic/supersonic/releases)
-- Run script "bin/supersonic-daemon.sh" to start services (one java process and one python process)
+- Run script "assembly/bin/supersonic-daemon.sh start" to start a standalone Java service
 - Visit http://localhost:9080 in the browser to start exploration
 
 ## Build and Development
