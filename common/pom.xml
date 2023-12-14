@@ -186,6 +186,10 @@
             <artifactId>log4j-api</artifactId>
             <version>${apache.log4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-embeddings</artifactId>
+        </dependency>
 
     </dependencies>
 
