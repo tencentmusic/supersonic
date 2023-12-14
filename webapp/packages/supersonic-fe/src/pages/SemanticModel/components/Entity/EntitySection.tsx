@@ -1,5 +1,6 @@
 import { message, Space } from 'antd';
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState, forwardRef, useImperativeHandle, Ref } from 'react';
+import type { ForwardRefRenderFunction } from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../../model';
@@ -12,82 +13,92 @@ import { ChatConfigType } from '../../enum';
 
 type Props = {
   chatConfigType: ChatConfigType.DETAIL | ChatConfigType.AGG;
+  onConfigSave?: () => void;
   dispatch: Dispatch;
   domainManger: StateType;
 };
 
-const EntitySection: React.FC<Props> = ({
-  domainManger,
-  chatConfigType = ChatConfigType.DETAIL,
-}) => {
-  const { selectDomainId, selectModelId: modelId, dimensionList, metricList } = domainManger;
+const EntitySection: React.FC<Props> = forwardRef(
+  ({ domainManger, chatConfigType = ChatConfigType.DETAIL, onConfigSave }, ref: Ref<any>) => {
+    const { selectDomainId, selectModelId: modelId, dimensionList, metricList } = domainManger;
 
-  const [entityData, setEntityData] = useState<IChatConfig.IChatRichConfig>();
+    const [entityData, setEntityData] = useState<IChatConfig.IChatRichConfig>();
 
-  const queryThemeListData: any = async () => {
-    const { code, data } = await getDomainExtendDetailConfig({
-      modelId,
-    });
+    useImperativeHandle(ref, () => ({
+      refreshConfigData: queryThemeListData,
+    }));
 
-    if (code === 200) {
-      const { chatAggRichConfig, chatDetailRichConfig, id, domainId, modelId } = data;
-      if (chatConfigType === ChatConfigType.DETAIL) {
-        setEntityData({ ...chatDetailRichConfig, id, domainId, modelId });
+    const queryThemeListData: any = async () => {
+      const { code, data } = await getDomainExtendDetailConfig({
+        modelId,
+      });
+
+      if (code === 200) {
+        const { chatAggRichConfig, chatDetailRichConfig, id, domainId, modelId } = data;
+        if (chatConfigType === ChatConfigType.DETAIL) {
+          setEntityData({ ...chatDetailRichConfig, id, domainId, modelId });
+        }
+        if (chatConfigType === ChatConfigType.AGG) {
+          setEntityData({ ...chatAggRichConfig, id, domainId, modelId });
+        }
+        return;
       }
-      if (chatConfigType === ChatConfigType.AGG) {
-        setEntityData({ ...chatAggRichConfig, id, domainId, modelId });
+
+      message.error('获取问答设置信息失败');
+    };
+
+    const initPage = async () => {
+      queryThemeListData();
+    };
+
+    useEffect(() => {
+      if (!modelId) {
+        return;
       }
-      return;
-    }
+      initPage();
+    }, [modelId]);
 
-    message.error('获取问答设置信息失败');
-  };
-
-  const initPage = async () => {
-    queryThemeListData();
-  };
-
-  useEffect(() => {
-    if (!modelId) {
-      return;
-    }
-    initPage();
-  }, [modelId]);
-
-  return (
-    <div style={{ width: 800, margin: '0 auto' }}>
-      <Space direction="vertical" style={{ width: '100%' }} size={20}>
-        <ProCard bordered title="默认设置">
-          <DefaultSettingForm
-            domainId={Number(selectDomainId)}
-            entityData={entityData || {}}
-            chatConfigType={chatConfigType}
-            chatConfigKey={
-              chatConfigType === ChatConfigType.DETAIL ? 'chatDetailConfig' : 'chatAggConfig'
-            }
-            dimensionList={dimensionList.filter((item) => {
-              const blackDimensionList = entityData?.visibility?.blackDimIdList;
-              if (Array.isArray(blackDimensionList)) {
-                return !blackDimensionList.includes(item.id);
+    return (
+      <div style={{ width: 800, margin: '0 auto' }}>
+        <Space direction="vertical" style={{ width: '100%' }} size={20}>
+          <ProCard bordered title="默认设置">
+            <DefaultSettingForm
+              domainId={Number(selectDomainId)}
+              entityData={entityData || {}}
+              chatConfigType={chatConfigType}
+              chatConfigKey={
+                chatConfigType === ChatConfigType.DETAIL ? 'chatDetailConfig' : 'chatAggConfig'
               }
-              return false;
-            })}
-            metricList={metricList.filter((item) => {
-              const blackMetricIdList = entityData?.visibility?.blackMetricIdList;
-              if (Array.isArray(blackMetricIdList)) {
-                return !blackMetricIdList.includes(item.id);
-              }
-              return false;
-            })}
-            onSubmit={() => {
-              queryThemeListData();
-            }}
-          />
-        </ProCard>
-      </Space>
-    </div>
-  );
-};
-export default connect(({ domainManger }: { domainManger: StateType }) => ({
-  domainManger,
-}))(EntitySection);
+              dimensionList={dimensionList.filter((item) => {
+                const blackDimensionList = entityData?.visibility?.blackDimIdList;
+                if (Array.isArray(blackDimensionList)) {
+                  return !blackDimensionList.includes(item.id);
+                }
+                return false;
+              })}
+              metricList={metricList.filter((item) => {
+                const blackMetricIdList = entityData?.visibility?.blackMetricIdList;
+                if (Array.isArray(blackMetricIdList)) {
+                  return !blackMetricIdList.includes(item.id);
+                }
+                return false;
+              })}
+              onSubmit={() => {
+                queryThemeListData();
+                onConfigSave?.();
+              }}
+            />
+          </ProCard>
+        </Space>
+      </div>
+    );
+  },
+);
+export default connect(
+  ({ domainManger }: { domainManger: StateType }) => ({
+    domainManger,
+  }),
+  () => {},
+  null,
+  { forwardRef: true },
+)(EntitySection);
