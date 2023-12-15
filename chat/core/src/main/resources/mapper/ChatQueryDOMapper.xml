@@ -14,6 +14,7 @@
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO">
     <result column="query_text" jdbcType="LONGVARCHAR" property="queryText" />
     <result column="query_result" jdbcType="LONGVARCHAR" property="queryResult" />
+    <result column="similar_queries" jdbcType="LONGVARCHAR" property="similarQueries"/>
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
@@ -48,7 +49,7 @@
     question_id, agent_id, create_time, user_name, query_state, chat_id, score, feedback
   </sql>
   <sql id="Blob_Column_List">
-    query_text, query_result
+    query_text, query_result, similar_queries
   </sql>
   <select id="selectByExampleWithBLOBs" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDOExample" resultMap="ResultMapWithBLOBs">
     select
@@ -67,6 +68,11 @@
     </if>
   </select>
 
+  <select id="selectByPrimaryKey"  resultMap="ResultMapWithBLOBs">
+    select * from s2_chat_query
+    where question_id = #{questionId,jdbcType=BIGINT}
+  </select>
+
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from s2_chat_query
@@ -75,11 +81,12 @@
   <insert id="insert" parameterType="com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO" useGeneratedKeys="true" keyProperty="questionId">
     insert into s2_chat_query (agent_id, create_time, user_name,
       query_state, chat_id, score,
-      feedback, query_text, query_result
+      feedback, query_text, query_result, similar_queries
       )
     values (#{agentId,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{userName,jdbcType=VARCHAR},
       #{queryState,jdbcType=INTEGER}, #{chatId,jdbcType=BIGINT}, #{score,jdbcType=INTEGER},
-      #{feedback,jdbcType=VARCHAR}, #{queryText,jdbcType=LONGVARCHAR}, #{queryResult,jdbcType=LONGVARCHAR}
+      #{feedback,jdbcType=VARCHAR}, #{queryText,jdbcType=LONGVARCHAR}, #{queryResult,jdbcType=LONGVARCHAR},
+      #{similarQueries, jdbcType=LONGVARCHAR}
       )
   </insert>
 
@@ -109,6 +116,9 @@
       </if>
       <if test="queryResult != null">
         query_result = #{queryResult,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="similarQueries != null">
+        similar_queries = #{similarQueries,jdbcType=LONGVARCHAR},
       </if>
     </set>
     where question_id = #{questionId,jdbcType=BIGINT}

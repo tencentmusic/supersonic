@@ -3,6 +3,7 @@ package com.tencent.supersonic.semantic.model.application;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.semantic.api.model.request.ViewInfoReq;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
@@ -13,7 +14,6 @@ import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.dataobject.ViewInfoDO;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
-import com.tencent.supersonic.semantic.model.domain.pojo.ModelFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.ViewInfoRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -44,11 +44,9 @@ public class ViewInfoServiceImpl {
         return viewInfoRepository.getViewInfoList(domainId);
     }
 
-    public List<ModelSchemaRelaResp> getDomainSchema(Long domainId) {
+    public List<ModelSchemaRelaResp> getDomainSchema(Long domainId, User user) {
         List<ModelSchemaRelaResp> domainSchemaRelaResps = Lists.newArrayList();
-        ModelFilter modelFilter = new ModelFilter();
-        modelFilter.setDomainIds(Lists.newArrayList(domainId));
-        List<ModelResp> modelResps = modelService.getModelList(modelFilter);
+        List<ModelResp> modelResps = modelService.getModelListWithAuth(user, domainId, AuthType.ADMIN);
         for (ModelResp modelResp : modelResps) {
             ModelSchemaRelaResp domainSchemaRelaResp = new ModelSchemaRelaResp();
             MetaFilter metaFilter = new MetaFilter();

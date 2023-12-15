@@ -3,22 +3,23 @@ package com.tencent.supersonic.chat.rest;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.chat.api.pojo.response.QueryRecallResp;
-import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
-import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
-import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
-import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
+import com.tencent.supersonic.chat.api.pojo.response.QueryRecallResp;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
+import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
+import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
+import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.service.ChatService;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping({"/api/chat/manage", "/openapi/chat/manage"})
@@ -81,6 +82,11 @@ public class ChatController {
         return chatService.queryInfo(pageQueryInfoCommand, chatId);
     }
 
+    @GetMapping("/getChatQuery/{queryId}")
+    public QueryResp getChatQuery(@PathVariable("queryId") Long queryId) {
+        return chatService.getChatQuery(queryId);
+    }
+
     @PostMapping("/queryShowCase")
     public ShowCaseResp queryShowCase(@RequestBody PageQueryInfoReq pageQueryInfoCommand,
                                       @RequestParam(value = "agentId") int agentId) {
@@ -88,11 +94,11 @@ public class ChatController {
     }
 
     @RequestMapping("/getSolvedQuery")
-    public List<SolvedQueryRecallResp> getSolvedQuery(@RequestParam(value = "queryText") String queryText,
-                                                      @RequestParam(value = "agentId") Integer agentId) {
+    public List<SimilarQueryRecallResp> getSolvedQuery(@RequestParam(value = "queryText") String queryText,
+                                                       @RequestParam(value = "agentId") Integer agentId) {
         QueryRecallResp queryRecallResp = new QueryRecallResp();
         Long startTime = System.currentTimeMillis();
-        List<SolvedQueryRecallResp> solvedQueryRecallRespList = chatService.getSolvedQuery(queryText, agentId);
+        List<SimilarQueryRecallResp> solvedQueryRecallRespList = chatService.getSolvedQuery(queryText, agentId);
         queryRecallResp.setSolvedQueryRecallRespList(solvedQueryRecallRespList);
         queryRecallResp.setQueryTimeCost(System.currentTimeMillis() - startTime);
         return solvedQueryRecallRespList;

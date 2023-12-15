@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SolvedQueryReq {
+public class SimilarQueryReq {
 
     private Long queryId;
 

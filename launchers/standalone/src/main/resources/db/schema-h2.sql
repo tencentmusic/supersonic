@@ -37,6 +37,7 @@ CREATE TABLE `s2_chat_query`
     `query_result` mediumtext NOT NULL ,
     `score`             int DEFAULT '0',
     `feedback`          varchar(1024) DEFAULT '',
+    `similar_queries`          varchar(1024) DEFAULT '',
     PRIMARY KEY (`question_id`)
 );
 

@@ -134,7 +134,7 @@ public class MetricController {
                                              HttpServletRequest request,
                                              HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        metricService.saveOrUpdateMetricQueryDefaultConfig(queryDefaultConfig, user);
+        metricService.saveMetricQueryDefaultConfig(queryDefaultConfig, user);
         return true;
     }
 

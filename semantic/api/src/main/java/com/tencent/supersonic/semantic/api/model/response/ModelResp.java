@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.api.model.response;
 
+import com.google.common.base.Objects;
 import com.tencent.supersonic.semantic.api.model.pojo.Identify;
 import com.tencent.supersonic.semantic.api.model.pojo.ModelDetail;
 import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
@@ -60,6 +61,26 @@ public class ModelResp extends SchemaItem {
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        ModelResp that = (ModelResp) o;
+        return Objects.equal(getId(), that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(super.hashCode(), getId());
     }
 
 }

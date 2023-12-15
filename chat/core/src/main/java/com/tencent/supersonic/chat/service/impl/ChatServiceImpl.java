@@ -10,7 +10,7 @@ import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
-import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
+import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
@@ -19,7 +19,7 @@ import com.tencent.supersonic.chat.persistence.repository.ChatContextRepository;
 import com.tencent.supersonic.chat.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.persistence.repository.ChatRepository;
 import com.tencent.supersonic.chat.service.ChatService;
-import com.tencent.supersonic.chat.utils.SolvedQueryManager;
+import com.tencent.supersonic.chat.utils.SimilarQueryManager;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
@@ -46,10 +46,10 @@ public class ChatServiceImpl implements ChatService {
     private ChatContextRepository chatContextRepository;
     private ChatRepository chatRepository;
     private ChatQueryRepository chatQueryRepository;
-    private SolvedQueryManager solvedQueryManager;
+    private SimilarQueryManager solvedQueryManager;
 
     public ChatServiceImpl(ChatContextRepository chatContextRepository, ChatRepository chatRepository,
-            ChatQueryRepository chatQueryRepository, SolvedQueryManager solvedQueryManager) {
+            ChatQueryRepository chatQueryRepository, SimilarQueryManager solvedQueryManager) {
         this.chatContextRepository = chatContextRepository;
         this.chatRepository = chatRepository;
         this.chatQueryRepository = chatQueryRepository;
@@ -81,12 +81,6 @@ public class ChatServiceImpl implements ChatService {
     public void updateContext(ChatContext chatCtx) {
         log.debug("save ChatContext {}", chatCtx);
         chatContextRepository.updateContext(chatCtx);
-    }
-
-    @Override
-    public void switchContext(ChatContext chatCtx) {
-        log.debug("switchContext ChatContext {}", chatCtx);
-        chatCtx.setParseInfo(new SemanticParseInfo());
     }
 
     @Override
@@ -140,6 +134,11 @@ public class ChatServiceImpl implements ChatService {
         }
         fillParseInfo(queryRespPageInfo.getList());
         return queryRespPageInfo;
+    }
+
+    @Override
+    public QueryResp getChatQuery(Long queryId) {
+        return chatQueryRepository.getChatQuery(queryId);
     }
 
     @Override
@@ -197,13 +196,6 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void addQuery(QueryResult queryResult, ChatContext chatCtx) {
-        chatQueryRepository.createChatQuery(queryResult, chatCtx);
-        chatRepository.updateLastQuestion(chatCtx.getChatId().longValue(),
-                chatCtx.getQueryText(), getCurrentTime());
-    }
-
-    @Override
     public Boolean updateQuery(Long questionId, QueryResult queryResult, ChatContext chatCtx) {
         ChatQueryDO chatQueryDO = new ChatQueryDO();
         chatQueryDO.setQuestionId(questionId);
@@ -227,11 +219,6 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void updateChatParse(List<ChatParseDO> chatParseDOS) {
-        chatQueryRepository.updateChatParseInfo(chatParseDOS);
-    }
-
-    @Override
     public ChatQueryDO getLastQuery(long chatId) {
         return chatQueryRepository.getLastChatQuery(chatId);
     }
@@ -250,14 +237,14 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public List<SolvedQueryRecallResp> getSolvedQuery(String queryText, Integer agentId) {
+    public List<SimilarQueryRecallResp> getSolvedQuery(String queryText, Integer agentId) {
         //1. recall solved query by queryText
-        List<SolvedQueryRecallResp> solvedQueryRecallResps = solvedQueryManager.recallSolvedQuery(queryText, agentId);
+        List<SimilarQueryRecallResp> solvedQueryRecallResps = solvedQueryManager.recallSimilarQuery(queryText, agentId);
         if (CollectionUtils.isEmpty(solvedQueryRecallResps)) {
             return Lists.newArrayList();
         }
         List<Long> queryIds = solvedQueryRecallResps.stream()
-                .map(SolvedQueryRecallResp::getQueryId).collect(Collectors.toList());
+                .map(SimilarQueryRecallResp::getQueryId).collect(Collectors.toList());
         PageQueryInfoReq pageQueryInfoReq = new PageQueryInfoReq();
         pageQueryInfoReq.setIds(queryIds);
         pageQueryInfoReq.setPageSize(100);

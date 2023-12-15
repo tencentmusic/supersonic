@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class SolvedQueryRecallResp {
+public class SimilarQueryRecallResp {
 
     private Long queryId;
 
