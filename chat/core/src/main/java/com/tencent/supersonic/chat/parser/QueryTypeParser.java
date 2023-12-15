@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * QueryTypeParser resolves query type as either METRIC or TAG, or OTHER.
+ * QueryTypeParser resolves query type as either METRIC or TAG, or ID.
  */
 @Slf4j
 public class QueryTypeParser implements SemanticParser {

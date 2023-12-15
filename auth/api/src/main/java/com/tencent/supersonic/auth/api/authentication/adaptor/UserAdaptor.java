@@ -7,6 +7,9 @@ import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * UserAdaptor defines some interfaces for obtaining user and organization information
+ */
 public interface UserAdaptor {
 
     List<String> getUserNames();

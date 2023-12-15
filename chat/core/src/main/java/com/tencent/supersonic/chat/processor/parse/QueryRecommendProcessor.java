@@ -22,8 +22,11 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+/**
+ * MetricRecommendProcessor fills recommended query based on embedding similarity.
+ */
 @Slf4j
-public class SimilarQueryProcessor implements ParseResultProcessor {
+public class QueryRecommendProcessor implements ParseResultProcessor {
 
     @Override
     public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {

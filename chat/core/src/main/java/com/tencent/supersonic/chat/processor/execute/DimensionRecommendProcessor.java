@@ -20,7 +20,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * DimensionRecommendProcessor obtains metric recommended dimensions
+ * DimensionRecommendProcessor recommend some dimensions
+ * related to metrics based on configuration
  */
 public class DimensionRecommendProcessor implements ExecuteResultProcessor {
 
