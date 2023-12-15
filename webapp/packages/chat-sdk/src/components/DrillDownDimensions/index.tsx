@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 import { CLS_PREFIX } from '../../common/constants';
 import { DrillDownDimensionType, FilterItemType } from '../../common/type';
-import { queryDrillDownDimensions } from '../../service';
 import DimensionSection from './DimensionSection';
 
 type Props = {
-  modelId: number;
-  metricId?: number;
+  drillDownDimensions: DrillDownDimensionType[];
   drillDownDimension?: DrillDownDimensionType;
   secondDrillDownDimension?: DrillDownDimensionType;
   originDimensions?: DrillDownDimensionType[];
@@ -18,8 +16,7 @@ type Props = {
 const MAX_DIMENSION_COUNT = 20;
 
 const DrillDownDimensions: React.FC<Props> = ({
-  modelId,
-  metricId,
+  drillDownDimensions,
   drillDownDimension,
   secondDrillDownDimension,
   originDimensions,
@@ -32,9 +29,8 @@ const DrillDownDimensions: React.FC<Props> = ({
   const prefixCls = `${CLS_PREFIX}-drill-down-dimensions`;
 
   const initData = async () => {
-    const res = await queryDrillDownDimensions(modelId, metricId);
     setDimensions(
-      res.data.dimensions
+      drillDownDimensions
         .filter(
           dimension =>
             !dimensionFilters?.some(filter => filter.name === dimension.name) &&

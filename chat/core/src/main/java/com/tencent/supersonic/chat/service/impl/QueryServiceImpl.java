@@ -19,7 +19,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.api.pojo.request.SolvedQueryReq;
+import com.tencent.supersonic.chat.api.pojo.request.SimilarQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
@@ -39,7 +39,7 @@ import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.chat.service.StatisticsService;
 import com.tencent.supersonic.chat.service.TimeCost;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
-import com.tencent.supersonic.chat.utils.SolvedQueryManager;
+import com.tencent.supersonic.chat.utils.SimilarQueryManager;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
@@ -104,7 +104,7 @@ public class QueryServiceImpl implements QueryService {
     @Autowired
     private StatisticsService statisticsService;
     @Autowired
-    private SolvedQueryManager solvedQueryManager;
+    private SimilarQueryManager similarQueryManager;
 
     @Value("${time.threshold: 100}")
     private Integer timeThreshold;
@@ -240,7 +240,7 @@ public class QueryServiceImpl implements QueryService {
         if (queryResult.getResponse() == null && CollectionUtils.isEmpty(queryResult.getQueryResults())) {
             return;
         }
-        solvedQueryManager.saveSolvedQuery(SolvedQueryReq.builder().parseId(queryReq.getParseId())
+        similarQueryManager.saveSimilarQuery(SimilarQueryReq.builder().parseId(queryReq.getParseId())
                 .queryId(queryReq.getQueryId())
                 .agentId(chatQueryDO.getAgentId())
                 .modelId(parseInfo.getModelClusterKey())

@@ -6,6 +6,6 @@ import java.util.List;
 
 @Data
 public class QueryRecallResp {
-    private List<SolvedQueryRecallResp> solvedQueryRecallRespList;
+    private List<SimilarQueryRecallResp> solvedQueryRecallRespList;
     private Long queryTimeCost;
 }

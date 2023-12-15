@@ -295,16 +295,19 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public void saveOrUpdateMetricQueryDefaultConfig(MetricQueryDefaultConfig queryDefaultConfig, User user) {
-        MetricQueryDefaultConfigDO metricQueryDefaultConfigDO = new MetricQueryDefaultConfigDO();
-        if (queryDefaultConfig.getId() == null) {
-            queryDefaultConfig.createdBy(user.getName());
-            BeanMapper.mapper(queryDefaultConfig, metricQueryDefaultConfigDO);
-            metricRepository.saveDefaultQueryConfig(metricQueryDefaultConfigDO);
+    public void saveMetricQueryDefaultConfig(MetricQueryDefaultConfig defaultConfig, User user) {
+        MetricQueryDefaultConfigDO defaultConfigDO =
+                metricRepository.getDefaultQueryConfig(defaultConfig.getMetricId(), user.getName());
+        if (defaultConfigDO == null) {
+            defaultConfigDO = new MetricQueryDefaultConfigDO();
+            defaultConfig.createdBy(user.getName());
+            BeanMapper.mapper(defaultConfig, defaultConfigDO);
+            metricRepository.saveDefaultQueryConfig(defaultConfigDO);
         } else {
-            queryDefaultConfig.updatedBy(user.getName());
-            BeanMapper.mapper(queryDefaultConfig, metricQueryDefaultConfigDO);
-            metricRepository.updateDefaultQueryConfig(metricQueryDefaultConfigDO);
+            defaultConfig.setId(defaultConfigDO.getId());
+            defaultConfig.updatedBy(user.getName());
+            BeanMapper.mapper(defaultConfig, defaultConfigDO);
+            metricRepository.updateDefaultQueryConfig(defaultConfigDO);
         }
     }
 

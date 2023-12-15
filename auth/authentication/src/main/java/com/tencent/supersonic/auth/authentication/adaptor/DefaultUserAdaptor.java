@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * DefaultUserAdaptor provides a default method to obtain user and organization information
+ */
 public class DefaultUserAdaptor implements UserAdaptor {
 
     private List<UserDO> getUserDOList() {

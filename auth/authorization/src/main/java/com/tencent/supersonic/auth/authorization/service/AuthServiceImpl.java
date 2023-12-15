@@ -1,4 +1,4 @@
-package com.tencent.supersonic.auth.authorization.application;
+package com.tencent.supersonic.auth.authorization.service;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
