@@ -19,9 +19,7 @@ public class LLMReq {
 
     private String priorExts;
 
-    // FIXME: Currently Java code is not use AUTO_COT, only two step, but it is used in Python
-    //  code, we use it here just for compatibility. The Java code will be updated in the future.
-    private SqlGenerationMode sqlGenerationMode = SqlGenerationMode.TWO_STEP_AUTO_COT;
+    private SqlGenerationMode sqlGenerationMode = SqlGenerationMode.TWO_PASS_AUTO_COT;
 
     @Data
     public static class ElementValue {
@@ -51,13 +49,13 @@ public class LLMReq {
 
     public enum SqlGenerationMode {
 
-        ONE_STEP_AUTO_COT("1_pass_auto_cot"),
+        ONE_PASS_AUTO_COT("1_pass_auto_cot"),
 
-        ONE_STEP_AUTO_COT_SELF_CONSISTENCY("1_pass_auto_cot_self_consistency"),
+        ONE_PASS_AUTO_COT_SELF_CONSISTENCY("1_pass_auto_cot_self_consistency"),
 
-        TWO_STEP_AUTO_COT("2_pass_auto_cot"),
+        TWO_PASS_AUTO_COT("2_pass_auto_cot"),
 
-        TWO_STEP_AUTO_COT_SELF_CONSISTENCY("2_pass_auto_cot_self_consistency");
+        TWO_PASS_AUTO_COT_SELF_CONSISTENCY("2_pass_auto_cot_self_consistency");
 
 
         private String name;

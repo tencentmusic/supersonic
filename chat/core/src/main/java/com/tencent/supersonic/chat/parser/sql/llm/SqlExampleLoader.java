@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SqlExampleLoader {
 
-    private static final String EXAMPLE_JSON_FILE = "example.json";
+    private static final String EXAMPLE_JSON_FILE = "s2ql_examplar.json";
 
     private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
     private TypeReference<List<SqlExample>> valueTypeRef = new TypeReference<List<SqlExample>>() {

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@Order(4)
+@Order(0)
 public class EmbeddingInitListener implements CommandLineRunner {
 
     @Autowired

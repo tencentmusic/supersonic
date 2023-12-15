@@ -1,65 +1,131 @@
 package com.tencent.supersonic.chat.parser.sql.llm;
 
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
 public class SqlPromptGenerator {
 
-    public String generateSchemaLinkingPrompt(String question, String modelName, List<String> fieldsList,
-            List<ElementValue> priorSchemaLinks, List<Map<String, String>> exampleList) {
+    public String generatorLinkingAndSqlPrompt(LLMReq llmReq, List<Map<String, String>> exampleList) {
+        String instruction =
+                "# Find the schema_links for generating SQL queries for each question based on the database schema "
+                        + "and Foreign keys. Then use the the schema links to generate the "
+                        + "SQL queries for each of the questions.";
 
-        String exampleTemplate = "Table {tableName}, columns = {fieldsList}, prior_schema_links = {priorSchemaLinks}\n"
-                + "问题:{question}\n分析:{analysis} 所以Schema_links是:\nSchema_links:{schemaLinks}";
+        List<String> exampleKeys = Arrays.asList("questionAugmented", "dbSchema", "generatedSchemaLinkingCoT", "sql");
+        String exampleTemplate = "dbSchema\nQ: questionAugmented\nA: generatedSchemaLinkingCoT\nSQL: sql";
 
-        List<String> exampleKeys = Arrays.asList("tableName", "fieldsList", "priorSchemaLinks", "question", "analysis",
-                "schemaLinks");
+        String exampleFormat = InputFormat.format(exampleTemplate, exampleKeys, exampleList);
 
-        String schemaLinkingPrompt = InputFormat.format(exampleTemplate, exampleKeys, exampleList);
+        Pair<String, String> questionPrompt = transformQuestionPrompt(llmReq);
+        String dbSchema = questionPrompt.getLeft();
+        String questionAugmented = questionPrompt.getRight();
 
-        String newCaseTemplate = "Table {tableName}, columns = {fieldsList}, prior_schema_links = {priorSchemaLinks}\n"
-                + "问题:{question}\n分析: 让我们一步一步地思考。";
+        String newCaseTemplate = "%s\nQ: %s\nA: Let’s think step by step. In the question \"%s\", we are asked:";
+        String newCasePrompt = String.format(newCaseTemplate, dbSchema, questionAugmented, questionAugmented);
 
-        String newCasePrompt = newCaseTemplate.replace("{tableName}", modelName)
-                .replace("{fieldsList}", fieldsList.toString())
-                .replace("{priorSchemaLinks}", getPriorSchemaLinks(priorSchemaLinks))
-                .replace("{question}", question);
+        return instruction + InputFormat.SEPERATOR + exampleFormat + InputFormat.SEPERATOR + newCasePrompt;
+    }
 
-        String instruction = "# 根据数据库的表结构,参考先验信息,找出为每个问题生成SQL查询语句的schema_links";
+    public String generateLinkingPrompt(LLMReq llmReq, List<Map<String, String>> exampleList) {
+        String instruction = "# Find the schema_links for generating SQL queries for each question "
+                + "based on the database schema and Foreign keys.";
+
+        List<String> exampleKeys = Arrays.asList("questionAugmented", "dbSchema", "generatedSchemaLinkingCoT");
+        String exampleTemplate = "dbSchema\nQ: questionAugmented\nA: generatedSchemaLinkingCoT";
+        String exampleFormat = InputFormat.format(exampleTemplate, exampleKeys, exampleList);
+
+        Pair<String, String> questionPrompt = transformQuestionPrompt(llmReq);
+        String dbSchema = questionPrompt.getLeft();
+        String questionAugmented = questionPrompt.getRight();
+        String newCaseTemplate = "%s\nQ: %s\nA: Let’s think step by step. In the question \"%s\", we are asked:";
+        String newCasePrompt = String.format(newCaseTemplate, dbSchema, questionAugmented, questionAugmented);
+
+        return instruction + InputFormat.SEPERATOR + exampleFormat + InputFormat.SEPERATOR + newCasePrompt;
+    }
+
+    public String generateSqlPrompt(LLMReq llmReq, String schemaLinkStr, List<Map<String, String>> fewshotExampleList) {
+        String instruction = "# Use the the schema links to generate the SQL queries for each of the questions.";
+        List<String> exampleKeys = Arrays.asList("questionAugmented", "dbSchema", "generatedSchemaLinkings", "sql");
+        String exampleTemplate = "dbSchema\nQ: questionAugmented\n"
+                + "Schema_links: generatedSchemaLinkings\nSQL: {sql}";
+
+        String schemaLinkingPrompt = InputFormat.format(exampleTemplate, exampleKeys, fewshotExampleList);
+        Pair<String, String> questionPrompt = transformQuestionPrompt(llmReq);
+        String dbSchema = questionPrompt.getLeft();
+        String questionAugmented = questionPrompt.getRight();
+        String newCaseTemplate = "%s\nQ: %s\nSchema_links: %s\nSQL: ";
+        String newCasePrompt = String.format(newCaseTemplate, dbSchema, questionAugmented, schemaLinkStr);
         return instruction + InputFormat.SEPERATOR + schemaLinkingPrompt + InputFormat.SEPERATOR + newCasePrompt;
     }
 
-    private String getPriorSchemaLinks(List<ElementValue> priorSchemaLinks) {
-        return priorSchemaLinks.stream()
-                .map(elementValue -> "'" + elementValue.getFieldName() + "'->" + elementValue.getFieldValue())
-                .collect(Collectors.joining(",", "[", "]"));
+    public List<String> generatePromptPool(LLMReq llmReq, List<List<Map<String, String>>> exampleListPool,
+            boolean isSqlPrompt) {
+        List<String> promptPool = new ArrayList<>();
+        for (List<Map<String, String>> exampleList : exampleListPool) {
+            String prompt;
+            if (isSqlPrompt) {
+                prompt = generatorLinkingAndSqlPrompt(llmReq, exampleList);
+            } else {
+                prompt = generateLinkingPrompt(llmReq, exampleList);
+            }
+            promptPool.add(prompt);
+        }
+        return promptPool;
     }
 
-    public String generateSqlPrompt(String question, String modelName, String schemaLinkStr, String dataDate,
-            List<Map<String, String>> exampleList) {
+    public List<List<Map<String, String>>> getExampleCombos(List<Map<String, String>> exampleList, int numFewShots,
+            int numSelfConsistency) {
+        List<List<Map<String, String>>> results = new ArrayList<>();
+        for (int i = 0; i < numSelfConsistency; i++) {
+            List<Map<String, String>> shuffledList = new ArrayList<>(exampleList);
+            Collections.shuffle(shuffledList);
+            results.add(shuffledList.subList(0, numFewShots));
+        }
+        return results;
+    }
 
-        List<String> exampleKeys = Arrays.asList("question", "currentDate", "tableName", "schemaLinks", "sql");
-        String exampleTemplate = "问题:{question}\nCurrent_date:{currentDate}\nTable {tableName}\n"
-                + "Schema_links:{schemaLinks}\nSQL:{sql}";
+    public Pair<String, String> transformQuestionPrompt(LLMReq llmReq) {
+        String modelName = llmReq.getSchema().getModelName();
+        List<String> fieldNameList = llmReq.getSchema().getFieldNameList();
+        List<ElementValue> linking = llmReq.getLinking();
+        String currentDate = llmReq.getCurrentDate();
+        String priorExts = llmReq.getPriorExts();
 
-        String sqlExamplePrompt = InputFormat.format(exampleTemplate, exampleKeys, exampleList);
+        String dbSchema = "Table: " + modelName + ", Columns = " + fieldNameList + "\nForeign_keys: []";
 
-        String newCaseTemplate = "问题:{question}\nCurrent_date:{currentDate}\nTable {tableName}\n"
-                + "Schema_links:{schemaLinks}\nSQL:";
+        List<String> priorLinkingList = new ArrayList<>();
+        for (ElementValue priorLinking : linking) {
+            String fieldName = priorLinking.getFieldName();
+            String fieldValue = priorLinking.getFieldValue();
+            priorLinkingList.add("'" + fieldValue + "'是一个'" + fieldName + "'");
+        }
+        String currentDataStr = "当前的日期是" + currentDate;
+        String linkingListStr = String.join("，", priorLinkingList);
+        String questionAugmented = String.format("%s (补充信息:%s 。 %s) (备注: %s)", llmReq.getQueryText(), linkingListStr,
+                currentDataStr, priorExts);
+        return Pair.of(dbSchema, questionAugmented);
+    }
 
-        String newCasePrompt = newCaseTemplate.replace("{question}", question)
-                .replace("{currentDate}", dataDate)
-                .replace("{tableName}", modelName)
-                .replace("{schemaLinks}", schemaLinkStr);
-
-        String instruction = "# 根据schema_links为每个问题生成SQL查询语句";
-        return instruction + InputFormat.SEPERATOR + sqlExamplePrompt + InputFormat.SEPERATOR + newCasePrompt;
+    public List<String> generateSqlPromptPool(LLMReq llmReq, List<String> schemaLinkStrPool,
+            List<List<Map<String, String>>> fewshotExampleListPool) {
+        List<String> sqlPromptPool = new ArrayList<>();
+        for (int i = 0; i < schemaLinkStrPool.size(); i++) {
+            String schemaLinkStr = schemaLinkStrPool.get(i);
+            List<Map<String, String>> fewshotExampleList = fewshotExampleListPool.get(i);
+            String sqlPrompt = generateSqlPrompt(llmReq, schemaLinkStr, fewshotExampleList);
+            sqlPromptPool.add(sqlPrompt);
+        }
+        return sqlPromptPool;
     }
 
 }
