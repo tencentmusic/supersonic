@@ -30,6 +30,8 @@ public class ModelReq extends SchemaItem {
 
     private String alias;
 
+    private String sourceType;
+
     private ModelDetail modelDetail;
 
     private List<String> viewers = new ArrayList<>();

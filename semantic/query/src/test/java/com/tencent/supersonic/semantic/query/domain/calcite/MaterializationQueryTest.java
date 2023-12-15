@@ -42,7 +42,10 @@ public class MaterializationQueryTest {
         queryStructReq.setDateInfo(dateConf);
 
         try {
-            QueryStatement queryStatement = queryParser.logicSql(queryStructReq);
+            QueryStatement queryStatement = new QueryStatement();
+            queryStatement.setQueryStructReq(queryStructReq);
+            queryStatement.setIsS2SQL(false);
+            queryStatement = queryParser.logicSql(queryStatement);
             queryUtils.checkSqlParse(queryStatement);
             queryStatement.setModelIds(queryStructReq.getModelIds());
             log.info("queryStatement:{}", queryStatement);

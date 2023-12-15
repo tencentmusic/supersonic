@@ -324,6 +324,7 @@ CREATE TABLE `s2_model` (
                             `drill_down_dimensions` varchar(500) DEFAULT NULL,
                             `database_id` INT NOT  NULL ,
                             `model_detail` text NOT  NULL ,
+                            `source_type` varchar(128) DEFAULT NULL ,
                             `depends` varchar(500) DEFAULT NULL ,
                             `filter_sql` varchar(1000) DEFAULT NULL ,
                             PRIMARY KEY (`id`)

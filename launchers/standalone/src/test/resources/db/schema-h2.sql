@@ -137,6 +137,7 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
     `database_id` INT NOT  NULL ,
     `model_detail` LONGVARCHAR NOT  NULL ,
     `depends` varchar(500) DEFAULT NULL ,
+    `source_type` varchar(128) DEFAULT NULL ,
     `filter_sql` varchar(1000) DEFAULT NULL ,
     PRIMARY KEY (`id`)
     );

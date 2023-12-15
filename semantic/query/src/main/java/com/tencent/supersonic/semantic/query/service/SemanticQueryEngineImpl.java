@@ -43,12 +43,12 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
         return queryResultWithColumns;
     }
 
-    public QueryStatement plan(QueryStructReq queryStructCmd) throws Exception {
-        QueryStatement queryStatement = queryParser.logicSql(queryStructCmd);
+    public QueryStatement plan(QueryStatement queryStatement) throws Exception {
+        queryStatement = queryParser.logicSql(queryStatement);
         queryUtils.checkSqlParse(queryStatement);
-        queryStatement.setModelIds(queryStructCmd.getModelIds());
+        queryStatement.setModelIds(queryStatement.getQueryStructReq().getModelIds());
         log.info("queryStatement:{}", queryStatement);
-        return optimize(queryStructCmd, queryStatement);
+        return optimize(queryStatement.getQueryStructReq(), queryStatement);
     }
 
     public QueryStatement optimize(QueryStructReq queryStructCmd, QueryStatement queryStatement) {
@@ -69,11 +69,19 @@ public class SemanticQueryEngineImpl implements SemanticQueryEngine {
 
     @Override
     public QueryStatement physicalSql(QueryStructReq queryStructCmd, ParseSqlReq sqlCommend) throws Exception {
-        return optimize(queryStructCmd, queryParser.parser(sqlCommend));
+        QueryStatement queryStatement = new QueryStatement();
+        queryStatement.setQueryStructReq(queryStructCmd);
+        queryStatement.setParseSqlReq(sqlCommend);
+        queryStatement.setIsS2SQL(true);
+        return optimize(queryStructCmd, queryParser.parser(sqlCommend, queryStatement));
     }
 
     public QueryStatement physicalSql(QueryStructReq queryStructCmd, MetricReq metricCommand) throws Exception {
-        return queryParser.parser(metricCommand);
+        QueryStatement queryStatement = new QueryStatement();
+        queryStatement.setQueryStructReq(queryStructCmd);
+        queryStatement.setMetricReq(metricCommand);
+        queryStatement.setIsS2SQL(false);
+        return queryParser.parser(queryStatement);
     }
 
 }

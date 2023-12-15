@@ -3,8 +3,8 @@ package com.tencent.supersonic.semantic.query.parser.convert;
 
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
@@ -26,14 +26,6 @@ import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +34,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 @Slf4j
@@ -118,7 +117,11 @@ public class QueryReqConverter {
         queryStructCmd.setModelIds(databaseReq.getModelIds().stream().collect(Collectors.toSet()));
         queryStructCmd.setQueryType(getQueryType(aggOption));
         log.info("QueryReqConverter queryStructCmd[{}]", queryStructCmd);
-        QueryStatement queryStatement = parserService.physicalSql(queryStructCmd, result);
+        QueryStatement queryStatement = new QueryStatement();
+        queryStatement.setQueryStructReq(queryStructCmd);
+        queryStatement.setParseSqlReq(result);
+        queryStatement.setIsS2SQL(true);
+        queryStatement = parserService.plan(queryStatement);
         queryStatement.setSql(String.format(SqlExecuteReq.LIMIT_WRAPPER, queryStatement.getSql()));
         return queryStatement;
     }

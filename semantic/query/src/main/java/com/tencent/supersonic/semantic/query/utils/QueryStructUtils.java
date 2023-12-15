@@ -28,11 +28,11 @@ import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
-import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.service.SchemaService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -277,24 +277,30 @@ public class QueryStructUtils {
         return mergeDateWhereClause(queryStructCmd, whereClauseFromFilter, whereFromDate);
     }
 
-    public String generateZipperWhere(QueryStatement queryStatement, QueryStructReq queryStructReq) {
-        if (Objects.nonNull(queryStatement.getParseSqlReq().getSql())) {
-            String sql = SqlParserRemoveHelper.removeWhere(queryStatement.getParseSqlReq().getSql(),
+    public String generateZipperWhere(QueryStructReq queryStructCmd, ParseSqlReq parseSqlReq) {
+        if (Objects.nonNull(parseSqlReq.getSql()) && !CollectionUtils.isEmpty(parseSqlReq.getTables())
+                && Objects.nonNull(queryStructCmd.getDateInfo())) {
+            String sql = SqlParserRemoveHelper.removeWhere(parseSqlReq.getSql(),
                     dateModeUtils.getDateCol());
-            if (!CollectionUtils.isEmpty(queryStatement.getMetricReq().getDimensions())) {
-                List<String> dimension = queryStatement.getMetricReq().getDimensions().stream()
-                        .filter(d -> !dateModeUtils.getDateCol().contains(d.toLowerCase())).collect(
-                                Collectors.toList());
-                dimension.add(dateModeUtils.getDateColBegin(queryStructReq.getDateInfo()));
-                dimension.add(dateModeUtils.getDateColEnd(queryStructReq.getDateInfo()));
-                queryStatement.getMetricReq().setDimensions(dimension);
-            }
+            parseSqlReq.getTables().stream().forEach(t -> {
+                if (Objects.nonNull(t)) {
+                    List<String> dimensions = new ArrayList<>();
+                    if (!CollectionUtils.isEmpty(t.getDimensions())) {
+                        dimensions.addAll(t.getDimensions().stream()
+                                .filter(d -> !dateModeUtils.getDateCol().contains(d.toLowerCase())).collect(
+                                        Collectors.toList()));
+                    }
+                    dimensions.add(dateModeUtils.getDateColBegin(queryStructCmd.getDateInfo()));
+                    dimensions.add(dateModeUtils.getDateColEnd(queryStructCmd.getDateInfo()));
+                    t.setDimensions(dimensions);
+                }
+            });
             return SqlParserAddHelper.addWhere(sql,
-                    SqlParserSelectHelper.getTimeFilter(queryStatement.getTimeRanges(),
-                            dateModeUtils.getDateColBegin(queryStructReq.getDateInfo()),
-                            dateModeUtils.getDateColEnd(queryStructReq.getDateInfo())));
+                    SqlParserSelectHelper.getTimeFilter(getTimeRanges(queryStructCmd),
+                            dateModeUtils.getDateColBegin(queryStructCmd.getDateInfo()),
+                            dateModeUtils.getDateColEnd(queryStructCmd.getDateInfo())));
         }
-        return queryStatement.getSql();
+        return parseSqlReq.getSql();
     }
 
     public String getZipperDateWhereClause(QueryStructReq queryStructCmd) {

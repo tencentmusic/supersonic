@@ -6,6 +6,7 @@ import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Identify;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Materialization.TimePartType;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Measure;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Metric;
 import com.tencent.supersonic.semantic.query.parser.calcite.schema.SemanticSchema;
@@ -55,7 +56,7 @@ public class SourceRender extends Renderer {
                     datasource, scope,
                     schema, nonAgg);
         }
-
+        addTimeDimension(datasource, queryDimensions);
         for (String metric : queryMetrics) {
             MetricNode metricNode = buildMetricNode(metric, datasource, scope, schema, nonAgg, alias);
             if (!metricNode.getAggNode().isEmpty()) {
@@ -287,14 +288,26 @@ public class SourceRender extends Renderer {
         return false;
     }
 
-    private static void expandWhere(MetricReq metricCommand, TableView tableView, SqlValidatorScope scope)
-            throws Exception {
-        if (metricCommand.getWhere() != null && !metricCommand.getWhere().isEmpty()) {
-            SqlNode sqlNode = SemanticNode.parse(metricCommand.getWhere(), scope);
-            Set<String> fieldWhere = new HashSet<>();
-            FilterNode.getFilterField(sqlNode, fieldWhere);
-            //super.tableView.getFilter().add(sqlNode);
-            tableView.getFilter().add(sqlNode);
+    private static void addTimeDimension(DataSource dataSource, List<String> queryDimension) {
+        if (TimePartType.ZIPPER.equals(dataSource.getTimePartType())) {
+            Optional<Dimension> startTimeOp = dataSource.getDimensions().stream()
+                    .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
+                    .filter(d -> d.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_START)).findFirst();
+            Optional<Dimension> endTimeOp = dataSource.getDimensions().stream()
+                    .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType()))
+                    .filter(d -> d.getName().startsWith(Constants.MATERIALIZATION_ZIPPER_END)).findFirst();
+            if (startTimeOp.isPresent() && !queryDimension.contains(startTimeOp.get().getName())) {
+                queryDimension.add(startTimeOp.get().getName());
+            }
+            if (endTimeOp.isPresent() && !queryDimension.contains(endTimeOp.get().getName())) {
+                queryDimension.add(endTimeOp.get().getName());
+            }
+        } else {
+            Optional<Dimension> timeOp = dataSource.getDimensions().stream()
+                    .filter(d -> Constants.DIMENSION_TYPE_TIME.equalsIgnoreCase(d.getType())).findFirst();
+            if (timeOp.isPresent() && !queryDimension.contains(timeOp.get().getName())) {
+                queryDimension.add(timeOp.get().getName());
+            }
         }
     }
 
