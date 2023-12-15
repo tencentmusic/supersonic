@@ -270,8 +270,7 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
               )}
               {existDrillDownDimension && (
                 <DrillDownDimensions
-                  modelId={chatContext.modelId}
-                  metricId={activeMetricField?.id || defaultMetricField?.id}
+                  drillDownDimensions={data?.recommendedDimensions || []}
                   drillDownDimension={drillDownDimension}
                   secondDrillDownDimension={secondDrillDownDimension}
                   originDimensions={chatContext.dimensions}
