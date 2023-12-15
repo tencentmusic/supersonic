@@ -1,7 +1,6 @@
 import axios from './axiosInstance';
 import {
   ChatContextType,
-  DrillDownDimensionType,
   EntityInfoType,
   HistoryMsgItemType,
   HistoryType,
@@ -126,12 +125,6 @@ export function queryDimensionValues(
     value,
   });
 }
-
-// export function querySimilarQuestions(queryText: string, agentId?: number) {
-//   return axios.get<any>(
-//     `${prefix}/chat/manage/getSolvedQuery?queryText=${queryText}&agentId=${agentId || 0}`
-//   );
-// }
 
 export function queryEntityInfo(queryId: number, parseId: number) {
   return axios.get<EntityInfoType>(
