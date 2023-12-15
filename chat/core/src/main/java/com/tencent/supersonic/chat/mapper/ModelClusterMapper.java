@@ -19,7 +19,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /***
- * A mapper that forms a cluster from connectable models
+ * ModelClusterMapper build a cluster from
+ * connectable data models based on model-rela configuration
+ * and generate SchemaModelClusterMapInfo
  */
 public class ModelClusterMapper implements SchemaMapper {
 

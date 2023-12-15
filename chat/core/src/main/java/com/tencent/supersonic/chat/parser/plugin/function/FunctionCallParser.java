@@ -13,16 +13,20 @@ import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * FunctionCallParser is an implementation of a recall plugin based on FunctionCall
+ */
 @Slf4j
 public class FunctionCallParser extends PluginParser {
 

@@ -42,7 +42,7 @@ com.tencent.supersonic.chat.postprocessor.PostProcessor=\
 
 
 com.tencent.supersonic.chat.processor.execute.ExecuteResultProcessor=\
-    com.tencent.supersonic.chat.processor.execute.SimilarMetricProcessor
+    com.tencent.supersonic.chat.processor.execute.MetricRecommendProcessor
 
 
 com.tencent.supersonic.common.util.embedding.S2EmbeddingStore=\

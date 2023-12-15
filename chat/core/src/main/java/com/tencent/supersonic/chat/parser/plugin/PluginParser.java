@@ -27,6 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
+/**
+ * PluginParser defines the basic process and common methods for recalling plugins.
+ */
 public abstract class PluginParser implements SemanticParser {
 
     @Override
