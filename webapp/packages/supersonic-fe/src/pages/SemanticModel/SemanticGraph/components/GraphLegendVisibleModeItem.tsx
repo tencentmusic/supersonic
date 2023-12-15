@@ -1,6 +1,6 @@
 import { Segmented } from 'antd';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { SemanticNodeType } from '../../enum';
 import styles from '../style.less';
 
@@ -11,12 +11,18 @@ type Props = {
 };
 
 const GraphLegendVisibleModeItem: React.FC<Props> = ({ value, onChange }) => {
+  const [nodeType, setNodeType] = useState<SemanticNodeType | undefined>();
+
+  useEffect(() => {
+    setNodeType(value);
+  }, [value]);
+
   return (
     <div className={styles.graphLegendVisibleModeItem}>
       <Segmented
         size="small"
         block={true}
-        value={value}
+        value={nodeType}
         onChange={(changeValue) => {
           onChange?.(changeValue as SemanticNodeType);
         }}
