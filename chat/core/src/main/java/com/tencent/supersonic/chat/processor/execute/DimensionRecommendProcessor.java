@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * DrillDownDimensionProcessor obtains metric recommended dimensions
+ * DimensionRecommendProcessor obtains metric recommended dimensions
  */
 public class DimensionRecommendProcessor implements ExecuteResultProcessor {
 
