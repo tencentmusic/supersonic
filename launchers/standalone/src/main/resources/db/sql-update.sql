@@ -143,3 +143,6 @@ CREATE TABLE `s2_metric_query_default_config`
     `created_by`     varchar(100) null,
     `updated_by`     varchar(100) null
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--20231214
+alter table s2_chat_query add column `similar_queries` varchar(1024) DEFAULT '';

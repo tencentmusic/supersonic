@@ -157,19 +157,21 @@ CREATE TABLE `s2_chat_parse` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-CREATE TABLE `s2_chat_query` (
-                                 `question_id` bigint(20) NOT NULL AUTO_INCREMENT,
-                                 `agent_id` int(11) DEFAULT NULL,
-                                 `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                 `query_text` mediumtext,
-                                 `user_name` varchar(150) DEFAULT NULL,
-                                 `query_state` int(1) DEFAULT NULL,
-                                 `chat_id` bigint(20) NOT NULL,
-                                 `query_result` mediumtext,
-                                 `score` int(11) DEFAULT '0',
-                                 `feedback` varchar(1024) DEFAULT '',
-                                 PRIMARY KEY (`question_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE `s2_chat_query`
+(
+    `question_id`     bigint(20) NOT NULL AUTO_INCREMENT,
+    `agent_id`        int(11)             DEFAULT NULL,
+    `create_time`     timestamp  NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `query_text`      mediumtext,
+    `user_name`       varchar(150)        DEFAULT NULL,
+    `query_state`     int(1)              DEFAULT NULL,
+    `chat_id`         bigint(20) NOT NULL,
+    `query_result`    mediumtext,
+    `score`           int(11)             DEFAULT '0',
+    `feedback`        varchar(1024)       DEFAULT '',
+    `similar_queries` varchar(1024)       DEFAULT '',
+    PRIMARY KEY (`question_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
 
 CREATE TABLE `s2_chat_statistics` (

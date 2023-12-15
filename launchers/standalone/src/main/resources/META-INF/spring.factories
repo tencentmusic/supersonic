@@ -27,7 +27,8 @@ com.tencent.supersonic.chat.processor.parse.ParseResultProcessor=\
     com.tencent.supersonic.chat.processor.parse.EntityInfoProcessor, \
     com.tencent.supersonic.chat.processor.parse.SqlInfoProcessor, \
     com.tencent.supersonic.chat.processor.parse.TimeCostProcessor, \
-    com.tencent.supersonic.chat.processor.parse.RespBuildProcessor
+    com.tencent.supersonic.chat.processor.parse.RespBuildProcessor, \
+    com.tencent.supersonic.chat.processor.parse.SimilarQueryProcessor
 
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.LocalSemanticInterpreter
@@ -42,7 +43,8 @@ com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
 
 com.tencent.supersonic.chat.processor.execute.ExecuteResultProcessor=\
-    com.tencent.supersonic.chat.processor.execute.SimilarMetricProcessor
+    com.tencent.supersonic.chat.processor.execute.SimilarMetricProcessor,\
+    com.tencent.supersonic.chat.processor.execute.DimensionRecommendProcessor
 
 com.tencent.supersonic.common.util.embedding.S2EmbeddingStore=\
     com.tencent.supersonic.common.util.embedding.InMemoryS2EmbeddingStore

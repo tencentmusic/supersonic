@@ -42,7 +42,7 @@ public interface MetricService {
 
     List<DataItem> getDataItems(Long modelId);
 
-    void saveOrUpdateMetricQueryDefaultConfig(MetricQueryDefaultConfig queryDefaultConfig, User user);
+    void saveMetricQueryDefaultConfig(MetricQueryDefaultConfig defaultConfig, User user);
 
     MetricQueryDefaultConfig getMetricQueryDefaultConfig(Long metricId, User user);
 

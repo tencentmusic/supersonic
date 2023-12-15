@@ -15,7 +15,6 @@ import com.tencent.supersonic.semantic.api.model.pojo.Identify;
 import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
 import com.tencent.supersonic.semantic.api.model.pojo.Measure;
 import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
-import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import com.tencent.supersonic.semantic.api.model.request.DateInfoReq;
 import com.tencent.supersonic.semantic.api.model.request.DimensionReq;
 import com.tencent.supersonic.semantic.api.model.request.MetaBatchReq;
@@ -46,9 +45,7 @@ import com.tencent.supersonic.semantic.model.domain.manager.DatasourceYamlManage
 import com.tencent.supersonic.semantic.model.domain.manager.DimensionYamlManager;
 import com.tencent.supersonic.semantic.model.domain.manager.MetricYamlManager;
 import com.tencent.supersonic.semantic.model.domain.pojo.Datasource;
-import com.tencent.supersonic.semantic.model.domain.pojo.DimensionFilter;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
-import com.tencent.supersonic.semantic.model.domain.pojo.MetricFilter;
 import com.tencent.supersonic.semantic.model.domain.pojo.ModelFilter;
 import com.tencent.supersonic.semantic.model.domain.repository.DateInfoRepository;
 import com.tencent.supersonic.semantic.model.domain.repository.ModelRepository;
@@ -66,7 +63,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -307,8 +303,7 @@ public class ModelServiceImpl implements ModelService {
             modelRespSet = modelRespSet.stream().filter(modelResp ->
                     modelResp.getDomainId().equals(domainId)).collect(Collectors.toSet());
         }
-        return fillMetricInfo(new ArrayList<>(modelRespSet)).stream()
-                .sorted(Comparator.comparingLong(SchemaItem::getId)).collect(Collectors.toList());
+        return new ArrayList<>(modelRespSet);
     }
 
     public List<ModelResp> getModelRespAuthInheritDomain(User user, AuthType authType) {
@@ -462,21 +457,6 @@ public class ModelServiceImpl implements ModelService {
                 })
                 .collect(Collectors.toList());
         modelRepository.batchUpdate(modelDOS);
-    }
-
-    private List<ModelResp> fillMetricInfo(List<ModelResp> modelResps) {
-        if (CollectionUtils.isEmpty(modelResps)) {
-            return modelResps;
-        }
-        Map<Long, List<MetricResp>> metricMap = metricService.getMetrics(new MetricFilter()).stream()
-                .collect(Collectors.groupingBy(MetricResp::getModelId));
-        Map<Long, List<DimensionResp>> dimensionMap = dimensionService.getDimensions(new DimensionFilter()).stream()
-                .collect(Collectors.groupingBy(DimensionResp::getModelId));
-        modelResps.forEach(modelResp -> {
-            modelResp.setDimensionCnt(dimensionMap.getOrDefault(modelResp.getId(), Lists.newArrayList()).size());
-            modelResp.setMetricCnt(metricMap.getOrDefault(modelResp.getId(), Lists.newArrayList()).size());
-        });
-        return modelResps;
     }
 
     protected ModelDO getModelDO(Long id) {

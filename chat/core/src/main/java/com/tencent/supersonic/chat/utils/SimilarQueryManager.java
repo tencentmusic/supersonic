@@ -1,8 +1,8 @@
 package com.tencent.supersonic.chat.utils;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.api.pojo.request.SolvedQueryReq;
-import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
+import com.tencent.supersonic.chat.api.pojo.request.SimilarQueryReq;
+import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.ComponentFactory;
 import com.tencent.supersonic.common.util.embedding.EmbeddingQuery;
@@ -10,13 +10,6 @@ import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,33 +24,41 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 @Slf4j
 @Component
-public class SolvedQueryManager {
+public class SimilarQueryManager {
 
     private EmbeddingConfig embeddingConfig;
 
     private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
 
 
-    public SolvedQueryManager(EmbeddingConfig embeddingConfig) {
+    public SimilarQueryManager(EmbeddingConfig embeddingConfig) {
         this.embeddingConfig = embeddingConfig;
     }
 
-    public void saveSolvedQuery(SolvedQueryReq solvedQueryReq) {
+    public void saveSimilarQuery(SimilarQueryReq similarQueryReq) {
         if (StringUtils.isBlank(embeddingConfig.getUrl())) {
             return;
         }
-        String queryText = solvedQueryReq.getQueryText();
+        String queryText = similarQueryReq.getQueryText();
         try {
-            String uniqueId = generateUniqueId(solvedQueryReq.getQueryId(), solvedQueryReq.getParseId());
+            String uniqueId = generateUniqueId(similarQueryReq.getQueryId(), similarQueryReq.getParseId());
             EmbeddingQuery embeddingQuery = new EmbeddingQuery();
             embeddingQuery.setQueryId(uniqueId);
             embeddingQuery.setQuery(queryText);
 
             Map<String, Object> metaData = new HashMap<>();
-            metaData.put("modelId", (solvedQueryReq.getModelId()));
-            metaData.put("agentId", solvedQueryReq.getAgentId());
+            metaData.put("modelId", (similarQueryReq.getModelId()));
+            metaData.put("agentId", similarQueryReq.getAgentId());
             embeddingQuery.setMetadata(metaData);
             String solvedQueryCollection = embeddingConfig.getSolvedQueryCollection();
             s2EmbeddingStore.addQuery(solvedQueryCollection, Lists.newArrayList(embeddingQuery));
@@ -66,11 +67,11 @@ public class SolvedQueryManager {
         }
     }
 
-    public List<SolvedQueryRecallResp> recallSolvedQuery(String queryText, Integer agentId) {
+    public List<SimilarQueryRecallResp> recallSimilarQuery(String queryText, Integer agentId) {
         if (StringUtils.isBlank(embeddingConfig.getUrl())) {
             return Lists.newArrayList();
         }
-        List<SolvedQueryRecallResp> solvedQueryRecallResps = Lists.newArrayList();
+        List<SimilarQueryRecallResp> similarQueryRecallResps = Lists.newArrayList();
         try {
             String solvedQueryCollection = embeddingConfig.getSolvedQueryCollection();
             int solvedQueryResultNum = embeddingConfig.getSolvedQueryResultNum();
@@ -97,11 +98,11 @@ public class SolvedQueryManager {
                             continue;
                         }
                         String id = retrieval.getId();
-                        SolvedQueryRecallResp solvedQueryRecallResp = SolvedQueryRecallResp.builder()
+                        SimilarQueryRecallResp similarQueryRecallResp = SimilarQueryRecallResp.builder()
                                 .queryText(retrieval.getQuery())
                                 .queryId(getQueryId(id)).parseId(getParseId(id))
                                 .build();
-                        solvedQueryRecallResps.add(solvedQueryRecallResp);
+                        similarQueryRecallResps.add(similarQueryRecallResp);
                         querySet.add(retrieval.getQuery());
                     }
                 }
@@ -110,7 +111,7 @@ public class SolvedQueryManager {
         } catch (Exception e) {
             log.warn("recall similar solved query failed, queryText:{}", queryText);
         }
-        return solvedQueryRecallResps;
+        return similarQueryRecallResps;
     }
 
     private String generateUniqueId(Long queryId, Integer parseId) {

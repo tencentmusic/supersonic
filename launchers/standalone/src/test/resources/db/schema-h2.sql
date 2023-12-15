@@ -37,6 +37,7 @@ CREATE TABLE `s2_chat_query`
     `query_result` mediumtext NOT NULL ,
     `score`             int DEFAULT '0',
     `feedback`          varchar(1024) DEFAULT '',
+    `similar_queries`  varchar(1024) DEFAULT '',
     PRIMARY KEY (`question_id`)
 );
 
@@ -200,6 +201,7 @@ CREATE TABLE IF NOT EXISTS `s2_metric` (
     `alias` varchar(500) DEFAULT NULL,
     `tags` varchar(500) DEFAULT NULL,
     `relate_dimensions` varchar(500) DEFAULT NULL,
+    `ext` LONGVARCHAR DEFAULT NULL  ,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_metric IS 'metric information table';
@@ -530,4 +532,16 @@ CREATE TABLE s2_sys_parameter
     id  INT PRIMARY KEY AUTO_INCREMENT,
     admin varchar(500),
     parameters text null
+);
+
+CREATE TABLE `s2_metric_query_default_config`(
+    `id`             bigint        NOT NULL AUTO_INCREMENT,
+    `metric_id`      bigint,
+    `user_name`      varchar(255)  NOT NULL,
+    `default_config` varchar(1000) NOT NULL,
+    `created_at`     TIMESTAMP null,
+    `updated_at`     TIMESTAMP null,
+    `created_by`     varchar(100) null,
+    `updated_by`     varchar(100)  not null,
+    PRIMARY KEY (`id`)
 );

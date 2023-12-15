@@ -47,8 +47,11 @@ public class ViewInfoController {
     }
 
     @GetMapping("/getDomainSchemaRela/{domainId}")
-    public List<ModelSchemaRelaResp> getDomainSchema(@PathVariable("domainId") Long domainId) {
-        return viewInfoServiceImpl.getDomainSchema(domainId);
+    public List<ModelSchemaRelaResp> getDomainSchema(@PathVariable("domainId") Long domainId,
+                                                     HttpServletRequest request,
+                                                     HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return viewInfoServiceImpl.getDomainSchema(domainId, user);
     }
 
 }
