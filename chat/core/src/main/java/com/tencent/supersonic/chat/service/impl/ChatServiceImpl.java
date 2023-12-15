@@ -196,7 +196,11 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Boolean updateQuery(Long questionId, QueryResult queryResult, ChatContext chatCtx) {
+    public void updateQuery(Long questionId, int parseId, QueryResult queryResult, ChatContext chatCtx) {
+        //The history record only retains the query result of the first parse
+        if (parseId > 1) {
+            return;
+        }
         ChatQueryDO chatQueryDO = new ChatQueryDO();
         chatQueryDO.setQuestionId(questionId);
         chatQueryDO.setQueryResult(JsonUtil.toString(queryResult));
@@ -204,7 +208,6 @@ public class ChatServiceImpl implements ChatService {
         updateQuery(chatQueryDO);
         chatRepository.updateLastQuestion(chatCtx.getChatId().longValue(),
                 chatCtx.getQueryText(), getCurrentTime());
-        return true;
     }
 
     @Override
