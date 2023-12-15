@@ -53,4 +53,6 @@ public class ModelDO {
 
     private String alias;
 
+    private String sourceType;
+
 }

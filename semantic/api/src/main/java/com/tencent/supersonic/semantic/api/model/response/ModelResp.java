@@ -22,6 +22,8 @@ public class ModelResp extends SchemaItem {
 
     private String depends;
 
+    private String sourceType;
+
     private String filterSql;
 
     private List<String> viewers = new ArrayList<>();

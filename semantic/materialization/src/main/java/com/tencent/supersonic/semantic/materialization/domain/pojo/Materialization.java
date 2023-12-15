@@ -3,7 +3,7 @@ package com.tencent.supersonic.semantic.materialization.domain.pojo;
 
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.semantic.api.materialization.enums.MaterializedTypeEnum;
+import com.tencent.supersonic.semantic.api.model.enums.ModelSourceTypeEnum;
 import com.tencent.supersonic.semantic.api.materialization.enums.UpdateCycleEnum;
 import lombok.Data;
 
@@ -14,7 +14,7 @@ public class Materialization extends RecordInfo {
 
     private Long id;
     private String name;
-    private MaterializedTypeEnum materializedType;
+    private ModelSourceTypeEnum materializedType;
     private UpdateCycleEnum updateCycle;
     private Long modelId;
     private Long databaseId;

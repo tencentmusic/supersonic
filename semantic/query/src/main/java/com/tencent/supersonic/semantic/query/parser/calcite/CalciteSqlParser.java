@@ -20,8 +20,8 @@ public class CalciteSqlParser implements SqlParser {
     }
 
     @Override
-    public QueryStatement explain(MetricReq metricReq, AggOption isAgg, Catalog catalog) throws Exception {
-        QueryStatement queryStatement = new QueryStatement();
+    public QueryStatement explain(QueryStatement queryStatement, AggOption isAgg, Catalog catalog) throws Exception {
+        MetricReq metricReq = queryStatement.getMetricReq();
         SemanticModel semanticModel = semanticSchemaManager.get(metricReq.getRootPath());
         if (semanticModel == null) {
             queryStatement.setErrMsg("semanticSchema not found");

@@ -9,7 +9,7 @@ import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 
 public interface SemanticQueryEngine {
 
-    QueryStatement plan(QueryStructReq queryStructCmd) throws Exception;
+    QueryStatement plan(QueryStatement queryStatement) throws Exception;
 
     QueryExecutor route(QueryStatement queryStatement);
 

@@ -11,6 +11,7 @@ import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.utils.ComponentFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -30,28 +31,35 @@ public class QueryParser {
         this.catalog = catalog;
     }
 
-    public QueryStatement logicSql(QueryStructReq queryStructReq) throws Exception {
-        ParseSqlReq parseSqlReq = new ParseSqlReq();
-        MetricReq metricReq = new MetricReq();
+    public QueryStatement logicSql(QueryStatement queryStatement) throws Exception {
+        QueryStructReq queryStructReq = queryStatement.getQueryStructReq();
+        if (Objects.isNull(queryStatement.getParseSqlReq())) {
+            queryStatement.setParseSqlReq(new ParseSqlReq());
+        }
+        if (Objects.isNull(queryStatement.getMetricReq())) {
+            queryStatement.setMetricReq(new MetricReq());
+        }
         log.info("SemanticConverter before [{}]", queryStructReq);
         for (SemanticConverter semanticConverter : ComponentFactory.getSemanticConverters()) {
-            if (semanticConverter.accept(queryStructReq)) {
+            if (semanticConverter.accept(queryStatement)) {
                 log.info("SemanticConverter accept [{}]", semanticConverter.getClass().getName());
-                semanticConverter.converter(catalog, queryStructReq, parseSqlReq, metricReq);
+                semanticConverter.converter(catalog, queryStructReq, queryStatement.getParseSqlReq(),
+                        queryStatement.getMetricReq());
             }
         }
-        log.info("SemanticConverter after {} {} {}", queryStructReq, metricReq, parseSqlReq);
-        if (!parseSqlReq.getSql().isEmpty()) {
-            return parser(parseSqlReq);
+        log.info("SemanticConverter after {} {} {}", queryStructReq, queryStatement.getParseSqlReq(),
+                queryStatement.getMetricReq());
+        if (!queryStatement.getParseSqlReq().getSql().isEmpty()) {
+            return parser(queryStatement.getParseSqlReq(), queryStatement);
         }
 
-        metricReq.setNativeQuery(queryStructReq.getQueryType().isNativeAggQuery());
-        return parser(metricReq);
+        queryStatement.getMetricReq().setNativeQuery(queryStructReq.getQueryType().isNativeAggQuery());
+        return parser(queryStatement);
+
     }
 
-    public QueryStatement parser(ParseSqlReq sqlCommend) {
+    public QueryStatement parser(ParseSqlReq sqlCommend, QueryStatement queryStatement) {
         log.info("parser MetricReq [{}] ", sqlCommend);
-        QueryStatement queryStatement = new QueryStatement();
         try {
             if (!CollectionUtils.isEmpty(sqlCommend.getTables())) {
                 List<String[]> tables = new ArrayList<>();
@@ -63,7 +71,10 @@ public class QueryParser {
                     metricReq.setWhere(StringUtil.formatSqlQuota(metricTable.getWhere()));
                     metricReq.setNativeQuery(!AggOption.isAgg(metricTable.getAggOption()));
                     metricReq.setRootPath(sqlCommend.getRootPath());
-                    QueryStatement tableSql = parser(metricReq, metricTable.getAggOption());
+                    QueryStatement tableSql = new QueryStatement();
+                    tableSql.setIsS2SQL(false);
+                    tableSql.setMetricReq(metricReq);
+                    tableSql = parser(tableSql, metricTable.getAggOption());
                     if (!tableSql.isOk()) {
                         queryStatement.setErrMsg(String.format("parser table [%s] error [%s]", metricTable.getAlias(),
                                 tableSql.getErrMsg()));
@@ -99,19 +110,19 @@ public class QueryParser {
         return queryStatement;
     }
 
-    public QueryStatement parser(MetricReq metricCommand) {
-        return parser(metricCommand, AggOption.getAggregation(metricCommand.isNativeQuery()));
+    public QueryStatement parser(QueryStatement queryStatement) {
+        return parser(queryStatement, AggOption.getAggregation(queryStatement.getMetricReq().isNativeQuery()));
     }
 
-    public QueryStatement parser(MetricReq metricCommand, AggOption isAgg) {
+    public QueryStatement parser(QueryStatement queryStatement, AggOption isAgg) {
+        MetricReq metricCommand = queryStatement.getMetricReq();
         log.info("parser MetricReq [{}] isAgg [{}]", metricCommand, isAgg);
-        QueryStatement queryStatement = new QueryStatement();
         if (metricCommand.getRootPath().isEmpty()) {
             queryStatement.setErrMsg("rootPath empty");
             return queryStatement;
         }
         try {
-            queryStatement = ComponentFactory.getSqlParser().explain(metricCommand, isAgg, catalog);
+            queryStatement = ComponentFactory.getSqlParser().explain(queryStatement, isAgg, catalog);
             return queryStatement;
         } catch (Exception e) {
             queryStatement.setErrMsg(e.getMessage());

@@ -7,7 +7,9 @@ import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.query.parser.SemanticConverter;
+import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -30,8 +32,11 @@ public class ParserDefaultConverter implements SemanticConverter {
     }
 
     @Override
-    public boolean accept(QueryStructReq queryStructCmd) {
-        return !calculateCoverterAgg.accept(queryStructCmd);
+    public boolean accept(QueryStatement queryStatement) {
+        if (Objects.isNull(queryStatement.getQueryStructReq()) || queryStatement.getIsS2SQL()) {
+            return false;
+        }
+        return !calculateCoverterAgg.accept(queryStatement);
     }
 
     @Override

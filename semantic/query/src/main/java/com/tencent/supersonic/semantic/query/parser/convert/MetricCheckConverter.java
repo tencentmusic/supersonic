@@ -1,21 +1,23 @@
 package com.tencent.supersonic.semantic.query.parser.convert;
 
+import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.query.parser.SemanticConverter;
+import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 
 @Component("MetricCheckConverter")
@@ -23,7 +25,11 @@ import java.util.stream.Collectors;
 public class MetricCheckConverter implements SemanticConverter {
 
     @Override
-    public boolean accept(QueryStructReq queryStructCmd) {
+    public boolean accept(QueryStatement queryStatement) {
+        if (Objects.isNull(queryStatement.getQueryStructReq()) || queryStatement.getIsS2SQL()) {
+            return false;
+        }
+        QueryStructReq queryStructCmd = queryStatement.getQueryStructReq();
         if (queryStructCmd.getQueryType().isNativeAggQuery()) {
             return false;
         }
@@ -41,9 +47,9 @@ public class MetricCheckConverter implements SemanticConverter {
         List<String> dimensionFilterBizNames = queryStructReq.getDimensionFilters().stream()
                 .map(Filter::getBizName).collect(Collectors.toList());
         List<MetricResp> metricToQuery = metricResps.stream().filter(metricResp ->
-                        metricBizNames.contains(metricResp.getBizName())).collect(Collectors.toList());
+                metricBizNames.contains(metricResp.getBizName())).collect(Collectors.toList());
         List<Long> dimensionToFilter = dimensionResps.stream().filter(dimensionResp ->
-                dimensionFilterBizNames.contains(dimensionResp.getBizName()))
+                        dimensionFilterBizNames.contains(dimensionResp.getBizName()))
                 .map(DimensionResp::getId).collect(Collectors.toList());
         for (MetricResp metricResp : metricToQuery) {
             Set<Long> necessaryDimensionIds = metricResp.getNecessaryDimensionIds();

@@ -31,17 +31,17 @@ import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.utils.QueryUtils;
 import com.tencent.supersonic.semantic.query.utils.S2SQLPermissionAnnotation;
 import com.tencent.supersonic.semantic.query.utils.StatUtils;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 
 @Service
@@ -123,7 +123,10 @@ public class QueryServiceImpl implements QueryService {
                 }
             }
             StatUtils.get().setUseResultCache(false);
-            QueryStatement queryStatement = semanticQueryEngine.plan(queryStructCmd);
+            QueryStatement queryStatement = new QueryStatement();
+            queryStatement.setQueryStructReq(queryStructCmd);
+            queryStatement.setIsS2SQL(false);
+            queryStatement = semanticQueryEngine.plan(queryStatement);
             QueryExecutor queryExecutor = semanticQueryEngine.route(queryStatement);
             if (queryExecutor != null) {
                 queryResultWithColumns = semanticQueryEngine.execute(queryStatement);
@@ -183,7 +186,10 @@ public class QueryServiceImpl implements QueryService {
     private QueryStatement getQueryStatementByMultiStruct(QueryMultiStructReq queryMultiStructReq) throws Exception {
         List<QueryStatement> sqlParsers = new ArrayList<>();
         for (QueryStructReq queryStructCmd : queryMultiStructReq.getQueryStructReqs()) {
-            QueryStatement queryStatement = semanticQueryEngine.plan(queryStructCmd);
+            QueryStatement queryStatement = new QueryStatement();
+            queryStatement.setQueryStructReq(queryStructCmd);
+            queryStatement.setIsS2SQL(false);
+            queryStatement = semanticQueryEngine.plan(queryStatement);
             queryUtils.checkSqlParse(queryStatement);
             sqlParsers.add(queryStatement);
         }
@@ -229,7 +235,10 @@ public class QueryServiceImpl implements QueryService {
             return getExplainResp(queryStatement);
         }
         if (QueryTypeEnum.STRUCT.equals(queryTypeEnum) && queryReq instanceof QueryStructReq) {
-            QueryStatement queryStatement = semanticQueryEngine.plan((QueryStructReq) queryReq);
+            QueryStatement queryStatement = new QueryStatement();
+            queryStatement.setQueryStructReq((QueryStructReq) queryReq);
+            queryStatement.setIsS2SQL(false);
+            queryStatement = semanticQueryEngine.plan(queryStatement);
             return getExplainResp(queryStatement);
         }
         if (QueryTypeEnum.STRUCT.equals(queryTypeEnum) && queryReq instanceof QueryMultiStructReq) {

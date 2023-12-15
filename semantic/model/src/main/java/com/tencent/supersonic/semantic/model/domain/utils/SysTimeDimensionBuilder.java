@@ -43,7 +43,7 @@ public class SysTimeDimensionBuilder {
         dim.setType(DimensionTypeEnum.time.name());
         dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.WEEK.name().toLowerCase(), engineAdaptor));
         DimensionTimeTypeParams typeParams = new DimensionTimeTypeParams();
-        typeParams.setTimeGranularity(TimeDimensionEnum.DAY.name().toLowerCase());
+        typeParams.setTimeGranularity(TimeDimensionEnum.WEEK.name().toLowerCase());
         typeParams.setIsPrimary("false");
         dim.setTypeParams(typeParams);
         return dim;
@@ -55,7 +55,7 @@ public class SysTimeDimensionBuilder {
         dim.setType(DimensionTypeEnum.time.name());
         dim.setExpr(generateTimeExpr(timeDim, TimeDimensionEnum.MONTH.name().toLowerCase(), engineAdaptor));
         DimensionTimeTypeParams typeParams = new DimensionTimeTypeParams();
-        typeParams.setTimeGranularity(TimeDimensionEnum.DAY.name().toLowerCase());
+        typeParams.setTimeGranularity(TimeDimensionEnum.MONTH.name().toLowerCase());
         typeParams.setIsPrimary("false");
         dim.setTypeParams(typeParams);
         return dim;

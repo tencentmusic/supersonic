@@ -2,6 +2,7 @@ package com.tencent.supersonic.semantic.query.persistence.pojo;
 
 import com.tencent.supersonic.semantic.api.query.request.MetricReq;
 import com.tencent.supersonic.semantic.api.query.request.ParseSqlReq;
+import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -15,9 +16,11 @@ public class QueryStatement {
     private String sourceId = "";
     private String errMsg = "";
     private Boolean ok;
+    private QueryStructReq queryStructReq;
     private MetricReq metricReq;
     private ParseSqlReq parseSqlReq;
     private Integer status = 0;
+    private Boolean isS2SQL = false;
     private List<ImmutablePair<String, String>> timeRanges;
 
     public boolean isOk() {
