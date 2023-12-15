@@ -140,6 +140,8 @@ export type MsgDataType = {
   response: PluginResonseType;
   parseInfos?: ChatContextType[];
   queryTimeCost?: number;
+  similarQueries: SimilarQuestionType[];
+  recommendedDimensions: DrillDownDimensionType[];
 };
 
 export enum ParseStateEnum {
@@ -220,6 +222,7 @@ export type HistoryMsgItemType = {
   createTime: string;
   feedback: string;
   score: number;
+  similarQueries: SimilarQuestionType[];
 };
 
 export type HistoryType = {
@@ -242,8 +245,8 @@ export type SendMsgParamsType = {
 };
 
 export type SimilarQuestionType = {
-  // queryId: number;
-  // parseId: number;
+  queryId: number;
+  parseId: number;
   queryText: string;
 };
 

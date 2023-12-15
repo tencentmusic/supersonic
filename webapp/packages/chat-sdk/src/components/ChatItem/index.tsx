@@ -97,7 +97,9 @@ const ChatItem: React.FC<Props> = ({
       data = res.data;
       tip = '';
     }
-    setDataCache({ ...dataCache, [chatContext!.id!]: { tip, data } });
+    if (chatContext) {
+      setDataCache({ ...dataCache, [chatContext!.id!]: { tip, data } });
+    }
     if (data) {
       setData(data);
       setExecuteTip('');
@@ -356,9 +358,9 @@ const ChatItem: React.FC<Props> = ({
           )}
           {(parseTip !== '' || (executeMode && !executeLoading)) && integrateSystem !== 'c2' && (
             <SimilarQuestionItem
-              queryText={msg || msgData?.queryText || ''}
-              agentId={agentId}
+              queryId={parseInfo?.queryId}
               defaultExpanded={parseTip !== '' || executeTip !== '' || integrateSystem === 'wiki'}
+              similarQueries={data?.similarQueries}
               onSelectQuestion={onSelectQuestion}
             />
           )}
