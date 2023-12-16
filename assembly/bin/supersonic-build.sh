@@ -4,9 +4,9 @@ set -x
 sbinDir=$(cd "$(dirname "$0")"; pwd)
 chmod +x $sbinDir/supersonic-common.sh
 source $sbinDir/supersonic-common.sh
-
 cd $baseDir
 
+service=$1
 #1. build backend java modules
 rm -fr ${buildDir}/*.tar.gz
 rm -fr dist
@@ -44,10 +44,12 @@ cp -fr webapp ../../launchers/standalone/target/classes
 rm -fr  ${buildDir}/webapp
 
 #5. build backend python modules
-echo "start installing python modules with pip: ${pip_path}"
-requirementPath=$baseDir/../chat/python/requirements.txt
-${pip_path} install -r ${requirementPath}
-echo "install python modules success"
+if [ "$service" == "pyllm" ]; then
+  echo "start installing python modules with pip: ${pip_path}"
+  requirementPath=$baseDir/../chat/python/requirements.txt
+  ${pip_path} install -r ${requirementPath}
+  echo "install python modules success"
+fi
 
 #6. reset runtime
 rm -fr $runtimeDir/supersonic*
