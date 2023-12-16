@@ -56,8 +56,8 @@ public class SqlPromptGenerator {
     public String generateSqlPrompt(LLMReq llmReq, String schemaLinkStr, List<Map<String, String>> fewshotExampleList) {
         String instruction = "# Use the the schema links to generate the SQL queries for each of the questions.";
         List<String> exampleKeys = Arrays.asList("questionAugmented", "dbSchema", "generatedSchemaLinkings", "sql");
-        String exampleTemplate = "dbSchema\nQ: questionAugmented\n"
-                + "Schema_links: generatedSchemaLinkings\nSQL: {sql}";
+        String exampleTemplate = "dbSchema\nQ: questionAugmented\n" + "Schema_links: generatedSchemaLinkings\n"
+                + "SQL: {sql}";
 
         String schemaLinkingPrompt = InputFormat.format(exampleTemplate, exampleKeys, fewshotExampleList);
         Pair<String, String> questionPrompt = transformQuestionPrompt(llmReq);
