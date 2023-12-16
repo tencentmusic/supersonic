@@ -87,10 +87,10 @@ public class SysParameter {
         parameters.add(new Parameter("llm.temperature", "0.0",
                 "温度值", "number", "Parser相关配置"));
 
-        Parameter s2SQLParameter = new Parameter("s2SQL.generation", "2_pass_auto_cot_self_consistency",
+        Parameter s2SQLParameter = new Parameter("s2SQL.generation", "TWO_PASS_AUTO_COT",
                 "S2SQL生成方式", "list", "Parser相关配置");
-        s2SQLParameter.setCandidateValues(Lists.newArrayList("1_pass_auto_cot", "1_pass_auto_cot_self_consistency",
-                "2_pass_auto_cot", "2_pass_auto_cot_self_consistency"));
+        s2SQLParameter.setCandidateValues(Lists.newArrayList("ONE_PASS_AUTO_COT", "ONE_PASS_AUTO_COT_SELF_CONSISTENCY",
+                "TWO_PASS_AUTO_COT", "TWO_PASS_AUTO_COT_SELF_CONSISTENCY"));
         parameters.add(s2SQLParameter);
         parameters.add(new Parameter("s2SQL.linking.value.switch", "true",
                 "是否将Mapper探测识别到的维度值提供给大模型", "为了数据安全考虑, 这里可进行开关选择",

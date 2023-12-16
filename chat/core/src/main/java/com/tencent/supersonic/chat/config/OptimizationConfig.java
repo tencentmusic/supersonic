@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.config;
 
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.SqlGenerationMode;
 import com.tencent.supersonic.common.service.SysParameterService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +57,9 @@ public class OptimizationConfig {
 
     @Value("${s2SQL.linking.value.switch:true}")
     private boolean useLinkingValueSwitch;
+
+    @Value("${s2SQL.generation:TWO_PASS_AUTO_COT}")
+    private SqlGenerationMode sqlGenerationMode;
 
     @Value("${s2SQL.use.switch:true}")
     private boolean useS2SqlSwitch;
@@ -139,6 +143,10 @@ public class OptimizationConfig {
         return convertValue("s2SQL.linking.value.switch", Boolean.class, useLinkingValueSwitch);
     }
 
+    public SqlGenerationMode getSqlGenerationMode() {
+        return convertValue("s2SQL.generation", SqlGenerationMode.class, sqlGenerationMode);
+    }
+
     public <T> T convertValue(String paramName, Class<T> targetType, T defaultValue) {
         try {
             String value = sysParameterService.getSysParameter().getParameterByName(paramName);
@@ -151,6 +159,8 @@ public class OptimizationConfig {
                 return targetType.cast(Integer.parseInt(value));
             } else if (targetType == Boolean.class) {
                 return targetType.cast(Boolean.parseBoolean(value));
+            } else if (targetType == SqlGenerationMode.class) {
+                return targetType.cast(SqlGenerationMode.valueOf(value));
             }
         } catch (Exception e) {
             log.error("convertValue", e);
