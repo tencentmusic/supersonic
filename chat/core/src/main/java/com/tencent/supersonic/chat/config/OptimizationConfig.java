@@ -63,10 +63,10 @@ public class OptimizationConfig {
     @Value("${text2sql.example.num:10}")
     private int text2sqlExampleNum;
 
-    @Value("${text2sql.fewShots.num:10}")
+    @Value("${text2sql.fewShots.num:5}")
     private int text2sqlFewShotsNum;
 
-    @Value("${text2sql.self.consistency.num:5}")
+    @Value("${text2sql.self.consistency.num:2}")
     private int text2sqlSelfConsistencyNum;
 
     @Value("${text2sql.collection.name:text2dsl_agent_collection}")
