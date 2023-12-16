@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.parser.sql.llm.OutputFormat;
 import com.tencent.supersonic.chat.parser.sql.llm.SqlGeneration;
 import com.tencent.supersonic.chat.parser.sql.llm.SqlGenerationFactory;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.SqlGenerationMode;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -35,7 +36,8 @@ public class JavaLLMProxy implements LLMProxy {
 
     public LLMResp query2sql(LLMReq llmReq, String modelClusterKey) {
 
-        SqlGeneration sqlGeneration = SqlGenerationFactory.get(llmReq.getSqlGenerationMode());
+        SqlGeneration sqlGeneration = SqlGenerationFactory.get(
+                SqlGenerationMode.valueOf(llmReq.getSqlGenerationMode()));
         String modelName = llmReq.getSchema().getModelName();
         Map<String, Double> sqlWeight = sqlGeneration.generation(llmReq, modelClusterKey);
 
