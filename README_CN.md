@@ -9,7 +9,7 @@
 大型语言模型（LLMs）如ChatGPT的出现正在重塑信息检索的方式。在数据分析领域，学术界和工业界主要关注利用深度学习模型将自然语言查询转换为SQL查询。虽然一些工作显示出有前景的结果，但它们的可靠性还达不到生产可用的要求。
 
 在我们看来，为了在实际场景发挥价值，有三个关键点：
-1. 引入语义模型层，封装底层数据的上下文（关联、公式等），降低SQL生成的**复杂度**。
+1. 融合HeadlessBI，通过统一语义层封装底层数据细节（关联、键值、公式等），降低SQL生成的**复杂度**。
 2. 通过一前一后的模式映射器和语义修正器，来缓解LLM常见的**幻觉**现象。
 3. 设计启发式的规则，在一些特定场景提升语义解析的**效率**。
 
@@ -47,7 +47,7 @@ SuperSonic的整体架构和主流程如下图所示：
 SuperSonic自带样例的语义模型和问答对话，只需以下三步即可快速体验：
 
 - 从[release page](https://github.com/tencentmusic/supersonic/releases)下载预先构建好的发行包
-- 运行 "bin/supersonic-daemon.sh"启动服务（一个Java进程和一个Python进程）
+- 运行 "assembly/bin/supersonic-daemon.sh start"启动standalone模式的Java服务
 - 在浏览器访问http://localhost:9080 开启探索
 
 ## 如何构建和部署
