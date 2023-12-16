@@ -132,7 +132,7 @@ public class LLMRequestService {
             currentDate = DateUtils.getBeforeDate(0);
         }
         llmReq.setCurrentDate(currentDate);
-        llmReq.setSqlGenerationMode(optimizationConfig.getSqlGenerationMode());
+        llmReq.setSqlGenerationMode(optimizationConfig.getSqlGenerationMode().getName());
         return llmReq;
     }
 

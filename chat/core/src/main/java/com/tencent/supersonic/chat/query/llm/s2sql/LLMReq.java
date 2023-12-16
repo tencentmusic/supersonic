@@ -19,7 +19,7 @@ public class LLMReq {
 
     private String priorExts;
 
-    private SqlGenerationMode sqlGenerationMode;
+    private String sqlGenerationMode;
 
     @Data
     public static class ElementValue {
