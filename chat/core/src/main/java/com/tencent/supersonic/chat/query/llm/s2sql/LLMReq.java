@@ -19,7 +19,7 @@ public class LLMReq {
 
     private String priorExts;
 
-    private SqlGenerationMode sqlGenerationMode = SqlGenerationMode.TWO_PASS_AUTO_COT;
+    private SqlGenerationMode sqlGenerationMode;
 
     @Data
     public static class ElementValue {
