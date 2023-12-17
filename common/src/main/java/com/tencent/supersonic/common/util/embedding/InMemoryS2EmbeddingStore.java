@@ -1,21 +1,23 @@
 package com.tencent.supersonic.common.util.embedding;
 
 import static dev.langchain4j.internal.Utils.randomUUID;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.util.Comparator.comparingDouble;
 
 import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.data.embedding.Embedding;
+import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.spi.ServiceHelper;
-import dev.langchain4j.spi.store.embedding.inmemory.InMemoryEmbeddingStoreJsonCodecFactory;
 import dev.langchain4j.store.embedding.CosineSimilarity;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.RelevanceScore;
-import dev.langchain4j.store.embedding.inmemory.GsonInMemoryEmbeddingStoreJsonCodec;
-import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStoreJsonCodec;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -40,7 +42,7 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
             new ConcurrentHashMap<>();
 
     @Override
-    public void addCollection(String collectionName) {
+    public synchronized void addCollection(String collectionName) {
         collectionNameToStore.computeIfAbsent(collectionName, k -> new InMemoryEmbeddingStore());
     }
 
@@ -164,7 +166,7 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
                 if (o == null || getClass() != o.getClass()) {
                     return false;
                 }
-                Entry<?> that = (Entry<?>) o;
+                InMemoryEmbeddingStore.Entry<?> that = (InMemoryEmbeddingStore.Entry<?>) o;
                 return Objects.equals(this.id, that.id)
                         && Objects.equals(this.embedding, that.embedding)
                         && Objects.equals(this.embedded, that.embedded);
@@ -176,7 +178,8 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
             }
         }
 
-        private final List<Entry<Embedded>> entries = new CopyOnWriteArrayList<>();
+        private static final InMemoryEmbeddingStoreJsonCodec CODEC = loadCodec();
+        private final List<InMemoryEmbeddingStore.Entry<Embedded>> entries = new CopyOnWriteArrayList<>();
 
         @Override
         public String add(Embedding embedding) {
@@ -198,7 +201,7 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
         }
 
         public void add(String id, Embedding embedding, Embedded embedded) {
-            entries.add(new Entry<>(id, embedding, embedded));
+            entries.add(new InMemoryEmbeddingStore.Entry<>(id, embedding, embedded));
         }
 
         @Override
@@ -230,7 +233,7 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
             Comparator<EmbeddingMatch<Embedded>> comparator = comparingDouble(EmbeddingMatch::score);
             PriorityQueue<EmbeddingMatch<Embedded>> matches = new PriorityQueue<>(comparator);
 
-            for (Entry<Embedded> entry : entries) {
+            for (InMemoryEmbeddingStore.Entry<Embedded> entry : entries) {
                 double cosineSimilarity = CosineSimilarity.between(entry.embedding, referenceEmbedding);
                 double score = RelevanceScore.fromCosineSimilarity(cosineSimilarity);
                 if (score >= minScore) {
@@ -264,16 +267,44 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
             return Objects.hash(entries);
         }
 
-        private static InMemoryEmbeddingStoreJsonCodec loadCodec() {
-            Collection<InMemoryEmbeddingStoreJsonCodecFactory> factories = ServiceHelper.loadFactories(
-                    InMemoryEmbeddingStoreJsonCodecFactory.class);
-            for (InMemoryEmbeddingStoreJsonCodecFactory factory : factories) {
-                return factory.create();
+        public String serializeToJson() {
+            return CODEC.toJson(this);
+        }
+
+        public void serializeToFile(Path filePath) {
+            try {
+                String json = serializeToJson();
+                Files.write(filePath, json.getBytes(), CREATE, TRUNCATE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
+        }
+
+        public void serializeToFile(String filePath) {
+            serializeToFile(Paths.get(filePath));
+        }
+
+        private static InMemoryEmbeddingStoreJsonCodec loadCodec() {
             // fallback to default
             return new GsonInMemoryEmbeddingStoreJsonCodec();
         }
 
+        public static InMemoryEmbeddingStore<TextSegment> fromJson(String json) {
+            return CODEC.fromJson(json);
+        }
+
+        public static InMemoryEmbeddingStore<TextSegment> fromFile(Path filePath) {
+            try {
+                String json = new String(Files.readAllBytes(filePath));
+                return fromJson(json);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public static InMemoryEmbeddingStore<TextSegment> fromFile(String filePath) {
+            return fromFile(Paths.get(filePath));
+        }
     }
 
 }

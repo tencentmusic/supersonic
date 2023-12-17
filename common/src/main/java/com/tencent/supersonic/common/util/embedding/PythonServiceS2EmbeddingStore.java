@@ -4,12 +4,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
+import com.tencent.supersonic.common.util.ContextUtils;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,9 +26,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 public class PythonServiceS2EmbeddingStore implements S2EmbeddingStore {
 
-    @Autowired
-    private EmbeddingConfig embeddingConfig;
-
     private RestTemplate restTemplate = new RestTemplate();
 
     public void addCollection(String collectionName) {
@@ -36,6 +33,7 @@ public class PythonServiceS2EmbeddingStore implements S2EmbeddingStore {
         if (collections.contains(collectionName)) {
             return;
         }
+        EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         String url = String.format("%s/create_collection?collection_name=%s",
                 embeddingConfig.getUrl(), collectionName);
         doRequest(url, null, HttpMethod.GET);
@@ -45,6 +43,7 @@ public class PythonServiceS2EmbeddingStore implements S2EmbeddingStore {
         if (CollectionUtils.isEmpty(queries)) {
             return;
         }
+        EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         String url = String.format("%s/add_query?collection_name=%s",
                 embeddingConfig.getUrl(), collectionName);
         doRequest(url, JSONObject.toJSONString(queries, SerializerFeature.WriteMapNullValue), HttpMethod.POST);
@@ -54,6 +53,7 @@ public class PythonServiceS2EmbeddingStore implements S2EmbeddingStore {
         if (CollectionUtils.isEmpty(queries)) {
             return;
         }
+        EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         List<String> queryIds = queries.stream().map(EmbeddingQuery::getQueryId).collect(Collectors.toList());
         String url = String.format("%s/delete_query_by_ids?collection_name=%s",
                 embeddingConfig.getUrl(), collectionName);
@@ -61,6 +61,7 @@ public class PythonServiceS2EmbeddingStore implements S2EmbeddingStore {
     }
 
     public List<RetrieveQueryResult> retrieveQuery(String collectionName, RetrieveQuery retrieveQuery, int num) {
+        EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         String url = String.format("%s/retrieve_query?collection_name=%s&n_results=%s",
                 embeddingConfig.getUrl(), collectionName, num);
         ResponseEntity<String> responseEntity = doRequest(url, JSONObject.toJSONString(retrieveQuery,
@@ -72,6 +73,7 @@ public class PythonServiceS2EmbeddingStore implements S2EmbeddingStore {
     }
 
     private List<String> getCollectionList() {
+        EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
         String url = embeddingConfig.getUrl() + "/list_collections";
         ResponseEntity<String> responseEntity = doRequest(url, null, HttpMethod.GET);
         if (!responseEntity.hasBody()) {

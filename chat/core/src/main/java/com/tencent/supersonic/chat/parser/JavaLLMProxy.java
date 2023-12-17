@@ -37,7 +37,7 @@ public class JavaLLMProxy implements LLMProxy {
     public LLMResp query2sql(LLMReq llmReq, String modelClusterKey) {
 
         SqlGeneration sqlGeneration = SqlGenerationFactory.get(
-                SqlGenerationMode.valueOf(llmReq.getSqlGenerationMode()));
+                SqlGenerationMode.getMode(llmReq.getSqlGenerationMode()));
         String modelName = llmReq.getSchema().getModelName();
         Map<String, Double> sqlWeight = sqlGeneration.generation(llmReq, modelClusterKey);
 
