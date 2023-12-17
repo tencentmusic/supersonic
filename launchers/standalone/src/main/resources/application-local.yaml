@@ -80,3 +80,7 @@ logging:
   level:
     dev.langchain4j: DEBUG
     dev.ai4j.openai4j: DEBUG
+
+inMemoryEmbeddingStore:
+  persistent:
+    path: /tmp
