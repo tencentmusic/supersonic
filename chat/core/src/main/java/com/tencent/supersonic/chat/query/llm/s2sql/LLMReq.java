@@ -69,5 +69,14 @@ public class LLMReq {
             return name;
         }
 
+        public static SqlGenerationMode getMode(String name) {
+            for (SqlGenerationMode sqlGenerationMode : SqlGenerationMode.values()) {
+                if (sqlGenerationMode.name.equals(name)) {
+                    return sqlGenerationMode;
+                }
+            }
+            return null;
+        }
+
     }
 }
