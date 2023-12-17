@@ -5,9 +5,9 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.util.Comparator.comparingDouble;
 
+import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.data.embedding.Embedding;
-import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.CosineSimilarity;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
@@ -38,12 +38,44 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
 
+    public static final String PERSISTENT_FILE_PRE = "InMemory.";
     private static Map<String, InMemoryEmbeddingStore<EmbeddingQuery>> collectionNameToStore =
             new ConcurrentHashMap<>();
 
     @Override
     public synchronized void addCollection(String collectionName) {
-        collectionNameToStore.computeIfAbsent(collectionName, k -> new InMemoryEmbeddingStore());
+        InMemoryEmbeddingStore<EmbeddingQuery> embeddingStore = null;
+        Path filePath = getPersistentPath(collectionName);
+        try {
+            if (Files.exists(filePath)) {
+                embeddingStore = InMemoryEmbeddingStore.fromFile(filePath);
+                embeddingStore.entries = new CopyOnWriteArrayList<>(embeddingStore.entries);
+                log.info("embeddingStore reload from file:{}", filePath);
+            }
+        } catch (Exception e) {
+            log.error("load persistentFile error, persistentFile:" + filePath, e);
+        }
+        if (Objects.isNull(embeddingStore)) {
+            embeddingStore = new InMemoryEmbeddingStore();
+        }
+        collectionNameToStore.putIfAbsent(collectionName, embeddingStore);
+    }
+
+    private Path getPersistentPath(String collectionName) {
+        EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
+        String persistentFile = PERSISTENT_FILE_PRE + collectionName;
+        return Paths.get(embeddingConfig.getEmbeddingStorePersistentPath(), persistentFile);
+    }
+
+    public void persistentToFile() {
+        for (Entry<String, InMemoryEmbeddingStore<EmbeddingQuery>> entry : collectionNameToStore.entrySet()) {
+            Path filePath = getPersistentPath(entry.getKey());
+            try {
+                entry.getValue().serializeToFile(filePath);
+            } catch (Exception e) {
+                log.error("persistentToFile error, persistentFile:" + filePath, e);
+            }
+        }
     }
 
     @Override
@@ -179,7 +211,7 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
         }
 
         private static final InMemoryEmbeddingStoreJsonCodec CODEC = loadCodec();
-        private final List<InMemoryEmbeddingStore.Entry<Embedded>> entries = new CopyOnWriteArrayList<>();
+        private List<InMemoryEmbeddingStore.Entry<Embedded>> entries = new CopyOnWriteArrayList<>();
 
         @Override
         public String add(Embedding embedding) {
@@ -289,11 +321,11 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
             return new GsonInMemoryEmbeddingStoreJsonCodec();
         }
 
-        public static InMemoryEmbeddingStore<TextSegment> fromJson(String json) {
+        public static InMemoryEmbeddingStore<EmbeddingQuery> fromJson(String json) {
             return CODEC.fromJson(json);
         }
 
-        public static InMemoryEmbeddingStore<TextSegment> fromFile(Path filePath) {
+        public static InMemoryEmbeddingStore<EmbeddingQuery> fromFile(Path filePath) {
             try {
                 String json = new String(Files.readAllBytes(filePath));
                 return fromJson(json);
@@ -302,7 +334,7 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
             }
         }
 
-        public static InMemoryEmbeddingStore<TextSegment> fromFile(String filePath) {
+        public static InMemoryEmbeddingStore<EmbeddingQuery> fromFile(String filePath) {
             return fromFile(Paths.get(filePath));
         }
     }

@@ -32,4 +32,6 @@ public class EmbeddingConfig {
     @Value("${embedding.metric.analyzeQuery.nResult:5}")
     private int metricAnalyzeQueryResultNum;
 
+    @Value("${embeddingStore.persistent.path:/tmp}")
+    private String embeddingStorePersistentPath;
 }
