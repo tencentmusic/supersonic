@@ -175,19 +175,23 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
     }
   };
 
+  const drawerEdgeFromConfig = (relationConfigData: any) => {
+    const { config } = relationConfigData;
+    const parseConfig = jsonParse(config, []);
+    if (Array.isArray(parseConfig)) {
+      parseConfig.forEach((item) => {
+        graphRef?.current?.addItem('edge', item);
+      });
+    }
+  };
+
   const getRelationConfig = async (domainId: number) => {
     const { code, data, msg } = await getViewInfoList(domainId);
     if (code === 200) {
       const target = data[0];
       if (target) {
-        const { config } = target;
-        const parseConfig = jsonParse(config, []);
-        if (Array.isArray(parseConfig)) {
-          setRelationConfig(target);
-          parseConfig.forEach((item) => {
-            graphRef?.current?.addItem('edge', item);
-          });
-        }
+        setRelationConfig(target);
+        drawerEdgeFromConfig(target);
       }
     } else {
       message.error(msg);
@@ -203,14 +207,16 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
   };
 
   const saveRelationConfig = async (domainId: number, graphData: any) => {
-    const { code, msg } = await createOrUpdateViewInfo({
+    const configData = {
       id: relationConfig?.id,
       // modelId: domainManger.selectModelId,
       domainId: domainId,
       type: 'modelEdgeRelation',
       config: JSON.stringify(graphData),
-    });
+    };
+    const { code, msg } = await createOrUpdateViewInfo(configData);
     if (code === 200) {
+      setRelationConfig(configData);
       queryModelRelaList(selectDomainId);
     } else {
       message.error(msg);
@@ -946,6 +952,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
     const rootNode = graphRef.current.findById('root');
     graphRef.current.hideItem(rootNode);
     // graphRef.current.fitView();
+    drawerEdgeFromConfig(relationConfig);
     lessNodeZoomRealAndMoveCenter();
   };
 
@@ -992,8 +999,13 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
           const rootGraphData = changeGraphData(dataSourceRef.current);
           refreshGraphData(rootGraphData);
         }}
-        onZoomIn={() => {}}
-        onZoomOut={() => {}}
+        onAutoZoom={() => {
+          // lessNodeZoomRealAndMoveCenter();
+          const rootGraphData = changeGraphData(dataSourceRef.current);
+          refreshGraphData(rootGraphData);
+        }}
+        // onZoomIn={() => {}}
+        // onZoomOut={() => {}}
       />
 
       <GraphToolBar
