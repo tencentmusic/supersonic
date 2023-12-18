@@ -20,6 +20,8 @@ public class DataItem {
 
     private Long modelId;
 
+    private String defaultAgg;
+
     public String getNewName() {
         return newName == null ? name : newName;
     }

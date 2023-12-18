@@ -1,13 +1,15 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Collections;
-import java.util.Map;
-import java.util.HashMap;
-
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * SqlParserReplaceHelperTest
@@ -33,6 +35,18 @@ class SqlParserReplaceHelperTest {
         sql = SqlParserReplaceHelper.replaceSelectFields(sql, fieldMap);
         System.out.println(sql);
         Assert.assertEquals("SELECT 维度1, 播放量1 FROM 数据库 WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1", sql);
+    }
+
+    @Test
+    void replaceAggField() {
+        String sql = "SELECT 维度1,sum(播放量) FROM 数据库 "
+                + "WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1";
+        Map<String, Pair<String, String>> fieldMap = new HashMap<>();
+        fieldMap.put("播放量", Pair.of("收听用户数", AggOperatorEnum.COUNT_DISTINCT.name()));
+        sql = SqlParserReplaceHelper.replaceAggFields(sql, fieldMap);
+        System.out.println(sql);
+        Assert.assertEquals("SELECT 维度1, count(DISTINCT 收听用户数) FROM 数据库 "
+                + "WHERE (歌手名 = '张三') AND 数据日期 = '2023-11-17' GROUP BY 维度1", sql);
     }
 
     @Test

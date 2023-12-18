@@ -4,10 +4,8 @@ package com.tencent.supersonic.chat.rest;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
-import com.tencent.supersonic.chat.api.pojo.response.QueryRecallResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
-import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.service.ChatService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -91,17 +89,6 @@ public class ChatController {
     public ShowCaseResp queryShowCase(@RequestBody PageQueryInfoReq pageQueryInfoCommand,
                                       @RequestParam(value = "agentId") int agentId) {
         return chatService.queryShowCase(pageQueryInfoCommand, agentId);
-    }
-
-    @RequestMapping("/getSolvedQuery")
-    public List<SimilarQueryRecallResp> getSolvedQuery(@RequestParam(value = "queryText") String queryText,
-                                                       @RequestParam(value = "agentId") Integer agentId) {
-        QueryRecallResp queryRecallResp = new QueryRecallResp();
-        Long startTime = System.currentTimeMillis();
-        List<SimilarQueryRecallResp> solvedQueryRecallRespList = chatService.getSolvedQuery(queryText, agentId);
-        queryRecallResp.setSolvedQueryRecallRespList(solvedQueryRecallRespList);
-        queryRecallResp.setQueryTimeCost(System.currentTimeMillis() - startTime);
-        return solvedQueryRecallRespList;
     }
 
 }
