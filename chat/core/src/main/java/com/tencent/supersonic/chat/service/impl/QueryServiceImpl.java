@@ -209,7 +209,7 @@ public class QueryServiceImpl implements QueryService {
             for (ExecuteResultProcessor executeResultProcessor : executeProcessors) {
                 executeResultProcessor.process(queryResult, parseInfo, queryReq);
             }
-            chatService.updateQuery(queryReq.getQueryId(), queryResult, chatCtx);
+            chatService.updateQuery(queryReq.getQueryId(), queryReq.getParseId(), queryResult, chatCtx);
         } else {
             chatService.deleteChatQuery(queryReq.getQueryId());
         }

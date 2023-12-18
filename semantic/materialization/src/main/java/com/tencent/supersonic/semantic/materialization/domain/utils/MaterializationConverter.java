@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.semantic.api.materialization.enums.ElementFrequencyEnum;
 import com.tencent.supersonic.semantic.api.materialization.enums.ElementTypeEnum;
-import com.tencent.supersonic.semantic.api.materialization.enums.MaterializedTypeEnum;
+import com.tencent.supersonic.semantic.api.model.enums.ModelSourceTypeEnum;
 import com.tencent.supersonic.semantic.api.materialization.enums.UpdateCycleEnum;
 import com.tencent.supersonic.semantic.api.materialization.request.MaterializationElementReq;
 import com.tencent.supersonic.semantic.api.materialization.request.MaterializationReq;
@@ -115,7 +115,7 @@ public class MaterializationConverter {
         MaterializationResp materializationResp = new MaterializationResp();
         BeanUtils.copyProperties(materializationDO, materializationResp);
         if (Strings.isNotEmpty(materializationDO.getMaterializedType())) {
-            materializationResp.setMaterializedType(Enum.valueOf(MaterializedTypeEnum.class,
+            materializationResp.setMaterializedType(Enum.valueOf(ModelSourceTypeEnum.class,
                     materializationDO.getMaterializedType()));
         }
         if (Strings.isNotEmpty(materializationDO.getUpdateCycle())) {

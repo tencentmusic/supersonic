@@ -6,6 +6,7 @@ import com.tencent.supersonic.semantic.api.model.pojo.ItemDateFilter;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.MetricResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.semantic.api.model.yaml.MetricYamlTpl;
@@ -37,5 +38,7 @@ public interface Catalog {
             Map<Long, String> modelIdName);
 
     ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric);
+
+    List<ModelResp> getModelList(List<Long> modelIds);
 
 }

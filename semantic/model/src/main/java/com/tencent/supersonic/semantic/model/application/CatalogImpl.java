@@ -18,13 +18,14 @@ import com.tencent.supersonic.semantic.model.domain.MetricService;
 import com.tencent.supersonic.semantic.model.domain.ModelRelaService;
 import com.tencent.supersonic.semantic.model.domain.ModelService;
 import com.tencent.supersonic.semantic.model.domain.pojo.MetaFilter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -97,6 +98,17 @@ public class CatalogImpl implements Catalog {
     @Override
     public ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric) {
         return datasourceService.getItemDate(dimension, metric);
+    }
+
+    @Override
+    public List<ModelResp> getModelList(List<Long> modelIds) {
+        List<ModelResp> modelRespList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(modelIds)) {
+            modelIds.stream().forEach(m -> {
+                modelRespList.add(modelService.getModel(m));
+            });
+        }
+        return modelRespList;
     }
 
     @Override

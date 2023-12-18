@@ -4,7 +4,6 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.semantic.query.executor.JdbcExecutor;
 import com.tencent.supersonic.semantic.query.executor.QueryExecutor;
 import com.tencent.supersonic.semantic.query.optimizer.DetailQuery;
-import com.tencent.supersonic.semantic.query.optimizer.MaterializationQuery;
 import com.tencent.supersonic.semantic.query.optimizer.QueryOptimizer;
 import com.tencent.supersonic.semantic.query.parser.SemanticConverter;
 import com.tencent.supersonic.semantic.query.parser.SqlParser;
@@ -13,6 +12,7 @@ import com.tencent.supersonic.semantic.query.parser.convert.CalculateAggConverte
 import com.tencent.supersonic.semantic.query.parser.convert.DefaultDimValueConverter;
 import com.tencent.supersonic.semantic.query.parser.convert.MetricCheckConverter;
 import com.tencent.supersonic.semantic.query.parser.convert.ParserDefaultConverter;
+import com.tencent.supersonic.semantic.query.parser.convert.ZipperModelConverter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +73,6 @@ public class ComponentFactory {
     }
 
     private static void initQueryOptimizer() {
-        queryOptimizers.put("MaterializationQuery", getBean("MaterializationQuery", MaterializationQuery.class));
         queryOptimizers.put("DetailQuery", getBean("DetailQuery", DetailQuery.class));
     }
 
@@ -82,6 +81,7 @@ public class ComponentFactory {
         semanticConverters.add(getBean("DefaultDimValueConverter", DefaultDimValueConverter.class));
         semanticConverters.add(getBean("CalculateAggConverter", CalculateAggConverter.class));
         semanticConverters.add(getBean("ParserDefaultConverter", ParserDefaultConverter.class));
+        semanticConverters.add(getBean("ZipperModelConverter", ZipperModelConverter.class));
     }
 
     private static void initQueryExecutors() {

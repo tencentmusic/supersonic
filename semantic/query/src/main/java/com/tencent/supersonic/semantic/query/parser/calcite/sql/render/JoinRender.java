@@ -5,7 +5,6 @@ import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Identify;
-import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Identify.Type;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Materialization.TimePartType;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Metric;
@@ -18,6 +17,17 @@ import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.FilterNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.IdentifyNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.MetricNode;
 import com.tencent.supersonic.semantic.query.parser.calcite.sql.node.SemanticNode;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.JoinConditionType;
 import org.apache.calcite.sql.SqlBasicCall;
@@ -29,21 +39,6 @@ import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class JoinRender extends Renderer {
@@ -259,14 +254,26 @@ public class JoinRender extends Renderer {
             throws Exception {
         SqlNode condition = getCondition(leftTable, tableView, dataSource, schema, scope);
         SqlLiteral sqlLiteral = SemanticNode.getJoinSqlLiteral("");
-        if (!TimePartType.ZIPPER.equals(leftTable.getDataSource().getTimePartType()) && !TimePartType.ZIPPER.equals(
+        JoinRelation matchJoinRelation = getMatchJoinRelation(before, tableView, schema);
+        SqlNode joinRelationCondition = null;
+        if (!CollectionUtils.isEmpty(matchJoinRelation.getJoinCondition())) {
+            sqlLiteral = SemanticNode.getJoinSqlLiteral(matchJoinRelation.getJoinType());
+            joinRelationCondition = getCondition(matchJoinRelation, scope);
+            condition = joinRelationCondition;
+        }
+        if (TimePartType.ZIPPER.equals(leftTable.getDataSource().getTimePartType()) || TimePartType.ZIPPER.equals(
                 tableView.getDataSource().getTimePartType())) {
-            JoinRelation matchJoinRelation = getMatchJoinRelation(before, tableView, schema);
-            if (!CollectionUtils.isEmpty(matchJoinRelation.getJoinCondition())) {
-                sqlLiteral = SemanticNode.getJoinSqlLiteral(matchJoinRelation.getJoinType());
-                condition = getCondition(matchJoinRelation, scope);
+            SqlNode zipperCondition = getZipperCondition(leftTable, tableView, dataSource, schema, scope);
+            if (Objects.nonNull(joinRelationCondition)) {
+                condition = new SqlBasicCall(
+                        SqlStdOperatorTable.AND,
+                        new ArrayList<>(Arrays.asList(zipperCondition, joinRelationCondition)),
+                        SqlParserPos.ZERO, null);
+            } else {
+                condition = zipperCondition;
             }
         }
+
         return new SqlJoin(
                 SqlParserPos.ZERO,
                 left,
@@ -324,10 +331,7 @@ public class JoinRender extends Renderer {
 
     private SqlNode getCondition(TableView left, TableView right, DataSource dataSource, SemanticSchema schema,
             SqlValidatorScope scope) throws Exception {
-        if (TimePartType.ZIPPER.equals(left.getDataSource().getTimePartType()) || TimePartType.ZIPPER.equals(
-                right.getDataSource().getTimePartType())) {
-            return getZipperCondition(left, right, dataSource, schema, scope);
-        }
+
         Set<String> selectLeft = SemanticNode.getSelect(left.getTable());
         Set<String> selectRight = SemanticNode.getSelect(right.getTable());
         selectLeft.retainAll(selectRight);
@@ -366,67 +370,6 @@ public class JoinRender extends Renderer {
                     SqlParserPos.ZERO, null);
         }
         return condition;
-    }
-
-    private List<DataSource> getOrderSource(List<DataSource> dataSources) throws Exception {
-        if (CollectionUtils.isEmpty(dataSources) || dataSources.size() <= 2) {
-            return dataSources;
-        }
-        Map<String, Set<String>> next = new HashMap<>();
-        Map<String, Boolean> visited = new HashMap<>();
-        Map<String, List<Identify>> dataSourceIdentifies = new HashMap<>();
-        dataSources.stream().forEach(d -> {
-            next.put(d.getName(), new HashSet<>());
-            visited.put(d.getName(), false);
-            dataSourceIdentifies.put(d.getName(), d.getIdentifiers());
-        });
-        int cnt = dataSources.size();
-        List<Map.Entry<String, List<Identify>>> dataSourceIdentifyList = dataSourceIdentifies.entrySet().stream()
-                .collect(Collectors.toList());
-        for (int i = 0; i < cnt; i++) {
-            for (int j = i + 1; j < cnt; j++) {
-                Set<String> primaries = IdentifyNode.getIdentifyNames(dataSourceIdentifyList.get(i).getValue(),
-                        Type.PRIMARY);
-                Set<String> foreign = IdentifyNode.getIdentifyNames(dataSourceIdentifyList.get(i).getValue(),
-                        Type.FOREIGN);
-                Set<String> nextPrimaries = IdentifyNode.getIdentifyNames(dataSourceIdentifyList.get(j).getValue(),
-                        Type.PRIMARY);
-                Set<String> nextForeign = IdentifyNode.getIdentifyNames(dataSourceIdentifyList.get(j).getValue(),
-                        Type.FOREIGN);
-                Set<String> nextAll = new HashSet<>();
-                nextAll.addAll(nextPrimaries);
-                nextAll.addAll(nextForeign);
-                primaries.retainAll(nextPrimaries);
-                foreign.retainAll(nextPrimaries);
-                if (primaries.size() > 0 || foreign.size() > 0) {
-                    next.get(dataSourceIdentifyList.get(i).getKey()).add(dataSourceIdentifyList.get(j).getKey());
-                    next.get(dataSourceIdentifyList.get(j).getKey()).add(dataSourceIdentifyList.get(i).getKey());
-                }
-
-            }
-        }
-        Queue<String> paths = new ArrayDeque<>();
-        for (String id : visited.keySet()) {
-            if (!visited.get(id)) {
-                joinOrder(cnt, id, next, paths, visited);
-                if (paths.size() >= cnt) {
-                    break;
-                }
-            }
-        }
-        if (paths.size() < cnt) {
-            throw new Exception("datasource cant join,pls check identify :" + dataSources.stream()
-                    .map(d -> d.getName()).collect(
-                            Collectors.joining(",")));
-        }
-        List<String> orderList = new ArrayList<>(paths);
-        Collections.sort(dataSources, new Comparator<DataSource>() {
-            @Override
-            public int compare(DataSource o1, DataSource o2) {
-                return orderList.indexOf(o1.getName()) - orderList.indexOf(o2.getName());
-            }
-        });
-        return dataSources;
     }
 
     private static void joinOrder(int cnt, String id, Map<String, Set<String>> next, Queue<String> orders,
@@ -482,8 +425,6 @@ public class JoinRender extends Renderer {
             String startTime = "";
             String endTime = "";
             String dateTime = "";
-            List<String> primaryZipper = new ArrayList<>();
-            List<String> primaryPartition = new ArrayList<>();
 
             Optional<Dimension> startTimeOp = (TimePartType.ZIPPER.equals(left.getDataSource().getTimePartType()) ? left
                     : right).getDataSource().getDimensions().stream()
@@ -502,12 +443,8 @@ public class JoinRender extends Renderer {
                 startTime = zipper.getAlias() + "." + startTimeOp.get().getName();
                 endTime = zipper.getAlias() + "." + endTimeOp.get().getName();
                 dateTime = partMetric.getAlias() + "." + partTime.get().getName();
-                primaryZipper = zipper.getDataSource().getIdentifiers().stream().map(i -> i.getName()).collect(
-                        Collectors.toList());
-                primaryPartition = partMetric.getDataSource().getIdentifiers().stream().map(i -> i.getName()).collect(
-                        Collectors.toList());
             }
-            primaryZipper.retainAll(primaryPartition);
+
             condition =
                     new SqlBasicCall(
                             SqlStdOperatorTable.AND,
@@ -521,20 +458,6 @@ public class JoinRender extends Renderer {
                                             SemanticNode.parse(dateTime, scope))),
                                     SqlParserPos.ZERO, null))),
                             SqlParserPos.ZERO, null);
-
-            for (String p : primaryZipper) {
-                List<SqlNode> ons = new ArrayList<>();
-                ons.add(SemanticNode.parse(left.getAlias() + "." + p, scope));
-                ons.add(SemanticNode.parse(right.getAlias() + "." + p, scope));
-                SqlNode addCondition = new SqlBasicCall(
-                        SqlStdOperatorTable.EQUALS,
-                        ons,
-                        SqlParserPos.ZERO, null);
-                condition = new SqlBasicCall(
-                        SqlStdOperatorTable.AND,
-                        new ArrayList<>(Arrays.asList(condition, addCondition)),
-                        SqlParserPos.ZERO, null);
-            }
 
         }
         return condition;

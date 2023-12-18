@@ -15,20 +15,20 @@ import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.model.domain.pojo.EngineTypeEnum;
 import com.tencent.supersonic.semantic.query.parser.SemanticConverter;
+import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.service.SemanticQueryEngine;
 import com.tencent.supersonic.semantic.query.utils.QueryStructUtils;
 import com.tencent.supersonic.semantic.query.utils.SqlGenerateUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 
 @Component("CalculateAggConverter")
@@ -94,7 +94,11 @@ public class CalculateAggConverter implements SemanticConverter {
     }
 
     @Override
-    public boolean accept(QueryStructReq queryStructCmd) {
+    public boolean accept(QueryStatement queryStatement) {
+        if (Objects.isNull(queryStatement.getQueryStructReq()) || queryStatement.getIsS2SQL()) {
+            return false;
+        }
+        QueryStructReq queryStructCmd = queryStatement.getQueryStructReq();
         if (queryStructCmd.getQueryType().isNativeAggQuery()) {
             return false;
         }

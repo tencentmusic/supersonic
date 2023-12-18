@@ -15,6 +15,8 @@ public class Datasource extends SchemaItem {
 
     private ModelDetail datasourceDetail;
 
+    private String sourceType;
+
 
 
 }

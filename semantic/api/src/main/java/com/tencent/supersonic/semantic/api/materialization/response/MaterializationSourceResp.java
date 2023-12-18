@@ -1,6 +1,6 @@
 package com.tencent.supersonic.semantic.api.materialization.response;
 
-import com.tencent.supersonic.semantic.api.materialization.enums.MaterializedTypeEnum;
+import com.tencent.supersonic.semantic.api.model.enums.ModelSourceTypeEnum;
 import com.tencent.supersonic.semantic.api.materialization.enums.UpdateCycleEnum;
 import com.tencent.supersonic.semantic.api.model.response.DatabaseResp;
 import java.util.List;
@@ -26,7 +26,7 @@ public class MaterializationSourceResp {
 
     private String dateInfo;
     private String entities;
-    private MaterializedTypeEnum materializedType;
+    private ModelSourceTypeEnum materializedType;
     private UpdateCycleEnum updateCycle;
     private DatabaseResp databaseResp;
     private String depends;

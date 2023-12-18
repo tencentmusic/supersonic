@@ -20,6 +20,7 @@ import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.DimensionTimeTypeParams;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Identify;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.JoinRelation;
+import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Materialization.TimePartType;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Measure;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.Metric;
 import com.tencent.supersonic.semantic.query.parser.calcite.s2sql.MetricTypeParams;
@@ -62,10 +63,6 @@ public class SemanticSchemaManager {
     public SemanticModel reload(String rootPath) {
         SemanticModel semanticModel = new SemanticModel();
         semanticModel.setRootPath(rootPath);
-        //Map<Long, String> modelFullPathMap = catalog.getModelFullPath();
-        //log.info("modelFullPathMap {}", modelFullPathMap);
-        //Set<Long> modelIds = modelFullPathMap.entrySet().stream().filter(e -> e.getValue().startsWith(rootPath))
-        //        .map(Entry::getKey).collect(Collectors.toSet());
         Set<Long> modelIds = Arrays.stream(rootPath.split(",")).map(s -> Long.parseLong(s.trim()))
                 .collect(Collectors.toSet());
         if (modelIds.isEmpty()) {
@@ -122,6 +119,9 @@ public class SemanticSchemaManager {
                 .name(d.getName()).tableQuery(d.getTableQuery()).identifiers(getIdentify(d.getIdentifiers()))
                 .measures(getMeasures(d.getMeasures())).dimensions(getDimensions(d.getDimensions())).build();
         datasource.setAggTime(getDataSourceAggTime(datasource.getDimensions()));
+        if (Objects.nonNull(d.getModelSourceTypeEnum())) {
+            datasource.setTimePartType(TimePartType.of(d.getModelSourceTypeEnum().name()));
+        }
         return datasource;
     }
 

@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.model.domain.manager;
 
+import com.tencent.supersonic.semantic.api.model.enums.ModelSourceTypeEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.ModelDetail;
 import com.tencent.supersonic.semantic.api.model.pojo.Dim;
 import com.tencent.supersonic.semantic.api.model.pojo.Identify;
@@ -42,6 +43,7 @@ public class DatasourceYamlManager {
                 .collect(Collectors.toList()));
         dataModelYamlTpl.setName(datasource.getBizName());
         dataModelYamlTpl.setSourceId(datasource.getDatabaseId());
+        dataModelYamlTpl.setModelSourceTypeEnum(ModelSourceTypeEnum.of(datasource.getSourceType()));
         if (datasourceDetail.getQueryType().equalsIgnoreCase(DatasourceQueryEnum.SQL_QUERY.getName())) {
             dataModelYamlTpl.setSqlQuery(datasourceDetail.getSqlQuery());
         } else {

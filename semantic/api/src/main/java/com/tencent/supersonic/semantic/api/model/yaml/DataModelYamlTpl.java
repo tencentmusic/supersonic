@@ -1,5 +1,6 @@
 package com.tencent.supersonic.semantic.api.model.yaml;
 
+import com.tencent.supersonic.semantic.api.model.enums.ModelSourceTypeEnum;
 import java.util.List;
 import lombok.Data;
 
@@ -20,6 +21,8 @@ public class DataModelYamlTpl {
     private List<DimensionYamlTpl> dimensions;
 
     private List<MeasureYamlTpl> measures;
+
+    private ModelSourceTypeEnum modelSourceTypeEnum;
 
 
 
