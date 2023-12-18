@@ -99,7 +99,6 @@ const ControlToolBar: React.FC<Props> = ({
           icon={<OneToOneOutlined />}
           description="重置"
           onClick={() => {
-            graph.fitView();
             onAutoZoom?.();
           }}
         />
