@@ -179,4 +179,13 @@ public class SemanticSchema implements Serializable {
         return modelSchemaList.stream().collect(Collectors.toMap(modelSchema
                 -> modelSchema.getModel().getModel(), modelSchema -> modelSchema));
     }
+
+    public Map<Long, ModelSchema> getModelSchemaMap(Set<Long> modelIds) {
+        if (CollectionUtils.isEmpty(modelSchemaList)) {
+            return new HashMap<>();
+        }
+        return modelSchemaList.stream()
+                .filter(modelSchema -> modelIds.contains(modelSchema.getModel().getId()))
+                .collect(Collectors.toMap(modelSchema -> modelSchema.getModel().getId(), modelSchema -> modelSchema));
+    }
 }

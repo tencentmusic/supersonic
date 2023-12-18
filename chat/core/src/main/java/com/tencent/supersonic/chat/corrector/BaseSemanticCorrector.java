@@ -54,6 +54,18 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         dbAllFields.addAll(semanticSchema.getMetrics());
         dbAllFields.addAll(semanticSchema.getDimensions());
 
+        // match model ids should add related model ids
+        semanticSchema.getModelSchemaMap(modelIds).values().stream()
+                .filter(Objects::nonNull)
+                .forEach(modelSchema -> {
+                    modelSchema.getModelRelas().stream()
+                            .filter(Objects::nonNull)
+                            .forEach(modelRela -> {
+                                modelIds.add(modelRela.getToModelId());
+                                modelIds.add(modelRela.getFromModelId());
+                            });
+                });
+
         // support fieldName and field alias
         Map<String, String> result = dbAllFields.stream()
                 .filter(entry -> modelIds.contains(entry.getModel()))
