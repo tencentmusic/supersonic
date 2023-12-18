@@ -92,9 +92,9 @@ public class ChatDemoLoader {
 
         ExecuteQueryReq executeReq = ExecuteQueryReq.builder().build();
         executeReq.setQueryId(parseResp.getQueryId());
-        executeReq.setParseId(parseResp.getCandidateParses().get(0).getId());
+        executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());
         executeReq.setQueryText(queryRequest.getQueryText());
-        executeReq.setParseInfo(parseResp.getCandidateParses().get(0));
+        executeReq.setParseInfo(parseResp.getSelectedParses().get(0));
         executeReq.setChatId(parseResp.getChatId());
         executeReq.setUser(queryRequest.getUser());
         executeReq.setAgentId(1);
