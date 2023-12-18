@@ -21,6 +21,10 @@ if "%service%"=="" (
    set "service=%standalone_service%"
 )
 
+IF "%service%"=="pyllm" (
+  SET "llmProxy=PythonLLMProxy"
+)
+
 call :BUILD_RUNTIME
 
 if "%command%"=="restart" (
@@ -44,17 +48,13 @@ if "%command%"=="restart" (
 :START
     if "%service%"=="%pyllm_service%" (
          call :START_PYTHON
+         call :START_JAVA
          goto :EOF
     )
-    call :START_PYTHON
     call :START_JAVA
     goto :EOF
 
 :STOP
-    if "%service%"=="%pyllm_service%" (
-        call :STOP_PYTHON
-        goto :EOF
-    )
     call :STOP_PYTHON
     call :STOP_JAVA
     goto :EOF
@@ -71,9 +71,9 @@ if "%command%"=="restart" (
   echo 'java service starting, see logs in logs/'
    cd "%javaRunDir%"
    if not exist "%runtimeDir%\supersonic-standalone\logs" mkdir "%runtimeDir%\supersonic-standalone\logs"
-   set "libDir=%runtimeDir%\supersonic-%service%\lib"
-   set "confDir=%runtimeDir%\supersonic-%service%\conf"
-   set "webDir=%runtimeDir%\supersonic-%service%\webapp"
+   set "libDir=%runtimeDir%\supersonic-standalone\lib"
+   set "confDir=%runtimeDir%\supersonic-standalone\conf"
+   set "webDir=%runtimeDir%\supersonic-standalone\webapp"
    set "classpath=%confDir%;%webDir%;%libDir%\*"
    set "java-command=-Dfile.encoding=UTF-8 -Duser.language=Zh -Duser.region=CN -Duser.timezone=GMT+08 -Xms1024m -Xmx2048m -cp %CLASSPATH% %MAIN_CLASS%"
    start /B java %java-command% >nul 2>&1
