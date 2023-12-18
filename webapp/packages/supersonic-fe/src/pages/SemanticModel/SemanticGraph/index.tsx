@@ -419,7 +419,8 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
     mindmap: {
       defaultEdge: {
-        type: 'polyline',
+        // type: 'polyline',
+        type: 'cubic-horizontal',
       },
       layout: {
         type: 'mindmap',
@@ -489,7 +490,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
       const graphNodeList = flatGraphDataNode(graphData.children);
       const graphConfigKey = graphNodeList.length > 20 ? 'dendrogram' : 'mindmap';
       // const graphConfigKey = 'mindmap';
-
+      // const graphConfigKey = 'dendrogram';
       // getLegendDataFilterFunctions();
       // const toolbar = initToolBar({ onSearch: handleSeachNode, onClick: handleToolBarClick });
       const tooltip = initTooltips();

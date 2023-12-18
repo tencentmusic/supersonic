@@ -16,7 +16,13 @@ import DimensionAndMetricRelationModal from '../../components/DimensionAndMetric
 import TrendChart from '@/pages/SemanticModel/Metric/components/MetricTrend';
 import MetricTrendDimensionFilterContainer from './MetricTrendDimensionFilterContainer';
 import MDatePicker from '@/components/MDatePicker';
-import { DateRangeType, DateSettingType } from '@/components/MDatePicker/type';
+import {
+  DateRangeType,
+  DateSettingType,
+  DynamicAdvancedConfigType,
+  DatePeriodType,
+} from '@/components/MDatePicker/type';
+import { getDatePickerDynamicInitialValues } from '@/components/MDatePicker/utils';
 import StandardFormRow from '@/components/StandardFormRow';
 import MetricTable from './Table';
 import { ColumnConfig } from '../data';
@@ -205,20 +211,7 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
               <StandardFormRow key="metricDate" title="日期区间:">
                 <FormItem name="metricDate">
                   <MDatePicker
-                    initialValues={{
-                      dateSettingType: 'DYNAMIC',
-                      dynamicParams: {
-                        number: 7,
-                        periodType: 'DAYS',
-                        includesCurrentPeriod: true,
-                        shortCutId: 'last7Days',
-                        dateRangeType: 'DAY',
-                        dynamicAdvancedConfigType: 'last',
-                        dateRangeStringDesc: '最近7天',
-                        dateSettingType: DateSettingType.DYNAMIC,
-                      },
-                      staticParams: {},
-                    }}
+                    initialValues={getDatePickerDynamicInitialValues(7, DateRangeType.DAY)}
                     showCurrentDataRangeString={false}
                     onDateRangeChange={(value, config) => {
                       const [startDate, endDate] = value;
