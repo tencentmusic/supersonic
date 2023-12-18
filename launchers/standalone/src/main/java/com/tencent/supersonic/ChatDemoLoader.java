@@ -34,6 +34,8 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -43,7 +45,8 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class ChatDemoLoader {
+@Order(3)
+public class ChatDemoLoader implements CommandLineRunner {
 
     private User user = User.getFakeUser();
     @Qualifier("chatQueryService")
@@ -59,6 +62,13 @@ public class ChatDemoLoader {
     private AgentService agentService;
     @Autowired
     private SysParameterService sysParameterService;
+
+    @Override
+    public void run(String... args) throws Exception {
+        if (checkEnable()) {
+            doRun();
+        }
+    }
 
     public void doRun() {
         try {
@@ -488,6 +498,10 @@ public class ChatDemoLoader {
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());
+    }
+
+    private boolean checkEnable() {
+        return chatService.getLastQuery(1L) == null;
     }
 
 }

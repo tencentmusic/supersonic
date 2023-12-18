@@ -37,7 +37,6 @@ public class DemoLoader implements CommandLineRunner {
         }
         modelDataDemoLoader.doRun();
         benchMarkDemoLoader.doRun();
-        chatDemoLoader.doRun();
     }
 
     private boolean checkLoadDemo() {
