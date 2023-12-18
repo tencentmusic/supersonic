@@ -10,7 +10,6 @@ import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
-import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
@@ -22,7 +21,6 @@ import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.utils.SimilarQueryManager;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.Lists;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -237,34 +235,6 @@ public class ChatServiceImpl implements ChatService {
 
     public Boolean deleteChatQuery(Long questionId) {
         return chatQueryRepository.deleteChatQuery(questionId);
-    }
-
-    @Override
-    public List<SimilarQueryRecallResp> getSolvedQuery(String queryText, Integer agentId) {
-        //1. recall solved query by queryText
-        List<SimilarQueryRecallResp> solvedQueryRecallResps = solvedQueryManager.recallSimilarQuery(queryText, agentId);
-        if (CollectionUtils.isEmpty(solvedQueryRecallResps)) {
-            return Lists.newArrayList();
-        }
-        List<Long> queryIds = solvedQueryRecallResps.stream()
-                .map(SimilarQueryRecallResp::getQueryId).collect(Collectors.toList());
-        PageQueryInfoReq pageQueryInfoReq = new PageQueryInfoReq();
-        pageQueryInfoReq.setIds(queryIds);
-        pageQueryInfoReq.setPageSize(100);
-        pageQueryInfoReq.setCurrent(1);
-        //2. remove low score query
-        int lowScoreThreshold = 3;
-        PageInfo<QueryResp> queryRespPageInfo = chatQueryRepository.getChatQuery(pageQueryInfoReq, null);
-        List<QueryResp> queryResps = queryRespPageInfo.getList();
-        if (CollectionUtils.isEmpty(queryResps)) {
-            return Lists.newArrayList();
-        }
-        Set<Long> lowScoreQueryIds = queryResps.stream().filter(queryResp ->
-                        queryResp.getScore() != null && queryResp.getScore() <= lowScoreThreshold)
-                .map(QueryResp::getQuestionId).collect(Collectors.toSet());
-        return solvedQueryRecallResps.stream().filter(solvedQueryRecallResp ->
-                        !lowScoreQueryIds.contains(solvedQueryRecallResp.getQueryId()))
-                .collect(Collectors.toList());
     }
 
 }

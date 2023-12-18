@@ -401,9 +401,12 @@ public class MetricServiceImpl implements MetricService {
     }
 
     private DataItem getDataItem(MetricDO metricDO) {
+        MetricResp metricResp = MetricConverter.convert2MetricResp(metricDO,
+                new HashMap<>(), Lists.newArrayList());
         return DataItem.builder().id(metricDO.getId()).name(metricDO.getName())
                 .bizName(metricDO.getBizName())
-                .modelId(metricDO.getModelId()).type(TypeEnums.METRIC).build();
+                .modelId(metricDO.getModelId()).type(TypeEnums.METRIC)
+                .defaultAgg(metricResp.getDefaultAgg()).build();
     }
 
 }
