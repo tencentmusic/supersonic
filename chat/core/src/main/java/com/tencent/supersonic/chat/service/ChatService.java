@@ -53,7 +53,7 @@ public interface ChatService {
 
     int updateQuery(ChatQueryDO chatQueryDO);
 
-    Boolean updateQuery(Long questionId, QueryResult queryResult, ChatContext chatCtx);
+    void updateQuery(Long questionId, int parseId, QueryResult queryResult, ChatContext chatCtx);
 
     ChatParseDO getParseInfo(Long questionId, int parseId);
 
