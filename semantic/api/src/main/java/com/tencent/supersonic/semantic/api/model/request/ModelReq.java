@@ -2,17 +2,14 @@ package com.tencent.supersonic.semantic.api.model.request;
 
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.semantic.api.model.enums.DimensionTypeEnum;
 import com.tencent.supersonic.semantic.api.model.pojo.Dim;
 import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
 import com.tencent.supersonic.semantic.api.model.pojo.ModelDetail;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import lombok.Data;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Data
@@ -43,12 +40,10 @@ public class ModelReq extends SchemaItem {
     private List<String> adminOrgs = new ArrayList<>();
 
     public List<Dim> getTimeDimension() {
-        if (CollectionUtils.isEmpty(modelDetail.getDimensions())) {
+        if (modelDetail == null) {
             return Lists.newArrayList();
         }
-        return modelDetail.getDimensions().stream()
-                .filter(dim -> DimensionTypeEnum.time.name().equalsIgnoreCase(dim.getType()))
-                .collect(Collectors.toList());
+        return modelDetail.getTimeDims();
     }
 
     public String getViewer() {

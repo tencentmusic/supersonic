@@ -26,10 +26,6 @@ public class Measure {
 
     private Integer isCreateMetric = 0;
 
-    private Long datasourceId;
-
-    private String datasourceName;
-
     public Measure(String name, String bizName, String agg, Integer isCreateMetric) {
         this.name = name;
         this.agg = agg;
@@ -37,8 +33,4 @@ public class Measure {
         this.bizName = bizName;
     }
 
-    public Measure(String bizName, Long datasourceId) {
-        this.bizName = bizName;
-        this.datasourceId = datasourceId;
-    }
 }

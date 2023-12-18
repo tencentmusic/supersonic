@@ -63,6 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -303,7 +304,8 @@ public class ModelServiceImpl implements ModelService {
             modelRespSet = modelRespSet.stream().filter(modelResp ->
                     modelResp.getDomainId().equals(domainId)).collect(Collectors.toSet());
         }
-        return new ArrayList<>(modelRespSet);
+        return modelRespSet.stream().sorted(Comparator.comparingLong(ModelResp::getId))
+                .collect(Collectors.toList());
     }
 
     public List<ModelResp> getModelRespAuthInheritDomain(User user, AuthType authType) {
