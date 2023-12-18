@@ -88,7 +88,12 @@ public class SysParameter {
                 "温度值", "number", "Parser相关配置"));
 
         Parameter s2SQLParameter = new Parameter("s2SQL.generation", "TWO_PASS_AUTO_COT",
-                "S2SQL生成方式", "list", "Parser相关配置");
+                "S2SQL生成方式", "ONE_PASS_AUTO_COT: 通过思维链方式一步生成sql"
+                + "\nONE_PASS_AUTO_COT_SELF_CONSISTENCY: 通过思维链且投票方式一步生成sql"
+                + "\nTWO_PASS_AUTO_COT: 通过思维链方式两步生成sql"
+                + "\nTWO_PASS_AUTO_COT_SELF_CONSISTENCY: 通过思维链且投票方式两步生成sql"
+                , "list", "Parser相关配置");
+
         s2SQLParameter.setCandidateValues(Lists.newArrayList("ONE_PASS_AUTO_COT", "ONE_PASS_AUTO_COT_SELF_CONSISTENCY",
                 "TWO_PASS_AUTO_COT", "TWO_PASS_AUTO_COT_SELF_CONSISTENCY"));
         parameters.add(s2SQLParameter);
