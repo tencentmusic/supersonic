@@ -1,9 +1,11 @@
 package com.tencent.supersonic.semantic.api.model.response;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
+import com.tencent.supersonic.semantic.api.model.pojo.Dim;
+import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
 import com.tencent.supersonic.semantic.api.model.pojo.Identify;
 import com.tencent.supersonic.semantic.api.model.pojo.ModelDetail;
-import com.tencent.supersonic.semantic.api.model.pojo.DrillDownDimension;
 import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
@@ -63,6 +65,13 @@ public class ModelResp extends SchemaItem {
             }
         }
         return null;
+    }
+
+    public List<Dim> getTimeDimension() {
+        if (modelDetail == null) {
+            return Lists.newArrayList();
+        }
+        return modelDetail.getTimeDims();
     }
 
     @Override

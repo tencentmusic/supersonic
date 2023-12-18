@@ -105,7 +105,6 @@ public class ModelConverter {
     }
 
     public static MetricReq convert(Measure measure, ModelDO modelDO) {
-        measure.setDatasourceId(modelDO.getId());
         MetricReq metricReq = new MetricReq();
         metricReq.setName(measure.getName());
         metricReq.setBizName(measure.getBizName().replaceFirst(modelDO.getBizName() + "_", ""));

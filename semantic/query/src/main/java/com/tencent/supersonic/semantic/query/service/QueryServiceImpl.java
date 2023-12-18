@@ -1,19 +1,20 @@
 package com.tencent.supersonic.semantic.query.service;
 
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.Filter;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.cache.CacheUtils;
 import com.tencent.supersonic.semantic.api.model.enums.QueryTypeEnum;
+import com.tencent.supersonic.semantic.api.model.pojo.Dim;
 import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
+import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
 import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
+import com.tencent.supersonic.semantic.api.model.response.ModelResp;
 import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
 import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.semantic.api.query.pojo.Cache;
@@ -25,23 +26,24 @@ import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
 import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
 import com.tencent.supersonic.semantic.api.query.response.ItemUseResp;
+import com.tencent.supersonic.semantic.model.domain.Catalog;
 import com.tencent.supersonic.semantic.query.executor.QueryExecutor;
 import com.tencent.supersonic.semantic.query.parser.convert.QueryReqConverter;
 import com.tencent.supersonic.semantic.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.semantic.query.utils.QueryUtils;
 import com.tencent.supersonic.semantic.query.utils.S2SQLPermissionAnnotation;
 import com.tencent.supersonic.semantic.query.utils.StatUtils;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -55,6 +57,7 @@ public class QueryServiceImpl implements QueryService {
     private final CacheUtils cacheUtils;
     private final QueryUtils queryUtils;
     private final QueryReqConverter queryReqConverter;
+    private final Catalog catalog;
 
     @Value("${query.cache.enable:true}")
     private Boolean cacheEnable;
@@ -66,12 +69,14 @@ public class QueryServiceImpl implements QueryService {
             CacheUtils cacheUtils,
             QueryUtils queryUtils,
             QueryReqConverter queryReqConverter,
-            SemanticQueryEngine semanticQueryEngine) {
+            SemanticQueryEngine semanticQueryEngine,
+            Catalog catalog) {
         this.statUtils = statUtils;
         this.cacheUtils = cacheUtils;
         this.queryUtils = queryUtils;
         this.queryReqConverter = queryReqConverter;
         this.semanticQueryEngine = semanticQueryEngine;
+        this.catalog = catalog;
     }
 
     @Override
@@ -83,7 +88,7 @@ public class QueryServiceImpl implements QueryService {
         try {
             queryStatement = convertToQueryStatement(queryS2SQLReq, user);
         } catch (Exception e) {
-            log.info("convertToQueryStatement has a exception:{}", e.toString());
+            log.info("convertToQueryStatement has a exception:", e);
         }
         log.info("queryStatement:{}", queryStatement);
         QueryResultWithSchemaResp results = semanticQueryEngine.execute(queryStatement);
@@ -200,8 +205,8 @@ public class QueryServiceImpl implements QueryService {
     @Override
     @SneakyThrows
     public QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user) {
-        QueryStructReq queryStructReq = generateDimValueQueryStruct(queryDimValueReq);
-        return queryByStruct(queryStructReq, user);
+        QueryS2SQLReq queryS2SQLReq = generateDimValueQuerySql(queryDimValueReq);
+        return (QueryResultWithSchemaResp) queryBySql(queryS2SQLReq, user);
     }
 
     private void handleGlobalCacheDisable(QueryStructReq queryStructCmd) {
@@ -295,37 +300,27 @@ public class QueryServiceImpl implements QueryService {
         return null;
     }
 
-    private QueryStructReq generateDimValueQueryStruct(QueryDimValueReq queryDimValueReq) {
-        QueryStructReq queryStructReq = new QueryStructReq();
-
-        queryStructReq.setModelId(queryDimValueReq.getModelId());
-        queryStructReq.setGroups(Collections.singletonList(queryDimValueReq.getDimensionBizName()));
-
-        if (!Objects.isNull(queryDimValueReq.getValue())) {
-            List<Filter> dimensionFilters = new ArrayList<>();
-            Filter dimensionFilter = new Filter();
-            dimensionFilter.setOperator(FilterOperatorEnum.LIKE);
-            dimensionFilter.setRelation(Filter.Relation.FILTER);
-            dimensionFilter.setBizName(queryDimValueReq.getDimensionBizName());
-            dimensionFilter.setValue(queryDimValueReq.getValue());
-            dimensionFilters.add(dimensionFilter);
-            queryStructReq.setDimensionFilters(dimensionFilters);
+    private QueryS2SQLReq generateDimValueQuerySql(QueryDimValueReq queryDimValueReq) {
+        QueryS2SQLReq queryS2SQLReq = new QueryS2SQLReq();
+        List<ModelResp> modelResps = catalog.getModelList(Lists.newArrayList(queryDimValueReq.getModelId()));
+        DimensionResp dimensionResp = catalog.getDimension(queryDimValueReq.getDimensionBizName(),
+                queryDimValueReq.getModelId());
+        ModelResp modelResp = modelResps.get(0);
+        String sql = String.format("select distinct %s from %s", dimensionResp.getName(), modelResp.getName());
+        List<Dim> timeDims = modelResp.getTimeDimension();
+        if (CollectionUtils.isNotEmpty(timeDims)) {
+            sql = String.format("%s where %s >= '%s' and %s <= '%s'", sql, TimeDimensionEnum.DAY.getName(),
+                    queryDimValueReq.getDateInfo().getStartDate(), TimeDimensionEnum.DAY.getName(),
+                    queryDimValueReq.getDateInfo().getEndDate());
         }
-        List<Aggregator> aggregators = new ArrayList<>();
-        queryStructReq.setAggregators(aggregators);
-        DateConf dateInfo = queryDimValueReq.getDateInfo();
-        if (dateInfo == null) {
-            dateInfo = new DateConf();
-            dateInfo.setDateMode(DateConf.DateMode.RECENT);
-            dateInfo.setUnit(1);
-        }
-        queryStructReq.setDateInfo(dateInfo);
-        queryStructReq.setQueryType(QueryType.TAG);
-        return queryStructReq;
+        queryS2SQLReq.setModelIds(Sets.newHashSet(queryDimValueReq.getModelId()));
+        queryS2SQLReq.setSql(sql);
+        return queryS2SQLReq;
     }
 
     private String getKeyByModelIds(List<Long> modelIds) {
-        return String.join(",", modelIds.stream().map(Object::toString).collect(Collectors.toList()));
+        return String.join(",", modelIds.stream()
+                .map(Object::toString).collect(Collectors.toList()));
     }
 
 }
