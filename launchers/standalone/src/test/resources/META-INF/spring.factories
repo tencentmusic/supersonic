@@ -17,7 +17,18 @@ com.tencent.supersonic.chat.api.component.SemanticCorrector=\
     com.tencent.supersonic.chat.corrector.SelectCorrector, \
     com.tencent.supersonic.chat.corrector.WhereCorrector, \
     com.tencent.supersonic.chat.corrector.GroupByCorrector, \
-    com.tencent.supersonic.chat.corrector.HavingCorrector
+    com.tencent.supersonic.chat.corrector.HavingCorrector, \
+    com.tencent.supersonic.chat.corrector.FromCorrector
+
+com.tencent.supersonic.chat.processor.parse.ParseResultProcessor=\
+    com.tencent.supersonic.chat.processor.parse.MetricCheckProcessor, \
+    com.tencent.supersonic.chat.processor.parse.ParseInfoProcessor, \
+    com.tencent.supersonic.chat.processor.parse.QueryRankProcessor, \
+    com.tencent.supersonic.chat.processor.parse.EntityInfoProcessor, \
+    com.tencent.supersonic.chat.processor.parse.SqlInfoProcessor, \
+    com.tencent.supersonic.chat.processor.parse.TimeCostProcessor, \
+    com.tencent.supersonic.chat.processor.parse.RespBuildProcessor, \
+    com.tencent.supersonic.chat.processor.parse.QueryRecommendProcessor
 
 com.tencent.supersonic.chat.api.component.SemanticInterpreter=\
     com.tencent.supersonic.knowledge.semantic.LocalSemanticInterpreter
@@ -31,19 +42,9 @@ com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor
 com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
     com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
 
-com.tencent.supersonic.chat.postprocessor.PostProcessor=\
-    com.tencent.supersonic.chat.postprocessor.MetricCheckPostProcessor, \
-    com.tencent.supersonic.chat.postprocessor.ParseInfoUpdateProcessor, \
-    com.tencent.supersonic.chat.postprocessor.QueryRankPostProcessor, \
-    com.tencent.supersonic.chat.postprocessor.EntityInfoPostProcessor, \
-    com.tencent.supersonic.chat.postprocessor.SqlOutputPostProcessor, \
-    com.tencent.supersonic.chat.postprocessor.TimeCostPostProcessor, \
-    com.tencent.supersonic.chat.postprocessor.RespBuildPostProcessor
-
-
 com.tencent.supersonic.chat.processor.execute.ExecuteResultProcessor=\
-    com.tencent.supersonic.chat.processor.execute.MetricRecommendProcessor
-
+    com.tencent.supersonic.chat.processor.execute.MetricRecommendProcessor,\
+    com.tencent.supersonic.chat.processor.execute.DimensionRecommendProcessor
 
 com.tencent.supersonic.common.util.embedding.S2EmbeddingStore=\
     com.tencent.supersonic.common.util.embedding.InMemoryS2EmbeddingStore

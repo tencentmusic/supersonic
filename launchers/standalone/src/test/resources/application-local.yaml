@@ -42,7 +42,7 @@ s2:
       provider: open_ai
       openai:
         api-key: api_key
-        model-name: gpt-3.5-turbo
+        model-name: gpt-3.5-turbo-16k
         temperature: 0.0
         timeout: PT60S
     #2.embedding-model
@@ -67,10 +67,12 @@ s2:
     #      model-id: sentence-transformers/all-MiniLM-L6-v2
     #      timeout: 1h
 
-
-
 #langchain4j log
 logging:
   level:
     dev.langchain4j: DEBUG
     dev.ai4j.openai4j: DEBUG
+
+inMemoryEmbeddingStore:
+  persistent:
+    path: /tmp
