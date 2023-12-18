@@ -1,9 +1,13 @@
 package com.tencent.supersonic.semantic.api.model.pojo;
 
+import com.google.common.collect.Lists;
+import com.tencent.supersonic.semantic.api.model.enums.DimensionTypeEnum;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Data
@@ -26,6 +30,15 @@ public class ModelDetail {
             sqlQuery = sqlQuery.substring(0, sqlQuery.length() - 1);
         }
         return sqlQuery;
+    }
+
+    public List<Dim> getTimeDims() {
+        if (CollectionUtils.isEmpty(dimensions)) {
+            return Lists.newArrayList();
+        }
+        return dimensions.stream()
+                .filter(dim -> DimensionTypeEnum.time.name().equalsIgnoreCase(dim.getType()))
+                .collect(Collectors.toList());
     }
 
 }

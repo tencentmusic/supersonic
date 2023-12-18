@@ -93,7 +93,7 @@ public class DimensionServiceImpl implements DimensionService {
             return;
         }
         Long modelId = dimensionReqs.get(0).getModelId();
-        List<DimensionResp> dimensionResps = getDimensions(modelId);
+        List<DimensionResp> dimensionResps = getDimensionInSameDomain(modelId);
         Map<String, DimensionResp> bizNameMap = dimensionResps.stream()
                 .collect(Collectors.toMap(DimensionResp::getBizName, a -> a, (k1, k2) -> k1));
         Map<String, DimensionResp> nameMap = dimensionResps.stream()

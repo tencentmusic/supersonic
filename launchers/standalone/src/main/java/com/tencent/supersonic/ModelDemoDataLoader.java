@@ -338,7 +338,6 @@ public class ModelDemoDataLoader {
         List<Measure> measures = new ArrayList<>();
         Measure measure = new Measure("停留时长",
                 "s2_stay_time_statis_stay_hours", AggOperatorEnum.SUM.getOperator(), 1);
-        measure.setDatasourceId(3L);
         measures.add(measure);
         metricTypeParams.setMeasures(measures);
         metricReq.setTypeParams(metricTypeParams);
