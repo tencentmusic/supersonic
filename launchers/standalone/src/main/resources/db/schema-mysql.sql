@@ -512,8 +512,7 @@ CREATE TABLE `s2_collect` (
     `username` varchar(20) NOT NULL,
     `collect_id` bigint NOT NULL,
     `create_time` datetime,
-    `update_time` datetime,
-    PRIMARY KEY (`id`)
+    `update_time` datetime
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `s2_metric_query_default_config` (
