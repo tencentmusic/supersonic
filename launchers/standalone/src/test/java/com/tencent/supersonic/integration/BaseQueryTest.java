@@ -53,11 +53,11 @@ public class BaseQueryTest {
 
         ExecuteQueryReq request = ExecuteQueryReq.builder()
                 .queryId(parseResp.getQueryId())
-                .parseId(parseResp.getCandidateParses().get(0).getId())
+                .parseId(parseResp.getSelectedParses().get(0).getId())
                 .chatId(parseResp.getChatId())
                 .queryText(parseResp.getQueryText())
                 .user(DataUtils.getUser())
-                .parseInfo(parseResp.getCandidateParses().get(0))
+                .parseInfo(parseResp.getSelectedParses().get(0))
                 .saveAnswer(true)
                 .build();
 
@@ -69,11 +69,11 @@ public class BaseQueryTest {
 
         ExecuteQueryReq request = ExecuteQueryReq.builder()
                 .queryId(parseResp.getQueryId())
-                .parseId(parseResp.getCandidateParses().get(0).getId())
+                .parseId(parseResp.getSelectedParses().get(0).getId())
                 .chatId(parseResp.getChatId())
                 .queryText(parseResp.getQueryText())
                 .user(DataUtils.getUser())
-                .parseInfo(parseResp.getCandidateParses().get(0))
+                .parseInfo(parseResp.getSelectedParses().get(0))
                 .saveAnswer(true)
                 .build();
 
