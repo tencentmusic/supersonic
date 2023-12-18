@@ -254,7 +254,7 @@ const MDatePicker: React.FC<Props> = ({
 
   useEffect(() => {
     initDefaultDynamicData({ latestDateMap });
-  }, []);
+  }, [initialValues]);
 
   useEffect(() => {
     const { dateRange } = dateRangesParams;
