@@ -26,7 +26,7 @@ public class ChatGptHelper {
     @Value("${llm.chatgpt.apiHost:}")
     private String apiHost;
 
-    @Value("${llm.chatgpt.proxyIp:}")
+    @Value("${llm.chatgpt.proxyIp:default}")
     private String proxyIp;
 
     @Value("${llm.chatgpt.proxyPort:}")
