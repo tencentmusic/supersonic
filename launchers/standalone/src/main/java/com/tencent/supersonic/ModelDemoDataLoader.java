@@ -36,7 +36,6 @@ import com.tencent.supersonic.semantic.model.domain.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Component;
 
@@ -50,9 +49,6 @@ import java.util.List;
 public class ModelDemoDataLoader {
 
     private User user = User.getFakeUser();
-
-    @Value("${demo.dbType:mysql}")
-    private String demoDb;
     @Autowired
     private DatabaseService databaseService;
     @Autowired
