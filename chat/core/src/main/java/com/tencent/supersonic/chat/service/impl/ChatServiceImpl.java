@@ -18,7 +18,6 @@ import com.tencent.supersonic.chat.persistence.repository.ChatContextRepository;
 import com.tencent.supersonic.chat.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.persistence.repository.ChatRepository;
 import com.tencent.supersonic.chat.service.ChatService;
-import com.tencent.supersonic.chat.utils.SimilarQueryManager;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
@@ -44,14 +43,12 @@ public class ChatServiceImpl implements ChatService {
     private ChatContextRepository chatContextRepository;
     private ChatRepository chatRepository;
     private ChatQueryRepository chatQueryRepository;
-    private SimilarQueryManager solvedQueryManager;
 
     public ChatServiceImpl(ChatContextRepository chatContextRepository, ChatRepository chatRepository,
-            ChatQueryRepository chatQueryRepository, SimilarQueryManager solvedQueryManager) {
+            ChatQueryRepository chatQueryRepository) {
         this.chatContextRepository = chatContextRepository;
         this.chatRepository = chatRepository;
         this.chatQueryRepository = chatQueryRepository;
-        this.solvedQueryManager = solvedQueryManager;
     }
 
     @Override

@@ -34,6 +34,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -63,11 +64,16 @@ public class ChatDemoLoader implements CommandLineRunner {
     @Autowired
     private SysParameterService sysParameterService;
 
+    @Value("${demo.enabled:false}")
+    private boolean demoEnabled;
+
     @Override
     public void run(String... args) throws Exception {
-        if (checkEnable()) {
-            doRun();
+        if (!checkEnable()) {
+            log.info("skip load chat demo");
+            return;
         }
+        doRun();
     }
 
     public void doRun() {
@@ -501,7 +507,10 @@ public class ChatDemoLoader implements CommandLineRunner {
     }
 
     private boolean checkEnable() {
-        return chatService.getLastQuery(1L) == null;
+        if (!demoEnabled) {
+            return false;
+        }
+        return SemanticDemoLoader.isLoad();
     }
 
 }

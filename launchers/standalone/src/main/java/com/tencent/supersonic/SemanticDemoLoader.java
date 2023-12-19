@@ -12,7 +12,9 @@ import org.springframework.util.CollectionUtils;
 @Component
 @Slf4j
 @Order(1)
-public class DemoLoader implements CommandLineRunner {
+public class SemanticDemoLoader implements CommandLineRunner {
+
+    private static boolean isLoad = false;
 
     @Autowired
     private DomainService domainService;
@@ -22,9 +24,6 @@ public class DemoLoader implements CommandLineRunner {
 
     @Autowired
     private BenchMarkDemoDataLoader benchMarkDemoLoader;
-
-    @Autowired
-    private ChatDemoLoader chatDemoLoader;
 
     @Value("${demo.enabled:false}")
     private boolean demoEnabled;
@@ -37,6 +36,7 @@ public class DemoLoader implements CommandLineRunner {
         }
         modelDataDemoLoader.doRun();
         benchMarkDemoLoader.doRun();
+        isLoad = true;
     }
 
     private boolean checkLoadDemo() {
@@ -44,6 +44,10 @@ public class DemoLoader implements CommandLineRunner {
             return false;
         }
         return CollectionUtils.isEmpty(domainService.getDomainList());
+    }
+
+    public static boolean isLoad() {
+        return isLoad;
     }
 
 }
