@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -24,6 +25,11 @@ public class AgentServiceImpl implements AgentService {
 
     private AgentRepository agentRepository;
 
+    @Value("${demo.enabled:false}")
+    private boolean demoEnabled;
+
+    private final static List<Integer> demoAgentIds = Lists.newArrayList(1, 2, 3);
+
     public AgentServiceImpl(AgentRepository agentRepository) {
         this.agentRepository = agentRepository;
     }
@@ -31,7 +37,8 @@ public class AgentServiceImpl implements AgentService {
     @Override
     public List<Agent> getAgents() {
         return getAgentDOList().stream()
-                .map(this::convert).collect(Collectors.toList());
+            .filter(agentDO -> demoAgentIds.contains(agentDO.getId()) == demoEnabled)
+            .map(this::convert).collect(Collectors.toList());
     }
 
     @Override
