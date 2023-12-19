@@ -78,15 +78,6 @@ public class SysParameter {
                 "0.58", "向量召回相似度阈值", "相似度大于该阈值的则舍弃", "number", "Mapper相关配置"));
 
         //llm config
-        Parameter parameter = new Parameter("llm.model.name", "gpt3.5",
-                "模型名称", "", "list", "Parser相关配置");
-        parameter.setCandidateValues(Lists.newArrayList("gpt3.5", "gpt3.5-16k"));
-        parameters.add(parameter);
-        parameters.add(new Parameter("llm.api.key", "sk-secret",
-                "模型密钥", "string", "Parser相关配置"));
-        parameters.add(new Parameter("llm.temperature", "0.0",
-                "温度值", "number", "Parser相关配置"));
-
         Parameter s2SQLParameter = new Parameter("s2SQL.generation", "TWO_PASS_AUTO_COT",
                 "S2SQL生成方式", "ONE_PASS_AUTO_COT: 通过思维链方式一步生成sql"
                 + "\nONE_PASS_AUTO_COT_SELF_CONSISTENCY: 通过思维链且投票方式一步生成sql"
