@@ -1,7 +1,8 @@
 package com.tencent.supersonic.chat.parser.sql.llm;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionResp;
-import com.tencent.supersonic.common.util.JsonUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -114,15 +115,11 @@ public class OutputFormat {
 
     public static FunctionResp functionCallParse(String llmOutput) {
         try {
-            String[] findResult = llmOutput.split(PATTERN);
-            String result = findResult[0].trim();
-
-            Map<String, String> resultDict = JsonUtil.toMap(result, String.class, String.class);
-            log.info("result:{},resultDict:{}", result, resultDict);
-
-            String selection = resultDict.get("选择工具");
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(llmOutput);
+            String selectedTool = jsonNode.get("选择工具").asText();
             FunctionResp resp = new FunctionResp();
-            resp.setToolSelection(selection);
+            resp.setToolSelection(selectedTool);
             return resp;
         } catch (Exception e) {
             log.error("", e);
