@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.query.utils;
+package com.tencent.supersonic.headless.query.annotation;
 
 import java.lang.annotation.Target;
 import java.lang.annotation.RetentionPolicy;
@@ -9,6 +9,6 @@ import java.lang.annotation.Documented;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface S2SQLPermissionAnnotation {
+public @interface S2SQLDataPermission {
 
 }

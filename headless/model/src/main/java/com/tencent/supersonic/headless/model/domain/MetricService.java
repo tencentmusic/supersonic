@@ -34,6 +34,8 @@ public interface MetricService {
 
     MetricResp getMetric(Long id, User user);
 
+    MetricResp getMetric(Long id);
+
     List<String> mockAlias(MetricReq metricReq, String mockType, User user);
 
     Set<String> getMetricTags();

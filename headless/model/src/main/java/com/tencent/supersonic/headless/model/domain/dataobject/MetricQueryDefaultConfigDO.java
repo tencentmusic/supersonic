@@ -22,6 +22,12 @@ public class MetricQueryDefaultConfigDO {
 
     private String defaultConfig;
 
+    private String appKey;
+
+    private String appSecret;
+
+    private String owner;
+
     private Date createdAt;
 
     private String createdBy;

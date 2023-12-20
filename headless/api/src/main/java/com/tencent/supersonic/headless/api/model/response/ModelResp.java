@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.api.model.response;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.model.pojo.Dim;
 import com.tencent.supersonic.headless.api.model.pojo.DrillDownDimension;
@@ -44,10 +43,6 @@ public class ModelResp extends SchemaItem {
 
     private String fullPath;
 
-    private Integer dimensionCnt;
-
-    private Integer metricCnt;
-
     public boolean openToAll() {
         return isOpen != null && isOpen == 1;
     }
@@ -72,26 +67,6 @@ public class ModelResp extends SchemaItem {
             return Lists.newArrayList();
         }
         return modelDetail.getTimeDims();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        if (!super.equals(o)) {
-            return false;
-        }
-        ModelResp that = (ModelResp) o;
-        return Objects.equal(getId(), that.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(super.hashCode(), getId());
     }
 
 }

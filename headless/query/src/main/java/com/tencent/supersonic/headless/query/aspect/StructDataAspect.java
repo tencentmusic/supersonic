@@ -1,6 +1,4 @@
-package com.tencent.supersonic.headless.query.utils;
-
-import static com.tencent.supersonic.common.pojo.Constants.MINUS;
+package com.tencent.supersonic.headless.query.aspect;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -17,14 +15,7 @@ import com.tencent.supersonic.headless.model.domain.DimensionService;
 import com.tencent.supersonic.headless.model.domain.ModelService;
 import com.tencent.supersonic.headless.model.domain.pojo.MetaFilter;
 import com.tencent.supersonic.headless.query.service.AuthCommonService;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
+import com.tencent.supersonic.headless.query.utils.QueryStructUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -36,10 +27,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+
+import static com.tencent.supersonic.common.pojo.Constants.MINUS;
+
 @Component
 @Aspect
 @Slf4j
-public class DataPermissionAOP {
+public class StructDataAspect {
     @Autowired
     private QueryStructUtils queryStructUtils;
     @Autowired
@@ -51,7 +53,7 @@ public class DataPermissionAOP {
     @Value("${permission.data.enable:true}")
     private Boolean permissionDataEnable;
 
-    @Pointcut("@annotation(com.tencent.supersonic.headless.query.service.DataPermission)")
+    @Pointcut("@annotation(com.tencent.supersonic.headless.query.annotation.StructDataPermission)")
     public void dataPermissionAOP() {
     }
 
