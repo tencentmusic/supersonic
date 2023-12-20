@@ -20,7 +20,7 @@ declare module 'react-split-pane/lib/Pane';
 declare const REACT_APP_ENV: 'test' | 'dev' | 'pre' | false;
 
 declare interface Window {
-  RUNNING_ENV: 'semantic' | 'chat';
+  RUNNING_ENV: 'headless' | 'chat';
 }
 
 type Result<T> = {
