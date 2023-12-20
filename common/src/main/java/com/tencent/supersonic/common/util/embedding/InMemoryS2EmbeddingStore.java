@@ -71,6 +71,10 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
         for (Entry<String, InMemoryEmbeddingStore<EmbeddingQuery>> entry : collectionNameToStore.entrySet()) {
             Path filePath = getPersistentPath(entry.getKey());
             try {
+                Path directoryPath = filePath.getParent();
+                if (!Files.exists(directoryPath)) {
+                    Files.createDirectories(directoryPath);
+                }
                 entry.getValue().serializeToFile(filePath);
             } catch (Exception e) {
                 log.error("persistentToFile error, persistentFile:" + filePath, e);

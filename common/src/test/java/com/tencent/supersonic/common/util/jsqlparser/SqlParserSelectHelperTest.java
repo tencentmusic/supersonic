@@ -170,6 +170,11 @@ class SqlParserSelectHelperTest {
                 + "WHERE MONTH(数据日期) = 9) FROM 营销 WHERE 国家中文名 = '中国' AND MONTH(数据日期) = 9");
 
         Assert.assertEquals(allFields.size(), 3);
+
+        allFields = SqlParserSelectHelper.getAllFields(
+                "SELECT 用户, 页面  FROM 超音数用户部门 GROUP BY 用户, 页面 ORDER BY count(*) DESC");
+
+        Assert.assertEquals(allFields.size(), 2);
     }
 
     @Test

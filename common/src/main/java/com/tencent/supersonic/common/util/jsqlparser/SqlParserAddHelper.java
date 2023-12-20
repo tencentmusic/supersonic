@@ -42,7 +42,7 @@ public class SqlParserAddHelper {
         SelectBody selectBody = selectStatement.getSelectBody();
         if (selectBody instanceof PlainSelect) {
             PlainSelect plainSelect = (PlainSelect) selectBody;
-            fields.stream().forEach(field -> {
+            fields.stream().filter(Objects::nonNull).forEach(field -> {
                 SelectExpressionItem selectExpressionItem = new SelectExpressionItem(new Column(field));
                 plainSelect.addSelectItems(selectExpressionItem);
             });
@@ -59,9 +59,6 @@ public class SqlParserAddHelper {
                 });
             }
         }
-        //for (String field : fields) {
-        //    SelectUtils.addExpression(selectStatement, new Column(field));
-        //}
         return selectStatement.toString();
     }
 
@@ -228,7 +225,7 @@ public class SqlParserAddHelper {
     }
 
     private static void addAggregateToSelectItems(List<SelectItem> selectItems,
-                                                  Map<String, String> fieldNameToAggregate) {
+            Map<String, String> fieldNameToAggregate) {
         for (SelectItem selectItem : selectItems) {
             if (selectItem instanceof SelectExpressionItem) {
                 SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
@@ -243,7 +240,7 @@ public class SqlParserAddHelper {
     }
 
     private static void addAggregateToOrderByItems(List<OrderByElement> orderByElements,
-                                                   Map<String, String> fieldNameToAggregate) {
+            Map<String, String> fieldNameToAggregate) {
         if (orderByElements == null) {
             return;
         }
@@ -258,7 +255,7 @@ public class SqlParserAddHelper {
     }
 
     private static void addAggregateToGroupByItems(GroupByElement groupByElement,
-                                                   Map<String, String> fieldNameToAggregate) {
+            Map<String, String> fieldNameToAggregate) {
         if (groupByElement == null) {
             return;
         }
@@ -279,7 +276,7 @@ public class SqlParserAddHelper {
     }
 
     private static void modifyWhereExpression(Expression whereExpression,
-                                              Map<String, String> fieldNameToAggregate) {
+            Map<String, String> fieldNameToAggregate) {
         if (SqlParserSelectHelper.isLogicExpression(whereExpression)) {
             AndExpression andExpression = (AndExpression) whereExpression;
             Expression leftExpression = andExpression.getLeftExpression();

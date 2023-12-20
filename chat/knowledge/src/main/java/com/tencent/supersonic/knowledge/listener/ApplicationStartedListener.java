@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
-@Order(5)
+@Order(2)
 public class ApplicationStartedListener implements CommandLineRunner {
 
     @Autowired

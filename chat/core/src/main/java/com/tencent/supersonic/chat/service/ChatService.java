@@ -9,7 +9,6 @@ import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
-import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
@@ -58,6 +57,4 @@ public interface ChatService {
     ChatParseDO getParseInfo(Long questionId, int parseId);
 
     Boolean deleteChatQuery(Long questionId);
-
-    List<SimilarQueryRecallResp> getSolvedQuery(String queryText, Integer agentId);
 }

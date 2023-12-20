@@ -146,7 +146,8 @@ public class QueryReqBuilder {
         List<Aggregator> aggregators = new ArrayList<>();
         if (metric != null) {
             String agg = "";
-            if (Objects.isNull(aggregateType) || aggregateType.equals(AggregateTypeEnum.NONE)) {
+            if (Objects.isNull(aggregateType) || aggregateType.equals(AggregateTypeEnum.NONE)
+                    || AggOperatorEnum.COUNT_DISTINCT.name().equalsIgnoreCase(metric.getDefaultAgg())) {
                 if (StringUtils.isNotBlank(metric.getDefaultAgg())) {
                     agg = metric.getDefaultAgg();
                 }

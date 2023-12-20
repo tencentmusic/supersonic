@@ -26,7 +26,7 @@ public class ModelSchemaBuilder {
 
     public static ModelSchema build(ModelSchemaResp resp) {
         ModelSchema modelSchema = new ModelSchema();
-        SchemaElement domain = SchemaElement.builder()
+        SchemaElement model = SchemaElement.builder()
                 .model(resp.getId())
                 .id(resp.getId())
                 .name(resp.getName())
@@ -34,7 +34,7 @@ public class ModelSchemaBuilder {
                 .type(SchemaElementType.MODEL)
                 .alias(SchemaItem.getAliasList(resp.getAlias()))
                 .build();
-        modelSchema.setModel(domain);
+        modelSchema.setModel(model);
         modelSchema.setModelRelas(resp.getModelRelas());
 
         Set<SchemaElement> metrics = new HashSet<>();

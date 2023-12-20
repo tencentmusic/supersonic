@@ -68,8 +68,7 @@ public class TwoPassSCSqlGeneration implements SqlGeneration, InitializingBean {
             sqlTaskPool.add(result);
         });
         //4.format response.
-        List<String> sqlTaskSortedList = OutputFormat.formatList(sqlTaskPool);
-        Pair<String, Map<String, Double>> sqlMap = OutputFormat.selfConsistencyVote(sqlTaskSortedList);
+        Pair<String, Map<String, Double>> sqlMap = OutputFormat.selfConsistencyVote(sqlTaskPool);
         log.info("linkingMap result:{},sqlMap:{}", linkingMap, sqlMap);
         return sqlMap.getRight();
     }

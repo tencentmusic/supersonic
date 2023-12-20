@@ -4,6 +4,15 @@
 - "Breaking Changes" describes any changes that may break existing functionality or cause
   compatibility issues with previous versions.
 
+## SuperSonic [0.8.2] - 2023-12-18
+
+### Added
+- rewrite Python service with Java project, default to Java implementation.
+- support setting the SQL generation method for large models in the interface.
+- optimization of metric market experience.
+- optimization of semantic modeling canvas experience.
+- code structure adjustment and abstraction optimization for chat.
+
 ## SuperSonic [0.7.5] - 2023-10-13
 
 ### Added

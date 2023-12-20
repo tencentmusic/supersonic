@@ -29,11 +29,15 @@ function setEnvToWeb {
 
 function moveToRuntime {
   model_name=$1
-  tar -zxvf ${buildDir}/supersonic-${model_name}.tar.gz  -C ${runtimeDir}
-  mv ${runtimeDir}/launchers-${model_name}-* ${runtimeDir}/supersonic-${model_name}
-
-  mkdir -p ${runtimeDir}/supersonic-${model_name}/webapp
-  cp -fr  ${buildDir}/webapp/* ${runtimeDir}/supersonic-${model_name}/webapp
+  file="${buildDir}/supersonic-${model_name}.tar.gz"
+  if [ -f "$file" ]; then
+    tar -zxvf "$file" -C ${runtimeDir}
+    mv ${runtimeDir}/launchers-${model_name}-* ${runtimeDir}/supersonic-${model_name}
+    mkdir -p ${runtimeDir}/supersonic-${model_name}/webapp
+    cp -fr ${buildDir}/webapp/* ${runtimeDir}/supersonic-${model_name}/webapp
+  else
+    echo "File $file does not exist. Skipping the move to runtime."
+  fi
 }
 
 function moveAllToRuntime {

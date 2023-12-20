@@ -1,11 +1,6 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.ArrayList;
-
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -32,10 +27,16 @@ import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
-import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.select.SetOperationList;
+import net.sf.jsqlparser.statement.select.SubSelect;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Sql Parser replace Helper
@@ -76,6 +77,39 @@ public class SqlParserReplaceHelper {
             }
             if (Objects.nonNull(selectExpressionItem.getAlias()) && StringUtils.isNotBlank(alias)) {
                 selectExpressionItem.getAlias().setName(alias);
+            }
+        });
+        return selectStatement.toString();
+    }
+
+    public static String replaceAggFields(String sql, Map<String, Pair<String, String>> fieldNameToAggMap) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+        if (!(selectBody instanceof PlainSelect)) {
+            return sql;
+        }
+        ((PlainSelect) selectBody).getSelectItems().stream().forEach(o -> {
+            SelectExpressionItem selectExpressionItem = (SelectExpressionItem) o;
+            if (selectExpressionItem.getExpression() instanceof Function) {
+                Function function = (Function) selectExpressionItem.getExpression();
+                Column column = (Column) function.getParameters().getExpressions().get(0);
+                if (fieldNameToAggMap.containsKey(column.getColumnName())) {
+                    Pair<String, String> agg = fieldNameToAggMap.get(column.getColumnName());
+                    String field = agg.getKey();
+                    String func = agg.getRight();
+                    if (AggOperatorEnum.isCountDistinct(func)) {
+                        function.setName("count");
+                        function.setDistinct(true);
+                    } else {
+                        function.setName(func);
+                    }
+                    List<Expression> expressions = new ArrayList<>();
+                    expressions.add(new Column(field));
+                    function.getParameters().setExpressions(expressions);
+                    if (Objects.nonNull(selectExpressionItem.getAlias()) && StringUtils.isNotBlank(field)) {
+                        selectExpressionItem.getAlias().setName(field);
+                    }
+                }
             }
         });
         return selectStatement.toString();

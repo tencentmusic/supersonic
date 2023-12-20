@@ -63,8 +63,7 @@ public class OnePassSCSqlGeneration implements SqlGeneration, InitializingBean {
         Pair<String, Map<String, Double>> linkingMap = OutputFormat.selfConsistencyVote(candidateSortedList);
         List<String> sqlList = llmResults.stream()
                 .map(llmResult -> OutputFormat.getSql(llmResult)).collect(Collectors.toList());
-        List<String> sqlListSortedList = OutputFormat.formatList(sqlList);
-        Pair<String, Map<String, Double>> sqlMap = OutputFormat.selfConsistencyVote(sqlListSortedList);
+        Pair<String, Map<String, Double>> sqlMap = OutputFormat.selfConsistencyVote(sqlList);
         log.info("linkingMap result:{},sqlMap:{}", linkingMap, sqlMap);
         return sqlMap.getRight();
     }

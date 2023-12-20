@@ -44,7 +44,7 @@ public class PluginRecognizeTest extends BasePluginTest {
                 .chatId(parseResp.getChatId())
                 .queryId(parseResp.getQueryId())
                 .queryText(parseResp.getQueryText())
-                .parseInfo(parseResp.getCandidateParses().get(0))
+                .parseInfo(parseResp.getSelectedParses().get(0))
                 .build();
         QueryResult queryResult = queryService.performExecution(executeReq);
 
@@ -69,7 +69,7 @@ public class PluginRecognizeTest extends BasePluginTest {
                 .chatId(parseResp.getChatId())
                 .queryId(parseResp.getQueryId())
                 .queryText(parseResp.getQueryText())
-                .parseInfo(parseResp.getCandidateParses().get(0))
+                .parseInfo(parseResp.getSelectedParses().get(0))
                 .build();
         QueryResult queryResult = queryService.performExecution(executeReq);
 
@@ -84,8 +84,8 @@ public class PluginRecognizeTest extends BasePluginTest {
         QueryReq queryContextReq = DataUtils.getQueryReqWithAgent(1000, "alice最近的访问情况怎么样",
                 DataUtils.getAgent().getId());
         ParseResp parseResp = queryService.performParsing(queryContextReq);
-        Assert.assertTrue(parseResp.getCandidateParses() != null
-                && parseResp.getCandidateParses().size() > 0);
+        Assert.assertTrue(parseResp.getSelectedParses() != null
+                && parseResp.getSelectedParses().size() > 0);
     }
 
 }

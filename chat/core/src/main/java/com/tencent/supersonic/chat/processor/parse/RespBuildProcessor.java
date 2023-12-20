@@ -27,9 +27,8 @@ public class RespBuildProcessor implements ParseResultProcessor {
         if (candidateQueries.size() > 0) {
             List<SemanticParseInfo> candidateParses = candidateQueries.stream()
                     .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
-            parseResp.setCandidateParses(candidateParses);
+            parseResp.setSelectedParses(candidateParses);
             parseResp.setState(ParseResp.ParseState.COMPLETED);
-            parseResp.setCandidateParses(candidateParses);
             ChatService chatService = ContextUtils.getBean(ChatService.class);
             chatService.batchAddParse(chatContext, queryReq, parseResp);
         } else {
