@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfigurat
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 
 /**
- * Semantic Launcher
+ * Headless Launcher
  **/
 @Slf4j
 @SpringBootApplication(scanBasePackages = {"com.tencent.supersonic"},
