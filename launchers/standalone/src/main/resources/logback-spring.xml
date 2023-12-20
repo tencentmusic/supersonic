@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
     <contextName>logback</contextName>
-<!--    <property name="LOG_PATH" value="${logback.logdir:-logs}"/>-->
+    <!--    <property name="LOG_PATH" value="${logback.logdir:-logs}"/>-->
     <property name="LOG_PATH" value="${LOG_PATH:-logs}"/>
     <property name="LOG_APPNAME" value="chat"/>
     <!--输出到控制台-->
     <appender name="consoleLog" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss} [%thread] %-5level %logger{36} %line  - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss} [%thread] %-5level %logger{36} %line - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -46,7 +46,8 @@
         <!--滚动策略，按照时间滚动 TimeBasedRollingPolicy-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--文件路径,定义了日志的切分方式——把每一天的日志归档到一个文件中,以防止日志填满整个磁盘空间-->
-            <FileNamePattern>${LOG_PATH}/error.${LOG_APPNAME}.%d{yyyy-MM-dd}.log.gz</FileNamePattern>
+            <FileNamePattern>${LOG_PATH}/error.${LOG_APPNAME}.%d{yyyy-MM-dd}.log.gz
+            </FileNamePattern>
             <!--只保留最近90天的日志-->
             <maxHistory>90</maxHistory>
             <!--用来指定日志文件的上限大小，那么到了这个值，就会删除旧的日志-->
@@ -59,12 +60,6 @@
         </encoder>
     </appender>
 
-    <root level="INFO">
-        <appender-ref ref="fileInfoLog"/>
-        <appender-ref ref="fileErrorLog"/>
-        <appender-ref ref="consoleLog"/>
-    </root>
-
     <appender name="serviceLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!--日志名称，如果没有File 属性，那么只会使用FileNamePattern的文件路径规则
             如果同时有<File>和<FileNamePattern>，那么当天日志是<File>，明天会自动把今天
@@ -74,7 +69,8 @@
         <!--滚动策略，按照时间滚动 TimeBasedRollingPolicy-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--文件路径,定义了日志的切分方式——把每一天的日志归档到一个文件中,以防止日志填满整个磁盘空间-->
-            <FileNamePattern>${LOG_PATH}/serviceinfo.${LOG_APPNAME}.%d{yyyy-MM-dd}.log.gz</FileNamePattern>
+            <FileNamePattern>${LOG_PATH}/serviceinfo.${LOG_APPNAME}.%d{yyyy-MM-dd}.log.gz
+            </FileNamePattern>
             <!--只保留最近30天的日志-->
             <maxHistory>30</maxHistory>
             <!--用来指定日志文件的上限大小，那么到了这个值，就会删除旧的日志-->
@@ -90,4 +86,35 @@
     <logger name="com.tencent.supersonic" level="INFO" additivity="true">
         <appender-ref ref="serviceLog"/>
     </logger>
+
+    <!-- 业务日志输出 -->
+    <appender name="keyPipelineAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${LOG_PATH}/keyPipeline.log</File>
+        <!-- 循环政策：基于时间创建日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 日志文件名格式 -->
+            <fileNamePattern>${LOG_PATH}/keyPipeline.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!--只保留最近30天的日志-->
+            <maxHistory>30</maxHistory>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d [%thread] %-5level [%X{traceId}] %logger{36} %line - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <!-- 过滤的级别 -->
+            <level>INFO</level>
+        </filter>
+    </appender>
+    <!--keyPipeline相关日志-->
+    <logger name="keyPipeline" level="info" additivity="false">
+        <appender-ref ref="keyPipelineAppender"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="fileInfoLog"/>
+        <appender-ref ref="fileErrorLog"/>
+        <appender-ref ref="consoleLog"/>
+    </root>
 </configuration>

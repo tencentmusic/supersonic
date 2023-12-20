@@ -15,6 +15,8 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,6 +25,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class JavaLLMProxy implements LLMProxy {
+
+    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
     @Override
     public boolean isSkip(QueryContext queryContext) {
@@ -53,14 +57,13 @@ public class JavaLLMProxy implements LLMProxy {
 
         FunctionPromptGenerator promptGenerator = ContextUtils.getBean(FunctionPromptGenerator.class);
 
+        ChatLanguageModel chatLanguageModel = ContextUtils.getBean(ChatLanguageModel.class);
         String functionCallPrompt = promptGenerator.generateFunctionCallPrompt(functionReq.getQueryText(),
                 functionReq.getPluginConfigs());
-
-        ChatLanguageModel chatLanguageModel = ContextUtils.getBean(ChatLanguageModel.class);
-
-        String functionSelect = chatLanguageModel.generate(functionCallPrompt);
-
-        return OutputFormat.functionCallParse(functionSelect);
+        keyPipelineLog.info("functionCallPrompt:{}", functionCallPrompt);
+        String response = chatLanguageModel.generate(functionCallPrompt);
+        keyPipelineLog.info("functionCall response:{}", response);
+        return OutputFormat.functionCallParse(response);
     }
 
 }

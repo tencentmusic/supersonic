@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class OnePassSqlGeneration implements SqlGeneration, InitializingBean {
 
+    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
     @Autowired
     private ChatLanguageModel chatLanguageModel;
 
@@ -37,6 +40,7 @@ public class OnePassSqlGeneration implements SqlGeneration, InitializingBean {
     @Override
     public Map<String, Double> generation(LLMReq llmReq, String modelClusterKey) {
         //1.retriever sqlExamples
+        keyPipelineLog.info("modelClusterKey:{},llmReq:{}", modelClusterKey, llmReq);
         List<Map<String, String>> sqlExamples = sqlExampleLoader.retrieverSqlExamples(llmReq.getQueryText(),
                 optimizationConfig.getText2sqlCollectionName(), optimizationConfig.getText2sqlExampleNum());
 
@@ -44,15 +48,16 @@ public class OnePassSqlGeneration implements SqlGeneration, InitializingBean {
         String promptStr = sqlPromptGenerator.generatorLinkingAndSqlPrompt(llmReq, sqlExamples);
 
         Prompt prompt = PromptTemplate.from(JsonUtil.toString(promptStr)).apply(new HashMap<>());
+        keyPipelineLog.info("request prompt:{}", prompt.toSystemMessage());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
-
+        String result = response.content().text();
+        keyPipelineLog.info("model response:{}", result);
         //3.format response.
-        String llmResult = response.content().text();
         String schemaLinkStr = OutputFormat.getSchemaLinks(response.content().text());
         String sql = OutputFormat.getSql(response.content().text());
         Map<String, Double> sqlMap = new HashMap<>();
         sqlMap.put(sql, 1D);
-        log.info("llmResult:{},schemaLinkStr:{},sql:{}", llmResult, schemaLinkStr, sql);
+        keyPipelineLog.info("schemaLinkStr:{},sqlMap:{}", schemaLinkStr, sqlMap);
         return sqlMap;
     }
 
