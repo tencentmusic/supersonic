@@ -9,11 +9,11 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.query.BaseSemanticQuery;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public abstract class PluginSemanticQuery extends BaseSemanticQuery {
@@ -50,25 +50,24 @@ public abstract class PluginSemanticQuery extends BaseSemanticQuery {
         Map<Long, Object> filterValueMap = getFilterMap(pluginParseResult);
         List<SchemaElementMatch> schemaElementMatchList = parseInfo.getElementMatches();
         if (!CollectionUtils.isEmpty(schemaElementMatchList)) {
-            schemaElementMatchList.stream()
-                .filter(schemaElementMatch ->
+            schemaElementMatchList.stream().filter(schemaElementMatch ->
                     SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType())
                         || SchemaElementType.ID.equals(schemaElementMatch.getElement().getType()))
-                .filter(schemaElementMatch -> schemaElementMatch.getSimilarity() == 1.0)
-                .forEach(schemaElementMatch -> {
-                    Object queryFilterValue = filterValueMap.get(schemaElementMatch.getElement().getId());
-                    if (queryFilterValue != null) {
-                        if (String.valueOf(queryFilterValue).equals(String.valueOf(schemaElementMatch.getWord()))) {
-                            elementValueMap.put(
-                                String.valueOf(schemaElementMatch.getElement().getId()),
-                                schemaElementMatch.getWord());
+                    .filter(schemaElementMatch -> schemaElementMatch.getSimilarity() == 1.0)
+                    .forEach(schemaElementMatch -> {
+                        Object queryFilterValue = filterValueMap.get(schemaElementMatch.getElement().getId());
+                        if (queryFilterValue != null) {
+                            if (String.valueOf(queryFilterValue).equals(String.valueOf(schemaElementMatch.getWord()))) {
+                                elementValueMap.put(
+                                        String.valueOf(schemaElementMatch.getElement().getId()),
+                                        schemaElementMatch.getWord());
+                            }
+                        } else {
+                            elementValueMap.computeIfAbsent(
+                                    String.valueOf(schemaElementMatch.getElement().getId()),
+                                    k -> schemaElementMatch.getWord());
                         }
-                    } else {
-                        elementValueMap.computeIfAbsent(
-                            String.valueOf(schemaElementMatch.getElement().getId()),
-                            k -> schemaElementMatch.getWord());
-                    }
-                });
+                    });
         }
         return elementValueMap;
     }
@@ -81,7 +80,7 @@ public abstract class PluginSemanticQuery extends BaseSemanticQuery {
         if (!CollectionUtils.isEmpty(webPage.getParamOptions()) && !CollectionUtils.isEmpty(elementValueMap)) {
             for (ParamOption paramOption : webPage.getParamOptions()) {
                 if (paramOption.getModelId() != null
-                    && !parseInfo.getModel().getModelIds().contains(paramOption.getModelId())) {
+                        && !parseInfo.getModel().getModelIds().contains(paramOption.getModelId())) {
                     continue;
                 }
                 paramOptions.add(paramOption);
@@ -96,4 +95,5 @@ public abstract class PluginSemanticQuery extends BaseSemanticQuery {
         webBaseResult.setParamOptions(paramOptions);
         return webBaseResult;
     }
+
 }

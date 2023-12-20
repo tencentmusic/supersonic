@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.query.plugin.webservice;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
@@ -13,12 +12,8 @@ import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.ContextUtils;
-
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
+import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.springframework.http.HttpEntity;
@@ -27,11 +22,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
+import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Slf4j
