@@ -113,7 +113,7 @@ const DomainManagerTab: React.FC<Props> = ({
       children: <RecommendedQuestionsSection />,
     },
   ].filter((item) => {
-    if (window.RUNNING_ENV === 'semantic') {
+    if (window.RUNNING_ENV === 'headless') {
       return !['chatSetting', 'recommendedQuestions'].includes(item.key);
     }
     return item;
