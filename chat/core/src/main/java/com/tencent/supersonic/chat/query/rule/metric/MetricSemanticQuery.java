@@ -1,5 +1,9 @@
 package com.tencent.supersonic.chat.query.rule.metric;
 
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.METRIC;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
@@ -14,16 +18,11 @@ import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import lombok.extern.slf4j.Slf4j;
-
+import com.tencent.supersonic.headless.api.model.response.QueryResultWithSchemaResp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.METRIC;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.OptionType.REQUIRED;
-import static com.tencent.supersonic.chat.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class MetricSemanticQuery extends RuleSemanticQuery {

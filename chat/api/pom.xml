@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
-            <artifactId>semantic-api</artifactId>
+            <artifactId>headless-api</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>

@@ -320,13 +320,13 @@ public class SearchServiceImpl implements SearchService {
             for (ModelWithSemanticType modelWithSemanticType : dimensionMetricClassIds) {
                 existMetric = true;
                 Long modelId = modelWithSemanticType.getModel();
-                SchemaElementType semanticType = modelWithSemanticType.getSemanticType();
+                SchemaElementType schemaElementType = modelWithSemanticType.getSchemaElementType();
                 SearchResult searchResult = SearchResult.builder()
                         .modelId(modelId)
                         .modelName(modelToName.get(modelId))
                         .recommend(matchText.getRegText() + hanlpMapResult.getName())
                         .subRecommend(hanlpMapResult.getName())
-                        .schemaElementType(semanticType)
+                        .schemaElementType(schemaElementType)
                         .build();
                 //visibility to filter  metrics
                 ItemNameVisibilityInfo visibility = (ItemNameVisibilityInfo) caffeineCache.getIfPresent(modelId);
@@ -347,8 +347,8 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private boolean matchCondition(ModelWithSemanticType entry, Set<Long> possibleModels) {
-        if (!(SchemaElementType.METRIC.equals(entry.getSemanticType()) || SchemaElementType.DIMENSION.equals(
-                entry.getSemanticType()))) {
+        if (!(SchemaElementType.METRIC.equals(entry.getSchemaElementType()) || SchemaElementType.DIMENSION.equals(
+                entry.getSchemaElementType()))) {
             return false;
         }
 

@@ -510,7 +510,7 @@ public class ChatDemoLoader implements CommandLineRunner {
         if (!demoEnabled) {
             return false;
         }
-        return SemanticDemoLoader.isLoad();
+        return HeadlessDemoLoader.isLoad();
     }
 
 }

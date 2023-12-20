@@ -1,8 +1,8 @@
 package com.tencent.supersonic.chat.utils;
 
-import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.component.SemanticCorrector;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
+import com.tencent.supersonic.chat.api.component.SchemaMapper;
 import com.tencent.supersonic.chat.api.component.SemanticParser;
 import com.tencent.supersonic.chat.parser.JavaLLMProxy;
 import com.tencent.supersonic.chat.parser.LLMProxy;
