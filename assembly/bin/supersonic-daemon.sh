@@ -33,8 +33,8 @@ cd $baseDir
 function setMainClass {
   if [ "$service" == $CHAT_SERVICE ]; then
     main_class="com.tencent.supersonic.ChatLauncher"
-  elif [ "$service" == $SEMANTIC_SERVICE ]; then
-    main_class="com.tencent.supersonic.SemanticLauncher"
+  elif [ "$service" == $HEADLESS_SERVICE ]; then
+    main_class="com.tencent.supersonic.HeadlessLauncher"
   fi
 }
 setMainClass
@@ -42,8 +42,8 @@ setMainClass
 function setAppName {
   if [ "$service" == $CHAT_SERVICE ]; then
     app_name=$CHAT_APP_NAME
-  elif [ "$service" == $SEMANTIC_SERVICE ]; then
-    app_name=$SEMANTIC_APP_NAME
+  elif [ "$service" == $HEADLESS_SERVICE ]; then
+    app_name=$HEADLESS_APP_NAME
   elif [ "$service" == $PYLLM_SERVICE ]; then
     app_name=$PYLLM_APP_NAME
   fi

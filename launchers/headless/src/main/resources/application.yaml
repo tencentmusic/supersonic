@@ -1,0 +1,5 @@
+spring:
+  profiles:
+    active: local
+  application:
+    name: headless

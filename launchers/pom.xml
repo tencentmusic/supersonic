@@ -14,7 +14,7 @@
 
     <modules>
         <module>chat</module>
-        <module>semantic</module>
+        <module>headless</module>
         <module>common</module>
         <module>standalone</module>
     </modules>

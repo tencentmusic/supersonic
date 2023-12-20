@@ -14,7 +14,7 @@
         <module>chat</module>
         <module>common</module>
         <module>launchers</module>
-        <module>semantic</module>
+        <module>headless</module>
     </modules>
 
     <name>supersonic</name>

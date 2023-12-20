@@ -1,5 +1,10 @@
 package com.tencent.supersonic.knowledge.semantic;
 
+import static com.tencent.supersonic.common.pojo.Constants.LIST_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.PAGESIZE_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.TOTAL_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.TRUE_LOWER;
+
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.google.gson.Gson;
@@ -7,28 +12,34 @@ import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfi
 import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.ResultData;
-import com.tencent.supersonic.common.pojo.enums.ReturnCode;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.enums.ReturnCode;
 import com.tencent.supersonic.common.pojo.exception.CommonException;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.S2ThreadContext;
 import com.tencent.supersonic.common.util.ThreadContext;
-import com.tencent.supersonic.semantic.api.model.request.ModelSchemaFilterReq;
-import com.tencent.supersonic.semantic.api.model.request.PageDimensionReq;
-import com.tencent.supersonic.semantic.api.model.request.PageMetricReq;
-import com.tencent.supersonic.semantic.api.model.response.DimensionResp;
-import com.tencent.supersonic.semantic.api.model.response.DomainResp;
-import com.tencent.supersonic.semantic.api.model.response.ExplainResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-import com.tencent.supersonic.semantic.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.semantic.api.query.request.ExplainSqlReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.model.request.ModelSchemaFilterReq;
+import com.tencent.supersonic.headless.api.model.request.PageDimensionReq;
+import com.tencent.supersonic.headless.api.model.request.PageMetricReq;
+import com.tencent.supersonic.headless.api.model.response.DimensionResp;
+import com.tencent.supersonic.headless.api.model.response.DomainResp;
+import com.tencent.supersonic.headless.api.model.response.ExplainResp;
+import com.tencent.supersonic.headless.api.model.response.MetricResp;
+import com.tencent.supersonic.headless.api.model.response.ModelResp;
+import com.tencent.supersonic.headless.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.query.request.ExplainSqlReq;
+import com.tencent.supersonic.headless.api.query.request.QueryDimValueReq;
+import com.tencent.supersonic.headless.api.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.headless.api.query.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.query.request.QueryStructReq;
+import java.net.URI;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -41,18 +52,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.net.URI;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
-
-import static com.tencent.supersonic.common.pojo.Constants.LIST_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.PAGESIZE_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.TOTAL_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.TRUE_LOWER;
 
 @Slf4j
 public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
@@ -115,17 +114,17 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
                     requestUrl, HttpMethod.POST, entity, structTypeRef);
             responseBody = responseEntity.getBody();
             log.info("ApiResponse<QueryResultWithColumns> responseBody:{}", responseBody);
-            QueryResultWithSchemaResp semanticQuery = new QueryResultWithSchemaResp();
+            QueryResultWithSchemaResp schemaResp = new QueryResultWithSchemaResp();
             if (ReturnCode.SUCCESS.getCode() == responseBody.getCode()) {
                 QueryResultWithSchemaResp data = responseBody.getData();
-                semanticQuery.setColumns(data.getColumns());
-                semanticQuery.setResultList(data.getResultList());
-                semanticQuery.setSql(data.getSql());
-                semanticQuery.setQueryAuthorization(data.getQueryAuthorization());
-                return semanticQuery;
+                schemaResp.setColumns(data.getColumns());
+                schemaResp.setResultList(data.getResultList());
+                schemaResp.setSql(data.getSql());
+                schemaResp.setQueryAuthorization(data.getQueryAuthorization());
+                return schemaResp;
             }
         } catch (Exception e) {
-            throw new RuntimeException("search semantic interface error,url:" + url, e);
+            throw new RuntimeException("search headless interface error,url:" + url, e);
         }
         throw new CommonException(responseBody.getCode(), responseBody.getMsg());
     }

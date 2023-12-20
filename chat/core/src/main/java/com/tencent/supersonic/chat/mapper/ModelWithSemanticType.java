@@ -10,10 +10,10 @@ import lombok.ToString;
 public class ModelWithSemanticType implements Serializable {
 
     private Long model;
-    private SchemaElementType semanticType;
+    private SchemaElementType schemaElementType;
 
-    public ModelWithSemanticType(Long model, SchemaElementType semanticType) {
+    public ModelWithSemanticType(Long model, SchemaElementType schemaElementType) {
         this.model = model;
-        this.semanticType = semanticType;
+        this.schemaElementType = schemaElementType;
     }
 }
