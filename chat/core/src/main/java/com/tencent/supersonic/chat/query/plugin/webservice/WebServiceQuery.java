@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.query.plugin.webservice;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
@@ -26,6 +27,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -75,7 +77,7 @@ public class WebServiceQuery extends PluginSemanticQuery {
     protected WebServiceResp buildResponse(PluginParseResult pluginParseResult) {
         WebServiceResp webServiceResponse = new WebServiceResp();
         Plugin plugin = pluginParseResult.getPlugin();
-        WebBase webBase = JsonUtil.toObject(plugin.getConfig(), WebBase.class);
+        WebBase webBase = fillWebBaseResult(JsonUtil.toObject(plugin.getConfig(), WebBase.class), pluginParseResult);
         webServiceResponse.setWebBase(webBase);
         List<ParamOption> paramOptions = webBase.getParamOptions();
         Map<String, Object> params = new HashMap<>();
