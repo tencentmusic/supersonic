@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.query.utils;
+package com.tencent.supersonic.headless.query.aspect;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -16,6 +16,7 @@ import com.tencent.supersonic.headless.model.domain.ModelService;
 import com.tencent.supersonic.headless.model.domain.pojo.MetaFilter;
 import com.tencent.supersonic.headless.model.domain.pojo.ModelFilter;
 import com.tencent.supersonic.headless.query.service.AuthCommonService;
+import com.tencent.supersonic.headless.query.utils.QueryStructUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -58,7 +59,7 @@ public class S2SQLDataAspect {
     @Value("${permission.data.enable:true}")
     private Boolean permissionDataEnable;
 
-    @Pointcut("@annotation(com.tencent.supersonic.headless.query.utils.S2SQLPermissionAnnotation)")
+    @Pointcut("@annotation(com.tencent.supersonic.headless.query.annotation.S2SQLDataPermission)")
     private void s2SQLPermissionCheck() {
     }
 

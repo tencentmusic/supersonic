@@ -242,7 +242,8 @@ public class MetricServiceImpl implements MetricService {
         return metricResp;
     }
 
-    private MetricResp getMetric(Long id) {
+    @Override
+    public MetricResp getMetric(Long id) {
         MetricDO metricDO = metricRepository.getMetricById(id);
         if (metricDO == null) {
             return null;

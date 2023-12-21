@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.query.service;
+package com.tencent.supersonic.headless.query.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DataPermission {
+public @interface ApiDataPermission {
 
 }

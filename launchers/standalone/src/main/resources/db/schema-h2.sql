@@ -541,3 +541,19 @@ CREATE TABLE `s2_metric_query_default_config` (
        `updated_by` varchar(100) not null,
        PRIMARY KEY (`id`)
 );
+
+CREATE TABLE `s2_app` (
+    id          bigint AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(255),
+    description VARCHAR(255),
+    status      INT,
+    config      TEXT,
+    end_date    TIMESTAMP,
+    qps         INT,
+    app_secret  VARCHAR(255),
+    owner       VARCHAR(255),
+    created_at  TIMESTAMP,
+    created_by  VARCHAR(255),
+    updated_at  TIMESTAMP,
+    updated_by  VARCHAR(255)
+);

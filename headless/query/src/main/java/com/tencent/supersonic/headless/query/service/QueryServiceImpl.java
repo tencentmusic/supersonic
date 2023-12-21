@@ -30,8 +30,9 @@ import com.tencent.supersonic.headless.model.domain.Catalog;
 import com.tencent.supersonic.headless.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.headless.query.executor.QueryExecutor;
 import com.tencent.supersonic.headless.query.parser.convert.QueryReqConverter;
+import com.tencent.supersonic.headless.query.annotation.StructDataPermission;
 import com.tencent.supersonic.headless.query.utils.QueryUtils;
-import com.tencent.supersonic.headless.query.utils.S2SQLPermissionAnnotation;
+import com.tencent.supersonic.headless.query.annotation.S2SQLDataPermission;
 import com.tencent.supersonic.headless.query.utils.StatUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +81,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    @S2SQLPermissionAnnotation
+    @S2SQLDataPermission
     @SneakyThrows
     public Object queryBySql(QueryS2SQLReq queryS2SQLReq, User user) {
         statUtils.initStatInfo(queryS2SQLReq, user);
@@ -150,7 +151,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    @DataPermission
+    @StructDataPermission
     @SneakyThrows
     public QueryResultWithSchemaResp queryByStructWithAuth(QueryStructReq queryStructCmd, User user) {
         return queryByStruct(queryStructCmd, user);
