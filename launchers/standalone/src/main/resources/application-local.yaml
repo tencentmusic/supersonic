@@ -49,7 +49,7 @@ s2:
     chat-model:
       provider: open_ai
       openai:
-        api-key: sk
+        api-key: api_key
         model-name: gpt-3.5-turbo-16k
         temperature: 0.0
         timeout: PT60S
