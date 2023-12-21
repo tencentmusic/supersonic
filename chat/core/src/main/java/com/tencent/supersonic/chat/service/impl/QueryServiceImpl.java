@@ -217,7 +217,15 @@ public class QueryServiceImpl implements QueryService {
         return queryResult;
     }
 
-    // save time cost data
+    /**
+     * save time cost data
+     *
+     * @param timeCostDOList
+     * @param queryText
+     * @param queryId
+     * @param userName
+     * @param chatId
+     */
     private void saveTimeCostInfo(List<StatisticsDO> timeCostDOList,
             String queryText, Long queryId,
             String userName, Long chatId) {

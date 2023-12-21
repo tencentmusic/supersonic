@@ -45,8 +45,8 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     private final ShowCaseCustomMapper showCaseCustomMapper;
 
     public ChatQueryRepositoryImpl(ChatQueryDOMapper chatQueryDOMapper,
-                                   ChatParseMapper chatParseMapper,
-                                   ShowCaseCustomMapper showCaseCustomMapper) {
+            ChatParseMapper chatParseMapper,
+            ShowCaseCustomMapper showCaseCustomMapper) {
         this.chatQueryDOMapper = chatQueryDOMapper;
         this.chatParseMapper = chatParseMapper;
         this.showCaseCustomMapper = showCaseCustomMapper;
@@ -136,12 +136,13 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
 
     @Override
     public List<ChatParseDO> batchSaveParseInfo(ChatContext chatCtx, QueryReq queryReq,
-                                      ParseResp parseResult,
-                                      List<SemanticParseInfo> candidateParses) {
+            ParseResp parseResult, List<SemanticParseInfo> candidateParses) {
         Long queryId = createChatQuery(parseResult, chatCtx, queryReq);
         List<ChatParseDO> chatParseDOList = new ArrayList<>();
         getChatParseDO(chatCtx, queryReq, queryId, candidateParses, chatParseDOList);
-        chatParseMapper.batchSaveParseInfo(chatParseDOList);
+        if (!CollectionUtils.isEmpty(candidateParses)) {
+            chatParseMapper.batchSaveParseInfo(chatParseDOList);
+        }
         return chatParseDOList;
     }
 
@@ -153,7 +154,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     }
 
     public void getChatParseDO(ChatContext chatCtx, QueryReq queryReq, Long queryId,
-                               List<SemanticParseInfo> parses, List<ChatParseDO> chatParseDOList) {
+            List<SemanticParseInfo> parses, List<ChatParseDO> chatParseDOList) {
         for (int i = 0; i < parses.size(); i++) {
             ChatParseDO chatParseDO = new ChatParseDO();
             chatParseDO.setChatId(Long.valueOf(chatCtx.getChatId()));
