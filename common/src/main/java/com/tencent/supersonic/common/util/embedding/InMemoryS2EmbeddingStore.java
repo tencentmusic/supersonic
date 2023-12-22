@@ -25,8 +25,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
@@ -49,7 +50,7 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
         try {
             if (Files.exists(filePath)) {
                 embeddingStore = InMemoryEmbeddingStore.fromFile(filePath);
-                embeddingStore.entries = new CopyOnWriteArrayList<>(embeddingStore.entries);
+                embeddingStore.entries = new CopyOnWriteArraySet<>(embeddingStore.entries);
                 log.info("embeddingStore reload from file:{}", filePath);
             }
         } catch (Exception e) {
@@ -215,7 +216,7 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
         }
 
         private static final InMemoryEmbeddingStoreJsonCodec CODEC = loadCodec();
-        private List<InMemoryEmbeddingStore.Entry<Embedded>> entries = new CopyOnWriteArrayList<>();
+        private Set<Entry<Embedded>> entries = new CopyOnWriteArraySet<>();
 
         @Override
         public String add(Embedding embedding) {
@@ -237,22 +238,14 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
         }
 
         public void add(String id, Embedding embedding, Embedded embedded) {
-            if (checkEmbeddingNotExists(embedding)) {
-                entries.add(new InMemoryEmbeddingStore.Entry<>(id, embedding, embedded));
-            }
-        }
-
-        private boolean checkEmbeddingNotExists(Embedding embedding) {
-            return entries.stream().noneMatch(entry -> entry.embedding.equals(embedding));
+            entries.add(new InMemoryEmbeddingStore.Entry<>(id, embedding, embedded));
         }
 
         @Override
         public List<String> addAll(List<Embedding> embeddings) {
             List<String> ids = new ArrayList<>();
             for (Embedding embedding : embeddings) {
-                if (checkEmbeddingNotExists(embedding)) {
-                    ids.add(add(embedding));
-                }
+                ids.add(add(embedding));
             }
             return ids;
         }
@@ -265,9 +258,7 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
 
             List<String> ids = new ArrayList<>();
             for (int i = 0; i < embeddings.size(); i++) {
-                if (checkEmbeddingNotExists(embeddings.get(i))) {
-                    ids.add(add(embeddings.get(i), embedded.get(i)));
-                }
+                ids.add(add(embeddings.get(i), embedded.get(i)));
             }
             return ids;
         }
