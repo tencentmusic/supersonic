@@ -12,6 +12,10 @@ public class Item {
 
     private String name;
 
+    private String bizName;
+
+    private String createdBy;
+
     private ApiItemType type;
 
     private List<Item> relateItems = Lists.newArrayList();
