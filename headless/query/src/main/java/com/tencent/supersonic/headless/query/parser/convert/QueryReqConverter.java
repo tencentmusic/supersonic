@@ -121,6 +121,7 @@ public class QueryReqConverter {
         queryStatement.setQueryStructReq(queryStructCmd);
         queryStatement.setParseSqlReq(result);
         queryStatement.setIsS2SQL(true);
+        queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructCmd));
         queryStatement = parserService.plan(queryStatement);
         queryStatement.setSql(String.format(SqlExecuteReq.LIMIT_WRAPPER, queryStatement.getSql()));
         return queryStatement;

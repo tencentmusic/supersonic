@@ -6,8 +6,8 @@ import com.tencent.supersonic.headless.api.query.request.MetricReq;
 import com.tencent.supersonic.headless.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.query.request.QueryStructReq;
 import com.tencent.supersonic.headless.model.domain.Catalog;
-import com.tencent.supersonic.headless.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.headless.query.parser.HeadlessConverter;
+import com.tencent.supersonic.headless.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.headless.query.utils.QueryStructUtils;
 import java.util.List;
 import java.util.Objects;
@@ -48,8 +48,10 @@ public class ZipperModelConverter implements HeadlessConverter {
     }
 
     @Override
-    public void converter(Catalog catalog, QueryStructReq queryStructCmd, ParseSqlReq sqlCommend,
-            MetricReq metricCommand) throws Exception {
+    public void converter(Catalog catalog, QueryStatement queryStatement) throws Exception {
+        QueryStructReq queryStructCmd = queryStatement.getQueryStructReq();
+        ParseSqlReq sqlCommend = queryStatement.getParseSqlReq();
+        MetricReq metricCommand = queryStatement.getMetricReq();
         doSingleZipperSource(queryStructCmd, sqlCommend, metricCommand);
     }
 

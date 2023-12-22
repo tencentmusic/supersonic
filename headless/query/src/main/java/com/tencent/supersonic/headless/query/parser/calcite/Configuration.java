@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.query.parser.calcite;
 
 
 import com.tencent.supersonic.headless.query.parser.calcite.schema.SemanticSqlDialect;
+import com.tencent.supersonic.headless.query.parser.calcite.schema.ViewExpanderImpl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,11 +14,15 @@ import org.apache.calcite.config.CalciteConnectionConfigImpl;
 import org.apache.calcite.config.CalciteConnectionProperty;
 import org.apache.calcite.config.Lex;
 import org.apache.calcite.jdbc.CalciteSchema;
+import org.apache.calcite.plan.RelOptCluster;
+import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.prepare.Prepare;
+import org.apache.calcite.prepare.Prepare.CatalogReader;
 import org.apache.calcite.rel.hint.HintStrategyTable;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
+import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParser;
@@ -26,8 +31,11 @@ import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.apache.calcite.sql.util.ChainedSqlOperatorTable;
 import org.apache.calcite.sql.validate.SqlConformanceEnum;
 import org.apache.calcite.sql.validate.SqlValidator;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
 import org.apache.calcite.sql.validate.SqlValidatorUtil;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
+import org.apache.calcite.tools.FrameworkConfig;
+import org.apache.calcite.tools.Frameworks;
 
 public class Configuration {
 
@@ -36,15 +44,15 @@ public class Configuration {
     public static SqlOperatorTable operatorTable = SqlStdOperatorTable.instance();
     public static CalciteConnectionConfig config = new CalciteConnectionConfigImpl(configProperties);
     public static SqlValidator.Config validatorConfig = SqlValidator.Config.DEFAULT
-            .withLenientOperatorLookup(config.lenientOperatorLookup())
-            .withSqlConformance(SemanticSqlDialect.DEFAULT.getConformance())
+            .withConformance(SemanticSqlDialect.DEFAULT.getConformance())
             .withDefaultNullCollation(config.defaultNullCollation())
-            .withIdentifierExpansion(true);
+            .withLenientOperatorLookup(true);
 
     static {
         configProperties.put(CalciteConnectionProperty.CASE_SENSITIVE.camelName(), Boolean.TRUE.toString());
         configProperties.put(CalciteConnectionProperty.UNQUOTED_CASING.camelName(), Casing.UNCHANGED.toString());
         configProperties.put(CalciteConnectionProperty.QUOTED_CASING.camelName(), Casing.TO_LOWER.toString());
+
     }
 
     public static SqlParser.Config getParserConfig() {
@@ -71,11 +79,6 @@ public class Configuration {
         tables.add(SqlStdOperatorTable.instance());
         SqlOperatorTable operatorTable = new ChainedSqlOperatorTable(tables);
         //operatorTable.
-        SqlValidator.Config validatorConfig = SqlValidator.Config.DEFAULT
-                .withLenientOperatorLookup(config.lenientOperatorLookup())
-                .withConformance(SemanticSqlDialect.DEFAULT.getConformance())
-                .withDefaultNullCollation(config.defaultNullCollation())
-                .withIdentifierExpansion(true);
         Prepare.CatalogReader catalogReader = new CalciteCatalogReader(
                 rootSchema,
                 Collections.singletonList(rootSchema.getName()),
@@ -93,6 +96,20 @@ public class Configuration {
                 .withHintStrategyTable(strategies)
                 .withTrimUnusedFields(true)
                 .withExpand(true);
+    }
+
+    public static SqlToRelConverter getSqlToRelConverter(SqlValidatorScope scope, SqlValidator sqlValidator,
+            RelOptPlanner relOptPlanner) {
+        RexBuilder rexBuilder = new RexBuilder(typeFactory);
+        RelOptCluster cluster = RelOptCluster.create(relOptPlanner, rexBuilder);
+        FrameworkConfig fromworkConfig = Frameworks.newConfigBuilder()
+                .parserConfig(getParserConfig())
+                .defaultSchema(scope.getValidator().getCatalogReader().getRootSchema().plus())
+                .build();
+        return new SqlToRelConverter(new ViewExpanderImpl(),
+                sqlValidator,
+                (CatalogReader) scope.getValidator().getCatalogReader(), cluster, fromworkConfig.getConvertletTable(),
+                getConverterConfig());
     }
 
 }

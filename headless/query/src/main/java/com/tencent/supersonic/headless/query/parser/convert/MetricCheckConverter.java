@@ -4,8 +4,6 @@ import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.model.response.DimensionResp;
 import com.tencent.supersonic.headless.api.model.response.MetricResp;
-import com.tencent.supersonic.headless.api.query.request.MetricReq;
-import com.tencent.supersonic.headless.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.query.request.QueryStructReq;
 import com.tencent.supersonic.headless.model.domain.Catalog;
 import com.tencent.supersonic.headless.query.parser.HeadlessConverter;
@@ -37,8 +35,8 @@ public class MetricCheckConverter implements HeadlessConverter {
     }
 
     @Override
-    public void converter(Catalog catalog, QueryStructReq queryStructReq, ParseSqlReq sqlCommend,
-            MetricReq metricCommand) throws Exception {
+    public void converter(Catalog catalog, QueryStatement queryStatement) throws Exception {
+        QueryStructReq queryStructReq = queryStatement.getQueryStructReq();
         List<MetricResp> metricResps = catalog.getMetrics(queryStructReq.getModelIds());
         List<DimensionResp> dimensionResps = catalog.getDimensions(queryStructReq.getModelIds());
         Map<Long, DimensionResp> dimensionMap = dimensionResps.stream()

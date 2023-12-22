@@ -3,15 +3,17 @@ package com.tencent.supersonic.headless.query.parser.calcite;
 import com.tencent.supersonic.headless.api.query.enums.AggOption;
 import com.tencent.supersonic.headless.api.query.request.MetricReq;
 import com.tencent.supersonic.headless.model.domain.Catalog;
-import com.tencent.supersonic.headless.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.headless.query.parser.SqlParser;
 import com.tencent.supersonic.headless.query.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.headless.query.parser.calcite.s2sql.HeadlessModel;
 import com.tencent.supersonic.headless.query.parser.calcite.schema.HeadlessSchema;
+import com.tencent.supersonic.headless.query.parser.calcite.schema.RuntimeOptions;
+import com.tencent.supersonic.headless.query.persistence.pojo.QueryStatement;
 import org.springframework.stereotype.Component;
 
 @Component("CalciteSqlParser")
 public class CalciteSqlParser implements SqlParser {
+
     private final HeadlessSchemaManager headlessSchemaManager;
 
     public CalciteSqlParser(
@@ -28,7 +30,7 @@ public class CalciteSqlParser implements SqlParser {
             return queryStatement;
         }
         queryStatement.setMetricReq(metricReq);
-        HeadlessSchema headlessSchema = getSemanticSchema(headlessModel);
+        HeadlessSchema headlessSchema = getSemanticSchema(headlessModel, queryStatement);
         AggPlanner aggBuilder = new AggPlanner(headlessSchema);
         aggBuilder.explain(queryStatement, isAgg);
         queryStatement.setSql(aggBuilder.getSql());
@@ -36,12 +38,14 @@ public class CalciteSqlParser implements SqlParser {
         return queryStatement;
     }
 
-    private HeadlessSchema getSemanticSchema(HeadlessModel headlessModel) {
+    private HeadlessSchema getSemanticSchema(HeadlessModel headlessModel, QueryStatement queryStatement) {
         HeadlessSchema headlessSchema = HeadlessSchema.newBuilder(headlessModel.getRootPath()).build();
         headlessSchema.setDatasource(headlessModel.getDatasourceMap());
         headlessSchema.setDimension(headlessModel.getDimensionMap());
         headlessSchema.setMetric(headlessModel.getMetrics());
         headlessSchema.setJoinRelations(headlessModel.getJoinRelations());
+        headlessSchema.setRuntimeOptions(RuntimeOptions.builder().minMaxTime(queryStatement.getMinMaxTime())
+                .enableOptimize(queryStatement.getEnableOptimize()).build());
         return headlessSchema;
     }
 }

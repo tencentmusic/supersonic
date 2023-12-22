@@ -3,8 +3,6 @@ package com.tencent.supersonic.headless.query.parser.convert;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.headless.api.model.response.DimensionResp;
-import com.tencent.supersonic.headless.api.query.request.MetricReq;
-import com.tencent.supersonic.headless.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.query.request.QueryStructReq;
 import com.tencent.supersonic.headless.model.domain.Catalog;
 import com.tencent.supersonic.headless.query.parser.HeadlessConverter;
@@ -29,8 +27,8 @@ public class DefaultDimValueConverter implements HeadlessConverter {
     }
 
     @Override
-    public void converter(Catalog catalog, QueryStructReq queryStructCmd,
-            ParseSqlReq sqlCommend, MetricReq metricCommand) throws Exception {
+    public void converter(Catalog catalog, QueryStatement queryStatement) throws Exception {
+        QueryStructReq queryStructCmd = queryStatement.getQueryStructReq();
         List<DimensionResp> dimensionResps = catalog.getDimensions(queryStructCmd.getModelIds());
         //dimension which has default values
         dimensionResps = dimensionResps.stream()

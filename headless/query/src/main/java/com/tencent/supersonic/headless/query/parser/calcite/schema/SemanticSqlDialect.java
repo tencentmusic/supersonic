@@ -34,12 +34,16 @@ public class SemanticSqlDialect extends SqlDialect {
         writer.newlineAndIndent();
         fetchFrame = writer.startList(SqlWriter.FrameTypeEnum.OFFSET);
         writer.keyword("LIMIT");
+        boolean hasOffset = false;
         if (offset != null) {
             offset.unparse(writer, -1, -1);
+            hasOffset = true;
         }
 
         if (fetch != null) {
-            writer.keyword(",");
+            if (hasOffset) {
+                writer.keyword(",");
+            }
             fetch.unparse(writer, -1, -1);
         }
 

@@ -44,6 +44,7 @@ public class HeadlessQueryEngineImpl implements HeadlessQueryEngine {
     }
 
     public QueryStatement plan(QueryStatement queryStatement) throws Exception {
+        queryStatement.setEnableOptimize(queryUtils.enableOptimize());
         queryStatement = queryParser.logicSql(queryStatement);
         queryUtils.checkSqlParse(queryStatement);
         queryStatement.setModelIds(queryStatement.getQueryStructReq().getModelIds());

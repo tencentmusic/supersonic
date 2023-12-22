@@ -49,6 +49,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -320,35 +321,44 @@ public class QueryStructUtils {
         return "";
     }
 
-    public ImmutablePair<String, String> getBeginEndTime(QueryStructReq queryStructCmd) {
+    public Triple<String, String, String> getBeginEndTime(QueryStructReq queryStructCmd) {
+        if (Objects.isNull(queryStructCmd.getDateInfo())) {
+            return Triple.of("", "", "");
+        }
         DateConf dateConf = queryStructCmd.getDateInfo();
+        String dateInfo = dateModeUtils.getSysDateCol(dateConf);
+        if (dateInfo.isEmpty()) {
+            return Triple.of("", "", "");
+        }
         switch (dateConf.getDateMode()) {
             case AVAILABLE:
             case BETWEEN:
-                return ImmutablePair.of(dateConf.getStartDate(), dateConf.getEndDate());
+                return Triple.of(dateInfo, dateConf.getStartDate(), dateConf.getEndDate());
             case LIST:
-                return ImmutablePair.of(Collections.min(dateConf.getDateList()),
+                return Triple.of(dateInfo, Collections.min(dateConf.getDateList()),
                         Collections.max(dateConf.getDateList()));
             case RECENT:
                 ItemDateResp dateDate = getItemDateResp(queryStructCmd);
                 LocalDate dateMax = LocalDate.now().minusDays(1);
                 LocalDate dateMin = dateMax.minusDays(dateConf.getUnit() - 1);
                 if (Objects.isNull(dateDate)) {
-                    return ImmutablePair.of(dateMin.format(DateTimeFormatter.ofPattern(DAY_FORMAT)),
+                    return Triple.of(dateInfo, dateMin.format(DateTimeFormatter.ofPattern(DAY_FORMAT)),
                             dateMax.format(DateTimeFormatter.ofPattern(DAY_FORMAT)));
                 }
                 switch (dateConf.getPeriod()) {
                     case DAY:
-                        return dateModeUtils.recentDay(dateDate, dateConf);
+                        ImmutablePair<String, String> dayInfo = dateModeUtils.recentDay(dateDate, dateConf);
+                        return Triple.of(dateInfo, dayInfo.left, dayInfo.right);
                     case WEEK:
-                        return dateModeUtils.recentWeek(dateDate, dateConf);
+                        ImmutablePair<String, String> weekInfo = dateModeUtils.recentWeek(dateDate, dateConf);
+                        return Triple.of(dateInfo, weekInfo.left, weekInfo.right);
                     case MONTH:
                         List<ImmutablePair<String, String>> rets = dateModeUtils.recentMonth(dateDate, dateConf);
                         Optional<String> minBegins = rets.stream().map(i -> i.left).sorted().findFirst();
                         Optional<String> maxBegins = rets.stream().map(i -> i.right).sorted(Comparator.reverseOrder())
                                 .findFirst();
                         if (minBegins.isPresent() && maxBegins.isPresent()) {
-                            return ImmutablePair.of(minBegins.get(), maxBegins.get());
+                            return Triple.of(dateInfo, minBegins.get(), maxBegins.get());
                         }
                         break;
                     default:
@@ -359,7 +369,7 @@ public class QueryStructUtils {
                 break;
 
         }
-        return ImmutablePair.of("", "");
+        return Triple.of("", "", "");
     }
 
     public List<ImmutablePair<String, String>> getTimeRanges(QueryStructReq queryStructCmd) {
@@ -438,11 +448,11 @@ public class QueryStructUtils {
                 if ("=".equals(f.getOperator())) {
                     dateList.add(f.getFieldValue().toString());
                 } else if ("<".equals(f.getOperator()) || "<=".equals(f.getOperator())) {
-                    if (!"".equals(startDate) && startDate.compareTo(f.getFieldValue().toString()) > 0) {
+                    if (startDate.isEmpty() || startDate.compareTo(f.getFieldValue().toString()) > 0) {
                         startDate = f.getFieldValue().toString();
                     }
                 } else if (">".equals(f.getOperator()) || ">=".equals(f.getOperator())) {
-                    if (!"".equals(endDate) && endDate.compareTo(f.getFieldValue().toString()) < 0) {
+                    if (endDate.isEmpty() || endDate.compareTo(f.getFieldValue().toString()) < 0) {
                         endDate = f.getFieldValue().toString();
                     }
                 }

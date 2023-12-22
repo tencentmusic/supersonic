@@ -6,6 +6,8 @@ import com.tencent.supersonic.headless.query.parser.calcite.sql.S2SQLSqlValidato
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.prepare.Prepare;
@@ -55,5 +57,34 @@ public class SchemaBuilder {
                 .build();
         schema.add(MATERIALIZATION_SYS_VIEW, viewTable);
         return rootSchema;
+    }
+
+    public static void addSourceView(CalciteSchema viewSchema, String dbSrc, String tbSrc, Set<String> dates,
+            Set<String> dimensions, Set<String> metrics) {
+        String tb = tbSrc.toLowerCase();
+        String db = dbSrc.toLowerCase();
+        DataSourceTable.Builder builder = DataSourceTable.newBuilder(tb);
+        for (String date : dates) {
+            builder.addField(date.toLowerCase(), SqlTypeName.VARCHAR);
+        }
+        for (String dim : dimensions) {
+            builder.addField(dim.toLowerCase(), SqlTypeName.VARCHAR);
+        }
+        for (String metric : metrics) {
+            builder.addField(metric.toLowerCase(), SqlTypeName.BIGINT);
+        }
+        DataSourceTable srcTable = builder
+                .withRowCount(1)
+                .build();
+        if (Objects.nonNull(db) && !db.isEmpty()) {
+            SchemaPlus schemaPlus = viewSchema.plus().getSubSchema(db);
+            if (Objects.isNull(schemaPlus)) {
+                viewSchema.plus().add(db, new AbstractSchema());
+                schemaPlus = viewSchema.plus().getSubSchema(db);
+            }
+            schemaPlus.add(tb, srcTable);
+        } else {
+            viewSchema.add(tb, srcTable);
+        }
     }
 }

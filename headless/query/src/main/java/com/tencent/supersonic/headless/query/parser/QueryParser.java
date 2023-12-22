@@ -43,8 +43,7 @@ public class QueryParser {
         for (HeadlessConverter headlessConverter : ComponentFactory.getSemanticConverters()) {
             if (headlessConverter.accept(queryStatement)) {
                 log.info("SemanticConverter accept [{}]", headlessConverter.getClass().getName());
-                headlessConverter.converter(catalog, queryStructReq, queryStatement.getParseSqlReq(),
-                        queryStatement.getMetricReq());
+                headlessConverter.converter(catalog, queryStatement);
             }
         }
         log.info("SemanticConverter after {} {} {}", queryStructReq, queryStatement.getParseSqlReq(),
