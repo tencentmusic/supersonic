@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -138,14 +139,18 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppDO> implements App
     @Override
     public AppDetailResp getApp(Integer id, User user) {
         AppDO appDO = getAppDO(id);
+        Map<Long, MetricResp> metricResps = metricService.getMetrics(new MetaFilter())
+                .stream().collect(Collectors.toMap(MetricResp::getId, m -> m));
+        Map<Long, DimensionResp> dimensionResps = dimensionService.getDimensions(new MetaFilter())
+                .stream().collect(Collectors.toMap(DimensionResp::getId, m -> m));
         checkAuth(appDO, user);
-        return convertDetail(appDO);
+        return convertDetail(appDO, dimensionResps, metricResps);
     }
 
     @Override
     public AppDetailResp getApp(Integer id) {
         AppDO appDO = getAppDO(id);
-        return convertDetail(appDO);
+        return convertDetail(appDO, new HashMap<>(), new HashMap<>());
     }
 
     private AppDO getAppDO(Integer id) {
@@ -175,12 +180,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppDO> implements App
         AppResp app = new AppResp();
         BeanMapper.mapper(appDO, app);
         AppConfig appConfig = JSONObject.parseObject(appDO.getConfig(), AppConfig.class);
-        appConfig.getItems().forEach(metricItem -> {
-            metricItem.setName(metricMap.getOrDefault(metricItem.getId(), new MetricResp()).getName());
-            metricItem.getRelateItems().forEach(dimensionItem -> {
-                dimensionItem.setName(dimensionMap.getOrDefault(dimensionItem.getId(), new DimensionResp()).getName());
-            });
-        });
+        fillItemName(appConfig, dimensionMap, metricMap);
         app.setConfig(appConfig);
         app.setAppStatus(AppStatusEnum.fromCode(appDO.getStatus()));
         app.setHasAdminRes(hasAuth(appDO, user));
@@ -188,11 +188,34 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, AppDO> implements App
     }
 
     private AppDetailResp convertDetail(AppDO appDO) {
+        return convertDetail(appDO, new HashMap<>(), new HashMap<>());
+    }
+
+    private AppDetailResp convertDetail(AppDO appDO, Map<Long, DimensionResp> dimensionMap,
+                                        Map<Long, MetricResp> metricMap) {
         AppDetailResp app = new AppDetailResp();
         BeanMapper.mapper(appDO, app);
-        app.setConfig(JSONObject.parseObject(appDO.getConfig(), AppConfig.class));
+        AppConfig appConfig = JSONObject.parseObject(appDO.getConfig(), AppConfig.class);
+        fillItemName(appConfig, dimensionMap, metricMap);
+        app.setConfig(appConfig);
         app.setAppStatus(AppStatusEnum.fromCode(appDO.getStatus()));
         return app;
+    }
+
+    private void fillItemName(AppConfig appConfig, Map<Long, DimensionResp> dimensionMap,
+                              Map<Long, MetricResp> metricMap) {
+        appConfig.getItems().forEach(metricItem -> {
+            metricItem.setName(metricMap.getOrDefault(metricItem.getId(), new MetricResp()).getName());
+            metricItem.setBizName(metricMap.getOrDefault(metricItem.getId(), new MetricResp()).getBizName());
+            metricItem.setCreatedBy(metricMap.getOrDefault(metricItem.getId(), new MetricResp()).getCreatedBy());
+            metricItem.getRelateItems().forEach(dimensionItem -> {
+                dimensionItem.setName(dimensionMap.getOrDefault(dimensionItem.getId(), new DimensionResp()).getName());
+                dimensionItem.setBizName(dimensionMap.getOrDefault(dimensionItem.getId(),
+                        new DimensionResp()).getBizName());
+                dimensionItem.setCreatedBy(dimensionMap.getOrDefault(dimensionItem.getId(),
+                        new DimensionResp()).getCreatedBy());
+            });
+        });
     }
 
     private String getUniqueId() {

@@ -13,7 +13,9 @@ public class FromCorrector extends BaseSemanticCorrector {
     @Override
     public void doCorrect(QueryReq queryReq, SemanticParseInfo semanticParseInfo) {
         String modelName = semanticParseInfo.getModel().getName();
-        SqlParserReplaceHelper.replaceTable(semanticParseInfo.getSqlInfo().getCorrectS2SQL(), modelName);
+        String correctSql = SqlParserReplaceHelper
+                .replaceTable(semanticParseInfo.getSqlInfo().getCorrectS2SQL(), modelName);
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctSql);
     }
 
 }
