@@ -4,23 +4,15 @@ package com.tencent.supersonic.headless.query.parser.calcite.sql.node;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.query.request.MetricReq;
 import com.tencent.supersonic.headless.query.parser.calcite.Configuration;
-import com.tencent.supersonic.headless.query.parser.calcite.sql.node.extend.LateralViewExplodeNode;
 import com.tencent.supersonic.headless.query.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.query.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.query.parser.calcite.s2sql.Dimension;
+import com.tencent.supersonic.headless.query.parser.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.query.parser.calcite.s2sql.JoinRelation;
+import com.tencent.supersonic.headless.query.parser.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.query.parser.calcite.schema.HeadlessSchema;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.calcite.sql.SqlBasicCall;
-import org.apache.calcite.sql.SqlDataTypeSpec;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlNodeList;
-import org.apache.calcite.sql.SqlUserDefinedTypeNameSpec;
-import org.apache.calcite.sql.parser.SqlParser;
-import org.apache.calcite.sql.parser.SqlParserPos;
-import org.apache.calcite.sql.validate.SqlValidatorScope;
-import org.springframework.util.CollectionUtils;
-
+import com.tencent.supersonic.headless.query.parser.calcite.schema.SchemaBuilder;
+import com.tencent.supersonic.headless.query.parser.calcite.sql.node.extend.LateralViewExplodeNode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -32,6 +24,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.calcite.sql.SqlBasicCall;
+import org.apache.calcite.sql.SqlDataTypeSpec;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.SqlUserDefinedTypeNameSpec;
+import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.parser.SqlParserPos;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class DataSourceNode extends SemanticNode {
@@ -46,7 +48,48 @@ public class DataSourceNode extends SemanticNode {
         if (sqlTable.isEmpty()) {
             throw new Exception("DatasourceNode build error [tableSqlNode not found]");
         }
-        return buildAs(datasource.getName(), getTable(sqlTable, scope));
+        SqlNode source = getTable(sqlTable, scope);
+        addSchema(scope, datasource, source);
+        return buildAs(datasource.getName(), source);
+    }
+
+    private static void addSchema(SqlValidatorScope scope, DataSource datasource, SqlNode table) throws Exception {
+        Map<String, String> parseInfo = SemanticNode.getDbTable(table);
+        if (!parseInfo.isEmpty() && parseInfo.containsKey(Constants.SQL_PARSER_TABLE)) {
+            Set<String> dateInfo = new HashSet<>();
+            Set<String> dimensions = new HashSet<>();
+            Set<String> metrics = new HashSet<>();
+            String db = parseInfo.containsKey(Constants.SQL_PARSER_DB) ? parseInfo.get(Constants.SQL_PARSER_DB) : "";
+            String tb = parseInfo.get(Constants.SQL_PARSER_TABLE);
+            for (Dimension d : datasource.getDimensions()) {
+                List<SqlNode> identifiers = expand(SemanticNode.parse(d.getExpr(), scope), scope);
+                identifiers.stream().forEach(i -> dimensions.add(i.toString()));
+                dimensions.add(d.getName());
+            }
+            if (parseInfo.containsKey(Constants.SQL_PARSER_FIELD)) {
+                for (String field : parseInfo.get(Constants.SQL_PARSER_FIELD).split(",")) {
+                    dimensions.add(field);
+                }
+            }
+            for (Identify i : datasource.getIdentifiers()) {
+                dimensions.add(i.getName());
+            }
+            for (Measure m : datasource.getMeasures()) {
+                List<SqlNode> identifiers = expand(SemanticNode.parse(m.getExpr(), scope), scope);
+                identifiers.stream().forEach(i -> {
+                            if (!dimensions.contains(i.toString())) {
+                                metrics.add(i.toString());
+                            }
+                        }
+                );
+                if (!dimensions.contains(m.getName())) {
+                    metrics.add(m.getName());
+                }
+            }
+            SchemaBuilder.addSourceView(scope.getValidator().getCatalogReader().getRootSchema(), db,
+                    tb, dateInfo,
+                    dimensions, metrics);
+        }
     }
 
     public static SqlNode buildExtend(DataSource datasource, Set<String> exprList,

@@ -45,6 +45,10 @@ public class QueryUtils {
     private final Set<Pattern> patterns = new HashSet<>();
     @Value("${query.cache.enable:true}")
     private Boolean cacheEnable;
+
+    @Value("${query.optimizer.enable:true}")
+    private Boolean optimizeEnable;
+
     private final CacheUtils cacheUtils;
     private final StatUtils statUtils;
 
@@ -240,5 +244,9 @@ public class QueryUtils {
             log.info("add record to cache, key:{}", key);
         }
 
+    }
+
+    public Boolean enableOptimize() {
+        return optimizeEnable;
     }
 }

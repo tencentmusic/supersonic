@@ -14,6 +14,8 @@ public class Constants {
     public static final String DIMENSION_ARRAY_SINGLE_SUFFIX = "_sgl";
     public static final String MATERIALIZATION_ZIPPER_START = "start_";
     public static final String MATERIALIZATION_ZIPPER_END = "end_";
-
+    public static final String SQL_PARSER_TABLE = "parsed_tb";
+    public static final String SQL_PARSER_DB = "parsed_db";
+    public static final String SQL_PARSER_FIELD = "parsed_field";
 
 }

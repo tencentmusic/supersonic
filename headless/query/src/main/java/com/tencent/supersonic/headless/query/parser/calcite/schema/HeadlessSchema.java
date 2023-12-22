@@ -25,6 +25,8 @@ public class HeadlessSchema extends AbstractSchema {
 
     private List<JoinRelation> joinRelations;
 
+    private RuntimeOptions runtimeOptions;
+
 
     private HeadlessSchema(String rootPath, Map<String, Table> tableMap) {
         this.rootPath = rootPath;
@@ -97,6 +99,13 @@ public class HeadlessSchema extends AbstractSchema {
         return joinRelations;
     }
 
+    public void setRuntimeOptions(RuntimeOptions runtimeOptions) {
+        this.runtimeOptions = runtimeOptions;
+    }
+
+    public RuntimeOptions getRuntimeOptions() {
+        return runtimeOptions;
+    }
 
     public static final class Builder {
 

@@ -152,7 +152,7 @@ public class HeadlessSqlConformance implements SqlConformance {
     }
 
     @Override
-    public boolean allowCoercionStringToArray() {
+    public boolean allowLenientCoercion() {
         return false;
     }
 }

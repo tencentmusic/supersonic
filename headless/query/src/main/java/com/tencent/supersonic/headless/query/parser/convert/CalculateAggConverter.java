@@ -9,7 +9,6 @@ import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.headless.api.model.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.query.enums.AggOption;
 import com.tencent.supersonic.headless.api.query.pojo.MetricTable;
-import com.tencent.supersonic.headless.api.query.request.MetricReq;
 import com.tencent.supersonic.headless.api.query.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.query.request.QueryStructReq;
 import com.tencent.supersonic.headless.model.domain.Catalog;
@@ -122,8 +121,9 @@ public class CalculateAggConverter implements HeadlessConverter {
     }
 
     @Override
-    public void converter(Catalog catalog, QueryStructReq queryStructCmd, ParseSqlReq sqlCommend,
-            MetricReq metricCommand) throws Exception {
+    public void converter(Catalog catalog, QueryStatement queryStatement) throws Exception {
+        QueryStructReq queryStructCmd = queryStatement.getQueryStructReq();
+        ParseSqlReq sqlCommend = queryStatement.getParseSqlReq();
         DatabaseResp databaseResp = catalog.getDatabaseByModelId(queryStructCmd.getModelIds().get(0));
         ParseSqlReq parseSqlReq = generateSqlCommend(queryStructCmd,
                 EngineTypeEnum.valueOf(databaseResp.getType().toUpperCase()), databaseResp.getVersion());
