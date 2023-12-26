@@ -52,7 +52,7 @@ if text2sql_agent_autoCoT.count_examples()==0:
     source_dir_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
     example_dir_path = os.path.join(source_dir_path, 'few_shot_example')
     example_json_file = os.path.join(example_dir_path, 's2ql_examplar3_transformed.json')
-    with open(example_json_file, 'r') as f:
+    with open(example_json_file, 'r', encoding='utf-8') as f:
         transformed_sql_examplar_list = json.load(f)
 
     transformed_sql_examplar_ids = [str(i) for i in range(0, len(transformed_sql_examplar_list))]
