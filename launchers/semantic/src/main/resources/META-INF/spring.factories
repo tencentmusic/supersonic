@@ -1,6 +1,0 @@
-com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\
-    com.tencent.supersonic.auth.authentication.interceptor.DefaultAuthenticationInterceptor
-
-com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
-    com.tencent.supersonic.auth.authentication.adaptor.DefaultUserAdaptor
-

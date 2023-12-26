@@ -12,31 +12,30 @@ import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.semantic.api.model.enums.DataTypeEnum;
-import com.tencent.supersonic.semantic.api.model.enums.DimensionTypeEnum;
-import com.tencent.supersonic.semantic.api.model.enums.IdentifyTypeEnum;
-import com.tencent.supersonic.semantic.api.model.enums.SemanticTypeEnum;
-import com.tencent.supersonic.semantic.api.model.pojo.Dim;
-import com.tencent.supersonic.semantic.api.model.pojo.DimensionTimeTypeParams;
-import com.tencent.supersonic.semantic.api.model.pojo.Identify;
-import com.tencent.supersonic.semantic.api.model.pojo.Measure;
-import com.tencent.supersonic.semantic.api.model.pojo.MetricTypeParams;
-import com.tencent.supersonic.semantic.api.model.pojo.ModelDetail;
-import com.tencent.supersonic.semantic.api.model.request.DatabaseReq;
-import com.tencent.supersonic.semantic.api.model.request.DimensionReq;
-import com.tencent.supersonic.semantic.api.model.request.DomainReq;
-import com.tencent.supersonic.semantic.api.model.request.MetricReq;
-import com.tencent.supersonic.semantic.api.model.request.ModelReq;
-import com.tencent.supersonic.semantic.model.domain.DatabaseService;
-import com.tencent.supersonic.semantic.model.domain.DimensionService;
-import com.tencent.supersonic.semantic.model.domain.DomainService;
-import com.tencent.supersonic.semantic.model.domain.MetricService;
-import com.tencent.supersonic.semantic.model.domain.ModelRelaService;
-import com.tencent.supersonic.semantic.model.domain.ModelService;
+import com.tencent.supersonic.headless.api.model.enums.DataTypeEnum;
+import com.tencent.supersonic.headless.api.model.enums.DimensionTypeEnum;
+import com.tencent.supersonic.headless.api.model.enums.IdentifyTypeEnum;
+import com.tencent.supersonic.headless.api.model.enums.SemanticTypeEnum;
+import com.tencent.supersonic.headless.api.model.pojo.Dim;
+import com.tencent.supersonic.headless.api.model.pojo.DimensionTimeTypeParams;
+import com.tencent.supersonic.headless.api.model.pojo.Identify;
+import com.tencent.supersonic.headless.api.model.pojo.Measure;
+import com.tencent.supersonic.headless.api.model.pojo.MetricTypeParams;
+import com.tencent.supersonic.headless.api.model.pojo.ModelDetail;
+import com.tencent.supersonic.headless.api.model.request.DatabaseReq;
+import com.tencent.supersonic.headless.api.model.request.DimensionReq;
+import com.tencent.supersonic.headless.api.model.request.DomainReq;
+import com.tencent.supersonic.headless.api.model.request.MetricReq;
+import com.tencent.supersonic.headless.api.model.request.ModelReq;
+import com.tencent.supersonic.headless.model.domain.DatabaseService;
+import com.tencent.supersonic.headless.model.domain.DimensionService;
+import com.tencent.supersonic.headless.model.domain.DomainService;
+import com.tencent.supersonic.headless.model.domain.MetricService;
+import com.tencent.supersonic.headless.model.domain.ModelRelaService;
+import com.tencent.supersonic.headless.model.domain.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Component;
 
@@ -50,9 +49,6 @@ import java.util.List;
 public class ModelDemoDataLoader {
 
     private User user = User.getFakeUser();
-
-    @Value("${demo.dbType:mysql}")
-    private String demoDb;
     @Autowired
     private DatabaseService databaseService;
     @Autowired
@@ -338,7 +334,6 @@ public class ModelDemoDataLoader {
         List<Measure> measures = new ArrayList<>();
         Measure measure = new Measure("停留时长",
                 "s2_stay_time_statis_stay_hours", AggOperatorEnum.SUM.getOperator(), 1);
-        measure.setDatasourceId(3L);
         measures.add(measure);
         metricTypeParams.setMeasures(measures);
         metricReq.setTypeParams(metricTypeParams);

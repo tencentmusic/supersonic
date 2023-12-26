@@ -289,6 +289,7 @@ public class SqlParserSelectHelper {
         Set<FieldExpression> orderByFieldExpressions = getOrderByFields(plainSelect);
         Set<String> collect = orderByFieldExpressions.stream()
                 .map(fieldExpression -> fieldExpression.getFieldName())
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         result.addAll(collect);
     }

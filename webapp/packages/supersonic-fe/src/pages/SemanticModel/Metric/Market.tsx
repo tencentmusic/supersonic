@@ -190,9 +190,11 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         if (record.hasAdminRes) {
           return (
             <a
-              onClick={() => {
-                history.replace(`/model/${record.domainId}/${record.modelId}/metric`);
-              }}
+              target="blank"
+              href={`/webapp/model/${record.domainId}/${record.modelId}/metric`}
+              // onClick={() => {
+              //   history.push(`/model/${record.domainId}/${record.modelId}/metric`);
+              // }}
             >
               {record.modelName}
             </a>

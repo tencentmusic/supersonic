@@ -1,4 +1,5 @@
 import { SemanticNodeType } from './enum';
+import { DateRangeType } from '@/components/MDatePicker/type';
 
 export enum SENSITIVE_LEVEL {
   LOW = 0,
@@ -57,4 +58,16 @@ export const SEMANTIC_NODE_TYPE_CONFIG = {
     value: SemanticNodeType.METRIC,
     color: 'orange',
   },
+};
+
+export const DateFieldMap = {
+  [DateRangeType.DAY]: 'sys_imp_date',
+  [DateRangeType.WEEK]: 'sys_imp_week',
+  [DateRangeType.MONTH]: 'sys_imp_month',
+};
+
+export const DatePeridMap = {
+  sys_imp_date: DateRangeType.DAY,
+  sys_imp_week: DateRangeType.WEEK,
+  sys_imp_month: DateRangeType.MONTH,
 };

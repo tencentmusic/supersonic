@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.parser;
 
 import com.alibaba.fastjson.JSON;
+import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.config.LLMParserConfig;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionCallConfig;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionReq;
@@ -12,11 +13,15 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import java.net.URI;
 import java.net.URL;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -24,12 +29,25 @@ import org.springframework.web.util.UriComponentsBuilder;
  * PythonLLMProxy sends requests to LangChain-based python service.
  */
 @Slf4j
+@Component
 public class PythonLLMProxy implements LLMProxy {
 
-    public LLMResp query2sql(LLMReq llmReq, String modelClusterKey) {
+    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
+    @Override
+    public boolean isSkip(QueryContext queryContext) {
+        LLMParserConfig llmParserConfig = ContextUtils.getBean(LLMParserConfig.class);
+        if (StringUtils.isEmpty(llmParserConfig.getUrl())) {
+            log.warn("llmParserUrl is empty, skip :{}", PythonLLMProxy.class.getName());
+            return true;
+        }
+        return false;
+    }
+
+    public LLMResp query2sql(LLMReq llmReq, String modelClusterKey) {
         long startTime = System.currentTimeMillis();
         log.info("requestLLM request, modelId:{},llmReq:{}", modelClusterKey, llmReq);
+        keyPipelineLog.info("modelClusterKey:{},llmReq:{}", modelClusterKey, llmReq);
         try {
             LLMParserConfig llmParserConfig = ContextUtils.getBean(LLMParserConfig.class);
 
@@ -43,6 +61,7 @@ public class PythonLLMProxy implements LLMProxy {
 
             log.info("requestLLM response,cost:{}, questUrl:{} \n entity:{} \n body:{}",
                     System.currentTimeMillis() - startTime, url, entity, responseEntity.getBody());
+            keyPipelineLog.info("LLMResp:{}", responseEntity.getBody());
             return responseEntity.getBody();
         } catch (Exception e) {
             log.error("requestLLM error", e);
@@ -61,10 +80,12 @@ public class PythonLLMProxy implements LLMProxy {
         RestTemplate restTemplate = ContextUtils.getBean(RestTemplate.class);
         try {
             log.info("requestFunction functionReq:{}", JsonUtil.toString(functionReq));
+            keyPipelineLog.info("requestFunction functionReq:{}", JsonUtil.toString(functionReq));
             ResponseEntity<FunctionResp> responseEntity = restTemplate.exchange(requestUrl, HttpMethod.POST, entity,
                     FunctionResp.class);
             log.info("requestFunction responseEntity:{},cost:{}", responseEntity,
                     System.currentTimeMillis() - startTime);
+            keyPipelineLog.info("response:{}", responseEntity.getBody());
             return responseEntity.getBody();
         } catch (Exception e) {
             log.error("requestFunction error", e);

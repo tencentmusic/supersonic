@@ -6,10 +6,17 @@ set "baseDir=%~dp0.."
 set "buildDir=%baseDir%\build"
 set "runtimeDir=%baseDir%\..\runtime"
 set "pip_path=pip3"
+set "service=%~1"
+
 
 rem 1. build backend java modules
 del /q "%buildDir%\*.tar.gz" 2>NUL
 call mvn -f "%baseDir%\..\pom.xml" clean package -DskipTests
+
+IF ERRORLEVEL 1 (
+    ECHO Failed to build backend Java modules.
+    EXIT /B 1
+)
 
 rem 2. move package to build
 echo f|xcopy "%baseDir%\..\launchers\standalone\target\*.tar.gz" "%buildDir%\supersonic-standalone.tar.gz"
@@ -19,6 +26,11 @@ cd "%baseDir%\..\webapp"
 call start-fe-prod.bat
 copy /y "%baseDir%\..\webapp\supersonic-webapp.tar.gz" "%buildDir%\"
 
+IF ERRORLEVEL 1 (
+    ECHO Failed to build frontend webapp.
+    EXIT /B 1
+)
+
 rem 4. copy webapp to java classpath
 cd "%buildDir%"
 tar -zxvf supersonic-webapp.tar.gz
@@ -26,16 +38,23 @@ move supersonic-webapp webapp
 move webapp ..\..\launchers\standalone\target\classes
 
 rem 5. build backend python modules
-echo "start installing python modules with pip: ${pip_path}"
-set requirementPath="%baseDir%/../chat/python/requirements.txt"
-%pip_path% install -r %requirementPath%
-echo "install python modules success"
+if "%service%"=="pyllm" (
+    echo "start installing python modules with pip: ${pip_path}"
+    set requirementPath="%baseDir%/../chat/python/requirements.txt"
+    %pip_path% install -r %requirementPath%
+    echo "install python modules success"
+)
 
 call :BUILD_RUNTIME
 
 :BUILD_RUNTIME
   rem 6. reset runtime
-  rd /s /q "%runtimeDir%"
+  IF EXIST "%runtimeDir%" (
+      echo begin to delete dir : %runtimeDir%
+      rd /s /q "%runtimeDir%"
+  ) ELSE (
+      echo %runtimeDir% does not exist, create directly
+  )
   mkdir "%runtimeDir%"
   tar -zxvf "%buildDir%\supersonic-standalone.tar.gz" -C "%runtimeDir%"
   for /d %%f in ("%runtimeDir%\launchers-standalone-*") do (

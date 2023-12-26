@@ -21,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * match strategy implement
+ * HanlpDictMatchStrategy uses <a href="https://www.hanlp.com/">HanLP</a> to
+ * match schema elements. It currently supports prefix and suffix matching
+ * against names, values and aliases.
  */
 @Service
 @Slf4j

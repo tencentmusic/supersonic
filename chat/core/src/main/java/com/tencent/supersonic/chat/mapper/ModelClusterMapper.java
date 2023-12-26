@@ -18,6 +18,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/***
+ * ModelClusterMapper build a cluster from
+ * connectable data models based on model-rela configuration
+ * and generate SchemaModelClusterMapInfo
+ */
 public class ModelClusterMapper implements SchemaMapper {
 
     @Override

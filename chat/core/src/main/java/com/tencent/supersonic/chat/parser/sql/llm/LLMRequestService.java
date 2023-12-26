@@ -12,7 +12,6 @@ import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.config.LLMParserConfig;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
-import com.tencent.supersonic.chat.parser.LLMProxy;
 import com.tencent.supersonic.chat.parser.SatisfactionChecker;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
@@ -24,15 +23,8 @@ import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.knowledge.service.SchemaService;
-import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
-import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
+import com.tencent.supersonic.headless.api.model.pojo.SchemaItem;
+import com.tencent.supersonic.headless.api.model.response.ModelSchemaResp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -42,12 +34,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
 public class LLMRequestService {
-
-    protected LLMProxy llmProxy = ComponentFactory.getLLMProxy();
 
     protected SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
     @Autowired
@@ -60,13 +56,11 @@ public class LLMRequestService {
     private OptimizationConfig optimizationConfig;
 
     public boolean isSkip(QueryContext queryCtx) {
-        QueryReq request = queryCtx.getRequest();
-        if (StringUtils.isEmpty(llmParserConfig.getUrl())) {
-            log.info("llm parser url is empty, skip {} , llmParserConfig:{}", LLMSqlParser.class, llmParserConfig);
+        if (ComponentFactory.getLLMProxy().isSkip(queryCtx)) {
             return true;
         }
         if (SatisfactionChecker.isSkip(queryCtx)) {
-            log.info("skip {}, queryText:{}", LLMSqlParser.class, request.getQueryText());
+            log.info("skip {}, queryText:{}", LLMSqlParser.class, queryCtx.getRequest().getQueryText());
             return true;
         }
         return false;
@@ -104,7 +98,7 @@ public class LLMRequestService {
     }
 
     public LLMReq getLlmReq(QueryContext queryCtx, SemanticSchema semanticSchema,
-                            ModelCluster modelCluster, List<ElementValue> linkingValues) {
+            ModelCluster modelCluster, List<ElementValue> linkingValues) {
         Map<Long, String> modelIdToName = semanticSchema.getModelIdToName();
         String queryText = queryCtx.getRequest().getQueryText();
 
@@ -138,15 +132,16 @@ public class LLMRequestService {
             currentDate = DateUtils.getBeforeDate(0);
         }
         llmReq.setCurrentDate(currentDate);
+        llmReq.setSqlGenerationMode(optimizationConfig.getSqlGenerationMode().getName());
         return llmReq;
     }
 
     public LLMResp requestLLM(LLMReq llmReq, String modelClusterKey) {
-        return llmProxy.query2sql(llmReq, modelClusterKey);
+        return ComponentFactory.getLLMProxy().query2sql(llmReq, modelClusterKey);
     }
 
     protected List<String> getFieldNameList(QueryContext queryCtx, ModelCluster modelCluster,
-                                            LLMParserConfig llmParserConfig) {
+            LLMParserConfig llmParserConfig) {
 
         Set<String> results = getTopNFieldNames(modelCluster, llmParserConfig);
 

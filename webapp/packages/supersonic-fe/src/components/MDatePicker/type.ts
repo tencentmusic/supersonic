@@ -8,7 +8,7 @@ export enum DynamicAdvancedConfigType {
 }
 
 export enum DatePeriodType {
-  DAY = 'DAYS',
+  DAY = 'DAY',
   WEEK = 'WEEK',
   MONTH = 'MONTH',
   YEAR = 'YEAR',
@@ -43,6 +43,12 @@ export enum DateRangeType {
   WEEK = 'WEEK',
   MONTH = 'MONTH',
 }
+
+export const shortCutIdType = {
+  [DateRangeType.DAY]: 'Days',
+  [DateRangeType.WEEK]: 'Weeks',
+  [DateRangeType.MONTH]: 'Months',
+};
 
 export enum DateRangePicker {
   DATE = 'date',

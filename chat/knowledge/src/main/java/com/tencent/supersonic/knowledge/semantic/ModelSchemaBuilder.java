@@ -6,12 +6,12 @@ import com.tencent.supersonic.chat.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
-import com.tencent.supersonic.semantic.api.model.pojo.DimValueMap;
-import com.tencent.supersonic.semantic.api.model.pojo.RelateDimension;
-import com.tencent.supersonic.semantic.api.model.pojo.SchemaItem;
-import com.tencent.supersonic.semantic.api.model.response.DimSchemaResp;
-import com.tencent.supersonic.semantic.api.model.response.MetricSchemaResp;
-import com.tencent.supersonic.semantic.api.model.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.model.pojo.DimValueMap;
+import com.tencent.supersonic.headless.api.model.pojo.RelateDimension;
+import com.tencent.supersonic.headless.api.model.pojo.SchemaItem;
+import com.tencent.supersonic.headless.api.model.response.DimSchemaResp;
+import com.tencent.supersonic.headless.api.model.response.MetricSchemaResp;
+import com.tencent.supersonic.headless.api.model.response.ModelSchemaResp;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
@@ -26,7 +26,7 @@ public class ModelSchemaBuilder {
 
     public static ModelSchema build(ModelSchemaResp resp) {
         ModelSchema modelSchema = new ModelSchema();
-        SchemaElement domain = SchemaElement.builder()
+        SchemaElement model = SchemaElement.builder()
                 .model(resp.getId())
                 .id(resp.getId())
                 .name(resp.getName())
@@ -34,7 +34,7 @@ public class ModelSchemaBuilder {
                 .type(SchemaElementType.MODEL)
                 .alias(SchemaItem.getAliasList(resp.getAlias()))
                 .build();
-        modelSchema.setModel(domain);
+        modelSchema.setModel(model);
         modelSchema.setModelRelas(resp.getModelRelas());
 
         Set<SchemaElement> metrics = new HashSet<>();

@@ -27,13 +27,16 @@ import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.chat.service.QueryService;
-import com.tencent.supersonic.common.pojo.QueryType;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.SysParameter;
 import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -43,7 +46,8 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class ChatDemoLoader {
+@Order(3)
+public class ChatDemoLoader implements CommandLineRunner {
 
     private User user = User.getFakeUser();
     @Qualifier("chatQueryService")
@@ -59,6 +63,18 @@ public class ChatDemoLoader {
     private AgentService agentService;
     @Autowired
     private SysParameterService sysParameterService;
+
+    @Value("${demo.enabled:false}")
+    private boolean demoEnabled;
+
+    @Override
+    public void run(String... args) throws Exception {
+        if (!checkEnable()) {
+            log.info("skip load chat demo");
+            return;
+        }
+        doRun();
+    }
 
     public void doRun() {
         try {
@@ -92,9 +108,9 @@ public class ChatDemoLoader {
 
         ExecuteQueryReq executeReq = ExecuteQueryReq.builder().build();
         executeReq.setQueryId(parseResp.getQueryId());
-        executeReq.setParseId(parseResp.getCandidateParses().get(0).getId());
+        executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());
         executeReq.setQueryText(queryRequest.getQueryText());
-        executeReq.setParseInfo(parseResp.getCandidateParses().get(0));
+        executeReq.setParseInfo(parseResp.getSelectedParses().get(0));
         executeReq.setChatId(parseResp.getChatId());
         executeReq.setUser(queryRequest.getUser());
         executeReq.setAgentId(1);
@@ -488,6 +504,13 @@ public class ChatDemoLoader {
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());
+    }
+
+    private boolean checkEnable() {
+        if (!demoEnabled) {
+            return false;
+        }
+        return HeadlessDemoLoader.isLoad();
     }
 
 }

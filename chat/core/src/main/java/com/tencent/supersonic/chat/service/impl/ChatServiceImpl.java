@@ -10,7 +10,6 @@ import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
-import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
@@ -19,10 +18,8 @@ import com.tencent.supersonic.chat.persistence.repository.ChatContextRepository;
 import com.tencent.supersonic.chat.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.persistence.repository.ChatRepository;
 import com.tencent.supersonic.chat.service.ChatService;
-import com.tencent.supersonic.chat.utils.SolvedQueryManager;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.Lists;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -46,14 +43,12 @@ public class ChatServiceImpl implements ChatService {
     private ChatContextRepository chatContextRepository;
     private ChatRepository chatRepository;
     private ChatQueryRepository chatQueryRepository;
-    private SolvedQueryManager solvedQueryManager;
 
     public ChatServiceImpl(ChatContextRepository chatContextRepository, ChatRepository chatRepository,
-            ChatQueryRepository chatQueryRepository, SolvedQueryManager solvedQueryManager) {
+            ChatQueryRepository chatQueryRepository) {
         this.chatContextRepository = chatContextRepository;
         this.chatRepository = chatRepository;
         this.chatQueryRepository = chatQueryRepository;
-        this.solvedQueryManager = solvedQueryManager;
     }
 
     @Override
@@ -81,12 +76,6 @@ public class ChatServiceImpl implements ChatService {
     public void updateContext(ChatContext chatCtx) {
         log.debug("save ChatContext {}", chatCtx);
         chatContextRepository.updateContext(chatCtx);
-    }
-
-    @Override
-    public void switchContext(ChatContext chatCtx) {
-        log.debug("switchContext ChatContext {}", chatCtx);
-        chatCtx.setParseInfo(new SemanticParseInfo());
     }
 
     @Override
@@ -140,6 +129,11 @@ public class ChatServiceImpl implements ChatService {
         }
         fillParseInfo(queryRespPageInfo.getList());
         return queryRespPageInfo;
+    }
+
+    @Override
+    public QueryResp getChatQuery(Long queryId) {
+        return chatQueryRepository.getChatQuery(queryId);
     }
 
     @Override
@@ -197,14 +191,11 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void addQuery(QueryResult queryResult, ChatContext chatCtx) {
-        chatQueryRepository.createChatQuery(queryResult, chatCtx);
-        chatRepository.updateLastQuestion(chatCtx.getChatId().longValue(),
-                chatCtx.getQueryText(), getCurrentTime());
-    }
-
-    @Override
-    public Boolean updateQuery(Long questionId, QueryResult queryResult, ChatContext chatCtx) {
+    public void updateQuery(Long questionId, int parseId, QueryResult queryResult, ChatContext chatCtx) {
+        //The history record only retains the query result of the first parse
+        if (parseId > 1) {
+            return;
+        }
         ChatQueryDO chatQueryDO = new ChatQueryDO();
         chatQueryDO.setQuestionId(questionId);
         chatQueryDO.setQueryResult(JsonUtil.toString(queryResult));
@@ -212,7 +203,6 @@ public class ChatServiceImpl implements ChatService {
         updateQuery(chatQueryDO);
         chatRepository.updateLastQuestion(chatCtx.getChatId().longValue(),
                 chatCtx.getQueryText(), getCurrentTime());
-        return true;
     }
 
     @Override
@@ -222,13 +212,8 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ChatParseDO> batchAddParse(ChatContext chatCtx, QueryReq queryReq, ParseResp parseResult) {
-        List<SemanticParseInfo> candidateParses = parseResult.getCandidateParses();
+        List<SemanticParseInfo> candidateParses = parseResult.getSelectedParses();
         return chatQueryRepository.batchSaveParseInfo(chatCtx, queryReq, parseResult, candidateParses);
-    }
-
-    @Override
-    public void updateChatParse(List<ChatParseDO> chatParseDOS) {
-        chatQueryRepository.updateChatParseInfo(chatParseDOS);
     }
 
     @Override
@@ -247,34 +232,6 @@ public class ChatServiceImpl implements ChatService {
 
     public Boolean deleteChatQuery(Long questionId) {
         return chatQueryRepository.deleteChatQuery(questionId);
-    }
-
-    @Override
-    public List<SolvedQueryRecallResp> getSolvedQuery(String queryText, Integer agentId) {
-        //1. recall solved query by queryText
-        List<SolvedQueryRecallResp> solvedQueryRecallResps = solvedQueryManager.recallSolvedQuery(queryText, agentId);
-        if (CollectionUtils.isEmpty(solvedQueryRecallResps)) {
-            return Lists.newArrayList();
-        }
-        List<Long> queryIds = solvedQueryRecallResps.stream()
-                .map(SolvedQueryRecallResp::getQueryId).collect(Collectors.toList());
-        PageQueryInfoReq pageQueryInfoReq = new PageQueryInfoReq();
-        pageQueryInfoReq.setIds(queryIds);
-        pageQueryInfoReq.setPageSize(100);
-        pageQueryInfoReq.setCurrent(1);
-        //2. remove low score query
-        int lowScoreThreshold = 3;
-        PageInfo<QueryResp> queryRespPageInfo = chatQueryRepository.getChatQuery(pageQueryInfoReq, null);
-        List<QueryResp> queryResps = queryRespPageInfo.getList();
-        if (CollectionUtils.isEmpty(queryResps)) {
-            return Lists.newArrayList();
-        }
-        Set<Long> lowScoreQueryIds = queryResps.stream().filter(queryResp ->
-                        queryResp.getScore() != null && queryResp.getScore() <= lowScoreThreshold)
-                .map(QueryResp::getQuestionId).collect(Collectors.toSet());
-        return solvedQueryRecallResps.stream().filter(solvedQueryRecallResp ->
-                        !lowScoreQueryIds.contains(solvedQueryRecallResp.getQueryId()))
-                .collect(Collectors.toList());
     }
 
 }

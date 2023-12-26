@@ -35,6 +35,7 @@ import GraphToolBar from './components/GraphToolBar';
 import GraphLegend from './components/GraphLegend';
 import GraphLegendVisibleModeItem from './components/GraphLegendVisibleModeItem';
 import ModelRelationFormDrawer from './components/ModelRelationFormDrawer';
+import ControlToolBar from './components/ControlToolBar';
 
 type Props = {
   domainManger: StateType;
@@ -174,17 +175,23 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
     }
   };
 
+  const drawerEdgeFromConfig = (relationConfigData: any) => {
+    const { config } = relationConfigData;
+    const parseConfig = jsonParse(config, []);
+    if (Array.isArray(parseConfig)) {
+      parseConfig.forEach((item) => {
+        graphRef?.current?.addItem('edge', item);
+      });
+    }
+  };
+
   const getRelationConfig = async (domainId: number) => {
     const { code, data, msg } = await getViewInfoList(domainId);
     if (code === 200) {
       const target = data[0];
       if (target) {
-        const { config } = target;
-        const parseConfig = jsonParse(config, []);
         setRelationConfig(target);
-        parseConfig.forEach((item) => {
-          graphRef?.current?.addItem('edge', item);
-        });
+        drawerEdgeFromConfig(target);
       }
     } else {
       message.error(msg);
@@ -200,14 +207,16 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
   };
 
   const saveRelationConfig = async (domainId: number, graphData: any) => {
-    const { code, msg } = await createOrUpdateViewInfo({
+    const configData = {
       id: relationConfig?.id,
       // modelId: domainManger.selectModelId,
       domainId: domainId,
       type: 'modelEdgeRelation',
       config: JSON.stringify(graphData),
-    });
+    };
+    const { code, msg } = await createOrUpdateViewInfo(configData);
     if (code === 200) {
+      setRelationConfig(configData);
       queryModelRelaList(selectDomainId);
     } else {
       message.error(msg);
@@ -410,7 +419,8 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
     mindmap: {
       defaultEdge: {
-        type: 'polyline',
+        // type: 'polyline',
+        type: 'cubic-horizontal',
       },
       layout: {
         type: 'mindmap',
@@ -478,11 +488,11 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
 
     if (!graph && graphData) {
       const graphNodeList = flatGraphDataNode(graphData.children);
-      // const graphConfigKey = graphNodeList.length > 20 ? 'dendrogram' : 'mindmap';
-      const graphConfigKey = 'dendrogram';
-
+      const graphConfigKey = graphNodeList.length > 20 ? 'dendrogram' : 'mindmap';
+      // const graphConfigKey = 'mindmap';
+      // const graphConfigKey = 'dendrogram';
       // getLegendDataFilterFunctions();
-      const toolbar = initToolBar({ onSearch: handleSeachNode, onClick: handleToolBarClick });
+      // const toolbar = initToolBar({ onSearch: handleSeachNode, onClick: handleToolBarClick });
       const tooltip = initTooltips();
       const contextMenu = initContextMenu({
         onMenuClick: handleContextMenuClick,
@@ -532,7 +542,8 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
                 .getContainer()
                 .findAll((ele) => ele.get('name') === 'anchor-point');
               anchorPoints.forEach((point) => {
-                if (value || point.get('links') > 0) point.show();
+                // if (value || point.get('links') > 0) point.show();
+                if (value) point.show();
                 else point.hide();
               });
             }
@@ -655,6 +666,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
                 return true;
               },
             },
+            'scroll-canvas',
             'drag-canvas',
             // config the shouldBegin and shouldEnd to make sure the create-edge is began and ended at anchor-point circles
             {
@@ -679,10 +691,10 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
                 return true;
               },
             },
-            {
-              type: 'zoom-canvas',
-              sensitivity: 0.3, // 设置缩放灵敏度，值越小，缩放越不敏感，默认值为 1
-            },
+            // {
+            //   type: 'zoom-canvas',
+            //   sensitivity: 0.3, // 设置缩放灵敏度，值越小，缩放越不敏感，默认值为 1
+            // },
             {
               type: 'activate-relations',
               trigger: 'mouseenter', // 触发方式，可以是 'mouseenter' 或 'click'
@@ -693,7 +705,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
         layout: {
           ...graphConfigMap[graphConfigKey].layout,
         },
-        plugins: [tooltip, toolbar, contextMenu],
+        plugins: [tooltip, contextMenu],
 
         defaultNode: {
           type: 'rect-node',
@@ -751,8 +763,13 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
             label: '模型关系编辑',
             style: {
               stroke: '#296df3',
+              endArrow: true,
             },
           });
+          const sourceNode = e.edge.get('sourceNode');
+          const targetnode = e.edge.get('targetNode');
+          graphRef.current.setItemState(sourceNode, 'showAnchors', false);
+          graphRef.current.setItemState(targetnode, 'showAnchors', false);
         }
 
         // update the curveOffset for parallel edges
@@ -804,6 +821,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
               label: '模型关系编辑',
               style: {
                 stroke: '#296df3',
+                endArrow: true,
               },
             });
           }
@@ -858,12 +876,12 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
       graphRef.current.data(graphData);
       graphRef.current.render();
 
-      const nodeCount = graphRef.current.getNodes().length;
-      if (nodeCount < 10) {
-        lessNodeZoomRealAndMoveCenter();
-      } else {
-        graphRef.current.fitView([80, 80]);
-      }
+      // const nodeCount = graphRef.current.getNodes().length;
+      // if (nodeCount < 10) {
+      lessNodeZoomRealAndMoveCenter();
+      // } else {
+      // graphRef.current.fitView([80, 80]);
+      // }
 
       graphRef.current.on('node:click', (evt: any) => {
         const item = evt.item; // 被操作的节点 item
@@ -934,7 +952,9 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
     graphRef.current.changeData(graphRootData);
     const rootNode = graphRef.current.findById('root');
     graphRef.current.hideItem(rootNode);
-    graphRef.current.fitView();
+    // graphRef.current.fitView();
+    drawerEdgeFromConfig(relationConfig);
+    lessNodeZoomRealAndMoveCenter();
   };
 
   const saveModelRelationEdges = () => {
@@ -948,7 +968,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   return (
     <>
-      <GraphLegend
+      {/* <GraphLegend
         legendOptions={legendDataRef.current}
         defaultCheckAll={true}
         onChange={(nodeIds: string[]) => {
@@ -967,7 +987,27 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
             refreshGraphData(rootGraphData);
           }}
         />
-      )}
+      )} */}
+
+      <ControlToolBar
+        graph={graphRef.current}
+        onSearch={(text) => {
+          handleSeachNode(text);
+        }}
+        onShowTypeChange={(showType) => {
+          graphShowTypeRef.current = showType;
+          setGraphShowTypeState(showType);
+          const rootGraphData = changeGraphData(dataSourceRef.current);
+          refreshGraphData(rootGraphData);
+        }}
+        onAutoZoom={() => {
+          // lessNodeZoomRealAndMoveCenter();
+          const rootGraphData = changeGraphData(dataSourceRef.current);
+          refreshGraphData(rootGraphData);
+        }}
+        // onZoomIn={() => {}}
+        // onZoomOut={() => {}}
+      />
 
       <GraphToolBar
         onClick={({ eventName }: { eventName: string }) => {
@@ -1029,6 +1069,7 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
       {createDimensionModalVisible && (
         <DimensionInfoModal
           modelId={modelId}
+          domainId={selectDomainId}
           bindModalVisible={createDimensionModalVisible}
           dimensionItem={dimensionItem}
           dataSourceList={nodeDataSource ? [nodeDataSource] : dataSourceInfoList}

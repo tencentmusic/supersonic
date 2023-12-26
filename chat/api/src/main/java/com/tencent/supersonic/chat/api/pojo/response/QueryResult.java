@@ -1,11 +1,12 @@
 package com.tencent.supersonic.chat.api.pojo.response;
 
+import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.common.pojo.QueryAuthorization;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import lombok.Data;
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
 
 @Data
 public class QueryResult {
@@ -22,4 +23,5 @@ public class QueryResult {
     private Object response;
     private List<Map<String, Object>> queryResults;
     private Long queryTimeCost;
+    private List<SchemaElement> recommendedDimensions;
 }

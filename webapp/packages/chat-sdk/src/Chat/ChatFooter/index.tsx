@@ -311,16 +311,16 @@ const ChatFooter: ForwardRefRenderFunction<any, Props> = (
             <div>历史对话</div>
           </div>
         )}
-        <div className={styles.toolItem} onClick={onOpenAgents}>
-          <IconFont type="icon-zhinengzhuli" className={styles.toolIcon} />
-          <div>智能助理</div>
-        </div>
-        {!isMobile && (
-          <div className={styles.toolItem} onClick={onOpenShowcase}>
-            <IconFont type="icon-showcase" className={styles.toolIcon} />
-            <div>showcase</div>
+        {agentList?.length > 1 && (
+          <div className={styles.toolItem} onClick={onOpenAgents}>
+            <IconFont type="icon-zhinengzhuli" className={styles.toolIcon} />
+            <div>智能助理</div>
           </div>
         )}
+        <div className={styles.toolItem} onClick={onOpenShowcase}>
+          <IconFont type="icon-showcase" className={styles.toolIcon} />
+          <div>showcase</div>
+        </div>
       </div>
       <div className={styles.composer}>
         <div className={styles.composerInputWrapper}>

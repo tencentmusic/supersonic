@@ -97,7 +97,9 @@ const ChatItem: React.FC<Props> = ({
       data = res.data;
       tip = '';
     }
-    setDataCache({ ...dataCache, [chatContext!.id!]: { tip, data } });
+    if (chatContext) {
+      setDataCache({ ...dataCache, [chatContext!.id!]: { tip, data } });
+    }
     if (data) {
       setData(data);
       setExecuteTip('');
@@ -169,6 +171,7 @@ const ChatItem: React.FC<Props> = ({
       (!parses[0]?.properties?.type && !parses[0]?.queryMode)
     ) {
       setParseTip(PARSE_ERROR_TIP);
+      setParseInfo({ queryId } as any);
       return;
     }
     onUpdateMessageScroll?.();
@@ -356,9 +359,9 @@ const ChatItem: React.FC<Props> = ({
           )}
           {(parseTip !== '' || (executeMode && !executeLoading)) && integrateSystem !== 'c2' && (
             <SimilarQuestionItem
-              queryText={msg || msgData?.queryText || ''}
-              agentId={agentId}
+              queryId={parseInfo?.queryId}
               defaultExpanded={parseTip !== '' || executeTip !== '' || integrateSystem === 'wiki'}
+              similarQueries={data?.similarQueries}
               onSelectQuestion={onSelectQuestion}
             />
           )}

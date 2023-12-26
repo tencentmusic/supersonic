@@ -9,13 +9,13 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
-import com.tencent.supersonic.common.pojo.QueryType;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.semantic.api.query.request.QueryMultiStructReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryS2SQLReq;
-import com.tencent.supersonic.semantic.api.query.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.headless.api.query.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.query.request.QueryStructReq;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -118,6 +118,7 @@ public class QueryReqBuilder {
         for (Filter dimensionFilter : queryStructReq.getDimensionFilters()) {
             QueryStructReq req = new QueryStructReq();
             BeanUtils.copyProperties(queryStructReq, req);
+            req.setModelIds(new HashSet<>(queryStructReq.getModelIds()));
             req.setDimensionFilters(Lists.newArrayList(dimensionFilter));
             queryStructReqs.add(req);
         }
@@ -145,7 +146,8 @@ public class QueryReqBuilder {
         List<Aggregator> aggregators = new ArrayList<>();
         if (metric != null) {
             String agg = "";
-            if (Objects.isNull(aggregateType) || aggregateType.equals(AggregateTypeEnum.NONE)) {
+            if (Objects.isNull(aggregateType) || aggregateType.equals(AggregateTypeEnum.NONE)
+                    || AggOperatorEnum.COUNT_DISTINCT.name().equalsIgnoreCase(metric.getDefaultAgg())) {
                 if (StringUtils.isNotBlank(metric.getDefaultAgg())) {
                     agg = metric.getDefaultAgg();
                 }

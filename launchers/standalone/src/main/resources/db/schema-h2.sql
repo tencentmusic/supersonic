@@ -37,6 +37,7 @@ CREATE TABLE `s2_chat_query`
     `query_result` mediumtext NOT NULL ,
     `score`             int DEFAULT '0',
     `feedback`          varchar(1024) DEFAULT '',
+    `similar_queries`          varchar(1024) DEFAULT '',
     PRIMARY KEY (`question_id`)
 );
 
@@ -136,6 +137,7 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
     `database_id` INT NOT  NULL ,
     `model_detail` LONGVARCHAR NOT  NULL ,
     `depends` varchar(500) DEFAULT NULL ,
+    `source_type` varchar(128) DEFAULT NULL ,
     `filter_sql` varchar(1000) DEFAULT NULL ,
     PRIMARY KEY (`id`)
     );
@@ -158,21 +160,6 @@ CREATE TABLE `s2_database` (
                                PRIMARY KEY (`id`)
 );
 COMMENT ON TABLE s2_database IS 'database instance table';
-
-CREATE TABLE  IF NOT EXISTS  `s2_datasource` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `model_id` INT NOT  NULL ,
-    `name` varchar(255) NOT  NULL ,
-    `biz_name` varchar(255) NOT  NULL ,
-    `description` varchar(500) DEFAULT  NULL ,
-
-    `created_at` TIMESTAMP NOT  NULL ,
-    `created_by` varchar(100) NOT  NULL ,
-    `updated_at` TIMESTAMP NOT  NULL ,
-    `updated_by` varchar(100) NOT  NULL,
-    PRIMARY KEY (`id`)
-    );
-COMMENT ON TABLE s2_datasource IS 'datasource table';
 
 create table s2_auth_groups
 (
@@ -200,6 +187,7 @@ CREATE TABLE IF NOT EXISTS `s2_metric` (
     `alias` varchar(500) DEFAULT NULL,
     `tags` varchar(500) DEFAULT NULL,
     `relate_dimensions` varchar(500) DEFAULT NULL,
+    `ext` LONGVARCHAR DEFAULT NULL  ,
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_metric IS 'metric information table';
@@ -245,7 +233,7 @@ create table s2_view_info
 (
     id         INT auto_increment,
     domain_id  INT       null,
-    type       varchar(20)  null comment 'datasource、dimension、metric',
+    type       varchar(20)  null comment 'model、dimension、metric',
     config     LONGVARCHAR   null comment 'config detail',
     created_at TIMESTAMP     null,
     created_by varchar(100) null,
@@ -540,4 +528,32 @@ CREATE TABLE `s2_collect` (
     `create_time` TIMESTAMP,
     `update_time` TIMESTAMP,
     PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `s2_metric_query_default_config` (
+       `id` bigint NOT NULL AUTO_INCREMENT,
+       `metric_id` bigint ,
+       `user_name` varchar(255) NOT NULL,
+       `default_config` varchar(1000) NOT NULL,
+       `created_at` TIMESTAMP null,
+       `updated_at` TIMESTAMP null,
+       `created_by` varchar(100) null,
+       `updated_by` varchar(100) not null,
+       PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `s2_app` (
+    id          bigint AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(255),
+    description VARCHAR(255),
+    status      INT,
+    config      TEXT,
+    end_date    TIMESTAMP,
+    qps         INT,
+    app_secret  VARCHAR(255),
+    owner       VARCHAR(255),
+    created_at  TIMESTAMP,
+    created_by  VARCHAR(255),
+    updated_at  TIMESTAMP,
+    updated_by  VARCHAR(255)
 );

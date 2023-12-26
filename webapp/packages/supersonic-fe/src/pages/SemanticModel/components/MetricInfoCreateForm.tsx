@@ -89,7 +89,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
 
   const queryClassMeasureList = async () => {
     // const { code, data } = await getMeasureListByModelId(modelId);
-    const { code, data } = await getModelDetail({ modelId });
+    const { code, data } = await getModelDetail({ modelId: modelId || metricItem?.modelId });
     if (code === 200) {
       if (Array.isArray(data?.modelDetail?.measures)) {
         setClassMeasureList(data.modelDetail.measures);

@@ -29,6 +29,9 @@ public class EmbeddingConfig {
     @Value("${embedding.metric.analyzeQuery.collection:solved_query_collection}")
     private String metricAnalyzeQueryCollection;
 
+    @Value("${embedding.metric.analyzeQuery.nResult:5}")
+    private int metricAnalyzeQueryResultNum;
 
-
+    @Value("${inMemoryEmbeddingStore.persistent.path:/tmp}")
+    private String embeddingStorePersistentPath;
 }

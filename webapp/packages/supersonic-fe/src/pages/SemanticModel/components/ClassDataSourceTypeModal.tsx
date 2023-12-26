@@ -193,7 +193,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
         >
           <Drawer
             width={'100%'}
-            title="数据源编辑"
+            title="模型编辑"
             open={dataSourceEditOpen}
             onClose={() => {
               setDataSourceEditOpen(false);

@@ -7,6 +7,7 @@ import {
   DateSettingType,
   DynamicAdvancedConfigType,
   DateRangeParams,
+  shortCutIdType,
 } from './type';
 import { LatestDateMap } from './type';
 
@@ -55,6 +56,21 @@ export const DATE_RANGE_TYPE_ITEM_LIST = [
 ];
 
 export const LATEST_TEXT = '最近1天';
+
+export const getDatePickerDynamicInitialValues = (number: number, dateRangeType: DateRangeType) => {
+  return {
+    dateSettingType: 'DYNAMIC',
+    dynamicParams: {
+      includesCurrentPeriod: true,
+      dateRangeType: dateRangeType,
+      dynamicAdvancedConfigType: 'last',
+      dateSettingType: DateSettingType.DYNAMIC,
+      shortCutId: `last${number}${shortCutIdType[dateRangeType]}`,
+      number,
+      periodType: dateRangeType,
+    },
+  };
+};
 
 export const SHORT_CUT_ITEM_LIST = [
   {

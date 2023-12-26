@@ -16,12 +16,19 @@ import DimensionAndMetricRelationModal from '../../components/DimensionAndMetric
 import TrendChart from '@/pages/SemanticModel/Metric/components/MetricTrend';
 import MetricTrendDimensionFilterContainer from './MetricTrendDimensionFilterContainer';
 import MDatePicker from '@/components/MDatePicker';
-import { DateRangeType, DateSettingType } from '@/components/MDatePicker/type';
+import {
+  DateRangeType,
+  DateSettingType,
+  DynamicAdvancedConfigType,
+  DatePeriodType,
+} from '@/components/MDatePicker/type';
+import { getDatePickerDynamicInitialValues } from '@/components/MDatePicker/utils';
 import StandardFormRow from '@/components/StandardFormRow';
 import MetricTable from './Table';
 import { ColumnConfig } from '../data';
 import dayjs from 'dayjs';
 import { ISemantic } from '../../data';
+import { DateFieldMap } from '@/pages/SemanticModel/constant';
 
 const FormItem = Form.Item;
 const { Option } = Select;
@@ -32,11 +39,6 @@ type Props = {
 };
 
 const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
-  const dateFieldMap = {
-    [DateRangeType.DAY]: 'sys_imp_date',
-    [DateRangeType.WEEK]: 'sys_imp_week',
-    [DateRangeType.MONTH]: 'sys_imp_month',
-  };
   const indicatorFields = useRef<{ name: string; column: string }[]>([]);
   const [metricTrendData, setMetricTrendData] = useState<ISemantic.IMetricTrendItem[]>([]);
   const [metricTrendLoading, setMetricTrendLoading] = useState<boolean>(false);
@@ -61,7 +63,7 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
   }>({
     startDate: dayjs().subtract(6, 'days').format('YYYY-MM-DD'),
     endDate: dayjs().format('YYYY-MM-DD'),
-    dateField: dateFieldMap[DateRangeType.DAY],
+    dateField: DateFieldMap[DateRangeType.DAY],
   });
   const [rowNumber, setRowNumber] = useState<number>(5);
   const [chartType, setChartType] = useState<'chart' | 'table'>('chart');
@@ -209,30 +211,17 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
               <StandardFormRow key="metricDate" title="日期区间:">
                 <FormItem name="metricDate">
                   <MDatePicker
-                    initialValues={{
-                      dateSettingType: 'DYNAMIC',
-                      dynamicParams: {
-                        number: 7,
-                        periodType: 'DAYS',
-                        includesCurrentPeriod: true,
-                        shortCutId: 'last7Days',
-                        dateRangeType: 'DAY',
-                        dynamicAdvancedConfigType: 'last',
-                        dateRangeStringDesc: '最近7天',
-                        dateSettingType: DateSettingType.DYNAMIC,
-                      },
-                      staticParams: {},
-                    }}
+                    initialValues={getDatePickerDynamicInitialValues(7, DateRangeType.DAY)}
                     showCurrentDataRangeString={false}
                     onDateRangeChange={(value, config) => {
                       const [startDate, endDate] = value;
                       const { dateSettingType, dynamicParams, staticParams } = config;
-                      let dateField = dateFieldMap[DateRangeType.DAY];
+                      let dateField = DateFieldMap[DateRangeType.DAY];
                       if (DateSettingType.DYNAMIC === dateSettingType) {
-                        dateField = dateFieldMap[dynamicParams.dateRangeType];
+                        dateField = DateFieldMap[dynamicParams.dateRangeType];
                       }
                       if (DateSettingType.STATIC === dateSettingType) {
-                        dateField = dateFieldMap[staticParams.dateRangeType];
+                        dateField = DateFieldMap[staticParams.dateRangeType];
                       }
                       setPeriodDate({ startDate, endDate, dateField });
                     }}

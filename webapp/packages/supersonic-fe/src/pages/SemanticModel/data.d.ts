@@ -140,8 +140,10 @@ export declare namespace ISemantic {
     fullPath: string;
     datasourceId: number;
     modelId: number;
+    modelName: string;
     datasourceName: string;
     datasourceBizName: string;
+    commonDimensionId: number;
     semanticType: string;
     alias: string;
     useCnt: number;

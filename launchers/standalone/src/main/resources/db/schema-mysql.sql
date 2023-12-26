@@ -157,19 +157,21 @@ CREATE TABLE `s2_chat_parse` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-CREATE TABLE `s2_chat_query` (
-                                 `question_id` bigint(20) NOT NULL AUTO_INCREMENT,
-                                 `agent_id` int(11) DEFAULT NULL,
-                                 `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                 `query_text` mediumtext,
-                                 `user_name` varchar(150) DEFAULT NULL,
-                                 `query_state` int(1) DEFAULT NULL,
-                                 `chat_id` bigint(20) NOT NULL,
-                                 `query_result` mediumtext,
-                                 `score` int(11) DEFAULT '0',
-                                 `feedback` varchar(1024) DEFAULT '',
-                                 PRIMARY KEY (`question_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE `s2_chat_query`
+(
+    `question_id`     bigint(20) NOT NULL AUTO_INCREMENT,
+    `agent_id`        int(11)             DEFAULT NULL,
+    `create_time`     timestamp  NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `query_text`      mediumtext,
+    `user_name`       varchar(150)        DEFAULT NULL,
+    `query_state`     int(1)              DEFAULT NULL,
+    `chat_id`         bigint(20) NOT NULL,
+    `query_result`    mediumtext,
+    `score`           int(11)             DEFAULT '0',
+    `feedback`        varchar(1024)       DEFAULT '',
+    `similar_queries` varchar(1024)       DEFAULT '',
+    PRIMARY KEY (`question_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
 
 CREATE TABLE `s2_chat_statistics` (
@@ -199,38 +201,6 @@ CREATE TABLE `s2_database` (
                                `viewer` varchar(500) DEFAULT NULL,
                                PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='数据库实例表';
-
-CREATE TABLE `s2_datasource` (
-                                 `id` bigint(20) NOT NULL AUTO_INCREMENT,
-                                 `model_id` bigint(20) DEFAULT NULL,
-                                 `name` varchar(255) NOT NULL COMMENT '数据源名称',
-                                 `biz_name` varchar(255) NOT NULL COMMENT '内部名称',
-                                 `agg_time` varchar(32) DEFAULT 'day',
-                                 `description` varchar(500) DEFAULT NULL COMMENT '数据源描述',
-                                 `database_id` bigint(20) NOT NULL COMMENT '数据库实例ID',
-                                 `datasource_detail` mediumtext NOT NULL COMMENT '数据源配置',
-                                 `status` int(11) DEFAULT NULL ,
-                                 `depends` text DEFAULT NULL COMMENT '上游依赖标识',
-                                 `filter_sql` varchar(1000) DEFAULT NULL ,
-                                 `created_at` datetime NOT NULL COMMENT '创建时间',
-                                 `created_by` varchar(100) NOT NULL COMMENT '创建人',
-                                 `updated_at` datetime NOT NULL COMMENT '更新时间',
-                                 `updated_by` varchar(100) NOT NULL COMMENT '更新人',
-                                 PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE `s2_datasource_rela` (
-                                      `id` bigint(20) NOT NULL AUTO_INCREMENT,
-                                      `model_id` bigint(20) DEFAULT NULL,
-                                      `datasource_from` bigint(20) DEFAULT NULL,
-                                      `datasource_to` bigint(20) DEFAULT NULL,
-                                      `join_key` varchar(100) DEFAULT NULL,
-                                      `created_at` datetime DEFAULT NULL,
-                                      `created_by` varchar(100) DEFAULT NULL,
-                                      `updated_at` datetime DEFAULT NULL,
-                                      `updated_by` varchar(100) DEFAULT NULL,
-                                      PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `s2_dictionary` (
                                  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -328,6 +298,7 @@ CREATE TABLE `s2_metric` (
                              `alias` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
                              `tags` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
                              `relate_dimensions` varchar(500) DEFAULT NULL COMMENT '指标相关维度',
+                             `ext` text DEFAULT NULL  ,
                              PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='指标表';
 
@@ -353,6 +324,7 @@ CREATE TABLE `s2_model` (
                             `drill_down_dimensions` varchar(500) DEFAULT NULL,
                             `database_id` INT NOT  NULL ,
                             `model_detail` text NOT  NULL ,
+                            `source_type` varchar(128) DEFAULT NULL ,
                             `depends` varchar(500) DEFAULT NULL ,
                             `filter_sql` varchar(1000) DEFAULT NULL ,
                             PRIMARY KEY (`id`)
@@ -475,6 +447,7 @@ CREATE TABLE `s2_materialization`
     `description`       mediumtext COMMENT '备注说明',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
 CREATE TABLE `s2_materialization_element`
 (
     `id`                 bigint(20) NOT NULL COMMENT 'element类型对应id',
@@ -493,6 +466,7 @@ CREATE TABLE `s2_materialization_element`
     `status`             int(11) NOT NULL DEFAULT '1' COMMENT '0-废弃，1-使用中',
     PRIMARY KEY (`id`, `type`, `materialization_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE `s2_materialization_record`
 (
     `id`                 bigint(11) NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -533,11 +507,38 @@ CREATE TABLE s2_model_rela
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `s2_collect` (
-    `id` bigint NOT NULL AUTO_INCREMENT,
+    `id` bigint NOT NULL primary key AUTO_INCREMENT,
     `type` varchar(20) NOT NULL,
     `username` varchar(20) NOT NULL,
     `collect_id` bigint NOT NULL,
     `create_time` datetime,
-    `update_time` datetime,
-    PRIMARY KEY (`id`)
+    `update_time` datetime
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `s2_metric_query_default_config` (
+    `id` bigint NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `metric_id` bigint,
+    `user_name` varchar(255) NOT NULL,
+    `default_config` varchar(1000) NOT NULL,
+    `created_at` datetime null,
+    `updated_at` datetime null,
+    `created_by` varchar(100) null,
+    `updated_by` varchar(100) null
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `s2_app`
+(
+    id          bigint primary key AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(255),
+    description VARCHAR(255),
+    status      INT,
+    config      TEXT,
+    end_date    TIMESTAMP,
+    qps         INT,
+    app_secret  VARCHAR(255),
+    owner       VARCHAR(255),
+    created_at  TIMESTAMP,
+    created_by  VARCHAR(255),
+    updated_at  TIMESTAMP,
+    updated_by  VARCHAR(255)
+);

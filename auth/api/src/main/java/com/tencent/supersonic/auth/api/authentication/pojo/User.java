@@ -28,6 +28,11 @@ public class User {
         return new User(1L, "admin", "admin", "admin@email", 1);
     }
 
+    public static User getAppUser(int appId) {
+        String name = String.format("app_%s", appId);
+        return new User(1L, name, name, "", 1);
+    }
+
     public String getDisplayName() {
         return StringUtils.isBlank(displayName) ? name : displayName;
     }

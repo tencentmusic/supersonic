@@ -6,13 +6,19 @@ import SqlEditor from '@/components/SqlEditor';
 import InfoTagList from './InfoTagList';
 import { ISemantic } from '../data';
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { createDimension, updateDimension, mockDimensionAlias } from '../service';
+import {
+  createDimension,
+  updateDimension,
+  mockDimensionAlias,
+  getCommonDimensionList,
+} from '../service';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 
 import { message } from 'antd';
 
 export type CreateFormProps = {
   modelId: number;
+  domainId: number;
   dimensionItem?: ISemantic.IDimensionItem;
   onCancel: () => void;
   bindModalVisible: boolean;
@@ -26,6 +32,7 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 const DimensionInfoModal: React.FC<CreateFormProps> = ({
+  domainId,
   modelId,
   onCancel,
   bindModalVisible,
@@ -40,6 +47,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
   const [form] = Form.useForm();
   const { setFieldsValue, resetFields } = form;
   const [llmLoading, setLlmLoading] = useState<boolean>(false);
+  const [commonDimensionOptions, setCommonDimensionOptions] = useState([]);
 
   const handleSubmit = async (
     isSilenceSubmit = false,
@@ -54,6 +62,26 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
       },
       isSilenceSubmit,
     );
+  };
+
+  useEffect(() => {
+    queryCommonDimensionList();
+  }, [domainId]);
+
+  const queryCommonDimensionList = async () => {
+    const { code, data, msg } = await getCommonDimensionList(domainId);
+    // const { list, pageSize, pageNum, total } = data || {};
+    if (code === 200) {
+      const options = data.map((item) => {
+        return {
+          value: item.id,
+          label: item.name,
+        };
+      });
+      setCommonDimensionOptions(options);
+    } else {
+      message.error(msg);
+    }
   };
 
   const saveDimension = async (fieldsValue: any, isSilenceSubmit = false) => {
@@ -214,6 +242,9 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
               </Option>
             ))}
           </Select>
+        </FormItem>
+        <FormItem name="commonDimensionId" label="公共维度">
+          <Select placeholder="请绑定公共维度" allowClear options={commonDimensionOptions} />
         </FormItem>
         <FormItem name="defaultValues" label="默认值">
           <InfoTagList />

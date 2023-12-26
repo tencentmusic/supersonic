@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * match strategy
+ * MatchStrategy encapsulates a concrete matching algorithm
+ * executed during query or search process.
  */
 public interface MatchStrategy<T> {
 

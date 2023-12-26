@@ -2,7 +2,6 @@ package com.tencent.supersonic.chat.parser.plugin.embedding;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
-import com.tencent.supersonic.chat.parser.LLMProxy;
 import com.tencent.supersonic.chat.parser.PythonLLMProxy;
 import com.tencent.supersonic.chat.parser.plugin.ParseMode;
 import com.tencent.supersonic.chat.parser.plugin.PluginParser;
@@ -14,25 +13,27 @@ import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * EmbeddingRecallParser is an implementation of a recall plugin based on Embedding
+ */
 @Slf4j
 public class EmbeddingRecallParser extends PluginParser {
-
-    protected LLMProxy llmInterpreter = ComponentFactory.getLLMProxy();
 
     @Override
     public boolean checkPreCondition(QueryContext queryContext) {
         EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
-        if (StringUtils.isBlank(embeddingConfig.getUrl()) && llmInterpreter instanceof PythonLLMProxy) {
+        if (StringUtils.isBlank(embeddingConfig.getUrl()) && ComponentFactory.getLLMProxy() instanceof PythonLLMProxy) {
             return false;
         }
         List<Plugin> plugins = getPluginList(queryContext);

@@ -9,7 +9,6 @@ import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
-import com.tencent.supersonic.chat.api.pojo.response.SolvedQueryRecallResp;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.persistence.dataobject.ChatQueryDO;
@@ -29,8 +28,6 @@ public interface ChatService {
 
     void updateContext(ChatContext chatCtx);
 
-    void switchContext(ChatContext chatCtx);
-
     Boolean addChat(User user, String chatName, Integer agentId);
 
     List<ChatDO> getAll(String userName, Integer agentId);
@@ -45,23 +42,19 @@ public interface ChatService {
 
     PageInfo<QueryResp> queryInfo(PageQueryInfoReq pageQueryInfoCommend, long chatId);
 
+    QueryResp getChatQuery(Long queryId);
+
     ShowCaseResp queryShowCase(PageQueryInfoReq pageQueryInfoCommend, int agentId);
 
-    void addQuery(QueryResult queryResult, ChatContext chatCtx);
-
     List<ChatParseDO> batchAddParse(ChatContext chatCtx, QueryReq queryReq, ParseResp parseResult);
-
-    void updateChatParse(List<ChatParseDO> chatParseDOS);
 
     ChatQueryDO getLastQuery(long chatId);
 
     int updateQuery(ChatQueryDO chatQueryDO);
 
-    Boolean updateQuery(Long questionId, QueryResult queryResult, ChatContext chatCtx);
+    void updateQuery(Long questionId, int parseId, QueryResult queryResult, ChatContext chatCtx);
 
     ChatParseDO getParseInfo(Long questionId, int parseId);
 
     Boolean deleteChatQuery(Long questionId);
-
-    List<SolvedQueryRecallResp> getSolvedQuery(String queryText, Integer agentId);
 }

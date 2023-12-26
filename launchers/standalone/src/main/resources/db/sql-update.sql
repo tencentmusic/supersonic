@@ -117,3 +117,50 @@ CREATE TABLE s2_model_rela
 
 alter table s2_view_info change model_id domain_id bigint;
 alter table s2_dimension drop column datasource_id;
+
+-- 20231211
+CREATE TABLE `s2_collect`
+(
+    `id`          bigint      NOT NULL primary key AUTO_INCREMENT,
+    `type`        varchar(20) NOT NULL,
+    `username`    varchar(20) NOT NULL,
+    `collect_id`  bigint      NOT NULL,
+    `create_time` datetime,
+    `update_time` datetime
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+alter table s2_metric add column `ext` text DEFAULT NULL;
+
+CREATE TABLE `s2_metric_query_default_config`
+(
+    `id`             bigint  NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `metric_id`      bigint,
+    `user_name`      varchar(255)  NOT NULL,
+    `default_config` varchar(1000) NOT NULL,
+    `created_at`     datetime null,
+    `updated_at`     datetime null,
+    `created_by`     varchar(100) null,
+    `updated_by`     varchar(100) null
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--20231214
+alter table s2_chat_query add column `similar_queries` varchar(1024) DEFAULT '';
+alter table s2_model add column `source_type` varchar(128) DEFAULT NULL;
+
+
+CREATE TABLE `s2_app`
+(
+    id          bigint primary key AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(255),
+    description VARCHAR(255),
+    status      INT,
+    config      TEXT,
+    end_date    TIMESTAMP,
+    qps         INT,
+    app_secret  VARCHAR(255),
+    owner       VARCHAR(255),
+    created_at  TIMESTAMP,
+    created_by  VARCHAR(255),
+    updated_at  TIMESTAMP,
+    updated_by  VARCHAR(255)
+);

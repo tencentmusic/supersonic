@@ -2,7 +2,6 @@ package com.tencent.supersonic.chat.parser.plugin.function;
 
 import com.tencent.supersonic.chat.api.pojo.QueryContext;
 import com.tencent.supersonic.chat.parser.PythonLLMProxy;
-import com.tencent.supersonic.chat.parser.LLMProxy;
 import com.tencent.supersonic.chat.parser.plugin.ParseMode;
 import com.tencent.supersonic.chat.parser.plugin.PluginParser;
 import com.tencent.supersonic.chat.plugin.Plugin;
@@ -14,26 +13,28 @@ import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * FunctionCallParser is an implementation of a recall plugin based on FunctionCall
+ */
 @Slf4j
 public class FunctionCallParser extends PluginParser {
-
-    protected LLMProxy llmInterpreter = ComponentFactory.getLLMProxy();
 
     @Override
     public boolean checkPreCondition(QueryContext queryContext) {
         FunctionCallConfig functionCallConfig = ContextUtils.getBean(FunctionCallConfig.class);
         String functionUrl = functionCallConfig.getUrl();
-        if (StringUtils.isBlank(functionUrl) && llmInterpreter instanceof PythonLLMProxy) {
+        if (StringUtils.isBlank(functionUrl) && ComponentFactory.getLLMProxy() instanceof PythonLLMProxy) {
             log.info("functionUrl:{}, skip function parser, queryText:{}", functionUrl,
                     queryContext.getRequest().getQueryText());
             return false;
@@ -84,7 +85,7 @@ public class FunctionCallParser extends PluginParser {
             FunctionReq functionReq = FunctionReq.builder()
                     .queryText(queryContext.getRequest().getQueryText())
                     .pluginConfigs(pluginToFunctionCall).build();
-            functionResp = llmInterpreter.requestFunction(functionReq);
+            functionResp = ComponentFactory.getLLMProxy().requestFunction(functionReq);
         }
         return functionResp;
     }

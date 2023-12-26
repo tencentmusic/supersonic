@@ -9,16 +9,20 @@ set "main_class=com.tencent.supersonic.StandaloneLauncher"
 set "python_path=python"
 set "pip_path=pip3"
 set "standalone_service=standalone"
-set "llmparser_service=llmparser"
+set "pyllm_service=pyllm"
 
 set "javaRunDir=%runtimeDir%\supersonic-standalone"
-set "pythonRunDir=%runtimeDir%\supersonic-standalone\llmparser"
+set "pythonRunDir=%runtimeDir%\supersonic-standalone\pyllm"
 
 set "command=%~1"
 set "service=%~2"
 
 if "%service%"=="" (
    set "service=%standalone_service%"
+)
+
+IF "%service%"=="pyllm" (
+  SET "llmProxy=PythonLLMProxy"
 )
 
 call :BUILD_RUNTIME
@@ -42,27 +46,23 @@ if "%command%"=="restart" (
 )
 
 :START
-    if "%service%"=="%llmparser_service%" (
+    if "%service%"=="%pyllm_service%" (
          call :START_PYTHON
+         call :START_JAVA
          goto :EOF
     )
-    call :START_PYTHON
     call :START_JAVA
     goto :EOF
 
 :STOP
-    if "%service%"=="%llmparser_service%" (
-        call :STOP_PYTHON
-        goto :EOF
-    )
     call :STOP_PYTHON
     call :STOP_JAVA
     goto :EOF
 
 :START_PYTHON
-   echo 'python service starting, see logs in llmparser/llmparser.log'
+   echo 'python service starting, see logs in pyllm/pyllm.log'
    cd "%pythonRunDir%"
-   start /B %python_path% supersonic_llmparser.py  > %pythonRunDir%\llmparser.log 2>&1
+   start /B %python_path% supersonic_pyllm.py  > %pythonRunDir%\pyllm.log 2>&1
    timeout /t 10 >nul
    echo 'python service started'
    goto :EOF
@@ -71,9 +71,9 @@ if "%command%"=="restart" (
   echo 'java service starting, see logs in logs/'
    cd "%javaRunDir%"
    if not exist "%runtimeDir%\supersonic-standalone\logs" mkdir "%runtimeDir%\supersonic-standalone\logs"
-   set "libDir=%runtimeDir%\supersonic-%service%\lib"
-   set "confDir=%runtimeDir%\supersonic-%service%\conf"
-   set "webDir=%runtimeDir%\supersonic-%service%\webapp"
+   set "libDir=%runtimeDir%\supersonic-standalone\lib"
+   set "confDir=%runtimeDir%\supersonic-standalone\conf"
+   set "webDir=%runtimeDir%\supersonic-standalone\webapp"
    set "classpath=%confDir%;%webDir%;%libDir%\*"
    set "java-command=-Dfile.encoding=UTF-8 -Duser.language=Zh -Duser.region=CN -Duser.timezone=GMT+08 -Xms1024m -Xmx2048m -cp %CLASSPATH% %MAIN_CLASS%"
    start /B java %java-command% >nul 2>&1
@@ -96,7 +96,7 @@ if "%command%"=="restart" (
    goto :EOF
 
 :RELOAD_EXAMPLE
-   cd "%runtimeDir%\supersonic-standalone\llmparser\sql"
+   cd "%runtimeDir%\supersonic-standalone\pyllm\sql"
    start  %python_path% examples_reload_run.py
    goto :EOF
 

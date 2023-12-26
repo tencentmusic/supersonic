@@ -387,4 +387,14 @@ class SqlParserAddHelperTest {
                 replaceSql);
     }
 
+    @Test
+    void addFieldsToSelect() {
+        String correctS2SQL = "SELECT 用户, 页面  FROM 超音数用户部门 GROUP BY 用户, 页面 ORDER BY count(*) DESC";
+        String replaceFields = SqlParserAddHelper.addFieldsToSelect(correctS2SQL,
+                SqlParserSelectHelper.getOrderByFields(correctS2SQL));
+
+        Assert.assertEquals(
+                "SELECT 用户, 页面 FROM 超音数用户部门 GROUP BY 用户, 页面 ORDER BY count(*) DESC", replaceFields);
+    }
+
 }

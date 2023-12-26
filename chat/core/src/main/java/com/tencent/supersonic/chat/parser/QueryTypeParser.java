@@ -12,7 +12,8 @@ import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.chat.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.chat.service.SemanticService;
-import com.tencent.supersonic.common.pojo.QueryType;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.knowledge.service.SchemaService;
@@ -26,7 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * QueryTypeParser resolves query type as either METRIC or TAG, or OTHER.
+ * QueryTypeParser resolves query type as either METRIC or TAG, or ID.
  */
 @Slf4j
 public class QueryTypeParser implements SemanticParser {
@@ -50,19 +51,26 @@ public class QueryTypeParser implements SemanticParser {
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
         if (Objects.isNull(sqlInfo) || StringUtils.isBlank(sqlInfo.getS2SQL())) {
-            return QueryType.OTHER;
+            return QueryType.ID;
         }
         //1. entity queryType
         Set<Long> modelIds = parseInfo.getModel().getModelIds();
         if (semanticQuery instanceof RuleSemanticQuery || semanticQuery instanceof LLMSqlQuery) {
             //If all the fields in the SELECT statement are of tag type.
-            List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getS2SQL());
+            List<String> whereFields = SqlParserSelectHelper.getWhereFields(sqlInfo.getS2SQL())
+                    .stream().filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
+                    .collect(Collectors.toList());
             SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
             SemanticSchema semanticSchema = semanticService.getSemanticSchema();
-            if (CollectionUtils.isNotEmpty(selectFields)) {
+            if (CollectionUtils.isNotEmpty(whereFields)) {
+                Set<String> ids = semanticSchema.getEntities(modelIds).stream().map(SchemaElement::getName)
+                        .collect(Collectors.toSet());
+                if (CollectionUtils.isNotEmpty(ids) && ids.stream().anyMatch(whereFields::contains)) {
+                    return QueryType.ID;
+                }
                 Set<String> tags = semanticSchema.getTags(modelIds).stream().map(SchemaElement::getName)
                         .collect(Collectors.toSet());
-                if (CollectionUtils.isNotEmpty(tags) && tags.containsAll(selectFields)) {
+                if (CollectionUtils.isNotEmpty(tags) && tags.containsAll(whereFields)) {
                     return QueryType.TAG;
                 }
             }
@@ -78,7 +86,7 @@ public class QueryTypeParser implements SemanticParser {
                 return QueryType.METRIC;
             }
         }
-        return QueryType.OTHER;
+        return QueryType.ID;
     }
 
 }

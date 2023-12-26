@@ -1,6 +1,6 @@
 import { Popover, message, Space } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { connect, Helmet, history, useParams } from 'umi';
+import { connect, history, useParams } from 'umi';
 import DomainListTree from './components/DomainList';
 
 import styles from './components/style.less';
@@ -199,7 +199,6 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
 
   return (
     <div className={styles.projectBody}>
-      <Helmet title={'语义模型-超音数'} />
       <div className={styles.projectManger}>
         <div className={`${styles.sider} ${!collapsedState ? styles.siderCollapsed : ''}`}>
           <div className={styles.treeContainer}>
