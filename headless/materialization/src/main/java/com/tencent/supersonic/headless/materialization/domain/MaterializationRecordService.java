@@ -1,11 +1,11 @@
 package com.tencent.supersonic.headless.materialization.domain;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.api.materialization.pojo.MaterializationDateFilter;
-import com.tencent.supersonic.headless.api.materialization.pojo.MaterializationRecordFilter;
-import com.tencent.supersonic.headless.api.materialization.request.MaterializationRecordReq;
-import com.tencent.supersonic.headless.api.materialization.response.MaterializationDateResp;
-import com.tencent.supersonic.headless.api.materialization.response.MaterializationRecordResp;
+import com.tencent.supersonic.headless.common.materialization.pojo.MaterializationDateFilter;
+import com.tencent.supersonic.headless.common.materialization.pojo.MaterializationRecordFilter;
+import com.tencent.supersonic.headless.common.materialization.request.MaterializationRecordReq;
+import com.tencent.supersonic.headless.common.materialization.response.MaterializationDateResp;
+import com.tencent.supersonic.headless.common.materialization.response.MaterializationRecordResp;
 import java.util.List;
 
 public interface MaterializationRecordService {

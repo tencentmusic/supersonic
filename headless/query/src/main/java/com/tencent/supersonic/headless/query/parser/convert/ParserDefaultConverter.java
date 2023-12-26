@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.query.parser.convert;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
-import com.tencent.supersonic.headless.api.query.pojo.Param;
-import com.tencent.supersonic.headless.api.query.request.MetricReq;
-import com.tencent.supersonic.headless.api.query.request.QueryStructReq;
+import com.tencent.supersonic.headless.common.query.pojo.Param;
+import com.tencent.supersonic.headless.common.query.request.MetricReq;
+import com.tencent.supersonic.headless.common.query.request.QueryStructReq;
 import com.tencent.supersonic.headless.model.domain.Catalog;
 import com.tencent.supersonic.headless.query.parser.HeadlessConverter;
 import com.tencent.supersonic.headless.query.persistence.pojo.QueryStatement;

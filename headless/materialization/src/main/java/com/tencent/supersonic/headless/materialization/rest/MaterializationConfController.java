@@ -2,12 +2,12 @@ package com.tencent.supersonic.headless.materialization.rest;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.headless.api.materialization.pojo.MaterializationConfFilter;
-import com.tencent.supersonic.headless.api.materialization.pojo.MaterializationFilter;
-import com.tencent.supersonic.headless.api.materialization.request.MaterializationElementReq;
-import com.tencent.supersonic.headless.api.materialization.request.MaterializationReq;
-import com.tencent.supersonic.headless.api.materialization.response.MaterializationResp;
-import com.tencent.supersonic.headless.api.materialization.response.MaterializationSourceResp;
+import com.tencent.supersonic.headless.common.materialization.pojo.MaterializationConfFilter;
+import com.tencent.supersonic.headless.common.materialization.pojo.MaterializationFilter;
+import com.tencent.supersonic.headless.common.materialization.request.MaterializationElementReq;
+import com.tencent.supersonic.headless.common.materialization.request.MaterializationReq;
+import com.tencent.supersonic.headless.common.materialization.response.MaterializationResp;
+import com.tencent.supersonic.headless.common.materialization.response.MaterializationSourceResp;
 import com.tencent.supersonic.headless.materialization.domain.MaterializationConfService;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;

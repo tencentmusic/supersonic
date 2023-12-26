@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.query.persistence.pojo;
 
-import com.tencent.supersonic.headless.api.query.request.MetricReq;
-import com.tencent.supersonic.headless.api.query.request.ParseSqlReq;
-import com.tencent.supersonic.headless.api.query.request.QueryStructReq;
+import com.tencent.supersonic.headless.common.query.request.MetricReq;
+import com.tencent.supersonic.headless.common.query.request.ParseSqlReq;
+import com.tencent.supersonic.headless.common.query.request.QueryStructReq;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 

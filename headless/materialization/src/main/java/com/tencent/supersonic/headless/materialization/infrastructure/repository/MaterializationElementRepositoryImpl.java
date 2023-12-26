@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.materialization.infrastructure.repository;
 
-import com.tencent.supersonic.headless.api.materialization.pojo.MaterializationConfFilter;
-import com.tencent.supersonic.headless.api.materialization.response.MaterializationElementResp;
+import com.tencent.supersonic.headless.common.materialization.pojo.MaterializationConfFilter;
+import com.tencent.supersonic.headless.common.materialization.response.MaterializationElementResp;
 import com.tencent.supersonic.headless.materialization.infrastructure.mapper.MaterializationElementDOMapper;
 import com.tencent.supersonic.headless.materialization.domain.dataobject.MaterializationElementDOExample;
 import com.tencent.supersonic.headless.materialization.domain.dataobject.MaterializationElementDOKey;

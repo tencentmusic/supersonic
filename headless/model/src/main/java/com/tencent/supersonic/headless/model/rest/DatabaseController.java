@@ -2,10 +2,10 @@ package com.tencent.supersonic.headless.model.rest;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.headless.api.model.request.DatabaseReq;
-import com.tencent.supersonic.headless.api.model.request.SqlExecuteReq;
-import com.tencent.supersonic.headless.api.model.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.common.model.request.DatabaseReq;
+import com.tencent.supersonic.headless.common.model.request.SqlExecuteReq;
+import com.tencent.supersonic.headless.common.model.response.DatabaseResp;
+import com.tencent.supersonic.headless.common.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.headless.model.domain.DatabaseService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

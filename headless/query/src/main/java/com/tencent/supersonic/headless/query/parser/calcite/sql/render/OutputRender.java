@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.query.parser.calcite.sql.render;
 
 
-import com.tencent.supersonic.headless.api.query.request.MetricReq;
+import com.tencent.supersonic.headless.common.query.request.MetricReq;
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.headless.query.parser.calcite.sql.node.SemanticNode;
 import com.tencent.supersonic.headless.query.parser.calcite.sql.Renderer;

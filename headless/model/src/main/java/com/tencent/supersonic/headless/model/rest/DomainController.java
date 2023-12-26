@@ -2,9 +2,9 @@ package com.tencent.supersonic.headless.model.rest;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.headless.api.model.request.DomainReq;
-import com.tencent.supersonic.headless.api.model.request.DomainUpdateReq;
-import com.tencent.supersonic.headless.api.model.response.DomainResp;
+import com.tencent.supersonic.headless.common.model.request.DomainReq;
+import com.tencent.supersonic.headless.common.model.request.DomainUpdateReq;
+import com.tencent.supersonic.headless.common.model.response.DomainResp;
 import com.tencent.supersonic.headless.model.domain.DomainService;
 
 import java.util.Arrays;

@@ -1,14 +1,14 @@
 package com.tencent.supersonic.headless.materialization.domain;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.api.materialization.pojo.MaterializationConfFilter;
-import com.tencent.supersonic.headless.api.materialization.pojo.MaterializationFilter;
-import com.tencent.supersonic.headless.api.materialization.request.MaterializationElementReq;
-import com.tencent.supersonic.headless.api.materialization.request.MaterializationReq;
-import com.tencent.supersonic.headless.api.materialization.response.MaterializationElementModelResp;
-import com.tencent.supersonic.headless.api.materialization.response.MaterializationResp;
-import com.tencent.supersonic.headless.api.materialization.response.MaterializationSourceResp;
-import com.tencent.supersonic.headless.api.model.response.MeasureResp;
+import com.tencent.supersonic.headless.common.materialization.pojo.MaterializationConfFilter;
+import com.tencent.supersonic.headless.common.materialization.pojo.MaterializationFilter;
+import com.tencent.supersonic.headless.common.materialization.request.MaterializationElementReq;
+import com.tencent.supersonic.headless.common.materialization.request.MaterializationReq;
+import com.tencent.supersonic.headless.common.materialization.response.MaterializationElementModelResp;
+import com.tencent.supersonic.headless.common.materialization.response.MaterializationResp;
+import com.tencent.supersonic.headless.common.materialization.response.MaterializationSourceResp;
+import com.tencent.supersonic.headless.common.model.response.MeasureResp;
 import java.util.List;
 
 public interface MaterializationConfService {

@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.model.domain.manager;
 
-import com.tencent.supersonic.headless.api.model.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.common.model.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.model.domain.pojo.Metric;
 import com.tencent.supersonic.headless.model.domain.utils.MetricConverter;
 import java.util.ArrayList;

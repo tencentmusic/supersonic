@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.model.domain;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.api.model.request.DatabaseReq;
-import com.tencent.supersonic.headless.api.model.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.common.model.request.DatabaseReq;
+import com.tencent.supersonic.headless.common.model.response.DatabaseResp;
+import com.tencent.supersonic.headless.common.model.response.QueryResultWithSchemaResp;
 import java.util.List;
 
 
