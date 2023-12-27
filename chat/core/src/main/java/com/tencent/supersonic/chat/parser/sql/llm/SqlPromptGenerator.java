@@ -107,7 +107,7 @@ public class SqlPromptGenerator {
         for (ElementValue priorLinking : linking) {
             String fieldName = priorLinking.getFieldName();
             String fieldValue = priorLinking.getFieldValue();
-            priorLinkingList.add("'" + fieldValue + "'是一个'" + fieldName + "'");
+            priorLinkingList.add("‘" + fieldValue + "‘是一个‘" + fieldName + "‘");
         }
         String currentDataStr = "当前的日期是" + currentDate;
         String linkingListStr = String.join("，", priorLinkingList);
