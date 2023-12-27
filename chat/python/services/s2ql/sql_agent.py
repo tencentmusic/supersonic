@@ -245,6 +245,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             resp['model'] = model_name
             resp['fields'] = fields_list
             resp['priorSchemaLinking'] = prior_schema_links
+            resp['priorExts'] = prior_exts
             resp['currentDate'] = current_date
 
             resp['schemaLinkingOutput'] = schema_link_output
@@ -281,6 +282,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             resp['model'] = model_name
             resp['fields'] = fields_list
             resp['priorSchemaLinking'] = prior_schema_links
+            resp['priorExts'] = prior_exts
             resp['currentDate'] = current_date
 
             resp['schemaLinkingComboOutput'] = schema_linking_sql_shortcut_output
@@ -352,6 +354,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             resp['model'] = model_name
             resp['fields'] = fields_list
             resp['priorSchemaLinking'] = prior_schema_links
+            resp['priorExts'] = prior_exts
             resp['currentDate'] = current_date
 
             resp['schemaLinkStr'] = schema_linking_output_max
@@ -394,6 +397,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             resp['model'] = model_name
             resp['fields'] = fields_list
             resp['priorSchemaLinking'] = prior_schema_links
+            resp['priorExts'] = prior_exts
             resp['currentDate'] = current_date
 
             resp['schemaLinkStr'] = schema_linking_output_max
