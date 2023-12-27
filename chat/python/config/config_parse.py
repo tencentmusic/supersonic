@@ -8,8 +8,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from instances.logging_instance import logger
-
 
 def type_convert(input_str: str):
     try:
@@ -26,6 +24,11 @@ config_path = os.path.join(CONFIG_DIR_PATH, config_file)
 
 config = configparser.ConfigParser()
 config.read(config_path)
+
+log_dir = "log"
+LOG_DIR_PATH = os.path.join(PROJECT_DIR_PATH, log_dir)
+log_file = "run.log"
+LOG_FILE_PATH = os.path.join(LOG_DIR_PATH, log_file)
 
 llm_parser_section_name = "LLMParser"
 LLMPARSER_HOST = config.get(llm_parser_section_name, 'LLMPARSER_HOST')
@@ -57,21 +60,22 @@ for option in config.options(llm_model_section_name):
 
 
 if __name__ == "__main__":
-    logger.info(f"PROJECT_DIR_PATH: {PROJECT_DIR_PATH}")
-    logger.info(f"EMB_MODEL_PATH: {HF_TEXT2VEC_MODEL_NAME}")
-    logger.info(f"CHROMA_DB_PERSIST_PATH: {CHROMA_DB_PERSIST_PATH}")
-    logger.info(f"LLMPARSER_HOST: {LLMPARSER_HOST}")
-    logger.info(f"LLMPARSER_PORT: {LLMPARSER_PORT}")
-    logger.info(f"llm_config_dict: {llm_config_dict}")
-    logger.info(f"LLM_PROVIDER_NAME: {LLM_PROVIDER_NAME}")
-    logger.info(f"PRESET_QUERY_COLLECTION_NAME: {PRESET_QUERY_COLLECTION_NAME}")
-    logger.info(f"SOLVED_QUERY_COLLECTION_NAME: {SOLVED_QUERY_COLLECTION_NAME}")
-    logger.info(f"TEXT2DSLAGENT_COLLECTION_NAME: {TEXT2DSLAGENT_COLLECTION_NAME}")
-    logger.info(f"TEXT2DSLAGENTACT_COLLECTION_NAME: {TEXT2DSLAGENTACT_COLLECTION_NAME}")
-    logger.info(f"TEXT2DSL_EXAMPLE_NUM: {TEXT2DSL_EXAMPLE_NUM}")
-    logger.info(f"TEXT2DSL_FEWSHOTS_NUM: {TEXT2DSL_FEWSHOTS_NUM}")
-    logger.info(f"TEXT2DSL_SELF_CONSISTENCY_NUM: {TEXT2DSL_SELF_CONSISTENCY_NUM}")
-    logger.info(f"ACT_MIN_WINDOWN_SIZE: {ACT_MIN_WINDOWN_SIZE}")
-    logger.info(f"ACT_MAX_WINDOWN_SIZE: {ACT_MAX_WINDOWN_SIZE}")
+    print(f"PROJECT_DIR_PATH: {PROJECT_DIR_PATH}")
+    print(f"EMB_MODEL_PATH: {HF_TEXT2VEC_MODEL_NAME}")
+    print(f"CHROMA_DB_PERSIST_PATH: {CHROMA_DB_PERSIST_PATH}")
+    print(f"LLMPARSER_HOST: {LLMPARSER_HOST}")
+    print(f"LLMPARSER_PORT: {LLMPARSER_PORT}")
+    print(f"llm_config_dict: {llm_config_dict}")
+    print(f"LLM_PROVIDER_NAME: {LLM_PROVIDER_NAME}")
+    print(f"PRESET_QUERY_COLLECTION_NAME: {PRESET_QUERY_COLLECTION_NAME}")
+    print(f"SOLVED_QUERY_COLLECTION_NAME: {SOLVED_QUERY_COLLECTION_NAME}")
+    print(f"TEXT2DSLAGENT_COLLECTION_NAME: {TEXT2DSLAGENT_COLLECTION_NAME}")
+    print(f"TEXT2DSLAGENTACT_COLLECTION_NAME: {TEXT2DSLAGENTACT_COLLECTION_NAME}")
+    print(f"TEXT2DSL_EXAMPLE_NUM: {TEXT2DSL_EXAMPLE_NUM}")
+    print(f"TEXT2DSL_FEWSHOTS_NUM: {TEXT2DSL_FEWSHOTS_NUM}")
+    print(f"TEXT2DSL_SELF_CONSISTENCY_NUM: {TEXT2DSL_SELF_CONSISTENCY_NUM}")
+    print(f"ACT_MIN_WINDOWN_SIZE: {ACT_MIN_WINDOWN_SIZE}")
+    print(f"ACT_MAX_WINDOWN_SIZE: {ACT_MAX_WINDOWN_SIZE}")
+    print(f"LOG_FILE_PATH: {LOG_FILE_PATH}")
 
     

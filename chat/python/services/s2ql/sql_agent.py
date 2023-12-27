@@ -33,8 +33,27 @@ class Text2DSLAgentBase(object):
     def get_examples_candidates(self, question: str, filter_condition: Mapping[str, str], num_examples: int)->List[Mapping[str, str]]:
         few_shot_example_meta_list = self.sql_example_prompter.retrieve_few_shot_example(question, num_examples, filter_condition)
 
-        return few_shot_example_meta_list
-  
+        if len(few_shot_example_meta_list) == num_examples:
+            return few_shot_example_meta_list
+        elif len(few_shot_example_meta_list) < num_examples:
+            logger.info(f"few_shot_example_meta_list size: {len(few_shot_example_meta_list)} < num_examples: {num_examples}")
+            existed_id_set = set([item['id'] for item in few_shot_example_meta_list])
+            extra_few_shot_example_meta_list = self.sql_example_prompter.retrieve_few_shot_example(query_text=question, retrieval_num=num_examples, filter_condition=None)
+
+            for item in extra_few_shot_example_meta_list:
+                if item['id'] not in existed_id_set:
+                    few_shot_example_meta_list.append(item)
+                    existed_id_set.add(item['id'])
+                if len(few_shot_example_meta_list) == num_examples:
+                        break
+            
+            logger.info(f"few_shot_example_meta_list size: {len(few_shot_example_meta_list)} = num_examples: {num_examples}")
+            return few_shot_example_meta_list
+        else:
+            logger.info(f"few_shot_example_meta_list size: {len(few_shot_example_meta_list)} > num_examples: {num_examples}")
+            few_shot_example_meta_list = few_shot_example_meta_list[:num_examples]
+            return few_shot_example_meta_list
+        
     def get_fewshot_example_combos(self, example_meta_list:List[Mapping[str, str]], num_fewshots:int)-> List[List[Mapping[str, str]]]:
         fewshot_example_list = []
         for i in range(0, self.num_self_consistency):
@@ -124,6 +143,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
 
             schema_linking_prompt = instruction + '\n\n' + schema_linking_fewshot_prompt + '\n\n' + new_case_prompt
 
+            logger.info(f'schema_linking_prompt: {schema_linking_prompt}')
             return schema_linking_prompt
 
 
@@ -153,7 +173,8 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             new_case_prompt = new_case_template.format(dbSchema=db_schema, questionAugmented=question_augmented, schemaLinkings=schema_link_str)
 
             sql_example_prompt = instruction + '\n\n' + sql_example_fewshot_prompt + '\n\n' + new_case_prompt
-
+            
+            logger.info(f'sql_example_prompt: {sql_example_prompt}')
             return sql_example_prompt
         
         def generate_sql_prompt_pool(self, question: str, domain_name: str,fields_list: List[str],
@@ -183,6 +204,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
 
             prompt = instruction + '\n\n' + fewshot_prompt + '\n\n' + new_case_prompt
 
+            logger.info(f'schema_linking_sql_prompt: {prompt}')
             return prompt
 
         def generate_schema_linking_sql_prompt_pool(self, question: str, current_date:str, domain_name: str, fields_list: List[str],
@@ -223,6 +245,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             resp['model'] = model_name
             resp['fields'] = fields_list
             resp['priorSchemaLinking'] = prior_schema_links
+            resp['priorExts'] = prior_exts
             resp['currentDate'] = current_date
 
             resp['schemaLinkingOutput'] = schema_link_output
@@ -259,6 +282,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             resp['model'] = model_name
             resp['fields'] = fields_list
             resp['priorSchemaLinking'] = prior_schema_links
+            resp['priorExts'] = prior_exts
             resp['currentDate'] = current_date
 
             resp['schemaLinkingComboOutput'] = schema_linking_sql_shortcut_output
@@ -330,6 +354,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             resp['model'] = model_name
             resp['fields'] = fields_list
             resp['priorSchemaLinking'] = prior_schema_links
+            resp['priorExts'] = prior_exts
             resp['currentDate'] = current_date
 
             resp['schemaLinkStr'] = schema_linking_output_max
@@ -372,6 +397,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             resp['model'] = model_name
             resp['fields'] = fields_list
             resp['priorSchemaLinking'] = prior_schema_links
+            resp['priorExts'] = prior_exts
             resp['currentDate'] = current_date
 
             resp['schemaLinkStr'] = schema_linking_output_max
