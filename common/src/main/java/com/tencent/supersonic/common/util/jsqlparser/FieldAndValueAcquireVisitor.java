@@ -144,7 +144,10 @@ public class FieldAndValueAcquireVisitor extends ExpressionVisitorAdapter {
 
     private Column getColumn(Function leftExpressionFunction) {
         List<Expression> leftExpressions = leftExpressionFunction.getParameters().getExpressions();
-        if (CollectionUtils.isEmpty(leftExpressions) || leftExpressions.size() < 1) {
+        if (CollectionUtils.isEmpty(leftExpressions)) {
+            return null;
+        }
+        if (!(leftExpressions.get(0) instanceof Column)) {
             return null;
         }
         return (Column) leftExpressions.get(0);
