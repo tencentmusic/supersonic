@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.materialization.infrastructure.mapper;
 
-import com.tencent.supersonic.headless.api.materialization.pojo.MaterializationFilter;
+import com.tencent.supersonic.headless.common.materialization.pojo.MaterializationFilter;
 import com.tencent.supersonic.headless.materialization.domain.dataobject.MaterializationDOWithBLOBs;
 import org.apache.ibatis.annotations.Mapper;
 

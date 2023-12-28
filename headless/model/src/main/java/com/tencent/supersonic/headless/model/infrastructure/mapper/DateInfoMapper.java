@@ -1,11 +1,11 @@
 package com.tencent.supersonic.headless.model.infrastructure.mapper;
 
 
-import com.tencent.supersonic.headless.api.model.pojo.ItemDateFilter;
+import com.tencent.supersonic.headless.common.model.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.model.domain.dataobject.DateInfoDO;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
-import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface DateInfoMapper {

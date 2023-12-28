@@ -16,7 +16,7 @@ import com.tencent.supersonic.chat.service.PluginService;
 import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.model.response.ModelResp;
+import com.tencent.supersonic.headless.common.model.response.ModelResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;

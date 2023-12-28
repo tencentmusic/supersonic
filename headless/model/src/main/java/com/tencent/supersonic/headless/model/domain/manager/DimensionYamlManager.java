@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.model.domain.manager;
 
 
-import com.tencent.supersonic.headless.api.model.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.common.model.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.model.domain.pojo.Dimension;
 import com.tencent.supersonic.headless.model.domain.utils.DimensionConverter;
 import java.util.ArrayList;

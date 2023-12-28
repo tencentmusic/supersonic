@@ -6,8 +6,8 @@ import com.alibaba.druid.filter.Filter;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.wall.WallConfig;
 import com.alibaba.druid.wall.WallFilter;
-import com.tencent.supersonic.headless.api.model.enums.DataTypeEnum;
-import com.tencent.supersonic.headless.api.model.response.DatabaseResp;
+import com.tencent.supersonic.headless.common.model.enums.DataTypeEnum;
+import com.tencent.supersonic.headless.common.model.response.DatabaseResp;
 import com.tencent.supersonic.headless.model.domain.utils.JdbcDataSourceUtils;
 
 import java.util.Arrays;

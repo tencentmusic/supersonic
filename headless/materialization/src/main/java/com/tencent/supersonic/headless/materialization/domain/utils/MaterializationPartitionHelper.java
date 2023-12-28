@@ -2,9 +2,9 @@ package com.tencent.supersonic.headless.materialization.domain.utils;
 
 
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
-import com.tencent.supersonic.headless.api.materialization.enums.ElementFrequencyEnum;
-import com.tencent.supersonic.headless.api.materialization.response.MaterializationElementResp;
-import com.tencent.supersonic.headless.api.materialization.response.MaterializationResp;
+import com.tencent.supersonic.headless.common.materialization.enums.ElementFrequencyEnum;
+import com.tencent.supersonic.headless.common.materialization.response.MaterializationElementResp;
+import com.tencent.supersonic.headless.common.materialization.response.MaterializationResp;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
 

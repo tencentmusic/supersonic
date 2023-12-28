@@ -4,8 +4,8 @@ package com.tencent.supersonic.headless.materialization.domain.pojo;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
-import com.tencent.supersonic.headless.api.materialization.enums.ElementFrequencyEnum;
-import com.tencent.supersonic.headless.api.materialization.enums.ElementTypeEnum;
+import com.tencent.supersonic.headless.common.materialization.enums.ElementFrequencyEnum;
+import com.tencent.supersonic.headless.common.materialization.enums.ElementTypeEnum;
 import lombok.Data;
 
 @Data

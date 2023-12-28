@@ -59,7 +59,7 @@
     date_info, entities, description
   </sql>
 
-  <select id="getMaterializationResp" parameterType="com.tencent.supersonic.headless.api.materialization.pojo.MaterializationFilter" resultMap="ResultMapWithBLOBs">
+  <select id="getMaterializationResp" parameterType="com.tencent.supersonic.headless.common.materialization.pojo.MaterializationFilter" resultMap="ResultMapWithBLOBs">
     select *
     from s2_materialization
     <where>
