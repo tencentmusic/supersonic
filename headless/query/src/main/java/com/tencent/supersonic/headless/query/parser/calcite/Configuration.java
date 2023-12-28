@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.query.parser.calcite;
 
 
+import com.tencent.supersonic.headless.query.parser.calcite.schema.HeadlessSqlTypeFactoryImpl;
 import com.tencent.supersonic.headless.query.parser.calcite.schema.SemanticSqlDialect;
 import com.tencent.supersonic.headless.query.parser.calcite.schema.ViewExpanderImpl;
 import java.util.ArrayList;
@@ -27,9 +28,7 @@ import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.impl.SqlParserImpl;
-import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.apache.calcite.sql.util.ChainedSqlOperatorTable;
-import org.apache.calcite.sql.validate.SqlConformanceEnum;
 import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 import org.apache.calcite.sql.validate.SqlValidatorUtil;
@@ -40,7 +39,7 @@ import org.apache.calcite.tools.Frameworks;
 public class Configuration {
 
     public static Properties configProperties = new Properties();
-    public static RelDataTypeFactory typeFactory = new SqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
+    public static RelDataTypeFactory typeFactory = new HeadlessSqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
     public static SqlOperatorTable operatorTable = SqlStdOperatorTable.instance();
     public static CalciteConnectionConfig config = new CalciteConnectionConfigImpl(configProperties);
     public static SqlValidator.Config validatorConfig = SqlValidator.Config.DEFAULT
@@ -69,7 +68,7 @@ public class Configuration {
                 .setQuoting(Quoting.SINGLE_QUOTE)
                 .setQuotedCasing(Casing.TO_UPPER)
                 .setUnquotedCasing(Casing.TO_UPPER)
-                .setConformance(SqlConformanceEnum.MYSQL_5)
+                .setConformance(SemanticSqlDialect.DEFAULT.getConformance())
                 .setLex(Lex.BIG_QUERY);
         return parserConfig.build();
     }
