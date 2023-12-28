@@ -72,7 +72,8 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
   };
 
   useEffect(() => {
-    queryTableColumnListByScript(dataSourceItem);
+    // queryTableColumnListByScript(dataSourceItem);
+    setSql(dataSourceItem?.modelDetail?.sqlQuery);
   }, [dataSourceItem]);
 
   const fetchTaskResult = (params) => {
@@ -89,7 +90,6 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
     });
     if (code === 200) {
       fetchTaskResult(data);
-      setSql(dataSource?.modelDetail?.sqlQuery);
     }
   };
 
@@ -153,7 +153,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
         <DataSourceCreateForm
           sql={fastModeSql}
           basicInfoFormMode="fast"
-          dataSourceItem={dataSourceItem}
+          modelItem={dataSourceItem}
           onCancel={() => {
             setDataSourceModalVisible(false);
             handleCancel();
@@ -173,7 +173,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
           sql={sql}
           databaseId={currentDatabaseId}
           basicInfoFormMode="normal"
-          dataSourceItem={dataSourceItem}
+          modelItem={dataSourceItem}
           scriptColumns={scriptColumns}
           onCancel={() => {
             setCreateModalVisible(false);

@@ -98,28 +98,30 @@ export declare namespace ISemantic {
   }
 
   interface IModelItem {
-    createdBy?: string;
-    updatedBy?: string;
-    createdAt?: string;
-    updatedAt?: string;
     id: number;
     name: string;
     bizName: string;
-    description: any;
+    description: string;
+    sensitiveLevel: SensitiveLevel;
+    domainId: number;
+    databaseId: number;
+    modelDetail: IDataSourceDetail;
     status?: StatusEnum;
     typeEnum?: any;
     sensitiveLevel?: number;
     parentId: number;
+    filterSql: string;
+    alias: string;
     fullPath?: string;
     viewers?: any[];
     viewOrgs?: any[];
     admins?: string[];
     adminOrgs?: any[];
-    isOpen?: number;
-    entity?: { entityId: number; names: string[] };
-    dimensionCnt?: number;
-    metricCnt?: number;
     drillDownDimensions: IDrillDownDimensionItem[];
+    createdBy: UserName;
+    updatedBy: UserName;
+    createdAt: ISODateString;
+    updatedAt: ISODateString;
   }
 
   interface IDimensionItem {

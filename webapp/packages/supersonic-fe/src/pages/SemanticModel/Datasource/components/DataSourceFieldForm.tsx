@@ -61,11 +61,11 @@ const FieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSqlChange })
       dataIndex: 'bizName',
       width: 100,
     },
-    {
-      title: '数据类型',
-      dataIndex: 'sqlType',
-      width: 80,
-    },
+    // {
+    //   title: '数据类型',
+    //   dataIndex: 'sqlType',
+    //   width: 80,
+    // },
     {
       title: '字段类型',
       dataIndex: 'type',
