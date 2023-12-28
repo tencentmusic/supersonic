@@ -16,10 +16,6 @@ public class Measure {
 
     private String expr;
 
-    private String constraint;
-
-    private String alias;
-
     private String createMetric;
 
     private String bizName;

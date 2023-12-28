@@ -6,7 +6,10 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.model.enums.DimensionTypeEnum;
+import com.tencent.supersonic.headless.api.model.enums.IdentifyTypeEnum;
 import com.tencent.supersonic.headless.api.model.enums.MetricTypeEnum;
+import com.tencent.supersonic.headless.api.model.enums.SemanticTypeEnum;
 import com.tencent.supersonic.headless.api.model.pojo.Dim;
 import com.tencent.supersonic.headless.api.model.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.model.pojo.Identify;
@@ -74,6 +77,9 @@ public class ModelConverter {
     public static ModelDO convert(ModelDO modelDO, ModelReq modelReq, User user) {
         ModelDetail modelDetail = getModelDetail(modelReq);
         BeanMapper.mapper(modelReq, modelDO);
+        if (modelReq.getDrillDownDimensions() != null) {
+            modelDO.setDrillDownDimensions(JSONObject.toJSONString(modelReq.getDrillDownDimensions()));
+        }
         modelDO.setModelDetail(JSONObject.toJSONString((modelDetail)));
         modelDO.setUpdatedBy(user.getName());
         modelDO.setUpdatedAt(new Date());
@@ -95,10 +101,10 @@ public class ModelConverter {
         dimensionReq.setName(dim.getName());
         dimensionReq.setBizName(dim.getBizName());
         dimensionReq.setDescription(dim.getName());
-        dimensionReq.setSemanticType("CATEGORY");
+        dimensionReq.setSemanticType(SemanticTypeEnum.CATEGORY.name());
         dimensionReq.setModelId(modelDO.getId());
         dimensionReq.setExpr(dim.getBizName());
-        dimensionReq.setType("categorical");
+        dimensionReq.setType(DimensionTypeEnum.categorical.name());
         dimensionReq.setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
         dimensionReq.setIsTag(dim.getIsTag());
         return dimensionReq;
@@ -123,7 +129,7 @@ public class ModelConverter {
         dimensionReq.setName(identify.getName());
         dimensionReq.setBizName(identify.getBizName());
         dimensionReq.setDescription(identify.getName());
-        dimensionReq.setSemanticType("CATEGORY");
+        dimensionReq.setSemanticType(SemanticTypeEnum.CATEGORY.name());
         dimensionReq.setModelId(modelDO.getId());
         dimensionReq.setExpr(identify.getBizName());
         dimensionReq.setType(identify.getType());
@@ -141,7 +147,7 @@ public class ModelConverter {
     private static boolean isCreateDimension(Dim dim) {
         return dim.getIsCreateDimension() == 1
                 && StringUtils.isNotBlank(dim.getName())
-                && !dim.getType().equalsIgnoreCase("time");
+                && !dim.getType().equalsIgnoreCase(DimensionTypeEnum.time.name());
     }
 
     private static boolean isCreateMetric(Measure measure) {
@@ -175,7 +181,7 @@ public class ModelConverter {
             return dimensionReqs;
         }
         dimensionReqs.addAll(identifies.stream()
-                .filter(i -> i.getType().equalsIgnoreCase("primary"))
+                .filter(i -> i.getType().equalsIgnoreCase(IdentifyTypeEnum.primary.name()))
                 .filter(i -> StringUtils.isNotBlank(i.getName()))
                 .map(identify -> convert(identify, modelDO)).collect(Collectors.toList()));
         return dimensionReqs;
@@ -196,17 +202,18 @@ public class ModelConverter {
         BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
         List<Measure> measures = modelDetail.getMeasures();
         for (Measure measure : measures) {
-            if (StringUtils.isBlank(measure.getExpr())) {
-                measure.setExpr(measure.getBizName());
+            if (StringUtils.isBlank(measure.getBizName())) {
+                continue;
             }
-            if (StringUtils.isBlank(measure.getConstraint())) {
-                measure.setConstraint(null);
+            //Compatible with front-end tmp
+            String oriFieldName = measure.getBizName()
+                    .replaceFirst(modelReq.getBizName() + "_", "");
+            measure.setExpr(oriFieldName);
+            if (!measure.getBizName().startsWith(modelReq.getBizName())) {
+                measure.setBizName(String.format("%s_%s", modelReq.getBizName(), oriFieldName));
             }
-            if (StringUtils.isBlank(measure.getAlias())) {
-                measure.setAlias(null);
-            }
-            measure.setBizName(String.format("%s_%s", modelReq.getBizName(), measure.getBizName()));
         }
         return modelDetail;
     }
+
 }
