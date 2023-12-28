@@ -150,7 +150,7 @@ alter table s2_model add column `source_type` varchar(128) DEFAULT NULL;
 
 CREATE TABLE `s2_app`
 (
-    id          bigint primary key AUTO_INCREMENT PRIMARY KEY,
+    id          bigint PRIMARY KEY AUTO_INCREMENT,
     name        VARCHAR(255),
     description VARCHAR(255),
     status      INT,
