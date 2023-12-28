@@ -14,9 +14,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from instances.logging_instance import logger
 
-from s2ql.constructor import FewShotPromptTemplate2
-from s2ql.output_parser import  schema_link_parse, combo_schema_link_parse, combo_sql_parse
-from s2ql.auto_cot_run import transform_sql_example, transform_sql_example_autoCoT_run
+from s2sql.constructor import FewShotPromptTemplate2
+from s2sql.output_parser import  schema_link_parse, combo_schema_link_parse, combo_sql_parse
+from s2sql.auto_cot_run import transform_sql_example, transform_sql_example_autoCoT_run
 
 
 class Text2DSLAgentBase(object):

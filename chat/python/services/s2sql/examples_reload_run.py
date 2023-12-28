@@ -15,7 +15,7 @@ from instances.logging_instance import logger
 from config.config_parse import (
                     TEXT2DSL_EXAMPLE_NUM, TEXT2DSL_FEWSHOTS_NUM, TEXT2DSL_SELF_CONSISTENCY_NUM,
                     LLMPARSER_HOST, LLMPARSER_PORT,)
-from few_shot_example.s2ql_examplar import examplars as sql_examplars
+from few_shot_example.s2sql_exemplar import exemplars as sql_exemplars
 
 
 def text2dsl_agent_wrapper_setting_update(llm_host:str, llm_port:str,
@@ -35,6 +35,6 @@ def text2dsl_agent_wrapper_setting_update(llm_host:str, llm_port:str,
 
 if __name__ == "__main__":
     text2dsl_agent_wrapper_setting_update(LLMPARSER_HOST,LLMPARSER_PORT,
-        sql_examplars, TEXT2DSL_EXAMPLE_NUM, TEXT2DSL_FEWSHOTS_NUM, TEXT2DSL_SELF_CONSISTENCY_NUM)
+        sql_exemplars, TEXT2DSL_EXAMPLE_NUM, TEXT2DSL_FEWSHOTS_NUM, TEXT2DSL_SELF_CONSISTENCY_NUM)
                                           
     
