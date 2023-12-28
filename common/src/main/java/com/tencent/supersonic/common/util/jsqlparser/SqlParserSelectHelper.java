@@ -34,6 +34,7 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.select.SetOperationList;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.util.CollectionUtils;
 
@@ -59,6 +60,9 @@ public class SqlParserSelectHelper {
                 having.accept(new FieldAndValueAcquireVisitor(result));
             }
         }
+        result = result.stream()
+                .filter(fieldExpression -> StringUtils.isNotBlank(fieldExpression.getFieldName()))
+                .collect(Collectors.toSet());
         return new ArrayList<>(result);
     }
 

@@ -150,17 +150,17 @@ alter table s2_model add column `source_type` varchar(128) DEFAULT NULL;
 
 CREATE TABLE `s2_app`
 (
-    id          bigint primary key AUTO_INCREMENT PRIMARY KEY,
+    id          bigint PRIMARY KEY AUTO_INCREMENT,
     name        VARCHAR(255),
     description VARCHAR(255),
     status      INT,
     config      TEXT,
-    end_date    TIMESTAMP,
+    end_date    datetime,
     qps         INT,
     app_secret  VARCHAR(255),
     owner       VARCHAR(255),
-    created_at  TIMESTAMP,
-    created_by  VARCHAR(255),
-    updated_at  TIMESTAMP,
-    updated_by  VARCHAR(255)
-);
+    `created_at`     datetime null,
+    `updated_at`     datetime null,
+    `created_by`     varchar(255) null,
+    `updated_by`     varchar(255) null
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -8,7 +8,6 @@ import com.tencent.supersonic.headless.api.model.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.model.pojo.SchemaItem;
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -31,13 +30,13 @@ public class ModelReq extends SchemaItem {
 
     private ModelDetail modelDetail;
 
-    private List<String> viewers = new ArrayList<>();
+    private List<String> viewers;
 
-    private List<String> viewOrgs = new ArrayList<>();
+    private List<String> viewOrgs;
 
-    private List<String> admins = new ArrayList<>();
+    private List<String> admins;
 
-    private List<String> adminOrgs = new ArrayList<>();
+    private List<String> adminOrgs;
 
     public List<Dim> getTimeDimension() {
         if (modelDetail == null) {
@@ -47,18 +46,30 @@ public class ModelReq extends SchemaItem {
     }
 
     public String getViewer() {
+        if (viewers == null) {
+            return null;
+        }
         return String.join(",", viewers);
     }
 
     public String getViewOrg() {
+        if (viewOrgs == null) {
+            return null;
+        }
         return String.join(",", viewOrgs);
     }
 
     public String getAdmin() {
+        if (admins == null) {
+            return null;
+        }
         return String.join(",", admins);
     }
 
     public String getAdminOrg() {
+        if (adminOrgs == null) {
+            return null;
+        }
         return String.join(",", adminOrgs);
     }
 

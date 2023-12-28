@@ -9,7 +9,7 @@ import { updateModel, createModel, getColumns } from '../../service';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
 import { connect } from 'umi';
-import { IDataSource } from '../../data';
+import { IDataSource, ISemantic } from '../../data';
 
 export type CreateFormProps = {
   domainManger: StateType;
@@ -17,7 +17,7 @@ export type CreateFormProps = {
   createModalVisible: boolean;
   sql?: string;
   databaseId?: number;
-  dataSourceItem: IDataSource.IDataSourceItem;
+  modelItem: ISemantic.IModelItem;
   onCancel?: () => void;
   onSubmit?: (dataSourceInfo: any) => void;
   scriptColumns?: any[] | undefined;
@@ -34,21 +34,21 @@ const initFormVal = {
   description: '', // 模型描述
 };
 
-const DataSourceCreateForm: React.FC<CreateFormProps> = ({
+const ModelCreateForm: React.FC<CreateFormProps> = ({
   domainManger,
   onCancel,
   createModalVisible,
   scriptColumns,
   sql = '',
   onSubmit,
-  dataSourceItem,
+  modelItem,
   databaseId,
   basicInfoFormMode,
   onDataSourceBtnClick,
   onOpenDataSourceEdit,
   children,
 }) => {
-  const isEdit = !!dataSourceItem?.id;
+  const isEdit = !!modelItem?.id;
   const [fields, setFields] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [saveLoading, setSaveLoading] = useState(false);
@@ -170,10 +170,10 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       const { dbName, tableName } = submitForm;
       const queryParams = {
         ...submitForm,
-        databaseId: databaseId || dataSourceItem?.databaseId || formDatabaseId,
-        modelId: isEdit ? dataSourceItem.modelId : modelId,
+        databaseId: databaseId || modelItem?.databaseId || formDatabaseId,
+        modelId: isEdit ? modelItem.id : modelId,
         filterSql: sqlFilter,
-        domainId: isEdit ? dataSourceItem.domainId : selectDomainId,
+        domainId: isEdit ? modelItem.domainId : selectDomainId,
         modelDetail: {
           ...submitForm,
           queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
@@ -198,6 +198,10 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const initFields = (fieldsClassifyList: any[], columns: any[]) => {
+    if (Array.isArray(columns) && columns.length === 0) {
+      setFields(fieldsClassifyList || []);
+      return;
+    }
     const columnFields: any[] = columns.map((item: any) => {
       const { type, nameEn } = item;
       const oldItem =
@@ -235,13 +239,13 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const initData = async () => {
-    const { queryType, tableQuery } = dataSourceItem?.modelDetail || {};
+    const { queryType, tableQuery } = modelItem?.modelDetail || {};
     let tableQueryInitValue = {};
     let columns = fieldColumns || [];
     if (queryType === 'table_query') {
       const tableQueryString = tableQuery || '';
       const [dbName, tableName] = tableQueryString.split('.');
-      columns = await queryTableColumnList(dataSourceItem.databaseId, dbName, tableName);
+      columns = await queryTableColumnList(modelItem.databaseId, dbName, tableName);
       tableQueryInitValue = {
         dbName,
         tableName,
@@ -251,8 +255,17 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   const formatterInitData = (columns: any[], extendParams: Record<string, any> = {}) => {
-    const { id, name, bizName, description, modelDetail, databaseId, filterSql, alias } =
-      dataSourceItem as any;
+    const {
+      id,
+      name,
+      bizName,
+      description,
+      modelDetail,
+      databaseId,
+      filterSql,
+      alias,
+      drillDownDimensions = [],
+    } = modelItem;
     const { dimensions, identifiers, measures } = modelDetail || {};
     const initValue = {
       id,
@@ -262,6 +275,11 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
       databaseId,
       filterSql,
       alias,
+      drillDownDimensions: Array.isArray(drillDownDimensions)
+        ? drillDownDimensions.map((item) => {
+            return item.dimensionId;
+          })
+        : [],
       ...extendParams,
     };
     const editInitFormVal = {
@@ -280,7 +298,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   };
 
   useEffect(() => {
-    const { queryType } = dataSourceItem?.modelDetail || {};
+    const { queryType } = modelItem?.modelDetail || {};
     if (queryType === 'table_query') {
       if (isEdit) {
         initData();
@@ -288,10 +306,10 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
         initFields([], fieldColumns);
       }
     }
-  }, [dataSourceItem]);
+  }, [modelItem]);
 
   useEffect(() => {
-    const { queryType } = dataSourceItem?.modelDetail || {};
+    const { queryType } = modelItem?.modelDetail || {};
     if (queryType !== 'table_query') {
       if (isEdit) {
         initData();
@@ -299,7 +317,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
         initFields([], fieldColumns);
       }
     }
-  }, [dataSourceItem, fieldColumns]);
+  }, [modelItem, fieldColumns]);
 
   const handleFieldChange = (fieldName: string, data: any) => {
     const result = fields.map((field) => {
@@ -353,6 +371,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
             form={form}
             isEdit={isEdit}
             mode={basicInfoFormMode}
+            modelItem={modelItem}
             databaseConfigList={databaseConfigList}
           />
         </div>
@@ -368,8 +387,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
             上一步
           </Button>
           <Button onClick={onCancel}>取 消</Button>
-          {(dataSourceItem?.modelDetail?.queryType === 'sql_query' ||
-            basicInfoFormMode !== 'fast') && (
+          {(modelItem?.modelDetail?.queryType === 'sql_query' || basicInfoFormMode !== 'fast') && (
             <Button
               type="primary"
               onClick={() => {
@@ -465,4 +483,4 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
 
 export default connect(({ domainManger }: { domainManger: StateType }) => ({
   domainManger,
-}))(DataSourceCreateForm);
+}))(ModelCreateForm);
