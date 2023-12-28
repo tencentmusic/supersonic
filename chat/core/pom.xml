@@ -77,12 +77,12 @@
         </dependency>
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
-            <artifactId>semantic-api</artifactId>
+            <artifactId>headless-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
-            <artifactId>semantic-query</artifactId>
+            <artifactId>headless-query</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

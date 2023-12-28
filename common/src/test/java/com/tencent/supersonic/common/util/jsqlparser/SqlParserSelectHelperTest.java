@@ -118,6 +118,13 @@ class SqlParserSelectHelperTest {
                 + "WHERE MONTH(数据日期) = 9) FROM 营销月模型 WHERE 国家中文名 = '肯尼亚' AND MONTH(数据日期) = 9");
 
         System.out.println(fieldExpression);
+
+        fieldExpression = SqlParserSelectHelper.getFilterExpression(
+                "select 等级, count(*) from 歌手 where 别名 = '港台' or 活跃区域 = '港台' and"
+                        + " datediff('day', 数据日期, '2023-12-24') <= 0 group by 等级");
+
+        System.out.println(fieldExpression);
+
     }
 
     @Test

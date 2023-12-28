@@ -70,6 +70,7 @@ def transform_sql_example_autoCoT_run(examplar_list, min_window_size, max_window
         transformed_sql_examplar = dict()
         transformed_sql_examplar['question'] = question
         transformed_sql_examplar['questionAugmented'] = question_augmented
+        transformed_sql_examplar['modelName'] = table_name
         transformed_sql_examplar['dbSchema'] = db_schema
         transformed_sql_examplar['sql'] = sql
         transformed_sql_examplar['generatedSchemaLinkingCoT'] = generated_schema_linking_cot

@@ -10,11 +10,11 @@ runtimeDir=$baseDir/../runtime
 buildDir=$baseDir/build
 
 readonly CHAT_APP_NAME="supersonic_chat"
-readonly SEMANTIC_APP_NAME="supersonic_semantic"
+readonly HEADLESS_APP_NAME="supersonic_headless"
 readonly PYLLM_APP_NAME="supersonic_pyllm"
 readonly STANDALONE_APP_NAME="supersonic_standalone"
 readonly CHAT_SERVICE="chat"
-readonly SEMANTIC_SERVICE="semantic"
+readonly HEADLESS_SERVICE="headless"
 readonly PYLLM_SERVICE="pyllm"
 readonly STANDALONE_SERVICE="standalone"
 readonly PYLLM_HOST="127.0.0.1"
@@ -46,7 +46,7 @@ function moveAllToRuntime {
   mv ${buildDir}/supersonic-webapp ${buildDir}/webapp
 
   moveToRuntime chat
-  moveToRuntime semantic
+  moveToRuntime headless
   moveToRuntime standalone
   rm -fr  ${buildDir}/webapp
 }

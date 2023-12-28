@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class TwoPassSqlGeneration implements SqlGeneration, InitializingBean {
 
+    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
     @Autowired
     private ChatLanguageModel chatLanguageModel;
 
@@ -36,23 +39,27 @@ public class TwoPassSqlGeneration implements SqlGeneration, InitializingBean {
 
     @Override
     public Map<String, Double> generation(LLMReq llmReq, String modelClusterKey) {
-
+        keyPipelineLog.info("modelClusterKey:{},llmReq:{}", modelClusterKey, llmReq);
         List<Map<String, String>> sqlExamples = sqlExampleLoader.retrieverSqlExamples(llmReq.getQueryText(),
                 optimizationConfig.getText2sqlCollectionName(), optimizationConfig.getText2sqlExampleNum());
 
         String linkingPromptStr = sqlPromptGenerator.generateLinkingPrompt(llmReq, sqlExamples);
 
         Prompt prompt = PromptTemplate.from(JsonUtil.toString(linkingPromptStr)).apply(new HashMap<>());
+        keyPipelineLog.info("step one request prompt:{}", prompt.toSystemMessage());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toSystemMessage());
-
+        keyPipelineLog.info("step one model response:{}", response.content().text());
         String schemaLinkStr = OutputFormat.getSchemaLink(response.content().text());
-
         String generateSqlPrompt = sqlPromptGenerator.generateSqlPrompt(llmReq, schemaLinkStr, sqlExamples);
 
         Prompt sqlPrompt = PromptTemplate.from(JsonUtil.toString(generateSqlPrompt)).apply(new HashMap<>());
+        keyPipelineLog.info("step two request prompt:{}", sqlPrompt.toSystemMessage());
         Response<AiMessage> sqlResult = chatLanguageModel.generate(sqlPrompt.toSystemMessage());
+        String result = sqlResult.content().text();
+        keyPipelineLog.info("step two model response:{}", result);
         Map<String, Double> sqlMap = new HashMap<>();
-        sqlMap.put(sqlResult.content().text(), 1D);
+        sqlMap.put(result, 1D);
+        keyPipelineLog.info("schemaLinkStr:{},sqlMap:{}", schemaLinkStr, sqlMap);
         return sqlMap;
     }
 

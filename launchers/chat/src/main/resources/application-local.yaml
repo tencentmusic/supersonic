@@ -31,3 +31,47 @@ semantic:
 llm:
   parser:
     url:  http://127.0.0.1:9092
+
+
+#langchain4j config
+s2:
+  langchain4j:
+    #1.chat-model
+    chat-model:
+      provider: open_ai
+      openai:
+        api-key: sk
+        model-name: gpt-3.5-turbo-16k
+        temperature: 0.0
+        timeout: PT60S
+    #2.embedding-model
+    #2.1 in_memory(default)
+    embedding-model:
+      provider: in_process
+    #      inProcess:
+    #        modelPath: /data/model.onnx
+    #        vocabularyPath: /data/onnx_vocab.txt
+    #2.2 open_ai
+    #  embedding-model:
+    #    provider: open_ai
+    #    openai:
+    #      api-key: api_key
+    #      modelName: all-minilm-l6-v2.onnx
+
+    #2.2 hugging_face
+    #  embedding-model:
+    #    provider: hugging_face
+    #    hugging-face:
+    #      access-token: hg_access_token
+    #      model-id: sentence-transformers/all-MiniLM-L6-v2
+    #      timeout: 1h
+
+#langchain4j log
+logging:
+  level:
+    dev.langchain4j: DEBUG
+    dev.ai4j.openai4j: DEBUG
+
+inMemoryEmbeddingStore:
+  persistent:
+    path: /tmp

@@ -12,12 +12,8 @@ import com.tencent.supersonic.chat.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.chat.query.plugin.WebBase;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.ContextUtils;
-
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
+import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.springframework.http.HttpEntity;
@@ -28,8 +24,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
+import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Slf4j
@@ -75,7 +73,7 @@ public class WebServiceQuery extends PluginSemanticQuery {
     protected WebServiceResp buildResponse(PluginParseResult pluginParseResult) {
         WebServiceResp webServiceResponse = new WebServiceResp();
         Plugin plugin = pluginParseResult.getPlugin();
-        WebBase webBase = JsonUtil.toObject(plugin.getConfig(), WebBase.class);
+        WebBase webBase = fillWebBaseResult(JsonUtil.toObject(plugin.getConfig(), WebBase.class), pluginParseResult);
         webServiceResponse.setWebBase(webBase);
         List<ParamOption> paramOptions = webBase.getParamOptions();
         Map<String, Object> params = new HashMap<>();

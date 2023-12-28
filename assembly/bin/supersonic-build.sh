@@ -19,7 +19,7 @@ if [ $? -ne 0 ]; then
 fi
 
 #2. move package to build
-cp $baseDir/../launchers/semantic/target/*.tar.gz ${buildDir}/supersonic-semantic.tar.gz
+cp $baseDir/../launchers/headless/target/*.tar.gz ${buildDir}/supersonic-headless.tar.gz
 cp $baseDir/../launchers/chat/target/*.tar.gz ${buildDir}/supersonic-chat.tar.gz
 cp $baseDir/../launchers/standalone/target/*.tar.gz ${buildDir}/supersonic-standalone.tar.gz
 
@@ -38,7 +38,7 @@ fi
 cd $buildDir
 tar xvf supersonic-webapp.tar.gz
 mv supersonic-webapp webapp
-cp -fr webapp ../../launchers/semantic/target/classes
+cp -fr webapp ../../launchers/headless/target/classes
 cp -fr webapp ../../launchers/chat/target/classes
 cp -fr webapp ../../launchers/standalone/target/classes
 rm -fr  ${buildDir}/webapp
@@ -55,4 +55,4 @@ fi
 rm -fr $runtimeDir/supersonic*
 moveAllToRuntime
 setEnvToWeb chat
-setEnvToWeb semantic
+setEnvToWeb headless

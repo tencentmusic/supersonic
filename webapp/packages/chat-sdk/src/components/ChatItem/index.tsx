@@ -171,6 +171,7 @@ const ChatItem: React.FC<Props> = ({
       (!parses[0]?.properties?.type && !parses[0]?.queryMode)
     ) {
       setParseTip(PARSE_ERROR_TIP);
+      setParseInfo({ queryId } as any);
       return;
     }
     onUpdateMessageScroll?.();

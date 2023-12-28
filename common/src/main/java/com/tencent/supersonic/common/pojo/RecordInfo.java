@@ -1,9 +1,10 @@
 package com.tencent.supersonic.common.pojo;
 
 import com.google.common.base.Objects;
-import java.util.Date;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.Date;
 
 @Data
 @ToString
@@ -42,8 +43,7 @@ public class RecordInfo {
         }
         RecordInfo that = (RecordInfo) o;
         return Objects.equal(createdBy, that.createdBy) && Objects.equal(
-                updatedBy, that.updatedBy) && Objects.equal(createdAt, that.createdAt)
-                && Objects.equal(updatedAt, that.updatedAt);
+                updatedBy, that.updatedBy);
     }
 
     @Override

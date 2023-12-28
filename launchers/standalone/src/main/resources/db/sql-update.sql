@@ -146,3 +146,21 @@ CREATE TABLE `s2_metric_query_default_config`
 --20231214
 alter table s2_chat_query add column `similar_queries` varchar(1024) DEFAULT '';
 alter table s2_model add column `source_type` varchar(128) DEFAULT NULL;
+
+
+CREATE TABLE `s2_app`
+(
+    id          bigint PRIMARY KEY AUTO_INCREMENT,
+    name        VARCHAR(255),
+    description VARCHAR(255),
+    status      INT,
+    config      TEXT,
+    end_date    datetime,
+    qps         INT,
+    app_secret  VARCHAR(255),
+    owner       VARCHAR(255),
+    `created_at`     datetime null,
+    `updated_at`     datetime null,
+    `created_by`     varchar(255) null,
+    `updated_by`     varchar(255) null
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

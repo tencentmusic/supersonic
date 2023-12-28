@@ -14,16 +14,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-@Slf4j
 public class TwoPassSCSqlGeneration implements SqlGeneration, InitializingBean {
 
+    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
     @Autowired
     private ChatLanguageModel chatLanguageModel;
 
@@ -39,6 +40,7 @@ public class TwoPassSCSqlGeneration implements SqlGeneration, InitializingBean {
     @Override
     public Map<String, Double> generation(LLMReq llmReq, String modelClusterKey) {
         //1.retriever sqlExamples and generate exampleListPool
+        keyPipelineLog.info("modelClusterKey:{},llmReq:{}", modelClusterKey, llmReq);
         List<Map<String, String>> sqlExamples = sqlExampleLoader.retrieverSqlExamples(llmReq.getQueryText(),
                 optimizationConfig.getText2sqlCollectionName(), optimizationConfig.getText2sqlExampleNum());
 
@@ -51,8 +53,10 @@ public class TwoPassSCSqlGeneration implements SqlGeneration, InitializingBean {
         linkingPromptPool.parallelStream().forEach(
                 linkingPrompt -> {
                     Prompt prompt = PromptTemplate.from(JsonUtil.toString(linkingPrompt)).apply(new HashMap<>());
+                    keyPipelineLog.info("step one request prompt:{}", prompt.toSystemMessage());
                     Response<AiMessage> linkingResult = chatLanguageModel.generate(prompt.toSystemMessage());
                     String result = linkingResult.content().text();
+                    keyPipelineLog.info("step one model response:{}", result);
                     linkingResults.add(OutputFormat.getSchemaLink(result));
                 }
         );
@@ -63,13 +67,15 @@ public class TwoPassSCSqlGeneration implements SqlGeneration, InitializingBean {
         List<String> sqlTaskPool = new CopyOnWriteArrayList<>();
         sqlPromptPool.parallelStream().forEach(sqlPrompt -> {
             Prompt linkingPrompt = PromptTemplate.from(JsonUtil.toString(sqlPrompt)).apply(new HashMap<>());
+            keyPipelineLog.info("step two request prompt:{}", linkingPrompt.toSystemMessage());
             Response<AiMessage> sqlResult = chatLanguageModel.generate(linkingPrompt.toSystemMessage());
             String result = sqlResult.content().text();
+            keyPipelineLog.info("step two model response:{}", result);
             sqlTaskPool.add(result);
         });
         //4.format response.
         Pair<String, Map<String, Double>> sqlMap = OutputFormat.selfConsistencyVote(sqlTaskPool);
-        log.info("linkingMap result:{},sqlMap:{}", linkingMap, sqlMap);
+        keyPipelineLog.info("linkingMap:{} sqlMap:{}", linkingMap, sqlMap);
         return sqlMap.getRight();
     }
 

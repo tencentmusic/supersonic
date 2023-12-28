@@ -14,6 +14,8 @@ import java.net.URI;
 import java.net.URL;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,6 +32,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class PythonLLMProxy implements LLMProxy {
 
+    private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
+
     @Override
     public boolean isSkip(QueryContext queryContext) {
         LLMParserConfig llmParserConfig = ContextUtils.getBean(LLMParserConfig.class);
@@ -41,9 +45,9 @@ public class PythonLLMProxy implements LLMProxy {
     }
 
     public LLMResp query2sql(LLMReq llmReq, String modelClusterKey) {
-
         long startTime = System.currentTimeMillis();
         log.info("requestLLM request, modelId:{},llmReq:{}", modelClusterKey, llmReq);
+        keyPipelineLog.info("modelClusterKey:{},llmReq:{}", modelClusterKey, llmReq);
         try {
             LLMParserConfig llmParserConfig = ContextUtils.getBean(LLMParserConfig.class);
 
@@ -57,6 +61,7 @@ public class PythonLLMProxy implements LLMProxy {
 
             log.info("requestLLM response,cost:{}, questUrl:{} \n entity:{} \n body:{}",
                     System.currentTimeMillis() - startTime, url, entity, responseEntity.getBody());
+            keyPipelineLog.info("LLMResp:{}", responseEntity.getBody());
             return responseEntity.getBody();
         } catch (Exception e) {
             log.error("requestLLM error", e);
@@ -75,10 +80,12 @@ public class PythonLLMProxy implements LLMProxy {
         RestTemplate restTemplate = ContextUtils.getBean(RestTemplate.class);
         try {
             log.info("requestFunction functionReq:{}", JsonUtil.toString(functionReq));
+            keyPipelineLog.info("requestFunction functionReq:{}", JsonUtil.toString(functionReq));
             ResponseEntity<FunctionResp> responseEntity = restTemplate.exchange(requestUrl, HttpMethod.POST, entity,
                     FunctionResp.class);
             log.info("requestFunction responseEntity:{},cost:{}", responseEntity,
                     System.currentTimeMillis() - startTime);
+            keyPipelineLog.info("response:{}", responseEntity.getBody());
             return responseEntity.getBody();
         } catch (Exception e) {
             log.error("requestFunction error", e);

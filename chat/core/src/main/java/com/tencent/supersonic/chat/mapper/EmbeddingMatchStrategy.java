@@ -10,7 +10,7 @@ import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
 import com.tencent.supersonic.knowledge.dictionary.EmbeddingResult;
-import com.tencent.supersonic.semantic.model.domain.listener.MetaEmbeddingListener;
+import com.tencent.supersonic.headless.model.domain.listener.MetaEmbeddingListener;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
