@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Input, Spin, Select, message } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
-import { getDbNames, getTables } from '../../service';
+import { getDbNames, getTables, getDimensionList } from '../../service';
 import { ISemantic } from '../../data';
+import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import { isString } from 'lodash';
 
 const FormItem = Form.Item;
@@ -11,15 +12,45 @@ const { TextArea } = Input;
 type Props = {
   isEdit?: boolean;
   databaseConfigList: ISemantic.IDatabaseItemList;
+  modelItem: ISemantic.IModelItem;
   form: FormInstance<any>;
   mode?: 'normal' | 'fast';
 };
 
-const DataSourceBasicForm: React.FC<Props> = ({ isEdit, databaseConfigList, mode = 'normal' }) => {
+const DataSourceBasicForm: React.FC<Props> = ({
+  isEdit,
+  modelItem,
+  databaseConfigList,
+  mode = 'normal',
+}) => {
   const [currentDbLinkConfigId, setCurrentDbLinkConfigId] = useState<number>();
   const [dbNameList, setDbNameList] = useState<any[]>([]);
   const [tableNameList, setTableNameList] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [dimensionOptions, setDimensionOptions] = useState<{ label: string; value: number }[]>([]);
+
+  useEffect(() => {
+    if (modelItem?.id) {
+      queryDimensionList();
+    }
+  }, [modelItem]);
+
+  const queryDimensionList = async () => {
+    const { code, data, msg } = await getDimensionList({ modelId: modelItem?.id });
+    if (code === 200 && Array.isArray(data?.list)) {
+      setDimensionOptions(
+        data.list.map((item: ISemantic.IDimensionItem) => {
+          return {
+            label: item.name,
+            value: item.id,
+          };
+        }),
+      );
+    } else {
+      message.error(msg);
+    }
+  };
+
   const queryDbNameList = async (databaseId: number) => {
     setLoading(true);
     const { code, data, msg } = await getDbNames(databaseId);
@@ -129,7 +160,7 @@ const DataSourceBasicForm: React.FC<Props> = ({ isEdit, databaseConfigList, mode
         }}
         getValueProps={(value) => {
           return {
-            value: isString(value) ? value.split(',') : [],
+            value: value && isString(value) ? value.split(',') : [],
           };
         }}
       >
@@ -137,6 +168,23 @@ const DataSourceBasicForm: React.FC<Props> = ({ isEdit, databaseConfigList, mode
           mode="tags"
           placeholder="输入别名后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
           tokenSeparators={[',']}
+          maxTagCount={9}
+        />
+      </FormItem>
+      <FormItem
+        name="drillDownDimensions"
+        label={
+          <FormItemTitle
+            title={'默认下钻维度'}
+            subTitle={'配置之后,可在指标主页和问答指标卡处选择用来对指标进行下钻和过滤'}
+          />
+        }
+        hidden={!modelItem?.id}
+      >
+        <Select
+          mode="multiple"
+          options={dimensionOptions}
+          placeholder="请选择默认下钻维度"
           maxTagCount={9}
         />
       </FormItem>

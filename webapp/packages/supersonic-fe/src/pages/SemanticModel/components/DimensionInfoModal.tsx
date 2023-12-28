@@ -243,9 +243,9 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
             ))}
           </Select>
         </FormItem>
-        <FormItem name="commonDimensionId" label="公共维度">
+        {/* <FormItem name="commonDimensionId" label="公共维度">
           <Select placeholder="请绑定公共维度" allowClear options={commonDimensionOptions} />
-        </FormItem>
+        </FormItem> */}
         <FormItem name="defaultValues" label="默认值">
           <InfoTagList />
         </FormItem>
