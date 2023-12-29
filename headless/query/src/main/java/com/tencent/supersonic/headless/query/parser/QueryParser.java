@@ -73,6 +73,8 @@ public class QueryParser {
                     QueryStatement tableSql = new QueryStatement();
                     tableSql.setIsS2SQL(false);
                     tableSql.setMetricReq(metricReq);
+                    tableSql.setMinMaxTime(queryStatement.getMinMaxTime());
+                    tableSql.setEnableOptimize(queryStatement.getEnableOptimize());
                     tableSql = parser(tableSql, metricTable.getAggOption());
                     if (!tableSql.isOk()) {
                         queryStatement.setErrMsg(String.format("parser table [%s] error [%s]", metricTable.getAlias(),
