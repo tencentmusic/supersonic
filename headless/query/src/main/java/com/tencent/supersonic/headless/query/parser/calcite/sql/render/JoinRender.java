@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.query.parser.calcite.sql.render;
 
-import com.tencent.supersonic.headless.api.query.request.MetricReq;
+import com.tencent.supersonic.headless.common.query.request.MetricReq;
 import com.tencent.supersonic.headless.query.parser.calcite.s2sql.Materialization.TimePartType;
 import com.tencent.supersonic.headless.query.parser.calcite.sql.node.AggFunctionNode;
 import com.tencent.supersonic.headless.query.parser.calcite.sql.node.DataSourceNode;

@@ -1,16 +1,16 @@
 package com.tencent.supersonic.headless.query.service;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.api.model.response.ExplainResp;
-import com.tencent.supersonic.headless.api.model.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.headless.api.query.request.ExplainSqlReq;
-import com.tencent.supersonic.headless.api.query.request.ItemUseReq;
-import com.tencent.supersonic.headless.api.query.request.MetricReq;
-import com.tencent.supersonic.headless.api.query.request.QueryDimValueReq;
-import com.tencent.supersonic.headless.api.query.request.QueryS2SQLReq;
-import com.tencent.supersonic.headless.api.query.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.query.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.query.response.ItemUseResp;
+import com.tencent.supersonic.headless.common.model.response.ExplainResp;
+import com.tencent.supersonic.headless.common.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.common.query.request.ExplainSqlReq;
+import com.tencent.supersonic.headless.common.query.request.ItemUseReq;
+import com.tencent.supersonic.headless.common.query.request.MetricReq;
+import com.tencent.supersonic.headless.common.query.request.QueryDimValueReq;
+import com.tencent.supersonic.headless.common.query.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.common.query.request.QueryMultiStructReq;
+import com.tencent.supersonic.headless.common.query.request.QueryStructReq;
+import com.tencent.supersonic.headless.common.query.response.ItemUseResp;
 import com.tencent.supersonic.headless.query.persistence.pojo.QueryStatement;
 import java.util.List;
 

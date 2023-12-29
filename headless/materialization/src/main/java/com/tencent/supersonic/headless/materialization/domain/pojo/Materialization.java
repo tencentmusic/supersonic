@@ -3,8 +3,8 @@ package com.tencent.supersonic.headless.materialization.domain.pojo;
 
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.headless.api.model.enums.ModelSourceTypeEnum;
-import com.tencent.supersonic.headless.api.materialization.enums.UpdateCycleEnum;
+import com.tencent.supersonic.headless.common.model.enums.ModelSourceTypeEnum;
+import com.tencent.supersonic.headless.common.materialization.enums.UpdateCycleEnum;
 import lombok.Data;
 
 import java.util.List;

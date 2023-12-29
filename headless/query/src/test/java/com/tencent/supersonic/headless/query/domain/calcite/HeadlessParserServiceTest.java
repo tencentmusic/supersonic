@@ -1,16 +1,16 @@
 package com.tencent.supersonic.headless.query.domain.calcite;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
-import com.tencent.supersonic.headless.api.model.response.SqlParserResp;
-import com.tencent.supersonic.headless.api.model.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.api.model.yaml.DimensionTimeTypeParamsTpl;
-import com.tencent.supersonic.headless.api.model.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.api.model.yaml.IdentifyYamlTpl;
-import com.tencent.supersonic.headless.api.model.yaml.MeasureYamlTpl;
-import com.tencent.supersonic.headless.api.model.yaml.MetricTypeParamsYamlTpl;
-import com.tencent.supersonic.headless.api.model.yaml.MetricYamlTpl;
-import com.tencent.supersonic.headless.api.query.enums.AggOption;
-import com.tencent.supersonic.headless.api.query.request.MetricReq;
+import com.tencent.supersonic.headless.common.model.response.SqlParserResp;
+import com.tencent.supersonic.headless.common.model.yaml.DataModelYamlTpl;
+import com.tencent.supersonic.headless.common.model.yaml.DimensionTimeTypeParamsTpl;
+import com.tencent.supersonic.headless.common.model.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.common.model.yaml.IdentifyYamlTpl;
+import com.tencent.supersonic.headless.common.model.yaml.MeasureYamlTpl;
+import com.tencent.supersonic.headless.common.model.yaml.MetricTypeParamsYamlTpl;
+import com.tencent.supersonic.headless.common.model.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.common.query.enums.AggOption;
+import com.tencent.supersonic.headless.common.query.request.MetricReq;
 import com.tencent.supersonic.headless.query.parser.calcite.HeadlessSchemaManager;
 import com.tencent.supersonic.headless.query.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.headless.query.persistence.pojo.QueryStatement;

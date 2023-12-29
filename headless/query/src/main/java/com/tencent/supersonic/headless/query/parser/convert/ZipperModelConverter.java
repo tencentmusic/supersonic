@@ -1,10 +1,10 @@
 package com.tencent.supersonic.headless.query.parser.convert;
 
-import com.tencent.supersonic.headless.api.model.enums.ModelSourceTypeEnum;
-import com.tencent.supersonic.headless.api.model.response.ModelResp;
-import com.tencent.supersonic.headless.api.query.request.MetricReq;
-import com.tencent.supersonic.headless.api.query.request.ParseSqlReq;
-import com.tencent.supersonic.headless.api.query.request.QueryStructReq;
+import com.tencent.supersonic.headless.common.model.enums.ModelSourceTypeEnum;
+import com.tencent.supersonic.headless.common.model.response.ModelResp;
+import com.tencent.supersonic.headless.common.query.request.MetricReq;
+import com.tencent.supersonic.headless.common.query.request.ParseSqlReq;
+import com.tencent.supersonic.headless.common.query.request.QueryStructReq;
 import com.tencent.supersonic.headless.model.domain.Catalog;
 import com.tencent.supersonic.headless.query.parser.HeadlessConverter;
 import com.tencent.supersonic.headless.query.persistence.pojo.QueryStatement;

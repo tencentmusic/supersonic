@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.model.domain.pojo;
 
 import com.tencent.supersonic.common.pojo.DataFormat;
-import com.tencent.supersonic.headless.api.model.pojo.MetricTypeParams;
-import com.tencent.supersonic.headless.api.model.pojo.RelateDimension;
-import com.tencent.supersonic.headless.api.model.pojo.SchemaItem;
+import com.tencent.supersonic.headless.common.model.pojo.MetricTypeParams;
+import com.tencent.supersonic.headless.common.model.pojo.RelateDimension;
+import com.tencent.supersonic.headless.common.model.pojo.SchemaItem;
 import lombok.Data;
 import java.util.List;
 

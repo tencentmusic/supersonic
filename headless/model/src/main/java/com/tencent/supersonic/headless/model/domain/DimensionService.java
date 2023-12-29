@@ -4,11 +4,11 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.enums.EventType;
-import com.tencent.supersonic.headless.api.model.pojo.DimValueMap;
-import com.tencent.supersonic.headless.api.model.request.DimensionReq;
-import com.tencent.supersonic.headless.api.model.request.MetaBatchReq;
-import com.tencent.supersonic.headless.api.model.request.PageDimensionReq;
-import com.tencent.supersonic.headless.api.model.response.DimensionResp;
+import com.tencent.supersonic.headless.common.model.pojo.DimValueMap;
+import com.tencent.supersonic.headless.common.model.request.DimensionReq;
+import com.tencent.supersonic.headless.common.model.request.MetaBatchReq;
+import com.tencent.supersonic.headless.common.model.request.PageDimensionReq;
+import com.tencent.supersonic.headless.common.model.response.DimensionResp;
 import com.tencent.supersonic.headless.model.domain.pojo.MetaFilter;
 
 import java.util.List;

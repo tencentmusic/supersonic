@@ -1,16 +1,16 @@
 package com.tencent.supersonic.headless.model.domain.manager;
 
-import com.tencent.supersonic.headless.api.model.enums.ModelSourceTypeEnum;
-import com.tencent.supersonic.headless.api.model.pojo.ModelDetail;
-import com.tencent.supersonic.headless.api.model.pojo.Dim;
-import com.tencent.supersonic.headless.api.model.pojo.Identify;
-import com.tencent.supersonic.headless.api.model.pojo.Measure;
-import com.tencent.supersonic.headless.api.model.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.model.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.api.model.yaml.DimensionTimeTypeParamsTpl;
-import com.tencent.supersonic.headless.api.model.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.api.model.yaml.IdentifyYamlTpl;
-import com.tencent.supersonic.headless.api.model.yaml.MeasureYamlTpl;
+import com.tencent.supersonic.headless.common.model.enums.ModelSourceTypeEnum;
+import com.tencent.supersonic.headless.common.model.pojo.ModelDetail;
+import com.tencent.supersonic.headless.common.model.pojo.Dim;
+import com.tencent.supersonic.headless.common.model.pojo.Identify;
+import com.tencent.supersonic.headless.common.model.pojo.Measure;
+import com.tencent.supersonic.headless.common.model.response.DatabaseResp;
+import com.tencent.supersonic.headless.common.model.yaml.DataModelYamlTpl;
+import com.tencent.supersonic.headless.common.model.yaml.DimensionTimeTypeParamsTpl;
+import com.tencent.supersonic.headless.common.model.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.common.model.yaml.IdentifyYamlTpl;
+import com.tencent.supersonic.headless.common.model.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.headless.model.domain.pojo.Datasource;
 import com.tencent.supersonic.headless.model.domain.pojo.DatasourceQueryEnum;
 import com.tencent.supersonic.headless.model.domain.adaptor.engineadapter.EngineAdaptor;

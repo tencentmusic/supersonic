@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.model.domain.utils;
 
-import com.tencent.supersonic.headless.api.model.enums.DimensionTypeEnum;
+import com.tencent.supersonic.headless.common.model.enums.DimensionTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.model.pojo.Dim;
-import com.tencent.supersonic.headless.api.model.pojo.DimensionTimeTypeParams;
+import com.tencent.supersonic.headless.common.model.pojo.Dim;
+import com.tencent.supersonic.headless.common.model.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.model.domain.adaptor.engineadapter.EngineAdaptor;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.query.parser;
 
-import com.tencent.supersonic.headless.api.query.enums.AggOption;
+import com.tencent.supersonic.headless.common.query.enums.AggOption;
 import com.tencent.supersonic.headless.model.domain.Catalog;
 import com.tencent.supersonic.headless.query.persistence.pojo.QueryStatement;
 

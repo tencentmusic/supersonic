@@ -18,7 +18,7 @@ import com.tencent.supersonic.chat.service.ConfigService;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.common.model.response.QueryResultWithSchemaResp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;

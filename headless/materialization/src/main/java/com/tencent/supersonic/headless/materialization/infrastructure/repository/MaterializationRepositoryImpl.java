@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.materialization.infrastructure.repository;
 
-import com.tencent.supersonic.headless.api.materialization.pojo.MaterializationFilter;
-import com.tencent.supersonic.headless.api.materialization.response.MaterializationResp;
+import com.tencent.supersonic.headless.common.materialization.pojo.MaterializationFilter;
+import com.tencent.supersonic.headless.common.materialization.response.MaterializationResp;
 import com.tencent.supersonic.headless.materialization.domain.pojo.Materialization;
 import com.tencent.supersonic.headless.materialization.domain.repository.MaterializationRepository;
 import com.tencent.supersonic.headless.materialization.domain.utils.MaterializationConverter;

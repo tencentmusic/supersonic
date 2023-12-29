@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.materialization.infrastructure.repository;
 
 
-import com.tencent.supersonic.headless.api.materialization.pojo.MaterializationRecordFilter;
-import com.tencent.supersonic.headless.api.materialization.response.MaterializationRecordResp;
+import com.tencent.supersonic.headless.common.materialization.pojo.MaterializationRecordFilter;
+import com.tencent.supersonic.headless.common.materialization.response.MaterializationRecordResp;
 import com.tencent.supersonic.headless.materialization.domain.dataobject.MaterializationRecordDO;
 import com.tencent.supersonic.headless.materialization.domain.pojo.MaterializationRecord;
 import com.tencent.supersonic.headless.materialization.domain.repository.MaterializationRecordRepository;

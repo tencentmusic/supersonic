@@ -1,10 +1,10 @@
 package com.tencent.supersonic.headless.model.application;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.api.model.request.DatabaseReq;
-import com.tencent.supersonic.headless.api.model.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.model.response.ModelResp;
-import com.tencent.supersonic.headless.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.common.model.request.DatabaseReq;
+import com.tencent.supersonic.headless.common.model.response.DatabaseResp;
+import com.tencent.supersonic.headless.common.model.response.ModelResp;
+import com.tencent.supersonic.headless.common.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.headless.model.domain.DatabaseService;
 import com.tencent.supersonic.headless.model.domain.ModelService;
 import com.tencent.supersonic.headless.model.domain.adaptor.engineadapter.EngineAdaptor;

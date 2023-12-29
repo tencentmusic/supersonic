@@ -13,7 +13,7 @@
     <dependencies>
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
-            <artifactId>headless-api</artifactId>
+            <artifactId>headless-common</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>

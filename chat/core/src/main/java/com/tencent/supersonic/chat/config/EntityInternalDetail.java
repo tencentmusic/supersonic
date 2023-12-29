@@ -1,8 +1,8 @@
 package com.tencent.supersonic.chat.config;
 
 
-import com.tencent.supersonic.headless.api.model.response.DimSchemaResp;
-import com.tencent.supersonic.headless.api.model.response.MetricSchemaResp;
+import com.tencent.supersonic.headless.common.model.response.DimSchemaResp;
+import com.tencent.supersonic.headless.common.model.response.MetricSchemaResp;
 import java.util.List;
 import lombok.Data;
 

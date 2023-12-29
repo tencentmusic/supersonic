@@ -13,10 +13,11 @@
 
     <packaging>pom</packaging>
     <modules>
-        <module>api</module>
+        <module>common</module>
         <module>model</module>
         <module>query</module>
         <module>materialization</module>
+        <module>api</module>
     </modules>
 
 </project>
