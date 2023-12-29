@@ -67,12 +67,6 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.tencent.supersonic</groupId>
-            <artifactId>headless-materialization</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
             <version>${jsonpath.version}</version>
