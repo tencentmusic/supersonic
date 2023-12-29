@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.tencent.supersonic</groupId>
         <artifactId>headless</artifactId>
-        <version>0.8.2-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>headless-api</artifactId>
