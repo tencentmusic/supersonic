@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.query.parser.calcite.sql;
 
 
-import com.tencent.supersonic.headless.api.query.request.MetricReq;
+import com.tencent.supersonic.headless.common.query.request.MetricReq;
 import com.tencent.supersonic.headless.query.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.query.parser.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.query.parser.calcite.s2sql.Measure;

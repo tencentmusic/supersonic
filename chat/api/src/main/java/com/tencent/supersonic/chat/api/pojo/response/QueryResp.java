@@ -17,4 +17,6 @@ public class QueryResp {
     private QueryResult queryResult;
     private List<SemanticParseInfo> parseInfos;
     private List<SimilarQueryRecallResp> similarQueries;
+
+
 }

@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.query.executor;
 
-import com.tencent.supersonic.headless.api.model.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.model.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.common.model.response.DatabaseResp;
+import com.tencent.supersonic.headless.common.model.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.headless.model.domain.Catalog;
 import com.tencent.supersonic.headless.model.domain.utils.SqlUtils;
 import com.tencent.supersonic.headless.query.persistence.pojo.QueryStatement;

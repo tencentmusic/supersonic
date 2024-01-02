@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.query.parser.calcite;
 
-import com.tencent.supersonic.headless.api.query.enums.AggOption;
-import com.tencent.supersonic.headless.api.query.request.MetricReq;
+import com.tencent.supersonic.headless.common.query.enums.AggOption;
+import com.tencent.supersonic.headless.common.query.request.MetricReq;
 import com.tencent.supersonic.headless.model.domain.Catalog;
 import com.tencent.supersonic.headless.query.parser.SqlParser;
 import com.tencent.supersonic.headless.query.parser.calcite.planner.AggPlanner;

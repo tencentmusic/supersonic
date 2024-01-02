@@ -1,11 +1,11 @@
 package com.tencent.supersonic.headless.query.parser;
 
 import com.tencent.supersonic.common.util.StringUtil;
-import com.tencent.supersonic.headless.api.query.enums.AggOption;
-import com.tencent.supersonic.headless.api.query.pojo.MetricTable;
-import com.tencent.supersonic.headless.api.query.request.MetricReq;
-import com.tencent.supersonic.headless.api.query.request.ParseSqlReq;
-import com.tencent.supersonic.headless.api.query.request.QueryStructReq;
+import com.tencent.supersonic.headless.common.query.enums.AggOption;
+import com.tencent.supersonic.headless.common.query.pojo.MetricTable;
+import com.tencent.supersonic.headless.common.query.request.MetricReq;
+import com.tencent.supersonic.headless.common.query.request.ParseSqlReq;
+import com.tencent.supersonic.headless.common.query.request.QueryStructReq;
 import com.tencent.supersonic.headless.model.domain.Catalog;
 import com.tencent.supersonic.headless.query.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.headless.query.utils.ComponentFactory;
@@ -73,6 +73,8 @@ public class QueryParser {
                     QueryStatement tableSql = new QueryStatement();
                     tableSql.setIsS2SQL(false);
                     tableSql.setMetricReq(metricReq);
+                    tableSql.setMinMaxTime(queryStatement.getMinMaxTime());
+                    tableSql.setEnableOptimize(queryStatement.getEnableOptimize());
                     tableSql = parser(tableSql, metricTable.getAggOption());
                     if (!tableSql.isOk()) {
                         queryStatement.setErrMsg(String.format("parser table [%s] error [%s]", metricTable.getAlias(),
