@@ -58,7 +58,7 @@ const FieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSqlChange })
   const columns = [
     {
       title: '字段名称',
-      dataIndex: 'bizName',
+      dataIndex: 'fieldName',
       width: 100,
     },
     // {
