@@ -88,6 +88,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
         const {
           type,
           bizName,
+          fieldName,
           timeGranularity,
           agg,
           isCreateDimension: createDimension,
@@ -102,7 +103,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
         switch (type) {
           case EnumDataSourceType.CATEGORICAL:
             fieldsClassify.dimensions.push({
-              bizName,
+              bizName: fieldName,
               type,
               isCreateDimension,
               name,
@@ -111,7 +112,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
             break;
           case EnumDataSourceType.TIME:
             fieldsClassify.dimensions.push({
-              bizName,
+              bizName: fieldName,
               type,
               isCreateDimension,
               name,
@@ -125,7 +126,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
           case EnumDataSourceType.FOREIGN:
           case EnumDataSourceType.PRIMARY:
             fieldsClassify.identifiers.push({
-              bizName,
+              bizName: fieldName,
               name,
               type,
               entityNames,
@@ -133,7 +134,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
             break;
           case EnumDataSourceType.MEASURES:
             fieldsClassify.measures.push({
-              bizName,
+              bizName: fieldName,
               type,
               agg,
               name,
@@ -206,14 +207,15 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
       const { type, nameEn } = item;
       const oldItem =
         fieldsClassifyList.find((oItem) => {
-          if (oItem.type === EnumDataSourceType.MEASURES) {
-            return oItem.expr === item.nameEn;
-          }
-          return oItem.bizName === item.nameEn;
+          // if (oItem.type === EnumDataSourceType.MEASURES) {
+          //   return oItem.expr === item.nameEn;
+          // }
+          return oItem.fieldName === item.nameEn;
         }) || {};
       return {
         ...oldItem,
         bizName: nameEn,
+        fieldName: nameEn,
         sqlType: type,
       };
     });
@@ -394,7 +396,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
                 onDataSourceBtnClick?.();
               }}
             >
-              数据源编辑
+              SQL编辑
             </Button>
           )}
 
