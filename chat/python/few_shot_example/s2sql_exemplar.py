@@ -1,4 +1,4 @@
-examplars= [
+exemplars= [
     {   "currentDate":"2020-12-01",
         "tableName":"内容库产品",
         "fieldsList":"""["部门", "模块", "用户名", "访问次数", "访问人数", "访问时长", "数据日期"]""",

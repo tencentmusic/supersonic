@@ -14,9 +14,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from instances.logging_instance import logger
 
-from s2ql.constructor import FewShotPromptTemplate2
-from s2ql.output_parser import  schema_link_parse, combo_schema_link_parse, combo_sql_parse
-from s2ql.auto_cot_run import transform_sql_example, transform_sql_example_autoCoT_run
+from s2sql.constructor import FewShotPromptTemplate2
+from s2sql.output_parser import  schema_link_parse, combo_schema_link_parse, combo_sql_parse
+from s2sql.auto_cot_run import transform_sql_example, transform_sql_example_autoCoT_run
 
 
 class Text2DSLAgentBase(object):
@@ -248,6 +248,8 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             resp['priorExts'] = prior_exts
             resp['currentDate'] = current_date
 
+            resp['prompt'] = [schema_linking_prompt+'\n\n'+sql_prompt]
+
             resp['schemaLinkingOutput'] = schema_link_output
             resp['schemaLinkStr'] = schema_link_str
             
@@ -285,6 +287,8 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             resp['priorExts'] = prior_exts
             resp['currentDate'] = current_date
 
+            resp['prompt'] = [schema_linking_sql_shortcut_prompt]
+
             resp['schemaLinkingComboOutput'] = schema_linking_sql_shortcut_output
             resp['schemaLinkStr'] = schema_linking_str
             resp['sqlOutput'] = sql_str
@@ -303,7 +307,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
 
             schema_linking_str_pool = [schema_link_parse(schema_linking_output) for schema_linking_output in schema_linking_output_pool]
 
-            return schema_linking_str_pool
+            return schema_linking_str_pool, schema_linking_output_pool, schema_linking_prompt_pool
         
         async def generate_sql_tasks(self, question: str, model_name: str, fields_list: List[str], schema_link_str_pool: List[str],
                     current_date: str, prior_schema_links: Mapping[str,str], prior_exts: str, fewshot_example_list_combo:List[List[Mapping[str, str]]]):
@@ -313,7 +317,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             sql_output_pool = await asyncio.gather(*[self.llm._call_async(sql_prompt) for sql_prompt in sql_prompt_pool])
             logger.debug("sql_output_pool->{}".format(sql_output_pool))
 
-            return sql_output_pool
+            return sql_output_pool, sql_prompt_pool
         
         async def generate_schema_linking_sql_tasks(self, question: str, model_name: str, fields_list: List[str],
                                                     current_date: str, prior_schema_links: Mapping[str,str], prior_exts: str, fewshot_example_list_combo:List[List[Mapping[str, str]]]):
@@ -322,7 +326,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             schema_linking_sql_output_res_pool = await asyncio.gather(*schema_linking_sql_output_task_pool)
             logger.debug("schema_linking_sql_output_res_pool->{}".format(schema_linking_sql_output_res_pool))
 
-            return schema_linking_sql_output_res_pool
+            return schema_linking_sql_output_res_pool, schema_linking_sql_prompt_pool, schema_linking_sql_output_task_pool
    
         async def tasks_run(self, question: str, filter_condition: Mapping[str,str],
                     model_name: str, fields_list: List[str],
@@ -338,14 +342,14 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             fewshot_example_meta_list = self.get_examples_candidates(question, filter_condition, self.num_examples)
             fewshot_example_list_combo = self.get_fewshot_example_combos(fewshot_example_meta_list, self.num_fewshots)
 
-            schema_linking_candidate_list = await self.generate_schema_linking_tasks(question, model_name, fields_list, current_date, prior_schema_links, prior_exts, fewshot_example_list_combo)
+            schema_linking_candidate_list, _, schema_linking_prompt_list = await self.generate_schema_linking_tasks(question, model_name, fields_list, current_date, prior_schema_links, prior_exts, fewshot_example_list_combo)
             logger.debug(f'schema_linking_candidate_list:{schema_linking_candidate_list}')
             schema_linking_candidate_sorted_list = self.schema_linking_list_str_unify(schema_linking_candidate_list)
             logger.debug(f'schema_linking_candidate_sorted_list:{schema_linking_candidate_sorted_list}')
 
             schema_linking_output_max, schema_linking_output_vote_percentage = self.self_consistency_vote(schema_linking_candidate_sorted_list)
 
-            sql_output_candicates = await self.generate_sql_tasks(question, model_name, fields_list, schema_linking_candidate_list, current_date, prior_schema_links, prior_exts, fewshot_example_list_combo)
+            sql_output_candicates, sql_output_prompt_list = await self.generate_sql_tasks(question, model_name, fields_list, schema_linking_candidate_list, current_date, prior_schema_links, prior_exts, fewshot_example_list_combo)
             logger.debug(f'sql_output_candicates:{sql_output_candicates}')
             sql_output_max, sql_output_vote_percentage = self.self_consistency_vote(sql_output_candicates)
 
@@ -356,6 +360,8 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             resp['priorSchemaLinking'] = prior_schema_links
             resp['priorExts'] = prior_exts
             resp['currentDate'] = current_date
+
+            resp['prompt'] = [schema_linking_prompt+'\n\n'+sql_prompt for schema_linking_prompt, sql_prompt in zip(schema_linking_prompt_list, sql_output_prompt_list)]
 
             resp['schemaLinkStr'] = schema_linking_output_max
             resp['schemaLinkingWeight'] = schema_linking_output_vote_percentage
@@ -380,7 +386,7 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             fewshot_example_meta_list = self.get_examples_candidates(question, filter_condition, self.num_examples)
             fewshot_example_list_combo = self.get_fewshot_example_combos(fewshot_example_meta_list, self.num_fewshots)
 
-            schema_linking_sql_output_candidates = await self.generate_schema_linking_sql_tasks(question, model_name, fields_list, current_date, prior_schema_links, prior_exts, fewshot_example_list_combo)
+            schema_linking_sql_output_candidates, schema_linking_sql_prompt_list, _ = await self.generate_schema_linking_sql_tasks(question, model_name, fields_list, current_date, prior_schema_links, prior_exts, fewshot_example_list_combo)
             logger.debug(f'schema_linking_sql_output_candidates:{schema_linking_sql_output_candidates}')
             schema_linking_output_candidate_list = [combo_schema_link_parse(schema_linking_sql_output_candidate) for schema_linking_sql_output_candidate in schema_linking_sql_output_candidates]
             logger.debug(f'schema_linking_sql_output_candidate_list:{schema_linking_output_candidate_list}')
@@ -399,6 +405,8 @@ class Text2DSLAgentAutoCoT(Text2DSLAgentBase):
             resp['priorSchemaLinking'] = prior_schema_links
             resp['priorExts'] = prior_exts
             resp['currentDate'] = current_date
+
+            resp['prompt'] = schema_linking_sql_prompt_list
 
             resp['schemaLinkStr'] = schema_linking_output_max
             resp['schemaLinkingWeight'] = schema_linking_output_vote_percentage
