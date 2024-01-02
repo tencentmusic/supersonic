@@ -9,20 +9,20 @@ import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
+import com.tencent.supersonic.headless.server.listener.MetaEmbeddingListener;
 import com.tencent.supersonic.knowledge.dictionary.EmbeddingResult;
-import com.tencent.supersonic.headless.model.domain.listener.MetaEmbeddingListener;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * EmbeddingMatchStrategy uses vector database to perform

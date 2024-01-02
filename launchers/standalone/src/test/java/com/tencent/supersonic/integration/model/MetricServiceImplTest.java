@@ -3,15 +3,16 @@ package com.tencent.supersonic.integration.model;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.StandaloneLauncher;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
-import com.tencent.supersonic.headless.common.model.enums.MetricTypeEnum;
-import com.tencent.supersonic.headless.common.model.response.MetricResp;
-import com.tencent.supersonic.headless.model.domain.MetricService;
-import com.tencent.supersonic.headless.model.domain.pojo.MetricFilter;
+import com.tencent.supersonic.headless.common.server.enums.MetricType;
+import com.tencent.supersonic.headless.common.server.response.MetricResp;
+import com.tencent.supersonic.headless.server.pojo.MetricFilter;
+import com.tencent.supersonic.headless.server.service.MetricService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+
 import java.util.List;
 
 @SpringBootTest(classes = StandaloneLauncher.class)
@@ -24,7 +25,7 @@ public class MetricServiceImplTest {
     @Test
     void getMetrics() {
         MetricFilter metricFilter = new MetricFilter();
-        metricFilter.setType(MetricTypeEnum.ATOMIC.name());
+        metricFilter.setType(MetricType.ATOMIC.name());
         metricFilter.setModelIds(Lists.newArrayList(1L));
         metricFilter.setSensitiveLevel(SensitiveLevelEnum.LOW.ordinal());
         List<MetricResp> metricResps = metricService.getMetrics(metricFilter);

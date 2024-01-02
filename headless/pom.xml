@@ -13,10 +13,9 @@
 
     <packaging>pom</packaging>
     <modules>
-        <module>common</module>
-        <module>model</module>
-        <module>query</module>
         <module>api</module>
+        <module>server</module>
+        <module>core</module>
     </modules>
 
 </project>

@@ -12,27 +12,27 @@ import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.headless.common.model.enums.DataTypeEnum;
-import com.tencent.supersonic.headless.common.model.enums.DimensionTypeEnum;
-import com.tencent.supersonic.headless.common.model.enums.IdentifyTypeEnum;
-import com.tencent.supersonic.headless.common.model.enums.SemanticTypeEnum;
-import com.tencent.supersonic.headless.common.model.pojo.Dim;
-import com.tencent.supersonic.headless.common.model.pojo.DimensionTimeTypeParams;
-import com.tencent.supersonic.headless.common.model.pojo.Identify;
-import com.tencent.supersonic.headless.common.model.pojo.Measure;
-import com.tencent.supersonic.headless.common.model.pojo.MetricTypeParams;
-import com.tencent.supersonic.headless.common.model.pojo.ModelDetail;
-import com.tencent.supersonic.headless.common.model.request.DatabaseReq;
-import com.tencent.supersonic.headless.common.model.request.DimensionReq;
-import com.tencent.supersonic.headless.common.model.request.DomainReq;
-import com.tencent.supersonic.headless.common.model.request.MetricReq;
-import com.tencent.supersonic.headless.common.model.request.ModelReq;
-import com.tencent.supersonic.headless.model.domain.DatabaseService;
-import com.tencent.supersonic.headless.model.domain.DimensionService;
-import com.tencent.supersonic.headless.model.domain.DomainService;
-import com.tencent.supersonic.headless.model.domain.MetricService;
-import com.tencent.supersonic.headless.model.domain.ModelRelaService;
-import com.tencent.supersonic.headless.model.domain.ModelService;
+import com.tencent.supersonic.headless.common.server.enums.DataType;
+import com.tencent.supersonic.headless.common.server.enums.DimensionType;
+import com.tencent.supersonic.headless.common.server.enums.IdentifyType;
+import com.tencent.supersonic.headless.common.server.enums.SemanticType;
+import com.tencent.supersonic.headless.common.server.pojo.Dim;
+import com.tencent.supersonic.headless.common.server.pojo.DimensionTimeTypeParams;
+import com.tencent.supersonic.headless.common.server.pojo.Identify;
+import com.tencent.supersonic.headless.common.server.pojo.Measure;
+import com.tencent.supersonic.headless.common.server.pojo.MetricTypeParams;
+import com.tencent.supersonic.headless.common.server.pojo.ModelDetail;
+import com.tencent.supersonic.headless.common.server.request.DatabaseReq;
+import com.tencent.supersonic.headless.common.server.request.DimensionReq;
+import com.tencent.supersonic.headless.common.server.request.DomainReq;
+import com.tencent.supersonic.headless.common.server.request.MetricReq;
+import com.tencent.supersonic.headless.common.server.request.ModelReq;
+import com.tencent.supersonic.headless.server.service.DatabaseService;
+import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.service.DomainService;
+import com.tencent.supersonic.headless.server.service.MetricService;
+import com.tencent.supersonic.headless.server.service.ModelRelaService;
+import com.tencent.supersonic.headless.server.service.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,11 +93,11 @@ public class ModelDemoDataLoader {
         databaseReq.setName("数据实例");
         databaseReq.setDescription("样例数据库实例");
         if (StringUtils.isNotBlank(url)
-                && url.toLowerCase().contains(DataTypeEnum.MYSQL.getFeature().toLowerCase())) {
-            databaseReq.setType(DataTypeEnum.MYSQL.getFeature());
+                && url.toLowerCase().contains(DataType.MYSQL.getFeature().toLowerCase())) {
+            databaseReq.setType(DataType.MYSQL.getFeature());
             databaseReq.setVersion("5.7");
         } else {
-            databaseReq.setType(DataTypeEnum.H2.getFeature());
+            databaseReq.setType(DataType.H2.getFeature());
         }
         databaseReq.setUrl(url);
         databaseReq.setUsername(dataSourceProperties.getUsername());
@@ -131,12 +131,12 @@ public class ModelDemoDataLoader {
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Identify> identifiers = new ArrayList<>();
-        identifiers.add(new Identify("用户", IdentifyTypeEnum.primary.name(), "user_name"));
+        identifiers.add(new Identify("用户", IdentifyType.primary.name(), "user_name"));
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
         dimensions.add(new Dim("部门", "department",
-                DimensionTypeEnum.categorical.name(), 1));
+                DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
 
         modelDetail.setMeasures(Collections.emptyList());
@@ -159,14 +159,14 @@ public class ModelDemoDataLoader {
         modelReq.setAdminOrgs(Collections.emptyList());
         List<Identify> identifiers = new ArrayList<>();
         ModelDetail modelDetail = new ModelDetail();
-        identifiers.add(new Identify("用户名", IdentifyTypeEnum.primary.name(), "s2_pv_uv_statis_user_name"));
+        identifiers.add(new Identify("用户名", IdentifyType.primary.name(), "s2_pv_uv_statis_user_name"));
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionTypeEnum.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        Dim dimension2 = new Dim("", "page", DimensionTypeEnum.categorical.name(), 0);
+        Dim dimension2 = new Dim("", "page", DimensionType.categorical.name(), 0);
         dimension2.setExpr("page");
         dimensions.add(dimension2);
         modelDetail.setDimensions(dimensions);
@@ -199,14 +199,14 @@ public class ModelDemoDataLoader {
         modelReq.setAdminOrgs(Collections.emptyList());
         List<Identify> identifiers = new ArrayList<>();
         ModelDetail modelDetail = new ModelDetail();
-        identifiers.add(new Identify("用户名称", IdentifyTypeEnum.primary.name(), "stay_hours_user_name"));
+        identifiers.add(new Identify("用户名称", IdentifyType.primary.name(), "stay_hours_user_name"));
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionTypeEnum.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        Dim dimension2 = new Dim("页面", "page", DimensionTypeEnum.categorical.name(), 1);
+        Dim dimension2 = new Dim("页面", "page", DimensionType.categorical.name(), 1);
         dimension2.setExpr("page");
         dimensions.add(dimension2);
         modelDetail.setDimensions(dimensions);
@@ -274,21 +274,21 @@ public class ModelDemoDataLoader {
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Identify> identifiers = new ArrayList<>();
-        Identify identify = new Identify("歌手名", IdentifyTypeEnum.primary.name(), "singer_name");
+        Identify identify = new Identify("歌手名", IdentifyType.primary.name(), "singer_name");
         identify.setEntityNames(Lists.newArrayList("歌手", "艺人"));
         identifiers.add(identify);
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionTypeEnum.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         dimensions.add(new Dim("活跃区域", "act_area",
-                DimensionTypeEnum.categorical.name(), 1, 1));
+                DimensionType.categorical.name(), 1, 1));
         dimensions.add(new Dim("代表作", "song_name",
-                DimensionTypeEnum.categorical.name(), 1));
+                DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("风格", "genre",
-                DimensionTypeEnum.categorical.name(), 1, 1));
+                DimensionType.categorical.name(), 1, 1));
         modelDetail.setDimensions(dimensions);
 
         Measure measure1 = new Measure("播放量", "js_play_cnt", "sum", 1);
@@ -305,13 +305,13 @@ public class ModelDemoDataLoader {
     public void updateDimension() throws Exception {
         DimensionReq dimensionReq = new DimensionReq();
         dimensionReq.setModelId(1L);
-        dimensionReq.setType(DimensionTypeEnum.categorical.name());
+        dimensionReq.setType(DimensionType.categorical.name());
         dimensionReq.setId(4L);
         dimensionReq.setName("页面");
         dimensionReq.setBizName("page");
         dimensionReq.setModelId(3L);
         dimensionReq.setAlias("page");
-        dimensionReq.setSemanticType(SemanticTypeEnum.CATEGORY.name());
+        dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
         dimensionReq.setSensitiveLevel(2);
         dimensionReq.setDescription("页面");
         dimensionReq.setExpr("page");

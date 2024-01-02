@@ -6,18 +6,18 @@ import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.headless.common.model.enums.DimensionTypeEnum;
-import com.tencent.supersonic.headless.common.model.enums.IdentifyTypeEnum;
-import com.tencent.supersonic.headless.common.model.pojo.Dim;
-import com.tencent.supersonic.headless.common.model.pojo.DimensionTimeTypeParams;
-import com.tencent.supersonic.headless.common.model.pojo.Identify;
-import com.tencent.supersonic.headless.common.model.pojo.Measure;
-import com.tencent.supersonic.headless.common.model.pojo.ModelDetail;
-import com.tencent.supersonic.headless.common.model.request.DomainReq;
-import com.tencent.supersonic.headless.common.model.request.ModelReq;
-import com.tencent.supersonic.headless.model.domain.DomainService;
-import com.tencent.supersonic.headless.model.domain.ModelRelaService;
-import com.tencent.supersonic.headless.model.domain.ModelService;
+import com.tencent.supersonic.headless.common.server.enums.DimensionType;
+import com.tencent.supersonic.headless.common.server.enums.IdentifyType;
+import com.tencent.supersonic.headless.common.server.pojo.Dim;
+import com.tencent.supersonic.headless.common.server.pojo.DimensionTimeTypeParams;
+import com.tencent.supersonic.headless.common.server.pojo.Identify;
+import com.tencent.supersonic.headless.common.server.pojo.Measure;
+import com.tencent.supersonic.headless.common.server.pojo.ModelDetail;
+import com.tencent.supersonic.headless.common.server.request.DomainReq;
+import com.tencent.supersonic.headless.common.server.request.ModelReq;
+import com.tencent.supersonic.headless.server.service.DomainService;
+import com.tencent.supersonic.headless.server.service.ModelRelaService;
+import com.tencent.supersonic.headless.server.service.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -84,14 +84,14 @@ public class BenchMarkDemoDataLoader {
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionTypeEnum.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        dimensions.add(new Dim("活跃区域", "most_popular_in", DimensionTypeEnum.categorical.name(), 1));
+        dimensions.add(new Dim("活跃区域", "most_popular_in", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
 
         List<Identify> identifiers = new ArrayList<>();
-        identifiers.add(new Identify("音乐类型名称", IdentifyTypeEnum.primary.name(), "g_name"));
+        identifiers.add(new Identify("音乐类型名称", IdentifyType.primary.name(), "g_name"));
         modelDetail.setIdentifiers(identifiers);
 
         List<Measure> measures = new ArrayList<>();
@@ -114,13 +114,13 @@ public class BenchMarkDemoDataLoader {
         modelReq.setDatabaseId(1L);
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
-        dimensions.add(new Dim("国籍", "country", DimensionTypeEnum.categorical.name(), 1));
-        dimensions.add(new Dim("性别", "gender", DimensionTypeEnum.categorical.name(), 1));
+        dimensions.add(new Dim("国籍", "country", DimensionType.categorical.name(), 1));
+        dimensions.add(new Dim("性别", "gender", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
 
         List<Identify> identifiers = new ArrayList<>();
-        identifiers.add(new Identify("艺术家名称", IdentifyTypeEnum.primary.name(), "artist_name"));
-        identifiers.add(new Identify("音乐类型名称", IdentifyTypeEnum.foreign.name(), "g_name"));
+        identifiers.add(new Identify("艺术家名称", IdentifyType.primary.name(), "artist_name"));
+        identifiers.add(new Identify("音乐类型名称", IdentifyType.foreign.name(), "g_name"));
         modelDetail.setIdentifiers(identifiers);
 
         modelDetail.setMeasures(Collections.emptyList());
@@ -140,13 +140,13 @@ public class BenchMarkDemoDataLoader {
         modelReq.setDatabaseId(1L);
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
-        dimensions.add(new Dim("持续时间", "duration", DimensionTypeEnum.categorical.name(), 1));
-        dimensions.add(new Dim("文件格式", "formats", DimensionTypeEnum.categorical.name(), 1));
+        dimensions.add(new Dim("持续时间", "duration", DimensionType.categorical.name(), 1));
+        dimensions.add(new Dim("文件格式", "formats", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
 
         List<Identify> identifiers = new ArrayList<>();
-        identifiers.add(new Identify("歌曲ID", IdentifyTypeEnum.primary.name(), "f_id"));
-        identifiers.add(new Identify("艺术家名称", IdentifyTypeEnum.foreign.name(), "artist_name"));
+        identifiers.add(new Identify("歌曲ID", IdentifyType.primary.name(), "f_id"));
+        identifiers.add(new Identify("艺术家名称", IdentifyType.foreign.name(), "artist_name"));
         modelDetail.setIdentifiers(identifiers);
 
         modelDetail.setMeasures(Collections.emptyList());
@@ -166,19 +166,19 @@ public class BenchMarkDemoDataLoader {
         modelReq.setDatabaseId(1L);
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
-        Dim dimension1 = new Dim("", "imp_date", DimensionTypeEnum.time.name(), 0);
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
-        dimensions.add(new Dim("国家", "country", DimensionTypeEnum.categorical.name(), 1));
-        dimensions.add(new Dim("语种", "languages", DimensionTypeEnum.categorical.name(), 1));
-        dimensions.add(new Dim("发行时间", "releasedate", DimensionTypeEnum.categorical.name(), 1));
+        dimensions.add(new Dim("国家", "country", DimensionType.categorical.name(), 1));
+        dimensions.add(new Dim("语种", "languages", DimensionType.categorical.name(), 1));
+        dimensions.add(new Dim("发行时间", "releasedate", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
 
         List<Identify> identifiers = new ArrayList<>();
-        identifiers.add(new Identify("歌曲名称", IdentifyTypeEnum.primary.name(), "song_name"));
-        identifiers.add(new Identify("歌曲ID", IdentifyTypeEnum.foreign.name(), "f_id"));
-        identifiers.add(new Identify("艺术家名称", IdentifyTypeEnum.foreign.name(), "artist_name"));
-        identifiers.add(new Identify("艺术家名称", IdentifyTypeEnum.foreign.name(), "artist_name"));
+        identifiers.add(new Identify("歌曲名称", IdentifyType.primary.name(), "song_name"));
+        identifiers.add(new Identify("歌曲ID", IdentifyType.foreign.name(), "f_id"));
+        identifiers.add(new Identify("艺术家名称", IdentifyType.foreign.name(), "artist_name"));
+        identifiers.add(new Identify("艺术家名称", IdentifyType.foreign.name(), "artist_name"));
 
         modelDetail.setIdentifiers(identifiers);
 

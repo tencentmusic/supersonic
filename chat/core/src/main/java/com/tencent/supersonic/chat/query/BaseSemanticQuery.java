@@ -15,11 +15,11 @@ import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.knowledge.service.SchemaService;
-import com.tencent.supersonic.headless.common.model.enums.QueryTypeEnum;
-import com.tencent.supersonic.headless.common.model.response.ExplainResp;
-import com.tencent.supersonic.headless.common.query.request.ExplainSqlReq;
-import com.tencent.supersonic.headless.common.query.request.QueryS2SQLReq;
-import com.tencent.supersonic.headless.common.query.request.QueryStructReq;
+import com.tencent.supersonic.headless.common.server.enums.QueryType;
+import com.tencent.supersonic.headless.common.server.response.ExplainResp;
+import com.tencent.supersonic.headless.common.core.request.ExplainSqlReq;
+import com.tencent.supersonic.headless.common.core.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.common.core.request.QueryStructReq;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -48,7 +48,7 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
             if (StringUtils.isNotBlank(sqlInfo.getCorrectS2SQL())) {
                 //sql
                 explainSqlReq = ExplainSqlReq.builder()
-                        .queryTypeEnum(QueryTypeEnum.SQL)
+                        .queryTypeEnum(QueryType.SQL)
                         .queryReq(QueryReqBuilder.buildS2SQLReq(
                                 sqlInfo.getCorrectS2SQL(), parseInfo.getModel().getModelIds()
                         ))
@@ -56,7 +56,7 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
             } else {
                 //struct
                 explainSqlReq = ExplainSqlReq.builder()
-                        .queryTypeEnum(QueryTypeEnum.STRUCT)
+                        .queryTypeEnum(QueryType.STRUCT)
                         .queryReq(QueryReqBuilder.buildStructReq(parseInfo))
                         .build();
             }
