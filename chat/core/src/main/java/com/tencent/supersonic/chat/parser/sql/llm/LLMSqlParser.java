@@ -9,6 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMSqlResp;
 import com.tencent.supersonic.chat.service.SemanticService;
 import com.tencent.supersonic.common.pojo.ModelCluster;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -56,7 +57,7 @@ public class LLMSqlParser implements SemanticParser {
             //5. deduplicate the SQL result list and build parserInfo
             modelCluster.buildName(semanticSchema.getModelIdToName());
             LLMResponseService responseService = ContextUtils.getBean(LLMResponseService.class);
-            Map<String, Double> deduplicationSqlWeight = responseService.getDeduplicationSqlWeight(llmResp);
+            Map<String, LLMSqlResp> deduplicationSqlResp = responseService.getDeduplicationSqlResp(llmResp);
             ParseResult parseResult = ParseResult.builder()
                     .request(request)
                     .modelCluster(modelCluster)
@@ -66,11 +67,11 @@ public class LLMSqlParser implements SemanticParser {
                     .linkingValues(linkingValues)
                     .build();
 
-            if (MapUtils.isEmpty(deduplicationSqlWeight)) {
+            if (MapUtils.isEmpty(deduplicationSqlResp)) {
                 responseService.addParseInfo(queryCtx, parseResult, llmResp.getSqlOutput(), 1D);
             } else {
-                deduplicationSqlWeight.forEach((sql, weight) -> {
-                    responseService.addParseInfo(queryCtx, parseResult, sql, weight);
+                deduplicationSqlResp.forEach((sql, sqlResp) -> {
+                    responseService.addParseInfo(queryCtx, parseResult, sql, sqlResp.getSqlWeight());
                 });
             }
 

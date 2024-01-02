@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.parser.sql.llm;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionResp;
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMSqlResp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -18,8 +20,6 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 @Slf4j
 public class OutputFormat {
-
-    public static final String PATTERN = "\\{[^{}]+\\}";
 
     public static String getSchemaLink(String schemaLink) {
         String reult = "";
@@ -125,5 +125,14 @@ public class OutputFormat {
             log.error("", e);
         }
         return null;
+    }
+
+    public static Map<String, LLMSqlResp> buildSqlRespMap(List<Map<String, String>> sqlExamples,
+            Map<String, Double> sqlMap) {
+        return sqlMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> LLMSqlResp.builder().sqlWeight(entry.getValue()).fewShots(sqlExamples).build())
+                );
     }
 }
