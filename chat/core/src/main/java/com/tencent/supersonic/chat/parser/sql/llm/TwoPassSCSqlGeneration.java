@@ -4,6 +4,7 @@ package com.tencent.supersonic.chat.parser.sql.llm;
 import com.tencent.supersonic.chat.config.OptimizationConfig;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq.SqlGenerationMode;
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.common.util.JsonUtil;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -38,7 +39,7 @@ public class TwoPassSCSqlGeneration implements SqlGeneration, InitializingBean {
     private SqlPromptGenerator sqlPromptGenerator;
 
     @Override
-    public Map<String, Double> generation(LLMReq llmReq, String modelClusterKey) {
+    public LLMResp generation(LLMReq llmReq, String modelClusterKey) {
         //1.retriever sqlExamples and generate exampleListPool
         keyPipelineLog.info("modelClusterKey:{},llmReq:{}", modelClusterKey, llmReq);
         List<Map<String, String>> sqlExamples = sqlExampleLoader.retrieverSqlExamples(llmReq.getQueryText(),
@@ -74,9 +75,13 @@ public class TwoPassSCSqlGeneration implements SqlGeneration, InitializingBean {
             sqlTaskPool.add(result);
         });
         //4.format response.
-        Pair<String, Map<String, Double>> sqlMap = OutputFormat.selfConsistencyVote(sqlTaskPool);
-        keyPipelineLog.info("linkingMap:{} sqlMap:{}", linkingMap, sqlMap);
-        return sqlMap.getRight();
+        Pair<String, Map<String, Double>> sqlMapPair = OutputFormat.selfConsistencyVote(sqlTaskPool);
+        keyPipelineLog.info("linkingMap:{} sqlMap:{}", linkingMap, sqlMapPair.getRight());
+
+        LLMResp llmResp = new LLMResp();
+        llmResp.setQuery(llmReq.getQueryText());
+        llmResp.setSqlRespMap(OutputFormat.buildSqlRespMap(sqlExamples, sqlMapPair.getRight()));
+        return llmResp;
     }
 
     @Override

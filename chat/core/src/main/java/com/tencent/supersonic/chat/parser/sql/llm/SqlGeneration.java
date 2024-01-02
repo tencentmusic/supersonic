@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.parser.sql.llm;
 
 
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
-import java.util.Map;
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 
 /**
  * Sql Generation interface, generating SQL using a large model.
@@ -10,11 +10,11 @@ import java.util.Map;
 public interface SqlGeneration {
 
     /***
-     * generate SQL through LLMReq.
+     * generate llmResp (sql, schemaLink, prompt, etc.) through LLMReq.
      * @param llmReq
      * @param modelClusterKey
      * @return
      */
-    Map<String, Double> generation(LLMReq llmReq, String modelClusterKey);
+    LLMResp generation(LLMReq llmReq, String modelClusterKey);
 
 }
