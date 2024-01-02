@@ -1,12 +1,12 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.common.server.request.DatabaseReq;
-import com.tencent.supersonic.headless.common.server.response.DatabaseResp;
-import com.tencent.supersonic.headless.common.server.response.ModelResp;
-import com.tencent.supersonic.headless.common.server.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.headless.server.engineadapter.EngineAdaptor;
-import com.tencent.supersonic.headless.server.engineadapter.EngineAdaptorFactory;
+import com.tencent.supersonic.headless.api.request.DatabaseReq;
+import com.tencent.supersonic.headless.api.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.response.ModelResp;
+import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.server.adaptor.db.DbAdaptor;
+import com.tencent.supersonic.headless.server.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DatabaseRepository;
 import com.tencent.supersonic.headless.server.pojo.Database;
@@ -148,7 +148,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     @Override
     public QueryResultWithSchemaResp getDbNames(Long id) {
         DatabaseResp databaseResp = getDatabase(id);
-        EngineAdaptor engineAdaptor = EngineAdaptorFactory.getEngineAdaptor(databaseResp.getType());
+        DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         String metaQueryTpl = engineAdaptor.getDbMetaQueryTpl();
         return queryWithColumns(metaQueryTpl, databaseResp);
     }
@@ -156,7 +156,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     @Override
     public QueryResultWithSchemaResp getTables(Long id, String db) {
         DatabaseResp databaseResp = getDatabase(id);
-        EngineAdaptor engineAdaptor = EngineAdaptorFactory.getEngineAdaptor(databaseResp.getType());
+        DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         String metaQueryTpl = engineAdaptor.getTableMetaQueryTpl();
         String metaQuerySql = String.format(metaQueryTpl, db);
         return queryWithColumns(metaQuerySql, databaseResp);
@@ -165,7 +165,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     @Override
     public QueryResultWithSchemaResp getColumns(Long id, String db, String table) {
         DatabaseResp databaseResp = getDatabase(id);
-        EngineAdaptor engineAdaptor = EngineAdaptorFactory.getEngineAdaptor(databaseResp.getType());
+        DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         String metaQueryTpl = engineAdaptor.getColumnMetaQueryTpl();
         String metaQuerySql = String.format(metaQueryTpl, db, table);
         return queryWithColumns(metaQuerySql, databaseResp);

@@ -4,7 +4,7 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
-import com.tencent.supersonic.headless.common.core.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.optimizer.QueryOptimizer;
 import com.tencent.supersonic.headless.core.parser.QueryParser;

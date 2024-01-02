@@ -1,11 +1,11 @@
 package com.tencent.supersonic.headless.core.parser;
 
 import com.tencent.supersonic.common.util.StringUtil;
-import com.tencent.supersonic.headless.common.core.enums.AggOption;
-import com.tencent.supersonic.headless.common.core.pojo.MetricTable;
-import com.tencent.supersonic.headless.common.core.request.MetricReq;
-import com.tencent.supersonic.headless.common.core.request.ParseSqlReq;
-import com.tencent.supersonic.headless.common.core.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.enums.AggOption;
+import com.tencent.supersonic.headless.api.pojo.MetricTable;
+import com.tencent.supersonic.headless.api.request.MetricQueryReq;
+import com.tencent.supersonic.headless.api.request.ParseSqlReq;
+import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.service.Catalog;
@@ -38,7 +38,7 @@ public class QueryParser {
             queryStatement.setParseSqlReq(new ParseSqlReq());
         }
         if (Objects.isNull(queryStatement.getMetricReq())) {
-            queryStatement.setMetricReq(new MetricReq());
+            queryStatement.setMetricReq(new MetricQueryReq());
         }
         log.info("SemanticConverter before [{}]", queryStructReq);
         for (HeadlessConverter headlessConverter : ComponentFactory.getSemanticConverters()) {
@@ -65,7 +65,7 @@ public class QueryParser {
                 List<String[]> tables = new ArrayList<>();
                 String sourceId = "";
                 for (MetricTable metricTable : sqlCommend.getTables()) {
-                    MetricReq metricReq = new MetricReq();
+                    MetricQueryReq metricReq = new MetricQueryReq();
                     metricReq.setMetrics(metricTable.getMetrics());
                     metricReq.setDimensions(metricTable.getDimensions());
                     metricReq.setWhere(StringUtil.formatSqlQuota(metricTable.getWhere()));
@@ -117,7 +117,7 @@ public class QueryParser {
     }
 
     public QueryStatement parser(QueryStatement queryStatement, AggOption isAgg) {
-        MetricReq metricCommand = queryStatement.getMetricReq();
+        MetricQueryReq metricCommand = queryStatement.getMetricReq();
         log.info("parser MetricReq [{}] isAgg [{}]", metricCommand, isAgg);
         if (metricCommand.getRootPath().isEmpty()) {
             queryStatement.setErrMsg("rootPath empty");

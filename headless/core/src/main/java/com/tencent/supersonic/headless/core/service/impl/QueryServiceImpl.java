@@ -14,29 +14,29 @@ import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.cache.CacheUtils;
-import com.tencent.supersonic.headless.common.core.pojo.SingleItemQueryResult;
-import com.tencent.supersonic.headless.common.core.pojo.Cache;
-import com.tencent.supersonic.headless.common.core.request.ExplainSqlReq;
-import com.tencent.supersonic.headless.common.core.request.ItemUseReq;
-import com.tencent.supersonic.headless.common.core.request.MetricReq;
-import com.tencent.supersonic.headless.common.core.request.QueryItemReq;
-import com.tencent.supersonic.headless.common.core.request.QueryDimValueReq;
-import com.tencent.supersonic.headless.common.core.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.common.core.request.QueryS2SQLReq;
-import com.tencent.supersonic.headless.common.core.request.QueryStructReq;
-import com.tencent.supersonic.headless.common.core.response.ItemQueryResultResp;
-import com.tencent.supersonic.headless.common.core.response.ItemUseResp;
-import com.tencent.supersonic.headless.common.server.enums.QueryType;
-import com.tencent.supersonic.headless.common.server.pojo.Dim;
-import com.tencent.supersonic.headless.common.server.pojo.Item;
-import com.tencent.supersonic.headless.common.server.request.ModelSchemaFilterReq;
-import com.tencent.supersonic.headless.common.server.response.AppDetailResp;
-import com.tencent.supersonic.headless.common.server.response.DimensionResp;
-import com.tencent.supersonic.headless.common.server.response.ExplainResp;
-import com.tencent.supersonic.headless.common.server.response.MetricResp;
-import com.tencent.supersonic.headless.common.server.response.ModelResp;
-import com.tencent.supersonic.headless.common.server.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.common.server.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.SingleItemQueryResult;
+import com.tencent.supersonic.headless.api.pojo.Cache;
+import com.tencent.supersonic.headless.api.request.ExplainSqlReq;
+import com.tencent.supersonic.headless.api.request.ItemUseReq;
+import com.tencent.supersonic.headless.api.request.MetricQueryReq;
+import com.tencent.supersonic.headless.api.request.QueryItemReq;
+import com.tencent.supersonic.headless.api.request.QueryDimValueReq;
+import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
+import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.response.ItemQueryResultResp;
+import com.tencent.supersonic.headless.api.response.ItemUseResp;
+import com.tencent.supersonic.headless.api.enums.QueryType;
+import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.Item;
+import com.tencent.supersonic.headless.api.request.ModelSchemaFilterReq;
+import com.tencent.supersonic.headless.api.response.AppDetailResp;
+import com.tencent.supersonic.headless.api.response.DimensionResp;
+import com.tencent.supersonic.headless.api.response.ExplainResp;
+import com.tencent.supersonic.headless.api.response.MetricResp;
+import com.tencent.supersonic.headless.api.response.ModelResp;
+import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.headless.core.annotation.ApiHeaderCheck;
 import com.tencent.supersonic.headless.core.annotation.S2SQLDataPermission;
 import com.tencent.supersonic.headless.core.annotation.StructDataPermission;
@@ -365,7 +365,7 @@ public class QueryServiceImpl implements QueryService {
         return ExplainResp.builder().sql(sql).build();
     }
 
-    public QueryStatement parseMetricReq(MetricReq metricReq) throws Exception {
+    public QueryStatement parseMetricReq(MetricQueryReq metricReq) throws Exception {
         QueryStructReq queryStructCmd = new QueryStructReq();
         return headlessQueryEngine.physicalSql(queryStructCmd, metricReq);
     }

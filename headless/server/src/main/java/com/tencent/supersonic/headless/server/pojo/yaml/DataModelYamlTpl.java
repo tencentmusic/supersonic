@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.server.pojo.yaml;
 
-import com.tencent.supersonic.headless.common.server.enums.ModelSourceType;
+import com.tencent.supersonic.headless.api.enums.ModelSourceType;
 import lombok.Data;
 
 import java.util.List;

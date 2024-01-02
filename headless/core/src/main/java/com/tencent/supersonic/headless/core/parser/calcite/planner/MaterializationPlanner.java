@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.parser.calcite.planner;
 
 import com.tencent.supersonic.common.util.calcite.SqlParseUtils;
-import com.tencent.supersonic.headless.common.core.enums.AggOption;
-import com.tencent.supersonic.headless.common.core.request.MetricReq;
+import com.tencent.supersonic.headless.api.enums.AggOption;
+import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SchemaBuilder;
 import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
@@ -97,7 +97,7 @@ public class MaterializationPlanner implements Planner {
             return;
         }
         Set<String> fields = new HashSet<>();
-        MetricReq metricCommand = queryStatement.getMetricReq();
+        MetricQueryReq metricCommand = queryStatement.getMetricReq();
         if (!Objects.isNull(metricCommand.getWhere()) && !metricCommand.getWhere().isEmpty()) {
             fields.addAll(SqlParseUtils.getFilterField(metricCommand.getWhere()));
         }
@@ -286,7 +286,7 @@ public class MaterializationPlanner implements Planner {
                         relBuilder.literal(timeRange.getEnd())));
     }
 
-    public boolean check(MetricReq metricCommand, Materialization materialization, String elem,
+    public boolean check(MetricQueryReq metricCommand, Materialization materialization, String elem,
                          List<ImmutablePair<String, String>> timeRanges)
             throws SqlParseException {
         boolean isMatch = false;

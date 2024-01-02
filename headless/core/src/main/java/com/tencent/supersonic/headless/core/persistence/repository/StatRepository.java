@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.persistence.repository;
 
-import com.tencent.supersonic.headless.common.server.pojo.QueryStat;
-import com.tencent.supersonic.headless.common.core.request.ItemUseReq;
-import com.tencent.supersonic.headless.common.core.response.ItemUseResp;
+import com.tencent.supersonic.headless.api.pojo.QueryStat;
+import com.tencent.supersonic.headless.api.request.ItemUseReq;
+import com.tencent.supersonic.headless.api.response.ItemUseResp;
 import java.util.List;
 
 public interface StatRepository {

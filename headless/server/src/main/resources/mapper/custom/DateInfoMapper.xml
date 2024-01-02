@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.supersonic.headless.server.persistence.mapper.DateInfoMapper">
+
+    <resultMap id="BaseResultMap"
+            type="com.tencent.supersonic.headless.server.persistence.dataobject.DateInfoDO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="type" jdbcType="BIGINT" property="type"/>
+        <result column="item_id" jdbcType="VARCHAR" property="itemId"/>
+        <result column="date_format" jdbcType="VARCHAR" property="dateFormat"/>
+        <result column="start_date" jdbcType="VARCHAR" property="startDate"/>
+        <result column="end_date" jdbcType="VARCHAR" property="endDate"/>
+        <result column="unavailable_date" jdbcType="INTEGER" property="unavailableDateList"/>
+        <result column="created_by" jdbcType="TIMESTAMP" property="createdBy"/>
+        <result column="updated_by" jdbcType="VARCHAR" property="updatedBy"/>
+        <result column="date_period" jdbcType="VARCHAR" property="datePeriod"/>
+    </resultMap>
+
+    <insert id="upsertDateInfo">
+        insert into s2_available_date_info
+        (`type`, item_id, date_format, start_date, end_date, unavailable_date, created_by,
+         updated_by,date_period)
+        values (#{type}, #{itemId}, #{dateFormat}, #{startDate}, #{endDate}, #{unavailableDateList},
+                #{createdBy}, #{updatedBy}, #{datePeriod}) ON DUPLICATE KEY
+        UPDATE
+            date_format = #{dateFormat},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            unavailable_date = #{unavailableDateList},
+            created_by = #{createdBy},
+            updated_by = #{updatedBy},
+            date_period = #{datePeriod}
+    </insert>
+
+    <select id="getDateInfos" resultMap="BaseResultMap">
+        select e.*
+        from s2_available_date_info e
+        inner join
+        (
+        select item_id, max(created_at) as created_at
+        from s2_available_date_info
+        where `type` = #{type}
+        <if test="itemIds != null and itemIds.size >0">
+            and item_id in
+            <foreach collection="itemIds" index="index" item="item" open="(" close=")"
+                     separator=",">
+                #{item}
+            </foreach>
+        </if>
+        group by item_id
+        ) t
+        on e.item_id=t.item_id and e.created_at=t.created_at
+    </select>
+</mapper>
+

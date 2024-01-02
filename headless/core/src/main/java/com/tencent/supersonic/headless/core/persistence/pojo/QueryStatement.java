@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.persistence.pojo;
 
-import com.tencent.supersonic.headless.common.core.request.MetricReq;
-import com.tencent.supersonic.headless.common.core.request.ParseSqlReq;
-import com.tencent.supersonic.headless.common.core.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.request.MetricQueryReq;
+import com.tencent.supersonic.headless.api.request.ParseSqlReq;
+import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -18,7 +18,7 @@ public class QueryStatement {
     private String errMsg = "";
     private Boolean ok;
     private QueryStructReq queryStructReq;
-    private MetricReq metricReq;
+    private MetricQueryReq metricReq;
     private ParseSqlReq parseSqlReq;
     private Integer status = 0;
     private Boolean isS2SQL = false;

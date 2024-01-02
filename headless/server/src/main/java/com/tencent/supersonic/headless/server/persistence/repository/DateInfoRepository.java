@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.server.persistence.repository;
 
 
-import com.tencent.supersonic.headless.common.server.pojo.ItemDateFilter;
-import com.tencent.supersonic.headless.common.server.request.DateInfoReq;
+import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
+import com.tencent.supersonic.headless.api.request.DateInfoReq;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DateInfoDO;
 
 import java.util.List;
