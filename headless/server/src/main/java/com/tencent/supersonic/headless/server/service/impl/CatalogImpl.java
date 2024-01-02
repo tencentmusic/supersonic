@@ -2,11 +2,11 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.ModelRela;
-import com.tencent.supersonic.headless.common.server.pojo.ItemDateFilter;
-import com.tencent.supersonic.headless.common.server.response.DatabaseResp;
-import com.tencent.supersonic.headless.common.server.response.DimensionResp;
-import com.tencent.supersonic.headless.common.server.response.MetricResp;
-import com.tencent.supersonic.headless.common.server.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
+import com.tencent.supersonic.headless.api.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.response.DimensionResp;
+import com.tencent.supersonic.headless.api.response.MetricResp;
+import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;

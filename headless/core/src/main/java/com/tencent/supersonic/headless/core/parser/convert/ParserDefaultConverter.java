@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.core.parser.convert;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
-import com.tencent.supersonic.headless.common.core.pojo.Param;
-import com.tencent.supersonic.headless.common.core.request.MetricReq;
-import com.tencent.supersonic.headless.common.core.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.Param;
+import com.tencent.supersonic.headless.api.request.MetricQueryReq;
+import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.core.parser.HeadlessConverter;
 import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.QueryStructUtils;
@@ -42,14 +42,14 @@ public class ParserDefaultConverter implements HeadlessConverter {
     @Override
     public void converter(Catalog catalog, QueryStatement queryStatement) throws Exception {
         QueryStructReq queryStructCmd = queryStatement.getQueryStructReq();
-        MetricReq metricCommand = queryStatement.getMetricReq();
-        MetricReq metricReq = generateSqlCommand(catalog, queryStructCmd);
+        MetricQueryReq metricCommand = queryStatement.getMetricReq();
+        MetricQueryReq metricReq = generateSqlCommand(catalog, queryStructCmd);
         queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructCmd));
         BeanUtils.copyProperties(metricReq, metricCommand);
     }
 
-    public MetricReq generateSqlCommand(Catalog catalog, QueryStructReq queryStructCmd) {
-        MetricReq sqlCommend = new MetricReq();
+    public MetricQueryReq generateSqlCommand(Catalog catalog, QueryStructReq queryStructCmd) {
+        MetricQueryReq sqlCommend = new MetricQueryReq();
         sqlCommend.setMetrics(queryStructCmd.getMetrics());
         sqlCommend.setDimensions(queryStructCmd.getGroups());
         String where = queryStructUtils.generateWhere(queryStructCmd);

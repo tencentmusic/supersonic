@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.parser.calcite;
 
-import com.tencent.supersonic.headless.common.core.enums.AggOption;
-import com.tencent.supersonic.headless.common.core.request.MetricReq;
+import com.tencent.supersonic.headless.api.enums.AggOption;
+import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.SqlParser;
 import com.tencent.supersonic.headless.core.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.HeadlessModel;
@@ -23,7 +23,7 @@ public class CalciteSqlParser implements SqlParser {
 
     @Override
     public QueryStatement explain(QueryStatement queryStatement, AggOption isAgg, Catalog catalog) throws Exception {
-        MetricReq metricReq = queryStatement.getMetricReq();
+        MetricQueryReq metricReq = queryStatement.getMetricReq();
         HeadlessModel headlessModel = headlessSchemaManager.get(metricReq.getRootPath());
         if (headlessModel == null) {
             queryStatement.setErrMsg("semanticSchema not found");

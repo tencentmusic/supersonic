@@ -1,10 +1,10 @@
 package com.tencent.supersonic.headless.core.parser.convert;
 
-import com.tencent.supersonic.headless.common.core.request.MetricReq;
-import com.tencent.supersonic.headless.common.core.request.ParseSqlReq;
-import com.tencent.supersonic.headless.common.core.request.QueryStructReq;
-import com.tencent.supersonic.headless.common.server.enums.ModelSourceType;
-import com.tencent.supersonic.headless.common.server.response.ModelResp;
+import com.tencent.supersonic.headless.api.request.MetricQueryReq;
+import com.tencent.supersonic.headless.api.request.ParseSqlReq;
+import com.tencent.supersonic.headless.api.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.enums.ModelSourceType;
+import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.core.parser.HeadlessConverter;
 import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.QueryStructUtils;
@@ -52,12 +52,12 @@ public class ZipperModelConverter implements HeadlessConverter {
     public void converter(Catalog catalog, QueryStatement queryStatement) throws Exception {
         QueryStructReq queryStructCmd = queryStatement.getQueryStructReq();
         ParseSqlReq sqlCommend = queryStatement.getParseSqlReq();
-        MetricReq metricCommand = queryStatement.getMetricReq();
+        MetricQueryReq metricCommand = queryStatement.getMetricReq();
         doSingleZipperSource(queryStructCmd, sqlCommend, metricCommand);
     }
 
     protected void doSingleZipperSource(QueryStructReq queryStructCmd, ParseSqlReq sqlCommend,
-            MetricReq metricCommand) {
+            MetricQueryReq metricCommand) {
         // all data sources are zipper tables
         // request  time field rewrite to start_ end_
         if (!sqlCommend.getSql().isEmpty()) {

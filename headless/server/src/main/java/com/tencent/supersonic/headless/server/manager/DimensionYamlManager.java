@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.server.manager;
 
 
-import com.tencent.supersonic.headless.common.server.enums.IdentifyType;
-import com.tencent.supersonic.headless.common.server.response.DimensionResp;
+import com.tencent.supersonic.headless.api.enums.IdentifyType;
+import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.server.utils.DimensionConverter;
 import lombok.extern.slf4j.Slf4j;

@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.core.service.impl;
 
-import com.tencent.supersonic.headless.common.server.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.headless.common.core.request.MetricReq;
-import com.tencent.supersonic.headless.common.core.request.ParseSqlReq;
-import com.tencent.supersonic.headless.common.core.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.request.MetricQueryReq;
+import com.tencent.supersonic.headless.api.request.ParseSqlReq;
+import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.optimizer.QueryOptimizer;
 import com.tencent.supersonic.headless.core.parser.QueryParser;
@@ -78,7 +78,7 @@ public class HeadlessQueryEngineImpl implements HeadlessQueryEngine {
         return optimize(queryStructCmd, queryParser.parser(sqlCommend, queryStatement));
     }
 
-    public QueryStatement physicalSql(QueryStructReq queryStructCmd, MetricReq metricCommand) throws Exception {
+    public QueryStatement physicalSql(QueryStructReq queryStructCmd, MetricQueryReq metricCommand) throws Exception {
         QueryStatement queryStatement = new QueryStatement();
         queryStatement.setQueryStructReq(queryStructCmd);
         queryStatement.setMetricReq(metricCommand);

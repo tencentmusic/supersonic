@@ -4,7 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.tencent.supersonic.chat.api.component.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ModelSchema;
-import com.tencent.supersonic.headless.common.server.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

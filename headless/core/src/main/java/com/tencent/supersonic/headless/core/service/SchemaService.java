@@ -3,14 +3,14 @@ package com.tencent.supersonic.headless.core.service;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
-import com.tencent.supersonic.headless.common.server.request.ModelSchemaFilterReq;
-import com.tencent.supersonic.headless.common.server.request.PageDimensionReq;
-import com.tencent.supersonic.headless.common.server.request.PageMetricReq;
-import com.tencent.supersonic.headless.common.server.response.ModelResp;
-import com.tencent.supersonic.headless.common.server.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.common.server.response.DimensionResp;
-import com.tencent.supersonic.headless.common.server.response.MetricResp;
-import com.tencent.supersonic.headless.common.server.response.DomainResp;
+import com.tencent.supersonic.headless.api.request.ModelSchemaFilterReq;
+import com.tencent.supersonic.headless.api.request.PageDimensionReq;
+import com.tencent.supersonic.headless.api.request.PageMetricReq;
+import com.tencent.supersonic.headless.api.response.ModelResp;
+import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.response.DimensionResp;
+import com.tencent.supersonic.headless.api.response.MetricResp;
+import com.tencent.supersonic.headless.api.response.DomainResp;
 
 import java.util.List;
 

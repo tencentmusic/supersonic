@@ -2,9 +2,9 @@ package com.tencent.supersonic.headless.server.rest;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.headless.common.server.request.DomainReq;
-import com.tencent.supersonic.headless.common.server.request.DomainUpdateReq;
-import com.tencent.supersonic.headless.common.server.response.DomainResp;
+import com.tencent.supersonic.headless.api.request.DomainReq;
+import com.tencent.supersonic.headless.api.request.DomainUpdateReq;
+import com.tencent.supersonic.headless.api.response.DomainResp;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

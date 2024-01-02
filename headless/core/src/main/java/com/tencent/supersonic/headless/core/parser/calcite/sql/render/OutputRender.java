@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.render;
 
 
-import com.tencent.supersonic.headless.common.core.request.MetricReq;
+import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
@@ -21,7 +21,7 @@ import org.springframework.util.CollectionUtils;
 public class OutputRender extends Renderer {
 
     @Override
-    public void render(MetricReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
+    public void render(MetricQueryReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
                        HeadlessSchema schema, boolean nonAgg) throws Exception {
         TableView selectDataSet = super.tableView;
         for (String dimension : metricCommand.getDimensions()) {

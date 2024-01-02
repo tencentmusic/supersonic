@@ -1,10 +1,10 @@
 package com.tencent.supersonic.headless.server.utils;
 
-import com.tencent.supersonic.headless.common.server.enums.DimensionType;
+import com.tencent.supersonic.headless.api.enums.DimensionType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.common.server.pojo.Dim;
-import com.tencent.supersonic.headless.common.server.pojo.DimensionTimeTypeParams;
-import com.tencent.supersonic.headless.server.engineadapter.EngineAdaptor;
+import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
+import com.tencent.supersonic.headless.server.adaptor.db.DbAdaptor;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SysTimeDimensionBuilder {
 
-    public static void addSysTimeDimension(List<Dim> dims, EngineAdaptor engineAdaptor) {
+    public static void addSysTimeDimension(List<Dim> dims, DbAdaptor engineAdaptor) {
         log.info("addSysTimeDimension before:{}, engineAdaptor:{}", dims, engineAdaptor);
         Dim timeDim = getTimeDim(dims);
         if (timeDim == null) {
@@ -26,7 +26,7 @@ public class SysTimeDimensionBuilder {
         log.debug("addSysTimeDimension after:{}, engineAdaptor:{}", dims, engineAdaptor);
     }
 
-    private static Dim generateSysDayDimension(Dim timeDim, EngineAdaptor engineAdaptor) {
+    private static Dim generateSysDayDimension(Dim timeDim, DbAdaptor engineAdaptor) {
         Dim dim = new Dim();
         dim.setBizName(TimeDimensionEnum.DAY.getName());
         dim.setType(DimensionType.time.name());
@@ -38,7 +38,7 @@ public class SysTimeDimensionBuilder {
         return dim;
     }
 
-    private static Dim generateSysWeekDimension(Dim timeDim, EngineAdaptor engineAdaptor) {
+    private static Dim generateSysWeekDimension(Dim timeDim, DbAdaptor engineAdaptor) {
         Dim dim = new Dim();
         dim.setBizName(TimeDimensionEnum.WEEK.getName());
         dim.setType(DimensionType.time.name());
@@ -50,7 +50,7 @@ public class SysTimeDimensionBuilder {
         return dim;
     }
 
-    private static Dim generateSysMonthDimension(Dim timeDim, EngineAdaptor engineAdaptor) {
+    private static Dim generateSysMonthDimension(Dim timeDim, DbAdaptor engineAdaptor) {
         Dim dim = new Dim();
         dim.setBizName(TimeDimensionEnum.MONTH.getName());
         dim.setType(DimensionType.time.name());
@@ -62,7 +62,7 @@ public class SysTimeDimensionBuilder {
         return dim;
     }
 
-    private static String generateTimeExpr(Dim timeDim, String dateType, EngineAdaptor engineAdaptor) {
+    private static String generateTimeExpr(Dim timeDim, String dateType, DbAdaptor engineAdaptor) {
         String bizName = timeDim.getBizName();
         String dateFormat = timeDim.getDateFormat();
         return engineAdaptor.getDateFormat(dateType, dateFormat, bizName);

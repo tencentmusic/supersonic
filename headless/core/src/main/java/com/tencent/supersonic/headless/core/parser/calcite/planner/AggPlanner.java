@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.parser.calcite.planner;
 
 
-import com.tencent.supersonic.headless.common.core.enums.AggOption;
-import com.tencent.supersonic.headless.common.core.request.MetricReq;
+import com.tencent.supersonic.headless.api.enums.AggOption;
+import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SchemaBuilder;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.Renderer;
@@ -39,7 +39,7 @@ import org.apache.calcite.sql2rel.SqlToRelConverter;
 @Slf4j
 public class AggPlanner implements Planner {
 
-    private MetricReq metricReq;
+    private MetricQueryReq metricReq;
     private HeadlessSchema schema;
     private SqlValidatorScope scope;
     private Stack<TableView> dataSets = new Stack<>();

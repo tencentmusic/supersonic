@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.query.domain.calcite;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
-import com.tencent.supersonic.headless.common.core.response.SqlParserResp;
+import com.tencent.supersonic.headless.api.response.SqlParserResp;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
@@ -9,8 +9,8 @@ import com.tencent.supersonic.headless.server.pojo.yaml.IdentifyYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
-import com.tencent.supersonic.headless.common.core.enums.AggOption;
-import com.tencent.supersonic.headless.common.core.request.MetricReq;
+import com.tencent.supersonic.headless.api.enums.AggOption;
+import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.HeadlessSchemaManager;
 import com.tencent.supersonic.headless.core.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
@@ -27,7 +27,7 @@ class HeadlessParserServiceTest {
 
     private static Map<String, HeadlessSchema> headlessSchemaMap = new HashMap<>();
 
-    public static SqlParserResp parser(HeadlessSchema headlessSchema, MetricReq metricCommand, boolean isAgg) {
+    public static SqlParserResp parser(HeadlessSchema headlessSchema, MetricQueryReq metricCommand, boolean isAgg) {
         SqlParserResp sqlParser = new SqlParserResp();
         if (metricCommand.getRootPath().isEmpty()) {
             sqlParser.setErrMsg("rootPath empty");
@@ -164,7 +164,7 @@ class HeadlessParserServiceTest {
 
         HeadlessSchemaManager.update(headlessSchema, HeadlessSchemaManager.getMetrics(metric));
 
-        MetricReq metricCommand = new MetricReq();
+        MetricQueryReq metricCommand = new MetricQueryReq();
         metricCommand.setRootPath("s2");
         metricCommand.setDimensions(new ArrayList<>(Arrays.asList("sys_imp_date")));
         metricCommand.setMetrics(new ArrayList<>(Arrays.asList("pv")));
@@ -177,7 +177,7 @@ class HeadlessParserServiceTest {
 
         addDepartment(headlessSchema);
 
-        MetricReq metricCommand2 = new MetricReq();
+        MetricQueryReq metricCommand2 = new MetricQueryReq();
         metricCommand2.setRootPath("s2");
         metricCommand2.setDimensions(new ArrayList<>(
                 Arrays.asList("sys_imp_date", "user_name__department", "user_name", "user_name__page")));

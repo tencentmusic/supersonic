@@ -4,9 +4,9 @@ import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.DateUtils;
-import com.tencent.supersonic.headless.common.server.enums.DataType;
-import com.tencent.supersonic.headless.common.server.response.DatabaseResp;
-import com.tencent.supersonic.headless.common.server.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.enums.DataType;
+import com.tencent.supersonic.headless.api.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.headless.server.pojo.JdbcDataSource;
 import java.rmi.ServerException;
 import java.sql.Connection;

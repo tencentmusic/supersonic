@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.server.utils;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tencent.supersonic.headless.common.server.request.DatabaseReq;
-import com.tencent.supersonic.headless.common.server.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.request.DatabaseReq;
+import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO;
 import com.tencent.supersonic.headless.server.pojo.ConnectInfo;
 import com.tencent.supersonic.headless.server.pojo.Database;

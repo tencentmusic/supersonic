@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.optimizer;
 
 import com.google.common.base.Strings;
-import com.tencent.supersonic.headless.common.core.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
 
 import java.util.Objects;

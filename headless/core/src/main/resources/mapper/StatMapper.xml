@@ -5,7 +5,7 @@
 <mapper namespace="com.tencent.supersonic.headless.core.persistence.mapper.StatMapper">
 
     <resultMap id="QueryStatDO"
-               type="com.tencent.supersonic.headless.common.server.pojo.QueryStat">
+               type="com.tencent.supersonic.headless.api.pojo.QueryStat">
         <id column="id" property="id"/>
         <result column="trace_id" property="traceId"/>
         <result column="model_id" property="modelId"/>
@@ -55,7 +55,7 @@
     </insert>
 
     <select id="getStatInfo"
-            resultType="com.tencent.supersonic.headless.common.server.pojo.QueryStat">
+            resultType="com.tencent.supersonic.headless.api.pojo.QueryStat">
         select *
         from s2_query_stat_info
         <where>

@@ -2,9 +2,9 @@ package com.tencent.supersonic.headless.core.parser.convert;
 
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
-import com.tencent.supersonic.headless.common.core.request.QueryStructReq;
-import com.tencent.supersonic.headless.common.server.response.DimensionResp;
-import com.tencent.supersonic.headless.common.server.response.MetricResp;
+import com.tencent.supersonic.headless.api.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.response.DimensionResp;
+import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.core.parser.HeadlessConverter;
 import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;

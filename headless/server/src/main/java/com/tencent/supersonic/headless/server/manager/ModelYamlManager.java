@@ -1,19 +1,19 @@
 package com.tencent.supersonic.headless.server.manager;
 
-import com.tencent.supersonic.headless.common.server.enums.ModelSourceType;
-import com.tencent.supersonic.headless.common.server.pojo.Dim;
-import com.tencent.supersonic.headless.common.server.pojo.Identify;
-import com.tencent.supersonic.headless.common.server.pojo.Measure;
-import com.tencent.supersonic.headless.common.server.pojo.ModelDetail;
-import com.tencent.supersonic.headless.common.server.response.DatabaseResp;
-import com.tencent.supersonic.headless.common.server.response.ModelResp;
+import com.tencent.supersonic.headless.api.enums.ModelSourceType;
+import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.Identify;
+import com.tencent.supersonic.headless.api.pojo.Measure;
+import com.tencent.supersonic.headless.api.pojo.ModelDetail;
+import com.tencent.supersonic.headless.api.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.IdentifyYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
-import com.tencent.supersonic.headless.server.engineadapter.EngineAdaptor;
-import com.tencent.supersonic.headless.server.engineadapter.EngineAdaptorFactory;
+import com.tencent.supersonic.headless.server.adaptor.db.DbAdaptor;
+import com.tencent.supersonic.headless.server.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.server.pojo.DatasourceQueryEnum;
 import com.tencent.supersonic.headless.server.utils.SysTimeDimensionBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public class ModelYamlManager {
 
     public static DataModelYamlTpl convert2YamlObj(ModelResp modelResp, DatabaseResp databaseResp) {
         ModelDetail modelDetail = modelResp.getModelDetail();
-        EngineAdaptor engineAdaptor = EngineAdaptorFactory.getEngineAdaptor(databaseResp.getType());
+        DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         SysTimeDimensionBuilder.addSysTimeDimension(modelDetail.getDimensions(), engineAdaptor);
         addInterCntMetric(modelResp.getBizName(), modelDetail);
         DataModelYamlTpl dataModelYamlTpl = new DataModelYamlTpl();
