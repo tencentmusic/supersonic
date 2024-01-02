@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from services.s2ql.run import text2sql_agent_router
+from services.s2sql.run import text2sql_agent_router
 
 router = APIRouter()
 
