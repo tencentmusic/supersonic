@@ -12,7 +12,7 @@ import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
-import com.tencent.supersonic.headless.model.domain.listener.MetaEmbeddingListener;
+import com.tencent.supersonic.headless.server.listener.MetaEmbeddingListener;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;

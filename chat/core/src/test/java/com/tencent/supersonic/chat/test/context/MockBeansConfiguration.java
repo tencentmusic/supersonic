@@ -1,9 +1,5 @@
 package com.tencent.supersonic.chat.test.context;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
-
 import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.config.DefaultMetric;
@@ -15,23 +11,28 @@ import com.tencent.supersonic.chat.service.ChatService;
 import com.tencent.supersonic.chat.service.QueryService;
 import com.tencent.supersonic.chat.service.impl.ConfigServiceImpl;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.headless.common.model.response.DimSchemaResp;
-import com.tencent.supersonic.headless.common.model.response.DimensionResp;
-import com.tencent.supersonic.headless.common.model.response.MetricResp;
-import com.tencent.supersonic.headless.common.model.response.MetricSchemaResp;
-import com.tencent.supersonic.headless.common.model.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.model.domain.DimensionService;
-import com.tencent.supersonic.headless.model.domain.MetricService;
-import com.tencent.supersonic.headless.model.domain.ModelService;
-import com.tencent.supersonic.headless.model.domain.pojo.DimensionFilter;
-import com.tencent.supersonic.headless.model.domain.pojo.MetaFilter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.tencent.supersonic.headless.common.server.response.DimSchemaResp;
+import com.tencent.supersonic.headless.common.server.response.DimensionResp;
+import com.tencent.supersonic.headless.common.server.response.MetricResp;
+import com.tencent.supersonic.headless.common.server.response.MetricSchemaResp;
+import com.tencent.supersonic.headless.common.server.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
+import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.service.MetricService;
+import com.tencent.supersonic.headless.server.service.ModelService;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
 @Configuration
 public class MockBeansConfiguration {
