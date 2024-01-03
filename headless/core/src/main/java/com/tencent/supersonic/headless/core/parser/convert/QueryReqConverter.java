@@ -18,7 +18,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.service.HeadlessQueryEngine;
 import com.tencent.supersonic.headless.core.utils.QueryStructUtils;
 import com.tencent.supersonic.headless.server.adaptor.db.DbAdaptor;

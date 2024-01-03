@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.core.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.HeadlessModel;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.RuntimeOptions;
-import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import org.springframework.stereotype.Component;
 

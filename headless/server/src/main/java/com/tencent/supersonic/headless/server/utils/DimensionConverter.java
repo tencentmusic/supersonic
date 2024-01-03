@@ -9,7 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.request.DimensionReq;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;

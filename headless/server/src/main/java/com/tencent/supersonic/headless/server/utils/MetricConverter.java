@@ -11,9 +11,9 @@ import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.request.MetricReq;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.MeasureYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.MetricTypeParamsYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import org.springframework.beans.BeanUtils;
 

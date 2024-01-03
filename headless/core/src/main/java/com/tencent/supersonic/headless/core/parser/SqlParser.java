@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.parser;
 
 import com.tencent.supersonic.headless.api.enums.AggOption;
-import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.server.service.Catalog;
 
 public interface SqlParser {

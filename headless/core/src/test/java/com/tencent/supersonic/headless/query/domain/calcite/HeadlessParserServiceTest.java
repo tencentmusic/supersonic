@@ -13,7 +13,7 @@ import com.tencent.supersonic.headless.api.enums.AggOption;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.HeadlessSchemaManager;
 import com.tencent.supersonic.headless.core.parser.calcite.planner.AggPlanner;
-import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
 import java.util.ArrayList;
 import java.util.Arrays;

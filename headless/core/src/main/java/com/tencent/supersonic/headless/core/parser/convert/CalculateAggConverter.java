@@ -12,7 +12,7 @@ import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.core.parser.HeadlessConverter;
-import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.service.HeadlessQueryEngine;
 import com.tencent.supersonic.headless.core.utils.QueryStructUtils;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;

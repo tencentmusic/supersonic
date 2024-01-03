@@ -4,27 +4,20 @@ package com.tencent.supersonic.headless.core.parser.calcite.planner;
 import com.tencent.supersonic.headless.api.enums.AggOption;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
+import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
+import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SchemaBuilder;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlDialect;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.Renderer;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.DataSourceNode;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.SemanticNode;
-import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlDialect;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.optimizer.FilterToGroupScanRule;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.render.FilterRender;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.render.OutputRender;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.render.SourceRender;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Objects;
-import java.util.Stack;
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.hep.HepPlanner;
@@ -35,6 +28,13 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Objects;
+import java.util.Stack;
 
 @Slf4j
 public class AggPlanner implements Planner {

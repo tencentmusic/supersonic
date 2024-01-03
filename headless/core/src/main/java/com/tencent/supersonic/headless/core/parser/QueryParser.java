@@ -6,7 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import lombok.extern.slf4j.Slf4j;

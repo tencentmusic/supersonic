@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.parser.calcite.planner;
 
 
 import com.tencent.supersonic.headless.api.enums.AggOption;
-import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
 
 public interface Planner {

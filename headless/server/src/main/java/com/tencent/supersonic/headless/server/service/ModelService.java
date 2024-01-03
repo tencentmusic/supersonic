@@ -11,9 +11,9 @@ import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.MeasureResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.DataModelYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 
 import java.util.List;
