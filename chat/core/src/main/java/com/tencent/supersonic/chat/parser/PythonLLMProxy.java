@@ -6,13 +6,16 @@ import com.tencent.supersonic.chat.config.LLMParserConfig;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionCallConfig;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionReq;
 import com.tencent.supersonic.chat.parser.plugin.function.FunctionResp;
+import com.tencent.supersonic.chat.parser.sql.llm.OutputFormat;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,10 +62,15 @@ public class PythonLLMProxy implements LLMProxy {
             ResponseEntity<LLMResp> responseEntity = restTemplate.exchange(url.toString(), HttpMethod.POST, entity,
                     LLMResp.class);
 
+            LLMResp llmResp = responseEntity.getBody();
             log.info("requestLLM response,cost:{}, questUrl:{} \n entity:{} \n body:{}",
-                    System.currentTimeMillis() - startTime, url, entity, responseEntity.getBody());
-            keyPipelineLog.info("LLMResp:{}", responseEntity.getBody());
-            return responseEntity.getBody();
+                    System.currentTimeMillis() - startTime, url, entity, llmResp);
+            keyPipelineLog.info("LLMResp:{}", llmResp);
+
+            if (MapUtils.isEmpty(llmResp.getSqlRespMap())) {
+                llmResp.setSqlRespMap(OutputFormat.buildSqlRespMap(new ArrayList<>(), llmResp.getSqlWeight()));
+            }
+            return llmResp;
         } catch (Exception e) {
             log.error("requestLLM error", e);
         }

@@ -1,6 +1,6 @@
 package com.tencent.supersonic;
 
-import com.tencent.supersonic.headless.model.domain.DomainService;
+import com.tencent.supersonic.headless.server.service.DomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

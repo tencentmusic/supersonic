@@ -7,6 +7,7 @@ import com.tencent.supersonic.chat.query.QueryManager;
 import com.tencent.supersonic.chat.query.llm.LLMSemanticQuery;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.chat.query.llm.s2sql.LLMSqlQuery;
+import com.tencent.supersonic.chat.query.llm.s2sql.LLMSqlResp;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserEqualHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -46,12 +47,12 @@ public class LLMResponseService {
         return parseInfo;
     }
 
-    public Map<String, Double> getDeduplicationSqlWeight(LLMResp llmResp) {
-        if (MapUtils.isEmpty(llmResp.getSqlWeight())) {
-            return llmResp.getSqlWeight();
+    public Map<String, LLMSqlResp> getDeduplicationSqlResp(LLMResp llmResp) {
+        if (MapUtils.isEmpty(llmResp.getSqlRespMap())) {
+            return llmResp.getSqlRespMap();
         }
-        Map<String, Double> result = new HashMap<>();
-        for (Map.Entry<String, Double> entry : llmResp.getSqlWeight().entrySet()) {
+        Map<String, LLMSqlResp> result = new HashMap<>();
+        for (Map.Entry<String, LLMSqlResp> entry : llmResp.getSqlRespMap().entrySet()) {
             String key = entry.getKey();
             if (result.keySet().stream().anyMatch(existKey -> SqlParserEqualHelper.equals(existKey, key))) {
                 continue;

@@ -15,9 +15,11 @@ public class LLMResp {
 
     private List<String> fields;
 
-    private String schemaLinkingOutput;
+    private Map<String, LLMSqlResp> sqlRespMap;
 
-    private String schemaLinkStr;
-
+    /**
+     * Only for compatibility with python code, later deleted
+     */
     private Map<String, Double> sqlWeight;
+
 }

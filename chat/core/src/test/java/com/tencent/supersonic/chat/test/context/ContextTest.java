@@ -1,14 +1,14 @@
 package com.tencent.supersonic.chat.test.context;
 
-import com.tencent.supersonic.chat.persistence.repository.impl.ChatContextRepositoryImpl;
-import com.tencent.supersonic.chat.utils.ComponentFactory;
 import com.tencent.supersonic.chat.persistence.mapper.ChatContextMapper;
-import com.tencent.supersonic.knowledge.semantic.RemoteSemanticInterpreter;
+import com.tencent.supersonic.chat.persistence.repository.impl.ChatContextRepositoryImpl;
 import com.tencent.supersonic.chat.test.ChatBizLauncher;
-import com.tencent.supersonic.headless.model.domain.DimensionService;
-import com.tencent.supersonic.headless.model.domain.MetricService;
-import com.tencent.supersonic.headless.model.domain.ModelService;
-import com.tencent.supersonic.headless.query.service.QueryService;
+import com.tencent.supersonic.chat.utils.ComponentFactory;
+import com.tencent.supersonic.headless.core.service.QueryService;
+import com.tencent.supersonic.headless.server.service.DimensionService;
+import com.tencent.supersonic.headless.server.service.MetricService;
+import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.knowledge.semantic.RemoteSemanticInterpreter;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
