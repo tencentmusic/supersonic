@@ -22,7 +22,9 @@ public class Agent extends RecordInfo {
     private String name;
     private String description;
 
-    //0 offline, 1 online
+    /**
+     * 0 offline, 1 online
+     */
     private Integer status;
     private List<String> examples;
     private String agentConfig;
@@ -49,7 +51,7 @@ public class Agent extends RecordInfo {
         return enableSearch != null && enableSearch == 1;
     }
 
-    public boolean containsAllModel(Set<Long> detectModelIds) {
+    public static boolean containsAllModel(Set<Long> detectModelIds) {
         return !CollectionUtils.isEmpty(detectModelIds) && detectModelIds.contains(-1L);
     }
 

@@ -61,8 +61,12 @@ public class LLMRequestService {
     }
 
     public ModelCluster getModelCluster(QueryContext queryCtx, ChatContext chatCtx) {
-        Set<Long> distinctModelIds = queryCtx.getAgent().getModelIds(AgentToolType.NL2SQL_LLM);
-        if (queryCtx.getAgent().containsAllModel(distinctModelIds)) {
+        Agent agent = queryCtx.getAgent();
+        Set<Long> distinctModelIds = new HashSet<>();
+        if (Objects.nonNull(agent)) {
+            distinctModelIds = agent.getModelIds(AgentToolType.NL2SQL_LLM);
+        }
+        if (Agent.containsAllModel(distinctModelIds)) {
             distinctModelIds = new HashSet<>();
         }
         ModelResolver modelResolver = ComponentFactory.getModelResolver();
@@ -77,7 +81,7 @@ public class LLMRequestService {
         Optional<NL2SQLTool> llmParserTool = commonAgentTools.stream()
                 .filter(tool -> {
                     List<Long> modelIds = tool.getModelIds();
-                    if (agent.containsAllModel(new HashSet<>(modelIds))) {
+                    if (Agent.containsAllModel(new HashSet<>(modelIds))) {
                         return true;
                     }
                     for (Long modelId : modelIdSet) {

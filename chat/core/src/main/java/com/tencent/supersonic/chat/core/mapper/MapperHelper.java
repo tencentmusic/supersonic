@@ -85,9 +85,12 @@ public class MapperHelper {
     public Set<Long> getModelIds(QueryReq request, Agent agent) {
 
         Long modelId = request.getModelId();
-        Set<Long> detectModelIds = agent.getModelIds(null);
+        Set<Long> detectModelIds = new HashSet<>();
+        if (Objects.nonNull(agent)) {
+            detectModelIds = agent.getModelIds(null);
+        }
         //contains all
-        if (agent.containsAllModel(detectModelIds)) {
+        if (Agent.containsAllModel(detectModelIds)) {
             if (Objects.nonNull(modelId) && modelId > 0) {
                 Set<Long> result = new HashSet<>();
                 result.add(modelId);
