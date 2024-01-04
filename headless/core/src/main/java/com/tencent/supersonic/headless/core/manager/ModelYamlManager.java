@@ -24,7 +24,9 @@ import org.springframework.util.CollectionUtils;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
+/**
+ * manager to handle the model
+ */
 @Service
 @Slf4j
 public class ModelYamlManager {

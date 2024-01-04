@@ -26,6 +26,10 @@ import org.apache.calcite.util.ImmutableBitSet;
 import org.apache.calcite.util.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
+/**
+ *  push down the time filter into group using the RuntimeOptions defined minMaxTime
+ *
+ */
 public class FilterToGroupScanRule extends RelRule<Config>
         implements TransformationRule {
 

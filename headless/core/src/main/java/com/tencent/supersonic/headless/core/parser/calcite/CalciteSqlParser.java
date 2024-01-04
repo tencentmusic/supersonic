@@ -10,6 +10,9 @@ import com.tencent.supersonic.headless.core.parser.calcite.schema.RuntimeOptions
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import org.springframework.stereotype.Component;
 
+/**
+ * the calcite parse implements
+ */
 @Component("CalciteSqlParser")
 public class CalciteSqlParser implements SqlParser {
 

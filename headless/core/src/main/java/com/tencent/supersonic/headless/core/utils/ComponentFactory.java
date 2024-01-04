@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * HeadlessConverter QueryOptimizer QueryExecutor object factory
+ */
 public class ComponentFactory {
 
     private static List<HeadlessConverter> headlessConverters = new ArrayList<>();

@@ -36,6 +36,9 @@ import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Stack;
 
+/**
+ * parsing from query dimensions and metrics
+ */
 @Slf4j
 public class AggPlanner implements Planner {
 

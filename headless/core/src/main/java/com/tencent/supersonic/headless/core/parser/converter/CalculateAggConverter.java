@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
+/**
+ * supplement the QueryStatement when query with custom aggregation method
+ */
 @Component("CalculateAggConverter")
 @Slf4j
 public class CalculateAggConverter implements HeadlessConverter {

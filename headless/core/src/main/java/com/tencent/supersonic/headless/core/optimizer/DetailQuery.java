@@ -10,6 +10,9 @@ import org.springframework.util.CollectionUtils;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Remove the default metric added by the system when the query only has dimensions
+ */
 @Slf4j
 @Component("DetailQuery")
 public class DetailQuery implements QueryOptimizer {

@@ -23,6 +23,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * process query specified filtering information
+ */
 public class FilterRender extends Renderer {
 
     @Override
