@@ -7,9 +7,9 @@ import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.DataModelYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -56,11 +55,6 @@ public class CatalogImpl implements Catalog {
 
     public DatabaseResp getDatabaseByModelId(Long modelId) {
         return modelService.getDatabaseByModelId(modelId);
-    }
-
-    @Override
-    public String getModelFullPath(List<Long> modelIds) {
-        return String.join(",", modelIds.stream().map(Object::toString).collect(Collectors.toList()));
     }
 
     @Override

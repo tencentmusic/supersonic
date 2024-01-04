@@ -1,25 +1,19 @@
 package com.tencent.supersonic.headless.server.utils;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DataFormat;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
-import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MetricTypeParams;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.request.MetricReq;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import org.springframework.beans.BeanUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class MetricConverter {
 
@@ -50,12 +44,6 @@ public class MetricConverter {
         return metricDO;
     }
 
-    public static MeasureYamlTpl convert(Measure measure) {
-        MeasureYamlTpl measureYamlTpl = new MeasureYamlTpl();
-        measureYamlTpl.setName(measure.getBizName());
-        return measureYamlTpl;
-    }
-
     public static MetricResp convert2MetricResp(MetricDO metricDO, Map<Long, ModelResp> modelMap, List<Long> collect) {
         MetricResp metricResp = new MetricResp();
         BeanUtils.copyProperties(metricDO, metricResp);
@@ -78,21 +66,6 @@ public class MetricConverter {
             metricResp.setExt(JSONObject.parseObject(metricDO.getExt(), Map.class));
         }
         return metricResp;
-    }
-
-    public static MetricYamlTpl convert2MetricYamlTpl(MetricResp metric) {
-        MetricYamlTpl metricYamlTpl = new MetricYamlTpl();
-        BeanUtils.copyProperties(metric, metricYamlTpl);
-        metricYamlTpl.setName(metric.getBizName());
-        metricYamlTpl.setOwners(Lists.newArrayList(metric.getCreatedBy()));
-        MetricTypeParams exprMetricTypeParams = metric.getTypeParams();
-        MetricTypeParamsYamlTpl metricTypeParamsYamlTpl = new MetricTypeParamsYamlTpl();
-        metricTypeParamsYamlTpl.setExpr(exprMetricTypeParams.getExpr());
-        List<Measure> measures = exprMetricTypeParams.getMeasures();
-        metricTypeParamsYamlTpl.setMeasures(
-                measures.stream().map(MetricConverter::convert).collect(Collectors.toList()));
-        metricYamlTpl.setTypeParams(metricTypeParamsYamlTpl);
-        return metricYamlTpl;
     }
 
 }

@@ -7,9 +7,9 @@ import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.DataModelYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 
 import java.util.List;
@@ -21,8 +21,6 @@ public interface Catalog {
     DatabaseResp getDatabase(Long id);
 
     DatabaseResp getDatabaseByModelId(Long modelId);
-
-    String getModelFullPath(List<Long> modelIds);
 
     DimensionResp getDimension(String bizName, Long modelId);
 

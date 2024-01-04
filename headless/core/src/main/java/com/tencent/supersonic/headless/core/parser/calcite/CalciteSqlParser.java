@@ -7,24 +7,16 @@ import com.tencent.supersonic.headless.core.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.HeadlessModel;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.RuntimeOptions;
-import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
-import com.tencent.supersonic.headless.server.service.Catalog;
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import org.springframework.stereotype.Component;
 
 @Component("CalciteSqlParser")
 public class CalciteSqlParser implements SqlParser {
 
-    private final HeadlessSchemaManager headlessSchemaManager;
-
-    public CalciteSqlParser(
-            HeadlessSchemaManager headlessSchemaManager) {
-        this.headlessSchemaManager = headlessSchemaManager;
-    }
-
     @Override
-    public QueryStatement explain(QueryStatement queryStatement, AggOption isAgg, Catalog catalog) throws Exception {
+    public QueryStatement explain(QueryStatement queryStatement, AggOption isAgg) throws Exception {
         MetricQueryReq metricReq = queryStatement.getMetricReq();
-        HeadlessModel headlessModel = headlessSchemaManager.get(metricReq.getRootPath());
+        HeadlessModel headlessModel = queryStatement.getHeadlessModel();
         if (headlessModel == null) {
             queryStatement.setErrMsg("semanticSchema not found");
             return queryStatement;

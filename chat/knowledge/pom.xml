@@ -100,7 +100,7 @@
         </dependency>
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
-            <artifactId>headless-core</artifactId>
+            <artifactId>headless-server</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
