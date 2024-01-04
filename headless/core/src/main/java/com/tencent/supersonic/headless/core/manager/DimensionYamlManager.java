@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+/**
+ *  manager to handle the dimension
+ */
 @Slf4j
 @Service
 public class DimensionYamlManager {

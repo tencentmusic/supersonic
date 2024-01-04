@@ -27,6 +27,9 @@ import static com.tencent.supersonic.common.pojo.Constants.NEW_LINE_CHAR;
 import static com.tencent.supersonic.common.pojo.Constants.PATTERN_JDBC_TYPE;
 import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 
+/**
+ * tools functions about jdbc
+ */
 @Slf4j
 public class JdbcDataSourceUtils {
 

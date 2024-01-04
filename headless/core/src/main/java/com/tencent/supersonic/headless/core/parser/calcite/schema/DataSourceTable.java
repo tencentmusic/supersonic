@@ -22,6 +22,9 @@ import org.apache.calcite.schema.TranslatableTable;
 import org.apache.calcite.schema.impl.AbstractTable;
 import org.apache.calcite.sql.type.SqlTypeName;
 
+/**
+ * customize the  AbstractTable
+ */
 public class DataSourceTable extends AbstractTable implements ScannableTable, TranslatableTable {
 
     private final String tableName;

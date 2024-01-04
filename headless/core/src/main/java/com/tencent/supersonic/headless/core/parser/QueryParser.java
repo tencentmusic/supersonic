@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * logical parse from ParseSqlReq or MetricReq
+ */
 @Component
 @Slf4j
 @Primary

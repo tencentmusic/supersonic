@@ -41,6 +41,9 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * process the join conditions when the source number is greater than 1
+ */
 @Slf4j
 public class JoinRender extends Renderer {
 

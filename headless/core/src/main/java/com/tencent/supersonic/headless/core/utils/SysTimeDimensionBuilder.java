@@ -9,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+/**
+ * generate system time dimension tools
+ */
 @Slf4j
 public class SysTimeDimensionBuilder {
 

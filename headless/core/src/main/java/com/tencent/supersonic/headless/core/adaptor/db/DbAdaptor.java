@@ -1,6 +1,8 @@
 package com.tencent.supersonic.headless.core.adaptor.db;
 
-
+/**
+ * Adapters for different query engines to obtain table, field, and time formatting methods
+ */
 public abstract class DbAdaptor {
 
     public abstract String getDateFormat(String dateType, String dateFormat, String column);

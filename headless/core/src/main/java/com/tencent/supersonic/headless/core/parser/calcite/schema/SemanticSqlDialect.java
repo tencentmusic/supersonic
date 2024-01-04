@@ -10,6 +10,9 @@ import org.apache.calcite.sql.SqlWriter;
 import org.apache.calcite.sql.validate.SqlConformance;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * customize the  SqlDialect
+ */
 public class SemanticSqlDialect extends SqlDialect {
 
     public static final Context DEFAULT_CONTEXT = SqlDialect.EMPTY_CONTEXT

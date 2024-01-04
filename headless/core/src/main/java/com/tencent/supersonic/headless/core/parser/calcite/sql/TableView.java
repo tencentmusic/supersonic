@@ -12,6 +12,9 @@ import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.parser.SqlParserPos;
 
+/**
+ * basic query project
+ */
 @Data
 public class TableView {
 

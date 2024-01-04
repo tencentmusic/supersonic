@@ -4,6 +4,9 @@ import org.apache.calcite.sql.fun.SqlLibrary;
 import org.apache.calcite.sql.validate.SqlConformance;
 import org.apache.calcite.sql.validate.SqlConformanceEnum;
 
+/**
+ * customize the  SqlConformance
+ */
 public class HeadlessSqlConformance implements SqlConformance {
 
     @Override

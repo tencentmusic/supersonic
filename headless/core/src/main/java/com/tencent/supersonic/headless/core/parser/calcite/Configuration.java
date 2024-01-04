@@ -36,6 +36,9 @@ import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 
+/**
+ * global configuration of the calcite
+ */
 public class Configuration {
 
     public static Properties configProperties = new Properties();
@@ -94,7 +97,8 @@ public class Configuration {
         return SqlToRelConverter.config()
                 .withHintStrategyTable(strategies)
                 .withTrimUnusedFields(true)
-                .withExpand(true);
+                .withExpand(true)
+                .addRelBuilderConfigTransform(c -> c.withSimplify(false));
     }
 
     public static SqlToRelConverter getSqlToRelConverter(SqlValidatorScope scope, SqlValidator sqlValidator,

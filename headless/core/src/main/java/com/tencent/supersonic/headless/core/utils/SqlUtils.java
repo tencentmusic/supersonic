@@ -29,7 +29,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-
+/**
+ * tools functions about sql query
+ */
 @Slf4j
 @Component
 public class SqlUtils {

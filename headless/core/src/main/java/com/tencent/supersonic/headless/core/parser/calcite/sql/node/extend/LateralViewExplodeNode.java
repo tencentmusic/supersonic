@@ -11,6 +11,9 @@ import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.SqlWriter;
 
+/**
+ * extend node to handle lateral explode view
+ */
 public class LateralViewExplodeNode extends ExtendNode {
 
     public final String sqlNameView = "view";

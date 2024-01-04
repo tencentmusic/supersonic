@@ -1,5 +1,10 @@
 package com.tencent.supersonic.headless.api.enums;
 
+/**
+ * Aggregation type of metric when query metric without aggregation method
+ * NATIVE: will not use Aggregation
+ * DEFAULT: will use the aggregation method define in the model
+ */
 public enum AggOption {
     NATIVE,
     AGGREGATION,

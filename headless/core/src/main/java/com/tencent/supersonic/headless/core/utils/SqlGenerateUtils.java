@@ -35,6 +35,9 @@ import static com.tencent.supersonic.common.pojo.Constants.MONTH;
 import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
 import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
+/**
+ * tools functions to analyze queryStructReq
+ */
 @Component
 @Slf4j
 public class SqlGenerateUtils {
