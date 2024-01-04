@@ -106,7 +106,7 @@ class MetricCheckProcessorTest {
         SemanticParseInfo parseInfo = mockParseInfo(correctSql);
         String actualProcessedSql = metricCheckPostProcessor.processCorrectSql(parseInfo,
                 mockModelSchemaNoDimensionSetting());
-        String expectedProcessedSql = "select 部门, count(*) from 超音数 group by 部门";
+        String expectedProcessedSql = "SELECT count(*) FROM 超音数";
         Assertions.assertEquals(expectedProcessedSql, actualProcessedSql);
     }
 

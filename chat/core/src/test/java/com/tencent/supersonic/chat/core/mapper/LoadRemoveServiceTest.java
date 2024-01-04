@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.server.mapper;
+package com.tencent.supersonic.chat.core.mapper;
 
 
 import com.hankcs.hanlp.algorithm.EditDistance;

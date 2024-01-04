@@ -1,15 +1,15 @@
 package com.tencent.supersonic.chat.api.pojo;
 
-import org.springframework.util.CollectionUtils;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.util.CollectionUtils;
 
 public class SemanticSchema implements Serializable {
 
@@ -160,7 +160,8 @@ public class SemanticSchema implements Serializable {
     private Optional<SchemaElement> getElementsByNameOrAlias(String name, List<SchemaElement> elements) {
         return elements.stream()
                 .filter(schemaElement ->
-                    name.equals(schemaElement.getName()) || schemaElement.getAlias().contains(name)
+                        name.equals(schemaElement.getName()) || (Objects.nonNull(schemaElement.getAlias())
+                                && schemaElement.getAlias().contains(name))
                 ).findFirst();
     }
 

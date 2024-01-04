@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.server.parser.llm.s2sql;
+package com.tencent.supersonic.chat.core.s2sql;
 
 import com.tencent.supersonic.chat.core.parser.sql.llm.LLMResponseService;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMSqlResp;
