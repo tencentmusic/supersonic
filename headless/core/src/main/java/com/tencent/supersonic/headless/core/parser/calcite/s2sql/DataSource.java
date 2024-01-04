@@ -1,13 +1,16 @@
 package com.tencent.supersonic.headless.core.parser.calcite.s2sql;
 
-import java.util.List;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
 
 
 @Data
 @Builder
 public class DataSource {
+
+    private Long id;
 
     private String name;
 

@@ -2,35 +2,34 @@ package com.tencent.supersonic.chat.server.service.impl;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.request.PluginQueryReq;
-import com.tencent.supersonic.chat.server.persistence.dataobject.PluginDO;
-import com.tencent.supersonic.chat.server.persistence.dataobject.PluginDOExample;
+import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.plugin.Plugin;
 import com.tencent.supersonic.chat.core.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.core.plugin.event.PluginAddEvent;
 import com.tencent.supersonic.chat.core.plugin.event.PluginDelEvent;
 import com.tencent.supersonic.chat.core.plugin.event.PluginUpdateEvent;
 import com.tencent.supersonic.chat.core.utils.ComponentFactory;
+import com.tencent.supersonic.chat.server.persistence.dataobject.PluginDO;
+import com.tencent.supersonic.chat.server.persistence.dataobject.PluginDOExample;
 import com.tencent.supersonic.chat.server.persistence.repository.PluginRepository;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.common.server.response.ModelResp;
+import com.tencent.supersonic.headless.api.response.ModelResp;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j

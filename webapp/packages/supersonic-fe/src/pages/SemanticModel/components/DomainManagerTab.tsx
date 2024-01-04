@@ -37,7 +37,7 @@ const DomainManagerTab: React.FC<Props> = ({
   onBackDomainBtnClick,
   onMenuChange,
 }) => {
-  const defaultTabKey = 'dimenstion';
+  const defaultTabKey = 'metric';
   const { selectDomainId, domainList, selectModelId, selectModelName, selectDomainName } =
     domainManger;
 
@@ -88,15 +88,16 @@ const DomainManagerTab: React.FC<Props> = ({
 
   const isModelItem = [
     {
-      label: '维度',
-      key: 'dimenstion',
-      children: <ClassDimensionTable />,
-    },
-    {
       label: '指标',
       key: 'metric',
       children: <ClassMetricTable />,
     },
+    {
+      label: '维度',
+      key: 'dimenstion',
+      children: <ClassDimensionTable />,
+    },
+
     {
       label: '权限管理',
       key: 'permissonSetting',

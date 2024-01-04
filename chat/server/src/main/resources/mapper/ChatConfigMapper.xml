@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 
-<mapper namespace="com.tencent.supersonic.chat.server.rest.persistence.mapper.ChatConfigMapper">
+<mapper namespace="com.tencent.supersonic.chat.server.persistence.mapper.ChatConfigMapper">
 
     <resultMap id="chaConfigDO"
                type="com.tencent.supersonic.chat.server.persistence.dataobject.ChatConfigDO">

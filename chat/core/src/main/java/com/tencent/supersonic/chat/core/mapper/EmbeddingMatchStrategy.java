@@ -1,16 +1,16 @@
 package com.tencent.supersonic.chat.core.mapper;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
 import com.tencent.supersonic.chat.core.knowledge.EmbeddingResult;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
+import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.ComponentFactory;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
-import com.tencent.supersonic.headless.server.listener.MetaEmbeddingListener;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +34,9 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
 
     @Autowired
     private OptimizationConfig optimizationConfig;
+
+    @Autowired
+    private EmbeddingConfig embeddingConfig;
 
     private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
 
@@ -86,7 +89,7 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
                 .build();
         // step2. retrieveQuery by detectSegment
         List<RetrieveQueryResult> retrieveQueryResults = s2EmbeddingStore.retrieveQuery(
-                MetaEmbeddingListener.COLLECTION_NAME, retrieveQuery, embeddingNumber);
+                embeddingConfig.getMetaCollectionName(), retrieveQuery, embeddingNumber);
 
         if (CollectionUtils.isEmpty(retrieveQueryResults)) {
             return;

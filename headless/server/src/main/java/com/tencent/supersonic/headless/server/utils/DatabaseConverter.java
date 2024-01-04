@@ -1,11 +1,11 @@
 package com.tencent.supersonic.headless.server.utils;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tencent.supersonic.headless.common.server.request.DatabaseReq;
-import com.tencent.supersonic.headless.common.server.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.request.DatabaseReq;
+import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO;
-import com.tencent.supersonic.headless.server.pojo.ConnectInfo;
-import com.tencent.supersonic.headless.server.pojo.Database;
+import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
+import com.tencent.supersonic.headless.core.pojo.Database;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import java.util.Arrays;

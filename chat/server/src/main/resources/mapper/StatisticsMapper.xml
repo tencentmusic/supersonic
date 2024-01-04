@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 
-<mapper namespace="com.tencent.supersonic.chat.server.rest.persistence.mapper.StatisticsMapper">
+<mapper namespace="com.tencent.supersonic.chat.server.persistence.mapper.StatisticsMapper">
 
     <resultMap id="Statistics" type="com.tencent.supersonic.chat.server.persistence.dataobject.StatisticsDO">
         <id column="question_id" property="questionId"/>

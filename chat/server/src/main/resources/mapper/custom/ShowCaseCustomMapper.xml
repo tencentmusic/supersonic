@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.tencent.supersonic.chat.server.rest.persistence.mapper.custom.ShowCaseCustomMapper">
+<mapper namespace="com.tencent.supersonic.chat.server.persistence.mapper.custom.ShowCaseCustomMapper">
     <resultMap id="BaseResultMap" type="com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO">
         <id column="question_id" jdbcType="BIGINT" property="questionId" />
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />

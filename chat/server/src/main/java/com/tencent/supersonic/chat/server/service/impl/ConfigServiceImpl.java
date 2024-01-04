@@ -31,9 +31,9 @@ import com.tencent.supersonic.chat.server.persistence.repository.ChatConfigRepos
 import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.chat.server.service.SemanticService;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.common.server.pojo.SchemaItem;
-import com.tencent.supersonic.headless.common.server.response.DimensionResp;
-import com.tencent.supersonic.headless.common.server.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.SchemaItem;
+import com.tencent.supersonic.headless.api.response.DimensionResp;
+import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.tencent.supersonic.knowledge.persistence.mapper.DictConfMapper">
+<mapper namespace="com.tencent.supersonic.chat.server.persistence.mapper.DictConfMapper">
 
     <resultMap id="DictConfPO"
                type="com.tencent.supersonic.chat.server.persistence.dataobject.DictConfDO">

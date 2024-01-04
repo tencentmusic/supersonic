@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 
-<mapper namespace="com.tencent.supersonic.chat.server.rest.persistence.mapper.ChatMapper">
+<mapper namespace="com.tencent.supersonic.chat.server.persistence.mapper.ChatMapper">
 
     <resultMap id="IntelligentConversion" type="com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO">
         <id column="chat_id" property="chatId"/>

@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 
-<mapper namespace="com.tencent.supersonic.chat.server.rest.persistence.mapper.ChatParseMapper">
+<mapper namespace="com.tencent.supersonic.chat.server.persistence.mapper.ChatParseMapper">
 
     <resultMap id="ChatParse" type="com.tencent.supersonic.chat.server.persistence.dataobject.ChatParseDO">
         <id column="question_id" property="questionId"/>

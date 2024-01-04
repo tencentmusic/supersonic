@@ -3,10 +3,10 @@ package com.tencent.supersonic.headless.server.utils;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.common.server.request.DomainReq;
-import com.tencent.supersonic.headless.common.server.response.DimensionResp;
-import com.tencent.supersonic.headless.common.server.response.DomainResp;
-import com.tencent.supersonic.headless.common.server.response.MetricResp;
+import com.tencent.supersonic.headless.api.request.DomainReq;
+import com.tencent.supersonic.headless.api.response.DimensionResp;
+import com.tencent.supersonic.headless.api.response.DomainResp;
+import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DomainDO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;

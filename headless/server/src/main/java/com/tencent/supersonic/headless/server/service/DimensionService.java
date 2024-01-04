@@ -3,11 +3,11 @@ package com.tencent.supersonic.headless.server.service;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.EventType;
-import com.tencent.supersonic.headless.common.server.pojo.DimValueMap;
-import com.tencent.supersonic.headless.common.server.request.DimensionReq;
-import com.tencent.supersonic.headless.common.server.request.MetaBatchReq;
-import com.tencent.supersonic.headless.common.server.request.PageDimensionReq;
-import com.tencent.supersonic.headless.common.server.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.DimValueMap;
+import com.tencent.supersonic.headless.api.request.DimensionReq;
+import com.tencent.supersonic.headless.api.request.MetaBatchReq;
+import com.tencent.supersonic.headless.api.request.PageDimensionReq;
+import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 
 import java.util.List;

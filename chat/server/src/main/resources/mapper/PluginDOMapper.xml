@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.tencent.supersonic.chat.server.rest.persistence.mapper.PluginDOMapper">
+<mapper namespace="com.tencent.supersonic.chat.server.persistence.mapper.PluginDOMapper">
   <resultMap id="BaseResultMap" type="com.tencent.supersonic.chat.server.persistence.dataobject.PluginDO">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="type" jdbcType="VARCHAR" property="type" />
@@ -88,7 +88,7 @@
     </if>
   </select>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
-    select 
+    select
     <include refid="Base_Column_List" />
     ,
     <include refid="Blob_Column_List" />
@@ -101,15 +101,15 @@
   </delete>
   <insert id="insert" parameterType="com.tencent.supersonic.chat.server.persistence.dataobject.PluginDO">
     insert into s2_plugin (id, type, model,
-      pattern, parse_mode, name, 
-      created_at, created_by, updated_at, 
-      updated_by, parse_mode_config, config, 
-      comment)
+                           pattern, parse_mode, name,
+                           created_at, created_by, updated_at,
+                           updated_by, parse_mode_config, config,
+                           comment)
     values (#{id,jdbcType=BIGINT}, #{type,jdbcType=VARCHAR}, #{model,jdbcType=VARCHAR},
-      #{pattern,jdbcType=VARCHAR}, #{parseMode,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
-      #{createdAt,jdbcType=TIMESTAMP}, #{createdBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP}, 
-      #{updatedBy,jdbcType=VARCHAR}, #{parseModeConfig,jdbcType=LONGVARCHAR}, #{config,jdbcType=LONGVARCHAR}, 
-      #{comment,jdbcType=LONGVARCHAR})
+            #{pattern,jdbcType=VARCHAR}, #{parseMode,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
+            #{createdAt,jdbcType=TIMESTAMP}, #{createdBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP},
+            #{updatedBy,jdbcType=VARCHAR}, #{parseModeConfig,jdbcType=LONGVARCHAR}, #{config,jdbcType=LONGVARCHAR},
+            #{comment,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.tencent.supersonic.chat.server.persistence.dataobject.PluginDO">
     insert into s2_plugin
@@ -247,30 +247,30 @@
   <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.tencent.supersonic.chat.server.persistence.dataobject.PluginDO">
     update s2_plugin
     set type = #{type,jdbcType=VARCHAR},
-      model = #{model,jdbcType=VARCHAR},
-      pattern = #{pattern,jdbcType=VARCHAR},
-      parse_mode = #{parseMode,jdbcType=VARCHAR},
-      name = #{name,jdbcType=VARCHAR},
-      created_at = #{createdAt,jdbcType=TIMESTAMP},
-      created_by = #{createdBy,jdbcType=VARCHAR},
-      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
-      updated_by = #{updatedBy,jdbcType=VARCHAR},
-      parse_mode_config = #{parseModeConfig,jdbcType=LONGVARCHAR},
-      config = #{config,jdbcType=LONGVARCHAR},
-      comment = #{comment,jdbcType=LONGVARCHAR}
+        model = #{model,jdbcType=VARCHAR},
+        pattern = #{pattern,jdbcType=VARCHAR},
+        parse_mode = #{parseMode,jdbcType=VARCHAR},
+        name = #{name,jdbcType=VARCHAR},
+        created_at = #{createdAt,jdbcType=TIMESTAMP},
+        created_by = #{createdBy,jdbcType=VARCHAR},
+        updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+        updated_by = #{updatedBy,jdbcType=VARCHAR},
+        parse_mode_config = #{parseModeConfig,jdbcType=LONGVARCHAR},
+        config = #{config,jdbcType=LONGVARCHAR},
+        comment = #{comment,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.tencent.supersonic.chat.server.persistence.dataobject.PluginDO">
     update s2_plugin
     set type = #{type,jdbcType=VARCHAR},
-      model = #{model,jdbcType=VARCHAR},
-      pattern = #{pattern,jdbcType=VARCHAR},
-      parse_mode = #{parseMode,jdbcType=VARCHAR},
-      name = #{name,jdbcType=VARCHAR},
-      created_at = #{createdAt,jdbcType=TIMESTAMP},
-      created_by = #{createdBy,jdbcType=VARCHAR},
-      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
-      updated_by = #{updatedBy,jdbcType=VARCHAR}
+        model = #{model,jdbcType=VARCHAR},
+        pattern = #{pattern,jdbcType=VARCHAR},
+        parse_mode = #{parseMode,jdbcType=VARCHAR},
+        name = #{name,jdbcType=VARCHAR},
+        created_at = #{createdAt,jdbcType=TIMESTAMP},
+        created_by = #{createdBy,jdbcType=VARCHAR},
+        updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+        updated_by = #{updatedBy,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

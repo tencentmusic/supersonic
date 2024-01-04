@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.server.service.impl;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.DimensionValueReq;
@@ -62,8 +63,8 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.headless.common.core.request.QueryStructReq;
-import com.tencent.supersonic.headless.common.server.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -194,7 +195,10 @@ public class QueryServiceImpl implements QueryService {
 
         Map<String, Plugin> nameToPlugin = pluginService.getNameToPlugin();
         QueryContext queryCtx = QueryContext.builder()
+                .request(queryReq)
                 .semanticSchema(semanticSchema)
+                .candidateQueries(new ArrayList<>())
+                .mapInfo(new SchemaMapInfo())
                 .agent(agent)
                 .modelIdToChatRichConfig(modelIdToChatRichConfig)
                 .nameToPlugin(nameToPlugin)

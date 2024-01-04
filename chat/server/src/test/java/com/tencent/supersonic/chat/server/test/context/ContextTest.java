@@ -1,11 +1,12 @@
+
 package com.tencent.supersonic.chat.server.test.context;
 
 import com.tencent.supersonic.chat.core.knowledge.semantic.RemoteSemanticInterpreter;
 import com.tencent.supersonic.chat.core.utils.ComponentFactory;
 import com.tencent.supersonic.chat.server.persistence.mapper.ChatContextMapper;
 import com.tencent.supersonic.chat.server.persistence.repository.impl.ChatContextRepositoryImpl;
+import com.tencent.supersonic.chat.server.service.QueryService;
 import com.tencent.supersonic.chat.server.test.ChatBizLauncher;
-import com.tencent.supersonic.headless.core.service.QueryService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
