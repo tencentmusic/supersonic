@@ -11,7 +11,7 @@ import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.headless.core.utils.QueryStructUtils;
+import com.tencent.supersonic.headless.server.utils.QueryStructUtils;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;

@@ -9,6 +9,8 @@ import java.util.List;
 @Data
 public class DataModelYamlTpl {
 
+    private Long id;
+
     private String name;
 
     private Long sourceId;

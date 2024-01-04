@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.core.manager;
 
+import com.tencent.supersonic.headless.api.enums.DatasourceQuery;
 import com.tencent.supersonic.headless.api.enums.ModelSourceType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.Identify;
@@ -7,15 +8,14 @@ import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.IdentifyYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
-import com.tencent.supersonic.headless.server.adaptor.db.DbAdaptor;
-import com.tencent.supersonic.headless.server.adaptor.db.DbAdaptorFactory;
-import com.tencent.supersonic.headless.server.pojo.DatasourceQueryEnum;
-import com.tencent.supersonic.headless.server.utils.SysTimeDimensionBuilder;
+import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
+import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
+import com.tencent.supersonic.headless.core.pojo.yaml.DataModelYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.DimensionTimeTypeParamsTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.IdentifyYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.MeasureYamlTpl;
+import com.tencent.supersonic.headless.core.utils.SysTimeDimensionBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -45,7 +45,7 @@ public class ModelYamlManager {
         dataModelYamlTpl.setName(modelResp.getBizName());
         dataModelYamlTpl.setSourceId(modelResp.getDatabaseId());
         dataModelYamlTpl.setModelSourceTypeEnum(ModelSourceType.of(modelResp.getSourceType()));
-        if (modelDetail.getQueryType().equalsIgnoreCase(DatasourceQueryEnum.SQL_QUERY.getName())) {
+        if (modelDetail.getQueryType().equalsIgnoreCase(DatasourceQuery.SQL_QUERY.getName())) {
             dataModelYamlTpl.setSqlQuery(modelDetail.getSqlQuery());
         } else {
             dataModelYamlTpl.setTableQuery(modelDetail.getTableQuery());

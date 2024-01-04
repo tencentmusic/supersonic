@@ -5,7 +5,7 @@ import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.server.executor.QueryExecutor;
+import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 
 public interface HeadlessQueryEngine {
 

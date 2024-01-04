@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.core.pojo;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
+import com.tencent.supersonic.headless.core.parser.calcite.s2sql.HeadlessModel;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -25,6 +26,8 @@ public class QueryStatement {
     private List<ImmutablePair<String, String>> timeRanges;
     private Boolean enableOptimize = true;
     private Triple<String, String, String> minMaxTime;
+
+    private HeadlessModel headlessModel;
 
     public boolean isOk() {
         this.ok = "".equals(errMsg) && !"".equals(sql);

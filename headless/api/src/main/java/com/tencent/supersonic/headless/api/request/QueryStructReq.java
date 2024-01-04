@@ -82,6 +82,10 @@ public class QueryStructReq {
         return Lists.newArrayList(modelIds);
     }
 
+    public String getModelIdStr() {
+        return String.join(",", modelIds.stream().map(Object::toString).collect(Collectors.toList()));
+    }
+
     public Set<Long> getModelIdSet() {
         return modelIds;
     }

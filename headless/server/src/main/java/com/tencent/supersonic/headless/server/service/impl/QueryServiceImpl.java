@@ -37,7 +37,7 @@ import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.headless.core.parser.convert.QueryReqConverter;
+import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.server.service.HeadlessQueryEngine;
 import com.tencent.supersonic.headless.server.service.QueryService;
@@ -47,7 +47,7 @@ import com.tencent.supersonic.headless.server.annotation.ApiHeaderCheck;
 import com.tencent.supersonic.headless.server.annotation.S2SQLDataPermission;
 import com.tencent.supersonic.headless.server.annotation.StructDataPermission;
 import com.tencent.supersonic.headless.server.aspect.ApiHeaderCheckAspect;
-import com.tencent.supersonic.headless.server.executor.QueryExecutor;
+import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.service.AppService;
 import com.tencent.supersonic.headless.server.service.Catalog;
@@ -125,13 +125,13 @@ public class QueryServiceImpl implements QueryService {
         return headlessQueryEngine.execute(queryStatement);
     }
 
-    private QueryStatement convertToQueryStatement(QueryS2SQLReq querySqlCmd, User user) throws Exception {
+    private QueryStatement convertToQueryStatement(QueryS2SQLReq queryS2SQLReq, User user) throws Exception {
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
-        filter.setModelIds(querySqlCmd.getModelIds());
+        filter.setModelIds(queryS2SQLReq.getModelIds());
         SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
         List<ModelSchemaResp> modelSchemaResps = schemaService.fetchModelSchema(filter, user);
-        QueryStatement queryStatement = queryReqConverter.convert(querySqlCmd, modelSchemaResps);
-        queryStatement.setModelIds(querySqlCmd.getModelIds());
+        QueryStatement queryStatement = queryReqConverter.convert(queryS2SQLReq, modelSchemaResps);
+        queryStatement.setModelIds(queryS2SQLReq.getModelIds());
         return queryStatement;
     }
 

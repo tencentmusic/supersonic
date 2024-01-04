@@ -22,8 +22,6 @@ public interface Catalog {
 
     DatabaseResp getDatabaseByModelId(Long modelId);
 
-    String getModelFullPath(List<Long> modelIds);
-
     DimensionResp getDimension(String bizName, Long modelId);
 
     DimensionResp getDimension(Long id);

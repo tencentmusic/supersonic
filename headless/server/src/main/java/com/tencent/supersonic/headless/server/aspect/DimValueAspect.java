@@ -133,7 +133,7 @@ public class DimValueAspect {
         filedNameToValueMap.put(fieldName, map);
     }
 
-    @Around("execution(* com.tencent.supersonic.headless.core.rest.QueryController.queryByStruct(..))"
+    @Around("execution(* com.tencent.supersonic.headless.server.rest.QueryController.queryByStruct(..))"
             + " || execution(* com.tencent.supersonic.headless.server.service.QueryService.queryByStruct(..))"
             + " || execution(* com.tencent.supersonic.headless.server.service.QueryService.queryByStructWithAuth(..))")
     public Object handleDimValue(ProceedingJoinPoint joinPoint) throws Throwable {

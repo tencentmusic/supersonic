@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -56,11 +55,6 @@ public class CatalogImpl implements Catalog {
 
     public DatabaseResp getDatabaseByModelId(Long modelId) {
         return modelService.getDatabaseByModelId(modelId);
-    }
-
-    @Override
-    public String getModelFullPath(List<Long> modelIds) {
-        return String.join(",", modelIds.stream().map(Object::toString).collect(Collectors.toList()));
     }
 
     @Override
