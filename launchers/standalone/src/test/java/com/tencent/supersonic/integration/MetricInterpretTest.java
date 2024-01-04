@@ -1,8 +1,8 @@
 package com.tencent.supersonic.integration;
 
 import com.tencent.supersonic.StandaloneLauncher;
-import com.tencent.supersonic.chat.query.llm.analytics.LLMAnswerResp;
-import com.tencent.supersonic.chat.service.AgentService;
+import com.tencent.supersonic.chat.core.query.llm.analytics.LLMAnswerResp;
+import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;

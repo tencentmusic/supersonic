@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
-        <module>core</module>
-        <module>knowledge</module>
         <module>api</module>
+        <module>core</module>
+        <module>server</module>
     </modules>
 
     <parent>

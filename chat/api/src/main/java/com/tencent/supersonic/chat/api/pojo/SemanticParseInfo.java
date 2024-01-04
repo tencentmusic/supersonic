@@ -1,9 +1,9 @@
 package com.tencent.supersonic.chat.api.pojo;
 
 
+import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
-import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.ModelCluster;
 import com.tencent.supersonic.common.pojo.Order;

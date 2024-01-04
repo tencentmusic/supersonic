@@ -30,6 +30,11 @@
         </dependency>
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
+            <artifactId>chat-server</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.tencent.supersonic</groupId>
             <artifactId>chat-api</artifactId>
             <version>${project.version}</version>
         </dependency>
