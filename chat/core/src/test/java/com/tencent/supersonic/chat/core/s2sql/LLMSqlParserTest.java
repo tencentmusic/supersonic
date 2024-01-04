@@ -1,26 +1,20 @@
-package com.tencent.supersonic.chat.server.parser.llm.s2sql;
+package com.tencent.supersonic.chat.core.s2sql;
 
 import static org.mockito.Mockito.when;
 
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
-import com.tencent.supersonic.chat.server.service.impl.SchemaService;
-import com.tencent.supersonic.common.util.ContextUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-class LLMS2SQLParserTest {
+class LLMSqlParserTest {
 
     @Test
     void setFilter() {
-        MockedStatic<ContextUtils> mockContextUtils = Mockito.mockStatic(ContextUtils.class);
-
-        SchemaService mockSchemaService = Mockito.mock(SchemaService.class);
         SemanticSchema mockSemanticSchema = Mockito.mock(SemanticSchema.class);
 
         List<SchemaElement> dimensions = new ArrayList<>();
@@ -57,8 +51,5 @@ class LLMS2SQLParserTest {
         metrics.add(metric);
 
         when(mockSemanticSchema.getMetrics()).thenReturn(metrics);
-
-        when(mockSchemaService.getSemanticSchema()).thenReturn(mockSemanticSchema);
-        mockContextUtils.when(() -> ContextUtils.getBean(SchemaService.class)).thenReturn(mockSchemaService);
     }
 }

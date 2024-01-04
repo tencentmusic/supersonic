@@ -5,7 +5,6 @@ import com.tencent.supersonic.chat.core.parser.JavaLLMProxy;
 import com.tencent.supersonic.chat.core.parser.LLMProxy;
 import com.tencent.supersonic.chat.core.parser.sql.llm.ModelResolver;
 import com.tencent.supersonic.common.util.ContextUtils;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -50,12 +49,6 @@ public class ComponentFactory {
             modelResolver = init(ModelResolver.class);
         }
         return modelResolver;
-    }
-
-    private static <T> List<T> init(Class<T> factoryType, List list) {
-        list.addAll(SpringFactoriesLoader.loadFactories(factoryType,
-                Thread.currentThread().getContextClassLoader()));
-        return list;
     }
 
     private static <T> T init(Class<T> factoryType) {

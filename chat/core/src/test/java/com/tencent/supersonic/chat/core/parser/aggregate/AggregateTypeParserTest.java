@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.server.application.parser.aggregate;
+package com.tencent.supersonic.chat.core.parser.aggregate;
 
 
 import com.tencent.supersonic.chat.core.parser.sql.rule.AggregateTypeParser;

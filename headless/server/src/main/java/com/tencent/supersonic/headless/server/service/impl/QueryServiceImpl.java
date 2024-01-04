@@ -37,28 +37,21 @@ import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
+import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.server.service.HeadlessQueryEngine;
-import com.tencent.supersonic.headless.server.service.QueryService;
-import com.tencent.supersonic.headless.server.service.SchemaService;
-import com.tencent.supersonic.headless.server.utils.StatUtils;
 import com.tencent.supersonic.headless.server.annotation.ApiHeaderCheck;
 import com.tencent.supersonic.headless.server.annotation.S2SQLDataPermission;
 import com.tencent.supersonic.headless.server.annotation.StructDataPermission;
 import com.tencent.supersonic.headless.server.aspect.ApiHeaderCheckAspect;
-import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.service.AppService;
 import com.tencent.supersonic.headless.server.service.Catalog;
+import com.tencent.supersonic.headless.server.service.HeadlessQueryEngine;
+import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.SchemaService;
+import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletRequest;
+import com.tencent.supersonic.headless.server.utils.StatUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +59,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
 
 @Service
@@ -92,7 +92,7 @@ public class QueryServiceImpl implements QueryService {
             CacheUtils cacheUtils,
             QueryUtils queryUtils,
             QueryReqConverter queryReqConverter,
-            HeadlessQueryEngine headlessQueryEngine,
+            @Lazy HeadlessQueryEngine headlessQueryEngine,
             Catalog catalog,
             AppService appService) {
         this.statUtils = statUtils;
@@ -283,7 +283,7 @@ public class QueryServiceImpl implements QueryService {
     @Override
     @ApiHeaderCheck
     public ItemQueryResultResp metricDataQueryById(QueryItemReq queryItemReq,
-                                                   HttpServletRequest request) throws Exception {
+            HttpServletRequest request) throws Exception {
         AppDetailResp appDetailResp = getAppDetailResp(request);
         authCheck(appDetailResp, queryItemReq.getIds(), ApiItemType.METRIC);
         List<SingleItemQueryResult> results = Lists.newArrayList();
@@ -323,7 +323,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     private QueryStructReq buildQueryStructReq(List<DimensionResp> dimensionResps,
-                                               MetricResp metricResp, DateConf dateConf, Long limit) {
+            MetricResp metricResp, DateConf dateConf, Long limit) {
         Set<Long> modelIds = dimensionResps.stream().map(DimensionResp::getModelId).collect(Collectors.toSet());
         modelIds.add(metricResp.getModelId());
         QueryStructReq queryStructReq = new QueryStructReq();
