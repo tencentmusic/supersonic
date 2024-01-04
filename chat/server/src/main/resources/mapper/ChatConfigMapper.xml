@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.tencent.supersonic.chat.server.persistence.mapper.ChatConfigMapper">
+
+    <resultMap id="chaConfigDO"
+               type="com.tencent.supersonic.chat.server.persistence.dataobject.ChatConfigDO">
+        <id column="id" property="id"/>
+        <result column="model_id" property="modelId"/>
+        <result column="chat_detail_config" property="chatDetailConfig"/>
+        <result column="chat_agg_config" property="chatAggConfig"/>
+        <result column="recommended_questions" property="recommendedQuestions"/>
+        <result column="status" property="status"/>
+        <result column="llm_examples" property="llmExamples"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <insert id="addConfig"
+            parameterType="com.tencent.supersonic.chat.server.persistence.dataobject.ChatConfigDO"
+            useGeneratedKeys="true" keyProperty="id">
+    insert into s2_chat_config
+    (
+        model_id, `chat_detail_config`, chat_agg_config,  recommended_questions, status, llm_examples, created_by, updated_by, created_at, updated_at
+    )
+    values
+    (
+        #{modelId}, #{chatDetailConfig}, #{chatAggConfig}, #{recommendedQuestions}, #{status}, #{llmExamples}, #{createdBy}, #{updatedBy}, #{createdAt}, #{updatedAt}
+    )
+    </insert>
+
+
+    <update id="editConfig">
+        update s2_chat_config
+        <set>
+            `updated_at` = #{updatedAt} ,
+            <if test="chatDetailConfig != null and chatDetailConfig != ''">
+                `chat_detail_config` = #{chatDetailConfig} ,
+            </if>
+            <if test="chatAggConfig != null and chatAggConfig != ''">
+                chat_agg_config = #{chatAggConfig} ,
+            </if>
+            <if test="recommendedQuestions != null and recommendedQuestions != ''">
+                recommended_questions = #{recommendedQuestions} ,
+            </if>
+            <if test="status != null and status != ''">
+                status = #{status} ,
+            </if>
+            <if test="updatedBy != null and updatedBy != ''">
+                updated_by = #{updatedBy} ,
+            </if>
+            <if test="llmExamples != null and llmExamples != ''">
+                llm_examples = #{llmExamples} ,
+            </if>
+        </set>
+
+        <where>
+            <if test="id != null and id != ''">
+                id = #{id}
+            </if>
+            <if test="modelId != null and modelId != ''">
+                and model_id = #{modelId}
+            </if>
+        </where>
+    </update>
+
+    <select id="search" resultMap="chaConfigDO">
+        select *
+        from s2_chat_config
+        <where>
+            <if test="id != null and id != ''">
+                id = #{id}
+            </if>
+            <if test="modelId != null and modelId != ''">
+                and model_id = #{modelId}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+        </where>
+
+    </select>
+
+    <select id="fetchConfigByModelId" resultMap="chaConfigDO">
+        select *
+        from s2_chat_config
+        where model_id = #{modelId}
+        and status != 3
+        order by updated_at desc
+        limit 1
+    </select>
+
+</mapper>

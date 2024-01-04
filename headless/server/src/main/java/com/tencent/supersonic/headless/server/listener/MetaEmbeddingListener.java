@@ -1,28 +1,30 @@
 package com.tencent.supersonic.headless.server.listener;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.util.ComponentFactory;
 import com.tencent.supersonic.common.util.embedding.EmbeddingQuery;
 import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Component
 @Slf4j
 public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
 
-    public static final String COLLECTION_NAME = "meta_collection";
+    @Autowired
+    private EmbeddingConfig embeddingConfig;
 
     private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
 
@@ -55,14 +57,14 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
         } catch (InterruptedException e) {
             log.error("", e);
         }
-        s2EmbeddingStore.addCollection(COLLECTION_NAME);
+        s2EmbeddingStore.addCollection(embeddingConfig.getMetaCollectionName());
         if (event.getEventType().equals(EventType.ADD)) {
-            s2EmbeddingStore.addQuery(COLLECTION_NAME, embeddingQueries);
+            s2EmbeddingStore.addQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
         } else if (event.getEventType().equals(EventType.DELETE)) {
-            s2EmbeddingStore.deleteQuery(COLLECTION_NAME, embeddingQueries);
+            s2EmbeddingStore.deleteQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
         } else if (event.getEventType().equals(EventType.UPDATE)) {
-            s2EmbeddingStore.deleteQuery(COLLECTION_NAME, embeddingQueries);
-            s2EmbeddingStore.addQuery(COLLECTION_NAME, embeddingQueries);
+            s2EmbeddingStore.deleteQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
+            s2EmbeddingStore.addQuery(embeddingConfig.getMetaCollectionName(), embeddingQueries);
         }
     }
 
