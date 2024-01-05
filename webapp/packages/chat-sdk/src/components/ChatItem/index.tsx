@@ -308,6 +308,8 @@ const ChatItem: React.FC<Props> = ({
     [`${prefixCls}-content-mobile`]: isMobile,
   });
 
+  const { llmReq, llmResp } = parseInfo?.properties?.CONTEXT || {};
+
   return (
     <div className={prefixCls}>
       {!isMobile && integrateSystem !== 'wiki' && (
@@ -337,7 +339,8 @@ const ChatItem: React.FC<Props> = ({
             <>
               {!isMobile && parseInfo?.sqlInfo && isDeveloper && integrateSystem !== 'c2' && (
                 <SqlItem
-                  llmReq={parseInfo?.properties?.CONTEXT?.llmReq}
+                  llmReq={llmReq}
+                  llmResp={llmResp}
                   integrateSystem={integrateSystem}
                   sqlInfo={parseInfo.sqlInfo}
                   sqlTimeCost={parseTimeCost?.sqlTime}
