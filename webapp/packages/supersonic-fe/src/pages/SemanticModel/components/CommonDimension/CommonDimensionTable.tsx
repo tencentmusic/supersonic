@@ -57,7 +57,7 @@ const CommonDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'key',
       title: '维度搜索',
       hideInTable: true,
-      renderFormItem: () => <Input placeholder="请输入ID/维度名称/字段名称" />,
+      renderFormItem: () => <Input placeholder="请输入ID/维度名称/英文名称" />,
     },
     {
       dataIndex: 'name',
@@ -66,7 +66,7 @@ const CommonDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
     {
       dataIndex: 'bizName',
-      title: '字段名称',
+      title: '英文名称',
       search: false,
       // order: 9,
     },

@@ -149,7 +149,7 @@ const CommonDimensionInfoModal: React.FC<CreateFormProps> = ({
         </FormItem>
         <FormItem
           name="bizName"
-          label="字段名称"
+          label="英文名称"
           rules={[{ required: true, message: '请输入字段名称' }]}
         >
           <Input placeholder="名称不可重复" disabled={isEdit} />

@@ -67,7 +67,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
       dataIndex: 'key',
       title: '模型搜索',
       hideInTable: true,
-      renderFormItem: () => <Input placeholder="请输入ID/模型名称/字段名称/标签" />,
+      renderFormItem: () => <Input placeholder="请输入ID/模型名称/英文名称/标签" />,
     },
     {
       dataIndex: 'alias',

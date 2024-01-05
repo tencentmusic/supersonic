@@ -76,7 +76,7 @@ const NodeInfoDrawer: React.FC<Props> = ({
         title: '基本信息',
         children: [
           {
-            label: '字段名称',
+            label: '英文名称',
             value: bizName,
           },
           {
