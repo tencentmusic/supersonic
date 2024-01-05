@@ -196,6 +196,7 @@ public class QueryServiceImpl implements QueryService {
         Map<String, Plugin> nameToPlugin = pluginService.getNameToPlugin();
         QueryContext queryCtx = QueryContext.builder()
                 .request(queryReq)
+                .queryFilters(queryReq.getQueryFilters())
                 .semanticSchema(semanticSchema)
                 .candidateQueries(new ArrayList<>())
                 .mapInfo(new SchemaMapInfo())

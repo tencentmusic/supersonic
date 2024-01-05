@@ -19,6 +19,7 @@ import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class QueryFilterMapper implements SchemaMapper {
+
     private double similarity = 1.0;
 
     @Override
@@ -35,7 +36,7 @@ public class QueryFilterMapper implements SchemaMapper {
             schemaElementMatches = Lists.newArrayList();
             schemaMapInfo.setMatchedElements(modelId, schemaElementMatches);
         }
-        addValueSchemaElementMatch(queryContext, schemaElementMatches, queryReq.getQueryFilters());
+        addValueSchemaElementMatch(queryContext, schemaElementMatches);
     }
 
     private void clearOtherSchemaElementMatch(Long modelId, SchemaMapInfo schemaMapInfo) {
@@ -47,12 +48,12 @@ public class QueryFilterMapper implements SchemaMapper {
     }
 
     private List<SchemaElementMatch> addValueSchemaElementMatch(QueryContext queryContext,
-                                                                List<SchemaElementMatch> candidateElementMatches,
-                                                           QueryFilters queryFilter) {
-        if (queryFilter == null || CollectionUtils.isEmpty(queryFilter.getFilters())) {
+            List<SchemaElementMatch> candidateElementMatches) {
+        QueryFilters queryFilters = queryContext.getQueryFilters();
+        if (queryFilters == null || CollectionUtils.isEmpty(queryFilters.getFilters())) {
             return candidateElementMatches;
         }
-        for (QueryFilter filter : queryFilter.getFilters()) {
+        for (QueryFilter filter : queryFilters.getFilters()) {
             if (checkExistSameValueSchemaElementMatch(filter, candidateElementMatches)) {
                 continue;
             }
@@ -76,7 +77,7 @@ public class QueryFilterMapper implements SchemaMapper {
     }
 
     private boolean checkExistSameValueSchemaElementMatch(QueryFilter queryFilter,
-                                                          List<SchemaElementMatch> schemaElementMatches) {
+            List<SchemaElementMatch> schemaElementMatches) {
         List<SchemaElementMatch> valueSchemaElements = schemaElementMatches.stream().filter(schemaElementMatch ->
                         SchemaElementType.VALUE.equals(schemaElementMatch.getElement().getType()))
                 .collect(Collectors.toList());
