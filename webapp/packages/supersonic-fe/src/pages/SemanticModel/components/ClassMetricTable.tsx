@@ -107,7 +107,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'key',
       title: '指标搜索',
       hideInTable: true,
-      renderFormItem: () => <Input placeholder="请输入ID/指标名称/字段名称/标签" />,
+      renderFormItem: () => <Input placeholder="请输入ID/指标名称/英文名称/标签" />,
     },
     {
       dataIndex: 'alias',
@@ -118,7 +118,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
     {
       dataIndex: 'bizName',
-      title: '字段名称',
+      title: '英文名称',
       search: false,
     },
     {

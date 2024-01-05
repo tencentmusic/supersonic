@@ -4,6 +4,7 @@ import { Button, Form, Input, message, Space } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import RegisterForm from './components/RegisterForm';
 // import ForgetPwdForm from './components/ForgetPwdForm';
+import { ROUTE_AUTH_CODES } from '../../../config/routes';
 import S2Icon, { ICON } from '@/components/S2Icon';
 import React, { useState } from 'react';
 import { useForm } from 'antd/lib/form/Form';
@@ -30,7 +31,11 @@ const LoginPage: React.FC = () => {
           ...queryUserData,
           staffName: queryUserData.staffName || queryUserData.name,
         };
-        setInitialState({ ...initialState, currentUser });
+        const authCodes = Array.isArray(initialState?.authCodes) ? initialState?.authCodes : [];
+        if (queryUserData.superAdmin) {
+          authCodes.push(ROUTE_AUTH_CODES.SYSTEM_ADMIN);
+        }
+        setInitialState({ ...initialState, currentUser, authCodes });
       }
       history.push('/');
       return;
