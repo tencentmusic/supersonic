@@ -487,6 +487,46 @@
     flex: 1;
     color: var(--text-color);
   }
+
+  &-few-shot-item {
+    margin-top: 10px;
+
+    &:first-child {
+      margin-top: 4px;
+    }
+  }
+
+  &-few-shot-title {
+    color: var(--text-color);
+    font-weight: 500;
+  }
+
+  &-few-shot-content {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 2px;
+  }
+
+  &-few-shot-content-item {
+    display: flex;
+    align-items: baseline;
+  }
+
+  &-few-shot-content-title {
+    width: 50px;
+    color: var(--text-color);
+  }
+
+  &-few-shot-content-text {
+    line-height: 24px;
+    color: var(--text-color-secondary);
+  }
+
+  &-few-shot-code {
+    padding: 0 !important;
+    background-color: transparent !important;
+  }
 }
 
 .@{sql-item-prefix-cls}-copilot {

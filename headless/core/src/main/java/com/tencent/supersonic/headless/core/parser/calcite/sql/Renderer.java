@@ -20,6 +20,9 @@ import lombok.Data;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 
+/**
+ * process TableView
+ */
 @Data
 public abstract class Renderer {
 

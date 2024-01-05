@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * transform query results to return the users
+ */
 public class DataTransformUtils {
 
     public static List<Map<String, Object>> transform(List<Map<String, Object>> originalData, String metric,

@@ -7,7 +7,7 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.query.rule.metric.MetricTagQuery;
+import com.tencent.supersonic.chat.core.query.rule.metric.MetricTagQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.integration.BaseQueryTest;

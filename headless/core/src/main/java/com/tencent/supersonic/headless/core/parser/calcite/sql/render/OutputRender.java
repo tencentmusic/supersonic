@@ -18,6 +18,9 @@ import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 import org.springframework.util.CollectionUtils;
 
+/**
+ * process the query result items from query request
+ */
 public class OutputRender extends Renderer {
 
     @Override

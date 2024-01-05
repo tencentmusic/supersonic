@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @ToString
@@ -25,6 +26,10 @@ public class QueryS2SQLReq {
 
     public List<Long> getModelIds() {
         return Lists.newArrayList(modelIds);
+    }
+
+    public String getModelIdStr() {
+        return String.join(",", modelIds.stream().map(Object::toString).collect(Collectors.toList()));
     }
 
 }

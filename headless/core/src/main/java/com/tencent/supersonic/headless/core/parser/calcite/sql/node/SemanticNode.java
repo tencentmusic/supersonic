@@ -42,6 +42,9 @@ import org.apache.calcite.sql.validate.SqlValidatorScope;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * model item node
+ */
 public abstract class SemanticNode {
 
     public static Set<SqlKind> AGGREGATION_KIND = new HashSet<>();

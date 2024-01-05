@@ -9,7 +9,6 @@ import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.request.DimensionReq;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
@@ -74,14 +73,6 @@ public class DimensionConverter {
             dimensionResp.setDataType(DataTypeEnums.of(dimensionDO.getDataType()));
         }
         return dimensionResp;
-    }
-
-    public static DimensionYamlTpl convert2DimensionYamlTpl(DimensionResp dimension) {
-        DimensionYamlTpl dimensionYamlTpl = new DimensionYamlTpl();
-        BeanUtils.copyProperties(dimension, dimensionYamlTpl);
-        dimensionYamlTpl.setName(dimension.getBizName());
-        dimensionYamlTpl.setOwners(dimension.getCreatedBy());
-        return dimensionYamlTpl;
     }
 
 }

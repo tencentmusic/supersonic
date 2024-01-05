@@ -2,14 +2,17 @@ package com.tencent.supersonic.headless.core.optimizer;
 
 import com.google.common.base.Strings;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.core.persistence.pojo.QueryStatement;
-
-import java.util.Objects;
-import java.util.stream.Collectors;
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+/**
+ * Remove the default metric added by the system when the query only has dimensions
+ */
 @Slf4j
 @Component("DetailQuery")
 public class DetailQuery implements QueryOptimizer {

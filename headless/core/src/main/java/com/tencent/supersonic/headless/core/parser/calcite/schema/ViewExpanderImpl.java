@@ -5,6 +5,9 @@ import org.apache.calcite.plan.RelOptTable;
 import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.type.RelDataType;
 
+/**
+ * customize the  ViewExpander
+ */
 public class ViewExpanderImpl implements RelOptTable.ViewExpander {
     public ViewExpanderImpl() {
     }

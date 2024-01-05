@@ -17,6 +17,9 @@ public class EmbeddingConfig {
     @Value("${embedding.preset.collection:preset_query_collection}")
     private String presetCollection;
 
+    @Value("${embedding.meta.collection:meta_collection}")
+    private String metaCollectionName;
+
     @Value("${embedding.nResult:1}")
     private int nResult;
 
@@ -34,4 +37,5 @@ public class EmbeddingConfig {
 
     @Value("${inMemoryEmbeddingStore.persistent.path:/tmp}")
     private String embeddingStorePersistentPath;
+
 }

@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.api.pojo.response;
 
 
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq.TimeMode;
 import com.tencent.supersonic.common.pojo.Constants;
 import lombok.Data;
 
@@ -26,6 +26,6 @@ public class ChatDefaultRichConfigResp {
      */
     private String period = Constants.DAY;
 
-    private ChatDefaultConfigReq.TimeMode timeMode;
+    private TimeMode timeMode;
 
 }

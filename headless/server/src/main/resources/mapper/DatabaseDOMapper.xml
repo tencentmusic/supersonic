@@ -47,7 +47,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, name, description, version, type, created_at, created_by, updated_at, updated_by, 
+    id, name, description, version, type, created_at, created_by, updated_at, updated_by,
     admin, viewer
   </sql>
   <sql id="Blob_Column_List">
@@ -87,7 +87,7 @@
     </if>
   </select>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
-    select 
+    select
     <include refid="Base_Column_List" />
     ,
     <include refid="Blob_Column_List" />
@@ -99,16 +99,16 @@
     where id = #{id,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO">
-    insert into s2_database (id, name, description, 
-      version, type, created_at, 
-      created_by, updated_at, updated_by, 
-      admin, viewer, config
-      )
-    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, 
-      #{version,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, 
-      #{createdBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP}, #{updatedBy,jdbcType=VARCHAR}, 
-      #{admin,jdbcType=VARCHAR}, #{viewer,jdbcType=VARCHAR}, #{config,jdbcType=LONGVARCHAR}
-      )
+    insert into s2_database (id, name, description,
+                             version, type, created_at,
+                             created_by, updated_at, updated_by,
+                             admin, viewer, config
+    )
+    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR},
+            #{version,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP},
+            #{createdBy,jdbcType=VARCHAR}, #{updatedAt,jdbcType=TIMESTAMP}, #{updatedBy,jdbcType=VARCHAR},
+            #{admin,jdbcType=VARCHAR}, #{viewer,jdbcType=VARCHAR}, #{config,jdbcType=LONGVARCHAR}
+           )
   </insert>
   <insert id="insertSelective" parameterType="com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO">
     insert into s2_database
@@ -237,30 +237,30 @@
   <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO">
     update s2_database
     set name = #{name,jdbcType=VARCHAR},
-      description = #{description,jdbcType=VARCHAR},
-      version = #{version,jdbcType=VARCHAR},
-      type = #{type,jdbcType=VARCHAR},
-      created_at = #{createdAt,jdbcType=TIMESTAMP},
-      created_by = #{createdBy,jdbcType=VARCHAR},
-      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
-      updated_by = #{updatedBy,jdbcType=VARCHAR},
-      admin = #{admin,jdbcType=VARCHAR},
-      viewer = #{viewer,jdbcType=VARCHAR},
-      config = #{config,jdbcType=LONGVARCHAR}
+        description = #{description,jdbcType=VARCHAR},
+        version = #{version,jdbcType=VARCHAR},
+        type = #{type,jdbcType=VARCHAR},
+        created_at = #{createdAt,jdbcType=TIMESTAMP},
+        created_by = #{createdBy,jdbcType=VARCHAR},
+        updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+        updated_by = #{updatedBy,jdbcType=VARCHAR},
+        admin = #{admin,jdbcType=VARCHAR},
+        viewer = #{viewer,jdbcType=VARCHAR},
+        config = #{config,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO">
     update s2_database
     set name = #{name,jdbcType=VARCHAR},
-      description = #{description,jdbcType=VARCHAR},
-      version = #{version,jdbcType=VARCHAR},
-      type = #{type,jdbcType=VARCHAR},
-      created_at = #{createdAt,jdbcType=TIMESTAMP},
-      created_by = #{createdBy,jdbcType=VARCHAR},
-      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
-      updated_by = #{updatedBy,jdbcType=VARCHAR},
-      admin = #{admin,jdbcType=VARCHAR},
-      viewer = #{viewer,jdbcType=VARCHAR}
+        description = #{description,jdbcType=VARCHAR},
+        version = #{version,jdbcType=VARCHAR},
+        type = #{type,jdbcType=VARCHAR},
+        created_at = #{createdAt,jdbcType=TIMESTAMP},
+        created_by = #{createdBy,jdbcType=VARCHAR},
+        updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+        updated_by = #{updatedBy,jdbcType=VARCHAR},
+        admin = #{admin,jdbcType=VARCHAR},
+        viewer = #{viewer,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>
