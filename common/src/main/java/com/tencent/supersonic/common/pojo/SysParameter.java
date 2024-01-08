@@ -99,6 +99,11 @@ public class SysParameter {
         parameters.add(new Parameter("long.text.threshold", "0.8",
                 "长文本匹配阈值", "如果是长文本, 若query得分/文本长度>该阈值, 则跳过当前parser",
                 "number", "Parser相关配置"));
+
+        //parse config
+        parameters.add(new Parameter("parse.show.count", "3",
+                "parseShowCount", "前端展示的解析个数",
+                "number", "Parser相关配置"));
     }
 
 }

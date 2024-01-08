@@ -76,6 +76,9 @@ public class OptimizationConfig {
     @Value("${text2sql.collection.name:text2dsl_agent_collection}")
     private String text2sqlCollectionName;
 
+    @Value("${parse.show.count:3}")
+    private Integer parseShowCount;
+
     @Autowired
     private SysParameterService sysParameterService;
 
@@ -145,6 +148,10 @@ public class OptimizationConfig {
 
     public SqlGenerationMode getSqlGenerationMode() {
         return convertValue("s2SQL.generation", SqlGenerationMode.class, sqlGenerationMode);
+    }
+
+    public Integer getParseShowCount() {
+        return convertValue("parse.show.count", Integer.class, parseShowCount);
     }
 
     public <T> T convertValue(String paramName, Class<T> targetType, T defaultValue) {
