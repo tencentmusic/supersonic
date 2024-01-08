@@ -79,7 +79,7 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
       dataIndex: 'x',
       valueType: 'option',
       render: (_: any, record: any) => {
-        const { name } = record;
+        const { bizName } = record;
         return (
           <Space>
             <a
@@ -87,7 +87,7 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
               onClick={() => {
                 const { measures } = measuresParams;
                 const list = measures.filter((item: any) => {
-                  return item.name !== name;
+                  return item.bizName !== bizName;
                 });
                 onFieldChange?.(list);
               }}
