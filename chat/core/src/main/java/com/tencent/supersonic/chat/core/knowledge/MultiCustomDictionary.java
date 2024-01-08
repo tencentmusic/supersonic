@@ -353,7 +353,7 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
 
     }
 
-    public boolean insert(String word, String natureWithFrequency) {
+    public synchronized boolean insert(String word, String natureWithFrequency) {
         if (word == null) {
             return false;
         } else {
