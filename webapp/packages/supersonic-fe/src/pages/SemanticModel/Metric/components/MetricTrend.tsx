@@ -251,7 +251,7 @@ const TrendChart: React.FC<Props> = ({
       <Skeleton
         className={styles.chart}
         style={{ height, display: loading ? 'table' : 'none' }}
-        paragraph={{ rows: height && height > 300 ? 15 : 6 }}
+        paragraph={{ rows: height && height > 300 ? 10 : 6 }}
       />
       <div
         className={styles.chart}

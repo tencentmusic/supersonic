@@ -143,6 +143,15 @@ export const layout: RunTimeLayoutConfig = (params) => {
     menuHeaderRender: undefined,
     childrenRender: (dom: any) => {
       return (
+        <ConfigProvider
+          theme={{
+            components: {
+              Button: {
+                colorPrimary: '#3182ce',
+              },
+            },
+          }}
+        >
         <div
           style={{ height: location.pathname.includes('chat') ? 'calc(100vh - 56px)' : undefined }}
         >
@@ -151,6 +160,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
             <Copilot token={getToken() || ''} isDeveloper />
           )}
         </div>
+        </ConfigProvider>
       );
     },
     ...initialState?.settings,
