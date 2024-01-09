@@ -1,7 +1,7 @@
 import RightContent from '@/components/RightContent';
 import S2Icon, { ICON } from '@/components/S2Icon';
 import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
-import { Space, Spin } from 'antd';
+import { Space, Spin, ConfigProvider } from 'antd';
 import ScaleLoader from 'react-spinners/ScaleLoader';
 import type { RunTimeLayoutConfig } from 'umi';
 import { history } from 'umi';
