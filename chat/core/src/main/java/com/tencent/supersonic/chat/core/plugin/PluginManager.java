@@ -51,7 +51,7 @@ public class PluginManager {
     }
 
     public static List<Plugin> getPluginAgentCanSupport(QueryContext queryContext) {
-        List<Plugin> plugins = new ArrayList<>();
+        List<Plugin> plugins = queryContext.getPluginList();
         if (Objects.isNull(queryContext.getAgent())) {
             return plugins;
         }
