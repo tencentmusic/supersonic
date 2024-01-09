@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.headless.api.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.headless.api.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.request.PageMetricReq;
+import com.tencent.supersonic.headless.api.request.SchemaItemQueryReq;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.DomainResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
@@ -70,6 +71,11 @@ public class SchemaController {
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return schemaService.queryMetric(pageMetricCmd, user);
+    }
+
+    @PostMapping("/schemaItem/list")
+    public List querySchemaItem(@RequestBody SchemaItemQueryReq schemaItemQueryReq) {
+        return schemaService.querySchemaItem(schemaItemQueryReq);
     }
 
 }

@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.headless.api.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.headless.api.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.request.PageMetricReq;
+import com.tencent.supersonic.headless.api.request.SchemaItemQueryReq;
 import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
@@ -21,6 +22,8 @@ public interface SchemaService {
     PageInfo<DimensionResp> queryDimension(PageDimensionReq pageDimensionReq, User user);
 
     PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user);
+
+    List querySchemaItem(SchemaItemQueryReq schemaItemQueryReq);
 
     List<DomainResp> getDomainList(User user);
 

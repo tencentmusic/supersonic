@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -66,10 +67,10 @@ public class QueryController {
         return queryService.queryByStructWithAuth(queryStructReq, user);
     }
 
-    @PostMapping("/metricDataQueryById")
-    public ItemQueryResultResp metricDataQueryById(@RequestBody QueryItemReq queryApiReq,
+    @PostMapping("/queryMetricDataById")
+    public ItemQueryResultResp queryMetricDataById(@Valid @RequestBody QueryItemReq queryApiReq,
                                                    HttpServletRequest request) throws Exception {
-        return queryService.metricDataQueryById(queryApiReq, request);
+        return queryService.queryMetricDataById(queryApiReq, request);
     }
 
     @PostMapping("/download/struct")
