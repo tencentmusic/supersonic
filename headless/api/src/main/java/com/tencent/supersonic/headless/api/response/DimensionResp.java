@@ -20,8 +20,6 @@ public class DimensionResp extends SchemaItem {
 
     private String expr;
 
-    private String fullPath;
-
     private String modelName;
 
     private String modelBizName;

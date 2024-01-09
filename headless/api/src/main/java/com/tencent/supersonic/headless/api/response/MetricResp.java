@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.pojo.DataFormat;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
-import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MetricTypeParams;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
@@ -76,13 +75,6 @@ public class MetricResp extends SchemaItem {
                 .map(DrillDownDimension::getDimensionId)
                 .map(String::valueOf)
                 .collect(Collectors.joining(","));
-    }
-
-    public List<Measure> getMeasures() {
-        if (typeParams == null) {
-            return Lists.newArrayList();
-        }
-        return typeParams.getMeasures();
     }
 
     public String getDefaultAgg() {

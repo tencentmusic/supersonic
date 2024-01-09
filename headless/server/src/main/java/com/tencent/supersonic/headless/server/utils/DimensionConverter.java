@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
@@ -72,6 +73,7 @@ public class DimensionConverter {
         if (Strings.isNotEmpty(dimensionDO.getDataType())) {
             dimensionResp.setDataType(DataTypeEnums.of(dimensionDO.getDataType()));
         }
+        dimensionResp.setTypeEnum(TypeEnums.DIMENSION);
         return dimensionResp;
     }
 

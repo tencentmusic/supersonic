@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.utils;
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.common.pojo.DataFormat;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.headless.api.pojo.MetricTypeParams;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
@@ -65,6 +66,7 @@ public class MetricConverter {
         if (metricDO.getExt() != null) {
             metricResp.setExt(JSONObject.parseObject(metricDO.getExt(), Map.class));
         }
+        metricResp.setTypeEnum(TypeEnums.METRIC);
         return metricResp;
     }
 

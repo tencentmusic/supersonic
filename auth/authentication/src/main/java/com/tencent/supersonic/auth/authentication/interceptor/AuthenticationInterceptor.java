@@ -5,16 +5,17 @@ import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.authentication.service.UserServiceImpl;
 import com.tencent.supersonic.auth.authentication.utils.UserTokenUtils;
 import com.tencent.supersonic.common.util.S2ThreadContext;
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.catalina.connector.RequestFacade;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerInterceptor;
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 
 
 public abstract class AuthenticationInterceptor implements HandlerInterceptor {
@@ -56,6 +57,11 @@ public abstract class AuthenticationInterceptor implements HandlerInterceptor {
     protected boolean isInternalRequest(HttpServletRequest request) {
         String internal = request.getHeader(UserConstants.INTERNAL);
         return "true".equalsIgnoreCase(internal);
+    }
+
+    protected boolean isAppRequest(HttpServletRequest request) {
+        String appId = request.getHeader(authenticationConfig.getAppId());
+        return StringUtils.isNotBlank(appId);
     }
 
     protected void reflectSetparam(HttpServletRequest request, String key, String value) {

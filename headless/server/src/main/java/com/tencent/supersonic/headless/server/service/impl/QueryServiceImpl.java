@@ -39,7 +39,6 @@ import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.server.annotation.ApiHeaderCheck;
 import com.tencent.supersonic.headless.server.annotation.S2SQLDataPermission;
 import com.tencent.supersonic.headless.server.annotation.StructDataPermission;
 import com.tencent.supersonic.headless.server.aspect.ApiHeaderCheckAspect;
@@ -52,6 +51,13 @@ import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -59,13 +65,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
 
 
 @Service
@@ -136,17 +135,17 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructCmd, User user) throws Exception {
+    public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user) throws Exception {
         QueryResultWithSchemaResp queryResultWithColumns = null;
-        log.info("[queryStructCmd:{}]", queryStructCmd);
+        log.info("[queryStructReq:{}]", queryStructReq);
         try {
-            statUtils.initStatInfo(queryStructCmd, user);
-            String cacheKey = cacheUtils.generateCacheKey(getKeyByModelIds(queryStructCmd.getModelIds()),
-                    queryStructCmd.generateCommandMd5());
-            handleGlobalCacheDisable(queryStructCmd);
-            boolean isCache = isCache(queryStructCmd);
+            statUtils.initStatInfo(queryStructReq, user);
+            String cacheKey = cacheUtils.generateCacheKey(getKeyByModelIds(queryStructReq.getModelIds()),
+                    queryStructReq.generateCommandMd5());
+            handleGlobalCacheDisable(queryStructReq);
+            boolean isCache = isCache(queryStructReq);
             if (isCache) {
-                queryResultWithColumns = queryByCache(cacheKey, queryStructCmd);
+                queryResultWithColumns = queryByCache(cacheKey, queryStructReq);
                 if (queryResultWithColumns != null) {
                     statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
                     return queryResultWithColumns;
@@ -154,7 +153,7 @@ public class QueryServiceImpl implements QueryService {
             }
             StatUtils.get().setUseResultCache(false);
             QueryStatement queryStatement = new QueryStatement();
-            queryStatement.setQueryStructReq(queryStructCmd);
+            queryStatement.setQueryStructReq(queryStructReq);
             queryStatement.setIsS2SQL(false);
             queryStatement = headlessQueryEngine.plan(queryStatement);
             QueryExecutor queryExecutor = headlessQueryEngine.route(queryStatement);
@@ -177,8 +176,8 @@ public class QueryServiceImpl implements QueryService {
     @Override
     @StructDataPermission
     @SneakyThrows
-    public QueryResultWithSchemaResp queryByStructWithAuth(QueryStructReq queryStructCmd, User user) {
-        return queryByStruct(queryStructCmd, user);
+    public QueryResultWithSchemaResp queryByStructWithAuth(QueryStructReq queryStructReq, User user) {
+        return queryByStruct(queryStructReq, user);
     }
 
     @Override
@@ -215,9 +214,9 @@ public class QueryServiceImpl implements QueryService {
 
     private QueryStatement getQueryStatementByMultiStruct(QueryMultiStructReq queryMultiStructReq) throws Exception {
         List<QueryStatement> sqlParsers = new ArrayList<>();
-        for (QueryStructReq queryStructCmd : queryMultiStructReq.getQueryStructReqs()) {
+        for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
             QueryStatement queryStatement = new QueryStatement();
-            queryStatement.setQueryStructReq(queryStructCmd);
+            queryStatement.setQueryStructReq(queryStructReq);
             queryStatement.setIsS2SQL(false);
             queryStatement = headlessQueryEngine.plan(queryStatement);
             queryUtils.checkSqlParse(queryStatement);
@@ -234,11 +233,11 @@ public class QueryServiceImpl implements QueryService {
         return (QueryResultWithSchemaResp) queryBySql(queryS2SQLReq, user);
     }
 
-    private void handleGlobalCacheDisable(QueryStructReq queryStructCmd) {
+    private void handleGlobalCacheDisable(QueryStructReq queryStructReq) {
         if (!cacheEnable) {
             Cache cacheInfo = new Cache();
             cacheInfo.setCache(false);
-            queryStructCmd.setCacheInfo(cacheInfo);
+            queryStructReq.setCacheInfo(cacheInfo);
         }
     }
 
@@ -281,8 +280,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    @ApiHeaderCheck
-    public ItemQueryResultResp metricDataQueryById(QueryItemReq queryItemReq,
+    public ItemQueryResultResp queryMetricDataById(QueryItemReq queryItemReq,
             HttpServletRequest request) throws Exception {
         AppDetailResp appDetailResp = getAppDetailResp(request);
         authCheck(appDetailResp, queryItemReq.getIds(), ApiItemType.METRIC);
@@ -300,6 +298,9 @@ public class QueryServiceImpl implements QueryService {
 
     private SingleItemQueryResult dataQuery(Integer appId, Item item, DateConf dateConf, Long limit) throws Exception {
         MetricResp metricResp = catalog.getMetric(item.getId());
+        item.setCreatedBy(metricResp.getCreatedBy());
+        item.setBizName(metricResp.getBizName());
+        item.setName(metricResp.getName());
         List<Item> items = item.getRelateItems();
         List<DimensionResp> dimensionResps = Lists.newArrayList();
         if (!org.springframework.util.CollectionUtils.isEmpty(items)) {
@@ -366,27 +367,27 @@ public class QueryServiceImpl implements QueryService {
     }
 
     public QueryStatement parseMetricReq(MetricQueryReq metricReq) throws Exception {
-        QueryStructReq queryStructCmd = new QueryStructReq();
-        return headlessQueryEngine.physicalSql(queryStructCmd, metricReq);
+        QueryStructReq queryStructReq = new QueryStructReq();
+        return headlessQueryEngine.physicalSql(queryStructReq, metricReq);
     }
 
-    private boolean isCache(QueryStructReq queryStructCmd) {
+    private boolean isCache(QueryStructReq queryStructReq) {
         if (!cacheEnable) {
             return false;
         }
-        if (queryStructCmd.getCacheInfo() != null) {
-            return queryStructCmd.getCacheInfo().getCache();
+        if (queryStructReq.getCacheInfo() != null) {
+            return queryStructReq.getCacheInfo().getCache();
         }
         return false;
     }
 
-    private boolean isCache(QueryMultiStructReq queryStructCmd) {
+    private boolean isCache(QueryMultiStructReq queryStructReq) {
         if (!cacheEnable) {
             return false;
         }
-        if (!CollectionUtils.isEmpty(queryStructCmd.getQueryStructReqs())
-                && queryStructCmd.getQueryStructReqs().get(0).getCacheInfo() != null) {
-            return queryStructCmd.getQueryStructReqs().get(0).getCacheInfo().getCache();
+        if (!CollectionUtils.isEmpty(queryStructReq.getQueryStructReqs())
+                && queryStructReq.getQueryStructReqs().get(0).getCacheInfo() != null) {
+            return queryStructReq.getQueryStructReqs().get(0).getCacheInfo().getCache();
         }
         return false;
     }
