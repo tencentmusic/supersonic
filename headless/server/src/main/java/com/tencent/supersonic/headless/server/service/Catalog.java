@@ -7,6 +7,7 @@ import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
+import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
@@ -34,9 +35,11 @@ public interface Catalog {
 
     List<ModelRela> getModelRela(List<Long> modelIds);
 
+    List<ModelSchemaResp> getModelSchema(List<Long> modelIds);
+
     void getModelYamlTplByModelIds(Set<Long> modelIds, Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
-            List<DataModelYamlTpl> dataModelYamlTplList, List<MetricYamlTpl> metricYamlTplList,
-            Map<Long, String> modelIdName);
+                                   List<DataModelYamlTpl> dataModelYamlTplList, List<MetricYamlTpl> metricYamlTplList,
+                                   Map<Long, String> modelIdName);
 
     ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric);
 

@@ -3,10 +3,12 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
+import com.tencent.supersonic.headless.api.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
+import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
@@ -101,6 +103,13 @@ public class CatalogImpl implements Catalog {
             });
         }
         return modelRespList;
+    }
+
+    @Override
+    public List<ModelSchemaResp> getModelSchema(List<Long> modelIds) {
+        ModelSchemaFilterReq modelSchemaFilterReq = new ModelSchemaFilterReq();
+        modelSchemaFilterReq.setModelIds(modelIds);
+        return modelService.fetchModelSchema(modelSchemaFilterReq);
     }
 
     @Override

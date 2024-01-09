@@ -36,6 +36,7 @@ public class QueryContext {
     private Agent agent;
     private Map<Long, ChatConfigRichResp> modelIdToChatRichConfig;
     private Map<String, Plugin> nameToPlugin;
+    private List<Plugin> pluginList;
 
     public List<SemanticQuery> getCandidateQueries() {
         OptimizationConfig optimizationConfig = ContextUtils.getBean(OptimizationConfig.class);

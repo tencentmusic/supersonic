@@ -4,18 +4,21 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.request.ItemUseReq;
-import com.tencent.supersonic.headless.api.response.ItemUseResp;
 import com.tencent.supersonic.headless.api.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.headless.api.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.request.PageMetricReq;
+import com.tencent.supersonic.headless.api.request.SchemaItemQueryReq;
 import com.tencent.supersonic.headless.api.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.DomainResp;
+import com.tencent.supersonic.headless.api.response.ItemUseResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
@@ -121,6 +124,18 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user) {
         return metricService.queryMetric(pageMetricReq, user);
+    }
+
+    @Override
+    public List querySchemaItem(SchemaItemQueryReq schemaItemQueryReq) {
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setIds(schemaItemQueryReq.getIds());
+        if (TypeEnums.METRIC.equals(schemaItemQueryReq.getType())) {
+            return metricService.getMetrics(metaFilter);
+        } else if (TypeEnums.DIMENSION.equals(schemaItemQueryReq.getType())) {
+            return dimensionService.getDimensions(metaFilter);
+        }
+        throw new InvalidArgumentException("暂不支持的类型" + schemaItemQueryReq.getType().getName());
     }
 
     @Override

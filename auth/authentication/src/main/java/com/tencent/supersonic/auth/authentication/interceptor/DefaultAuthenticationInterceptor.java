@@ -10,12 +10,12 @@ import com.tencent.supersonic.common.pojo.exception.AccessException;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.S2ThreadContext;
 import com.tencent.supersonic.common.util.ThreadContext;
-import java.lang.reflect.Method;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.method.HandlerMethod;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.Method;
 
 @Slf4j
 public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor {
@@ -35,7 +35,10 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
             setFakerUser(request);
             return true;
         }
-
+        if (isAppRequest(request)) {
+            setFakerUser(request);
+            return true;
+        }
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             Method method = handlerMethod.getMethod();

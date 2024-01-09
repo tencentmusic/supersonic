@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.core.parser.calcite.s2sql;
 
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.headless.api.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class HeadlessModel {
     private List<JoinRelation> joinRelations;
     private ItemDateResp dataDate;
     private DatabaseResp databaseResp;
+    private List<ModelSchemaResp> modelSchemaResps;
 
     public List<Dimension> getDimensions() {
         return dimensionMap.values().stream().flatMap(Collection::stream).collect(Collectors.toList());

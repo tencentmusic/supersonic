@@ -194,6 +194,8 @@ public class QueryServiceImpl implements QueryService {
         Map<Long, ChatConfigRichResp> modelIdToChatRichConfig = configService.getModelIdToChatRichConfig();
 
         Map<String, Plugin> nameToPlugin = pluginService.getNameToPlugin();
+        List<Plugin> pluginList = pluginService.getPluginList();
+
         QueryContext queryCtx = QueryContext.builder()
                 .request(queryReq)
                 .queryFilters(queryReq.getQueryFilters())
@@ -203,6 +205,7 @@ public class QueryServiceImpl implements QueryService {
                 .agent(agent)
                 .modelIdToChatRichConfig(modelIdToChatRichConfig)
                 .nameToPlugin(nameToPlugin)
+                .pluginList(pluginList)
                 .build();
         return queryCtx;
     }

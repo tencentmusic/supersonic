@@ -4,6 +4,7 @@ import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
 import com.tencent.supersonic.headless.core.optimizer.QueryOptimizer;
 import com.tencent.supersonic.headless.core.parser.QueryParser;
@@ -19,6 +20,7 @@ import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -55,10 +57,7 @@ public class HeadlessQueryEngineImpl implements HeadlessQueryEngine {
 
     public QueryStatement plan(QueryStatement queryStatement) throws Exception {
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
-        HeadlessModel headlessModel = headlessSchemaManager.get(queryStatement.getQueryStructReq().getModelIdStr());
-        ItemDateResp itemDateResp = queryStructUtils.getItemDateResp(queryStatement.getQueryStructReq());
-        headlessModel.setDataDate(itemDateResp);
-        queryStatement.setHeadlessModel(headlessModel);
+        queryStatement.setHeadlessModel(getHeadLessModel(queryStatement));
         queryStatement = queryParser.logicSql(queryStatement);
         queryUtils.checkSqlParse(queryStatement);
         queryStatement.setModelIds(queryStatement.getQueryStructReq().getModelIds());
@@ -97,6 +96,15 @@ public class HeadlessQueryEngineImpl implements HeadlessQueryEngine {
         queryStatement.setMetricReq(metricCommand);
         queryStatement.setIsS2SQL(false);
         return queryParser.parser(queryStatement);
+    }
+
+    private HeadlessModel getHeadLessModel(QueryStatement queryStatement) throws Exception {
+        HeadlessModel headlessModel = headlessSchemaManager.get(queryStatement.getQueryStructReq().getModelIdStr());
+        ItemDateResp itemDateResp = queryStructUtils.getItemDateResp(queryStatement.getQueryStructReq());
+        headlessModel.setDataDate(itemDateResp);
+        List<ModelSchemaResp> modelSchemaResps = catalog.getModelSchema(queryStatement.getModelIds());
+        headlessModel.setModelSchemaResps(modelSchemaResps);
+        return headlessModel;
     }
 
 }

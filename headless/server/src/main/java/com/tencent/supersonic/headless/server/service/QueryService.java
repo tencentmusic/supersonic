@@ -3,7 +3,6 @@ package com.tencent.supersonic.headless.server.service;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.request.ItemUseReq;
-import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.api.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.request.QueryItemReq;
 import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
@@ -39,9 +38,7 @@ public interface QueryService {
     <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception;
 
     @ApiHeaderCheck
-    ItemQueryResultResp metricDataQueryById(QueryItemReq queryApiReq,
+    ItemQueryResultResp queryMetricDataById(QueryItemReq queryApiReq,
                                             HttpServletRequest request) throws Exception;
-
-    QueryStatement parseMetricReq(MetricQueryReq metricReq) throws Exception;
 
 }
