@@ -22,4 +22,6 @@ public class LLMParserConfig {
     @Value("${metric.topn:5}")
     private Integer metricTopN;
 
+    @Value("${all.model:false}")
+    private Boolean allModel;
 }
