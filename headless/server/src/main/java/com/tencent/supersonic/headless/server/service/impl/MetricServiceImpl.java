@@ -182,14 +182,17 @@ public class MetricServiceImpl implements MetricService {
         List<Long> modelIds = modelResps.stream().map(ModelResp::getId).collect(Collectors.toList());
         pageMetricReq.getModelIds().addAll(modelIds);
         metricFilter.setModelIds(pageMetricReq.getModelIds());
+        List<CollectDO> collectList = collectService.getCollectList(user.getName());
+        List<Long> collectIds = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
+        if (pageMetricReq.isHasCollect()) {
+            metricFilter.setIds(collectIds);
+        }
         PageInfo<MetricDO> metricDOPageInfo = PageHelper.startPage(pageMetricReq.getCurrent(),
                         pageMetricReq.getPageSize())
                 .doSelectPageInfo(() -> queryMetric(metricFilter));
         PageInfo<MetricResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(metricDOPageInfo, pageInfo);
-        List<CollectDO> collectList = collectService.getCollectList(user.getName());
-        List<Long> collect = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
-        List<MetricResp> metricResps = convertList(metricDOPageInfo.getList(), collect);
+        List<MetricResp> metricResps = convertList(metricDOPageInfo.getList(), collectIds);
         fillAdminRes(metricResps, user);
         pageInfo.setList(metricResps);
         return pageInfo;
