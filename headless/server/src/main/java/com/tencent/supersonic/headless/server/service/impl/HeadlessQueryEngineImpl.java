@@ -99,10 +99,11 @@ public class HeadlessQueryEngineImpl implements HeadlessQueryEngine {
     }
 
     private HeadlessModel getHeadLessModel(QueryStatement queryStatement) throws Exception {
-        HeadlessModel headlessModel = headlessSchemaManager.get(queryStatement.getQueryStructReq().getModelIdStr());
-        ItemDateResp itemDateResp = queryStructUtils.getItemDateResp(queryStatement.getQueryStructReq());
+        QueryStructReq queryStructReq = queryStatement.getQueryStructReq();
+        HeadlessModel headlessModel = headlessSchemaManager.get(queryStructReq.getModelIdStr());
+        ItemDateResp itemDateResp = queryStructUtils.getItemDateResp(queryStructReq);
         headlessModel.setDataDate(itemDateResp);
-        List<ModelSchemaResp> modelSchemaResps = catalog.getModelSchema(queryStatement.getModelIds());
+        List<ModelSchemaResp> modelSchemaResps = catalog.getModelSchema(queryStructReq.getModelIds());
         headlessModel.setModelSchemaResps(modelSchemaResps);
         return headlessModel;
     }
