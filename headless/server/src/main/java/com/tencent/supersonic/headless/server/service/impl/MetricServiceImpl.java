@@ -235,10 +235,14 @@ public class MetricServiceImpl implements MetricService {
 
     @Override
     public MetricResp getMetric(Long id, User user) {
-        MetricResp metricResp = getMetric(id);
-        if (metricResp == null) {
+        MetricDO metricDO = metricRepository.getMetricById(id);
+        if (metricDO == null) {
             return null;
         }
+        Map<Long, ModelResp> modelMap = modelService.getModelMap();
+        List<CollectDO> collectList = collectService.getCollectList(user.getName());
+        List<Long> collect = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
+        MetricResp metricResp = MetricConverter.convert2MetricResp(metricDO, modelMap, collect);
         fillAdminRes(Lists.newArrayList(metricResp), user);
         return metricResp;
     }
