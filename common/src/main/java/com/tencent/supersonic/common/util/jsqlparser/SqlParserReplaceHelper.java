@@ -231,6 +231,9 @@ public class SqlParserReplaceHelper {
         if (!CollectionUtils.isEmpty(joins)) {
             for (Join join : joins) {
                 join.getOnExpression().accept(visitor);
+                if (!(join.getRightItem() instanceof SubSelect)) {
+                    continue;
+                }
                 SelectBody subSelectBody = ((SubSelect) join.getRightItem()).getSelectBody();
                 List<PlainSelect> plainSelectList = new ArrayList<>();
                 plainSelectList.add((PlainSelect) subSelectBody);
@@ -414,13 +417,19 @@ public class SqlParserReplaceHelper {
             List<Join> joins = painSelect.getJoins();
             if (!CollectionUtils.isEmpty(joins)) {
                 for (Join join : joins) {
-                    SelectBody subSelectBody = ((SubSelect) join.getRightItem()).getSelectBody();
-                    List<PlainSelect> plainSelectList = new ArrayList<>();
-                    plainSelectList.add((PlainSelect) subSelectBody);
-                    List<PlainSelect> subPlainSelects = SqlParserSelectHelper.getPlainSelects(plainSelectList);
-                    for (PlainSelect subPlainSelect : subPlainSelects) {
-                        subPlainSelect.getFromItem().accept(new TableNameReplaceVisitor(tableName));
+                    if (join.getRightItem() instanceof SubSelect) {
+                        SelectBody subSelectBody = ((SubSelect) join.getRightItem()).getSelectBody();
+                        List<PlainSelect> plainSelectList = new ArrayList<>();
+                        plainSelectList.add((PlainSelect) subSelectBody);
+                        List<PlainSelect> subPlainSelects = SqlParserSelectHelper.getPlainSelects(plainSelectList);
+                        for (PlainSelect subPlainSelect : subPlainSelects) {
+                            subPlainSelect.getFromItem().accept(new TableNameReplaceVisitor(tableName));
+                        }
                     }
+                    //else {
+                    //    Table table = (Table) join.getRightItem();
+                    //    table.setName(tableName);
+                    //}
                 }
             }
         }
