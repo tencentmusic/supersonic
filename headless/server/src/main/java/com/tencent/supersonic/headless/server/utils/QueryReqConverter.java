@@ -25,14 +25,6 @@ import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import com.tencent.supersonic.headless.server.service.HeadlessQueryEngine;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -41,10 +33,22 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 @Slf4j
 public class QueryReqConverter {
+
+    @Value("${query.sql.limitWrapper:true}")
+    private Boolean limitWrapper;
+
     @Autowired
     private HeadlessQueryEngine headlessQueryEngine;
     @Autowired
@@ -57,7 +61,7 @@ public class QueryReqConverter {
     private Catalog catalog;
 
     public QueryStatement convert(QueryS2SQLReq queryS2SQLReq,
-                                  List<ModelSchemaResp> modelSchemaResps) throws Exception {
+            List<ModelSchemaResp> modelSchemaResps) throws Exception {
 
         if (CollectionUtils.isEmpty(modelSchemaResps)) {
             return new QueryStatement();
@@ -127,7 +131,8 @@ public class QueryReqConverter {
         queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructReq));
         queryStatement.setModelIds(queryS2SQLReq.getModelIds());
         queryStatement = headlessQueryEngine.plan(queryStatement);
-        queryStatement.setSql(String.format(SqlExecuteReq.LIMIT_WRAPPER, queryStatement.getSql()));
+        queryStatement.setSql(limitWrapper ? String.format(SqlExecuteReq.LIMIT_WRAPPER, queryStatement.getSql())
+                : queryStatement.getSql());
         return queryStatement;
     }
 

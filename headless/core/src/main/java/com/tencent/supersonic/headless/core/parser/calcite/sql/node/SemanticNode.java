@@ -3,7 +3,9 @@ package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlDialect;
+import com.tencent.supersonic.headless.core.parser.calcite.sql.optimizer.FilterToGroupScanRule;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,8 +17,13 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.jdbc.CalciteSchema;
+import org.apache.calcite.plan.RelOptPlanner;
+import org.apache.calcite.plan.hep.HepPlanner;
+import org.apache.calcite.plan.hep.HepProgramBuilder;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
 import org.apache.calcite.sql.JoinType;
 import org.apache.calcite.sql.SqlAsOperator;
 import org.apache.calcite.sql.SqlBasicCall;
@@ -45,6 +52,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * model item node
  */
+@Slf4j
 public abstract class SemanticNode {
 
     public static Set<SqlKind> AGGREGATION_KIND = new HashSet<>();
@@ -156,7 +164,7 @@ public abstract class SemanticNode {
         return sqlNode;
     }
 
-    private static void sqlVisit(SqlNode sqlNode, Map<String, String> parseInfo) {
+    private static void sqlVisit(SqlNode sqlNode, Map<String, Object> parseInfo) {
         SqlKind kind = sqlNode.getKind();
         switch (kind) {
             case SELECT:
@@ -164,12 +172,21 @@ public abstract class SemanticNode {
                 break;
             case AS:
                 SqlBasicCall sqlBasicCall = (SqlBasicCall) sqlNode;
-                sqlVisit(sqlBasicCall.getOperandList().get(0), parseInfo);
+                if (sqlBasicCall.getOperandList().get(0).getKind().equals(SqlKind.IDENTIFIER)) {
+                    addTableName(sqlBasicCall.getOperandList().get(0).toString(),
+                            sqlBasicCall.getOperandList().get(1).toString(), parseInfo);
+                } else {
+                    sqlVisit(sqlBasicCall.getOperandList().get(0), parseInfo);
+                }
                 break;
             case JOIN:
                 SqlJoin sqlJoin = (SqlJoin) sqlNode;
                 sqlVisit(sqlJoin.getLeft(), parseInfo);
                 sqlVisit(sqlJoin.getRight(), parseInfo);
+                SqlBasicCall condition = (SqlBasicCall) sqlJoin.getCondition();
+                if (Objects.nonNull(condition)) {
+                    condition.getOperandList().stream().forEach(c -> addTagField(c.toString(), parseInfo, ""));
+                }
                 break;
             case UNION:
                 ((SqlBasicCall) sqlNode).getOperandList().forEach(node -> {
@@ -185,7 +202,7 @@ public abstract class SemanticNode {
         }
     }
 
-    private static void queryVisit(SqlNode select, Map<String, String> parseInfo) {
+    private static void queryVisit(SqlNode select, Map<String, Object> parseInfo) {
         if (select == null) {
             return;
         }
@@ -197,7 +214,7 @@ public abstract class SemanticNode {
         fromVisit(sqlSelect.getFrom(), parseInfo);
     }
 
-    private static void fieldVisit(SqlNode field, Map<String, String> parseInfo, String func) {
+    private static void fieldVisit(SqlNode field, Map<String, Object> parseInfo, String func) {
         if (field == null) {
             return;
         }
@@ -237,39 +254,57 @@ public abstract class SemanticNode {
         }
     }
 
-    private static void addTagField(String exp, Map<String, String> parseInfo, String func) {
-        Set<String> fields = new HashSet<>();
-        for (String f : exp.split("[^\\w]+")) {
-            if (Pattern.matches("(?i)[a-z\\d_]+", f)) {
-                fields.add(f);
+    private static void addTagField(String exp, Map<String, Object> parseInfo, String func) {
+
+        if (!parseInfo.containsKey(Constants.SQL_PARSER_FIELD)) {
+            parseInfo.put(Constants.SQL_PARSER_FIELD, new HashMap<>());
+        }
+        Map<String, Set<String>> fields = (Map<String, Set<String>>) parseInfo.get(Constants.SQL_PARSER_FIELD);
+
+        if (Pattern.matches("(?i)[a-z\\d_\\.]+", exp)) {
+            if (exp.contains(".")) {
+                String[] res = exp.split("\\.");
+                if (!fields.containsKey(res[0])) {
+                    fields.put(res[0], new HashSet<>());
+                }
+                fields.get(res[0]).add(res[1]);
+            } else {
+                if (!fields.containsKey("")) {
+                    fields.put("", new HashSet<>());
+                }
+                fields.get("").add(exp);
             }
+
         }
-        if (!fields.isEmpty()) {
-            parseInfo.put(Constants.SQL_PARSER_FIELD, fields.stream().collect(Collectors.joining(",")));
-        }
+
     }
 
-    private static void fromVisit(SqlNode from, Map<String, String> parseInfo) {
+    private static void fromVisit(SqlNode from, Map<String, Object> parseInfo) {
         SqlKind kind = from.getKind();
         switch (kind) {
             case IDENTIFIER:
                 SqlIdentifier sqlIdentifier = (SqlIdentifier) from;
-                addTableName(sqlIdentifier.toString(), parseInfo);
+                addTableName(sqlIdentifier.toString(), "", parseInfo);
                 break;
             case AS:
                 SqlBasicCall sqlBasicCall = (SqlBasicCall) from;
-                SqlNode selectNode1 = sqlBasicCall.getOperandList().get(0);
-                if (!SqlKind.UNION.equals(selectNode1.getKind())) {
-                    if (!SqlKind.SELECT.equals(selectNode1.getKind())) {
-                        addTableName(selectNode1.toString(), parseInfo);
+                SqlNode selectNode0 = sqlBasicCall.getOperandList().get(0);
+                SqlNode selectNode1 = sqlBasicCall.getOperandList().get(1);
+                if (!SqlKind.UNION.equals(selectNode0.getKind())) {
+                    if (!SqlKind.SELECT.equals(selectNode0.getKind())) {
+                        addTableName(selectNode0.toString(), selectNode1.toString(), parseInfo);
                     }
                 }
-                sqlVisit(selectNode1, parseInfo);
+                sqlVisit(selectNode0, parseInfo);
                 break;
             case JOIN:
                 SqlJoin sqlJoin = (SqlJoin) from;
                 sqlVisit(sqlJoin.getLeft(), parseInfo);
                 sqlVisit(sqlJoin.getRight(), parseInfo);
+                SqlBasicCall condition = (SqlBasicCall) sqlJoin.getCondition();
+                if (Objects.nonNull(condition)) {
+                    condition.getOperandList().stream().forEach(c -> addTagField(c.toString(), parseInfo, ""));
+                }
                 break;
             case SELECT:
                 sqlVisit(from, parseInfo);
@@ -279,25 +314,47 @@ public abstract class SemanticNode {
         }
     }
 
-    private static void addTableName(String exp, Map<String, String> parseInfo) {
+    private static void addTableName(String exp, String alias, Map<String, Object> parseInfo) {
         if (exp.indexOf(" ") > 0) {
             return;
         }
-        if (exp.indexOf("_") > 0) {
-            if (exp.split("_").length > 1) {
-                String[] dbTb = exp.split("\\.");
-                if (Objects.nonNull(dbTb) && dbTb.length > 0) {
-                    parseInfo.put(Constants.SQL_PARSER_TABLE, dbTb.length > 1 ? dbTb[1] : dbTb[0]);
-                    parseInfo.put(Constants.SQL_PARSER_DB, dbTb.length > 1 ? dbTb[0] : "");
-                }
-            }
+        if (!parseInfo.containsKey(Constants.SQL_PARSER_TABLE)) {
+            parseInfo.put(Constants.SQL_PARSER_TABLE, new HashMap<>());
         }
+        Map<String, Set<String>> dbTbs = (Map<String, Set<String>>) parseInfo.get(Constants.SQL_PARSER_TABLE);
+        if (!dbTbs.containsKey(alias)) {
+            dbTbs.put(alias, new HashSet<>());
+        }
+        dbTbs.get(alias).add(exp);
+
     }
 
-    public static Map<String, String> getDbTable(SqlNode sqlNode) {
-        Map<String, String> parseInfo = new HashMap<>();
+    public static Map<String, Object> getDbTable(SqlNode sqlNode) {
+        Map<String, Object> parseInfo = new HashMap<>();
         sqlVisit(sqlNode, parseInfo);
         return parseInfo;
+    }
+
+    public static SqlNode optimize(SqlValidatorScope scope, HeadlessSchema schema, SqlNode sqlNode) {
+        try {
+            HepProgramBuilder hepProgramBuilder = new HepProgramBuilder();
+            hepProgramBuilder.addRuleInstance(new FilterToGroupScanRule(FilterToGroupScanRule.DEFAULT, schema));
+            RelOptPlanner relOptPlanner = new HepPlanner(hepProgramBuilder.build());
+            RelToSqlConverter converter = new RelToSqlConverter(SemanticSqlDialect.DEFAULT);
+            SqlValidator sqlValidator = Configuration.getSqlValidator(
+                    scope.getValidator().getCatalogReader().getRootSchema());
+            SqlToRelConverter sqlToRelConverter = Configuration.getSqlToRelConverter(scope, sqlValidator,
+                    relOptPlanner);
+            RelNode sqlRel = sqlToRelConverter.convertQuery(
+                    sqlValidator.validate(sqlNode), false, true).rel;
+            log.debug("RelNode optimize {}", SemanticNode.getSql(converter.visitRoot(sqlRel).asStatement()));
+            relOptPlanner.setRoot(sqlRel);
+            RelNode relNode = relOptPlanner.findBestExp();
+            return converter.visitRoot(relNode).asStatement();
+        } catch (Exception e) {
+            log.error("optimize error {}", e);
+        }
+        return null;
     }
 
     public static RelNode getRelNode(CalciteSchema rootSchema, SqlToRelConverter sqlToRelConverter, String sql)
