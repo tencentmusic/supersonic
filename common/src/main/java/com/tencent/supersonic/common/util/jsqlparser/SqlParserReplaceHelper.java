@@ -18,6 +18,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.OrderByElement;
@@ -425,11 +426,10 @@ public class SqlParserReplaceHelper {
                         for (PlainSelect subPlainSelect : subPlainSelects) {
                             subPlainSelect.getFromItem().accept(new TableNameReplaceVisitor(tableName));
                         }
+                    } else if (join.getRightItem() instanceof Table) {
+                        Table table = (Table) join.getRightItem();
+                        table.setName(tableName);
                     }
-                    //else {
-                    //    Table table = (Table) join.getRightItem();
-                    //    table.setName(tableName);
-                    //}
                 }
             }
         }
