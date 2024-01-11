@@ -182,14 +182,17 @@ public class MetricServiceImpl implements MetricService {
         List<Long> modelIds = modelResps.stream().map(ModelResp::getId).collect(Collectors.toList());
         pageMetricReq.getModelIds().addAll(modelIds);
         metricFilter.setModelIds(pageMetricReq.getModelIds());
+        List<CollectDO> collectList = collectService.getCollectList(user.getName());
+        List<Long> collectIds = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
+        if (pageMetricReq.isHasCollect()) {
+            metricFilter.setIds(collectIds);
+        }
         PageInfo<MetricDO> metricDOPageInfo = PageHelper.startPage(pageMetricReq.getCurrent(),
                         pageMetricReq.getPageSize())
                 .doSelectPageInfo(() -> queryMetric(metricFilter));
         PageInfo<MetricResp> pageInfo = new PageInfo<>();
         BeanUtils.copyProperties(metricDOPageInfo, pageInfo);
-        List<CollectDO> collectList = collectService.getCollectList(user.getName());
-        List<Long> collect = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
-        List<MetricResp> metricResps = convertList(metricDOPageInfo.getList(), collect);
+        List<MetricResp> metricResps = convertList(metricDOPageInfo.getList(), collectIds);
         fillAdminRes(metricResps, user);
         pageInfo.setList(metricResps);
         return pageInfo;
@@ -235,10 +238,14 @@ public class MetricServiceImpl implements MetricService {
 
     @Override
     public MetricResp getMetric(Long id, User user) {
-        MetricResp metricResp = getMetric(id);
-        if (metricResp == null) {
+        MetricDO metricDO = metricRepository.getMetricById(id);
+        if (metricDO == null) {
             return null;
         }
+        Map<Long, ModelResp> modelMap = modelService.getModelMap();
+        List<CollectDO> collectList = collectService.getCollectList(user.getName());
+        List<Long> collect = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
+        MetricResp metricResp = MetricConverter.convert2MetricResp(metricDO, modelMap, collect);
         fillAdminRes(Lists.newArrayList(metricResp), user);
         return metricResp;
     }
