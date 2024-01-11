@@ -1,5 +1,5 @@
 import { Tooltip, message } from 'antd';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { metricStarState } from '../../service';
 import MStar from '@/components/MStar';
 
@@ -11,6 +11,9 @@ type Props = {
 
 const MetricStar: React.FC<Props> = ({ metricId, initState = false }) => {
   const [star, setStar] = useState<boolean>(initState);
+  useEffect(() => {
+    setStar(initState);
+  }, [initState]);
 
   const starStateChange = async (id: number, state: boolean) => {
     const { code, msg } = await metricStarState({ id, state });
