@@ -34,6 +34,20 @@ const MetricFilter: React.FC<Props> = ({ initFilterValues = {}, onFiltersChange 
 
   const filterList = [
     {
+      title: '展示类型',
+      key: 'showFilter',
+      options: [
+        {
+          label: '我创建的',
+          value: 'onlyShowMe',
+        },
+        {
+          label: '我收藏的',
+          value: 'hasCollect',
+        },
+      ],
+    },
+    {
       title: '敏感度',
       key: 'sensitiveLevel',
       options: SENSITIVE_LEVEL_OPTIONS,
@@ -89,16 +103,12 @@ const MetricFilter: React.FC<Props> = ({ initFilterValues = {}, onFiltersChange 
             <Switch size="small" />
           </FormItem>
         </StandardFormRow>
-        <StandardFormRow key="onlyShowMe" title="仅显示我的" block>
+        {/* <StandardFormRow key="onlyShowMe" title="仅显示我的" block>
           <FormItem name="onlyShowMe" valuePropName="checked">
             <Switch size="small" />
           </FormItem>
-        </StandardFormRow>
-        <StandardFormRow key="domainIds" title="所属主题域" block>
-          <FormItem name="domainIds">
-            <DomainTreeSelect />
-          </FormItem>
-        </StandardFormRow>
+        </StandardFormRow> */}
+
         {filterList.map((item) => {
           const { title, key, options } = item;
           return (
@@ -115,6 +125,11 @@ const MetricFilter: React.FC<Props> = ({ initFilterValues = {}, onFiltersChange 
             </StandardFormRow>
           );
         })}
+        <StandardFormRow key="domainIds" title="所属主题域" block>
+          <FormItem name="domainIds">
+            <DomainTreeSelect />
+          </FormItem>
+        </StandardFormRow>
       </Space>
     </Form>
   );

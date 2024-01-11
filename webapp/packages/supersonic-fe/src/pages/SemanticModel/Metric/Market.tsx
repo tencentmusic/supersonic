@@ -310,14 +310,16 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   const handleFilterChange = async (filterParams: {
     key: string;
-    sensitiveLevel: string;
+    sensitiveLevel: string[];
+    showFilter: string[];
     type: string;
   }) => {
-    const { sensitiveLevel, type } = filterParams;
+    const { sensitiveLevel, type, showFilter } = filterParams;
     const params: QueryMetricListParams = { ...filterParams };
     const sensitiveLevelValue = sensitiveLevel?.[0];
+    const showFilterValue = showFilter?.[0];
     const typeValue = type?.[0];
-
+    showFilterValue ? (params[showFilterValue] = true) : null;
     params.sensitiveLevel = sensitiveLevelValue;
     params.type = typeValue;
     setFilterParams(params);

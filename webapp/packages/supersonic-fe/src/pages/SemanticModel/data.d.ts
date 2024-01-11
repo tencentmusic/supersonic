@@ -200,6 +200,7 @@ export declare namespace ISemantic {
     modelId: number;
     hasAdminRes: boolean;
     type: string;
+    tags: string[];
     typeParams: ITypeParams;
     fullPath: string;
     dataFormatType: string;
