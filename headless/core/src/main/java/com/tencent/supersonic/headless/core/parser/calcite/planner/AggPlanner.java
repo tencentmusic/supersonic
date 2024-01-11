@@ -8,33 +8,24 @@ import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SchemaBuilder;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlDialect;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.Renderer;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.DataSourceNode;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.SemanticNode;
-import com.tencent.supersonic.headless.core.parser.calcite.sql.optimizer.FilterToGroupScanRule;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.render.FilterRender;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.render.OutputRender;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.render.SourceRender;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.calcite.plan.RelOptPlanner;
-import org.apache.calcite.plan.hep.HepPlanner;
-import org.apache.calcite.plan.hep.HepProgramBuilder;
-import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.validate.SqlValidator;
-import org.apache.calcite.sql.validate.SqlValidatorScope;
-import org.apache.calcite.sql2rel.SqlToRelConverter;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Stack;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
 
 /**
  * parsing from query dimensions and metrics
@@ -125,33 +116,6 @@ public class AggPlanner implements Planner {
         optimize();
     }
 
-    public void optimize() {
-        if (Objects.isNull(schema.getRuntimeOptions()) || Objects.isNull(schema.getRuntimeOptions().getEnableOptimize())
-                || !schema.getRuntimeOptions().getEnableOptimize()) {
-            return;
-        }
-        HepProgramBuilder hepProgramBuilder = new HepProgramBuilder();
-        hepProgramBuilder.addRuleInstance(new FilterToGroupScanRule(FilterToGroupScanRule.DEFAULT, schema));
-        RelOptPlanner relOptPlanner = new HepPlanner(hepProgramBuilder.build());
-        RelToSqlConverter converter = new RelToSqlConverter(SemanticSqlDialect.DEFAULT);
-        SqlValidator sqlValidator = Configuration.getSqlValidator(
-                scope.getValidator().getCatalogReader().getRootSchema());
-        try {
-            log.info("before optimize {}", SemanticNode.getSql(parserNode));
-            SqlToRelConverter sqlToRelConverter = Configuration.getSqlToRelConverter(scope, sqlValidator,
-                    relOptPlanner);
-            RelNode sqlRel = sqlToRelConverter.convertQuery(
-                    sqlValidator.validate(parserNode), false, true).rel;
-            log.debug("RelNode optimize {}", SemanticNode.getSql(converter.visitRoot(sqlRel).asStatement()));
-            relOptPlanner.setRoot(sqlRel);
-            RelNode relNode = relOptPlanner.findBestExp();
-            parserNode = converter.visitRoot(relNode).asStatement();
-            log.debug("after optimize {}", SemanticNode.getSql(parserNode));
-        } catch (Exception e) {
-            log.error("optimize error {}", e);
-        }
-    }
-
     @Override
     public String getSql() {
         return SemanticNode.getSql(parserNode);
@@ -163,7 +127,43 @@ public class AggPlanner implements Planner {
     }
 
     @Override
-    public HeadlessSchema findBest() {
-        return schema;
+    public String simplify(String sql) {
+        return optimize(sql);
+    }
+
+    public void optimize() {
+        if (Objects.isNull(schema.getRuntimeOptions()) || Objects.isNull(schema.getRuntimeOptions().getEnableOptimize())
+                || !schema.getRuntimeOptions().getEnableOptimize()) {
+            return;
+        }
+        SqlNode optimizeNode = optimizeSql(SemanticNode.getSql(parserNode));
+        if (Objects.nonNull(optimizeNode)) {
+            parserNode = optimizeNode;
+        }
+    }
+
+    public String optimize(String sql) {
+        try {
+            SqlNode sqlNode = SqlParser.create(sql, Configuration.getParserConfig()).parseStmt();
+            if (Objects.nonNull(sqlNode)) {
+                return SemanticNode.getSql(SemanticNode.optimize(scope, schema, sqlNode));
+            }
+        } catch (Exception e) {
+            log.error("optimize error {}", e);
+        }
+        return "";
+    }
+
+    private SqlNode optimizeSql(String sql) {
+        try {
+            log.info("before optimize:[{}]", sql);
+            SqlNode sqlNode = SqlParser.create(sql, Configuration.getParserConfig()).parseStmt();
+            if (Objects.nonNull(sqlNode)) {
+                return SemanticNode.optimize(scope, schema, sqlNode);
+            }
+        } catch (Exception e) {
+            log.error("optimize error {}", e);
+        }
+        return null;
     }
 }

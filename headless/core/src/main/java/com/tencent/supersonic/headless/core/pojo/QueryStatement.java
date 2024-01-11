@@ -26,6 +26,9 @@ public class QueryStatement {
     private List<ImmutablePair<String, String>> timeRanges;
     private Boolean enableOptimize = true;
     private Triple<String, String, String> minMaxTime;
+    private String viewSql = "";
+    private String viewAlias = "";
+
 
     private HeadlessModel headlessModel;
 

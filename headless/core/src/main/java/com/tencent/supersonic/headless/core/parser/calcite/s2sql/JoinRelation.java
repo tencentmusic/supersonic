@@ -8,7 +8,7 @@ import org.apache.commons.lang3.tuple.Triple;
 @Data
 @Builder
 public class JoinRelation {
-
+    private Long id;
     private String left;
     private String right;
     private String joinType;

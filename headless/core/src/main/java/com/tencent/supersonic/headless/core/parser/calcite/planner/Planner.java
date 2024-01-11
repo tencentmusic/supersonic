@@ -3,7 +3,6 @@ package com.tencent.supersonic.headless.core.parser.calcite.planner;
 
 import com.tencent.supersonic.headless.api.enums.AggOption;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
 
 /**
  * parse and generate SQL and other execute information
@@ -16,5 +15,5 @@ public interface Planner {
 
     public String getSourceId();
 
-    public HeadlessSchema findBest();
+    public String simplify(String sql);
 }

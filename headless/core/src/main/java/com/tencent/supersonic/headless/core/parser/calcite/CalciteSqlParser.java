@@ -8,12 +8,15 @@ import com.tencent.supersonic.headless.core.parser.calcite.s2sql.HeadlessModel;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.RuntimeOptions;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * the calcite parse implements
  */
 @Component("CalciteSqlParser")
+@Slf4j
 public class CalciteSqlParser implements SqlParser {
 
     @Override
@@ -30,6 +33,15 @@ public class CalciteSqlParser implements SqlParser {
         aggBuilder.explain(queryStatement, isAgg);
         queryStatement.setSql(aggBuilder.getSql());
         queryStatement.setSourceId(aggBuilder.getSourceId());
+        if (Objects.nonNull(queryStatement.getViewAlias()) && !queryStatement.getViewAlias().isEmpty()) {
+            // simplify model sql with query sql
+            String simplifySql = aggBuilder.simplify(
+                    getSqlByView(aggBuilder.getSql(), queryStatement.getViewSql(), queryStatement.getViewAlias()));
+            if (Objects.nonNull(simplifySql) && !simplifySql.isEmpty()) {
+                log.info("simplifySql [{}]", simplifySql);
+                queryStatement.setSql(simplifySql);
+            }
+        }
         return queryStatement;
     }
 
@@ -42,5 +54,9 @@ public class CalciteSqlParser implements SqlParser {
         headlessSchema.setRuntimeOptions(RuntimeOptions.builder().minMaxTime(queryStatement.getMinMaxTime())
                 .enableOptimize(queryStatement.getEnableOptimize()).build());
         return headlessSchema;
+    }
+
+    private String getSqlByView(String sql, String viewSql, String viewAlias) {
+        return String.format("with %s as (%s) %s", viewAlias, sql, viewSql);
     }
 }
