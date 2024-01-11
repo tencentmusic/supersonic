@@ -33,7 +33,8 @@ public class CalciteSqlParser implements SqlParser {
         aggBuilder.explain(queryStatement, isAgg);
         queryStatement.setSql(aggBuilder.getSql());
         queryStatement.setSourceId(aggBuilder.getSourceId());
-        if (Objects.nonNull(queryStatement.getViewAlias()) && !queryStatement.getViewAlias().isEmpty()) {
+        if (Objects.nonNull(queryStatement.getEnableOptimize()) && queryStatement.getEnableOptimize()
+                && Objects.nonNull(queryStatement.getViewAlias()) && !queryStatement.getViewAlias().isEmpty()) {
             // simplify model sql with query sql
             String simplifySql = aggBuilder.simplify(
                     getSqlByView(aggBuilder.getSql(), queryStatement.getViewSql(), queryStatement.getViewAlias()));
