@@ -1,12 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { message, Row, Col, Button, Space, Select, Form, Tooltip, Radio } from 'antd';
-import {
-  queryStruct,
-  getDrillDownDimension,
-  getDimensionList,
-} from '@/pages/SemanticModel/service';
-import { InfoCircleOutlined, DownloadOutlined, PoweroffOutlined } from '@ant-design/icons';
-import DimensionAndMetricRelationModal from '../../components/DimensionAndMetricRelationModal';
+import { message, Row, Col, Button, Space, Select, Form, Tooltip } from 'antd';
+import { queryStruct } from '@/pages/SemanticModel/service';
+import { DownloadOutlined, PoweroffOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import TrendChart from '@/pages/SemanticModel/Metric/components/MetricTrend';
 import MetricTrendDimensionFilterContainer from './MetricTrendDimensionFilterContainer';
 import MDatePicker from '@/components/MDatePicker';
@@ -16,6 +11,7 @@ import StandardFormRow from '@/components/StandardFormRow';
 import MetricTable from './Table';
 import { ColumnConfig } from '../data';
 import dayjs from 'dayjs';
+import { history } from 'umi';
 import { ISemantic } from '../../data';
 import { DateFieldMap } from '@/pages/SemanticModel/constant';
 import ProCard from '@ant-design/pro-card';
@@ -25,28 +21,25 @@ import styles from '../style.less';
 const FormItem = Form.Item;
 
 type Props = {
+  relationDimensionOptions: { value: string; label: string; modelId: number }[];
+  dimensionList: ISemantic.IDimensionItem[];
   metircData?: ISemantic.IMetricItem;
   [key: string]: any;
 };
 
-const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
+const MetricTrendSection: React.FC<Props> = ({
+  metircData,
+  relationDimensionOptions,
+  dimensionList,
+}) => {
   const indicatorFields = useRef<{ name: string; column: string }[]>([]);
   const [metricTrendData, setMetricTrendData] = useState<ISemantic.IMetricTrendItem[]>([]);
   const [metricTrendLoading, setMetricTrendLoading] = useState<boolean>(false);
   const [metricColumnConfig, setMetricColumnConfig] = useState<ISemantic.IMetricTrendColumn>();
-  const [metricRelationModalOpenState, setMetricRelationModalOpenState] = useState<boolean>(false);
-  const [drillDownDimensions, setDrillDownDimensions] = useState<
-    ISemantic.IDrillDownDimensionItem[]
-  >(metircData?.relateDimension?.drillDownDimensions || []);
   const [authMessage, setAuthMessage] = useState<string>('');
   const [downloadLoding, setDownloadLoding] = useState<boolean>(false);
-  const [relationDimensionOptions, setRelationDimensionOptions] = useState<
-    { value: string; label: string; modelId: number }[]
-  >([]);
-  const [dimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>([]);
   const [queryParams, setQueryParams] = useState<any>({});
   const [downloadBtnDisabledState, setDownloadBtnDisabledState] = useState<boolean>(true);
-  // const [showDimensionOptions, setShowDimensionOptions] = useState<any[]>([]);
   const [periodDate, setPeriodDate] = useState<{
     startDate: string;
     endDate: string;
@@ -57,7 +50,7 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
     dateField: DateFieldMap[DateRangeType.DAY],
   });
   const [rowNumber, setRowNumber] = useState<number>(5);
-  const [chartType, setChartType] = useState<'chart' | 'table'>('chart');
+
   const [tableColumnConfig, setTableColumnConfig] = useState<ColumnConfig[]>([]);
 
   const [transformState, setTransformState] = useState<boolean>(false);
@@ -138,60 +131,19 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
     }
   };
 
-  const queryDimensionList = async (ids: number[]) => {
-    if (!(Array.isArray(ids) && ids.length > 0)) {
-      return;
-    }
-    const { code, data, msg } = await getDimensionList({ ids });
-    if (code === 200 && Array.isArray(data?.list)) {
-      setDimensionList(data.list);
-      setRelationDimensionOptions(
-        data.list.map((item: ISemantic.IMetricItem) => {
-          return { label: item.name, value: item.bizName, modelId: item.modelId };
-        }),
-      );
-      return data.list;
-    }
-    message.error(msg);
-    return [];
-  };
-
-  const queryDrillDownDimension = async (metricId: number) => {
-    const { code, data, msg } = await getDrillDownDimension(metricId);
-    if (code === 200 && Array.isArray(data)) {
-      const ids = data.map((item) => item.dimensionId);
-      queryDimensionList(ids);
-      return data;
-    } else {
-      setDimensionList([]);
-      setRelationDimensionOptions([]);
-    }
-    if (code !== 200) {
-      message.error(msg);
-    }
-    return [];
-  };
-
-  const initDimensionData = async (metricItem: ISemantic.IMetricItem) => {
-    await queryDrillDownDimension(metricItem.id);
-  };
-
   useEffect(() => {
     if (metircData?.id) {
       getMetricTrendData({ ...queryParams });
-      initDimensionData(metircData);
-      setDrillDownDimensions(metircData?.relateDimension?.drillDownDimensions || []);
     }
   }, [metircData, periodDate]);
 
   return (
     <div className={styles.metricTrendSection}>
       <div className={styles.sectionBox}>
-        <Row>
+        <Row style={{ padding: '10px 10px 0px 10px' }}>
           <Col flex="1 1 200px">
             <Form
               layout="inline"
-              // form={form}
               colon={false}
               onValuesChange={(value, values) => {
                 if (value.key) {
@@ -269,6 +221,27 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
           </Col>
           <Col flex="0 1" />
         </Row>
+        <Button
+          style={{
+            position: 'absolute',
+            top: 20,
+            right: 20,
+          }}
+          size="middle"
+          type="link"
+          key="backListBtn"
+          onClick={() => {
+            history.push('/metric/market');
+          }}
+        >
+          <Space>
+            <ArrowLeftOutlined />
+            返回列表页
+          </Space>
+        </Button>
+        {/* <div className={styles.btnWrapper}>
+
+        </div> */}
       </div>
       {authMessage && <div style={{ color: '#d46b08', marginBottom: 15 }}>{authMessage}</div>}
       <div className={styles.sectionBox}>
@@ -292,7 +265,7 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
             loading={metricTrendLoading}
             dateFieldName={periodDate.dateField}
             groupByDimensionFieldName={groupByDimensionFieldName}
-            height={400}
+            height={350}
             renderType="clear"
             decimalPlaces={metricColumnConfig?.dataFormat?.decimalPlaces || 2}
           />
@@ -302,7 +275,7 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
       <div className={styles.sectionBox}>
         <ProCard
           size="small"
-          title="源数据"
+          title="数据明细"
           collapsible
           extra={
             <Space.Compact block>
@@ -345,20 +318,6 @@ const MetricTrendSection: React.FC<Props> = ({ metircData }) => {
           </div>
         </ProCard>
       </div>
-
-      <DimensionAndMetricRelationModal
-        metricItem={metircData}
-        relationsInitialValue={drillDownDimensions}
-        open={metricRelationModalOpenState}
-        onCancel={() => {
-          setMetricRelationModalOpenState(false);
-        }}
-        onSubmit={(relations) => {
-          setDrillDownDimensions(relations);
-          setMetricRelationModalOpenState(false);
-          initDimensionData(metircData!);
-        }}
-      />
     </div>
   );
 };

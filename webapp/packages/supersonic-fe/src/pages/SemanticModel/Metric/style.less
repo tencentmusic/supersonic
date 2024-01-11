@@ -2,6 +2,7 @@
     margin: 20px;
     padding: 20px;
     border-radius: 10px;
+    padding-bottom: 5px;
     background: #fff;
 }
 
@@ -154,18 +155,27 @@
                 }
             }
         }
+        .siderContainer {
+            background-color: rgb(255, 255, 255);
+            width: 450px;
+            min-height: 100vh;
+            margin: 20px 20px 20px 0; 
+            border-radius: 6px;
+            box-shadow: rgba(0, 0, 0, 0.08) 6px 0px 16px 0px, rgba(0, 0, 0, 0.12) 3px 0px 6px -4px, rgba(0, 0, 0, 0.05) 9px 0px 28px 8px;
+        }
     }
 }
 .metricTrendSection {
     .sectionBox {
         margin: 20px;
-        padding: 20px;
+        padding: 10px;
         box-shadow: #888888 0px 0px 1px, rgba(29, 41, 57, 0.08) 0px 1px 3px;
         background-color: rgb(255, 255, 255);
         transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
         border-radius: 6px;
         background-image: none;
         overflow: hidden;
+        position: relative;
     }
 }
 
@@ -198,10 +208,22 @@
         display: block;
         color: #7b809a;
     }
+    .subTitle {
+        margin: 0px;
+        font-size: 14px;
+        line-height: 1.25;
+        letter-spacing: 0.03333em;
+        opacity: 1;
+        text-transform: uppercase;
+        vertical-align: unset;
+        text-decoration: none;
+        color: rgb(123, 128, 154);
+        font-weight: 700;
+    }
     .sectionContainer{
-        transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        // transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
         border-radius: 6px;
-        box-shadow: #888888 0px 0px 1px, rgba(29, 41, 57, 0.08) 0px 1px 3px;
+        // box-shadow: #888888 0px 0px 1px, rgba(29, 41, 57, 0.08) 0px 1px 3px;
         background-image: none;
         margin-top: 20px;
         overflow: hidden;
@@ -231,19 +253,7 @@
                     font-weight: 600;
                 }
             }
-            .subTitle {
-                margin: 0px;
-                font-family: Roboto, Helvetica, Arial, sans-serif;
-                font-size: 14px;
-                line-height: 1.25;
-                letter-spacing: 0.03333em;
-                opacity: 1;
-                text-transform: uppercase;
-                vertical-align: unset;
-                text-decoration: none;
-                color: rgb(123, 128, 154);
-                font-weight: 700;
-            }
+
             .item {
                 display: flex;
                 padding-top: 8px;
@@ -284,7 +294,7 @@
         .hr {
             margin: 0px;
             flex-shrink: 0;
-            border-width: 0px 0px thin;
+            // border-width: 0px 0px thin;
             border-style: solid;
             border-color: rgb(242, 244, 247);
         }
@@ -329,7 +339,7 @@
                 }
                 .ctrlItemIcon {
                     flex-shrink: 0;
-                    font-size: 16px;
+                    font-size: 14px;
                     margin-right: 5px;
                     min-width: unset;
                 }

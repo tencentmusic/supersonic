@@ -227,6 +227,7 @@ public class HeadlessSchemaManager {
                         conditions.add(Triple.of(rr.getLeftField(), rr.getOperator().getValue(), rr.getRightField()));
                     }
                 });
+                joinRelation.setId(r.getId());
                 joinRelation.setJoinCondition(conditions);
                 joinRelations.add(joinRelation);
             }

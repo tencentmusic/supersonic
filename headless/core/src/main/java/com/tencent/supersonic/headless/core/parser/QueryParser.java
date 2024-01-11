@@ -8,16 +8,15 @@ import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * logical parse from ParseSqlReq or MetricReq
@@ -58,31 +57,16 @@ public class QueryParser {
         try {
             if (!CollectionUtils.isEmpty(parseSqlReq.getTables())) {
                 List<String[]> tables = new ArrayList<>();
-                String sourceId = "";
+                Boolean isSingleTable = parseSqlReq.getTables().size() == 1;
                 for (MetricTable metricTable : parseSqlReq.getTables()) {
-                    MetricQueryReq metricReq = new MetricQueryReq();
-                    metricReq.setMetrics(metricTable.getMetrics());
-                    metricReq.setDimensions(metricTable.getDimensions());
-                    metricReq.setWhere(StringUtil.formatSqlQuota(metricTable.getWhere()));
-                    metricReq.setNativeQuery(!AggOption.isAgg(metricTable.getAggOption()));
-                    metricReq.setRootPath(parseSqlReq.getRootPath());
-                    QueryStatement tableSql = new QueryStatement();
-                    tableSql.setIsS2SQL(false);
-                    tableSql.setMetricReq(metricReq);
-                    tableSql.setMinMaxTime(queryStatement.getMinMaxTime());
-                    tableSql.setEnableOptimize(queryStatement.getEnableOptimize());
-                    tableSql.setModelIds(queryStatement.getModelIds());
-                    tableSql.setHeadlessModel(queryStatement.getHeadlessModel());
-                    tableSql = parser(tableSql, metricTable.getAggOption());
-                    if (!tableSql.isOk()) {
-                        queryStatement.setErrMsg(String.format("parser table [%s] error [%s]", metricTable.getAlias(),
-                                tableSql.getErrMsg()));
+                    String metricTableSql = parserSql(metricTable, isSingleTable, parseSqlReq, queryStatement);
+                    if (isSingleTable) {
+                        queryStatement.setSql(metricTableSql);
+                        queryStatement.setParseSqlReq(parseSqlReq);
                         return queryStatement;
                     }
-                    tables.add(new String[]{metricTable.getAlias(), tableSql.getSql()});
-                    sourceId = tableSql.getSourceId();
+                    tables.add(new String[]{metricTable.getAlias(), metricTableSql});
                 }
-
                 if (!tables.isEmpty()) {
                     String sql = "";
                     if (parseSqlReq.isSupportWith()) {
@@ -97,7 +81,6 @@ public class QueryParser {
                         }
                     }
                     queryStatement.setSql(sql);
-                    queryStatement.setSourceId(sourceId);
                     queryStatement.setParseSqlReq(parseSqlReq);
                     return queryStatement;
                 }
@@ -128,6 +111,34 @@ public class QueryParser {
             log.error("parser error metricQueryReq[{}] error [{}]", metricQueryReq, e);
         }
         return queryStatement;
+    }
+
+    private String parserSql(MetricTable metricTable, Boolean isSingleMetricTable, ParseSqlReq parseSqlReq,
+            QueryStatement queryStatement) throws Exception {
+        MetricQueryReq metricReq = new MetricQueryReq();
+        metricReq.setMetrics(metricTable.getMetrics());
+        metricReq.setDimensions(metricTable.getDimensions());
+        metricReq.setWhere(StringUtil.formatSqlQuota(metricTable.getWhere()));
+        metricReq.setNativeQuery(!AggOption.isAgg(metricTable.getAggOption()));
+        metricReq.setRootPath(parseSqlReq.getRootPath());
+        QueryStatement tableSql = new QueryStatement();
+        tableSql.setIsS2SQL(false);
+        tableSql.setMetricReq(metricReq);
+        tableSql.setMinMaxTime(queryStatement.getMinMaxTime());
+        tableSql.setEnableOptimize(queryStatement.getEnableOptimize());
+        tableSql.setModelIds(queryStatement.getModelIds());
+        tableSql.setHeadlessModel(queryStatement.getHeadlessModel());
+        if (isSingleMetricTable) {
+            tableSql.setViewSql(parseSqlReq.getSql());
+            tableSql.setViewAlias(metricTable.getAlias());
+        }
+        tableSql = parser(tableSql, metricTable.getAggOption());
+        if (!tableSql.isOk()) {
+            throw new Exception(String.format("parser table [%s] error [%s]", metricTable.getAlias(),
+                    tableSql.getErrMsg()));
+        }
+        queryStatement.setSourceId(tableSql.getSourceId());
+        return tableSql.getSql();
     }
 
 }
