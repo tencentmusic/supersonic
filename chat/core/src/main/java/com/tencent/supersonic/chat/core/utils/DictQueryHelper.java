@@ -175,6 +175,7 @@ public class DictQueryHelper {
         dateInfo.setDateMode(DateConf.DateMode.RECENT);
         log.debug("defaultMetric unit():{}", defaultMetricDesc.getUnit());
         dateInfo.setUnit(defaultMetricDesc.getUnit());
+        dateInfo.setPeriod(defaultMetricDesc.getPeriod());
         queryStructCmd.setDateInfo(dateInfo);
 
         queryStructCmd.setLimit(dimMaxLimit);
