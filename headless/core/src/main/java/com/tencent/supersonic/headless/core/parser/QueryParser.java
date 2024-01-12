@@ -59,13 +59,14 @@ public class QueryParser {
                 List<String[]> tables = new ArrayList<>();
                 Boolean isSingleTable = parseSqlReq.getTables().size() == 1;
                 for (MetricTable metricTable : parseSqlReq.getTables()) {
-                    String metricTableSql = parserSql(metricTable, isSingleTable, parseSqlReq, queryStatement);
-                    if (isSingleTable) {
-                        queryStatement.setSql(metricTableSql);
+                    QueryStatement metricTableSql = parserSql(metricTable, isSingleTable, parseSqlReq, queryStatement);
+                    if (isSingleTable && Objects.nonNull(metricTableSql.getViewSimplifySql())
+                            && !metricTableSql.getViewSimplifySql().isEmpty()) {
+                        queryStatement.setSql(metricTableSql.getViewSimplifySql());
                         queryStatement.setParseSqlReq(parseSqlReq);
                         return queryStatement;
                     }
-                    tables.add(new String[]{metricTable.getAlias(), metricTableSql});
+                    tables.add(new String[]{metricTable.getAlias(), metricTableSql.getSql()});
                 }
                 if (!tables.isEmpty()) {
                     String sql = "";
@@ -113,7 +114,7 @@ public class QueryParser {
         return queryStatement;
     }
 
-    private String parserSql(MetricTable metricTable, Boolean isSingleMetricTable, ParseSqlReq parseSqlReq,
+    private QueryStatement parserSql(MetricTable metricTable, Boolean isSingleMetricTable, ParseSqlReq parseSqlReq,
             QueryStatement queryStatement) throws Exception {
         MetricQueryReq metricReq = new MetricQueryReq();
         metricReq.setMetrics(metricTable.getMetrics());
@@ -138,7 +139,7 @@ public class QueryParser {
                     tableSql.getErrMsg()));
         }
         queryStatement.setSourceId(tableSql.getSourceId());
-        return tableSql.getSql();
+        return tableSql;
     }
 
 }
