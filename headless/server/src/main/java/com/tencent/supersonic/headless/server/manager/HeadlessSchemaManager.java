@@ -120,7 +120,7 @@ public class HeadlessSchemaManager {
 
     public static DataSource getDatasource(final DataModelYamlTpl d) {
         DataSource datasource = DataSource.builder().id(d.getId()).sourceId(d.getSourceId())
-                .sqlQuery(d.getSqlQuery()).name(d.getName()).tableQuery(d.getTableQuery())
+                .type(d.getType()).sqlQuery(d.getSqlQuery()).name(d.getName()).tableQuery(d.getTableQuery())
                 .identifiers(getIdentify(d.getIdentifiers())).measures(getMeasures(d.getMeasures()))
                 .dimensions(getDimensions(d.getDimensions())).build();
         datasource.setAggTime(getDataSourceAggTime(datasource.getDimensions()));

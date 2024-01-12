@@ -6,7 +6,9 @@ import com.tencent.supersonic.headless.api.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.server.pojo.DatabaseParameter;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
+import java.util.Map;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,7 +55,7 @@ public class DatabaseController {
 
     @GetMapping("/getDatabaseList")
     public List<DatabaseResp> getDatabaseList(HttpServletRequest request,
-                                             HttpServletResponse response) {
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return databaseService.getDatabaseList(user);
     }
@@ -66,8 +68,8 @@ public class DatabaseController {
 
     @PostMapping("/executeSql")
     public QueryResultWithSchemaResp executeSql(@RequestBody SqlExecuteReq sqlExecuteReq,
-                                                HttpServletRequest request,
-                                                HttpServletResponse response) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return databaseService.executeSql(sqlExecuteReq.getSql(), sqlExecuteReq.getId(), user);
     }
@@ -88,6 +90,12 @@ public class DatabaseController {
             @PathVariable("db") String db,
             @PathVariable("table") String table) {
         return databaseService.getColumns(id, db, table);
+    }
+
+    @GetMapping("/getDatabaseParameters")
+    public Map<String, List<DatabaseParameter>> getDatabaseParameters(HttpServletRequest request,
+            HttpServletResponse response) {
+        return databaseService.getDatabaseParameters();
     }
 
 }

@@ -37,6 +37,7 @@ public class ModelYamlManager {
         SysTimeDimensionBuilder.addSysTimeDimension(modelDetail.getDimensions(), engineAdaptor);
         addInterCntMetric(modelResp.getBizName(), modelDetail);
         DataModelYamlTpl dataModelYamlTpl = new DataModelYamlTpl();
+        dataModelYamlTpl.setType(databaseResp.getType());
         BeanUtils.copyProperties(modelDetail, dataModelYamlTpl);
         dataModelYamlTpl.setIdentifiers(modelDetail.getIdentifiers().stream().map(ModelYamlManager::convert)
                 .collect(Collectors.toList()));

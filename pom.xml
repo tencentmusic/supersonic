@@ -73,6 +73,7 @@
         <easyexcel.version>2.2.6</easyexcel.version>
         <poi.version>3.17</poi.version>
         <langchain4j.version>0.24.0</langchain4j.version>
+        <postgresql.version>42.7.1</postgresql.version>
     </properties>
 
     <dependencyManagement>

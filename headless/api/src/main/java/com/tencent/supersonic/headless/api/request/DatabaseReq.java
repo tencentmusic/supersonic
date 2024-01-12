@@ -30,6 +30,7 @@ public class DatabaseReq {
 
     private String description;
 
+    private String schema;
     private String url;
 
     private List<String> admins = Lists.newArrayList();
