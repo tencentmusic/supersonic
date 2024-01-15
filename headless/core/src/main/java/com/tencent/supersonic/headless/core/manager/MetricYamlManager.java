@@ -50,6 +50,8 @@ public class MetricYamlManager {
     public static MeasureYamlTpl convert(Measure measure) {
         MeasureYamlTpl measureYamlTpl = new MeasureYamlTpl();
         measureYamlTpl.setName(measure.getBizName());
+        measureYamlTpl.setConstraint(measure.getConstraint());
+        measureYamlTpl.setAgg(measure.getAlias());
         return measureYamlTpl;
     }
 
