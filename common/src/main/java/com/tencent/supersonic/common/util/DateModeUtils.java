@@ -7,6 +7,7 @@ import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
 import static com.tencent.supersonic.common.pojo.Constants.MONTH;
 import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT;
 import static com.tencent.supersonic.common.pojo.Constants.WEEK;
+import static com.tencent.supersonic.common.pojo.Constants.YEAR;
 
 import com.google.common.base.Strings;
 import com.tencent.supersonic.common.pojo.DateConf;
@@ -304,14 +305,17 @@ public class DateModeUtils {
             return String.format("(%s >= '%s' and %s <= '%s')", sysDateCol, dateMin, sysDateCol, dateMax);
         }
 
-        if (MONTH.equalsIgnoreCase(dateInfo.getPeriod())) {
-            LocalDate dateMax = LocalDate.now().minusDays(1);
-            //return generateMonthSql(dateMax, unit.longValue(), DAY_FORMAT);
-            return recentMonthStr(dateMax, unit.longValue(), MONTH_FORMAT);
-        }
         if (WEEK.equalsIgnoreCase(dateInfo.getPeriod())) {
             LocalDate dateMax = LocalDate.now().minusDays(1);
             return recentWeekStr(dateMax, unit.longValue());
+        }
+        if (MONTH.equalsIgnoreCase(dateInfo.getPeriod())) {
+            LocalDate dateMax = LocalDate.now().minusDays(1);
+            return recentMonthStr(dateMax, unit.longValue(), MONTH_FORMAT);
+        }
+        if (YEAR.equalsIgnoreCase(dateInfo.getPeriod())) {
+            LocalDate dateMax = LocalDate.now().minusDays(1);
+            return recentMonthStr(dateMax, unit.longValue() * 12, MONTH_FORMAT);
         }
 
         return String.format("(%s >= '%s' and %s <= '%s')", sysDateCol, LocalDate.now().minusDays(2), sysDateCol,
