@@ -211,12 +211,13 @@ const FieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSqlChange })
               <span>时间粒度:</span>
               <Select
                 placeholder="时间粒度"
-                value={timeGranularity}
+                value={timeGranularity === '' ? undefined : timeGranularity}
                 onChange={(value) => {
                   handleFieldChange(record, 'timeGranularity', value);
                 }}
-                defaultValue={DATE_OPTIONS[0]}
-                style={{ minWidth: 50 }}
+                defaultValue={timeGranularity === '' ? undefined : DATE_OPTIONS[0]}
+                style={{ minWidth: 80 }}
+                allowClear
               >
                 {DATE_OPTIONS.map((item) => (
                   <Option key={item} value={item}>
