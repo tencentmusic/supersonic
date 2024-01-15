@@ -54,42 +54,59 @@ public class DataSourceNode extends SemanticNode {
     }
 
     private static void addSchema(SqlValidatorScope scope, DataSource datasource, SqlNode table) throws Exception {
-        Map<String, String> parseInfo = SemanticNode.getDbTable(table);
+        Map<String, Object> parseInfo = SemanticNode.getDbTable(table);
         if (!parseInfo.isEmpty() && parseInfo.containsKey(Constants.SQL_PARSER_TABLE)) {
-            Set<String> dateInfo = new HashSet<>();
-            Set<String> dimensions = new HashSet<>();
-            Set<String> metrics = new HashSet<>();
-            String db = parseInfo.containsKey(Constants.SQL_PARSER_DB) ? parseInfo.get(Constants.SQL_PARSER_DB) : "";
-            String tb = parseInfo.get(Constants.SQL_PARSER_TABLE);
-            for (Dimension d : datasource.getDimensions()) {
-                List<SqlNode> identifiers = expand(SemanticNode.parse(d.getExpr(), scope), scope);
-                identifiers.stream().forEach(i -> dimensions.add(i.toString()));
-                dimensions.add(d.getName());
-            }
-            if (parseInfo.containsKey(Constants.SQL_PARSER_FIELD)) {
-                for (String field : parseInfo.get(Constants.SQL_PARSER_FIELD).split(",")) {
-                    dimensions.add(field);
+            Map<String, Set<String>> dbTbs = (Map<String, Set<String>>) parseInfo.get(Constants.SQL_PARSER_TABLE);
+            Map<String, Set<String>> fields = (Map<String, Set<String>>) parseInfo.get(Constants.SQL_PARSER_FIELD);
+            for (Map.Entry<String, Set<String>> entry : dbTbs.entrySet()) {
+                for (String dbTb : entry.getValue()) {
+                    String[] dbTable = dbTb.split("\\.");
+                    if (Objects.nonNull(dbTable) && dbTable.length > 0) {
+                        String tb = dbTable.length > 1 ? dbTable[1] : dbTable[0];
+                        String db = dbTable.length > 1 ? dbTable[0] : "";
+                        addSchemaTable(scope, datasource, db, tb,
+                                fields.containsKey(entry.getKey()) ? fields.get(entry.getKey()) : new HashSet<>());
+                    }
                 }
             }
-            for (Identify i : datasource.getIdentifiers()) {
-                dimensions.add(i.getName());
-            }
-            for (Measure m : datasource.getMeasures()) {
-                List<SqlNode> identifiers = expand(SemanticNode.parse(m.getExpr(), scope), scope);
-                identifiers.stream().forEach(i -> {
-                            if (!dimensions.contains(i.toString())) {
-                                metrics.add(i.toString());
-                            }
-                        }
-                );
-                if (!dimensions.contains(m.getName())) {
-                    metrics.add(m.getName());
-                }
-            }
-            SchemaBuilder.addSourceView(scope.getValidator().getCatalogReader().getRootSchema(), db,
-                    tb, dateInfo,
-                    dimensions, metrics);
         }
+    }
+
+    private static void addSchemaTable(SqlValidatorScope scope, DataSource datasource, String db, String tb,
+            Set<String> fields)
+            throws Exception {
+        Set<String> dateInfo = new HashSet<>();
+        Set<String> dimensions = new HashSet<>();
+        Set<String> metrics = new HashSet<>();
+        for (Dimension d : datasource.getDimensions()) {
+            List<SqlNode> identifiers = expand(SemanticNode.parse(d.getExpr(), scope), scope);
+            identifiers.stream().forEach(i -> dimensions.add(i.toString()));
+            dimensions.add(d.getName());
+        }
+        for (Identify i : datasource.getIdentifiers()) {
+            dimensions.add(i.getName());
+        }
+        for (Measure m : datasource.getMeasures()) {
+            List<SqlNode> identifiers = expand(SemanticNode.parse(m.getExpr(), scope), scope);
+            identifiers.stream().forEach(i -> {
+                        if (!dimensions.contains(i.toString())) {
+                            metrics.add(i.toString());
+                        }
+                    }
+            );
+            if (!dimensions.contains(m.getName())) {
+                metrics.add(m.getName());
+            }
+        }
+        for (String field : fields) {
+            if (!metrics.contains(field) && !dimensions.contains(field)) {
+                dimensions.add(field);
+                log.info("add column {} {}", datasource.getName(), field);
+            }
+        }
+        SchemaBuilder.addSourceView(scope.getValidator().getCatalogReader().getRootSchema(), db,
+                tb, dateInfo,
+                dimensions, metrics);
     }
 
     public static SqlNode buildExtend(DataSource datasource, Set<String> exprList,
@@ -265,7 +282,13 @@ public class DataSourceNode extends SemanticNode {
         Set<String> before = new HashSet<>();
         before.add(baseDataSource.getName());
         if (!CollectionUtils.isEmpty(schema.getJoinRelations())) {
-            for (JoinRelation joinRelation : schema.getJoinRelations()) {
+            Set<Long> visitJoinRelations = new HashSet<>();
+            List<JoinRelation> sortedJoinRelation = new ArrayList<>();
+            sortJoinRelation(schema.getJoinRelations(), baseDataSource.getName(), visitJoinRelations,
+                    sortedJoinRelation);
+            schema.getJoinRelations().stream().filter(j -> !visitJoinRelations.contains(j.getId()))
+                    .forEach(j -> sortedJoinRelation.add(j));
+            for (JoinRelation joinRelation : sortedJoinRelation) {
                 if (!before.contains(joinRelation.getLeft()) && !before.contains(joinRelation.getRight())) {
                     continue;
                 }
@@ -319,6 +342,21 @@ public class DataSourceNode extends SemanticNode {
             });
         }
         return linkDataSources;
+    }
+
+    private static void sortJoinRelation(List<JoinRelation> joinRelations, String next, Set<Long> visited,
+            List<JoinRelation> sortedJoins) {
+        for (JoinRelation link : joinRelations) {
+            if (!visited.contains(link.getId())) {
+                if (link.getLeft().equals(next) || link.getRight().equals(next)) {
+                    visited.add(link.getId());
+                    sortedJoins.add(link);
+                    sortJoinRelation(joinRelations, link.getLeft().equals(next) ? link.getRight() : link.getLeft(),
+                            visited,
+                            sortedJoins);
+                }
+            }
+        }
     }
 
     private static List<DataSource> getLinkDataSources(Set<String> baseIdentifiers,
