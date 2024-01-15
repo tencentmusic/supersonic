@@ -32,6 +32,11 @@ public class Measure {
         this.bizName = bizName;
     }
 
+    public Measure(String bizName, String constraint) {
+        this.bizName = bizName;
+        this.constraint = constraint;
+    }
+
     public String getFieldName() {
         return expr;
     }

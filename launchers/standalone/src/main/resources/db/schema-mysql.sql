@@ -279,28 +279,31 @@ CREATE TABLE `s2_domain` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='主题域基础信息表';
 
 
-CREATE TABLE `s2_metric` (
-                             `id` bigint(20) NOT NULL AUTO_INCREMENT,
-                             `model_id` bigint(20) DEFAULT NULL,
-                             `name` varchar(255) NOT NULL COMMENT '指标名称',
-                             `biz_name` varchar(255) NOT NULL COMMENT '字段名称',
-                             `description` varchar(500) DEFAULT NULL COMMENT '描述',
-                             `status` int(10) NOT NULL COMMENT '指标状态,0未启用,1启用',
-                             `sensitive_level` int(10) NOT NULL COMMENT '敏感级别',
-                             `type` varchar(50) NOT NULL COMMENT '指标类型',
-                             `type_params` text NOT NULL COMMENT '类型参数',
-                             `created_at` datetime NOT NULL COMMENT '创建时间',
-                             `created_by` varchar(100) NOT NULL COMMENT '创建人',
-                             `updated_at` datetime NOT NULL COMMENT '更新时间',
-                             `updated_by` varchar(100) NOT NULL COMMENT '更新人',
-                             `data_format_type` varchar(50) DEFAULT NULL COMMENT '数值类型',
-                             `data_format` varchar(500) DEFAULT NULL COMMENT '数值类型参数',
-                             `alias` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
-                             `tags` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
-                             `relate_dimensions` varchar(500) DEFAULT NULL COMMENT '指标相关维度',
-                             `ext` text DEFAULT NULL  ,
-                             PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='指标表';
+CREATE TABLE `s2_metric`
+(
+    `id`                bigint(20)   NOT NULL AUTO_INCREMENT,
+    `model_id`          bigint(20)   DEFAULT NULL,
+    `name`              varchar(255) NOT NULL COMMENT '指标名称',
+    `biz_name`          varchar(255) NOT NULL COMMENT '字段名称',
+    `description`       varchar(500) DEFAULT NULL COMMENT '描述',
+    `status`            int(10)      NOT NULL COMMENT '指标状态',
+    `sensitive_level`   int(10)      NOT NULL COMMENT '敏感级别',
+    `type`              varchar(50)  NOT NULL COMMENT '指标类型',
+    `type_params`       text         NOT NULL COMMENT '类型参数',
+    `created_at`        datetime     NOT NULL COMMENT '创建时间',
+    `created_by`        varchar(100) NOT NULL COMMENT '创建人',
+    `updated_at`        datetime     NOT NULL COMMENT '更新时间',
+    `updated_by`        varchar(100) NOT NULL COMMENT '更新人',
+    `data_format_type`  varchar(50)  DEFAULT NULL COMMENT '数值类型',
+    `data_format`       varchar(500) DEFAULT NULL COMMENT '数值类型参数',
+    `alias`             varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+    `tags`              varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+    `relate_dimensions` varchar(500) DEFAULT NULL COMMENT '指标相关维度',
+    `ext`               text DEFAULT NULL,
+    `define_type` varchar(50)  DEFAULT NULL, -- MEASURE, FIELD, METRIC
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8 COMMENT ='指标表';
 
 
 CREATE TABLE `s2_model` (

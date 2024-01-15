@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.api.response;
 
-import com.tencent.supersonic.headless.api.pojo.Entity;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import lombok.Data;
 import lombok.ToString;
@@ -25,12 +24,6 @@ public class DomainResp extends SchemaItem {
     private List<String> adminOrgs;
 
     private Integer isOpen = 0;
-
-    private Integer dimensionCnt;
-
-    private Integer metricCnt;
-
-    private Entity entity;
 
     private boolean hasEditPermission = false;
 

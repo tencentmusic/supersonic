@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.manager;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.MetricTypeParams;
+import com.tencent.supersonic.headless.api.pojo.MeasureParam;
+import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.core.pojo.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MetricTypeParamsYamlTpl;
@@ -37,21 +37,21 @@ public class MetricYamlManager {
         BeanUtils.copyProperties(metric, metricYamlTpl);
         metricYamlTpl.setName(metric.getBizName());
         metricYamlTpl.setOwners(Lists.newArrayList(metric.getCreatedBy()));
-        MetricTypeParams exprMetricTypeParams = metric.getTypeParams();
+        MetricDefineByMeasureParams metricDefineParams = metric.getTypeParams();
         MetricTypeParamsYamlTpl metricTypeParamsYamlTpl = new MetricTypeParamsYamlTpl();
-        metricTypeParamsYamlTpl.setExpr(exprMetricTypeParams.getExpr());
-        List<Measure> measures = exprMetricTypeParams.getMeasures();
+        metricTypeParamsYamlTpl.setExpr(metricDefineParams.getExpr());
+        List<MeasureParam> measures = metricDefineParams.getMeasures();
         metricTypeParamsYamlTpl.setMeasures(
                 measures.stream().map(MetricYamlManager::convert).collect(Collectors.toList()));
         metricYamlTpl.setTypeParams(metricTypeParamsYamlTpl);
         return metricYamlTpl;
     }
 
-    public static MeasureYamlTpl convert(Measure measure) {
+    public static MeasureYamlTpl convert(MeasureParam measure) {
         MeasureYamlTpl measureYamlTpl = new MeasureYamlTpl();
         measureYamlTpl.setName(measure.getBizName());
         measureYamlTpl.setConstraint(measure.getConstraint());
-        measureYamlTpl.setAgg(measure.getAlias());
+        measureYamlTpl.setAgg(measure.getAgg());
         return measureYamlTpl;
     }
 
