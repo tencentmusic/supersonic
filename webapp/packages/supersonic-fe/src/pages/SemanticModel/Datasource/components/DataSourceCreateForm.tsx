@@ -119,7 +119,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
               dateFormat,
               typeParams: {
                 isPrimary: true,
-                timeGranularity,
+                timeGranularity: timeGranularity || '',
               },
             });
             break;

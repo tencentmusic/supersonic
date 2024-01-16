@@ -21,6 +21,10 @@ public class Measure {
 
     private Integer isCreateMetric = 0;
 
+    private String constraint;
+
+    private String alias;
+
     public Measure(String name, String bizName, String agg, Integer isCreateMetric) {
         this.name = name;
         this.agg = agg;
