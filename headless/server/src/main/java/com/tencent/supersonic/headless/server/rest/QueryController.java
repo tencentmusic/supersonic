@@ -23,6 +23,12 @@ import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.server.service.DownloadService;
 import com.tencent.supersonic.headless.server.service.HeadlessQueryEngine;
 import com.tencent.supersonic.headless.server.service.QueryService;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +36,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/semantic/query")
@@ -69,22 +70,22 @@ public class QueryController {
 
     @PostMapping("/queryMetricDataById")
     public ItemQueryResultResp queryMetricDataById(@Valid @RequestBody QueryItemReq queryApiReq,
-                                                   HttpServletRequest request) throws Exception {
+            HttpServletRequest request) throws Exception {
         return queryService.queryMetricDataById(queryApiReq, request);
     }
 
     @PostMapping("/download/struct")
     public void downloadByStruct(@RequestBody DownloadStructReq downloadStructReq,
-                                HttpServletRequest request,
-                                HttpServletResponse response) throws Exception {
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         downloadService.downloadByStruct(downloadStructReq, user, response);
     }
 
     @PostMapping("/download/batch")
     public void downloadBatch(@RequestBody BatchDownloadReq batchDownloadReq,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response) throws Exception {
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         downloadService.batchDownload(batchDownloadReq, user, response);
     }
@@ -97,6 +98,9 @@ public class QueryController {
     @PostMapping("/struct/parse")
     public SqlParserResp parseByStruct(@RequestBody ParseSqlReq parseSqlReq) throws Exception {
         QueryStructReq queryStructCmd = new QueryStructReq();
+        Set<Long> models = new HashSet<>();
+        models.add(Long.valueOf(parseSqlReq.getRootPath()));
+        queryStructCmd.setModelIds(models);
         QueryStatement queryStatement = headlessQueryEngine.physicalSql(queryStructCmd, parseSqlReq);
         SqlParserResp sqlParserResp = new SqlParserResp();
         BeanUtils.copyProperties(queryStatement, sqlParserResp);
