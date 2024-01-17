@@ -94,7 +94,7 @@ public class ModelYamlManager {
         }
         measure.setAgg("count");
         measure.setBizName(String.format("%s_%s", datasourceEnName, "internal_cnt"));
-        measure.setCreateMetric("true");
+        measure.setIsCreateMetric(1);
         datasourceDetail.getMeasures().add(measure);
     }
 

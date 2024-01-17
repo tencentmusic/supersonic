@@ -316,9 +316,9 @@ public class SourceRender extends Renderer {
         }
     }
 
-    public void render(MetricQueryReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
+    public void render(MetricQueryReq metricQueryReq, List<DataSource> dataSources, SqlValidatorScope scope,
                        HeadlessSchema schema, boolean nonAgg) throws Exception {
-        String queryWhere = metricCommand.getWhere();
+        String queryWhere = metricQueryReq.getWhere();
         Set<String> whereFields = new HashSet<>();
         List<String> fieldWhere = new ArrayList<>();
         if (queryWhere != null && !queryWhere.isEmpty()) {
@@ -328,13 +328,13 @@ public class SourceRender extends Renderer {
         }
         if (dataSources.size() == 1) {
             DataSource dataSource = dataSources.get(0);
-            super.tableView = renderOne("", fieldWhere, metricCommand.getMetrics(),
-                    metricCommand.getDimensions(),
-                    metricCommand.getWhere(), dataSource, scope, schema, nonAgg);
+            super.tableView = renderOne("", fieldWhere, metricQueryReq.getMetrics(),
+                    metricQueryReq.getDimensions(),
+                    metricQueryReq.getWhere(), dataSource, scope, schema, nonAgg);
             return;
         }
         JoinRender joinRender = new JoinRender();
-        joinRender.render(metricCommand, dataSources, scope, schema, nonAgg);
+        joinRender.render(metricQueryReq, dataSources, scope, schema, nonAgg);
         super.tableView = joinRender.getTableView();
     }
 

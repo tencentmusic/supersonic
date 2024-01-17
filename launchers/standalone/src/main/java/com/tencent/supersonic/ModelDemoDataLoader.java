@@ -15,12 +15,14 @@ import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.headless.api.enums.DataType;
 import com.tencent.supersonic.headless.api.enums.DimensionType;
 import com.tencent.supersonic.headless.api.enums.IdentifyType;
+import com.tencent.supersonic.headless.api.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.MetricTypeParams;
+import com.tencent.supersonic.headless.api.pojo.MeasureParam;
+import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.request.DimensionReq;
@@ -329,15 +331,16 @@ public class ModelDemoDataLoader {
         metricReq.setDescription("停留时长");
         metricReq.setTags(Collections.singletonList("核心指标"));
         metricReq.setAlias("访问时长");
-        MetricTypeParams metricTypeParams = new MetricTypeParams();
+        MetricDefineByMeasureParams metricTypeParams = new MetricDefineByMeasureParams();
         metricTypeParams.setExpr("s2_stay_time_statis_stay_hours");
-        List<Measure> measures = new ArrayList<>();
-        Measure measure = new Measure("停留时长",
-                "s2_stay_time_statis_stay_hours", AggOperatorEnum.SUM.getOperator(), 1);
+        List<MeasureParam> measures = new ArrayList<>();
+        MeasureParam measure = new MeasureParam("s2_stay_time_statis_stay_hours",
+                "", AggOperatorEnum.SUM.getOperator());
         measures.add(measure);
         metricTypeParams.setMeasures(measures);
         metricReq.setTypeParams(metricTypeParams);
-        metricService.updateExprMetric(metricReq, user);
+        metricReq.setMetricDefineType(MetricDefineType.MEASURE);
+        metricService.updateMetric(metricReq, user);
     }
 
     public void addAuthGroup_1() {

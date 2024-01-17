@@ -4,12 +4,13 @@ import com.google.common.base.Objects;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import lombok.Data;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Data
 @ToString(callSuper = true)
@@ -38,9 +39,6 @@ public class SchemaItem extends RecordInfo {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        if (!super.equals(o)) {
-            return false;
-        }
         SchemaItem that = (SchemaItem) o;
         return Objects.equal(id, that.id) && Objects.equal(name, that.name)
                 && Objects.equal(bizName, that.bizName) && Objects.equal(
@@ -50,7 +48,7 @@ public class SchemaItem extends RecordInfo {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(super.hashCode(), id, name, bizName, description, status, typeEnum, sensitiveLevel);
+        return Objects.hashCode(id, name, bizName, description, status, typeEnum, sensitiveLevel);
     }
 
     public static List<String> getAliasList(String alias) {

@@ -1,11 +1,5 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
@@ -19,6 +13,12 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 /**
  * Sql Parser Select function Helper
  */
@@ -30,6 +30,11 @@ public class SqlParserSelectFunctionHelper {
             return true;
         }
         return SqlParserSelectHelper.hasGroupBy(sql);
+    }
+
+    public static void main(String[] args) {
+        String sql = "select a from table";
+        System.out.println(hasAggregateFunction(sql));
     }
 
     public static boolean hasFunction(String sql, String functionName) {

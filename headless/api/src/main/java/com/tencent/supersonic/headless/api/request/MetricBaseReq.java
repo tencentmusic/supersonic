@@ -30,6 +30,9 @@ public class MetricBaseReq extends SchemaItem {
     private Map<String, Object> ext = new HashMap<>();
 
     public String getTag() {
+        if (tags == null) {
+            return null;
+        }
         if (CollectionUtils.isEmpty(tags)) {
             return "";
         }

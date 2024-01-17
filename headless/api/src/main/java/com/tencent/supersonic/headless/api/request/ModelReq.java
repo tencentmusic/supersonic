@@ -42,7 +42,7 @@ public class ModelReq extends SchemaItem {
         if (modelDetail == null) {
             return Lists.newArrayList();
         }
-        return modelDetail.getTimeDims();
+        return modelDetail.filterTimeDims();
     }
 
     public String getViewer() {
