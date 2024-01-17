@@ -8,7 +8,8 @@ public enum EngineType {
     DORIS(2, "doris"),
     CLICKHOUSE(3, "clickhouse"),
     KAFKA(4, "kafka"),
-    H2(5, "h2");
+    H2(5, "h2"),
+    POSTGRESQL(6, "postgresql");
 
 
     private Integer code;

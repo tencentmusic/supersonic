@@ -9,6 +9,7 @@ import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.MetricQueryDefaultConfig;
 import com.tencent.supersonic.headless.api.request.MetaBatchReq;
+import com.tencent.supersonic.headless.api.request.MetricBaseReq;
 import com.tencent.supersonic.headless.api.request.MetricReq;
 import com.tencent.supersonic.headless.api.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.response.MetricResp;
@@ -33,30 +34,26 @@ import java.util.Set;
 @RequestMapping("/api/semantic/metric")
 public class MetricController {
 
-
     private MetricService metricService;
-
 
     public MetricController(MetricService metricService) {
         this.metricService = metricService;
     }
 
     @PostMapping("/creatExprMetric")
-    public Boolean creatExprMetric(@RequestBody MetricReq metricReq,
-            HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+    public MetricResp createMetric(@RequestBody MetricReq metricReq,
+                                   HttpServletRequest request,
+                                   HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        metricService.createMetric(metricReq, user);
-        return true;
+        return metricService.createMetric(metricReq, user);
     }
 
     @PostMapping("/updateExprMetric")
-    public Boolean updateExprMetric(@RequestBody MetricReq metricReq,
-            HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+    public MetricResp updateMetric(@RequestBody MetricReq metricReq,
+                                HttpServletRequest request,
+                                HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        metricService.updateExprMetric(metricReq, user);
-        return true;
+        return metricService.updateMetric(metricReq, user);
     }
 
     @PostMapping("/batchUpdateStatus")
@@ -69,7 +66,7 @@ public class MetricController {
     }
 
     @PostMapping("/mockMetricAlias")
-    public List<String> mockMetricAlias(@RequestBody MetricReq metricReq,
+    public List<String> mockMetricAlias(@RequestBody MetricBaseReq metricReq,
                                         HttpServletRequest request,
                                         HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
@@ -82,6 +79,11 @@ public class MetricController {
         return metricService.getMetrics(metaFilter);
     }
 
+    @GetMapping("/getMetricsToCreateNewMetric/{modelId}")
+    public List<MetricResp> getMetricsToCreateNewMetric(@PathVariable("modelId") Long modelId) {
+        return metricService.getMetricsToCreateNewMetric(modelId);
+    }
+
     @PostMapping("/queryMetric")
     public PageInfo<MetricResp> queryMetric(@RequestBody PageMetricReq pageMetricReq,
                                             HttpServletRequest request,
@@ -92,13 +94,15 @@ public class MetricController {
 
     @Deprecated
     @GetMapping("getMetric/{modelId}/{bizName}")
-    public MetricResp getMetric(@PathVariable("modelId") Long modelId, @PathVariable("bizName") String bizName) {
+    public MetricResp getMetric(@PathVariable("modelId") Long modelId,
+                                @PathVariable("bizName") String bizName) {
         return metricService.getMetric(modelId, bizName);
     }
 
     @GetMapping("getMetric/{id}")
     public MetricResp getMetric(@PathVariable("id") Long id,
-                                HttpServletRequest request, HttpServletResponse response) {
+                                HttpServletRequest request,
+                                HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return metricService.getMetric(id, user);
     }

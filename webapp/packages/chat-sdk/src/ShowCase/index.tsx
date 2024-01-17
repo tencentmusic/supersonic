@@ -31,7 +31,7 @@ const ShowCase: React.FC<Props> = ({ height, agentId, onSendMsg }) => {
     if (pageNoValue === 1) {
       setLoading(false);
     }
-    const showCaseMapRes: any = res.data.showCaseMap;
+    const showCaseMapRes: any = res.data.showCaseMap || {};
     const list = Object.keys(showCaseMapRes)
       .reduce((result: ShowCaseItemType[], key: string) => {
         result.push({ msgList: showCaseMapRes[key], caseId: key });

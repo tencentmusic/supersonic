@@ -338,6 +338,7 @@ public abstract class SemanticNode {
     public static SqlNode optimize(SqlValidatorScope scope, HeadlessSchema schema, SqlNode sqlNode) {
         try {
             HepProgramBuilder hepProgramBuilder = new HepProgramBuilder();
+
             hepProgramBuilder.addRuleInstance(new FilterToGroupScanRule(FilterToGroupScanRule.DEFAULT, schema));
             RelOptPlanner relOptPlanner = new HepPlanner(hepProgramBuilder.build());
             RelToSqlConverter converter = new RelToSqlConverter(SemanticSqlDialect.DEFAULT);

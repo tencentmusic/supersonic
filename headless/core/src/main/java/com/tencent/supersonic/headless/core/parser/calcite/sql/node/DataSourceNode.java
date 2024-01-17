@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
@@ -43,7 +44,13 @@ public class DataSourceNode extends SemanticNode {
         if (datasource.getSqlQuery() != null && !datasource.getSqlQuery().isEmpty()) {
             sqlTable = datasource.getSqlQuery();
         } else if (datasource.getTableQuery() != null && !datasource.getTableQuery().isEmpty()) {
-            sqlTable = "select * from " + datasource.getTableQuery();
+            if (datasource.getType().equalsIgnoreCase(EngineType.POSTGRESQL.getName())) {
+                String fullTableName = Arrays.stream(datasource.getTableQuery().split("\\."))
+                        .collect(Collectors.joining(".public."));
+                sqlTable = "select * from " + fullTableName;
+            } else {
+                sqlTable = "select * from " + datasource.getTableQuery();
+            }
         }
         if (sqlTable.isEmpty()) {
             throw new Exception("DatasourceNode build error [tableSqlNode not found]");

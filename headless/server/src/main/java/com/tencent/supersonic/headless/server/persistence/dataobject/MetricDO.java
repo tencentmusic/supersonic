@@ -101,4 +101,6 @@ public class MetricDO {
 
     private String ext;
 
+    private String defineType;
+
 }

@@ -16,6 +16,8 @@ public class DataSource {
 
     private Long sourceId;
 
+    private String type;
+
     private String sqlQuery;
 
     private String tableQuery;
