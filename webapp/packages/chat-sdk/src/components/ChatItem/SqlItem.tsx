@@ -12,11 +12,19 @@ type Props = {
   llmReq?: any;
   llmResp?: any;
   integrateSystem?: string;
+  queryMode?: string;
   sqlInfo: SqlInfoType;
   sqlTimeCost?: number;
 };
 
-const SqlItem: React.FC<Props> = ({ llmReq, llmResp, integrateSystem, sqlInfo, sqlTimeCost }) => {
+const SqlItem: React.FC<Props> = ({
+  llmReq,
+  llmResp,
+  integrateSystem,
+  queryMode,
+  sqlInfo,
+  sqlTimeCost,
+}) => {
   const [sqlType, setSqlType] = useState('');
 
   const tipPrefixCls = `${PREFIX_CLS}-item`;
@@ -88,7 +96,7 @@ const SqlItem: React.FC<Props> = ({ llmReq, llmResp, integrateSystem, sqlInfo, s
                 setSqlType(sqlType === 's2SQL' ? '' : 's2SQL');
               }}
             >
-              解析器S2SQL
+              {queryMode === 'LLM_S2SQL' ? 'LLM' : 'Rule'}解析S2SQL
             </div>
           )}
           {sqlInfo.correctS2SQL && (
@@ -100,7 +108,7 @@ const SqlItem: React.FC<Props> = ({ llmReq, llmResp, integrateSystem, sqlInfo, s
                 setSqlType(sqlType === 'correctS2SQL' ? '' : 'correctS2SQL');
               }}
             >
-              修正器S2SQL
+              修正S2SQL
             </div>
           )}
           {sqlInfo.querySQL && (

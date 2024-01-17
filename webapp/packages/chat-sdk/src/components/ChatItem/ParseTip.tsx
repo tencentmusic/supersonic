@@ -156,11 +156,11 @@ const ParseTip: React.FC<Props> = ({
                 </div>
               </div>
             )}
-            {(queryType === 'METRIC' || queryType === 'TAG') && (
+            {(queryType === 'METRIC' || queryType === 'METRIC_TAG' || queryType === 'TAG') && (
               <div className={`${prefixCls}-tip-item`}>
                 <div className={`${prefixCls}-tip-item-name`}>查询模式：</div>
                 <div className={itemValueClass}>
-                  {queryType === 'METRIC' ? '指标模式' : '标签模式'}
+                  {queryType === 'METRIC' || queryType === 'METRIC_TAG' ? '指标模式' : '标签模式'}
                 </div>
               </div>
             )}
@@ -171,7 +171,7 @@ const ParseTip: React.FC<Props> = ({
                 <div className={`${prefixCls}-tip-item`}>
                   <div className={`${prefixCls}-tip-item-name`}>指标：</div>
                   <div className={itemValueClass}>
-                    {queryType === 'METRIC'
+                    {queryType === 'METRIC' || queryType === 'METRIC_TAG'
                       ? metrics[0].name
                       : metrics.map(metric => metric.name).join('、')}
                   </div>
