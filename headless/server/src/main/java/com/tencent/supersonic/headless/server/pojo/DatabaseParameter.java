@@ -12,8 +12,9 @@ import lombok.NoArgsConstructor;
 public class DatabaseParameter {
 
     private String name;
-    private String enName;
     private String comment;
-    private String defaultValue;
-
+    private String placeholder;
+    private String value;
+    private String dataType = "string";
+    private Boolean require = true;
 }

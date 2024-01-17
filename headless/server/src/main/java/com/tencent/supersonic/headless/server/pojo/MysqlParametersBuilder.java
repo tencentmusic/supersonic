@@ -14,36 +14,40 @@ public class MysqlParametersBuilder implements DbParametersBuilder {
     public List<DatabaseParameter> build() {
         List<DatabaseParameter> databaseParameters = new ArrayList<>();
         DatabaseParameter host = new DatabaseParameter();
+        host.setComment("host");
         host.setName("host");
-        host.setEnName("host");
-        host.setComment("请输入host");
+        host.setPlaceholder("请输入host");
         databaseParameters.add(host);
 
         DatabaseParameter port = new DatabaseParameter();
+        port.setComment("port");
         port.setName("port");
-        port.setEnName("port");
-        port.setComment("请输入端口号");
+        port.setPlaceholder("请输入端口号");
         databaseParameters.add(port);
 
         DatabaseParameter version = new DatabaseParameter();
-        version.setName("数据库版本");
-        version.setEnName("version");
-        version.setComment("请输入数据库版本");
+        version.setComment("数据库版本");
+        version.setName("version");
+        version.setPlaceholder("请输入数据库版本");
         databaseParameters.add(version);
 
         DatabaseParameter userName = new DatabaseParameter();
-        userName.setName("用户名");
-        userName.setEnName("username");
+        userName.setComment("用户名");
+        userName.setName("username");
+        userName.setPlaceholder("请输入用户名");
         databaseParameters.add(userName);
 
         DatabaseParameter password = new DatabaseParameter();
-        password.setName("密码");
-        password.setEnName("password");
+        password.setComment("密码");
+        password.setName("password");
+        password.setPlaceholder("请输入密码");
         databaseParameters.add(password);
 
         DatabaseParameter database = new DatabaseParameter();
-        database.setName("数据库名称");
-        database.setEnName("database");
+        database.setComment("数据库名称");
+        database.setName("database");
+        database.setPlaceholder("请输入数据库名称");
+        database.setRequire(false);
         databaseParameters.add(database);
         return databaseParameters;
     }
