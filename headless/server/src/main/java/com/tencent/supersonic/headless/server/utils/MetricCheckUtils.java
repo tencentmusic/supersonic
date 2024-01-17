@@ -28,7 +28,7 @@ public class MetricCheckUtils {
             }
         }
         if (MetricDefineType.MEASURE.equals(metricReq.getMetricDefineType())) {
-            MetricDefineByMeasureParams typeParams = metricReq.getTypeParams();
+            MetricDefineByMeasureParams typeParams = metricReq.getMetricDefineByMeasureParams();
             if (typeParams == null) {
                 throw new InvalidArgumentException("指标定义参数不可为空");
             }

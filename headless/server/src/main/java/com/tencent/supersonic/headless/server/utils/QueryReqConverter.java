@@ -279,7 +279,7 @@ public class QueryReqConverter {
         // check metrics has derived
         if (!metricResps.stream()
                 .anyMatch(m -> metrics.contains(m.getBizName()) && MetricType.isDerived(m.getMetricDefineType(),
-                        m.getTypeParams()))) {
+                        m.getMetricDefineByMeasureParams()))) {
             return;
         }
         Set<String> allFields = new HashSet<>();
@@ -298,7 +298,8 @@ public class QueryReqConverter {
         if (!CollectionUtils.isEmpty(metricResps)) {
             for (MetricResp metricResp : metricResps) {
                 if (metrics.contains(metricResp.getBizName())) {
-                    if (MetricType.isDerived(metricResp.getMetricDefineType(), metricResp.getTypeParams())) {
+                    if (MetricType.isDerived(metricResp.getMetricDefineType(),
+                            metricResp.getMetricDefineByMeasureParams())) {
                         String expr = sqlGenerateUtils.generateDerivedMetric(metricResps, allFields, allMeasures,
                                 dimensionResps,
                                 sqlGenerateUtils.getExpr(metricResp), metricResp.getMetricDefineType(), visitedMetric,

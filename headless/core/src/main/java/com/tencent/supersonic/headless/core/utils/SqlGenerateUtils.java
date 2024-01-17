@@ -1,12 +1,5 @@
 package com.tencent.supersonic.headless.core.utils;
 
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH;
-import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
-import static com.tencent.supersonic.common.pojo.Constants.WEEK;
-
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
@@ -23,6 +16,15 @@ import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Triple;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -34,14 +36,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Triple;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.common.pojo.Constants.DAY;
+import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH;
+import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
+import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
 /**
  * tools functions to analyze queryStructReq
@@ -333,7 +334,7 @@ public class SqlGenerateUtils {
 
     public String getExpr(MetricResp metricResp) {
         if (Objects.isNull(metricResp.getMetricDefineType())) {
-            return metricResp.getTypeParams().getExpr();
+            return metricResp.getMetricDefineByMeasureParams().getExpr();
         }
         if (metricResp.getMetricDefineType().equals(MetricDefineType.METRIC)) {
             return metricResp.getMetricDefineByMetricParams().getExpr();
@@ -342,6 +343,6 @@ public class SqlGenerateUtils {
             return metricResp.getMetricDefineByFieldParams().getExpr();
         }
         // measure add agg function
-        return metricResp.getTypeParams().getExpr();
+        return metricResp.getMetricDefineByMeasureParams().getExpr();
     }
 }
