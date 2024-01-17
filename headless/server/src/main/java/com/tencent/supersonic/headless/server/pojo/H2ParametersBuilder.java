@@ -14,30 +14,28 @@ public class H2ParametersBuilder implements DbParametersBuilder {
     public List<DatabaseParameter> build() {
         List<DatabaseParameter> databaseParameters = new ArrayList<>();
         DatabaseParameter host = new DatabaseParameter();
-        host.setName("链接");
-        host.setEnName("url");
-        host.setComment("请输入链接");
+        host.setComment("链接");
+        host.setName("url");
+        host.setPlaceholder("请输入链接");
         databaseParameters.add(host);
 
-        DatabaseParameter port = new DatabaseParameter();
-        port.setName("port");
-        port.setEnName("port");
-        port.setComment("请输入端口号");
-        databaseParameters.add(port);
-
         DatabaseParameter userName = new DatabaseParameter();
-        userName.setName("用户名");
-        userName.setEnName("username");
+        userName.setComment("用户名");
+        userName.setName("username");
+        userName.setPlaceholder("请输入用户名");
         databaseParameters.add(userName);
 
         DatabaseParameter password = new DatabaseParameter();
-        password.setName("密码");
-        password.setEnName("password");
+        password.setComment("密码");
+        password.setName("password");
+        password.setPlaceholder("请输入密码");
         databaseParameters.add(password);
 
         DatabaseParameter database = new DatabaseParameter();
-        database.setName("数据库名称");
-        database.setEnName("database");
+        database.setComment("数据库名称");
+        database.setName("database");
+        database.setPlaceholder("请输入数据库名称");
+        database.setRequire(false);
         databaseParameters.add(database);
         return databaseParameters;
     }
