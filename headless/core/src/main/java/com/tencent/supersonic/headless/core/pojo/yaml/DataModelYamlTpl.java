@@ -15,6 +15,8 @@ public class DataModelYamlTpl {
 
     private Long sourceId;
 
+    private String type;
+
     private String sqlQuery;
 
     private String tableQuery;

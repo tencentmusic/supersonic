@@ -84,3 +84,7 @@ logging:
 inMemoryEmbeddingStore:
   persistent:
     path: /tmp
+
+query:
+  optimizer:
+    enable: true
