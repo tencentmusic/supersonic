@@ -66,13 +66,13 @@ public class SchemaBuilder {
         String db = dbSrc.toLowerCase();
         DataSourceTable.Builder builder = DataSourceTable.newBuilder(tb);
         for (String date : dates) {
-            builder.addField(date.toLowerCase(), SqlTypeName.VARCHAR);
+            builder.addField(date, SqlTypeName.VARCHAR);
         }
         for (String dim : dimensions) {
-            builder.addField(dim.toLowerCase(), SqlTypeName.VARCHAR);
+            builder.addField(dim, SqlTypeName.VARCHAR);
         }
         for (String metric : metrics) {
-            builder.addField(metric.toLowerCase(), SqlTypeName.BIGINT);
+            builder.addField(metric, SqlTypeName.BIGINT);
         }
         DataSourceTable srcTable = builder
                 .withRowCount(1)

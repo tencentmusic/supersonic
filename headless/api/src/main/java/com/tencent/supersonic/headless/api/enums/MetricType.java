@@ -29,6 +29,9 @@ public enum MetricType {
         if (MetricDefineType.METRIC.equals(metricDefineType)) {
             return true;
         }
+        if (MetricDefineType.FIELD.equals(metricDefineType)) {
+            return true;
+        }
         if (MetricDefineType.MEASURE.equals(metricDefineType)) {
             List<MeasureParam> measures = typeParams.getMeasures();
             if (measures.size() > 1) {

@@ -53,6 +53,7 @@ public class ModelYamlManager {
         } else {
             dataModelYamlTpl.setTableQuery(modelDetail.getTableQuery());
         }
+        dataModelYamlTpl.setFields(modelResp.getModelDetail().getFields());
         return dataModelYamlTpl;
     }
 

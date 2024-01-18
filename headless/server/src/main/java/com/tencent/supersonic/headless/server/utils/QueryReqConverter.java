@@ -304,6 +304,7 @@ public class QueryReqConverter {
                                 sqlGenerateUtils.getExpr(metricResp), metricResp.getMetricDefineType(), visitedMetric,
                                 deriveMetric, deriveDimension);
                         replaces.put(metricResp.getBizName(), expr);
+                        log.info("derived metric {}->{}", metricResp.getBizName(), expr);
                     } else {
                         measures.add(metricResp.getBizName());
                     }

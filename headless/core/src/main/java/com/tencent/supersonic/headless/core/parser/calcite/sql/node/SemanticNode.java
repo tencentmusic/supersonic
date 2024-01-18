@@ -47,6 +47,7 @@ import org.apache.calcite.sql.pretty.SqlPrettyWriter;
 import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -57,6 +58,7 @@ public abstract class SemanticNode {
 
     public static Set<SqlKind> AGGREGATION_KIND = new HashSet<>();
     public static Set<String> AGGREGATION_FUNC = new HashSet<>();
+    public static List<String> groupHints = new ArrayList<>(Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9"));
 
     static {
         AGGREGATION_KIND.add(SqlKind.AVG);
@@ -212,6 +214,59 @@ public abstract class SemanticNode {
             fieldVisit(list, parseInfo, "");
         });
         fromVisit(sqlSelect.getFrom(), parseInfo);
+        if (sqlSelect.hasWhere()) {
+            whereVisit((SqlBasicCall) sqlSelect.getWhere(), parseInfo);
+        }
+        if (sqlSelect.hasOrderBy()) {
+            fieldVisit(sqlSelect.getOrderList(), parseInfo, "");
+        }
+        SqlNodeList group = sqlSelect.getGroup();
+        if (group != null) {
+            group.forEach(groupField -> {
+                if (groupHints.contains(groupField.toString())) {
+                    int groupIdx = Integer.valueOf(groupField.toString()) - 1;
+                    if (selectList.getList().size() > groupIdx) {
+                        fieldVisit(selectList.get(groupIdx), parseInfo, "");
+                    }
+                } else {
+                    fieldVisit(groupField, parseInfo, "");
+                }
+            });
+        }
+    }
+
+    private static void whereVisit(SqlBasicCall where, Map<String, Object> parseInfo) {
+        if (where == null) {
+            return;
+        }
+        if (where.operandCount() == 2 && where.operand(0).getKind().equals(SqlKind.IDENTIFIER)
+                && where.operand(1).getKind().equals(SqlKind.LITERAL)) {
+            fieldVisit(where.operand(0), parseInfo, "");
+            return;
+        }
+        // 子查询
+        if (where.operandCount() == 2
+                && (where.operand(0).getKind().equals(SqlKind.IDENTIFIER)
+                && (where.operand(1).getKind().equals(SqlKind.SELECT)
+                || where.operand(1).getKind().equals(SqlKind.ORDER_BY)))
+        ) {
+            fieldVisit(where.operand(0), parseInfo, "");
+            sqlVisit((SqlNode) (where.operand(1)), parseInfo);
+            return;
+        }
+        if (CollectionUtils.isNotEmpty(where.getOperandList()) && where.operand(0).getKind()
+                .equals(SqlKind.IDENTIFIER)) {
+            fieldVisit(where.operand(0), parseInfo, "");
+        }
+        if (where.operandCount() >= 2 && where.operand(1).getKind().equals(SqlKind.IDENTIFIER)) {
+            fieldVisit(where.operand(1), parseInfo, "");
+        }
+        if (CollectionUtils.isNotEmpty(where.getOperandList()) && where.operand(0) instanceof SqlBasicCall) {
+            whereVisit(where.operand(0), parseInfo);
+        }
+        if (where.operandCount() >= 2 && where.operand(1) instanceof SqlBasicCall) {
+            whereVisit(where.operand(1), parseInfo);
+        }
     }
 
     private static void fieldVisit(SqlNode field, Map<String, Object> parseInfo, String func) {
