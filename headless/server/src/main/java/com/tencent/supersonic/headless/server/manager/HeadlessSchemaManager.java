@@ -5,39 +5,32 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.headless.api.pojo.Field;
 import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataType;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DimensionTimeTypeParams;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Materialization.TimePartType;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Metric;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.MetricTypeParams;
+import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.FieldParamYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.IdentifyYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MeasureYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.MetricParamYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Triple;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,6 +43,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Triple;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 
 @Slf4j
 @Service
@@ -122,11 +125,26 @@ public class HeadlessSchemaManager {
     public static DataSource getDatasource(final DataModelYamlTpl d) {
         DataSource datasource = DataSource.builder().id(d.getId()).sourceId(d.getSourceId())
                 .type(d.getType()).sqlQuery(d.getSqlQuery()).name(d.getName()).tableQuery(d.getTableQuery())
-                .identifiers(getIdentify(d.getIdentifiers())).measures(getMeasures(d.getMeasures()))
+                .identifiers(getIdentify(d.getIdentifiers())).measures(getMeasureParams(d.getMeasures()))
                 .dimensions(getDimensions(d.getDimensions())).build();
         datasource.setAggTime(getDataSourceAggTime(datasource.getDimensions()));
         if (Objects.nonNull(d.getModelSourceTypeEnum())) {
             datasource.setTimePartType(TimePartType.of(d.getModelSourceTypeEnum().name()));
+        }
+        if (Objects.nonNull(d.getFields()) && !CollectionUtils.isEmpty(d.getFields())) {
+            Set<String> dimensions = datasource.getDimensions().stream().map(dd -> dd.getBizName())
+                    .collect(Collectors.toSet());
+            Set<String> measures = datasource.getMeasures().stream().map(mm -> mm.getName())
+                    .collect(Collectors.toSet());
+            Set<String> identifiers = datasource.getIdentifiers().stream().map(ii -> ii.getName())
+                    .collect(Collectors.toSet());
+            for (Field f : d.getFields()) {
+                if (dimensions.contains(f.getFieldName()) || measures.contains(f.getFieldName())
+                        || identifiers.contains(f.getFieldName())) {
+                    continue;
+                }
+                datasource.getMeasures().add(Measure.builder().name(f.getFieldName()).agg("").build());
+            }
         }
         return datasource;
     }
@@ -156,11 +174,42 @@ public class HeadlessSchemaManager {
     private static MetricTypeParams getMetricTypeParams(MetricTypeParamsYamlTpl metricTypeParamsYamlTpl) {
         MetricTypeParams metricTypeParams = new MetricTypeParams();
         metricTypeParams.setExpr(metricTypeParamsYamlTpl.getExpr());
-        metricTypeParams.setMeasures(getMeasures(metricTypeParamsYamlTpl.getMeasures()));
+        if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getMeasures())) {
+            metricTypeParams.setMeasures(getMeasureParams(metricTypeParamsYamlTpl.getMeasures()));
+        }
+        if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getMetrics())) {
+            metricTypeParams.setMeasures(getMetricParams(metricTypeParamsYamlTpl.getMetrics()));
+        }
+        if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getFields())) {
+            metricTypeParams.setMeasures(getFieldParams(metricTypeParamsYamlTpl.getFields()));
+        }
+
         return metricTypeParams;
     }
 
-    private static List<Measure> getMeasures(List<MeasureYamlTpl> measureYamlTpls) {
+    private static List<Measure> getFieldParams(List<FieldParamYamlTpl> fieldParamYamlTpls) {
+        List<Measure> measures = new ArrayList<>();
+        for (FieldParamYamlTpl fieldParamYamlTpl : fieldParamYamlTpls) {
+            Measure measure = new Measure();
+            measure.setName(fieldParamYamlTpl.getFieldName());
+            measure.setExpr(fieldParamYamlTpl.getFieldName());
+            measures.add(measure);
+        }
+        return measures;
+    }
+
+    private static List<Measure> getMetricParams(List<MetricParamYamlTpl> metricParamYamlTpls) {
+        List<Measure> measures = new ArrayList<>();
+        for (MetricParamYamlTpl metricParamYamlTpl : metricParamYamlTpls) {
+            Measure measure = new Measure();
+            measure.setName(metricParamYamlTpl.getBizName());
+            measure.setExpr(metricParamYamlTpl.getBizName());
+            measures.add(measure);
+        }
+        return measures;
+    }
+
+    private static List<Measure> getMeasureParams(List<MeasureYamlTpl> measureYamlTpls) {
         List<Measure> measures = new ArrayList<>();
         for (MeasureYamlTpl measureYamlTpl : measureYamlTpls) {
             Measure measure = new Measure();
@@ -227,7 +276,8 @@ public class HeadlessSchemaManager {
                 List<Triple<String, String, String>> conditions = new ArrayList<>();
                 r.getJoinConditions().stream().forEach(rr -> {
                     if (FilterOperatorEnum.isValueCompare(rr.getOperator())) {
-                        conditions.add(Triple.of(rr.getLeftField(), rr.getOperator().getValue(), rr.getRightField()));
+                        conditions.add(
+                                Triple.of(rr.getLeftField(), rr.getOperator().getValue(), rr.getRightField()));
                     }
                 });
                 joinRelation.setId(r.getId());

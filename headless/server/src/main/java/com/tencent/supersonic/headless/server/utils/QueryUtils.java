@@ -49,7 +49,7 @@ public class QueryUtils {
     @Value("${query.cache.enable:true}")
     private Boolean cacheEnable;
 
-    @Value("${query.optimizer.enable:false}")
+    @Value("${query.optimizer.enable:true}")
     private Boolean optimizeEnable;
 
     private final CacheUtils cacheUtils;

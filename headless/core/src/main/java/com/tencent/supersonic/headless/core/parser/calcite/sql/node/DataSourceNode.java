@@ -11,8 +11,8 @@ import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Measure;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SchemaBuilder;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.extend.LateralViewExplodeNode;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,7 +72,10 @@ public class DataSourceNode extends SemanticNode {
                         String tb = dbTable.length > 1 ? dbTable[1] : dbTable[0];
                         String db = dbTable.length > 1 ? dbTable[0] : "";
                         addSchemaTable(scope, datasource, db, tb,
-                                fields.containsKey(entry.getKey()) ? fields.get(entry.getKey()) : new HashSet<>());
+                                fields.containsKey(entry.getKey()) ? fields.get(entry.getKey())
+                                        : dbTbs.size() == 1 && fields.size() == 1 && fields.containsKey("")
+                                                ? fields.get("")
+                                                : new HashSet<>());
                     }
                 }
             }
