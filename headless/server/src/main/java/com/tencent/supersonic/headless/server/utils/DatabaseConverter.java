@@ -9,7 +9,21 @@ import com.tencent.supersonic.headless.core.pojo.Database;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import java.util.Arrays;
+
 public class DatabaseConverter {
+
+    public static Database convert(DatabaseResp databaseResp) {
+        Database database = new Database();
+        BeanUtils.copyProperties(databaseResp, database);
+        ConnectInfo connectInfo = new ConnectInfo();
+        connectInfo.setUserName(databaseResp.getUsername());
+        connectInfo.setPassword(databaseResp.getPassword());
+        connectInfo.setUrl(databaseResp.getUrl());
+        connectInfo.setDatabase(databaseResp.getDatabase());
+        database.setConnectInfo(connectInfo);
+        database.setVersion(databaseResp.getVersion());
+        return database;
+    }
 
     public static Database convert(DatabaseReq databaseReq) {
         Database database = new Database();

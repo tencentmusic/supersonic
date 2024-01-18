@@ -5,8 +5,8 @@ import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.enums.DataType;
-import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.JdbcDataSource;
 import java.rmi.ServerException;
 import java.sql.Connection;
@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 public class SqlUtils {
 
     @Getter
-    private DatabaseResp databaseResp;
+    private Database database;
 
     @Autowired
     private JdbcDataSource jdbcDataSource;
@@ -58,20 +58,20 @@ public class SqlUtils {
 
     }
 
-    public SqlUtils(DatabaseResp databaseResp) {
-        this.databaseResp = databaseResp;
-        this.dataTypeEnum = DataType.urlOf(databaseResp.getUrl());
+    public SqlUtils(Database database) {
+        this.database = database;
+        this.dataTypeEnum = DataType.urlOf(database.getUrl());
     }
 
-    public SqlUtils init(DatabaseResp databaseResp) {
+    public SqlUtils init(Database database) {
         //todo Password decryption
         return SqlUtilsBuilder
                 .getBuilder()
-                .withName(databaseResp.getId() + AT_SYMBOL + databaseResp.getName())
-                .withType(databaseResp.getType())
-                .withJdbcUrl(databaseResp.getUrl())
-                .withUsername(databaseResp.getUsername())
-                .withPassword(databaseResp.getPassword())
+                .withName(database.getId() + AT_SYMBOL + database.getName())
+                .withType(database.getType())
+                .withJdbcUrl(database.getUrl())
+                .withUsername(database.getUsername())
+                .withPassword(database.getPassword())
                 .withJdbcDataSource(this.jdbcDataSource)
                 .withResultLimit(this.resultLimit)
                 .withIsQueryLogEnable(this.isQueryLogEnable)
@@ -96,15 +96,15 @@ public class SqlUtils {
     public JdbcTemplate jdbcTemplate() throws RuntimeException {
         Connection connection = null;
         try {
-            connection = jdbcDataSourceUtils.getConnection(databaseResp);
+            connection = jdbcDataSourceUtils.getConnection(database);
         } catch (Exception e) {
             log.warn("e:", e);
         } finally {
             JdbcDataSourceUtils.releaseConnection(connection);
         }
-        DataSource dataSource = jdbcDataSourceUtils.getDataSource(databaseResp);
+        DataSource dataSource = jdbcDataSourceUtils.getDataSource(database);
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        jdbcTemplate.setDatabaseProductName(databaseResp.getName());
+        jdbcTemplate.setDatabaseProductName(database.getName());
         jdbcTemplate.setFetchSize(500);
         log.info("jdbcTemplate:{}, dataSource:{}", jdbcTemplate, dataSource);
         return jdbcTemplate;
@@ -234,7 +234,7 @@ public class SqlUtils {
         }
 
         public SqlUtils build() {
-            DatabaseResp databaseResp = DatabaseResp.builder()
+            Database database = Database.builder()
                     .name(this.name)
                     .type(this.type)
                     .url(this.jdbcUrl)
@@ -242,7 +242,7 @@ public class SqlUtils {
                     .password(this.password)
                     .build();
 
-            SqlUtils sqlUtils = new SqlUtils(databaseResp);
+            SqlUtils sqlUtils = new SqlUtils(database);
             sqlUtils.jdbcDataSource = this.jdbcDataSource;
             sqlUtils.resultLimit = this.resultLimit;
             sqlUtils.isQueryLogEnable = this.isQueryLogEnable;

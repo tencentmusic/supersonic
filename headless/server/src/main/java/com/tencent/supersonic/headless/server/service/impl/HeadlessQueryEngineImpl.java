@@ -1,16 +1,15 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
-import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.optimizer.QueryOptimizer;
 import com.tencent.supersonic.headless.core.parser.QueryParser;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
-import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.server.manager.HeadlessSchemaManager;
 import com.tencent.supersonic.headless.server.service.HeadlessQueryEngine;
 import com.tencent.supersonic.headless.server.utils.QueryStructUtils;
@@ -98,10 +97,7 @@ public class HeadlessQueryEngineImpl implements HeadlessQueryEngine {
 
     private SemanticModel getSemanticModel(QueryStatement queryStatement) throws Exception {
         QueryStructReq queryStructReq = queryStatement.getQueryStructReq();
-        SemanticModel semanticModel = headlessSchemaManager.get(queryStructReq.getModelIdStr());
-        ItemDateResp itemDateResp = queryStructUtils.getItemDateResp(queryStructReq);
-        semanticModel.setDataDate(itemDateResp);
-        return semanticModel;
+        return headlessSchemaManager.get(queryStructReq.getModelIdStr());
     }
 
 }
