@@ -8,7 +8,7 @@ import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Materialization;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.Renderer;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.AggFunctionNode;
@@ -49,7 +49,7 @@ public class JoinRender extends Renderer {
 
     @Override
     public void render(MetricQueryReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
-                       HeadlessSchema schema, boolean nonAgg) throws Exception {
+                       SemanticSchema schema, boolean nonAgg) throws Exception {
         String queryWhere = metricCommand.getWhere();
         //dataSources = getOrderSource(dataSources);
         Set<String> whereFields = new HashSet<>();
@@ -141,7 +141,7 @@ public class JoinRender extends Renderer {
 
     private void doMetric(Map<String, SqlNode> innerSelect, TableView filterView, List<String> queryMetrics,
             List<String> reqMetrics, DataSource dataSource, Set<String> sourceMeasure, SqlValidatorScope scope,
-            HeadlessSchema schema, boolean nonAgg) throws Exception {
+            SemanticSchema schema, boolean nonAgg) throws Exception {
         String alias = Constants.JOIN_TABLE_PREFIX + dataSource.getName();
         for (String m : reqMetrics) {
             if (getMatchMetric(schema, sourceMeasure, m, queryMetrics)) {
@@ -175,7 +175,7 @@ public class JoinRender extends Renderer {
 
     private void doDimension(Map<String, SqlNode> innerSelect, Set<String> filterDimension, List<String> queryDimension,
             List<String> reqDimensions, DataSource dataSource, Set<String> dimension, SqlValidatorScope scope,
-            HeadlessSchema schema) throws Exception {
+            SemanticSchema schema) throws Exception {
         String alias = Constants.JOIN_TABLE_PREFIX + dataSource.getName();
         for (String d : reqDimensions) {
             if (getMatchDimension(schema, dimension, dataSource, d, queryDimension)) {
@@ -198,7 +198,7 @@ public class JoinRender extends Renderer {
                 Collectors.toSet());
     }
 
-    private boolean getMatchMetric(HeadlessSchema schema, Set<String> sourceMeasure, String m,
+    private boolean getMatchMetric(SemanticSchema schema, Set<String> sourceMeasure, String m,
             List<String> queryMetrics) {
         Optional<Metric> metric = schema.getMetrics().stream().filter(mm -> mm.getName().equalsIgnoreCase(m))
                 .findFirst();
@@ -219,7 +219,7 @@ public class JoinRender extends Renderer {
         return isAdd;
     }
 
-    private boolean getMatchDimension(HeadlessSchema schema, Set<String> sourceDimension, DataSource dataSource,
+    private boolean getMatchDimension(SemanticSchema schema, Set<String> sourceDimension, DataSource dataSource,
             String d, List<String> queryDimension) {
         String oriDimension = d;
         boolean isAdd = false;
@@ -254,7 +254,7 @@ public class JoinRender extends Renderer {
 
     private SqlNode buildJoin(SqlNode left, TableView leftTable, TableView tableView, Map<String, String> before,
             DataSource dataSource,
-            HeadlessSchema schema, SqlValidatorScope scope)
+            SemanticSchema schema, SqlValidatorScope scope)
             throws Exception {
         SqlNode condition = getCondition(leftTable, tableView, dataSource, schema, scope);
         SqlLiteral sqlLiteral = SemanticNode.getJoinSqlLiteral("");
@@ -289,7 +289,7 @@ public class JoinRender extends Renderer {
         );
     }
 
-    private JoinRelation getMatchJoinRelation(Map<String, String> before, TableView tableView, HeadlessSchema schema) {
+    private JoinRelation getMatchJoinRelation(Map<String, String> before, TableView tableView, SemanticSchema schema) {
         JoinRelation matchJoinRelation = JoinRelation.builder().build();
         if (!CollectionUtils.isEmpty(schema.getJoinRelations())) {
             for (JoinRelation joinRelation : schema.getJoinRelations()) {
@@ -333,7 +333,7 @@ public class JoinRender extends Renderer {
         return condition;
     }
 
-    private SqlNode getCondition(TableView left, TableView right, DataSource dataSource, HeadlessSchema schema,
+    private SqlNode getCondition(TableView left, TableView right, DataSource dataSource, SemanticSchema schema,
             SqlValidatorScope scope) throws Exception {
 
         Set<String> selectLeft = SemanticNode.getSelect(left.getTable());
@@ -413,7 +413,7 @@ public class JoinRender extends Renderer {
         }
     }
 
-    private SqlNode getZipperCondition(TableView left, TableView right, DataSource dataSource, HeadlessSchema schema,
+    private SqlNode getZipperCondition(TableView left, TableView right, DataSource dataSource, SemanticSchema schema,
             SqlValidatorScope scope) throws Exception {
         if (Materialization.TimePartType.ZIPPER.equals(left.getDataSource().getTimePartType())
                 && Materialization.TimePartType.ZIPPER.equals(right.getDataSource().getTimePartType())) {

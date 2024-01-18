@@ -27,7 +27,7 @@ public class SchemaBuilder {
     public static final String MATERIALIZATION_SYS_FIELD_DATE = "C1";
     public static final String MATERIALIZATION_SYS_FIELD_DATA = "C2";
 
-    public static SqlValidatorScope getScope(HeadlessSchema schema) throws Exception {
+    public static SqlValidatorScope getScope(SemanticSchema schema) throws Exception {
         Map<String, RelDataType> nameToTypeMap = new HashMap<>();
         CalciteSchema rootSchema = CalciteSchema.createRootSchema(true, false);
         rootSchema.add(schema.getRootPath(), schema);

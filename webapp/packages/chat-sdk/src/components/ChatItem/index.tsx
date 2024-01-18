@@ -342,6 +342,7 @@ const ChatItem: React.FC<Props> = ({
                   llmReq={llmReq}
                   llmResp={llmResp}
                   integrateSystem={integrateSystem}
+                  queryMode={parseInfo.queryMode}
                   sqlInfo={parseInfo.sqlInfo}
                   sqlTimeCost={parseTimeCost?.sqlTime}
                 />

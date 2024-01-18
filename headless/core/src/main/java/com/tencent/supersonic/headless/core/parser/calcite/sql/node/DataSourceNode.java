@@ -11,7 +11,7 @@ import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Measure;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SchemaBuilder;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.extend.LateralViewExplodeNode;
 import java.util.ArrayList;
@@ -149,7 +149,7 @@ public class DataSourceNode extends SemanticNode {
         return dataSourceList.stream().map(d -> d.getName()).collect(Collectors.joining("_"));
     }
 
-    public static void getQueryDimensionMeasure(HeadlessSchema schema, MetricQueryReq metricCommand,
+    public static void getQueryDimensionMeasure(SemanticSchema schema, MetricQueryReq metricCommand,
             Set<String> queryDimension, List<String> measures) {
         queryDimension.addAll(metricCommand.getDimensions().stream()
                 .map(d -> d.contains(Constants.DIMENSION_IDENTIFY) ? d.split(Constants.DIMENSION_IDENTIFY)[1] : d)
@@ -161,7 +161,7 @@ public class DataSourceNode extends SemanticNode {
 
     }
 
-    public static void mergeQueryFilterDimensionMeasure(HeadlessSchema schema, MetricQueryReq metricCommand,
+    public static void mergeQueryFilterDimensionMeasure(SemanticSchema schema, MetricQueryReq metricCommand,
             Set<String> queryDimension, List<String> measures,
             SqlValidatorScope scope) throws Exception {
         if (Objects.nonNull(metricCommand.getWhere()) && !metricCommand.getWhere().isEmpty()) {
@@ -184,7 +184,7 @@ public class DataSourceNode extends SemanticNode {
         }
     }
 
-    public static List<DataSource> getMatchDataSources(SqlValidatorScope scope, HeadlessSchema schema,
+    public static List<DataSource> getMatchDataSources(SqlValidatorScope scope, SemanticSchema schema,
             MetricQueryReq metricCommand) throws Exception {
         List<DataSource> dataSources = new ArrayList<>();
 
@@ -283,7 +283,7 @@ public class DataSourceNode extends SemanticNode {
     }
 
     private static List<DataSource> getLinkDataSourcesByJoinRelation(Set<String> queryDimension, List<String> measures,
-            DataSource baseDataSource, HeadlessSchema schema) {
+            DataSource baseDataSource, SemanticSchema schema) {
         Set<String> linkDataSourceName = new HashSet<>();
         List<DataSource> linkDataSources = new ArrayList<>();
         Set<String> before = new HashSet<>();
@@ -370,7 +370,7 @@ public class DataSourceNode extends SemanticNode {
             Set<String> queryDimension,
             List<String> measures,
             DataSource baseDataSource,
-            HeadlessSchema schema) {
+            SemanticSchema schema) {
         Set<String> linkDataSourceName = new HashSet<>();
         List<DataSource> linkDataSources = new ArrayList<>();
         for (Map.Entry<String, DataSource> entry : schema.getDatasource().entrySet()) {

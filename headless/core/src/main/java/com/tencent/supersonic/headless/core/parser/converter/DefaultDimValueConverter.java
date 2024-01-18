@@ -3,8 +3,8 @@ package com.tencent.supersonic.headless.core.parser.converter;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.core.parser.HeadlessConverter;
+import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -28,21 +28,20 @@ public class DefaultDimValueConverter implements HeadlessConverter {
     @Override
     public void convert(QueryStatement queryStatement) {
         QueryStructReq queryStructCmd = queryStatement.getQueryStructReq();
-        List<DimensionResp> dimensionResps = queryStatement.getHeadlessModel().getModelSchemaResps()
-                .stream().flatMap(modelSchemaResp -> modelSchemaResp.getDimensions().stream())
-                .filter(dimSchemaResp -> !CollectionUtils.isEmpty(dimSchemaResp.getDefaultValues()))
+        List<Dimension> dimensions = queryStatement.getSemanticModel().getDimensions().stream()
+                .filter(dimension -> !CollectionUtils.isEmpty(dimension.getDefaultValues()))
                 .collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(dimensionResps)) {
+        if (CollectionUtils.isEmpty(dimensions)) {
             return;
         }
-        log.info("dimension with default values:{}, queryStruct:{}", dimensionResps, queryStructCmd);
+        log.info("dimension with default values:{}, queryStruct:{}", dimensions, queryStructCmd);
         //add dimension default value to filter
         List<String> dimensionFilterBizName = queryStructCmd.getDimensionFilters().stream()
                 .map(Filter::getBizName).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(dimensionFilterBizName)) {
             return;
         }
-        for (DimensionResp dimensionResp : dimensionResps) {
+        for (Dimension dimensionResp : dimensions) {
             Filter filter = new Filter();
             filter.setBizName(dimensionResp.getBizName());
             filter.setValue(dimensionResp.getDefaultValues());
