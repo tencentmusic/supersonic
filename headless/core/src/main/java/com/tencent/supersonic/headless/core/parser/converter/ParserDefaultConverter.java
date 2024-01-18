@@ -48,7 +48,7 @@ public class ParserDefaultConverter implements HeadlessConverter {
         MetricQueryReq metricQueryReq = queryStatement.getMetricReq();
         MetricQueryReq metricReq = generateSqlCommand(queryStructReq, queryStatement);
         queryStatement.setMinMaxTime(sqlGenerateUtils.getBeginEndTime(queryStructReq,
-                queryStatement.getHeadlessModel().getDataDate()));
+                queryStatement.getSemanticModel().getDataDate()));
         BeanUtils.copyProperties(metricReq, metricQueryReq);
     }
 
@@ -57,7 +57,7 @@ public class ParserDefaultConverter implements HeadlessConverter {
         metricQueryReq.setMetrics(queryStructReq.getMetrics());
         metricQueryReq.setDimensions(queryStructReq.getGroups());
         String where = sqlGenerateUtils.generateWhere(queryStructReq,
-                queryStatement.getHeadlessModel().getDataDate());
+                queryStatement.getSemanticModel().getDataDate());
         log.info("in generateSqlCommend, complete where:{}", where);
 
         metricQueryReq.setWhere(where);
@@ -71,7 +71,7 @@ public class ParserDefaultConverter implements HeadlessConverter {
 
         // support detail query
         if (queryStructReq.getQueryType().isNativeAggQuery() && CollectionUtils.isEmpty(metricQueryReq.getMetrics())) {
-            Map<Long, DataSource> dataSourceMap = queryStatement.getHeadlessModel().getModelMap();
+            Map<Long, DataSource> dataSourceMap = queryStatement.getSemanticModel().getModelMap();
             for (Long modelId : queryStructReq.getModelIds()) {
                 String modelBizName = dataSourceMap.get(modelId).getName();
                 String internalMetricName = sqlGenerateUtils.generateInternalMetricName(modelBizName);

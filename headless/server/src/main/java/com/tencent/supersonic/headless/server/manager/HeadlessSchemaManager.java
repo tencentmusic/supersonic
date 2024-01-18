@@ -11,14 +11,14 @@ import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataType;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DimensionTimeTypeParams;
-import com.tencent.supersonic.headless.core.parser.calcite.s2sql.HeadlessModel;
+import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.JoinRelation;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Materialization.TimePartType;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Metric;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.MetricTypeParams;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.DimensionYamlTpl;
@@ -55,21 +55,21 @@ import java.util.stream.Collectors;
 public class HeadlessSchemaManager {
 
     @Autowired
-    private LoadingCache<String, HeadlessModel> loadingCache;
+    private LoadingCache<String, SemanticModel> loadingCache;
     private final Catalog catalog;
 
     public HeadlessSchemaManager(Catalog catalog) {
         this.catalog = catalog;
     }
 
-    public HeadlessModel reload(String rootPath) {
-        HeadlessModel headlessModel = new HeadlessModel();
-        headlessModel.setRootPath(rootPath);
+    public SemanticModel reload(String rootPath) {
+        SemanticModel semanticModel = new SemanticModel();
+        semanticModel.setRootPath(rootPath);
         Set<Long> modelIds = Arrays.stream(rootPath.split(",")).map(s -> Long.parseLong(s.trim()))
                 .collect(Collectors.toSet());
         if (modelIds.isEmpty()) {
             log.error("get modelIds empty {}", rootPath);
-            return headlessModel;
+            return semanticModel;
         }
         Map<String, List<DimensionYamlTpl>> dimensionYamlTpls = new HashMap<>();
         List<DataModelYamlTpl> dataModelYamlTpls = new ArrayList<>();
@@ -77,33 +77,33 @@ public class HeadlessSchemaManager {
         Map<Long, String> modelIdName = new HashMap<>();
         catalog.getModelYamlTplByModelIds(modelIds, dimensionYamlTpls, dataModelYamlTpls, metricYamlTpls, modelIdName);
         DatabaseResp databaseResp = catalog.getDatabaseByModelId(modelIds.iterator().next());
-        headlessModel.setDatabaseResp(databaseResp);
+        semanticModel.setDatabaseResp(databaseResp);
         List<ModelRela> modelRelas = catalog.getModelRela(new ArrayList<>(modelIds));
         if (!CollectionUtils.isEmpty(modelRelas)) {
-            headlessModel.setJoinRelations(getJoinRelation(modelRelas, modelIdName));
+            semanticModel.setJoinRelations(getJoinRelation(modelRelas, modelIdName));
         }
         if (!dataModelYamlTpls.isEmpty()) {
             Map<String, DataSource> dataSourceMap = dataModelYamlTpls.stream().map(HeadlessSchemaManager::getDatasource)
                     .collect(Collectors.toMap(DataSource::getName, item -> item, (k1, k2) -> k1));
-            headlessModel.setDatasourceMap(dataSourceMap);
+            semanticModel.setDatasourceMap(dataSourceMap);
         }
         if (!dimensionYamlTpls.isEmpty()) {
             Map<String, List<Dimension>> dimensionMap = new HashMap<>();
             for (Map.Entry<String, List<DimensionYamlTpl>> entry : dimensionYamlTpls.entrySet()) {
                 dimensionMap.put(entry.getKey(), getDimensions(entry.getValue()));
             }
-            headlessModel.setDimensionMap(dimensionMap);
+            semanticModel.setDimensionMap(dimensionMap);
         }
         if (!metricYamlTpls.isEmpty()) {
-            headlessModel.setMetrics(getMetrics(metricYamlTpls));
+            semanticModel.setMetrics(getMetrics(metricYamlTpls));
         }
-        return headlessModel;
+        return semanticModel;
     }
 
     //private Map<String, SemanticSchema> semanticSchemaMap = new HashMap<>();
-    public HeadlessModel get(String rootPath) throws Exception {
+    public SemanticModel get(String rootPath) throws Exception {
         rootPath = formatKey(rootPath);
-        HeadlessModel schema = loadingCache.get(rootPath);
+        SemanticModel schema = loadingCache.get(rootPath);
         if (schema == null) {
             return null;
         }
@@ -182,6 +182,8 @@ public class HeadlessSchemaManager {
             dimension.setExpr(dimensionYamlTpl.getExpr());
             dimension.setName(dimensionYamlTpl.getName());
             dimension.setOwners(dimensionYamlTpl.getOwners());
+            dimension.setBizName(dimensionYamlTpl.getBizName());
+            dimension.setDefaultValues(dimensionYamlTpl.getDefaultValues());
             if (Objects.nonNull(dimensionYamlTpl.getDataType())) {
                 dimension.setDataType(DataType.of(dimensionYamlTpl.getDataType().getType()));
             }
@@ -235,13 +237,13 @@ public class HeadlessSchemaManager {
         return joinRelations;
     }
 
-    public static void update(HeadlessSchema schema, List<Metric> metric) throws Exception {
+    public static void update(SemanticSchema schema, List<Metric> metric) throws Exception {
         if (schema != null) {
             updateMetric(metric, schema.getMetrics());
         }
     }
 
-    public static void update(HeadlessSchema schema, DataSource datasourceYamlTpl) throws Exception {
+    public static void update(SemanticSchema schema, DataSource datasourceYamlTpl) throws Exception {
         if (schema != null) {
             String dataSourceName = datasourceYamlTpl.getName();
             Optional<Entry<String, DataSource>> datasourceYamlTplMap = schema.getDatasource().entrySet().stream()
@@ -254,7 +256,7 @@ public class HeadlessSchemaManager {
         }
     }
 
-    public static void update(HeadlessSchema schema, String datasourceBizName, List<Dimension> dimensionYamlTpls)
+    public static void update(SemanticSchema schema, String datasourceBizName, List<Dimension> dimensionYamlTpls)
             throws Exception {
         if (schema != null) {
             Optional<Map.Entry<String, List<Dimension>>> datasourceYamlTplMap = schema.getDimension().entrySet()
@@ -320,15 +322,15 @@ public class HeadlessSchemaManager {
         private Integer maximumSize = 1000;
 
         @Bean
-        public LoadingCache<String, HeadlessModel> getCache() {
-            LoadingCache<String, HeadlessModel> cache
+        public LoadingCache<String, SemanticModel> getCache() {
+            LoadingCache<String, SemanticModel> cache
                     = CacheBuilder.newBuilder()
                     .expireAfterWrite(saveMinutes, TimeUnit.MINUTES)
                     .initialCapacity(10)
                     .maximumSize(maximumSize).build(
-                            new CacheLoader<String, HeadlessModel>() {
+                            new CacheLoader<String, SemanticModel>() {
                                 @Override
-                                public HeadlessModel load(String key) {
+                                public SemanticModel load(String key) {
                                     log.info("load SemanticSchema [{}]", key);
                                     return HeadlessSchemaManager.this.reload(key);
                                 }

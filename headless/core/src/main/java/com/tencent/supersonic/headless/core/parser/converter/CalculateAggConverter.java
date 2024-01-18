@@ -58,7 +58,7 @@ public class CalculateAggConverter implements HeadlessConverter {
         metricTable.setMetrics(queryStructReq.getMetrics());
         metricTable.setDimensions(queryStructReq.getGroups());
         String where = sqlGenerateUtils.generateWhere(queryStructReq,
-                queryStatement.getHeadlessModel().getDataDate());
+                queryStatement.getSemanticModel().getDataDate());
         log.info("in generateSqlCommand, complete where:{}", where);
         metricTable.setWhere(where);
         metricTable.setAggOption(AggOption.AGGREGATION);
@@ -109,7 +109,7 @@ public class CalculateAggConverter implements HeadlessConverter {
     @Override
     public void convert(QueryStatement queryStatement) throws Exception {
         ParseSqlReq sqlCommend = queryStatement.getParseSqlReq();
-        DatabaseResp databaseResp = queryStatement.getHeadlessModel().getDatabaseResp();
+        DatabaseResp databaseResp = queryStatement.getSemanticModel().getDatabaseResp();
         ParseSqlReq parseSqlReq = generateSqlCommend(queryStatement,
                 EngineType.valueOf(databaseResp.getType().toUpperCase()), databaseResp.getVersion());
         sqlCommend.setSql(parseSqlReq.getSql());
@@ -145,7 +145,7 @@ public class CalculateAggConverter implements HeadlessConverter {
         metricTable.setAlias(metricTableName);
         metricTable.setMetrics(queryStructReq.getMetrics());
         metricTable.setDimensions(queryStructReq.getGroups());
-        String where = sqlGenerateUtils.generateWhere(queryStructReq, queryStatement.getHeadlessModel().getDataDate());
+        String where = sqlGenerateUtils.generateWhere(queryStructReq, queryStatement.getSemanticModel().getDataDate());
         log.info("in generateSqlCommend, complete where:{}", where);
         metricTable.setWhere(where);
         metricTable.setAggOption(AggOption.AGGREGATION);

@@ -6,7 +6,7 @@ import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SchemaBuilder;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.Renderer;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.TableView;
@@ -34,7 +34,7 @@ import org.apache.calcite.sql.validate.SqlValidatorScope;
 public class AggPlanner implements Planner {
 
     private MetricQueryReq metricReq;
-    private HeadlessSchema schema;
+    private SemanticSchema schema;
     private SqlValidatorScope scope;
     private Stack<TableView> dataSets = new Stack<>();
     private SqlNode parserNode;
@@ -42,7 +42,7 @@ public class AggPlanner implements Planner {
     private boolean isAgg = false;
     private AggOption aggOption = AggOption.DEFAULT;
 
-    public AggPlanner(HeadlessSchema schema) {
+    public AggPlanner(SemanticSchema schema) {
         this.schema = schema;
     }
 

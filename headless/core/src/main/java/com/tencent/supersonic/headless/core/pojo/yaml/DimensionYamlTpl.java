@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.core.pojo.yaml;
 
 
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
+import java.util.List;
 import lombok.Data;
 
 
@@ -9,6 +10,8 @@ import lombok.Data;
 public class DimensionYamlTpl {
 
     private String name;
+
+    private String bizName;
 
     private String owners;
 
@@ -19,4 +22,6 @@ public class DimensionYamlTpl {
     private DimensionTimeTypeParamsTpl typeParams;
 
     private DataTypeEnums dataType;
+
+    private List<String> defaultValues;
 }

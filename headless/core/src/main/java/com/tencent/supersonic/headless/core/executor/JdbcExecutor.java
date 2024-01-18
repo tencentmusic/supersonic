@@ -30,7 +30,7 @@ public class JdbcExecutor implements QueryExecutor {
             return null;
         }
         log.info("query SQL: {}", queryStatement.getSql());
-        DatabaseResp databaseResp = queryStatement.getHeadlessModel().getDatabaseResp();
+        DatabaseResp databaseResp = queryStatement.getSemanticModel().getDatabaseResp();
         log.info("database info:{}", databaseResp);
         QueryResultWithSchemaResp queryResultWithColumns = new QueryResultWithSchemaResp();
         SqlUtils sqlUtils = this.sqlUtils.init(databaseResp);

@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlDialect;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.optimizer.FilterToGroupScanRule;
 import java.util.ArrayList;
@@ -335,7 +335,7 @@ public abstract class SemanticNode {
         return parseInfo;
     }
 
-    public static SqlNode optimize(SqlValidatorScope scope, HeadlessSchema schema, SqlNode sqlNode) {
+    public static SqlNode optimize(SqlValidatorScope scope, SemanticSchema schema, SqlNode sqlNode) {
         try {
             HepProgramBuilder hepProgramBuilder = new HepProgramBuilder();
 
