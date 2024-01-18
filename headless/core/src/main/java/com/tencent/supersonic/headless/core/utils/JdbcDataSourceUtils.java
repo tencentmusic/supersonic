@@ -12,7 +12,6 @@ import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 import com.alibaba.druid.util.StringUtils;
 import com.tencent.supersonic.common.util.MD5Util;
 import com.tencent.supersonic.headless.api.enums.DataType;
-import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.JdbcDataSource;
 import java.sql.Connection;
@@ -147,27 +146,27 @@ public class JdbcDataSourceUtils {
         return MD5Util.getMD5(sb.toString(), true, 64);
     }
 
-    public DataSource getDataSource(DatabaseResp databaseResp) throws RuntimeException {
-        return jdbcDataSource.getDataSource(databaseResp);
+    public DataSource getDataSource(Database database) throws RuntimeException {
+        return jdbcDataSource.getDataSource(database);
     }
 
-    public Connection getConnection(DatabaseResp databaseResp) throws RuntimeException {
-        Connection conn = getConnectionWithRetry(databaseResp);
+    public Connection getConnection(Database database) throws RuntimeException {
+        Connection conn = getConnectionWithRetry(database);
         if (conn == null) {
             try {
-                releaseDataSource(databaseResp);
-                DataSource dataSource = getDataSource(databaseResp);
+                releaseDataSource(database);
+                DataSource dataSource = getDataSource(database);
                 return dataSource.getConnection();
             } catch (Exception e) {
-                log.error("Get connection error, jdbcUrl:{}, e:{}", databaseResp.getUrl(), e);
-                throw new RuntimeException("Get connection error, jdbcUrl:" + databaseResp.getUrl()
+                log.error("Get connection error, jdbcUrl:{}, e:{}", database.getUrl(), e);
+                throw new RuntimeException("Get connection error, jdbcUrl:" + database.getUrl()
                         + " you can try again later or reset datasource");
             }
         }
         return conn;
     }
 
-    private Connection getConnectionWithRetry(DatabaseResp databaseResp) {
+    private Connection getConnectionWithRetry(Database database) {
         int rc = 1;
         for (; ; ) {
 
@@ -176,7 +175,7 @@ public class JdbcDataSourceUtils {
             }
 
             try {
-                Connection connection = getDataSource(databaseResp).getConnection();
+                Connection connection = getDataSource(database).getConnection();
                 if (connection != null && connection.isValid(5)) {
                     return connection;
                 }
@@ -194,7 +193,7 @@ public class JdbcDataSourceUtils {
         }
     }
 
-    public void releaseDataSource(DatabaseResp databaseResp) {
-        jdbcDataSource.removeDatasource(databaseResp);
+    public void releaseDataSource(Database database) {
+        jdbcDataSource.removeDatasource(database);
     }
 }

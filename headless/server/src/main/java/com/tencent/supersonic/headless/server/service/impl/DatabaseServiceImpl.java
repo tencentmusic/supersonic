@@ -133,7 +133,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public QueryResultWithSchemaResp executeSql(String sql, DatabaseResp databaseResp) {
-        return queryWithColumns(sql, databaseResp);
+        return queryWithColumns(sql, DatabaseConverter.convert(databaseResp));
     }
 
     @Override
@@ -143,9 +143,9 @@ public class DatabaseServiceImpl implements DatabaseService {
                 LinkedHashMap::putAll);
     }
 
-    private QueryResultWithSchemaResp queryWithColumns(String sql, DatabaseResp databaseResp) {
+    private QueryResultWithSchemaResp queryWithColumns(String sql, Database database) {
         QueryResultWithSchemaResp queryResultWithColumns = new QueryResultWithSchemaResp();
-        SqlUtils sqlUtils = this.sqlUtils.init(databaseResp);
+        SqlUtils sqlUtils = this.sqlUtils.init(database);
         log.info("query SQL: {}", sql);
         sqlUtils.queryInternal(sql, queryResultWithColumns);
         return queryResultWithColumns;
@@ -160,7 +160,7 @@ public class DatabaseServiceImpl implements DatabaseService {
         DatabaseResp databaseResp = getDatabase(id);
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         String metaQueryTpl = engineAdaptor.getDbMetaQueryTpl();
-        return queryWithColumns(metaQueryTpl, databaseResp);
+        return queryWithColumns(metaQueryTpl, DatabaseConverter.convert(databaseResp));
     }
 
     @Override
@@ -169,7 +169,7 @@ public class DatabaseServiceImpl implements DatabaseService {
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         String metaQueryTpl = engineAdaptor.getTableMetaQueryTpl();
         String metaQuerySql = String.format(metaQueryTpl, db);
-        return queryWithColumns(metaQuerySql, databaseResp);
+        return queryWithColumns(metaQuerySql, DatabaseConverter.convert(databaseResp));
     }
 
     @Override
@@ -178,7 +178,7 @@ public class DatabaseServiceImpl implements DatabaseService {
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         String metaQueryTpl = engineAdaptor.getColumnMetaQueryTpl();
         String metaQuerySql = String.format(metaQueryTpl, db, table);
-        return queryWithColumns(metaQuerySql, databaseResp);
+        return queryWithColumns(metaQuerySql, DatabaseConverter.convert(databaseResp));
     }
 
 }
