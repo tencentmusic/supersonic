@@ -27,6 +27,7 @@ import com.tencent.supersonic.headless.core.pojo.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.service.Catalog;
+import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +78,7 @@ public class HeadlessSchemaManager {
         Map<Long, String> modelIdName = new HashMap<>();
         catalog.getModelYamlTplByModelIds(modelIds, dimensionYamlTpls, dataModelYamlTpls, metricYamlTpls, modelIdName);
         DatabaseResp databaseResp = catalog.getDatabaseByModelId(modelIds.iterator().next());
-        semanticModel.setDatabaseResp(databaseResp);
+        semanticModel.setDatabase(DatabaseConverter.convert(databaseResp));
         List<ModelRela> modelRelas = catalog.getModelRela(new ArrayList<>(modelIds));
         if (!CollectionUtils.isEmpty(modelRelas)) {
             semanticModel.setJoinRelations(getJoinRelation(modelRelas, modelIdName));
