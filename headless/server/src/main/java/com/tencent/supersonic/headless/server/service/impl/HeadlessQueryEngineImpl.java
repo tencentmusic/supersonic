@@ -6,21 +6,21 @@ import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.optimizer.QueryOptimizer;
 import com.tencent.supersonic.headless.core.parser.QueryParser;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.HeadlessModel;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
+import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.server.manager.HeadlessSchemaManager;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import com.tencent.supersonic.headless.server.service.HeadlessQueryEngine;
 import com.tencent.supersonic.headless.server.utils.QueryStructUtils;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -82,22 +82,20 @@ public class HeadlessQueryEngineImpl implements HeadlessQueryEngine {
     }
 
     @Override
-    public QueryStatement physicalSql(QueryStructReq queryStructCmd, ParseSqlReq sqlCommend) throws Exception {
+    public QueryStatement physicalSql(QueryStructReq queryStructCmd, ParseSqlReq sqlCommend) {
         QueryStatement queryStatement = new QueryStatement();
-        queryStatement.setSql(sqlCommend.getSql());
         queryStatement.setQueryStructReq(queryStructCmd);
         queryStatement.setParseSqlReq(sqlCommend);
+        queryStatement.setSql(sqlCommend.getSql());
         queryStatement.setIsS2SQL(true);
-        queryStatement.setHeadlessModel(getHeadLessModel(queryStatement));
         return optimize(queryStructCmd, queryParser.parser(sqlCommend, queryStatement));
     }
 
-    public QueryStatement physicalSql(QueryStructReq queryStructCmd, MetricQueryReq metricCommand) throws Exception {
+    public QueryStatement physicalSql(QueryStructReq queryStructCmd, MetricQueryReq metricCommand) {
         QueryStatement queryStatement = new QueryStatement();
         queryStatement.setQueryStructReq(queryStructCmd);
         queryStatement.setMetricReq(metricCommand);
         queryStatement.setIsS2SQL(false);
-        queryStatement.setHeadlessModel(getHeadLessModel(queryStatement));
         return queryParser.parser(queryStatement);
     }
 
