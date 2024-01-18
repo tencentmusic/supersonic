@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -13,20 +14,17 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.common.util.cache.CacheUtils;
 import com.tencent.supersonic.headless.api.enums.QueryType;
-import com.tencent.supersonic.headless.api.pojo.Cache;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.Item;
 import com.tencent.supersonic.headless.api.pojo.SingleItemQueryResult;
 import com.tencent.supersonic.headless.api.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.request.ItemUseReq;
-import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.api.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.headless.api.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.request.QueryItemReq;
 import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.AppDetailResp;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
@@ -36,28 +34,27 @@ import com.tencent.supersonic.headless.api.response.ItemUseResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
+import com.tencent.supersonic.headless.core.parser.QueryParser;
+import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
+import com.tencent.supersonic.headless.core.planner.QueryPlanner;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.server.annotation.S2SQLDataPermission;
 import com.tencent.supersonic.headless.server.annotation.StructDataPermission;
 import com.tencent.supersonic.headless.server.aspect.ApiHeaderCheckAspect;
+import com.tencent.supersonic.headless.server.cache.CacheManager;
+import com.tencent.supersonic.headless.server.cache.QueryCache;
+import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.service.AppService;
 import com.tencent.supersonic.headless.server.service.Catalog;
-import com.tencent.supersonic.headless.server.service.HeadlessQueryEngine;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
+import com.tencent.supersonic.headless.server.service.SemantciQueryEngine;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -65,17 +62,24 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
 
 @Service
 @Slf4j
 public class QueryServiceImpl implements QueryService {
 
-    protected final com.google.common.cache.Cache<String, List<ItemUseResp>> itemUseCache =
+    protected final Cache<String, List<ItemUseResp>> itemUseCache =
             CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).build();
 
     private final StatUtils statUtils;
-    private final CacheUtils cacheUtils;
+    private final CacheManager cacheManager;
     private final QueryUtils queryUtils;
     private final QueryReqConverter queryReqConverter;
     private final Catalog catalog;
@@ -84,88 +88,109 @@ public class QueryServiceImpl implements QueryService {
     @Value("${query.cache.enable:true}")
     private Boolean cacheEnable;
 
-    private final HeadlessQueryEngine headlessQueryEngine;
+    private final QueryCache queryCache;
+
+    private final SemantciQueryEngine semantciQueryEngine;
+    private final SemanticSchemaManager semanticSchemaManager;
+
+    private final QueryParser queryParser;
+
+    private final QueryPlanner queryPlanner;
 
     public QueryServiceImpl(
             StatUtils statUtils,
-            CacheUtils cacheUtils,
+            CacheManager cacheManager,
             QueryUtils queryUtils,
             QueryReqConverter queryReqConverter,
-            @Lazy HeadlessQueryEngine headlessQueryEngine,
+            @Lazy SemantciQueryEngine semantciQueryEngine,
             Catalog catalog,
-            AppService appService) {
+            AppService appService,
+            QueryCache queryCache,
+            SemanticSchemaManager semanticSchemaManager,
+            QueryParser queryParser,
+            QueryPlanner queryPlanner) {
         this.statUtils = statUtils;
-        this.cacheUtils = cacheUtils;
+        this.cacheManager = cacheManager;
         this.queryUtils = queryUtils;
         this.queryReqConverter = queryReqConverter;
-        this.headlessQueryEngine = headlessQueryEngine;
+        this.semantciQueryEngine = semantciQueryEngine;
         this.catalog = catalog;
         this.appService = appService;
+        this.queryCache = queryCache;
+        this.semanticSchemaManager = semanticSchemaManager;
+        this.queryParser = queryParser;
+        this.queryPlanner = queryPlanner;
     }
 
     @Override
     @S2SQLDataPermission
     @SneakyThrows
-    public Object queryBySql(QueryS2SQLReq queryS2SQLReq, User user) {
-        statUtils.initStatInfo(queryS2SQLReq, user);
+    public Object queryBySql(QuerySqlReq querySQLReq, User user) {
+        statUtils.initStatInfo(querySQLReq, user);
         QueryStatement queryStatement = new QueryStatement();
         try {
-            queryStatement = convertToQueryStatement(queryS2SQLReq, user);
+            queryStatement = convertToQueryStatement(querySQLReq, user);
         } catch (Exception e) {
             log.info("convertToQueryStatement has a exception:", e);
         }
         log.info("queryStatement:{}", queryStatement);
-        QueryResultWithSchemaResp results = headlessQueryEngine.execute(queryStatement);
+        SemanticQueryResp results = semantciQueryEngine.execute(queryStatement);
         statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
         return results;
     }
 
-    public Object queryByQueryStatement(QueryStatement queryStatement) {
-        return headlessQueryEngine.execute(queryStatement);
+    public SemanticQueryResp queryByQueryStatement(QueryStatement queryStatement) {
+        return semantciQueryEngine.execute(queryStatement);
     }
 
-    private QueryStatement convertToQueryStatement(QueryS2SQLReq queryS2SQLReq, User user) throws Exception {
+    private QueryStatement convertToQueryStatement(QuerySqlReq querySQLReq, User user) throws Exception {
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
-        filter.setModelIds(queryS2SQLReq.getModelIds());
+        filter.setModelIds(querySQLReq.getModelIds());
         SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
         List<ModelSchemaResp> modelSchemaResps = schemaService.fetchModelSchema(filter, user);
-        QueryStatement queryStatement = queryReqConverter.convert(queryS2SQLReq, modelSchemaResps);
-        queryStatement.setModelIds(queryS2SQLReq.getModelIds());
+        QueryStatement queryStatement = queryReqConverter.convert(querySQLReq, modelSchemaResps);
+        queryStatement.setModelIds(querySQLReq.getModelIds());
         return queryStatement;
     }
 
     @Override
-    public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user) throws Exception {
-        QueryResultWithSchemaResp queryResultWithColumns = null;
+    public SemanticQueryResp queryByStruct(QueryStructReq queryStructReq, User user) throws Exception {
+        SemanticQueryResp semanticQueryResp = null;
         log.info("[queryStructReq:{}]", queryStructReq);
         try {
+            //1.initStatInfo
             statUtils.initStatInfo(queryStructReq, user);
-            String cacheKey = cacheUtils.generateCacheKey(getKeyByModelIds(queryStructReq.getModelIds()),
-                    queryStructReq.generateCommandMd5());
-            handleGlobalCacheDisable(queryStructReq);
-            boolean isCache = isCache(queryStructReq);
-            if (isCache) {
-                queryResultWithColumns = queryByCache(cacheKey, queryStructReq);
-                if (queryResultWithColumns != null) {
-                    statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
-                    return queryResultWithColumns;
-                }
+            //2.query from cache
+            Object query = queryCache.query(queryStructReq);
+            if (Objects.nonNull(query)) {
+                statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
+                return (SemanticQueryResp) query;
             }
             StatUtils.get().setUseResultCache(false);
-            QueryStatement queryStatement = new QueryStatement();
-            queryStatement.setQueryStructReq(queryStructReq);
-            queryStatement.setIsS2SQL(false);
-            queryStatement = headlessQueryEngine.plan(queryStatement);
-            QueryExecutor queryExecutor = headlessQueryEngine.route(queryStatement);
+            //3 parse
+            QueryStatement queryStatement = buildQueryStatement(queryStructReq);
+            queryStatement = queryParser.parse(queryStatement);
+
+            //4 plan
+            QueryExecutor queryExecutor = queryPlanner.plan(queryStatement);
+
+            //5 execute
             if (queryExecutor != null) {
-                queryResultWithColumns = headlessQueryEngine.execute(queryStatement);
-                if (isCache) {
-                    // if queryResultWithColumns is not null, update cache data
-                    queryUtils.cacheResultLogic(cacheKey, queryResultWithColumns);
+                semanticQueryResp = queryExecutor.execute(queryStatement);
+                if (!CollectionUtils.isEmpty(queryStatement.getModelIds())) {
+                    queryUtils.fillItemNameInfo(semanticQueryResp, queryStatement.getModelIds());
                 }
             }
-            statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
-            return queryResultWithColumns;
+            //6 reset cache and set stateInfo
+            Boolean putCacheSuccess = queryCache.put(queryStructReq, semanticQueryResp);
+            if (putCacheSuccess) {
+                // if semanticQueryResp is not null, update cache data
+                statUtils.updateResultCacheKey(queryCache.getCacheKey(queryStructReq));
+            }
+            if (Objects.nonNull(semanticQueryResp)) {
+                statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
+            }
+            return semanticQueryResp;
         } catch (Exception e) {
             log.warn("exception in queryByStruct, e: ", e);
             statUtils.statInfo2DbAsync(TaskStatusEnum.ERROR);
@@ -173,38 +198,62 @@ public class QueryServiceImpl implements QueryService {
         }
     }
 
+    private QueryStatement buildQueryStatement(QueryStructReq queryStructReq) throws Exception {
+        QueryStatement queryStatement = new QueryStatement();
+        queryStatement.setQueryStructReq(queryStructReq);
+        queryStatement.setIsS2SQL(false);
+        queryStatement.setEnableOptimize(queryUtils.enableOptimize());
+        queryStatement.setModelIds(queryStatement.getQueryStructReq().getModelIds());
+        SemanticModel semanticModel = semanticSchemaManager.get(queryStructReq.getModelIdStr());
+        queryStatement.setSemanticModel(semanticModel);
+        return queryStatement;
+    }
+
     @Override
     @StructDataPermission
     @SneakyThrows
-    public QueryResultWithSchemaResp queryByStructWithAuth(QueryStructReq queryStructReq, User user) {
+    public SemanticQueryResp queryByStructWithAuth(QueryStructReq queryStructReq, User user) {
         return queryByStruct(queryStructReq, user);
     }
 
     @Override
-    public QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user)
+    public SemanticQueryResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user)
             throws Exception {
-        statUtils.initStatInfo(queryMultiStructReq.getQueryStructReqs().get(0), user);
-        String cacheKey = cacheUtils.generateCacheKey(
-                getKeyByModelIds(queryMultiStructReq.getQueryStructReqs().get(0).getModelIds()),
-                queryMultiStructReq.generateCommandMd5());
-        boolean isCache = isCache(queryMultiStructReq);
-        QueryResultWithSchemaResp queryResultWithColumns;
-        if (isCache) {
-            queryResultWithColumns = queryByCache(cacheKey, queryMultiStructReq);
-            if (queryResultWithColumns != null) {
-                statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
-                return queryResultWithColumns;
-            }
-        }
-        log.info("stat queryByStructWithoutCache, queryMultiStructReq:{}", queryMultiStructReq);
+
         try {
-            QueryStatement sqlParser = getQueryStatementByMultiStruct(queryMultiStructReq);
-            queryResultWithColumns = headlessQueryEngine.execute(sqlParser);
-            if (queryResultWithColumns != null) {
+            //1.initStatInfo
+            statUtils.initStatInfo(queryMultiStructReq.getQueryStructReqs().get(0), user);
+            //2.query from cache
+            Object query = queryCache.query(queryMultiStructReq);
+            if (Objects.nonNull(query)) {
                 statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
-                queryUtils.fillItemNameInfo(queryResultWithColumns, queryMultiStructReq);
+                return (SemanticQueryResp) query;
             }
-            return queryResultWithColumns;
+            StatUtils.get().setUseResultCache(false);
+            log.info("stat queryByStructWithoutCache, queryMultiStructReq:{}", queryMultiStructReq);
+            List<QueryStatement> sqlParsers = new ArrayList<>();
+
+            for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
+                QueryStatement queryStatement = buildQueryStatement(queryStructReq);
+                queryStatement = queryParser.parse(queryStatement);
+                queryPlanner.optimizer(queryStatement);
+                sqlParsers.add(queryStatement);
+            }
+            log.info("multi sqlParser:{}", sqlParsers);
+            QueryStatement queryStatement = queryUtils.sqlParserUnion(queryMultiStructReq, sqlParsers);
+            QueryExecutor executor = queryPlanner.route(queryStatement);
+
+            SemanticQueryResp semanticQueryResp = null;
+            if (executor != null) {
+                semanticQueryResp = executor.execute(queryStatement);
+                if (!CollectionUtils.isEmpty(queryStatement.getModelIds())) {
+                    queryUtils.fillItemNameInfo(semanticQueryResp, queryStatement.getModelIds());
+                }
+            }
+            if (Objects.nonNull(semanticQueryResp)) {
+                statUtils.statInfo2DbAsync(TaskStatusEnum.SUCCESS);
+            }
+            return semanticQueryResp;
         } catch (Exception e) {
             log.warn("exception in queryByMultiStruct, e: ", e);
             statUtils.statInfo2DbAsync(TaskStatusEnum.ERROR);
@@ -212,13 +261,11 @@ public class QueryServiceImpl implements QueryService {
         }
     }
 
-    private QueryStatement getQueryStatementByMultiStruct(QueryMultiStructReq queryMultiStructReq) throws Exception {
+    private QueryStatement buildQueryStatement(QueryMultiStructReq queryMultiStructReq) throws Exception {
         List<QueryStatement> sqlParsers = new ArrayList<>();
         for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
-            QueryStatement queryStatement = new QueryStatement();
-            queryStatement.setQueryStructReq(queryStructReq);
-            queryStatement.setIsS2SQL(false);
-            queryStatement = headlessQueryEngine.plan(queryStatement);
+            QueryStatement queryStatement = buildQueryStatement(queryStructReq);
+            queryStatement = semantciQueryEngine.plan(queryStatement);
             queryUtils.checkSqlParse(queryStatement);
             sqlParsers.add(queryStatement);
         }
@@ -228,17 +275,9 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     @SneakyThrows
-    public QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user) {
-        QueryS2SQLReq queryS2SQLReq = generateDimValueQuerySql(queryDimValueReq);
-        return (QueryResultWithSchemaResp) queryBySql(queryS2SQLReq, user);
-    }
-
-    private void handleGlobalCacheDisable(QueryStructReq queryStructReq) {
-        if (!cacheEnable) {
-            Cache cacheInfo = new Cache();
-            cacheInfo.setCache(false);
-            queryStructReq.setCacheInfo(cacheInfo);
-        }
+    public SemanticQueryResp queryDimValue(QueryDimValueReq queryDimValueReq, User user) {
+        QuerySqlReq querySQLReq = buildQuerySqlReq(queryDimValueReq);
+        return (SemanticQueryResp) queryBySql(querySQLReq, user);
     }
 
     @Override
@@ -259,20 +298,18 @@ public class QueryServiceImpl implements QueryService {
         QueryType queryTypeEnum = explainSqlReq.getQueryTypeEnum();
         T queryReq = explainSqlReq.getQueryReq();
 
-        if (QueryType.SQL.equals(queryTypeEnum) && queryReq instanceof QueryS2SQLReq) {
-            QueryStatement queryStatement = convertToQueryStatement((QueryS2SQLReq) queryReq, user);
+        if (QueryType.SQL.equals(queryTypeEnum) && queryReq instanceof QuerySqlReq) {
+            QueryStatement queryStatement = convertToQueryStatement((QuerySqlReq) queryReq, user);
             return getExplainResp(queryStatement);
         }
         if (QueryType.STRUCT.equals(queryTypeEnum) && queryReq instanceof QueryStructReq) {
-            QueryStatement queryStatement = new QueryStatement();
-            queryStatement.setQueryStructReq((QueryStructReq) queryReq);
-            queryStatement.setIsS2SQL(false);
-            queryStatement = headlessQueryEngine.plan(queryStatement);
+            QueryStatement queryStatement = buildQueryStatement((QueryStructReq) queryReq);
+            queryStatement = semantciQueryEngine.plan(queryStatement);
             return getExplainResp(queryStatement);
         }
         if (QueryType.STRUCT.equals(queryTypeEnum) && queryReq instanceof QueryMultiStructReq) {
             QueryMultiStructReq queryMultiStructReq = (QueryMultiStructReq) queryReq;
-            QueryStatement queryStatement = getQueryStatementByMultiStruct(queryMultiStructReq);
+            QueryStatement queryStatement = buildQueryStatement(queryMultiStructReq);
             return getExplainResp(queryStatement);
         }
 
@@ -310,11 +347,11 @@ public class QueryServiceImpl implements QueryService {
             dimensionResps = catalog.getDimensions(dimensionFilter);
         }
         QueryStructReq queryStructReq = buildQueryStructReq(dimensionResps, metricResp, dateConf, limit);
-        QueryResultWithSchemaResp queryResultWithSchemaResp =
+        SemanticQueryResp semanticQueryResp =
                 queryByStruct(queryStructReq, User.getAppUser(appId));
         SingleItemQueryResult apiQuerySingleResult = new SingleItemQueryResult();
         apiQuerySingleResult.setItem(item);
-        apiQuerySingleResult.setResult(queryResultWithSchemaResp);
+        apiQuerySingleResult.setResult(semanticQueryResp);
         return apiQuerySingleResult;
     }
 
@@ -366,21 +403,6 @@ public class QueryServiceImpl implements QueryService {
         return ExplainResp.builder().sql(sql).build();
     }
 
-    public QueryStatement parseMetricReq(MetricQueryReq metricReq) throws Exception {
-        QueryStructReq queryStructReq = new QueryStructReq();
-        return headlessQueryEngine.physicalSql(queryStructReq, metricReq);
-    }
-
-    private boolean isCache(QueryStructReq queryStructReq) {
-        if (!cacheEnable) {
-            return false;
-        }
-        if (queryStructReq.getCacheInfo() != null) {
-            return queryStructReq.getCacheInfo().getCache();
-        }
-        return false;
-    }
-
     private boolean isCache(QueryMultiStructReq queryStructReq) {
         if (!cacheEnable) {
             return false;
@@ -392,19 +414,19 @@ public class QueryServiceImpl implements QueryService {
         return false;
     }
 
-    private QueryResultWithSchemaResp queryByCache(String key, Object queryCmd) {
+    private SemanticQueryResp queryByCache(String key, Object queryCmd) {
 
-        Object resultObject = cacheUtils.get(key);
+        Object resultObject = cacheManager.get(key);
         if (Objects.nonNull(resultObject)) {
             log.info("queryByStructWithCache, key:{}, queryCmd:{}", key, queryCmd.toString());
             statUtils.updateResultCacheKey(key);
-            return (QueryResultWithSchemaResp) resultObject;
+            return (SemanticQueryResp) resultObject;
         }
         return null;
     }
 
-    private QueryS2SQLReq generateDimValueQuerySql(QueryDimValueReq queryDimValueReq) {
-        QueryS2SQLReq queryS2SQLReq = new QueryS2SQLReq();
+    private QuerySqlReq buildQuerySqlReq(QueryDimValueReq queryDimValueReq) {
+        QuerySqlReq querySQLReq = new QuerySqlReq();
         List<ModelResp> modelResps = catalog.getModelList(Lists.newArrayList(queryDimValueReq.getModelId()));
         DimensionResp dimensionResp = catalog.getDimension(queryDimValueReq.getDimensionBizName(),
                 queryDimValueReq.getModelId());
@@ -416,9 +438,9 @@ public class QueryServiceImpl implements QueryService {
                     queryDimValueReq.getDateInfo().getStartDate(), TimeDimensionEnum.DAY.getName(),
                     queryDimValueReq.getDateInfo().getEndDate());
         }
-        queryS2SQLReq.setModelIds(Sets.newHashSet(queryDimValueReq.getModelId()));
-        queryS2SQLReq.setSql(sql);
-        return queryS2SQLReq;
+        querySQLReq.setModelIds(Sets.newHashSet(queryDimValueReq.getModelId()));
+        querySQLReq.setSql(sql);
+        return querySQLReq;
     }
 
     private String getKeyByModelIds(List<Long> modelIds) {

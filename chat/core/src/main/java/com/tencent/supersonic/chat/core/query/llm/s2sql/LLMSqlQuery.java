@@ -11,8 +11,8 @@ import com.tencent.supersonic.chat.core.utils.QueryReqBuilder;
 import com.tencent.supersonic.chat.core.query.QueryManager;
 import com.tencent.supersonic.chat.core.query.llm.LLMSemanticQuery;
 import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.request.QuerySqlReq;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -42,8 +42,8 @@ public class LLMSqlQuery extends LLMSemanticQuery {
 
         long startTime = System.currentTimeMillis();
         String querySql = parseInfo.getSqlInfo().getCorrectS2SQL();
-        QueryS2SQLReq queryS2SQLReq = QueryReqBuilder.buildS2SQLReq(querySql, parseInfo.getModel().getModelIds());
-        QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByS2SQL(queryS2SQLReq, user);
+        QuerySqlReq querySQLReq = QueryReqBuilder.buildS2SQLReq(querySql, parseInfo.getModel().getModelIds());
+        SemanticQueryResp queryResp = semanticInterpreter.queryByS2SQL(querySQLReq, user);
 
         log.info("queryByS2SQL cost:{},querySql:{}", System.currentTimeMillis() - startTime, querySql);
 

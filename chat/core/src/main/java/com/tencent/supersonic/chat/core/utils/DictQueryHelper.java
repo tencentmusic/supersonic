@@ -18,7 +18,7 @@ import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,20 +53,20 @@ public class DictQueryHelper {
         List<String> data = new ArrayList<>();
         QueryStructReq queryStructCmd = generateQueryStructCmd(modelId, defaultMetricDesc, dim4Dict);
         try {
-            QueryResultWithSchemaResp queryResultWithColumns = semanticInterpreter.queryByStruct(queryStructCmd, user);
+            SemanticQueryResp semanticQueryResp = semanticInterpreter.queryByStruct(queryStructCmd, user);
 
-            log.info("fetchDimValueSingle sql:{}", queryResultWithColumns.getSql());
+            log.info("fetchDimValueSingle sql:{}", semanticQueryResp.getSql());
             String nature = String.format("_%d_%d", modelId, dim4Dict.getDimId());
-            String dimNameRewrite = rewriteDimName(queryResultWithColumns.getColumns(), dim4Dict.getBizName());
-            data = generateFileData(queryResultWithColumns.getResultList(), nature, dimNameRewrite,
+            String dimNameRewrite = rewriteDimName(semanticQueryResp.getColumns(), dim4Dict.getBizName());
+            data = generateFileData(semanticQueryResp.getResultList(), nature, dimNameRewrite,
                     defaultMetricDesc.getBizName(), dim4Dict);
             if (!CollectionUtils.isEmpty(data)) {
                 int size = (data.size() > printDataShow) ? printDataShow : data.size();
                 log.info("data:{}", data.subList(0, size));
             } else {
                 log.warn("data is empty. nature:{}", nature);
-                if (Objects.nonNull(queryResultWithColumns)) {
-                    log.warn("sql:{}", queryResultWithColumns.getSql());
+                if (Objects.nonNull(semanticQueryResp)) {
+                    log.warn("sql:{}", semanticQueryResp.getSql());
                 }
             }
 

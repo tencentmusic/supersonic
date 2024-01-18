@@ -5,7 +5,7 @@ import static com.tencent.supersonic.common.pojo.Constants.AT_SYMBOL;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.enums.DataType;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.JdbcDataSource;
 import java.rmi.ServerException;
@@ -89,7 +89,7 @@ public class SqlUtils {
         }
     }
 
-    public void execute(String sql, QueryResultWithSchemaResp queryResultWithColumns) {
+    public void execute(String sql, SemanticQueryResp queryResultWithColumns) {
         getResult(sql, queryResultWithColumns, jdbcTemplate());
     }
 
@@ -110,11 +110,11 @@ public class SqlUtils {
         return jdbcTemplate;
     }
 
-    public void queryInternal(String sql, QueryResultWithSchemaResp queryResultWithColumns) {
+    public void queryInternal(String sql, SemanticQueryResp queryResultWithColumns) {
         getResult(sql, queryResultWithColumns, jdbcTemplate());
     }
 
-    private QueryResultWithSchemaResp getResult(String sql, QueryResultWithSchemaResp queryResultWithColumns,
+    private SemanticQueryResp getResult(String sql, SemanticQueryResp queryResultWithColumns,
             JdbcTemplate jdbcTemplate) {
         jdbcTemplate.query(sql, rs -> {
             if (null == rs) {

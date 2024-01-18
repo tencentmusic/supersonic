@@ -10,7 +10,7 @@ import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.utils.QueryStructUtils;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -100,7 +100,7 @@ public class StructDataAspect extends AuthCheckBaseAspect {
         doRowPermission(queryStructReq, authorizedResource);
 
         // 6.proceed
-        QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) point.proceed();
+        SemanticQueryResp queryResultWithColumns = (SemanticQueryResp) point.proceed();
 
         if (CollectionUtils.isEmpty(sensitiveResReq) || allSensitiveResReqIsOk(sensitiveResReq, resAuthSet)) {
             // if sensitiveRes is empty
@@ -111,7 +111,7 @@ public class StructDataAspect extends AuthCheckBaseAspect {
         // 6.if the column has no permission, hit *
         Set<String> need2Apply = sensitiveResReq.stream().filter(req -> !resAuthSet.contains(req))
                 .collect(Collectors.toSet());
-        QueryResultWithSchemaResp queryResultAfterDesensitization =
+        SemanticQueryResp queryResultAfterDesensitization =
                 desensitizationData(queryResultWithColumns, need2Apply);
         addPromptInfoInfo(modelIds, queryResultAfterDesensitization, authorizedResource, need2Apply);
 

@@ -1,8 +1,9 @@
-package com.tencent.supersonic.common.util.cache;
+package com.tencent.supersonic.headless.server.cache;
 
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.base.Joiner;
+import com.tencent.supersonic.headless.server.config.CacheCommonConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class CaffeineCacheImpl implements CacheUtils {
-
+public class CaffeineCacheManager implements CacheManager {
 
     @Autowired
     private CacheCommonConfig cacheCommonConfig;

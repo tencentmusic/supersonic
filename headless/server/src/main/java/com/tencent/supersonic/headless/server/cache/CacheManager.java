@@ -1,7 +1,7 @@
-package com.tencent.supersonic.common.util.cache;
+package com.tencent.supersonic.headless.server.cache;
 
 
-public interface CacheUtils {
+public interface CacheManager {
 
     Boolean put(String key, Object value);
 

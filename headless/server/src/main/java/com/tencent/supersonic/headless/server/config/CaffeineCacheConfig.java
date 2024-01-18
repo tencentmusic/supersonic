@@ -1,4 +1,4 @@
-package com.tencent.supersonic.common.util.cache;
+package com.tencent.supersonic.headless.server.config;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -24,9 +24,7 @@ public class CaffeineCacheConfig {
     public Cache<String, Object> caffeineCache() {
         return Caffeine.newBuilder()
                 .expireAfterWrite(cacheCommonConfig.getCacheCommonExpireAfterWrite(), TimeUnit.MINUTES)
-                // 初始的缓存空间大小
                 .initialCapacity(caffeineInitialCapacity)
-                // 缓存的最大条数
                 .maximumSize(caffeineMaximumSize)
                 .build();
     }
@@ -35,9 +33,7 @@ public class CaffeineCacheConfig {
     public Cache<Long, Object> searchCaffeineCache() {
         return Caffeine.newBuilder()
                 .expireAfterWrite(10000, TimeUnit.MINUTES)
-                // 初始的缓存空间大小
                 .initialCapacity(caffeineInitialCapacity)
-                // 缓存的最大条数
                 .maximumSize(caffeineMaximumSize)
                 .build();
     }

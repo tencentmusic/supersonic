@@ -1,40 +1,37 @@
 package com.tencent.supersonic.headless.server.utils;
 
+import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
+import static com.tencent.supersonic.common.pojo.Constants.UNIONALL;
+
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.cache.CacheUtils;
-import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.enums.SemanticType;
+import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
+import com.tencent.supersonic.headless.server.cache.CacheManager;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.Catalog;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
-import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
-import static com.tencent.supersonic.common.pojo.Constants.UNIONALL;
+import javax.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 
 @Slf4j
@@ -52,15 +49,15 @@ public class QueryUtils {
     @Value("${query.optimizer.enable:true}")
     private Boolean optimizeEnable;
 
-    private final CacheUtils cacheUtils;
+    private final CacheManager cacheManager;
     private final StatUtils statUtils;
 
     private final Catalog catalog;
 
     public QueryUtils(
-            CacheUtils cacheUtils, StatUtils statUtils, Catalog catalog) {
+            CacheManager cacheManager, StatUtils statUtils, Catalog catalog) {
 
-        this.cacheUtils = cacheUtils;
+        this.cacheManager = cacheManager;
         this.statUtils = statUtils;
         this.catalog = catalog;
     }
@@ -74,7 +71,7 @@ public class QueryUtils {
         }
     }
 
-    public void fillItemNameInfo(QueryResultWithSchemaResp queryResultWithColumns, List<Long> modelIds) {
+    public void fillItemNameInfo(SemanticQueryResp queryResultWithColumns, List<Long> modelIds) {
         MetaFilter metaFilter = new MetaFilter(modelIds);
         List<MetricResp> metricDescList = catalog.getMetrics(metaFilter);
         List<DimensionResp> dimensionDescList = catalog.getDimensions(metaFilter);
@@ -125,7 +122,7 @@ public class QueryUtils {
         });
     }
 
-    public void fillItemNameInfo(QueryResultWithSchemaResp queryResultWithColumns,
+    public void fillItemNameInfo(SemanticQueryResp queryResultWithColumns,
             QueryMultiStructReq queryMultiStructCmd) {
         List<Aggregator> aggregators = queryMultiStructCmd.getQueryStructReqs().stream()
                 .flatMap(queryStructCmd -> queryStructCmd.getAggregators().stream())
@@ -242,21 +239,6 @@ public class QueryUtils {
         sqlParser.setSourceId(sqlParsers.get(0).getSourceId());
         log.info("union sql parser:{}", sqlParser);
         return sqlParser;
-    }
-
-    public void cacheResultLogic(String key, QueryResultWithSchemaResp queryResultWithColumns) {
-        if (cacheEnable && Objects.nonNull(queryResultWithColumns) && !CollectionUtils.isEmpty(
-                queryResultWithColumns.getResultList())) {
-            QueryResultWithSchemaResp finalQueryResultWithColumns = queryResultWithColumns;
-            CompletableFuture.supplyAsync(() -> cacheUtils.put(key, finalQueryResultWithColumns))
-                    .exceptionally(exception -> {
-                        log.warn("exception:", exception);
-                        return null;
-                    });
-            statUtils.updateResultCacheKey(key);
-            log.info("add record to cache, key:{}", key);
-        }
-
     }
 
     public Boolean enableOptimize() {

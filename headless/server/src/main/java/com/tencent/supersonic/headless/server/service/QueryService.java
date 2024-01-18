@@ -6,12 +6,12 @@ import com.tencent.supersonic.headless.api.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.request.QueryItemReq;
 import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.ExplainResp;
 import com.tencent.supersonic.headless.api.response.ItemQueryResultResp;
 import com.tencent.supersonic.headless.api.response.ItemUseResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.server.annotation.ApiHeaderCheck;
 
@@ -20,18 +20,17 @@ import java.util.List;
 
 public interface QueryService {
 
-    Object queryBySql(QueryS2SQLReq querySqlCmd, User user) throws Exception;
+    Object queryBySql(QuerySqlReq querySqlCmd, User user) throws Exception;
 
-    QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructCmd, User user) throws Exception;
+    SemanticQueryResp queryByStruct(QueryStructReq queryStructCmd, User user) throws Exception;
 
-    QueryResultWithSchemaResp queryByStructWithAuth(QueryStructReq queryStructCmd, User user)
-            throws Exception;
+    SemanticQueryResp queryByStructWithAuth(QueryStructReq queryStructCmd, User user) throws Exception;
 
-    QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructCmd, User user) throws Exception;
+    SemanticQueryResp queryByMultiStruct(QueryMultiStructReq queryMultiStructCmd, User user) throws Exception;
 
-    QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user);
+    SemanticQueryResp queryDimValue(QueryDimValueReq queryDimValueReq, User user);
 
-    Object queryByQueryStatement(QueryStatement queryStatement);
+    SemanticQueryResp queryByQueryStatement(QueryStatement queryStatement);
 
     List<ItemUseResp> getStatInfo(ItemUseReq itemUseCommend);
 
@@ -39,6 +38,6 @@ public interface QueryService {
 
     @ApiHeaderCheck
     ItemQueryResultResp queryMetricDataById(QueryItemReq queryApiReq,
-                                            HttpServletRequest request) throws Exception;
+            HttpServletRequest request) throws Exception;
 
 }

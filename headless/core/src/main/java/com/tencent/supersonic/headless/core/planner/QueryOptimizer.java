@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.optimizer;
+package com.tencent.supersonic.headless.core.planner;
 
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;

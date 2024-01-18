@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Data
 @ToString
-public class QueryResultWithSchemaResp extends QueryResult<Map<String, Object>> {
+public class SemanticQueryResp extends QueryResult<Map<String, Object>> {
 
     List<QueryColumn> columns = Lists.newArrayList();
     String sql;
