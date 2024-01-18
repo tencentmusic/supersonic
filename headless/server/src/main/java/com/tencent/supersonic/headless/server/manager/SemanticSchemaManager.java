@@ -56,13 +56,13 @@ import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
-public class HeadlessSchemaManager {
+public class SemanticSchemaManager {
 
     @Autowired
     private LoadingCache<String, SemanticModel> loadingCache;
     private final Catalog catalog;
 
-    public HeadlessSchemaManager(Catalog catalog) {
+    public SemanticSchemaManager(Catalog catalog) {
         this.catalog = catalog;
     }
 
@@ -87,7 +87,7 @@ public class HeadlessSchemaManager {
             semanticModel.setJoinRelations(getJoinRelation(modelRelas, modelIdName));
         }
         if (!dataModelYamlTpls.isEmpty()) {
-            Map<String, DataSource> dataSourceMap = dataModelYamlTpls.stream().map(HeadlessSchemaManager::getDatasource)
+            Map<String, DataSource> dataSourceMap = dataModelYamlTpls.stream().map(SemanticSchemaManager::getDatasource)
                     .collect(Collectors.toMap(DataSource::getName, item -> item, (k1, k2) -> k1));
             semanticModel.setDatasourceMap(dataSourceMap);
         }
@@ -104,7 +104,6 @@ public class HeadlessSchemaManager {
         return semanticModel;
     }
 
-    //private Map<String, SemanticSchema> semanticSchemaMap = new HashMap<>();
     public SemanticModel get(String rootPath) throws Exception {
         rootPath = formatKey(rootPath);
         SemanticModel schema = loadingCache.get(rootPath);
@@ -383,7 +382,7 @@ public class HeadlessSchemaManager {
                                 @Override
                                 public SemanticModel load(String key) {
                                     log.info("load SemanticSchema [{}]", key);
-                                    return HeadlessSchemaManager.this.reload(key);
+                                    return SemanticSchemaManager.this.reload(key);
                                 }
                             }
                     );

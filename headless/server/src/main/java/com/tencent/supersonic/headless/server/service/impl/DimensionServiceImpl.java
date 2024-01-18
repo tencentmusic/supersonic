@@ -23,7 +23,7 @@ import com.tencent.supersonic.headless.api.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DimensionRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
@@ -266,8 +266,8 @@ public class DimensionServiceImpl implements DimensionService {
 
         String sql = "select ai_talk." + dimensionReq.getBizName() + " from (" + sqlQuery
                 + ") as ai_talk group by ai_talk." + dimensionReq.getBizName();
-        QueryResultWithSchemaResp queryResultWithSchemaResp = databaseService.executeSql(sql, database);
-        List<Map<String, Object>> resultList = queryResultWithSchemaResp.getResultList();
+        SemanticQueryResp semanticQueryResp = databaseService.executeSql(sql, database);
+        List<Map<String, Object>> resultList = semanticQueryResp.getResultList();
         List<String> valueList = new ArrayList<>();
         for (Map<String, Object> stringObjectMap : resultList) {
             String value = (String) stringObjectMap.get(dimensionReq.getBizName());

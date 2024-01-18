@@ -1,5 +1,8 @@
 package com.tencent.supersonic.headless.server.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import com.alibaba.excel.util.FileUtils;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -11,20 +14,16 @@ import com.tencent.supersonic.headless.api.request.BatchDownloadReq;
 import com.tencent.supersonic.headless.api.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.service.impl.DownloadServiceImpl;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 
 class DownloadServiceImplTest {
@@ -98,16 +97,16 @@ class DownloadServiceImplTest {
         return dateConf;
     }
 
-    private QueryResultWithSchemaResp mockQueryResult() {
-        QueryResultWithSchemaResp queryResultWithSchemaResp = new QueryResultWithSchemaResp();
+    private SemanticQueryResp mockQueryResult() {
+        SemanticQueryResp semanticQueryResp = new SemanticQueryResp();
         List<Map<String, Object>> resultList = Lists.newArrayList();
         resultList.add(createMap("2023-10-11", "tom", "hr", "1"));
         resultList.add(createMap("2023-10-12", "alice", "sales", "2"));
         resultList.add(createMap("2023-10-13", "jack", "sales", "3"));
         resultList.add(createMap("2023-10-14", "luck", "market", "4"));
         resultList.add(createMap("2023-10-15", "tom", "hr", "5"));
-        queryResultWithSchemaResp.setResultList(resultList);
-        return queryResultWithSchemaResp;
+        semanticQueryResp.setResultList(resultList);
+        return semanticQueryResp;
     }
 
     private static Map<String, Object> createMap(String sysImpDate, String d1, String d2, String m1) {

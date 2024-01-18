@@ -5,7 +5,7 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.headless.api.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.DatabaseParameter;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import java.util.Map;
@@ -67,7 +67,7 @@ public class DatabaseController {
     }
 
     @PostMapping("/executeSql")
-    public QueryResultWithSchemaResp executeSql(@RequestBody SqlExecuteReq sqlExecuteReq,
+    public SemanticQueryResp executeSql(@RequestBody SqlExecuteReq sqlExecuteReq,
             HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
@@ -75,18 +75,18 @@ public class DatabaseController {
     }
 
     @RequestMapping("/getDbNames/{id}")
-    public QueryResultWithSchemaResp getDbNames(@PathVariable("id") Long id) {
+    public SemanticQueryResp getDbNames(@PathVariable("id") Long id) {
         return databaseService.getDbNames(id);
     }
 
     @RequestMapping("/getTables/{id}/{db}")
-    public QueryResultWithSchemaResp getTables(@PathVariable("id") Long id,
+    public SemanticQueryResp getTables(@PathVariable("id") Long id,
             @PathVariable("db") String db) {
         return databaseService.getTables(id, db);
     }
 
     @RequestMapping("/getColumns/{id}/{db}/{table}")
-    public QueryResultWithSchemaResp getColumns(@PathVariable("id") Long id,
+    public SemanticQueryResp getColumns(@PathVariable("id") Long id,
             @PathVariable("db") String db,
             @PathVariable("table") String table) {
         return databaseService.getColumns(id, db, table);

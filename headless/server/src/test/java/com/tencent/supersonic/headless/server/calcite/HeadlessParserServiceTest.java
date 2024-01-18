@@ -14,7 +14,7 @@ import com.tencent.supersonic.headless.core.pojo.yaml.IdentifyYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
-import com.tencent.supersonic.headless.server.manager.HeadlessSchemaManager;
+import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -124,7 +124,7 @@ class HeadlessParserServiceTest {
 
         SemanticSchema semanticSchema = SemanticSchema.newBuilder("s2").build();
 
-        HeadlessSchemaManager.update(semanticSchema, HeadlessSchemaManager.getDatasource(datasource));
+        SemanticSchemaManager.update(semanticSchema, SemanticSchemaManager.getDatasource(datasource));
 
         DimensionYamlTpl dimension1 = new DimensionYamlTpl();
         dimension1.setExpr("page");
@@ -133,8 +133,8 @@ class HeadlessParserServiceTest {
         List<DimensionYamlTpl> dimensionYamlTpls = new ArrayList<>();
         dimensionYamlTpls.add(dimension1);
 
-        HeadlessSchemaManager.update(semanticSchema, "s2_pv_uv_statis",
-                HeadlessSchemaManager.getDimensions(dimensionYamlTpls));
+        SemanticSchemaManager.update(semanticSchema, "s2_pv_uv_statis",
+                SemanticSchemaManager.getDimensions(dimensionYamlTpls));
 
         MetricYamlTpl metric1 = new MetricYamlTpl();
         metric1.setName("pv");
@@ -240,7 +240,7 @@ class HeadlessParserServiceTest {
         identifies.add(identify);
         datasource.setIdentifiers(identifies);
 
-        semanticSchema.getDatasource().put("user_department", HeadlessSchemaManager.getDatasource(datasource));
+        semanticSchema.getDatasource().put("user_department", SemanticSchemaManager.getDatasource(datasource));
 
         DimensionYamlTpl dimension1 = new DimensionYamlTpl();
         dimension1.setExpr("department");
@@ -250,6 +250,6 @@ class HeadlessParserServiceTest {
         dimensionYamlTpls.add(dimension1);
 
         semanticSchema.getDimension()
-                .put("user_department", HeadlessSchemaManager.getDimensions(dimensionYamlTpls));
+                .put("user_department", SemanticSchemaManager.getDimensions(dimensionYamlTpls));
     }
 }

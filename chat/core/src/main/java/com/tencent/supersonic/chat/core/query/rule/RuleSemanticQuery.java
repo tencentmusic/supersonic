@@ -22,7 +22,7 @@ import com.tencent.supersonic.common.pojo.ModelCluster;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import lombok.ToString;
@@ -207,7 +207,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
             queryStructReq.setS2SQL(parseInfo.getSqlInfo().getS2SQL());
             queryStructReq.setCorrectS2SQL(parseInfo.getSqlInfo().getCorrectS2SQL());
         }
-        QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
+        SemanticQueryResp queryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
 
         if (queryResp != null) {
             queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
@@ -242,7 +242,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
 
         QueryResult queryResult = new QueryResult();
         QueryMultiStructReq queryMultiStructReq = convertQueryMultiStruct();
-        QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByMultiStruct(queryMultiStructReq, user);
+        SemanticQueryResp queryResp = semanticInterpreter.queryByMultiStruct(queryMultiStructReq, user);
         if (queryResp != null) {
             queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
         }

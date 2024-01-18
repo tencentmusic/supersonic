@@ -8,11 +8,11 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import lombok.extern.slf4j.Slf4j;
@@ -51,13 +51,13 @@ public class DimValueAspect {
     public Object handleSqlDimValue(ProceedingJoinPoint joinPoint) throws Throwable {
         if (!dimensionValueMapSqlEnable) {
             log.debug("sql dimensionValueMapEnable is false, skip dimensionValueMap");
-            QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) joinPoint.proceed();
+            SemanticQueryResp queryResultWithColumns = (SemanticQueryResp) joinPoint.proceed();
             return queryResultWithColumns;
         }
         Object[] args = joinPoint.getArgs();
-        QueryS2SQLReq queryS2SQLReq = (QueryS2SQLReq) args[0];
-        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(queryS2SQLReq.getModelIds()));
-        String sql = queryS2SQLReq.getSql();
+        QuerySqlReq querySQLReq = (QuerySqlReq) args[0];
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(querySQLReq.getModelIds()));
+        String sql = querySQLReq.getSql();
         log.info("correctorSql before replacing:{}", sql);
         // if dimensionvalue is alias,consider the true dimensionvalue.
         List<FieldExpression> fieldExpressionList = SqlParserSelectHelper.getWhereExpressions(sql);
@@ -88,10 +88,10 @@ public class DimValueAspect {
         log.info("filedNameToValueMap:{}", filedNameToValueMap);
         sql = SqlParserReplaceHelper.replaceValue(sql, filedNameToValueMap);
         log.info("correctorSql after replacing:{}", sql);
-        queryS2SQLReq.setSql(sql);
+        querySQLReq.setSql(sql);
         Map<String, Map<String, String>> techNameToBizName = getTechNameToBizName(dimensions);
 
-        QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) joinPoint.proceed();
+        SemanticQueryResp queryResultWithColumns = (SemanticQueryResp) joinPoint.proceed();
         if (Objects.nonNull(queryResultWithColumns)) {
             rewriteDimValue(queryResultWithColumns, techNameToBizName);
         }
@@ -140,7 +140,7 @@ public class DimValueAspect {
 
         if (!dimensionValueMapEnable) {
             log.debug("dimensionValueMapEnable is false, skip dimensionValueMap");
-            QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) joinPoint.proceed();
+            SemanticQueryResp queryResultWithColumns = (SemanticQueryResp) joinPoint.proceed();
             return queryResultWithColumns;
         }
 
@@ -153,21 +153,21 @@ public class DimValueAspect {
 
         rewriteFilter(queryStructReq.getDimensionFilters(), dimAndAliasAndTechNamePair);
 
-        QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) joinPoint.proceed();
-        if (Objects.nonNull(queryResultWithColumns)) {
-            rewriteDimValue(queryResultWithColumns, dimAndTechNameAndBizNamePair);
+        SemanticQueryResp semanticQueryResp = (SemanticQueryResp) joinPoint.proceed();
+        if (Objects.nonNull(semanticQueryResp)) {
+            rewriteDimValue(semanticQueryResp, dimAndTechNameAndBizNamePair);
         }
 
-        return queryResultWithColumns;
+        return semanticQueryResp;
     }
 
-    private void rewriteDimValue(QueryResultWithSchemaResp queryResultWithColumns,
+    private void rewriteDimValue(SemanticQueryResp semanticQueryResp,
             Map<String, Map<String, String>> dimAndTechNameAndBizNamePair) {
-        if (!selectDimValueMap(queryResultWithColumns.getColumns(), dimAndTechNameAndBizNamePair)) {
+        if (!selectDimValueMap(semanticQueryResp.getColumns(), dimAndTechNameAndBizNamePair)) {
             return;
         }
         log.debug("start rewriteDimValue for resultList");
-        for (Map<String, Object> line : queryResultWithColumns.getResultList()) {
+        for (Map<String, Object> line : semanticQueryResp.getResultList()) {
             for (String bizName : line.keySet()) {
                 if (dimAndTechNameAndBizNamePair.containsKey(bizName) && Objects.nonNull(line.get(bizName))) {
                     String techName = line.get(bizName).toString();
