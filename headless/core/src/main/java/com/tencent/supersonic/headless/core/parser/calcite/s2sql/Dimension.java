@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.core.parser.calcite.s2sql;
 
 
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticItem;
+import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,8 +16,9 @@ public class Dimension implements SemanticItem {
     private String type;
     private String expr;
     private DimensionTimeTypeParams dimensionTimeTypeParams;
-
     private DataType dataType = DataType.UNKNOWN;
+    private String bizName;
+    private List<String> defaultValues;
 
     @Override
     public String getName() {

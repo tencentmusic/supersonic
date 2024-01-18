@@ -128,7 +128,7 @@ public class QueryParser {
         tableSql.setMinMaxTime(queryStatement.getMinMaxTime());
         tableSql.setEnableOptimize(queryStatement.getEnableOptimize());
         tableSql.setModelIds(queryStatement.getModelIds());
-        tableSql.setHeadlessModel(queryStatement.getHeadlessModel());
+        tableSql.setSemanticModel(queryStatement.getSemanticModel());
         if (isSingleMetricTable) {
             tableSql.setViewSql(parseSqlReq.getSql());
             tableSql.setViewAlias(metricTable.getAlias());
