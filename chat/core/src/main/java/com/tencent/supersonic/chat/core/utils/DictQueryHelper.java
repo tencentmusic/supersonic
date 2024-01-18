@@ -102,7 +102,9 @@ public class DictQueryHelper {
         Map<String, Long> valueAndFrequencyPair = new HashMap<>(2000);
         for (Map<String, Object> line : resultList) {
 
-            if (CollectionUtils.isEmpty(line) || !line.containsKey(dimName)) {
+            if (CollectionUtils.isEmpty(line) || !line.containsKey(dimName)
+                    || !line.containsKey(metricName)
+                    || line.get(dimName) == null) {
                 continue;
             }
 
