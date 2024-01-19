@@ -12,6 +12,10 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -34,11 +38,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 
 @Data
@@ -268,10 +267,7 @@ public class QueryStructReq extends SemanticQueryReq {
     }
 
     public String getModelName() {
-        if (StringUtils.isNotBlank(modelName)) {
-            return modelName;
-        }
-        return "table";
+        return Objects.nonNull(modelName) ? modelName : "m_" + String.valueOf(StringUtils.join(modelIds, "_"));
     }
 
 }

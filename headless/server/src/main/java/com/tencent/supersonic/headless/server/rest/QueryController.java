@@ -21,11 +21,8 @@ import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.response.SqlParserResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.server.service.DownloadService;
-import com.tencent.supersonic.headless.server.service.SemantciQueryEngine;
 import com.tencent.supersonic.headless.server.service.QueryService;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -44,8 +41,6 @@ public class QueryController {
 
     @Autowired
     private QueryService queryService;
-    @Autowired
-    private SemantciQueryEngine semantciQueryEngine;
 
     @Autowired
     private DownloadService downloadService;
@@ -63,7 +58,9 @@ public class QueryController {
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        return queryService.queryByStructWithAuth(queryStructReq, user);
+        QuerySqlReq querySqlReq = queryStructReq.convert(queryStructReq);
+        return queryService.queryBySql(querySqlReq, user);
+        //return queryService.queryByStructWithAuth(queryStructReq, user);
     }
 
     @PostMapping("/queryMetricDataById")
@@ -95,11 +92,7 @@ public class QueryController {
 
     @PostMapping("/struct/parse")
     public SqlParserResp parseByStruct(@RequestBody ParseSqlReq parseSqlReq) throws Exception {
-        QueryStructReq queryStructCmd = new QueryStructReq();
-        Set<Long> models = new HashSet<>();
-        models.add(Long.valueOf(parseSqlReq.getRootPath()));
-        queryStructCmd.setModelIds(models);
-        QueryStatement queryStatement = semantciQueryEngine.physicalSql(queryStructCmd, parseSqlReq);
+        QueryStatement queryStatement = queryService.explain(parseSqlReq);
         SqlParserResp sqlParserResp = new SqlParserResp();
         BeanUtils.copyProperties(queryStatement, sqlParserResp);
         return sqlParserResp;

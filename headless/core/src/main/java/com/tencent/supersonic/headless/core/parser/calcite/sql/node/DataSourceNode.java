@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
-
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
@@ -265,8 +264,15 @@ public class DataSourceNode extends SemanticNode {
         boolean isAllMatch = true;
         sourceMeasure.retainAll(measures);
         if (sourceMeasure.size() < measures.size()) {
-            log.info("baseDataSource not match all measure");
-            isAllMatch = false;
+            log.info("baseDataSource measures not match all measure");
+            // check dimension again
+            Set<String> dimensionMeasures = new HashSet<>();
+            dimensionMeasures.addAll(dimension);
+            dimensionMeasures.retainAll(measures);
+            if (sourceMeasure.size() + dimensionMeasures.size() < measures.size()) {
+                log.info("baseDataSource not match all measure");
+                isAllMatch = false;
+            }
         }
         measures.removeAll(sourceMeasure);
 
