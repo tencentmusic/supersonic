@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.parser.calcite;
 
 import com.tencent.supersonic.headless.api.enums.AggOption;
+import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.SqlParser;
 import com.tencent.supersonic.headless.core.parser.calcite.planner.AggPlanner;
@@ -31,13 +32,15 @@ public class CalciteSqlParser implements SqlParser {
         SemanticSchema semanticSchema = getSemanticSchema(semanticModel, queryStatement);
         AggPlanner aggBuilder = new AggPlanner(semanticSchema);
         aggBuilder.explain(queryStatement, isAgg);
-        queryStatement.setSql(aggBuilder.getSql());
+        EngineType engineType = EngineType.fromString(semanticSchema.getSemanticModel().getDatabase().getType());
+        queryStatement.setSql(aggBuilder.getSql(engineType));
         queryStatement.setSourceId(aggBuilder.getSourceId());
         if (Objects.nonNull(queryStatement.getEnableOptimize()) && queryStatement.getEnableOptimize()
                 && Objects.nonNull(queryStatement.getViewAlias()) && !queryStatement.getViewAlias().isEmpty()) {
             // simplify model sql with query sql
             String simplifySql = aggBuilder.simplify(
-                    getSqlByView(aggBuilder.getSql(), queryStatement.getViewSql(), queryStatement.getViewAlias()));
+                    getSqlByView(aggBuilder.getSql(engineType), queryStatement.getViewSql(),
+                            queryStatement.getViewAlias()), engineType);
             if (Objects.nonNull(simplifySql) && !simplifySql.isEmpty()) {
                 log.info("simplifySql [{}]", simplifySql);
                 queryStatement.setViewSimplifySql(simplifySql);
@@ -48,6 +51,7 @@ public class CalciteSqlParser implements SqlParser {
 
     private SemanticSchema getSemanticSchema(SemanticModel semanticModel, QueryStatement queryStatement) {
         SemanticSchema semanticSchema = SemanticSchema.newBuilder(semanticModel.getRootPath()).build();
+        semanticSchema.setSemanticModel(semanticModel);
         semanticSchema.setDatasource(semanticModel.getDatasourceMap());
         semanticSchema.setDimension(semanticModel.getDimensionMap());
         semanticSchema.setMetric(semanticModel.getMetrics());

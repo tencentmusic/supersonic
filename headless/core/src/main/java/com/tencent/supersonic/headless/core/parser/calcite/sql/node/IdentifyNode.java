@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
+import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Identify.Type;
 import java.util.List;
@@ -11,8 +12,8 @@ import org.apache.calcite.sql.validate.SqlValidatorScope;
 
 public class IdentifyNode extends SemanticNode {
 
-    public static SqlNode build(Identify identify, SqlValidatorScope scope) throws Exception {
-        return parse(identify.getName(), scope);
+    public static SqlNode build(Identify identify, SqlValidatorScope scope, EngineType engineType) throws Exception {
+        return parse(identify.getName(), scope, engineType);
     }
 
     public static Set<String> getIdentifyNames(List<Identify> identifies, Identify.Type type) {

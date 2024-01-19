@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.calcite;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.headless.api.enums.AggOption;
+import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.api.response.SqlParserResp;
 import com.tencent.supersonic.headless.core.parser.calcite.planner.AggPlanner;
@@ -43,7 +44,8 @@ class HeadlessParserServiceTest {
             QueryStatement queryStatement = new QueryStatement();
             queryStatement.setMetricReq(metricCommand);
             aggBuilder.explain(queryStatement, AggOption.getAggregation(!isAgg));
-            sqlParser.setSql(aggBuilder.getSql());
+            EngineType engineType = EngineType.fromString(semanticSchema.getSemanticModel().getDatabase().getType());
+            sqlParser.setSql(aggBuilder.getSql(engineType));
             sqlParser.setSourceId(aggBuilder.getSourceId());
         } catch (Exception e) {
             sqlParser.setErrMsg(e.getMessage());

@@ -21,7 +21,7 @@ import java.util.List;
 
 public interface QueryService {
 
-    Object queryBySql(QuerySqlReq querySqlCmd, User user) throws Exception;
+    SemanticQueryResp queryBySql(QuerySqlReq querySqlCmd, User user) throws Exception;
 
     SemanticQueryResp queryByStruct(QueryStructReq queryStructCmd, User user) throws Exception;
 

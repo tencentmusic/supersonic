@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.render;
 
 
+import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
@@ -34,8 +35,10 @@ public class FilterRender extends Renderer {
         SqlNode filterNode = null;
         List<String> queryMetrics = new ArrayList<>(metricCommand.getMetrics());
         List<String> queryDimensions = new ArrayList<>(metricCommand.getDimensions());
+        EngineType engineType = EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
+
         if (metricCommand.getWhere() != null && !metricCommand.getWhere().isEmpty()) {
-            filterNode = SemanticNode.parse(metricCommand.getWhere(), scope);
+            filterNode = SemanticNode.parse(metricCommand.getWhere(), scope, engineType);
             Set<String> whereFields = new HashSet<>();
             FilterNode.getFilterField(filterNode, whereFields);
             List<String> fieldWhere = whereFields.stream().collect(Collectors.toList());
@@ -49,7 +52,7 @@ public class FilterRender extends Renderer {
             queryDimensions.addAll(dimensions);
         }
         for (String dimension : queryDimensions) {
-            tableView.getMeasure().add(SemanticNode.parse(dimension, scope));
+            tableView.getMeasure().add(SemanticNode.parse(dimension, scope, engineType));
         }
         for (String metric : queryMetrics) {
             Optional<Metric> optionalMetric = Renderer.getMetricByName(metric, schema);
@@ -58,9 +61,9 @@ public class FilterRender extends Renderer {
                 continue;
             }
             if (optionalMetric.isPresent()) {
-                tableView.getMeasure().add(MetricNode.build(optionalMetric.get(), scope));
+                tableView.getMeasure().add(MetricNode.build(optionalMetric.get(), scope, engineType));
             } else {
-                tableView.getMeasure().add(SemanticNode.parse(metric, scope));
+                tableView.getMeasure().add(SemanticNode.parse(metric, scope, engineType));
             }
         }
         if (filterNode != null) {

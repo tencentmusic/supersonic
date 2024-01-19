@@ -28,4 +28,14 @@ public enum EngineType {
     public String getName() {
         return name;
     }
+
+    public static EngineType fromString(String value) {
+        for (EngineType engineType : EngineType.values()) {
+            if (engineType.name().equalsIgnoreCase(value)) {
+                return engineType;
+            }
+        }
+        throw new IllegalArgumentException("Invalid value: " + value);
+    }
+
 }
