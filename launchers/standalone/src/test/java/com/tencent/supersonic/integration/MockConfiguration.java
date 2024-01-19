@@ -39,5 +39,4 @@ public class MockConfiguration {
         when(agentService.getAgent(2)).thenReturn(DataUtils.getTagAgent());
     }
 
-
 }
