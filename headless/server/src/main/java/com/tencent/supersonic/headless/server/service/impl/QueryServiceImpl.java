@@ -316,6 +316,7 @@ public class QueryServiceImpl implements QueryService {
 
         if (QueryType.SQL.equals(queryTypeEnum) && queryReq instanceof QuerySqlReq) {
             QueryStatement queryStatement = convertToQueryStatement((QuerySqlReq) queryReq, user);
+            queryStatement = plan(queryStatement);
             return getExplainResp(queryStatement);
         }
         if (QueryType.STRUCT.equals(queryTypeEnum) && queryReq instanceof QueryStructReq) {
@@ -326,6 +327,7 @@ public class QueryServiceImpl implements QueryService {
         if (QueryType.STRUCT.equals(queryTypeEnum) && queryReq instanceof QueryMultiStructReq) {
             QueryMultiStructReq queryMultiStructReq = (QueryMultiStructReq) queryReq;
             QueryStatement queryStatement = buildQueryStatement(queryMultiStructReq);
+            queryStatement = plan(queryStatement);
             return getExplainResp(queryStatement);
         }
 
@@ -451,11 +453,6 @@ public class QueryServiceImpl implements QueryService {
         querySQLReq.setModelIds(Sets.newHashSet(queryDimValueReq.getModelId()));
         querySQLReq.setSql(sql);
         return querySQLReq;
-    }
-
-    private String getKeyByModelIds(List<Long> modelIds) {
-        return String.join(",", modelIds.stream()
-                .map(Object::toString).collect(Collectors.toList()));
     }
 
     private QueryStatement plan(QueryStatement queryStatement) throws Exception {
