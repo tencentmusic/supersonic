@@ -19,10 +19,15 @@ import com.tencent.supersonic.headless.api.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
+import com.tencent.supersonic.headless.api.pojo.Field;
+import com.tencent.supersonic.headless.api.pojo.FieldParam;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MeasureParam;
+import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
+import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
+import com.tencent.supersonic.headless.api.pojo.MetricParam;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.request.DimensionReq;
@@ -74,6 +79,8 @@ public class ModelDemoDataLoader {
             addDomain();
             addModel_1();
             addModel_2();
+            addMetric_uv();
+            addMetric_pv_avg();
             addModel_3();
             addModelRela_1();
             addModelRela_2();
@@ -140,7 +147,10 @@ public class ModelDemoDataLoader {
         dimensions.add(new Dim("部门", "department",
                 DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
-
+        List<Field> fields = Lists.newArrayList();
+        fields.add(Field.builder().fieldName("user_name").dataType("Varchar").build());
+        fields.add(Field.builder().fieldName("department").dataType("Varchar").build());
+        modelDetail.setFields(fields);
         modelDetail.setMeasures(Collections.emptyList());
         modelDetail.setQueryType("sql_query");
         modelDetail.setSqlQuery("select user_name,department from s2_user_department");
@@ -172,17 +182,21 @@ public class ModelDemoDataLoader {
         dimension2.setExpr("page");
         dimensions.add(dimension2);
         modelDetail.setDimensions(dimensions);
-
         List<Measure> measures = new ArrayList<>();
         Measure measure1 = new Measure("访问次数", "pv", AggOperatorEnum.SUM.name(), 1);
         measures.add(measure1);
-
-        Measure measure2 = new Measure("访问人数", "uv", AggOperatorEnum.COUNT_DISTINCT.name(), 1);
+        Measure measure2 = new Measure("访问用户数", "user_id", AggOperatorEnum.SUM.name(), 0);
         measures.add(measure2);
-
         modelDetail.setMeasures(measures);
+        List<Field> fields = Lists.newArrayList();
+        fields.add(Field.builder().fieldName("s2_pv_uv_statis_user_name").dataType("Varchar").build());
+        fields.add(Field.builder().fieldName("imp_date").dataType("Date").build());
+        fields.add(Field.builder().fieldName("page").dataType("Varchar").build());
+        fields.add(Field.builder().fieldName("pv").dataType("Long").build());
+        fields.add(Field.builder().fieldName("user_id").dataType("Varchar").build());
+        modelDetail.setFields(fields);
         modelDetail.setSqlQuery("SELECT imp_date, user_name as s2_pv_uv_statis_user_name, page, 1 as pv, "
-                + "user_name as uv FROM s2_pv_uv_statis");
+                + "user_name as user_id FROM s2_pv_uv_statis");
         modelDetail.setQueryType("sql_query");
         modelReq.setDomainId(1L);
         modelReq.setModelDetail(modelDetail);
@@ -216,8 +230,13 @@ public class ModelDemoDataLoader {
         List<Measure> measures = new ArrayList<>();
         Measure measure1 = new Measure("停留时长", "stay_hours", AggregateTypeEnum.SUM.name(), 1);
         measures.add(measure1);
-
         modelDetail.setMeasures(measures);
+        List<Field> fields = Lists.newArrayList();
+        fields.add(Field.builder().fieldName("stay_hours_user_name").dataType("Varchar").build());
+        fields.add(Field.builder().fieldName("imp_date").dataType("Date").build());
+        fields.add(Field.builder().fieldName("page").dataType("Varchar").build());
+        fields.add(Field.builder().fieldName("stay_hours").dataType("Double").build());
+        modelDetail.setFields(fields);
         modelDetail.setSqlQuery(
                 "select imp_date,user_name as stay_hours_user_name,stay_hours,page from s2_stay_time_statis");
         modelDetail.setQueryType("sql_query");
@@ -324,7 +343,7 @@ public class ModelDemoDataLoader {
     public void updateMetric() throws Exception {
         MetricReq metricReq = new MetricReq();
         metricReq.setModelId(3L);
-        metricReq.setId(3L);
+        metricReq.setId(4L);
         metricReq.setName("停留时长");
         metricReq.setBizName("stay_hours");
         metricReq.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
@@ -341,6 +360,46 @@ public class ModelDemoDataLoader {
         metricReq.setMetricDefineByMeasureParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
         metricService.updateMetric(metricReq, user);
+    }
+
+    public void addMetric_uv() throws Exception {
+        MetricReq metricReq = new MetricReq();
+        metricReq.setModelId(2L);
+        metricReq.setName("访问用户数");
+        metricReq.setBizName("uv");
+        metricReq.setSensitiveLevel(SensitiveLevelEnum.LOW.getCode());
+        metricReq.setDescription("访问的用户个数");
+        metricReq.setAlias("UV");
+        MetricDefineByFieldParams metricTypeParams = new MetricDefineByFieldParams();
+        metricTypeParams.setExpr("count(distinct user_id)");
+        List<FieldParam> fieldParams = new ArrayList<>();
+        fieldParams.add(FieldParam.builder().fieldName("user_id").build());
+        metricTypeParams.setFields(fieldParams);
+        metricReq.setMetricDefineByFieldParams(metricTypeParams);
+        metricReq.setMetricDefineType(MetricDefineType.FIELD);
+        metricService.createMetric(metricReq, user);
+    }
+
+    public void addMetric_pv_avg() throws Exception {
+        MetricReq metricReq = new MetricReq();
+        metricReq.setModelId(2L);
+        metricReq.setName("人均访问次数");
+        metricReq.setBizName("pv_avg");
+        metricReq.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
+        metricReq.setDescription("每个用户平均访问的次数");
+        metricReq.setTags(Collections.singletonList("核心指标"));
+        metricReq.setAlias("平均访问次数");
+        MetricDefineByMetricParams metricTypeParams = new MetricDefineByMetricParams();
+        metricTypeParams.setExpr("pv/uv");
+        List<MetricParam> metrics = new ArrayList<>();
+        MetricParam metricPv = new MetricParam(1L, "pv");
+        MetricParam metricUv = new MetricParam(2L, "uv");
+        metrics.add(metricPv);
+        metrics.add(metricUv);
+        metricTypeParams.setMetrics(metrics);
+        metricReq.setMetricDefineByMetricParams(metricTypeParams);
+        metricReq.setMetricDefineType(MetricDefineType.METRIC);
+        metricService.createMetric(metricReq, user);
     }
 
     public void addAuthGroup_1() {
