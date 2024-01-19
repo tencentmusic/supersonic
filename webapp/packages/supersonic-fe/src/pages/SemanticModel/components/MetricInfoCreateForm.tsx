@@ -336,7 +336,9 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     }
   };
   const queryMetricsToCreateNewMetric = async () => {
-    const { code, data } = await getMetricsToCreateNewMetric({ modelId });
+  const { code, data } = await getMetricsToCreateNewMetric({
+      modelId: modelId || metricItem?.modelId,
+    });
     if (code === 200) {
       setCreateNewMetricList(data);
     } else {
@@ -737,7 +739,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
               type="primary"
               key="console"
               onClick={() => {
-                history.replace(`/model/${domainId}/${modelId}/dataSource`);
+                history.replace(`/model/${domainId}/${modelId || metricItem?.modelId}/dataSource`);
                 onCancel?.();
               }}
             >
