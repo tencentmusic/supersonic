@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.pojo;
 
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,9 @@ public class MysqlParametersBuilder implements DbParametersBuilder {
         version.setComment("数据库版本");
         version.setName("version");
         version.setPlaceholder("请输入数据库版本");
+        version.setDataType("list");
+        version.setValue("5.7");
+        version.setCandidateValues(Lists.newArrayList("5.7", "8.0"));
         databaseParameters.add(version);
 
         DatabaseParameter userName = new DatabaseParameter();
