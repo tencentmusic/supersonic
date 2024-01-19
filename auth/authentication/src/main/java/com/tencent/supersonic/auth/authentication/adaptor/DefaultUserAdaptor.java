@@ -45,13 +45,13 @@ public class DefaultUserAdaptor implements UserAdaptor {
     @Override
     public List<Organization> getOrganizationTree() {
         Organization superSonic = new Organization("1", "0",
-                "Supersonic", "SuperSonic", Lists.newArrayList(), true);
+                "SuperSonic", "SuperSonic", Lists.newArrayList(), true);
         Organization hr = new Organization("2", "1",
-                "Hr", "Supersonic/Hr", Lists.newArrayList(), false);
+                "Hr", "SuperSonic/Hr", Lists.newArrayList(), false);
         Organization sales = new Organization("3", "1",
-                "Sales", "Supersonic/Sales", Lists.newArrayList(), false);
+                "Sales", "SuperSonic/Sales", Lists.newArrayList(), false);
         Organization marketing = new Organization("4", "1",
-                "Marketing", "Supersonic/Marketing", Lists.newArrayList(), false);
+                "Marketing", "SuperSonic/Marketing", Lists.newArrayList(), false);
         List<Organization> subOrganization = Lists.newArrayList(hr, sales, marketing);
         superSonic.setSubOrganizations(subOrganization);
         return Lists.newArrayList(superSonic);
