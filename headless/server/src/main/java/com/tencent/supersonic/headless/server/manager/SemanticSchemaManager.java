@@ -131,19 +131,13 @@ public class SemanticSchemaManager {
             datasource.setTimePartType(TimePartType.of(d.getModelSourceTypeEnum().name()));
         }
         if (Objects.nonNull(d.getFields()) && !CollectionUtils.isEmpty(d.getFields())) {
-            Set<String> dimensions = datasource.getDimensions().stream().map(dd -> dd.getBizName())
-                    .collect(Collectors.toSet());
             Set<String> measures = datasource.getMeasures().stream().map(mm -> mm.getName())
                     .collect(Collectors.toSet());
-            Set<String> identifiers = datasource.getIdentifiers().stream().map(ii -> ii.getName())
-                    .collect(Collectors.toSet());
             for (Field f : d.getFields()) {
-                if (dimensions.contains(f.getFieldName()) || measures.contains(f.getFieldName())
-                        || identifiers.contains(f.getFieldName())) {
-                    continue;
+                if (!measures.contains(f.getFieldName())) {
+                    datasource.getMeasures()
+                            .add(Measure.builder().expr(f.getFieldName()).name(f.getFieldName()).agg("").build());
                 }
-                datasource.getMeasures()
-                        .add(Measure.builder().expr(f.getFieldName()).name(f.getFieldName()).agg("").build());
             }
         }
         return datasource;
