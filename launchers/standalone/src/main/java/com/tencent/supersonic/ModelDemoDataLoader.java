@@ -124,7 +124,7 @@ public class ModelDemoDataLoader {
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
         domainReq.setViewers(Arrays.asList("admin", "tom", "jack"));
-        domainReq.setViewOrgs(Collections.singletonList("admin"));
+        domainReq.setViewOrgs(Collections.singletonList("1"));
         domainReq.setAdmins(Collections.singletonList("admin"));
         domainReq.setAdminOrgs(Collections.emptyList());
         domainService.createDomain(domainReq, user);
@@ -138,7 +138,7 @@ public class ModelDemoDataLoader {
         modelReq.setDatabaseId(1L);
         modelReq.setDomainId(1L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
-        modelReq.setViewOrgs(Collections.singletonList("admin"));
+        modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
@@ -169,7 +169,7 @@ public class ModelDemoDataLoader {
         modelReq.setDescription("超音数PVUV统计");
         modelReq.setDatabaseId(1L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
-        modelReq.setViewOrgs(Collections.singletonList("admin"));
+        modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
         modelReq.setAdminOrgs(Collections.emptyList());
         List<Identify> identifiers = new ArrayList<>();
@@ -213,7 +213,7 @@ public class ModelDemoDataLoader {
         modelReq.setDescription("停留时长统计");
         modelReq.setDatabaseId(1L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
-        modelReq.setViewOrgs(Collections.singletonList("admin"));
+        modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
         modelReq.setAdminOrgs(Collections.emptyList());
         List<Identify> identifiers = new ArrayList<>();
@@ -278,7 +278,7 @@ public class ModelDemoDataLoader {
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
         domainReq.setViewers(Arrays.asList("admin", "tom", "jack"));
-        domainReq.setViewOrgs(Collections.singletonList("admin"));
+        domainReq.setViewOrgs(Collections.singletonList("1"));
         domainReq.setAdmins(Collections.singletonList("admin"));
         domainReq.setAdminOrgs(Collections.emptyList());
         domainService.createDomain(domainReq, user);
@@ -292,7 +292,7 @@ public class ModelDemoDataLoader {
         modelReq.setDatabaseId(1L);
         modelReq.setDomainId(2L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
-        modelReq.setViewOrgs(Collections.singletonList("admin"));
+        modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
