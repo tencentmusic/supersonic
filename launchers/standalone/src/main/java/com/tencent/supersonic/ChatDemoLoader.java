@@ -31,10 +31,6 @@ import com.tencent.supersonic.common.pojo.SysParameter;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.common.util.JsonUtil;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,6 +38,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -185,7 +186,7 @@ public class ChatDemoLoader implements CommandLineRunner {
 
         ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
         ChatDefaultConfigReq chatDefaultConfigDetail = new ChatDefaultConfigReq();
-        List<Long> dimensionIds0 = Collections.singletonList(3L);
+        List<Long> dimensionIds0 = new ArrayList<>();
         List<Long> metricIds0 = Arrays.asList(1L, 2L);
         chatDefaultConfigDetail.setDimensionIds(dimensionIds0);
         chatDefaultConfigDetail.setMetricIds(metricIds0);
@@ -198,7 +199,7 @@ public class ChatDemoLoader implements CommandLineRunner {
 
         ChatAggConfigReq chatAggConfig = new ChatAggConfigReq();
         ChatDefaultConfigReq chatDefaultConfigAgg = new ChatDefaultConfigReq();
-        List<Long> dimensionIds1 = Arrays.asList(3L);
+        List<Long> dimensionIds1 = new ArrayList<>();
         List<Long> metricIds1 = Arrays.asList(1L, 2L);
         chatDefaultConfigAgg.setDimensionIds(dimensionIds1);
         chatDefaultConfigAgg.setMetricIds(metricIds1);
@@ -224,8 +225,8 @@ public class ChatDemoLoader implements CommandLineRunner {
 
         ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
         ChatDefaultConfigReq chatDefaultConfigDetail = new ChatDefaultConfigReq();
-        List<Long> dimensionIds0 = Arrays.asList(4L, 5L);
-        List<Long> metricIds0 = Arrays.asList(3L);
+        List<Long> dimensionIds0 = Collections.singletonList(3L);
+        List<Long> metricIds0 = Collections.singletonList(4L);
         chatDefaultConfigDetail.setDimensionIds(dimensionIds0);
         chatDefaultConfigDetail.setMetricIds(metricIds0);
         chatDefaultConfigDetail.setUnit(7);
@@ -237,8 +238,8 @@ public class ChatDemoLoader implements CommandLineRunner {
 
         ChatAggConfigReq chatAggConfig = new ChatAggConfigReq();
         ChatDefaultConfigReq chatDefaultConfigAgg = new ChatDefaultConfigReq();
-        List<Long> dimensionIds1 = Arrays.asList(4L, 5L);
-        List<Long> metricIds1 = Arrays.asList(3L);
+        List<Long> dimensionIds1 = Collections.singletonList(3L);
+        List<Long> metricIds1 = Collections.singletonList(4L);
         chatDefaultConfigAgg.setDimensionIds(dimensionIds1);
         chatDefaultConfigAgg.setMetricIds(metricIds1);
         chatDefaultConfigAgg.setUnit(7);
@@ -263,8 +264,8 @@ public class ChatDemoLoader implements CommandLineRunner {
 
         ChatDetailConfigReq chatDetailConfig = new ChatDetailConfigReq();
         ChatDefaultConfigReq chatDefaultConfigDetail = new ChatDefaultConfigReq();
-        List<Long> dimensionIds0 = Arrays.asList(6L, 7L, 8L, 9L);
-        List<Long> metricIds0 = Arrays.asList(4L);
+        List<Long> dimensionIds0 = Arrays.asList(4L, 5L, 6L, 7L);
+        List<Long> metricIds0 = Arrays.asList(5L);
         chatDefaultConfigDetail.setDimensionIds(dimensionIds0);
         chatDefaultConfigDetail.setMetricIds(metricIds0);
         chatDefaultConfigDetail.setUnit(7);
@@ -276,8 +277,8 @@ public class ChatDemoLoader implements CommandLineRunner {
 
         ChatAggConfigReq chatAggConfig = new ChatAggConfigReq();
         ChatDefaultConfigReq chatDefaultConfigAgg = new ChatDefaultConfigReq();
-        List<Long> dimensionIds1 = Arrays.asList(6L, 7L, 8L, 9L);
-        List<Long> metricIds1 = Arrays.asList(4L);
+        List<Long> dimensionIds1 = Arrays.asList(4L, 4L, 6L, 7L);
+        List<Long> metricIds1 = Arrays.asList(5L);
         chatDefaultConfigAgg.setDimensionIds(dimensionIds1);
         chatDefaultConfigAgg.setMetricIds(metricIds1);
         chatDefaultConfigAgg.setUnit(7);

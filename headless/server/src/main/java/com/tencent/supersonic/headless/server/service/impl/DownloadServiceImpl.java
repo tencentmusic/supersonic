@@ -16,6 +16,7 @@ import com.tencent.supersonic.headless.api.request.BatchDownloadReq;
 import com.tencent.supersonic.headless.api.request.DownloadStructReq;
 import com.tencent.supersonic.headless.api.enums.SemanticType;
 import com.tencent.supersonic.headless.api.request.ModelSchemaFilterReq;
+import com.tencent.supersonic.headless.api.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
@@ -72,7 +73,8 @@ public class DownloadServiceImpl implements DownloadService {
         String fileName = String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
         File file = FileUtils.createTmpFile(fileName);
         try {
-            SemanticQueryResp queryResult = queryService.queryByStructWithAuth(downloadStructReq, user);
+            QuerySqlReq querySqlReq = downloadStructReq.convert(downloadStructReq);
+            SemanticQueryResp queryResult = (SemanticQueryResp) queryService.queryBySql(querySqlReq, user);
             DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
             EasyExcel.write(file).sheet("Sheet1").head(dataDownload.getHeaders()).doWrite(dataDownload.getData());
         } catch (RuntimeException e) {

@@ -19,6 +19,7 @@ import com.tencent.supersonic.headless.api.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
+import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.Field;
 import com.tencent.supersonic.headless.api.pojo.FieldParam;
 import com.tencent.supersonic.headless.api.pojo.Identify;
@@ -29,6 +30,7 @@ import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
 import com.tencent.supersonic.headless.api.pojo.MetricParam;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
+import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.request.DimensionReq;
 import com.tencent.supersonic.headless.api.request.DomainReq;
@@ -88,6 +90,7 @@ public class ModelDemoDataLoader {
             addModel_4();
             updateDimension();
             updateMetric();
+            updateMetric_pv();
             addAuthGroup_1();
             addAuthGroup_2();
         } catch (Exception e) {
@@ -140,7 +143,7 @@ public class ModelDemoDataLoader {
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Identify> identifiers = new ArrayList<>();
-        identifiers.add(new Identify("用户", IdentifyType.primary.name(), "user_name"));
+        identifiers.add(new Identify("用户", IdentifyType.primary.name(), "user_name", 1));
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
@@ -171,7 +174,7 @@ public class ModelDemoDataLoader {
         modelReq.setAdminOrgs(Collections.emptyList());
         List<Identify> identifiers = new ArrayList<>();
         ModelDetail modelDetail = new ModelDetail();
-        identifiers.add(new Identify("用户名", IdentifyType.primary.name(), "s2_pv_uv_statis_user_name"));
+        identifiers.add(new Identify("用户名", IdentifyType.primary.name(), "user_name", 0));
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
@@ -189,13 +192,13 @@ public class ModelDemoDataLoader {
         measures.add(measure2);
         modelDetail.setMeasures(measures);
         List<Field> fields = Lists.newArrayList();
-        fields.add(Field.builder().fieldName("s2_pv_uv_statis_user_name").dataType("Varchar").build());
+        fields.add(Field.builder().fieldName("user_name").dataType("Varchar").build());
         fields.add(Field.builder().fieldName("imp_date").dataType("Date").build());
         fields.add(Field.builder().fieldName("page").dataType("Varchar").build());
         fields.add(Field.builder().fieldName("pv").dataType("Long").build());
         fields.add(Field.builder().fieldName("user_id").dataType("Varchar").build());
         modelDetail.setFields(fields);
-        modelDetail.setSqlQuery("SELECT imp_date, user_name as s2_pv_uv_statis_user_name, page, 1 as pv, "
+        modelDetail.setSqlQuery("SELECT imp_date, user_name, page, 1 as pv, "
                 + "user_name as user_id FROM s2_pv_uv_statis");
         modelDetail.setQueryType("sql_query");
         modelReq.setDomainId(1L);
@@ -215,7 +218,7 @@ public class ModelDemoDataLoader {
         modelReq.setAdminOrgs(Collections.emptyList());
         List<Identify> identifiers = new ArrayList<>();
         ModelDetail modelDetail = new ModelDetail();
-        identifiers.add(new Identify("用户名称", IdentifyType.primary.name(), "stay_hours_user_name"));
+        identifiers.add(new Identify("用户", IdentifyType.primary.name(), "user_name", 0));
         modelDetail.setIdentifiers(identifiers);
 
         List<Dim> dimensions = new ArrayList<>();
@@ -232,13 +235,12 @@ public class ModelDemoDataLoader {
         measures.add(measure1);
         modelDetail.setMeasures(measures);
         List<Field> fields = Lists.newArrayList();
-        fields.add(Field.builder().fieldName("stay_hours_user_name").dataType("Varchar").build());
+        fields.add(Field.builder().fieldName("user_name").dataType("Varchar").build());
         fields.add(Field.builder().fieldName("imp_date").dataType("Date").build());
         fields.add(Field.builder().fieldName("page").dataType("Varchar").build());
         fields.add(Field.builder().fieldName("stay_hours").dataType("Double").build());
         modelDetail.setFields(fields);
-        modelDetail.setSqlQuery(
-                "select imp_date,user_name as stay_hours_user_name,stay_hours,page from s2_stay_time_statis");
+        modelDetail.setSqlQuery("select imp_date,user_name,stay_hours,page from s2_stay_time_statis");
         modelDetail.setQueryType("sql_query");
         modelReq.setDomainId(1L);
         modelReq.setModelDetail(modelDetail);
@@ -247,7 +249,7 @@ public class ModelDemoDataLoader {
 
     public void addModelRela_1() {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(new JoinCondition("user_name", "s2_pv_uv_statis_user_name", FilterOperatorEnum.EQUALS));
+        joinConditions.add(new JoinCondition("user_name", "user_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(1L);
         modelRelaReq.setFromModelId(1L);
@@ -259,7 +261,7 @@ public class ModelDemoDataLoader {
 
     public void addModelRela_2() {
         List<JoinCondition> joinConditions = Lists.newArrayList();
-        joinConditions.add(new JoinCondition("user_name", "stay_hours_user_name", FilterOperatorEnum.EQUALS));
+        joinConditions.add(new JoinCondition("user_name", "user_name", FilterOperatorEnum.EQUALS));
         ModelRela modelRelaReq = new ModelRela();
         modelRelaReq.setDomainId(1L);
         modelRelaReq.setFromModelId(1L);
@@ -295,7 +297,7 @@ public class ModelDemoDataLoader {
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Identify> identifiers = new ArrayList<>();
-        Identify identify = new Identify("歌手名", IdentifyType.primary.name(), "singer_name");
+        Identify identify = new Identify("歌手名", IdentifyType.primary.name(), "singer_name", 1);
         identify.setEntityNames(Lists.newArrayList("歌手", "艺人"));
         identifiers.add(identify);
         modelDetail.setIdentifiers(identifiers);
@@ -325,9 +327,8 @@ public class ModelDemoDataLoader {
 
     public void updateDimension() throws Exception {
         DimensionReq dimensionReq = new DimensionReq();
-        dimensionReq.setModelId(1L);
         dimensionReq.setType(DimensionType.categorical.name());
-        dimensionReq.setId(4L);
+        dimensionReq.setId(3L);
         dimensionReq.setName("页面");
         dimensionReq.setBizName("page");
         dimensionReq.setModelId(3L);
@@ -359,6 +360,26 @@ public class ModelDemoDataLoader {
         metricTypeParams.setMeasures(measures);
         metricReq.setMetricDefineByMeasureParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
+        metricReq.setRelateDimension(getRelateDimension(Lists.newArrayList(1L, 2L)));
+        metricService.updateMetric(metricReq, user);
+    }
+
+    public void updateMetric_pv() throws Exception {
+        MetricReq metricReq = new MetricReq();
+        metricReq.setModelId(2L);
+        metricReq.setId(1L);
+        metricReq.setName("访问次数");
+        metricReq.setBizName("pv");
+        MetricDefineByMeasureParams metricTypeParams = new MetricDefineByMeasureParams();
+        metricTypeParams.setExpr("s2_pv_uv_statis_pv");
+        List<MeasureParam> measures = new ArrayList<>();
+        MeasureParam measure = new MeasureParam("s2_pv_uv_statis_pv",
+                "", AggOperatorEnum.SUM.getOperator());
+        measures.add(measure);
+        metricTypeParams.setMeasures(measures);
+        metricReq.setMetricDefineByMeasureParams(metricTypeParams);
+        metricReq.setMetricDefineType(MetricDefineType.MEASURE);
+        metricReq.setRelateDimension(getRelateDimension(Lists.newArrayList(1L, 2L)));
         metricService.updateMetric(metricReq, user);
     }
 
@@ -373,10 +394,15 @@ public class ModelDemoDataLoader {
         MetricDefineByFieldParams metricTypeParams = new MetricDefineByFieldParams();
         metricTypeParams.setExpr("count(distinct user_id)");
         List<FieldParam> fieldParams = new ArrayList<>();
-        fieldParams.add(FieldParam.builder().fieldName("user_id").build());
+        fieldParams.add(new FieldParam("user_id"));
         metricTypeParams.setFields(fieldParams);
+        RelateDimension relateDimension = new RelateDimension();
+        relateDimension.setDrillDownDimensions(Lists.newArrayList(
+                new DrillDownDimension(1L)));
+        metricReq.setRelateDimension(relateDimension);
         metricReq.setMetricDefineByFieldParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.FIELD);
+        metricReq.setRelateDimension(getRelateDimension(Lists.newArrayList(1L)));
         metricService.createMetric(metricReq, user);
     }
 
@@ -399,6 +425,7 @@ public class ModelDemoDataLoader {
         metricTypeParams.setMetrics(metrics);
         metricReq.setMetricDefineByMetricParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.METRIC);
+        metricReq.setRelateDimension(getRelateDimension(Lists.newArrayList(1L)));
         metricService.createMetric(metricReq, user);
     }
 
@@ -431,11 +458,19 @@ public class ModelDemoDataLoader {
         authRules.add(authRule);
 
         authGroupReq.setAuthRules(authRules);
-        authGroupReq.setDimensionFilters(Collections.singletonList("department in ('sales')"));
-        authGroupReq.setDimensionFilterDescription("部门 in [sales]");
+        authGroupReq.setDimensionFilters(Collections.singletonList("user_name = 'tom'"));
+        authGroupReq.setDimensionFilterDescription("用户名='tom'");
         authGroupReq.setAuthorizedUsers(Collections.singletonList("tom"));
         authGroupReq.setAuthorizedDepartmentIds(Collections.emptyList());
         authService.addOrUpdateAuthGroup(authGroupReq);
+    }
+
+    private RelateDimension getRelateDimension(List<Long> dimensionIds) {
+        RelateDimension relateDimension = new RelateDimension();
+        for (Long id : dimensionIds) {
+            relateDimension.getDrillDownDimensions().add(new DrillDownDimension(id));
+        }
+        return relateDimension;
     }
 
 }

@@ -7,7 +7,6 @@ import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.enums.DimensionType;
-import com.tencent.supersonic.headless.api.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
@@ -153,18 +152,38 @@ public class ModelConverter {
                 && !dim.getType().equalsIgnoreCase(DimensionType.time.name());
     }
 
+    private static boolean isCreateDimension(Identify identify) {
+        return identify.getIsCreateDimension() == 1
+                && StringUtils.isNotBlank(identify.getName());
+    }
+
     private static boolean isCreateMetric(Measure measure) {
         return measure.getIsCreateMetric() == 1
                 && StringUtils.isNotBlank(measure.getName());
     }
 
     public static List<Dim> getDimToCreateDimension(ModelDetail modelDetail) {
+        if (CollectionUtils.isEmpty(modelDetail.getDimensions())) {
+            return Lists.newArrayList();
+        }
         return modelDetail.getDimensions().stream()
                 .filter(ModelConverter::isCreateDimension)
                 .collect(Collectors.toList());
     }
 
+    public static List<Identify> getIdentityToCreateDimension(ModelDetail modelDetail) {
+        if (CollectionUtils.isEmpty(modelDetail.getIdentifiers())) {
+            return Lists.newArrayList();
+        }
+        return modelDetail.getIdentifiers().stream()
+                .filter(ModelConverter::isCreateDimension)
+                .collect(Collectors.toList());
+    }
+
     public static List<Measure> getMeasureToCreateMetric(ModelDetail modelDetail) {
+        if (CollectionUtils.isEmpty(modelDetail.getMeasures())) {
+            return Lists.newArrayList();
+        }
         return modelDetail.getMeasures().stream()
                 .filter(ModelConverter::isCreateMetric)
                 .collect(Collectors.toList());
@@ -179,13 +198,11 @@ public class ModelConverter {
             dimensionReqs = dims.stream().filter(dim -> StringUtils.isNotBlank(dim.getName()))
                     .map(dim -> convert(dim, modelDO)).collect(Collectors.toList());
         }
-        List<Identify> identifies = modelDetail.getIdentifiers();
+        List<Identify> identifies = getIdentityToCreateDimension(modelDetail);
         if (CollectionUtils.isEmpty(identifies)) {
             return dimensionReqs;
         }
         dimensionReqs.addAll(identifies.stream()
-                .filter(i -> i.getType().equalsIgnoreCase(IdentifyType.primary.name()))
-                .filter(i -> StringUtils.isNotBlank(i.getName()))
                 .map(identify -> convert(identify, modelDO)).collect(Collectors.toList()));
         return dimensionReqs;
     }

@@ -1,8 +1,5 @@
 package com.tencent.supersonic.integration;
 
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
-
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
@@ -15,13 +12,17 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.util.DataUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.Assert;
-import org.junit.Test;
+
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
 
 
 public class MetricQueryTest extends BaseQueryTest {
@@ -39,6 +40,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
 
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
                 FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
@@ -73,7 +75,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
-
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setQueryType(QueryType.METRIC);
 
@@ -102,6 +104,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
@@ -122,7 +125,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedResult.setQueryMode(MetricFilterQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
-
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         List<String> list = new ArrayList<>();
         list.add("alice");
         list.add("lucy");
@@ -147,9 +150,9 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(SUM);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户"));
-        expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户名"));
-        expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户名称"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(3, DateConf.DateMode.RECENT, "DAY"));
         expectedParseInfo.setQueryType(QueryType.METRIC);
@@ -168,6 +171,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(SUM);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
@@ -193,7 +197,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
-
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
                 FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
 

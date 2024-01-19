@@ -1,7 +1,5 @@
 package com.tencent.supersonic.integration;
 
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
-
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -13,15 +11,19 @@ import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.util.DataUtils;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Test;
+
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
 
 public class TagQueryTest extends BaseQueryTest {
 
     @Test
     public void queryTest_metric_tag_query() throws Exception {
-        QueryResult actualResult = submitNewChat("艺人周杰伦的播放量", null);
+        MockConfiguration.mockTagAgent(agentService);
+        QueryResult actualResult = submitNewChat("艺人周杰伦的播放量", DataUtils.tagAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -30,7 +32,7 @@ public class TagQueryTest extends BaseQueryTest {
         expectedResult.setQueryMode(MetricTagQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
 
-        QueryFilter dimensionFilter = DataUtils.getFilter("singer_name", FilterOperatorEnum.EQUALS, "周杰伦", "歌手名", 9L);
+        QueryFilter dimensionFilter = DataUtils.getFilter("singer_name", FilterOperatorEnum.EQUALS, "周杰伦", "歌手名", 7L);
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         SchemaElement metric = SchemaElement.builder().name("播放量").build();
@@ -44,7 +46,8 @@ public class TagQueryTest extends BaseQueryTest {
 
     @Test
     public void queryTest_tag_list_filter() throws Exception {
-        QueryResult actualResult = submitNewChat("爱情、流行类型的艺人", null);
+        MockConfiguration.mockTagAgent(agentService);
+        QueryResult actualResult = submitNewChat("爱情、流行类型的艺人", DataUtils.tagAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -56,7 +59,7 @@ public class TagQueryTest extends BaseQueryTest {
         List<String> list = new ArrayList<>();
         list.add("流行");
         QueryFilter dimensionFilter = DataUtils.getFilter("genre", FilterOperatorEnum.EQUALS,
-                "流行", "风格", 8L);
+                "流行", "风格", 6L);
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
 
         SchemaElement metric = SchemaElement.builder().name("播放量").build();
