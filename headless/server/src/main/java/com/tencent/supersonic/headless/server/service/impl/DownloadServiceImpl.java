@@ -73,7 +73,7 @@ public class DownloadServiceImpl implements DownloadService {
         String fileName = String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
         File file = FileUtils.createTmpFile(fileName);
         try {
-            QuerySqlReq querySqlReq = downloadStructReq.convert(downloadStructReq);
+            QuerySqlReq querySqlReq = downloadStructReq.convert(downloadStructReq, true);
             SemanticQueryResp queryResult = (SemanticQueryResp) queryService.queryBySql(querySqlReq, user);
             DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
             EasyExcel.write(file).sheet("Sheet1").head(dataDownload.getHeaders()).doWrite(dataDownload.getData());

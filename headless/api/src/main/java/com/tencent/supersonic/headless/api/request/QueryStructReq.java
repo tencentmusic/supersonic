@@ -149,16 +149,20 @@ public class QueryStructReq extends SemanticQueryReq {
         return sb.toString();
     }
 
+    public QuerySqlReq convert(QueryStructReq queryStructReq) {
+        return convert(queryStructReq, false);
+    }
+
     /**
      * convert queryStructReq to QueryS2QLReq
      *
      * @param queryStructReq
      * @return
      */
-    public QuerySqlReq convert(QueryStructReq queryStructReq) {
+    public QuerySqlReq convert(QueryStructReq queryStructReq, boolean isBizName) {
         String sql = null;
         try {
-            sql = buildSql(queryStructReq);
+            sql = buildSql(queryStructReq, isBizName);
         } catch (Exception e) {
             log.error("buildSql error", e);
         }
@@ -170,7 +174,7 @@ public class QueryStructReq extends SemanticQueryReq {
         return result;
     }
 
-    private String buildSql(QueryStructReq queryStructReq) throws JSQLParserException {
+    private String buildSql(QueryStructReq queryStructReq, boolean isBizName) throws JSQLParserException {
         Select select = new Select();
         //1.Set the select items (columns)
         PlainSelect plainSelect = new PlainSelect();
@@ -249,7 +253,7 @@ public class QueryStructReq extends SemanticQueryReq {
         //6.Set where
         List<Filter> dimensionFilters = queryStructReq.getDimensionFilters();
         SqlFilterUtils sqlFilterUtils = ContextUtils.getBean(SqlFilterUtils.class);
-        String whereClause = sqlFilterUtils.getWhereClause(dimensionFilters);
+        String whereClause = sqlFilterUtils.getWhereClause(dimensionFilters, isBizName);
 
         String sql = select.toString();
         if (StringUtils.isNotBlank(whereClause)) {
