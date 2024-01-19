@@ -161,10 +161,10 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   };
 
   const columns: ProColumns[] = [
-    {
-      dataIndex: 'id',
-      title: 'ID',
-    },
+    // {
+    //   dataIndex: 'id',
+    //   title: 'ID',
+    // },
     {
       dataIndex: 'name',
       title: '指标',

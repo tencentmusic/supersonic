@@ -51,16 +51,16 @@ const PermissionCreateForm: ForwardRefRenderFunction<any, Props> = (
         <FormItem name="name" label="名称" rules={[{ required: true, message: '请输入名称' }]}>
           <Input placeholder="请输入名称" />
         </FormItem>
-        {APP_TARGET === 'inner' && (
-          <FormItem name="authorizedDepartmentIds" label="按组织">
-            <SelectPartner
-              type="selectedDepartment"
-              treeSelectProps={{
-                placeholder: '请选择需要授权的部门',
-              }}
-            />
-          </FormItem>
-        )}
+        {/* {APP_TARGET === 'inner' && ( */}
+        <FormItem name="authorizedDepartmentIds" label="按组织">
+          <SelectPartner
+            type="selectedDepartment"
+            treeSelectProps={{
+              placeholder: '请选择需要授权的部门',
+            }}
+          />
+        </FormItem>
+        {/* )} */}
 
         <FormItem name="authorizedUsers" label="按个人">
           <SelectTMEPerson placeholder="请选择需要授权的个人" />
