@@ -1,5 +1,7 @@
 package com.tencent.supersonic.integration;
 
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -8,19 +10,18 @@ import com.tencent.supersonic.chat.core.query.rule.metric.MetricTagQuery;
 import com.tencent.supersonic.chat.core.query.rule.tag.TagFilterQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.util.DataUtils;
-import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+import org.junit.Test;
 
 public class TagQueryTest extends BaseQueryTest {
 
     @Test
     public void queryTest_metric_tag_query() throws Exception {
-        QueryResult actualResult = submitNewChat("艺人周杰伦的播放量");
+        QueryResult actualResult = submitNewChat("艺人周杰伦的播放量", null);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -43,7 +44,7 @@ public class TagQueryTest extends BaseQueryTest {
 
     @Test
     public void queryTest_tag_list_filter() throws Exception {
-        QueryResult actualResult = submitNewChat("爱情、流行类型的艺人");
+        QueryResult actualResult = submitNewChat("爱情、流行类型的艺人", null);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();

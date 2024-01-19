@@ -23,7 +23,7 @@ public class MapperTest extends BaseQueryTest {
         QueryReq queryContextReq = DataUtils.getQueryContextReq(10, "艺人周杰伦的播放量");
         queryContextReq.setAgentId(1);
 
-        QueryResult actualResult = submitNewChat("艺人周杰伦的播放量");
+        QueryResult actualResult = submitNewChat("艺人周杰伦的播放量",1);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();

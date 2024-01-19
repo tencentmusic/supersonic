@@ -80,9 +80,9 @@ public class PluginRecognizeTest extends BasePluginTest {
     public void pluginRecognizeWithAgent() {
         MockConfiguration.mockEmbeddingRecognize(pluginManager, "alice最近的访问情况怎么样", "1");
         MockConfiguration.mockEmbeddingUrl(embeddingConfig);
-        MockConfiguration.mockAgent(agentService);
+        MockConfiguration.mockMetricAgent(agentService);
         QueryReq queryContextReq = DataUtils.getQueryReqWithAgent(1000, "alice最近的访问情况怎么样",
-                DataUtils.getAgent().getId());
+                DataUtils.getMetricAgent().getId());
         ParseResp parseResp = queryService.performParsing(queryContextReq);
         Assert.assertTrue(parseResp.getSelectedParses() != null
                 && parseResp.getSelectedParses().size() > 0);
