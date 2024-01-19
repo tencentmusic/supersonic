@@ -90,6 +90,7 @@ import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
@@ -197,7 +198,6 @@ public class QueryServiceImpl implements QueryService {
         List<Plugin> pluginList = pluginService.getPluginList();
 
         QueryContext queryCtx = QueryContext.builder()
-                .request(queryReq)
                 .queryFilters(queryReq.getQueryFilters())
                 .semanticSchema(semanticSchema)
                 .candidateQueries(new ArrayList<>())
@@ -207,6 +207,7 @@ public class QueryServiceImpl implements QueryService {
                 .nameToPlugin(nameToPlugin)
                 .pluginList(pluginList)
                 .build();
+        BeanUtils.copyProperties(queryReq, queryCtx);
         return queryCtx;
     }
 

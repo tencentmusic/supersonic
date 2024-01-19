@@ -88,7 +88,7 @@ public class MetricServiceImplTest {
                 new MeasureParam("s2_pv", "department='hr'"),
                 new MeasureParam("s2_uv", "department='hr'")));
         typeParams.setExpr("s2_pv/s2_uv");
-        metricReq.setTypeParams(typeParams);
+        metricReq.setMetricDefineByMeasureParams(typeParams);
         metricReq.setTags(Lists.newArrayList("核心指标"));
         metricReq.setRelateDimension(
                 RelateDimension.builder().drillDownDimensions(Lists.newArrayList(
@@ -119,7 +119,7 @@ public class MetricServiceImplTest {
                 new MeasureParam("s2_pv", "department='hr'"),
                 new MeasureParam("s2_uv", "department='hr'")));
         typeParams.setExpr("s2_pv/s2_uv");
-        metricResp.setTypeParams(typeParams);
+        metricResp.setMetricDefineByMeasureParams(typeParams);
         metricResp.setTags(Lists.newArrayList("核心指标"));
         metricResp.setRelateDimension(
                 RelateDimension.builder().drillDownDimensions(Lists.newArrayList(
@@ -146,7 +146,7 @@ public class MetricServiceImplTest {
                 new MeasureParam("s2_pv", "department='hr'"),
                 new MeasureParam("s2_uv", "department='hr'")));
         typeParams.setExpr("s2_pv/s2_uv");
-        metricReq.setTypeParams(typeParams);
+        metricReq.setMetricDefineByMeasureParams(typeParams);
         return metricReq;
     }
 

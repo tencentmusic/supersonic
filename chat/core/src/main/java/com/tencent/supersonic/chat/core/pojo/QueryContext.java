@@ -1,10 +1,10 @@
 package com.tencent.supersonic.chat.core.pojo;
 
+import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.SchemaModelClusterMapInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
 import com.tencent.supersonic.chat.core.agent.Agent;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
@@ -27,7 +27,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class QueryContext {
 
-    private QueryReq request;
+    private String queryText;
+    private Integer chatId;
+    private Long modelId;
+    private User user;
+    private boolean saveAnswer = true;
+    private Integer agentId;
     private QueryFilters queryFilters;
     private List<SemanticQuery> candidateQueries = new ArrayList<>();
     private SchemaMapInfo mapInfo = new SchemaMapInfo();

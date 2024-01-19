@@ -2,7 +2,6 @@ package com.tencent.supersonic.chat.core.mapper;
 
 import com.hankcs.hanlp.algorithm.EditDistance;
 import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.core.agent.Agent;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
 import com.tencent.supersonic.chat.core.utils.NatureHelper;
@@ -82,9 +81,8 @@ public class MapperHelper {
                 detectSegment.length());
     }
 
-    public Set<Long> getModelIds(QueryReq request, Agent agent) {
+    public Set<Long> getModelIds(Long modelId, Agent agent) {
 
-        Long modelId = request.getModelId();
         Set<Long> detectModelIds = new HashSet<>();
         if (Objects.nonNull(agent)) {
             detectModelIds = agent.getModelIds(null);

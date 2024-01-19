@@ -116,7 +116,7 @@ public class HeuristicModelResolver implements ModelResolver {
     public String resolve(QueryContext queryContext, ChatContext chatCtx, Set<Long> restrictiveModels) {
         SchemaModelClusterMapInfo mapInfo = queryContext.getModelClusterMapInfo();
         Set<String> matchedModelClusters = mapInfo.getElementMatchesByModelIds(restrictiveModels).keySet();
-        Long modelId = queryContext.getRequest().getModelId();
+        Long modelId = queryContext.getModelId();
         if (Objects.nonNull(modelId) && modelId > 0) {
             if (CollectionUtils.isEmpty(restrictiveModels) || restrictiveModels.contains(modelId)) {
                 return getModelClusterByModelId(modelId, matchedModelClusters);

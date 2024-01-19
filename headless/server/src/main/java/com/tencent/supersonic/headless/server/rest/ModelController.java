@@ -3,10 +3,12 @@ package com.tencent.supersonic.headless.server.rest;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.headless.api.request.FieldRemovedReq;
 import com.tencent.supersonic.headless.api.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.request.ModelReq;
 import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
+import com.tencent.supersonic.headless.api.response.UnAvailableItemResp;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -90,6 +92,11 @@ public class ModelController {
         User user = UserHolder.findUser(request, response);
         modelService.batchUpdateStatus(metaBatchReq, user);
         return true;
+    }
+
+    @PostMapping("/getUnAvailableItem")
+    public UnAvailableItemResp getUnAvailableItem(@RequestBody FieldRemovedReq fieldRemovedReq) {
+        return modelService.getUnAvailableItem(fieldRemovedReq);
     }
 
 }

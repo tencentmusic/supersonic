@@ -1,15 +1,14 @@
 package com.tencent.supersonic.chat.server.persistence.repository;
 
 import com.github.pagehelper.PageInfo;
-import com.tencent.supersonic.chat.core.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
+import com.tencent.supersonic.chat.core.pojo.ChatContext;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
-
 import java.util.List;
 
 public interface ChatQueryRepository {
@@ -22,15 +21,12 @@ public interface ChatQueryRepository {
 
     List<QueryResp> queryShowCase(PageQueryInfoReq pageQueryInfoCommend, int agentId);
 
-    void updateChatParseInfo(List<ChatParseDO> chatParseDOS);
-
     ChatQueryDO getLastChatQuery(long chatId);
 
     int updateChatQuery(ChatQueryDO chatQueryDO);
 
-    List<ChatParseDO> batchSaveParseInfo(ChatContext chatCtx, QueryReq queryReq,
-                               ParseResp parseResult,
-                               List<SemanticParseInfo> candidateParses);
+    List<ChatParseDO> batchSaveParseInfo(ChatContext chatCtx, QueryContext queryContext,
+            ParseResp parseResult, List<SemanticParseInfo> candidateParses);
 
     ChatParseDO getParseInfo(Long questionId, int parseId);
 

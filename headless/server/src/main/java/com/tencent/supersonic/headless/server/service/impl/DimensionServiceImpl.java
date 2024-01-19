@@ -215,11 +215,27 @@ public class DimensionServiceImpl implements DimensionService {
         DimensionFilter dimensionFilter = new DimensionFilter();
         BeanUtils.copyProperties(metaFilter, dimensionFilter);
         List<DimensionDO> dimensionDOS = dimensionRepository.getDimension(dimensionFilter);
-        return convertList(dimensionDOS, modelService.getModelMap());
+        List<DimensionResp> dimensionResps = convertList(dimensionDOS, modelService.getModelMap());
+        if (!CollectionUtils.isEmpty(metaFilter.getFieldsDepend())) {
+            return filterByField(dimensionResps, metaFilter.getFieldsDepend());
+        }
+        return dimensionResps;
     }
 
     private List<DimensionResp> getDimensions(Long modelId) {
         return getDimensions(new MetaFilter(Lists.newArrayList(modelId)));
+    }
+
+    private List<DimensionResp> filterByField(List<DimensionResp> dimensionResps, List<String> fields) {
+        List<DimensionResp> dimensionFiltered = Lists.newArrayList();
+        for (DimensionResp dimensionResp : dimensionResps) {
+            for (String field : fields) {
+                if (dimensionResp.getExpr().contains(field)) {
+                    dimensionFiltered.add(dimensionResp);
+                }
+            }
+        }
+        return dimensionFiltered;
     }
 
     @Override

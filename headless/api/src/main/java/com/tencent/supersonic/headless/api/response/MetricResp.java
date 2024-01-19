@@ -10,15 +10,16 @@ import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
+import lombok.Data;
+import lombok.ToString;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.Data;
-import lombok.ToString;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 
 @Data
@@ -52,7 +53,7 @@ public class MetricResp extends SchemaItem {
 
     private MetricDefineType metricDefineType = MetricDefineType.MEASURE;
 
-    private MetricDefineByMeasureParams typeParams;
+    private MetricDefineByMeasureParams metricDefineByMeasureParams;
 
     private MetricDefineByFieldParams metricDefineByFieldParams;
 
@@ -77,9 +78,20 @@ public class MetricResp extends SchemaItem {
     }
 
     public String getDefaultAgg() {
-        if (typeParams != null
-                && CollectionUtils.isNotEmpty(typeParams.getMeasures())) {
-            return typeParams.getMeasures().get(0).getAgg();
+        if (metricDefineByMeasureParams != null
+                && CollectionUtils.isNotEmpty(metricDefineByMeasureParams.getMeasures())) {
+            return metricDefineByMeasureParams.getMeasures().get(0).getAgg();
+        }
+        return "";
+    }
+
+    public String getExpr() {
+        if (MetricDefineType.MEASURE.equals(metricDefineType)) {
+            return metricDefineByMeasureParams.getExpr();
+        } else if (MetricDefineType.METRIC.equals(metricDefineType)) {
+            return metricDefineByMetricParams.getExpr();
+        } else if (MetricDefineType.FIELD.equals(metricDefineType)) {
+            return metricDefineByFieldParams.getExpr();
         }
         return "";
     }

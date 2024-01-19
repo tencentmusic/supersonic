@@ -40,7 +40,7 @@ public class MetricController {
         this.metricService = metricService;
     }
 
-    @PostMapping("/creatExprMetric")
+    @PostMapping("/createMetric")
     public MetricResp createMetric(@RequestBody MetricReq metricReq,
                                    HttpServletRequest request,
                                    HttpServletResponse response) throws Exception {
@@ -48,7 +48,7 @@ public class MetricController {
         return metricService.createMetric(metricReq, user);
     }
 
-    @PostMapping("/updateExprMetric")
+    @PostMapping("/updateMetric")
     public MetricResp updateMetric(@RequestBody MetricReq metricReq,
                                 HttpServletRequest request,
                                 HttpServletResponse response) throws Exception {
