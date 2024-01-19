@@ -18,11 +18,9 @@ import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 
 public class DataUtils {
 
-    private static final User user_test = User.getFakeUser();
-
     public static final Integer metricAgentId = 1;
     public static final Integer tagAgentId = 2;
-
+    private static final User user_test = User.getFakeUser();
     public static User getUser() {
         return user_test;
     }
