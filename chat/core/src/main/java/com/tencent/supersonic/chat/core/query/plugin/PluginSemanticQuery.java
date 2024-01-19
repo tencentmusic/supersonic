@@ -7,7 +7,6 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.core.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.core.query.BaseSemanticQuery;
 import lombok.extern.slf4j.Slf4j;
@@ -31,11 +30,10 @@ public abstract class PluginSemanticQuery extends BaseSemanticQuery {
 
     private Map<Long, Object> getFilterMap(PluginParseResult pluginParseResult) {
         Map<Long, Object> map = new HashMap<>();
-        QueryReq queryReq = pluginParseResult.getRequest();
-        if (queryReq == null || queryReq.getQueryFilters() == null) {
+        QueryFilters queryFilters = pluginParseResult.getQueryFilters();
+        if (queryFilters == null) {
             return map;
         }
-        QueryFilters queryFilters = queryReq.getQueryFilters();
         List<QueryFilter> queryFilterList = queryFilters.getFilters();
         if (CollectionUtils.isEmpty(queryFilterList)) {
             return map;

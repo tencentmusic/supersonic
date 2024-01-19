@@ -42,7 +42,7 @@ public class EmbeddingRecallParser extends PluginParser {
 
     @Override
     public PluginRecallResult recallPlugin(QueryContext queryContext) {
-        String text = queryContext.getRequest().getQueryText();
+        String text = queryContext.getQueryText();
         List<Retrieval> embeddingRetrievals = embeddingRecall(text);
         if (CollectionUtils.isEmpty(embeddingRetrievals)) {
             return null;
@@ -63,7 +63,7 @@ public class EmbeddingRecallParser extends PluginParser {
                 }
                 plugin.setParseMode(ParseMode.EMBEDDING_RECALL);
                 double distance = embeddingRetrieval.getDistance();
-                double score = queryContext.getRequest().getQueryText().length() * (1 - distance);
+                double score = queryContext.getQueryText().length() * (1 - distance);
                 return PluginRecallResult.builder()
                         .plugin(plugin).modelIds(modelList).score(score).distance(distance).build();
             }

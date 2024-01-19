@@ -31,7 +31,7 @@ public class QueryTypeParser implements SemanticParser {
     public void parse(QueryContext queryContext, ChatContext chatContext) {
 
         List<SemanticQuery> candidateQueries = queryContext.getCandidateQueries();
-        User user = queryContext.getRequest().getUser();
+        User user = queryContext.getUser();
 
         for (SemanticQuery semanticQuery : candidateQueries) {
             // 1.init S2SQL

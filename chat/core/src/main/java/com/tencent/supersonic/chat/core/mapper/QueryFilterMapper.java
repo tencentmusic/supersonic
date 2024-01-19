@@ -1,15 +1,14 @@
 package com.tencent.supersonic.chat.core.mapper;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.core.knowledge.builder.BaseWordBuilder;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +23,7 @@ public class QueryFilterMapper implements SchemaMapper {
 
     @Override
     public void map(QueryContext queryContext) {
-        QueryReq queryReq = queryContext.getRequest();
-        Long modelId = queryReq.getModelId();
+        Long modelId = queryContext.getModelId();
         if (modelId == null || modelId <= 0) {
             return;
         }
@@ -62,7 +60,7 @@ public class QueryFilterMapper implements SchemaMapper {
                     .name(String.valueOf(filter.getValue()))
                     .type(SchemaElementType.VALUE)
                     .bizName(filter.getBizName())
-                    .model(queryContext.getRequest().getModelId())
+                    .model(queryContext.getModelId())
                     .build();
             SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
                     .element(element)

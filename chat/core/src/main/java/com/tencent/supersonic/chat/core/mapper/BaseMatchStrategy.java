@@ -28,7 +28,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
 
     @Override
     public Map<MatchText, List<T>> match(QueryContext queryContext, List<Term> terms, Set<Long> detectModelIds) {
-        String text = queryContext.getRequest().getQueryText();
+        String text = queryContext.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
         }
@@ -44,7 +44,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
 
     public List<T> detect(QueryContext queryContext, List<Term> terms, Set<Long> detectModelIds) {
         Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(terms);
-        String text = queryContext.getRequest().getQueryText();
+        String text = queryContext.getQueryText();
         Set<T> results = new HashSet<>();
 
         Set<String> detectSegments = new HashSet<>();
@@ -102,7 +102,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
     }
 
     public List<T> getMatches(QueryContext queryContext, List<Term> terms) {
-        Set<Long> detectModelIds = mapperHelper.getModelIds(queryContext.getRequest(), queryContext.getAgent());
+        Set<Long> detectModelIds = mapperHelper.getModelIds(queryContext.getModelId(), queryContext.getAgent());
         terms = filterByModelIds(terms, detectModelIds);
         Map<MatchText, List<T>> matchResult = match(queryContext, terms, detectModelIds);
         List<T> matches = new ArrayList<>();

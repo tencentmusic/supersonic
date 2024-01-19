@@ -1,13 +1,12 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
-import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
-import com.tencent.supersonic.headless.core.planner.QueryOptimizer;
 import com.tencent.supersonic.headless.core.parser.QueryParser;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
+import com.tencent.supersonic.headless.core.planner.QueryOptimizer;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
@@ -80,15 +79,6 @@ public class SemantciQueryEngineImpl implements SemantciQueryEngine {
         queryStatement.setIsS2SQL(true);
         queryStatement.setSemanticModel(getSemanticModel(queryStatement));
         return optimize(queryStructCmd, queryParser.parser(sqlCommend, queryStatement));
-    }
-
-    public QueryStatement physicalSql(QueryStructReq queryStructCmd, MetricQueryReq metricCommand) throws Exception {
-        QueryStatement queryStatement = new QueryStatement();
-        queryStatement.setQueryStructReq(queryStructCmd);
-        queryStatement.setMetricReq(metricCommand);
-        queryStatement.setIsS2SQL(false);
-        queryStatement.setSemanticModel(getSemanticModel(queryStatement));
-        return queryParser.parser(queryStatement);
     }
 
     private SemanticModel getSemanticModel(QueryStatement queryStatement) throws Exception {
