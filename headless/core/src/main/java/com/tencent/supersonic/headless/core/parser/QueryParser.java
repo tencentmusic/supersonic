@@ -117,8 +117,7 @@ public class QueryParser {
             return queryStatement;
         }
         try {
-            queryStatement = ComponentFactory.getSqlParser().explain(queryStatement, isAgg);
-            return queryStatement;
+            return ComponentFactory.getSqlParser().explain(queryStatement, isAgg);
         } catch (Exception e) {
             queryStatement.setErrMsg(e.getMessage());
             log.error("parser error metricQueryReq[{}] error [{}]", metricQueryReq, e);
