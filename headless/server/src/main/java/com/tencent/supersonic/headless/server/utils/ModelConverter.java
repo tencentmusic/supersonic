@@ -40,7 +40,7 @@ public class ModelConverter {
 
     public static ModelDO convert(ModelReq modelReq, User user) {
         ModelDO modelDO = new ModelDO();
-        ModelDetail modelDetail = getModelDetail(modelReq);
+        ModelDetail modelDetail = createModelDetail(modelReq);
         modelReq.createdBy(user.getName());
         BeanMapper.mapper(modelReq, modelDO);
         modelDO.setStatus(StatusEnum.ONLINE.getCode());
@@ -76,7 +76,7 @@ public class ModelConverter {
     }
 
     public static ModelDO convert(ModelDO modelDO, ModelReq modelReq, User user) {
-        ModelDetail modelDetail = getModelDetail(modelReq);
+        ModelDetail modelDetail = updateModelDetail(modelReq);
         BeanMapper.mapper(modelReq, modelDO);
         if (modelReq.getDrillDownDimensions() != null) {
             modelDO.setDrillDownDimensions(JSONObject.toJSONString(modelReq.getDrillDownDimensions()));
@@ -114,7 +114,7 @@ public class ModelConverter {
     public static MetricReq convert(Measure measure, ModelDO modelDO) {
         MetricReq metricReq = new MetricReq();
         metricReq.setName(measure.getName());
-        metricReq.setBizName(measure.getBizName().replaceFirst(modelDO.getBizName() + "_", ""));
+        metricReq.setBizName(measure.getExpr());
         metricReq.setDescription(measure.getName());
         metricReq.setModelId(modelDO.getId());
         MetricDefineByMeasureParams exprTypeParams = new MetricDefineByMeasureParams();
@@ -200,9 +200,29 @@ public class ModelConverter {
         return measures.stream().map(measure -> convert(measure, modelDO)).collect(Collectors.toList());
     }
 
-    private static ModelDetail getModelDetail(ModelReq modelReq) {
+    private static ModelDetail createModelDetail(ModelReq modelReq) {
         ModelDetail modelDetail = new ModelDetail();
         List<Measure> measures = modelReq.getModelDetail().getMeasures();
+        if (measures == null) {
+            measures = Lists.newArrayList();
+        }
+        for (Measure measure : measures) {
+            if (StringUtils.isBlank(measure.getBizName())) {
+                continue;
+            }
+            measure.setExpr(measure.getBizName());
+            measure.setBizName(String.format("%s_%s", modelReq.getBizName(), measure.getExpr()));
+        }
+        BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
+        return modelDetail;
+    }
+
+    private static ModelDetail updateModelDetail(ModelReq modelReq) {
+        ModelDetail modelDetail = new ModelDetail();
+        List<Measure> measures = modelReq.getModelDetail().getMeasures();
+        if (measures == null) {
+            measures = Lists.newArrayList();
+        }
         for (Measure measure : measures) {
             if (StringUtils.isBlank(measure.getBizName())) {
                 continue;
