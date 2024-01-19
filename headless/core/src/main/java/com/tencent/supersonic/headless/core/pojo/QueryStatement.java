@@ -28,6 +28,7 @@ public class QueryStatement {
     private String viewSql = "";
     private String viewAlias = "";
     private String viewSimplifySql = "";
+    private Boolean enableLimitWrapper = false;
 
 
     private SemanticModel semanticModel;

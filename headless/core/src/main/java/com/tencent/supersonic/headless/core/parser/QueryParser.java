@@ -7,6 +7,7 @@ import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import java.util.ArrayList;
@@ -54,6 +55,12 @@ public class QueryParser {
                 || Strings.isNullOrEmpty(queryStatement.getSourceId())) {
             throw new RuntimeException("parse Exception: " + queryStatement.getErrMsg());
         }
+        String querySql =
+                Objects.nonNull(queryStatement.getEnableLimitWrapper()) && queryStatement.getEnableLimitWrapper()
+                        ? String.format(SqlExecuteReq.LIMIT_WRAPPER,
+                        queryStatement.getSql())
+                        : queryStatement.getSql();
+        queryStatement.setSql(querySql);
         return queryStatement;
     }
 
