@@ -29,7 +29,7 @@ public class KeywordMapper extends BaseMapper {
 
     @Override
     public void doMap(QueryContext queryContext) {
-        String queryText = queryContext.getRequest().getQueryText();
+        String queryText = queryContext.getQueryText();
         //1.hanlpDict Match
         List<Term> terms = HanlpHelper.getTerms(queryText);
         HanlpDictMatchStrategy hanlpMatchStrategy = ContextUtils.getBean(HanlpDictMatchStrategy.class);

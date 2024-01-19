@@ -36,7 +36,7 @@ public class MetricTopNQuery extends MetricSemanticQuery {
     @Override
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
             QueryContext queryCtx) {
-        Matcher matcher = INTENT_PATTERN.matcher(queryCtx.getRequest().getQueryText());
+        Matcher matcher = INTENT_PATTERN.matcher(queryCtx.getQueryText());
         if (matcher.matches()) {
             return super.match(candidateElementMatches, queryCtx);
         }

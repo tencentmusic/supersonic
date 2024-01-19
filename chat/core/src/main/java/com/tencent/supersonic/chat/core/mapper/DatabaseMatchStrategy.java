@@ -55,11 +55,11 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
 
     public void detectByStep(QueryContext queryContext, Set<DatabaseMapResult> existResults, Set<Long> detectModelIds,
             Integer startIndex, Integer index, int offset) {
-        String detectSegment = queryContext.getRequest().getQueryText().substring(startIndex, index);
+        String detectSegment = queryContext.getQueryText().substring(startIndex, index);
         if (StringUtils.isBlank(detectSegment)) {
             return;
         }
-        Set<Long> modelIds = mapperHelper.getModelIds(queryContext.getRequest(), queryContext.getAgent());
+        Set<Long> modelIds = mapperHelper.getModelIds(queryContext.getModelId(), queryContext.getAgent());
 
         Double metricDimensionThresholdConfig = getThreshold(queryContext);
 

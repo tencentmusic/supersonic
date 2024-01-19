@@ -57,7 +57,7 @@ public class LLMRequestService {
             return true;
         }
         if (SatisfactionChecker.isSkip(queryCtx)) {
-            log.info("skip {}, queryText:{}", LLMSqlParser.class, queryCtx.getRequest().getQueryText());
+            log.info("skip {}, queryText:{}", LLMSqlParser.class, queryCtx.getQueryText());
             return true;
         }
         return false;
@@ -121,7 +121,7 @@ public class LLMRequestService {
     public LLMReq getLlmReq(QueryContext queryCtx, SemanticSchema semanticSchema,
             ModelCluster modelCluster, List<ElementValue> linkingValues) {
         Map<Long, String> modelIdToName = semanticSchema.getModelIdToName();
-        String queryText = queryCtx.getRequest().getQueryText();
+        String queryText = queryCtx.getQueryText();
 
         LLMReq llmReq = new LLMReq();
         llmReq.setQueryText(queryText);

@@ -35,8 +35,8 @@ public class QueryRecommendProcessor implements ParseResultProcessor {
     @SneakyThrows
     private void doProcess(ParseResp parseResp, QueryContext queryContext) {
         Long queryId = parseResp.getQueryId();
-        List<SimilarQueryRecallResp> solvedQueries = getSimilarQueries(queryContext.getRequest().getQueryText(),
-                queryContext.getRequest().getAgentId());
+        List<SimilarQueryRecallResp> solvedQueries = getSimilarQueries(queryContext.getQueryText(),
+                queryContext.getAgentId());
         ChatQueryDO chatQueryDO = getChatQuery(queryId);
         chatQueryDO.setSimilarQueries(JSONObject.toJSONString(solvedQueries));
         updateChatQuery(chatQueryDO);

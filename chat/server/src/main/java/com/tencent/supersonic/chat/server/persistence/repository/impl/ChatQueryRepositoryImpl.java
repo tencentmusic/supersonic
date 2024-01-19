@@ -3,35 +3,35 @@ package com.tencent.supersonic.chat.server.persistence.repository.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.tencent.supersonic.chat.core.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.SimilarQueryRecallResp;
-import com.tencent.supersonic.chat.server.persistence.mapper.custom.ShowCaseCustomMapper;
+import com.tencent.supersonic.chat.core.pojo.ChatContext;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDOExample;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDOExample.Criteria;
 import com.tencent.supersonic.chat.server.persistence.mapper.ChatParseMapper;
 import com.tencent.supersonic.chat.server.persistence.mapper.ChatQueryDOMapper;
+import com.tencent.supersonic.chat.server.persistence.mapper.custom.ShowCaseCustomMapper;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.PageUtils;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Repository
 @Primary
@@ -116,13 +116,13 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
         return queryResp;
     }
 
-    public Long createChatQuery(ParseResp parseResult, ChatContext chatCtx, QueryReq queryReq) {
+    public Long createChatQuery(ParseResp parseResult, ChatContext chatCtx, QueryContext queryContext) {
         ChatQueryDO chatQueryDO = new ChatQueryDO();
         chatQueryDO.setChatId(Long.valueOf(chatCtx.getChatId()));
         chatQueryDO.setCreateTime(new java.util.Date());
-        chatQueryDO.setUserName(queryReq.getUser().getName());
-        chatQueryDO.setQueryText(queryReq.getQueryText());
-        chatQueryDO.setAgentId(queryReq.getAgentId());
+        chatQueryDO.setUserName(queryContext.getUser().getName());
+        chatQueryDO.setQueryText(queryContext.getQueryText());
+        chatQueryDO.setAgentId(queryContext.getAgentId());
         chatQueryDO.setQueryResult("");
         try {
             chatQueryDOMapper.insert(chatQueryDO);
@@ -135,31 +135,24 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
     }
 
     @Override
-    public List<ChatParseDO> batchSaveParseInfo(ChatContext chatCtx, QueryReq queryReq,
+    public List<ChatParseDO> batchSaveParseInfo(ChatContext chatCtx, QueryContext queryContext,
             ParseResp parseResult, List<SemanticParseInfo> candidateParses) {
-        Long queryId = createChatQuery(parseResult, chatCtx, queryReq);
+        Long queryId = createChatQuery(parseResult, chatCtx, queryContext);
         List<ChatParseDO> chatParseDOList = new ArrayList<>();
-        getChatParseDO(chatCtx, queryReq, queryId, candidateParses, chatParseDOList);
+        getChatParseDO(chatCtx, queryContext, queryId, candidateParses, chatParseDOList);
         if (!CollectionUtils.isEmpty(candidateParses)) {
             chatParseMapper.batchSaveParseInfo(chatParseDOList);
         }
         return chatParseDOList;
     }
 
-    @Override
-    public void updateChatParseInfo(List<ChatParseDO> chatParseDOS) {
-        for (ChatParseDO chatParseDO : chatParseDOS) {
-            chatParseMapper.updateParseInfo(chatParseDO);
-        }
-    }
-
-    public void getChatParseDO(ChatContext chatCtx, QueryReq queryReq, Long queryId,
+    public void getChatParseDO(ChatContext chatCtx, QueryContext queryContext, Long queryId,
             List<SemanticParseInfo> parses, List<ChatParseDO> chatParseDOList) {
         for (int i = 0; i < parses.size(); i++) {
             ChatParseDO chatParseDO = new ChatParseDO();
             chatParseDO.setChatId(Long.valueOf(chatCtx.getChatId()));
             chatParseDO.setQuestionId(queryId);
-            chatParseDO.setQueryText(queryReq.getQueryText());
+            chatParseDO.setQueryText(queryContext.getQueryText());
             chatParseDO.setParseInfo(JsonUtil.toString(parses.get(i)));
             chatParseDO.setIsCandidate(1);
             if (i == 0) {
@@ -167,7 +160,7 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
             }
             chatParseDO.setParseId(parses.get(i).getId());
             chatParseDO.setCreateTime(new java.util.Date());
-            chatParseDO.setUserName(queryReq.getUser().getName());
+            chatParseDO.setUserName(queryContext.getUser().getName());
             chatParseDOList.add(chatParseDO);
         }
     }
