@@ -2,8 +2,10 @@ package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
 
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Metric;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import lombok.Data;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
@@ -24,6 +26,16 @@ public class MetricNode extends SemanticNode {
         }
         SqlNode sqlNode = parse(metric.getMetricTypeParams().getExpr(), scope);
         return buildAs(metric.getName(), sqlNode);
+    }
+
+    public static Boolean isMetricField(String name, SemanticSchema schema) {
+        Optional<Metric> metric = schema.getMetrics().stream().filter(m -> m.getName().equalsIgnoreCase(name))
+                .findFirst();
+        return metric.isPresent() && metric.get().getMetricTypeParams().isFieldMetric();
+    }
+
+    public static Boolean isMetricField(Metric metric) {
+        return metric.getMetricTypeParams().isFieldMetric();
     }
 
 }

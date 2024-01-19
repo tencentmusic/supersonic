@@ -9,7 +9,7 @@ public class MetricTypeParams {
     private List<Measure> measures;
     private List<Measure> metrics;
     private List<Measure> fields;
-
+    private boolean isFieldMetric = false;
     private String expr;
 
 }

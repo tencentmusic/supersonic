@@ -11,17 +11,16 @@ import com.tencent.supersonic.headless.core.parser.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.FilterNode;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.MetricNode;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.SemanticNode;
-import org.apache.calcite.sql.SqlIdentifier;
-import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.parser.SqlParserPos;
-import org.apache.calcite.sql.validate.SqlValidatorScope;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.calcite.sql.SqlIdentifier;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.parser.SqlParserPos;
+import org.apache.calcite.sql.validate.SqlValidatorScope;
 
 /**
  * process query specified filtering information
@@ -30,7 +29,7 @@ public class FilterRender extends Renderer {
 
     @Override
     public void render(MetricQueryReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
-                       SemanticSchema schema, boolean nonAgg) throws Exception {
+            SemanticSchema schema, boolean nonAgg) throws Exception {
         TableView tableView = super.tableView;
         SqlNode filterNode = null;
         List<String> queryMetrics = new ArrayList<>(metricCommand.getMetrics());
@@ -54,6 +53,10 @@ public class FilterRender extends Renderer {
         }
         for (String metric : queryMetrics) {
             Optional<Metric> optionalMetric = Renderer.getMetricByName(metric, schema);
+            if (optionalMetric.isPresent() && MetricNode.isMetricField(optionalMetric.get())) {
+                // metric from field ignore
+                continue;
+            }
             if (optionalMetric.isPresent()) {
                 tableView.getMeasure().add(MetricNode.build(optionalMetric.get(), scope));
             } else {
