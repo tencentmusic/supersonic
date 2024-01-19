@@ -1,7 +1,5 @@
 package com.tencent.supersonic.util;
 
-import static java.time.LocalDate.now;
-
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -15,6 +13,8 @@ import com.tencent.supersonic.chat.core.agent.PluginTool;
 import com.tencent.supersonic.chat.core.agent.RuleParserTool;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+
+import static java.time.LocalDate.now;
 
 public class DataUtils {
 
@@ -106,7 +106,6 @@ public class DataUtils {
         agent.setDescription("标签圈选");
         AgentConfig agentConfig = new AgentConfig();
         agentConfig.getTools().add(getRuleQueryTool());
-        agentConfig.getTools().add(getPluginTool());
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         return agent;
     }
@@ -114,8 +113,8 @@ public class DataUtils {
     private static RuleParserTool getRuleQueryTool() {
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
-        ruleQueryTool.setModelIds(Lists.newArrayList(1L, 2L));
-        ruleQueryTool.setQueryModes(Lists.newArrayList("METRIC_ENTITY", "METRIC_FILTER", "METRIC_MODEL",
+        ruleQueryTool.setModelIds(Lists.newArrayList(-1L));
+        ruleQueryTool.setQueryModes(Lists.newArrayList("METRIC_TAG", "METRIC_FILTER", "METRIC_MODEL",
                 "TAG_DETAIL", "TAG_LIST_FILTER", "TAG_ID"));
         return ruleQueryTool;
     }
