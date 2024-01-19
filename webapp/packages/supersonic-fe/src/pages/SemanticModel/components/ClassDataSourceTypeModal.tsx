@@ -40,7 +40,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState<boolean>(false);
   const [dataSourceEditOpen, setDataSourceEditOpen] = useState<boolean>(false);
   const [currentDatabaseId, setCurrentDatabaseId] = useState<number>();
-  const [scriptColumns, setScriptColumns] = useState<any[]>([]);
+  const [scriptColumns, setScriptColumns] = useState<IDataSource.IExecuteSqlColumn[]>([]);
 
   useEffect(() => {
     if (!dataSourceItem?.id || !open) {
@@ -74,24 +74,36 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
   useEffect(() => {
     // queryTableColumnListByScript(dataSourceItem);
     setSql(dataSourceItem?.modelDetail?.sqlQuery);
+
+    const modelDetailFields = dataSourceItem?.modelDetail?.fields;
+    if (Array.isArray(modelDetailFields)) {
+      setScriptColumns(
+        modelDetailFields.map((item) => {
+          return {
+            nameEn: item.fieldName,
+            type: item.dataType,
+          };
+        }),
+      );
+    }
   }, [dataSourceItem]);
 
-  const fetchTaskResult = (params) => {
-    setScriptColumns(params.columns);
-  };
+  // const fetchTaskResult = (params) => {
+  //   setScriptColumns(params.columns);
+  // };
 
-  const queryTableColumnListByScript = async (dataSource: IDataSource.IDataSourceItem) => {
-    if (!dataSource?.modelDetail?.sqlQuery) {
-      return;
-    }
-    const { code, data } = await excuteSql({
-      sql: dataSource.modelDetail?.sqlQuery,
-      id: dataSource.databaseId,
-    });
-    if (code === 200) {
-      fetchTaskResult(data);
-    }
-  };
+  // const queryTableColumnListByScript = async (dataSource: IDataSource.IDataSourceItem) => {
+  //   if (!dataSource?.modelDetail?.sqlQuery) {
+  //     return;
+  //   }
+  //   const { code, data } = await excuteSql({
+  //     sql: dataSource.modelDetail?.sqlQuery,
+  //     id: dataSource.databaseId,
+  //   });
+  //   if (code === 200) {
+  //     fetchTaskResult(data);
+  //   }
+  // };
 
   return (
     <>

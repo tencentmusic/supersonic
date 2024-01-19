@@ -1,4 +1,5 @@
 import React from 'react';
+import { Space } from 'antd';
 
 type Props = {
   title: string;
@@ -15,7 +16,12 @@ const FormLabelRequire: React.FC<Props> = ({ title, labelStyles = {} }) => {
           title={title}
           style={{ fontSize: '16px', ...labelStyles }}
         >
-          {title}
+          <Space size={5}>
+            <span style={{ color: '#ff4d4f', fontSize: '18px', position: 'relative', top: 3 }}>
+              *
+            </span>
+            {title}
+          </Space>
         </label>
       </div>
     </>

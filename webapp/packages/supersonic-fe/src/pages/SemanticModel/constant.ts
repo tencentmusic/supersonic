@@ -37,7 +37,7 @@ export const IS_TAG_ENUM = {
 };
 
 export const SENSITIVE_LEVEL_COLOR = {
-  [SENSITIVE_LEVEL.LOW]: 'lime',
+  [SENSITIVE_LEVEL.LOW]: 'geekblue',
   [SENSITIVE_LEVEL.MID]: 'warning',
   [SENSITIVE_LEVEL.HIGH]: 'error',
 };
@@ -71,3 +71,9 @@ export const DatePeridMap = {
   sys_imp_week: DateRangeType.WEEK,
   sys_imp_month: DateRangeType.MONTH,
 };
+
+export enum METRIC_DEFINE_TYPE {
+  FIELD = 'FIELD',
+  MEASURE = 'MEASURE',
+  METRIC = 'METRIC',
+}

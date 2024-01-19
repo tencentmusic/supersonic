@@ -9,7 +9,7 @@ import { updateModel, createModel, getColumns } from '../../service';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
 import { connect } from 'umi';
-import { IDataSource, ISemantic } from '../../data';
+import { ISemantic, IDataSource } from '../../data';
 
 export type CreateFormProps = {
   domainManger: StateType;
@@ -34,7 +34,7 @@ const initFormVal = {
   description: '', // 模型描述
 };
 
-const ModelCreateForm: React.FC<CreateFormProps> = ({
+const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   domainManger,
   onCancel,
   createModalVisible,
@@ -72,7 +72,9 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
     setHasEmptyNameField(hasEmpty);
   }, [fields]);
 
-  const [fieldColumns, setFieldColumns] = useState(scriptColumns || []);
+  const [fieldColumns, setFieldColumns] = useState<IDataSource.IExecuteSqlColumn[]>(
+    scriptColumns || [],
+  );
   useEffect(() => {
     if (scriptColumns) {
       setFieldColumns(scriptColumns);
@@ -162,6 +164,12 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
       ...formValRef.current,
       ...fieldsValue,
       ...fieldsClassify,
+      fields: fieldColumns.map((item) => {
+        return {
+          fieldName: item.nameEn,
+          dataType: item.type,
+        };
+      }),
     };
     updateFormVal(submitForm);
     if (!saveState && currentStep < 1) {
@@ -198,25 +206,22 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
     }
   };
 
-  const initFields = (fieldsClassifyList: any[], columns: any[]) => {
+  const initFields = (fieldsClassifyList: any[], columns: IDataSource.IExecuteSqlColumn[]) => {
     if (Array.isArray(columns) && columns.length === 0) {
       setFields(fieldsClassifyList || []);
       return;
     }
-    const columnFields: any[] = columns.map((item: any) => {
+    const columnFields: any[] = columns.map((item: IDataSource.IExecuteSqlColumn) => {
       const { type, nameEn } = item;
       const oldItem =
         fieldsClassifyList.find((oItem) => {
-          // if (oItem.type === EnumDataSourceType.MEASURES) {
-          //   return oItem.expr === item.nameEn;
-          // }
           return oItem.fieldName === item.nameEn;
         }) || {};
       return {
         ...oldItem,
         bizName: nameEn,
         fieldName: nameEn,
-        sqlType: type,
+        dataType: type,
       };
     });
     setFields(columnFields || []);
@@ -485,4 +490,4 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
 
 export default connect(({ domainManger }: { domainManger: StateType }) => ({
   domainManger,
-}))(ModelCreateForm);
+}))(DataSourceCreateForm);
