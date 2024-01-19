@@ -60,7 +60,6 @@ public class QueryController {
         User user = UserHolder.findUser(request, response);
         QuerySqlReq querySqlReq = queryStructReq.convert(queryStructReq);
         return queryService.queryBySql(querySqlReq, user);
-        //return queryService.queryByStructWithAuth(queryStructReq, user);
     }
 
     @PostMapping("/queryMetricDataById")

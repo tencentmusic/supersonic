@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
 
+import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Metric;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import java.util.HashMap;
@@ -19,12 +20,12 @@ public class MetricNode extends SemanticNode {
     private Map<String, SqlNode> measureFilter = new HashMap<>();
     private Map<String, String> aggFunction = new HashMap<>();
 
-    public static SqlNode build(Metric metric, SqlValidatorScope scope) throws Exception {
+    public static SqlNode build(Metric metric, SqlValidatorScope scope, EngineType engineType) throws Exception {
         if (metric.getMetricTypeParams() == null || metric.getMetricTypeParams().getExpr() == null
                 || metric.getMetricTypeParams().getExpr().isEmpty()) {
-            return parse(metric.getName(), scope);
+            return parse(metric.getName(), scope, engineType);
         }
-        SqlNode sqlNode = parse(metric.getMetricTypeParams().getExpr(), scope);
+        SqlNode sqlNode = parse(metric.getMetricTypeParams().getExpr(), scope, engineType);
         return buildAs(metric.getName(), sqlNode);
     }
 

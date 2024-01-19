@@ -1,11 +1,13 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
 
+import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlDialect;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.optimizer.FilterToGroupScanRule;
+import com.tencent.supersonic.headless.core.utils.SqlDialectFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,7 +20,6 @@ import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.calcite.jdbc.CalciteSchema;
 import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.hep.HepPlanner;
 import org.apache.calcite.plan.hep.HepProgramBuilder;
@@ -40,7 +41,6 @@ import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.SqlWith;
 import org.apache.calcite.sql.SqlWriterConfig;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
-import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.pretty.SqlPrettyWriter;
@@ -74,8 +74,8 @@ public abstract class SemanticNode {
         AGGREGATION_FUNC.add("min");
     }
 
-    public static SqlNode parse(String expression, SqlValidatorScope scope) throws Exception {
-        SqlParser sqlParser = SqlParser.create(expression, Configuration.getParserConfig());
+    public static SqlNode parse(String expression, SqlValidatorScope scope, EngineType engineType) throws Exception {
+        SqlParser sqlParser = SqlParser.create(expression, Configuration.getParserConfig(engineType));
         SqlNode sqlNode = sqlParser.parseExpression();
         scope.validateExpr(sqlNode);
         return sqlNode;
@@ -88,8 +88,9 @@ public abstract class SemanticNode {
                 SqlParserPos.ZERO);
     }
 
-    public static String getSql(SqlNode sqlNode) {
-        SqlWriterConfig config = SqlPrettyWriter.config().withDialect(SemanticSqlDialect.DEFAULT)
+    public static String getSql(SqlNode sqlNode, EngineType engineType) {
+        SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);
+        SqlWriterConfig config = SqlPrettyWriter.config().withDialect(sqlDialect)
                 .withKeywordsLowerCase(true).withClauseEndsLine(true).withAlwaysUseParentheses(false)
                 .withSelectListItemsOnSeparateLines(false).withUpdateSetListNewline(false).withIndentation(0);
 
@@ -390,20 +391,22 @@ public abstract class SemanticNode {
         return parseInfo;
     }
 
-    public static SqlNode optimize(SqlValidatorScope scope, SemanticSchema schema, SqlNode sqlNode) {
+    public static SqlNode optimize(SqlValidatorScope scope, SemanticSchema schema, SqlNode sqlNode,
+            EngineType engineType) {
         try {
             HepProgramBuilder hepProgramBuilder = new HepProgramBuilder();
-
+            SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);
             hepProgramBuilder.addRuleInstance(new FilterToGroupScanRule(FilterToGroupScanRule.DEFAULT, schema));
             RelOptPlanner relOptPlanner = new HepPlanner(hepProgramBuilder.build());
-            RelToSqlConverter converter = new RelToSqlConverter(SemanticSqlDialect.DEFAULT);
+            RelToSqlConverter converter = new RelToSqlConverter(sqlDialect);
             SqlValidator sqlValidator = Configuration.getSqlValidator(
-                    scope.getValidator().getCatalogReader().getRootSchema());
+                    scope.getValidator().getCatalogReader().getRootSchema(), engineType);
             SqlToRelConverter sqlToRelConverter = Configuration.getSqlToRelConverter(scope, sqlValidator,
-                    relOptPlanner);
+                    relOptPlanner, engineType);
             RelNode sqlRel = sqlToRelConverter.convertQuery(
                     sqlValidator.validate(sqlNode), false, true).rel;
-            log.debug("RelNode optimize {}", SemanticNode.getSql(converter.visitRoot(sqlRel).asStatement()));
+            log.debug("RelNode optimize {}",
+                    SemanticNode.getSql(converter.visitRoot(sqlRel).asStatement(), engineType));
             relOptPlanner.setRoot(sqlRel);
             RelNode relNode = relOptPlanner.findBestExp();
             return converter.visitRoot(relNode).asStatement();
@@ -411,13 +414,6 @@ public abstract class SemanticNode {
             log.error("optimize error {}", e);
         }
         return null;
-    }
-
-    public static RelNode getRelNode(CalciteSchema rootSchema, SqlToRelConverter sqlToRelConverter, String sql)
-            throws SqlParseException {
-        SqlValidator sqlValidator = Configuration.getSqlValidator(rootSchema);
-        return sqlToRelConverter.convertQuery(
-                sqlValidator.validate(SqlParser.create(sql, SqlParser.Config.DEFAULT).parseStmt()), false, true).rel;
     }
 
     public static SqlBinaryOperator getBinaryOperator(String val) {

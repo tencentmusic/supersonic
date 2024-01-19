@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.render;
 
+import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
@@ -49,13 +50,13 @@ public class JoinRender extends Renderer {
 
     @Override
     public void render(MetricQueryReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
-                       SemanticSchema schema, boolean nonAgg) throws Exception {
+            SemanticSchema schema, boolean nonAgg) throws Exception {
         String queryWhere = metricCommand.getWhere();
-        //dataSources = getOrderSource(dataSources);
+        EngineType engineType = EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
         Set<String> whereFields = new HashSet<>();
         List<String> fieldWhere = new ArrayList<>();
         if (queryWhere != null && !queryWhere.isEmpty()) {
-            SqlNode sqlNode = SemanticNode.parse(queryWhere, scope);
+            SqlNode sqlNode = SemanticNode.parse(queryWhere, scope, engineType);
             FilterNode.getFilterField(sqlNode, whereFields);
             fieldWhere = whereFields.stream().collect(Collectors.toList());
         }
@@ -129,9 +130,9 @@ public class JoinRender extends Renderer {
         if (!filterDimension.isEmpty()) {
             for (String d : getQueryDimension(filterDimension, queryAllDimension, whereFields)) {
                 if (nonAgg) {
-                    filterView.getMeasure().add(SemanticNode.parse(d, scope));
+                    filterView.getMeasure().add(SemanticNode.parse(d, scope, engineType));
                 } else {
-                    filterView.getDimension().add(SemanticNode.parse(d, scope));
+                    filterView.getDimension().add(SemanticNode.parse(d, scope, engineType));
                 }
 
             }
@@ -143,6 +144,7 @@ public class JoinRender extends Renderer {
             List<String> reqMetrics, DataSource dataSource, Set<String> sourceMeasure, SqlValidatorScope scope,
             SemanticSchema schema, boolean nonAgg) throws Exception {
         String alias = Constants.JOIN_TABLE_PREFIX + dataSource.getName();
+        EngineType engineType = EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
         for (String m : reqMetrics) {
             if (getMatchMetric(schema, sourceMeasure, m, queryMetrics)) {
                 MetricNode metricNode = buildMetricNode(m, dataSource, scope, schema, nonAgg, alias);
@@ -150,7 +152,8 @@ public class JoinRender extends Renderer {
                 if (!metricNode.getNonAggNode().isEmpty()) {
                     for (String measure : metricNode.getNonAggNode().keySet()) {
                         innerSelect.put(measure,
-                                SemanticNode.buildAs(measure, SemanticNode.parse(alias + "." + measure, scope)));
+                                SemanticNode.buildAs(measure,
+                                        SemanticNode.parse(alias + "." + measure, scope, engineType)));
                     }
 
                 }
@@ -159,10 +162,10 @@ public class JoinRender extends Renderer {
                         if (metricNode.getNonAggNode().containsKey(entry.getKey())) {
                             if (nonAgg) {
                                 filterView.getMeasure().add(SemanticNode.buildAs(entry.getKey(),
-                                        SemanticNode.parse(entry.getKey(), scope)));
+                                        SemanticNode.parse(entry.getKey(), scope, engineType)));
                             } else {
                                 filterView.getMeasure().add(SemanticNode.buildAs(entry.getKey(),
-                                        AggFunctionNode.build(entry.getValue(), entry.getKey(), scope)));
+                                        AggFunctionNode.build(entry.getValue(), entry.getKey(), scope, engineType)));
                             }
 
                         }
@@ -177,14 +180,16 @@ public class JoinRender extends Renderer {
             List<String> reqDimensions, DataSource dataSource, Set<String> dimension, SqlValidatorScope scope,
             SemanticSchema schema) throws Exception {
         String alias = Constants.JOIN_TABLE_PREFIX + dataSource.getName();
+        EngineType engineType = EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
         for (String d : reqDimensions) {
             if (getMatchDimension(schema, dimension, dataSource, d, queryDimension)) {
                 if (d.contains(Constants.DIMENSION_IDENTIFY)) {
                     String[] identifyDimension = d.split(Constants.DIMENSION_IDENTIFY);
                     innerSelect.put(d,
-                            SemanticNode.buildAs(d, SemanticNode.parse(alias + "." + identifyDimension[1], scope)));
+                            SemanticNode.buildAs(d,
+                                    SemanticNode.parse(alias + "." + identifyDimension[1], scope, engineType)));
                 } else {
-                    innerSelect.put(d, SemanticNode.buildAs(d, SemanticNode.parse(alias + "." + d, scope)));
+                    innerSelect.put(d, SemanticNode.buildAs(d, SemanticNode.parse(alias + "." + d, scope, engineType)));
 
                 }
                 filterDimension.add(d);
@@ -253,16 +258,16 @@ public class JoinRender extends Renderer {
     }
 
     private SqlNode buildJoin(SqlNode left, TableView leftTable, TableView tableView, Map<String, String> before,
-            DataSource dataSource,
-            SemanticSchema schema, SqlValidatorScope scope)
+            DataSource dataSource, SemanticSchema schema, SqlValidatorScope scope)
             throws Exception {
-        SqlNode condition = getCondition(leftTable, tableView, dataSource, schema, scope);
+        EngineType engineType = EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
+        SqlNode condition = getCondition(leftTable, tableView, dataSource, schema, scope, engineType);
         SqlLiteral sqlLiteral = SemanticNode.getJoinSqlLiteral("");
         JoinRelation matchJoinRelation = getMatchJoinRelation(before, tableView, schema);
         SqlNode joinRelationCondition = null;
         if (!CollectionUtils.isEmpty(matchJoinRelation.getJoinCondition())) {
             sqlLiteral = SemanticNode.getJoinSqlLiteral(matchJoinRelation.getJoinType());
-            joinRelationCondition = getCondition(matchJoinRelation, scope);
+            joinRelationCondition = getCondition(matchJoinRelation, scope, engineType);
             condition = joinRelationCondition;
         }
         if (Materialization.TimePartType.ZIPPER.equals(leftTable.getDataSource().getTimePartType())
@@ -307,13 +312,13 @@ public class JoinRender extends Renderer {
         return matchJoinRelation;
     }
 
-    private SqlNode getCondition(JoinRelation joinRelation,
-            SqlValidatorScope scope) throws Exception {
+    private SqlNode getCondition(JoinRelation joinRelation, SqlValidatorScope scope, EngineType engineType)
+            throws Exception {
         SqlNode condition = null;
         for (Triple<String, String, String> con : joinRelation.getJoinCondition()) {
             List<SqlNode> ons = new ArrayList<>();
-            ons.add(SemanticNode.parse(con.getLeft(), scope));
-            ons.add(SemanticNode.parse(con.getRight(), scope));
+            ons.add(SemanticNode.parse(con.getLeft(), scope, engineType));
+            ons.add(SemanticNode.parse(con.getRight(), scope, engineType));
             if (Objects.isNull(condition)) {
                 condition = new SqlBasicCall(
                         SemanticNode.getBinaryOperator(con.getMiddle()),
@@ -334,7 +339,7 @@ public class JoinRender extends Renderer {
     }
 
     private SqlNode getCondition(TableView left, TableView right, DataSource dataSource, SemanticSchema schema,
-            SqlValidatorScope scope) throws Exception {
+            SqlValidatorScope scope, EngineType engineType) throws Exception {
 
         Set<String> selectLeft = SemanticNode.getSelect(left.getTable());
         Set<String> selectRight = SemanticNode.getSelect(right.getTable());
@@ -355,8 +360,8 @@ public class JoinRender extends Renderer {
                 }
             }
             List<SqlNode> ons = new ArrayList<>();
-            ons.add(SemanticNode.parse(left.getAlias() + "." + on, scope));
-            ons.add(SemanticNode.parse(right.getAlias() + "." + on, scope));
+            ons.add(SemanticNode.parse(left.getAlias() + "." + on, scope, engineType));
+            ons.add(SemanticNode.parse(right.getAlias() + "." + on, scope, engineType));
             if (condition == null) {
                 condition = new SqlBasicCall(
                         SqlStdOperatorTable.EQUALS,
@@ -454,18 +459,21 @@ public class JoinRender extends Renderer {
                 endTime = zipper.getAlias() + "." + endTimeOp.get().getName();
                 dateTime = partMetric.getAlias() + "." + partTime.get().getName();
             }
-
+            EngineType engineType = EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
+            ArrayList<SqlNode> operandList = new ArrayList<>(
+                    Arrays.asList(SemanticNode.parse(endTime, scope, engineType),
+                            SemanticNode.parse(dateTime, scope, engineType)));
             condition =
                     new SqlBasicCall(
                             SqlStdOperatorTable.AND,
                             new ArrayList<SqlNode>(Arrays.asList(new SqlBasicCall(
                                     SqlStdOperatorTable.LESS_THAN_OR_EQUAL,
-                                    new ArrayList<SqlNode>(Arrays.asList(SemanticNode.parse(startTime, scope),
-                                            SemanticNode.parse(dateTime, scope))),
+                                    new ArrayList<SqlNode>(
+                                            Arrays.asList(SemanticNode.parse(startTime, scope, engineType),
+                                                    SemanticNode.parse(dateTime, scope, engineType))),
                                     SqlParserPos.ZERO, null), new SqlBasicCall(
                                     SqlStdOperatorTable.GREATER_THAN,
-                                            new ArrayList<SqlNode>(Arrays.asList(SemanticNode.parse(endTime, scope),
-                                            SemanticNode.parse(dateTime, scope))),
+                                    operandList,
                                     SqlParserPos.ZERO, null))),
                             SqlParserPos.ZERO, null);
 

@@ -7,9 +7,9 @@ import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 /**
  * customize the  SqlTypeFactoryImpl
  */
-public class HeadlessSqlTypeFactoryImpl extends SqlTypeFactoryImpl {
+public class SemanticSqlTypeFactoryImpl extends SqlTypeFactoryImpl {
 
-    public HeadlessSqlTypeFactoryImpl(RelDataTypeSystem typeSystem) {
+    public SemanticSqlTypeFactoryImpl(RelDataTypeSystem typeSystem) {
         super(typeSystem);
     }
 

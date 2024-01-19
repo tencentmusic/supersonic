@@ -1,9 +1,11 @@
 package com.tencent.supersonic.headless.core.parser.calcite;
 
 
-import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSqlTypeFactoryImpl;
+import com.tencent.supersonic.headless.api.enums.EngineType;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlTypeFactoryImpl;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlDialect;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.ViewExpanderImpl;
+import com.tencent.supersonic.headless.core.utils.SqlDialectFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,13 +44,17 @@ import org.apache.calcite.tools.Frameworks;
 public class Configuration {
 
     public static Properties configProperties = new Properties();
-    public static RelDataTypeFactory typeFactory = new HeadlessSqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
+    public static RelDataTypeFactory typeFactory = new SemanticSqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
     public static SqlOperatorTable operatorTable = SqlStdOperatorTable.instance();
     public static CalciteConnectionConfig config = new CalciteConnectionConfigImpl(configProperties);
-    public static SqlValidator.Config validatorConfig = SqlValidator.Config.DEFAULT
-            .withConformance(SemanticSqlDialect.DEFAULT.getConformance())
-            .withDefaultNullCollation(config.defaultNullCollation())
-            .withLenientOperatorLookup(true);
+
+    public static SqlValidator.Config getValidatorConfig(EngineType engineType) {
+        SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);
+        return SqlValidator.Config.DEFAULT
+                .withConformance(sqlDialect.getConformance())
+                .withDefaultNullCollation(config.defaultNullCollation())
+                .withLenientOperatorLookup(true);
+    }
 
     static {
         configProperties.put(CalciteConnectionProperty.CASE_SENSITIVE.camelName(), Boolean.TRUE.toString());
@@ -57,8 +63,10 @@ public class Configuration {
 
     }
 
-    public static SqlParser.Config getParserConfig() {
+    public static SqlParser.Config getParserConfig(EngineType engineType) {
         CalciteConnectionConfig config = new CalciteConnectionConfigImpl(configProperties);
+        SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);
+
         SqlParser.ConfigBuilder parserConfig = SqlParser.configBuilder();
         parserConfig.setCaseSensitive(config.caseSensitive());
         parserConfig.setUnquotedCasing(config.unquotedCasing());
@@ -71,12 +79,12 @@ public class Configuration {
                 .setQuoting(Quoting.SINGLE_QUOTE)
                 .setQuotedCasing(Casing.TO_UPPER)
                 .setUnquotedCasing(Casing.TO_UPPER)
-                .setConformance(SemanticSqlDialect.DEFAULT.getConformance())
+                .setConformance(sqlDialect.getConformance())
                 .setLex(Lex.BIG_QUERY);
         return parserConfig.build();
     }
 
-    public static SqlValidator getSqlValidator(CalciteSchema rootSchema) {
+    public static SqlValidator getSqlValidator(CalciteSchema rootSchema, EngineType engineType) {
         List<SqlOperatorTable> tables = new ArrayList<>();
         tables.add(SqlStdOperatorTable.instance());
         SqlOperatorTable operatorTable = new ChainedSqlOperatorTable(tables);
@@ -87,9 +95,8 @@ public class Configuration {
                 typeFactory,
                 config
         );
-        SqlValidator validator = SqlValidatorUtil.newValidator(operatorTable, catalogReader, typeFactory,
-                validatorConfig);
-        return validator;
+        return SqlValidatorUtil.newValidator(operatorTable, catalogReader, typeFactory,
+                Configuration.getValidatorConfig(engineType));
     }
 
     public static SqlToRelConverter.Config getConverterConfig() {
@@ -102,11 +109,11 @@ public class Configuration {
     }
 
     public static SqlToRelConverter getSqlToRelConverter(SqlValidatorScope scope, SqlValidator sqlValidator,
-            RelOptPlanner relOptPlanner) {
+            RelOptPlanner relOptPlanner, EngineType engineType) {
         RexBuilder rexBuilder = new RexBuilder(typeFactory);
         RelOptCluster cluster = RelOptCluster.create(relOptPlanner, rexBuilder);
         FrameworkConfig fromworkConfig = Frameworks.newConfigBuilder()
-                .parserConfig(getParserConfig())
+                .parserConfig(getParserConfig(engineType))
                 .defaultSchema(scope.getValidator().getCatalogReader().getRootSchema().plus())
                 .build();
         return new SqlToRelConverter(new ViewExpanderImpl(),
