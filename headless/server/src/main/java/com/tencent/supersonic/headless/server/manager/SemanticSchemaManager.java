@@ -174,16 +174,19 @@ public class SemanticSchemaManager {
     private static MetricTypeParams getMetricTypeParams(MetricTypeParamsYamlTpl metricTypeParamsYamlTpl) {
         MetricTypeParams metricTypeParams = new MetricTypeParams();
         metricTypeParams.setExpr(metricTypeParamsYamlTpl.getExpr());
+        metricTypeParams.setFieldMetric(false);
         if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getMeasures())) {
             metricTypeParams.setMeasures(getMeasureParams(metricTypeParamsYamlTpl.getMeasures()));
         }
         if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getMetrics())) {
             metricTypeParams.setMeasures(getMetricParams(metricTypeParamsYamlTpl.getMetrics()));
             metricTypeParams.setExpr(metricTypeParams.getMeasures().get(0).getExpr());
+            metricTypeParams.setFieldMetric(true);
         }
         if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getFields())) {
             metricTypeParams.setMeasures(getFieldParams(metricTypeParamsYamlTpl.getFields()));
             metricTypeParams.setExpr(metricTypeParams.getMeasures().get(0).getExpr());
+            metricTypeParams.setFieldMetric(true);
         }
 
         return metricTypeParams;

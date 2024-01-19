@@ -1,14 +1,14 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.render;
 
 
-import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.common.pojo.ColumnOrder;
+import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.Renderer;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.TableView;
+import com.tencent.supersonic.headless.core.parser.calcite.sql.node.MetricNode;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.SemanticNode;
-
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.calcite.sql.SqlNode;
@@ -25,12 +25,16 @@ public class OutputRender extends Renderer {
 
     @Override
     public void render(MetricQueryReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
-                       SemanticSchema schema, boolean nonAgg) throws Exception {
+            SemanticSchema schema, boolean nonAgg) throws Exception {
         TableView selectDataSet = super.tableView;
         for (String dimension : metricCommand.getDimensions()) {
             selectDataSet.getMeasure().add(SemanticNode.parse(dimension, scope));
         }
         for (String metric : metricCommand.getMetrics()) {
+            if (MetricNode.isMetricField(metric, schema)) {
+                // metric from field ignore
+                continue;
+            }
             selectDataSet.getMeasure().add(SemanticNode.parse(metric, scope));
         }
 
