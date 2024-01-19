@@ -19,7 +19,7 @@ import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
@@ -142,14 +142,14 @@ public class AuthCheckBaseAspect {
         return false;
     }
 
-    public QueryResultWithSchemaResp getQueryResultWithColumns(QueryResultWithSchemaResp resultWithColumns,
+    public SemanticQueryResp getQueryResultWithColumns(SemanticQueryResp resultWithColumns,
                                                                List<Long> modelIds,
                                                                AuthorizedResourceResp authResource) {
         addPromptInfoInfo(modelIds, resultWithColumns, authResource, Sets.newHashSet());
         return resultWithColumns;
     }
 
-    public QueryResultWithSchemaResp desensitizationData(QueryResultWithSchemaResp raw, Set<String> need2Apply) {
+    public SemanticQueryResp desensitizationData(SemanticQueryResp raw, Set<String> need2Apply) {
         log.debug("start desensitizationData logic");
         if (CollectionUtils.isEmpty(need2Apply)) {
             log.info("user has all sensitiveRes");
@@ -171,7 +171,7 @@ public class AuthCheckBaseAspect {
             return raw;
         }
 
-        QueryResultWithSchemaResp queryResultWithColumns = raw;
+        SemanticQueryResp queryResultWithColumns = raw;
         try {
             queryResultWithColumns = deepCopyResult(raw);
         } catch (Exception e) {
@@ -216,8 +216,8 @@ public class AuthCheckBaseAspect {
         }
     }
 
-    private QueryResultWithSchemaResp deepCopyResult(QueryResultWithSchemaResp raw) throws Exception {
-        QueryResultWithSchemaResp queryResultWithColumns = new QueryResultWithSchemaResp();
+    private SemanticQueryResp deepCopyResult(SemanticQueryResp raw) throws Exception {
+        SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();
         BeanUtils.copyProperties(raw, queryResultWithColumns);
 
         List<QueryColumn> columns = new ArrayList<>();
@@ -241,7 +241,7 @@ public class AuthCheckBaseAspect {
         return queryResultWithColumns;
     }
 
-    public void addPromptInfoInfo(List<Long> modelIds, QueryResultWithSchemaResp queryResultWithColumns,
+    public void addPromptInfoInfo(List<Long> modelIds, SemanticQueryResp queryResultWithColumns,
                                      AuthorizedResourceResp authorizedResource, Set<String> need2Apply) {
         List<DimensionFilter> filters = authorizedResource.getFilters();
         if (CollectionUtils.isEmpty(need2Apply) && CollectionUtils.isEmpty(filters)) {

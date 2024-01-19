@@ -16,7 +16,7 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.enums.QueryType;
 import com.tencent.supersonic.headless.api.request.ExplainSqlReq;
-import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.ExplainResp;
 import java.io.Serializable;
@@ -121,9 +121,9 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
         }
         QueryStructReq queryStructReq = convertQueryStruct();
         convertBizNameToName(semanticSchema, queryStructReq);
-        QueryS2SQLReq queryS2SQLReq = queryStructReq.convert(queryStructReq);
-        parseInfo.getSqlInfo().setS2SQL(queryS2SQLReq.getSql());
-        parseInfo.getSqlInfo().setCorrectS2SQL(queryS2SQLReq.getSql());
+        QuerySqlReq querySQLReq = queryStructReq.convert(queryStructReq);
+        parseInfo.getSqlInfo().setS2SQL(querySQLReq.getSql());
+        parseInfo.getSqlInfo().setCorrectS2SQL(querySQLReq.getSql());
     }
 
 }

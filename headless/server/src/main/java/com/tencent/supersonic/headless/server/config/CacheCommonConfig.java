@@ -1,4 +1,4 @@
-package com.tencent.supersonic.common.util.cache;
+package com.tencent.supersonic.headless.server.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;

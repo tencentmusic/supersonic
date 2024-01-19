@@ -5,7 +5,7 @@ import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.Renderer;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.FilterNode;
@@ -30,7 +30,7 @@ public class FilterRender extends Renderer {
 
     @Override
     public void render(MetricQueryReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
-                       HeadlessSchema schema, boolean nonAgg) throws Exception {
+                       SemanticSchema schema, boolean nonAgg) throws Exception {
         TableView tableView = super.tableView;
         SqlNode filterNode = null;
         List<String> queryMetrics = new ArrayList<>(metricCommand.getMetrics());

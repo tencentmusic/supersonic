@@ -7,6 +7,8 @@ import lombok.Data;
 public class MetricTypeParams {
 
     private List<Measure> measures;
+    private List<Measure> metrics;
+    private List<Measure> fields;
 
     private String expr;
 

@@ -21,7 +21,7 @@ import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.utils.DataTransformUtils;
 import com.tencent.supersonic.headless.server.pojo.DataDownload;
 import com.tencent.supersonic.headless.server.service.DownloadService;
@@ -72,7 +72,7 @@ public class DownloadServiceImpl implements DownloadService {
         String fileName = String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
         File file = FileUtils.createTmpFile(fileName);
         try {
-            QueryResultWithSchemaResp queryResult = queryService.queryByStructWithAuth(downloadStructReq, user);
+            SemanticQueryResp queryResult = queryService.queryByStructWithAuth(downloadStructReq, user);
             DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
             EasyExcel.write(file).sheet("Sheet1").head(dataDownload.getHeaders()).doWrite(dataDownload.getData());
         } catch (RuntimeException e) {
@@ -112,7 +112,7 @@ public class DownloadServiceImpl implements DownloadService {
             for (MetricSchemaResp metric : metrics) {
                 try {
                     DownloadStructReq downloadStructReq = buildDownloadStructReq(dimensions, metric, batchDownloadReq);
-                    QueryResultWithSchemaResp queryResult = queryService.queryByStructWithAuth(downloadStructReq, user);
+                    SemanticQueryResp queryResult = queryService.queryByStructWithAuth(downloadStructReq, user);
                     DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
                     WriteSheet writeSheet = EasyExcel.writerSheet("Sheet" + sheetCount)
                             .head(dataDownload.getHeaders()).build();
@@ -140,9 +140,9 @@ public class DownloadServiceImpl implements DownloadService {
         return data;
     }
 
-    private List<List<String>> buildHeader(QueryResultWithSchemaResp queryResultWithSchemaResp) {
+    private List<List<String>> buildHeader(SemanticQueryResp semanticQueryResp) {
         List<List<String>> header = Lists.newArrayList();
-        for (QueryColumn column : queryResultWithSchemaResp.getColumns()) {
+        for (QueryColumn column : semanticQueryResp.getColumns()) {
             header.add(Lists.newArrayList(column.getName()));
         }
         return header;
@@ -163,11 +163,11 @@ public class DownloadServiceImpl implements DownloadService {
         return headers;
     }
 
-    private List<List<String>> buildData(QueryResultWithSchemaResp queryResultWithSchemaResp) {
+    private List<List<String>> buildData(SemanticQueryResp semanticQueryResp) {
         List<List<String>> data = new ArrayList<>();
-        for (Map<String, Object> row : queryResultWithSchemaResp.getResultList()) {
+        for (Map<String, Object> row : semanticQueryResp.getResultList()) {
             List<String> rowData = new ArrayList<>();
-            for (QueryColumn column : queryResultWithSchemaResp.getColumns()) {
+            for (QueryColumn column : semanticQueryResp.getColumns()) {
                 rowData.add(String.valueOf(row.get(column.getNameEn())));
             }
             data.add(rowData);
@@ -198,7 +198,7 @@ public class DownloadServiceImpl implements DownloadService {
         return data;
     }
 
-    private DataDownload buildDataDownload(QueryResultWithSchemaResp queryResult, DownloadStructReq downloadStructReq) {
+    private DataDownload buildDataDownload(SemanticQueryResp queryResult, DownloadStructReq downloadStructReq) {
         List<QueryColumn> metricColumns = queryResult.getMetricColumns();
         List<QueryColumn> dimensionColumns = queryResult.getDimensionColumns();
         if (downloadStructReq.isTransform() && !CollectionUtils.isEmpty(metricColumns)) {

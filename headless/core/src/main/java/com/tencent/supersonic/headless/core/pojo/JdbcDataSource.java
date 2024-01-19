@@ -1,20 +1,13 @@
 package com.tencent.supersonic.headless.core.pojo;
 
+import static com.tencent.supersonic.common.pojo.Constants.STATISTIC;
+
 import com.alibaba.druid.filter.Filter;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.wall.WallConfig;
 import com.alibaba.druid.wall.WallFilter;
 import com.tencent.supersonic.headless.api.enums.DataType;
-import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.core.utils.JdbcDataSourceUtils;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.stereotype.Component;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
@@ -22,8 +15,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static com.tencent.supersonic.common.pojo.Constants.STATISTIC;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -154,9 +152,9 @@ public class JdbcDataSource {
         }
     }
 
-    public void removeDatasource(DatabaseResp jdbcSourceInfo) {
+    public void removeDatasource(Database database) {
 
-        String key = getDataSourceKey(jdbcSourceInfo);
+        String key = getDataSourceKey(database);
 
         Lock lock = getDataSourceLock(key);
 
@@ -176,15 +174,15 @@ public class JdbcDataSource {
         }
     }
 
-    public DruidDataSource getDataSource(DatabaseResp jdbcSourceInfo) throws RuntimeException {
+    public DruidDataSource getDataSource(Database database) throws RuntimeException {
 
-        String name = jdbcSourceInfo.getName();
-        String type = jdbcSourceInfo.getType();
-        String jdbcUrl = jdbcSourceInfo.getUrl();
-        String username = jdbcSourceInfo.getUsername();
-        String password = jdbcSourceInfo.getPassword();
+        String name = database.getName();
+        String type = database.getType();
+        String jdbcUrl = database.getUrl();
+        String username = database.getUsername();
+        String password = database.getPassword();
 
-        String key = getDataSourceKey(jdbcSourceInfo);
+        String key = getDataSourceKey(database);
 
         DruidDataSource druidDataSource = dataSourceMap.get(key);
         if (druidDataSource != null && !druidDataSource.isClosed()) {
@@ -306,10 +304,10 @@ public class JdbcDataSource {
         return druidDataSource;
     }
 
-    private String getDataSourceKey(DatabaseResp jdbcSourceInfo) {
-        return JdbcDataSourceUtils.getKey(jdbcSourceInfo.getName(),
-                jdbcSourceInfo.getUrl(),
-                jdbcSourceInfo.getUsername(),
-                jdbcSourceInfo.getPassword(), "", false);
+    private String getDataSourceKey(Database database) {
+        return JdbcDataSourceUtils.getKey(database.getName(),
+                database.getUrl(),
+                database.getUsername(),
+                database.getPassword(), "", false);
     }
 }

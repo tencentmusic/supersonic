@@ -30,12 +30,12 @@ import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.core.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.core.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.core.manager.DimensionYamlManager;
 import com.tencent.supersonic.headless.core.manager.MetricYamlManager;
 import com.tencent.supersonic.headless.core.manager.ModelYamlManager;
+import com.tencent.supersonic.headless.core.pojo.yaml.DataModelYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DateInfoDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
@@ -211,8 +211,8 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private void batchCreateMetric(ModelDO datasourceDO, User user) throws Exception {
-        List<MetricReq> exprMetricReqs = ModelConverter.convertMetricList(datasourceDO);
-        metricService.createMetricBatch(exprMetricReqs, user);
+        List<MetricReq> metricReqs = ModelConverter.convertMetricList(datasourceDO);
+        metricService.createMetricBatch(metricReqs, user);
     }
 
     private void checkName(ModelReq modelReq) {

@@ -6,6 +6,7 @@ public enum StatusEnum {
     ONLINE("ONLINE", 1),
     OFFLINE("OFFLINE", 2),
     DELETED("DELETED", 3),
+    UNAVAILABLE("UNAVAILABLE", 4),
     UNKNOWN("UNKNOWN", -1);
 
 

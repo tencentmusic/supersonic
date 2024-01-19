@@ -1,5 +1,10 @@
 package com.tencent.supersonic.headless.server.utils;
 
+import static com.tencent.supersonic.common.pojo.Constants.DAY;
+import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH;
+import static com.tencent.supersonic.common.pojo.Constants.WEEK;
+
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
@@ -14,7 +19,7 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.request.ModelSchemaFilterReq;
-import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
@@ -24,13 +29,6 @@ import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import com.tencent.supersonic.headless.server.service.SchemaService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Triple;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -44,11 +42,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH;
-import static com.tencent.supersonic.common.pojo.Constants.WEEK;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Triple;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 
 @Slf4j
@@ -130,8 +129,8 @@ public class QueryStructUtils {
         return resNameEnSet;
     }
 
-    public Set<String> getResName(QueryS2SQLReq queryS2SQLReq) {
-        Set<String> resNameSet = SqlParserSelectHelper.getAllFields(queryS2SQLReq.getSql())
+    public Set<String> getResName(QuerySqlReq querySQLReq) {
+        Set<String> resNameSet = SqlParserSelectHelper.getAllFields(querySQLReq.getSql())
                 .stream().collect(Collectors.toSet());
         return resNameSet;
     }
@@ -141,11 +140,11 @@ public class QueryStructUtils {
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 
-    public Set<String> getResNameEnExceptInternalCol(QueryS2SQLReq queryS2SQLReq, User user) {
-        Set<String> resNameSet = getResName(queryS2SQLReq);
+    public Set<String> getResNameEnExceptInternalCol(QuerySqlReq querySQLReq, User user) {
+        Set<String> resNameSet = getResName(querySQLReq);
         Set<String> resNameEnSet = new HashSet<>();
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
-        List<Long> modelIds = Lists.newArrayList(queryS2SQLReq.getModelIds());
+        List<Long> modelIds = Lists.newArrayList(querySQLReq.getModelIds());
         filter.setModelIds(modelIds);
         List<ModelSchemaResp> modelSchemaRespList = schemaService.fetchModelSchema(filter, user);
         if (!CollectionUtils.isEmpty(modelSchemaRespList)) {
@@ -176,8 +175,8 @@ public class QueryStructUtils {
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 
-    public Set<String> getFilterResNameEnExceptInternalCol(QueryS2SQLReq queryS2SQLReq) {
-        String sql = queryS2SQLReq.getSql();
+    public Set<String> getFilterResNameEnExceptInternalCol(QuerySqlReq querySQLReq) {
+        String sql = querySQLReq.getSql();
         Set<String> resNameEnSet = SqlParserSelectHelper.getWhereFields(sql).stream().collect(Collectors.toSet());
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }

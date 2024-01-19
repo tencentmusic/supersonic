@@ -174,9 +174,9 @@ CREATE TABLE IF NOT EXISTS `s2_metric` (
                                            `name` varchar(255)  NOT NULL ,
     `biz_name` varchar(255)  NOT NULL ,
     `description` varchar(500) DEFAULT NULL ,
-    `status` INT  NOT NULL , -- status, 0 is off the shelf, 1 is normal
+    `status` INT  NOT NULL ,
     `sensitive_level` INT NOT NULL ,
-    `type` varchar(50)  NOT NULL , -- type proxy,expr
+    `type` varchar(50)  NOT NULL , -- ATOMIC, DERIVED
     `type_params` LONGVARCHAR DEFAULT NULL  ,
     `created_at` TIMESTAMP NOT NULL ,
     `created_by` varchar(100) NOT NULL ,
@@ -188,6 +188,7 @@ CREATE TABLE IF NOT EXISTS `s2_metric` (
     `tags` varchar(500) DEFAULT NULL,
     `relate_dimensions` varchar(500) DEFAULT NULL,
     `ext` LONGVARCHAR DEFAULT NULL  ,
+    `define_type` varchar(50)  NOT NULL, -- MEASURE, FIELD, METRIC
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_metric IS 'metric information table';

@@ -2,6 +2,11 @@ package com.tencent.supersonic.common.util.jsqlparser;
 
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.StringUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
@@ -32,11 +37,6 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * Sql Parser replace Helper
@@ -120,7 +120,7 @@ public class SqlParserReplaceHelper {
     }
 
     public static String replaceValue(String sql, Map<String, Map<String, String>> filedNameToValueMap,
-                                      boolean exactReplace) {
+            boolean exactReplace) {
         Select selectStatement = SqlParserSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
         if (!(selectBody instanceof PlainSelect)) {
@@ -196,7 +196,7 @@ public class SqlParserReplaceHelper {
     }
 
     private static void replaceFieldsInPlainOneSelect(Map<String, String> fieldNameMap, boolean exactReplace,
-                                                      PlainSelect plainSelect) {
+            PlainSelect plainSelect) {
         //1. replace where fields
         Expression where = plainSelect.getWhere();
         FieldReplaceVisitor visitor = new FieldReplaceVisitor(fieldNameMap, exactReplace);
@@ -351,7 +351,7 @@ public class SqlParserReplaceHelper {
     }
 
     private static void replaceOrderByFunction(Map<String, String> functionMap,
-                                               List<OrderByElement> orderByElementList) {
+            List<OrderByElement> orderByElementList) {
         if (Objects.isNull(orderByElementList)) {
             return;
         }
@@ -497,6 +497,67 @@ public class SqlParserReplaceHelper {
             return expression;
         } else {
             return expression;
+        }
+    }
+
+    public static String replaceExpression(String expr, Map<String, String> replace) {
+        Expression expression = QueryExpressionReplaceVisitor.getExpression(expr);
+        if (Objects.nonNull(expression)) {
+            if (expression instanceof Column && replace.containsKey(expr)) {
+                return replace.get(expr);
+            }
+            ExpressionReplaceVisitor expressionReplaceVisitor = new ExpressionReplaceVisitor(replace);
+            expression.accept(expressionReplaceVisitor);
+            return expression.toString();
+        }
+        return expr;
+    }
+
+    public static String replaceSqlByExpression(String sql, Map<String, String> replace) {
+        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        SelectBody selectBody = selectStatement.getSelectBody();
+        List<PlainSelect> plainSelectList = new ArrayList<>();
+        if (selectBody instanceof PlainSelect) {
+            plainSelectList.add((PlainSelect) selectBody);
+        } else if (selectBody instanceof SetOperationList) {
+            SetOperationList setOperationList = (SetOperationList) selectBody;
+            if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
+                setOperationList.getSelects().forEach(subSelectBody -> {
+                    PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
+                    plainSelectList.add(subPlainSelect);
+                });
+            }
+        } else {
+            return sql;
+        }
+        List<PlainSelect> plainSelects = SqlParserSelectHelper.getPlainSelects(plainSelectList);
+        for (PlainSelect plainSelect : plainSelects) {
+            replacePlainSelectByExpr(plainSelect, replace);
+        }
+        return selectStatement.toString();
+    }
+
+    private static void replacePlainSelectByExpr(PlainSelect plainSelect, Map<String, String> replace) {
+        QueryExpressionReplaceVisitor expressionReplaceVisitor = new QueryExpressionReplaceVisitor(replace);
+        for (SelectItem selectItem : plainSelect.getSelectItems()) {
+            selectItem.accept(expressionReplaceVisitor);
+        }
+        Expression having = plainSelect.getHaving();
+        if (Objects.nonNull(having)) {
+            having.accept(expressionReplaceVisitor);
+        }
+
+        Expression where = plainSelect.getWhere();
+        if (Objects.nonNull(where)) {
+            where.accept(expressionReplaceVisitor);
+        }
+
+        List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
+        if (!CollectionUtils.isEmpty(orderByElements)) {
+            for (OrderByElement orderByElement : orderByElements) {
+                orderByElement.setExpression(
+                        QueryExpressionReplaceVisitor.replace(orderByElement.getExpression(), replace));
+            }
         }
     }
 }

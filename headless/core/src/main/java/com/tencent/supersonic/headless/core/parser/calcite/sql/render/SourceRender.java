@@ -9,7 +9,7 @@ import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Materialization;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.Renderer;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.DataSourceNode;
@@ -41,7 +41,7 @@ public class SourceRender extends Renderer {
     public static TableView renderOne(String alias, List<String> fieldWheres,
                                       List<String> reqMetrics, List<String> reqDimensions,
                                       String queryWhere, DataSource datasource, SqlValidatorScope scope,
-                                      HeadlessSchema schema, boolean nonAgg) throws Exception {
+                                      SemanticSchema schema, boolean nonAgg) throws Exception {
 
         TableView dataSet = new TableView();
         TableView output = new TableView();
@@ -93,7 +93,7 @@ public class SourceRender extends Renderer {
         return output;
     }
 
-    private static void buildDimension(String alias, String dimension, DataSource datasource, HeadlessSchema schema,
+    private static void buildDimension(String alias, String dimension, DataSource datasource, SemanticSchema schema,
             boolean nonAgg, Set<String> extendFields, TableView dataSet, TableView output, SqlValidatorScope scope)
             throws Exception {
         List<Dimension> dimensionList = schema.getDimension().get(datasource.getName());
@@ -161,7 +161,7 @@ public class SourceRender extends Renderer {
 
     private static List<SqlNode> getWhereMeasure(List<String> fields, List<String> queryMetrics,
             List<String> queryDimensions, Set<String> extendFields, DataSource datasource, SqlValidatorScope scope,
-            HeadlessSchema schema,
+            SemanticSchema schema,
             boolean nonAgg) throws Exception {
         Iterator<String> iterator = fields.iterator();
         List<SqlNode> whereNode = new ArrayList<>();
@@ -205,7 +205,7 @@ public class SourceRender extends Renderer {
     private static void mergeWhere(List<String> fields, TableView dataSet, TableView outputSet,
             List<String> queryMetrics,
             List<String> queryDimensions, Set<String> extendFields, DataSource datasource, SqlValidatorScope scope,
-            HeadlessSchema schema,
+            SemanticSchema schema,
             boolean nonAgg) throws Exception {
         List<SqlNode> whereNode = getWhereMeasure(fields, queryMetrics, queryDimensions, extendFields, datasource,
                 scope, schema,
@@ -215,7 +215,7 @@ public class SourceRender extends Renderer {
     }
 
     public static void whereDimMetric(List<String> fields, List<String> queryMetrics,
-            List<String> queryDimensions, DataSource datasource, HeadlessSchema schema, Set<String> dimensions,
+            List<String> queryDimensions, DataSource datasource, SemanticSchema schema, Set<String> dimensions,
             Set<String> metrics) {
         for (String field : fields) {
             if (queryDimensions.contains(field) || queryMetrics.contains(field)) {
@@ -229,7 +229,7 @@ public class SourceRender extends Renderer {
         }
     }
 
-    private static void addField(String field, String oriField, DataSource datasource, HeadlessSchema schema,
+    private static void addField(String field, String oriField, DataSource datasource, SemanticSchema schema,
             Set<String> dimensions,
             Set<String> metrics) {
         Optional<Dimension> dimension = datasource.getDimensions().stream()
@@ -272,7 +272,7 @@ public class SourceRender extends Renderer {
         }
     }
 
-    public static boolean isDimension(String name, DataSource datasource, HeadlessSchema schema) {
+    public static boolean isDimension(String name, DataSource datasource, SemanticSchema schema) {
         Optional<Dimension> dimension = datasource.getDimensions().stream()
                 .filter(d -> d.getName().equalsIgnoreCase(name)).findFirst();
         if (dimension.isPresent()) {
@@ -316,9 +316,9 @@ public class SourceRender extends Renderer {
         }
     }
 
-    public void render(MetricQueryReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
-                       HeadlessSchema schema, boolean nonAgg) throws Exception {
-        String queryWhere = metricCommand.getWhere();
+    public void render(MetricQueryReq metricQueryReq, List<DataSource> dataSources, SqlValidatorScope scope,
+                       SemanticSchema schema, boolean nonAgg) throws Exception {
+        String queryWhere = metricQueryReq.getWhere();
         Set<String> whereFields = new HashSet<>();
         List<String> fieldWhere = new ArrayList<>();
         if (queryWhere != null && !queryWhere.isEmpty()) {
@@ -328,13 +328,13 @@ public class SourceRender extends Renderer {
         }
         if (dataSources.size() == 1) {
             DataSource dataSource = dataSources.get(0);
-            super.tableView = renderOne("", fieldWhere, metricCommand.getMetrics(),
-                    metricCommand.getDimensions(),
-                    metricCommand.getWhere(), dataSource, scope, schema, nonAgg);
+            super.tableView = renderOne("", fieldWhere, metricQueryReq.getMetrics(),
+                    metricQueryReq.getDimensions(),
+                    metricQueryReq.getWhere(), dataSource, scope, schema, nonAgg);
             return;
         }
         JoinRender joinRender = new JoinRender();
-        joinRender.render(metricCommand, dataSources, scope, schema, nonAgg);
+        joinRender.render(metricQueryReq, dataSources, scope, schema, nonAgg);
         super.tableView = joinRender.getTableView();
     }
 

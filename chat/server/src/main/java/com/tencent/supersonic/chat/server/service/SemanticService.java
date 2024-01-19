@@ -27,7 +27,7 @@ import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -162,7 +162,7 @@ public class SemanticService {
 
         List<String> entities = Collections.singletonList(entity);
 
-        QueryResultWithSchemaResp queryResultWithColumns = getQueryResultWithSchemaResp(modelInfo, parseInfo, entities,
+        SemanticQueryResp queryResultWithColumns = getQueryResultWithSchemaResp(modelInfo, parseInfo, entities,
                 user);
 
         if (queryResultWithColumns != null) {
@@ -183,7 +183,7 @@ public class SemanticService {
         }
     }
 
-    public QueryResultWithSchemaResp getQueryResultWithSchemaResp(EntityInfo modelInfo, SemanticParseInfo parseInfo,
+    public SemanticQueryResp getQueryResultWithSchemaResp(EntityInfo modelInfo, SemanticParseInfo parseInfo,
             List<String> entities, User user) {
         if (CollectionUtils.isEmpty(entities)) {
             return null;
@@ -219,7 +219,7 @@ public class SemanticService {
         chatFilters.add(chatFilter);
         semanticParseInfo.setDimensionFilters(chatFilters);
 
-        QueryResultWithSchemaResp queryResultWithColumns = null;
+        SemanticQueryResp queryResultWithColumns = null;
         try {
             QueryStructReq queryStructReq = QueryReqBuilder.buildStructReq(semanticParseInfo);
             queryResultWithColumns = semanticInterpreter.queryByStruct(queryStructReq, user);

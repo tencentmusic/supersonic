@@ -8,13 +8,14 @@ import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.enums.DimensionType;
 import com.tencent.supersonic.headless.api.enums.IdentifyType;
-import com.tencent.supersonic.headless.api.enums.MetricType;
+import com.tencent.supersonic.headless.api.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.MetricTypeParams;
+import com.tencent.supersonic.headless.api.pojo.MeasureParam;
+import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.request.DimensionReq;
 import com.tencent.supersonic.headless.api.request.MetricReq;
@@ -116,11 +117,13 @@ public class ModelConverter {
         metricReq.setBizName(measure.getBizName().replaceFirst(modelDO.getBizName() + "_", ""));
         metricReq.setDescription(measure.getName());
         metricReq.setModelId(modelDO.getId());
-        metricReq.setMetricType(MetricType.ATOMIC);
-        MetricTypeParams exprTypeParams = new MetricTypeParams();
+        MetricDefineByMeasureParams exprTypeParams = new MetricDefineByMeasureParams();
         exprTypeParams.setExpr(measure.getBizName());
-        exprTypeParams.setMeasures(Lists.newArrayList(measure));
+        MeasureParam measureParam = new MeasureParam();
+        BeanMapper.mapper(measure, measureParam);
+        exprTypeParams.setMeasures(Lists.newArrayList(measureParam));
         metricReq.setTypeParams(exprTypeParams);
+        metricReq.setMetricDefineType(MetricDefineType.MEASURE);
         return metricReq;
     }
 

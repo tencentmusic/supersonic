@@ -164,3 +164,8 @@ CREATE TABLE `s2_app`
     `created_by`     varchar(255) null,
     `updated_by`     varchar(255) null
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+--20240115
+alter table s2_metric add column `define_type` varchar(50)  DEFAULT NULL; -- MEASURE, FIELD, METRIC
+update s2_metric set define_type = 'MEASURE';

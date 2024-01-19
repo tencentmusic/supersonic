@@ -1,10 +1,17 @@
 package com.tencent.supersonic.headless.core.manager;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.MetricTypeParams;
+import com.tencent.supersonic.headless.api.enums.MetricDefineType;
+import com.tencent.supersonic.headless.api.pojo.FieldParam;
+import com.tencent.supersonic.headless.api.pojo.MeasureParam;
+import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
+import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
+import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
+import com.tencent.supersonic.headless.api.pojo.MetricParam;
 import com.tencent.supersonic.headless.api.response.MetricResp;
+import com.tencent.supersonic.headless.core.pojo.yaml.FieldParamYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MeasureYamlTpl;
+import com.tencent.supersonic.headless.core.pojo.yaml.MetricParamYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
 import lombok.extern.slf4j.Slf4j;
@@ -37,20 +44,49 @@ public class MetricYamlManager {
         BeanUtils.copyProperties(metric, metricYamlTpl);
         metricYamlTpl.setName(metric.getBizName());
         metricYamlTpl.setOwners(Lists.newArrayList(metric.getCreatedBy()));
-        MetricTypeParams exprMetricTypeParams = metric.getTypeParams();
         MetricTypeParamsYamlTpl metricTypeParamsYamlTpl = new MetricTypeParamsYamlTpl();
-        metricTypeParamsYamlTpl.setExpr(exprMetricTypeParams.getExpr());
-        List<Measure> measures = exprMetricTypeParams.getMeasures();
-        metricTypeParamsYamlTpl.setMeasures(
-                measures.stream().map(MetricYamlManager::convert).collect(Collectors.toList()));
+        if (MetricDefineType.MEASURE.equals(metric.getMetricDefineType())) {
+            MetricDefineByMeasureParams metricDefineParams = metric.getTypeParams();
+            metricTypeParamsYamlTpl.setExpr(metricDefineParams.getExpr());
+            List<MeasureParam> measures = metricDefineParams.getMeasures();
+            metricTypeParamsYamlTpl.setMeasures(
+                    measures.stream().map(MetricYamlManager::convert).collect(Collectors.toList()));
+        } else if (MetricDefineType.FIELD.equals(metric.getMetricDefineType())) {
+            MetricDefineByFieldParams metricDefineParams = metric.getMetricDefineByFieldParams();
+            metricTypeParamsYamlTpl.setExpr(metricDefineParams.getExpr());
+            List<FieldParam> fields = metricDefineParams.getFields();
+            metricTypeParamsYamlTpl.setFields(
+                    fields.stream().map(MetricYamlManager::convert).collect(Collectors.toList()));
+        } else if (MetricDefineType.METRIC.equals(metric.getMetricDefineType())) {
+            MetricDefineByMetricParams metricDefineByMetricParams = metric.getMetricDefineByMetricParams();
+            metricTypeParamsYamlTpl.setExpr(metricDefineByMetricParams.getExpr());
+            List<MetricParam> metrics = metricDefineByMetricParams.getMetrics();
+            metricTypeParamsYamlTpl.setMetrics(
+                    metrics.stream().map(MetricYamlManager::convert).collect(Collectors.toList()));
+        }
         metricYamlTpl.setTypeParams(metricTypeParamsYamlTpl);
         return metricYamlTpl;
     }
 
-    public static MeasureYamlTpl convert(Measure measure) {
+    public static MeasureYamlTpl convert(MeasureParam measure) {
         MeasureYamlTpl measureYamlTpl = new MeasureYamlTpl();
         measureYamlTpl.setName(measure.getBizName());
+        measureYamlTpl.setConstraint(measure.getConstraint());
+        measureYamlTpl.setAgg(measure.getAgg());
         return measureYamlTpl;
+    }
+
+    public static FieldParamYamlTpl convert(FieldParam fieldParam) {
+        FieldParamYamlTpl fieldParamYamlTpl = new FieldParamYamlTpl();
+        fieldParamYamlTpl.setFieldName(fieldParam.getFieldName());
+        return fieldParamYamlTpl;
+    }
+
+    public static MetricParamYamlTpl convert(MetricParam metricParam) {
+        MetricParamYamlTpl metricParamYamlTpl = new MetricParamYamlTpl();
+        metricParamYamlTpl.setBizName(metricParam.getBizName());
+        metricParamYamlTpl.setId(metricParam.getId());
+        return metricParamYamlTpl;
     }
 
 }

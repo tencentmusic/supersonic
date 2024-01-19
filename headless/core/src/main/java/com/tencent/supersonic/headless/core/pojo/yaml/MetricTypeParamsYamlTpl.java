@@ -9,7 +9,10 @@ public class MetricTypeParamsYamlTpl {
 
     private List<MeasureYamlTpl> measures;
 
-    private String expr;
+    private List<MetricParamYamlTpl> metrics;
 
+    private List<FieldParamYamlTpl> fields;
+
+    private String expr;
 
 }

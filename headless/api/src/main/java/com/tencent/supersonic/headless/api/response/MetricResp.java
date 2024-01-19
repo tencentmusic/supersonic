@@ -2,22 +2,23 @@ package com.tencent.supersonic.headless.api.response;
 
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.pojo.DataFormat;
+import com.tencent.supersonic.headless.api.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
-import com.tencent.supersonic.headless.api.pojo.MetricTypeParams;
+import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
+import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
+import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
-import lombok.Data;
-import lombok.ToString;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.Data;
+import lombok.ToString;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 @Data
@@ -32,8 +33,6 @@ public class MetricResp extends SchemaItem {
 
     //ATOMIC DERIVED
     private String type;
-
-    private MetricTypeParams typeParams;
 
     private String dataFormatType;
 
@@ -51,20 +50,20 @@ public class MetricResp extends SchemaItem {
 
     private Map<String, Object> ext = new HashMap<>();
 
+    private MetricDefineType metricDefineType = MetricDefineType.MEASURE;
+
+    private MetricDefineByMeasureParams typeParams;
+
+    private MetricDefineByFieldParams metricDefineByFieldParams;
+
+    private MetricDefineByMetricParams metricDefineByMetricParams;
+
     public void setTag(String tag) {
         if (StringUtils.isBlank(tag)) {
             tags = Lists.newArrayList();
         } else {
             tags = Arrays.asList(tag.split(","));
         }
-    }
-
-    public Set<Long> getNecessaryDimensionIds() {
-        if (relateDimension == null || CollectionUtils.isEmpty(relateDimension.getDrillDownDimensions())) {
-            return Sets.newHashSet();
-        }
-        return relateDimension.getDrillDownDimensions().stream().filter(DrillDownDimension::isNecessary)
-               .map(DrillDownDimension::getDimensionId).collect(Collectors.toSet());
     }
 
     public String getRelaDimensionIdKey() {
@@ -78,6 +77,11 @@ public class MetricResp extends SchemaItem {
     }
 
     public String getDefaultAgg() {
-        return typeParams.getMeasures().get(0).getAgg();
+        if (typeParams != null
+                && CollectionUtils.isNotEmpty(typeParams.getMeasures())) {
+            return typeParams.getMeasures().get(0).getAgg();
+        }
+        return "";
     }
+
 }

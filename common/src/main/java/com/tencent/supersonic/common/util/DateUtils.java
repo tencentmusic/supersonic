@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -89,6 +91,19 @@ public class DateUtils {
                 result = currentDate.minusMonths(intervalDay);
                 if (intervalDay == 0) {
                     result = result.with(TemporalAdjusters.firstDayOfMonth());
+                }
+                break;
+            case QUARTER:
+                result = currentDate.minusMonths(intervalDay * 3L);
+                if (intervalDay == 0) {
+                    TemporalAdjuster firstDayOfQuarter = temporal -> {
+                        LocalDate tempDate = LocalDate.from(temporal);
+                        int month = tempDate.get(ChronoField.MONTH_OF_YEAR);
+                        int firstMonthOfQuarter = ((month - 1) / 3) * 3 + 1;
+                        return tempDate.with(ChronoField.MONTH_OF_YEAR, firstMonthOfQuarter)
+                            .with(TemporalAdjusters.firstDayOfMonth());
+                    };
+                    result = result.with(firstDayOfQuarter);
                 }
                 break;
             case YEAR:

@@ -9,7 +9,7 @@ import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import java.util.HashSet;
 import java.util.List;
@@ -36,7 +36,7 @@ public abstract class Renderer {
         return datasource.getMeasures().stream().filter(mm -> mm.getName().equalsIgnoreCase(name)).findFirst();
     }
 
-    public static Optional<Metric> getMetricByName(String name, HeadlessSchema schema) {
+    public static Optional<Metric> getMetricByName(String name, SemanticSchema schema) {
         Optional<Metric> metric = schema.getMetrics().stream().filter(m -> m.getName().equalsIgnoreCase(name))
                 .findFirst();
         return metric;
@@ -47,7 +47,7 @@ public abstract class Renderer {
     }
 
     public static MetricNode buildMetricNode(String metric, DataSource datasource, SqlValidatorScope scope,
-                                             HeadlessSchema schema, boolean nonAgg, String alias) throws Exception {
+                                             SemanticSchema schema, boolean nonAgg, String alias) throws Exception {
         Optional<Metric> metricOpt = getMetricByName(metric, schema);
         MetricNode metricNode = new MetricNode();
         if (metricOpt.isPresent()) {
@@ -105,5 +105,5 @@ public abstract class Renderer {
     }
 
     public abstract void render(MetricQueryReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
-                                HeadlessSchema schema, boolean nonAgg) throws Exception;
+                                SemanticSchema schema, boolean nonAgg) throws Exception;
 }

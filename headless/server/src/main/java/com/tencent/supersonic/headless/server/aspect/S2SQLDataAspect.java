@@ -1,5 +1,7 @@
 package com.tencent.supersonic.headless.server.aspect;
 
+import static com.tencent.supersonic.common.pojo.Constants.MINUS;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -7,15 +9,22 @@ import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResource
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
-import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.headless.server.utils.QueryStructUtils;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.utils.QueryStructUtils;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -30,16 +39,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.common.pojo.Constants.MINUS;
 
 @Component
 @Aspect
@@ -64,7 +63,7 @@ public class S2SQLDataAspect extends AuthCheckBaseAspect {
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
         log.info("s2SQL permission check!");
         Object[] objects = joinPoint.getArgs();
-        QueryS2SQLReq queryS2SQLReq = (QueryS2SQLReq) objects[0];
+        QuerySqlReq querySQLReq = (QuerySqlReq) objects[0];
         User user = (User) objects[1];
         if (!permissionDataEnable) {
             log.info("not to check s2SQL permission!");
@@ -73,7 +72,7 @@ public class S2SQLDataAspect extends AuthCheckBaseAspect {
         if (Objects.isNull(user) || Strings.isNullOrEmpty(user.getName())) {
             throw new RuntimeException("please provide user information");
         }
-        List<Long> modelIds = queryS2SQLReq.getModelIds();
+        List<Long> modelIds = querySQLReq.getModelIds();
 
         //1. determine whether admin of the model
         if (doModelAdmin(user, modelIds)) {
@@ -83,7 +82,7 @@ public class S2SQLDataAspect extends AuthCheckBaseAspect {
         // 2. determine whether the subject field is visible
         doModelVisible(user, modelIds);
         // 3. fetch data permission meta information
-        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(queryS2SQLReq, user);
+        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(querySQLReq, user);
         log.info("modelId:{}, res4Privilege:{}", modelIds, res4Privilege);
 
         Set<String> sensitiveResByModel = getHighSensitiveColsByModelId(modelIds);
@@ -97,13 +96,13 @@ public class S2SQLDataAspect extends AuthCheckBaseAspect {
         Set<String> resAuthSet = getAuthResNameSet(authorizedResource, modelIds);
 
         // 4.if sensitive fields without permission are involved in filter, thrown an exception
-        doFilterCheckLogic(queryS2SQLReq, resAuthSet, sensitiveResReq);
+        doFilterCheckLogic(querySQLReq, resAuthSet, sensitiveResReq);
 
         // 5.row permission pre-filter
-        doRowPermission(queryS2SQLReq, authorizedResource);
+        doRowPermission(querySQLReq, authorizedResource);
 
         // 6.proceed
-        QueryResultWithSchemaResp queryResultWithColumns = (QueryResultWithSchemaResp) joinPoint.proceed();
+        SemanticQueryResp queryResultWithColumns = (SemanticQueryResp) joinPoint.proceed();
 
         if (CollectionUtils.isEmpty(sensitiveResReq) || allSensitiveResReqIsOk(sensitiveResReq, resAuthSet)) {
             // if sensitiveRes is empty
@@ -115,14 +114,14 @@ public class S2SQLDataAspect extends AuthCheckBaseAspect {
         Set<String> need2Apply = sensitiveResReq.stream().filter(req -> !resAuthSet.contains(req))
                 .collect(Collectors.toSet());
         log.info("need2Apply:{},sensitiveResReq:{},resAuthSet:{}", need2Apply, sensitiveResReq, resAuthSet);
-        QueryResultWithSchemaResp queryResultAfterDesensitization =
+        SemanticQueryResp queryResultAfterDesensitization =
                 desensitizationData(queryResultWithColumns, need2Apply);
         addPromptInfoInfo(modelIds, queryResultAfterDesensitization, authorizedResource, need2Apply);
 
         return queryResultAfterDesensitization;
     }
 
-    private void doRowPermission(QueryS2SQLReq queryS2SQLReq, AuthorizedResourceResp authorizedResource) {
+    private void doRowPermission(QuerySqlReq querySQLReq, AuthorizedResourceResp authorizedResource) {
         log.debug("start doRowPermission logic");
         StringJoiner joiner = new StringJoiner(" OR ");
         List<String> dimensionFilters = new ArrayList<>();
@@ -144,10 +143,10 @@ public class S2SQLDataAspect extends AuthCheckBaseAspect {
         try {
             Expression expression = CCJSqlParserUtil.parseCondExpression(" ( " + joiner + " ) ");
             if (StringUtils.isNotEmpty(joiner.toString())) {
-                String sql = SqlParserAddHelper.addWhere(queryS2SQLReq.getSql(), expression);
-                log.info("before doRowPermission, queryS2SQLReq:{}", queryS2SQLReq.getSql());
-                queryS2SQLReq.setSql(sql);
-                log.info("after doRowPermission, queryS2SQLReq:{}", queryS2SQLReq.getSql());
+                String sql = SqlParserAddHelper.addWhere(querySQLReq.getSql(), expression);
+                log.info("before doRowPermission, queryS2SQLReq:{}", querySQLReq.getSql());
+                querySQLReq.setSql(sql);
+                log.info("after doRowPermission, queryS2SQLReq:{}", querySQLReq.getSql());
             }
         } catch (JSQLParserException jsqlParserException) {
             log.info("jsqlParser has an exception:{}", jsqlParserException.toString());
@@ -155,14 +154,14 @@ public class S2SQLDataAspect extends AuthCheckBaseAspect {
 
     }
 
-    private void doFilterCheckLogic(QueryS2SQLReq queryS2SQLReq, Set<String> resAuthName,
+    private void doFilterCheckLogic(QuerySqlReq querySQLReq, Set<String> resAuthName,
             Set<String> sensitiveResReq) {
-        Set<String> resFilterSet = queryStructUtils.getFilterResNameEnExceptInternalCol(queryS2SQLReq);
+        Set<String> resFilterSet = queryStructUtils.getFilterResNameEnExceptInternalCol(querySQLReq);
         Set<String> need2Apply = resFilterSet.stream()
                 .filter(res -> !resAuthName.contains(res) && sensitiveResReq.contains(res)).collect(Collectors.toSet());
         Set<String> nameCnSet = new HashSet<>();
 
-        List<Long> modelIds = Lists.newArrayList(queryS2SQLReq.getModelIds());
+        List<Long> modelIds = Lists.newArrayList(querySQLReq.getModelIds());
         ModelFilter modelFilter = new ModelFilter();
         modelFilter.setModelIds(modelIds);
         List<ModelResp> modelInfos = modelService.getModelList(modelFilter);

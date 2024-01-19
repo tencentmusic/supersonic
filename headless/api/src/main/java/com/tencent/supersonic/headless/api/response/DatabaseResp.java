@@ -40,6 +40,8 @@ public class DatabaseResp extends RecordInfo {
 
     private String version;
 
+    private String schema;
+
     private boolean hasPermission = false;
 
     private boolean hasUsePermission = false;

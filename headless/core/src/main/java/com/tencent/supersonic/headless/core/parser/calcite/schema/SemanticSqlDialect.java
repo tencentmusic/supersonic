@@ -18,7 +18,6 @@ public class SemanticSqlDialect extends SqlDialect {
             .withDatabaseProduct(DatabaseProduct.BIG_QUERY)
             .withLiteralQuoteString("'")
             .withLiteralEscapedQuoteString("''")
-            .withIdentifierQuoteString("`")
             .withUnquotedCasing(Casing.UNCHANGED)
             .withQuotedCasing(Casing.UNCHANGED)
             .withCaseSensitive(false);
