@@ -1,12 +1,12 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Button, Space, Popconfirm, Input } from 'antd';
-import React, { useRef, useState } from 'react';
+import { message, Button, Space, Popconfirm, Input, Select } from 'antd';
+import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { StatusEnum } from '../enum';
 import { connect } from 'umi';
 import type { StateType } from '../model';
-import { SENSITIVE_LEVEL_ENUM } from '../constant';
+import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS } from '../constant';
 import {
   queryMetric,
   deleteMetric,
@@ -31,11 +31,16 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [pagination, setPagination] = useState({
+  const [tableData, setTableData] = useState<ISemantic.IMetricItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const defaultPagination = {
     current: 1,
     pageSize: 20,
     total: 0,
-  });
+  };
+  const [pagination, setPagination] = useState(defaultPagination);
+  const [filterParams, setFilterParams] = useState<Record<string, any>>({});
+
   const actionRef = useRef<ActionType>();
 
   const [downloadLoading, setDownloadLoading] = useState<boolean>(false);
@@ -61,14 +66,19 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     message.error(msg);
   };
 
+  useEffect(() => {
+    queryMetricList({ ...filterParams, ...defaultPagination });
+  }, [filterParams]);
+
   const queryMetricList = async (params: any) => {
+    setLoading(true);
     const { code, data, msg } = await queryMetric({
-      ...params,
       ...pagination,
+      ...params,
       modelId,
     });
+    setLoading(false);
     const { list, pageSize, pageNum, total } = data || {};
-    let resData: any = {};
     if (code === 200) {
       setPagination({
         ...pagination,
@@ -76,20 +86,11 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         current: pageNum,
         total,
       });
-
-      resData = {
-        data: list || [],
-        success: true,
-      };
+      setTableData(list);
     } else {
       message.error(msg);
-      resData = {
-        data: [],
-        total: 0,
-        success: false,
-      };
+      setTableData([]);
     }
-    return resData;
   };
 
   const columns: ProColumns[] = [
@@ -104,13 +105,40 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'key',
       title: '指标搜索',
       hideInTable: true,
-      renderFormItem: () => <Input placeholder="请输入ID/指标名称/英文名称/标签" />,
+      renderFormItem: () => (
+        <Input.Search
+          placeholder="请输入ID/指标名称/英文名称/标签"
+          onSearch={(value) => {
+            setFilterParams((preState) => {
+              return {
+                ...preState,
+                key: value,
+              };
+            });
+          }}
+        />
+      ),
     },
     {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',
       hideInTable: true,
       valueEnum: SENSITIVE_LEVEL_ENUM,
+      renderFormItem: () => (
+        <Select
+          options={SENSITIVE_LEVEL_OPTIONS}
+          placeholder="请选择敏感度"
+          allowClear
+          onChange={(value) => {
+            setFilterParams((preState) => {
+              return {
+                ...preState,
+                sensitiveLevel: value,
+              };
+            });
+          }}
+        />
+      ),
     },
     {
       dataIndex: 'description',
@@ -249,6 +277,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft}`}
         actionRef={actionRef}
         rowKey="id"
+        loading={loading}
         search={{
           optionRender: false,
           collapsed: false,
@@ -259,19 +288,22 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         }}
         columns={columns}
         params={{ modelId }}
-        request={queryMetricList}
+        dataSource={tableData}
         pagination={pagination}
         tableAlertRender={() => {
           return false;
         }}
         onChange={(data: any) => {
           const { current, pageSize, total } = data;
-          setPagination({
+          const currentPagin = {
             current,
             pageSize,
             total,
-          });
+          };
+          setPagination(currentPagin);
+          queryMetricList({ ...filterParams, ...currentPagin });
         }}
+        sticky={{ offsetHeader: 0 }}
         size="large"
         options={{ reload: false, density: false, fullScreen: false }}
         toolBarRender={() => [

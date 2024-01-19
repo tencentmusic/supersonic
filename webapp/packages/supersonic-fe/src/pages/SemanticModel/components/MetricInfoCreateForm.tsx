@@ -336,7 +336,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     }
   };
   const queryMetricsToCreateNewMetric = async () => {
-  const { code, data } = await getMetricsToCreateNewMetric({
+    const { code, data } = await getMetricsToCreateNewMetric({
       modelId: modelId || metricItem?.modelId,
     });
     if (code === 200) {

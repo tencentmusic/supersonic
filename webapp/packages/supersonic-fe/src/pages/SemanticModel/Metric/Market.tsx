@@ -268,7 +268,13 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     params.sensitiveLevel = sensitiveLevelValue;
     params.type = typeValue;
     setFilterParams(params);
-    await queryMetricList(params, filterParams.key ? false : true);
+    await queryMetricList(
+      {
+        ...params,
+        ...defaultPagination,
+      },
+      filterParams.key ? false : true,
+    );
   };
 
   const rowSelection = {
@@ -352,6 +358,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             tableAlertRender={() => {
               return false;
             }}
+            sticky={{ offsetHeader: 0 }}
             rowSelection={{
               type: 'checkbox',
               ...rowSelection,
