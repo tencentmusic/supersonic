@@ -4,7 +4,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.core.pojo.Database;
@@ -112,10 +112,10 @@ public class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public QueryResultWithSchemaResp executeSql(String sql, Long id, User user) {
+    public SemanticQueryResp executeSql(String sql, Long id, User user) {
         DatabaseResp databaseResp = getDatabase(id);
         if (databaseResp == null) {
-            return new QueryResultWithSchemaResp();
+            return new SemanticQueryResp();
         }
         List<String> admins = databaseResp.getAdmins();
         List<String> viewers = databaseResp.getViewers();
@@ -132,7 +132,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public QueryResultWithSchemaResp executeSql(String sql, DatabaseResp databaseResp) {
+    public SemanticQueryResp executeSql(String sql, DatabaseResp databaseResp) {
         return queryWithColumns(sql, DatabaseConverter.convert(databaseResp));
     }
 
@@ -143,8 +143,8 @@ public class DatabaseServiceImpl implements DatabaseService {
                 LinkedHashMap::putAll);
     }
 
-    private QueryResultWithSchemaResp queryWithColumns(String sql, Database database) {
-        QueryResultWithSchemaResp queryResultWithColumns = new QueryResultWithSchemaResp();
+    private SemanticQueryResp queryWithColumns(String sql, Database database) {
+        SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();
         SqlUtils sqlUtils = this.sqlUtils.init(database);
         log.info("query SQL: {}", sql);
         sqlUtils.queryInternal(sql, queryResultWithColumns);
@@ -156,7 +156,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public QueryResultWithSchemaResp getDbNames(Long id) {
+    public SemanticQueryResp getDbNames(Long id) {
         DatabaseResp databaseResp = getDatabase(id);
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         String metaQueryTpl = engineAdaptor.getDbMetaQueryTpl();
@@ -164,7 +164,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public QueryResultWithSchemaResp getTables(Long id, String db) {
+    public SemanticQueryResp getTables(Long id, String db) {
         DatabaseResp databaseResp = getDatabase(id);
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         String metaQueryTpl = engineAdaptor.getTableMetaQueryTpl();
@@ -173,7 +173,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public QueryResultWithSchemaResp getColumns(Long id, String db, String table) {
+    public SemanticQueryResp getColumns(Long id, String db, String table) {
         DatabaseResp databaseResp = getDatabase(id);
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         String metaQueryTpl = engineAdaptor.getColumnMetaQueryTpl();

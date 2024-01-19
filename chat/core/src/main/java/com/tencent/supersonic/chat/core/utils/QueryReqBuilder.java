@@ -14,7 +14,7 @@ import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -133,13 +133,13 @@ public class QueryReqBuilder {
      * @param modelIds
      * @return
      */
-    public static QueryS2SQLReq buildS2SQLReq(String querySql, Set<Long> modelIds) {
-        QueryS2SQLReq queryS2SQLReq = new QueryS2SQLReq();
+    public static QuerySqlReq buildS2SQLReq(String querySql, Set<Long> modelIds) {
+        QuerySqlReq querySQLReq = new QuerySqlReq();
         if (Objects.nonNull(querySql)) {
-            queryS2SQLReq.setSql(querySql);
+            querySQLReq.setSql(querySql);
         }
-        queryS2SQLReq.setModelIds(modelIds);
-        return queryS2SQLReq;
+        querySQLReq.setModelIds(modelIds);
+        return querySQLReq;
     }
 
     private static List<Aggregator> getAggregatorByMetric(AggregateTypeEnum aggregateType, SchemaElement metric) {

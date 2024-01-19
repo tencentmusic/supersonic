@@ -12,16 +12,16 @@ import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.request.QueryItemReq;
 import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.ExplainResp;
 import com.tencent.supersonic.headless.api.response.ItemQueryResultResp;
 import com.tencent.supersonic.headless.api.response.ItemUseResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.response.SqlParserResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.server.service.DownloadService;
-import com.tencent.supersonic.headless.server.service.HeadlessQueryEngine;
+import com.tencent.supersonic.headless.server.service.SemantciQueryEngine;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import java.util.HashSet;
 import java.util.List;
@@ -45,19 +45,17 @@ public class QueryController {
     @Autowired
     private QueryService queryService;
     @Autowired
-    private HeadlessQueryEngine headlessQueryEngine;
+    private SemantciQueryEngine semantciQueryEngine;
 
     @Autowired
     private DownloadService downloadService;
 
     @PostMapping("/sql")
-    public Object queryBySql(@RequestBody QueryS2SQLReq queryS2SQLReq,
+    public Object queryBySql(@RequestBody QuerySqlReq querySQLReq,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        Object queryBySql = queryService.queryBySql(queryS2SQLReq, user);
-        log.info("queryBySql:{}", queryBySql);
-        return queryBySql;
+        return queryService.queryBySql(querySQLReq, user);
     }
 
     @PostMapping("/struct")
@@ -91,7 +89,7 @@ public class QueryController {
     }
 
     @PostMapping("/queryStatement")
-    public Object queryStatement(@RequestBody QueryStatement queryStatement) throws Exception {
+    public SemanticQueryResp queryStatement(@RequestBody QueryStatement queryStatement) throws Exception {
         return queryService.queryByQueryStatement(queryStatement);
     }
 
@@ -101,7 +99,7 @@ public class QueryController {
         Set<Long> models = new HashSet<>();
         models.add(Long.valueOf(parseSqlReq.getRootPath()));
         queryStructCmd.setModelIds(models);
-        QueryStatement queryStatement = headlessQueryEngine.physicalSql(queryStructCmd, parseSqlReq);
+        QueryStatement queryStatement = semantciQueryEngine.physicalSql(queryStructCmd, parseSqlReq);
         SqlParserResp sqlParserResp = new SqlParserResp();
         BeanUtils.copyProperties(queryStatement, sqlParserResp);
         return sqlParserResp;
@@ -130,7 +128,7 @@ public class QueryController {
     }
 
     @PostMapping("/queryDimValue")
-    public QueryResultWithSchemaResp queryDimValue(@RequestBody QueryDimValueReq queryDimValueReq,
+    public SemanticQueryResp queryDimValue(@RequestBody QueryDimValueReq queryDimValueReq,
             HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
@@ -147,9 +145,9 @@ public class QueryController {
         QueryType queryTypeEnum = explainSqlReq.getQueryTypeEnum();
 
         if (QueryType.SQL.equals(queryTypeEnum)) {
-            QueryS2SQLReq queryS2SQLReq = JsonUtil.toObject(queryReqJson, QueryS2SQLReq.class);
-            ExplainSqlReq<QueryS2SQLReq> explainSqlReqNew = ExplainSqlReq.<QueryS2SQLReq>builder()
-                    .queryReq(queryS2SQLReq)
+            QuerySqlReq querySQLReq = JsonUtil.toObject(queryReqJson, QuerySqlReq.class);
+            ExplainSqlReq<QuerySqlReq> explainSqlReqNew = ExplainSqlReq.<QuerySqlReq>builder()
+                    .queryReq(querySQLReq)
                     .queryTypeEnum(queryTypeEnum).build();
             return queryService.explain(explainSqlReqNew, user);
         }

@@ -20,7 +20,7 @@ import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,8 +59,8 @@ public class MetricAnalyzeQuery extends LLMSemanticQuery {
             queryStructReq.setS2SQL(parseInfo.getSqlInfo().getQuerySQL());
         }
 
-        QueryResultWithSchemaResp queryResultWithSchemaResp = semanticInterpreter.queryByStruct(queryStructReq, user);
-        String text = generateTableText(queryResultWithSchemaResp);
+        SemanticQueryResp semanticQueryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
+        String text = generateTableText(semanticQueryResp);
         Map<String, Object> properties = parseInfo.getProperties();
         Map<String, String> replacedMap = new HashMap<>();
         String textReplaced = replaceText((String) properties.get("queryText"),
@@ -130,7 +130,7 @@ public class MetricAnalyzeQuery extends LLMSemanticQuery {
         return text;
     }
 
-    public static String generateTableText(QueryResultWithSchemaResp result) {
+    public static String generateTableText(SemanticQueryResp result) {
         StringBuilder tableBuilder = new StringBuilder();
         for (QueryColumn column : result.getColumns()) {
             tableBuilder.append(column.getName()).append("\t");

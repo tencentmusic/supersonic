@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo;
 
 
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import lombok.Data;
 
 @Data
@@ -9,6 +9,6 @@ public class SingleItemQueryResult {
 
     private Item item;
 
-    private QueryResultWithSchemaResp result;
+    private SemanticQueryResp result;
 
 }

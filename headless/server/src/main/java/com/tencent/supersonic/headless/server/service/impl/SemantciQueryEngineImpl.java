@@ -3,16 +3,15 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
-import com.tencent.supersonic.headless.core.optimizer.QueryOptimizer;
+import com.tencent.supersonic.headless.core.planner.QueryOptimizer;
 import com.tencent.supersonic.headless.core.parser.QueryParser;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
-import com.tencent.supersonic.headless.server.manager.HeadlessSchemaManager;
-import com.tencent.supersonic.headless.server.service.HeadlessQueryEngine;
-import com.tencent.supersonic.headless.server.utils.QueryStructUtils;
+import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
+import com.tencent.supersonic.headless.server.service.SemantciQueryEngine;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,24 +19,21 @@ import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Component
-public class HeadlessQueryEngineImpl implements HeadlessQueryEngine {
+public class SemantciQueryEngineImpl implements SemantciQueryEngine {
 
     private final QueryParser queryParser;
     private final QueryUtils queryUtils;
-    private final QueryStructUtils queryStructUtils;
-    private final HeadlessSchemaManager headlessSchemaManager;
+    private final SemanticSchemaManager semanticSchemaManager;
 
-    public HeadlessQueryEngineImpl(QueryParser queryParser,
-            QueryUtils queryUtils, HeadlessSchemaManager headlessSchemaManager,
-            QueryStructUtils queryStructUtils) {
+    public SemantciQueryEngineImpl(QueryParser queryParser,
+            QueryUtils queryUtils, SemanticSchemaManager semanticSchemaManager) {
         this.queryParser = queryParser;
         this.queryUtils = queryUtils;
-        this.headlessSchemaManager = headlessSchemaManager;
-        this.queryStructUtils = queryStructUtils;
+        this.semanticSchemaManager = semanticSchemaManager;
     }
 
-    public QueryResultWithSchemaResp execute(QueryStatement queryStatement) {
-        QueryResultWithSchemaResp queryResultWithColumns = null;
+    public SemanticQueryResp execute(QueryStatement queryStatement) {
+        SemanticQueryResp queryResultWithColumns = null;
         QueryExecutor queryExecutor = route(queryStatement);
         if (queryExecutor != null) {
             queryResultWithColumns = queryExecutor.execute(queryStatement);
@@ -52,7 +48,7 @@ public class HeadlessQueryEngineImpl implements HeadlessQueryEngine {
     public QueryStatement plan(QueryStatement queryStatement) throws Exception {
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
         queryStatement.setSemanticModel(getSemanticModel(queryStatement));
-        queryStatement = queryParser.logicSql(queryStatement);
+        queryStatement = queryParser.parse(queryStatement);
         queryUtils.checkSqlParse(queryStatement);
         queryStatement.setModelIds(queryStatement.getQueryStructReq().getModelIds());
         log.info("queryStatement:{}", queryStatement);
@@ -97,7 +93,7 @@ public class HeadlessQueryEngineImpl implements HeadlessQueryEngine {
 
     private SemanticModel getSemanticModel(QueryStatement queryStatement) throws Exception {
         QueryStructReq queryStructReq = queryStatement.getQueryStructReq();
-        return headlessSchemaManager.get(queryStructReq.getModelIdStr());
+        return semanticSchemaManager.get(queryStructReq.getModelIdStr());
     }
 
 }

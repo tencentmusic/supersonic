@@ -36,7 +36,7 @@ import com.tencent.supersonic.common.pojo.enums.RatioOverType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import java.text.DecimalFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -105,7 +105,7 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
 
     public void fillAggregateInfo(User user, QueryResult queryResult) {
         if (Objects.nonNull(queryResult)) {
-            QueryResultWithSchemaResp queryResp = new QueryResultWithSchemaResp();
+            SemanticQueryResp queryResp = new SemanticQueryResp();
             queryResp.setColumns(queryResult.getQueryColumns());
             queryResp.setResultList(queryResult.getQueryResults());
             AggregateInfo aggregateInfo = getAggregateInfo(user, parseInfo, queryResp);
@@ -114,7 +114,7 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
     }
 
     public AggregateInfo getAggregateInfo(User user, SemanticParseInfo semanticParseInfo,
-            QueryResultWithSchemaResp result) {
+            SemanticQueryResp result) {
         AggregatorConfig aggregatorConfig = ContextUtils.getBean(AggregatorConfig.class);
 
         if (CollectionUtils.isEmpty(semanticParseInfo.getMetrics()) || !aggregatorConfig.getEnableRatio()) {
@@ -170,7 +170,7 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
     }
 
     private MetricInfo queryRatio(User user, SemanticParseInfo semanticParseInfo, SchemaElement metric,
-            AggOperatorEnum aggOperatorEnum, QueryResultWithSchemaResp results) {
+            AggOperatorEnum aggOperatorEnum, SemanticQueryResp results) {
         MetricInfo metricInfo = new MetricInfo();
         metricInfo.setStatistics(new HashMap<>());
         QueryStructReq queryStructReq = QueryReqBuilder.buildStructRatioReq(semanticParseInfo, metric, aggOperatorEnum);
@@ -180,7 +180,7 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
         queryStructReq.setGroups(new ArrayList<>(Arrays.asList(dateField)));
         queryStructReq.setDateInfo(getRatioDateConf(aggOperatorEnum, semanticParseInfo, results));
 
-        QueryResultWithSchemaResp queryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
+        SemanticQueryResp queryResp = semanticInterpreter.queryByStruct(queryStructReq, user);
 
         if (Objects.nonNull(queryResp) && !CollectionUtils.isEmpty(queryResp.getResultList())) {
 
@@ -220,7 +220,7 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
     }
 
     private DateConf getRatioDateConf(AggOperatorEnum aggOperatorEnum, SemanticParseInfo semanticParseInfo,
-            QueryResultWithSchemaResp results) {
+            SemanticQueryResp results) {
         String dateField = QueryReqBuilder.getDateField(semanticParseInfo.getDateInfo());
         Optional<String> lastDayOp = results.getResultList().stream()
                 .map(r -> r.get(dateField).toString())

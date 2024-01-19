@@ -20,24 +20,24 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.S2ThreadContext;
 import com.tencent.supersonic.common.util.ThreadContext;
+import com.tencent.supersonic.headless.api.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.headless.api.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.request.PageMetricReq;
+import com.tencent.supersonic.headless.api.request.QueryDimValueReq;
+import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
+import com.tencent.supersonic.headless.api.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.DomainResp;
 import com.tencent.supersonic.headless.api.response.ExplainResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
-import com.tencent.supersonic.headless.api.request.ExplainSqlReq;
-import com.tencent.supersonic.headless.api.request.QueryDimValueReq;
-import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
-import com.tencent.supersonic.headless.api.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
@@ -61,8 +61,8 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
 
     private AuthenticationConfig authenticationConfig;
 
-    private ParameterizedTypeReference<ResultData<QueryResultWithSchemaResp>> structTypeRef =
-            new ParameterizedTypeReference<ResultData<QueryResultWithSchemaResp>>() {
+    private ParameterizedTypeReference<ResultData<SemanticQueryResp>> structTypeRef =
+            new ParameterizedTypeReference<ResultData<SemanticQueryResp>>() {
             };
 
     private ParameterizedTypeReference<ResultData<ExplainResp>> explainTypeRef =
@@ -70,13 +70,13 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
             };
 
     @Override
-    public QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user) {
+    public SemanticQueryResp queryByStruct(QueryStructReq queryStructReq, User user) {
         if (StringUtils.isNotBlank(queryStructReq.getCorrectS2SQL())) {
-            QueryS2SQLReq queryS2SQLReq = new QueryS2SQLReq();
-            queryS2SQLReq.setSql(queryStructReq.getCorrectS2SQL());
-            queryS2SQLReq.setModelIds(queryStructReq.getModelIdSet());
-            queryS2SQLReq.setVariables(new HashMap<>());
-            return queryByS2SQL(queryS2SQLReq, user);
+            QuerySqlReq querySQLReq = new QuerySqlReq();
+            querySQLReq.setSql(queryStructReq.getCorrectS2SQL());
+            querySQLReq.setModelIds(queryStructReq.getModelIdSet());
+            querySQLReq.setParams(new ArrayList<>());
+            return queryByS2SQL(querySQLReq, user);
         }
 
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
@@ -86,7 +86,7 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
     }
 
     @Override
-    public QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user) {
+    public SemanticQueryResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user) {
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         return searchByRestTemplate(
                 defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getSearchByMultiStructPath(),
@@ -94,30 +94,30 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
     }
 
     @Override
-    public QueryResultWithSchemaResp queryByS2SQL(QueryS2SQLReq queryS2SQLReq, User user) {
+    public SemanticQueryResp queryByS2SQL(QuerySqlReq querySQLReq, User user) {
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         return searchByRestTemplate(defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getSearchBySqlPath(),
-                new Gson().toJson(queryS2SQLReq));
+                new Gson().toJson(querySQLReq));
     }
 
-    public QueryResultWithSchemaResp searchByRestTemplate(String url, String jsonReq) {
+    public SemanticQueryResp searchByRestTemplate(String url, String jsonReq) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         fillToken(headers);
         URI requestUrl = UriComponentsBuilder.fromHttpUrl(url).build().encode().toUri();
         HttpEntity<String> entity = new HttpEntity<>(jsonReq, headers);
         log.info("url:{},searchByRestTemplate:{}", url, entity.getBody());
-        ResultData<QueryResultWithSchemaResp> responseBody;
+        ResultData<SemanticQueryResp> responseBody;
         try {
             RestTemplate restTemplate = ContextUtils.getBean(RestTemplate.class);
 
-            ResponseEntity<ResultData<QueryResultWithSchemaResp>> responseEntity = restTemplate.exchange(
+            ResponseEntity<ResultData<SemanticQueryResp>> responseEntity = restTemplate.exchange(
                     requestUrl, HttpMethod.POST, entity, structTypeRef);
             responseBody = responseEntity.getBody();
             log.info("ApiResponse<QueryResultWithColumns> responseBody:{}", responseBody);
-            QueryResultWithSchemaResp schemaResp = new QueryResultWithSchemaResp();
+            SemanticQueryResp schemaResp = new SemanticQueryResp();
             if (ReturnCode.SUCCESS.getCode() == responseBody.getCode()) {
-                QueryResultWithSchemaResp data = responseBody.getData();
+                SemanticQueryResp data = responseBody.getData();
                 schemaResp.setColumns(data.getColumns());
                 schemaResp.setResultList(data.getResultList());
                 schemaResp.setSql(data.getSql());
@@ -131,7 +131,7 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
     }
 
     @Override
-    public QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user) {
+    public SemanticQueryResp queryDimValue(QueryDimValueReq queryDimValueReq, User user) {
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         return searchByRestTemplate(defaultSemanticConfig.getSemanticUrl()
                         + defaultSemanticConfig.getQueryDimValuePath(),

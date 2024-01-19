@@ -19,7 +19,6 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.api.enums.MetricDefineType;
-import com.tencent.supersonic.headless.api.enums.MetricType;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
@@ -283,19 +282,14 @@ public class SqlGenerateUtils {
                         Optional<MetricResp> metricItem = metricResps.stream()
                                 .filter(m -> m.getBizName().equalsIgnoreCase(field)).findFirst();
                         if (metricItem.isPresent()) {
-                            if (MetricType.isDerived(metricItem.get().getMetricDefineType(),
-                                    metricItem.get().getTypeParams())) {
-                                if (visitedMetric.contains(field)) {
-                                    break;
-                                }
-                                replace.put(field,
-                                        generateDerivedMetric(metricResps, allFields, allMeasures, dimensionResps,
-                                                getExpr(metricItem.get()), metricItem.get().getMetricDefineType(),
-                                                visitedMetric, measures, dimensions));
-                                visitedMetric.add(field);
-                            } else {
-                                replace.put(field, getExpr(metricItem.get()));
+                            if (visitedMetric.contains(field)) {
+                                break;
                             }
+                            replace.put(field,
+                                    generateDerivedMetric(metricResps, allFields, allMeasures, dimensionResps,
+                                            getExpr(metricItem.get()), metricItem.get().getMetricDefineType(),
+                                            visitedMetric, measures, dimensions));
+                            visitedMetric.add(field);
                         }
                         break;
                     case MEASURE:
@@ -321,7 +315,9 @@ public class SqlGenerateUtils {
                 }
             }
             if (!CollectionUtils.isEmpty(replace)) {
-                return SqlParserReplaceHelper.replaceExpression(expression, replace);
+                String expr = SqlParserReplaceHelper.replaceExpression(expression, replace);
+                log.info("derived measure {}->{}", expression, expr);
+                return expr;
             }
         }
         return expression;

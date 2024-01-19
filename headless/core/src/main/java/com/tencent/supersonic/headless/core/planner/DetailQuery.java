@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.optimizer;
+package com.tencent.supersonic.headless.core.planner;
 
 import com.google.common.base.Strings;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;

@@ -64,7 +64,7 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -628,7 +628,7 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception {
-        QueryResultWithSchemaResp queryResultWithSchemaResp = new QueryResultWithSchemaResp();
+        SemanticQueryResp semanticQueryResp = new SemanticQueryResp();
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();
         SchemaElement schemaElement = semanticSchema.getDimensions(dimensionValueReq.getElementID());
@@ -638,8 +638,8 @@ public class QueryServiceImpl implements QueryService {
         List<String> dimensionValues = getDimensionValues(dimensionValueReq, detectModelIds);
         // if the search results is null,search dimensionValue from database
         if (CollectionUtils.isEmpty(dimensionValues)) {
-            queryResultWithSchemaResp = queryDatabase(dimensionValueReq, user);
-            return queryResultWithSchemaResp;
+            semanticQueryResp = queryDatabase(dimensionValueReq, user);
+            return semanticQueryResp;
         }
         List<QueryColumn> columns = new ArrayList<>();
         QueryColumn queryColumn = new QueryColumn();
@@ -654,9 +654,9 @@ public class QueryServiceImpl implements QueryService {
             map.put(dimensionValueReq.getBizName(), o);
             resultList.add(map);
         });
-        queryResultWithSchemaResp.setColumns(columns);
-        queryResultWithSchemaResp.setResultList(resultList);
-        return queryResultWithSchemaResp;
+        semanticQueryResp.setColumns(columns);
+        semanticQueryResp.setResultList(resultList);
+        return semanticQueryResp;
     }
 
     private List<String> getDimensionValues(DimensionValueReq dimensionValueReq, Set<Long> detectModelIds) {
@@ -682,7 +682,7 @@ public class QueryServiceImpl implements QueryService {
                 .collect(Collectors.toList());
     }
 
-    private QueryResultWithSchemaResp queryDatabase(DimensionValueReq dimensionValueReq, User user) {
+    private SemanticQueryResp queryDatabase(DimensionValueReq dimensionValueReq, User user) {
         QueryStructReq queryStructReq = new QueryStructReq();
 
         DateConf dateConf = new DateConf();

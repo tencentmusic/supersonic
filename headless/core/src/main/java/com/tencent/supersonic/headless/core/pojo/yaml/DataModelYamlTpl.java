@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.pojo.yaml;
 
 import com.tencent.supersonic.headless.api.enums.ModelSourceType;
+import com.tencent.supersonic.headless.api.pojo.Field;
 import lombok.Data;
 
 import java.util.List;
@@ -26,6 +27,8 @@ public class DataModelYamlTpl {
     private List<DimensionYamlTpl> dimensions;
 
     private List<MeasureYamlTpl> measures;
+
+    private List<Field> fields;
 
     private ModelSourceType modelSourceTypeEnum;
 

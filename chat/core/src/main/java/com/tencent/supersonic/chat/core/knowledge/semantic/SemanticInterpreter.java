@@ -12,10 +12,10 @@ import com.tencent.supersonic.headless.api.response.ExplainResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryDimValueReq;
-import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
+import com.tencent.supersonic.headless.api.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 
@@ -34,13 +34,13 @@ import java.util.List;
  */
 public interface SemanticInterpreter {
 
-    QueryResultWithSchemaResp queryByStruct(QueryStructReq queryStructReq, User user);
+    SemanticQueryResp queryByStruct(QueryStructReq queryStructReq, User user);
 
-    QueryResultWithSchemaResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user);
+    SemanticQueryResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user);
 
-    QueryResultWithSchemaResp queryByS2SQL(QueryS2SQLReq queryS2SQLReq, User user);
+    SemanticQueryResp queryByS2SQL(QuerySqlReq querySQLReq, User user);
 
-    QueryResultWithSchemaResp queryDimValue(QueryDimValueReq queryDimValueReq, User user);
+    SemanticQueryResp queryDimValue(QueryDimValueReq queryDimValueReq, User user);
 
     List<ModelSchema> getModelSchema();
 
