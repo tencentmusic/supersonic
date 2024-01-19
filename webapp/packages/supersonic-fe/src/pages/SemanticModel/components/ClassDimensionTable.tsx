@@ -38,9 +38,9 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   >([]);
   const [dimensionValueSettingModalVisible, setDimensionValueSettingModalVisible] =
     useState<boolean>(false);
-  const [pagination, setPagination] = useState({
+  const [pagination] = useState({
     current: 1,
-    pageSize: 20,
+    pageSize: 99999,
     total: 0,
   });
 
@@ -54,16 +54,9 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       modelId,
     });
     setLoading(false);
-    const { list, pageSize, pageNum, total } = data || {};
+    const { list } = data || {};
     let resData: any = {};
     if (code === 200) {
-      setPagination({
-        ...pagination,
-        pageSize: Math.min(pageSize, 100),
-        current: pageNum,
-        total,
-      });
-
       resData = {
         data: list || [],
         success: true,
@@ -327,30 +320,6 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     },
   };
 
-  // const dropdownButtonItems = [
-  //   {
-  //     key: 'batchStart',
-  //     label: '批量启用',
-  //   },
-  //   {
-  //     key: 'batchStop',
-  //     label: '批量停用',
-  //   },
-  //   {
-  //     key: 'batchDelete',
-  //     label: (
-  //       <Popconfirm
-  //         title="确定批量删除吗？"
-  //         onConfirm={() => {
-  //           queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
-  //         }}
-  //       >
-  //         <a>批量删除</a>
-  //       </Popconfirm>
-  //     ),
-  //   },
-  // ];
-
   const onMenuClick = (key: string) => {
     switch (key) {
       case 'batchStart':
@@ -372,10 +341,8 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         rowKey="id"
         columns={columns}
         request={queryDimensionList}
-        pagination={pagination}
         loading={loading}
         search={{
-          span: 4,
           defaultCollapsed: false,
           collapseRender: () => {
             return <></>;
@@ -384,14 +351,6 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         rowSelection={{
           type: 'checkbox',
           ...rowSelection,
-        }}
-        onChange={(data: any) => {
-          const { current, pageSize, total } = data;
-          setPagination({
-            current,
-            pageSize,
-            total,
-          });
         }}
         tableAlertRender={() => {
           return false;

@@ -74,7 +74,7 @@ const BindMeasuresTable: React.FC<CreateFormProps> = ({
       <>
         <Button onClick={onCancel}>取消</Button>
         <Button type="primary" onClick={handleSubmit}>
-          将选中度量添加到指标
+          添加度量
         </Button>
       </>
     );

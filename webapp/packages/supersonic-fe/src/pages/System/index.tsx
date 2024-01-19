@@ -17,21 +17,19 @@ import React, { useState, useEffect } from 'react';
 import { getSystemConfig, saveSystemConfig } from '@/services/user';
 import ProCard from '@ant-design/pro-card';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
-import { SystemConfigParametersItem, SystemConfig } from './types';
+import { ConfigParametersItem, SystemConfig } from './types';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import { groupBy } from 'lodash';
+import { genneratorFormItemList } from '../SemanticModel/utils';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
 const System: React.FC = () => {
-  const [systemConfig, setSystemConfig] = useState<Record<string, SystemConfigParametersItem[]>>(
-    {},
-  );
+  const [systemConfig, setSystemConfig] = useState<Record<string, ConfigParametersItem[]>>({});
   const [anchorItems, setAnchorItems] = useState<{ key: string; href: string; title: string }[]>(
     [],
   );
   const [configSource, setConfigSource] = useState<SystemConfig>();
-  const [paramDescMap, setParamDescMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     querySystemConfig();
@@ -52,25 +50,13 @@ const System: React.FC = () => {
       setAnchorItems(anchor);
       setSystemConfig(groupByConfig);
       setInitData(admins, parameters);
-      initDescMap(parameters);
       setConfigSource(data);
     } else {
       message.error(msg);
     }
   };
 
-  const initDescMap = (systemConfigParameters: SystemConfigParametersItem[]) => {
-    const descData = systemConfigParameters.reduce(
-      (descMap: Record<string, string>, item: SystemConfigParametersItem) => {
-        descMap[item.name] = item.description;
-        return descMap;
-      },
-      {},
-    );
-    setParamDescMap(descData);
-  };
-
-  const setInitData = (admins: string[], systemConfigParameters: SystemConfigParametersItem[]) => {
+  const setInitData = (admins: string[], systemConfigParameters: ConfigParametersItem[]) => {
     const fieldsValue = systemConfigParameters.reduce(
       (fields, item) => {
         const { name, value } = item;
@@ -95,7 +81,6 @@ const System: React.FC = () => {
           return {
             ...item,
             value: submitData[name],
-            description: paramDescMap[name],
           };
         }
         return item;
@@ -143,69 +128,7 @@ const System: React.FC = () => {
                         bordered
                         id={key}
                       >
-                        {itemList.map((item) => {
-                          const { dataType, name, comment } = item;
-                          let defaultItem = <Input />;
-                          switch (dataType) {
-                            case 'string':
-                              defaultItem = <TextArea placeholder="" style={{ height: 100 }} />;
-                              break;
-                            case 'number':
-                              defaultItem = <InputNumber style={{ width: '100%' }} />;
-                              break;
-                            case 'bool':
-                              return (
-                                <FormItem
-                                  name={name}
-                                  label={comment}
-                                  key={name}
-                                  valuePropName="checked"
-                                  getValueFromEvent={(value) => {
-                                    return value === true ? 'true' : 'false';
-                                  }}
-                                  getValueProps={(value) => {
-                                    return {
-                                      checked: value === 'true',
-                                    };
-                                  }}
-                                >
-                                  <Switch />
-                                </FormItem>
-                              );
-                            case 'list': {
-                              const { candidateValues = [] } = item;
-                              const options = candidateValues.map((value) => {
-                                return { label: value, value };
-                              });
-                              defaultItem = <Select style={{ width: '100%' }} options={options} />;
-                              break;
-                            }
-                            default:
-                              defaultItem = <Input />;
-                              break;
-                          }
-                          return (
-                            <FormItem
-                              name={name}
-                              key={name}
-                              label={
-                                <FormItemTitle
-                                  title={comment}
-                                  subTitle={paramDescMap[name]}
-                                  // subTitleEditable={true}
-                                  onSubTitleChange={(title) => {
-                                    setParamDescMap({
-                                      ...paramDescMap,
-                                      [name]: title,
-                                    });
-                                  }}
-                                />
-                              }
-                            >
-                              {defaultItem}
-                            </FormItem>
-                          );
-                        })}
+                        {genneratorFormItemList(itemList)}
                       </ProCard>
                     );
                   })}

@@ -125,14 +125,14 @@ export function queryMetric(data: any): Promise<any> {
   return request.post(`${process.env.API_BASE_URL}metric/queryMetric`, queryParams);
 }
 
-export function creatExprMetric(data: any): Promise<any> {
-  return request.post(`${process.env.API_BASE_URL}metric/creatExprMetric`, {
+export function createMetric(data: any): Promise<any> {
+  return request.post(`${process.env.API_BASE_URL}metric/createMetric`, {
     data,
   });
 }
 
-export function updateExprMetric(data: any): Promise<any> {
-  return request.post(`${process.env.API_BASE_URL}metric/updateExprMetric`, {
+export function updateMetric(data: any): Promise<any> {
+  return request.post(`${process.env.API_BASE_URL}metric/updateMetric`, {
     data,
   });
 }
@@ -430,6 +430,12 @@ export function getModelDetail(data: any): Promise<any> {
   return request.get(`${process.env.API_BASE_URL}model/getModel/${data.modelId}`);
 }
 
+export function getMetricsToCreateNewMetric(data: any): Promise<any> {
+  return request.get(
+    `${process.env.API_BASE_URL}metric/getMetricsToCreateNewMetric/${data.modelId}`,
+  );
+}
+
 export function createDictTask(data: any): Promise<any> {
   return request(`${process.env.CHAT_API_BASE_URL}dict/task`, {
     method: 'POST',
@@ -545,4 +551,12 @@ export function metricStarState(data: { id: number; state: boolean }): Promise<a
       method: 'DELETE',
     });
   }
+}
+
+export function getDatabaseParameters(): Promise<any> {
+  return request.get(`${process.env.API_BASE_URL}database/getDatabaseParameters`);
+}
+
+export function getDatabaseDetail(id: number): Promise<any> {
+  return request.get(`${process.env.API_BASE_URL}database/${id}`);
 }

@@ -1,6 +1,6 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Button, Space, Popconfirm, Input, Tag } from 'antd';
+import { message, Button, Space, Popconfirm, Input } from 'antd';
 import React, { useRef, useState } from 'react';
 import type { Dispatch } from 'umi';
 import { StatusEnum } from '../enum';
@@ -19,6 +19,7 @@ import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
+import { ColumnsConfig } from './MetricTableColumnRender';
 
 type Props = {
   dispatch: Dispatch;
@@ -93,15 +94,11 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   const columns: ProColumns[] = [
     {
-      dataIndex: 'id',
-      title: 'ID',
-      width: 80,
-      search: false,
-    },
-    {
       dataIndex: 'name',
-      title: '指标名称',
+      title: '指标',
+      width: '30%',
       search: false,
+      render: ColumnsConfig.metricInfo.render,
     },
     {
       dataIndex: 'key',
@@ -110,73 +107,24 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       renderFormItem: () => <Input placeholder="请输入ID/指标名称/英文名称/标签" />,
     },
     {
-      dataIndex: 'alias',
-      title: '别名',
-      width: 150,
-      ellipsis: true,
-      search: false,
-    },
-    {
-      dataIndex: 'bizName',
-      title: '英文名称',
-      search: false,
-    },
-    {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',
-      width: 80,
+      hideInTable: true,
       valueEnum: SENSITIVE_LEVEL_ENUM,
-    },
-    {
-      dataIndex: 'status',
-      title: '状态',
-      width: 80,
-      search: false,
-      render: (status) => {
-        switch (status) {
-          case StatusEnum.ONLINE:
-            return <Tag color="success">已启用</Tag>;
-          case StatusEnum.OFFLINE:
-            return <Tag color="warning">未启用</Tag>;
-          case StatusEnum.INITIALIZED:
-            return <Tag color="processing">初始化</Tag>;
-          case StatusEnum.DELETED:
-            return <Tag color="default">已删除</Tag>;
-          default:
-            return <Tag color="default">未知</Tag>;
-        }
-      },
-    },
-    {
-      dataIndex: 'createdBy',
-      title: '创建人',
-      width: 100,
-      search: false,
-    },
-    {
-      dataIndex: 'tags',
-      title: '标签',
-      search: false,
-      render: (tags) => {
-        if (Array.isArray(tags)) {
-          return (
-            <Space size={2} wrap>
-              {tags.map((tag) => (
-                <Tag color="blue" key={tag}>
-                  {tag}
-                </Tag>
-              ))}
-            </Space>
-          );
-        }
-        return <>--</>;
-      },
     },
     {
       dataIndex: 'description',
       title: '描述',
       search: false,
     },
+    {
+      dataIndex: 'status',
+      title: '状态',
+      width: 200,
+      search: false,
+      render: ColumnsConfig.state.render,
+    },
+
     {
       dataIndex: 'updatedAt',
       title: '更新时间',
@@ -302,11 +250,8 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         actionRef={actionRef}
         rowKey="id"
         search={{
-          span: 4,
-          defaultCollapsed: false,
-          collapseRender: () => {
-            return <></>;
-          },
+          optionRender: false,
+          collapsed: false,
         }}
         rowSelection={{
           type: 'checkbox',
@@ -327,7 +272,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             total,
           });
         }}
-        size="small"
+        size="large"
         options={{ reload: false, density: false, fullScreen: false }}
         toolBarRender={() => [
           <Button

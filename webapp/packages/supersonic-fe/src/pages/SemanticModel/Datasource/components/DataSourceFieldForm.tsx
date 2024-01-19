@@ -16,7 +16,7 @@ import styles from '../style.less';
 type FieldItem = {
   expr?: string;
   bizName: string;
-  sqlType: string;
+  dataType: string;
   name: string;
   type: EnumDataSourceType;
   agg?: string;
@@ -47,7 +47,7 @@ const getCreateFieldName = (type: EnumDataSourceType) => {
   return isCreateName;
 };
 
-const FieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSqlChange }) => {
+const DataSourceFieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSqlChange }) => {
   const handleFieldChange = (record: FieldItem, fieldName: string, value: any) => {
     onFieldChange(record.bizName, {
       ...record,
@@ -61,13 +61,13 @@ const FieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSqlChange })
       dataIndex: 'fieldName',
       width: 100,
     },
-    // {
-    //   title: '数据类型',
-    //   dataIndex: 'sqlType',
-    //   width: 80,
-    // },
     {
       title: '字段类型',
+      dataIndex: 'dataType',
+      width: 80,
+    },
+    {
+      title: '语义类型',
       dataIndex: 'type',
       width: 100,
       render: (_: any, record: FieldItem) => {
@@ -305,9 +305,6 @@ const FieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSqlChange })
           <div>
             为了保障同一个模型下维度/指标列表唯一，消除歧义，若本模型下的多个数据源存在相同的字段名并且都勾选了快速创建，系统默认这些相同字段的指标维度是同一个，同时列表中将只显示第一次创建的指标/维度。
           </div>
-          // <Marquee pauseOnHover gradient={false}>
-          //   为了保障同一个主题域下维度/指标列表唯一，消除歧义，若本主题域下的多个数据源存在相同的字段名并且都勾选了快速创建，系统默认这些相同字段的指标维度是同一个，同时列表中将只显示最后一次创建的指标/维度。
-          // </Marquee>
         }
       />
       <Table<FieldItem>
@@ -329,4 +326,4 @@ const FieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSqlChange })
   );
 };
 
-export default FieldForm;
+export default DataSourceFieldForm;
