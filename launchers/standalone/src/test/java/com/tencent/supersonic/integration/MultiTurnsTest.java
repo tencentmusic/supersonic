@@ -20,7 +20,8 @@ public class MultiTurnsTest extends BaseQueryTest {
     @Test
     @Order(1)
     public void queryTest_01() throws Exception {
-        QueryResult actualResult = submitMultiTurnChat("alice的访问次数");
+        MockConfiguration.mockMetricAgent(agentService);
+        QueryResult actualResult = submitMultiTurnChat("alice的访问次数", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -43,7 +44,8 @@ public class MultiTurnsTest extends BaseQueryTest {
     @Test
     @Order(2)
     public void queryTest_02() throws Exception {
-        QueryResult actualResult = submitMultiTurnChat("停留时长呢");
+        MockConfiguration.mockMetricAgent(agentService);
+        QueryResult actualResult = submitMultiTurnChat("停留时长呢", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -66,7 +68,8 @@ public class MultiTurnsTest extends BaseQueryTest {
     @Test
     @Order(3)
     public void queryTest_03() throws Exception {
-        QueryResult actualResult = submitMultiTurnChat("lucy的如何");
+        MockConfiguration.mockMetricAgent(agentService);
+        QueryResult actualResult = submitMultiTurnChat("lucy的如何", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -89,7 +92,8 @@ public class MultiTurnsTest extends BaseQueryTest {
     @Test
     @Order(4)
     public void queryTest_04() throws Exception {
-        QueryResult actualResult = submitMultiTurnChat("按部门统计");
+        MockConfiguration.mockMetricAgent(agentService);
+        QueryResult actualResult = submitMultiTurnChat("按部门统计", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -110,9 +114,11 @@ public class MultiTurnsTest extends BaseQueryTest {
     @Test
     @Order(5)
     public void queryTest_05() throws Exception {
+        MockConfiguration.mockMetricAgent(agentService);
         DateFormat format = new SimpleDateFormat("yyyy-mm-dd");
         DateFormat textFormat = new SimpleDateFormat("yyyy年mm月dd日");
-        QueryResult actualResult = submitMultiTurnChat(textFormat.format(format.parse(startDay)));
+        QueryResult actualResult = submitMultiTurnChat(textFormat.format(format.parse(startDay)),
+                DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -133,7 +139,8 @@ public class MultiTurnsTest extends BaseQueryTest {
     @Test
     @Order(6)
     public void queryTest_06() throws Exception {
-        QueryResult actualResult = submitMultiTurnChat("近30天");
+        MockConfiguration.mockMetricAgent(agentService);
+        QueryResult actualResult = submitMultiTurnChat("近30天", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
