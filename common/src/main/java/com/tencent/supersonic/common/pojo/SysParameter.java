@@ -102,7 +102,7 @@ public class SysParameter {
 
         //parse config
         parameters.add(new Parameter("parse.show.count", "3",
-                "parseShowCount", "前端展示的解析个数",
+                "解析结果个数", "前端展示的解析个数",
                 "number", "Parser相关配置"));
     }
 

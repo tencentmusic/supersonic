@@ -93,6 +93,8 @@ public class ChatDemoLoader implements CommandLineRunner {
             addAgent3();
             addSampleChats();
             addSampleChats2();
+            updateQueryScore(1);
+            updateQueryScore(4);
         } catch (Exception e) {
             log.error("Failed to add sample chats", e);
         }
@@ -504,6 +506,10 @@ public class ChatDemoLoader implements CommandLineRunner {
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());
+    }
+
+    private void updateQueryScore(Integer queryId) {
+        chatService.updateFeedback(queryId, 5, "");
     }
 
     private boolean checkEnable() {
