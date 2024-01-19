@@ -31,6 +31,16 @@ import com.tencent.supersonic.headless.core.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Triple;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -43,15 +53,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Triple;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 
 @Slf4j
@@ -142,7 +143,8 @@ public class SemanticSchemaManager {
                         || identifiers.contains(f.getFieldName())) {
                     continue;
                 }
-                datasource.getMeasures().add(Measure.builder().name(f.getFieldName()).agg("").build());
+                datasource.getMeasures().add(Measure.builder().name(f.getFieldName())
+                        .expr(f.getFieldName()).agg("").build());
             }
         }
         return datasource;

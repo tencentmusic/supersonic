@@ -15,8 +15,6 @@ public class Measure {
 
     private String expr;
 
-    private String createMetric;
-
     private String bizName;
 
     private Integer isCreateMetric = 0;

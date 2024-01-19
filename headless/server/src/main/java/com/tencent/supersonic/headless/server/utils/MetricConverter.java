@@ -81,7 +81,7 @@ public class MetricConverter {
         }
         metricResp.setTypeEnum(TypeEnums.METRIC);
         if (MetricDefineType.MEASURE.name().equalsIgnoreCase(metricDO.getDefineType())) {
-            metricResp.setTypeParams(JSONObject.parseObject(metricDO.getTypeParams(),
+            metricResp.setMetricDefineByMeasureParams(JSONObject.parseObject(metricDO.getTypeParams(),
                     MetricDefineByMeasureParams.class));
         } else if (MetricDefineType.METRIC.name().equalsIgnoreCase(metricDO.getDefineType())) {
             metricResp.setMetricDefineByMetricParams(JSONObject.parseObject(metricDO.getTypeParams(),

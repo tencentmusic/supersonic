@@ -338,7 +338,7 @@ public class ModelDemoDataLoader {
                 "", AggOperatorEnum.SUM.getOperator());
         measures.add(measure);
         metricTypeParams.setMeasures(measures);
-        metricReq.setTypeParams(metricTypeParams);
+        metricReq.setMetricDefineByMeasureParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
         metricService.updateMetric(metricReq, user);
     }

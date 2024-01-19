@@ -12,23 +12,24 @@ import lombok.Data;
 public class MetricReq extends MetricBaseReq {
 
     private MetricDefineType metricDefineType = MetricDefineType.MEASURE;
-    private MetricDefineByMeasureParams typeParams;
+    private MetricDefineByMeasureParams metricDefineByMeasureParams;
     private MetricDefineByFieldParams metricDefineByFieldParams;
     private MetricDefineByMetricParams metricDefineByMetricParams;
 
     public String getTypeParamsJson() {
-        if (metricDefineByFieldParams != null) {
+        if (MetricDefineType.FIELD.equals(metricDefineType) && metricDefineByFieldParams != null) {
             return JSONObject.toJSONString(metricDefineByFieldParams);
-        } else if (typeParams != null) {
-            return JSONObject.toJSONString(typeParams);
-        } else if (metricDefineByMetricParams != null) {
+        } else if (MetricDefineType.MEASURE.equals(metricDefineType) && metricDefineByMeasureParams != null) {
+            return JSONObject.toJSONString(metricDefineByMeasureParams);
+        } else if (MetricDefineType.METRIC.equals(metricDefineType) && metricDefineByMetricParams != null) {
             return JSONObject.toJSONString(metricDefineByMetricParams);
         }
         return null;
     }
 
     public MetricType getMetricType() {
-        return MetricType.isDerived(metricDefineType, typeParams) ? MetricType.DERIVED : MetricType.ATOMIC;
+        return MetricType.isDerived(metricDefineType, metricDefineByMeasureParams)
+                ? MetricType.DERIVED : MetricType.ATOMIC;
     }
 
 }

@@ -46,7 +46,7 @@ public class MetricYamlManager {
         metricYamlTpl.setOwners(Lists.newArrayList(metric.getCreatedBy()));
         MetricTypeParamsYamlTpl metricTypeParamsYamlTpl = new MetricTypeParamsYamlTpl();
         if (MetricDefineType.MEASURE.equals(metric.getMetricDefineType())) {
-            MetricDefineByMeasureParams metricDefineParams = metric.getTypeParams();
+            MetricDefineByMeasureParams metricDefineParams = metric.getMetricDefineByMeasureParams();
             metricTypeParamsYamlTpl.setExpr(metricDefineParams.getExpr());
             List<MeasureParam> measures = metricDefineParams.getMeasures();
             metricTypeParamsYamlTpl.setMeasures(

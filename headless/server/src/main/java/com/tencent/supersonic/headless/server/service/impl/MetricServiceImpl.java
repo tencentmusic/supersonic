@@ -16,6 +16,7 @@ import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.headless.api.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
+import com.tencent.supersonic.headless.api.pojo.MetricParam;
 import com.tencent.supersonic.headless.api.pojo.MetricQueryDefaultConfig;
 import com.tencent.supersonic.headless.api.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.request.MetricBaseReq;
@@ -206,7 +207,36 @@ public class MetricServiceImpl implements MetricService {
     public List<MetricResp> getMetrics(MetaFilter metaFilter) {
         MetricFilter metricFilter = new MetricFilter();
         BeanUtils.copyProperties(metaFilter, metricFilter);
-        return convertList(queryMetric(metricFilter), Lists.newArrayList());
+        List<MetricResp> metricResps = convertList(queryMetric(metricFilter));
+        if (!CollectionUtils.isEmpty(metaFilter.getFieldsDepend())) {
+            return filterByField(metricResps, metaFilter.getFieldsDepend());
+        }
+        return metricResps;
+    }
+
+    private List<MetricResp> filterByField(List<MetricResp> metricResps, List<String> fields) {
+        List<MetricResp> metricRespFiltered = Lists.newArrayList();
+        for (MetricResp metricResp : metricResps) {
+            for (String field : fields) {
+                if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
+                    List<Long> ids = metricResp.getMetricDefineByMetricParams().getMetrics()
+                            .stream().map(MetricParam::getId).collect(Collectors.toList());
+                    List<MetricResp> metricById = metricResps.stream()
+                            .filter(metric -> ids.contains(metric.getId()))
+                            .collect(Collectors.toList());
+                    for (MetricResp metric : metricById) {
+                        if (metric.getExpr().contains(field)) {
+                            metricRespFiltered.add(metricResp);
+                        }
+                    }
+                } else {
+                    if (metricResp.getExpr().contains(field)) {
+                        metricRespFiltered.add(metricResp);
+                    }
+                }
+            }
+        }
+        return metricRespFiltered;
     }
 
     @Override
@@ -360,6 +390,10 @@ public class MetricServiceImpl implements MetricService {
         List<ModelResp> modelResps = modelService.getModelByDomainIds(Lists.newArrayList(domainId));
         List<Long> modelIds = modelResps.stream().map(ModelResp::getId).collect(Collectors.toList());
         return getMetrics(new MetaFilter(modelIds));
+    }
+
+    private List<MetricResp> convertList(List<MetricDO> metricDOS) {
+        return convertList(metricDOS, Lists.newArrayList());
     }
 
     private List<MetricResp> convertList(List<MetricDO> metricDOS, List<Long> collect) {

@@ -122,7 +122,7 @@ public class ModelConverter {
         MeasureParam measureParam = new MeasureParam();
         BeanMapper.mapper(measure, measureParam);
         exprTypeParams.setMeasures(Lists.newArrayList(measureParam));
-        metricReq.setTypeParams(exprTypeParams);
+        metricReq.setMetricDefineByMeasureParams(exprTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
         return metricReq;
     }
@@ -202,8 +202,7 @@ public class ModelConverter {
 
     private static ModelDetail getModelDetail(ModelReq modelReq) {
         ModelDetail modelDetail = new ModelDetail();
-        BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
-        List<Measure> measures = modelDetail.getMeasures();
+        List<Measure> measures = modelReq.getModelDetail().getMeasures();
         for (Measure measure : measures) {
             if (StringUtils.isBlank(measure.getBizName())) {
                 continue;
@@ -216,6 +215,7 @@ public class ModelConverter {
                 measure.setBizName(String.format("%s_%s", modelReq.getBizName(), oriFieldName));
             }
         }
+        BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
         return modelDetail;
     }
 
