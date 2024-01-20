@@ -131,18 +131,13 @@ public class SemanticSchemaManager {
             datasource.setTimePartType(TimePartType.of(d.getModelSourceTypeEnum().name()));
         }
         if (Objects.nonNull(d.getFields()) && !CollectionUtils.isEmpty(d.getFields())) {
-            Set<String> dimensions = datasource.getDimensions().stream().map(dd -> dd.getBizName())
-                    .collect(Collectors.toSet());
             Set<String> measures = datasource.getMeasures().stream().map(mm -> mm.getName())
                     .collect(Collectors.toSet());
-            Set<String> identifiers = datasource.getIdentifiers().stream().map(ii -> ii.getName())
-                    .collect(Collectors.toSet());
             for (Field f : d.getFields()) {
-                if (dimensions.contains(f.getFieldName()) || measures.contains(f.getFieldName())
-                        || identifiers.contains(f.getFieldName())) {
-                    continue;
+                if (!measures.contains(f.getFieldName())) {
+                    datasource.getMeasures()
+                            .add(Measure.builder().expr(f.getFieldName()).name(f.getFieldName()).agg("").build());
                 }
-                datasource.getMeasures().add(Measure.builder().name(f.getFieldName()).agg("").build());
             }
         }
         return datasource;
@@ -173,14 +168,19 @@ public class SemanticSchemaManager {
     private static MetricTypeParams getMetricTypeParams(MetricTypeParamsYamlTpl metricTypeParamsYamlTpl) {
         MetricTypeParams metricTypeParams = new MetricTypeParams();
         metricTypeParams.setExpr(metricTypeParamsYamlTpl.getExpr());
+        metricTypeParams.setFieldMetric(false);
         if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getMeasures())) {
             metricTypeParams.setMeasures(getMeasureParams(metricTypeParamsYamlTpl.getMeasures()));
         }
         if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getMetrics())) {
             metricTypeParams.setMeasures(getMetricParams(metricTypeParamsYamlTpl.getMetrics()));
+            metricTypeParams.setExpr(metricTypeParams.getMeasures().get(0).getExpr());
+            metricTypeParams.setFieldMetric(true);
         }
         if (!CollectionUtils.isEmpty(metricTypeParamsYamlTpl.getFields())) {
             metricTypeParams.setMeasures(getFieldParams(metricTypeParamsYamlTpl.getFields()));
+            metricTypeParams.setExpr(metricTypeParams.getMeasures().get(0).getExpr());
+            metricTypeParams.setFieldMetric(true);
         }
 
         return metricTypeParams;

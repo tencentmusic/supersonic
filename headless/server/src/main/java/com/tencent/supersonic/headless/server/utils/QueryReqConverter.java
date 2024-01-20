@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.server.utils;
 
-
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
@@ -18,7 +17,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
@@ -29,7 +27,6 @@ import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.Catalog;
-import com.tencent.supersonic.headless.server.service.SemantciQueryEngine;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,8 +52,6 @@ public class QueryReqConverter {
     @Value("${query.sql.limitWrapper:true}")
     private Boolean limitWrapper;
 
-    @Autowired
-    private SemantciQueryEngine semantciQueryEngine;
     @Autowired
     private QueryStructUtils queryStructUtils;
 
@@ -120,7 +115,7 @@ public class QueryReqConverter {
         result.setRootPath(querySQLReq.getModelIdStr());
         result.setTables(tables);
         DatabaseResp database = catalog.getDatabaseByModelId(querySQLReq.getModelIds().get(0));
-        if (!sqlGenerateUtils.isSupportWith(EngineType.valueOf(database.getType().toUpperCase()),
+        if (!sqlGenerateUtils.isSupportWith(EngineType.fromString(database.getType().toUpperCase()),
                 database.getVersion())) {
             result.setSupportWith(false);
             result.setWithAlias(false);
@@ -138,9 +133,8 @@ public class QueryReqConverter {
         queryStatement.setIsS2SQL(true);
         queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructReq));
         queryStatement.setModelIds(querySQLReq.getModelIds());
-        queryStatement = semantciQueryEngine.plan(queryStatement);
-        queryStatement.setSql(limitWrapper ? String.format(SqlExecuteReq.LIMIT_WRAPPER, queryStatement.getSql())
-                : queryStatement.getSql());
+        queryStatement.setEnableLimitWrapper(limitWrapper);
+
         return queryStatement;
     }
 
@@ -260,10 +254,10 @@ public class QueryReqConverter {
                 // metricTable sql use measures replace metric
                 sql = SqlParserReplaceHelper.replaceSqlByExpression(sql, replaces);
                 metricTable.setAggOption(AggOption.NATIVE);
-            }
-            // metricTable  use measures replace metric
-            if (!CollectionUtils.isEmpty(measures)) {
-                metricTable.setMetrics(measures);
+                // metricTable use measures replace metric
+                if (!CollectionUtils.isEmpty(measures)) {
+                    metricTable.setMetrics(measures);
+                }
             }
         }
         parseSqlReq.setSql(sql);
@@ -279,7 +273,7 @@ public class QueryReqConverter {
         // check metrics has derived
         if (!metricResps.stream()
                 .anyMatch(m -> metrics.contains(m.getBizName()) && MetricType.isDerived(m.getMetricDefineType(),
-                        m.getTypeParams()))) {
+                        m.getMetricDefineByMeasureParams()))) {
             return;
         }
         Set<String> allFields = new HashSet<>();
@@ -298,7 +292,8 @@ public class QueryReqConverter {
         if (!CollectionUtils.isEmpty(metricResps)) {
             for (MetricResp metricResp : metricResps) {
                 if (metrics.contains(metricResp.getBizName())) {
-                    if (MetricType.isDerived(metricResp.getMetricDefineType(), metricResp.getTypeParams())) {
+                    if (MetricType.isDerived(metricResp.getMetricDefineType(),
+                            metricResp.getMetricDefineByMeasureParams())) {
                         String expr = sqlGenerateUtils.generateDerivedMetric(metricResps, allFields, allMeasures,
                                 dimensionResps,
                                 sqlGenerateUtils.getExpr(metricResp), metricResp.getMetricDefineType(), visitedMetric,
@@ -312,7 +307,7 @@ public class QueryReqConverter {
             }
         }
         measures.addAll(deriveMetric);
-        dimensions.addAll(deriveDimension);
+        deriveDimension.stream().filter(d -> !dimensions.contains(d)).forEach(d -> dimensions.add(d));
     }
 
 }

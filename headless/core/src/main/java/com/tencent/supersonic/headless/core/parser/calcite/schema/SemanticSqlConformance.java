@@ -7,7 +7,7 @@ import org.apache.calcite.sql.validate.SqlConformanceEnum;
 /**
  * customize the  SqlConformance
  */
-public class HeadlessSqlConformance implements SqlConformance {
+public class SemanticSqlConformance implements SqlConformance {
 
     @Override
     public boolean isLiberal() {

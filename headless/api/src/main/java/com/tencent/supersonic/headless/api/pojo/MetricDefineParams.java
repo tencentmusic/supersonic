@@ -7,4 +7,6 @@ public abstract class MetricDefineParams {
 
     private String expr;
 
+    private String filterSql;
+
 }

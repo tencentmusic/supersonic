@@ -14,16 +14,10 @@ public class PostgresqlParametersBuilder implements DbParametersBuilder {
     public List<DatabaseParameter> build() {
         List<DatabaseParameter> databaseParameters = new ArrayList<>();
         DatabaseParameter host = new DatabaseParameter();
-        host.setComment("host");
-        host.setName("host");
-        host.setPlaceholder("请输入host");
+        host.setComment("链接");
+        host.setName("url");
+        host.setPlaceholder("请输入链接");
         databaseParameters.add(host);
-
-        DatabaseParameter port = new DatabaseParameter();
-        port.setComment("port");
-        port.setName("port");
-        port.setPlaceholder("请输入端口号");
-        databaseParameters.add(port);
 
         DatabaseParameter userName = new DatabaseParameter();
         userName.setComment("用户名");

@@ -1,7 +1,6 @@
 package com.tencent.supersonic.chat.core.parser.sql.llm;
 
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.core.agent.NL2SQLTool;
 import com.tencent.supersonic.chat.core.parser.SemanticParser;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
@@ -24,7 +23,6 @@ public class LLMSqlParser implements SemanticParser {
 
     @Override
     public void parse(QueryContext queryCtx, ChatContext chatCtx) {
-        QueryReq request = queryCtx.getRequest();
         LLMRequestService requestService = ContextUtils.getBean(LLMRequestService.class);
         //1.determine whether to skip this parser.
         if (requestService.isSkip(queryCtx)) {
@@ -56,7 +54,6 @@ public class LLMSqlParser implements SemanticParser {
             LLMResponseService responseService = ContextUtils.getBean(LLMResponseService.class);
             Map<String, LLMSqlResp> deduplicationSqlResp = responseService.getDeduplicationSqlResp(llmResp);
             ParseResult parseResult = ParseResult.builder()
-                    .request(request)
                     .modelCluster(modelCluster)
                     .commonAgentTool(commonAgentTool)
                     .llmReq(llmReq)

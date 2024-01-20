@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
-
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
@@ -55,7 +54,7 @@ public class DataSourceNode extends SemanticNode {
         if (sqlTable.isEmpty()) {
             throw new Exception("DatasourceNode build error [tableSqlNode not found]");
         }
-        SqlNode source = getTable(sqlTable, scope);
+        SqlNode source = getTable(sqlTable, scope, EngineType.fromString(datasource.getType()));
         addSchema(scope, datasource, source);
         return buildAs(datasource.getName(), source);
     }
@@ -88,8 +87,9 @@ public class DataSourceNode extends SemanticNode {
         Set<String> dateInfo = new HashSet<>();
         Set<String> dimensions = new HashSet<>();
         Set<String> metrics = new HashSet<>();
+        EngineType engineType = EngineType.fromString(datasource.getType());
         for (Dimension d : datasource.getDimensions()) {
-            List<SqlNode> identifiers = expand(SemanticNode.parse(d.getExpr(), scope), scope);
+            List<SqlNode> identifiers = expand(SemanticNode.parse(d.getExpr(), scope, engineType), scope);
             identifiers.stream().forEach(i -> dimensions.add(i.toString()));
             dimensions.add(d.getName());
         }
@@ -97,7 +97,7 @@ public class DataSourceNode extends SemanticNode {
             dimensions.add(i.getName());
         }
         for (Measure m : datasource.getMeasures()) {
-            List<SqlNode> identifiers = expand(SemanticNode.parse(m.getExpr(), scope), scope);
+            List<SqlNode> identifiers = expand(SemanticNode.parse(m.getExpr(), scope, engineType), scope);
             identifiers.stream().forEach(i -> {
                         if (!dimensions.contains(i.toString())) {
                             metrics.add(i.toString());
@@ -125,15 +125,17 @@ public class DataSourceNode extends SemanticNode {
         if (CollectionUtils.isEmpty(exprList)) {
             return build(datasource, scope);
         }
+        EngineType engineType = EngineType.fromString(datasource.getType());
         SqlNode view = new SqlBasicCall(new LateralViewExplodeNode(), Arrays.asList(build(datasource, scope),
-                new SqlNodeList(getExtendField(exprList, scope), SqlParserPos.ZERO)), SqlParserPos.ZERO);
+                new SqlNodeList(getExtendField(exprList, scope, engineType), SqlParserPos.ZERO)), SqlParserPos.ZERO);
         return buildAs(datasource.getName() + Constants.DIMENSION_ARRAY_SINGLE_SUFFIX, view);
     }
 
-    public static List<SqlNode> getExtendField(Set<String> exprList, SqlValidatorScope scope) throws Exception {
+    public static List<SqlNode> getExtendField(Set<String> exprList, SqlValidatorScope scope, EngineType engineType)
+            throws Exception {
         List<SqlNode> sqlNodeList = new ArrayList<>();
         for (String expr : exprList) {
-            sqlNodeList.add(parse(expr, scope));
+            sqlNodeList.add(parse(expr, scope, engineType));
             sqlNodeList.add(new SqlDataTypeSpec(
                     new SqlUserDefinedTypeNameSpec(expr + Constants.DIMENSION_ARRAY_SINGLE_SUFFIX, SqlParserPos.ZERO),
                     SqlParserPos.ZERO));
@@ -141,8 +143,8 @@ public class DataSourceNode extends SemanticNode {
         return sqlNodeList;
     }
 
-    private static SqlNode getTable(String sqlQuery, SqlValidatorScope scope) throws Exception {
-        SqlParser sqlParser = SqlParser.create(sqlQuery, Configuration.getParserConfig());
+    private static SqlNode getTable(String sqlQuery, SqlValidatorScope scope, EngineType engineType) throws Exception {
+        SqlParser sqlParser = SqlParser.create(sqlQuery, Configuration.getParserConfig(engineType));
         SqlNode sqlNode = sqlParser.parseQuery();
         scope.validateExpr(sqlNode);
         return sqlNode;
@@ -167,9 +169,10 @@ public class DataSourceNode extends SemanticNode {
     public static void mergeQueryFilterDimensionMeasure(SemanticSchema schema, MetricQueryReq metricCommand,
             Set<String> queryDimension, List<String> measures,
             SqlValidatorScope scope) throws Exception {
+        EngineType engineType = EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
         if (Objects.nonNull(metricCommand.getWhere()) && !metricCommand.getWhere().isEmpty()) {
             Set<String> filterConditions = new HashSet<>();
-            FilterNode.getFilterField(parse(metricCommand.getWhere(), scope), filterConditions);
+            FilterNode.getFilterField(parse(metricCommand.getWhere(), scope, engineType), filterConditions);
             Set<String> queryMeasures = new HashSet<>(measures);
             Set<String> schemaMetricName = schema.getMetrics().stream()
                     .map(m -> m.getName()).collect(Collectors.toSet());
@@ -224,8 +227,10 @@ public class DataSourceNode extends SemanticNode {
             }
             filterMeasure.addAll(sourceMeasure);
             filterMeasure.addAll(dimension);
+            EngineType engineType = EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
             mergeQueryFilterDimensionMeasure(schema, metricCommand, queryDimension, measures, scope);
-            boolean isAllMatch = checkMatch(sourceMeasure, queryDimension, measures, dimension, metricCommand, scope);
+            boolean isAllMatch = checkMatch(sourceMeasure, queryDimension, measures, dimension, metricCommand, scope,
+                    engineType);
             if (isAllMatch) {
                 log.info("baseDataSource  match all ");
                 return dataSources;
@@ -261,12 +266,20 @@ public class DataSourceNode extends SemanticNode {
             List<String> measures,
             Set<String> dimension,
             MetricQueryReq metricCommand,
-            SqlValidatorScope scope) throws Exception {
+            SqlValidatorScope scope,
+            EngineType engineType) throws Exception {
         boolean isAllMatch = true;
         sourceMeasure.retainAll(measures);
         if (sourceMeasure.size() < measures.size()) {
-            log.info("baseDataSource not match all measure");
-            isAllMatch = false;
+            log.info("baseDataSource measures not match all measure");
+            // check dimension again
+            Set<String> dimensionMeasures = new HashSet<>();
+            dimensionMeasures.addAll(dimension);
+            dimensionMeasures.retainAll(measures);
+            if (sourceMeasure.size() + dimensionMeasures.size() < measures.size()) {
+                log.info("baseDataSource not match all measure");
+                isAllMatch = false;
+            }
         }
         measures.removeAll(sourceMeasure);
 
@@ -279,7 +292,7 @@ public class DataSourceNode extends SemanticNode {
 
         if (metricCommand.getWhere() != null && !metricCommand.getWhere().isEmpty()) {
             Set<String> whereFields = new HashSet<>();
-            SqlNode sqlNode = parse(metricCommand.getWhere(), scope);
+            SqlNode sqlNode = parse(metricCommand.getWhere(), scope, engineType);
             FilterNode.getFilterField(sqlNode, whereFields);
         }
         return isAllMatch;

@@ -22,6 +22,7 @@ import styles from './style.less';
 import { ISemantic } from '../data';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import MetricStar from './components/MetricStar';
+import { ColumnsConfig } from '../components/MetricTableColumnRender';
 
 type Props = {
   dispatch: Dispatch;
@@ -160,28 +161,14 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   };
 
   const columns: ProColumns[] = [
-    {
-      dataIndex: 'id',
-      title: 'ID',
-    },
+    // {
+    //   dataIndex: 'id',
+    //   title: 'ID',
+    // },
     {
       dataIndex: 'name',
-      title: '指标名称',
-      render: (_, record: any) => {
-        const { id, isCollect } = record;
-        return (
-          <Space>
-            <MetricStar metricId={id} initState={isCollect} />
-            <a
-              onClick={() => {
-                history.push(`/metric/detail/${record.id}`);
-              }}
-            >
-              {record.name}
-            </a>
-          </Space>
-        );
-      },
+      title: '指标',
+      render: ColumnsConfig.metricInfo.render,
     },
     {
       dataIndex: 'modelName',
@@ -204,53 +191,11 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       },
     },
     {
-      dataIndex: 'sensitiveLevel',
-      title: '敏感度',
-      valueEnum: SENSITIVE_LEVEL_ENUM,
-    },
-    {
       dataIndex: 'status',
       title: '状态',
       width: 80,
       search: false,
-      render: (status) => {
-        switch (status) {
-          case StatusEnum.ONLINE:
-            return <Tag color="success">已启用</Tag>;
-          case StatusEnum.OFFLINE:
-            return <Tag color="warning">未启用</Tag>;
-          case StatusEnum.INITIALIZED:
-            return <Tag color="processing">初始化</Tag>;
-          case StatusEnum.DELETED:
-            return <Tag color="default">已删除</Tag>;
-          default:
-            return <Tag color="default">未知</Tag>;
-        }
-      },
-    },
-    {
-      dataIndex: 'createdBy',
-      title: '创建人',
-      search: false,
-    },
-    {
-      dataIndex: 'tags',
-      title: '标签',
-      search: false,
-      render: (tags) => {
-        if (Array.isArray(tags)) {
-          return (
-            <Space size={2}>
-              {tags.map((tag) => (
-                <Tag color="blue" key={tag}>
-                  {tag}
-                </Tag>
-              ))}
-            </Space>
-          );
-        }
-        return <>--</>;
-      },
+      render: ColumnsConfig.state.render,
     },
     {
       dataIndex: 'description',
@@ -323,7 +268,13 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     params.sensitiveLevel = sensitiveLevelValue;
     params.type = typeValue;
     setFilterParams(params);
-    await queryMetricList(params, filterParams.key ? false : true);
+    await queryMetricList(
+      {
+        ...params,
+        ...defaultPagination,
+      },
+      filterParams.key ? false : true,
+    );
   };
 
   const rowSelection = {
@@ -403,9 +354,11 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             dataSource={dataSource}
             columns={columns}
             pagination={pagination}
+            size="large"
             tableAlertRender={() => {
               return false;
             }}
+            sticky={{ offsetHeader: 0 }}
             rowSelection={{
               type: 'checkbox',
               ...rowSelection,
@@ -435,7 +388,6 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               setPagination(pagin);
               queryMetricList({ ...pagin, ...filterParams });
             }}
-            size="small"
             options={{ reload: false, density: false, fullScreen: false }}
           />
         )}

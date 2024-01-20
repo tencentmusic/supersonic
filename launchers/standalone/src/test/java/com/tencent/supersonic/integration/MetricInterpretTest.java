@@ -23,7 +23,7 @@ public class MetricInterpretTest {
 
     @Test
     public void testMetricInterpret() throws Exception {
-        MockConfiguration.mockAgent(agentService);
+        MockConfiguration.mockMetricAgent(agentService);
         MockConfiguration.mockEmbeddingUrl(embeddingConfig);
 
         LLMAnswerResp lLmAnswerResp = new LLMAnswerResp();

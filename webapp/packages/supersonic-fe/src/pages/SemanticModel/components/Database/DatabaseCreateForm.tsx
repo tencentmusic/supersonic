@@ -1,15 +1,22 @@
 import { useEffect, forwardRef, useImperativeHandle, useState } from 'react';
 import type { ForwardRefRenderFunction } from 'react';
 import { message, Form, Input, Select, Button, Space } from 'antd';
-import { saveDatabase, testDatabaseConnect } from '../../service';
+import {
+  saveDatabase,
+  testDatabaseConnect,
+  getDatabaseParameters,
+  getDatabaseDetail,
+} from '../../service';
 import { formLayout } from '@/components/FormHelper/utils';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
+import { ConfigParametersItem } from '../../../System/types';
+import { genneratorFormItemList } from '../../utils';
 import { ISemantic } from '../../data';
 
 import styles from '../style.less';
 type Props = {
   domainId?: number;
-  dataBaseConfig?: ISemantic.IDatabaseItem;
+  databaseId?: number;
   hideSubmitBtn?: boolean;
   onSubmit?: (params?: any) => void;
 };
@@ -18,21 +25,59 @@ const FormItem = Form.Item;
 const TextArea = Input.TextArea;
 
 const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
-  { domainId, dataBaseConfig, onSubmit, hideSubmitBtn = false },
+  { domainId, databaseId, onSubmit, hideSubmitBtn = false },
   ref,
 ) => {
   const [form] = Form.useForm();
-  const [selectedDbType, setSelectedDbType] = useState<string>('h2');
-
+  const [selectedDbType, setSelectedDbType] = useState<string>('');
+  const [databaseOptions, setDatabaseOptions] = useState<{ value: string; label: string }[]>([]);
+  const [databaseConfig, setDatabaseConfig] = useState<Record<string, ConfigParametersItem[]>>({});
   const [testLoading, setTestLoading] = useState<boolean>(false);
+
+  const [dataBaseDetail, setDataBaseDetail] = useState<ISemantic.IDatabaseItem>();
 
   useEffect(() => {
     form.resetFields();
-    if (dataBaseConfig) {
-      form.setFieldsValue({ ...dataBaseConfig });
-      setSelectedDbType(dataBaseConfig?.type);
+    if (dataBaseDetail) {
+      form.setFieldsValue({ ...dataBaseDetail });
+      setSelectedDbType(dataBaseDetail?.type);
     }
-  }, [dataBaseConfig]);
+  }, [dataBaseDetail]);
+
+  useEffect(() => {
+    if (databaseId) {
+      queryDatabaseDetail(databaseId);
+    }
+  }, [databaseId]);
+
+  useEffect(() => {
+    queryDatabaseConfig();
+  }, []);
+
+  const queryDatabaseDetail = async (id: number) => {
+    const { code, msg, data } = await getDatabaseDetail(id);
+    if (code === 200) {
+      setDataBaseDetail(data);
+      return;
+    }
+    message.error(msg);
+  };
+
+  const queryDatabaseConfig = async () => {
+    const { code, msg, data } = await getDatabaseParameters();
+    if (code === 200) {
+      const options = Object.keys(data).map((sqlName: string) => {
+        return {
+          value: sqlName,
+          label: sqlName,
+        };
+      });
+      setDatabaseConfig(data);
+      setDatabaseOptions(options);
+      return;
+    }
+    message.error(msg);
+  };
 
   const getFormValidateFields = async () => {
     return await form.validateFields();
@@ -47,7 +92,7 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
   const saveDatabaseConfig = async () => {
     const values = await form.validateFields();
     const { code, msg } = await saveDatabase({
-      ...dataBaseConfig,
+      ...(dataBaseDetail || {}),
       ...values,
       domainId,
     });
@@ -98,14 +143,12 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
           <Select
             style={{ width: '100%' }}
             placeholder="请选择数据库类型"
-            options={[
-              { value: 'h2', label: 'h2' },
-              { value: 'mysql', label: 'mysql' },
-              { value: 'clickhouse', label: 'clickhouse' },
-            ]}
+            options={databaseOptions}
           />
         </FormItem>
-        {selectedDbType === 'h2' ? (
+
+        {databaseConfig[selectedDbType] && genneratorFormItemList(databaseConfig[selectedDbType])}
+        {/* {selectedDbType === 'h2' ? (
           <FormItem name="url" label="链接" rules={[{ required: true, message: '请输入链接' }]}>
             <Input placeholder="请输入链接" />
           </FormItem>
@@ -139,11 +182,10 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
               ]}
             />
           </FormItem>
-        )}
-        <FormItem
+        )} */}
+        {/* <FormItem
           name="username"
           label="用户名"
-          // rules={[{ required: true, message: '请输入用户名' }]}
         >
           <Input placeholder="请输入用户名" />
         </FormItem>
@@ -152,7 +194,7 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
         </FormItem>
         <FormItem name="database" label="数据库名称">
           <Input placeholder="请输入数据库名称" />
-        </FormItem>
+        </FormItem> */}
         <FormItem
           name="admins"
           label="管理员"

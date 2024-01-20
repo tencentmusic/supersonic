@@ -17,6 +17,7 @@ import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.request.DateInfoReq;
 import com.tencent.supersonic.headless.api.request.DimensionReq;
+import com.tencent.supersonic.headless.api.request.FieldRemovedReq;
 import com.tencent.supersonic.headless.api.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.request.MetricReq;
 import com.tencent.supersonic.headless.api.request.ModelReq;
@@ -25,11 +26,11 @@ import com.tencent.supersonic.headless.api.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.DomainResp;
-import com.tencent.supersonic.headless.api.response.MeasureResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.response.UnAvailableItemResp;
 import com.tencent.supersonic.headless.core.manager.DimensionYamlManager;
 import com.tencent.supersonic.headless.core.manager.MetricYamlManager;
 import com.tencent.supersonic.headless.core.manager.ModelYamlManager;
@@ -197,12 +198,13 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public List<MeasureResp> getMeasureListOfModel(List<Long> modelIds) {
-        ModelFilter modelFilter = new ModelFilter();
-        modelFilter.setIds(modelIds);
-        List<ModelResp> modelResps = getModelList(modelFilter);
-        return modelResps.stream().flatMap(modelResp -> modelResp.getModelDetail().getMeasures()
-                .stream().map(measure -> ModelConverter.convert(measure, modelResp))).collect(Collectors.toList());
+    public UnAvailableItemResp getUnAvailableItem(FieldRemovedReq fieldRemovedReq) {
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(fieldRemovedReq.getModelId()));
+        metaFilter.setFieldsDepend(fieldRemovedReq.getFields());
+        List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
+        List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
+        return UnAvailableItemResp.builder().dimensionResps(dimensionResps)
+                .metricResps(metricResps).build();
     }
 
     private void batchCreateDimension(ModelDO modelDO, User user) throws Exception {

@@ -27,6 +27,8 @@ public class MetaFilter {
 
     private List<Long> ids;
 
+    private List<String> fieldsDepend;
+
     public MetaFilter(List<Long> modelIds) {
         this.modelIds = modelIds;
     }

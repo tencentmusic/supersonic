@@ -49,4 +49,21 @@ const settings = {
   'btn-disable-bg': 'rgba(0,10,36,0.04)',
 };
 
+export const configProviderTheme = {
+  components: {
+    Button: {
+      colorPrimary: '#3182ce',
+    },
+    Radio: {
+      colorPrimary: '#3182ce',
+    },
+    Table: {
+      headerBg: '#f9fafb',
+      headerColor: '#667085',
+      headerLineHeight: '38px',
+      headerSplitColor: '#f9fafb',
+    },
+  },
+};
+
 export default settings;

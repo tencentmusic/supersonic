@@ -1,11 +1,10 @@
 package com.tencent.supersonic.chat.server.processor.parse;
 
+import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.core.query.SemanticQuery;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
-import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.common.util.ContextUtils;
 import java.util.List;
@@ -20,9 +19,8 @@ public class RespBuildProcessor implements ParseResultProcessor {
 
     @Override
     public void process(ParseResp parseResp, QueryContext queryContext, ChatContext chatContext) {
-        QueryReq queryReq = queryContext.getRequest();
-        parseResp.setChatId(queryReq.getChatId());
-        parseResp.setQueryText(queryReq.getQueryText());
+        parseResp.setChatId(queryContext.getChatId());
+        parseResp.setQueryText(queryContext.getQueryText());
         List<SemanticQuery> candidateQueries = queryContext.getCandidateQueries();
         ChatService chatService = ContextUtils.getBean(ChatService.class);
         if (candidateQueries.size() > 0) {
@@ -33,7 +31,7 @@ public class RespBuildProcessor implements ParseResultProcessor {
         } else {
             parseResp.setState(ParseResp.ParseState.FAILED);
         }
-        chatService.batchAddParse(chatContext, queryReq, parseResp);
+        chatService.batchAddParse(chatContext, queryContext, parseResp);
     }
 
 }

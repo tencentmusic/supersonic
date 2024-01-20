@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.parser.calcite.schema;
 
 
+import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.S2SQLSqlValidatorImpl;
 
@@ -37,8 +38,9 @@ public class SchemaBuilder {
                 Configuration.typeFactory,
                 Configuration.config
         );
+        EngineType engineType = EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
         S2SQLSqlValidatorImpl s2SQLSqlValidator = new S2SQLSqlValidatorImpl(Configuration.operatorTable, catalogReader,
-                Configuration.typeFactory, Configuration.validatorConfig);
+                Configuration.typeFactory, Configuration.getValidatorConfig(engineType));
         return new ParameterScope(s2SQLSqlValidator, nameToTypeMap);
     }
 

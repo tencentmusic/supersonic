@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, Input, Space } from 'antd';
+import { Button, Input, Space, Tag } from 'antd';
 import ProTable from '@ant-design/pro-table';
 import ProCard from '@ant-design/pro-card';
 import SqlEditor from '@/components/SqlEditor';
 import BindMeasuresTable from './BindMeasuresTable';
 import FormLabelRequire from './FormLabelRequire';
+import styles from './style.less';
 import { ISemantic } from '../data';
 
 type Props = {
   datasourceId?: number;
-  typeParams: ISemantic.ITypeParams;
+  typeParams: ISemantic.IMeasureTypeParams;
   measuresList: ISemantic.IMeasure[];
   onFieldChange: (measures: ISemantic.IMeasure[]) => void;
   onSqlChange: (sql: string) => void;
@@ -25,7 +26,6 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
   onSqlChange,
 }) => {
   const actionRef = useRef<ActionType>();
-
   const [measuresModalVisible, setMeasuresModalVisible] = useState<boolean>(false);
   const [measuresParams, setMeasuresParams] = useState(
     typeParams || {
@@ -44,6 +44,7 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
     {
       dataIndex: 'bizName',
       title: '度量名称',
+      tooltip: '由模型名称_字段名称拼接而来',
     },
     {
       dataIndex: 'constraint',
@@ -75,6 +76,11 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
       },
     },
     {
+      dataIndex: 'agg',
+      title: '聚合函数',
+    },
+
+    {
       title: '操作',
       dataIndex: 'x',
       valueType: 'option',
@@ -105,7 +111,6 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
         <ProTable
           actionRef={actionRef}
           headerTitle={<FormLabelRequire title="度量列表" />}
-          tooltip="基于本主题域下所有数据源的度量来创建指标，且该列表的度量为了加以区分，均已加上数据源名称作为前缀，选中度量后，可基于这几个度量来写表达式，若是选中的度量来自不同的数据源，系统将会自动join来计算该指标"
           rowKey="name"
           columns={columns}
           dataSource={measuresParams?.measures || []}
@@ -127,8 +132,24 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
         />
         <ProCard
           title={<FormLabelRequire title="度量表达式" />}
-          tooltip="度量表达式由上面选择的度量组成，如选择了度量A和B，则可将表达式写成A+B"
+          // tooltip="由于度量已自带聚合函数，因此通过度量创建指标时，表达式中无需再写聚合函数，如
+          // 通过度量a和度量b来创建指标，由于建模的时候度量a和度量b被指定了聚合函数SUM，因此创建指标时表达式只需要写成 a+b, 而不需要带聚合函数"
         >
+          <p
+            className={styles.desc}
+            style={{ border: 'unset', padding: 0, marginBottom: 20, marginLeft: 2 }}
+          >
+            在
+            <Tag color="#2499ef14" className={styles.markerTag}>
+              建模时
+            </Tag>
+            度量已指定了
+            <Tag color="#2499ef14" className={styles.markerTag}>
+              聚合函数
+            </Tag>
+            ，在度量模式下，表达式无需再写聚合函数，如:
+            通过指定了聚合函数SUM的度量a和度量b来创建指标，表达式只需要写成 a+b
+          </p>
           <SqlEditor
             value={exprString}
             onChange={(sql: string) => {
@@ -149,11 +170,12 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
           }
           selectedMeasuresList={measuresParams?.measures || []}
           onSubmit={async (values: any[]) => {
-            const measures = values.map(({ bizName, name, expr, datasourceId }) => {
+            const measures = values.map(({ bizName, name, expr, datasourceId, agg }) => {
               return {
                 bizName,
                 name,
                 expr,
+                agg,
                 datasourceId,
               };
             });

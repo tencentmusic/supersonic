@@ -2,12 +2,13 @@ package com.tencent.supersonic.headless.core.parser.calcite.planner;
 
 
 import com.tencent.supersonic.headless.api.enums.AggOption;
+import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SchemaBuilder;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.Renderer;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.TableView;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.DataSourceNode;
@@ -15,6 +16,7 @@ import com.tencent.supersonic.headless.core.parser.calcite.sql.node.SemanticNode
 import com.tencent.supersonic.headless.core.parser.calcite.sql.render.FilterRender;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.render.OutputRender;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.render.SourceRender;
+import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -113,12 +115,14 @@ public class AggPlanner implements Planner {
         // build a parse Node
         parse();
         // optimizer
-        optimize();
+        Database database = queryStatement.getSemanticModel().getDatabase();
+        EngineType engineType = EngineType.fromString(database.getType());
+        optimize(engineType);
     }
 
     @Override
-    public String getSql() {
-        return SemanticNode.getSql(parserNode);
+    public String getSql(EngineType engineType) {
+        return SemanticNode.getSql(parserNode, engineType);
     }
 
     @Override
@@ -127,26 +131,26 @@ public class AggPlanner implements Planner {
     }
 
     @Override
-    public String simplify(String sql) {
-        return optimize(sql);
+    public String simplify(String sql, EngineType engineType) {
+        return optimize(sql, engineType);
     }
 
-    public void optimize() {
+    public void optimize(EngineType engineType) {
         if (Objects.isNull(schema.getRuntimeOptions()) || Objects.isNull(schema.getRuntimeOptions().getEnableOptimize())
                 || !schema.getRuntimeOptions().getEnableOptimize()) {
             return;
         }
-        SqlNode optimizeNode = optimizeSql(SemanticNode.getSql(parserNode));
+        SqlNode optimizeNode = optimizeSql(SemanticNode.getSql(parserNode, engineType), engineType);
         if (Objects.nonNull(optimizeNode)) {
             parserNode = optimizeNode;
         }
     }
 
-    public String optimize(String sql) {
+    public String optimize(String sql, EngineType engineType) {
         try {
-            SqlNode sqlNode = SqlParser.create(sql, Configuration.getParserConfig()).parseStmt();
+            SqlNode sqlNode = SqlParser.create(sql, Configuration.getParserConfig(engineType)).parseStmt();
             if (Objects.nonNull(sqlNode)) {
-                return SemanticNode.getSql(SemanticNode.optimize(scope, schema, sqlNode));
+                return SemanticNode.getSql(SemanticNode.optimize(scope, schema, sqlNode, engineType), engineType);
             }
         } catch (Exception e) {
             log.error("optimize error {}", e);
@@ -154,12 +158,12 @@ public class AggPlanner implements Planner {
         return "";
     }
 
-    private SqlNode optimizeSql(String sql) {
+    private SqlNode optimizeSql(String sql, EngineType engineType) {
         try {
             log.info("before optimize:[{}]", sql);
-            SqlNode sqlNode = SqlParser.create(sql, Configuration.getParserConfig()).parseStmt();
+            SqlNode sqlNode = SqlParser.create(sql, Configuration.getParserConfig(engineType)).parseStmt();
             if (Objects.nonNull(sqlNode)) {
-                return SemanticNode.optimize(scope, schema, sqlNode);
+                return SemanticNode.optimize(scope, schema, sqlNode, engineType);
             }
         } catch (Exception e) {
             log.error("optimize error {}", e);

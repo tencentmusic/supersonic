@@ -215,11 +215,27 @@ public class DimensionServiceImpl implements DimensionService {
         DimensionFilter dimensionFilter = new DimensionFilter();
         BeanUtils.copyProperties(metaFilter, dimensionFilter);
         List<DimensionDO> dimensionDOS = dimensionRepository.getDimension(dimensionFilter);
-        return convertList(dimensionDOS, modelService.getModelMap());
+        List<DimensionResp> dimensionResps = convertList(dimensionDOS, modelService.getModelMap());
+        if (!CollectionUtils.isEmpty(metaFilter.getFieldsDepend())) {
+            return filterByField(dimensionResps, metaFilter.getFieldsDepend());
+        }
+        return dimensionResps;
     }
 
     private List<DimensionResp> getDimensions(Long modelId) {
         return getDimensions(new MetaFilter(Lists.newArrayList(modelId)));
+    }
+
+    private List<DimensionResp> filterByField(List<DimensionResp> dimensionResps, List<String> fields) {
+        List<DimensionResp> dimensionFiltered = Lists.newArrayList();
+        for (DimensionResp dimensionResp : dimensionResps) {
+            for (String field : fields) {
+                if (dimensionResp.getExpr().contains(field)) {
+                    dimensionFiltered.add(dimensionResp);
+                }
+            }
+        }
+        return dimensionFiltered;
     }
 
     @Override
@@ -323,14 +339,14 @@ public class DimensionServiceImpl implements DimensionService {
             if (bizNameMap.containsKey(dimensionReq.getBizName())) {
                 DimensionResp dimensionResp = bizNameMap.get(dimensionReq.getBizName());
                 if (!dimensionResp.getId().equals(dimensionReq.getId())) {
-                    throw new RuntimeException(String.format("该模型下存在相同的维度字段名:%s 创建人:%s",
+                    throw new RuntimeException(String.format("该主题域下存在相同的维度字段名:%s 创建人:%s",
                             dimensionReq.getBizName(), dimensionResp.getCreatedBy()));
                 }
             }
             if (nameMap.containsKey(dimensionReq.getName())) {
                 DimensionResp dimensionResp = nameMap.get(dimensionReq.getName());
                 if (!dimensionResp.getId().equals(dimensionReq.getId())) {
-                    throw new RuntimeException(String.format("该模型下存在相同的维度名:%s 创建人:%s",
+                    throw new RuntimeException(String.format("该主题域下存在相同的维度名:%s 创建人:%s",
                             dimensionReq.getName(), dimensionResp.getCreatedBy()));
                 }
             }

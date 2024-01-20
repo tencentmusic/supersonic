@@ -1,12 +1,12 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { message, Button, Space, Popconfirm, Input, Tag } from 'antd';
-import React, { useRef, useState } from 'react';
+import { message, Button, Space, Popconfirm, Input, Select } from 'antd';
+import React, { useRef, useState, useEffect } from 'react';
 import type { Dispatch } from 'umi';
 import { StatusEnum } from '../enum';
 import { connect } from 'umi';
 import type { StateType } from '../model';
-import { SENSITIVE_LEVEL_ENUM } from '../constant';
+import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS } from '../constant';
 import {
   queryMetric,
   deleteMetric,
@@ -19,6 +19,7 @@ import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
+import { ColumnsConfig } from './MetricTableColumnRender';
 
 type Props = {
   dispatch: Dispatch;
@@ -30,11 +31,16 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [metricItem, setMetricItem] = useState<ISemantic.IMetricItem>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [pagination, setPagination] = useState({
+  const [tableData, setTableData] = useState<ISemantic.IMetricItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const defaultPagination = {
     current: 1,
     pageSize: 20,
     total: 0,
-  });
+  };
+  const [pagination, setPagination] = useState(defaultPagination);
+  const [filterParams, setFilterParams] = useState<Record<string, any>>({});
+
   const actionRef = useRef<ActionType>();
 
   const [downloadLoading, setDownloadLoading] = useState<boolean>(false);
@@ -60,14 +66,19 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     message.error(msg);
   };
 
+  useEffect(() => {
+    queryMetricList({ ...filterParams, ...defaultPagination });
+  }, [filterParams]);
+
   const queryMetricList = async (params: any) => {
+    setLoading(true);
     const { code, data, msg } = await queryMetric({
-      ...params,
       ...pagination,
+      ...params,
       modelId,
     });
+    setLoading(false);
     const { list, pageSize, pageNum, total } = data || {};
-    let resData: any = {};
     if (code === 200) {
       setPagination({
         ...pagination,
@@ -75,108 +86,73 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         current: pageNum,
         total,
       });
-
-      resData = {
-        data: list || [],
-        success: true,
-      };
+      setTableData(list);
     } else {
       message.error(msg);
-      resData = {
-        data: [],
-        total: 0,
-        success: false,
-      };
+      setTableData([]);
     }
-    return resData;
   };
 
   const columns: ProColumns[] = [
     {
-      dataIndex: 'id',
-      title: 'ID',
-      width: 80,
-      search: false,
-    },
-    {
       dataIndex: 'name',
-      title: '指标名称',
+      title: '指标',
+      width: '30%',
       search: false,
+      render: ColumnsConfig.metricInfo.render,
     },
     {
       dataIndex: 'key',
       title: '指标搜索',
       hideInTable: true,
-      renderFormItem: () => <Input placeholder="请输入ID/指标名称/英文名称/标签" />,
-    },
-    {
-      dataIndex: 'alias',
-      title: '别名',
-      width: 150,
-      ellipsis: true,
-      search: false,
-    },
-    {
-      dataIndex: 'bizName',
-      title: '英文名称',
-      search: false,
+      renderFormItem: () => (
+        <Input.Search
+          placeholder="请输入ID/指标名称/英文名称/标签"
+          onSearch={(value) => {
+            setFilterParams((preState) => {
+              return {
+                ...preState,
+                key: value,
+              };
+            });
+          }}
+        />
+      ),
     },
     {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',
-      width: 80,
+      hideInTable: true,
       valueEnum: SENSITIVE_LEVEL_ENUM,
-    },
-    {
-      dataIndex: 'status',
-      title: '状态',
-      width: 80,
-      search: false,
-      render: (status) => {
-        switch (status) {
-          case StatusEnum.ONLINE:
-            return <Tag color="success">已启用</Tag>;
-          case StatusEnum.OFFLINE:
-            return <Tag color="warning">未启用</Tag>;
-          case StatusEnum.INITIALIZED:
-            return <Tag color="processing">初始化</Tag>;
-          case StatusEnum.DELETED:
-            return <Tag color="default">已删除</Tag>;
-          default:
-            return <Tag color="default">未知</Tag>;
-        }
-      },
-    },
-    {
-      dataIndex: 'createdBy',
-      title: '创建人',
-      width: 100,
-      search: false,
-    },
-    {
-      dataIndex: 'tags',
-      title: '标签',
-      search: false,
-      render: (tags) => {
-        if (Array.isArray(tags)) {
-          return (
-            <Space size={2} wrap>
-              {tags.map((tag) => (
-                <Tag color="blue" key={tag}>
-                  {tag}
-                </Tag>
-              ))}
-            </Space>
-          );
-        }
-        return <>--</>;
-      },
+      renderFormItem: () => (
+        <Select
+          options={SENSITIVE_LEVEL_OPTIONS}
+          placeholder="请选择敏感度"
+          allowClear
+          onChange={(value) => {
+            setFilterParams((preState) => {
+              return {
+                ...preState,
+                sensitiveLevel: value,
+              };
+            });
+          }}
+        />
+      ),
     },
     {
       dataIndex: 'description',
       title: '描述',
       search: false,
     },
+    {
+      dataIndex: 'status',
+      title: '状态',
+      width: 200,
+      search: false,
+      render: ColumnsConfig.state.render,
+    },
+
     {
       dataIndex: 'updatedAt',
       title: '更新时间',
@@ -301,12 +277,10 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft}`}
         actionRef={actionRef}
         rowKey="id"
+        loading={loading}
         search={{
-          span: 4,
-          defaultCollapsed: false,
-          collapseRender: () => {
-            return <></>;
-          },
+          optionRender: false,
+          collapsed: false,
         }}
         rowSelection={{
           type: 'checkbox',
@@ -314,20 +288,23 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
         }}
         columns={columns}
         params={{ modelId }}
-        request={queryMetricList}
+        dataSource={tableData}
         pagination={pagination}
         tableAlertRender={() => {
           return false;
         }}
         onChange={(data: any) => {
           const { current, pageSize, total } = data;
-          setPagination({
+          const currentPagin = {
             current,
             pageSize,
             total,
-          });
+          };
+          setPagination(currentPagin);
+          queryMetricList({ ...filterParams, ...currentPagin });
         }}
-        size="small"
+        sticky={{ offsetHeader: 0 }}
+        size="large"
         options={{ reload: false, density: false, fullScreen: false }}
         toolBarRender={() => [
           <Button

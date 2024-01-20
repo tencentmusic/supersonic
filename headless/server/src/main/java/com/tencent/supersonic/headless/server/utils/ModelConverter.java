@@ -7,7 +7,6 @@ import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.enums.DimensionType;
-import com.tencent.supersonic.headless.api.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
@@ -40,7 +39,7 @@ public class ModelConverter {
 
     public static ModelDO convert(ModelReq modelReq, User user) {
         ModelDO modelDO = new ModelDO();
-        ModelDetail modelDetail = getModelDetail(modelReq);
+        ModelDetail modelDetail = createModelDetail(modelReq);
         modelReq.createdBy(user.getName());
         BeanMapper.mapper(modelReq, modelDO);
         modelDO.setStatus(StatusEnum.ONLINE.getCode());
@@ -76,7 +75,7 @@ public class ModelConverter {
     }
 
     public static ModelDO convert(ModelDO modelDO, ModelReq modelReq, User user) {
-        ModelDetail modelDetail = getModelDetail(modelReq);
+        ModelDetail modelDetail = updateModelDetail(modelReq);
         BeanMapper.mapper(modelReq, modelDO);
         if (modelReq.getDrillDownDimensions() != null) {
             modelDO.setDrillDownDimensions(JSONObject.toJSONString(modelReq.getDrillDownDimensions()));
@@ -114,7 +113,7 @@ public class ModelConverter {
     public static MetricReq convert(Measure measure, ModelDO modelDO) {
         MetricReq metricReq = new MetricReq();
         metricReq.setName(measure.getName());
-        metricReq.setBizName(measure.getBizName().replaceFirst(modelDO.getBizName() + "_", ""));
+        metricReq.setBizName(measure.getExpr());
         metricReq.setDescription(measure.getName());
         metricReq.setModelId(modelDO.getId());
         MetricDefineByMeasureParams exprTypeParams = new MetricDefineByMeasureParams();
@@ -122,7 +121,7 @@ public class ModelConverter {
         MeasureParam measureParam = new MeasureParam();
         BeanMapper.mapper(measure, measureParam);
         exprTypeParams.setMeasures(Lists.newArrayList(measureParam));
-        metricReq.setTypeParams(exprTypeParams);
+        metricReq.setMetricDefineByMeasureParams(exprTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
         return metricReq;
     }
@@ -153,18 +152,38 @@ public class ModelConverter {
                 && !dim.getType().equalsIgnoreCase(DimensionType.time.name());
     }
 
+    private static boolean isCreateDimension(Identify identify) {
+        return identify.getIsCreateDimension() == 1
+                && StringUtils.isNotBlank(identify.getName());
+    }
+
     private static boolean isCreateMetric(Measure measure) {
         return measure.getIsCreateMetric() == 1
                 && StringUtils.isNotBlank(measure.getName());
     }
 
     public static List<Dim> getDimToCreateDimension(ModelDetail modelDetail) {
+        if (CollectionUtils.isEmpty(modelDetail.getDimensions())) {
+            return Lists.newArrayList();
+        }
         return modelDetail.getDimensions().stream()
                 .filter(ModelConverter::isCreateDimension)
                 .collect(Collectors.toList());
     }
 
+    public static List<Identify> getIdentityToCreateDimension(ModelDetail modelDetail) {
+        if (CollectionUtils.isEmpty(modelDetail.getIdentifiers())) {
+            return Lists.newArrayList();
+        }
+        return modelDetail.getIdentifiers().stream()
+                .filter(ModelConverter::isCreateDimension)
+                .collect(Collectors.toList());
+    }
+
     public static List<Measure> getMeasureToCreateMetric(ModelDetail modelDetail) {
+        if (CollectionUtils.isEmpty(modelDetail.getMeasures())) {
+            return Lists.newArrayList();
+        }
         return modelDetail.getMeasures().stream()
                 .filter(ModelConverter::isCreateMetric)
                 .collect(Collectors.toList());
@@ -179,13 +198,11 @@ public class ModelConverter {
             dimensionReqs = dims.stream().filter(dim -> StringUtils.isNotBlank(dim.getName()))
                     .map(dim -> convert(dim, modelDO)).collect(Collectors.toList());
         }
-        List<Identify> identifies = modelDetail.getIdentifiers();
+        List<Identify> identifies = getIdentityToCreateDimension(modelDetail);
         if (CollectionUtils.isEmpty(identifies)) {
             return dimensionReqs;
         }
         dimensionReqs.addAll(identifies.stream()
-                .filter(i -> i.getType().equalsIgnoreCase(IdentifyType.primary.name()))
-                .filter(i -> StringUtils.isNotBlank(i.getName()))
                 .map(identify -> convert(identify, modelDO)).collect(Collectors.toList()));
         return dimensionReqs;
     }
@@ -200,10 +217,29 @@ public class ModelConverter {
         return measures.stream().map(measure -> convert(measure, modelDO)).collect(Collectors.toList());
     }
 
-    private static ModelDetail getModelDetail(ModelReq modelReq) {
+    private static ModelDetail createModelDetail(ModelReq modelReq) {
         ModelDetail modelDetail = new ModelDetail();
+        List<Measure> measures = modelReq.getModelDetail().getMeasures();
+        if (measures == null) {
+            measures = Lists.newArrayList();
+        }
+        for (Measure measure : measures) {
+            if (StringUtils.isBlank(measure.getBizName())) {
+                continue;
+            }
+            measure.setExpr(measure.getBizName());
+            measure.setBizName(String.format("%s_%s", modelReq.getBizName(), measure.getExpr()));
+        }
         BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
-        List<Measure> measures = modelDetail.getMeasures();
+        return modelDetail;
+    }
+
+    private static ModelDetail updateModelDetail(ModelReq modelReq) {
+        ModelDetail modelDetail = new ModelDetail();
+        List<Measure> measures = modelReq.getModelDetail().getMeasures();
+        if (measures == null) {
+            measures = Lists.newArrayList();
+        }
         for (Measure measure : measures) {
             if (StringUtils.isBlank(measure.getBizName())) {
                 continue;
@@ -216,6 +252,7 @@ public class ModelConverter {
                 measure.setBizName(String.format("%s_%s", modelReq.getBizName(), oriFieldName));
             }
         }
+        BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
         return modelDetail;
     }
 

@@ -37,7 +37,7 @@ CREATE TABLE `s2_chat_query`
     `query_result` mediumtext NOT NULL ,
     `score`             int DEFAULT '0',
     `feedback`          varchar(1024) DEFAULT '',
-    `similar_queries`  varchar(1024) DEFAULT '',
+    `similar_queries`          varchar(1024) DEFAULT '',
     PRIMARY KEY (`question_id`)
 );
 
@@ -161,21 +161,6 @@ CREATE TABLE `s2_database` (
 );
 COMMENT ON TABLE s2_database IS 'database instance table';
 
-CREATE TABLE  IF NOT EXISTS  `s2_datasource` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `model_id` INT NOT  NULL ,
-    `name` varchar(255) NOT  NULL ,
-    `biz_name` varchar(255) NOT  NULL ,
-    `description` varchar(500) DEFAULT  NULL ,
-
-    `created_at` TIMESTAMP NOT  NULL ,
-    `created_by` varchar(100) NOT  NULL ,
-    `updated_at` TIMESTAMP NOT  NULL ,
-    `updated_by` varchar(100) NOT  NULL,
-    PRIMARY KEY (`id`)
-    );
-COMMENT ON TABLE s2_datasource IS 'datasource table';
-
 create table s2_auth_groups
 (
     group_id INT,
@@ -189,9 +174,9 @@ CREATE TABLE IF NOT EXISTS `s2_metric` (
                                            `name` varchar(255)  NOT NULL ,
     `biz_name` varchar(255)  NOT NULL ,
     `description` varchar(500) DEFAULT NULL ,
-    `status` INT  NOT NULL , -- status, 0 is off the shelf, 1 is normal
+    `status` INT  NOT NULL ,
     `sensitive_level` INT NOT NULL ,
-    `type` varchar(50)  NOT NULL , -- type proxy,expr
+    `type` varchar(50)  NOT NULL , -- ATOMIC, DERIVED
     `type_params` LONGVARCHAR DEFAULT NULL  ,
     `created_at` TIMESTAMP NOT NULL ,
     `created_by` varchar(100) NOT NULL ,
@@ -203,6 +188,7 @@ CREATE TABLE IF NOT EXISTS `s2_metric` (
     `tags` varchar(500) DEFAULT NULL,
     `relate_dimensions` varchar(500) DEFAULT NULL,
     `ext` LONGVARCHAR DEFAULT NULL  ,
+    `define_type` varchar(50)  NOT NULL, -- MEASURE, FIELD, METRIC
     PRIMARY KEY (`id`)
     );
 COMMENT ON TABLE s2_metric IS 'metric information table';
@@ -247,8 +233,8 @@ CREATE TABLE s2_model_rela
 create table s2_view_info
 (
     id         INT auto_increment,
-    model_id  INT       null,
-    type       varchar(20)  null comment 'datasource、dimension、metric',
+    domain_id  INT       null,
+    type       varchar(20)  null comment 'model、dimension、metric',
     config     LONGVARCHAR   null comment 'config detail',
     created_at TIMESTAMP     null,
     created_by varchar(100) null,
@@ -464,9 +450,6 @@ CREATE TABLE IF NOT EXISTS `song` (
     );
 COMMENT ON TABLE song IS 'song';
 
--- benchmark
-
-
 CREATE TABLE s2_sys_parameter
 (
     id  INT PRIMARY KEY AUTO_INCREMENT,
@@ -474,20 +457,29 @@ CREATE TABLE s2_sys_parameter
     parameters text null
 );
 
-CREATE TABLE `s2_metric_query_default_config`(
-    `id`             bigint        NOT NULL AUTO_INCREMENT,
-    `metric_id`      bigint,
-    `user_name`      varchar(255)  NOT NULL,
-    `default_config` varchar(1000) NOT NULL,
-    `created_at`     TIMESTAMP null,
-    `updated_at`     TIMESTAMP null,
-    `created_by`     varchar(100) null,
-    `updated_by`     varchar(100)  not null,
+CREATE TABLE `s2_collect` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `type` varchar(20) NOT NULL,
+    `username` varchar(20) NOT NULL,
+    `collect_id` bigint NOT NULL,
+    `create_time` TIMESTAMP,
+    `update_time` TIMESTAMP,
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `s2_app`
-(
+CREATE TABLE `s2_metric_query_default_config` (
+       `id` bigint NOT NULL AUTO_INCREMENT,
+       `metric_id` bigint ,
+       `user_name` varchar(255) NOT NULL,
+       `default_config` varchar(1000) NOT NULL,
+       `created_at` TIMESTAMP null,
+       `updated_at` TIMESTAMP null,
+       `created_by` varchar(100) null,
+       `updated_by` varchar(100) not null,
+       PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `s2_app` (
     id          bigint AUTO_INCREMENT PRIMARY KEY,
     name        VARCHAR(255),
     description VARCHAR(255),
@@ -495,7 +487,6 @@ CREATE TABLE `s2_app`
     config      TEXT,
     end_date    TIMESTAMP,
     qps         INT,
-    app_key     VARCHAR(255),
     app_secret  VARCHAR(255),
     owner       VARCHAR(255),
     created_at  TIMESTAMP,

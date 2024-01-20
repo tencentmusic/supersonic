@@ -31,8 +31,12 @@ public class MockConfiguration {
         when(embeddingConfig.getUrl()).thenReturn("test");
     }
 
-    public static void mockAgent(AgentService agentService) {
-        when(agentService.getAgent(1)).thenReturn(DataUtils.getAgent());
+    public static void mockMetricAgent(AgentService agentService) {
+        when(agentService.getAgent(1)).thenReturn(DataUtils.getMetricAgent());
+    }
+
+    public static void mockTagAgent(AgentService agentService) {
+        when(agentService.getAgent(2)).thenReturn(DataUtils.getTagAgent());
     }
 
 }

@@ -1,7 +1,5 @@
 package com.tencent.supersonic.integration.mapper;
 
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
-
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -9,11 +7,13 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.core.query.rule.metric.MetricTagQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.integration.BaseQueryTest;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.Test;
+
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
 
 public class MapperTest extends BaseQueryTest {
 
@@ -21,9 +21,9 @@ public class MapperTest extends BaseQueryTest {
     public void hanlp() throws Exception {
 
         QueryReq queryContextReq = DataUtils.getQueryContextReq(10, "艺人周杰伦的播放量");
-        queryContextReq.setAgentId(1);
+        queryContextReq.setAgentId(DataUtils.tagAgentId);
 
-        QueryResult actualResult = submitNewChat("艺人周杰伦的播放量");
+        QueryResult actualResult = submitNewChat("艺人周杰伦的播放量", DataUtils.tagAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
