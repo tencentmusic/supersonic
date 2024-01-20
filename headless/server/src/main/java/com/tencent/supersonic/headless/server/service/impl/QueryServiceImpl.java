@@ -44,7 +44,7 @@ import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.server.annotation.S2SQLDataPermission;
 import com.tencent.supersonic.headless.server.annotation.StructDataPermission;
 import com.tencent.supersonic.headless.server.aspect.ApiHeaderCheckAspect;
-import com.tencent.supersonic.headless.server.cache.QueryCache;
+import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.service.AppService;

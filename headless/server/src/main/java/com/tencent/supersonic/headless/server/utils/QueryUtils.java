@@ -14,7 +14,7 @@ import com.tencent.supersonic.headless.api.response.MetricResp;
 import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
-import com.tencent.supersonic.headless.server.cache.CacheManager;
+import com.tencent.supersonic.headless.core.cache.CacheManager;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import java.util.Arrays;

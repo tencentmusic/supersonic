@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.cache;
+package com.tencent.supersonic.headless.core.cache;
 
 
 public interface CacheManager {
