@@ -37,6 +37,7 @@ import com.tencent.supersonic.headless.api.response.ModelResp;
 import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
+import com.tencent.supersonic.headless.core.parser.DefaultQueryParser;
 import com.tencent.supersonic.headless.core.parser.QueryParser;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
 import com.tencent.supersonic.headless.core.planner.QueryPlanner;
@@ -96,7 +97,7 @@ public class QueryServiceImpl implements QueryService {
             AppService appService,
             QueryCache queryCache,
             SemanticSchemaManager semanticSchemaManager,
-            QueryParser queryParser,
+            DefaultQueryParser queryParser,
             QueryPlanner queryPlanner) {
         this.statUtils = statUtils;
         this.queryUtils = queryUtils;
@@ -259,8 +260,8 @@ public class QueryServiceImpl implements QueryService {
             List<QueryStatement> sqlParsers = new ArrayList<>();
             for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
                 QueryStatement queryStatement = buildQueryStatement(queryStructReq);
-                queryStatement = queryParser.parse(queryStatement);
-                queryPlanner.optimizer(queryStatement);
+                queryParser.parse(queryStatement);
+                queryPlanner.plan(queryStatement);
                 sqlParsers.add(queryStatement);
             }
             log.info("multi sqlParser:{}", sqlParsers);
@@ -456,9 +457,9 @@ public class QueryServiceImpl implements QueryService {
     }
 
     private QueryStatement plan(QueryStatement queryStatement) throws Exception {
-        queryStatement = queryParser.parse(queryStatement);
+        queryParser.parse(queryStatement);
         log.info("queryStatement:{}", queryStatement);
-        queryPlanner.optimizer(queryStatement);
+        queryPlanner.plan(queryStatement);
         return queryStatement;
     }
 
@@ -467,7 +468,7 @@ public class QueryServiceImpl implements QueryService {
         log.info("[QueryStatement:{}]", queryStatement);
         try {
             //1 parse
-            queryStatement = queryParser.parse(queryStatement);
+            queryParser.parse(queryStatement);
             //2 plan
             QueryExecutor queryExecutor = queryPlanner.plan(queryStatement);
             //3 execute
