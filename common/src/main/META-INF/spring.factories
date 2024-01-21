@@ -1,2 +1,2 @@
-com.tencent.supersonic.headless.server.cache.CacheManager=\
-    com.tencent.supersonic.headless.server.cache.CaffeineCacheManager
+com.tencent.supersonic.headless.core.cache.CacheManager=\
+    com.tencent.supersonic.headless.core.cache.CaffeineCacheManager

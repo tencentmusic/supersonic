@@ -3,9 +3,9 @@ package com.tencent.supersonic.headless.core.utils;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.core.executor.JdbcExecutor;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
-import com.tencent.supersonic.headless.core.planner.DetailQuery;
+import com.tencent.supersonic.headless.core.planner.DetailQueryOptimizer;
 import com.tencent.supersonic.headless.core.planner.QueryOptimizer;
-import com.tencent.supersonic.headless.core.parser.HeadlessConverter;
+import com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter;
 import com.tencent.supersonic.headless.core.parser.SqlParser;
 import com.tencent.supersonic.headless.core.parser.calcite.CalciteSqlParser;
 import com.tencent.supersonic.headless.core.parser.converter.CalculateAggConverter;
@@ -74,7 +74,7 @@ public class ComponentFactory {
     }
 
     private static void initQueryOptimizer() {
-        queryOptimizers.put("DetailQuery", getBean("DetailQuery", DetailQuery.class));
+        queryOptimizers.put("DetailQueryOptimizer", getBean("DetailQueryOptimizer", DetailQueryOptimizer.class));
     }
 
     private static void initQueryExecutors() {

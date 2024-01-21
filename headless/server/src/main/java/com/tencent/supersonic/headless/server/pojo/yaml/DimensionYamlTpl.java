@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.core.pojo.yaml;
+package com.tencent.supersonic.headless.server.pojo.yaml;
 
 
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;

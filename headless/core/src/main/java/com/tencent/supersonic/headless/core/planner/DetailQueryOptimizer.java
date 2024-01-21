@@ -14,11 +14,12 @@ import java.util.stream.Collectors;
  * Remove the default metric added by the system when the query only has dimensions
  */
 @Slf4j
-@Component("DetailQuery")
-public class DetailQuery implements QueryOptimizer {
+@Component("DetailQueryOptimizer")
+public class DetailQueryOptimizer implements QueryOptimizer {
 
     @Override
-    public void rewrite(QueryStructReq queryStructCmd, QueryStatement queryStatement) {
+    public void rewrite(QueryStatement queryStatement) {
+        QueryStructReq queryStructCmd = queryStatement.getQueryStructReq();
         String sqlRaw = queryStatement.getSql().trim();
         if (Strings.isNullOrEmpty(sqlRaw)) {
             throw new RuntimeException("sql is empty or null");
