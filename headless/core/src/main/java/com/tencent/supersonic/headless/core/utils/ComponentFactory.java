@@ -74,7 +74,7 @@ public class ComponentFactory {
     }
 
     private static void initQueryOptimizer() {
-        queryOptimizers.put("DetailQuery", getBean("DetailQuery", DetailQueryOptimizer.class));
+        queryOptimizers.put("DetailQueryOptimizer", getBean("DetailQueryOptimizer", DetailQueryOptimizer.class));
     }
 
     private static void initQueryExecutors() {
