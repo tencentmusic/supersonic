@@ -9,4 +9,5 @@ public class PluginParseResult {
     private Plugin plugin;
     private QueryFilters queryFilters;
     private double distance;
+    private String queryText;
 }
