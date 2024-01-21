@@ -334,7 +334,7 @@ public class DimensionServiceImpl implements DimensionService {
                 .collect(Collectors.toMap(DimensionResp::getName, a -> a, (k1, k2) -> k1));
         for (DimensionReq dimensionReq : dimensionReqs) {
             if (NameCheckUtils.containsSpecialCharacters(dimensionReq.getName())) {
-                throw new InvalidArgumentException("名称包含特殊字符, 请修改");
+                throw new InvalidArgumentException("名称包含特殊字符, 请修改: " + dimensionReq.getName());
             }
             if (bizNameMap.containsKey(dimensionReq.getBizName())) {
                 DimensionResp dimensionResp = bizNameMap.get(dimensionReq.getBizName());
