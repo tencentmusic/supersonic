@@ -54,7 +54,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       status,
     });
     if (code === 200) {
-      actionRef?.current?.reload();
+      queryMetricList({ ...filterParams, ...defaultPagination });
       dispatch({
         type: 'domainManger/queryMetricList',
         payload: {
@@ -209,7 +209,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
                 const { code, msg } = await deleteMetric(record.id);
                 if (code === 200) {
                   setMetricItem(undefined);
-                  actionRef.current?.reload();
+                  queryMetricList({ ...filterParams, ...defaultPagination });
                 } else {
                   message.error(msg);
                 }
@@ -338,7 +338,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           metricItem={metricItem}
           onSubmit={() => {
             setCreateModalVisible(false);
-            actionRef?.current?.reload();
+            queryMetricList({ ...filterParams, ...defaultPagination });
             dispatch({
               type: 'domainManger/queryMetricList',
               payload: {
