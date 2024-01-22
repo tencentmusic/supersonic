@@ -2,11 +2,11 @@ package com.tencent.supersonic.headless.server.utils;
 
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
-import com.tencent.supersonic.headless.api.enums.MetricDefineType;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
-import com.tencent.supersonic.headless.api.request.MetricReq;
+import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 

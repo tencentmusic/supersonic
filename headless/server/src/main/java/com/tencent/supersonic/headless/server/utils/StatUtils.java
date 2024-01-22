@@ -7,16 +7,17 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.headless.api.enums.QueryOptMode;
-import com.tencent.supersonic.headless.api.enums.QueryType;
-import com.tencent.supersonic.headless.api.enums.QueryTypeBack;
+import com.tencent.supersonic.headless.api.pojo.enums.QueryOptMode;
+import com.tencent.supersonic.headless.api.pojo.enums.QueryType;
+import com.tencent.supersonic.headless.api.pojo.enums.QueryTypeBack;
 import com.tencent.supersonic.headless.api.pojo.QueryStat;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
-import com.tencent.supersonic.headless.api.request.ItemUseReq;
-import com.tencent.supersonic.headless.api.request.QuerySqlReq;
-import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.response.ItemUseResp;
-import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.server.persistence.repository.StatRepository;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import lombok.extern.slf4j.Slf4j;
@@ -85,7 +86,16 @@ public class StatUtils {
         return true;
     }
 
-    public void initStatInfo(QuerySqlReq querySQLReq, User facadeUser) {
+    public void initStatInfo(SemanticQueryReq semanticQueryReq, User facadeUser) {
+        if (semanticQueryReq instanceof QuerySqlReq) {
+            initSqlStatInfo((QuerySqlReq) semanticQueryReq, facadeUser);
+        }
+        if (semanticQueryReq instanceof QueryStructReq) {
+            initStructStatInfo((QueryStructReq) semanticQueryReq, facadeUser);
+        }
+    }
+
+    public void initSqlStatInfo(QuerySqlReq querySQLReq, User facadeUser) {
         QueryStat queryStatInfo = new QueryStat();
         List<String> allFields = SqlParserSelectHelper.getAllFields(querySQLReq.getSql());
         queryStatInfo.setModelId(querySQLReq.getModelIds().get(0));
@@ -118,7 +128,7 @@ public class StatUtils {
         StatUtils.set(queryStatInfo);
     }
 
-    public void initStatInfo(QueryStructReq queryStructCmd, User facadeUser) {
+    public void initStructStatInfo(QueryStructReq queryStructCmd, User facadeUser) {
         QueryStat queryStatInfo = new QueryStat();
         String traceId = "";
         List<String> dimensions = queryStructCmd.getGroups();

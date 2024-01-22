@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
 
-import com.tencent.supersonic.headless.api.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
 import java.util.List;

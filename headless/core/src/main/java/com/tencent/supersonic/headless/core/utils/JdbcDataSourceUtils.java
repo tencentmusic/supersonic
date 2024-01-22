@@ -11,7 +11,7 @@ import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 
 import com.alibaba.druid.util.StringUtils;
 import com.tencent.supersonic.common.util.MD5Util;
-import com.tencent.supersonic.headless.api.enums.DataType;
+import com.tencent.supersonic.headless.api.pojo.enums.DataType;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.JdbcDataSource;
 import java.sql.Connection;

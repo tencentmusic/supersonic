@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo;
 
-import com.tencent.supersonic.headless.api.enums.AggOption;
+import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import lombok.Data;
 
 import java.util.List;

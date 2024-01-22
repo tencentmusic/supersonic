@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo;
 
 
-import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import lombok.Data;
 
 @Data

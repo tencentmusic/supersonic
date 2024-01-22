@@ -3,18 +3,16 @@ package com.tencent.supersonic.headless.server.utils;
 import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
 import static com.tencent.supersonic.common.pojo.Constants.UNIONALL;
 
-import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.enums.SemanticType;
-import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.response.DimensionResp;
-import com.tencent.supersonic.headless.api.response.MetricResp;
-import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
+import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
-import com.tencent.supersonic.headless.core.cache.CacheManager;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import java.util.Arrays;
@@ -31,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 
 @Slf4j
@@ -43,22 +40,12 @@ public class QueryUtils {
     private static final String no_quotation_pattern = "\\((.*?)\\)";
 
     private final Set<Pattern> patterns = new HashSet<>();
-    @Value("${query.cache.enable:true}")
-    private Boolean cacheEnable;
 
     @Value("${query.optimizer.enable:true}")
     private Boolean optimizeEnable;
-
-    private final CacheManager cacheManager;
-    private final StatUtils statUtils;
-
     private final Catalog catalog;
 
-    public QueryUtils(
-            CacheManager cacheManager, StatUtils statUtils, Catalog catalog) {
-
-        this.cacheManager = cacheManager;
-        this.statUtils = statUtils;
+    public QueryUtils(Catalog catalog) {
         this.catalog = catalog;
     }
 
@@ -122,45 +109,6 @@ public class QueryUtils {
         });
     }
 
-    public void fillItemNameInfo(SemanticQueryResp queryResultWithColumns,
-            QueryMultiStructReq queryMultiStructCmd) {
-        List<Aggregator> aggregators = queryMultiStructCmd.getQueryStructReqs().stream()
-                .flatMap(queryStructCmd -> queryStructCmd.getAggregators().stream())
-                .collect(Collectors.toList());
-        log.info("multi agg merge:{}", aggregators);
-        Map<String, String> metricNameFromAgg = getMetricNameFromAgg(aggregators);
-        log.info("metricNameFromAgg:{}", metricNameFromAgg);
-        Map<String, String> namePair = new HashMap<>();
-        Map<String, String> nameTypePair = new HashMap<>();
-        addSysTimeDimension(namePair, nameTypePair);
-        namePair.putAll(metricNameFromAgg);
-        List<QueryColumn> columns = queryResultWithColumns.getColumns();
-        columns.forEach(column -> {
-            String nameEn = column.getNameEn().toLowerCase();
-            if (nameEn.contains(JOIN_UNDERLINE)) {
-                nameEn = nameEn.split(JOIN_UNDERLINE)[1];
-            }
-            if (namePair.containsKey(nameEn)) {
-                column.setName(namePair.get(nameEn));
-            } else {
-                if (nameEn.startsWith("name")) {
-                    column.setName("名称");
-                } else if (nameEn.startsWith("value")) {
-                    column.setName("指标值");
-                }
-            }
-            if (nameTypePair.containsKey(nameEn)) {
-                column.setShowType(nameTypePair.get(nameEn));
-            } else {
-                if (nameEn.startsWith("name")) {
-                    column.setShowType("CATEGORY");
-                } else if (nameEn.startsWith("value")) {
-                    column.setShowType("NUMBER");
-                }
-            }
-        });
-    }
-
     private String getName(String nameEn) {
         Pattern pattern = Pattern.compile("\\((.*?)\\)");
         Matcher matcher = pattern.matcher(nameEn);
@@ -195,32 +143,10 @@ public class QueryUtils {
         return false;
     }
 
-    private Map<String, String> getMetricNameFromAgg(List<Aggregator> aggregators) {
-        Map<String, String> map = new HashMap<>();
-        if (CollectionUtils.isEmpty(aggregators)) {
-            return map;
-        }
-        for (int i = 0; i < aggregators.size(); i++) {
-            Aggregator aggregator = aggregators.get(i);
-            if (StringUtils.isBlank(aggregator.getNameCh())) {
-                continue;
-            }
-            map.put("value" + (i + 1), aggregator.getNameCh());
-        }
-        return map;
-    }
-
     private static void addSysTimeDimension(Map<String, String> namePair, Map<String, String> nameTypePair) {
         for (TimeDimensionEnum timeDimensionEnum : TimeDimensionEnum.values()) {
             namePair.put(timeDimensionEnum.getName(), "date");
             nameTypePair.put(timeDimensionEnum.getName(), "DATE");
-        }
-    }
-
-    public void checkSqlParse(QueryStatement sqlParser) {
-        if (com.google.common.base.Strings.isNullOrEmpty(sqlParser.getSql())
-                || com.google.common.base.Strings.isNullOrEmpty(sqlParser.getSourceId())) {
-            throw new RuntimeException("parse Exception: " + sqlParser.getErrMsg());
         }
     }
 
