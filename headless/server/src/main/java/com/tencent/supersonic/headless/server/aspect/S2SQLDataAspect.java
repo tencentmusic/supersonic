@@ -9,10 +9,10 @@ import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResource
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
-import com.tencent.supersonic.headless.api.request.QuerySqlReq;
-import com.tencent.supersonic.headless.api.response.DimensionResp;
-import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;

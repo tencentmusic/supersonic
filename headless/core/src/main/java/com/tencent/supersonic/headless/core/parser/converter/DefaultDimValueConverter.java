@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.parser.converter;
 
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.headless.api.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import lombok.extern.slf4j.Slf4j;

@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.render;
 
 
-import com.tencent.supersonic.headless.api.enums.EngineType;
-import com.tencent.supersonic.headless.api.request.MetricQueryReq;
+import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Metric;

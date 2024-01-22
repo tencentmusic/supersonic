@@ -16,7 +16,7 @@ import com.tencent.supersonic.chat.server.persistence.repository.PluginRepositor
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;

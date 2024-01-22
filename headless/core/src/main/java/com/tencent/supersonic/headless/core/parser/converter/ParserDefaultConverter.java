@@ -2,8 +2,8 @@ package com.tencent.supersonic.headless.core.parser.converter;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.headless.api.pojo.Param;
-import com.tencent.supersonic.headless.api.request.MetricQueryReq;
-import com.tencent.supersonic.headless.api.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;

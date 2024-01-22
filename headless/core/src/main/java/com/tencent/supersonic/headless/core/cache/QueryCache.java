@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.cache;
 
 
 import com.tencent.supersonic.headless.api.pojo.Cache;
-import com.tencent.supersonic.headless.api.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;

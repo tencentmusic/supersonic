@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.parser.calcite;
 
 
-import com.tencent.supersonic.headless.api.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlTypeFactoryImpl;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSqlDialect;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.ViewExpanderImpl;

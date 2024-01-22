@@ -14,28 +14,29 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.Item;
 import com.tencent.supersonic.headless.api.pojo.SingleItemQueryResult;
-import com.tencent.supersonic.headless.api.request.ExplainSqlReq;
-import com.tencent.supersonic.headless.api.request.ItemUseReq;
-import com.tencent.supersonic.headless.api.request.ModelSchemaFilterReq;
-import com.tencent.supersonic.headless.api.request.ParseSqlReq;
-import com.tencent.supersonic.headless.api.request.QueryDimValueReq;
-import com.tencent.supersonic.headless.api.request.QueryItemReq;
-import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.request.QuerySqlReq;
-import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.response.AppDetailResp;
-import com.tencent.supersonic.headless.api.response.DimensionResp;
-import com.tencent.supersonic.headless.api.response.ExplainResp;
-import com.tencent.supersonic.headless.api.response.ItemQueryResultResp;
-import com.tencent.supersonic.headless.api.response.ItemUseResp;
-import com.tencent.supersonic.headless.api.response.MetricResp;
-import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
+import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaFilterReq;
+import com.tencent.supersonic.headless.api.pojo.request.ParseSqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryItemReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.AppDetailResp;
+import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
+import com.tencent.supersonic.headless.api.pojo.response.ItemQueryResultResp;
+import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.parser.DefaultQueryParser;
 import com.tencent.supersonic.headless.core.parser.QueryParser;
@@ -45,7 +46,6 @@ import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.server.annotation.S2SQLDataPermission;
 import com.tencent.supersonic.headless.server.annotation.StructDataPermission;
 import com.tencent.supersonic.headless.server.aspect.ApiHeaderCheckAspect;
-import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.service.AppService;
@@ -114,36 +114,12 @@ public class QueryServiceImpl implements QueryService {
     @S2SQLDataPermission
     @SneakyThrows
     public SemanticQueryResp queryBySql(QuerySqlReq querySQLReq, User user) {
-        TaskStatusEnum state = TaskStatusEnum.SUCCESS;
-        try {
-            //1.initStatInfo
-            statUtils.initStatInfo(querySQLReq, user);
-            //2.query from cache
-            Object query = queryCache.query(querySQLReq);
-            if (Objects.nonNull(query)) {
-                return (SemanticQueryResp) query;
-            }
-            StatUtils.get().setUseResultCache(false);
-            //3 query from db
-            QueryStatement queryStatement = convertToQueryStatement(querySQLReq, user);
-            log.info("queryStatement:{}", queryStatement);
-            SemanticQueryResp result = query(queryStatement);
-            //4 reset cache and set stateInfo
-            Boolean setCacheSuccess = queryCache.put(querySQLReq, result);
-            if (setCacheSuccess) {
-                // if semanticQueryResp is not null, update cache data
-                statUtils.updateResultCacheKey(queryCache.getCacheKey(querySQLReq));
-            }
-            if (Objects.isNull(result)) {
-                state = TaskStatusEnum.ERROR;
-            }
-            return result;
-        } catch (Exception e) {
-            log.info("convertToQueryStatement has a exception:", e);
-            throw e;
-        } finally {
-            statUtils.statInfo2DbAsync(state);
-        }
+        return queryBySemanticQuery(querySQLReq, user);
+    }
+
+    @Override
+    public SemanticQueryResp queryByStruct(QueryStructReq queryStructCmd, User user) throws Exception {
+        return queryBySemanticQuery(queryStructCmd, user);
     }
 
     public SemanticQueryResp queryByQueryStatement(QueryStatement queryStatement) {
@@ -161,7 +137,7 @@ public class QueryServiceImpl implements QueryService {
 
     }
 
-    private QueryStatement convertToQueryStatement(QuerySqlReq querySQLReq, User user) throws Exception {
+    private QueryStatement buildSqlQueryStatement(QuerySqlReq querySQLReq, User user) throws Exception {
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
         filter.setModelIds(querySQLReq.getModelIds());
         SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
@@ -175,26 +151,26 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public SemanticQueryResp queryByStruct(QueryStructReq queryStructReq, User user) throws Exception {
+    public SemanticQueryResp queryBySemanticQuery(SemanticQueryReq semanticQueryReq, User user) throws Exception {
         TaskStatusEnum state = TaskStatusEnum.SUCCESS;
-        log.info("[queryStructReq:{}]", queryStructReq);
+        log.info("[semanticQueryReq:{}]", semanticQueryReq);
         try {
             //1.initStatInfo
-            statUtils.initStatInfo(queryStructReq, user);
+            statUtils.initStatInfo(semanticQueryReq, user);
             //2.query from cache
-            Object query = queryCache.query(queryStructReq);
+            Object query = queryCache.query(semanticQueryReq);
             if (Objects.nonNull(query)) {
                 return (SemanticQueryResp) query;
             }
             StatUtils.get().setUseResultCache(false);
             //3 query
-            QueryStatement queryStatement = buildQueryStatement(queryStructReq);
+            QueryStatement queryStatement = buildQueryStatement(semanticQueryReq, user);
             SemanticQueryResp result = query(queryStatement);
             //4 reset cache and set stateInfo
-            Boolean setCacheSuccess = queryCache.put(queryStructReq, result);
+            Boolean setCacheSuccess = queryCache.put(semanticQueryReq, result);
             if (setCacheSuccess) {
                 // if result is not null, update cache data
-                statUtils.updateResultCacheKey(queryCache.getCacheKey(queryStructReq));
+                statUtils.updateResultCacheKey(queryCache.getCacheKey(semanticQueryReq));
             }
             if (Objects.isNull(result)) {
                 state = TaskStatusEnum.ERROR;
@@ -209,7 +185,20 @@ public class QueryServiceImpl implements QueryService {
         }
     }
 
-    private QueryStatement buildQueryStatement(QueryStructReq queryStructReq) throws Exception {
+    private QueryStatement buildQueryStatement(SemanticQueryReq semanticQueryReq, User user) throws Exception {
+        if (semanticQueryReq instanceof QuerySqlReq) {
+            return buildSqlQueryStatement((QuerySqlReq) semanticQueryReq, user);
+        }
+        if (semanticQueryReq instanceof QueryStructReq) {
+            return buildStructQueryStatement((QueryStructReq) semanticQueryReq, user);
+        }
+        if (semanticQueryReq instanceof QueryMultiStructReq) {
+            return buildMultiStructQueryStatement((QueryMultiStructReq) semanticQueryReq, user);
+        }
+        return null;
+    }
+
+    private QueryStatement buildStructQueryStatement(QueryStructReq queryStructReq, User user) throws Exception {
         QueryStatement queryStatement = new QueryStatement();
         queryStatement.setQueryStructReq(queryStructReq);
         queryStatement.setIsS2SQL(false);
@@ -220,10 +209,11 @@ public class QueryServiceImpl implements QueryService {
         return queryStatement;
     }
 
-    private QueryStatement buildQueryStatement(QueryMultiStructReq queryMultiStructReq) throws Exception {
+    private QueryStatement buildMultiStructQueryStatement(QueryMultiStructReq queryMultiStructReq, User user)
+            throws Exception {
         List<QueryStatement> sqlParsers = new ArrayList<>();
         for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
-            QueryStatement queryStatement = buildQueryStatement(queryStructReq);
+            QueryStatement queryStatement = buildQueryStatement(queryStructReq, user);
             SemanticModel semanticModel = semanticSchemaManager.get(queryStructReq.getModelIdStr());
             queryStatement.setModelIds(queryStatement.getQueryStructReq().getModelIds());
             queryStatement.setSemanticModel(semanticModel);
@@ -259,7 +249,7 @@ public class QueryServiceImpl implements QueryService {
             //3.parse and optimizer
             List<QueryStatement> sqlParsers = new ArrayList<>();
             for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
-                QueryStatement queryStatement = buildQueryStatement(queryStructReq);
+                QueryStatement queryStatement = buildQueryStatement(queryStructReq, user);
                 queryParser.parse(queryStatement);
                 queryPlanner.plan(queryStatement);
                 sqlParsers.add(queryStatement);
@@ -294,7 +284,7 @@ public class QueryServiceImpl implements QueryService {
     @SneakyThrows
     public SemanticQueryResp queryDimValue(QueryDimValueReq queryDimValueReq, User user) {
         QuerySqlReq querySQLReq = buildQuerySqlReq(queryDimValueReq);
-        return (SemanticQueryResp) queryBySql(querySQLReq, user);
+        return queryBySql(querySQLReq, user);
     }
 
     @Override
@@ -312,27 +302,10 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception {
-        QueryType queryTypeEnum = explainSqlReq.getQueryTypeEnum();
         T queryReq = explainSqlReq.getQueryReq();
-
-        if (QueryType.SQL.equals(queryTypeEnum) && queryReq instanceof QuerySqlReq) {
-            QueryStatement queryStatement = convertToQueryStatement((QuerySqlReq) queryReq, user);
-            queryStatement = plan(queryStatement);
-            return getExplainResp(queryStatement);
-        }
-        if (QueryType.STRUCT.equals(queryTypeEnum) && queryReq instanceof QueryStructReq) {
-            QueryStatement queryStatement = buildQueryStatement((QueryStructReq) queryReq);
-            queryStatement = plan(queryStatement);
-            return getExplainResp(queryStatement);
-        }
-        if (QueryType.STRUCT.equals(queryTypeEnum) && queryReq instanceof QueryMultiStructReq) {
-            QueryMultiStructReq queryMultiStructReq = (QueryMultiStructReq) queryReq;
-            QueryStatement queryStatement = buildQueryStatement(queryMultiStructReq);
-            queryStatement = plan(queryStatement);
-            return getExplainResp(queryStatement);
-        }
-
-        throw new IllegalArgumentException("Parameters are invalid, explainSqlReq: " + explainSqlReq);
+        QueryStatement queryStatement = buildQueryStatement((QuerySqlReq) queryReq, user);
+        queryStatement = plan(queryStatement);
+        return getExplainResp(queryStatement);
     }
 
     @Override

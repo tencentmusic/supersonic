@@ -2,10 +2,10 @@ package com.tencent.supersonic.headless.server.rest;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.headless.api.request.DatabaseReq;
-import com.tencent.supersonic.headless.api.request.SqlExecuteReq;
-import com.tencent.supersonic.headless.api.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
+import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.DatabaseParameter;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import java.util.Map;

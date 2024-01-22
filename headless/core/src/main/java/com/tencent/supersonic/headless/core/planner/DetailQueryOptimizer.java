@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.planner;
 
 import com.google.common.base.Strings;
-import com.tencent.supersonic.headless.api.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

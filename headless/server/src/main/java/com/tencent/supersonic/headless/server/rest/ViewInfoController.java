@@ -3,8 +3,8 @@ package com.tencent.supersonic.headless.server.rest;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.headless.api.request.ViewInfoReq;
-import com.tencent.supersonic.headless.api.response.ModelSchemaRelaResp;
+import com.tencent.supersonic.headless.api.pojo.request.ViewInfoReq;
+import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaRelaResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ViewInfoDO;
 import com.tencent.supersonic.headless.server.service.impl.ViewInfoServiceImpl;
 import org.springframework.web.bind.annotation.DeleteMapping;

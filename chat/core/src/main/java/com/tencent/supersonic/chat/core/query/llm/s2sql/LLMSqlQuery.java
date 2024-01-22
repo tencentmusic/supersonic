@@ -11,8 +11,8 @@ import com.tencent.supersonic.chat.core.utils.QueryReqBuilder;
 import com.tencent.supersonic.chat.core.query.QueryManager;
 import com.tencent.supersonic.chat.core.query.llm.LLMSemanticQuery;
 import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
