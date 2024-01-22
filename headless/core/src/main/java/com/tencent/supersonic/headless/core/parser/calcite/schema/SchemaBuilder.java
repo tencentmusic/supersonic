@@ -4,7 +4,6 @@ package com.tencent.supersonic.headless.core.parser.calcite.schema;
 import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.S2SQLSqlValidatorImpl;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +73,7 @@ public class SchemaBuilder {
             builder.addField(dim, SqlTypeName.VARCHAR);
         }
         for (String metric : metrics) {
-            builder.addField(metric, SqlTypeName.BIGINT);
+            builder.addField(metric, SqlTypeName.ANY);
         }
         DataSourceTable srcTable = builder
                 .withRowCount(1)

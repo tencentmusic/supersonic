@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.utils;
 
+
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
@@ -121,7 +122,7 @@ public class QueryReqConverter {
             result.setWithAlias(false);
         }
         //5. do deriveMetric
-        generateDerivedMetric(querySQLReq.getModelIds(), modelSchemaResps, result);
+        generateDerivedMetric(querySQLReq.getModelIds(), modelSchemaResps, aggOption, result);
         //6.physicalSql by ParseSqlReq
         queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySQLReq.getSql()));
         queryStructReq.setModelIds(new HashSet<>(querySQLReq.getModelIds()));
@@ -242,13 +243,14 @@ public class QueryReqConverter {
         return queryType;
     }
 
-    private void generateDerivedMetric(List<Long> modelIds, List<ModelSchemaResp> modelSchemaResps,
+    private void generateDerivedMetric(List<Long> modelIds, List<ModelSchemaResp> modelSchemaResps, AggOption aggOption,
             ParseSqlReq parseSqlReq) {
         String sql = parseSqlReq.getSql();
         for (MetricTable metricTable : parseSqlReq.getTables()) {
             List<String> measures = new ArrayList<>();
             Map<String, String> replaces = new HashMap<>();
-            generateDerivedMetric(modelIds, modelSchemaResps, metricTable.getMetrics(), metricTable.getDimensions(),
+            generateDerivedMetric(modelIds, modelSchemaResps, aggOption, metricTable.getMetrics(),
+                    metricTable.getDimensions(),
                     measures, replaces);
             if (!CollectionUtils.isEmpty(replaces)) {
                 // metricTable sql use measures replace metric
@@ -263,7 +265,7 @@ public class QueryReqConverter {
         parseSqlReq.setSql(sql);
     }
 
-    private void generateDerivedMetric(List<Long> modelIds, List<ModelSchemaResp> modelSchemaResps,
+    private void generateDerivedMetric(List<Long> modelIds, List<ModelSchemaResp> modelSchemaResps, AggOption aggOption,
             List<String> metrics, List<String> dimensions,
             List<String> measures, Map<String, String> replaces) {
         MetaFilter metaFilter = new MetaFilter();
@@ -276,6 +278,7 @@ public class QueryReqConverter {
                         m.getMetricDefineByMeasureParams()))) {
             return;
         }
+        log.info("begin to generateDerivedMetric {} [{}]", aggOption, metrics);
         Set<String> allFields = new HashSet<>();
         Map<String, Measure> allMeasures = new HashMap<>();
         modelSchemaResps.stream().forEach(modelSchemaResp -> {
@@ -296,7 +299,8 @@ public class QueryReqConverter {
                             metricResp.getMetricDefineByMeasureParams())) {
                         String expr = sqlGenerateUtils.generateDerivedMetric(metricResps, allFields, allMeasures,
                                 dimensionResps,
-                                sqlGenerateUtils.getExpr(metricResp), metricResp.getMetricDefineType(), visitedMetric,
+                                sqlGenerateUtils.getExpr(metricResp), metricResp.getMetricDefineType(), aggOption,
+                                visitedMetric,
                                 deriveMetric, deriveDimension);
                         replaces.put(metricResp.getBizName(), expr);
                         log.info("derived metric {}->{}", metricResp.getBizName(), expr);
