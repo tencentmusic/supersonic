@@ -9,10 +9,12 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.CaseExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
@@ -498,6 +500,18 @@ public class SqlParserSelectHelper {
             List<Expression> expressionList = ((Function) expression).getParameters().getExpressions();
             for (Expression expr : expressionList) {
                 getColumnFromExpr(expr, columns);
+            }
+        }
+        if (expression instanceof CaseExpression) {
+            CaseExpression expr = (CaseExpression) expression;
+            if (Objects.nonNull(expr.getWhenClauses())) {
+                for (WhenClause whenClause : expr.getWhenClauses()) {
+                    getColumnFromExpr(whenClause.getWhenExpression(), columns);
+                    getColumnFromExpr(whenClause.getThenExpression(), columns);
+                }
+            }
+            if (Objects.nonNull(expr.getElseExpression())) {
+                getColumnFromExpr(expr.getElseExpression(), columns);
             }
         }
         if (expression instanceof BinaryExpression) {

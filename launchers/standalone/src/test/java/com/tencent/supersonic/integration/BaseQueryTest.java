@@ -47,10 +47,11 @@ public class BaseQueryTest {
     @MockBean
     protected AgentService agentService;
 
-    protected QueryResult submitMultiTurnChat(String queryText) throws Exception {
-        ParseResp parseResp = submitParse(queryText);
+    protected QueryResult submitMultiTurnChat(String queryText, Integer agentId) throws Exception {
+        ParseResp parseResp = submitParse(queryText, agentId);
 
         ExecuteQueryReq request = ExecuteQueryReq.builder()
+                .agentId(agentId)
                 .queryId(parseResp.getQueryId())
                 .parseId(parseResp.getSelectedParses().get(0).getId())
                 .chatId(parseResp.getChatId())
@@ -63,10 +64,11 @@ public class BaseQueryTest {
         return queryService.performExecution(request);
     }
 
-    protected QueryResult submitNewChat(String queryText) throws Exception {
-        ParseResp parseResp = submitParse(queryText);
+    protected QueryResult submitNewChat(String queryText, Integer agentId) throws Exception {
+        ParseResp parseResp = submitParse(queryText, agentId);
 
         ExecuteQueryReq request = ExecuteQueryReq.builder()
+                .agentId(agentId)
                 .queryId(parseResp.getQueryId())
                 .parseId(parseResp.getSelectedParses().get(0).getId())
                 .chatId(parseResp.getChatId())
@@ -85,8 +87,9 @@ public class BaseQueryTest {
         return result;
     }
 
-    protected ParseResp submitParse(String queryText) {
+    protected ParseResp submitParse(String queryText, Integer agentId) {
         QueryReq queryContextReq = DataUtils.getQueryContextReq(10, queryText);
+        queryContextReq.setAgentId(agentId);
         return queryService.performParsing(queryContextReq);
     }
 

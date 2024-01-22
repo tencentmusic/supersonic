@@ -64,7 +64,7 @@ public class BenchMarkDemoDataLoader {
         domainReq.setBizName("music");
         domainReq.setParentId(0L);
         domainReq.setViewers(Arrays.asList("admin", "tom", "jack"));
-        domainReq.setViewOrgs(Collections.singletonList("admin"));
+        domainReq.setViewOrgs(Collections.singletonList("1"));
         domainReq.setAdmins(Collections.singletonList("admin"));
         domainReq.setAdminOrgs(Collections.emptyList());
         domainService.createDomain(domainReq, user);
@@ -79,7 +79,7 @@ public class BenchMarkDemoDataLoader {
         modelReq.setDatabaseId(1L);
         modelReq.setDomainId(3L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
-        modelReq.setViewOrgs(Collections.singletonList("admin"));
+        modelReq.setViewOrgs(Collections.singletonList("1"));
         modelReq.setAdmins(Collections.singletonList("admin"));
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();

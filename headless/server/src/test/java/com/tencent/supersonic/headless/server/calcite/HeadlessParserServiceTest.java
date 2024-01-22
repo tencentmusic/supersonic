@@ -2,18 +2,19 @@ package com.tencent.supersonic.headless.server.calcite;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.headless.api.enums.AggOption;
+import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.api.request.MetricQueryReq;
 import com.tencent.supersonic.headless.api.response.SqlParserResp;
 import com.tencent.supersonic.headless.core.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.core.pojo.yaml.DimensionTimeTypeParamsTpl;
-import com.tencent.supersonic.headless.core.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.core.pojo.yaml.IdentifyYamlTpl;
-import com.tencent.supersonic.headless.core.pojo.yaml.MeasureYamlTpl;
-import com.tencent.supersonic.headless.core.pojo.yaml.MetricTypeParamsYamlTpl;
-import com.tencent.supersonic.headless.core.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
+import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
+import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.server.pojo.yaml.IdentifyYamlTpl;
+import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
+import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
+import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,7 +44,8 @@ class HeadlessParserServiceTest {
             QueryStatement queryStatement = new QueryStatement();
             queryStatement.setMetricReq(metricCommand);
             aggBuilder.explain(queryStatement, AggOption.getAggregation(!isAgg));
-            sqlParser.setSql(aggBuilder.getSql());
+            EngineType engineType = EngineType.fromString(semanticSchema.getSemanticModel().getDatabase().getType());
+            sqlParser.setSql(aggBuilder.getSql(engineType));
             sqlParser.setSourceId(aggBuilder.getSourceId());
         } catch (Exception e) {
             sqlParser.setErrMsg(e.getMessage());

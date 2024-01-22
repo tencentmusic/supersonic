@@ -67,7 +67,7 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
     @SneakyThrows
     public SemanticQueryResp queryByS2SQL(QuerySqlReq querySQLReq, User user) {
         queryService = ContextUtils.getBean(QueryService.class);
-        Object object = queryService.queryBySql(querySQLReq, user);
+        SemanticQueryResp object = queryService.queryBySql(querySQLReq, user);
         return JsonUtil.toObject(JsonUtil.toString(object), SemanticQueryResp.class);
     }
 

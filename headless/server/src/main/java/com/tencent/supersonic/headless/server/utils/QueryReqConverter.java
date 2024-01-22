@@ -115,7 +115,7 @@ public class QueryReqConverter {
         result.setRootPath(querySQLReq.getModelIdStr());
         result.setTables(tables);
         DatabaseResp database = catalog.getDatabaseByModelId(querySQLReq.getModelIds().get(0));
-        if (!sqlGenerateUtils.isSupportWith(EngineType.valueOf(database.getType().toUpperCase()),
+        if (!sqlGenerateUtils.isSupportWith(EngineType.fromString(database.getType().toUpperCase()),
                 database.getVersion())) {
             result.setSupportWith(false);
             result.setWithAlias(false);

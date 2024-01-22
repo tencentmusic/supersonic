@@ -10,7 +10,6 @@ import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.api.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.core.parser.HeadlessConverter;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
@@ -109,7 +108,7 @@ public class CalculateAggConverter implements HeadlessConverter {
         ParseSqlReq sqlCommend = queryStatement.getParseSqlReq();
         Database database = queryStatement.getSemanticModel().getDatabase();
         ParseSqlReq parseSqlReq = generateSqlCommend(queryStatement,
-                EngineType.valueOf(database.getType().toUpperCase()), database.getVersion());
+                EngineType.fromString(database.getType().toUpperCase()), database.getVersion());
         sqlCommend.setSql(parseSqlReq.getSql());
         sqlCommend.setTables(parseSqlReq.getTables());
         sqlCommend.setRootPath(parseSqlReq.getRootPath());

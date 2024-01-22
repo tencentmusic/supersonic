@@ -1,9 +1,8 @@
-package com.tencent.supersonic.headless.server.cache;
+package com.tencent.supersonic.headless.core.cache;
 
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.base.Joiner;
-import com.tencent.supersonic.headless.server.config.CacheCommonConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;

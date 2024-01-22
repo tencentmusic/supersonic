@@ -20,11 +20,11 @@ import com.tencent.supersonic.chat.core.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.ModelCluster;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import org.springframework.util.CollectionUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.springframework.util.CollectionUtils;
 
 
 /**
@@ -63,8 +63,7 @@ public abstract class PluginParser implements SemanticParser {
         for (Long modelId : modelIds) {
             PluginSemanticQuery pluginQuery = QueryManager.createPluginQuery(plugin.getType());
             SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(modelId, plugin,
-                    queryContext.getQueryFilters(), queryContext.getModelClusterMapInfo().getMatchedElements(modelId),
-                    pluginRecallResult.getDistance());
+                    queryContext, pluginRecallResult.getDistance());
             semanticParseInfo.setQueryMode(pluginQuery.getQueryMode());
             semanticParseInfo.setScore(pluginRecallResult.getScore());
             pluginQuery.setParseInfo(semanticParseInfo);
@@ -76,8 +75,11 @@ public abstract class PluginParser implements SemanticParser {
         return PluginManager.getPluginAgentCanSupport(queryContext);
     }
 
-    protected SemanticParseInfo buildSemanticParseInfo(Long modelId, Plugin plugin, QueryFilters queryFilters,
-            List<SchemaElementMatch> schemaElementMatches, double distance) {
+    protected SemanticParseInfo buildSemanticParseInfo(Long modelId, Plugin plugin,
+                                                       QueryContext queryContext, double distance) {
+        List<SchemaElementMatch> schemaElementMatches =
+                queryContext.getModelClusterMapInfo().getMatchedElements(modelId);
+        QueryFilters queryFilters = queryContext.getQueryFilters();
         if (modelId == null && !CollectionUtils.isEmpty(plugin.getModelList())) {
             modelId = plugin.getModelList().get(0);
         }
@@ -92,6 +94,7 @@ public abstract class PluginParser implements SemanticParser {
         pluginParseResult.setPlugin(plugin);
         pluginParseResult.setQueryFilters(queryFilters);
         pluginParseResult.setDistance(distance);
+        pluginParseResult.setQueryText(queryContext.getQueryText());
         properties.put(Constants.CONTEXT, pluginParseResult);
         properties.put("type", "plugin");
         properties.put("name", plugin.getName());

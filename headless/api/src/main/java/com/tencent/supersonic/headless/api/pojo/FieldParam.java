@@ -1,10 +1,12 @@
 package com.tencent.supersonic.headless.api.pojo;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class FieldParam {
 
     private String fieldName;

@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.config;
+package com.tencent.supersonic.headless.core.cache;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
