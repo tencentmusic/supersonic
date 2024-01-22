@@ -1,5 +1,12 @@
 package com.tencent.supersonic.headless.core.utils;
 
+import static com.tencent.supersonic.common.pojo.Constants.DAY;
+import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH;
+import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
+import static com.tencent.supersonic.common.pojo.Constants.WEEK;
+
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
@@ -10,21 +17,13 @@ import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.headless.api.enums.AggOption;
 import com.tencent.supersonic.headless.api.enums.EngineType;
 import com.tencent.supersonic.headless.api.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.response.DimensionResp;
 import com.tencent.supersonic.headless.api.response.MetricResp;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Triple;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -36,13 +35,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH;
-import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
-import static com.tencent.supersonic.common.pojo.Constants.WEEK;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Triple;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 /**
  * tools functions to analyze queryStructReq
@@ -271,7 +271,8 @@ public class SqlGenerateUtils {
 
     public String generateDerivedMetric(final List<MetricResp> metricResps, final Set<String> allFields,
             final Map<String, Measure> allMeasures, final List<DimensionResp> dimensionResps,
-            final String expression, final MetricDefineType metricDefineType, Set<String> visitedMetric,
+            final String expression, final MetricDefineType metricDefineType, AggOption aggOption,
+            Set<String> visitedMetric,
             Set<String> measures,
             Set<String> dimensions) {
         Set<String> fields = SqlParserSelectHelper.getColumnFromExpr(expression);
@@ -289,14 +290,14 @@ public class SqlGenerateUtils {
                             replace.put(field,
                                     generateDerivedMetric(metricResps, allFields, allMeasures, dimensionResps,
                                             getExpr(metricItem.get()), metricItem.get().getMetricDefineType(),
-                                            visitedMetric, measures, dimensions));
+                                            aggOption, visitedMetric, measures, dimensions));
                             visitedMetric.add(field);
                         }
                         break;
                     case MEASURE:
                         if (allMeasures.containsKey(field)) {
                             measures.add(field);
-                            replace.put(field, getExpr(allMeasures.get(field)));
+                            replace.put(field, getExpr(allMeasures.get(field), aggOption));
                         }
                         break;
                     case FIELD:
@@ -324,12 +325,15 @@ public class SqlGenerateUtils {
         return expression;
     }
 
-    public String getExpr(Measure measure) {
+    public String getExpr(Measure measure, AggOption aggOption) {
         if (AggOperatorEnum.COUNT_DISTINCT.getOperator().equalsIgnoreCase(measure.getAgg())) {
-            return AggOperatorEnum.COUNT.getOperator() + " ( " + AggOperatorEnum.DISTINCT + " " + measure.getBizName()
-                    + " ) ";
+            return aggOption.equals(AggOption.NATIVE) ? measure.getBizName()
+                    : AggOperatorEnum.COUNT.getOperator() + " ( " + AggOperatorEnum.DISTINCT + " "
+                            + measure.getBizName()
+                            + " ) ";
         }
-        return measure.getAgg() + " ( " + measure.getBizName() + " ) ";
+        return aggOption.equals(AggOption.NATIVE) ? measure.getBizName()
+                : measure.getAgg() + " ( " + measure.getBizName() + " ) ";
     }
 
     public String getExpr(MetricResp metricResp) {

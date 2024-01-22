@@ -135,6 +135,7 @@ public class CalculateAggConverter implements HeadlessConverter {
             throws Exception {
         QueryStructReq queryStructReq = queryStatement.getQueryStructReq();
         check(queryStructReq);
+        queryStatement.setEnableOptimize(false);
         ParseSqlReq sqlCommand = new ParseSqlReq();
         sqlCommand.setRootPath(queryStructReq.getModelIdStr());
         String metricTableName = "v_metric_tb_tmp";
