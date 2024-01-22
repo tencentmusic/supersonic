@@ -193,7 +193,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'status',
       title: '状态',
-      width: 80,
+      width: 120,
       search: false,
       render: ColumnsConfig.state.render,
     },
