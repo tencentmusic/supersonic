@@ -14,6 +14,7 @@ import { Copilot } from 'supersonic-chat-sdk';
 import { getSystemConfig } from '@/services/user';
 export { request } from './services/request';
 import { ROUTE_AUTH_CODES } from '../config/routes';
+import { configProviderTheme } from '../config/themeSettings';
 
 const replaceRoute = '/';
 
@@ -143,16 +144,8 @@ export const layout: RunTimeLayoutConfig = (params) => {
     menuHeaderRender: undefined,
     childrenRender: (dom: any) => {
       return (
-        <ConfigProvider
-          theme={{
-            components: {
-              Button: {
-                colorPrimary: '#3182ce',
-              },
-            },
-          }}
-        >
-        <div
+        <ConfigProvider theme={configProviderTheme}>
+          <div
           style={{ height: location.pathname.includes('chat') ? 'calc(100vh - 56px)' : undefined }}
         >
           {dom}

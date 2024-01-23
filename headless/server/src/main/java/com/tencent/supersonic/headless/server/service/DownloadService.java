@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.server.service;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.api.request.BatchDownloadReq;
-import com.tencent.supersonic.headless.api.request.DownloadStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.BatchDownloadReq;
+import com.tencent.supersonic.headless.api.pojo.request.DownloadStructReq;
 import javax.servlet.http.HttpServletResponse;
 
 public interface DownloadService {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Button, message } from 'antd';
 import DimensionMetricRelationTableTransfer from './DimensionMetricRelationTableTransfer';
 import { ISemantic } from '../data';
-import { updateExprMetric } from '../service';
+import { updateMetric } from '../service';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 
 type Props = {
@@ -15,7 +15,7 @@ type Props = {
 
 const DimensionAndMetricRelationModal: React.FC<Props> = ({
   open,
-  metricItem = {},
+  metricItem,
   relationsInitialValue,
   onCancel,
   onSubmit,
@@ -30,7 +30,7 @@ const DimensionAndMetricRelationModal: React.FC<Props> = ({
         drillDownDimensions: relationList,
       },
     };
-    const { code, msg } = await updateExprMetric(queryParams);
+    const { code, msg } = await updateMetric(queryParams);
     if (code === 200) {
       onSubmit(relationList);
       return;
@@ -45,7 +45,11 @@ const DimensionAndMetricRelationModal: React.FC<Props> = ({
         <Button
           type="primary"
           onClick={() => {
-            saveMetric(relationList);
+            if (metricItem?.id) {
+              saveMetric(relationList);
+            } else {
+              onSubmit(relationList);
+            }
           }}
         >
           完成

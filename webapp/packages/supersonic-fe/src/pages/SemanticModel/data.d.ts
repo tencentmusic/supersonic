@@ -14,6 +14,16 @@ export type SensitiveLevel = 0 | 1 | 2 | null;
 export type ToolBarSearchCallBack = (text: string) => void;
 
 export declare namespace IDataSource {
+  interface IExecuteSqlColumn {
+    name?: string;
+    type: string;
+    nameEn: string;
+    showType?: string;
+    authorized?: boolean;
+    dataFormatType?: string;
+    dataFormat?: string;
+  }
+
   interface IIdentifiersItem {
     name: string;
     type: string;
@@ -42,12 +52,17 @@ export declare namespace IDataSource {
     nameCh: string;
     isCreateMetric: number;
   }
+
+  interface IDataSourceDetailFieldsItem {
+    dataType: string;
+    fieldName: string;
+  }
   interface IDataSourceDetail {
     queryType: string;
     sqlQuery: string;
     tableQuery: string;
     identifiers: IIdentifiersItem[];
-
+    fields: IDataSourceDetailFieldsItem[];
     dimensions: IDimensionsItem[];
     measures: IMeasuresItem[];
   }
@@ -168,9 +183,28 @@ export declare namespace ISemantic {
     isCreateMetric?: number;
     datasourceId: number;
   }
-  interface ITypeParams {
+
+  interface IFieldTypeParamsItem {
+    fieldName: string;
+  }
+
+  interface IMetricTypeParamsItem {
+    id: number;
+    bizName: string;
+  }
+
+  interface IMeasureTypeParams {
     measures: IMeasure[];
     expr: string;
+  }
+
+  interface IMetricTypeParams {
+    expr: string;
+    metrics: IMetricTypeParamsItem[];
+  }
+  interface IFieldTypeParams {
+    expr: string;
+    fields: IFieldTypeParamsItem[];
   }
 
   interface IDrillDownDimensionItem {
@@ -201,7 +235,10 @@ export declare namespace ISemantic {
     hasAdminRes: boolean;
     type: string;
     tags: string[];
-    typeParams: ITypeParams;
+    // typeParams: IMeasureTypeParams;
+    metricDefineByMeasureParams: IMeasureTypeParams;
+    metricDefineByFieldParams: IFieldTypeParams;
+    metricDefineByMetricParams: IMetricTypeParams;
     fullPath: string;
     dataFormatType: string;
     dataFormat: string;

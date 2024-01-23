@@ -1,15 +1,29 @@
 package com.tencent.supersonic.headless.server.utils;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tencent.supersonic.headless.api.request.DatabaseReq;
-import com.tencent.supersonic.headless.api.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import java.util.Arrays;
+
 public class DatabaseConverter {
+
+    public static Database convert(DatabaseResp databaseResp) {
+        Database database = new Database();
+        BeanUtils.copyProperties(databaseResp, database);
+        ConnectInfo connectInfo = new ConnectInfo();
+        connectInfo.setUserName(databaseResp.getUsername());
+        connectInfo.setPassword(databaseResp.getPassword());
+        connectInfo.setUrl(databaseResp.getUrl());
+        connectInfo.setDatabase(databaseResp.getDatabase());
+        database.setConnectInfo(connectInfo);
+        database.setVersion(databaseResp.getVersion());
+        return database;
+    }
 
     public static Database convert(DatabaseReq databaseReq) {
         Database database = new Database();

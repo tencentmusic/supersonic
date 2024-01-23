@@ -1,11 +1,10 @@
 package com.tencent.supersonic.chat.core.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
 import com.tencent.supersonic.chat.core.knowledge.HanlpMapResult;
 import com.tencent.supersonic.chat.core.knowledge.SearchService;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -38,8 +37,7 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     @Override
     public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<Term> terms,
             Set<Long> detectModelIds) {
-        QueryReq queryReq = queryContext.getRequest();
-        String text = queryReq.getQueryText();
+        String text = queryContext.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
         }
@@ -61,9 +59,8 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
     public void detectByStep(QueryContext queryContext, Set<HanlpMapResult> existResults, Set<Long> detectModelIds,
             Integer startIndex, Integer index, int offset) {
-        QueryReq queryReq = queryContext.getRequest();
-        String text = queryReq.getQueryText();
-        Integer agentId = queryReq.getAgentId();
+        String text = queryContext.getQueryText();
+        Integer agentId = queryContext.getAgentId();
         String detectSegment = text.substring(startIndex, index);
 
         // step1. pre search

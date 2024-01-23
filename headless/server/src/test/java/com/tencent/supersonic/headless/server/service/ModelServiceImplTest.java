@@ -5,15 +5,15 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.headless.api.enums.DimensionType;
-import com.tencent.supersonic.headless.api.enums.IdentifyType;
+import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
+import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
-import com.tencent.supersonic.headless.api.request.ModelReq;
-import com.tencent.supersonic.headless.api.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
 import com.tencent.supersonic.headless.server.persistence.repository.ModelRepository;
@@ -54,6 +54,18 @@ class ModelServiceImplTest {
         Assertions.assertEquals(expectedModelResp, actualModelResp);
         Assertions.assertEquals("admin", actualModelResp.getCreatedBy());
         Assertions.assertEquals("alice", actualModelResp.getUpdatedBy());
+    }
+
+    @Test
+    void updateModel_updateAdmin() throws Exception {
+        ModelRepository modelRepository = Mockito.mock(ModelRepository.class);
+        ModelService modelService = mockModelService(modelRepository);
+        ModelReq modelReq = mockModelReq_updateAdmin();
+        ModelDO modelDO = ModelConverter.convert(mockModelReq(), User.getFakeUser());
+        when(modelRepository.getModelById(modelReq.getId())).thenReturn(modelDO);
+        ModelResp actualModelResp = modelService.updateModel(modelReq, User.getFakeUser());
+        ModelResp expectedModelResp = buildExpectedModelResp();
+        Assertions.assertEquals(expectedModelResp, actualModelResp);
     }
 
     private ModelService mockModelService(ModelRepository modelRepository) {
@@ -137,11 +149,41 @@ class ModelServiceImplTest {
         measures.add(measure2);
 
         modelDetail.setMeasures(measures);
-        modelDetail.setSqlQuery("SELECT imp_date_a, user_name_a, page_a, 1 as pv_a, user_name "
-                + "as uv_a FROM s2_pv_uv_statis");
+        modelDetail.setSqlQuery("SELECT imp_date_a, user_name_a, page_a, 1 as pv_a,"
+                + " user_name as uv_a FROM s2_pv_uv_statis");
         modelDetail.setQueryType("sql_query");
         modelReq.setDomainId(1L);
         modelReq.setFilterSql("where user_name = 'tom'");
+        modelReq.setModelDetail(modelDetail);
+        return modelReq;
+    }
+
+    private ModelReq mockModelReq_updateAdmin() {
+        ModelReq modelReq = new ModelReq();
+        modelReq.setId(1L);
+        modelReq.setName("PVUV统计");
+        modelReq.setBizName("s2_pv_uv_statis");
+        ModelDetail modelDetail = new ModelDetail();
+        List<Identify> identifiers = new ArrayList<>();
+        identifiers.add(new Identify("用户名", IdentifyType.primary.name(), "user_name"));
+        modelDetail.setIdentifiers(identifiers);
+        List<Dim> dimensions = new ArrayList<>();
+        Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
+        dimension1.setTypeParams(new DimensionTimeTypeParams());
+        dimensions.add(dimension1);
+        Dim dimension2 = new Dim("", "page", DimensionType.categorical.name(), 0);
+        dimension2.setExpr("page");
+        dimensions.add(dimension2);
+        modelDetail.setDimensions(dimensions);
+        List<Measure> measures = new ArrayList<>();
+        Measure measure1 = new Measure("访问次数", "pv", AggOperatorEnum.SUM.name(), 1);
+        measures.add(measure1);
+        Measure measure2 = new Measure("访问人数", "uv", AggOperatorEnum.COUNT_DISTINCT.name(), 1);
+        measures.add(measure2);
+        modelDetail.setMeasures(measures);
+        modelDetail.setSqlQuery("SELECT imp_date, user_name, page, 1 as pv, "
+                + "user_name as uv FROM s2_pv_uv_statis");
+        modelDetail.setQueryType("sql_query");
         modelReq.setModelDetail(modelDetail);
         return modelReq;
     }
@@ -197,6 +239,7 @@ class ModelServiceImplTest {
         modelResp.setDescription("PVUV统计_a");
         modelResp.setDatabaseId(2L);
         modelResp.setDomainId(1L);
+        modelResp.setStatus(StatusEnum.ONLINE.getCode());
         modelResp.setAlias("访问次数统计,PVUV统计");
         modelResp.setAdmins(Lists.newArrayList("admin"));
         modelResp.setViewers(Lists.newArrayList("alice"));

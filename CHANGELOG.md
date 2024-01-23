@@ -4,6 +4,14 @@
 - "Breaking Changes" describes any changes that may break existing functionality or cause
   compatibility issues with previous versions.
 
+## SuperSonic [0.8.4] - 2024-01-19
+
+### Added
+- support creating derived metrics.
+  - Support creating metrics using three methods: by measure, metric, and field expressions.
+- added support for postgresql data source.
+- code adjustment and abstract optimization for chat and headless.
+
 ## SuperSonic [0.8.2] - 2023-12-18
 
 ### Added

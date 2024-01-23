@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.executor;
 
-import com.tencent.supersonic.headless.api.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.response.QueryResultWithSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -24,17 +24,18 @@ public class JdbcExecutor implements QueryExecutor {
     }
 
     @Override
-    public QueryResultWithSchemaResp execute(QueryStatement queryStatement) {
+    public SemanticQueryResp execute(QueryStatement queryStatement) {
         if (Strings.isEmpty(queryStatement.getSourceId())) {
             log.warn("data base id is empty");
             return null;
         }
         log.info("query SQL: {}", queryStatement.getSql());
-        DatabaseResp databaseResp = queryStatement.getHeadlessModel().getDatabaseResp();
-        log.info("database info:{}", databaseResp);
-        QueryResultWithSchemaResp queryResultWithColumns = new QueryResultWithSchemaResp();
-        SqlUtils sqlUtils = this.sqlUtils.init(databaseResp);
+        Database database = queryStatement.getSemanticModel().getDatabase();
+        log.info("database info:{}", database);
+        SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();
+        SqlUtils sqlUtils = this.sqlUtils.init(database);
         sqlUtils.queryInternal(queryStatement.getSql(), queryResultWithColumns);
+        queryResultWithColumns.setSql(queryStatement.getSql());
         return queryResultWithColumns;
     }
 

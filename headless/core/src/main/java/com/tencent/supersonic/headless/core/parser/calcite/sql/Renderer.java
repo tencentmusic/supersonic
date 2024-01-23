@@ -1,7 +1,8 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql;
 
 
-import com.tencent.supersonic.headless.api.request.MetricQueryReq;
+import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.MeasureNode;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.MetricNode;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.SemanticNode;
@@ -9,7 +10,7 @@ import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Identify;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Measure;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Metric;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.HeadlessSchema;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import java.util.HashSet;
 import java.util.List;
@@ -36,7 +37,7 @@ public abstract class Renderer {
         return datasource.getMeasures().stream().filter(mm -> mm.getName().equalsIgnoreCase(name)).findFirst();
     }
 
-    public static Optional<Metric> getMetricByName(String name, HeadlessSchema schema) {
+    public static Optional<Metric> getMetricByName(String name, SemanticSchema schema) {
         Optional<Metric> metric = schema.getMetrics().stream().filter(m -> m.getName().equalsIgnoreCase(name))
                 .findFirst();
         return metric;
@@ -47,27 +48,31 @@ public abstract class Renderer {
     }
 
     public static MetricNode buildMetricNode(String metric, DataSource datasource, SqlValidatorScope scope,
-                                             HeadlessSchema schema, boolean nonAgg, String alias) throws Exception {
+            SemanticSchema schema, boolean nonAgg, String alias) throws Exception {
         Optional<Metric> metricOpt = getMetricByName(metric, schema);
         MetricNode metricNode = new MetricNode();
+        EngineType engineType = EngineType.fromString(datasource.getType());
         if (metricOpt.isPresent()) {
             metricNode.setMetric(metricOpt.get());
             for (Measure m : metricOpt.get().getMetricTypeParams().getMeasures()) {
                 Optional<Measure> measure = getMeasureByName(m.getName(), datasource);
                 if (measure.isPresent()) {
                     metricNode.getNonAggNode()
-                            .put(measure.get().getName(), MeasureNode.buildNonAgg(alias, measure.get(), scope));
+                            .put(measure.get().getName(),
+                                    MeasureNode.buildNonAgg(alias, measure.get(), scope, engineType));
                     metricNode.getAggNode()
-                            .put(measure.get().getName(), MeasureNode.buildAgg(measure.get(), nonAgg, scope));
+                            .put(measure.get().getName(),
+                                    MeasureNode.buildAgg(measure.get(), nonAgg, scope, engineType));
                     metricNode.getAggFunction().put(measure.get().getName(), measure.get().getAgg());
 
                 } else {
-                    metricNode.getNonAggNode().put(m.getName(), MeasureNode.buildNonAgg(alias, m, scope));
-                    metricNode.getAggNode().put(m.getName(), MeasureNode.buildAgg(m, nonAgg, scope));
+                    metricNode.getNonAggNode().put(m.getName(), MeasureNode.buildNonAgg(alias, m, scope, engineType));
+                    metricNode.getAggNode().put(m.getName(), MeasureNode.buildAgg(m, nonAgg, scope, engineType));
                     metricNode.getAggFunction().put(m.getName(), m.getAgg());
                 }
                 if (m.getConstraint() != null && !m.getConstraint().isEmpty()) {
-                    metricNode.getMeasureFilter().put(m.getName(), SemanticNode.parse(m.getConstraint(), scope));
+                    metricNode.getMeasureFilter()
+                            .put(m.getName(), SemanticNode.parse(m.getConstraint(), scope, engineType));
                 }
             }
             return metricNode;
@@ -75,13 +80,14 @@ public abstract class Renderer {
         Optional<Measure> measure = getMeasureByName(metric, datasource);
         if (measure.isPresent()) {
             metricNode.getNonAggNode()
-                    .put(measure.get().getName(), MeasureNode.buildNonAgg(alias, measure.get(), scope));
-            metricNode.getAggNode().put(measure.get().getName(), MeasureNode.buildAgg(measure.get(), nonAgg, scope));
+                    .put(measure.get().getName(), MeasureNode.buildNonAgg(alias, measure.get(), scope, engineType));
+            metricNode.getAggNode()
+                    .put(measure.get().getName(), MeasureNode.buildAgg(measure.get(), nonAgg, scope, engineType));
             metricNode.getAggFunction().put(measure.get().getName(), measure.get().getAgg());
 
             if (measure.get().getConstraint() != null && !measure.get().getConstraint().isEmpty()) {
-                metricNode.getMeasureFilter()
-                        .put(measure.get().getName(), SemanticNode.parse(measure.get().getConstraint(), scope));
+                metricNode.getMeasureFilter().put(measure.get().getName(),
+                        SemanticNode.parse(measure.get().getConstraint(), scope, engineType));
             }
         }
         return metricNode;
@@ -105,5 +111,5 @@ public abstract class Renderer {
     }
 
     public abstract void render(MetricQueryReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
-                                HeadlessSchema schema, boolean nonAgg) throws Exception;
+            SemanticSchema schema, boolean nonAgg) throws Exception;
 }

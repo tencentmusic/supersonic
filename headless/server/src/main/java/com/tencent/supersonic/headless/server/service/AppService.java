@@ -3,10 +3,10 @@ package com.tencent.supersonic.headless.server.service;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.headless.api.request.AppQueryReq;
-import com.tencent.supersonic.headless.api.request.AppReq;
-import com.tencent.supersonic.headless.api.response.AppDetailResp;
-import com.tencent.supersonic.headless.api.response.AppResp;
+import com.tencent.supersonic.headless.api.pojo.request.AppQueryReq;
+import com.tencent.supersonic.headless.api.pojo.request.AppReq;
+import com.tencent.supersonic.headless.api.pojo.response.AppDetailResp;
+import com.tencent.supersonic.headless.api.pojo.response.AppResp;
 
 public interface AppService {
 

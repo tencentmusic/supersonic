@@ -12,19 +12,19 @@ import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
-import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ChatGptHelper;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
-import com.tencent.supersonic.headless.api.pojo.Measure;
+import com.tencent.supersonic.headless.api.pojo.MetricParam;
 import com.tencent.supersonic.headless.api.pojo.MetricQueryDefaultConfig;
-import com.tencent.supersonic.headless.api.pojo.MetricTypeParams;
-import com.tencent.supersonic.headless.api.request.MetaBatchReq;
-import com.tencent.supersonic.headless.api.request.MetricReq;
-import com.tencent.supersonic.headless.api.request.PageMetricReq;
-import com.tencent.supersonic.headless.api.response.DomainResp;
-import com.tencent.supersonic.headless.api.response.MetricResp;
-import com.tencent.supersonic.headless.api.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
+import com.tencent.supersonic.headless.api.pojo.request.MetricBaseReq;
+import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
+import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
+import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricQueryDefaultConfigDO;
@@ -35,10 +35,9 @@ import com.tencent.supersonic.headless.server.service.CollectService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.utils.MetricCheckUtils;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
-import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -83,13 +82,14 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public void createMetric(MetricReq metricReq, User user) {
+    public MetricResp createMetric(MetricReq metricReq, User user) {
         checkExist(Lists.newArrayList(metricReq));
-        checkParam(metricReq);
+        MetricCheckUtils.checkParam(metricReq);
         metricReq.createdBy(user.getName());
         MetricDO metricDO = MetricConverter.convert2MetricDO(metricReq);
         metricRepository.createMetric(metricDO);
         sendEventBatch(Lists.newArrayList(metricDO), EventType.ADD);
+        return MetricConverter.convert2MetricResp(metricDO);
     }
 
     @Override
@@ -116,8 +116,8 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public void updateExprMetric(MetricReq metricReq, User user) {
-        checkParam(metricReq);
+    public MetricResp updateMetric(MetricReq metricReq, User user) {
+        MetricCheckUtils.checkParam(metricReq);
         checkExist(Lists.newArrayList(metricReq));
         metricReq.updatedBy(user.getName());
         MetricDO metricDO = metricRepository.getMetricById(metricReq.getId());
@@ -130,6 +130,7 @@ public class MetricServiceImpl implements MetricService {
             dataItem.setNewName(metricDO.getName());
             sendEvent(getDataItem(metricDO), EventType.UPDATE);
         }
+        return MetricConverter.convert2MetricResp(metricDO);
     }
 
     @Override
@@ -206,7 +207,47 @@ public class MetricServiceImpl implements MetricService {
     public List<MetricResp> getMetrics(MetaFilter metaFilter) {
         MetricFilter metricFilter = new MetricFilter();
         BeanUtils.copyProperties(metaFilter, metricFilter);
-        return convertList(queryMetric(metricFilter), Lists.newArrayList());
+        List<MetricResp> metricResps = convertList(queryMetric(metricFilter));
+        if (!CollectionUtils.isEmpty(metaFilter.getFieldsDepend())) {
+            return filterByField(metricResps, metaFilter.getFieldsDepend());
+        }
+        return metricResps;
+    }
+
+    private List<MetricResp> filterByField(List<MetricResp> metricResps, List<String> fields) {
+        List<MetricResp> metricRespFiltered = Lists.newArrayList();
+        for (MetricResp metricResp : metricResps) {
+            for (String field : fields) {
+                if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
+                    List<Long> ids = metricResp.getMetricDefineByMetricParams().getMetrics()
+                            .stream().map(MetricParam::getId).collect(Collectors.toList());
+                    List<MetricResp> metricById = metricResps.stream()
+                            .filter(metric -> ids.contains(metric.getId()))
+                            .collect(Collectors.toList());
+                    for (MetricResp metric : metricById) {
+                        if (metric.getExpr().contains(field)) {
+                            metricRespFiltered.add(metricResp);
+                        }
+                    }
+                } else {
+                    if (metricResp.getExpr().contains(field)) {
+                        metricRespFiltered.add(metricResp);
+                    }
+                }
+            }
+        }
+        return metricRespFiltered;
+    }
+
+    @Override
+    public List<MetricResp> getMetricsToCreateNewMetric(Long modelId) {
+        MetricFilter metricFilter = new MetricFilter();
+        metricFilter.setModelIds(Lists.newArrayList(modelId));
+        List<MetricResp> metricResps = getMetrics(metricFilter);
+        return metricResps.stream().filter(metricResp ->
+                MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())
+                        || MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType()))
+                .collect(Collectors.toList());
     }
 
     private void fillAdminRes(List<MetricResp> metricResps, User user) {
@@ -260,7 +301,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public List<String> mockAlias(MetricReq metricReq, String mockType, User user) {
+    public List<String> mockAlias(MetricBaseReq metricReq, String mockType, User user) {
 
         String mockAlias = chatGptHelper.mockAlias(mockType, metricReq.getName(), metricReq.getBizName(), "",
                 metricReq.getDescription(), !"".equals(metricReq.getDataFormatType()));
@@ -293,17 +334,6 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public List<DataItem> getDataItems(Long modelId) {
-        MetricFilter metaFilter = new MetricFilter();
-        metaFilter.setModelIds(Lists.newArrayList(modelId));
-        List<MetricDO> metricDOS = queryMetric(metaFilter);
-        if (CollectionUtils.isEmpty(metricDOS)) {
-            return Lists.newArrayList();
-        }
-        return metricDOS.stream().map(this::getDataItem).collect(Collectors.toList());
-    }
-
-    @Override
     public void saveMetricQueryDefaultConfig(MetricQueryDefaultConfig defaultConfig, User user) {
         MetricQueryDefaultConfigDO defaultConfigDO =
                 metricRepository.getDefaultQueryConfig(defaultConfig.getMetricId(), user.getName());
@@ -329,31 +359,14 @@ public class MetricServiceImpl implements MetricService {
         return metricQueryDefaultConfig;
     }
 
-    private void checkParam(MetricReq metricReq) {
-        MetricTypeParams typeParams = metricReq.getTypeParams();
-        List<Measure> measures = typeParams.getMeasures();
-        if (CollectionUtils.isEmpty(measures)) {
-            throw new InvalidArgumentException("不可缺少度量");
-        }
-        if (StringUtils.isBlank(typeParams.getExpr())) {
-            throw new InvalidArgumentException("表达式不可为空");
-        }
-        if (NameCheckUtils.containsSpecialCharacters(metricReq.getName())) {
-            throw new InvalidArgumentException("名称包含特殊字符, 请修改");
-        }
-    }
-
-    private void checkExist(List<MetricReq> metricReqs) {
+    private void checkExist(List<MetricBaseReq> metricReqs) {
         Long modelId = metricReqs.get(0).getModelId();
         List<MetricResp> metricResps = getMetricInSameDomain(modelId);
         Map<String, MetricResp> bizNameMap = metricResps.stream()
                 .collect(Collectors.toMap(MetricResp::getBizName, a -> a, (k1, k2) -> k1));
         Map<String, MetricResp> nameMap = metricResps.stream()
                 .collect(Collectors.toMap(MetricResp::getName, a -> a, (k1, k2) -> k1));
-        for (MetricReq metricReq : metricReqs) {
-            if (NameCheckUtils.containsSpecialCharacters(metricReq.getName())) {
-                throw new InvalidArgumentException("名称包含特殊字符, 请修改");
-            }
+        for (MetricBaseReq metricReq : metricReqs) {
             if (bizNameMap.containsKey(metricReq.getBizName())) {
                 MetricResp metricResp = bizNameMap.get(metricReq.getBizName());
                 if (!metricResp.getId().equals(metricReq.getId())) {
@@ -377,6 +390,10 @@ public class MetricServiceImpl implements MetricService {
         List<ModelResp> modelResps = modelService.getModelByDomainIds(Lists.newArrayList(domainId));
         List<Long> modelIds = modelResps.stream().map(ModelResp::getId).collect(Collectors.toList());
         return getMetrics(new MetaFilter(modelIds));
+    }
+
+    private List<MetricResp> convertList(List<MetricDO> metricDOS) {
+        return convertList(metricDOS, Lists.newArrayList());
     }
 
     private List<MetricResp> convertList(List<MetricDO> metricDOS, List<Long> collect) {

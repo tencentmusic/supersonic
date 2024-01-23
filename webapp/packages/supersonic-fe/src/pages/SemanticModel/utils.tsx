@@ -1,6 +1,11 @@
 import type { API } from '@/services/API';
 import { ISemantic } from './data';
 import type { DataNode } from 'antd/lib/tree';
+import { Form, Input, InputNumber, Switch, Select } from 'antd';
+import FormItemTitle from '@/components/FormHelper/FormItemTitle';
+import { ConfigParametersItem } from '../System/types';
+const FormItem = Form.Item;
+const { TextArea } = Input;
 
 export const changeTreeData = (treeData: API.DomainList, auth?: boolean): DataNode[] => {
   return treeData.map((item: any) => {
@@ -124,4 +129,69 @@ export const findLeafNodesFromDomainList = (
   }
 
   return leafNodes;
+};
+
+export const genneratorFormItemList = (itemList: ConfigParametersItem[]) => {
+  return itemList.map((item) => {
+    const { dataType, name, comment, placeholder, description, require } = item;
+    let defaultItem = <Input />;
+    switch (dataType) {
+      case 'string':
+        if (name === 'password') {
+          defaultItem = <Input.Password placeholder={placeholder} />;
+        } else {
+          defaultItem = <Input placeholder={placeholder} />;
+        }
+
+        break;
+      case 'longText':
+        defaultItem = <TextArea placeholder={placeholder} style={{ height: 100 }} />;
+        break;
+      case 'number':
+        defaultItem = <InputNumber placeholder={placeholder} style={{ width: '100%' }} />;
+        break;
+      case 'bool':
+        return (
+          <FormItem
+            name={name}
+            label={comment}
+            key={name}
+            valuePropName="checked"
+            getValueFromEvent={(value) => {
+              return value === true ? 'true' : 'false';
+            }}
+            getValueProps={(value) => {
+              return {
+                checked: value === 'true',
+              };
+            }}
+          >
+            <Switch />
+          </FormItem>
+        );
+      case 'list': {
+        const { candidateValues = [] } = item;
+        const options = candidateValues.map((value) => {
+          return { label: value, value };
+        });
+        defaultItem = (
+          <Select style={{ width: '100%' }} options={options} placeholder={placeholder} />
+        );
+        break;
+      }
+      default:
+        defaultItem = <Input placeholder={placeholder} />;
+        break;
+    }
+    return (
+      <FormItem
+        name={name}
+        key={name}
+        rules={[{ required: !!require, message: `请输入${comment}` }]}
+        label={<FormItemTitle title={comment} subTitle={description} />}
+      >
+        {defaultItem}
+      </FormItem>
+    );
+  });
 };

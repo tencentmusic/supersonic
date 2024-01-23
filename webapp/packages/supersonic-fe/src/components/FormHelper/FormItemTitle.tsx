@@ -17,16 +17,12 @@ const FormItemTitle: React.FC<IProps> = ({
   onSubTitleChange,
 }) => {
   return (
-    // <div style={{ display: 'block' }}>
-
-    // </div>
     <Space direction="vertical" size={2} style={{ width: '100%' }}>
       <div>{title}</div>
       <div className={styles.subTitleContainer}>
         {subTitleEditable ? (
           <Paragraph
             editable={{
-              // editing: true,
               onChange: (title: string) => {
                 onSubTitleChange?.(title);
               },

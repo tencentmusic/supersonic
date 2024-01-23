@@ -23,7 +23,7 @@ public class EmbeddingMapper extends BaseMapper {
     @Override
     public void doMap(QueryContext queryContext) {
         //1. query from embedding by queryText
-        String queryText = queryContext.getRequest().getQueryText();
+        String queryText = queryContext.getQueryText();
         List<Term> terms = HanlpHelper.getTerms(queryText);
 
         EmbeddingMatchStrategy matchStrategy = ContextUtils.getBean(EmbeddingMatchStrategy.class);

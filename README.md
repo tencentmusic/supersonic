@@ -1,5 +1,7 @@
 [中文介绍](README_CN.md) | [文档中心](https://github.com/tencentmusic/supersonic/wiki)
 
+![Java CI](https://github.com/tencentmusic/supersonic/workflows/supersonic%20CI/badge.svg)
+
 # SuperSonic (超音数)
 
 **SuperSonic is the next-generation LLM-powered data analytics platform that integrates ChatBI and HeadlessBI**. SuperSonic provides a chat interface that empowers users to query data using natural language and visualize the results with suitable charts. To enable such experience, the only thing necessary is to build logical semantic models (definition of entities/metrics/dimensions/tags, along with their meaning, context and relationships) on top of physical data models, and **no data modification or copying** is required. Meanwhile, SuperSonic is designed to be **highly extensible**, allowing custom functionalities to be added and configured with Java SPI.

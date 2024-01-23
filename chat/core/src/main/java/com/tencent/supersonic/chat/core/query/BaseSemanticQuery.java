@@ -14,11 +14,11 @@ import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.api.enums.QueryType;
-import com.tencent.supersonic.headless.api.request.ExplainSqlReq;
-import com.tencent.supersonic.headless.api.request.QueryS2SQLReq;
-import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.response.ExplainResp;
+import com.tencent.supersonic.headless.api.pojo.enums.QueryType;
+import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -121,9 +121,9 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
         }
         QueryStructReq queryStructReq = convertQueryStruct();
         convertBizNameToName(semanticSchema, queryStructReq);
-        QueryS2SQLReq queryS2SQLReq = queryStructReq.convert(queryStructReq);
-        parseInfo.getSqlInfo().setS2SQL(queryS2SQLReq.getSql());
-        parseInfo.getSqlInfo().setCorrectS2SQL(queryS2SQLReq.getSql());
+        QuerySqlReq querySQLReq = queryStructReq.convert(queryStructReq);
+        parseInfo.getSqlInfo().setS2SQL(querySQLReq.getSql());
+        parseInfo.getSqlInfo().setCorrectS2SQL(querySQLReq.getSql());
     }
 
 }

@@ -6,13 +6,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.CaseExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
@@ -32,8 +34,8 @@ import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
-import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.select.SetOperationList;
+import net.sf.jsqlparser.statement.select.SubSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.util.CollectionUtils;
@@ -479,6 +481,44 @@ public class SqlParserSelectHelper {
             return null;
         }
         return selectStatement.toString();
+    }
+
+    public static Set<String> getColumnFromExpr(String expr) {
+        Expression expression = QueryExpressionReplaceVisitor.getExpression(expr);
+        Set<String> columns = new HashSet<>();
+        if (Objects.nonNull(expression)) {
+            getColumnFromExpr(expression, columns);
+        }
+        return columns;
+    }
+
+    public static void getColumnFromExpr(Expression expression, Set<String> columns) {
+        if (expression instanceof Column) {
+            columns.add(((Column) expression).getColumnName());
+        }
+        if (expression instanceof Function) {
+            List<Expression> expressionList = ((Function) expression).getParameters().getExpressions();
+            for (Expression expr : expressionList) {
+                getColumnFromExpr(expr, columns);
+            }
+        }
+        if (expression instanceof CaseExpression) {
+            CaseExpression expr = (CaseExpression) expression;
+            if (Objects.nonNull(expr.getWhenClauses())) {
+                for (WhenClause whenClause : expr.getWhenClauses()) {
+                    getColumnFromExpr(whenClause.getWhenExpression(), columns);
+                    getColumnFromExpr(whenClause.getThenExpression(), columns);
+                }
+            }
+            if (Objects.nonNull(expr.getElseExpression())) {
+                getColumnFromExpr(expr.getElseExpression(), columns);
+            }
+        }
+        if (expression instanceof BinaryExpression) {
+            BinaryExpression expr = (BinaryExpression) expression;
+            getColumnFromExpr(expr.getLeftExpression(), columns);
+            getColumnFromExpr(expr.getRightExpression(), columns);
+        }
     }
 }
 

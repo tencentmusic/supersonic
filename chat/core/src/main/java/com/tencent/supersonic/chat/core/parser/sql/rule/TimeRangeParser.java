@@ -42,12 +42,13 @@ public class TimeRangeParser implements SemanticParser {
 
     @Override
     public void parse(QueryContext queryContext, ChatContext chatContext) {
-        DateConf dateConf = parseRecent(queryContext.getRequest().getQueryText());
+        String queryText = queryContext.getQueryText();
+        DateConf dateConf = parseRecent(queryText);
         if (dateConf == null) {
-            dateConf = parseDateNumber(queryContext.getRequest().getQueryText());
+            dateConf = parseDateNumber(queryText);
         }
         if (dateConf == null) {
-            dateConf = parseDateCN(queryContext.getRequest().getQueryText());
+            dateConf = parseDateCN(queryText);
         }
 
         if (dateConf != null) {

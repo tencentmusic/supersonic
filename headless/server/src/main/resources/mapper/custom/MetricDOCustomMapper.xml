@@ -19,6 +19,7 @@
         <result column="data_format" jdbcType="VARCHAR" property="dataFormat" />
         <result column="alias" jdbcType="VARCHAR" property="alias" />
         <result column="tags" jdbcType="VARCHAR" property="tags" />
+        <result column="define_type" jdbcType="VARCHAR" property="defineType" />
     </resultMap>
     <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO">
         <result column="type_params" jdbcType="LONGVARCHAR" property="typeParams" />
@@ -56,7 +57,7 @@
     </sql>
     <sql id="Base_Column_List">
         id, model_id, name, biz_name, description, status, sensitive_level, type, created_at,
-    created_by, updated_at, updated_by, data_format_type, data_format, alias, tags
+    created_by, updated_at, updated_by, data_format_type, data_format, alias, tags, define_type
     </sql>
     <sql id="Blob_Column_List">
         type_params
@@ -66,7 +67,7 @@
         insert into s2_metric (model_id, name,
         biz_name, description, type,status,sensitive_level,
         created_at, created_by, updated_at,
-        updated_by, type_params
+        updated_by, type_params, define_type
         )
         values
         <foreach collection="list" item="metric" separator=",">
@@ -76,29 +77,11 @@
             #{metric.status,jdbcType=VARCHAR},#{metric.sensitiveLevel,jdbcType=VARCHAR},
             #{metric.createdAt,jdbcType=TIMESTAMP}, #{metric.createdBy,jdbcType=VARCHAR},
             #{metric.updatedAt,jdbcType=TIMESTAMP},
-            #{metric.updatedBy,jdbcType=VARCHAR}, #{metric.typeParams,jdbcType=LONGVARCHAR}
+            #{metric.updatedBy,jdbcType=VARCHAR}, #{metric.typeParams,jdbcType=LONGVARCHAR},
+            #{metric.defineType,jdbcType=VARCHAR}
             )
         </foreach>
     </insert>
-
-    <update id="batchUpdate" parameterType="java.util.List">
-        <foreach collection="list" item="metric" separator=";">
-            update s2_metric
-            set model_id = #{metric.modelId,jdbcType=BIGINT},
-            name = #{metric.name,jdbcType=VARCHAR},
-            biz_name = #{metric.bizName,jdbcType=VARCHAR},
-            description = #{metric.description,jdbcType=VARCHAR},
-            type = #{metric.type,jdbcType=VARCHAR},
-            status = #{metric.status,jdbcType=VARCHAR},
-            created_at = #{metric.createdAt,jdbcType=TIMESTAMP},
-            created_by = #{metric.createdBy,jdbcType=VARCHAR},
-            updated_at = #{metric.updatedAt,jdbcType=TIMESTAMP},
-            updated_by = #{metric.updatedBy,jdbcType=VARCHAR},
-            sensitive_level = #{metric.sensitiveLevel,jdbcType=INTEGER},
-            type_params = #{metric.typeParams,jdbcType=LONGVARCHAR}
-            where id = #{metric.id,jdbcType=BIGINT}
-        </foreach>
-    </update>
 
     <update id="batchUpdateStatus" parameterType="java.util.List">
         <foreach collection="list" item="metric" separator=";">

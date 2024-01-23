@@ -15,8 +15,6 @@ public class Measure {
 
     private String expr;
 
-    private String createMetric;
-
     private String bizName;
 
     private Integer isCreateMetric = 0;
@@ -30,6 +28,11 @@ public class Measure {
         this.agg = agg;
         this.isCreateMetric = isCreateMetric;
         this.bizName = bizName;
+    }
+
+    public Measure(String bizName, String constraint) {
+        this.bizName = bizName;
+        this.constraint = constraint;
     }
 
     public String getFieldName() {

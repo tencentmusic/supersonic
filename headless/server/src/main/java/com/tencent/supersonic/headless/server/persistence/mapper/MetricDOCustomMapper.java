@@ -11,8 +11,6 @@ public interface MetricDOCustomMapper {
 
     void batchInsert(List<MetricDO> metricDOS);
 
-    void batchUpdate(List<MetricDO> metricDOS);
-
     void batchUpdateStatus(List<MetricDO> metricDOS);
 
     List<MetricDO> query(MetricFilter metricFilter);

@@ -15,19 +15,23 @@ import {
   Col,
   Space,
   Tooltip,
+  Tag,
 } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import MetricMeasuresFormTable from './MetricMeasuresFormTable';
-import { SENSITIVE_LEVEL_OPTIONS } from '../constant';
+import { SENSITIVE_LEVEL_OPTIONS, METRIC_DEFINE_TYPE } from '../constant';
 import { formLayout } from '@/components/FormHelper/utils';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import styles from './style.less';
-import { getMeasureListByModelId, getModelDetail } from '../service';
+import { getMetricsToCreateNewMetric, getModelDetail } from '../service';
+import MetricMetricFormTable from './MetricMetricFormTable';
+import MetricFieldFormTable from './MetricFieldFormTable';
 import DimensionAndMetricRelationModal from './DimensionAndMetricRelationModal';
 import TableTitleTooltips from '../components/TableTitleTooltips';
-import { creatExprMetric, updateExprMetric, mockMetricAlias, getMetricTags } from '../service';
+import { createMetric, updateMetric, mockMetricAlias, getMetricTags } from '../service';
 import { ISemantic } from '../data';
 import { history } from 'umi';
+import { cloneDeep } from 'lodash';
 
 export type CreateFormProps = {
   datasourceId?: number;
@@ -43,6 +47,12 @@ const { Step } = Steps;
 const FormItem = Form.Item;
 const { TextArea } = Input;
 const { Option } = Select;
+
+const queryParamsTypeParamsKey = {
+  [METRIC_DEFINE_TYPE.MEASURE]: 'metricDefineByMeasureParams',
+  [METRIC_DEFINE_TYPE.METRIC]: 'metricDefineByMetricParams',
+  [METRIC_DEFINE_TYPE.FIELD]: 'metricDefineByFieldParams',
+};
 
 const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   datasourceId,
@@ -67,10 +77,31 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
 
   const [classMeasureList, setClassMeasureList] = useState<ISemantic.IMeasure[]>([]);
 
-  const [exprTypeParamsState, setExprTypeParamsState] = useState<ISemantic.IMeasure[]>([]);
+  const [exprTypeParamsState, setExprTypeParamsState] = useState<{
+    [METRIC_DEFINE_TYPE.MEASURE]: ISemantic.IMeasureTypeParams;
+    [METRIC_DEFINE_TYPE.METRIC]: ISemantic.IMetricTypeParams;
+    [METRIC_DEFINE_TYPE.FIELD]: ISemantic.IFieldTypeParams;
+  }>({
+    [METRIC_DEFINE_TYPE.MEASURE]: {
+      measures: [],
+      expr: '',
+    },
+    [METRIC_DEFINE_TYPE.METRIC]: {
+      metrics: [],
+      expr: '',
+    },
+    [METRIC_DEFINE_TYPE.FIELD]: {
+      fields: [],
+      expr: '',
+    },
+  } as any);
 
-  const [exprSql, setExprSql] = useState<string>('');
+  // const [exprTypeParamsState, setExprTypeParamsState] = useState<ISemantic.IMeasure[]>([]);
 
+  const [defineType, setDefineType] = useState(METRIC_DEFINE_TYPE.MEASURE);
+
+  const [createNewMetricList, setCreateNewMetricList] = useState<ISemantic.IMetricItem[]>([]);
+  const [fieldList, setFieldList] = useState<string[]>([]);
   const [isPercentState, setIsPercentState] = useState<boolean>(false);
   const [isDecimalState, setIsDecimalState] = useState<boolean>(false);
   const [hasMeasuresState, setHasMeasuresState] = useState<boolean>(true);
@@ -87,10 +118,13 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   const forward = () => setCurrentStep(currentStep + 1);
   const backward = () => setCurrentStep(currentStep - 1);
 
-  const queryClassMeasureList = async () => {
+  const queryModelDetail = async () => {
     // const { code, data } = await getMeasureListByModelId(modelId);
     const { code, data } = await getModelDetail({ modelId: modelId || metricItem?.modelId });
     if (code === 200) {
+      if (Array.isArray(data?.modelDetail?.fields)) {
+        setFieldList(data.modelDetail.fields);
+      }
       if (Array.isArray(data?.modelDetail?.measures)) {
         setClassMeasureList(data.modelDetail.measures);
         if (datasourceId) {
@@ -106,7 +140,8 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   };
 
   useEffect(() => {
-    queryClassMeasureList();
+    queryModelDetail();
+    queryMetricsToCreateNewMetric();
     queryMetricTags();
   }, []);
 
@@ -115,10 +150,8 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     const submitForm = {
       ...formValRef.current,
       ...fieldsValue,
-      typeParams: {
-        expr: exprSql,
-        measures: exprTypeParamsState,
-      },
+      metricDefineType: defineType,
+      [queryParamsTypeParamsKey[defineType]]: exprTypeParamsState[defineType],
     };
     updateFormVal(submitForm);
     if (currentStep < 1) {
@@ -135,12 +168,16 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       bizName,
       description,
       sensitiveLevel,
-      typeParams: typeParams,
+      typeParams,
       dataFormat,
       dataFormatType,
       alias,
       tags,
-    } = metricItem as any;
+      metricDefineType,
+      metricDefineByMeasureParams,
+      metricDefineByMetricParams,
+      metricDefineByFieldParams,
+    } = metricItem;
     const isPercent = dataFormatType === 'percent';
     const isDecimal = dataFormatType === 'decimal';
     const initValue = {
@@ -162,10 +199,39 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       ...formValRef.current,
       ...initValue,
     };
+    if (metricDefineType === METRIC_DEFINE_TYPE.MEASURE) {
+      const { measures, expr } = metricDefineByMeasureParams || {};
+      setExprTypeParamsState({
+        ...exprTypeParamsState,
+        [METRIC_DEFINE_TYPE.MEASURE]: {
+          measures: measures || [],
+          expr: expr || '',
+        },
+      });
+    }
+    if (metricDefineType === METRIC_DEFINE_TYPE.METRIC) {
+      const { metrics, expr } = metricDefineByMetricParams || {};
+      setExprTypeParamsState({
+        ...exprTypeParamsState,
+        [METRIC_DEFINE_TYPE.METRIC]: {
+          metrics: metrics || [],
+          expr: expr || '',
+        },
+      });
+    }
+    if (metricDefineType === METRIC_DEFINE_TYPE.FIELD) {
+      const { fields, expr } = metricDefineByFieldParams || {};
+      setExprTypeParamsState({
+        ...exprTypeParamsState,
+        [METRIC_DEFINE_TYPE.FIELD]: {
+          fields: fields || [],
+          expr: expr || '',
+        },
+      });
+    }
     updateFormVal(editInitFormVal);
     form.setFieldsValue(initValue);
-    setExprTypeParamsState(typeParams.measures);
-    setExprSql(typeParams.expr);
+    setDefineType(metricDefineType);
     setIsPercentState(isPercent);
     setIsDecimalState(isDecimal);
   };
@@ -176,6 +242,37 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
     }
   }, [metricItem]);
 
+  const isEmptyConditions = (
+    metricDefineType: METRIC_DEFINE_TYPE,
+    metricDefineParams:
+      | ISemantic.IMeasureTypeParams
+      | ISemantic.IMetricTypeParams
+      | ISemantic.IFieldTypeParams,
+  ) => {
+    if (metricDefineType === METRIC_DEFINE_TYPE.MEASURE) {
+      const { measures } = (metricDefineParams as ISemantic.IMeasureTypeParams) || {};
+      if (!(Array.isArray(measures) && measures.length > 0)) {
+        message.error('请添加一个度量');
+        return true;
+      }
+    }
+    if (metricDefineType === METRIC_DEFINE_TYPE.METRIC) {
+      const { metrics } = (metricDefineParams as ISemantic.IMetricTypeParams) || {};
+      if (!(Array.isArray(metrics) && metrics.length > 0)) {
+        message.error('请添加一个指标');
+        return true;
+      }
+    }
+    if (metricDefineType === METRIC_DEFINE_TYPE.FIELD) {
+      const { fields } = (metricDefineParams as ISemantic.IFieldTypeParams) || {};
+      if (!(Array.isArray(fields) && fields.length > 0)) {
+        message.error('请添加一个字段');
+        return true;
+      }
+    }
+    return false;
+  };
+
   const saveMetric = async (fieldsValue: any) => {
     const queryParams = {
       modelId: isEdit ? metricItem.modelId : modelId,
@@ -185,22 +282,22 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       },
       ...fieldsValue,
     };
-    const { typeParams, alias, dataFormatType } = queryParams;
+    const { alias, dataFormatType } = queryParams;
     queryParams.alias = Array.isArray(alias) ? alias.join(',') : '';
-    if (!typeParams?.expr) {
+    if (!queryParams[queryParamsTypeParamsKey[defineType]]?.expr) {
       message.error('请输入度量表达式');
       return;
     }
     if (!dataFormatType) {
       delete queryParams.dataFormat;
     }
-    if (!(Array.isArray(typeParams?.measures) && typeParams.measures.length > 0)) {
-      message.error('请添加一个度量');
+    if (isEmptyConditions(defineType, queryParams[queryParamsTypeParamsKey[defineType]])) {
       return;
     }
-    let saveMetricQuery = creatExprMetric;
+
+    let saveMetricQuery = createMetric;
     if (queryParams.id) {
-      saveMetricQuery = updateExprMetric;
+      saveMetricQuery = updateMetric;
     }
     const { code, msg } = await saveMetricQuery(queryParams);
     if (code === 200) {
@@ -238,24 +335,143 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       message.error('获取指标标签失败');
     }
   };
+  const queryMetricsToCreateNewMetric = async () => {
+    const { code, data } = await getMetricsToCreateNewMetric({
+      modelId: modelId || metricItem?.modelId,
+    });
+    if (code === 200) {
+      setCreateNewMetricList(data);
+    } else {
+      message.error('获取指标标签失败');
+    }
+  };
 
   const renderContent = () => {
     if (currentStep === 1) {
       return (
-        <MetricMeasuresFormTable
-          datasourceId={datasourceId}
-          typeParams={{
-            measures: exprTypeParamsState,
-            expr: exprSql,
-          }}
-          measuresList={classMeasureList}
-          onFieldChange={(typeParams: any) => {
-            setExprTypeParamsState([...typeParams]);
-          }}
-          onSqlChange={(sql: string) => {
-            setExprSql(sql);
-          }}
-        />
+        <div>
+          <div
+            style={{
+              padding: '0 0 20px 24px',
+              // borderBottom: '1px solid #eee',
+            }}
+          >
+            <Radio.Group
+              buttonStyle="solid"
+              value={defineType}
+              onChange={(e) => {
+                setDefineType(e.target.value);
+              }}
+            >
+              <Radio.Button value={METRIC_DEFINE_TYPE.MEASURE}>按度量</Radio.Button>
+              <Radio.Button value={METRIC_DEFINE_TYPE.METRIC}>按指标</Radio.Button>
+              <Radio.Button value={METRIC_DEFINE_TYPE.FIELD}>按字段</Radio.Button>
+            </Radio.Group>
+          </div>
+          {defineType === METRIC_DEFINE_TYPE.MEASURE && (
+            <>
+              <MetricMeasuresFormTable
+                datasourceId={datasourceId}
+                typeParams={exprTypeParamsState[METRIC_DEFINE_TYPE.MEASURE]}
+                measuresList={classMeasureList}
+                onFieldChange={(measures: ISemantic.IMeasure[]) => {
+                  setExprTypeParamsState((prevState) => {
+                    return {
+                      ...prevState,
+                      [METRIC_DEFINE_TYPE.MEASURE]: {
+                        ...prevState[METRIC_DEFINE_TYPE.MEASURE],
+                        measures,
+                      },
+                    };
+                  });
+                }}
+                onSqlChange={(expr: string) => {
+                  setExprTypeParamsState((prevState) => {
+                    return {
+                      ...prevState,
+                      [METRIC_DEFINE_TYPE.MEASURE]: {
+                        ...prevState[METRIC_DEFINE_TYPE.MEASURE],
+                        expr,
+                      },
+                    };
+                  });
+                }}
+              />
+            </>
+          )}
+          {defineType === METRIC_DEFINE_TYPE.METRIC && (
+            <>
+              <p className={styles.desc}>
+                通过
+                <Tag color="#2499ef14" className={styles.markerTag}>
+                  字段
+                </Tag>
+                和
+                <Tag color="#2499ef14" className={styles.markerTag}>
+                  度量
+                </Tag>
+                创建的指标可用来创建新的指标
+              </p>
+
+              <MetricMetricFormTable
+                typeParams={exprTypeParamsState[METRIC_DEFINE_TYPE.METRIC]}
+                metricList={createNewMetricList}
+                onFieldChange={(metrics: ISemantic.IMetricTypeParamsItem[]) => {
+                  setExprTypeParamsState((prevState) => {
+                    return {
+                      ...prevState,
+                      [METRIC_DEFINE_TYPE.METRIC]: {
+                        ...prevState[METRIC_DEFINE_TYPE.METRIC],
+                        metrics,
+                      },
+                    };
+                  });
+                }}
+                onSqlChange={(expr: string) => {
+                  setExprTypeParamsState((prevState) => {
+                    return {
+                      ...prevState,
+                      [METRIC_DEFINE_TYPE.METRIC]: {
+                        ...prevState[METRIC_DEFINE_TYPE.METRIC],
+                        expr,
+                      },
+                    };
+                  });
+                }}
+              />
+            </>
+          )}
+          {defineType === METRIC_DEFINE_TYPE.FIELD && (
+            <>
+              <MetricFieldFormTable
+                typeParams={exprTypeParamsState[METRIC_DEFINE_TYPE.FIELD]}
+                fieldList={fieldList}
+                onFieldChange={(fields: ISemantic.IFieldTypeParamsItem[]) => {
+                  setExprTypeParamsState((prevState) => {
+                    return {
+                      ...prevState,
+                      [METRIC_DEFINE_TYPE.FIELD]: {
+                        ...prevState[METRIC_DEFINE_TYPE.FIELD],
+                        fields,
+                      },
+                    };
+                  });
+                }}
+                onSqlChange={(expr: string) => {
+                  setExprTypeParamsState((prevState) => {
+                    return {
+                      ...prevState,
+                      [METRIC_DEFINE_TYPE.FIELD]: {
+                        ...prevState[METRIC_DEFINE_TYPE.FIELD],
+                        expr,
+                      },
+                    };
+                  });
+                }}
+              />
+            </>
+          )}
+        </div>
       );
     }
 
@@ -456,9 +672,9 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   return (
     <Modal
       forceRender
-      width={1300}
+      width={800}
       style={{ top: 48 }}
-      styles={{ padding: '32px 40px 48px' }}
+      // styles={{ padding: '32px 40px 48px' }}
       destroyOnClose
       title={`${isEdit ? '编辑' : '新建'}指标`}
       maskClosable={false}
@@ -523,7 +739,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
               type="primary"
               key="console"
               onClick={() => {
-                history.replace(`/model/${domainId}/${modelId}/dataSource`);
+                history.replace(`/model/${domainId}/${modelId || metricItem?.modelId}/dataSource`);
                 onCancel?.();
               }}
             >

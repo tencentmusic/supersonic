@@ -2,9 +2,8 @@ package com.tencent.supersonic.headless.core.parser.converter;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.headless.api.pojo.Param;
-import com.tencent.supersonic.headless.api.request.MetricQueryReq;
-import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.core.parser.HeadlessConverter;
+import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
@@ -29,7 +28,7 @@ public class ParserDefaultConverter implements HeadlessConverter {
     private final CalculateAggConverter calculateConverterAgg;
 
     public ParserDefaultConverter(CalculateAggConverter calculateConverterAgg,
-                                  SqlGenerateUtils sqlGenerateUtils) {
+            SqlGenerateUtils sqlGenerateUtils) {
         this.calculateConverterAgg = calculateConverterAgg;
         this.sqlGenerateUtils = sqlGenerateUtils;
     }
@@ -47,8 +46,7 @@ public class ParserDefaultConverter implements HeadlessConverter {
         QueryStructReq queryStructReq = queryStatement.getQueryStructReq();
         MetricQueryReq metricQueryReq = queryStatement.getMetricReq();
         MetricQueryReq metricReq = generateSqlCommand(queryStructReq, queryStatement);
-        queryStatement.setMinMaxTime(sqlGenerateUtils.getBeginEndTime(queryStructReq,
-                queryStatement.getHeadlessModel().getDataDate()));
+        queryStatement.setMinMaxTime(sqlGenerateUtils.getBeginEndTime(queryStructReq, null));
         BeanUtils.copyProperties(metricReq, metricQueryReq);
     }
 
@@ -56,8 +54,7 @@ public class ParserDefaultConverter implements HeadlessConverter {
         MetricQueryReq metricQueryReq = new MetricQueryReq();
         metricQueryReq.setMetrics(queryStructReq.getMetrics());
         metricQueryReq.setDimensions(queryStructReq.getGroups());
-        String where = sqlGenerateUtils.generateWhere(queryStructReq,
-                queryStatement.getHeadlessModel().getDataDate());
+        String where = sqlGenerateUtils.generateWhere(queryStructReq, null);
         log.info("in generateSqlCommend, complete where:{}", where);
 
         metricQueryReq.setWhere(where);
@@ -71,7 +68,7 @@ public class ParserDefaultConverter implements HeadlessConverter {
 
         // support detail query
         if (queryStructReq.getQueryType().isNativeAggQuery() && CollectionUtils.isEmpty(metricQueryReq.getMetrics())) {
-            Map<Long, DataSource> dataSourceMap = queryStatement.getHeadlessModel().getModelMap();
+            Map<Long, DataSource> dataSourceMap = queryStatement.getSemanticModel().getModelMap();
             for (Long modelId : queryStructReq.getModelIds()) {
                 String modelBizName = dataSourceMap.get(modelId).getName();
                 String internalMetricName = sqlGenerateUtils.generateInternalMetricName(modelBizName);

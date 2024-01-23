@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -91,10 +92,10 @@ public class SearchServiceImpl implements SearchService {
         List<Term> originals = HanlpHelper.getTerms(queryText);
         log.info("hanlp parse result: {}", originals);
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
-        Set<Long> detectModelIds = mapperHelper.getModelIds(queryReq, agentService.getAgent(agentId));
+        Set<Long> detectModelIds = mapperHelper.getModelIds(queryReq.getModelId(), agentService.getAgent(agentId));
 
         QueryContext queryContext = new QueryContext();
-        queryContext.setRequest(queryReq);
+        BeanUtils.copyProperties(queryReq, queryContext);
         Map<MatchText, List<HanlpMapResult>> regTextMap =
                 searchMatchStrategy.match(queryContext, originals, detectModelIds);
         regTextMap.entrySet().stream().forEach(m -> HanlpHelper.transLetterOriginal(m.getValue()));

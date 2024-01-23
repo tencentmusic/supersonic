@@ -9,8 +9,8 @@ import com.tencent.supersonic.chat.core.query.rule.metric.MetricGroupByQuery;
 import com.tencent.supersonic.chat.core.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.chat.core.query.rule.metric.MetricTopNQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.util.DataUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,7 +29,8 @@ public class MetricQueryTest extends BaseQueryTest {
 
     @Test
     public void queryTest_metric_filter() throws Exception {
-        QueryResult actualResult = submitNewChat("alice的访问次数");
+        MockConfiguration.mockMetricAgent(agentService);
+        QueryResult actualResult = submitNewChat("alice的访问次数", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -39,6 +40,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
 
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
                 FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
@@ -52,8 +54,8 @@ public class MetricQueryTest extends BaseQueryTest {
     @Test
     public void queryTest_metric_filter_with_agent() {
         //agent only support METRIC_ENTITY, METRIC_FILTER
-        MockConfiguration.mockAgent(agentService);
-        ParseResp parseResp = submitParseWithAgent("alice的访问次数", DataUtils.getAgent().getId());
+        MockConfiguration.mockMetricAgent(agentService);
+        ParseResp parseResp = submitParseWithAgent("alice的访问次数", DataUtils.getMetricAgent().getId());
         Assert.assertNotNull(parseResp.getSelectedParses());
         List<String> queryModes = parseResp.getSelectedParses().stream()
                 .map(SemanticParseInfo::getQueryMode).collect(Collectors.toList());
@@ -62,7 +64,8 @@ public class MetricQueryTest extends BaseQueryTest {
 
     @Test
     public void queryTest_metric_domain() throws Exception {
-        QueryResult actualResult = submitNewChat("超音数的访问次数");
+        MockConfiguration.mockMetricAgent(agentService);
+        QueryResult actualResult = submitNewChat("超音数的访问次数", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -72,7 +75,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
-
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
         expectedParseInfo.setQueryType(QueryType.METRIC);
 
@@ -82,8 +85,8 @@ public class MetricQueryTest extends BaseQueryTest {
     @Test
     public void queryTest_metric_model_with_agent() {
         //agent only support METRIC_ENTITY, METRIC_FILTER
-        MockConfiguration.mockAgent(agentService);
-        ParseResp parseResp = submitParseWithAgent("超音数的访问次数", DataUtils.getAgent().getId());
+        MockConfiguration.mockMetricAgent(agentService);
+        ParseResp parseResp = submitParseWithAgent("超音数的访问次数", DataUtils.getMetricAgent().getId());
         List<String> queryModes = parseResp.getSelectedParses().stream()
                 .map(SemanticParseInfo::getQueryMode).collect(Collectors.toList());
         Assert.assertTrue(queryModes.contains("METRIC_MODEL"));
@@ -91,7 +94,7 @@ public class MetricQueryTest extends BaseQueryTest {
 
     @Test
     public void queryTest_metric_groupby() throws Exception {
-        QueryResult actualResult = submitNewChat("超音数各部门的访问次数");
+        QueryResult actualResult = submitNewChat("超音数各部门的访问次数", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -101,6 +104,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
@@ -111,7 +115,8 @@ public class MetricQueryTest extends BaseQueryTest {
 
     @Test
     public void queryTest_metric_filter_compare() throws Exception {
-        QueryResult actualResult = submitNewChat("对比alice和lucy的访问次数");
+        MockConfiguration.mockMetricAgent(agentService);
+        QueryResult actualResult = submitNewChat("对比alice和lucy的访问次数", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -120,7 +125,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedResult.setQueryMode(MetricFilterQuery.QUERY_MODE);
         expectedParseInfo.setAggType(NONE);
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
-
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         List<String> list = new ArrayList<>();
         list.add("alice");
         list.add("lucy");
@@ -135,7 +140,7 @@ public class MetricQueryTest extends BaseQueryTest {
 
     @Test
     public void queryTest_metric_topn() throws Exception {
-        QueryResult actualResult = submitNewChat("近3天访问次数最多的用户");
+        QueryResult actualResult = submitNewChat("近3天访问次数最多的用户", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -145,9 +150,9 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(SUM);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户"));
-        expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户名"));
-        expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户名称"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(3, DateConf.DateMode.RECENT, "DAY"));
         expectedParseInfo.setQueryType(QueryType.METRIC);
@@ -157,7 +162,7 @@ public class MetricQueryTest extends BaseQueryTest {
 
     @Test
     public void queryTest_metric_groupby_sum() throws Exception {
-        QueryResult actualResult = submitNewChat("超音数各部门的访问次数总和");
+        QueryResult actualResult = submitNewChat("超音数各部门的访问次数总和", DataUtils.metricAgentId);
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
         expectedResult.setChatContext(expectedParseInfo);
@@ -166,6 +171,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(SUM);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("部门"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.RECENT, unit, period, startDay, endDay));
@@ -176,11 +182,12 @@ public class MetricQueryTest extends BaseQueryTest {
 
     @Test
     public void queryTest_metric_filter_time() throws Exception {
+        MockConfiguration.mockMetricAgent(agentService);
         DateFormat format = new SimpleDateFormat("yyyy-mm-dd");
         DateFormat textFormat = new SimpleDateFormat("yyyy年mm月dd日");
         String dateStr = textFormat.format(format.parse(startDay));
 
-        QueryResult actualResult = submitNewChat(String.format("想知道%salice的访问次数", dateStr));
+        QueryResult actualResult = submitNewChat(String.format("想知道%salice的访问次数", dateStr), DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -190,7 +197,7 @@ public class MetricQueryTest extends BaseQueryTest {
         expectedParseInfo.setAggType(NONE);
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
-
+        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
         expectedParseInfo.getDimensionFilters().add(DataUtils.getFilter("user_name",
                 FilterOperatorEnum.EQUALS, "alice", "用户", 2L));
 

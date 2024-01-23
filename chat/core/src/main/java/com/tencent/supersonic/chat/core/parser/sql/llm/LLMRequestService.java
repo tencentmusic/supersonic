@@ -25,7 +25,7 @@ import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
-import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -57,7 +57,7 @@ public class LLMRequestService {
             return true;
         }
         if (SatisfactionChecker.isSkip(queryCtx)) {
-            log.info("skip {}, queryText:{}", LLMSqlParser.class, queryCtx.getRequest().getQueryText());
+            log.info("skip {}, queryText:{}", LLMSqlParser.class, queryCtx.getQueryText());
             return true;
         }
         return false;
@@ -121,7 +121,7 @@ public class LLMRequestService {
     public LLMReq getLlmReq(QueryContext queryCtx, SemanticSchema semanticSchema,
             ModelCluster modelCluster, List<ElementValue> linkingValues) {
         Map<Long, String> modelIdToName = semanticSchema.getModelIdToName();
-        String queryText = queryCtx.getRequest().getQueryText();
+        String queryText = queryCtx.getQueryText();
 
         LLMReq llmReq = new LLMReq();
         llmReq.setQueryText(queryText);
