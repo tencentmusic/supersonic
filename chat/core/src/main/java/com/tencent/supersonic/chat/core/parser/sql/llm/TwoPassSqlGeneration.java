@@ -30,7 +30,7 @@ public class TwoPassSqlGeneration implements SqlGeneration, InitializingBean {
     private ChatLanguageModel chatLanguageModel;
 
     @Autowired
-    private SqlExampleLoader sqlExampleLoader;
+    private SqlExamplarLoader sqlExamplarLoader;
 
     @Autowired
     private OptimizationConfig optimizationConfig;
@@ -41,7 +41,7 @@ public class TwoPassSqlGeneration implements SqlGeneration, InitializingBean {
     @Override
     public LLMResp generation(LLMReq llmReq, String modelClusterKey) {
         keyPipelineLog.info("modelClusterKey:{},llmReq:{}", modelClusterKey, llmReq);
-        List<Map<String, String>> sqlExamples = sqlExampleLoader.retrieverSqlExamples(llmReq.getQueryText(),
+        List<Map<String, String>> sqlExamples = sqlExamplarLoader.retrieverSqlExamples(llmReq.getQueryText(),
                 optimizationConfig.getText2sqlCollectionName(), optimizationConfig.getText2sqlExampleNum());
 
         String linkingPromptStr = sqlPromptGenerator.generateLinkingPrompt(llmReq, sqlExamples);
