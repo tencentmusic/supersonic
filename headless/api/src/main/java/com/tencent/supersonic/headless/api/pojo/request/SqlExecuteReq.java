@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @Data
 public class SqlExecuteReq {
-    public static final String LIMIT_WRAPPER = " select * from ( %s ) a limit 1000 ";
+    public static final String LIMIT_WRAPPER = " SELECT * FROM ( %s ) a LIMIT 1000 ";
 
     @NotNull(message = "modelId can not be null")
     private Long id;

@@ -8,7 +8,7 @@ exemplars= [
 “比较jackjchen和robinlee”，所以我们需要column=[用户名],cell values = ['jackjchen', 'robinlee'],所以有[用户名:('jackjchen', 'robinlee')]
 ”内容库的访问次数“，所以我们需要column=[访问次数]""",
         "schemaLinks":"""["用户名":("'jackjchen'", "'robinlee'"), "访问次数"]""",
-        "sql":"""select 用户名, 访问次数 from 内容库产品 where 用户名 in ('jackjchen', 'robinlee')"""
+        "sql":"""SELECT 用户名, 访问次数 FROM 内容库产品 WHERE 用户名 IN ('jackjchen', 'robinlee')"""
         },
     {   "currentDate":"2022-11-06",
         "tableName":"内容库产品",
@@ -20,7 +20,7 @@ exemplars= [
 “访问人数”，所以我们需要column=[访问人数]
 ”按部门“，所以我们需要column=[部门]""",
         "schemaLinks":"""["数据日期":(12), "访问人数", "部门"]""",
-        "sql":"""select 部门, 数据日期, 访问人数 from 内容库产品 where datediff('month', 数据日期, '2022-11-06') <= 12 """
+        "sql":"""SELECT 部门, 数据日期, 访问人数 FROM 内容库产品 WHERE datediff('month', 数据日期, '2022-11-06') <= 12 """
         },
     {   "currentDate":"2023-04-21",
         "tableName":"内容库产品",
@@ -31,7 +31,7 @@ exemplars= [
 “访问时长”，所以我们需要column=[访问时长]
 ”内容库美术部、技术研发部“，所以我们需要column=[部门], cell values = ['美术部', '技术研发部'],所以有[部门:('美术部', '技术研发部')]""",
         "schemaLinks":"""["访问时长", "部门":("'美术部'", "'技术研发部'")]""",
-        "sql":"""select 部门, 访问时长 from 内容库产品 where 部门 in ('美术部', '技术研发部')"""
+        "sql":"""SELECT 部门, 访问时长 FROM 内容库产品 WHERE 部门 IN ('美术部', '技术研发部')"""
         },
     {   "currentDate":"2023-08-21",
         "tableName":"严选",
@@ -43,7 +43,7 @@ exemplars= [
 ”海田飞系“，所以我们需要column=[严选版权归属系], cell values = ['海田飞系'],所以有[严选版权归属系:('海田飞系')],
 ”近3天“，所以我们需要column=[数据日期], cell values = [3],所以有[数据日期:(3)]""",
         "schemaLinks":"""["结算播放份额", "严选版权归属系":("'海田飞系'"), "数据日期":(3)]""",
-        "sql":"""select 严选版权归属系, 结算播放份额 from 严选 where 严选版权归属系 = '海田飞系' and datediff('day', 数据日期, '2023-08-21') <= 3 """
+        "sql":"""SELECT 严选版权归属系, 结算播放份额 FROM 严选 WHERE 严选版权归属系 = '海田飞系' AND datediff('day', 数据日期, '2023-08-21') <= 3 """
         },
     {   "currentDate":"2023-05-22",
         "tableName":"歌曲库",
@@ -56,7 +56,7 @@ exemplars= [
 ”和纯音乐的歌曲“，所以我们需要column=[语种], cell values = ['纯音乐'],所以有[语种:('纯音乐')]
 ”近7天“，所以我们需要column=[数据日期], cell values = [7],所以有[数据日期:(7)]""",
         "schemaLinks":"""["结算播放量", "歌曲版本":("'翻唱版'"), "语种":("'纯音乐'"), "数据日期":(7)]""",
-        "sql":"""select 歌曲版本, 语种, 结算播放量 from 歌曲库 where 歌曲版本 = '翻唱版' and 语种 = '纯音乐' and datediff('day', 数据日期, '2023-05-22') <= 7 """
+        "sql":"""SELECT 歌曲版本, 语种, 结算播放量 FROM 歌曲库 WHERE 歌曲版本 = '翻唱版' AND 语种 = '纯音乐' AND datediff('day', 数据日期, '2023-05-22') <= 7 """
         },
     {   "currentDate":"2023-05-31",
         "tableName":"艺人库",
@@ -67,7 +67,7 @@ exemplars= [
 “粉丝数”，所以我们需要column=[粉丝数]
 ”陈拙悬、孟梅琦、赖媚韵“，所以我们需要column=[歌手名], cell values = ['陈拙悬', '孟梅琦', '赖媚韵'],所以有[歌手名:('陈拙悬', '孟梅琦', '赖媚韵')]""",
         "schemaLinks":"""["粉丝数", "歌手名":("'陈拙悬'", "'孟梅琦'", "'赖媚韵'")]""",
-        "sql":"""select 歌手名, 粉丝数 from 艺人库 where 歌手名 in ('陈拙悬', '孟梅琦', '赖媚韵')"""
+        "sql":"""SELECT 歌手名, 粉丝数 FROM 艺人库 WHERE 歌手名 IN ('陈拙悬', '孟梅琦', '赖媚韵')"""
         },
     {   "currentDate":"2023-07-31",
         "tableName":"歌曲库",
@@ -78,7 +78,7 @@ exemplars= [
 “歌曲有多少”，所以我们需要column=[歌曲名]
 ”播放量大于1万的“，所以我们需要column=[结算播放量], cell values = [10000],所以有[结算播放量:(10000)]""",
         "schemaLinks":"""["歌曲名", "结算播放量":(10000)]""",
-        "sql":"""select 歌曲名 from 歌曲库 where 结算播放量 > 10000"""
+        "sql":"""SELECT 歌曲名 FROM 歌曲库 WHERE 结算播放量 > 10000"""
         },
     {   "currentDate":"2023-07-31",
         "tableName":"内容库产品",
@@ -90,7 +90,7 @@ exemplars= [
 ”美术部的“，所以我们需要column=[部门], cell values = ['美术部'],所以有[部门:('美术部')]
 ”访问时长小于1小时“，所以我们需要column=[访问时长], cell values = [1],所以有[访问时长:(1)]""",
         "schemaLinks":"""["用户名", "部门":("'美术部'"), "访问时长":(1)]""",
-        "sql":"""select 用户名 from 内容库产品 where 部门 = '美术部' and 访问时长 < 1"""
+        "sql":"""SELECT 用户名 FROM 内容库产品 WHERE 部门 = '美术部' AND 访问时长 < 1"""
         },
     {   "currentDate":"2023-08-31",
         "tableName":"内容库产品",
@@ -101,7 +101,7 @@ exemplars= [
 “用户有哪些”，所以我们需要column=[用户名]
 ”pv最高的“，所以我们需要column=[访问次数], cell values = [1],所以有[访问次数:(1)]""",
         "schemaLinks":"""["用户名", "访问次数":(1)]""",
-        "sql":"""select 用户名 from 内容库产品 order by 访问次数 desc limit 1"""
+        "sql":"""SELECT 用户名 FROM 内容库产品 ORDER BY 访问次数 DESC LIMIT 1"""
         },
     {   "currentDate":"2023-08-31",
         "tableName":"艺人库",
@@ -113,7 +113,7 @@ exemplars= [
 ”袁亚伟“，所以我们需要column=[歌手名], cell values = ['袁亚伟'],所以有[歌手名:('袁亚伟')]
 ”近90天“，所以我们需要column=[数据日期], cell values = [90],所以有[数据日期:(90)]""",
         "schemaLinks":"""["结算播放量", "歌手名":("'袁亚伟'"), "数据日期":(90)]""",
-        "sql":"""select avg(结算播放量) from 艺人库 where 歌手名 = '袁亚伟' and datediff('day', 数据日期, '2023-08-31') <= 90 """
+        "sql":"""SELECT AVG(结算播放量) FROM 艺人库 WHERE 歌手名 = '袁亚伟' AND datediff('day', 数据日期, '2023-08-31') <= 90 """
         },
     {   "currentDate":"2023-08-31",
         "tableName":"艺人库",
@@ -125,7 +125,7 @@ exemplars= [
 ”周倩倩“，所以我们需要column=[歌手名], cell values = ['周倩倩'],所以有[歌手名:('周倩倩')]
 ”近7天“，所以我们需要column=[数据日期], cell values = [7],所以有[数据日期:(7)]""",
         "schemaLinks":"""["结算播放量", "歌手名":("'周倩倩'"), "数据日期":(7)]""",
-        "sql":"""select sum(结算播放量) from 艺人库 where 歌手名 = '周倩倩' and datediff('day', 数据日期, '2023-08-31') <= 7 """
+        "sql":"""SELECT SUM(结算播放量) FROM 艺人库 WHERE 歌手名 = '周倩倩' AND datediff('day', 数据日期, '2023-08-31') <= 7 """
         },
     {   "currentDate":"2023-09-14",
         "tableName":"内容库产品",
@@ -136,7 +136,7 @@ exemplars= [
 “部门是哪些”，所以我们需要column=[部门]
 ”访问次数大于1k的“，所以我们需要column=[访问次数], cell values = [1000],所以有[访问次数:(1000)]""",
         "schemaLinks":"""["部门", "访问次数":(1000)]""",
-        "sql":"""select 部门 from 内容库产品 where 访问次数 > 1000"""
+        "sql":"""SELECT 部门 FROM 内容库产品 WHERE 访问次数 > 1000"""
         },
     {   "currentDate":"2023-09-18",
         "tableName":"歌曲库",
@@ -148,7 +148,7 @@ exemplars= [
 ”播放量大于20k的“，所以我们需要column=[结算播放量], cell values = [20000],所以有[结算播放量:(20000)]
 ”陈亿训唱的“，所以我们需要column=[歌手名], cell values = ['陈亿训'],所以有[歌手名:('陈亿训')]""",
         "schemaLinks":"""["歌曲名":("'孤勇者'"), "结算播放量":(20000), "歌手名":("'陈亿训'")]""",
-        "sql":"""select 歌曲名 from 歌曲库 where 结算播放量 > 20000 and 歌手名 = '陈亿训' and 歌曲名 = '孤勇者'"""
+        "sql":"""SELECT 歌曲名 FROM 歌曲库 WHERE 结算播放量 > 20000 AND 歌手名 = '陈亿训' AND 歌曲名 = '孤勇者'"""
         },
     {   "currentDate":"2023-09-18",
         "tableName":"歌曲库",
@@ -160,7 +160,7 @@ exemplars= [
 ”去年发布的“，所以我们需要column=[发布时间], cell values = [1],所以有[发布时间:(1)]
 ”周洁轮“，所以我们需要column=[歌手名], cell values = ['周洁轮'],所以有[歌手名:('周洁轮')]""",
         "schemaLinks":"""["歌曲名", "发布时间":(1), "歌手名":("'周洁轮'")]""",
-        "sql":"""select 歌曲名 from 歌曲库 where datediff('year', 发布时间, '2023-09-18') <= 1 and 歌手名 = '周洁轮'"""
+        "sql":"""SELECT 歌曲名 FROM 歌曲库 WHERE datediff('year', 发布时间, '2023-09-18') <= 1 AND 歌手名 = '周洁轮'"""
         },
     {   "currentDate":"2023-09-11",
         "tableName":"艺人库",
@@ -172,7 +172,7 @@ exemplars= [
 ”播放量前十的“，所以我们需要column=[结算播放量], cell values = [10],所以有[结算播放量:(10)]
 ”近半年签约的“，所以我们需要column=[签约日期], cell values = [0.5],所以有[签约日期:(0.5)]""",
         "schemaLinks":"""["歌手名", "结算播放量":(10), "签约日期":(0.5)]""",
-        "sql":"""select 歌手名 from 艺人库 where datediff('year', 签约日期, '2023-09-11') <= 0.5 order by 结算播放量 desc limit 10"""
+        "sql":"""SELECT 歌手名 FROM 艺人库 WHERE datediff('year', 签约日期, '2023-09-11') <= 0.5 ORDER BY 结算播放量 DESC LIMIT 10"""
         },
     {   "currentDate":"2023-08-12",
         "tableName":"歌曲库",
@@ -184,7 +184,7 @@ exemplars= [
 ”最近一年发行的“，所以我们需要column=[发行日期], cell values = [1],所以有[发行日期:(1)]
 ”在近7天播放超过一千万的“，所以我们需要column=[数据日期, 结算播放量], cell values = [7, 10000000],所以有[数据日期:(7), 结算播放量:(10000000)]""",
         "schemaLinks":"""["歌曲名", "发行日期":(1), "数据日期":(7), "结算播放量":(10000000)]""",
-        "sql":"""select 歌曲名 from 歌曲库 where datediff('year', 发行日期, '2023-08-12') <= 1 and datediff('day', 数据日期, '2023-08-12') <= 7 and 结算播放量 > 10000000"""
+        "sql":"""SELECT 歌曲名 FROM 歌曲库 WHERE datediff('year', 发行日期, '2023-08-12') <= 1 AND datediff('day', 数据日期, '2023-08-12') <= 7 AND 结算播放量 > 10000000"""
         },
     {   "currentDate":"2023-08-12",
         "tableName":"歌曲库",
@@ -196,7 +196,7 @@ exemplars= [
 ”今年以来发行的“，所以我们需要column=[发行日期], cell values = [0],所以有[发行日期:(0)]
 ”在近7天播放超过一千万的“，所以我们需要column=[数据日期, 结算播放量], cell values = [7, 10000000],所以有[数据日期:(7), 结算播放量:(10000000)]""",
         "schemaLinks":"""["歌曲名", "发行日期":(0), "数据日期":(7), "结算播放量":(10000000)]""",
-        "sql":"""select 歌曲名 from 歌曲库 where datediff('year', 发行日期, '2023-08-12') <= 0 and datediff('day', 数据日期, '2023-08-12') <= 7 and 结算播放量 > 10000000"""
+        "sql":"""SELECT 歌曲名 FROM 歌曲库 WHERE datediff('year', 发行日期, '2023-08-12') <= 0 AND datediff('day', 数据日期, '2023-08-12') <= 7 AND 结算播放量 > 10000000"""
         },
     {   "currentDate":"2023-08-12",
         "tableName":"歌曲库",
@@ -208,7 +208,7 @@ exemplars= [
 ”2023年以来发行的“，所以我们需要column=[发行日期], cell values = ['2023-01-01'],所以有[发行日期:('2023-01-01')]
 ”在近7天播放超过一千万的“，所以我们需要column=[数据日期, 结算播放量], cell values = [7, 10000000],所以有[数据日期:(7), 结算播放量:(10000000)]""",
         "schemaLinks":"""["歌曲名", "发行日期":("'2023-01-01'"), "数据日期":(7), "结算播放量":(10000000)]""",
-        "sql":"""select 歌曲名 from 歌曲库 where 发行日期 >= '2023-01-01' and datediff('day', 数据日期, '2023-08-12') <= 7 and 结算播放量 > 10000000"""
+        "sql":"""SELECT 歌曲名 FROM 歌曲库 WHERE 发行日期 >= '2023-01-01' AND datediff('day', 数据日期, '2023-08-12') <= 7 AND 结算播放量 > 10000000"""
         },
     {   "currentDate":"2023-08-01",
         "tableName":"歌曲库",
@@ -220,7 +220,7 @@ exemplars= [
 ”2023年6月之后发布的“，所以我们需要column=[发布时间], cell values = ['2023-06-01'],所以有[发布时间:('2023-06-01')]
 ”周洁轮“，所以我们需要column=[歌手名], cell values = ['周洁轮'],所以有[歌手名:('周洁轮')]""",
         "schemaLinks":"""["歌曲名", "发布时间":("'2023-06-01'"), "歌手名":("'周洁轮'")]""",
-        "sql":"""select 歌曲名 from 歌曲库 where 发布时间 >= '2023-06-01' and 歌手名 = '周洁轮'"""
+        "sql":"""SELECT 歌曲名 FROM 歌曲库 WHERE 发布时间 >= '2023-06-01' AND 歌手名 = '周洁轮'"""
         },
     {   "currentDate":"2023-08-01",
         "tableName":"歌曲库",
@@ -233,7 +233,7 @@ exemplars= [
 ”邓梓琦在2023年1月5日之后发布的“，所以我们需要column=[发布时间], cell values = ['2023-01-05'],所以有[发布时间:('2023-01-05')]
 ”邓梓琦“，所以我们需要column=[歌手名], cell values = ['邓梓琦'],所以有[歌手名:('邓梓琦')]""",
         "schemaLinks":"""["歌曲名", "结算播放量":(5000000), "发布时间":("'2023-01-05'"), "歌手名":("'邓梓琦'")]""",
-        "sql":"""select 歌曲名 from 歌曲库 where 发布时间 >= '2023-01-05' and 歌手名 = '邓梓琦' and 结算播放量 > 5000000"""
+        "sql":"""SELECT 歌曲名 FROM 歌曲库 WHERE 发布时间 >= '2023-01-05' AND 歌手名 = '邓梓琦' AND 结算播放量 > 5000000"""
         },
     {   "currentDate":"2023-09-17",
         "tableName":"歌曲库",
@@ -245,7 +245,7 @@ exemplars= [
 ”2023年6月以后，张亮英“，所以我们需要column=[数据日期, 歌手名], cell values = ['2023-06-01', '张亮英'],所以有[数据日期:('2023-06-01'), 歌手名:('张亮英')],
 ”歌曲有哪些“，所以我们需要column=[歌曲名]""",
         "schemaLinks":"""["结算播放量":(2000000), "数据日期":("'2023-06-01'"), "歌手名":("'张亮英'"), "歌曲名"]""",
-        "sql":"""select 歌曲名 from 歌曲库 where 数据日期 >= '2023-06-01' and 歌手名 = '张亮英' and 结算播放量 > 2000000"""
+        "sql":"""SELECT 歌曲名 FROM 歌曲库 WHERE 数据日期 >= '2023-06-01' AND 歌手名 = '张亮英' AND 结算播放量 > 2000000"""
         },
     {   "currentDate":"2023-08-16",
         "tableName":"歌曲库",
@@ -257,7 +257,7 @@ exemplars= [
 ”2021年6月以后发布的“，所以我们需要column=[发布时间], cell values = ['2021-06-01'],所以有[发布时间:('2021-06-01')]
 ”李雨纯“，所以我们需要column=[歌手名], cell values = ['李雨纯'],所以有[歌手名:('李雨纯')]""",
         "schemaLinks":"""["结算播放量":(200000), "发布时间":("'2021-06-01'"), "歌手名":("'李雨纯'")]""",
-        "sql":"""select 歌曲名 from 歌曲库 where 发布时间 >= '2021-06-01' and 歌手名 = '李雨纯' and 结算播放量 > 200000"""
+        "sql":"""SELECT 歌曲名 FROM 歌曲库 WHERE 发布时间 >= '2021-06-01' AND 歌手名 = '李雨纯' AND 结算播放量 > 200000"""
         },
     {   "currentDate":"2023-08-16",
         "tableName":"歌曲库",
@@ -269,7 +269,7 @@ exemplars= [
 ”1992年4月2日到2020年5月2日之间发布的“， 所以我们需要column=[发布时间], cell values = ['1992-04-02', '2020-05-02'],所以有[发布时间:('1992-04-02', '2020-05-02')]
 ”刘锝桦“，所以我们需要column=[歌手名], cell values = ['刘锝桦'],所以有[歌手名:('刘锝桦')]""",
         "schemaLinks":"""["结算播放量":(200000), "发布时间":("'1992-04-02'", "'2020-05-02'"), "歌手名":("'刘锝桦'")]""",
-        "sql":"""select 歌曲名 from 歌曲库 where 发布时间 >= '1992-04-02' and 发布时间 <= '2020-05-02' and 歌手名 = '刘锝桦' and 结算播放量 > 200000"""
+        "sql":"""SELECT 歌曲名 FROM 歌曲库 WHERE 发布时间 >= '1992-04-02' AND 发布时间 <= '2020-05-02' AND 歌手名 = '刘锝桦' AND 结算播放量 > 200000"""
         },
     {
         "currentDate":"2023-09-04",
@@ -281,7 +281,7 @@ exemplars= [
 “访问次数的平均数”，所以我们需要column=[访问次数]
 ”内容库近30天“，所以我们需要column=[数据日期], cell values = [30],所以有[数据日期:(30)]""",
         "schemaLinks":"""["访问次数", "数据日期":(30)]""",
-        "sql":"""select avg(访问次数) from 内容库产品 where datediff('day', 数据日期, '2023-09-04') <= 30 """
+        "sql":"""SELECT AVG(访问次数) FROM 内容库产品 WHERE datediff('day', 数据日期, '2023-09-04') <= 30 """
         },
     {
         "currentDate":"2023-09-04",
@@ -293,7 +293,7 @@ exemplars= [
 “访问次数汇总最高”，所以我们需要column=[访问次数], cell values = [1],所以有[访问次数:(1)]
 ”内容库近半年“，所以我们需要column=[数据日期], cell values = [0.5],所以有[数据日期:(0.5)]""",
         "schemaLinks":"""["访问次数":(1), "数据日期":(0.5)]""",
-        "sql":"""select MONTH(数据日期), sum(访问次数) from 内容库产品 where datediff('year', 数据日期, '2023-09-04') <= 0.5 group by MONTH(数据日期) order by sum(访问次数) desc limit 1"""
+        "sql":"""SELECT MONTH(数据日期), SUM(访问次数) FROM 内容库产品 WHERE datediff('year', 数据日期, '2023-09-04') <= 0.5 GROUP BY MONTH(数据日期) ORDER BY SUM(访问次数) DESC LIMIT 1"""
         },
     {
         "currentDate":"2023-09-04",
@@ -305,7 +305,7 @@ exemplars= [
 “每个月的平均访问次数”，所以我们需要column=[访问次数]
 ”内容库近半年“，所以我们需要column=[数据日期], cell values = [0.5],所以有[数据日期:(0.5)]""",
         "schemaLinks":"""["访问次数", "数据日期":(0.5)]""",
-        "sql":"""select MONTH(数据日期), avg(访问次数) from 内容库产品 where datediff('year', 数据日期, '2023-09-04') <= 0.5 group by MONTH(数据日期)"""
+        "sql":"""SELECT MONTH(数据日期), AVG(访问次数) FROM 内容库产品 WHERE datediff('year', 数据日期, '2023-09-04') <= 0.5 GROUP BY MONTH(数据日期)"""
         },
     {
         "currentDate":"2023-09-10",
@@ -317,7 +317,7 @@ exemplars= [
 “访问次数 top10 的部门”，所以我们需要column=[访问次数], cell values = [10],所以有[访问次数:(10)]
 ”内容库 按部门统计“，所以我们需要column=[部门]""",
         "schemaLinks":"""["访问次数":(10), "部门"]""",
-        "sql":"""select 部门, sum(访问次数) from 内容库产品 group by 部门 order by sum(访问次数) desc limit 10"""
+        "sql":"""SELECT 部门, SUM(访问次数) FROM 内容库产品 GROUP BY 部门 ORDER BY SUM(访问次数) DESC LIMIT 10"""
         },
     {
         "currentDate":"2023-09-10",
@@ -329,7 +329,7 @@ exemplars= [
 “月度总访问量超过 2万的月份”，所以我们需要column=[访问次数], cell values = [20000],所以有[访问次数:(20000)]
 ”超音速 近7个月“，所以我们需要column=[数据日期], cell values = [7],所以有[数据日期:(7)]""",
         "schemaLinks":"""["访问次数":(20000), "数据日期":(7)]""",
-        "sql":"""select MONTH(数据日期) from 内容库产品 where datediff('month', 数据日期, '2023-09-10') <= 7 group by MONTH(数据日期) having sum(访问次数) > 20000"""
+        "sql":"""SELECT MONTH(数据日期) FROM 内容库产品 WHERE datediff('month', 数据日期, '2023-09-10') <= 7 GROUP BY MONTH(数据日期) HAVING SUM(访问次数) > 20000"""
         },
     {
         "currentDate":"2023-09-10",
@@ -342,7 +342,7 @@ exemplars= [
 ”按播放量取top 100“，所以我们需要column=[播放量], cell values = [100],所以有[播放量:(100)]
 “2022年7月到2023年7月之间发布到歌曲”，所以我们需要column=[发布日期], cell values = ['2022-07-01', '2023-07-01'],所以有[发布日期:('2022-07-01', '2023-07-01')]""",
         "schemaLinks":"""["运营播放量", "数据日期":(1), "播放量":(100), "发布日期":("'2022-07-01'", "'2023-07-01'")]""",
-        "sql":"""select MONTH(数据日期), sum(运营播放量) from (select 数据日期, 运营播放量 from 歌曲库 where 发布日期 >= '2022-07-01' and 发布日期 <= '2023-07-01' order by 播放量 desc limit 100) t where datediff('year', 数据日期, '2023-09-10') <= 1 group by MONTH(数据日期)"""
+        "sql":"""SELECT MONTH(数据日期), SUM(运营播放量) FROM (SELECT 数据日期, 运营播放量 FROM 歌曲库 WHERE 发布日期 >= '2022-07-01' AND 发布日期 <= '2023-07-01' ORDER BY 播放量 DESC LIMIT 100) t WHERE datediff('year', 数据日期, '2023-09-10') <= 1 GROUP BY MONTH(数据日期)"""
         },
     {
         "currentDate":"2023-09-10",
@@ -356,7 +356,7 @@ exemplars= [
 ”按播放量取top100“，所以我们需要column=[播放量], cell values = [100],所以有[播放量:(100)]
 ”2022年7月到2023年7月之间发布到歌曲“，所以我们需要column=[发布日期], cell values = ['2022-07-01', '2023-07-01'],所以有[发布日期:('2022-07-01', '2023-07-01')]""",
         "schemaLinks":"""["运营播放量":(2000), "数据日期":(1), "播放量":(100), "发布日期":("'2022-07-01'", "'2023-07-01'")]""",
-        "sql":"""select MONTH(数据日期), sum(运营播放量) from (select 数据日期, 运营播放量 from 歌曲库 where 发布日期 >= '2022-07-01' and 发布日期 <= '2023-07-01' order by 播放量 desc limit 100) t where datediff('year', 数据日期, '2023-09-10') <= 1 group by MONTH(数据日期) having sum(运营播放量) > 2000"""
+        "sql":"""SELECT MONTH(数据日期), SUM(运营播放量) FROM (SELECT 数据日期, 运营播放量 FROM 歌曲库 WHERE 发布日期 >= '2022-07-01' AND 发布日期 <= '2023-07-01' ORDER BY 播放量 DESC LIMIT 100) t WHERE datediff('year', 数据日期, '2023-09-10') <= 1 GROUP BY MONTH(数据日期) HAVING SUM(运营播放量) > 2000"""
     },
     {
         "currentDate":"2023-11-01",
@@ -369,6 +369,6 @@ exemplars= [
 ”今年“，所以我们需要column=[数据日期], cell values = ['2023-01-01', '2023-11-01'],所以有[数据日期:('2023-01-01', '2023-11-01')]
 ”智能机“，所以我们需要column=[机型类别], cell values = ['智能机'],所以有[机型类别:('智能机')]""",
         "schemaLinks":"""["销量":(1), "数据日期":("'2023-01-01'", "'2023-11-01'"), "机型类别":("'智能机'")]""",
-        "sql":"""select 国家中文名, sum(销量) from 营销月模型 where 机型类别 = '智能机' and 数据日期 >= '2023-01-01' and 数据日期 <= '2023-11-01' group by 国家中文名 order by sum(销量) desc limit 1"""
+        "sql":"""SELECT 国家中文名, SUM(销量) FROM 营销月模型 WHERE 机型类别 = '智能机' AND 数据日期 >= '2023-01-01' AND 数据日期 <= '2023-11-01' GROUP BY 国家中文名 ORDER BY SUM(销量) DESC LIMIT 1"""
     }
 ]

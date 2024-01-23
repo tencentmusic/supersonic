@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class SqlExampleLoader {
+public class SqlExamplarLoader {
 
     private static final String EXAMPLE_JSON_FILE = "s2ql_examplar.json";
 

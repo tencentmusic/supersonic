@@ -2,8 +2,8 @@ package com.tencent.supersonic;
 
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
 import com.tencent.supersonic.chat.core.parser.JavaLLMProxy;
+import com.tencent.supersonic.chat.core.parser.sql.llm.SqlExamplarLoader;
 import com.tencent.supersonic.chat.core.parser.sql.llm.SqlExample;
-import com.tencent.supersonic.chat.core.parser.sql.llm.SqlExampleLoader;
 import com.tencent.supersonic.chat.core.utils.ComponentFactory;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class EmbeddingInitListener implements CommandLineRunner {
 
     @Autowired
-    private SqlExampleLoader sqlExampleLoader;
+    private SqlExamplarLoader sqlExamplarLoader;
     @Autowired
     private OptimizationConfig optimizationConfig;
 
@@ -30,9 +30,9 @@ public class EmbeddingInitListener implements CommandLineRunner {
     public void initSqlExamples() {
         try {
             if (ComponentFactory.getLLMProxy() instanceof JavaLLMProxy) {
-                List<SqlExample> sqlExamples = sqlExampleLoader.getSqlExamples();
+                List<SqlExample> sqlExamples = sqlExamplarLoader.getSqlExamples();
                 String collectionName = optimizationConfig.getText2sqlCollectionName();
-                sqlExampleLoader.addEmbeddingStore(sqlExamples, collectionName);
+                sqlExamplarLoader.addEmbeddingStore(sqlExamples, collectionName);
             }
         } catch (Exception e) {
             log.error("initSqlExamples error", e);
