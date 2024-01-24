@@ -181,6 +181,7 @@ public class DictQueryHelper {
         queryStructCmd.setDateInfo(dateInfo);
 
         queryStructCmd.setLimit(dimMaxLimit);
+        queryStructCmd.setNeedAuth(false);
         return queryStructCmd;
 
     }

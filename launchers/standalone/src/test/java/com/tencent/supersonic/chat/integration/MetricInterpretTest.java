@@ -1,4 +1,4 @@
-package com.tencent.supersonic.integration;
+package com.tencent.supersonic.chat.integration;
 
 import com.tencent.supersonic.StandaloneLauncher;
 import com.tencent.supersonic.chat.core.query.llm.analytics.LLMAnswerResp;

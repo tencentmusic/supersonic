@@ -1,4 +1,4 @@
-package com.tencent.supersonic.integration.plugin;
+package com.tencent.supersonic.chat.integration.plugin;
 
 import com.tencent.supersonic.StandaloneLauncher;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;

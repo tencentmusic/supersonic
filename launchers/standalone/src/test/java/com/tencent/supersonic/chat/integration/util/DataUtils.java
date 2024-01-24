@@ -1,4 +1,4 @@
-package com.tencent.supersonic.util;
+package com.tencent.supersonic.chat.integration.util;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;

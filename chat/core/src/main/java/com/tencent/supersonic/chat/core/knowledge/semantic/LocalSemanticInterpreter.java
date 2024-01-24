@@ -49,14 +49,14 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
             return queryByS2SQL(querySQLReq, user);
         }
         queryService = ContextUtils.getBean(QueryService.class);
-        return queryService.queryByStructWithAuth(queryStructReq, user);
+        return queryService.queryByReq(queryStructReq, user);
     }
 
     @Override
     public SemanticQueryResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user) {
         try {
             queryService = ContextUtils.getBean(QueryService.class);
-            return queryService.queryByMultiStruct(queryMultiStructReq, user);
+            return queryService.queryByReq(queryMultiStructReq, user);
         } catch (Exception e) {
             log.info("queryByMultiStruct has an exception:{}", e);
         }
@@ -67,7 +67,7 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
     @SneakyThrows
     public SemanticQueryResp queryByS2SQL(QuerySqlReq querySQLReq, User user) {
         queryService = ContextUtils.getBean(QueryService.class);
-        SemanticQueryResp object = queryService.queryBySql(querySQLReq, user);
+        SemanticQueryResp object = queryService.queryByReq(querySQLReq, user);
         return JsonUtil.toObject(JsonUtil.toString(object), SemanticQueryResp.class);
     }
 

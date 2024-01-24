@@ -1,7 +1,8 @@
-package com.tencent.supersonic.integration;
+package com.tencent.supersonic.chat.integration;
 
 import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
 
+import com.tencent.supersonic.chat.integration.util.DataUtils;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.core.query.rule.metric.MetricFilterQuery;
@@ -9,13 +10,12 @@ import com.tencent.supersonic.chat.core.query.rule.metric.MetricGroupByQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.util.DataUtils;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import org.junit.Test;
 import org.junit.jupiter.api.Order;
 
-public class MultiTurnsTest extends BaseQueryTest {
+public class MultiTurnsTest extends BaseTest {
 
     @Test
     @Order(1)

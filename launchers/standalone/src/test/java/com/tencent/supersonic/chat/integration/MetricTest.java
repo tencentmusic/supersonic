@@ -1,4 +1,7 @@
-package com.tencent.supersonic.integration;
+package com.tencent.supersonic.chat.integration;
+
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
 
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -8,27 +11,23 @@ import com.tencent.supersonic.chat.core.query.rule.metric.MetricFilterQuery;
 import com.tencent.supersonic.chat.core.query.rule.metric.MetricGroupByQuery;
 import com.tencent.supersonic.chat.core.query.rule.metric.MetricModelQuery;
 import com.tencent.supersonic.chat.core.query.rule.metric.MetricTopNQuery;
+import com.tencent.supersonic.chat.integration.util.DataUtils;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
-import com.tencent.supersonic.util.DataUtils;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.junit.Assert;
+import org.junit.Test;
 
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
 
-
-public class MetricQueryTest extends BaseQueryTest {
+public class MetricTest extends BaseTest {
 
     @Test
-    public void queryTest_metric_filter() throws Exception {
+    public void testMetricFilter() throws Exception {
         MockConfiguration.mockMetricAgent(agentService);
         QueryResult actualResult = submitNewChat("alice的访问次数", DataUtils.metricAgentId);
 
@@ -52,7 +51,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_metric_filter_with_agent() {
+    public void testMetricFilterWithAgent() {
         //agent only support METRIC_ENTITY, METRIC_FILTER
         MockConfiguration.mockMetricAgent(agentService);
         ParseResp parseResp = submitParseWithAgent("alice的访问次数", DataUtils.getMetricAgent().getId());
@@ -63,7 +62,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_metric_domain() throws Exception {
+    public void testMetricDomain() throws Exception {
         MockConfiguration.mockMetricAgent(agentService);
         QueryResult actualResult = submitNewChat("超音数的访问次数", DataUtils.metricAgentId);
 
@@ -83,7 +82,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_metric_model_with_agent() {
+    public void testMetricModelWithAgent() {
         //agent only support METRIC_ENTITY, METRIC_FILTER
         MockConfiguration.mockMetricAgent(agentService);
         ParseResp parseResp = submitParseWithAgent("超音数的访问次数", DataUtils.getMetricAgent().getId());
@@ -93,7 +92,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_metric_groupby() throws Exception {
+    public void testMetricGroupBy() throws Exception {
         QueryResult actualResult = submitNewChat("超音数各部门的访问次数", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
@@ -114,7 +113,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_metric_filter_compare() throws Exception {
+    public void testMetricFilterCompare() throws Exception {
         MockConfiguration.mockMetricAgent(agentService);
         QueryResult actualResult = submitNewChat("对比alice和lucy的访问次数", DataUtils.metricAgentId);
 
@@ -139,7 +138,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_metric_topn() throws Exception {
+    public void testMetricTopN() throws Exception {
         QueryResult actualResult = submitNewChat("近3天访问次数最多的用户", DataUtils.metricAgentId);
 
         QueryResult expectedResult = new QueryResult();
@@ -161,7 +160,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_metric_groupby_sum() throws Exception {
+    public void testMetricGroupBySum() throws Exception {
         QueryResult actualResult = submitNewChat("超音数各部门的访问次数总和", DataUtils.metricAgentId);
         QueryResult expectedResult = new QueryResult();
         SemanticParseInfo expectedParseInfo = new SemanticParseInfo();
@@ -181,7 +180,7 @@ public class MetricQueryTest extends BaseQueryTest {
     }
 
     @Test
-    public void queryTest_metric_filter_time() throws Exception {
+    public void testMetricFilterTime() throws Exception {
         MockConfiguration.mockMetricAgent(agentService);
         DateFormat format = new SimpleDateFormat("yyyy-mm-dd");
         DateFormat textFormat = new SimpleDateFormat("yyyy年mm月dd日");

@@ -17,6 +17,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 @Slf4j
 public abstract class SemanticQueryReq {
 
+    protected boolean needAuth = true;
+
     protected Set<Long> modelIds;
     protected List<Param> params = new ArrayList<>();
 
@@ -45,4 +47,11 @@ public abstract class SemanticQueryReq {
         return modelIds;
     }
 
+    public boolean isNeedAuth() {
+        return needAuth;
+    }
+
+    public void setNeedAuth(boolean needAuth) {
+        this.needAuth = needAuth;
+    }
 }
