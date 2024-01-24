@@ -1,4 +1,4 @@
-package com.tencent.supersonic.integration.model;
+package com.tencent.supersonic.chat.integration.model;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.StandaloneLauncher;

@@ -1,7 +1,8 @@
-package com.tencent.supersonic.integration;
+package com.tencent.supersonic.chat.integration;
 
 import static org.junit.Assert.assertEquals;
 
+import com.tencent.supersonic.chat.integration.util.DataUtils;
 import com.tencent.supersonic.StandaloneLauncher;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
@@ -15,7 +16,6 @@ import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.chat.server.service.QueryService;
-import com.tencent.supersonic.util.DataUtils;
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,7 +30,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = StandaloneLauncher.class)
 @ActiveProfiles("local")
-public class BaseQueryTest {
+public class BaseTest {
 
     protected final int unit = 7;
     protected final String startDay = LocalDate.now().plusDays(-unit).toString();

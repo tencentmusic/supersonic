@@ -32,7 +32,7 @@ class DownloadServiceImplTest {
         ModelService modelService = Mockito.mock(ModelService.class);
         QueryService queryService = Mockito.mock(QueryService.class);
         when(modelService.fetchModelSchema(any())).thenReturn(Lists.newArrayList(mockModelSchemaResp()));
-        when(queryService.queryByStruct(any(), any())).thenReturn(mockQueryResult());
+        when(queryService.queryByReq(any(), any())).thenReturn(mockQueryResult());
         DownloadServiceImpl downloadService = new DownloadServiceImpl(modelService, queryService);
         String fileName = String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
         File file = FileUtils.createTmpFile(fileName);
