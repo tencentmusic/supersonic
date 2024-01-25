@@ -20,8 +20,7 @@ public class DefaultQueryCache implements QueryCache {
     @Autowired
     private CacheManager cacheManager;
 
-    public Object query(SemanticQueryReq semanticQueryReq) {
-        String cacheKey = getCacheKey(semanticQueryReq);
+    public Object query(SemanticQueryReq semanticQueryReq, String cacheKey) {
         if (isCache(semanticQueryReq)) {
             Object result = cacheManager.get(cacheKey);
             log.info("queryFromCache, key:{}, semanticQueryReq:{}", cacheKey, semanticQueryReq);
@@ -30,15 +29,14 @@ public class DefaultQueryCache implements QueryCache {
         return null;
     }
 
-    public Boolean put(SemanticQueryReq semanticQueryReq, Object value) {
+    public Boolean put(String cacheKey, Object value) {
         if (cacheEnable && Objects.nonNull(value)) {
-            String key = getCacheKey(semanticQueryReq);
-            CompletableFuture.supplyAsync(() -> cacheManager.put(key, value))
+            CompletableFuture.supplyAsync(() -> cacheManager.put(cacheKey, value))
                     .exceptionally(exception -> {
                         log.warn("exception:", exception);
                         return null;
                     });
-            log.info("add record to cache, key:{}", key);
+            log.info("add record to cache, key:{}", cacheKey);
             return true;
         }
         return false;

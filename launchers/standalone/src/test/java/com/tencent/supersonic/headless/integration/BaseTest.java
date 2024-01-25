@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.integration;
 import com.tencent.supersonic.StandaloneLauncher;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import java.util.HashSet;
@@ -29,7 +30,11 @@ public class BaseTest {
         return queryService.queryByReq(buildQuerySqlReq(sql), user);
     }
 
-    protected QuerySqlReq buildQuerySqlReq(String sql) {
+    protected SemanticQueryResp queryByReq(SemanticQueryReq queryReq, User user) throws Exception {
+        return queryService.queryByReq(queryReq, user);
+    }
+
+    protected SemanticQueryReq buildQuerySqlReq(String sql) {
         QuerySqlReq querySqlCmd = new QuerySqlReq();
         querySqlCmd.setSql(sql);
         Set<Long> modelIds = new HashSet<>();

@@ -159,7 +159,7 @@ public class DictQueryHelper {
     private QueryStructReq generateQueryStructCmd(Long modelId, DefaultMetric defaultMetricDesc, Dim4Dict dim4Dict) {
         QueryStructReq queryStructCmd = new QueryStructReq();
 
-        queryStructCmd.setModelId(modelId);
+        queryStructCmd.addModelId(modelId);
         queryStructCmd.setGroups(Arrays.asList(dim4Dict.getBizName()));
 
         List<Filter> filters = generateFilters(dim4Dict, queryStructCmd);

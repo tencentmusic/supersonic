@@ -129,8 +129,8 @@ public class QueryStructUtils {
         return resNameEnSet;
     }
 
-    public Set<String> getResName(QuerySqlReq querySQLReq) {
-        Set<String> resNameSet = SqlParserSelectHelper.getAllFields(querySQLReq.getSql())
+    public Set<String> getResName(QuerySqlReq querySqlReq) {
+        Set<String> resNameSet = SqlParserSelectHelper.getAllFields(querySqlReq.getSql())
                 .stream().collect(Collectors.toSet());
         return resNameSet;
     }
@@ -140,11 +140,11 @@ public class QueryStructUtils {
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 
-    public Set<String> getResNameEnExceptInternalCol(QuerySqlReq querySQLReq, User user) {
-        Set<String> resNameSet = getResName(querySQLReq);
+    public Set<String> getResNameEnExceptInternalCol(QuerySqlReq querySqlReq, User user) {
+        Set<String> resNameSet = getResName(querySqlReq);
         Set<String> resNameEnSet = new HashSet<>();
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
-        List<Long> modelIds = Lists.newArrayList(querySQLReq.getModelIds());
+        List<Long> modelIds = Lists.newArrayList(querySqlReq.getModelIds());
         filter.setModelIds(modelIds);
         List<ModelSchemaResp> modelSchemaRespList = schemaService.fetchModelSchema(filter, user);
         if (!CollectionUtils.isEmpty(modelSchemaRespList)) {
@@ -175,8 +175,8 @@ public class QueryStructUtils {
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 
-    public Set<String> getFilterResNameEnExceptInternalCol(QuerySqlReq querySQLReq) {
-        String sql = querySQLReq.getSql();
+    public Set<String> getFilterResNameEnExceptInternalCol(QuerySqlReq querySqlReq) {
+        String sql = querySqlReq.getSql();
         Set<String> resNameEnSet = SqlParserSelectHelper.getWhereFields(sql).stream().collect(Collectors.toSet());
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }

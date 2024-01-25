@@ -84,9 +84,9 @@ public class DimValueAspect {
 
     public Object handleSqlDimValue(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
-        QuerySqlReq querySQLReq = (QuerySqlReq) args[0];
-        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(querySQLReq.getModelIds()));
-        String sql = querySQLReq.getSql();
+        QuerySqlReq querySqlReq = (QuerySqlReq) args[0];
+        MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(querySqlReq.getModelIds()));
+        String sql = querySqlReq.getSql();
         log.info("correctorSql before replacing:{}", sql);
         List<FieldExpression> fieldExpressionList = SqlParserSelectHelper.getWhereExpressions(sql);
         List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
@@ -117,7 +117,7 @@ public class DimValueAspect {
         }
         sql = SqlParserReplaceHelper.replaceValue(sql, filedNameToValueMap);
         log.info("correctorSql after replacing:{}", sql);
-        querySQLReq.setSql(sql);
+        querySqlReq.setSql(sql);
         Map<String, Map<String, String>> techNameToBizName = getTechNameToBizName(dimensions);
 
         SemanticQueryResp queryResultWithColumns = (SemanticQueryResp) joinPoint.proceed();

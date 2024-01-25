@@ -72,11 +72,11 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
     @Override
     public SemanticQueryResp queryByStruct(QueryStructReq queryStructReq, User user) {
         if (StringUtils.isNotBlank(queryStructReq.getCorrectS2SQL())) {
-            QuerySqlReq querySQLReq = new QuerySqlReq();
-            querySQLReq.setSql(queryStructReq.getCorrectS2SQL());
-            querySQLReq.setModelIds(queryStructReq.getModelIdSet());
-            querySQLReq.setParams(new ArrayList<>());
-            return queryByS2SQL(querySQLReq, user);
+            QuerySqlReq querySqlReq = new QuerySqlReq();
+            querySqlReq.setSql(queryStructReq.getCorrectS2SQL());
+            querySqlReq.setModelIds(queryStructReq.getModelIdSet());
+            querySqlReq.setParams(new ArrayList<>());
+            return queryByS2SQL(querySqlReq, user);
         }
 
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
@@ -94,10 +94,10 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
     }
 
     @Override
-    public SemanticQueryResp queryByS2SQL(QuerySqlReq querySQLReq, User user) {
+    public SemanticQueryResp queryByS2SQL(QuerySqlReq querySqlReq, User user) {
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         return searchByRestTemplate(defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getSearchBySqlPath(),
-                new Gson().toJson(querySQLReq));
+                new Gson().toJson(querySqlReq));
     }
 
     public SemanticQueryResp searchByRestTemplate(String url, String jsonReq) {
