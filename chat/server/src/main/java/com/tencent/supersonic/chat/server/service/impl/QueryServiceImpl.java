@@ -692,7 +692,7 @@ public class QueryServiceImpl implements QueryService {
         dateConf.setPeriod("DAY");
         queryStructReq.setDateInfo(dateConf);
         queryStructReq.setLimit(20L);
-        queryStructReq.setModelId(dimensionValueReq.getModelId());
+        queryStructReq.addModelId(dimensionValueReq.getModelId());
         queryStructReq.setQueryType(QueryType.ID);
         List<String> groups = new ArrayList<>();
         groups.add(dimensionValueReq.getBizName());

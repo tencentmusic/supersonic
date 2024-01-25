@@ -117,7 +117,8 @@ public class QueryServiceImpl implements QueryService {
             //1.initStatInfo
             statUtils.initStatInfo(queryReq, user);
             //2.query from cache
-            Object query = queryCache.query(queryReq);
+            String cacheKey = queryCache.getCacheKey(queryReq);
+            Object query = queryCache.query(queryReq, cacheKey);
             if (Objects.nonNull(query)) {
                 return (SemanticQueryResp) query;
             }
@@ -126,10 +127,10 @@ public class QueryServiceImpl implements QueryService {
             QueryStatement queryStatement = buildQueryStatement(queryReq, user);
             SemanticQueryResp result = query(queryStatement);
             //4 reset cache and set stateInfo
-            Boolean setCacheSuccess = queryCache.put(queryReq, result);
+            Boolean setCacheSuccess = queryCache.put(cacheKey, result);
             if (setCacheSuccess) {
                 // if result is not null, update cache data
-                statUtils.updateResultCacheKey(queryCache.getCacheKey(queryReq));
+                statUtils.updateResultCacheKey(cacheKey);
             }
             if (Objects.isNull(result)) {
                 state = TaskStatusEnum.ERROR;
@@ -144,15 +145,15 @@ public class QueryServiceImpl implements QueryService {
         }
     }
 
-    private QueryStatement buildSqlQueryStatement(QuerySqlReq querySQLReq, User user) throws Exception {
+    private QueryStatement buildSqlQueryStatement(QuerySqlReq querySqlReq, User user) throws Exception {
         ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
-        filter.setModelIds(querySQLReq.getModelIds());
+        filter.setModelIds(querySqlReq.getModelIds());
         SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
         List<ModelSchemaResp> modelSchemaResps = schemaService.fetchModelSchema(filter, user);
-        QueryStatement queryStatement = queryReqConverter.convert(querySQLReq, modelSchemaResps);
-        queryStatement.setModelIds(querySQLReq.getModelIds());
+        QueryStatement queryStatement = queryReqConverter.convert(querySqlReq, modelSchemaResps);
+        queryStatement.setModelIds(querySqlReq.getModelIds());
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
-        SemanticModel semanticModel = semanticSchemaManager.get(querySQLReq.getModelIdStr());
+        SemanticModel semanticModel = semanticSchemaManager.get(querySqlReq.getModelIdStr());
         queryStatement.setSemanticModel(semanticModel);
         return queryStatement;
     }
@@ -200,8 +201,8 @@ public class QueryServiceImpl implements QueryService {
     @Override
     @SneakyThrows
     public SemanticQueryResp queryDimValue(QueryDimValueReq queryDimValueReq, User user) {
-        QuerySqlReq querySQLReq = buildQuerySqlReq(queryDimValueReq);
-        return queryByReq(querySQLReq, user);
+        QuerySqlReq querySqlReq = buildQuerySqlReq(queryDimValueReq);
+        return queryByReq(querySqlReq, user);
     }
 
     @Override
@@ -312,7 +313,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     private QuerySqlReq buildQuerySqlReq(QueryDimValueReq queryDimValueReq) {
-        QuerySqlReq querySQLReq = new QuerySqlReq();
+        QuerySqlReq querySqlReq = new QuerySqlReq();
         List<ModelResp> modelResps = catalog.getModelList(Lists.newArrayList(queryDimValueReq.getModelId()));
         DimensionResp dimensionResp = catalog.getDimension(queryDimValueReq.getDimensionBizName(),
                 queryDimValueReq.getModelId());
@@ -324,9 +325,9 @@ public class QueryServiceImpl implements QueryService {
                     queryDimValueReq.getDateInfo().getStartDate(), TimeDimensionEnum.DAY.getName(),
                     queryDimValueReq.getDateInfo().getEndDate());
         }
-        querySQLReq.setModelIds(Sets.newHashSet(queryDimValueReq.getModelId()));
-        querySQLReq.setSql(sql);
-        return querySQLReq;
+        querySqlReq.setModelIds(Sets.newHashSet(queryDimValueReq.getModelId()));
+        querySqlReq.setSql(sql);
+        return querySqlReq;
     }
 
     private QueryStatement plan(QueryStatement queryStatement) throws Exception {

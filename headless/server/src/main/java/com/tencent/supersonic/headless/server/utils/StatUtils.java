@@ -13,6 +13,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.QueryTypeBack;
 import com.tencent.supersonic.headless.api.pojo.QueryStat;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
@@ -93,13 +94,17 @@ public class StatUtils {
         if (semanticQueryReq instanceof QueryStructReq) {
             initStructStatInfo((QueryStructReq) semanticQueryReq, facadeUser);
         }
+        if (semanticQueryReq instanceof QueryMultiStructReq) {
+            QueryStructReq queryStructCmd = ((QueryMultiStructReq) semanticQueryReq).getQueryStructReqs().get(0);
+            initStructStatInfo(queryStructCmd, facadeUser);
+        }
     }
 
-    public void initSqlStatInfo(QuerySqlReq querySQLReq, User facadeUser) {
+    public void initSqlStatInfo(QuerySqlReq querySqlReq, User facadeUser) {
         QueryStat queryStatInfo = new QueryStat();
-        List<String> allFields = SqlParserSelectHelper.getAllFields(querySQLReq.getSql());
-        queryStatInfo.setModelId(querySQLReq.getModelIds().get(0));
-        ModelSchemaResp modelSchemaResp = modelService.fetchSingleModelSchema(querySQLReq.getModelIds().get(0));
+        List<String> allFields = SqlParserSelectHelper.getAllFields(querySqlReq.getSql());
+        queryStatInfo.setModelId(querySqlReq.getModelIds().get(0));
+        ModelSchemaResp modelSchemaResp = modelService.fetchSingleModelSchema(querySqlReq.getModelIds().get(0));
 
         List<String> dimensions = new ArrayList<>();
         List<String> metrics = new ArrayList<>();
@@ -111,12 +116,12 @@ public class StatUtils {
         String userName = getUserName(facadeUser);
         try {
             queryStatInfo.setTraceId("")
-                    .setModelId(querySQLReq.getModelIds().get(0))
+                    .setModelId(querySqlReq.getModelIds().get(0))
                     .setUser(userName)
                     .setQueryType(QueryType.SQL.getValue())
                     .setQueryTypeBack(QueryTypeBack.NORMAL.getState())
-                    .setQuerySqlCmd(querySQLReq.toString())
-                    .setQuerySqlCmdMd5(DigestUtils.md5Hex(querySQLReq.toString()))
+                    .setQuerySqlCmd(querySqlReq.toString())
+                    .setQuerySqlCmdMd5(DigestUtils.md5Hex(querySqlReq.toString()))
                     .setStartTime(System.currentTimeMillis())
                     .setUseResultCache(true)
                     .setUseSqlCache(true)

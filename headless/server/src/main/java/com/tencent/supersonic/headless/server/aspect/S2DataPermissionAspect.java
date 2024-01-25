@@ -99,13 +99,13 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
         throw new InvalidArgumentException("queryReq is not Invalid:" + queryReq);
     }
 
-    private Object checkSqlPermission(ProceedingJoinPoint joinPoint, QuerySqlReq querySQLReq)
+    private Object checkSqlPermission(ProceedingJoinPoint joinPoint, QuerySqlReq querySqlReq)
             throws Throwable {
         Object[] objects = joinPoint.getArgs();
         User user = (User) objects[1];
-        List<Long> modelIds = querySQLReq.getModelIds();
+        List<Long> modelIds = querySqlReq.getModelIds();
         // fetch data permission meta information
-        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(querySQLReq, user);
+        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(querySqlReq, user);
         log.info("modelId:{}, res4Privilege:{}", modelIds, res4Privilege);
 
         Set<String> sensitiveResByModel = getHighSensitiveColsByModelId(modelIds);
@@ -119,10 +119,10 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
         Set<String> resAuthSet = getAuthResNameSet(authorizedResource, modelIds);
 
         // if sensitive fields without permission are involved in filter, thrown an exception
-        doFilterCheckLogic(querySQLReq, resAuthSet, sensitiveResReq);
+        doFilterCheckLogic(querySqlReq, resAuthSet, sensitiveResReq);
 
         // row permission pre-filter
-        doRowPermission(querySQLReq, authorizedResource);
+        doRowPermission(querySqlReq, authorizedResource);
 
         // proceed
         SemanticQueryResp queryResultWithColumns = (SemanticQueryResp) joinPoint.proceed();
@@ -144,14 +144,14 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
         return queryResultAfterDesensitization;
     }
 
-    private void doFilterCheckLogic(QuerySqlReq querySQLReq, Set<String> resAuthName,
+    private void doFilterCheckLogic(QuerySqlReq querySqlReq, Set<String> resAuthName,
             Set<String> sensitiveResReq) {
-        Set<String> resFilterSet = queryStructUtils.getFilterResNameEnExceptInternalCol(querySQLReq);
+        Set<String> resFilterSet = queryStructUtils.getFilterResNameEnExceptInternalCol(querySqlReq);
         Set<String> need2Apply = resFilterSet.stream()
                 .filter(res -> !resAuthName.contains(res) && sensitiveResReq.contains(res)).collect(Collectors.toSet());
         Set<String> nameCnSet = new HashSet<>();
 
-        List<Long> modelIds = Lists.newArrayList(querySQLReq.getModelIds());
+        List<Long> modelIds = Lists.newArrayList(querySqlReq.getModelIds());
         ModelFilter modelFilter = new ModelFilter();
         modelFilter.setModelIds(modelIds);
         List<ModelResp> modelInfos = modelService.getModelList(modelFilter);
@@ -249,7 +249,7 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
         return false;
     }
 
-    private void doRowPermission(QuerySqlReq querySQLReq, AuthorizedResourceResp authorizedResource) {
+    private void doRowPermission(QuerySqlReq querySqlReq, AuthorizedResourceResp authorizedResource) {
         log.debug("start doRowPermission logic");
         StringJoiner joiner = new StringJoiner(" OR ");
         List<String> dimensionFilters = new ArrayList<>();
@@ -271,10 +271,10 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
         try {
             Expression expression = CCJSqlParserUtil.parseCondExpression(" ( " + joiner + " ) ");
             if (StringUtils.isNotEmpty(joiner.toString())) {
-                String sql = SqlParserAddHelper.addWhere(querySQLReq.getSql(), expression);
-                log.info("before doRowPermission, queryS2SQLReq:{}", querySQLReq.getSql());
-                querySQLReq.setSql(sql);
-                log.info("after doRowPermission, queryS2SQLReq:{}", querySQLReq.getSql());
+                String sql = SqlParserAddHelper.addWhere(querySqlReq.getSql(), expression);
+                log.info("before doRowPermission, queryS2SQLReq:{}", querySqlReq.getSql());
+                querySqlReq.setSql(sql);
+                log.info("after doRowPermission, queryS2SQLReq:{}", querySqlReq.getSql());
             }
         } catch (JSQLParserException jsqlParserException) {
             log.info("jsqlParser has an exception:{}", jsqlParserException.toString());

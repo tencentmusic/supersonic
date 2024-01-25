@@ -42,8 +42,8 @@ public class LLMSqlQuery extends LLMSemanticQuery {
 
         long startTime = System.currentTimeMillis();
         String querySql = parseInfo.getSqlInfo().getCorrectS2SQL();
-        QuerySqlReq querySQLReq = QueryReqBuilder.buildS2SQLReq(querySql, parseInfo.getModel().getModelIds());
-        SemanticQueryResp queryResp = semanticInterpreter.queryByS2SQL(querySQLReq, user);
+        QuerySqlReq querySqlReq = QueryReqBuilder.buildS2SQLReq(querySql, parseInfo.getModel().getModelIds());
+        SemanticQueryResp queryResp = semanticInterpreter.queryByS2SQL(querySqlReq, user);
 
         log.info("queryByS2SQL cost:{},querySql:{}", System.currentTimeMillis() - startTime, querySql);
 

@@ -62,7 +62,7 @@ public class QueryReqConverter {
     @Autowired
     private Catalog catalog;
 
-    public QueryStatement convert(QuerySqlReq querySQLReq,
+    public QueryStatement convert(QuerySqlReq querySqlReq,
             List<ModelSchemaResp> modelSchemaResps) throws Exception {
 
         if (CollectionUtils.isEmpty(modelSchemaResps)) {
@@ -71,18 +71,18 @@ public class QueryReqConverter {
         Map<Long, ModelSchemaResp> modelSchemaRespMap = modelSchemaResps.stream()
                 .collect(Collectors.toMap(ModelSchemaResp::getId, modelSchemaResp -> modelSchemaResp));
         //1.convert name to bizName
-        convertNameToBizName(querySQLReq, modelSchemaResps);
+        convertNameToBizName(querySqlReq, modelSchemaResps);
         //2.functionName corrector
-        functionNameCorrector(querySQLReq);
+        functionNameCorrector(querySqlReq);
         //3.correct tableName
-        correctTableName(querySQLReq);
+        correctTableName(querySqlReq);
 
-        String tableName = SqlParserSelectHelper.getTableName(querySQLReq.getSql());
+        String tableName = SqlParserSelectHelper.getTableName(querySqlReq.getSql());
         if (StringUtils.isEmpty(tableName)) {
             return new QueryStatement();
         }
         //4.build MetricTables
-        List<String> allFields = SqlParserSelectHelper.getAllFields(querySQLReq.getSql());
+        List<String> allFields = SqlParserSelectHelper.getAllFields(querySqlReq.getSql());
         List<String> metrics = getMetrics(modelSchemaResps, allFields);
         QueryStructReq queryStructReq = new QueryStructReq();
         MetricTable metricTable = new MetricTable();
@@ -96,7 +96,7 @@ public class QueryReqConverter {
         // if metric empty , fill model default
         if (CollectionUtils.isEmpty(metricTable.getMetrics())) {
             metricTable.setMetrics(new ArrayList<>());
-            for (Long modelId : querySQLReq.getModelIds()) {
+            for (Long modelId : querySqlReq.getModelIds()) {
                 ModelSchemaResp modelSchemaResp = modelSchemaRespMap.get(modelId);
                 metricTable.getMetrics().add(sqlGenerateUtils.generateInternalMetricName(modelSchemaResp.getBizName()));
             }
@@ -105,27 +105,27 @@ public class QueryReqConverter {
                     metricTable.getMetrics().stream().map(m -> new Aggregator(m, AggOperatorEnum.UNKNOWN)).collect(
                             Collectors.toList()));
         }
-        AggOption aggOption = getAggOption(querySQLReq);
+        AggOption aggOption = getAggOption(querySqlReq);
         metricTable.setAggOption(aggOption);
         List<MetricTable> tables = new ArrayList<>();
         tables.add(metricTable);
         //4.build ParseSqlReq
         ParseSqlReq result = new ParseSqlReq();
-        BeanUtils.copyProperties(querySQLReq, result);
+        BeanUtils.copyProperties(querySqlReq, result);
 
-        result.setRootPath(querySQLReq.getModelIdStr());
+        result.setRootPath(querySqlReq.getModelIdStr());
         result.setTables(tables);
-        DatabaseResp database = catalog.getDatabaseByModelId(querySQLReq.getModelIds().get(0));
+        DatabaseResp database = catalog.getDatabaseByModelId(querySqlReq.getModelIds().get(0));
         if (!sqlGenerateUtils.isSupportWith(EngineType.fromString(database.getType().toUpperCase()),
                 database.getVersion())) {
             result.setSupportWith(false);
             result.setWithAlias(false);
         }
         //5. do deriveMetric
-        generateDerivedMetric(querySQLReq.getModelIds(), modelSchemaResps, aggOption, result);
+        generateDerivedMetric(querySqlReq.getModelIds(), modelSchemaResps, aggOption, result);
         //6.physicalSql by ParseSqlReq
-        queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySQLReq.getSql()));
-        queryStructReq.setModelIds(new HashSet<>(querySQLReq.getModelIds()));
+        queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySqlReq.getSql()));
+        queryStructReq.setModelIds(new HashSet<>(querySqlReq.getModelIds()));
         queryStructReq.setQueryType(getQueryType(aggOption));
         log.info("QueryReqConverter queryStructReq[{}]", queryStructReq);
         QueryStatement queryStatement = new QueryStatement();
@@ -133,7 +133,7 @@ public class QueryReqConverter {
         queryStatement.setParseSqlReq(result);
         queryStatement.setIsS2SQL(true);
         queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructReq));
-        queryStatement.setModelIds(querySQLReq.getModelIds());
+        queryStatement.setModelIds(querySqlReq.getModelIds());
         queryStatement.setEnableLimitWrapper(limitWrapper);
 
         return queryStatement;

@@ -134,12 +134,12 @@ public class QueryReqBuilder {
      * @return
      */
     public static QuerySqlReq buildS2SQLReq(String querySql, Set<Long> modelIds) {
-        QuerySqlReq querySQLReq = new QuerySqlReq();
+        QuerySqlReq querySqlReq = new QuerySqlReq();
         if (Objects.nonNull(querySql)) {
-            querySQLReq.setSql(querySql);
+            querySqlReq.setSql(querySql);
         }
-        querySQLReq.setModelIds(modelIds);
-        return querySQLReq;
+        querySqlReq.setModelIds(modelIds);
+        return querySqlReq;
     }
 
     private static List<Aggregator> getAggregatorByMetric(AggregateTypeEnum aggregateType, SchemaElement metric) {
