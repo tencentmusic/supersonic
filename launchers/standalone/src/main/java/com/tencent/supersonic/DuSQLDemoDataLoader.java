@@ -90,7 +90,8 @@ public class DuSQLDemoDataLoader {
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
         Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
-        dimension1.setTypeParams(new DimensionTimeTypeParams());
+        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false","none");
+        dimension1.setTypeParams(dimensionTimeTypeParams);
         dimensions.add(dimension1);
         dimensions.add(new Dim("公司名称", "company_name", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("总部地点", "headquarter_address", DimensionType.categorical.name(), 1));
@@ -131,7 +132,8 @@ public class DuSQLDemoDataLoader {
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
         Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
-        dimension1.setTypeParams(new DimensionTimeTypeParams());
+        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false","none");
+        dimension1.setTypeParams(dimensionTimeTypeParams);
         dimensions.add(dimension1);
         dimensions.add(new Dim("品牌名称", "brand_name", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("品牌成立时间", "brand_established_time", DimensionType.categorical.name(), 1));
@@ -169,7 +171,8 @@ public class DuSQLDemoDataLoader {
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
         Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
-        dimension1.setTypeParams(new DimensionTimeTypeParams());
+        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false","none");
+        dimension1.setTypeParams(dimensionTimeTypeParams);
         dimensions.add(dimension1);
         modelDetail.setDimensions(dimensions);
 
@@ -213,7 +216,8 @@ public class DuSQLDemoDataLoader {
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
         Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
-        dimension1.setTypeParams(new DimensionTimeTypeParams());
+        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false","none");
+        dimension1.setTypeParams(dimensionTimeTypeParams);
         dimensions.add(dimension1);
         dimensions.add(new Dim("年份", "year_time", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
