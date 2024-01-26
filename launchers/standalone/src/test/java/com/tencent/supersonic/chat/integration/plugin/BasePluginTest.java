@@ -1,23 +1,14 @@
 package com.tencent.supersonic.chat.integration.plugin;
 
-import com.tencent.supersonic.StandaloneLauncher;
+import com.tencent.supersonic.BaseApplication;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
 import com.tencent.supersonic.chat.core.query.plugin.WebBase;
 import com.tencent.supersonic.chat.core.query.plugin.webpage.WebPageQuery;
 import com.tencent.supersonic.chat.core.query.plugin.webpage.WebPageResp;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = StandaloneLauncher.class)
-@ActiveProfiles("local")
-@Slf4j
-public class BasePluginTest {
+public class BasePluginTest extends BaseApplication {
 
     protected void assertPluginRecognizeResult(QueryResult queryResult) {
         Assert.assertEquals(queryResult.getQueryState(), QueryState.SUCCESS);

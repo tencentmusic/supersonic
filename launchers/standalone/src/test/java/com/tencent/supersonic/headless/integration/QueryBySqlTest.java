@@ -7,7 +7,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class QueryBySqlTest extends BaseTest {
 

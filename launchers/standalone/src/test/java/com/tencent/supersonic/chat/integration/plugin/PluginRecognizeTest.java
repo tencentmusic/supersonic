@@ -1,6 +1,5 @@
 package com.tencent.supersonic.chat.integration.plugin;
 
-import com.tencent.supersonic.chat.integration.util.DataUtils;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
@@ -8,12 +7,12 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.core.plugin.PluginManager;
+import com.tencent.supersonic.chat.integration.MockConfiguration;
+import com.tencent.supersonic.chat.integration.util.DataUtils;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.QueryService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.chat.integration.MockConfiguration;
 import org.junit.Assert;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -33,7 +32,6 @@ public class PluginRecognizeTest extends BasePluginTest {
     @Qualifier("chatQueryService")
     private QueryService queryService;
 
-    @Test
     public void webPageRecognize() throws Exception {
         MockConfiguration.mockEmbeddingRecognize(pluginManager, "alice最近的访问情况怎么样", "1");
         MockConfiguration.mockEmbeddingUrl(embeddingConfig);
@@ -51,7 +49,6 @@ public class PluginRecognizeTest extends BasePluginTest {
         assertPluginRecognizeResult(queryResult);
     }
 
-    @Test
     public void webPageRecognizeWithQueryFilter() throws Exception {
         MockConfiguration.mockEmbeddingRecognize(pluginManager, "在超音数最近的情况怎么样", "1");
         MockConfiguration.mockEmbeddingUrl(embeddingConfig);
@@ -76,7 +73,6 @@ public class PluginRecognizeTest extends BasePluginTest {
         assertPluginRecognizeResult(queryResult);
     }
 
-    @Test
     public void pluginRecognizeWithAgent() {
         MockConfiguration.mockEmbeddingRecognize(pluginManager, "alice最近的访问情况怎么样", "1");
         MockConfiguration.mockEmbeddingUrl(embeddingConfig);

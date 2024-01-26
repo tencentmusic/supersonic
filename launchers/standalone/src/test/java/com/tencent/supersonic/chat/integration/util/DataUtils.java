@@ -1,5 +1,7 @@
 package com.tencent.supersonic.chat.integration.util;
 
+import static java.time.LocalDate.now;
+
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -14,13 +16,13 @@ import com.tencent.supersonic.chat.core.agent.RuleParserTool;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 
-import static java.time.LocalDate.now;
-
 public class DataUtils {
 
     public static final Integer metricAgentId = 1;
     public static final Integer tagAgentId = 2;
+    public static final Integer MULTI_TURNS_CHAT_ID = 11;
     private static final User user_test = User.getFakeUser();
+
     public static User getUser() {
         return user_test;
     }
