@@ -6,6 +6,8 @@ import proxy from './proxy';
 import routes from './routes';
 import moment from 'moment';
 import ENV_CONFIG from './envConfig';
+import CompressionWebpackPlugin from 'compression-webpack-plugin'
+
 
 const { REACT_APP_ENV, RUN_TYPE } = process.env;
 
@@ -76,5 +78,18 @@ export default defineConfig({
   outputPath: RUN_TYPE === 'local' ? 'supersonic-webapp' : 'dist',
   resolve: {
     includes: ['src/components'],
+  },
+  chainWebpack: (config) => {
+    if (process.env.NODE_ENV === 'production') {  // 生产模式开启
+      config.plugin('compression-webpack-plugin').use(
+        new CompressionWebpackPlugin({
+          algorithm: 'gzip',
+          test: new RegExp('\\.(' + ['js', 'css'].join('|') + ')$'),
+          threshold: 10240,
+          minRatio: 0.6,
+          deleteOriginalAssets: false, // 不删除源文件
+        })
+      );
+    }
   },
 });
