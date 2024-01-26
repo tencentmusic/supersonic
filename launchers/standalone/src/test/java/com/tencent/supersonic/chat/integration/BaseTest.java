@@ -2,8 +2,7 @@ package com.tencent.supersonic.chat.integration;
 
 import static org.junit.Assert.assertEquals;
 
-import com.tencent.supersonic.chat.integration.util.DataUtils;
-import com.tencent.supersonic.StandaloneLauncher;
+import com.tencent.supersonic.BaseApplication;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
@@ -12,25 +11,20 @@ import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
+import com.tencent.supersonic.chat.integration.util.DataUtils;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.chat.server.service.QueryService;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = StandaloneLauncher.class)
-@ActiveProfiles("local")
-public class BaseTest {
+public class BaseTest extends BaseApplication {
 
     protected final int unit = 7;
     protected final String startDay = LocalDate.now().plusDays(-unit).toString();
@@ -47,34 +41,37 @@ public class BaseTest {
     @MockBean
     protected AgentService agentService;
 
-    protected QueryResult submitMultiTurnChat(String queryText, Integer agentId) throws Exception {
-        ParseResp parseResp = submitParse(queryText, agentId);
+    protected QueryResult submitMultiTurnChat(String queryText, Integer agentId, Integer chatId) throws Exception {
+        ParseResp parseResp = submitParse(queryText, agentId, chatId);
 
+        SemanticParseInfo semanticParseInfo = parseResp.getSelectedParses().get(0);
         ExecuteQueryReq request = ExecuteQueryReq.builder()
                 .agentId(agentId)
                 .queryId(parseResp.getQueryId())
-                .parseId(parseResp.getSelectedParses().get(0).getId())
+                .parseId(semanticParseInfo.getId())
                 .chatId(parseResp.getChatId())
                 .queryText(parseResp.getQueryText())
                 .user(DataUtils.getUser())
-                .parseInfo(parseResp.getSelectedParses().get(0))
+                .parseInfo(semanticParseInfo)
                 .saveAnswer(true)
                 .build();
-
-        return queryService.performExecution(request);
+        QueryResult queryResult = queryService.performExecution(request);
+        queryResult.setChatContext(semanticParseInfo);
+        return queryResult;
     }
 
     protected QueryResult submitNewChat(String queryText, Integer agentId) throws Exception {
         ParseResp parseResp = submitParse(queryText, agentId);
 
+        SemanticParseInfo parseInfo = parseResp.getSelectedParses().get(0);
         ExecuteQueryReq request = ExecuteQueryReq.builder()
                 .agentId(agentId)
                 .queryId(parseResp.getQueryId())
-                .parseId(parseResp.getSelectedParses().get(0).getId())
+                .parseId(parseInfo.getId())
                 .chatId(parseResp.getChatId())
                 .queryText(parseResp.getQueryText())
                 .user(DataUtils.getUser())
-                .parseInfo(parseResp.getSelectedParses().get(0))
+                .parseInfo(parseInfo)
                 .saveAnswer(true)
                 .build();
 
@@ -83,14 +80,21 @@ public class BaseTest {
         ChatContext chatContext = chatService.getOrCreateContext(parseResp.getChatId());
         chatContext.setParseInfo(new SemanticParseInfo());
         chatService.updateContext(chatContext);
-
+        result.setChatContext(parseInfo);
         return result;
     }
 
-    protected ParseResp submitParse(String queryText, Integer agentId) {
-        QueryReq queryContextReq = DataUtils.getQueryContextReq(10, queryText);
+    protected ParseResp submitParse(String queryText, Integer agentId, Integer chatId) {
+        if (Objects.isNull(chatId)) {
+            chatId = 10;
+        }
+        QueryReq queryContextReq = DataUtils.getQueryContextReq(chatId, queryText);
         queryContextReq.setAgentId(agentId);
         return queryService.performParsing(queryContextReq);
+    }
+
+    protected ParseResp submitParse(String queryText, Integer agentId) {
+        return submitParse(queryText, agentId, 10);
     }
 
     protected ParseResp submitParseWithAgent(String queryText, Integer agentId) {

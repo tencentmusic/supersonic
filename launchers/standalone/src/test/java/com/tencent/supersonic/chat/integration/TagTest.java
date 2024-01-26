@@ -2,20 +2,20 @@ package com.tencent.supersonic.chat.integration;
 
 import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
 
-import com.tencent.supersonic.chat.integration.util.DataUtils;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.core.query.rule.metric.MetricTagQuery;
 import com.tencent.supersonic.chat.core.query.rule.tag.TagFilterQuery;
+import com.tencent.supersonic.chat.integration.util.DataUtils;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TagTest extends BaseTest {
 

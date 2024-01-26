@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat`
     ) ;
 
 
-CREATE TABLE `s2_chat_query`
+CREATE TABLE IF NOT EXISTS `s2_chat_query`
 (
     `question_id`             BIGINT  NOT NULL AUTO_INCREMENT,
     `agent_id`             INT  NULL,
@@ -41,7 +41,7 @@ CREATE TABLE `s2_chat_query`
     PRIMARY KEY (`question_id`)
 );
 
-CREATE TABLE `s2_chat_parse`
+CREATE TABLE IF NOT EXISTS `s2_chat_parse`
 (
     `question_id`             BIGINT  NOT NULL,
     `chat_id`           BIGINT NOT NULL ,
@@ -53,7 +53,7 @@ CREATE TABLE `s2_chat_parse`
     `is_candidate` INT DEFAULT 1 COMMENT '1是candidate,0是selected'
 );
 
-CREATE TABLE `s2_chat_statistics`
+CREATE TABLE IF NOT EXISTS `s2_chat_statistics`
 (
     `question_id`             BIGINT  NOT NULL,
     `chat_id`           BIGINT NOT NULL ,
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_config` (
 COMMENT ON TABLE s2_chat_config IS 'chat config information table ';
 
 
-create table s2_user
+create table IF NOT EXISTS s2_user
 (
     id       INT AUTO_INCREMENT,
     name     varchar(100) not null,
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `s2_model` (
 COMMENT ON TABLE s2_model IS 'model information';
 
 
-CREATE TABLE `s2_database` (
+CREATE TABLE IF NOT EXISTS `s2_database` (
                                `id` INT NOT NULL AUTO_INCREMENT,
                                `name` varchar(255) NOT  NULL ,
                                `description` varchar(500) DEFAULT  NULL ,
@@ -161,7 +161,7 @@ CREATE TABLE `s2_database` (
 );
 COMMENT ON TABLE s2_database IS 'database instance table';
 
-create table s2_auth_groups
+create table IF NOT EXISTS s2_auth_groups
 (
     group_id INT,
     config varchar(2048),
@@ -219,7 +219,7 @@ CREATE TABLE IF NOT EXISTS `s2_dimension` (
     );
 COMMENT ON TABLE s2_dimension IS 'dimension information table';
 
-CREATE TABLE s2_model_rela
+CREATE TABLE IF NOT EXISTS s2_model_rela
 (
     id             BIGINT AUTO_INCREMENT,
     domain_id       BIGINT,
@@ -230,7 +230,7 @@ CREATE TABLE s2_model_rela
     PRIMARY KEY (`id`)
 );
 
-create table s2_view_info
+create table IF NOT EXISTS s2_view_info
 (
     id         INT auto_increment,
     domain_id  INT       null,
@@ -239,12 +239,13 @@ create table s2_view_info
     created_at TIMESTAMP     null,
     created_by varchar(100) null,
     updated_at TIMESTAMP     null,
-    updated_by varchar(100) not null
+    updated_by varchar(100) not null,
+    PRIMARY KEY (`id`)
 );
 COMMENT ON TABLE s2_view_info IS 'view information table';
 
 
-CREATE TABLE `s2_query_stat_info` (
+CREATE TABLE IF NOT EXISTS `s2_query_stat_info` (
                                       `id` INT NOT NULL AUTO_INCREMENT,
                                       `trace_id` varchar(200) DEFAULT NULL, -- query unique identifier
                                       `model_id` INT DEFAULT NULL,
@@ -359,7 +360,8 @@ CREATE TABLE IF NOT EXISTS s2_agent
 -------demo for semantic and chat
 CREATE TABLE IF NOT EXISTS `s2_user_department` (
     `user_name` varchar(200) NOT NULL,
-    `department` varchar(200) NOT NULL -- department of user
+    `department` varchar(200) NOT NULL, -- department of user
+     PRIMARY KEY (`user_name`,`department`)
     );
 COMMENT ON TABLE s2_user_department IS 'user_department_info';
 
@@ -386,7 +388,8 @@ CREATE TABLE IF NOT EXISTS `singer` (
     `genre` varchar(200) NOT NULL,
     `js_play_cnt` bigINT DEFAULT NULL,
     `down_cnt` bigINT DEFAULT NULL,
-    `favor_cnt` bigINT DEFAULT NULL
+    `favor_cnt` bigINT DEFAULT NULL,
+     PRIMARY KEY (`imp_date`, `singer_name`)
     );
 COMMENT ON TABLE singer IS 'singer_info';
 
@@ -422,7 +425,8 @@ CREATE TABLE IF NOT EXISTS `artist` (
     `artist_name` varchar(50) NOT NULL , -- genre name
     `country` varchar(20) ,
     `gender` varchar(20) ,
-    `g_name` varchar(50)
+    `g_name` varchar(50),
+    PRIMARY KEY (`artist_name`,`country`)
     );
 COMMENT ON TABLE artist IS 'artist';
 
@@ -446,18 +450,19 @@ CREATE TABLE IF NOT EXISTS `song` (
     `rating` INT ,
     `languages` varchar(20) ,
     `releasedate` varchar(50) ,
-    `resolution` bigINT NOT NULL
+    `resolution` bigINT NOT NULL,
+     PRIMARY KEY (`imp_date`,`song_name`)
     );
 COMMENT ON TABLE song IS 'song';
 
-CREATE TABLE s2_sys_parameter
+CREATE TABLE IF NOT EXISTS s2_sys_parameter
 (
     id  INT PRIMARY KEY AUTO_INCREMENT,
     admin varchar(500),
     parameters text null
 );
 
-CREATE TABLE `s2_collect` (
+CREATE TABLE IF NOT EXISTS `s2_collect` (
     `id` bigint NOT NULL AUTO_INCREMENT,
     `type` varchar(20) NOT NULL,
     `username` varchar(20) NOT NULL,
@@ -467,7 +472,7 @@ CREATE TABLE `s2_collect` (
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `s2_metric_query_default_config` (
+CREATE TABLE IF NOT EXISTS `s2_metric_query_default_config` (
        `id` bigint NOT NULL AUTO_INCREMENT,
        `metric_id` bigint ,
        `user_name` varchar(255) NOT NULL,
@@ -479,7 +484,7 @@ CREATE TABLE `s2_metric_query_default_config` (
        PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `s2_app` (
+CREATE TABLE IF NOT EXISTS `s2_app` (
     id          bigint AUTO_INCREMENT PRIMARY KEY,
     name        VARCHAR(255),
     description VARCHAR(255),
