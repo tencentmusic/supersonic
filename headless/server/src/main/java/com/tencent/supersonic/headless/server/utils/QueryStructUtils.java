@@ -5,8 +5,6 @@ import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
 import static com.tencent.supersonic.common.pojo.Constants.MONTH;
 import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
-import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
@@ -18,7 +16,6 @@ import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
-import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
@@ -28,7 +25,6 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.Catalog;
-import com.tencent.supersonic.headless.server.service.SchemaService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -45,7 +41,6 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -66,9 +61,6 @@ public class QueryStructUtils {
     private final DateModeUtils dateModeUtils;
     private final SqlFilterUtils sqlFilterUtils;
     private final Catalog catalog;
-    @Autowired
-    private SchemaService schemaService;
-
     private String variablePrefix = "'${";
 
     public QueryStructUtils(
@@ -140,13 +132,10 @@ public class QueryStructUtils {
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 
-    public Set<String> getResNameEnExceptInternalCol(QuerySqlReq querySqlReq, User user) {
+    public Set<String> getResNameEnExceptInternalCol(QuerySqlReq querySqlReq,
+            List<ModelSchemaResp> modelSchemaRespList) {
         Set<String> resNameSet = getResName(querySqlReq);
         Set<String> resNameEnSet = new HashSet<>();
-        ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
-        List<Long> modelIds = Lists.newArrayList(querySqlReq.getModelIds());
-        filter.setModelIds(modelIds);
-        List<ModelSchemaResp> modelSchemaRespList = schemaService.fetchModelSchema(filter, user);
         if (!CollectionUtils.isEmpty(modelSchemaRespList)) {
             List<MetricSchemaResp> metrics = modelSchemaRespList.get(0).getMetrics();
             List<DimSchemaResp> dimensions = modelSchemaRespList.get(0).getDimensions();
