@@ -12,16 +12,19 @@ import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
+import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.headless.server.utils.QueryStructUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -60,6 +63,8 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
     private ModelService modelService;
     @Value("${permission.data.enable:true}")
     private Boolean permissionDataEnable;
+    @Autowired
+    private SchemaService schemaService;
 
     @Pointcut("@annotation(com.tencent.supersonic.headless.server.annotation.S2DataPermission)")
     private void s2PermissionCheck() {
@@ -105,7 +110,10 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
         User user = (User) objects[1];
         List<Long> modelIds = querySqlReq.getModelIds();
         // fetch data permission meta information
-        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(querySqlReq, user);
+        ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
+        filter.setModelIds(modelIds);
+        List<ModelSchemaResp> modelSchemaRespList = schemaService.fetchModelSchema(filter, user);
+        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(querySqlReq, modelSchemaRespList);
         log.info("modelId:{}, res4Privilege:{}", modelIds, res4Privilege);
 
         Set<String> sensitiveResByModel = getHighSensitiveColsByModelId(modelIds);
