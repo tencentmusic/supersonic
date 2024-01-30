@@ -1111,4 +1111,29 @@ MERGE INTO song(imp_date,song_name,artist_name,country,f_id,g_name,rating,langua
 MERGE INTO song(imp_date,song_name,artist_name,country,f_id,g_name,rating,languages,releasedate,resolution) VALUES (DATEADD('DAY', 0, CURRENT_DATE()),'打败它','Michel','英国',5,'流行',8,'英文','17-MAR-2002',720);
 MERGE INTO song(imp_date,song_name,artist_name,country,f_id,g_name,rating,languages,releasedate,resolution) VALUES (DATEADD('DAY', 0, CURRENT_DATE()),'阿杰伊阿卡什','Topu','印度',6,'现代',10,'孟加拉语','27-MAR-2004',320);
 
+
+insert into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_131','百度集团','北京','2000','李彦宏','李彦宏',102300000000,40000);
+insert into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_132','阿里巴巴集团','杭州','1999年','马云','张勇',376800000000,103699);
+insert into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_133','深圳市腾讯计算机系统有限公司','深圳','1998','马化腾','刘炽平',321600000000,56310);
+insert into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_134','北京京东世纪贸易有限公司','北京','1998','刘强东','刘强东',28800000000,179000);
+insert into company(imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_135','网易公司','杭州','1997','丁磊','丁磊',67500000000,20000);
+
+insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_136','阿里云','2009年9月10日','item_enterprise_13_134','张勇',50000000);
+insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_137','天猫','2012年1月11日','item_enterprise_13_134','张勇',100000000);
+insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_138','腾讯游戏','2003','item_enterprise_13_131','马化腾',50000000);
+insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_139','度小满','2018','item_enterprise_13_132','朱光',100000000);
+insert into brand(imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES (DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_140','京东金融','2017','item_enterprise_13_134','刘强东',100000000);
+
+insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_131','item_enterprise_13_139',10,10,30);
+insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_134','item_enterprise_13_138',80,80,60);
+insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_135','item_enterprise_13_139',80,80,60);
+insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_131','item_enterprise_13_137',80,80,60);
+insert into company_revenue(imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'item_enterprise_13_135','item_enterprise_13_137',10,10,30);
+
+insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2018','item_enterprise_13_138',500000000,-300000000,10,-10);
+insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2019','item_enterprise_13_136',100000000000,50000000000,100,50);
+insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'2018','item_enterprise_13_137',100000000000,50000000000,100,-10);
+insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '2018','item_enterprise_13_139',500000000,50000000000,10,50);
+insert into company_brand_revenue(imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ( DATEADD('DAY', -1, CURRENT_DATE()),'2018','item_enterprise_13_138',100000000000,-300000000,10,50);
+
 -- benchmark

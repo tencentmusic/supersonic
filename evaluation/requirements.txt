@@ -1,0 +1,6 @@
+pysqlite3==0.5.2
+PyJWT==2.8.0
+PyYAML==6.0.1
+sqlparse==0.4.4
+nltk==3.8.1
+

@@ -91,6 +91,7 @@ public class ChatDemoLoader implements CommandLineRunner {
             addAgent1();
             addAgent2();
             addAgent3();
+            addAgent4();
             addSampleChats();
             addSampleChats2();
             updateQueryScore(1);
@@ -502,6 +503,26 @@ public class ChatDemoLoader implements CommandLineRunner {
         llmParserTool.setId("1");
         llmParserTool.setType(AgentToolType.NL2SQL_LLM);
         llmParserTool.setModelIds(Lists.newArrayList(5L, 6L, 7L, 8L));
+        agentConfig.getTools().add(llmParserTool);
+
+        agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        agentService.createAgent(agent, User.getFakeUser());
+    }
+
+    private void addAgent4() {
+        Agent agent = new Agent();
+        agent.setId(4);
+        agent.setName("DuSQL 互联网企业");
+        agent.setDescription("DuSQL");
+        agent.setStatus(1);
+        agent.setEnableSearch(1);
+        agent.setExamples(Lists.newArrayList());
+        AgentConfig agentConfig = new AgentConfig();
+
+        LLMParserTool llmParserTool = new LLMParserTool();
+        llmParserTool.setId("1");
+        llmParserTool.setType(AgentToolType.NL2SQL_LLM);
+        llmParserTool.setModelIds(Lists.newArrayList(9L, 10L, 11L, 12L));
         agentConfig.getTools().add(llmParserTool);
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
