@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.api.pojo;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -51,4 +52,7 @@ public class SchemaElement implements Serializable {
         return Objects.hashCode(view, id, name, bizName, type);
     }
 
+    public List<String> getModelNames() {
+        return Lists.newArrayList(name);
+    }
 }

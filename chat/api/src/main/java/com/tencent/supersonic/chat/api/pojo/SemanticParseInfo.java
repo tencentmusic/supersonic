@@ -78,4 +78,8 @@ public class SemanticParseInfo {
         return view.getView();
     }
 
+    public SchemaElement getModel() {
+        return view;
+    }
+
 }
