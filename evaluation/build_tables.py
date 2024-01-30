@@ -6,11 +6,8 @@ import yaml
 def build_internet(path,day):
     imp_date=(datetime.datetime.now()+datetime.timedelta(days=day)).strftime("%Y-%m-%d")
     print(imp_date)
-    # 连接到数据库（如果数据库不存在，则会自动创建）
     conn = sqlite3.connect(path+'/internet.db')
-    # 创建一个游标对象
     cursor = conn.cursor()
-    # 创建表
     create_table_query = '''
     CREATE TABLE IF NOT EXISTS company (
         `imp_date` varchar(50) ,
@@ -26,7 +23,6 @@ def build_internet(path,day):
     )
     '''
     cursor.execute(create_table_query)
-    # 插入数据
     insert_data_query = '''
     INSERT INTO company (imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count)
     VALUES (?, ?, ?,?, ?, ?,?, ?, ?)
@@ -39,11 +35,9 @@ def build_internet(path,day):
         (imp_date,"item_enterprise_13_135","网易公司","杭州","1997","丁磊","丁磊",67500000000,20000)
     ]
     cursor.executemany(insert_data_query, data)
-    # 提交更改
     conn.commit()
 
 
-    # 创建表
     create_table_query = '''
     CREATE TABLE IF NOT EXISTS brand (
         `imp_date` varchar(50) ,
@@ -57,7 +51,6 @@ def build_internet(path,day):
     )
     '''
     cursor.execute(create_table_query)
-    # 插入数据
     insert_data_query = '''
     INSERT INTO brand (imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital)
     VALUES (?, ?, ?,?, ?, ?,?)
@@ -70,11 +63,9 @@ def build_internet(path,day):
         (imp_date,"item_enterprise_13_140","京东金融","2017","item_enterprise_13_134","刘强东",100000000)
     ]
     cursor.executemany(insert_data_query, data)
-    # 提交更改
     conn.commit()
 
 
-    # 创建表
     create_table_query = '''
     CREATE TABLE IF NOT EXISTS company_revenue (
         `imp_date` varchar(50) ,
@@ -86,7 +77,6 @@ def build_internet(path,day):
     )
     '''
     cursor.execute(create_table_query)
-    # 插入数据
     insert_data_query = '''
     INSERT INTO company_revenue (imp_date,company_id,brand_id,revenue_proportion,profit_proportion,expenditure_proportion)
     VALUES (?, ?, ?,?, ?, ?)
@@ -99,11 +89,9 @@ def build_internet(path,day):
         (imp_date,"item_enterprise_13_135","item_enterprise_13_137",0.1,0.1,0.3)
     ]
     cursor.executemany(insert_data_query, data)
-    # 提交更改
     conn.commit()
 
 
-    # 创建表
     create_table_query = '''
     CREATE TABLE IF NOT EXISTS company_brand_revenue (
         `imp_date` varchar(50) ,
@@ -116,7 +104,6 @@ def build_internet(path,day):
     )
     '''
     cursor.execute(create_table_query)
-    # 插入数据
     insert_data_query = '''
     INSERT INTO company_brand_revenue (imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year)
     VALUES (?, ?, ?,?, ?, ?,?)
@@ -129,18 +116,13 @@ def build_internet(path,day):
         (imp_date, "2018", "item_enterprise_13_138", 100000000000, -300000000, 0.1, 0.5)
     ]
     cursor.executemany(insert_data_query, data)
-    # 提交更改
     conn.commit()
-    # 关闭连接
     conn.close()
 def build_china_travel_agency(path,day):
     imp_date=(datetime.datetime.now()+datetime.timedelta(days=day)).strftime("%Y-%m-%d")
     print(imp_date)
-    # 连接到数据库（如果数据库不存在，则会自动创建）
     conn = sqlite3.connect(path+'/china_travel_agency.db')
-    # 创建一个游标对象
     cursor = conn.cursor()
-    # 创建表
     create_table_query = '''
     CREATE TABLE IF NOT EXISTS `travel_agency` (
     `imp_date` varchar(50) ,
@@ -162,7 +144,6 @@ def build_china_travel_agency(path,day):
 
     '''
     cursor.execute(create_table_query)
-    # 插入数据
     insert_data_query = '''
     INSERT INTO travel_agency (imp_date, travel_agency_id,travel_agency_name,travel_agency_level,number_countrie_outbound_travel,
     number_domestic_tourist_cities,number_outbound_travel_routes,number_domestic_travel_routes,
@@ -178,11 +159,9 @@ def build_china_travel_agency(path,day):
         (imp_date,"item_enterprise_7_60","众信旅游集团股份有限公司","5A",90,30,1000,2000,1,20000000,20,70,8000,180)
     ]
     cursor.executemany(insert_data_query, data)
-    # 提交更改
     conn.commit()
 
 
-    # 创建表
     create_table_query = '''
     CREATE TABLE IF NOT EXISTS `outbound_travel_routes` (
     `imp_date` varchar(50) ,
@@ -200,7 +179,6 @@ def build_china_travel_agency(path,day):
 )
     '''
     cursor.execute(create_table_query)
-    # 插入数据
     insert_data_query = '''
     INSERT INTO outbound_travel_routes (imp_date, outbound_route_id,outbound_route_name,travel_agency_id,
 outbound_departure_city,outbound_days,adult_price,child_price,countries,attractions,total_ticket_price)
@@ -214,11 +192,9 @@ outbound_departure_city,outbound_days,adult_price,child_price,countries,attracti
         (imp_date,"item_enterprise_7_65","英国+爱尔兰+威尔士精选之旅","item_enterprise_7_57","深圳",12,18900,15900,10,15,750)
     ]
     cursor.executemany(insert_data_query, data)
-    # 提交更改
     conn.commit()
 
 
-    # 创建表
     create_table_query = '''
     CREATE TABLE IF NOT EXISTS `country_outbound_travel` (
     `imp_date` varchar(50) ,
@@ -229,7 +205,6 @@ outbound_departure_city,outbound_days,adult_price,child_price,countries,attracti
 )
     '''
     cursor.execute(create_table_query)
-    # 插入数据
     insert_data_query = '''
     INSERT INTO country_outbound_travel (imp_date, outbound_travel_route_id,nation,travel_days,outbound_number_attractions)
     VALUES (?, ?, ?,?, ?)
@@ -242,11 +217,8 @@ outbound_departure_city,outbound_days,adult_price,child_price,countries,attracti
         (imp_date,"item_enterprise_7_61","英格兰",4,3)
     ]
     cursor.executemany(insert_data_query, data)
-    # 提交更改
     conn.commit()
 
-
-    # 创建表
     create_table_query = '''
     CREATE TABLE IF NOT EXISTS `domestic_travel_routes` (
     `imp_date` varchar(50) ,
@@ -264,7 +236,6 @@ outbound_departure_city,outbound_days,adult_price,child_price,countries,attracti
  )
     '''
     cursor.execute(create_table_query)
-    # 插入数据
     insert_data_query = '''
     INSERT INTO domestic_travel_routes (imp_date, domestic_travel_route_id,domestic_travel_route_name,travel_agency_id,domestic_departure_city,domestic_days,presale_price,tour_price,number_people_group,personal_price,domestic_number_attractions)
     VALUES (?, ?, ?,?, ?, ?,?,?, ?, ?,?)
@@ -277,11 +248,9 @@ outbound_departure_city,outbound_days,adult_price,child_price,countries,attracti
         (imp_date,"item_enterprise_7_70","上海时尚游","item_enterprise_7_59",'深圳',4,6500,2000,5,7000,10)
     ]
     cursor.executemany(insert_data_query, data)
-    # 提交更改
     conn.commit()
 
 
-    # 创建表
     create_table_query = '''
         CREATE TABLE IF NOT EXISTS `cruise_route` (
     `imp_date` varchar(50) ,
@@ -299,7 +268,6 @@ outbound_departure_city,outbound_days,adult_price,child_price,countries,attracti
  )
         '''
     cursor.execute(create_table_query)
-    # 插入数据
     insert_data_query = '''
         INSERT INTO cruise_route (imp_date, cruise_route_id,cruise_route_name,travel_agency_id,cruise_departure_city,cruise_days,interior_cabin_price,sea_view_room_price,balcony_room_price,sailing_area,cruise_line)
         VALUES (?, ?, ?,?, ?, ?,?,?, ?, ?,?)
@@ -312,24 +280,8 @@ outbound_departure_city,outbound_days,adult_price,child_price,countries,attracti
         (imp_date,"item_enterprise_7_75","超凡体验来自未来的游轮","item_enterprise_7_60",'天津',10,6399,4799,5299,"韩国航线","海洋亚特兰蒂游轮")
     ]
     cursor.executemany(insert_data_query, data)
-    # 提交更改
     conn.commit()
-    # 关闭连接
     conn.close()
-# def query_sql(sql):
-#     # 连接到数据库（如果数据库不存在，则会自动创建）
-#     # sql=" select * from ( SELECT brand_name, legal_representative, sum(revenue), sum(registered_capital) FROM (select `sys_imp_date`, `legal_representative`, `brand_name`, `revenue`, `registered_capital`\nfrom\n(select `sys_imp_date`, `legal_representative`, `brand_name`, `revenue` as `revenue`, `registered_capital` as `registered_capital`\nfrom\n(select `registered_capital` as `registered_capital`, `revenue` as `revenue`, `sys_imp_date`, `legal_representative`, `brand_name`\nfrom\n(select `src1_company_brand_revenue`.`sys_imp_date` as `sys_imp_date`, `src1_company_brand_revenue`.`revenue` as `revenue`, `src1_brand`.`legal_representative` as `legal_representative`, `src1_brand`.`brand_name` as `brand_name`, `src1_brand`.`registered_capital` as `registered_capital`, `src1_company_brand_revenue`.`brand_id` as `brand_id`\nfrom\n(select `registered_capital` as `registered_capital`, `imp_date` as `sys_imp_date`, `company_id`, `legal_representative` as `legal_representative`, `brand_name` as `brand_name`, `brand_id`, `imp_date` as `imp_date`\nfrom\n(select `imp_date`, `brand_id`, `brand_name`, `brand_established_time`, `company_id`, `legal_representative`, `registered_capital`\nfrom `brand`) as `brand`) as `src1_brand`\ninner join (select `revenue` as `revenue`, `imp_date` as `sys_imp_date`, `brand_id`, `imp_date` as `imp_date`\nfrom\n(select `imp_date`, `year_time`, `brand_id`, `revenue`, `profit`, `revenue_growth_year_on_year`, `profit_growth_year_on_year`\nfrom `company_brand_revenue`) as `company_brand_revenue`) as `src1_company_brand_revenue` on `src1_brand`.`brand_id` = `src1_company_brand_revenue`.`brand_id`) as `src11_`) as `brand_company_brand_revenue_0`) as `brand_company_brand_revenue_1`) t_103 WHERE sys_imp_date = '2024-01-08' GROUP BY brand_name, legal_representative HAVING sum(registered_capital) > 100000000 ORDER BY sum(revenue) ASC LIMIT 5 ) a limit 1000 \n"
-#     # sql=" select * from ( SELECT company_name, brand_name, sum(revenue_proportion), sys_imp_date, sum(profit_proportion) FROM (select `sys_imp_date`, `company_name`, `brand_name`, `revenue_proportion`, `profit_proportion`\nfrom\n(select `sys_imp_date`, `company_name`, `brand_name`, `revenue_proportion` as `revenue_proportion`, `profit_proportion` as `profit_proportion`\nfrom\n(select `revenue_proportion` as `revenue_proportion`, `profit_proportion` as `profit_proportion`, `sys_imp_date`, `company_name`\nfrom\n(select `src1_company_revenue`.`sys_imp_date` as `sys_imp_date`, `src1_company_revenue`.`revenue_proportion` as `revenue_proportion`, `src1_company_revenue`.`company_id` as `company_id`, `src1_company_revenue`.`profit_proportion` as `profit_proportion`, `src1_company`.`company_name` as `company_name`\nfrom\n(select `imp_date` as `sys_imp_date`, `company_id`, `company_name` as `company_name`, `imp_date` as `imp_date`\nfrom\n(select `imp_date`, `company_id`, `company_name`, `headquarter_address`, `company_established_time`, `founder`, `ceo`, `annual_turnover`, `employee_count`\nfrom\n`company`) as `company`) as `src1_company`\ninner join (select `revenue_proportion` as `revenue_proportion`, `profit_proportion` as `profit_proportion`, `imp_date` as `sys_imp_date`, `company_id`, `brand_id`, `imp_date` as `imp_date`\nfrom\n(select `imp_date`, `company_id`, `brand_id`, `revenue_proportion`, `profit_proportion`, `expenditure_proportion`\nfrom\n`company_revenue`) as `company_revenue`) as `src1_company_revenue` on `src1_company`.`company_id` = `src1_company_revenue`.`company_id`) as `src11_`) as `company_company_revenue_0`) as `company_company_revenue_1`) t_103 WHERE sys_imp_date = '2024-01-08' GROUP BY brand_name, company_name, sys_imp_date HAVING sum(profit_proportion) < 0.1 ORDER BY sum(revenue_proportion) DESC ) a limit 1000 "
-#     # sql=" select * from ( SELECT brand_name, company_name, sum(revenue_proportion), sum(annual_turnover), sys_imp_date FROM (select `sys_imp_date`, `company_name`, `brand_name`, `annual_turnover`, `revenue_proportion`from(select `sys_imp_date`, `company_name`, `brand_name`, `annual_turnover` as `annual_turnover`, `revenue_proportion` as `revenue_proportion`from(select `annual_turnover` as `annual_turnover`, `revenue_proportion` as `revenue_proportion`, `sys_imp_date`, `company_name`, `brand_name`from(select `src1_brand`.`sys_imp_date` as `sys_imp_date`, `src1_company`.`annual_turnover` as `annual_turnover`, `src1_company_revenue`.`revenue_proportion` as `revenue_proportion`, `src1_brand`.`company_id` as `company_id`, `src1_company`.`company_name` as `company_name`, `src1_brand`.`brand_name` as `brand_name`, `src1_brand`.`brand_id` as `brand_id`from(select `annual_turnover` as `annual_turnover`, `imp_date` as `sys_imp_date`, `company_id`, `company_name` as `company_name`, `imp_date` as `imp_date`from(select `imp_date`, `company_id`, `company_name`, `headquarter_address`, `company_established_time`, `founder`, `ceo`, `annual_turnover`, `employee_count`from`company`) as `company`) as `src1_company`inner join (select `revenue_proportion` as `revenue_proportion`, `imp_date` as `sys_imp_date`, `company_id`, `brand_id`, `imp_date` as `imp_date`from(select `imp_date`, `company_id`, `brand_id`, `revenue_proportion`, `profit_proportion`, `expenditure_proportion`from`company_revenue`) as `company_revenue`) as `src1_company_revenue` on `src1_company`.`company_id` = `src1_company_revenue`.`company_id`inner join (select `imp_date` as `sys_imp_date`, `company_id`, `brand_name` as `brand_name`, `brand_id`, `imp_date` as `imp_date`from(select `imp_date`, `brand_id`, `brand_name`, `brand_established_time`, `company_id`, `legal_representative`, `registered_capital`from`brand`) as `brand`) as `src1_brand` on `src1_company`.`company_id` = `src1_brand`.`company_id`) as `src11_`) as `company_company_revenue_brand_0`) as `company_company_revenue_brand_1`) t_103 WHERE sys_imp_date = '2024-01-11' GROUP BY brand_name, company_name, sys_imp_date ORDER BY sum(revenue_proportion) DESC ) a limit 1000 "
-#     #
-#     conn = sqlite3.connect(path+'/internet.db')
-#     # 创建一个游标对象
-#     cursor = conn.cursor()
-#     cursor.execute(sql)
-#     result=cursor.fetchall()
-#     cursor.close()
-#     print(result)
-#     return result
 def build_table():
     current_directory = os.path.dirname(os.path.abspath(__file__))
     config_file=current_directory+"/config/config.yaml"

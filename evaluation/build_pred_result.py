@@ -10,15 +10,13 @@ def read_query(input_path):
     result=[]
     with open(input_path, "r") as f:
         for line in f.readlines():
-            line = line.strip('\n')  # 去掉列表中每一个元素的换行符
+            line = line.strip('\n')
             result.append(line)
     return result
 def write_sql(output_path,result):
     file = open(output_path, mode='a')
     file.writelines(result)
     file.close()
-    # json_file = open(output_path, mode='w', encoding="utf8")
-    # json.dump(result, json_file, ensure_ascii=False,indent=2)
 def get_pred_sql(query,url,agentId,chatId,authorization,default_sql):
     url=url+"/api/chat/query/parse"
     data = {"agentId": agentId, "chatId":chatId,"queryText":query}
@@ -28,7 +26,6 @@ def get_pred_sql(query,url,agentId,chatId,authorization,default_sql):
         result = requests.post(url=url, headers=header, json=data)
         if result.status_code == 200:
             data = result.json()["data"]
-            print(result.json()["traceId"])
             selectedParses = data["selectedParses"]
             if selectedParses is not None and len(selectedParses) > 0:
                 querySQL = selectedParses[0]["sqlInfo"]["querySQL"]
@@ -36,6 +33,9 @@ def get_pred_sql(query,url,agentId,chatId,authorization,default_sql):
                 return querySQL+'\n'
         return default_sql+'\n'
     except Exception as e:
+        print(url)
+        print(result.json())
+        print(e)
         logging.info(e)
         return default_sql+'\n'
 def get_authorization():

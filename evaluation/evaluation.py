@@ -597,7 +597,7 @@ def evaluate(gold, predict, db_dir, etype, kmaps,query_path):
     print_scores(scores, etype)
     print(scores['all']['exec'])
     current_directory = os.path.dirname(os.path.abspath(__file__))
-    file_name=current_directory+"/log.json"
+    file_name=current_directory+"/eval.json"
     json_exist=os.path.exists(file_name)
     if json_exist:
         os.remove(file_name)
@@ -618,22 +618,14 @@ def eval_exec_match(db, p_str, g_str, pred, gold):
         p_fields = [field_tuple[0] for field_tuple in columns_tuple]
         for index in range(0,len(p_fields)):
             p_fields[index]=re.sub("t\d+.", "",p_fields[index].replace("`","").lower())
-        #print("p_fields:{}", p_fields)
         p_res = cursor.fetchall()
-        #print("p_res:{}", p_res)
     except:
         return False
 
     cursor.execute(g_str)
     q_res = cursor.fetchall()
 
-    def res_map(res, val_units):
-        rmap = {}
-        for idx, val_unit in enumerate(val_units):
-            key = tuple(val_unit[1]) if not val_unit[2] else (val_unit[0], tuple(val_unit[1]), tuple(val_unit[2]))
-            rmap[key] = [r[idx] for r in res]
-        return rmap
-    def res_map1(res, p_fields):
+    def res_map(res, p_fields):
         rmap = {}
         for i in range(0,len(p_fields)):
             if p_fields[i] != "sys_imp_date":
@@ -644,11 +636,9 @@ def eval_exec_match(db, p_str, g_str, pred, gold):
 
     g_fields = parse_sql(g_str)
 
-    # print("p_fields:{}", p_fields)
-    # print("g_fields:{}", g_fields)
-    print("p_res_map:{}".format(res_map1(p_res, p_fields)))
-    print("q_res_map:{}".format(res_map1(q_res, g_fields)))
-    return res_map1(p_res, p_fields) == res_map1(q_res, g_fields)
+    #print("p_res_map:{}".format(res_map(p_res, p_fields)))
+    #print("q_res_map:{}".format(res_map(q_res, g_fields)))
+    return res_map(p_res, p_fields) == res_map(q_res, g_fields)
 
 def parse_sql(sql):
     # 使用 sqlparse 库解析 SQL 查询语句
@@ -903,10 +893,6 @@ def get_evaluation_result():
     kmaps = build_foreign_key_map_from_json(table)
 
     evaluate(gold, pred, db_dir, etype, kmaps,query_path)
-    # db_exist=os.path.exists(db_dir)
-    # if db_exist:
-    #     os.remove(db_dir)
-    #     print("db_file removed!")
 
 def remove_unused_file():
     current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -923,14 +909,14 @@ def remove_unused_file():
         print("db_file removed!")
     pred_exist=os.path.exists(pred_file)
     if pred_exist:
-        os.remove(pred_exist)
+        os.remove(pred_file)
         print("pred_file removed!")
 
 if __name__ == "__main__":
-    # build_table()
-    # get_pred_result()
+    build_table()
+    get_pred_result()
     get_evaluation_result()
-    #remove_unused_file()
+    remove_unused_file()
 
 
 
