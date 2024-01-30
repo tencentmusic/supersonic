@@ -4,14 +4,14 @@ export enum ChatConfigType {
 }
 
 export enum TransType {
-  DIMENSION = 'dimension',
-  METRIC = 'metric',
+  DIMENSION = 'DIMENSION',
+  METRIC = 'METRIC',
 }
 
 export enum SemanticNodeType {
-  DATASOURCE = 'datasource',
-  DIMENSION = 'dimension',
-  METRIC = 'metric',
+  DATASOURCE = 'DATASOURCE',
+  DIMENSION = 'DIMENSION',
+  METRIC = 'METRIC',
 }
 
 export enum MetricTypeWording {

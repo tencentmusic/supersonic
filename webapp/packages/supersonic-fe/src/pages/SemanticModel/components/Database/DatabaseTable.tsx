@@ -120,7 +120,7 @@ const DatabaseTable: React.FC<Props> = ({}) => {
   return (
     <div style={{ margin: 20 }}>
       <ProTable
-        className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft}`}
+        // className={`${styles.classTable}`}
         actionRef={actionRef}
         rowKey="id"
         columns={columns}

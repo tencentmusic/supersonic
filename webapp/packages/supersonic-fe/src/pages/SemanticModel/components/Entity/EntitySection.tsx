@@ -1,6 +1,5 @@
 import { message, Space } from 'antd';
 import { useEffect, useState, forwardRef, useImperativeHandle, Ref } from 'react';
-import type { ForwardRefRenderFunction } from 'react';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../../model';

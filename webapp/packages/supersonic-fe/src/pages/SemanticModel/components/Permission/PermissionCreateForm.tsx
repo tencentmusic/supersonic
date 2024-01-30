@@ -8,7 +8,7 @@ import styles from '../style.less';
 type Props = {
   permissonData: any;
   onSubmit?: (data?: any) => void;
-  onValuesChange?: (value, values) => void;
+  onValuesChange?: (value: any, values: any) => void;
 };
 
 const FormItem = Form.Item;
@@ -17,7 +17,6 @@ const PermissionCreateForm: ForwardRefRenderFunction<any, Props> = (
   { permissonData, onValuesChange },
   ref,
 ) => {
-  const { APP_TARGET } = process.env;
   const [form] = Form.useForm();
 
   useImperativeHandle(ref, () => ({
@@ -51,7 +50,6 @@ const PermissionCreateForm: ForwardRefRenderFunction<any, Props> = (
         <FormItem name="name" label="名称" rules={[{ required: true, message: '请输入名称' }]}>
           <Input placeholder="请输入名称" />
         </FormItem>
-        {/* {APP_TARGET === 'inner' && ( */}
         <FormItem name="authorizedDepartmentIds" label="按组织">
           <SelectPartner
             type="selectedDepartment"
@@ -60,7 +58,6 @@ const PermissionCreateForm: ForwardRefRenderFunction<any, Props> = (
             }}
           />
         </FormItem>
-        {/* )} */}
 
         <FormItem name="authorizedUsers" label="按个人">
           <SelectTMEPerson placeholder="请选择需要授权的个人" />

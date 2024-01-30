@@ -6,7 +6,7 @@ import type { Dispatch } from 'umi';
 import { connect } from 'umi';
 import type { StateType } from '../model';
 import { StatusEnum } from '../enum';
-import { SENSITIVE_LEVEL_ENUM } from '../constant';
+import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS } from '../constant';
 import {
   getModelList,
   getDimensionList,
@@ -15,10 +15,11 @@ import {
 } from '../service';
 import DimensionInfoModal from './DimensionInfoModal';
 import DimensionValueSettingModal from './DimensionValueSettingModal';
-// import { updateDimension } from '../service';
 import { ISemantic, IDataSource } from '../data';
+import TableHeaderFilter from './TableHeaderFilter';
 import moment from 'moment';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
+import { ColumnsConfig } from './MetricTableColumnRender';
 import styles from './style.less';
 
 type Props = {
@@ -31,6 +32,8 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [dimensionItem, setDimensionItem] = useState<ISemantic.IDimensionItem>();
   const [dataSourceList, setDataSourceList] = useState<IDataSource.IDataSourceItem[]>([]);
+  const [tableData, setTableData] = useState<ISemantic.IMetricItem[]>([]);
+  const [filterParams, setFilterParams] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [dimensionValueSettingList, setDimensionValueSettingList] = useState<
@@ -38,38 +41,37 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   >([]);
   const [dimensionValueSettingModalVisible, setDimensionValueSettingModalVisible] =
     useState<boolean>(false);
-  const [pagination] = useState({
+
+  const defaultPagination = {
     current: 1,
-    pageSize: 99999,
+    pageSize: 20,
     total: 0,
-  });
+  };
+  const [pagination, setPagination] = useState(defaultPagination);
 
   const actionRef = useRef<ActionType>();
 
   const queryDimensionList = async (params: any) => {
     setLoading(true);
     const { code, data, msg } = await getDimensionList({
-      ...params,
       ...pagination,
+      ...params,
       modelId,
     });
     setLoading(false);
-    const { list } = data || {};
-    let resData: any = {};
+    const { list, pageSize, pageNum, total } = data || {};
     if (code === 200) {
-      resData = {
-        data: list || [],
-        success: true,
-      };
+      setPagination({
+        ...pagination,
+        pageSize: Math.min(pageSize, 100),
+        current: pageNum,
+        total,
+      });
+      setTableData(list);
     } else {
       message.error(msg);
-      resData = {
-        data: [],
-        total: 0,
-        success: false,
-      };
+      setTableData([]);
     }
-    return resData;
   };
 
   const queryDataSourceList = async () => {
@@ -82,23 +84,12 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   };
 
   useEffect(() => {
+    queryDimensionList({ ...filterParams, ...defaultPagination });
+  }, [filterParams]);
+
+  useEffect(() => {
     queryDataSourceList();
   }, [modelId]);
-
-  // const updateDimensionStatus = async (dimensionData: ISemantic.IDimensionItem) => {
-  //   const { code, msg } = await updateDimension(dimensionData);
-  //   if (code === 200) {
-  //     actionRef?.current?.reload();
-  //     dispatch({
-  //       type: 'domainManger/queryDimensionList',
-  //       payload: {
-  //         modelId,
-  //       },
-  //     });
-  //     return;
-  //   }
-  //   message.error(msg);
-  // };
 
   const queryBatchUpdateStatus = async (ids: React.Key[], status: StatusEnum) => {
     if (Array.isArray(ids) && ids.length === 0) {
@@ -111,7 +102,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     });
     setLoading(false);
     if (code === 200) {
-      actionRef?.current?.reload();
+      queryDimensionList({ ...filterParams, ...defaultPagination });
       dispatch({
         type: 'domainManger/queryDimensionList',
         payload: {
@@ -127,6 +118,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'id',
       title: 'ID',
+      fixed: 'left',
       width: 80,
       order: 100,
       search: false,
@@ -135,46 +127,26 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'key',
       title: '维度搜索',
       hideInTable: true,
-      renderFormItem: () => <Input placeholder="请输入ID/维度名称/英文名称" />,
     },
     {
       dataIndex: 'name',
-      title: '维度名称',
+      title: '维度',
+      fixed: 'left',
+      width: 280,
+      render: ColumnsConfig.dimensionInfo.render,
       search: false,
-    },
-    {
-      dataIndex: 'alias',
-      title: '别名',
-      width: 150,
-      ellipsis: true,
-      search: false,
-    },
-    {
-      dataIndex: 'bizName',
-      title: '英文名称',
-      search: false,
-      // order: 9,
     },
     {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',
-      width: 80,
+      width: 150,
       valueEnum: SENSITIVE_LEVEL_ENUM,
+      render: ColumnsConfig.sensitiveLevel.render,
     },
     {
       dataIndex: 'isTag',
       title: '是否为标签',
-      // search: false,
-      renderFormItem: () => (
-        <Select
-          placeholder="请选择标签状态"
-          allowClear
-          options={[
-            { value: 1, label: '是' },
-            { value: 0, label: '否' },
-          ]}
-        />
-      ),
+      width: 120,
       render: (isTag) => {
         switch (isTag) {
           case 0:
@@ -189,27 +161,14 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     {
       dataIndex: 'status',
       title: '状态',
-      width: 80,
+      width: 150,
       search: false,
-      render: (status) => {
-        switch (status) {
-          case StatusEnum.ONLINE:
-            return <Tag color="success">已启用</Tag>;
-          case StatusEnum.OFFLINE:
-            return <Tag color="warning">未启用</Tag>;
-          case StatusEnum.INITIALIZED:
-            return <Tag color="processing">初始化</Tag>;
-          case StatusEnum.DELETED:
-            return <Tag color="default">已删除</Tag>;
-          default:
-            return <Tag color="default">未知</Tag>;
-        }
-      },
+      render: ColumnsConfig.state.render,
     },
     {
       dataIndex: 'createdBy',
       title: '创建人',
-      width: 100,
+      width: 180,
       search: false,
     },
 
@@ -217,6 +176,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'description',
       title: '描述',
       search: false,
+      render: ColumnsConfig.description.render,
     },
 
     {
@@ -233,7 +193,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '操作',
       dataIndex: 'x',
       valueType: 'option',
-      width: 200,
+      width: 250,
       render: (_, record) => {
         return (
           <Space className={styles.ctrlBtnContainer}>
@@ -292,7 +252,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
                 const { code, msg } = await deleteDimension(record.id);
                 if (code === 200) {
                   setDimensionItem(undefined);
-                  actionRef.current?.reload();
+                  queryDimensionList({ ...filterParams, ...defaultPagination });
                 } else {
                   message.error(msg);
                 }
@@ -336,27 +296,102 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   return (
     <>
       <ProTable
-        className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft}`}
+        className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft}  ${styles.disabledSearchTable}`}
         actionRef={actionRef}
         rowKey="id"
         columns={columns}
-        request={queryDimensionList}
         loading={loading}
-        search={{
-          defaultCollapsed: false,
-          collapseRender: () => {
-            return <></>;
-          },
-        }}
+        headerTitle={
+          <TableHeaderFilter
+            components={[
+              {
+                label: '维度搜索',
+                component: (
+                  <Input.Search
+                    style={{ width: 280 }}
+                    placeholder="请输入ID/维度名称/英文名称"
+                    onSearch={(value) => {
+                      setFilterParams((preState) => {
+                        return {
+                          ...preState,
+                          key: value,
+                        };
+                      });
+                    }}
+                  />
+                ),
+              },
+              {
+                label: '敏感度',
+                component: (
+                  <Select
+                    style={{ width: 140 }}
+                    options={SENSITIVE_LEVEL_OPTIONS}
+                    placeholder="请选择敏感度"
+                    allowClear
+                    onChange={(value) => {
+                      setFilterParams((preState) => {
+                        return {
+                          ...preState,
+                          sensitiveLevel: value,
+                        };
+                      });
+                    }}
+                  />
+                ),
+              },
+              {
+                label: '标签状态',
+                component: (
+                  <Select
+                    style={{ width: 145 }}
+                    placeholder="请选择标签状态"
+                    allowClear
+                    onChange={(value) => {
+                      setFilterParams((preState) => {
+                        return {
+                          ...preState,
+                          isTag: value,
+                        };
+                      });
+                    }}
+                    options={[
+                      { value: 1, label: '是' },
+                      { value: 0, label: '否' },
+                    ]}
+                  />
+                ),
+              },
+            ]}
+          />
+        }
+        search={false}
+        // search={{
+        //   optionRender: false,
+        //   collapsed: false,
+        // }}
         rowSelection={{
           type: 'checkbox',
           ...rowSelection,
         }}
+        dataSource={tableData}
+        pagination={pagination}
         tableAlertRender={() => {
           return false;
         }}
-        size="small"
+        size="large"
+        scroll={{ x: 1500 }}
         options={{ reload: false, density: false, fullScreen: false }}
+        onChange={(data: any) => {
+          const { current, pageSize, total } = data;
+          const currentPagin = {
+            current,
+            pageSize,
+            total,
+          };
+          setPagination(currentPagin);
+          queryDimensionList({ ...filterParams, ...currentPagin });
+        }}
         toolBarRender={() => [
           <Button
             key="create"
@@ -388,7 +423,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           dataSourceList={dataSourceList}
           onSubmit={() => {
             setCreateModalVisible(false);
-            actionRef?.current?.reload();
+            queryDimensionList({ ...filterParams, ...defaultPagination });
             dispatch({
               type: 'domainManger/queryDimensionList',
               payload: {
@@ -417,7 +452,7 @@ const ClassDimensionTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             setDimensionValueSettingModalVisible(false);
           }}
           onSubmit={() => {
-            actionRef?.current?.reload();
+            queryDimensionList({ ...filterParams, ...defaultPagination });
             dispatch({
               type: 'domainManger/queryDimensionList',
               payload: {

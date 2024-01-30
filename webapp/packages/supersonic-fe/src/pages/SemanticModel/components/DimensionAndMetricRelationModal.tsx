@@ -11,6 +11,7 @@ type Props = {
   metricItem?: ISemantic.IMetricItem;
   relationsInitialValue?: ISemantic.IDrillDownDimensionItem[];
   onSubmit: (relations: ISemantic.IDrillDownDimensionItem[]) => void;
+  onRefreshRelationData?: () => void;
 };
 
 const DimensionAndMetricRelationModal: React.FC<Props> = ({
@@ -19,6 +20,7 @@ const DimensionAndMetricRelationModal: React.FC<Props> = ({
   relationsInitialValue,
   onCancel,
   onSubmit,
+  onRefreshRelationData,
 }) => {
   const [relationList, setRelationList] = useState<ISemantic.IDrillDownDimensionItem[]>([]);
 
@@ -30,9 +32,11 @@ const DimensionAndMetricRelationModal: React.FC<Props> = ({
         drillDownDimensions: relationList,
       },
     };
+
     const { code, msg } = await updateMetric(queryParams);
     if (code === 200) {
       onSubmit(relationList);
+      onRefreshRelationData?.();
       return;
     }
     message.error(msg);

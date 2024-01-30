@@ -75,42 +75,45 @@
         line-height: 34px;
         text-align: right;
         background: #fff;
-        // border-bottom: 1px solid #d9d9d9;
-    
+
         .title {
           float: left;
         }
-    
-    
       }
-    
       .search {
-        // width: calc(100% - 100px);
-        width: 100%;
-        margin: 10px 0 10px 10px;
+        width: 205px;
+        margin: 10px 0 10px 16px;
       }
     
       .tree {
         flex: 1;
         padding: 10px;
-    
+        padding-right: 18px;
         .projectItem {
           display: flex;
           width: 100%;
           cursor: auto;
-          line-height: 30px;
-          height: 30px;
+          line-height: 25px;
+          height: 25px;
+          color: rgb(95, 116, 141);
+          font-weight: 500;
           .projectItemTitle {
-            font-size: 16px;
+            font-size: 15px;
             flex: 1;
             cursor: pointer;
-
           }
-    
           .operation {
             .icon {
               margin-left: 6px;
               cursor: pointer;
+            }
+          }
+          .rowHover {
+            display: none;
+          }
+          &:hover {
+            .rowHover {
+              display: block;
             }
           }
         }
@@ -179,6 +182,8 @@
         }
         .ant-tabs-tab {
           padding-bottom:15px;
+          color: rgb(95, 116, 141);
+          font-weight: 500;
         }
       }
       .backBtn {
@@ -236,6 +241,10 @@
   }
 }
 
+
+.disabledSearchTable {
+  padding-top:20px;
+}
 
 .classTable {
   // padding: 0 20px;
@@ -418,5 +427,16 @@
   color: #101828;
   &:hover {
     color: #69b1ff;
+  }
+}
+
+.tableHeaderTitle {
+  margin-left: 20px;
+  .headerTitleLabel {
+    color: #667085;
+    font-size: 14px;
+    font-weight: 400;
+    width: max-content;
+    display: flex;
   }
 }

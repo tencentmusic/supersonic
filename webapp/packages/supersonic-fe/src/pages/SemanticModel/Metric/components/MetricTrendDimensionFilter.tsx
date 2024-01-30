@@ -5,15 +5,17 @@ import RemoteSelect, { RemoteSelectImperativeHandle } from '@/components/RemoteS
 import { queryDimValue } from '@/pages/SemanticModel/service';
 import { OperatorEnum } from '@/pages/SemanticModel/enum';
 import { isString } from 'lodash';
+import { isArrayOfValues } from '@/utils/utils';
 
 const FormItem = Form.Item;
 
 type Props = {
-  dimensionOptions: OptionsItem[];
+  dimensionOptions: (OptionsItem & { modelId: number })[];
   modelId: number;
   periodDate?: { startDate: string; endDate: string; dateField: string };
   value?: FormData;
   onChange?: (value: FormData) => void;
+  afterSolt?: React.ReactNode;
 };
 
 export type FormData = {
@@ -24,16 +26,15 @@ export type FormData = {
 
 const MetricTrendDimensionFilter: React.FC<Props> = ({
   dimensionOptions,
-  modelId,
   value,
   periodDate,
+  afterSolt,
   onChange,
 }) => {
   const [form] = Form.useForm();
   const dimensionValueSearchRef = useRef<RemoteSelectImperativeHandle>();
   const queryParams = useRef<{ dimensionBizName?: string }>({});
   const [formData, setFormData] = useState<FormData>({ operator: OperatorEnum.IN } as FormData);
-
   useEffect(() => {
     if (!value) {
       return;
@@ -59,7 +60,10 @@ const MetricTrendDimensionFilter: React.FC<Props> = ({
       return;
     }
     const { dimensionBizName } = queryParams.current;
-    const targetOptions = dimensionOptions.find((item) => item.value === dimensionBizName) || {};
+    const targetOptions = dimensionOptions.find((item) => item.value === dimensionBizName);
+    if (!targetOptions) {
+      return;
+    }
     const { code, data } = await queryDimValue({
       ...queryParams.current,
       value: searchValue,
@@ -95,7 +99,6 @@ const MetricTrendDimensionFilter: React.FC<Props> = ({
       }}
       onValuesChange={(value, values) => {
         const { operator, dimensionValue } = values;
-
         if (multipleValueOperator.includes(operator) && isString(dimensionValue)) {
           const tempDimensionValue = [dimensionValue];
           setFormData({ ...values, dimensionValue: tempDimensionValue });
@@ -152,12 +155,14 @@ const MetricTrendDimensionFilter: React.FC<Props> = ({
           <Button
             type="primary"
             icon={<PlusOutlined />}
+            disabled={!(formData.dimensionBizName && isArrayOfValues(formData.dimensionValue))}
             onClick={() => {
               const formValues = form.getFieldsValue();
               onChange?.(formValues);
             }}
           />
         </Tooltip>
+        {afterSolt}
       </Space>
     </Form>
   );

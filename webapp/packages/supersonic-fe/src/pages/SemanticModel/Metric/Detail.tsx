@@ -1,13 +1,15 @@
-import { message } from 'antd';
+import { message, Tabs, Button, Space } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { getMetricData, getDimensionList, getDrillDownDimension } from '../service';
-import { connect, useParams } from 'umi';
+import { connect, useParams, history } from 'umi';
 import type { StateType } from '../model';
 import styles from './style.less';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import MetricTrendSection from '@/pages/SemanticModel/Metric/components/MetricTrendSection';
 import { ISemantic } from '../data';
 import DimensionAndMetricRelationModal from '../components/DimensionAndMetricRelationModal';
 import MetricInfoSider from './MetricInfoSider';
+import type { TabsProps } from 'antd';
 
 type Props = Record<string, any>;
 
@@ -17,6 +19,9 @@ const MetricDetail: React.FC<Props> = () => {
   const [metricRelationModalOpenState, setMetricRelationModalOpenState] = useState<boolean>(false);
   const [metircData, setMetircData] = useState<ISemantic.IMetricItem>();
   const [dimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>([]);
+  const [drillDownDimension, setDrillDownDimension] = useState<ISemantic.IDrillDownDimensionItem[]>(
+    [],
+  );
   const [relationDimensionOptions, setRelationDimensionOptions] = useState<
     { value: string; label: string; modelId: number }[]
   >([]);
@@ -38,6 +43,7 @@ const MetricDetail: React.FC<Props> = () => {
   const queryDrillDownDimension = async (metricId: number) => {
     const { code, data, msg } = await getDrillDownDimension(metricId);
     if (code === 200 && Array.isArray(data)) {
+      setDrillDownDimension(data);
       const ids = data.map((item) => item.dimensionId);
       queryDimensionList(ids);
       return data;
@@ -70,15 +76,57 @@ const MetricDetail: React.FC<Props> = () => {
     return [];
   };
 
+  const tabItems: TabsProps['items'] = [
+    {
+      key: 'metricTrend',
+      label: '图表',
+      children: (
+        <MetricTrendSection
+          metircData={metircData}
+          relationDimensionOptions={relationDimensionOptions}
+          dimensionList={dimensionList}
+        />
+      ),
+    },
+    // {
+    //   key: 'metricCaliberInput',
+    //   label: '基础信息',
+    //   children: <></>,
+    // },
+    // {
+    //   key: 'metricDataRemark',
+    //   label: '备注',
+    //   children: <></>,
+    // },
+  ];
+
   return (
     <>
       <div className={styles.metricDetailWrapper}>
         <div className={styles.metricDetail}>
           <div className={styles.tabContainer}>
-            <MetricTrendSection
-              metircData={metircData}
-              relationDimensionOptions={relationDimensionOptions}
-              dimensionList={dimensionList}
+            <Tabs
+              defaultActiveKey="metricTrend"
+              items={tabItems}
+              tabBarExtraContent={{
+                right: (
+                  <Button
+                    size="middle"
+                    type="link"
+                    key="backListBtn"
+                    onClick={() => {
+                      history.push('/metric/market');
+                    }}
+                  >
+                    <Space>
+                      <ArrowLeftOutlined />
+                      返回列表页
+                    </Space>
+                  </Button>
+                ),
+              }}
+              size="large"
+              className={styles.metricDetailTab}
             />
           </div>
           <div className={styles.siderContainer}>
@@ -91,20 +139,20 @@ const MetricDetail: React.FC<Props> = () => {
             />
           </div>
         </div>
+        <DimensionAndMetricRelationModal
+          metricItem={metircData}
+          relationsInitialValue={drillDownDimension}
+          open={metricRelationModalOpenState}
+          onCancel={() => {
+            setMetricRelationModalOpenState(false);
+          }}
+          onSubmit={(relations) => {
+            queryMetricData(metricId);
+            queryDrillDownDimension(metricId);
+            setMetricRelationModalOpenState(false);
+          }}
+        />
       </div>
-      <DimensionAndMetricRelationModal
-        metricItem={metircData}
-        relationsInitialValue={metircData?.relateDimension?.drillDownDimensions}
-        open={metricRelationModalOpenState}
-        onCancel={() => {
-          setMetricRelationModalOpenState(false);
-        }}
-        onSubmit={(relations) => {
-          queryMetricData(metricId);
-          queryDrillDownDimension(metricId);
-          setMetricRelationModalOpenState(false);
-        }}
-      />
     </>
   );
 };

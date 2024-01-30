@@ -98,11 +98,11 @@ const MetricFilter: React.FC<Props> = ({ initFilterValues = {}, onFiltersChange 
         </div>
       </StandardFormRow>
       <Space size={40}>
-        <StandardFormRow key="showType" title="切换为卡片" block>
+        {/* <StandardFormRow key="showType" title="切换为卡片" block>
           <FormItem name="showType" valuePropName="checked">
             <Switch size="small" />
           </FormItem>
-        </StandardFormRow>
+        </StandardFormRow> */}
         {/* <StandardFormRow key="onlyShowMe" title="仅显示我的" block>
           <FormItem name="onlyShowMe" valuePropName="checked">
             <Switch size="small" />

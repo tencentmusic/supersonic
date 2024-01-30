@@ -139,6 +139,31 @@ export declare namespace ISemantic {
     updatedAt: ISODateString;
   }
 
+  interface IViewModelConfigItem {
+    id: number;
+    includesAll: boolean;
+    metrics: number[];
+    dimensions: number[];
+  }
+
+  interface IViewItem {
+    createdBy: UserName;
+    updatedBy: UserName;
+    createdAt: ISODateString;
+    updatedAt: ISODateString;
+    id: number;
+    name: string;
+    bizName: string;
+    description: string;
+    status?: StatusEnum;
+    typeEnum?: any;
+    sensitiveLevel: number;
+    domainId: number;
+    viewDetail: {
+      viewModelConfigs: IViewModelConfigItem[];
+    };
+  }
+
   interface IDimensionItem {
     createdBy: string;
     updatedBy: string;
@@ -209,6 +234,7 @@ export declare namespace ISemantic {
 
   interface IDrillDownDimensionItem {
     dimensionId: number;
+    inheritFromModel?: boolean;
     necessary?: boolean;
   }
 

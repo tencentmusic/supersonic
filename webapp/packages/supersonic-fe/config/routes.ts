@@ -40,13 +40,7 @@ const ROUTES = [
     name: 'semanticModel',
     envEnableList: [ENV_KEY.SEMANTIC],
   },
-  {
-    path: '/database',
-    name: 'database',
-    hideInMenu: true,
-    component: './SemanticModel/components/Database/DatabaseTable',
-    envEnableList: [ENV_KEY.SEMANTIC],
-  },
+
   {
     path: '/metric',
     name: 'metric',
@@ -84,6 +78,13 @@ const ROUTES = [
     layout: false,
     hideInMenu: true,
     component: './Login',
+  },
+  {
+    path: '/database',
+    name: 'database',
+    // hideInMenu: true,
+    component: './SemanticModel/components/Database/DatabaseTable',
+    envEnableList: [ENV_KEY.SEMANTIC],
   },
   {
     path: '/system',
