@@ -82,9 +82,10 @@ public class ChatConfigController {
         return semanticInterpreter.getDomainList(user);
     }
 
-    @GetMapping("/viewList/{domainId}")
-    public List<ViewResp> getViewList(@PathVariable("domainId") Long domainId) {
-        return semanticInterpreter.getViewList(domainId);
+    @GetMapping("/viewList")
+    public List<ViewResp> getViewList() {
+        //Compatible with front-end
+        return semanticInterpreter.getViewList(null);
     }
 
     @PostMapping("/dimension/page")
