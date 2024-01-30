@@ -36,7 +36,7 @@ public class ViewResp extends SchemaItem {
     }
 
     public List<Long> getAllDimensions() {
-        return getViewModelConfigs().stream().map(ViewModelConfig::getMetrics)
+        return getViewModelConfigs().stream().map(ViewModelConfig::getDimensions)
                 .flatMap(Collection::stream).collect(Collectors.toList());
     }
 
