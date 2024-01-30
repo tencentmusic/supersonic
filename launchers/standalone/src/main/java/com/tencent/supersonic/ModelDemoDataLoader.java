@@ -451,9 +451,9 @@ public class ModelDemoDataLoader {
         viewReq.setDescription("包含超音数访问统计相关的指标和维度等");
         viewReq.setAdmins(Lists.newArrayList("admin"));
         List<ViewModelConfig> viewModelConfigs = Lists.newArrayList(
-                new ViewModelConfig(1L, true),
-                new ViewModelConfig(2L, true),
-                new ViewModelConfig(3L, true));
+                new ViewModelConfig(1L, Lists.newArrayList(1L, 2L), Lists.newArrayList()),
+                new ViewModelConfig(2L, Lists.newArrayList(), Lists.newArrayList(1L, 2L, 3L)),
+                new ViewModelConfig(3L, Lists.newArrayList(3L), Lists.newArrayList(4L)));
 
         ViewDetail viewDetail = new ViewDetail();
         viewDetail.setViewModelConfigs(viewModelConfigs);
@@ -477,8 +477,10 @@ public class ModelDemoDataLoader {
         viewReq.setDomainId(2L);
         viewReq.setDescription("包含艺人相关标签和指标信息");
         viewReq.setAdmins(Lists.newArrayList("admin"));
-        List<ViewModelConfig> viewModelConfigs =
-                Lists.newArrayList(new ViewModelConfig(4L, true));
+        List<ViewModelConfig> viewModelConfigs = Lists.newArrayList(
+                new ViewModelConfig(4L, Lists.newArrayList(4L, 5L, 6L, 7L),
+                        Lists.newArrayList(5L, 6L, 7L))
+        );
         ViewDetail viewDetail = new ViewDetail();
         viewDetail.setViewModelConfigs(viewModelConfigs);
         viewReq.setViewDetail(viewDetail);
