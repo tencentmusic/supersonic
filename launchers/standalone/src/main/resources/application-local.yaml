@@ -17,6 +17,10 @@ demo:
 
 server:
   port: 9080
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: application/javascript,application/json,application/xml,text/html,text/xml,text/plain,text/css,image/*
 
 authentication:
   enable: true

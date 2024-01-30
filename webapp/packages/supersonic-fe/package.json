@@ -73,6 +73,7 @@
     "ahooks": "^3.7.7",
     "antd": "^5.11.0",
     "classnames": "^2.2.6",
+    "compression-webpack-plugin": "^11.0.0",
     "copy-to-clipboard": "^3.3.1",
     "cross-env": "^7.0.3",
     "crypto-js": "^4.0.0",

@@ -42,32 +42,28 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
     @Override
     public SemanticQueryResp queryByStruct(QueryStructReq queryStructReq, User user) {
         if (StringUtils.isNotBlank(queryStructReq.getCorrectS2SQL())) {
-            QuerySqlReq querySQLReq = new QuerySqlReq();
-            querySQLReq.setSql(queryStructReq.getCorrectS2SQL());
-            querySQLReq.setModelIds(queryStructReq.getModelIdSet());
-            querySQLReq.setParams(new ArrayList<>());
-            return queryByS2SQL(querySQLReq, user);
+            QuerySqlReq querySqlReq = new QuerySqlReq();
+            querySqlReq.setSql(queryStructReq.getCorrectS2SQL());
+            querySqlReq.setModelIds(queryStructReq.getModelIdSet());
+            querySqlReq.setParams(new ArrayList<>());
+            return queryByS2SQL(querySqlReq, user);
         }
         queryService = ContextUtils.getBean(QueryService.class);
-        return queryService.queryByStructWithAuth(queryStructReq, user);
-    }
-
-    @Override
-    public SemanticQueryResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user) {
-        try {
-            queryService = ContextUtils.getBean(QueryService.class);
-            return queryService.queryByMultiStruct(queryMultiStructReq, user);
-        } catch (Exception e) {
-            log.info("queryByMultiStruct has an exception:{}", e);
-        }
-        return null;
+        return queryService.queryByReq(queryStructReq, user);
     }
 
     @Override
     @SneakyThrows
-    public SemanticQueryResp queryByS2SQL(QuerySqlReq querySQLReq, User user) {
+    public SemanticQueryResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user) {
         queryService = ContextUtils.getBean(QueryService.class);
-        SemanticQueryResp object = queryService.queryBySql(querySQLReq, user);
+        return queryService.queryByReq(queryMultiStructReq, user);
+    }
+
+    @Override
+    @SneakyThrows
+    public SemanticQueryResp queryByS2SQL(QuerySqlReq querySqlReq, User user) {
+        queryService = ContextUtils.getBean(QueryService.class);
+        SemanticQueryResp object = queryService.queryByReq(querySqlReq, user);
         return JsonUtil.toObject(JsonUtil.toString(object), SemanticQueryResp.class);
     }
 

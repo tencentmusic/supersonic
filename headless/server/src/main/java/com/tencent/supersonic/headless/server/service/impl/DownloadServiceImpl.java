@@ -74,7 +74,7 @@ public class DownloadServiceImpl implements DownloadService {
         File file = FileUtils.createTmpFile(fileName);
         try {
             QuerySqlReq querySqlReq = downloadStructReq.convert(downloadStructReq, true);
-            SemanticQueryResp queryResult = (SemanticQueryResp) queryService.queryBySql(querySqlReq, user);
+            SemanticQueryResp queryResult = (SemanticQueryResp) queryService.queryByReq(querySqlReq, user);
             DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
             EasyExcel.write(file).sheet("Sheet1").head(dataDownload.getHeaders()).doWrite(dataDownload.getData());
         } catch (RuntimeException e) {
@@ -114,7 +114,7 @@ public class DownloadServiceImpl implements DownloadService {
             for (MetricSchemaResp metric : metrics) {
                 try {
                     DownloadStructReq downloadStructReq = buildDownloadStructReq(dimensions, metric, batchDownloadReq);
-                    SemanticQueryResp queryResult = queryService.queryByStructWithAuth(downloadStructReq, user);
+                    SemanticQueryResp queryResult = queryService.queryByReq(downloadStructReq, user);
                     DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
                     WriteSheet writeSheet = EasyExcel.writerSheet("Sheet" + sheetCount)
                             .head(dataDownload.getHeaders()).build();

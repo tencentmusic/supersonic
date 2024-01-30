@@ -9,6 +9,6 @@ import java.lang.annotation.Documented;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface S2SQLDataPermission {
+public @interface S2DataPermission {
 
 }

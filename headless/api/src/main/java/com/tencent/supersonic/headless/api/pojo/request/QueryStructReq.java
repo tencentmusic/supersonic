@@ -272,7 +272,8 @@ public class QueryStructReq extends SemanticQueryReq {
     }
 
     public String getModelName() {
-        return Objects.nonNull(modelName) ? modelName : "m_" + String.valueOf(StringUtils.join(modelIds, "_"));
+        return Objects.nonNull(modelName) ? modelName :
+                Constants.TABLE_PREFIX + StringUtils.join(modelIds, "_");
     }
 
 }

@@ -17,13 +17,14 @@ import org.apache.commons.codec.digest.DigestUtils;
 @Slf4j
 public abstract class SemanticQueryReq {
 
-    protected Set<Long> modelIds;
+    protected boolean needAuth = true;
+
+    protected Set<Long> modelIds = new HashSet<>();
     protected List<Param> params = new ArrayList<>();
 
     protected Cache cacheInfo = new Cache();
 
-    public void setModelId(Long modelId) {
-        modelIds = new HashSet<>();
+    public void addModelId(Long modelId) {
         modelIds.add(modelId);
     }
 
@@ -45,4 +46,11 @@ public abstract class SemanticQueryReq {
         return modelIds;
     }
 
+    public boolean isNeedAuth() {
+        return needAuth;
+    }
+
+    public void setNeedAuth(boolean needAuth) {
+        this.needAuth = needAuth;
+    }
 }

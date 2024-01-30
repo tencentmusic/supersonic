@@ -38,7 +38,7 @@ public interface SemanticInterpreter {
 
     SemanticQueryResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user);
 
-    SemanticQueryResp queryByS2SQL(QuerySqlReq querySQLReq, User user);
+    SemanticQueryResp queryByS2SQL(QuerySqlReq querySqlReq, User user);
 
     SemanticQueryResp queryDimValue(QueryDimValueReq queryDimValueReq, User user);
 
