@@ -169,3 +169,24 @@ CREATE TABLE `s2_app`
 --20240115
 alter table s2_metric add column `define_type` varchar(50)  DEFAULT NULL; -- MEASURE, FIELD, METRIC
 update s2_metric set define_type = 'MEASURE';
+
+--20240129
+CREATE TABLE s2_view(
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    domain_id   BIGINT,
+    `name`      VARCHAR(255),
+    biz_name    VARCHAR(255),
+    `description` VARCHAR(255),
+    `status`      INT,
+    alias       VARCHAR(255),
+    view_detail text,
+    created_at  datetime,
+    created_by  VARCHAR(255),
+    updated_at  datetime,
+    updated_by  VARCHAR(255)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+alter table s2_plugin change column model `view` varchar(100);
+alter table s2_view_info rename to s2_canvas;
+
+alter table s2_query_stat_info add column `view_id` bigint(20) DEFAULT NULL after `model_id`;

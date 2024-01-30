@@ -2,9 +2,6 @@
 package com.tencent.supersonic.chat.core.query.rule;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
-import com.tencent.supersonic.chat.core.pojo.ChatContext;
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
@@ -14,17 +11,19 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
+import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
+import com.tencent.supersonic.chat.core.pojo.ChatContext;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.query.BaseSemanticQuery;
+import com.tencent.supersonic.chat.core.query.QueryManager;
 import com.tencent.supersonic.chat.core.utils.ComponentFactory;
 import com.tencent.supersonic.chat.core.utils.QueryReqBuilder;
-import com.tencent.supersonic.chat.core.query.QueryManager;
-import com.tencent.supersonic.common.pojo.ModelCluster;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -103,11 +102,9 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     }
 
     private void fillSchemaElement(SemanticParseInfo parseInfo, SemanticSchema semanticSchema) {
-        Set<Long> modelIds = parseInfo.getElementMatches().stream().map(SchemaElementMatch::getElement)
-                .map(SchemaElement::getModel).collect(Collectors.toSet());
-        ModelCluster modelCluster = ModelCluster.build(modelIds);
-        modelCluster.buildName(semanticSchema.getModelIdToName());
-        parseInfo.setModel(modelCluster);
+        Set<Long> viewIds = parseInfo.getElementMatches().stream().map(SchemaElementMatch::getElement)
+                .map(SchemaElement::getView).collect(Collectors.toSet());
+        parseInfo.setView(semanticSchema.getView(viewIds.iterator().next()));
         Map<Long, List<SchemaElementMatch>> dim2Values = new HashMap<>();
         Map<Long, List<SchemaElementMatch>> id2Values = new HashMap<>();
 
@@ -192,7 +189,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     public QueryResult execute(User user) {
         String queryMode = parseInfo.getQueryMode();
 
-        if (StringUtils.isBlank(parseInfo.getModelClusterKey()) || StringUtils.isEmpty(queryMode)
+        if (parseInfo.getViewId() == null || StringUtils.isEmpty(queryMode)
                 || !QueryManager.containsRuleQuery(queryMode)) {
             // reach here some error may happen
             log.error("not find QueryMode");
@@ -233,7 +230,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     public QueryResult multiStructExecute(User user) {
         String queryMode = parseInfo.getQueryMode();
 
-        if (StringUtils.isBlank(parseInfo.getModelClusterKey()) || StringUtils.isEmpty(queryMode)
+        if (parseInfo.getViewId() != null || StringUtils.isEmpty(queryMode)
                 || !QueryManager.containsRuleQuery(queryMode)) {
             // reach here some error may happen
             log.error("not find QueryMode");

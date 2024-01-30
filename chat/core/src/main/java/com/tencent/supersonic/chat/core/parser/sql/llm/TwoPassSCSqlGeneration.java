@@ -11,16 +11,17 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 public class TwoPassSCSqlGeneration implements SqlGeneration, InitializingBean {
@@ -39,9 +40,9 @@ public class TwoPassSCSqlGeneration implements SqlGeneration, InitializingBean {
     private SqlPromptGenerator sqlPromptGenerator;
 
     @Override
-    public LLMResp generation(LLMReq llmReq, String modelClusterKey) {
+    public LLMResp generation(LLMReq llmReq, Long viewId) {
         //1.retriever sqlExamples and generate exampleListPool
-        keyPipelineLog.info("modelClusterKey:{},llmReq:{}", modelClusterKey, llmReq);
+        keyPipelineLog.info("viewId:{},llmReq:{}", viewId, llmReq);
         List<Map<String, String>> sqlExamples = sqlExamplarLoader.retrieverSqlExamples(llmReq.getQueryText(),
                 optimizationConfig.getText2sqlCollectionName(), optimizationConfig.getText2sqlExampleNum());
 

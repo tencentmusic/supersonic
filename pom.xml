@@ -51,7 +51,7 @@
         <mybatis.plus.version>3.1.2</mybatis.plus.version>
         <clickhouse.jdbc.version>0.4.6</clickhouse.jdbc.version>
         <h2.version>1.4.200</h2.version>
-        <fastjson.version>2.0.24</fastjson.version>
+        <fastjson.version>2.0.40</fastjson.version>
         <dozer.verson>6.5.0</dozer.verson>
         <httpmime.version>4.5.6</httpmime.version>
         <transmittable.version>2.12.1</transmittable.version>

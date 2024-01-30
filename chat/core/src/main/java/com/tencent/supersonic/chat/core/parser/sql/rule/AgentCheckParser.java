@@ -11,11 +11,11 @@ import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.query.QueryManager;
 import com.tencent.supersonic.chat.core.query.SemanticQuery;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class AgentCheckParser implements SemanticParser {
@@ -52,16 +52,13 @@ public class AgentCheckParser implements SemanticParser {
                         return !tool.getQueryTypes().contains(QueryType.METRIC.name());
                     }
                 }
-                if (CollectionUtils.isEmpty(tool.getModelIds())) {
+                if (CollectionUtils.isEmpty(tool.getViewIds())) {
                     return true;
                 }
                 if (tool.isContainsAllModel()) {
                     return false;
                 }
-                if (new HashSet<>(tool.getModelIds())
-                        .containsAll(query.getParseInfo().getModel().getModelIds())) {
-                    return false;
-                }
+                return !tool.getViewIds().contains(query.getParseInfo().getViewId());
             }
             return true;
         });

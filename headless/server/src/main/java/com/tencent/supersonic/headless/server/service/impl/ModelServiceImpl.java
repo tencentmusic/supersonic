@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
-import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
@@ -14,29 +13,19 @@ import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.pojo.request.DateInfoReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.FieldRemovedReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
-import com.tencent.supersonic.headless.server.manager.DimensionYamlManager;
-import com.tencent.supersonic.headless.server.manager.MetricYamlManager;
-import com.tencent.supersonic.headless.server.manager.ModelYamlManager;
-import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DateInfoDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
@@ -49,6 +38,7 @@ import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.ViewService;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -67,7 +57,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -90,6 +79,8 @@ public class ModelServiceImpl implements ModelService {
 
     private UserService userService;
 
+    private ViewService viewService;
+
     private DateInfoRepository dateInfoRepository;
 
     public ModelServiceImpl(ModelRepository modelRepository,
@@ -99,6 +90,7 @@ public class ModelServiceImpl implements ModelService {
                             ModelRelaService modelRelaService,
                             DomainService domainService,
                             UserService userService,
+                            ViewService viewService,
                             DateInfoRepository dateInfoRepository) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
@@ -107,6 +99,7 @@ public class ModelServiceImpl implements ModelService {
         this.domainService = domainService;
         this.modelRelaService = modelRelaService;
         this.userService = userService;
+        this.viewService = viewService;
         this.dateInfoRepository = dateInfoRepository;
     }
 
@@ -153,8 +146,16 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public List<ModelResp> getModelList(ModelFilter modelFilter) {
-        return ModelConverter.convertList(modelRepository.getModelList(modelFilter));
+    public List<ModelResp> getModelList(MetaFilter metaFilter) {
+        ModelFilter modelFilter = new ModelFilter();
+        BeanUtils.copyProperties(metaFilter, modelFilter);
+        List<ModelResp> modelResps = ModelConverter.convertList(modelRepository.getModelList(modelFilter));
+        if (modelFilter.getViewId() != null) {
+            ViewResp viewResp = viewService.getView(modelFilter.getViewId());
+            return modelResps.stream().filter(modelResp -> viewResp.getAllModels().contains(modelResp.getId()))
+                    .collect(Collectors.toList());
+        }
+        return modelResps;
     }
 
     @Override
@@ -384,52 +385,6 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public ModelSchemaResp fetchSingleModelSchema(Long modelId) {
-        ModelResp modelResp = getModel(modelId);
-        ModelSchemaResp modelSchemaResp = new ModelSchemaResp();
-        BeanUtils.copyProperties(modelResp, modelSchemaResp);
-        modelSchemaResp.setDimensions(generateDimSchema(modelId));
-        modelSchemaResp.setMetrics(generateMetricSchema(modelId, modelResp));
-        return modelSchemaResp;
-    }
-
-    @Override
-    public List<ModelSchemaResp> fetchModelSchema(ModelSchemaFilterReq modelSchemaFilterReq) {
-        List<ModelSchemaResp> modelSchemaRespList = new ArrayList<>();
-        List<Long> modelIds = modelSchemaFilterReq.getModelIds();
-        if (CollectionUtils.isEmpty(modelIds)) {
-            modelIds = generateModelIdsReq(modelSchemaFilterReq);
-        }
-        MetaFilter metaFilter = new MetaFilter(modelIds);
-        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
-        Map<Long, List<MetricResp>> metricRespMap = metricService.getMetrics(metaFilter)
-                .stream().collect(Collectors.groupingBy(MetricResp::getModelId));
-        Map<Long, List<DimensionResp>> dimensionRespsMap = dimensionService.getDimensions(metaFilter)
-                .stream().collect(Collectors.groupingBy(DimensionResp::getModelId));
-        List<ModelRela> modelRelas = modelRelaService.getModelRela(modelIds);
-        for (Long modelId : modelIds) {
-            ModelResp modelResp = getModelMap().get(modelId);
-            if (modelResp == null || !StatusEnum.ONLINE.getCode().equals(modelResp.getStatus())) {
-                continue;
-            }
-            List<MetricResp> metricResps = metricRespMap.getOrDefault(modelId, Lists.newArrayList());
-            List<MetricSchemaResp> metricSchemaResps = metricResps.stream().map(metricResp ->
-                    convert(metricResp, modelResp)).collect(Collectors.toList());
-            List<DimSchemaResp> dimensionResps = dimensionRespsMap.getOrDefault(modelId, Lists.newArrayList())
-                    .stream().map(this::convert).collect(Collectors.toList());
-            ModelSchemaResp modelSchemaResp = new ModelSchemaResp();
-            BeanUtils.copyProperties(modelResp, modelSchemaResp);
-            modelSchemaResp.setDimensions(dimensionResps);
-            modelSchemaResp.setMetrics(metricSchemaResps);
-            modelSchemaResp.setModelRelas(modelRelas.stream().filter(modelRela
-                    -> modelRela.getFromModelId().equals(modelId) || modelRela.getToModelId().equals(modelId))
-                    .collect(Collectors.toList()));
-            modelSchemaRespList.add(modelSchemaResp);
-        }
-        return modelSchemaRespList;
-    }
-
-    @Override
     public DatabaseResp getDatabaseByModelId(Long modelId) {
         ModelResp modelResp = getModel(modelId);
         if (modelResp != null) {
@@ -464,37 +419,6 @@ public class ModelServiceImpl implements ModelService {
         return modelRepository.getModelById(id);
     }
 
-    private List<MetricSchemaResp> generateMetricSchema(Long modelId, ModelResp modelResp) {
-        List<MetricSchemaResp> metricSchemaDescList = new ArrayList<>();
-        List<MetricResp> metricResps = metricService.getMetrics(new MetaFilter(Lists.newArrayList(modelId)));
-        metricResps.forEach(metricResp -> metricSchemaDescList.add(convert(metricResp, modelResp)));
-        return metricSchemaDescList;
-    }
-
-    private List<DimSchemaResp> generateDimSchema(Long modelId) {
-        List<DimensionResp> dimDescList = dimensionService.getDimensions(new MetaFilter(Lists.newArrayList(modelId)));
-        return dimDescList.stream().map(this::convert).collect(Collectors.toList());
-    }
-
-    private DimSchemaResp convert(DimensionResp dimensionResp) {
-        DimSchemaResp dimSchemaResp = new DimSchemaResp();
-        BeanUtils.copyProperties(dimensionResp, dimSchemaResp);
-        dimSchemaResp.setUseCnt(0L);
-        return dimSchemaResp;
-    }
-
-    private MetricSchemaResp convert(MetricResp metricResp, ModelResp modelResp) {
-        MetricSchemaResp metricSchemaResp = new MetricSchemaResp();
-        BeanUtils.copyProperties(metricResp, metricSchemaResp);
-        RelateDimension relateDimension = metricResp.getRelateDimension();
-        if (relateDimension == null || CollectionUtils.isEmpty(relateDimension.getDrillDownDimensions())) {
-            metricSchemaResp.setRelateDimension(RelateDimension.builder()
-                    .drillDownDimensions(modelResp.getDrillDownDimensions()).build());
-        }
-        metricSchemaResp.setUseCnt(0L);
-        return metricSchemaResp;
-    }
-
     private List<DateInfoReq> convert(List<DateInfoDO> dateInfoDOList) {
         List<DateInfoReq> dateInfoCommendList = new ArrayList<>();
         dateInfoDOList.forEach(dateInfoDO -> {
@@ -504,13 +428,6 @@ public class ModelServiceImpl implements ModelService {
             dateInfoCommendList.add(dateInfoCommend);
         });
         return dateInfoCommendList;
-    }
-
-    private List<Long> generateModelIdsReq(ModelSchemaFilterReq filter) {
-        if (Objects.nonNull(filter) && !CollectionUtils.isEmpty(filter.getModelIds())) {
-            return filter.getModelIds();
-        }
-        return new ArrayList<>(getModelMap().keySet());
     }
 
     public static boolean checkAdminPermission(Set<String> orgIds, User user, ModelResp modelResp) {
@@ -559,32 +476,6 @@ public class ModelServiceImpl implements ModelService {
             }
         }
         return false;
-    }
-
-    @Override
-    public void getModelYamlTplByModelIds(Set<Long> modelIds, Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
-            List<DataModelYamlTpl> dataModelYamlTplList, List<MetricYamlTpl> metricYamlTplList,
-            Map<Long, String> modelIdName) {
-        for (Long modelId : modelIds) {
-            ModelResp modelResp = getModel(modelId);
-            modelIdName.put(modelId, modelResp.getBizName());
-            MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(modelId));
-            List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
-            metricYamlTplList.addAll(MetricYamlManager.convert2YamlObj(metricResps));
-            Long databaseId = modelResp.getDatabaseId();
-            DatabaseResp databaseResp = databaseService.getDatabase(databaseId);
-            List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
-
-            dataModelYamlTplList.add(ModelYamlManager.convert2YamlObj(modelResp, databaseResp));
-            if (!dimensionYamlMap.containsKey(modelResp.getBizName())) {
-                dimensionYamlMap.put(modelResp.getBizName(), new ArrayList<>());
-            }
-            List<DimensionResp> dimensionRespList = dimensionResps.stream()
-                    .filter(d -> d.getModelBizName().equalsIgnoreCase(modelResp.getBizName()))
-                    .collect(Collectors.toList());
-            dimensionYamlMap.get(modelResp.getBizName()).addAll(DimensionYamlManager.convert2DimensionYaml(
-                    dimensionRespList));
-        }
     }
 
 }

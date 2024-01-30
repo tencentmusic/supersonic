@@ -2,11 +2,11 @@ package com.tencent.supersonic.headless.api.pojo;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Objects;
-
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.List;
+import java.util.Objects;
 
 @Data
 @ToString
@@ -15,6 +15,8 @@ public class QueryStat {
     private Long id;
     private String traceId;
     private Long modelId;
+
+    private Long viewId;
     private String user;
     private String createdAt;
     /**
@@ -88,6 +90,11 @@ public class QueryStat {
 
     public QueryStat setModelId(Long modelId) {
         this.modelId = modelId;
+        return this;
+    }
+
+    public QueryStat setViewId(Long viewId) {
+        this.viewId = viewId;
         return this;
     }
 

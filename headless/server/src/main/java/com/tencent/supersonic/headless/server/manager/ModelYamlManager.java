@@ -1,21 +1,20 @@
 package com.tencent.supersonic.headless.server.manager;
 
-import com.tencent.supersonic.headless.api.pojo.enums.DatasourceQuery;
-import com.tencent.supersonic.headless.api.pojo.enums.ModelSourceType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
+import com.tencent.supersonic.headless.api.pojo.enums.DatasourceQuery;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
+import com.tencent.supersonic.headless.core.utils.SysTimeDimensionBuilder;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.IdentifyYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
-import com.tencent.supersonic.headless.core.utils.SysTimeDimensionBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -47,7 +46,6 @@ public class ModelYamlManager {
                 .collect(Collectors.toList()));
         dataModelYamlTpl.setName(modelResp.getBizName());
         dataModelYamlTpl.setSourceId(modelResp.getDatabaseId());
-        dataModelYamlTpl.setModelSourceTypeEnum(ModelSourceType.of(modelResp.getSourceType()));
         if (modelDetail.getQueryType().equalsIgnoreCase(DatasourceQuery.SQL_QUERY.getName())) {
             dataModelYamlTpl.setSqlQuery(modelDetail.getSqlQuery());
         } else {

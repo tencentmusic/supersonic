@@ -2,14 +2,15 @@ package com.tencent.supersonic.chat.core.parser.sql.llm;
 
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMReq.ElementValue;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
@@ -95,7 +96,7 @@ public class SqlPromptGenerator {
     }
 
     public Pair<String, String> transformQuestionPrompt(LLMReq llmReq) {
-        String modelName = llmReq.getSchema().getModelName();
+        String modelName = llmReq.getSchema().getViewName();
         List<String> fieldNameList = llmReq.getSchema().getFieldNameList();
         List<ElementValue> linking = llmReq.getLinking();
         String currentDate = llmReq.getCurrentDate();

@@ -1,22 +1,23 @@
 package com.tencent.supersonic.chat.server.processor.execute;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.ViewSchema;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.service.SemanticService;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
+import org.springframework.util.CollectionUtils;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.util.CollectionUtils;
 
 /**
  * DimensionRecommendProcessor recommend some dimensions
@@ -33,13 +34,13 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
             return;
         }
         SchemaElement element = semanticParseInfo.getMetrics().iterator().next();
-        List<SchemaElement> dimensionRecommended = getDimensions(element.getId(), element.getModel());
+        List<SchemaElement> dimensionRecommended = getDimensions(element.getId(), element.getView());
         queryResult.setRecommendedDimensions(dimensionRecommended);
     }
 
     private List<SchemaElement> getDimensions(Long metricId, Long modelId) {
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
-        ModelSchema modelSchema = semanticService.getModelSchema(modelId);
+        ViewSchema modelSchema = semanticService.getModelSchema(modelId);
         List<Long> drillDownDimensions = Lists.newArrayList();
         Set<SchemaElement> metricElements = modelSchema.getMetrics();
         if (!CollectionUtils.isEmpty(metricElements)) {

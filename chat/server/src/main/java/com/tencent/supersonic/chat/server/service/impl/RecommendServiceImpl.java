@@ -2,9 +2,9 @@ package com.tencent.supersonic.chat.server.service.impl;
 
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.ViewSchema;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.api.pojo.request.RecommendReq;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
@@ -13,6 +13,11 @@ import com.tencent.supersonic.chat.api.pojo.response.RecommendResp;
 import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.chat.server.service.RecommendService;
 import com.tencent.supersonic.chat.server.service.SemanticService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -20,10 +25,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 /***
  * Recommend Service impl
@@ -47,7 +48,7 @@ public class RecommendServiceImpl implements RecommendService {
         if (Objects.isNull(modelId)) {
             return new RecommendResp();
         }
-        ModelSchema modelSchema = semanticService.getModelSchema(modelId);
+        ViewSchema modelSchema = semanticService.getModelSchema(modelId);
         if (Objects.isNull(modelSchema)) {
             return new RecommendResp();
         }
@@ -79,7 +80,7 @@ public class RecommendServiceImpl implements RecommendService {
                 .limit(limit)
                 .map(dimSchemaDesc -> {
                     SchemaElement item = new SchemaElement();
-                    item.setModel(modelId);
+                    item.setView(modelId);
                     item.setName(dimSchemaDesc.getName());
                     item.setBizName(dimSchemaDesc.getBizName());
                     item.setId(dimSchemaDesc.getId());
@@ -93,7 +94,7 @@ public class RecommendServiceImpl implements RecommendService {
                 .limit(limit)
                 .map(metricSchemaDesc -> {
                     SchemaElement item = new SchemaElement();
-                    item.setModel(modelId);
+                    item.setView(modelId);
                     item.setName(metricSchemaDesc.getName());
                     item.setBizName(metricSchemaDesc.getBizName());
                     item.setId(metricSchemaDesc.getId());

@@ -1,8 +1,9 @@
 package com.tencent.supersonic.chat.core.query.llm.s2sql;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class LLMReq {
@@ -35,7 +36,7 @@ public class LLMReq {
 
         private String domainName;
 
-        private String modelName;
+        private String viewName;
 
         private List<String> fieldNameList;
 

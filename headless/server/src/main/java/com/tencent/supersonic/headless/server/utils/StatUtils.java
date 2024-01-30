@@ -7,18 +7,17 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.headless.api.pojo.QueryStat;
+import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryOptMode;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryTypeBack;
-import com.tencent.supersonic.headless.api.pojo.QueryStat;
-import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.server.persistence.repository.StatRepository;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import lombok.extern.slf4j.Slf4j;
@@ -101,22 +100,15 @@ public class StatUtils {
 
     public void initSqlStatInfo(QuerySqlReq querySqlReq, User facadeUser) {
         QueryStat queryStatInfo = new QueryStat();
+        List<String> aggFields = SqlParserSelectHelper.getAggregateFields(querySqlReq.getSql());
         List<String> allFields = SqlParserSelectHelper.getAllFields(querySqlReq.getSql());
-        queryStatInfo.setModelId(querySqlReq.getModelIds().get(0));
-        ModelSchemaResp modelSchemaResp = modelService.fetchSingleModelSchema(querySqlReq.getModelIds().get(0));
-
-        List<String> dimensions = new ArrayList<>();
-        List<String> metrics = new ArrayList<>();
-        if (Objects.nonNull(modelSchemaResp)) {
-            dimensions = getFieldNames(allFields, modelSchemaResp.getDimensions());
-            metrics = getFieldNames(allFields, modelSchemaResp.getMetrics());
-        }
+        List<String> dimensions = allFields.stream().filter(aggFields::contains).collect(Collectors.toList());
 
         String userName = getUserName(facadeUser);
         try {
             queryStatInfo.setTraceId("")
-                    .setModelId(querySqlReq.getModelIds().get(0))
                     .setUser(userName)
+                    .setViewId(querySqlReq.getViewId())
                     .setQueryType(QueryType.SQL.getValue())
                     .setQueryTypeBack(QueryTypeBack.NORMAL.getState())
                     .setQuerySqlCmd(querySqlReq.toString())
@@ -124,43 +116,49 @@ public class StatUtils {
                     .setStartTime(System.currentTimeMillis())
                     .setUseResultCache(true)
                     .setUseSqlCache(true)
-                    .setMetrics(objectMapper.writeValueAsString(metrics))
+                    .setMetrics(objectMapper.writeValueAsString(aggFields))
                     .setDimensions(objectMapper.writeValueAsString(dimensions));
+            if (!CollectionUtils.isEmpty(querySqlReq.getModelIds())) {
+                queryStatInfo.setModelId(querySqlReq.getModelIds().get(0));
+            }
         } catch (JsonProcessingException e) {
             log.error("initStatInfo:{}", e);
         }
         StatUtils.set(queryStatInfo);
     }
 
-    public void initStructStatInfo(QueryStructReq queryStructCmd, User facadeUser) {
+    public void initStructStatInfo(QueryStructReq queryStructReq, User facadeUser) {
         QueryStat queryStatInfo = new QueryStat();
         String traceId = "";
-        List<String> dimensions = queryStructCmd.getGroups();
+        List<String> dimensions = queryStructReq.getGroups();
 
         List<String> metrics = new ArrayList<>();
-        queryStructCmd.getAggregators().stream().forEach(aggregator -> metrics.add(aggregator.getColumn()));
+        queryStructReq.getAggregators().stream().forEach(aggregator -> metrics.add(aggregator.getColumn()));
         String user = getUserName(facadeUser);
 
         try {
             queryStatInfo.setTraceId(traceId)
-                    .setModelId(1L)
+                    .setViewId(queryStructReq.getViewId())
                     .setUser(user)
                     .setQueryType(QueryType.STRUCT.getValue())
                     .setQueryTypeBack(QueryTypeBack.NORMAL.getState())
-                    .setQueryStructCmd(queryStructCmd.toString())
-                    .setQueryStructCmdMd5(DigestUtils.md5Hex(queryStructCmd.toString()))
+                    .setQueryStructCmd(queryStructReq.toString())
+                    .setQueryStructCmdMd5(DigestUtils.md5Hex(queryStructReq.toString()))
                     .setStartTime(System.currentTimeMillis())
-                    .setNativeQuery(queryStructCmd.getQueryType().isNativeAggQuery())
-                    .setGroupByCols(objectMapper.writeValueAsString(queryStructCmd.getGroups()))
-                    .setAggCols(objectMapper.writeValueAsString(queryStructCmd.getAggregators()))
-                    .setOrderByCols(objectMapper.writeValueAsString(queryStructCmd.getOrders()))
+                    .setNativeQuery(queryStructReq.getQueryType().isNativeAggQuery())
+                    .setGroupByCols(objectMapper.writeValueAsString(queryStructReq.getGroups()))
+                    .setAggCols(objectMapper.writeValueAsString(queryStructReq.getAggregators()))
+                    .setOrderByCols(objectMapper.writeValueAsString(queryStructReq.getOrders()))
                     .setFilterCols(objectMapper.writeValueAsString(
-                            sqlFilterUtils.getFiltersCol(queryStructCmd.getOriginalFilter())))
+                            sqlFilterUtils.getFiltersCol(queryStructReq.getOriginalFilter())))
                     .setUseResultCache(true)
                     .setUseSqlCache(true)
                     .setMetrics(objectMapper.writeValueAsString(metrics))
                     .setDimensions(objectMapper.writeValueAsString(dimensions))
                     .setQueryOptMode(QueryOptMode.NONE.name());
+            if (!CollectionUtils.isEmpty(queryStructReq.getModelIds())) {
+                queryStatInfo.setModelId(queryStructReq.getModelIds().get(0));
+            }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

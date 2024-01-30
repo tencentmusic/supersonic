@@ -5,11 +5,12 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.core.knowledge.DictWord;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
-import java.util.List;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * dimension value wordNature
@@ -26,8 +27,8 @@ public class ValueWordBuilder extends BaseWordBuilder {
 
             schemaElement.getAlias().stream().forEach(value -> {
                 DictWord dictWord = new DictWord();
-                Long modelId = schemaElement.getModel();
-                String nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId();
+                Long viewId = schemaElement.getView();
+                String nature = DictWordType.NATURE_SPILT + viewId + DictWordType.NATURE_SPILT + schemaElement.getId();
                 dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
                 dictWord.setWord(value);
                 result.add(dictWord);

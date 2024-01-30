@@ -14,6 +14,8 @@ import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
+import org.springframework.util.CollectionUtils;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -21,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.util.CollectionUtils;
 
 /**
  * MetricRecommendProcessor fills recommended metrics based on embedding similarity.
@@ -45,7 +46,7 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
         }
         List<String> metricNames = Collections.singletonList(parseInfo.getMetrics().iterator().next().getName());
         Map<String, String> filterCondition = new HashMap<>();
-        filterCondition.put("modelId", parseInfo.getMetrics().iterator().next().getModel().toString());
+        filterCondition.put("modelId", parseInfo.getMetrics().iterator().next().getView().toString());
         filterCondition.put("type", SchemaElementType.METRIC.name());
         RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(metricNames)
                 .filterCondition(filterCondition).queryEmbeddings(null).build();
@@ -70,9 +71,9 @@ public class MetricRecommendProcessor implements ExecuteResultProcessor {
             if (!metricIds.contains(Retrieval.getLongId(retrieval.getId()))) {
                 SchemaElement schemaElement = JSONObject.parseObject(JSONObject.toJSONString(retrieval.getMetadata()),
                         SchemaElement.class);
-                if (retrieval.getMetadata().containsKey("modelId")) {
-                    String modelId = retrieval.getMetadata().get("modelId").toString();
-                    schemaElement.setModel(Long.parseLong(modelId));
+                if (retrieval.getMetadata().containsKey("viewId")) {
+                    String viewId = retrieval.getMetadata().get("viewId").toString();
+                    schemaElement.setView(Long.parseLong(viewId));
                 }
                 schemaElement.setOrder(++metricOrder);
                 parseInfo.getMetrics().add(schemaElement);

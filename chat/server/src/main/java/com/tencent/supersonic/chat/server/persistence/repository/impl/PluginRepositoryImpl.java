@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.server.persistence.repository.impl;
 
-import com.tencent.supersonic.chat.server.persistence.dataobject.PluginDOExample;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tencent.supersonic.chat.server.persistence.dataobject.PluginDO;
 import com.tencent.supersonic.chat.server.persistence.mapper.PluginDOMapper;
 import com.tencent.supersonic.chat.server.persistence.repository.PluginRepository;
@@ -26,7 +26,7 @@ public class PluginRepositoryImpl implements PluginRepository {
 
     @Override
     public List<PluginDO> getPlugins() {
-        return pluginDOMapper.selectByExampleWithBLOBs(new PluginDOExample());
+        return pluginDOMapper.selectList(new QueryWrapper<>());
     }
 
     @Override
@@ -60,22 +60,22 @@ public class PluginRepositoryImpl implements PluginRepository {
 
     @Override
     public void updatePlugin(PluginDO pluginDO) {
-        pluginDOMapper.updateByPrimaryKeyWithBLOBs(pluginDO);
+        pluginDOMapper.updateById(pluginDO);
     }
 
     @Override
     public PluginDO getPlugin(Long id) {
-        return pluginDOMapper.selectByPrimaryKey(id);
+        return pluginDOMapper.selectById(id);
     }
 
     @Override
-    public List<PluginDO> query(PluginDOExample pluginDOExample) {
-        return pluginDOMapper.selectByExampleWithBLOBs(pluginDOExample);
+    public List<PluginDO> query(QueryWrapper<PluginDO> queryWrapper) {
+        return pluginDOMapper.selectList(queryWrapper);
     }
 
     @Override
     public void deletePlugin(Long id) {
-        pluginDOMapper.deleteByPrimaryKey(id);
+        pluginDOMapper.deleteById(id);
     }
 
 }

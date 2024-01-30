@@ -19,15 +19,16 @@ import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @ToString
@@ -48,7 +49,7 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
                 explainSqlReq = ExplainSqlReq.builder()
                         .queryTypeEnum(QueryType.SQL)
                         .queryReq(QueryReqBuilder.buildS2SQLReq(
-                                sqlInfo.getCorrectS2SQL(), parseInfo.getModel().getModelIds()
+                                sqlInfo.getCorrectS2SQL(), parseInfo.getViewId()
                         ))
                         .build();
             } else {
@@ -83,7 +84,7 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
     }
 
     protected void convertBizNameToName(SemanticSchema semanticSchema, QueryStructReq queryStructReq) {
-        Map<String, String> bizNameToName = semanticSchema.getBizNameToName(queryStructReq.getModelIdSet());
+        Map<String, String> bizNameToName = semanticSchema.getBizNameToName(queryStructReq.getViewId());
         bizNameToName.putAll(TimeDimensionEnum.getNameToNameMap());
 
         List<Order> orders = queryStructReq.getOrders();
@@ -100,18 +101,17 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
         }
         List<String> groups = queryStructReq.getGroups();
         if (CollectionUtils.isNotEmpty(groups)) {
-            groups = groups.stream().map(group -> bizNameToName.get(group)).collect(Collectors.toList());
+            groups = groups.stream().map(bizNameToName::get).collect(Collectors.toList());
             queryStructReq.setGroups(groups);
         }
         List<Filter> dimensionFilters = queryStructReq.getDimensionFilters();
         if (CollectionUtils.isNotEmpty(dimensionFilters)) {
-            dimensionFilters.stream().forEach(filter -> filter.setName(bizNameToName.get(filter.getBizName())));
+            dimensionFilters.forEach(filter -> filter.setName(bizNameToName.get(filter.getBizName())));
         }
         List<Filter> metricFilters = queryStructReq.getMetricFilters();
         if (CollectionUtils.isNotEmpty(dimensionFilters)) {
-            metricFilters.stream().forEach(filter -> filter.setName(bizNameToName.get(filter.getBizName())));
+            metricFilters.forEach(filter -> filter.setName(bizNameToName.get(filter.getBizName())));
         }
-        queryStructReq.setModelName(parseInfo.getModelName());
     }
 
     protected void initS2SqlByStruct(SemanticSchema semanticSchema) {
@@ -121,9 +121,9 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
         }
         QueryStructReq queryStructReq = convertQueryStruct();
         convertBizNameToName(semanticSchema, queryStructReq);
-        QuerySqlReq querySqlReq = queryStructReq.convert(queryStructReq);
-        parseInfo.getSqlInfo().setS2SQL(querySqlReq.getSql());
-        parseInfo.getSqlInfo().setCorrectS2SQL(querySqlReq.getSql());
+        QuerySqlReq querySQLReq = queryStructReq.convert(queryStructReq);
+        parseInfo.getSqlInfo().setS2SQL(querySQLReq.getSql());
+        parseInfo.getSqlInfo().setCorrectS2SQL(querySQLReq.getSql());
     }
 
 }

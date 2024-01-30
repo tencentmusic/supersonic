@@ -1,9 +1,6 @@
 package com.tencent.supersonic.headless;
 
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.core.utils.QueryReqBuilder;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryType;
@@ -12,8 +9,12 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.util.DataUtils;
-import java.util.Arrays;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class ExplainTest extends BaseTest {
 
@@ -22,7 +23,7 @@ public class ExplainTest extends BaseTest {
         String sql = "SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门 ";
         ExplainSqlReq<QuerySqlReq> explainSqlReq = ExplainSqlReq.<QuerySqlReq>builder()
                 .queryTypeEnum(QueryType.SQL)
-                .queryReq(QueryReqBuilder.buildS2SQLReq(sql, DataUtils.getMetricAgentIModelIds()))
+                .queryReq(QueryReqBuilder.buildS2SQLReq(sql, DataUtils.getMetricAgentView()))
                 .build();
         ExplainResp explain = queryService.explain(explainSqlReq, User.getFakeUser());
         assertNotNull(explain);

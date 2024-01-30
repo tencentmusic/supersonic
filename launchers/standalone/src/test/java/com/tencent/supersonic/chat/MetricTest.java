@@ -1,8 +1,5 @@
 package com.tencent.supersonic.chat;
 
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
-
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
@@ -15,13 +12,17 @@ import com.tencent.supersonic.util.DataUtils;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
+
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
+import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.SUM;
 
 
 public class MetricTest extends BaseTest {
@@ -150,7 +151,6 @@ public class MetricTest extends BaseTest {
 
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问次数"));
         expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("人均访问次数"));
-        expectedParseInfo.getMetrics().add(DataUtils.getSchemaElement("访问用户数"));
         expectedParseInfo.getDimensions().add(DataUtils.getSchemaElement("用户"));
 
         expectedParseInfo.setDateInfo(DataUtils.getDateConf(3, DateConf.DateMode.RECENT, "DAY"));

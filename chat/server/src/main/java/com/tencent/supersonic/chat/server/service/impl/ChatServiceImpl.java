@@ -31,7 +31,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -52,7 +51,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Set<Long> getContextModel(Integer chatId) {
+    public Long getContextModel(Integer chatId) {
         if (Objects.isNull(chatId)) {
             return null;
         }
@@ -61,8 +60,8 @@ public class ChatServiceImpl implements ChatService {
             return null;
         }
         SemanticParseInfo originalSemanticParse = chatContext.getParseInfo();
-        if (Objects.nonNull(originalSemanticParse) && Objects.nonNull(originalSemanticParse.getModel().getModelIds())) {
-            return originalSemanticParse.getModel().getModelIds();
+        if (Objects.nonNull(originalSemanticParse) && Objects.nonNull(originalSemanticParse.getViewId())) {
+            return originalSemanticParse.getViewId();
         }
         return null;
     }

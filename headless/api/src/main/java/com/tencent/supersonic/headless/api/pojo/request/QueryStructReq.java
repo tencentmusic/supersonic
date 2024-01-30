@@ -44,8 +44,6 @@ import java.util.stream.Collectors;
 @Data
 @Slf4j
 public class QueryStructReq extends SemanticQueryReq {
-
-    private String modelName;
     private List<String> groups = new ArrayList<>();
     private List<Aggregator> aggregators = new ArrayList<>();
     private List<Order> orders = new ArrayList<>();
@@ -94,7 +92,9 @@ public class QueryStructReq extends SemanticQueryReq {
 
     public String toCustomizedString() {
         StringBuilder stringBuilder = new StringBuilder("{");
-        stringBuilder.append("\"modelId\":")
+        stringBuilder.append("\"viewId\":")
+                .append(viewId);
+        stringBuilder.append("\"modelIds\":")
                 .append(modelIds);
         stringBuilder.append(",\"groups\":")
                 .append(groups);
@@ -125,7 +125,9 @@ public class QueryStructReq extends SemanticQueryReq {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
-        sb.append("\"modelId\":")
+        sb.append("\"viewId\":")
+                .append(viewId);
+        sb.append("\"modelIds\":")
                 .append(modelIds);
         sb.append(",\"groups\":")
                 .append(groups);
@@ -169,6 +171,7 @@ public class QueryStructReq extends SemanticQueryReq {
 
         QuerySqlReq result = new QuerySqlReq();
         result.setSql(sql);
+        result.setViewId(queryStructReq.getViewId());
         result.setModelIds(queryStructReq.getModelIdSet());
         result.setParams(new ArrayList<>());
         return result;
@@ -211,7 +214,7 @@ public class QueryStructReq extends SemanticQueryReq {
         }
         plainSelect.setSelectItems(selectItems);
         //2.Set the table name
-        Table table = new Table(queryStructReq.getModelName());
+        Table table = new Table(queryStructReq.getTableName());
         plainSelect.setFromItem(table);
 
         //3.Set the order by clause
@@ -271,9 +274,14 @@ public class QueryStructReq extends SemanticQueryReq {
         return sql;
     }
 
-    public String getModelName() {
-        return Objects.nonNull(modelName) ? modelName :
-                Constants.TABLE_PREFIX + StringUtils.join(modelIds, "_");
+    public String getTableName() {
+        if (StringUtils.isNotBlank(viewName)) {
+            return viewName;
+        }
+        if (viewId != null) {
+            return Constants.TABLE_PREFIX + viewId;
+        }
+        return Constants.TABLE_PREFIX + StringUtils.join(modelIds, "_");
     }
 
 }

@@ -13,14 +13,15 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 /**
  * supplement the QueryStatement when query with custom aggregation method
@@ -49,7 +50,6 @@ public class CalculateAggConverter implements HeadlessConverter {
             return generateRatioSqlCommand(queryStatement, engineTypeEnum, version);
         }
         ParseSqlReq sqlCommand = new ParseSqlReq();
-        sqlCommand.setRootPath(queryStructReq.getModelIdStr());
         String metricTableName = "v_metric_tb_tmp";
         MetricTable metricTable = new MetricTable();
         metricTable.setAlias(metricTableName);
@@ -111,7 +111,6 @@ public class CalculateAggConverter implements HeadlessConverter {
                 EngineType.fromString(database.getType().toUpperCase()), database.getVersion());
         sqlCommend.setSql(parseSqlReq.getSql());
         sqlCommend.setTables(parseSqlReq.getTables());
-        sqlCommend.setRootPath(parseSqlReq.getRootPath());
         sqlCommend.setVariables(parseSqlReq.getVariables());
         sqlCommend.setSupportWith(parseSqlReq.isSupportWith());
     }
@@ -137,7 +136,6 @@ public class CalculateAggConverter implements HeadlessConverter {
         check(queryStructReq);
         queryStatement.setEnableOptimize(false);
         ParseSqlReq sqlCommand = new ParseSqlReq();
-        sqlCommand.setRootPath(queryStructReq.getModelIdStr());
         String metricTableName = "v_metric_tb_tmp";
         MetricTable metricTable = new MetricTable();
         metricTable.setAlias(metricTableName);

@@ -63,14 +63,12 @@ public class ParserDefaultConverter implements HeadlessConverter {
         metricQueryReq.setVariables(queryStructReq.getParams().stream()
                 .collect(Collectors.toMap(Param::getName, Param::getValue, (k1, k2) -> k1)));
         metricQueryReq.setLimit(queryStructReq.getLimit());
-        String rootPath = queryStructReq.getModelIdStr();
-        metricQueryReq.setRootPath(rootPath);
 
         // support detail query
         if (queryStructReq.getQueryType().isNativeAggQuery() && CollectionUtils.isEmpty(metricQueryReq.getMetrics())) {
-            Map<Long, DataSource> dataSourceMap = queryStatement.getSemanticModel().getModelMap();
-            for (Long modelId : queryStructReq.getModelIds()) {
-                String modelBizName = dataSourceMap.get(modelId).getName();
+            Map<Long, DataSource> modelMap = queryStatement.getSemanticModel().getModelMap();
+            for (Long modelId : modelMap.keySet()) {
+                String modelBizName = modelMap.get(modelId).getName();
                 String internalMetricName = sqlGenerateUtils.generateInternalMetricName(modelBizName);
                 metricQueryReq.getMetrics().add(internalMetricName);
             }

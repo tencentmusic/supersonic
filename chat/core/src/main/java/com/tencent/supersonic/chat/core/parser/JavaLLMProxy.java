@@ -1,22 +1,23 @@
 package com.tencent.supersonic.chat.core.parser;
 
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.parser.plugin.function.FunctionPromptGenerator;
+import com.tencent.supersonic.chat.core.parser.plugin.function.FunctionReq;
+import com.tencent.supersonic.chat.core.parser.plugin.function.FunctionResp;
 import com.tencent.supersonic.chat.core.parser.sql.llm.OutputFormat;
 import com.tencent.supersonic.chat.core.parser.sql.llm.SqlGeneration;
 import com.tencent.supersonic.chat.core.parser.sql.llm.SqlGenerationFactory;
-import com.tencent.supersonic.chat.core.parser.plugin.function.FunctionReq;
-import com.tencent.supersonic.chat.core.parser.plugin.function.FunctionResp;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMReq.SqlGenerationMode;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.model.chat.ChatLanguageModel;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 /**
  * LLMProxy based on langchain4j Java version.
@@ -37,12 +38,12 @@ public class JavaLLMProxy implements LLMProxy {
         return false;
     }
 
-    public LLMResp query2sql(LLMReq llmReq, String modelClusterKey) {
+    public LLMResp query2sql(LLMReq llmReq, Long viewId) {
 
         SqlGeneration sqlGeneration = SqlGenerationFactory.get(
                 SqlGenerationMode.getMode(llmReq.getSqlGenerationMode()));
-        String modelName = llmReq.getSchema().getModelName();
-        LLMResp result = sqlGeneration.generation(llmReq, modelClusterKey);
+        String modelName = llmReq.getSchema().getViewName();
+        LLMResp result = sqlGeneration.generation(llmReq, viewId);
         result.setQuery(llmReq.getQueryText());
         result.setModelName(modelName);
         return result;

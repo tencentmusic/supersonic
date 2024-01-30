@@ -1,7 +1,5 @@
 package com.tencent.supersonic.util;
 
-import static java.time.LocalDate.now;
-
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -17,6 +15,8 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import java.util.HashSet;
 import java.util.Set;
+
+import static java.time.LocalDate.now;
 
 public class DataUtils {
 
@@ -92,6 +92,15 @@ public class DataUtils {
         return dateInfo;
     }
 
+    public static DateConf getDateConf(DateConf.DateMode dateMode, String startDate, String endDate, int unit) {
+        DateConf dateInfo = new DateConf();
+        dateInfo.setDateMode(dateMode);
+        dateInfo.setStartDate(startDate);
+        dateInfo.setEndDate(endDate);
+        dateInfo.setUnit(unit);
+        return dateInfo;
+    }
+
     public static Agent getMetricAgent() {
         Agent agent = new Agent();
         agent.setId(1);
@@ -117,7 +126,7 @@ public class DataUtils {
     private static RuleParserTool getRuleQueryTool() {
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
-        ruleQueryTool.setModelIds(Lists.newArrayList(-1L));
+        ruleQueryTool.setViewIds(Lists.newArrayList(-1L));
         ruleQueryTool.setQueryModes(Lists.newArrayList("METRIC_TAG", "METRIC_FILTER", "METRIC_MODEL",
                 "TAG_DETAIL", "TAG_LIST_FILTER", "TAG_ID"));
         return ruleQueryTool;
@@ -136,5 +145,9 @@ public class DataUtils {
         result.add(2L);
         result.add(3L);
         return result;
+    }
+
+    public static Long getMetricAgentView() {
+        return 1L;
     }
 }

@@ -1,11 +1,8 @@
 package com.tencent.supersonic.chat.server.util;
 
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
-import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
-
 import com.github.pagehelper.PageInfo;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.ViewSchema;
 import com.tencent.supersonic.chat.api.pojo.request.KnowledgeAdvancedConfig;
 import com.tencent.supersonic.chat.api.pojo.request.KnowledgeInfoReq;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
@@ -19,6 +16,13 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.DimValueDO;
 import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,12 +32,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.common.pojo.Constants.DAY;
+import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE;
 
 @Component
 public class DictMetaHelper {
@@ -56,13 +57,13 @@ public class DictMetaHelper {
                 dimValueDOList = generateDimValueInfoByModel(modelIds);
                 break;
             case OFFLINE_FULL:
-                List<ModelSchema> modelSchemaDescList = semanticInterpreter.getModelSchema();
+                List<ViewSchema> modelSchemaDescList = semanticInterpreter.getViewSchema();
                 if (CollectionUtils.isEmpty(modelSchemaDescList)) {
                     break;
                 }
 
-                Map<Long, ModelSchema> modelIdAndDescPair = modelSchemaDescList.stream()
-                        .collect(Collectors.toMap(a -> a.getModel().getId(), schema -> schema, (k1, k2) -> k1));
+                Map<Long, ViewSchema> modelIdAndDescPair = modelSchemaDescList.stream()
+                        .collect(Collectors.toMap(a -> a.getView().getId(), schema -> schema, (k1, k2) -> k1));
                 if (!CollectionUtils.isEmpty(modelIdAndDescPair)) {
                     modelIds.addAll(modelIdAndDescPair.keySet());
                     dimValueDOList = generateDimValueInfoByModel(modelIds);
@@ -87,12 +88,12 @@ public class DictMetaHelper {
             return dimValueDOList;
         }
 
-        List<ModelSchema> modelSchemaDescList = semanticInterpreter.getModelSchema();
+        List<ViewSchema> modelSchemaDescList = semanticInterpreter.getViewSchema();
         if (CollectionUtils.isEmpty(modelSchemaDescList)) {
             return dimValueDOList;
         }
-        Map<Long, ModelSchema> modelIdAndDescPair = modelSchemaDescList.stream()
-                .collect(Collectors.toMap(a -> a.getModel().getId(), a -> a, (k1, k2) -> k1));
+        Map<Long, ViewSchema> modelIdAndDescPair = modelSchemaDescList.stream()
+                .collect(Collectors.toMap(a -> a.getView().getId(), a -> a, (k1, k2) -> k1));
 
         for (Long modelId : modelAndDimMap.keySet()) {
             if (!modelIdAndDescPair.containsKey(modelId)) {
@@ -116,7 +117,7 @@ public class DictMetaHelper {
 
     private List<DimValueDO> generateDimValueInfoByModel(Set<Long> modelIds) {
         List<DimValueDO> dimValueDOList = new ArrayList<>();
-        List<ModelSchema> modelSchemaDescList = semanticInterpreter.getModelSchema(new ArrayList<>(modelIds));
+        List<ViewSchema> modelSchemaDescList = semanticInterpreter.getViewSchema(new ArrayList<>(modelIds));
         if (CollectionUtils.isEmpty(modelSchemaDescList)) {
             return dimValueDOList;
         }
@@ -124,7 +125,7 @@ public class DictMetaHelper {
         modelSchemaDescList.forEach(modelSchemaDesc -> {
             Map<Long, SchemaElement> dimIdAndDescPair = modelSchemaDesc.getDimensions().stream()
                     .collect(Collectors.toMap(SchemaElement::getId, dimSchemaDesc -> dimSchemaDesc, (k1, k2) -> k1));
-            fillDimValueDOList(dimValueDOList, modelSchemaDesc.getModel().getId(), dimIdAndDescPair);
+            fillDimValueDOList(dimValueDOList, modelSchemaDesc.getView().getId(), dimIdAndDescPair);
 
         });
 

@@ -4,6 +4,9 @@ package com.tencent.supersonic.chat.core.agent;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.RecordInfo;
+import lombok.Data;
+import org.springframework.util.CollectionUtils;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -11,8 +14,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.Data;
-import org.springframework.util.CollectionUtils;
 
 @Data
 public class Agent extends RecordInfo {
@@ -51,8 +52,8 @@ public class Agent extends RecordInfo {
         return enableSearch != null && enableSearch == 1;
     }
 
-    public static boolean containsAllModel(Set<Long> detectModelIds) {
-        return !CollectionUtils.isEmpty(detectModelIds) && detectModelIds.contains(-1L);
+    public static boolean containsAllModel(Set<Long> detectViewIds) {
+        return !CollectionUtils.isEmpty(detectViewIds) && detectViewIds.contains(-1L);
     }
 
     public List<NL2SQLTool> getParserTools(AgentToolType agentToolType) {
@@ -64,12 +65,12 @@ public class Agent extends RecordInfo {
                 .collect(Collectors.toList());
     }
 
-    public Set<Long> getModelIds(AgentToolType agentToolType) {
+    public Set<Long> getViewIds(AgentToolType agentToolType) {
         List<NL2SQLTool> commonAgentTools = getParserTools(agentToolType);
         if (CollectionUtils.isEmpty(commonAgentTools)) {
             return new HashSet<>();
         }
-        return commonAgentTools.stream().map(NL2SQLTool::getModelIds)
+        return commonAgentTools.stream().map(NL2SQLTool::getViewIds)
                 .filter(modelIds -> !CollectionUtils.isEmpty(modelIds))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());

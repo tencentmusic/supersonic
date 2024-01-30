@@ -5,7 +5,6 @@ import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.ModelCluster;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
@@ -26,7 +25,7 @@ public class SemanticParseInfo {
 
     private Integer id;
     private String queryMode;
-    private ModelCluster model = new ModelCluster();
+    private SchemaElement view;
     private Set<SchemaElement> metrics = new TreeSet<>(new SchemaNameLengthComparator());
     private Set<SchemaElement> dimensions = new LinkedHashSet();
     private SchemaElement entity;
@@ -43,20 +42,6 @@ public class SemanticParseInfo {
     private EntityInfo entityInfo;
     private SqlInfo sqlInfo = new SqlInfo();
     private QueryType queryType = QueryType.ID;
-
-    public String getModelClusterKey() {
-        if (model == null) {
-            return "";
-        }
-        return model.getKey();
-    }
-
-    public String getModelName() {
-        if (model == null) {
-            return "";
-        }
-        return model.getName();
-    }
 
     private static class SchemaNameLengthComparator implements Comparator<SchemaElement> {
 
@@ -86,27 +71,11 @@ public class SemanticParseInfo {
         return metrics;
     }
 
-    private Map<Long, Integer> getModelElementCountMap() {
-        Map<Long, Integer> elementCountMap = new HashMap<>();
-        elementMatches.stream().filter(element -> element.getElement().getModel() != null)
-                .forEach(element -> {
-                    int count = elementCountMap.getOrDefault(element.getElement().getModel(), 0);
-                    elementCountMap.put(element.getElement().getModel(), count + 1);
-                });
-        return elementCountMap;
-    }
-
-    public Long getModelId() {
-        Map<Long, Integer> elementCountMap = getModelElementCountMap();
-        Long modelId = -1L;
-        int maxCnt = 0;
-        for (Long model : elementCountMap.keySet()) {
-            if (elementCountMap.get(model) > maxCnt) {
-                maxCnt = elementCountMap.get(model);
-                modelId = model;
-            }
+    public Long getViewId() {
+        if (view == null) {
+            return null;
         }
-        return modelId;
+        return view.getView();
     }
 
 }

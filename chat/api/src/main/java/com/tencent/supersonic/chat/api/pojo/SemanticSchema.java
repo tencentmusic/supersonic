@@ -1,5 +1,7 @@
 package com.tencent.supersonic.chat.api.pojo;
 
+import org.springframework.util.CollectionUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,20 +9,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.util.CollectionUtils;
 
 public class SemanticSchema implements Serializable {
 
-    private List<ModelSchema> modelSchemaList;
+    private List<ViewSchema> viewSchemaList;
 
-    public SemanticSchema(List<ModelSchema> modelSchemaList) {
-        this.modelSchemaList = modelSchemaList;
+    public SemanticSchema(List<ViewSchema> viewSchemaList) {
+        this.viewSchemaList = viewSchemaList;
     }
 
-    public void add(ModelSchema schema) {
-        modelSchemaList.add(schema);
+    public void add(ViewSchema schema) {
+        viewSchemaList.add(schema);
     }
 
     public SchemaElement getElement(SchemaElementType elementType, long elementID) {
@@ -30,8 +30,8 @@ public class SemanticSchema implements Serializable {
             case ENTITY:
                 element = getElementsById(elementID, getEntities());
                 break;
-            case MODEL:
-                element = getElementsById(elementID, getModels());
+            case VIEW:
+                element = getElementsById(elementID, getViews());
                 break;
             case METRIC:
                 element = getElementsById(elementID, getMetrics());
@@ -59,8 +59,8 @@ public class SemanticSchema implements Serializable {
             case ENTITY:
                 element = getElementsByNameOrAlias(name, getEntities());
                 break;
-            case MODEL:
-                element = getElementsByNameOrAlias(name, getModels());
+            case VIEW:
+                element = getElementsByNameOrAlias(name, getViews());
                 break;
             case METRIC:
                 element = getElementsByNameOrAlias(name, getMetrics());
@@ -81,29 +81,29 @@ public class SemanticSchema implements Serializable {
         }
     }
 
-    public Map<Long, String> getModelIdToName() {
-        return modelSchemaList.stream()
-                .collect(Collectors.toMap(a -> a.getModel().getId(), a -> a.getModel().getName(), (k1, k2) -> k1));
+    public Map<Long, String> getViewIdToName() {
+        return viewSchemaList.stream()
+                .collect(Collectors.toMap(a -> a.getView().getId(), a -> a.getView().getName(), (k1, k2) -> k1));
     }
 
     public List<SchemaElement> getDimensionValues() {
         List<SchemaElement> dimensionValues = new ArrayList<>();
-        modelSchemaList.stream().forEach(d -> dimensionValues.addAll(d.getDimensionValues()));
+        viewSchemaList.stream().forEach(d -> dimensionValues.addAll(d.getDimensionValues()));
         return dimensionValues;
     }
 
     public List<SchemaElement> getDimensions() {
         List<SchemaElement> dimensions = new ArrayList<>();
-        modelSchemaList.stream().forEach(d -> dimensions.addAll(d.getDimensions()));
+        viewSchemaList.stream().forEach(d -> dimensions.addAll(d.getDimensions()));
         return dimensions;
     }
 
-    public List<SchemaElement> getDimensions(Set<Long> modelIds) {
+    public List<SchemaElement> getDimensions(Long viewId) {
         List<SchemaElement> dimensions = getDimensions();
-        return getElementsByModelId(modelIds, dimensions);
+        return getElementsByViewId(viewId, dimensions);
     }
 
-    public SchemaElement getDimensions(Long id) {
+    public SchemaElement getDimension(Long id) {
         List<SchemaElement> dimensions = getDimensions();
         Optional<SchemaElement> dimension = getElementsById(id, dimensions);
         return dimension.orElse(null);
@@ -111,43 +111,43 @@ public class SemanticSchema implements Serializable {
 
     public List<SchemaElement> getTags() {
         List<SchemaElement> tags = new ArrayList<>();
-        modelSchemaList.stream().forEach(d -> tags.addAll(d.getTags()));
+        viewSchemaList.stream().forEach(d -> tags.addAll(d.getTags()));
         return tags;
     }
 
-    public List<SchemaElement> getTags(Set<Long> modelIds) {
+    public List<SchemaElement> getTags(Long viewId) {
         List<SchemaElement> tags = new ArrayList<>();
-        modelSchemaList.stream().filter(schemaElement ->
-                        modelIds.contains(schemaElement.getModel().getModel()))
+        viewSchemaList.stream().filter(schemaElement ->
+                        viewId.equals(schemaElement.getView().getView()))
                 .forEach(d -> tags.addAll(d.getTags()));
         return tags;
     }
 
     public List<SchemaElement> getMetrics() {
         List<SchemaElement> metrics = new ArrayList<>();
-        modelSchemaList.stream().forEach(d -> metrics.addAll(d.getMetrics()));
+        viewSchemaList.stream().forEach(d -> metrics.addAll(d.getMetrics()));
         return metrics;
     }
 
-    public List<SchemaElement> getMetrics(Set<Long> modelIds) {
+    public List<SchemaElement> getMetrics(Long viewId) {
         List<SchemaElement> metrics = getMetrics();
-        return getElementsByModelId(modelIds, metrics);
+        return getElementsByViewId(viewId, metrics);
     }
 
     public List<SchemaElement> getEntities() {
         List<SchemaElement> entities = new ArrayList<>();
-        modelSchemaList.stream().forEach(d -> entities.add(d.getEntity()));
+        viewSchemaList.stream().forEach(d -> entities.add(d.getEntity()));
         return entities;
     }
 
-    public List<SchemaElement> getEntities(Set<Long> modelIds) {
+    public List<SchemaElement> getEntities(Long viewId) {
         List<SchemaElement> entities = getEntities();
-        return getElementsByModelId(modelIds, entities);
+        return getElementsByViewId(viewId, entities);
     }
 
-    private List<SchemaElement> getElementsByModelId(Set<Long> modelIds, List<SchemaElement> elements) {
+    private List<SchemaElement> getElementsByViewId(Long viewId, List<SchemaElement> elements) {
         return elements.stream()
-                .filter(schemaElement -> modelIds.contains(schemaElement.getModel()))
+                .filter(schemaElement -> viewId.equals(schemaElement.getView()))
                 .collect(Collectors.toList());
     }
 
@@ -165,25 +165,30 @@ public class SemanticSchema implements Serializable {
                 ).findFirst();
     }
 
-    public List<SchemaElement> getModels() {
-        List<SchemaElement> models = new ArrayList<>();
-        modelSchemaList.stream().forEach(d -> models.add(d.getModel()));
-        return models;
+    public SchemaElement getView(Long viewId) {
+        List<SchemaElement> views = getViews();
+        return getElementsById(viewId, views).orElse(null);
     }
 
-    public Map<String, String> getBizNameToName(Set<Long> modelIds) {
+    public List<SchemaElement> getViews() {
+        List<SchemaElement> views = new ArrayList<>();
+        viewSchemaList.stream().forEach(d -> views.add(d.getView()));
+        return views;
+    }
+
+    public Map<String, String> getBizNameToName(Long viewId) {
         List<SchemaElement> allElements = new ArrayList<>();
-        allElements.addAll(getDimensions(modelIds));
-        allElements.addAll(getMetrics(modelIds));
+        allElements.addAll(getDimensions(viewId));
+        allElements.addAll(getMetrics(viewId));
         return allElements.stream()
                 .collect(Collectors.toMap(SchemaElement::getBizName, SchemaElement::getName, (k1, k2) -> k1));
     }
 
-    public Map<Long, ModelSchema> getModelSchemaMap() {
-        if (CollectionUtils.isEmpty(modelSchemaList)) {
+    public Map<Long, ViewSchema> getViewSchemaMap() {
+        if (CollectionUtils.isEmpty(viewSchemaList)) {
             return new HashMap<>();
         }
-        return modelSchemaList.stream().collect(Collectors.toMap(modelSchema
-                -> modelSchema.getModel().getModel(), modelSchema -> modelSchema));
+        return viewSchemaList.stream().collect(Collectors.toMap(viewSchema
+                -> viewSchema.getView().getView(), viewSchema -> viewSchema));
     }
 }

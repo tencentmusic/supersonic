@@ -1,15 +1,16 @@
 package com.tencent.supersonic.chat.core.knowledge;
 
 import com.tencent.supersonic.chat.core.utils.NatureHelper;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Data
 @Service
@@ -31,7 +32,7 @@ public class LoadRemoveService {
                 if (Objects.isNull(nature)) {
                     return false;
                 }
-                Long modelId = NatureHelper.getModelId(nature);
+                Long modelId = NatureHelper.getViewId(nature);
                 if (Objects.nonNull(modelId)) {
                     return !detectModelIds.contains(modelId);
                 }

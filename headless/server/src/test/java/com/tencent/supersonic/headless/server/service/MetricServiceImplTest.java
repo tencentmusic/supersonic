@@ -20,6 +20,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
 import com.tencent.supersonic.headless.server.service.impl.MetricServiceImpl;
+import com.tencent.supersonic.headless.server.service.impl.ViewServiceImpl;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -65,8 +66,9 @@ public class MetricServiceImplTest {
         ChatGptHelper chatGptHelper = Mockito.mock(ChatGptHelper.class);
         CollectService collectService = Mockito.mock(CollectService.class);
         ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
+        ViewService viewService = Mockito.mock(ViewServiceImpl.class);
         return new MetricServiceImpl(metricRepository, modelService, domainService,
-                chatGptHelper, collectService, eventPublisher);
+                chatGptHelper, collectService, viewService, eventPublisher);
     }
 
     private MetricReq buildMetricReq() {

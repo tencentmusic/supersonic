@@ -10,11 +10,12 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.core.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.Constants;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class QueryFilterMapper implements SchemaMapper {
@@ -23,22 +24,22 @@ public class QueryFilterMapper implements SchemaMapper {
 
     @Override
     public void map(QueryContext queryContext) {
-        Long modelId = queryContext.getModelId();
-        if (modelId == null || modelId <= 0) {
+        Long viewId = queryContext.getViewId();
+        if (viewId == null || viewId <= 0) {
             return;
         }
         SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
-        clearOtherSchemaElementMatch(modelId, schemaMapInfo);
-        List<SchemaElementMatch> schemaElementMatches = schemaMapInfo.getMatchedElements(modelId);
+        clearOtherSchemaElementMatch(viewId, schemaMapInfo);
+        List<SchemaElementMatch> schemaElementMatches = schemaMapInfo.getMatchedElements(viewId);
         if (schemaElementMatches == null) {
             schemaElementMatches = Lists.newArrayList();
-            schemaMapInfo.setMatchedElements(modelId, schemaElementMatches);
+            schemaMapInfo.setMatchedElements(viewId, schemaElementMatches);
         }
         addValueSchemaElementMatch(queryContext, schemaElementMatches);
     }
 
     private void clearOtherSchemaElementMatch(Long modelId, SchemaMapInfo schemaMapInfo) {
-        for (Map.Entry<Long, List<SchemaElementMatch>> entry : schemaMapInfo.getModelElementMatches().entrySet()) {
+        for (Map.Entry<Long, List<SchemaElementMatch>> entry : schemaMapInfo.getViewElementMatches().entrySet()) {
             if (!entry.getKey().equals(modelId)) {
                 entry.getValue().clear();
             }
@@ -60,7 +61,7 @@ public class QueryFilterMapper implements SchemaMapper {
                     .name(String.valueOf(filter.getValue()))
                     .type(SchemaElementType.VALUE)
                     .bizName(filter.getBizName())
-                    .model(queryContext.getModelId())
+                    .view(queryContext.getViewId())
                     .build();
             SchemaElementMatch schemaElementMatch = SchemaElementMatch.builder()
                     .element(element)

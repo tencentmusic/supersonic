@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.core.utils;
 import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.parser.JavaLLMProxy;
 import com.tencent.supersonic.chat.core.parser.LLMProxy;
-import com.tencent.supersonic.chat.core.parser.sql.llm.ModelResolver;
+import com.tencent.supersonic.chat.core.parser.sql.llm.ViewResolver;
 import com.tencent.supersonic.common.util.ContextUtils;
 import java.util.Map;
 import java.util.Objects;
@@ -16,7 +16,7 @@ public class ComponentFactory {
 
     private static SemanticInterpreter semanticInterpreter;
     private static LLMProxy llmProxy;
-    private static ModelResolver modelResolver;
+    private static ViewResolver modelResolver;
 
     public static SemanticInterpreter getSemanticLayer() {
         if (Objects.isNull(semanticInterpreter)) {
@@ -44,9 +44,9 @@ public class ComponentFactory {
         return llmProxy;
     }
 
-    public static ModelResolver getModelResolver() {
+    public static ViewResolver getModelResolver() {
         if (Objects.isNull(modelResolver)) {
-            modelResolver = init(ModelResolver.class);
+            modelResolver = init(ViewResolver.class);
         }
         return modelResolver;
     }

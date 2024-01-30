@@ -1,24 +1,25 @@
 package com.tencent.supersonic.chat.core.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.core.knowledge.DatabaseMapResult;
 import com.tencent.supersonic.chat.core.knowledge.HanlpMapResult;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.utils.HanlpHelper;
 import com.tencent.supersonic.chat.core.utils.NatureHelper;
 import com.tencent.supersonic.common.util.ContextUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 
 /***
  * A mapper that recognizes schema elements with keyword.
@@ -56,8 +57,8 @@ public class KeywordMapper extends BaseMapper {
 
         for (HanlpMapResult hanlpMapResult : mapResults) {
             for (String nature : hanlpMapResult.getNatures()) {
-                Long modelId = NatureHelper.getModelId(nature);
-                if (Objects.isNull(modelId)) {
+                Long viewId = NatureHelper.getViewId(nature);
+                if (Objects.isNull(viewId)) {
                     continue;
                 }
                 SchemaElementType elementType = NatureHelper.convertToElementType(nature);
@@ -65,8 +66,8 @@ public class KeywordMapper extends BaseMapper {
                     continue;
                 }
                 Long elementID = NatureHelper.getElementID(nature);
-                SchemaElement element = getSchemaElement(modelId, elementType, elementID,
-                        queryContext.getSemanticSchema());
+                SchemaElement element = getSchemaElement(viewId, elementType,
+                        elementID, queryContext.getSemanticSchema());
                 if (element == null) {
                     continue;
                 }
@@ -82,7 +83,7 @@ public class KeywordMapper extends BaseMapper {
                         .detectWord(hanlpMapResult.getDetectWord())
                         .build();
 
-                addToSchemaMap(queryContext.getMapInfo(), modelId, schemaElementMatch);
+                addToSchemaMap(queryContext.getMapInfo(), viewId, schemaElementMatch);
             }
         }
     }
@@ -103,12 +104,12 @@ public class KeywordMapper extends BaseMapper {
                     .similarity(mapperHelper.getSimilarity(match.getDetectWord(), schemaElement.getName()))
                     .build();
             log.info("add to schema, elementMatch {}", schemaElementMatch);
-            addToSchemaMap(queryContext.getMapInfo(), schemaElement.getModel(), schemaElementMatch);
+            addToSchemaMap(queryContext.getMapInfo(), schemaElement.getView(), schemaElementMatch);
         }
     }
 
     private Set<Long> getRegElementSet(SchemaMapInfo schemaMap, SchemaElement schemaElement) {
-        List<SchemaElementMatch> elements = schemaMap.getMatchedElements(schemaElement.getModel());
+        List<SchemaElementMatch> elements = schemaMap.getMatchedElements(schemaElement.getView());
         if (CollectionUtils.isEmpty(elements)) {
             return new HashSet<>();
         }

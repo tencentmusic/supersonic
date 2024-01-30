@@ -1,18 +1,20 @@
 package com.tencent.supersonic.chat.core.query.rule.tag;
 
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
-import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
+import com.tencent.supersonic.chat.api.pojo.ViewSchema;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.Order;
+import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
+import org.apache.commons.collections.CollectionUtils;
+
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-import org.apache.commons.collections.CollectionUtils;
+import java.util.stream.Collectors;
 
 public abstract class TagListQuery extends TagSemanticQuery {
 
@@ -23,28 +25,29 @@ public abstract class TagListQuery extends TagSemanticQuery {
     }
 
     private void addEntityDetailAndOrderByMetric(QueryContext queryContext, SemanticParseInfo parseInfo) {
-        Long modelId = parseInfo.getModelId();
-        if (Objects.nonNull(modelId) && modelId > 0L) {
-            ChatConfigRichResp chaConfigRichDesc = queryContext.getModelIdToChatRichConfig().get(modelId);
-            ModelSchema modelSchema = queryContext.getSemanticSchema().getModelSchemaMap().get(parseInfo.getModelId());
-            if (chaConfigRichDesc != null && chaConfigRichDesc.getChatDetailRichConfig() != null
-                    && Objects.nonNull(modelSchema) && Objects.nonNull(modelSchema.getEntity())) {
+        Long viewId = parseInfo.getViewId();
+        if (Objects.nonNull(viewId) && viewId > 0L) {
+            ViewSchema viewSchema = queryContext.getSemanticSchema().getViewSchemaMap().get(viewId);
+            if (viewSchema != null && Objects.nonNull(viewSchema.getEntity())) {
                 Set<SchemaElement> dimensions = new LinkedHashSet<>();
-                Set<SchemaElement> metrics = new LinkedHashSet();
-                Set<Order> orders = new LinkedHashSet();
-                ChatDefaultRichConfigResp chatDefaultConfig = chaConfigRichDesc
-                        .getChatDetailRichConfig().getChatDefaultConfig();
-                if (chatDefaultConfig != null) {
-                    if (CollectionUtils.isNotEmpty(chatDefaultConfig.getMetrics())) {
-                        chatDefaultConfig.getMetrics().stream()
-                                .forEach(metric -> {
-                                    metrics.add(metric);
-                                    orders.add(new Order(metric.getBizName(), Constants.DESC_UPPER));
-                                });
+                Set<SchemaElement> metrics = new LinkedHashSet<>();
+                Set<Order> orders = new LinkedHashSet<>();
+                TagTypeDefaultConfig tagTypeDefaultConfig = viewSchema.getTagTypeDefaultConfig();
+                if (tagTypeDefaultConfig != null) {
+                    if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getMetricIds())) {
+                        metrics = tagTypeDefaultConfig.getMetricIds()
+                                .stream().map(id -> {
+                                    SchemaElement metric = viewSchema.getElement(SchemaElementType.METRIC, id);
+                                    if (metric != null) {
+                                        orders.add(new Order(metric.getBizName(), Constants.DESC_UPPER));
+                                    }
+                                    return metric;
+                                }).filter(Objects::nonNull).collect(Collectors.toSet());
                     }
-                    if (CollectionUtils.isNotEmpty(chatDefaultConfig.getDimensions())) {
-                        chatDefaultConfig.getDimensions().stream()
-                                .forEach(dimension -> dimensions.add(dimension));
+                    if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDimensionIds())) {
+                        dimensions = tagTypeDefaultConfig.getDimensionIds().stream()
+                                .map(id -> viewSchema.getElement(SchemaElementType.DIMENSION, id))
+                                .filter(Objects::nonNull).collect(Collectors.toSet());
                     }
                 }
                 parseInfo.setDimensions(dimensions);

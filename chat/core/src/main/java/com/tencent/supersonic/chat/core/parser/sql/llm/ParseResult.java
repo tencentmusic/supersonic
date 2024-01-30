@@ -5,7 +5,6 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMResp;
-import com.tencent.supersonic.common.pojo.ModelCluster;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 public class ParseResult {
 
-    private ModelCluster modelCluster;
+    private Long viewId;
 
     private LLMReq llmReq;
 

@@ -21,7 +21,7 @@ com.tencent.supersonic.chat.core.corrector.SemanticCorrector=\
 com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter=\
     com.tencent.supersonic.chat.core.knowledge.semantic.RemoteSemanticInterpreter
 
-com.tencent.supersonic.chat.core.parser.sql.llm.ModelResolver=\
+com.tencent.supersonic.chat.core.parser.sql.llm.ViewResolver=\
   com.tencent.supersonic.chat.core.parser.sql.llm.HeuristicModelResolver
 
 com.tencent.supersonic.auth.authentication.interceptor.AuthenticationInterceptor=\

@@ -9,14 +9,13 @@ import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMSqlResp;
-import com.tencent.supersonic.common.pojo.ModelCluster;
 import com.tencent.supersonic.common.util.ContextUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class LLMSqlParser implements SemanticParser {
@@ -30,31 +29,30 @@ public class LLMSqlParser implements SemanticParser {
         }
         try {
             //2.get modelId from queryCtx and chatCtx.
-            ModelCluster modelCluster = requestService.getModelCluster(queryCtx, chatCtx);
-            if (StringUtils.isBlank(modelCluster.getKey())) {
+            Long viewId = requestService.getViewId(queryCtx);
+            if (viewId == null) {
                 return;
             }
             //3.get agent tool and determine whether to skip this parser.
-            NL2SQLTool commonAgentTool = requestService.getParserTool(queryCtx, modelCluster.getModelIds());
+            NL2SQLTool commonAgentTool = requestService.getParserTool(queryCtx, viewId);
             if (Objects.isNull(commonAgentTool)) {
                 log.info("no tool in this agent, skip {}", LLMSqlParser.class);
                 return;
             }
             //4.construct a request, call the API for the large model, and retrieve the results.
-            List<ElementValue> linkingValues = requestService.getValueList(queryCtx, modelCluster);
+            List<ElementValue> linkingValues = requestService.getValueList(queryCtx, viewId);
             SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
-            LLMReq llmReq = requestService.getLlmReq(queryCtx, semanticSchema, modelCluster, linkingValues);
-            LLMResp llmResp = requestService.requestLLM(llmReq, modelCluster.getKey());
+            LLMReq llmReq = requestService.getLlmReq(queryCtx, viewId, semanticSchema, linkingValues);
+            LLMResp llmResp = requestService.requestLLM(llmReq, viewId);
 
             if (Objects.isNull(llmResp)) {
                 return;
             }
             //5. deduplicate the SQL result list and build parserInfo
-            modelCluster.buildName(semanticSchema.getModelIdToName());
             LLMResponseService responseService = ContextUtils.getBean(LLMResponseService.class);
             Map<String, LLMSqlResp> deduplicationSqlResp = responseService.getDeduplicationSqlResp(llmResp);
             ParseResult parseResult = ParseResult.builder()
-                    .modelCluster(modelCluster)
+                    .viewId(viewId)
                     .commonAgentTool(commonAgentTool)
                     .llmReq(llmReq)
                     .llmResp(llmResp)

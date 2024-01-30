@@ -14,7 +14,7 @@ public enum DictWordType {
 
     VALUE("value"),
 
-    MODEL("model"),
+    VIEW("view"),
 
     ENTITY("entity"),
 
@@ -48,7 +48,7 @@ public enum DictWordType {
         //domain
         String[] natures = nature.split(DictWordType.NATURE_SPILT);
         if (natures.length == 2 && StringUtils.isNumeric(natures[1])) {
-            return MODEL;
+            return VIEW;
         }
         //dimension value
         if (natures.length == 3 && StringUtils.isNumeric(natures[1]) && StringUtils.isNumeric(natures[2])) {

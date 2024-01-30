@@ -1,21 +1,22 @@
 package com.tencent.supersonic.chat.core.corrector;
 
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.core.parser.sql.llm.ParseResult;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.AggregateEnum;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Perform schema corrections on the Schema information in S2QL.
@@ -51,7 +52,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
     }
 
     private void correctFieldName(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        Map<String, String> fieldNameMap = getFieldNameMap(queryContext, semanticParseInfo.getModel().getModelIds());
+        Map<String, String> fieldNameMap = getFieldNameMap(queryContext, semanticParseInfo.getViewId());
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String sql = SqlParserReplaceHelper.replaceFields(sqlInfo.getCorrectS2SQL(), fieldNameMap);
         sqlInfo.setCorrectS2SQL(sql);

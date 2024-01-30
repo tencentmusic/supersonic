@@ -1,18 +1,19 @@
 package com.tencent.supersonic.chat.core.corrector;
 
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Perform SQL corrections on the "Group by" section in S2SQL.
@@ -28,8 +29,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
     }
 
     private void addGroupByFields(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        Set<Long> modelIds = semanticParseInfo.getModel().getModelIds();
-
+        Long viewId = semanticParseInfo.getViewId();
         //add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectS2SQL();
@@ -41,7 +41,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
             return;
         }
         //add alias field name
-        Set<String> dimensions = semanticSchema.getDimensions(modelIds).stream()
+        Set<String> dimensions = semanticSchema.getDimensions(viewId).stream()
                 .flatMap(
                         schemaElement -> {
                             Set<String> elements = new HashSet<>();

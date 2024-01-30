@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.server.processor.parse;
 
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.ViewSchema;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
@@ -10,9 +11,10 @@ import com.tencent.supersonic.chat.core.query.SemanticQuery;
 import com.tencent.supersonic.chat.core.query.llm.analytics.MetricAnalyzeQuery;
 import com.tencent.supersonic.chat.server.service.SemanticService;
 import com.tencent.supersonic.common.util.ContextUtils;
+import org.springframework.util.CollectionUtils;
+
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.util.CollectionUtils;
 
 /**
  * EntityInfoProcessor fills core attributes of an entity so that
@@ -35,8 +37,9 @@ public class EntityInfoProcessor implements ParseResultProcessor {
                 return;
             }
             //1. set entity info
+            ViewSchema viewSchema = queryContext.getSemanticSchema().getViewSchemaMap().get(parseInfo.getViewId());
             SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
-            EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, queryContext.getUser());
+            EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, viewSchema, queryContext.getUser());
             if (QueryManager.isTagQuery(queryMode)
                     || QueryManager.isMetricQuery(queryMode)) {
                 parseInfo.setEntityInfo(entityInfo);
