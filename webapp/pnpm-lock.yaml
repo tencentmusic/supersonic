@@ -345,6 +345,9 @@ importers:
       classnames:
         specifier: ^2.2.6
         version: 2.3.2
+      compression-webpack-plugin:
+        specifier: ^11.0.0
+        version: 11.0.0(webpack@5.88.2)
       copy-to-clipboard:
         specifier: ^3.3.1
         version: 3.3.3
@@ -6734,7 +6737,6 @@ packages:
         optional: true
     dependencies:
       ajv: 8.12.0
-    dev: true
 
   /ajv-keywords@3.5.2(ajv@6.12.6):
     resolution: {integrity: sha512-5p6WTN0DdTGVQk6VjcEju19IgaHudalcfabD7yhDGeA6bcQnmL+CpveLJq/3hvfwd1aof6L386Ougkx6RfyMIQ==}
@@ -6750,7 +6752,6 @@ packages:
     dependencies:
       ajv: 8.12.0
       fast-deep-equal: 3.1.3
-    dev: true
 
   /ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
@@ -8601,6 +8602,17 @@ packages:
     dependencies:
       mime-db: 1.52.0
     dev: true
+
+  /compression-webpack-plugin@11.0.0(webpack@5.88.2):
+    resolution: {integrity: sha512-Nz9dMiu0sag+mgJ5QTkRx0+vwrDZPU/gps7IdrkFE+oRSkgyoX4wbMol7QnXjI5/TEWx8yEwew9MiMjZgdLtjg==}
+    engines: {node: '>= 18.12.0'}
+    peerDependencies:
+      webpack: ^5.1.0
+    dependencies:
+      schema-utils: 4.2.0
+      serialize-javascript: 6.0.2
+      webpack: 5.88.2
+    dev: false
 
   /compression@1.7.4:
     resolution: {integrity: sha512-jaSIDzP9pZVS4ZfQ+TzvtiWhdpFhE2RDHz8QJkpX9SIpLq88VueF5jJw6t+6CUQcAoA6t+x89MLrWAqpfDE8iQ==}
@@ -22318,7 +22330,6 @@ packages:
       ajv: 8.12.0
       ajv-formats: 2.1.1(ajv@8.12.0)
       ajv-keywords: 5.1.0(ajv@8.12.0)
-    dev: true
 
   /screenfull@5.2.0:
     resolution: {integrity: sha512-9BakfsO2aUQN2K9Fdbj87RJIEZ82Q9IGim7FqM5OsebfoFC6ZHXgDq/KvniuLTPdeM8wY2o6Dj3WQ7KeQCj3cA==}
@@ -22408,6 +22419,12 @@ packages:
     resolution: {integrity: sha512-owoXEFjWRllis8/M1Q+Cw5k8ZH40e3zhp/ovX+Xr/vi1qj6QesbyXXViFbpNvWvPNAD62SutwEXavefrLJWj7w==}
     dependencies:
       randombytes: 2.1.0
+
+  /serialize-javascript@6.0.2:
+    resolution: {integrity: sha512-Saa1xPByTTq2gdeFZYLLo+RFE35NHZkAbqZeWNd3BpzppeVisAqpDjcp8dyf6uIvEqJRd46jemmyA4iFIeVk8g==}
+    dependencies:
+      randombytes: 2.1.0
+    dev: false
 
   /serve-index@1.9.1:
     resolution: {integrity: sha512-pXHfKNP4qujrtteMrSBb0rc8HJ9Ms/GrXwcUtUtD5s4ewDJI8bT3Cz2zTVRMKtri49pLx2e0Ya8ziP5Ya2pZZw==}
