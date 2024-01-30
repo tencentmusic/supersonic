@@ -23,12 +23,8 @@ type Props = {
   [key: string]: any;
 };
 
-// type TaskStateMap = Record<string, DictTaskState>;
-
 const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
-  // domainManger,
   knowledgeInfosMap,
-  // onKnowledgeInfosMapChange,
   ...restProps
 }) => {
   let rightColumns: ColumnsType<RecordType> = [
@@ -57,6 +53,11 @@ const DimensionMetricVisibleTableTransfer: React.FC<Props> = ({
       render: (type) => {
         return <TransTypeTag type={type} />;
       },
+    },
+
+    {
+      dataIndex: 'modelName',
+      title: '所属模型',
     },
   ];
   if (!knowledgeInfosMap) {

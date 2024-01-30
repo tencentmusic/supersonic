@@ -121,6 +121,23 @@
 .metricDetailWrapper {
     height: calc(100vh - 56px);
     overflow: scroll;
+    .metricDetailTab {
+        :global {
+            .ant-tabs-nav {
+                background-color: rgb(255, 255, 255);
+                transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+                margin: 10px 20px 0 20px;
+                padding: 0 20px;
+                border-radius: 8px;
+            }
+            .ant-tabs-tab {
+                padding: 12px 0;
+                color: #344767;
+                font-weight: 500;
+            }
+        }
+
+    }
     .metricDetail {
         display: flex;
         padding: 0px;
@@ -158,26 +175,26 @@
         .siderContainer {
             background-color: rgb(255, 255, 255);
             width: 450px;
-            min-height: 100vh;
-            margin: 20px 20px 20px 0; 
+            min-height: calc(100vh - 78px);
+            margin: 10px 20px 20px 0; 
             border-radius: 6px;
             box-shadow: rgba(0, 0, 0, 0.08) 6px 0px 16px 0px, rgba(0, 0, 0, 0.12) 3px 0px 6px -4px, rgba(0, 0, 0, 0.05) 9px 0px 28px 8px;
         }
     }
 }
-.metricTrendSection {
-    .sectionBox {
-        margin: 20px;
-        padding: 10px;
-        box-shadow: #888888 0px 0px 1px, rgba(29, 41, 57, 0.08) 0px 1px 3px;
-        background-color: rgb(255, 255, 255);
-        transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-        border-radius: 6px;
-        background-image: none;
-        overflow: hidden;
-        position: relative;
-    }
+
+.sectionBox {
+    margin: 20px;
+    padding: 10px;
+    box-shadow: #888888 0px 0px 1px, rgba(29, 41, 57, 0.08) 0px 1px 3px;
+    background-color: rgb(255, 255, 255);
+    transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    border-radius: 6px;
+    background-image: none;
+    overflow: hidden;
+    position: relative;
 }
+
 
 .metricInfoSider{
     padding: 24px;

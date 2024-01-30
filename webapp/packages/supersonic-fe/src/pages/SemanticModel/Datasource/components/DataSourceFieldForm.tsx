@@ -298,7 +298,7 @@ const DataSourceFieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSq
 
   return (
     <>
-      <Alert
+      {/* <Alert
         style={{ marginBottom: '10px' }}
         banner
         message={
@@ -306,7 +306,7 @@ const DataSourceFieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSq
             为了保障同一个模型下维度/指标列表唯一，消除歧义，若本模型下的多个数据源存在相同的字段名并且都勾选了快速创建，系统默认这些相同字段的指标维度是同一个，同时列表中将只显示第一次创建的指标/维度。
           </div>
         }
-      />
+      /> */}
       <Table<FieldItem>
         dataSource={fields}
         columns={columns}

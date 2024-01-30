@@ -1,4 +1,4 @@
-import { Tag, Space, Tooltip } from 'antd';
+import { Tag, Space, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { connect } from 'umi';
 import type { StateType } from '../model';
@@ -11,12 +11,14 @@ import {
   PartitionOutlined,
   PlusOutlined,
   AreaChartOutlined,
-  DeleteOutlined,
 } from '@ant-design/icons';
 import styles from './style.less';
+import { isString } from 'lodash';
 import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_COLOR } from '../constant';
 import { ISemantic } from '../data';
 import MetricStar from './components/MetricStar';
+
+const { Text } = Typography;
 
 type Props = {
   metircData: ISemantic.IMetricItem;
@@ -40,7 +42,6 @@ const MetricInfoSider: React.FC<Props> = ({
           <Space>
             <MetricStar metricId={metircData?.id} initState={metircData?.isCollect} />
             {metircData?.name}
-            {metircData?.alias && `[${metircData.alias}]`}
             {metircData?.hasAdminRes && (
               <span
                 className={styles.gotoMetricListIcon}
@@ -105,6 +106,44 @@ const MetricInfoSider: React.FC<Props> = ({
               </Space>
             </span>
           </div>
+
+          {isArrayOfValues(metircData?.tags) && (
+            <div className={styles.item}>
+              <span className={styles.itemLable}>别名: </span>
+              <span className={styles.itemValue}>
+                <Space size={2} wrap>
+                  {isString(metircData?.alias) &&
+                    metircData?.alias.split(',').map((aliasName: string) => {
+                      return (
+                        <Tag
+                          color="#eee"
+                          key={aliasName}
+                          style={{
+                            borderRadius: 44,
+                            maxWidth: 90,
+                            minWidth: 40,
+                            backgroundColor: 'rgba(18, 31, 67, 0.04)',
+                          }}
+                        >
+                          <Text
+                            style={{
+                              maxWidth: 80,
+                              color: 'rgb(95, 116, 141)',
+                              textAlign: 'center',
+                              fontSize: 12,
+                            }}
+                            ellipsis={{ tooltip: aliasName }}
+                          >
+                            {aliasName}
+                          </Text>
+                        </Tag>
+                      );
+                    })}
+                </Space>
+              </span>
+            </div>
+          )}
+
           <div className={styles.item}>
             <span className={styles.itemLable}>描述: </span>
             <span className={styles.itemValue}>{metircData?.description}</span>

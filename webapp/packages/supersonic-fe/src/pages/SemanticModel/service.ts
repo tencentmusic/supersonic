@@ -514,7 +514,7 @@ export async function queryStruct({
             args: null,
           },
         ],
-        orders: [],
+        orders: [{ column: dateField, direction: 'desc' }],
         metricFilters: [],
         params: [],
         dateInfo: {
@@ -559,4 +559,30 @@ export function getDatabaseParameters(): Promise<any> {
 
 export function getDatabaseDetail(id: number): Promise<any> {
   return request.get(`${process.env.API_BASE_URL}database/${id}`);
+}
+
+export function getViewList(domainId: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}view/getViewList`, {
+    method: 'GET',
+    params: { domainId },
+  });
+}
+
+export function createView(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}view`, {
+    method: 'POST',
+    data,
+  });
+}
+export function updateView(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}view`, {
+    method: 'PUT',
+    data,
+  });
+}
+
+export function deleteView(viewId: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}view/${viewId}`, {
+    method: 'DELETE',
+  });
 }

@@ -4,11 +4,12 @@ import MetricTrendDimensionFilter from './MetricTrendDimensionFilter';
 import type { FormData } from './MetricTrendDimensionFilter';
 
 type Props = {
-  dimensionOptions: OptionsItem[];
+  dimensionOptions: (OptionsItem & { modelId: number })[];
   modelId: number;
   value?: FormData;
   periodDate?: { startDate: string; endDate: string; dateField: string };
   onChange?: (value: FormData[]) => void;
+  afterSolt?: React.ReactNode;
 };
 
 type DimensionOptionsMapItem = {
@@ -20,6 +21,7 @@ const MetricTrendDimensionFilterContainer: React.FC<Props> = ({
   dimensionOptions,
   modelId,
   periodDate,
+  afterSolt,
   value,
   onChange,
 }) => {
@@ -56,6 +58,7 @@ const MetricTrendDimensionFilterContainer: React.FC<Props> = ({
           setFilterData(data);
           onChange?.(data);
         }}
+        afterSolt={afterSolt}
       />
       <Space size={8} wrap style={{ marginTop: 10 }}>
         {filterData.map((item: FormData, index: number) => {

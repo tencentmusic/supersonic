@@ -13,9 +13,9 @@ import {
   batchUpdateMetricStatus,
   batchDownloadMetric,
 } from '../service';
-
 import MetricInfoCreateForm from './MetricInfoCreateForm';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
+import TableHeaderFilter from './TableHeaderFilter';
 import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
@@ -39,6 +39,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
     total: 0,
   };
   const [pagination, setPagination] = useState(defaultPagination);
+
   const [filterParams, setFilterParams] = useState<Record<string, any>>({});
 
   const actionRef = useRef<ActionType>();
@@ -95,9 +96,18 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
 
   const columns: ProColumns[] = [
     {
+      dataIndex: 'id',
+      title: 'ID',
+      width: 80,
+      fixed: 'left',
+      search: false,
+    },
+    {
       dataIndex: 'name',
       title: '指标',
-      width: '30%',
+      width: 280,
+      fixed: 'left',
+      // width: '30%',
       search: false,
       render: ColumnsConfig.metricInfo.render,
     },
@@ -105,54 +115,35 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       dataIndex: 'key',
       title: '指标搜索',
       hideInTable: true,
-      renderFormItem: () => (
-        <Input.Search
-          placeholder="请输入ID/指标名称/英文名称/标签"
-          onSearch={(value) => {
-            setFilterParams((preState) => {
-              return {
-                ...preState,
-                key: value,
-              };
-            });
-          }}
-        />
-      ),
     },
     {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',
-      hideInTable: true,
+      width: 160,
       valueEnum: SENSITIVE_LEVEL_ENUM,
-      renderFormItem: () => (
-        <Select
-          options={SENSITIVE_LEVEL_OPTIONS}
-          placeholder="请选择敏感度"
-          allowClear
-          onChange={(value) => {
-            setFilterParams((preState) => {
-              return {
-                ...preState,
-                sensitiveLevel: value,
-              };
-            });
-          }}
-        />
-      ),
+      render: ColumnsConfig.sensitiveLevel.render,
     },
+
     {
       dataIndex: 'description',
       title: '描述',
+      width: 300,
       search: false,
+      render: ColumnsConfig.description.render,
     },
     {
       dataIndex: 'status',
       title: '状态',
-      width: 200,
+      width: 160,
       search: false,
       render: ColumnsConfig.state.render,
     },
-
+    {
+      dataIndex: 'createdBy',
+      title: '创建人',
+      width: 150,
+      search: false,
+    },
     {
       dataIndex: 'updatedAt',
       title: '更新时间',
@@ -274,14 +265,53 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   return (
     <>
       <ProTable
-        className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft}`}
+        className={`${styles.classTable} ${styles.classTableSelectColumnAlignLeft} ${styles.disabledSearchTable} `}
         actionRef={actionRef}
+        headerTitle={
+          <TableHeaderFilter
+            components={[
+              {
+                label: '指标搜索',
+                component: (
+                  <Input.Search
+                    style={{ width: 280 }}
+                    placeholder="请输入ID/指标名称/英文名称/标签"
+                    onSearch={(value) => {
+                      setFilterParams((preState) => {
+                        return {
+                          ...preState,
+                          key: value,
+                        };
+                      });
+                    }}
+                  />
+                ),
+              },
+              {
+                label: '敏感度',
+                component: (
+                  <Select
+                    style={{ width: 140 }}
+                    options={SENSITIVE_LEVEL_OPTIONS}
+                    placeholder="请选择敏感度"
+                    allowClear
+                    onChange={(value) => {
+                      setFilterParams((preState) => {
+                        return {
+                          ...preState,
+                          sensitiveLevel: value,
+                        };
+                      });
+                    }}
+                  />
+                ),
+              },
+            ]}
+          />
+        }
         rowKey="id"
         loading={loading}
-        search={{
-          optionRender: false,
-          collapsed: false,
-        }}
+        search={false}
         rowSelection={{
           type: 'checkbox',
           ...rowSelection,
@@ -303,6 +333,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
           setPagination(currentPagin);
           queryMetricList({ ...filterParams, ...currentPagin });
         }}
+        scroll={{ x: 1500 }}
         sticky={{ offsetHeader: 0 }}
         size="large"
         options={{ reload: false, density: false, fullScreen: false }}

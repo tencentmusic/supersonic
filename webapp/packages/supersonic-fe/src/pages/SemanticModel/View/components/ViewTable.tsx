@@ -2,40 +2,57 @@ import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
 import { message, Button, Space, Popconfirm, Input, Tag } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
-import { StatusEnum } from '../enum';
+import { StatusEnum } from '../../enum';
 import type { Dispatch } from 'umi';
 import { connect } from 'umi';
-import type { StateType } from '../model';
-import { deleteModel, updateModel } from '../service';
-import ClassDataSourceTypeModal from './ClassDataSourceTypeModal';
-import { ColumnsConfig } from './MetricTableColumnRender';
-
+import type { StateType } from '../../model';
+import { deleteView, updateView, getViewList } from '../../service';
+import ViewCreateFormModal from './ViewCreateFormModal';
 import moment from 'moment';
-import styles from './style.less';
-import { ISemantic } from '../data';
+import styles from '../../components/style.less';
+import { ISemantic } from '../../data';
+import { ColumnsConfig } from '../../components/MetricTableColumnRender';
 
 type Props = {
   disabledEdit?: boolean;
   modelList: ISemantic.IModelItem[];
-  onModelChange?: (model?: ISemantic.IModelItem) => void;
   dispatch: Dispatch;
   domainManger: StateType;
 };
 
-const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelChange }) => {
-  const [modelItem, setModelItem] = useState<ISemantic.IModelItem>();
+const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainManger }) => {
+  const { selectDomainId } = domainManger;
+  const [viewItem, setViewItem] = useState<ISemantic.IViewItem>();
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
   const actionRef = useRef<ActionType>();
 
-  const updateModelStatus = async (modelData: ISemantic.IModelItem) => {
+  const updateViewStatus = async (modelData: ISemantic.IViewItem) => {
     setSaveLoading(true);
-    const { code, msg } = await updateModel({
+    const { code, msg } = await updateView({
       ...modelData,
     });
     setSaveLoading(false);
     if (code === 200) {
-      onModelChange?.();
+      queryViewList();
+    } else {
+      message.error(msg);
+    }
+  };
+
+  const [viewList, setViewList] = useState([]);
+
+  useEffect(() => {
+    queryViewList();
+  }, []);
+
+  const queryViewList = async () => {
+    setLoading(true);
+    const { code, data, msg } = await getViewList(selectDomainId);
+    setLoading(false);
+    if (code === 200) {
+      setViewList(data);
     } else {
       message.error(msg);
     }
@@ -50,25 +67,11 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
     },
     {
       dataIndex: 'name',
-      title: '模型名称',
+      title: '视图名称',
       search: false,
-      render: (_, record) => {
-        return (
-          <a
-            onClick={() => {
-              onModelChange?.(record);
-            }}
-          >
-            {_}
-          </a>
-        );
-      },
-    },
-    {
-      dataIndex: 'key',
-      title: '模型搜索',
-      hideInTable: true,
-      renderFormItem: () => <Input placeholder="请输入ID/模型名称/英文名称/标签" />,
+      // render: (_, record) => {
+      //   return <a>{_}</a>;
+      // },
     },
     {
       dataIndex: 'alias',
@@ -120,7 +123,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
             <a
               key="metricEditBtn"
               onClick={() => {
-                setModelItem(record);
+                setViewItem(record);
                 setCreateDataSourceModalOpen(true);
               }}
             >
@@ -131,7 +134,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
                 type="link"
                 key="editStatusOfflineBtn"
                 onClick={() => {
-                  updateModelStatus({
+                  updateViewStatus({
                     ...record,
                     status: StatusEnum.OFFLINE,
                   });
@@ -144,7 +147,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
                 type="link"
                 key="editStatusOnlineBtn"
                 onClick={() => {
-                  updateModelStatus({
+                  updateViewStatus({
                     ...record,
                     status: StatusEnum.ONLINE,
                   });
@@ -158,9 +161,9 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
               okText="是"
               cancelText="否"
               onConfirm={async () => {
-                const { code, msg } = await deleteModel(record.id);
+                const { code, msg } = await deleteView(record.id);
                 if (code === 200) {
-                  onModelChange?.();
+                  queryViewList();
                 } else {
                   message.error(msg);
                 }
@@ -182,7 +185,8 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
         rowKey="id"
         search={false}
         columns={columns}
-        dataSource={modelList}
+        loading={loading}
+        dataSource={viewList}
         tableAlertRender={() => {
           return false;
         }}
@@ -196,21 +200,22 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
                   key="create"
                   type="primary"
                   onClick={() => {
-                    setModelItem(undefined);
+                    setViewItem(undefined);
                     setCreateDataSourceModalOpen(true);
                   }}
                 >
-                  创建模型
+                  创建视图
                 </Button>,
               ]
         }
       />
       {createDataSourceModalOpen && (
-        <ClassDataSourceTypeModal
-          open={createDataSourceModalOpen}
-          dataSourceItem={modelItem}
+        <ViewCreateFormModal
+          domainId={selectDomainId}
+          viewItem={viewItem}
+          modelList={modelList}
           onSubmit={() => {
-            onModelChange?.();
+            queryViewList();
             setCreateDataSourceModalOpen(false);
           }}
           onCancel={() => {
@@ -223,4 +228,4 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
 };
 export default connect(({ domainManger }: { domainManger: StateType }) => ({
   domainManger,
-}))(ModelTable);
+}))(ViewTable);

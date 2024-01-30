@@ -2,7 +2,6 @@ import { Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
-import styles from '../style.less';
 import { ColumnConfig } from '../data';
 
 type Props = {
@@ -57,16 +56,15 @@ const MetricTable: React.FC<Props> = ({
 
   return (
     <div style={{ height: '100%' }}>
-      {Array.isArray(columns) && columns.length > 0 && (
-        <Table
-          columns={columns}
-          dataSource={dataSource}
-          scroll={{ x: 200, y: 700 }}
-          // pagination={{ defaultPageSize: 20 }}
-          loading={loading}
-          onChange={() => {}}
-        />
-      )}
+      {/* {Array.isArray(columns) && columns.length > 0 && ( */}
+      <Table
+        columns={columns}
+        dataSource={dataSource}
+        scroll={{ x: 200, y: 700 }}
+        loading={loading}
+        onChange={() => {}}
+      />
+      {/* )} */}
     </div>
   );
 };

@@ -103,12 +103,14 @@ const DomainManger: React.FC<Props> = ({ domainManger, dispatch }) => {
     const filterData = dataSourceRef.current.reduce(
       (data: ISemantic.IDomainSchemaRelaList, item: ISemantic.IDomainSchemaRelaItem) => {
         const { dimensions, metrics } = item;
-        const dimensionsList = dimensions.filter((dimension) => {
-          return dimension.name.includes(text);
-        });
-        const metricsList = metrics.filter((metric) => {
-          return metric.name.includes(text);
-        });
+        const dimensionsList =
+          dimensions?.filter((dimension) => {
+            return dimension.name.includes(text);
+          }) || [];
+        const metricsList =
+          metrics?.filter((metric) => {
+            return metric.name.includes(text);
+          }) || [];
         data.push({
           ...item,
           dimensions: dimensionsList,

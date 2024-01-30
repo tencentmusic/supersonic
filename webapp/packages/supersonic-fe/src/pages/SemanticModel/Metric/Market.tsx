@@ -21,7 +21,6 @@ import moment from 'moment';
 import styles from './style.less';
 import { ISemantic } from '../data';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
-import MetricStar from './components/MetricStar';
 import { ColumnsConfig } from '../components/MetricTableColumnRender';
 
 type Props = {
@@ -161,13 +160,19 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
   };
 
   const columns: ProColumns[] = [
-    // {
-    //   dataIndex: 'id',
-    //   title: 'ID',
-    // },
+    {
+      dataIndex: 'id',
+      title: 'ID',
+      width: 80,
+      fixed: 'left',
+      search: false,
+    },
     {
       dataIndex: 'name',
       title: '指标',
+      // width: '20%',
+      width: 280,
+      fixed: 'left',
       render: ColumnsConfig.metricInfo.render,
     },
     {
@@ -191,15 +196,31 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       },
     },
     {
+      dataIndex: 'sensitiveLevel',
+      title: '敏感度',
+      width: 150,
+      valueEnum: SENSITIVE_LEVEL_ENUM,
+      render: ColumnsConfig.sensitiveLevel.render,
+    },
+
+    {
+      dataIndex: 'description',
+      title: '描述',
+      search: false,
+      width: 300,
+      render: ColumnsConfig.description.render,
+    },
+    {
       dataIndex: 'status',
       title: '状态',
-      width: 120,
+      width: 180,
       search: false,
       render: ColumnsConfig.state.render,
     },
     {
-      dataIndex: 'description',
-      title: '描述',
+      dataIndex: 'createdBy',
+      title: '创建人',
+      // width: 150,
       search: false,
     },
     {
@@ -214,6 +235,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       title: '操作',
       dataIndex: 'x',
       valueType: 'option',
+      width: 180,
       render: (_, record) => {
         if (record.hasAdminRes) {
           return (
@@ -334,7 +356,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
               metricList={dataSource}
               disabledEdit={true}
               onMetricChange={(metricItem: ISemantic.IMetricItem) => {
-                history.push(`/metric/detail/${metricItem.modelId}/${metricItem.bizName}`);
+                history.push(`/metric/detail/${metricItem.id}`);
               }}
               onDeleteBtnClick={(metricItem: ISemantic.IMetricItem) => {
                 deleteMetricQuery(metricItem.id);
@@ -355,6 +377,7 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
             columns={columns}
             pagination={pagination}
             size="large"
+            scroll={{ x: 1500 }}
             tableAlertRender={() => {
               return false;
             }}

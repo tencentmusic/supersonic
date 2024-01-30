@@ -3,7 +3,7 @@ import { IChatConfig } from '../../data';
 import DimensionMetricVisibleTableTransfer from './DimensionMetricVisibleTableTransfer';
 
 interface RecordType {
-  key: string;
+  key: React.Key;
   name: string;
   type: 'dimension' | 'metric';
 }
@@ -11,11 +11,10 @@ interface RecordType {
 type Props = {
   knowledgeInfosMap?: IChatConfig.IKnowledgeInfosItemMap;
   sourceList: any[];
-  targetList: string[];
+  targetList: React.Key[];
   titles?: string[];
   onKnowledgeInfosMapChange?: (knowledgeInfosMap: IChatConfig.IKnowledgeInfosItemMap) => void;
   onChange?: (params?: any) => void;
-  // transferProps?: Record<string, any>;
   [key: string]: any;
 };
 
@@ -29,25 +28,27 @@ const DimensionMetricVisibleTransfer: React.FC<Props> = ({
   ...rest
 }) => {
   const [transferData, setTransferData] = useState<RecordType[]>([]);
-  const [targetKeys, setTargetKeys] = useState<string[]>(targetList);
+  const [targetKeys, setTargetKeys] = useState<React.Key[]>(targetList);
 
   useEffect(() => {
     setTransferData(
-      sourceList.map(({ key, id, name, bizName, transType }) => {
+      sourceList.map(({ key, id, name, bizName, transType, modelName }) => {
         return {
           key,
           name,
           bizName,
           id,
+          modelName,
           type: transType,
         };
       }),
     );
-  }, [sourceList]);
-
-  useEffect(() => {
-    setTargetKeys(targetList);
-  }, [targetList]);
+    const keyList: React.Key[] = sourceList.map((item) => item.key);
+    const filterTargetList = targetList.filter((key: React.Key) => {
+      return keyList.includes(key);
+    });
+    setTargetKeys(filterTargetList);
+  }, [sourceList, targetList]);
 
   const handleChange = (newTargetKeys: string[]) => {
     setTargetKeys(newTargetKeys);

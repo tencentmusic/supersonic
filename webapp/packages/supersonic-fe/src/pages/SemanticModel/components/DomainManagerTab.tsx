@@ -13,8 +13,9 @@ import { HomeOutlined, FundViewOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
 import SemanticGraphCanvas from '../SemanticGraphCanvas';
 import RecommendedQuestionsSection from '../components/Entity/RecommendedQuestionsSection';
-import CommonDimensionTable from './CommonDimension/CommonDimensionTable';
-import DatabaseTable from '../components/Database/DatabaseTable';
+import View from '../View';
+// import CommonDimensionTable from './CommonDimension/CommonDimensionTable';
+// import DatabaseTable from '../components/Database/DatabaseTable';
 
 import type { Dispatch } from 'umi';
 
@@ -55,6 +56,18 @@ const DomainManagerTab: React.FC<Props> = ({
       ),
     },
     {
+      label: '视图管理',
+      key: 'viewManange',
+      children: (
+        <View
+          modelList={modelList}
+          onModelChange={(model) => {
+            handleModelChange(model);
+          }}
+        />
+      ),
+    },
+    {
       label: '画布',
       key: 'xflow',
       children: (
@@ -68,11 +81,11 @@ const DomainManagerTab: React.FC<Props> = ({
       key: 'permissonSetting',
       children: <PermissionSection permissionTarget={'domain'} />,
     },
-    {
-      label: '数据库管理',
-      key: 'database',
-      children: <DatabaseTable />,
-    },
+    // {
+    //   label: '数据库管理',
+    //   key: 'database',
+    //   children: <DatabaseTable />,
+    // },
     // {
     //   label: '公共维度',
     //   key: 'commonDimension',
@@ -88,12 +101,12 @@ const DomainManagerTab: React.FC<Props> = ({
 
   const isModelItem = [
     {
-      label: '指标',
+      label: '指标管理',
       key: 'metric',
       children: <ClassMetricTable />,
     },
     {
-      label: '维度',
+      label: '维度管理',
       key: 'dimenstion',
       children: <ClassDimensionTable />,
     },
