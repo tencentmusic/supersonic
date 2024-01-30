@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.integration;
+package com.tencent.supersonic.chat;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,7 +11,7 @@ import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
-import com.tencent.supersonic.chat.integration.util.DataUtils;
+import com.tencent.supersonic.util.DataUtils;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.service.ConfigService;

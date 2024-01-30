@@ -153,7 +153,7 @@ public class QueryServiceImpl implements QueryService {
             parser.parse(queryCtx, chatCtx);
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(parser.getClass().getSimpleName()).type(CostType.PARSER.getType()).build());
-            log.info("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
+            log.debug("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
 
         // 3. corrector
@@ -177,7 +177,7 @@ public class QueryServiceImpl implements QueryService {
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(processor.getClass().getSimpleName())
                     .type(CostType.PROCESSOR.getType()).build());
-            log.info("{} result:{}", processor.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
+            log.debug("{} result:{}", processor.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
 
         if (Objects.nonNull(parseResult.getQueryId()) && timeCostDOList.size() > 0) {

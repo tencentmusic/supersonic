@@ -188,10 +188,8 @@ public class QueryReqConverter {
         }
         String type = database.getType();
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(type.toLowerCase());
-        log.info("type:{},engineAdaptor:{}", type, engineAdaptor);
         if (Objects.nonNull(engineAdaptor)) {
             String functionNameCorrector = engineAdaptor.functionNameCorrector(databaseReq.getSql());
-            log.info("sql:{} ,after corrector", databaseReq.getSql(), functionNameCorrector);
             databaseReq.setSql(functionNameCorrector);
         }
     }

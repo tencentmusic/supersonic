@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.integration.util;
+package com.tencent.supersonic.util;
 
 import static java.time.LocalDate.now;
 
@@ -15,6 +15,8 @@ import com.tencent.supersonic.chat.core.agent.PluginTool;
 import com.tencent.supersonic.chat.core.agent.RuleParserTool;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DataUtils {
 
@@ -128,4 +130,11 @@ public class DataUtils {
         return pluginTool;
     }
 
+    public static Set<Long> getMetricAgentIModelIds() {
+        Set<Long> result = new HashSet<>();
+        result.add(1L);
+        result.add(2L);
+        result.add(3L);
+        return result;
+    }
 }

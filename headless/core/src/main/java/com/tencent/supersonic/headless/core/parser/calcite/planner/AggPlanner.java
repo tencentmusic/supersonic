@@ -160,7 +160,6 @@ public class AggPlanner implements Planner {
 
     private SqlNode optimizeSql(String sql, EngineType engineType) {
         try {
-            log.info("before optimize:[{}]", sql);
             SqlNode sqlNode = SqlParser.create(sql, Configuration.getParserConfig(engineType)).parseStmt();
             if (Objects.nonNull(sqlNode)) {
                 return SemanticNode.optimize(scope, schema, sqlNode, engineType);
