@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.server.processor;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
+import com.tencent.supersonic.chat.api.pojo.ViewSchema;
 import com.tencent.supersonic.chat.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
@@ -115,7 +115,7 @@ class MetricCheckProcessorTest {
      * 访问用户数 drill down dimension is 部门, and 部门 is necessary, 部门 need in select and group by or where expressions
      */
     private SemanticSchema mockModelSchema() {
-        ModelSchema modelSchema = new ModelSchema();
+        ViewSchema modelSchema = new ViewSchema();
         Set<SchemaElement> metrics = Sets.newHashSet(
                 mockElement(1L, "访问次数", SchemaElementType.METRIC,
                         Lists.newArrayList(RelatedSchemaElement.builder().dimensionId(2L).isNecessary(false).build(),
@@ -129,7 +129,7 @@ class MetricCheckProcessorTest {
     }
 
     private SemanticSchema mockModelSchemaNoDimensionSetting() {
-        ModelSchema modelSchema = new ModelSchema();
+        ViewSchema modelSchema = new ViewSchema();
         Set<SchemaElement> metrics = Sets.newHashSet(
                 mockElement(1L, "访问次数", SchemaElementType.METRIC, Lists.newArrayList()),
                 mockElement(2L, "访问用户数", SchemaElementType.METRIC, Lists.newArrayList())

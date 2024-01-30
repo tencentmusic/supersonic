@@ -1,7 +1,5 @@
 package com.tencent.supersonic.headless.server.aspect;
 
-import static com.tencent.supersonic.common.pojo.Constants.MINUS;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -12,28 +10,20 @@ import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
-import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.headless.server.utils.QueryStructUtils;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -48,6 +38,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+import static com.tencent.supersonic.common.pojo.Constants.MINUS;
 
 @Component
 @Aspect
@@ -108,23 +107,24 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
             throws Throwable {
         Object[] objects = joinPoint.getArgs();
         User user = (User) objects[1];
-        List<Long> modelIds = querySqlReq.getModelIds();
         // fetch data permission meta information
-        ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
-        filter.setModelIds(modelIds);
-        List<ModelSchemaResp> modelSchemaRespList = schemaService.fetchModelSchema(filter, user);
-        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(querySqlReq, modelSchemaRespList);
-        log.info("modelId:{}, res4Privilege:{}", modelIds, res4Privilege);
+        SchemaFilterReq filter = new SchemaFilterReq();
+        filter.setModelIds(querySqlReq.getModelIds());
+        filter.setViewId(querySqlReq.getViewId());
+        SemanticSchemaResp semanticSchemaResp = schemaService.fetchSemanticSchema(filter);
+        List<Long> modelIdInView = semanticSchemaResp.getModelResps().stream()
+                .map(ModelResp::getId).collect(Collectors.toList());
+        Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(querySqlReq, semanticSchemaResp);
+        log.info("modelId:{}, res4Privilege:{}", modelIdInView, res4Privilege);
 
-        Set<String> sensitiveResByModel = getHighSensitiveColsByModelId(modelIds);
+        Set<String> sensitiveResByModel = getHighSensitiveColsByModelId(semanticSchemaResp);
         Set<String> sensitiveResReq = res4Privilege.parallelStream()
                 .filter(sensitiveResByModel::contains).collect(Collectors.toSet());
-        log.info("this query domainId:{}, sensitiveResReq:{}", modelIds, sensitiveResReq);
 
         // query user privilege info
-        AuthorizedResourceResp authorizedResource = getAuthorizedResource(user, modelIds, sensitiveResReq);
+        AuthorizedResourceResp authorizedResource = getAuthorizedResource(user, modelIdInView, sensitiveResReq);
         // get sensitiveRes that user has privilege
-        Set<String> resAuthSet = getAuthResNameSet(authorizedResource, modelIds);
+        Set<String> resAuthSet = getAuthResNameSet(authorizedResource, modelIdInView);
 
         // if sensitive fields without permission are involved in filter, thrown an exception
         doFilterCheckLogic(querySqlReq, resAuthSet, sensitiveResReq);
@@ -138,7 +138,7 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
         if (CollectionUtils.isEmpty(sensitiveResReq) || allSensitiveResReqIsOk(sensitiveResReq, resAuthSet)) {
             // if sensitiveRes is empty
             log.info("sensitiveResReq is empty");
-            return getQueryResultWithColumns(queryResultWithColumns, modelIds, authorizedResource);
+            return getQueryResultWithColumns(queryResultWithColumns, modelIdInView, authorizedResource);
         }
 
         // if the column has no permission, hit *
@@ -147,7 +147,7 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
         log.info("need2Apply:{},sensitiveResReq:{},resAuthSet:{}", need2Apply, sensitiveResReq, resAuthSet);
         SemanticQueryResp queryResultAfterDesensitization =
                 desensitizationData(queryResultWithColumns, need2Apply);
-        addPromptInfoInfo(modelIds, queryResultAfterDesensitization, authorizedResource, need2Apply);
+        addPromptInfoInfo(modelIdInView, queryResultAfterDesensitization, authorizedResource, need2Apply);
 
         return queryResultAfterDesensitization;
     }
@@ -207,21 +207,25 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
         Object[] args = point.getArgs();
         User user = (User) args[1];
         // fetch data permission meta information
-        List<Long> modelIds = queryStructReq.getModelIds();
+        SchemaFilterReq filter = new SchemaFilterReq();
+        filter.setModelIds(queryStructReq.getModelIds());
+        filter.setViewId(queryStructReq.getViewId());
+        SemanticSchemaResp semanticSchemaResp = schemaService.fetchSemanticSchema(filter);
+        List<Long> modelIdInView = semanticSchemaResp.getModelResps().stream()
+                .map(ModelResp::getId).collect(Collectors.toList());
         Set<String> res4Privilege = queryStructUtils.getResNameEnExceptInternalCol(queryStructReq);
-        log.info("modelId:{}, res4Privilege:{}", modelIds, res4Privilege);
+        log.info("modelId:{}, res4Privilege:{}", modelIdInView, res4Privilege);
 
-        Set<String> sensitiveResByModel = getHighSensitiveColsByModelId(modelIds);
+        Set<String> sensitiveResByModel = getHighSensitiveColsByModelId(semanticSchemaResp);
         Set<String> sensitiveResReq = res4Privilege.parallelStream()
                 .filter(sensitiveResByModel::contains).collect(Collectors.toSet());
-        log.info("this query domainId:{}, sensitiveResReq:{}", modelIds, sensitiveResReq);
+        log.info("this query domainId:{}, sensitiveResReq:{}", modelIdInView, sensitiveResReq);
 
         // query user privilege info
         AuthorizedResourceResp authorizedResource = getAuthorizedResource(user,
-                modelIds, sensitiveResReq);
+                modelIdInView, sensitiveResReq);
         // get sensitiveRes that user has privilege
-        Set<String> resAuthSet = getAuthResNameSet(authorizedResource,
-                queryStructReq.getModelIds());
+        Set<String> resAuthSet = getAuthResNameSet(authorizedResource, queryStructReq.getModelIds());
 
         // if sensitive fields without permission are involved in filter, thrown an exception
         doFilterCheckLogic(queryStructReq, resAuthSet, sensitiveResReq);
@@ -235,7 +239,7 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
         if (CollectionUtils.isEmpty(sensitiveResReq) || allSensitiveResReqIsOk(sensitiveResReq, resAuthSet)) {
             // if sensitiveRes is empty
             log.info("sensitiveResReq is empty");
-            return getQueryResultWithColumns(queryResultWithColumns, modelIds, authorizedResource);
+            return getQueryResultWithColumns(queryResultWithColumns, modelIdInView, authorizedResource);
         }
 
         // if the column has no permission, hit *
@@ -243,7 +247,7 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
                 .collect(Collectors.toSet());
         SemanticQueryResp queryResultAfterDesensitization =
                 desensitizationData(queryResultWithColumns, need2Apply);
-        addPromptInfoInfo(modelIds, queryResultAfterDesensitization, authorizedResource, need2Apply);
+        addPromptInfoInfo(modelIdInView, queryResultAfterDesensitization, authorizedResource, need2Apply);
 
         return queryResultAfterDesensitization;
 

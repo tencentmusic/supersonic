@@ -12,14 +12,15 @@ import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.chat.core.utils.ComponentFactory;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * FunctionCallParser is an implementation of a recall plugin based on FunctionCall
@@ -56,19 +57,19 @@ public class FunctionCallParser extends PluginParser {
         plugin.setParseMode(ParseMode.FUNCTION_CALL);
         Pair<Boolean, Set<Long>> pluginResolveResult = PluginManager.resolve(plugin, queryContext);
         if (pluginResolveResult.getLeft()) {
-            Set<Long> modelList = pluginResolveResult.getRight();
-            if (CollectionUtils.isEmpty(modelList)) {
+            Set<Long> viewList = pluginResolveResult.getRight();
+            if (CollectionUtils.isEmpty(viewList)) {
                 return null;
             }
             double score = queryContext.getQueryText().length();
-            return PluginRecallResult.builder().plugin(plugin).modelIds(modelList).score(score).build();
+            return PluginRecallResult.builder().plugin(plugin).viewIds(viewList).score(score).build();
         }
         return null;
     }
 
     public FunctionResp functionCall(QueryContext queryContext) {
         List<PluginParseConfig> pluginToFunctionCall =
-                getPluginToFunctionCall(queryContext.getModelId(), queryContext);
+                getPluginToFunctionCall(queryContext.getViewId(), queryContext);
         if (CollectionUtils.isEmpty(pluginToFunctionCall)) {
             log.info("function call parser, plugin is empty, skip");
             return null;

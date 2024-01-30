@@ -1,15 +1,14 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
+import lombok.Data;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
 
 @Data
 public class ParseSqlReq {
-
-    private String rootPath = "";
     private Map<String, String> variables;
     private String sql = "";
     private List<MetricTable> tables;

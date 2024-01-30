@@ -19,6 +19,10 @@ public class MetaFilter {
 
     private List<Long> modelIds;
 
+    private Long domainId;
+
+    private Long viewId;
+
     private Integer sensitiveLevel;
 
     private Integer status;

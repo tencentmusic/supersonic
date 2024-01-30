@@ -1,7 +1,5 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
@@ -12,19 +10,17 @@ import com.tencent.supersonic.common.pojo.enums.ApiItemType;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
-import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.Item;
 import com.tencent.supersonic.headless.api.pojo.SingleItemQueryResult;
 import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.AppDetailResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
@@ -33,8 +29,8 @@ import com.tencent.supersonic.headless.api.pojo.response.ItemQueryResultResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.parser.DefaultQueryParser;
@@ -49,32 +45,27 @@ import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.service.AppService;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import com.tencent.supersonic.headless.server.service.QueryService;
-import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 @Service
 @Slf4j
 public class QueryServiceImpl implements QueryService {
-
-    protected final Cache<String, List<ItemUseResp>> itemUseCache =
-            CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).build();
-
-    private final StatUtils statUtils;
+    private StatUtils statUtils;
     private final QueryUtils queryUtils;
     private final QueryReqConverter queryReqConverter;
     private final Catalog catalog;
@@ -124,7 +115,7 @@ public class QueryServiceImpl implements QueryService {
             }
             StatUtils.get().setUseResultCache(false);
             //3 query
-            QueryStatement queryStatement = buildQueryStatement(queryReq, user);
+            QueryStatement queryStatement = buildQueryStatement(queryReq);
             SemanticQueryResp result = query(queryStatement);
             //4 reset cache and set stateInfo
             Boolean setCacheSuccess = queryCache.put(cacheKey, result);
@@ -145,49 +136,51 @@ public class QueryServiceImpl implements QueryService {
         }
     }
 
-    private QueryStatement buildSqlQueryStatement(QuerySqlReq querySqlReq, User user) throws Exception {
-        ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
-        filter.setModelIds(querySqlReq.getModelIds());
-        SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
-        List<ModelSchemaResp> modelSchemaResps = schemaService.fetchModelSchema(filter, user);
-        QueryStatement queryStatement = queryReqConverter.convert(querySqlReq, modelSchemaResps);
+    private QueryStatement buildSqlQueryStatement(QuerySqlReq querySqlReq) throws Exception {
+        SchemaFilterReq filter = buildSchemaFilterReq(querySqlReq);
+        SemanticSchemaResp semanticSchemaResp = catalog.fetchSemanticSchema(filter);
+        QueryStatement queryStatement = queryReqConverter.convert(querySqlReq, semanticSchemaResp);
         queryStatement.setModelIds(querySqlReq.getModelIds());
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
-        SemanticModel semanticModel = semanticSchemaManager.get(querySqlReq.getModelIdStr());
+        queryStatement.setSemanticSchemaResp(semanticSchemaResp);
+        SemanticModel semanticModel = semanticSchemaManager.getSemanticModel(semanticSchemaResp);
         queryStatement.setSemanticModel(semanticModel);
         return queryStatement;
     }
 
-    private QueryStatement buildQueryStatement(SemanticQueryReq semanticQueryReq, User user) throws Exception {
+    private QueryStatement buildQueryStatement(SemanticQueryReq semanticQueryReq) throws Exception {
         if (semanticQueryReq instanceof QuerySqlReq) {
-            return buildSqlQueryStatement((QuerySqlReq) semanticQueryReq, user);
+            return buildSqlQueryStatement((QuerySqlReq) semanticQueryReq);
         }
         if (semanticQueryReq instanceof QueryStructReq) {
-            return buildStructQueryStatement((QueryStructReq) semanticQueryReq, user);
+            return buildStructQueryStatement((QueryStructReq) semanticQueryReq);
         }
         if (semanticQueryReq instanceof QueryMultiStructReq) {
-            return buildMultiStructQueryStatement((QueryMultiStructReq) semanticQueryReq, user);
+            return buildMultiStructQueryStatement((QueryMultiStructReq) semanticQueryReq);
         }
         return null;
     }
 
-    private QueryStatement buildStructQueryStatement(QueryStructReq queryStructReq, User user) throws Exception {
+    private QueryStatement buildStructQueryStatement(QueryStructReq queryStructReq) throws Exception {
+        SchemaFilterReq filter = buildSchemaFilterReq(queryStructReq);
+        SemanticSchemaResp semanticSchemaResp = catalog.fetchSemanticSchema(filter);
         QueryStatement queryStatement = new QueryStatement();
         queryStatement.setQueryStructReq(queryStructReq);
         queryStatement.setIsS2SQL(false);
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
-        queryStatement.setModelIds(queryStatement.getQueryStructReq().getModelIds());
-        SemanticModel semanticModel = semanticSchemaManager.get(queryStructReq.getModelIdStr());
+        queryStatement.setViewId(queryStatement.getQueryStructReq().getViewId());
+        queryStatement.setSemanticSchemaResp(semanticSchemaResp);
+        SemanticModel semanticModel = semanticSchemaManager.getSemanticModel(semanticSchemaResp);
         queryStatement.setSemanticModel(semanticModel);
         return queryStatement;
     }
 
-    private QueryStatement buildMultiStructQueryStatement(QueryMultiStructReq queryMultiStructReq, User user)
+    private QueryStatement buildMultiStructQueryStatement(QueryMultiStructReq queryMultiStructReq)
             throws Exception {
         List<QueryStatement> sqlParsers = new ArrayList<>();
         for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
-            QueryStatement queryStatement = buildQueryStatement(queryStructReq, user);
-            SemanticModel semanticModel = semanticSchemaManager.get(queryStructReq.getModelIdStr());
+            QueryStatement queryStatement = buildQueryStatement(queryStructReq);
+            SemanticModel semanticModel = queryStatement.getSemanticModel();
             queryStatement.setModelIds(queryStatement.getQueryStructReq().getModelIds());
             queryStatement.setSemanticModel(semanticModel);
             queryStatement.setEnableOptimize(queryUtils.enableOptimize());
@@ -196,6 +189,13 @@ public class QueryServiceImpl implements QueryService {
         }
         log.info("multi sqlParser:{}", sqlParsers);
         return queryUtils.sqlParserUnion(queryMultiStructReq, sqlParsers);
+    }
+
+    private SchemaFilterReq buildSchemaFilterReq(SemanticQueryReq semanticQueryReq) {
+        SchemaFilterReq schemaFilterReq = new SchemaFilterReq();
+        schemaFilterReq.setViewId(semanticQueryReq.getViewId());
+        schemaFilterReq.setModelIds(semanticQueryReq.getModelIds());
+        return schemaFilterReq;
     }
 
     @Override
@@ -208,20 +208,13 @@ public class QueryServiceImpl implements QueryService {
     @Override
     @SneakyThrows
     public List<ItemUseResp> getStatInfo(ItemUseReq itemUseReq) {
-        if (itemUseReq.getCacheEnable()) {
-            return itemUseCache.get(JsonUtil.toString(itemUseReq), () -> {
-                List<ItemUseResp> data = statUtils.getStatInfo(itemUseReq);
-                itemUseCache.put(JsonUtil.toString(itemUseReq), data);
-                return data;
-            });
-        }
-        return statUtils.getStatInfo(itemUseReq);
+        return catalog.getStatInfo(itemUseReq);
     }
 
     @Override
     public <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception {
         T queryReq = explainSqlReq.getQueryReq();
-        QueryStatement queryStatement = buildQueryStatement((SemanticQueryReq) queryReq, user);
+        QueryStatement queryStatement = buildQueryStatement((SemanticQueryReq) queryReq);
         queryStatement = plan(queryStatement);
         return getExplainResp(queryStatement);
     }
@@ -297,7 +290,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     private void authCheck(AppDetailResp appDetailResp, List<Long> ids, ApiItemType type) {
-        Set<Long> idsInApp = appDetailResp.getConfig().getAllItems().stream()
+        Set<Long> idsInApp = appDetailResp.allItems().stream()
                 .filter(item -> type.equals(item.getType())).map(Item::getId).collect(Collectors.toSet());
         if (!idsInApp.containsAll(ids)) {
             throw new InvalidArgumentException("查询范围超过应用申请范围, 请检查");
@@ -346,9 +339,7 @@ public class QueryServiceImpl implements QueryService {
             //3 execute
             if (queryExecutor != null) {
                 semanticQueryResp = queryExecutor.execute(queryStatement);
-                if (!CollectionUtils.isEmpty(queryStatement.getModelIds())) {
-                    queryUtils.fillItemNameInfo(semanticQueryResp, queryStatement.getModelIds());
-                }
+                queryUtils.fillItemNameInfo(semanticQueryResp, queryStatement.getSemanticSchemaResp());
             }
             return semanticQueryResp;
         } catch (Exception e) {

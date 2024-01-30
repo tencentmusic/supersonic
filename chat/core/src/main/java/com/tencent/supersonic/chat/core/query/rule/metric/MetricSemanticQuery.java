@@ -1,26 +1,11 @@
 package com.tencent.supersonic.chat.core.query.rule.metric;
 
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.METRIC;
-import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.REQUIRED;
-import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT_INT;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT_INT;
-import static com.tencent.supersonic.common.pojo.Constants.TIMES_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.TIME_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.WEEK;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.api.pojo.request.ChatDefaultConfigReq;
+import com.tencent.supersonic.chat.api.pojo.ViewSchema;
 import com.tencent.supersonic.chat.api.pojo.response.AggregateInfo;
-import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
-import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.MetricInfo;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.core.config.AggregatorConfig;
@@ -33,10 +18,15 @@ import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.RatioOverType;
+import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
+
 import java.text.DecimalFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -53,8 +43,19 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.METRIC;
+import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+import static com.tencent.supersonic.common.pojo.Constants.DAY;
+import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT_INT;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH_FORMAT_INT;
+import static com.tencent.supersonic.common.pojo.Constants.TIMES_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.TIME_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
 @Slf4j
 public abstract class MetricSemanticQuery extends RuleSemanticQuery {
@@ -75,30 +76,26 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
     @Override
     public void fillParseInfo(QueryContext queryContext, ChatContext chatContext) {
         super.fillParseInfo(queryContext, chatContext);
-
         parseInfo.setLimit(METRIC_MAX_RESULTS);
         if (parseInfo.getDateInfo() == null) {
-            ChatConfigRichResp chatConfig = queryContext.getModelIdToChatRichConfig().get(parseInfo.getModelId());
-            ChatDefaultRichConfigResp defaultConfig = chatConfig.getChatAggRichConfig().getChatDefaultConfig();
+            ViewSchema viewSchema = queryContext.getSemanticSchema().getViewSchemaMap().get(parseInfo.getViewId());
+            TimeDefaultConfig timeDefaultConfig = viewSchema.getMetricTypeTimeDefaultConfig();
             DateConf dateInfo = new DateConf();
-            int unit = 1;
-            if (Objects.nonNull(defaultConfig) && Objects.nonNull(defaultConfig.getUnit())) {
-                unit = defaultConfig.getUnit();
+            if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())) {
+                int unit = timeDefaultConfig.getUnit();
+                String startDate = LocalDate.now().plusDays(-unit).toString();
+                String endDate = startDate;
+                if (TimeMode.LAST.equals(timeDefaultConfig.getTimeMode())) {
+                    dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
+                } else if (TimeMode.RECENT.equals(timeDefaultConfig.getTimeMode())) {
+                    dateInfo.setDateMode(DateConf.DateMode.RECENT);
+                    endDate = LocalDate.now().plusDays(-1).toString();
+                }
+                dateInfo.setUnit(unit);
+                dateInfo.setPeriod(timeDefaultConfig.getPeriod());
+                dateInfo.setStartDate(startDate);
+                dateInfo.setEndDate(endDate);
             }
-            String startDate = LocalDate.now().plusDays(-unit).toString();
-            String endDate = startDate;
-
-            if (ChatDefaultConfigReq.TimeMode.LAST.equals(defaultConfig.getTimeMode())) {
-                dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
-            } else if (ChatDefaultConfigReq.TimeMode.RECENT.equals(defaultConfig.getTimeMode())) {
-                dateInfo.setDateMode(DateConf.DateMode.RECENT);
-                endDate = LocalDate.now().plusDays(-1).toString();
-            }
-            dateInfo.setUnit(unit);
-            dateInfo.setPeriod(defaultConfig.getPeriod());
-            dateInfo.setStartDate(startDate);
-            dateInfo.setEndDate(endDate);
-
             parseInfo.setDateInfo(dateInfo);
         }
     }

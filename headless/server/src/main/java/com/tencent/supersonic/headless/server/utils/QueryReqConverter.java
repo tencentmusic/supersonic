@@ -9,25 +9,33 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
-import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.api.pojo.enums.MetricType;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
+import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
+import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricType;
 import com.tencent.supersonic.headless.api.pojo.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.service.Catalog;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,14 +45,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 @Component
 @Slf4j
@@ -59,36 +59,31 @@ public class QueryReqConverter {
     @Autowired
     private SqlGenerateUtils sqlGenerateUtils;
 
-    @Autowired
-    private Catalog catalog;
+    public QueryStatement convert(QuerySqlReq querySQLReq,
+                                  SemanticSchemaResp semanticSchemaResp) throws Exception {
 
-    public QueryStatement convert(QuerySqlReq querySqlReq,
-            List<ModelSchemaResp> modelSchemaResps) throws Exception {
-
-        if (CollectionUtils.isEmpty(modelSchemaResps)) {
+        if (semanticSchemaResp == null) {
             return new QueryStatement();
         }
-        Map<Long, ModelSchemaResp> modelSchemaRespMap = modelSchemaResps.stream()
-                .collect(Collectors.toMap(ModelSchemaResp::getId, modelSchemaResp -> modelSchemaResp));
         //1.convert name to bizName
-        convertNameToBizName(querySqlReq, modelSchemaResps);
+        convertNameToBizName(querySQLReq, semanticSchemaResp);
         //2.functionName corrector
-        functionNameCorrector(querySqlReq);
+        functionNameCorrector(querySQLReq, semanticSchemaResp);
         //3.correct tableName
-        correctTableName(querySqlReq);
+        correctTableName(querySQLReq);
 
-        String tableName = SqlParserSelectHelper.getTableName(querySqlReq.getSql());
+        String tableName = SqlParserSelectHelper.getTableName(querySQLReq.getSql());
         if (StringUtils.isEmpty(tableName)) {
             return new QueryStatement();
         }
         //4.build MetricTables
-        List<String> allFields = SqlParserSelectHelper.getAllFields(querySqlReq.getSql());
-        List<String> metrics = getMetrics(modelSchemaResps, allFields);
+        List<String> allFields = SqlParserSelectHelper.getAllFields(querySQLReq.getSql());
+        List<String> metrics = getMetrics(semanticSchemaResp, allFields);
         QueryStructReq queryStructReq = new QueryStructReq();
         MetricTable metricTable = new MetricTable();
         metricTable.setMetrics(metrics);
 
-        Set<String> dimensions = getDimensions(modelSchemaResps, allFields);
+        Set<String> dimensions = getDimensions(semanticSchemaResp, allFields);
 
         metricTable.setDimensions(new ArrayList<>(dimensions));
 
@@ -96,36 +91,33 @@ public class QueryReqConverter {
         // if metric empty , fill model default
         if (CollectionUtils.isEmpty(metricTable.getMetrics())) {
             metricTable.setMetrics(new ArrayList<>());
-            for (Long modelId : querySqlReq.getModelIds()) {
-                ModelSchemaResp modelSchemaResp = modelSchemaRespMap.get(modelId);
-                metricTable.getMetrics().add(sqlGenerateUtils.generateInternalMetricName(modelSchemaResp.getBizName()));
-            }
+            metricTable.getMetrics().add(sqlGenerateUtils.generateInternalMetricName(
+                    semanticSchemaResp.getModelResps().get(0).getBizName()));
         } else {
             queryStructReq.setAggregators(
                     metricTable.getMetrics().stream().map(m -> new Aggregator(m, AggOperatorEnum.UNKNOWN)).collect(
                             Collectors.toList()));
         }
-        AggOption aggOption = getAggOption(querySqlReq);
+        AggOption aggOption = getAggOption(querySQLReq);
         metricTable.setAggOption(aggOption);
         List<MetricTable> tables = new ArrayList<>();
         tables.add(metricTable);
         //4.build ParseSqlReq
         ParseSqlReq result = new ParseSqlReq();
-        BeanUtils.copyProperties(querySqlReq, result);
+        BeanUtils.copyProperties(querySQLReq, result);
 
-        result.setRootPath(querySqlReq.getModelIdStr());
         result.setTables(tables);
-        DatabaseResp database = catalog.getDatabaseByModelId(querySqlReq.getModelIds().get(0));
+        DatabaseResp database = semanticSchemaResp.getDatabaseResp();
         if (!sqlGenerateUtils.isSupportWith(EngineType.fromString(database.getType().toUpperCase()),
                 database.getVersion())) {
             result.setSupportWith(false);
             result.setWithAlias(false);
         }
         //5. do deriveMetric
-        generateDerivedMetric(querySqlReq.getModelIds(), modelSchemaResps, aggOption, result);
+        generateDerivedMetric(semanticSchemaResp, aggOption, result);
         //6.physicalSql by ParseSqlReq
-        queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySqlReq.getSql()));
-        queryStructReq.setModelIds(new HashSet<>(querySqlReq.getModelIds()));
+        queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySQLReq.getSql()));
+        queryStructReq.setViewId(querySQLReq.getViewId());
         queryStructReq.setQueryType(getQueryType(aggOption));
         log.info("QueryReqConverter queryStructReq[{}]", queryStructReq);
         QueryStatement queryStatement = new QueryStatement();
@@ -133,7 +125,7 @@ public class QueryReqConverter {
         queryStatement.setParseSqlReq(result);
         queryStatement.setIsS2SQL(true);
         queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructReq));
-        queryStatement.setModelIds(querySqlReq.getModelIds());
+        queryStatement.setViewId(querySQLReq.getViewId());
         queryStatement.setEnableLimitWrapper(limitWrapper);
 
         return queryStatement;
@@ -151,8 +143,8 @@ public class QueryReqConverter {
         return AggOption.DEFAULT;
     }
 
-    private void convertNameToBizName(QuerySqlReq databaseReq, List<ModelSchemaResp> modelSchemaResps) {
-        Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(modelSchemaResps);
+    private void convertNameToBizName(QuerySqlReq databaseReq, SemanticSchemaResp semanticSchemaResp) {
+        Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(semanticSchemaResp);
         String sql = databaseReq.getSql();
         log.info("convert name to bizName before:{}", sql);
         String replaceFields = SqlParserReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, true);
@@ -160,9 +152,8 @@ public class QueryReqConverter {
         databaseReq.setSql(replaceFields);
     }
 
-    private Set<String> getDimensions(List<ModelSchemaResp> modelSchemaResps, List<String> allFields) {
-        Map<String, String> dimensionLowerToNameMap = modelSchemaResps.stream()
-                .flatMap(modelSchemaResp -> modelSchemaResp.getDimensions().stream())
+    private Set<String> getDimensions(SemanticSchemaResp semanticSchemaResp, List<String> allFields) {
+        Map<String, String> dimensionLowerToNameMap = semanticSchemaResp.getDimensions().stream()
                 .collect(Collectors.toMap(entry -> entry.getBizName().toLowerCase(), SchemaItem::getBizName,
                         (k1, k2) -> k1));
         Map<String, String> internalLowerToNameMap = QueryStructUtils.internalCols.stream()
@@ -173,16 +164,15 @@ public class QueryReqConverter {
                 .map(entry -> dimensionLowerToNameMap.get(entry.toLowerCase())).collect(Collectors.toSet());
     }
 
-    private List<String> getMetrics(List<ModelSchemaResp> modelSchemaResps, List<String> allFields) {
-        Map<String, String> metricLowerToNameMap = modelSchemaResps.stream()
-                .flatMap(modelSchemaResp -> modelSchemaResp.getMetrics().stream())
+    private List<String> getMetrics(SemanticSchemaResp semanticSchemaResp, List<String> allFields) {
+        Map<String, String> metricLowerToNameMap = semanticSchemaResp.getMetrics().stream()
                 .collect(Collectors.toMap(entry -> entry.getBizName().toLowerCase(), SchemaItem::getBizName));
         return allFields.stream().filter(entry -> metricLowerToNameMap.containsKey(entry.toLowerCase()))
                 .map(entry -> metricLowerToNameMap.get(entry.toLowerCase())).collect(Collectors.toList());
     }
 
-    private void functionNameCorrector(QuerySqlReq databaseReq) {
-        DatabaseResp database = catalog.getDatabaseByModelId(databaseReq.getModelIds().get(0));
+    private void functionNameCorrector(QuerySqlReq databaseReq, SemanticSchemaResp semanticSchemaResp) {
+        DatabaseResp database = semanticSchemaResp.getDatabaseResp();
         if (Objects.isNull(database) || Objects.isNull(database.getType())) {
             return;
         }
@@ -194,15 +184,13 @@ public class QueryReqConverter {
         }
     }
 
-    protected Map<String, String> getFieldNameToBizNameMap(List<ModelSchemaResp> modelSchemaResps) {
+    protected Map<String, String> getFieldNameToBizNameMap(SemanticSchemaResp semanticSchemaResp) {
         // support fieldName and field alias to bizName
-        Map<String, String> dimensionResults = modelSchemaResps.stream().flatMap(modelSchemaResp
-                        -> modelSchemaResp.getDimensions().stream())
+        Map<String, String> dimensionResults = semanticSchemaResp.getDimensions().stream()
                 .flatMap(entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
                 .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
 
-        Map<String, String> metricResults = modelSchemaResps.stream().flatMap(modelSchemaResp
-                        -> modelSchemaResp.getMetrics().stream())
+        Map<String, String> metricResults = semanticSchemaResp.getMetrics().stream()
                 .flatMap(entry -> getPairStream(entry.getAlias(), entry.getName(), entry.getBizName()))
                 .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (k1, k2) -> k1));
 
@@ -224,12 +212,11 @@ public class QueryReqConverter {
         return elements.stream();
     }
 
-    public void correctTableName(QuerySqlReq databaseReq) {
-        String sql = databaseReq.getSql();
-        for (Long modelId : databaseReq.getModelIds()) {
-            sql = SqlParserReplaceHelper.replaceTable(sql, Constants.TABLE_PREFIX + modelId);
-        }
-        databaseReq.setSql(sql);
+    public void correctTableName(QuerySqlReq querySqlReq) {
+        String sql = querySqlReq.getSql();
+        sql = SqlParserReplaceHelper.replaceTable(sql,
+                Constants.TABLE_PREFIX + querySqlReq.getViewId());
+        querySqlReq.setSql(sql);
     }
 
     private QueryType getQueryType(AggOption aggOption) {
@@ -241,13 +228,13 @@ public class QueryReqConverter {
         return queryType;
     }
 
-    private void generateDerivedMetric(List<Long> modelIds, List<ModelSchemaResp> modelSchemaResps, AggOption aggOption,
+    private void generateDerivedMetric(SemanticSchemaResp semanticSchemaResp, AggOption aggOption,
             ParseSqlReq parseSqlReq) {
         String sql = parseSqlReq.getSql();
         for (MetricTable metricTable : parseSqlReq.getTables()) {
             List<String> measures = new ArrayList<>();
             Map<String, String> replaces = new HashMap<>();
-            generateDerivedMetric(modelIds, modelSchemaResps, aggOption, metricTable.getMetrics(),
+            generateDerivedMetric(semanticSchemaResp, aggOption, metricTable.getMetrics(),
                     metricTable.getDimensions(),
                     measures, replaces);
             if (!CollectionUtils.isEmpty(replaces)) {
@@ -263,13 +250,11 @@ public class QueryReqConverter {
         parseSqlReq.setSql(sql);
     }
 
-    private void generateDerivedMetric(List<Long> modelIds, List<ModelSchemaResp> modelSchemaResps, AggOption aggOption,
+    private void generateDerivedMetric(SemanticSchemaResp semanticSchemaResp, AggOption aggOption,
             List<String> metrics, List<String> dimensions,
             List<String> measures, Map<String, String> replaces) {
-        MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setModelIds(modelIds);
-        List<MetricResp> metricResps = catalog.getMetrics(metaFilter);
-        List<DimensionResp> dimensionResps = catalog.getDimensions(metaFilter);
+        List<MetricSchemaResp> metricResps = semanticSchemaResp.getMetrics();
+        List<DimSchemaResp> dimensionResps = semanticSchemaResp.getDimensions();
         // check metrics has derived
         if (!metricResps.stream()
                 .anyMatch(m -> metrics.contains(m.getBizName()) && MetricType.isDerived(m.getMetricDefineType(),
@@ -279,14 +264,13 @@ public class QueryReqConverter {
         log.info("begin to generateDerivedMetric {} [{}]", aggOption, metrics);
         Set<String> allFields = new HashSet<>();
         Map<String, Measure> allMeasures = new HashMap<>();
-        modelSchemaResps.stream().forEach(modelSchemaResp -> {
-            allFields.addAll(modelSchemaResp.getFieldList());
-            if (Objects.nonNull(modelSchemaResp.getModelDetail().getMeasures())) {
-                modelSchemaResp.getModelDetail().getMeasures().stream()
+        semanticSchemaResp.getModelResps().forEach(modelResp -> {
+            allFields.addAll(modelResp.getFieldList());
+            if (Objects.nonNull(modelResp.getModelDetail().getMeasures())) {
+                modelResp.getModelDetail().getMeasures().stream()
                         .forEach(mm -> allMeasures.put(mm.getBizName(), mm));
             }
         });
-
         Set<String> deriveDimension = new HashSet<>();
         Set<String> deriveMetric = new HashSet<>();
         Set<String> visitedMetric = new HashSet<>();

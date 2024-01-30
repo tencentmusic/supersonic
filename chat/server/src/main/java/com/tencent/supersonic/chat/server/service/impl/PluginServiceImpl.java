@@ -1,22 +1,25 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.request.PluginQueryReq;
-import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.plugin.Plugin;
 import com.tencent.supersonic.chat.core.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.core.plugin.event.PluginAddEvent;
 import com.tencent.supersonic.chat.core.plugin.event.PluginDelEvent;
 import com.tencent.supersonic.chat.core.plugin.event.PluginUpdateEvent;
-import com.tencent.supersonic.chat.core.utils.ComponentFactory;
 import com.tencent.supersonic.chat.server.persistence.dataobject.PluginDO;
-import com.tencent.supersonic.chat.server.persistence.dataobject.PluginDOExample;
 import com.tencent.supersonic.chat.server.persistence.repository.PluginRepository;
 import com.tencent.supersonic.chat.server.service.PluginService;
-import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -24,12 +27,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -91,27 +88,27 @@ public class PluginServiceImpl implements PluginService {
 
     @Override
     public List<Plugin> query(PluginQueryReq pluginQueryReq) {
-        PluginDOExample pluginDOExample = new PluginDOExample();
-        pluginDOExample.createCriteria();
+        QueryWrapper<PluginDO> queryWrapper = new QueryWrapper<>();
+
         if (StringUtils.isNotBlank(pluginQueryReq.getType())) {
-            pluginDOExample.getOredCriteria().get(0).andTypeEqualTo(pluginQueryReq.getType());
+            queryWrapper.lambda().eq(PluginDO::getType, pluginQueryReq.getType());
         }
-        if (StringUtils.isNotBlank(pluginQueryReq.getModel())) {
-            pluginDOExample.getOredCriteria().get(0).andModelLike('%' + pluginQueryReq.getModel() + '%');
+        if (StringUtils.isNotBlank(pluginQueryReq.getView())) {
+            queryWrapper.lambda().like(PluginDO::getView, pluginQueryReq.getView());
         }
         if (StringUtils.isNotBlank(pluginQueryReq.getParseMode())) {
-            pluginDOExample.getOredCriteria().get(0).andParseModeEqualTo(pluginQueryReq.getParseMode());
+            queryWrapper.lambda().eq(PluginDO::getParseMode, pluginQueryReq.getParseMode());
         }
         if (StringUtils.isNotBlank(pluginQueryReq.getName())) {
-            pluginDOExample.getOredCriteria().get(0).andNameLike('%' + pluginQueryReq.getName() + '%');
+            queryWrapper.lambda().like(PluginDO::getName, pluginQueryReq.getName());
         }
         if (StringUtils.isNotBlank(pluginQueryReq.getPattern())) {
-            pluginDOExample.getOredCriteria().get(0).andPatternLike('%' + pluginQueryReq.getPattern() + '%');
+            queryWrapper.lambda().like(PluginDO::getPattern, pluginQueryReq.getPattern());
         }
         if (StringUtils.isNotBlank(pluginQueryReq.getCreatedBy())) {
-            pluginDOExample.getOredCriteria().get(0).andCreatedByEqualTo(pluginQueryReq.getCreatedBy());
+            queryWrapper.lambda().eq(PluginDO::getCreatedBy, pluginQueryReq.getCreatedBy());
         }
-        List<PluginDO> pluginDOS = pluginRepository.query(pluginDOExample);
+        List<PluginDO> pluginDOS = pluginRepository.query(queryWrapper);
         if (StringUtils.isNotBlank(pluginQueryReq.getPattern())) {
             pluginDOS = pluginDOS.stream().filter(pluginDO ->
                             pluginDO.getPattern().contains(pluginQueryReq.getPattern())
@@ -175,29 +172,16 @@ public class PluginServiceImpl implements PluginService {
                 }, a -> a, (k1, k2) -> k1));
     }
 
+    //todo
     private List<Plugin> authCheck(List<Plugin> plugins, User user) {
-        SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
-        List<Long> modelIdAuthorized = semanticInterpreter.getModelList(AuthType.ADMIN, null, user).stream()
-                .map(ModelResp::getId).collect(Collectors.toList());
-        plugins = plugins.stream().filter(plugin -> {
-            if (CollectionUtils.isEmpty(plugin.getModelList()) || plugin.isContainsAllModel()) {
-                return true;
-            }
-            for (Long modelId : plugin.getModelList()) {
-                if (modelIdAuthorized.contains(modelId)) {
-                    return true;
-                }
-            }
-            return false;
-        }).collect(Collectors.toList());
         return plugins;
     }
 
     public Plugin convert(PluginDO pluginDO) {
         Plugin plugin = new Plugin();
         BeanUtils.copyProperties(pluginDO, plugin);
-        if (StringUtils.isNotBlank(pluginDO.getModel())) {
-            plugin.setModelList(Arrays.stream(pluginDO.getModel().split(","))
+        if (StringUtils.isNotBlank(pluginDO.getView())) {
+            plugin.setViewList(Arrays.stream(pluginDO.getView().split(","))
                     .map(Long::parseLong).collect(Collectors.toList()));
         }
         return plugin;
@@ -210,7 +194,7 @@ public class PluginServiceImpl implements PluginService {
         pluginDO.setCreatedBy(user.getName());
         pluginDO.setUpdatedAt(new Date());
         pluginDO.setUpdatedBy(user.getName());
-        pluginDO.setModel(StringUtils.join(plugin.getModelList(), ","));
+        pluginDO.setView(StringUtils.join(plugin.getViewList(), ","));
         return pluginDO;
     }
 
@@ -218,7 +202,7 @@ public class PluginServiceImpl implements PluginService {
         BeanUtils.copyProperties(plugin, pluginDO);
         pluginDO.setUpdatedAt(new Date());
         pluginDO.setUpdatedBy(user.getName());
-        pluginDO.setModel(StringUtils.join(plugin.getModelList(), ","));
+        pluginDO.setView(StringUtils.join(plugin.getViewList(), ","));
         return pluginDO;
     }
 

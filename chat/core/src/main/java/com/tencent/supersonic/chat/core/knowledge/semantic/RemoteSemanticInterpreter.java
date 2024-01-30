@@ -1,19 +1,11 @@
 package com.tencent.supersonic.chat.core.knowledge.semantic;
 
-import static com.tencent.supersonic.common.pojo.Constants.LIST_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.PAGESIZE_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.TOTAL_LOWER;
-import static com.tencent.supersonic.common.pojo.Constants.TRUE_LOWER;
-
-import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.google.gson.Gson;
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
-import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.core.config.DefaultSemanticConfig;
 import com.tencent.supersonic.common.pojo.ResultData;
-import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.ReturnCode;
 import com.tencent.supersonic.common.pojo.exception.CommonException;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -21,10 +13,8 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.S2ThreadContext;
 import com.tencent.supersonic.common.util.ThreadContext;
 import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
@@ -32,15 +22,9 @@ import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import java.net.URI;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
+import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
+import com.tencent.supersonic.headless.api.pojo.response.ViewSchemaResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -53,6 +37,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
+
+import static com.tencent.supersonic.common.pojo.Constants.LIST_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.PAGESIZE_LOWER;
+import static com.tencent.supersonic.common.pojo.Constants.TOTAL_LOWER;
 
 @Slf4j
 public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
@@ -131,69 +126,12 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
     }
 
     @Override
-    public SemanticQueryResp queryDimValue(QueryDimValueReq queryDimValueReq, User user) {
-        DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
-        return searchByRestTemplate(defaultSemanticConfig.getSemanticUrl()
-                        + defaultSemanticConfig.getQueryDimValuePath(),
-                new Gson().toJson(queryDimValueReq));
-    }
-
-    @Override
-    public List<ModelSchemaResp> doFetchModelSchema(List<Long> ids) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(UserConstants.INTERNAL, TRUE_LOWER);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        fillToken(headers);
-        DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
-
-        String semanticUrl = defaultSemanticConfig.getSemanticUrl();
-        String fetchModelSchemaPath = defaultSemanticConfig.getFetchModelSchemaPath();
-        URI requestUrl = UriComponentsBuilder.fromHttpUrl(semanticUrl + fetchModelSchemaPath)
-                .build().encode().toUri();
-        ModelSchemaFilterReq filter = new ModelSchemaFilterReq();
-        filter.setModelIds(ids);
-        ParameterizedTypeReference<ResultData<List<ModelSchemaResp>>> responseTypeRef =
-                new ParameterizedTypeReference<ResultData<List<ModelSchemaResp>>>() {
-                };
-
-        HttpEntity<String> entity = new HttpEntity<>(JSON.toJSONString(filter), headers);
-
-        try {
-            RestTemplate restTemplate = ContextUtils.getBean(RestTemplate.class);
-            ResponseEntity<ResultData<List<ModelSchemaResp>>> responseEntity = restTemplate.exchange(
-                    requestUrl, HttpMethod.POST, entity, responseTypeRef);
-            ResultData<List<ModelSchemaResp>> responseBody = responseEntity.getBody();
-            log.debug("ApiResponse<fetchModelSchema> responseBody:{}", responseBody);
-            if (ReturnCode.SUCCESS.getCode() == responseBody.getCode()) {
-                List<ModelSchemaResp> data = responseBody.getData();
-                return data;
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("fetchModelSchema interface error", e);
-        }
-        throw new RuntimeException("fetchModelSchema interface error");
-    }
-
-    @Override
     public List<DomainResp> getDomainList(User user) {
         DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
         Object domainDescListObject = fetchHttpResult(
                 defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchDomainListPath(),
                 null, HttpMethod.GET);
         return JsonUtil.toList(JsonUtil.toString(domainDescListObject), DomainResp.class);
-    }
-
-    @Override
-    public List<ModelResp> getModelList(AuthType authType, Long domainId, User user) {
-        if (domainId == null) {
-            domainId = 0L;
-        }
-        DefaultSemanticConfig defaultSemanticConfig = ContextUtils.getBean(DefaultSemanticConfig.class);
-        String url = String.format("%s?domainId=%s&authType=%s",
-                defaultSemanticConfig.getSemanticUrl() + defaultSemanticConfig.getFetchModelListPath(),
-                domainId, authType.toString());
-        Object domainDescListObject = fetchHttpResult(url, null, HttpMethod.GET);
-        return JsonUtil.toList(JsonUtil.toString(domainDescListObject), ModelResp.class);
     }
 
     @Override
@@ -310,4 +248,13 @@ public class RemoteSemanticInterpreter extends BaseSemanticInterpreter {
         return pageInfo;
     }
 
+    @Override
+    protected List<ViewSchemaResp> doFetchViewSchema(List<Long> ids) {
+        return null;
+    }
+
+    @Override
+    public List<ViewResp> getViewList(Long domainId) {
+        return null;
+    }
 }

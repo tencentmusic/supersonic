@@ -3,8 +3,11 @@ package com.tencent.supersonic.chat.core.utils;
 import com.hankcs.hanlp.corpus.tag.Nature;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
-import com.tencent.supersonic.chat.core.knowledge.ModelInfoStat;
+import com.tencent.supersonic.chat.core.knowledge.ViewInfoStat;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -12,8 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * nature parse helper
@@ -37,8 +38,8 @@ public class NatureHelper {
             case ENTITY:
                 result = SchemaElementType.ENTITY;
                 break;
-            case MODEL:
-                result = SchemaElementType.MODEL;
+            case VIEW:
+                result = SchemaElementType.VIEW;
                 break;
             case VALUE:
                 result = SchemaElementType.VALUE;
@@ -52,12 +53,12 @@ public class NatureHelper {
         return result;
     }
 
-    private static boolean isModelOrEntity(Term term, Integer model) {
+    private static boolean isViewOrEntity(Term term, Integer model) {
         return (DictWordType.NATURE_SPILT + model).equals(term.nature.toString()) || term.nature.toString()
                 .endsWith(DictWordType.ENTITY.getType());
     }
 
-    public static Integer getModelByNature(Nature nature) {
+    public static Integer getViewByNature(Nature nature) {
         if (nature.startsWith(DictWordType.NATURE_SPILT)) {
             String[] dimensionValues = nature.toString().split(DictWordType.NATURE_SPILT);
             if (StringUtils.isNumeric(dimensionValues[1])) {
@@ -67,7 +68,7 @@ public class NatureHelper {
         return 0;
     }
 
-    public static Long getModelId(String nature) {
+    public static Long getViewId(String nature) {
         try {
             String[] split = nature.split(DictWordType.NATURE_SPILT);
             if (split.length <= 1) {
@@ -80,7 +81,7 @@ public class NatureHelper {
         return null;
     }
 
-    public static boolean isDimensionValueModelId(String nature) {
+    public static boolean isDimensionValueViewId(String nature) {
         if (StringUtils.isEmpty(nature)) {
             return false;
         }
@@ -95,21 +96,21 @@ public class NatureHelper {
                 && StringUtils.isNumeric(split[1]);
     }
 
-    public static ModelInfoStat getModelStat(List<Term> terms) {
-        return ModelInfoStat.builder()
-                .modelCount(getModelCount(terms))
-                .dimensionModelCount(getDimensionCount(terms))
-                .metricModelCount(getMetricCount(terms))
-                .dimensionValueModelCount(getDimensionValueCount(terms))
+    public static ViewInfoStat getViewStat(List<Term> terms) {
+        return ViewInfoStat.builder()
+                .viewCount(getViewCount(terms))
+                .dimensionViewCount(getDimensionCount(terms))
+                .metricViewCount(getMetricCount(terms))
+                .dimensionValueViewCount(getDimensionValueCount(terms))
                 .build();
     }
 
-    private static long getModelCount(List<Term> terms) {
-        return terms.stream().filter(term -> isModelOrEntity(term, getModelByNature(term.nature))).count();
+    private static long getViewCount(List<Term> terms) {
+        return terms.stream().filter(term -> isViewOrEntity(term, getViewByNature(term.nature))).count();
     }
 
     private static long getDimensionValueCount(List<Term> terms) {
-        return terms.stream().filter(term -> isDimensionValueModelId(term.nature.toString())).count();
+        return terms.stream().filter(term -> isDimensionValueViewId(term.nature.toString())).count();
     }
 
     private static long getDimensionCount(List<Term> terms) {
@@ -129,13 +130,13 @@ public class NatureHelper {
      * @param terms
      * @return
      */
-    public static Map<Long, Map<DictWordType, Integer>> getModelToNatureStat(List<Term> terms) {
+    public static Map<Long, Map<DictWordType, Integer>> getViewToNatureStat(List<Term> terms) {
         Map<Long, Map<DictWordType, Integer>> modelToNature = new HashMap<>();
         terms.stream().filter(
                 term -> term.nature.startsWith(DictWordType.NATURE_SPILT)
         ).forEach(term -> {
             DictWordType dictWordType = DictWordType.getNatureType(String.valueOf(term.nature));
-            Long model = getModelId(String.valueOf(term.nature));
+            Long model = getViewId(String.valueOf(term.nature));
 
             Map<DictWordType, Integer> natureTypeMap = new HashMap<>();
             natureTypeMap.put(dictWordType, 1);
@@ -156,15 +157,15 @@ public class NatureHelper {
         return modelToNature;
     }
 
-    public static List<Long> selectPossibleModels(List<Term> terms) {
-        Map<Long, Map<DictWordType, Integer>> modelToNatureStat = getModelToNatureStat(terms);
-        Integer maxModelTypeSize = modelToNatureStat.entrySet().stream()
+    public static List<Long> selectPossibleViews(List<Term> terms) {
+        Map<Long, Map<DictWordType, Integer>> modelToNatureStat = getViewToNatureStat(terms);
+        Integer maxViewTypeSize = modelToNatureStat.entrySet().stream()
                 .max(Comparator.comparingInt(o -> o.getValue().size())).map(entry -> entry.getValue().size())
                 .orElse(null);
-        if (Objects.isNull(maxModelTypeSize) || maxModelTypeSize == 0) {
+        if (Objects.isNull(maxViewTypeSize) || maxViewTypeSize == 0) {
             return new ArrayList<>();
         }
-        return modelToNatureStat.entrySet().stream().filter(entry -> entry.getValue().size() == maxModelTypeSize)
+        return modelToNatureStat.entrySet().stream().filter(entry -> entry.getValue().size() == maxViewTypeSize)
                 .map(entry -> entry.getKey()).collect(Collectors.toList());
     }
 

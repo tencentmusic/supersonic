@@ -25,6 +25,7 @@ import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricQueryDefaultConfigDO;
@@ -35,6 +36,7 @@ import com.tencent.supersonic.headless.server.service.CollectService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.ViewService;
 import com.tencent.supersonic.headless.server.utils.MetricCheckUtils;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import lombok.extern.slf4j.Slf4j;
@@ -65,6 +67,8 @@ public class MetricServiceImpl implements MetricService {
 
     private CollectService collectService;
 
+    private ViewService viewService;
+
     private ApplicationEventPublisher eventPublisher;
 
     public MetricServiceImpl(MetricRepository metricRepository,
@@ -72,6 +76,7 @@ public class MetricServiceImpl implements MetricService {
             DomainService domainService,
             ChatGptHelper chatGptHelper,
             CollectService collectService,
+            ViewService viewService,
             ApplicationEventPublisher eventPublisher) {
         this.domainService = domainService;
         this.metricRepository = metricRepository;
@@ -79,6 +84,7 @@ public class MetricServiceImpl implements MetricService {
         this.chatGptHelper = chatGptHelper;
         this.eventPublisher = eventPublisher;
         this.collectService = collectService;
+        this.viewService = viewService;
     }
 
     @Override
@@ -98,7 +104,7 @@ public class MetricServiceImpl implements MetricService {
             return;
         }
         Long modelId = metricReqs.get(0).getModelId();
-        List<MetricResp> metricResps = getMetricInSameDomain(modelId);
+        List<MetricResp> metricResps = getMetrics(new MetaFilter(Lists.newArrayList(modelId)));
         Map<String, MetricResp> bizNameMap = metricResps.stream()
                 .collect(Collectors.toMap(MetricResp::getBizName, a -> a, (k1, k2) -> k1));
         Map<String, MetricResp> nameMap = metricResps.stream()
@@ -186,7 +192,11 @@ public class MetricServiceImpl implements MetricService {
         List<CollectDO> collectList = collectService.getCollectList(user.getName());
         List<Long> collectIds = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
         if (pageMetricReq.isHasCollect()) {
-            metricFilter.setIds(collectIds);
+            if (CollectionUtils.isEmpty(collectIds)) {
+                metricFilter.setIds(Lists.newArrayList(-1L));
+            } else {
+                metricFilter.setIds(collectIds);
+            }
         }
         PageInfo<MetricDO> metricDOPageInfo = PageHelper.startPage(pageMetricReq.getCurrent(),
                         pageMetricReq.getPageSize())
@@ -210,6 +220,10 @@ public class MetricServiceImpl implements MetricService {
         List<MetricResp> metricResps = convertList(queryMetric(metricFilter));
         if (!CollectionUtils.isEmpty(metaFilter.getFieldsDepend())) {
             return filterByField(metricResps, metaFilter.getFieldsDepend());
+        }
+        if (metaFilter.getViewId() != null) {
+            ViewResp viewResp = viewService.getView(metaFilter.getViewId());
+            return MetricConverter.filterByView(metricResps, viewResp);
         }
         return metricResps;
     }
@@ -321,16 +335,27 @@ public class MetricServiceImpl implements MetricService {
 
     @Override
     public List<DrillDownDimension> getDrillDownDimension(Long metricId) {
+        List<DrillDownDimension> drillDownDimensions = Lists.newArrayList();
         MetricResp metricResp = getMetric(metricId);
         if (metricResp == null) {
-            return Lists.newArrayList();
+            return drillDownDimensions;
         }
         if (metricResp.getRelateDimension() != null
                 && !CollectionUtils.isEmpty(metricResp.getRelateDimension().getDrillDownDimensions())) {
-            return metricResp.getRelateDimension().getDrillDownDimensions();
+            drillDownDimensions.addAll(metricResp.getRelateDimension().getDrillDownDimensions());
         }
         ModelResp modelResp = modelService.getModel(metricResp.getModelId());
-        return modelResp.getDrillDownDimensions();
+        if (modelResp.getDrillDownDimensions() == null) {
+            return drillDownDimensions;
+        }
+        for (DrillDownDimension drillDownDimension : modelResp.getDrillDownDimensions()) {
+            if (!drillDownDimensions.stream().map(DrillDownDimension::getDimensionId)
+                    .collect(Collectors.toList()).contains(drillDownDimension.getDimensionId())) {
+                drillDownDimension.setInheritedFromModel(true);
+                drillDownDimensions.add(drillDownDimension);
+            }
+        }
+        return drillDownDimensions;
     }
 
     @Override
@@ -361,7 +386,9 @@ public class MetricServiceImpl implements MetricService {
 
     private void checkExist(List<MetricBaseReq> metricReqs) {
         Long modelId = metricReqs.get(0).getModelId();
-        List<MetricResp> metricResps = getMetricInSameDomain(modelId);
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setModelIds(Lists.newArrayList(modelId));
+        List<MetricResp> metricResps = getMetrics(metaFilter);
         Map<String, MetricResp> bizNameMap = metricResps.stream()
                 .collect(Collectors.toMap(MetricResp::getBizName, a -> a, (k1, k2) -> k1));
         Map<String, MetricResp> nameMap = metricResps.stream()
@@ -382,14 +409,6 @@ public class MetricServiceImpl implements MetricService {
                 }
             }
         }
-    }
-
-    private List<MetricResp> getMetricInSameDomain(Long modelId) {
-        ModelResp modelResp = modelService.getModel(modelId);
-        Long domainId = modelResp.getDomainId();
-        List<ModelResp> modelResps = modelService.getModelByDomainIds(Lists.newArrayList(domainId));
-        List<Long> modelIds = modelResps.stream().map(ModelResp::getId).collect(Collectors.toList());
-        return getMetrics(new MetaFilter(modelIds));
     }
 
     private List<MetricResp> convertList(List<MetricDO> metricDOS) {

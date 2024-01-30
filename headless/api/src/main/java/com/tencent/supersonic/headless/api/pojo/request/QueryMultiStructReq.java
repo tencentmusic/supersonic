@@ -2,12 +2,12 @@ package com.tencent.supersonic.headless.api.pojo.request;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.headless.api.pojo.Cache;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Data;
 import lombok.ToString;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
 
 @Data
 @ToString
@@ -23,11 +23,11 @@ public class QueryMultiStructReq extends SemanticQueryReq {
         return DigestUtils.md5Hex(this.toCustomizedString());
     }
 
-    public List<Long> getModelIds() {
+    public Long getViewId() {
         if (CollectionUtils.isEmpty(this.getQueryStructReqs())) {
-            return new ArrayList<>();
+            return null;
         }
-        return this.getQueryStructReqs().get(0).getModelIds();
+        return this.getQueryStructReqs().get(0).getViewId();
     }
 
     public Cache getCacheInfo() {

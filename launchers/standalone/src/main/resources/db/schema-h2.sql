@@ -230,8 +230,7 @@ CREATE TABLE IF NOT EXISTS s2_model_rela
     PRIMARY KEY (`id`)
 );
 
-create table IF NOT EXISTS s2_view_info
-(
+create table IF NOT EXISTS `s2_canvas` (
     id         INT auto_increment,
     domain_id  INT       null,
     type       varchar(20)  null comment 'model、dimension、metric',
@@ -242,13 +241,14 @@ create table IF NOT EXISTS s2_view_info
     updated_by varchar(100) not null,
     PRIMARY KEY (`id`)
 );
-COMMENT ON TABLE s2_view_info IS 'view information table';
+COMMENT ON TABLE s2_canvas IS 'canvas table';
 
 
 CREATE TABLE IF NOT EXISTS `s2_query_stat_info` (
                                       `id` INT NOT NULL AUTO_INCREMENT,
                                       `trace_id` varchar(200) DEFAULT NULL, -- query unique identifier
                                       `model_id` INT DEFAULT NULL,
+                                      `view_id` INT DEFAULT NULL,
                                       `user`    varchar(200) DEFAULT NULL,
                                       `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
                                       `query_type` varchar(200) DEFAULT NULL, -- the corresponding scene
@@ -326,7 +326,7 @@ CREATE TABLE IF NOT EXISTS `s2_plugin`
 (
     `id`         INT AUTO_INCREMENT,
     `type`      varchar(50)   NULL,
-    `model`     varchar(100)  NULL,
+    `view`     varchar(100)  NULL,
     `pattern`    varchar(500)  NULL,
     `parse_mode` varchar(100)  NULL,
     `parse_mode_config` LONGVARCHAR  NULL,
@@ -543,4 +543,23 @@ CREATE TABLE IF NOT EXISTS `s2_app` (
     created_by  VARCHAR(255),
     updated_at  TIMESTAMP,
     updated_by  VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS `s2_view` (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    domain_id   BIGINT,
+    `name`      VARCHAR(255),
+    biz_name    VARCHAR(255),
+    description VARCHAR(255),
+    status      INT,
+    alias       VARCHAR(255),
+    view_detail TEXT,
+    created_at  TIMESTAMP,
+    created_by  VARCHAR(255),
+    updated_at  TIMESTAMP,
+    updated_by  VARCHAR(255),
+    filter_sql VARCHAR(1000),
+    query_config VARCHAR(3000),
+    `admin` varchar(3000) DEFAULT NULL,
+    `admin_org` varchar(3000) DEFAULT NULL
 );

@@ -1,15 +1,15 @@
 package com.tencent.supersonic.chat.server.processor.parse;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.core.pojo.ChatContext;
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.chat.core.query.SemanticQuery;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
+import com.tencent.supersonic.chat.core.pojo.ChatContext;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
+import com.tencent.supersonic.chat.core.query.SemanticQuery;
 import com.tencent.supersonic.chat.server.service.impl.SchemaService;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
@@ -18,6 +18,11 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -26,10 +31,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.util.CollectionUtils;
 
 /**
  * ParseInfoProcessor extracts structured info from S2SQL so that
@@ -73,9 +74,9 @@ public class ParseInfoProcessor implements ParseResultProcessor {
         }
 
         //set filter
-        Set<Long> modelIds = parseInfo.getModel().getModelIds();
+        Long viewId = parseInfo.getViewId();
         try {
-            Map<String, SchemaElement> fieldNameToElement = getNameToElement(modelIds);
+            Map<String, SchemaElement> fieldNameToElement = getNameToElement(viewId);
             List<QueryFilter> result = getDimensionFilter(fieldNameToElement, expressions);
             parseInfo.getDimensionFilters().addAll(result);
         } catch (Exception e) {
@@ -87,31 +88,31 @@ public class ParseInfoProcessor implements ParseResultProcessor {
             return;
         }
         List<String> allFields = getFieldsExceptDate(SqlParserSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
-        Set<SchemaElement> metrics = getElements(modelIds, allFields, semanticSchema.getMetrics());
+        Set<SchemaElement> metrics = getElements(viewId, allFields, semanticSchema.getMetrics());
         parseInfo.setMetrics(metrics);
         if (QueryType.METRIC.equals(parseInfo.getQueryType())) {
             List<String> groupByFields = SqlParserSelectHelper.getGroupByFields(sqlInfo.getCorrectS2SQL());
             List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
-            parseInfo.setDimensions(getElements(modelIds, groupByDimensions, semanticSchema.getDimensions()));
+            parseInfo.setDimensions(getElements(viewId, groupByDimensions, semanticSchema.getDimensions()));
         } else if (QueryType.TAG.equals(parseInfo.getQueryType())) {
             List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getCorrectS2SQL());
             List<String> selectDimensions = getFieldsExceptDate(selectFields);
-            parseInfo.setDimensions(getElements(modelIds, selectDimensions, semanticSchema.getDimensions()));
+            parseInfo.setDimensions(getElements(viewId, selectDimensions, semanticSchema.getDimensions()));
         }
     }
 
-    private Set<SchemaElement> getElements(Set<Long> modelIds, List<String> allFields, List<SchemaElement> elements) {
+    private Set<SchemaElement> getElements(Long viewId, List<String> allFields, List<SchemaElement> elements) {
         return elements.stream()
                 .filter(schemaElement -> {
                             if (CollectionUtils.isEmpty(schemaElement.getAlias())) {
-                                return modelIds.contains(schemaElement.getModel()) && allFields.contains(
+                                return viewId.equals(schemaElement.getView()) && allFields.contains(
                                         schemaElement.getName());
                             }
                             Set<String> allFieldsSet = new HashSet<>(allFields);
                             Set<String> aliasSet = new HashSet<>(schemaElement.getAlias());
                             List<String> intersection = allFieldsSet.stream()
                                     .filter(aliasSet::contains).collect(Collectors.toList());
-                            return modelIds.contains(schemaElement.getModel()) && (allFields.contains(
+                            return viewId.equals(schemaElement.getView()) && (allFields.contains(
                                     schemaElement.getName()) || !CollectionUtils.isEmpty(intersection));
                         }
                 ).collect(Collectors.toSet());
@@ -193,10 +194,10 @@ public class ParseInfoProcessor implements ParseResultProcessor {
         return dateExpressions.size() > 1 && Objects.nonNull(dateExpressions.get(1).getFieldValue());
     }
 
-    protected Map<String, SchemaElement> getNameToElement(Set<Long> modelIds) {
+    protected Map<String, SchemaElement> getNameToElement(Long viewId) {
         SemanticSchema semanticSchema = ContextUtils.getBean(SchemaService.class).getSemanticSchema();
-        List<SchemaElement> dimensions = semanticSchema.getDimensions(modelIds);
-        List<SchemaElement> metrics = semanticSchema.getMetrics(modelIds);
+        List<SchemaElement> dimensions = semanticSchema.getDimensions(viewId);
+        List<SchemaElement> metrics = semanticSchema.getMetrics(viewId);
 
         List<SchemaElement> allElements = Lists.newArrayList();
         allElements.addAll(dimensions);

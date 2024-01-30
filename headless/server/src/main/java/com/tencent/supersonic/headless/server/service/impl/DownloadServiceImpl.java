@@ -12,21 +12,21 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
+import com.tencent.supersonic.headless.api.pojo.RelateDimension;
+import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.request.BatchDownloadReq;
 import com.tencent.supersonic.headless.api.pojo.request.DownloadStructReq;
-import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
-import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
-import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.utils.DataTransformUtils;
 import com.tencent.supersonic.headless.server.pojo.DataDownload;
+import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DownloadService;
-import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -42,6 +42,7 @@ import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -58,12 +59,16 @@ public class DownloadServiceImpl implements DownloadService {
 
     private static final long downloadSize = 10000;
 
-    private ModelService modelService;
+    private MetricService metricService;
+
+    private DimensionService dimensionService;
 
     private QueryService queryService;
 
-    public DownloadServiceImpl(ModelService modelService, QueryService queryService) {
-        this.modelService = modelService;
+    public DownloadServiceImpl(MetricService metricService,
+                               DimensionService dimensionService, QueryService queryService) {
+        this.metricService = metricService;
+        this.dimensionService = dimensionService;
         this.queryService = queryService;
     }
 
@@ -74,7 +79,7 @@ public class DownloadServiceImpl implements DownloadService {
         File file = FileUtils.createTmpFile(fileName);
         try {
             QuerySqlReq querySqlReq = downloadStructReq.convert(downloadStructReq, true);
-            SemanticQueryResp queryResult = (SemanticQueryResp) queryService.queryByReq(querySqlReq, user);
+            SemanticQueryResp queryResult = queryService.queryByReq(querySqlReq, user);
             DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
             EasyExcel.write(file).sheet("Sheet1").head(dataDownload.getHeaders()).doWrite(dataDownload.getData());
         } catch (RuntimeException e) {
@@ -100,21 +105,30 @@ public class DownloadServiceImpl implements DownloadService {
 
     public void batchDownload(BatchDownloadReq batchDownloadReq, User user, File file) throws Exception {
         List<Long> metricIds = batchDownloadReq.getMetricIds();
-        List<ModelSchemaResp> modelSchemaRespList = modelService.fetchModelSchema(new ModelSchemaFilterReq());
-        Map<String, List<MetricSchemaResp>> metricSchemaMap = getMetricSchemaMap(modelSchemaRespList, metricIds);
-        Map<Long, DimSchemaResp> dimensionRespMap = getDimensionMap(modelSchemaRespList);
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setIds(metricIds);
+        List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
+        Map<String, List<MetricResp>> metricMap = getMetricMap(metricResps);
+        List<Long> dimensionIds = metricResps.stream().map(MetricResp::getRelateDimension)
+                .map(RelateDimension::getDrillDownDimensions).flatMap(Collection::stream)
+                .map(DrillDownDimension::getDimensionId).collect(Collectors.toList());
+        metaFilter.setIds(dimensionIds);
+        Map<Long, DimensionResp> dimensionRespMap = dimensionService.getDimensions(metaFilter)
+                .stream().collect(Collectors.toMap(DimensionResp::getId, d -> d));
         ExcelWriter excelWriter = EasyExcel.write(file).build();
         int sheetCount = 1;
-        for (List<MetricSchemaResp> metrics : metricSchemaMap.values()) {
+        for (List<MetricResp> metrics : metricMap.values()) {
             if (CollectionUtils.isEmpty(metrics)) {
                 continue;
             }
-            MetricSchemaResp metricSchemaResp = metrics.get(0);
-            List<DimSchemaResp> dimensions = getMetricRelaDimensions(metricSchemaResp, dimensionRespMap);
-            for (MetricSchemaResp metric : metrics) {
+            MetricResp metricResp = metrics.get(0);
+            List<DimensionResp> dimensions = getMetricRelaDimensions(metricResp, dimensionRespMap);
+            for (MetricResp metric : metrics) {
                 try {
-                    DownloadStructReq downloadStructReq = buildDownloadStructReq(dimensions, metric, batchDownloadReq);
-                    SemanticQueryResp queryResult = queryService.queryByReq(downloadStructReq, user);
+                    DownloadStructReq downloadStructReq = buildDownloadReq(dimensions, metric, batchDownloadReq);
+                    QuerySqlReq querySqlReq = downloadStructReq.convert(downloadStructReq);
+                    querySqlReq.setNeedAuth(true);
+                    SemanticQueryResp queryResult = queryService.queryByReq(querySqlReq, user);
                     DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
                     WriteSheet writeSheet = EasyExcel.writerSheet("Sheet" + sheetCount)
                             .head(dataDownload.getHeaders()).build();
@@ -219,14 +233,14 @@ public class DownloadServiceImpl implements DownloadService {
         }
     }
 
-    private DownloadStructReq buildDownloadStructReq(List<DimSchemaResp> dimensionResps, MetricResp metricResp,
+    private DownloadStructReq buildDownloadReq(List<DimensionResp> dimensionResps, MetricResp metricResp,
                                                      BatchDownloadReq batchDownloadReq) {
         DateConf dateConf = batchDownloadReq.getDateInfo();
-        Set<Long> modelIds = dimensionResps.stream().map(DimSchemaResp::getModelId).collect(Collectors.toSet());
+        Set<Long> modelIds = dimensionResps.stream().map(DimensionResp::getModelId).collect(Collectors.toSet());
         modelIds.add(metricResp.getModelId());
         DownloadStructReq downloadStructReq = new DownloadStructReq();
         downloadStructReq.setGroups(dimensionResps.stream()
-                .map(DimSchemaResp::getBizName).collect(Collectors.toList()));
+                .map(DimensionResp::getBizName).collect(Collectors.toList()));
         downloadStructReq.getGroups().add(0, getTimeDimension(dateConf));
         Aggregator aggregator = new Aggregator();
         aggregator.setColumn(metricResp.getBizName());
@@ -248,31 +262,27 @@ public class DownloadServiceImpl implements DownloadService {
         }
     }
 
-    private Map<String, List<MetricSchemaResp>> getMetricSchemaMap(List<ModelSchemaResp> modelSchemaRespList,
-                                                                    List<Long> metricIds) {
-        return modelSchemaRespList.stream().flatMap(modelSchemaResp
-                        -> modelSchemaResp.getMetrics().stream())
-                .filter(metricSchemaResp -> metricIds.contains(metricSchemaResp.getId()))
-                .collect(Collectors.groupingBy(MetricSchemaResp::getRelaDimensionIdKey));
-    }
-
-    private Map<Long, DimSchemaResp> getDimensionMap(List<ModelSchemaResp> modelSchemaRespList) {
-        return modelSchemaRespList.stream().flatMap(modelSchemaResp
-                        -> modelSchemaResp.getDimensions().stream())
-                .collect(Collectors.toMap(DimensionResp::getId, dimensionResp -> dimensionResp));
+    private Map<String, List<MetricResp>> getMetricMap(List<MetricResp> metricResps) {
+        for (MetricResp metricResp : metricResps) {
+            List<DrillDownDimension> drillDownDimensions = metricService.getDrillDownDimension(metricResp.getId());
+            RelateDimension relateDimension = RelateDimension.builder()
+                    .drillDownDimensions(drillDownDimensions).build();
+            metricResp.setRelateDimension(relateDimension);
+        }
+        return metricResps.stream().collect(Collectors.groupingBy(MetricResp::getRelaDimensionIdKey));
     }
 
     private Map<String, String> getDimensionNameMap(List<QueryColumn> queryColumns) {
         return queryColumns.stream().collect(Collectors.toMap(QueryColumn::getName, QueryColumn::getNameEn));
     }
 
-    private List<DimSchemaResp> getMetricRelaDimensions(MetricSchemaResp metricSchemaResp,
-                                                        Map<Long, DimSchemaResp> dimensionRespMap) {
-        if (metricSchemaResp.getRelateDimension() == null
-                || CollectionUtils.isEmpty(metricSchemaResp.getRelateDimension().getDrillDownDimensions())) {
+    private List<DimensionResp> getMetricRelaDimensions(MetricResp metricResp,
+                                                        Map<Long, DimensionResp> dimensionRespMap) {
+        if (metricResp.getRelateDimension() == null
+                || CollectionUtils.isEmpty(metricResp.getRelateDimension().getDrillDownDimensions())) {
             return Lists.newArrayList();
         }
-        return metricSchemaResp.getRelateDimension().getDrillDownDimensions()
+        return metricResp.getRelateDimension().getDrillDownDimensions()
                 .stream().map(drillDownDimension -> dimensionRespMap.get(drillDownDimension.getDimensionId()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());

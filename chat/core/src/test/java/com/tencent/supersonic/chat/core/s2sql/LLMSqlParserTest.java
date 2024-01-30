@@ -1,15 +1,16 @@
 package com.tencent.supersonic.chat.core.s2sql;
 
-import static org.mockito.Mockito.when;
-
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.mockito.Mockito.when;
 
 class LLMSqlParserTest {
 
@@ -28,7 +29,7 @@ class LLMSqlParserTest {
         SchemaElement schemaElement = SchemaElement.builder()
                 .bizName("singer_name")
                 .name("歌手名")
-                .model(2L)
+                .view(2L)
                 .schemaValueMaps(schemaValueMaps)
                 .build();
         dimensions.add(schemaElement);
@@ -36,7 +37,7 @@ class LLMSqlParserTest {
         SchemaElement schemaElement2 = SchemaElement.builder()
                 .bizName("publish_time")
                 .name("发布时间")
-                .model(2L)
+                .view(2L)
                 .build();
         dimensions.add(schemaElement2);
 
@@ -46,7 +47,7 @@ class LLMSqlParserTest {
         SchemaElement metric = SchemaElement.builder()
                 .bizName("play_count")
                 .name("播放量")
-                .model(2L)
+                .view(2L)
                 .build();
         metrics.add(metric);
 

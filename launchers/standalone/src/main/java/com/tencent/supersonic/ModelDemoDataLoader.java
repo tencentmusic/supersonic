@@ -12,6 +12,12 @@ import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeMode;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.QueryConfig;
+import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
@@ -31,17 +37,21 @@ import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
 import com.tencent.supersonic.headless.api.pojo.MetricParam;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
+import com.tencent.supersonic.headless.api.pojo.ViewDetail;
+import com.tencent.supersonic.headless.api.pojo.ViewModelConfig;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
+import com.tencent.supersonic.headless.api.pojo.request.ViewReq;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.ViewService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +83,8 @@ public class ModelDemoDataLoader {
     @Autowired
     private AuthService authService;
     @Autowired
+    private ViewService viewService;
+    @Autowired
     private DataSourceProperties dataSourceProperties;
 
     public void doRun() {
@@ -91,6 +103,8 @@ public class ModelDemoDataLoader {
             updateDimension();
             updateMetric();
             updateMetric_pv();
+            addView_1();
+            addView_2();
             addAuthGroup_1();
             addAuthGroup_2();
         } catch (Exception e) {
@@ -427,6 +441,65 @@ public class ModelDemoDataLoader {
         metricReq.setMetricDefineType(MetricDefineType.METRIC);
         metricReq.setRelateDimension(getRelateDimension(Lists.newArrayList(1L)));
         metricService.createMetric(metricReq, user);
+    }
+
+    public void addView_1() {
+        ViewReq viewReq = new ViewReq();
+        viewReq.setName("超音数");
+        viewReq.setBizName("s2");
+        viewReq.setDomainId(1L);
+        viewReq.setDescription("包含超音数访问统计相关的指标和维度等");
+        viewReq.setAdmins(Lists.newArrayList("admin"));
+        List<ViewModelConfig> viewModelConfigs = Lists.newArrayList(
+                new ViewModelConfig(1L, true),
+                new ViewModelConfig(2L, true),
+                new ViewModelConfig(3L, true));
+
+        ViewDetail viewDetail = new ViewDetail();
+        viewDetail.setViewModelConfigs(viewModelConfigs);
+        viewReq.setViewDetail(viewDetail);
+        viewReq.setTypeEnum(TypeEnums.VIEW);
+        QueryConfig queryConfig = new QueryConfig();
+        MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
+        TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
+        timeDefaultConfig.setTimeMode(TimeMode.RECENT);
+        timeDefaultConfig.setUnit(7);
+        metricTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
+        queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
+        viewReq.setQueryConfig(queryConfig);
+        viewService.save(viewReq, User.getFakeUser());
+    }
+
+    public void addView_2() {
+        ViewReq viewReq = new ViewReq();
+        viewReq.setName("艺人库");
+        viewReq.setBizName("singer");
+        viewReq.setDomainId(2L);
+        viewReq.setDescription("包含艺人相关标签和指标信息");
+        viewReq.setAdmins(Lists.newArrayList("admin"));
+        List<ViewModelConfig> viewModelConfigs =
+                Lists.newArrayList(new ViewModelConfig(4L, true));
+        ViewDetail viewDetail = new ViewDetail();
+        viewDetail.setViewModelConfigs(viewModelConfigs);
+        viewReq.setViewDetail(viewDetail);
+        viewReq.setTypeEnum(TypeEnums.VIEW);
+        QueryConfig queryConfig = new QueryConfig();
+        TagTypeDefaultConfig tagTypeDefaultConfig = new TagTypeDefaultConfig();
+        TimeDefaultConfig tagTimeDefaultConfig = new TimeDefaultConfig();
+        tagTimeDefaultConfig.setTimeMode(TimeMode.LAST);
+        tagTimeDefaultConfig.setUnit(7);
+        tagTypeDefaultConfig.setTimeDefaultConfig(tagTimeDefaultConfig);
+        tagTypeDefaultConfig.setDimensionIds(Lists.newArrayList(4L, 5L, 6L, 7L));
+        tagTypeDefaultConfig.setMetricIds(Lists.newArrayList(5L));
+        MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
+        TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
+        timeDefaultConfig.setTimeMode(TimeMode.RECENT);
+        timeDefaultConfig.setUnit(7);
+        metricTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
+        queryConfig.setTagTypeDefaultConfig(tagTypeDefaultConfig);
+        queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
+        viewReq.setQueryConfig(queryConfig);
+        viewService.save(viewReq, User.getFakeUser());
     }
 
     public void addAuthGroup_1() {

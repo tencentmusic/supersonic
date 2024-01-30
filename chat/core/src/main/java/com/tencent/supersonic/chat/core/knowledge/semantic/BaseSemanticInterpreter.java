@@ -2,66 +2,67 @@ package com.tencent.supersonic.chat.core.knowledge.semantic;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
-import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.headless.api.pojo.response.ViewSchemaResp;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 @Slf4j
 public abstract class BaseSemanticInterpreter implements SemanticInterpreter {
 
-    protected final Cache<String, List<ModelSchemaResp>> modelSchemaCache =
+    protected final Cache<String, List<ViewSchemaResp>> viewSchemaCache =
             CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
 
     @SneakyThrows
-    public List<ModelSchemaResp> fetchModelSchema(List<Long> ids, Boolean cacheEnable) {
+    public List<ViewSchemaResp> fetchViewSchema(List<Long> ids, Boolean cacheEnable) {
         if (cacheEnable) {
-            return modelSchemaCache.get(String.valueOf(ids), () -> {
-                List<ModelSchemaResp> data = doFetchModelSchema(ids);
-                modelSchemaCache.put(String.valueOf(ids), data);
+            return viewSchemaCache.get(String.valueOf(ids), () -> {
+                List<ViewSchemaResp> data = doFetchViewSchema(ids);
+                viewSchemaCache.put(String.valueOf(ids), data);
                 return data;
             });
         }
-        List<ModelSchemaResp> data = doFetchModelSchema(ids);
-        return data;
+        return doFetchViewSchema(ids);
     }
 
     @Override
-    public ModelSchema getModelSchema(Long model, Boolean cacheEnable) {
+    public ViewSchema getViewSchema(Long viewId, Boolean cacheEnable) {
         List<Long> ids = new ArrayList<>();
-        ids.add(model);
-        List<ModelSchemaResp> modelSchemaResps = fetchModelSchema(ids, cacheEnable);
-        if (!CollectionUtils.isEmpty(modelSchemaResps)) {
-            Optional<ModelSchemaResp> modelSchemaResp = modelSchemaResps.stream()
-                    .filter(d -> d.getId().equals(model)).findFirst();
-            if (modelSchemaResp.isPresent()) {
-                ModelSchemaResp modelSchema = modelSchemaResp.get();
-                return ModelSchemaBuilder.build(modelSchema);
+        ids.add(viewId);
+        List<ViewSchemaResp> viewSchemaResps = fetchViewSchema(ids, cacheEnable);
+        if (!CollectionUtils.isEmpty(viewSchemaResps)) {
+            Optional<ViewSchemaResp> viewSchemaResp = viewSchemaResps.stream()
+                    .filter(d -> d.getId().equals(viewId)).findFirst();
+            if (viewSchemaResp.isPresent()) {
+                ViewSchemaResp viewSchema = viewSchemaResp.get();
+                return ViewSchemaBuilder.build(viewSchema);
             }
         }
         return null;
     }
 
     @Override
-    public List<ModelSchema> getModelSchema() {
-        return getModelSchema(new ArrayList<>());
+    public List<ViewSchema> getViewSchema() {
+        return getViewSchema(new ArrayList<>());
     }
 
     @Override
-    public List<ModelSchema> getModelSchema(List<Long> ids) {
-        List<ModelSchema> domainSchemaList = new ArrayList<>();
+    public List<ViewSchema> getViewSchema(List<Long> ids) {
+        List<ViewSchema> domainSchemaList = new ArrayList<>();
 
-        for (ModelSchemaResp resp : fetchModelSchema(ids, true)) {
-            domainSchemaList.add(ModelSchemaBuilder.build(resp));
+        for (ViewSchemaResp resp : fetchViewSchema(ids, true)) {
+            domainSchemaList.add(ViewSchemaBuilder.build(resp));
         }
 
         return domainSchemaList;
     }
 
-    protected abstract List<ModelSchemaResp> doFetchModelSchema(List<Long> ids);
+    protected abstract List<ViewSchemaResp> doFetchViewSchema(List<Long> ids);
+
 }

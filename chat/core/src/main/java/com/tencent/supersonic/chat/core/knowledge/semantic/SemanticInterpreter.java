@@ -2,22 +2,20 @@ package com.tencent.supersonic.chat.core.knowledge.semantic;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
-import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
-import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
+import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
-import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
+import com.tencent.supersonic.headless.api.pojo.response.ViewSchemaResp;
 
 import java.util.List;
 
@@ -38,15 +36,13 @@ public interface SemanticInterpreter {
 
     SemanticQueryResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user);
 
-    SemanticQueryResp queryByS2SQL(QuerySqlReq querySqlReq, User user);
+    SemanticQueryResp queryByS2SQL(QuerySqlReq querySQLReq, User user);
 
-    SemanticQueryResp queryDimValue(QueryDimValueReq queryDimValueReq, User user);
+    List<ViewSchema> getViewSchema();
 
-    List<ModelSchema> getModelSchema();
+    List<ViewSchema> getViewSchema(List<Long> ids);
 
-    List<ModelSchema> getModelSchema(List<Long> ids);
-
-    ModelSchema getModelSchema(Long model, Boolean cacheEnable);
+    ViewSchema getViewSchema(Long model, Boolean cacheEnable);
 
     PageInfo<DimensionResp> getDimensionPage(PageDimensionReq pageDimensionReq);
 
@@ -54,10 +50,10 @@ public interface SemanticInterpreter {
 
     List<DomainResp> getDomainList(User user);
 
-    List<ModelResp> getModelList(AuthType authType, Long domainId, User user);
-
     <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception;
 
-    List<ModelSchemaResp> fetchModelSchema(List<Long> ids, Boolean cacheEnable);
+    List<ViewSchemaResp> fetchViewSchema(List<Long> ids, Boolean cacheEnable);
+
+    List<ViewResp> getViewList(Long domainId);
 
 }

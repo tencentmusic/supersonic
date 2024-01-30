@@ -1,15 +1,9 @@
 package com.tencent.supersonic.chat.core.utils;
 
-import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
-import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
-import static com.tencent.supersonic.common.pojo.Constants.COMMA;
-import static com.tencent.supersonic.common.pojo.Constants.SPACE;
-import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE_DOUBLE;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.config.DefaultMetric;
 import com.tencent.supersonic.chat.core.config.Dim4Dict;
+import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
@@ -18,8 +12,15 @@ import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,11 +28,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
+import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
+import static com.tencent.supersonic.common.pojo.Constants.COMMA;
+import static com.tencent.supersonic.common.pojo.Constants.SPACE;
+import static com.tencent.supersonic.common.pojo.Constants.UNDERLINE_DOUBLE;
 
 @Slf4j
 @Component
@@ -82,7 +84,7 @@ public class DictQueryHelper {
 
         if (!CollectionUtils.isEmpty(columns)) {
             for (QueryColumn column : columns) {
-                if (Strings.isNotEmpty(column.getNameEn())) {
+                if (StringUtils.isNotEmpty(column.getNameEn())) {
                     String nameEn = column.getNameEn();
                     if (nameEn.endsWith(UNDERLINE_DOUBLE + bizName)) {
                         dimNameRewrite = nameEn;
@@ -158,9 +160,6 @@ public class DictQueryHelper {
 
     private QueryStructReq generateQueryStructCmd(Long modelId, DefaultMetric defaultMetricDesc, Dim4Dict dim4Dict) {
         QueryStructReq queryStructCmd = new QueryStructReq();
-
-        queryStructCmd.addModelId(modelId);
-        queryStructCmd.setGroups(Arrays.asList(dim4Dict.getBizName()));
 
         List<Filter> filters = generateFilters(dim4Dict, queryStructCmd);
         queryStructCmd.setDimensionFilters(filters);

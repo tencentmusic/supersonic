@@ -1,7 +1,5 @@
 package com.tencent.supersonic.chat;
 
-import static org.junit.Assert.assertEquals;
-
 import com.tencent.supersonic.BaseApplication;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
@@ -16,13 +14,16 @@ import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.chat.server.service.QueryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.mock.mockito.MockBean;
+
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.mock.mockito.MockBean;
+
+import static org.junit.Assert.assertEquals;
 
 public class BaseTest extends BaseApplication {
 

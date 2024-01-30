@@ -28,10 +28,9 @@ public class LLMResponseService {
         }
         LLMSemanticQuery semanticQuery = QueryManager.createLLMQuery(LLMSqlQuery.QUERY_MODE);
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
-        parseInfo.setModel(parseResult.getModelCluster());
+        parseInfo.setView(queryCtx.getSemanticSchema().getView(parseResult.getViewId()));
         NL2SQLTool commonAgentTool = parseResult.getCommonAgentTool();
-        parseInfo.getElementMatches().addAll(queryCtx.getModelClusterMapInfo()
-                .getMatchedElements(parseInfo.getModelClusterKey()));
+        parseInfo.getElementMatches().addAll(queryCtx.getMapInfo().getMatchedElements(parseInfo.getViewId()));
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(Constants.CONTEXT, parseResult);
@@ -42,7 +41,6 @@ public class LLMResponseService {
         parseInfo.setScore(queryCtx.getQueryText().length() * (1 + weight));
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
         parseInfo.getSqlInfo().setS2SQL(s2SQL);
-        parseInfo.setModel(parseResult.getModelCluster());
         queryCtx.getCandidateQueries().add(semanticQuery);
         return parseInfo;
     }

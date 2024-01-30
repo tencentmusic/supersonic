@@ -1,10 +1,5 @@
 package com.tencent.supersonic.headless.server.utils;
 
-import static com.tencent.supersonic.common.pojo.Constants.DAY;
-import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
-import static com.tencent.supersonic.common.pojo.Constants.MONTH;
-import static com.tencent.supersonic.common.pojo.Constants.WEEK;
-
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
@@ -22,9 +17,16 @@ import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.Catalog;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Triple;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -38,11 +40,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Triple;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+
+import static com.tencent.supersonic.common.pojo.Constants.DAY;
+import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
+import static com.tencent.supersonic.common.pojo.Constants.MONTH;
+import static com.tencent.supersonic.common.pojo.Constants.WEEK;
 
 
 @Slf4j
@@ -65,26 +67,27 @@ public class QueryStructUtils {
 
     public QueryStructUtils(
             DateModeUtils dateModeUtils,
-            SqlFilterUtils sqlFilterUtils, Catalog catalog) {
+            SqlFilterUtils sqlFilterUtils, @Lazy Catalog catalog) {
 
         this.dateModeUtils = dateModeUtils;
         this.sqlFilterUtils = sqlFilterUtils;
         this.catalog = catalog;
     }
 
-    private List<Long> getDimensionIds(QueryStructReq queryStructCmd) {
+    private List<Long> getDimensionIds(QueryStructReq queryStructReq) {
         List<Long> dimensionIds = new ArrayList<>();
-        MetaFilter metaFilter = new MetaFilter(queryStructCmd.getModelIds());
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setViewId(queryStructReq.getViewId());
         List<DimensionResp> dimensions = catalog.getDimensions(metaFilter);
         Map<String, List<DimensionResp>> pair = dimensions.stream()
                 .collect(Collectors.groupingBy(DimensionResp::getBizName));
-        for (String group : queryStructCmd.getGroups()) {
+        for (String group : queryStructReq.getGroups()) {
             if (pair.containsKey(group)) {
                 dimensionIds.add(pair.get(group).get(0).getId());
             }
         }
 
-        List<String> filtersCols = sqlFilterUtils.getFiltersCol(queryStructCmd.getOriginalFilter());
+        List<String> filtersCols = sqlFilterUtils.getFiltersCol(queryStructReq.getOriginalFilter());
         for (String col : filtersCols) {
             if (pair.containsKey(col)) {
                 dimensionIds.add(pair.get(col).get(0).getId());
@@ -95,7 +98,8 @@ public class QueryStructUtils {
 
     private List<Long> getMetricIds(QueryStructReq queryStructCmd) {
         List<Long> metricIds = new ArrayList<>();
-        MetaFilter metaFilter = new MetaFilter(queryStructCmd.getModelIds());
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setViewId(queryStructCmd.getViewId());
         List<MetricResp> metrics = catalog.getMetrics(metaFilter);
         Map<String, List<MetricResp>> pair = metrics.stream().collect(Collectors.groupingBy(SchemaItem::getBizName));
         for (Aggregator agg : queryStructCmd.getAggregators()) {
@@ -133,12 +137,12 @@ public class QueryStructUtils {
     }
 
     public Set<String> getResNameEnExceptInternalCol(QuerySqlReq querySqlReq,
-            List<ModelSchemaResp> modelSchemaRespList) {
+                                                     SemanticSchemaResp semanticSchemaResp) {
         Set<String> resNameSet = getResName(querySqlReq);
         Set<String> resNameEnSet = new HashSet<>();
-        if (!CollectionUtils.isEmpty(modelSchemaRespList)) {
-            List<MetricSchemaResp> metrics = modelSchemaRespList.get(0).getMetrics();
-            List<DimSchemaResp> dimensions = modelSchemaRespList.get(0).getDimensions();
+        if (semanticSchemaResp != null) {
+            List<MetricSchemaResp> metrics = semanticSchemaResp.getMetrics();
+            List<DimSchemaResp> dimensions = semanticSchemaResp.getDimensions();
             metrics.stream().forEach(o -> {
                 if (resNameSet.contains(o.getName())) {
                     resNameEnSet.add(o.getBizName());
@@ -174,8 +178,8 @@ public class QueryStructUtils {
         List<Long> dimensionIds = getDimensionIds(queryStructCmd);
         List<Long> metricIds = getMetricIds(queryStructCmd);
         ItemDateResp dateDate = catalog.getItemDate(
-                new ItemDateFilter(dimensionIds, TypeEnums.DIMENSION.getName()),
-                new ItemDateFilter(metricIds, TypeEnums.METRIC.getName()));
+                new ItemDateFilter(dimensionIds, TypeEnums.DIMENSION.name()),
+                new ItemDateFilter(metricIds, TypeEnums.METRIC.name()));
         return dateDate;
     }
 

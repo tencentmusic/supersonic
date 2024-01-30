@@ -15,7 +15,7 @@ public interface LLMProxy {
 
     boolean isSkip(QueryContext queryContext);
 
-    LLMResp query2sql(LLMReq llmReq, String modelClusterKey);
+    LLMResp query2sql(LLMReq llmReq, Long viewId);
 
     FunctionResp requestFunction(FunctionReq functionReq);
 

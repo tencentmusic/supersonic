@@ -1,12 +1,18 @@
 package com.tencent.supersonic.chat.core.mapper;
 
 import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
 import com.tencent.supersonic.chat.core.knowledge.DatabaseMapResult;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.Constants;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -14,11 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 /**
  * DatabaseMatchStrategy uses SQL LIKE operator to match schema elements.
@@ -59,7 +60,7 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
         if (StringUtils.isBlank(detectSegment)) {
             return;
         }
-        Set<Long> modelIds = mapperHelper.getModelIds(queryContext.getModelId(), queryContext.getAgent());
+        Set<Long> viewIds = mapperHelper.getViewIds(queryContext.getViewId(), queryContext.getAgent());
 
         Double metricDimensionThresholdConfig = getThreshold(queryContext);
 
@@ -72,9 +73,9 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
                 continue;
             }
             Set<SchemaElement> schemaElements = entry.getValue();
-            if (!CollectionUtils.isEmpty(modelIds)) {
+            if (!CollectionUtils.isEmpty(viewIds)) {
                 schemaElements = schemaElements.stream()
-                        .filter(schemaElement -> modelIds.contains(schemaElement.getModel()))
+                        .filter(schemaElement -> viewIds.contains(schemaElement.getView()))
                         .collect(Collectors.toSet());
             }
             for (SchemaElement schemaElement : schemaElements) {
@@ -98,7 +99,7 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
         Double metricDimensionThresholdConfig = optimizationConfig.getMetricDimensionThresholdConfig();
         Double metricDimensionMinThresholdConfig = optimizationConfig.getMetricDimensionMinThresholdConfig();
 
-        Map<Long, List<SchemaElementMatch>> modelElementMatches = queryContext.getMapInfo().getModelElementMatches();
+        Map<Long, List<SchemaElementMatch>> modelElementMatches = queryContext.getMapInfo().getViewElementMatches();
 
         boolean existElement = modelElementMatches.entrySet().stream().anyMatch(entry -> entry.getValue().size() >= 1);
 

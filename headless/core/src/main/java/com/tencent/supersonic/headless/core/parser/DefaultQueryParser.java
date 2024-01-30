@@ -11,15 +11,16 @@ import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -109,10 +110,6 @@ public class DefaultQueryParser implements QueryParser {
     public QueryStatement parser(QueryStatement queryStatement, AggOption isAgg) {
         MetricQueryReq metricQueryReq = queryStatement.getMetricReq();
         log.info("parser metricQueryReq [{}] isAgg [{}]", metricQueryReq, isAgg);
-        if (metricQueryReq.getRootPath().isEmpty()) {
-            queryStatement.setErrMsg("rootPath empty");
-            return queryStatement;
-        }
         try {
             return ComponentFactory.getSqlParser().explain(queryStatement, isAgg);
         } catch (Exception e) {
@@ -129,13 +126,12 @@ public class DefaultQueryParser implements QueryParser {
         metricReq.setDimensions(metricTable.getDimensions());
         metricReq.setWhere(StringUtil.formatSqlQuota(metricTable.getWhere()));
         metricReq.setNativeQuery(!AggOption.isAgg(metricTable.getAggOption()));
-        metricReq.setRootPath(parseSqlReq.getRootPath());
         QueryStatement tableSql = new QueryStatement();
         tableSql.setIsS2SQL(false);
         tableSql.setMetricReq(metricReq);
         tableSql.setMinMaxTime(queryStatement.getMinMaxTime());
         tableSql.setEnableOptimize(queryStatement.getEnableOptimize());
-        tableSql.setModelIds(queryStatement.getModelIds());
+        tableSql.setViewId(queryStatement.getViewId());
         tableSql.setSemanticModel(queryStatement.getSemanticModel());
         if (isSingleMetricTable) {
             tableSql.setViewSql(parseSqlReq.getSql());

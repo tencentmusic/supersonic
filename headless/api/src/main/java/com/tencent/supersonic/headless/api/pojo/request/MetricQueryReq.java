@@ -11,7 +11,6 @@ public class MetricQueryReq {
 
     private List<String> metrics;
     private List<String> dimensions;
-    private String rootPath = "";
     private Map<String, String> variables;
     private String where;
     private Long limit;

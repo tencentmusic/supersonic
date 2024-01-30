@@ -1,4 +1,3 @@
--------demo for semantic and chat
 CREATE TABLE `s2_user_department` (
       `user_name` varchar(200) NOT NULL,
        `department` varchar(200) NOT NULL
@@ -336,7 +335,7 @@ CREATE TABLE `s2_model` (
 CREATE TABLE `s2_plugin` (
                              `id` bigint(20) NOT NULL AUTO_INCREMENT,
                              `type` varchar(50) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'DASHBOARD,WIDGET,URL',
-                             `model` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                             `view` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                              `pattern` varchar(500) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
                              `parse_mode` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                              `parse_mode_config` text COLLATE utf8mb4_unicode_ci,
@@ -354,6 +353,7 @@ CREATE TABLE `s2_query_stat_info` (
                                       `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
                                       `trace_id` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '查询标识',
                                       `model_id` bigint(20) DEFAULT NULL,
+                                      `view_id` bigint(20) DEFAULT NULL,
                                       `user` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '执行sql的用户',
                                       `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                                       `query_type` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '查询对应的场景',
@@ -406,17 +406,18 @@ CREATE TABLE `s2_semantic_pasre_info` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='语义层sql解析信息表';
 
 
-CREATE TABLE `s2_view_info` (
-                                `id` bigint(20) NOT NULL AUTO_INCREMENT,
-                                `domain_id` bigint(20) DEFAULT NULL,
-                                `type` varchar(20) DEFAULT NULL COMMENT 'datasource、dimension、metric',
-                                `config` text COMMENT 'config detail',
-                                `created_at` datetime DEFAULT NULL,
-                                `created_by` varchar(100) DEFAULT NULL,
-                                `updated_at` datetime DEFAULT NULL,
-                                `updated_by` varchar(100) NOT NULL,
-                                PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE `s2_canvas`
+(
+    `id`         bigint(20)   NOT NULL AUTO_INCREMENT,
+    `domain_id`  bigint(20)   DEFAULT NULL,
+    `type`       varchar(20)  DEFAULT NULL COMMENT 'datasource、dimension、metric',
+    `config`     text COMMENT 'config detail',
+    `created_at` datetime     DEFAULT NULL,
+    `created_by` varchar(100) DEFAULT NULL,
+    `updated_at` datetime     DEFAULT NULL,
+    `updated_by` varchar(100) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
 create table s2_user
 (
@@ -481,4 +482,24 @@ CREATE TABLE `s2_app`
     `updated_at`     datetime null,
     `created_by`     varchar(255) null,
     `updated_by`     varchar(255) null
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE s2_view
+(
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    domain_id   BIGINT,
+    `name`      VARCHAR(255),
+    biz_name    VARCHAR(255),
+    `description` VARCHAR(255),
+    `status`      INT,
+    alias       VARCHAR(255),
+    view_detail text,
+    created_at  datetime,
+    created_by  VARCHAR(255),
+    updated_at  datetime,
+    updated_by  VARCHAR(255),
+    filter_sql VARCHAR(1000),
+    query_config VARCHAR(3000),
+    `admin` varchar(3000) DEFAULT NULL,
+    `admin_org` varchar(3000) DEFAULT NULL
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

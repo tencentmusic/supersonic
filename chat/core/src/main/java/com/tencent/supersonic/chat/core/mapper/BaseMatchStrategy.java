@@ -3,6 +3,12 @@ package com.tencent.supersonic.chat.core.mapper;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.utils.NatureHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,11 +19,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
@@ -27,15 +28,15 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
     private MapperHelper mapperHelper;
 
     @Override
-    public Map<MatchText, List<T>> match(QueryContext queryContext, List<Term> terms, Set<Long> detectModelIds) {
+    public Map<MatchText, List<T>> match(QueryContext queryContext, List<Term> terms, Set<Long> detectViewIds) {
         String text = queryContext.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
         }
 
-        log.debug("terms:{},,detectModelIds:{}", terms, detectModelIds);
+        log.debug("terms:{},,detectViewIds:{}", terms, detectViewIds);
 
-        List<T> detects = detect(queryContext, terms, detectModelIds);
+        List<T> detects = detect(queryContext, terms, detectViewIds);
         Map<MatchText, List<T>> result = new HashMap<>();
 
         result.put(MatchText.builder().regText(text).detectSegment(text).build(), detects);
@@ -102,9 +103,9 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
     }
 
     public List<T> getMatches(QueryContext queryContext, List<Term> terms) {
-        Set<Long> detectModelIds = mapperHelper.getModelIds(queryContext.getModelId(), queryContext.getAgent());
-        terms = filterByModelIds(terms, detectModelIds);
-        Map<MatchText, List<T>> matchResult = match(queryContext, terms, detectModelIds);
+        Set<Long> viewIds = mapperHelper.getViewIds(queryContext.getViewId(), queryContext.getAgent());
+        terms = filterByViewId(terms, viewIds);
+        Map<MatchText, List<T>> matchResult = match(queryContext, terms, viewIds);
         List<T> matches = new ArrayList<>();
         if (Objects.isNull(matchResult)) {
             return matches;
@@ -119,17 +120,17 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         return matches;
     }
 
-    public List<Term> filterByModelIds(List<Term> terms, Set<Long> detectModelIds) {
+    public List<Term> filterByViewId(List<Term> terms, Set<Long> viewIds) {
         logTerms(terms);
-        if (CollectionUtils.isNotEmpty(detectModelIds)) {
+        if (CollectionUtils.isNotEmpty(viewIds)) {
             terms = terms.stream().filter(term -> {
-                Long modelId = NatureHelper.getModelId(term.getNature().toString());
-                if (Objects.nonNull(modelId)) {
-                    return detectModelIds.contains(modelId);
+                Long viewId = NatureHelper.getViewId(term.getNature().toString());
+                if (Objects.nonNull(viewId)) {
+                    return viewIds.contains(viewId);
                 }
                 return false;
             }).collect(Collectors.toList());
-            log.info("terms filter by modelIds:{}", detectModelIds);
+            log.info("terms filter by viewId:{}", viewIds);
             logTerms(terms);
         }
         return terms;

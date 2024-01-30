@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 public class SchemaElement implements Serializable {
 
-    private Long model;
+    private Long view;
     private Long id;
     private String name;
     private String bizName;
@@ -40,7 +40,7 @@ public class SchemaElement implements Serializable {
             return false;
         }
         SchemaElement schemaElement = (SchemaElement) o;
-        return Objects.equal(model, schemaElement.model) && Objects.equal(id,
+        return Objects.equal(view, schemaElement.view) && Objects.equal(id,
                 schemaElement.id) && Objects.equal(name, schemaElement.name)
                 && Objects.equal(bizName, schemaElement.bizName)
                 && Objects.equal(type, schemaElement.type);
@@ -48,7 +48,7 @@ public class SchemaElement implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(model, id, name, bizName, type);
+        return Objects.hashCode(view, id, name, bizName, type);
     }
 
 }

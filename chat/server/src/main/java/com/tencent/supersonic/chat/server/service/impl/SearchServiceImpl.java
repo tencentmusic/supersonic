@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.server.service.impl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.collect.Lists;
 import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
@@ -15,11 +14,12 @@ import com.tencent.supersonic.chat.api.pojo.response.SearchResult;
 import com.tencent.supersonic.chat.core.agent.Agent;
 import com.tencent.supersonic.chat.core.knowledge.DictWord;
 import com.tencent.supersonic.chat.core.knowledge.HanlpMapResult;
-import com.tencent.supersonic.chat.core.knowledge.ModelInfoStat;
+import com.tencent.supersonic.chat.core.knowledge.ViewInfoStat;
 import com.tencent.supersonic.chat.core.mapper.MapperHelper;
 import com.tencent.supersonic.chat.core.mapper.MatchText;
 import com.tencent.supersonic.chat.core.mapper.ModelWithSemanticType;
 import com.tencent.supersonic.chat.core.mapper.SearchMatchStrategy;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.utils.HanlpHelper;
 import com.tencent.supersonic.chat.core.utils.NatureHelper;
 import com.tencent.supersonic.chat.server.service.AgentService;
@@ -28,6 +28,13 @@ import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.chat.server.service.SearchService;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.util.ContextUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -40,12 +47,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
 
 
 /**
@@ -86,13 +87,13 @@ public class SearchServiceImpl implements SearchService {
         // 2.get meta info
         SemanticSchema semanticSchemaDb = schemaService.getSemanticSchema();
         List<SchemaElement> metricsDb = semanticSchemaDb.getMetrics();
-        final Map<Long, String> modelToName = semanticSchemaDb.getModelIdToName();
+        final Map<Long, String> modelToName = semanticSchemaDb.getViewIdToName();
 
         // 3.detect by segment
         List<Term> originals = HanlpHelper.getTerms(queryText);
         log.info("hanlp parse result: {}", originals);
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
-        Set<Long> detectModelIds = mapperHelper.getModelIds(queryReq.getModelId(), agentService.getAgent(agentId));
+        Set<Long> detectModelIds = mapperHelper.getViewIds(queryReq.getModelId(), agentService.getAgent(agentId));
 
         QueryContext queryContext = new QueryContext();
         BeanUtils.copyProperties(queryReq, queryContext);
@@ -116,7 +117,7 @@ public class SearchServiceImpl implements SearchService {
         log.info("searchTextEntry:{},queryReq:{}", searchTextEntry, queryReq);
 
         Set<SearchResult> searchResults = new LinkedHashSet();
-        ModelInfoStat modelStat = NatureHelper.getModelStat(originals);
+        ViewInfoStat modelStat = NatureHelper.getViewStat(originals);
 
         List<Long> possibleModels = getPossibleModels(queryReq, originals, modelStat, queryReq.getModelId());
 
@@ -132,7 +133,7 @@ public class SearchServiceImpl implements SearchService {
         for (Map.Entry<String, String> natureToNameEntry : natureToNameMap.entrySet()) {
 
             Set<SearchResult> searchResultSet = searchDimensionValue(metricsDb, modelToName,
-                    modelStat.getMetricModelCount(), existMetricAndDimension,
+                    modelStat.getMetricViewCount(), existMetricAndDimension,
                     matchText, natureToNameMap, natureToNameEntry, queryReq.getQueryFilters());
 
             searchResults.addAll(searchResultSet);
@@ -141,7 +142,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private List<Long> getPossibleModels(QueryReq queryCtx, List<Term> originals,
-            ModelInfoStat modelStat, Long webModelId) {
+                                         ViewInfoStat modelStat, Long webModelId) {
 
         if (Objects.nonNull(webModelId) && webModelId > 0) {
             List<Long> result = new ArrayList<>();
@@ -149,22 +150,22 @@ public class SearchServiceImpl implements SearchService {
             return result;
         }
 
-        List<Long> possibleModels = NatureHelper.selectPossibleModels(originals);
+        List<Long> possibleModels = NatureHelper.selectPossibleViews(originals);
 
-        Set<Long> contextModel = chatService.getContextModel(queryCtx.getChatId());
+        Long contextModel = chatService.getContextModel(queryCtx.getChatId());
 
         log.debug("possibleModels:{},modelStat:{},contextModel:{}", possibleModels, modelStat, contextModel);
 
         // If nothing is recognized or only metric are present, then add the contextModel.
         if (nothingOrOnlyMetric(modelStat)) {
-            return contextModel.stream().filter(modelId -> modelId > 0).collect(Collectors.toList());
+            return Lists.newArrayList(contextModel);
         }
         return possibleModels;
     }
 
-    private boolean nothingOrOnlyMetric(ModelInfoStat modelStat) {
-        return modelStat.getMetricModelCount() >= 0 && modelStat.getDimensionModelCount() <= 0
-                && modelStat.getDimensionValueModelCount() <= 0 && modelStat.getModelCount() <= 0;
+    private boolean nothingOrOnlyMetric(ViewInfoStat modelStat) {
+        return modelStat.getMetricViewCount() >= 0 && modelStat.getDimensionViewCount() <= 0
+                && modelStat.getDimensionValueViewCount() <= 0 && modelStat.getViewCount() <= 0;
     }
 
     private boolean effectiveModel(Long contextModel) {
@@ -184,7 +185,7 @@ public class SearchServiceImpl implements SearchService {
         String nature = natureToNameEntry.getKey();
         String wordName = natureToNameEntry.getValue();
 
-        Long modelId = NatureHelper.getModelId(nature);
+        Long modelId = NatureHelper.getViewId(nature);
         SchemaElementType schemaElementType = NatureHelper.convertToElementType(nature);
 
         if (SchemaElementType.ENTITY.equals(schemaElementType)) {
@@ -261,7 +262,7 @@ public class SearchServiceImpl implements SearchService {
             return Lists.newArrayList();
         }
         return metricsDb.stream()
-                .filter(mapDO -> Objects.nonNull(mapDO) && model.equals(mapDO.getModel()))
+                .filter(mapDO -> Objects.nonNull(mapDO) && model.equals(mapDO.getView()))
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                 .flatMap(entry -> {
                     List<String> result = new ArrayList<>();
@@ -285,7 +286,7 @@ public class SearchServiceImpl implements SearchService {
                             if (CollectionUtils.isEmpty(possibleModels)) {
                                 return true;
                             }
-                            Long model = NatureHelper.getModelId(nature);
+                            Long model = NatureHelper.getViewId(nature);
                             return possibleModels.contains(model);
                         })
                         .map(nature -> {
@@ -308,7 +309,7 @@ public class SearchServiceImpl implements SearchService {
         for (HanlpMapResult hanlpMapResult : hanlpMapResults) {
 
             List<ModelWithSemanticType> dimensionMetricClassIds = hanlpMapResult.getNatures().stream()
-                    .map(nature -> new ModelWithSemanticType(NatureHelper.getModelId(nature),
+                    .map(nature -> new ModelWithSemanticType(NatureHelper.getViewId(nature),
                             NatureHelper.convertToElementType(nature)))
                     .filter(entry -> matchCondition(entry, possibleModels)).collect(Collectors.toList());
 
