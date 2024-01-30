@@ -90,7 +90,7 @@ public class DuSQLDemoDataLoader {
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
         Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
-        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false","none");
+        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false", "none");
         dimension1.setTypeParams(dimensionTimeTypeParams);
         dimensions.add(dimension1);
         dimensions.add(new Dim("公司名称", "company_name", DimensionType.categorical.name(), 1));
@@ -132,7 +132,7 @@ public class DuSQLDemoDataLoader {
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
         Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
-        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false","none");
+        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false", "none");
         dimension1.setTypeParams(dimensionTimeTypeParams);
         dimensions.add(dimension1);
         dimensions.add(new Dim("品牌名称", "brand_name", DimensionType.categorical.name(), 1));
@@ -171,7 +171,7 @@ public class DuSQLDemoDataLoader {
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
         Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
-        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false","none");
+        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false", "none");
         dimension1.setTypeParams(dimensionTimeTypeParams);
         dimensions.add(dimension1);
         modelDetail.setDimensions(dimensions);
@@ -182,7 +182,7 @@ public class DuSQLDemoDataLoader {
         modelDetail.setIdentifiers(identifiers);
 
         List<Measure> measures = new ArrayList<>();
-        Measure measure=new Measure("营收占比", "revenue_proportion", AggOperatorEnum.SUM.name(), 1);
+        Measure measure = new Measure("营收占比", "revenue_proportion", AggOperatorEnum.SUM.name(), 1);
         measures.add(measure);
         measures.add(new Measure("利润占比", "profit_proportion", AggOperatorEnum.SUM.name(), 1));
         measures.add(new Measure("支出占比", "expenditure_proportion", AggOperatorEnum.SUM.name(), 1));
@@ -193,10 +193,10 @@ public class DuSQLDemoDataLoader {
                 + "profit_proportion,expenditure_proportion FROM company_revenue");
         modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
-        MetricResp metricResp=metricService.getMetric(13L, user);
+        MetricResp metricResp = metricService.getMetric(13L, user);
 
-        MetricReq metricReq=new MetricReq();
-        BeanUtils.copyProperties(metricResp,metricReq);
+        MetricReq metricReq = new MetricReq();
+        BeanUtils.copyProperties(metricResp, metricReq);
         metricReq.setAlias("收入比例");
         metricService.updateMetric(metricReq, user);
     }
@@ -216,7 +216,7 @@ public class DuSQLDemoDataLoader {
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
         Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
-        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false","none");
+        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams("false", "none");
         dimension1.setTypeParams(dimensionTimeTypeParams);
         dimensions.add(dimension1);
         dimensions.add(new Dim("年份", "year_time", DimensionType.categorical.name(), 1));
