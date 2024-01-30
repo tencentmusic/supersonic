@@ -1,10 +1,10 @@
-package com.tencent.supersonic.chat.integration;
+package com.tencent.supersonic.chat;
 
 
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.integration.util.DataUtils;
+import com.tencent.supersonic.util.DataUtils;
 import com.tencent.supersonic.chat.core.plugin.PluginManager;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;

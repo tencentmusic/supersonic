@@ -106,7 +106,6 @@ public class SqlUtils {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         jdbcTemplate.setDatabaseProductName(database.getName());
         jdbcTemplate.setFetchSize(500);
-        log.info("jdbcTemplate:{}, dataSource:{}", jdbcTemplate, dataSource);
         return jdbcTemplate;
     }
 

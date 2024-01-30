@@ -42,7 +42,7 @@ public class CalciteSqlParser implements SqlParser {
                     getSqlByView(aggBuilder.getSql(engineType), queryStatement.getViewSql(),
                             queryStatement.getViewAlias()), engineType);
             if (Objects.nonNull(simplifySql) && !simplifySql.isEmpty()) {
-                log.info("simplifySql [{}]", simplifySql);
+                log.debug("simplifySql [{}]", simplifySql);
                 queryStatement.setViewSimplifySql(simplifySql);
             }
         }

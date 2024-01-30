@@ -221,7 +221,7 @@ public class QueryServiceImpl implements QueryService {
     @Override
     public <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception {
         T queryReq = explainSqlReq.getQueryReq();
-        QueryStatement queryStatement = buildQueryStatement((QuerySqlReq) queryReq, user);
+        QueryStatement queryStatement = buildQueryStatement((SemanticQueryReq) queryReq, user);
         queryStatement = plan(queryStatement);
         return getExplainResp(queryStatement);
     }
@@ -332,14 +332,12 @@ public class QueryServiceImpl implements QueryService {
 
     private QueryStatement plan(QueryStatement queryStatement) throws Exception {
         queryParser.parse(queryStatement);
-        log.info("queryStatement:{}", queryStatement);
         queryPlanner.plan(queryStatement);
         return queryStatement;
     }
 
     private SemanticQueryResp query(QueryStatement queryStatement) throws Exception {
         SemanticQueryResp semanticQueryResp = null;
-        log.info("[QueryStatement:{}]", queryStatement);
         try {
             //1 parse
             queryParser.parse(queryStatement);

@@ -23,7 +23,7 @@ public class DefaultQueryCache implements QueryCache {
     public Object query(SemanticQueryReq semanticQueryReq, String cacheKey) {
         if (isCache(semanticQueryReq)) {
             Object result = cacheManager.get(cacheKey);
-            log.info("queryFromCache, key:{}, semanticQueryReq:{}", cacheKey, semanticQueryReq);
+            log.info("query from cache, key:{}", cacheKey);
             return result;
         }
         return null;
@@ -36,7 +36,7 @@ public class DefaultQueryCache implements QueryCache {
                         log.warn("exception:", exception);
                         return null;
                     });
-            log.info("add record to cache, key:{}", cacheKey);
+            log.info("put to cache, key:{}", cacheKey);
             return true;
         }
         return false;

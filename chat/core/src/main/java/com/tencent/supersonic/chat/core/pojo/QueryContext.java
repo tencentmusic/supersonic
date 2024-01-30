@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.core.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.SchemaModelClusterMapInfo;
@@ -37,10 +38,15 @@ public class QueryContext {
     private List<SemanticQuery> candidateQueries = new ArrayList<>();
     private SchemaMapInfo mapInfo = new SchemaMapInfo();
     private SchemaModelClusterMapInfo modelClusterMapInfo = new SchemaModelClusterMapInfo();
+    @JsonIgnore
     private SemanticSchema semanticSchema;
+    @JsonIgnore
     private Agent agent;
+    @JsonIgnore
     private Map<Long, ChatConfigRichResp> modelIdToChatRichConfig;
+    @JsonIgnore
     private Map<String, Plugin> nameToPlugin;
+    @JsonIgnore
     private List<Plugin> pluginList;
 
     public List<SemanticQuery> getCandidateQueries() {

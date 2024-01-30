@@ -71,7 +71,6 @@ public class StatUtils {
         QueryStat queryStatInfo = get();
         queryStatInfo.setElapsedMs(System.currentTimeMillis() - queryStatInfo.getStartTime());
         queryStatInfo.setQueryState(state.getStatus());
-        log.info("queryStatInfo: {}", queryStatInfo);
         CompletableFuture.runAsync(() -> {
             statRepository.createRecord(queryStatInfo);
         }).exceptionally(exception -> {
@@ -186,16 +185,7 @@ public class StatUtils {
                 : "Admin";
     }
 
-    public Boolean updateQueryOptMode(String mode) {
-        STATS.get().setQueryOptMode(mode);
-        return true;
-    }
-
     public List<ItemUseResp> getStatInfo(ItemUseReq itemUseCommend) {
         return statRepository.getStatInfo(itemUseCommend);
-    }
-
-    public List<QueryStat> getQueryStatInfoWithoutCache(ItemUseReq itemUseCommend) {
-        return statRepository.getQueryStatInfoWithoutCache(itemUseCommend);
     }
 }

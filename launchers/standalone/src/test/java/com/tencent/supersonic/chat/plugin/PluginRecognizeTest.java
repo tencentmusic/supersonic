@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.integration.plugin;
+package com.tencent.supersonic.chat.plugin;
 
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -7,8 +7,8 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.ParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.core.plugin.PluginManager;
-import com.tencent.supersonic.chat.integration.MockConfiguration;
-import com.tencent.supersonic.chat.integration.util.DataUtils;
+import com.tencent.supersonic.chat.MockConfiguration;
+import com.tencent.supersonic.util.DataUtils;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.QueryService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
