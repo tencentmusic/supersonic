@@ -146,4 +146,8 @@ public class DataUtils {
         result.add(3L);
         return result;
     }
+
+    public static Long getMetricAgentView() {
+        return 1L;
+    }
 }
