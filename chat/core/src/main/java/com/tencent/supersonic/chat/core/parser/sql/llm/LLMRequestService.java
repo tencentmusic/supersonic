@@ -100,6 +100,9 @@ public class LLMRequestService {
 
     public NL2SQLTool getParserTool(QueryContext queryCtx, Set<Long> modelIdSet) {
         Agent agent = queryCtx.getAgent();
+        if (Objects.isNull(agent)) {
+            return null;
+        }
         List<NL2SQLTool> commonAgentTools = agent.getParserTools(AgentToolType.NL2SQL_LLM);
         Optional<NL2SQLTool> llmParserTool = commonAgentTools.stream()
                 .filter(tool -> {
