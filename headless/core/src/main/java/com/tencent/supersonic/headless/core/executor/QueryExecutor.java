@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.executor;
 
-import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 
 /**

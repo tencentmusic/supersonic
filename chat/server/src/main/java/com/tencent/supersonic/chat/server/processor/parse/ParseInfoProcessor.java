@@ -102,8 +102,18 @@ public class ParseInfoProcessor implements ParseResultProcessor {
 
     private Set<SchemaElement> getElements(Set<Long> modelIds, List<String> allFields, List<SchemaElement> elements) {
         return elements.stream()
-                .filter(schemaElement -> modelIds.contains(schemaElement.getModel()) && allFields.contains(
-                        schemaElement.getName())
+                .filter(schemaElement -> {
+                            if (CollectionUtils.isEmpty(schemaElement.getAlias())) {
+                                return modelIds.contains(schemaElement.getModel()) && allFields.contains(
+                                        schemaElement.getName());
+                            }
+                            Set<String> allFieldsSet = new HashSet<>(allFields);
+                            Set<String> aliasSet = new HashSet<>(schemaElement.getAlias());
+                            List<String> intersection = allFieldsSet.stream()
+                                    .filter(aliasSet::contains).collect(Collectors.toList());
+                            return modelIds.contains(schemaElement.getModel()) && (allFields.contains(
+                                    schemaElement.getName()) || !CollectionUtils.isEmpty(intersection));
+                        }
                 ).collect(Collectors.toSet());
     }
 

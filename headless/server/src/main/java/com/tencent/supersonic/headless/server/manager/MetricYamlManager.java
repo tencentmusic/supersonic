@@ -1,14 +1,14 @@
 package com.tencent.supersonic.headless.server.manager;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.headless.api.enums.MetricDefineType;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.FieldParam;
 import com.tencent.supersonic.headless.api.pojo.MeasureParam;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
 import com.tencent.supersonic.headless.api.pojo.MetricParam;
-import com.tencent.supersonic.headless.api.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.server.pojo.yaml.FieldParamYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricParamYamlTpl;

@@ -18,8 +18,8 @@ import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -159,7 +159,7 @@ public class DictQueryHelper {
     private QueryStructReq generateQueryStructCmd(Long modelId, DefaultMetric defaultMetricDesc, Dim4Dict dim4Dict) {
         QueryStructReq queryStructCmd = new QueryStructReq();
 
-        queryStructCmd.setModelId(modelId);
+        queryStructCmd.addModelId(modelId);
         queryStructCmd.setGroups(Arrays.asList(dim4Dict.getBizName()));
 
         List<Filter> filters = generateFilters(dim4Dict, queryStructCmd);
@@ -181,6 +181,7 @@ public class DictQueryHelper {
         queryStructCmd.setDateInfo(dateInfo);
 
         queryStructCmd.setLimit(dimMaxLimit);
+        queryStructCmd.setNeedAuth(false);
         return queryStructCmd;
 
     }

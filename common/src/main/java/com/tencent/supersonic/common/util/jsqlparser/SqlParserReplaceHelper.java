@@ -23,6 +23,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.OrderByElement;
@@ -231,6 +232,9 @@ public class SqlParserReplaceHelper {
         if (!CollectionUtils.isEmpty(joins)) {
             for (Join join : joins) {
                 join.getOnExpression().accept(visitor);
+                if (!(join.getRightItem() instanceof SubSelect)) {
+                    continue;
+                }
                 SelectBody subSelectBody = ((SubSelect) join.getRightItem()).getSelectBody();
                 List<PlainSelect> plainSelectList = new ArrayList<>();
                 plainSelectList.add((PlainSelect) subSelectBody);
@@ -414,12 +418,17 @@ public class SqlParserReplaceHelper {
             List<Join> joins = painSelect.getJoins();
             if (!CollectionUtils.isEmpty(joins)) {
                 for (Join join : joins) {
-                    SelectBody subSelectBody = ((SubSelect) join.getRightItem()).getSelectBody();
-                    List<PlainSelect> plainSelectList = new ArrayList<>();
-                    plainSelectList.add((PlainSelect) subSelectBody);
-                    List<PlainSelect> subPlainSelects = SqlParserSelectHelper.getPlainSelects(plainSelectList);
-                    for (PlainSelect subPlainSelect : subPlainSelects) {
-                        subPlainSelect.getFromItem().accept(new TableNameReplaceVisitor(tableName));
+                    if (join.getRightItem() instanceof SubSelect) {
+                        SelectBody subSelectBody = ((SubSelect) join.getRightItem()).getSelectBody();
+                        List<PlainSelect> plainSelectList = new ArrayList<>();
+                        plainSelectList.add((PlainSelect) subSelectBody);
+                        List<PlainSelect> subPlainSelects = SqlParserSelectHelper.getPlainSelects(plainSelectList);
+                        for (PlainSelect subPlainSelect : subPlainSelects) {
+                            subPlainSelect.getFromItem().accept(new TableNameReplaceVisitor(tableName));
+                        }
+                    } else if (join.getRightItem() instanceof Table) {
+                        Table table = (Table) join.getRightItem();
+                        table.setName(tableName);
                     }
                 }
             }

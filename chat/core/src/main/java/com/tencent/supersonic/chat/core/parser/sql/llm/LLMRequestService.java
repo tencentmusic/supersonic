@@ -25,7 +25,7 @@ import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
-import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -100,6 +100,9 @@ public class LLMRequestService {
 
     public NL2SQLTool getParserTool(QueryContext queryCtx, Set<Long> modelIdSet) {
         Agent agent = queryCtx.getAgent();
+        if (Objects.isNull(agent)) {
+            return null;
+        }
         List<NL2SQLTool> commonAgentTools = agent.getParserTools(AgentToolType.NL2SQL_LLM);
         Optional<NL2SQLTool> llmParserTool = commonAgentTools.stream()
                 .filter(tool -> {

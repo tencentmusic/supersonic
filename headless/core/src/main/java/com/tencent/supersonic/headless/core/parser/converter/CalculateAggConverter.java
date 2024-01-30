@@ -5,11 +5,11 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
-import com.tencent.supersonic.headless.api.enums.AggOption;
-import com.tencent.supersonic.headless.api.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
+import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
-import com.tencent.supersonic.headless.api.request.ParseSqlReq;
-import com.tencent.supersonic.headless.api.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.ParseSqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
@@ -135,6 +135,7 @@ public class CalculateAggConverter implements HeadlessConverter {
             throws Exception {
         QueryStructReq queryStructReq = queryStatement.getQueryStructReq();
         check(queryStructReq);
+        queryStatement.setEnableOptimize(false);
         ParseSqlReq sqlCommand = new ParseSqlReq();
         sqlCommand.setRootPath(queryStructReq.getModelIdStr());
         String metricTableName = "v_metric_tb_tmp";

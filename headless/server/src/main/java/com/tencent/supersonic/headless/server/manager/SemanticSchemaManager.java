@@ -6,7 +6,7 @@ import com.google.common.cache.LoadingCache;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.Field;
-import com.tencent.supersonic.headless.api.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataType;

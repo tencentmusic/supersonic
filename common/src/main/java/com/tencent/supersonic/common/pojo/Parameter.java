@@ -16,15 +16,6 @@ public class Parameter {
     private String dataType;
     private String module;
     private List<Object> candidateValues;
-
-    public Parameter(String name, String value, String comment, String dataType, String module) {
-        this.name = name;
-        this.value = value;
-        this.comment = comment;
-        this.dataType = dataType;
-        this.module = module;
-    }
-
     public Parameter(String name, String value, String comment, String description, String dataType, String module) {
         this.name = name;
         this.value = value;

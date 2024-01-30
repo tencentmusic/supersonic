@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.headless.api.enums.DimensionType;
+import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;

@@ -63,8 +63,8 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -153,7 +153,7 @@ public class QueryServiceImpl implements QueryService {
             parser.parse(queryCtx, chatCtx);
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(parser.getClass().getSimpleName()).type(CostType.PARSER.getType()).build());
-            log.info("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
+            log.debug("{} result:{}", parser.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
 
         // 3. corrector
@@ -177,7 +177,7 @@ public class QueryServiceImpl implements QueryService {
             timeCostDOList.add(StatisticsDO.builder().cost((int) (System.currentTimeMillis() - startTime))
                     .interfaceName(processor.getClass().getSimpleName())
                     .type(CostType.PROCESSOR.getType()).build());
-            log.info("{} result:{}", processor.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
+            log.debug("{} result:{}", processor.getClass().getSimpleName(), JsonUtil.toString(queryCtx));
         });
 
         if (Objects.nonNull(parseResult.getQueryId()) && timeCostDOList.size() > 0) {
@@ -692,7 +692,7 @@ public class QueryServiceImpl implements QueryService {
         dateConf.setPeriod("DAY");
         queryStructReq.setDateInfo(dateConf);
         queryStructReq.setLimit(20L);
-        queryStructReq.setModelId(dimensionValueReq.getModelId());
+        queryStructReq.addModelId(dimensionValueReq.getModelId());
         queryStructReq.setQueryType(QueryType.ID);
         List<String> groups = new ArrayList<>();
         groups.add(dimensionValueReq.getBizName());

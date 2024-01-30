@@ -1,6 +1,6 @@
 package com.tencent.supersonic.headless.core.executor;
 
-import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlUtils;
@@ -31,7 +31,6 @@ public class JdbcExecutor implements QueryExecutor {
         }
         log.info("query SQL: {}", queryStatement.getSql());
         Database database = queryStatement.getSemanticModel().getDatabase();
-        log.info("database info:{}", database);
         SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();
         SqlUtils sqlUtils = this.sqlUtils.init(database);
         sqlUtils.queryInternal(queryStatement.getSql(), queryResultWithColumns);

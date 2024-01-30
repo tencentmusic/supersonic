@@ -1,13 +1,13 @@
 package com.tencent.supersonic.headless.server.manager;
 
-import com.tencent.supersonic.headless.api.enums.DatasourceQuery;
-import com.tencent.supersonic.headless.api.enums.ModelSourceType;
+import com.tencent.supersonic.headless.api.pojo.enums.DatasourceQuery;
+import com.tencent.supersonic.headless.api.pojo.enums.ModelSourceType;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
-import com.tencent.supersonic.headless.api.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;

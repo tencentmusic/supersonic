@@ -1,9 +1,9 @@
 package com.tencent.supersonic.headless.core.parser.calcite.planner;
 
 
-import com.tencent.supersonic.headless.api.enums.AggOption;
-import com.tencent.supersonic.headless.api.enums.EngineType;
-import com.tencent.supersonic.headless.api.request.MetricQueryReq;
+import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
+import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
@@ -160,7 +160,6 @@ public class AggPlanner implements Planner {
 
     private SqlNode optimizeSql(String sql, EngineType engineType) {
         try {
-            log.info("before optimize:[{}]", sql);
             SqlNode sqlNode = SqlParser.create(sql, Configuration.getParserConfig(engineType)).parseStmt();
             if (Objects.nonNull(sqlNode)) {
                 return SemanticNode.optimize(scope, schema, sqlNode, engineType);

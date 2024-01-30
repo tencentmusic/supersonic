@@ -8,6 +8,7 @@ import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.schema.Column;
 
 public class ExpressionReplaceVisitor extends ExpressionVisitorAdapter {
@@ -17,6 +18,20 @@ public class ExpressionReplaceVisitor extends ExpressionVisitorAdapter {
 
     public ExpressionReplaceVisitor(Map<String, String> fieldExprMap) {
         this.fieldExprMap = fieldExprMap;
+    }
+
+    public void visit(WhenClause expr) {
+        expr.getWhenExpression().accept(this);
+        if (expr.getThenExpression() instanceof Column) {
+            Column column = (Column) expr.getThenExpression();
+            Expression expression = QueryExpressionReplaceVisitor.getExpression(
+                    QueryExpressionReplaceVisitor.getReplaceExpr(column, fieldExprMap));
+            if (Objects.nonNull(expression)) {
+                expr.setThenExpression(expression);
+            }
+        } else {
+            expr.getThenExpression().accept(this);
+        }
     }
 
     protected void visitBinaryExpression(BinaryExpression expr) {

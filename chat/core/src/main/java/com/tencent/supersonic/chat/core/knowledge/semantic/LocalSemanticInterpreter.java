@@ -5,21 +5,21 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.request.ExplainSqlReq;
-import com.tencent.supersonic.headless.api.request.ModelSchemaFilterReq;
-import com.tencent.supersonic.headless.api.request.PageDimensionReq;
-import com.tencent.supersonic.headless.api.request.PageMetricReq;
-import com.tencent.supersonic.headless.api.request.QueryDimValueReq;
-import com.tencent.supersonic.headless.api.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.request.QuerySqlReq;
-import com.tencent.supersonic.headless.api.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.response.DimensionResp;
-import com.tencent.supersonic.headless.api.response.DomainResp;
-import com.tencent.supersonic.headless.api.response.ExplainResp;
-import com.tencent.supersonic.headless.api.response.MetricResp;
-import com.tencent.supersonic.headless.api.response.ModelResp;
-import com.tencent.supersonic.headless.api.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.api.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaFilterReq;
+import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
+import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
+import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.QueryService;
@@ -42,32 +42,28 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
     @Override
     public SemanticQueryResp queryByStruct(QueryStructReq queryStructReq, User user) {
         if (StringUtils.isNotBlank(queryStructReq.getCorrectS2SQL())) {
-            QuerySqlReq querySQLReq = new QuerySqlReq();
-            querySQLReq.setSql(queryStructReq.getCorrectS2SQL());
-            querySQLReq.setModelIds(queryStructReq.getModelIdSet());
-            querySQLReq.setParams(new ArrayList<>());
-            return queryByS2SQL(querySQLReq, user);
+            QuerySqlReq querySqlReq = new QuerySqlReq();
+            querySqlReq.setSql(queryStructReq.getCorrectS2SQL());
+            querySqlReq.setModelIds(queryStructReq.getModelIdSet());
+            querySqlReq.setParams(new ArrayList<>());
+            return queryByS2SQL(querySqlReq, user);
         }
         queryService = ContextUtils.getBean(QueryService.class);
-        return queryService.queryByStructWithAuth(queryStructReq, user);
-    }
-
-    @Override
-    public SemanticQueryResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user) {
-        try {
-            queryService = ContextUtils.getBean(QueryService.class);
-            return queryService.queryByMultiStruct(queryMultiStructReq, user);
-        } catch (Exception e) {
-            log.info("queryByMultiStruct has an exception:{}", e);
-        }
-        return null;
+        return queryService.queryByReq(queryStructReq, user);
     }
 
     @Override
     @SneakyThrows
-    public SemanticQueryResp queryByS2SQL(QuerySqlReq querySQLReq, User user) {
+    public SemanticQueryResp queryByMultiStruct(QueryMultiStructReq queryMultiStructReq, User user) {
         queryService = ContextUtils.getBean(QueryService.class);
-        SemanticQueryResp object = queryService.queryBySql(querySQLReq, user);
+        return queryService.queryByReq(queryMultiStructReq, user);
+    }
+
+    @Override
+    @SneakyThrows
+    public SemanticQueryResp queryByS2SQL(QuerySqlReq querySqlReq, User user) {
+        queryService = ContextUtils.getBean(QueryService.class);
+        SemanticQueryResp object = queryService.queryByReq(querySqlReq, user);
         return JsonUtil.toObject(JsonUtil.toString(object), SemanticQueryResp.class);
     }
 

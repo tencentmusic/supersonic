@@ -34,6 +34,12 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectS2SQL();
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+        // check if has distinct
+        boolean hasDistinct = SqlParserSelectHelper.hasDistinct(correctS2SQL);
+        if (hasDistinct) {
+            log.info("not add group by ,exist distinct in correctS2SQL:{}", correctS2SQL);
+            return;
+        }
         //add alias field name
         Set<String> dimensions = semanticSchema.getDimensions(modelIds).stream()
                 .flatMap(

@@ -1,10 +1,10 @@
 package com.tencent.supersonic.headless.server.calcite;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
-import com.tencent.supersonic.headless.api.enums.AggOption;
-import com.tencent.supersonic.headless.api.enums.EngineType;
-import com.tencent.supersonic.headless.api.request.MetricQueryReq;
-import com.tencent.supersonic.headless.api.response.SqlParserResp;
+import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
+import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.SqlParserResp;
 import com.tencent.supersonic.headless.core.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;

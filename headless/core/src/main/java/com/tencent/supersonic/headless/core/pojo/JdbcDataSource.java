@@ -6,7 +6,7 @@ import com.alibaba.druid.filter.Filter;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.wall.WallConfig;
 import com.alibaba.druid.wall.WallFilter;
-import com.tencent.supersonic.headless.api.enums.DataType;
+import com.tencent.supersonic.headless.api.pojo.enums.DataType;
 import com.tencent.supersonic.headless.core.utils.JdbcDataSourceUtils;
 import java.util.Arrays;
 import java.util.Map;

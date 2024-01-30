@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.parser.calcite.planner;
 
 
-import com.tencent.supersonic.headless.api.enums.AggOption;
-import com.tencent.supersonic.headless.api.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
+import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 
 /**

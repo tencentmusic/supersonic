@@ -22,7 +22,7 @@ public class CaffeineCacheManager implements CacheManager {
 
     @Override
     public Boolean put(String key, Object value) {
-        log.info("[put caffeineCache] key:{}, value:{}", key, value);
+        log.debug("[put caffeineCache] key:{}, value:{}", key, value);
         caffeineCache.put(key, value);
         return true;
     }
@@ -30,7 +30,7 @@ public class CaffeineCacheManager implements CacheManager {
     @Override
     public Object get(String key) {
         Object value = caffeineCache.asMap().get(key);
-        log.info("[get caffeineCache] key:{}, value:{}", key, value);
+        log.debug("[get caffeineCache] key:{}, value:{}", key, value);
         return value;
     }
 

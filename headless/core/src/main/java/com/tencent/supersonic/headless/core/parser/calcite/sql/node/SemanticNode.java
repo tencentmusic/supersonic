@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
 
-import com.tencent.supersonic.headless.api.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
@@ -91,7 +91,7 @@ public abstract class SemanticNode {
     public static String getSql(SqlNode sqlNode, EngineType engineType) {
         SemanticSqlDialect sqlDialect = SqlDialectFactory.getSqlDialect(engineType);
         SqlWriterConfig config = SqlPrettyWriter.config().withDialect(sqlDialect)
-                .withKeywordsLowerCase(true).withClauseEndsLine(true).withAlwaysUseParentheses(false)
+                .withKeywordsLowerCase(false).withClauseEndsLine(true).withAlwaysUseParentheses(false)
                 .withSelectListItemsOnSeparateLines(false).withUpdateSetListNewline(false).withIndentation(0);
 
         UnaryOperator<SqlWriterConfig> sqlWriterConfigUnaryOperator = (c) -> config;

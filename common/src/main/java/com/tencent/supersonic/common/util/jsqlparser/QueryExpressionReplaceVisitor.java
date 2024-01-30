@@ -2,6 +2,7 @@ package com.tencent.supersonic.common.util.jsqlparser;
 
 import java.util.Map;
 import java.util.Objects;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
@@ -46,20 +47,28 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
 
         Expression expression = selectExpressionItem.getExpression();
         String toReplace = "";
+        String columnName = "";
         if (expression instanceof Function) {
             Function leftFunc = (Function) expression;
             if (leftFunc.getParameters().getExpressions().get(0) instanceof Column) {
+                Column column = (Column) leftFunc.getParameters().getExpressions().get(0);
+                columnName = column.getColumnName();
                 toReplace = getReplaceExpr(leftFunc, fieldExprMap);
             }
 
         }
         if (expression instanceof Column) {
+            Column column = (Column) expression;
+            columnName = column.getColumnName();
             toReplace = getReplaceExpr((Column) expression, fieldExprMap);
         }
         if (!toReplace.isEmpty()) {
             Expression toReplaceExpr = getExpression(toReplace);
             if (Objects.nonNull(toReplaceExpr)) {
                 selectExpressionItem.setExpression(toReplaceExpr);
+                if (Objects.isNull(selectExpressionItem.getAlias())) {
+                    selectExpressionItem.setAlias(new Alias(columnName, true));
+                }
             }
         }
         //selectExpressionItem.getExpression().accept(this);

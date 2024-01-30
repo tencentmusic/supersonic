@@ -67,6 +67,9 @@ public class ChatDemoLoader implements CommandLineRunner {
     @Value("${demo.enabled:false}")
     private boolean demoEnabled;
 
+    @Value("${demo.nl2SqlLlm.enabled:true}")
+    private boolean demoEnabledNl2SqlLlm;
+
     @Override
     public void run(String... args) throws Exception {
         if (!checkEnable()) {
@@ -91,6 +94,7 @@ public class ChatDemoLoader implements CommandLineRunner {
             addAgent1();
             addAgent2();
             addAgent3();
+            addAgent4();
             addSampleChats();
             addSampleChats2();
             updateQueryScore(1);
@@ -450,12 +454,13 @@ public class ChatDemoLoader implements CommandLineRunner {
         ruleQueryTool.setQueryTypes(Lists.newArrayList(QueryType.METRIC.name()));
         agentConfig.getTools().add(ruleQueryTool);
 
-        LLMParserTool llmParserTool = new LLMParserTool();
-        llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-        llmParserTool.setModelIds(Lists.newArrayList(-1L));
-        agentConfig.getTools().add(llmParserTool);
-
+        if (demoEnabledNl2SqlLlm) {
+            LLMParserTool llmParserTool = new LLMParserTool();
+            llmParserTool.setId("1");
+            llmParserTool.setType(AgentToolType.NL2SQL_LLM);
+            llmParserTool.setModelIds(Lists.newArrayList(-1L));
+            agentConfig.getTools().add(llmParserTool);
+        }
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());
     }
@@ -476,12 +481,13 @@ public class ChatDemoLoader implements CommandLineRunner {
         ruleQueryTool.setQueryTypes(Lists.newArrayList(QueryType.TAG.name()));
         agentConfig.getTools().add(ruleQueryTool);
 
-        LLMParserTool llmParserTool = new LLMParserTool();
-        llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-        llmParserTool.setModelIds(Lists.newArrayList(-1L));
-        agentConfig.getTools().add(llmParserTool);
-
+        if (demoEnabledNl2SqlLlm) {
+            LLMParserTool llmParserTool = new LLMParserTool();
+            llmParserTool.setId("1");
+            llmParserTool.setType(AgentToolType.NL2SQL_LLM);
+            llmParserTool.setModelIds(Lists.newArrayList(-1L));
+            agentConfig.getTools().add(llmParserTool);
+        }
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());
     }
@@ -497,12 +503,35 @@ public class ChatDemoLoader implements CommandLineRunner {
                 "“孟加拉语”歌曲的平均评分和分辨率是多少？",
                 "找出所有至少有一首“英文”歌曲的艺术家的名字和作品数量。"));
         AgentConfig agentConfig = new AgentConfig();
+        if (demoEnabledNl2SqlLlm) {
+            LLMParserTool llmParserTool = new LLMParserTool();
+            llmParserTool.setId("1");
+            llmParserTool.setType(AgentToolType.NL2SQL_LLM);
+            llmParserTool.setModelIds(Lists.newArrayList(5L, 6L, 7L, 8L));
+            agentConfig.getTools().add(llmParserTool);
+        }
 
-        LLMParserTool llmParserTool = new LLMParserTool();
-        llmParserTool.setId("1");
-        llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-        llmParserTool.setModelIds(Lists.newArrayList(5L, 6L, 7L, 8L));
-        agentConfig.getTools().add(llmParserTool);
+        agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        agentService.createAgent(agent, User.getFakeUser());
+    }
+
+    private void addAgent4() {
+        Agent agent = new Agent();
+        agent.setId(4);
+        agent.setName("DuSQL 互联网企业");
+        agent.setDescription("DuSQL");
+        agent.setStatus(1);
+        agent.setEnableSearch(1);
+        agent.setExamples(Lists.newArrayList());
+        AgentConfig agentConfig = new AgentConfig();
+
+        if (demoEnabledNl2SqlLlm) {
+            LLMParserTool llmParserTool = new LLMParserTool();
+            llmParserTool.setId("1");
+            llmParserTool.setType(AgentToolType.NL2SQL_LLM);
+            llmParserTool.setModelIds(Lists.newArrayList(9L, 10L, 11L, 12L));
+            agentConfig.getTools().add(llmParserTool);
+        }
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
         agentService.createAgent(agent, User.getFakeUser());

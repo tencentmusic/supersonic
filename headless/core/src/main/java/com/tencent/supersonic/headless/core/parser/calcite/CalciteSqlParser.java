@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.parser.calcite;
 
-import com.tencent.supersonic.headless.api.enums.AggOption;
-import com.tencent.supersonic.headless.api.enums.EngineType;
-import com.tencent.supersonic.headless.api.request.MetricQueryReq;
+import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
+import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
+import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.SqlParser;
 import com.tencent.supersonic.headless.core.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
@@ -42,7 +42,7 @@ public class CalciteSqlParser implements SqlParser {
                     getSqlByView(aggBuilder.getSql(engineType), queryStatement.getViewSql(),
                             queryStatement.getViewAlias()), engineType);
             if (Objects.nonNull(simplifySql) && !simplifySql.isEmpty()) {
-                log.info("simplifySql [{}]", simplifySql);
+                log.debug("simplifySql [{}]", simplifySql);
                 queryStatement.setViewSimplifySql(simplifySql);
             }
         }
