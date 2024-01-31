@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless;
 import static java.time.LocalDate.now;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.QueryColumn;
@@ -11,6 +12,18 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import org.junit.jupiter.api.Test;
 
 public class QueryBySqlTest extends BaseTest {
+
+    @Test
+    public void testDetailQuery() throws Exception {
+        SemanticQueryResp semanticQueryResp = queryBySql("SELECT 用户,访问次数 FROM 超音数PVUV统计 WHERE 用户='alice' ");
+
+        assertEquals(2, semanticQueryResp.getColumns().size());
+        QueryColumn firstColumn = semanticQueryResp.getColumns().get(0);
+        assertEquals("用户", firstColumn.getName());
+        QueryColumn secondColumn = semanticQueryResp.getColumns().get(1);
+        assertEquals("访问次数", secondColumn.getName());
+        assertTrue(semanticQueryResp.getResultList().size() > 0);
+    }
 
     @Test
     public void testSumQuery() throws Exception {
@@ -62,7 +75,7 @@ public class QueryBySqlTest extends BaseTest {
     public void testCacheQuery() throws Exception {
         SemanticQueryResp result1 = queryBySql("SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门 ");
         SemanticQueryResp result2 = queryBySql("SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门 ");
-        assertEquals(result1, result2);
+        assertTrue(result1 == result2);
     }
 
     @Test
