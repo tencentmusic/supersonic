@@ -45,4 +45,5 @@ public class ExplainTest extends BaseTest {
         assertTrue(explain.getSql().contains("department"));
         assertTrue(explain.getSql().contains("pv"));
     }
+
 }
