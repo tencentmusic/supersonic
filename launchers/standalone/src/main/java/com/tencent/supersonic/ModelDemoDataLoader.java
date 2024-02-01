@@ -105,6 +105,7 @@ public class ModelDemoDataLoader {
             updateMetric_pv();
             addView_1();
             addView_2();
+            addView_3();
             addAuthGroup_1();
             addAuthGroup_2();
         } catch (Exception e) {
@@ -493,6 +494,42 @@ public class ModelDemoDataLoader {
         tagTypeDefaultConfig.setTimeDefaultConfig(tagTimeDefaultConfig);
         tagTypeDefaultConfig.setDimensionIds(Lists.newArrayList(4L, 5L, 6L, 7L));
         tagTypeDefaultConfig.setMetricIds(Lists.newArrayList(5L));
+        MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
+        TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
+        timeDefaultConfig.setTimeMode(TimeMode.RECENT);
+        timeDefaultConfig.setUnit(7);
+        metricTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
+        queryConfig.setTagTypeDefaultConfig(tagTypeDefaultConfig);
+        queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
+        viewReq.setQueryConfig(queryConfig);
+        viewService.save(viewReq, User.getFakeUser());
+    }
+
+    public void addView_3() {
+        ViewReq viewReq = new ViewReq();
+        viewReq.setName("cspider");
+        viewReq.setBizName("singer");
+        viewReq.setDomainId(3L);
+        viewReq.setDescription("包含cspider数据集相关标签和指标信息");
+        viewReq.setAdmins(Lists.newArrayList("admin"));
+        List<ViewModelConfig> viewModelConfigs = Lists.newArrayList(
+                new ViewModelConfig(5L, Lists.newArrayList(8L), Lists.newArrayList()),
+                new ViewModelConfig(6L, Lists.newArrayList(9L, 10L), Lists.newArrayList()),
+                new ViewModelConfig(7L, Lists.newArrayList(11L, 12L), Lists.newArrayList()),
+                new ViewModelConfig(8L, Lists.newArrayList(13L, 14L,15L), Lists.newArrayList(8L, 9L))
+        );
+        ViewDetail viewDetail = new ViewDetail();
+        viewDetail.setViewModelConfigs(viewModelConfigs);
+        viewReq.setViewDetail(viewDetail);
+        viewReq.setTypeEnum(TypeEnums.VIEW);
+        QueryConfig queryConfig = new QueryConfig();
+        TagTypeDefaultConfig tagTypeDefaultConfig = new TagTypeDefaultConfig();
+        TimeDefaultConfig tagTimeDefaultConfig = new TimeDefaultConfig();
+        tagTimeDefaultConfig.setTimeMode(TimeMode.LAST);
+        tagTimeDefaultConfig.setUnit(7);
+        tagTypeDefaultConfig.setTimeDefaultConfig(tagTimeDefaultConfig);
+        tagTypeDefaultConfig.setDimensionIds(Lists.newArrayList());
+        tagTypeDefaultConfig.setMetricIds(Lists.newArrayList());
         MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
         TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
         timeDefaultConfig.setTimeMode(TimeMode.RECENT);
