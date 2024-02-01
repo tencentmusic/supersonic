@@ -12,7 +12,7 @@ import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.chat.core.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -54,7 +54,7 @@ public class QueryTypeParser implements SemanticParser {
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
         if (semanticQuery instanceof RuleSemanticQuery || semanticQuery instanceof LLMSqlQuery) {
             //If all the fields in the SELECT statement are of tag type.
-            List<String> whereFields = SqlParserSelectHelper.getWhereFields(sqlInfo.getS2SQL())
+            List<String> whereFields = SqlSelectHelper.getWhereFields(sqlInfo.getS2SQL())
                     .stream().filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
                     .collect(Collectors.toList());
 
@@ -72,7 +72,7 @@ public class QueryTypeParser implements SemanticParser {
             }
         }
         //2. metric queryType
-        List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getS2SQL());
+        List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getS2SQL());
         List<SchemaElement> metrics = semanticSchema.getMetrics(viewId);
         if (CollectionUtils.isNotEmpty(metrics)) {
             Set<String> metricNameSet = metrics.stream().map(SchemaElement::getName).collect(Collectors.toSet());

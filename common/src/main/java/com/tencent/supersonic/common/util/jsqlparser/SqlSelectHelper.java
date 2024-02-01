@@ -13,15 +13,13 @@ import net.sf.jsqlparser.expression.CaseExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
 import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -38,14 +36,13 @@ import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
 import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.util.CollectionUtils;
 
 /**
  * Sql Parser Select Helper
  */
 @Slf4j
-public class SqlParserSelectHelper {
+public class SqlSelectHelper {
 
     public static List<FieldExpression> getFilterExpression(String sql) {
         List<PlainSelect> plainSelectList = getPlainSelect(sql);
@@ -435,34 +432,16 @@ public class SqlParserSelectHelper {
         return "";
     }
 
-    public static Expression getTimeFilter(List<ImmutablePair<String, String>> times, String columnBegin,
-            String columnEnd) {
-        Expression expression = null;
-        for (ImmutablePair<String, String> t : times) {
-            Expression expr = null;
-            ComparisonOperator left = new MinorThanEquals();
-            if (t.left.equals(t.right)) {
-                left.setLeftExpression(new Column(columnBegin));
-                left.setRightExpression(new StringValue(t.left));
-                ComparisonOperator right = new GreaterThan();
-                right.setLeftExpression(new Column(columnEnd));
-                right.setRightExpression(new StringValue(t.right));
-                expr = new AndExpression(left, right);
-            } else {
-                left.setLeftExpression(new StringValue(t.left));
-                left.setRightExpression(new Column(columnEnd));
-                ComparisonOperator right = new GreaterThanEquals();
-                right.setLeftExpression(new StringValue(t.right));
-                right.setRightExpression(new Column(columnBegin));
-                expr = new AndExpression(left, right);
-            }
-            if (expression == null) {
-                expression = expr;
-                continue;
-            }
-            expression = new OrExpression(expression, expr);
+    public static String getColumValue(Expression expression) {
+        if (expression instanceof StringValue) {
+            StringValue value = (StringValue) expression;
+            return value.getValue();
         }
-        return expression;
+        if (expression instanceof LongValue) {
+            LongValue value = (LongValue) expression;
+            return String.valueOf(value.getValue());
+        }
+        return "";
     }
 
     public static Table getTable(String sql) {
@@ -486,14 +465,6 @@ public class SqlParserSelectHelper {
     public static String getDbTableName(String sql) {
         Table table = getTable(sql);
         return table.getFullyQualifiedName();
-    }
-
-    public static String getNormalizedSql(String sql) {
-        Select selectStatement = getSelect(sql);
-        if (selectStatement == null) {
-            return null;
-        }
-        return selectStatement.toString();
     }
 
     public static Set<String> getColumnFromExpr(String expr) {

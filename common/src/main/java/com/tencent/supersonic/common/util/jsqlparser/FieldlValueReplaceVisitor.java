@@ -102,7 +102,7 @@ public class FieldlValueReplaceVisitor extends ExpressionVisitorAdapter {
         if (Objects.isNull(rightExpression) || Objects.isNull(leftExpression)) {
             return;
         }
-        String columnName = SqlParserSelectHelper.getColumnName(leftExpression);
+        String columnName = SqlSelectHelper.getColumnName(leftExpression);
         if (StringUtils.isEmpty(columnName)) {
             return;
         }

@@ -6,9 +6,9 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectFunctionHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
@@ -72,12 +72,12 @@ public class QueryReqConverter {
         //3.correct tableName
         correctTableName(querySQLReq);
 
-        String tableName = SqlParserSelectHelper.getTableName(querySQLReq.getSql());
+        String tableName = SqlSelectHelper.getTableName(querySQLReq.getSql());
         if (StringUtils.isEmpty(tableName)) {
             return new QueryStatement();
         }
         //4.build MetricTables
-        List<String> allFields = SqlParserSelectHelper.getAllFields(querySQLReq.getSql());
+        List<String> allFields = SqlSelectHelper.getAllFields(querySQLReq.getSql());
         List<String> metrics = getMetrics(semanticSchemaResp, allFields);
         QueryStructReq queryStructReq = new QueryStructReq();
         MetricTable metricTable = new MetricTable();
@@ -135,9 +135,9 @@ public class QueryReqConverter {
         // if there is no group by in S2SQL,set MetricTable's aggOption to "NATIVE"
         // if there is count() in S2SQL,set MetricTable's aggOption to "NATIVE"
         String sql = databaseReq.getSql();
-        if (!SqlParserSelectHelper.hasGroupBy(sql)
-                || SqlParserSelectFunctionHelper.hasFunction(sql, "count")
-                || SqlParserSelectFunctionHelper.hasFunction(sql, "count_distinct")) {
+        if (!SqlSelectHelper.hasGroupBy(sql)
+                || SqlSelectFunctionHelper.hasFunction(sql, "count")
+                || SqlSelectFunctionHelper.hasFunction(sql, "count_distinct")) {
             return AggOption.NATIVE;
         }
         return AggOption.DEFAULT;
@@ -147,7 +147,7 @@ public class QueryReqConverter {
         Map<String, String> fieldNameToBizNameMap = getFieldNameToBizNameMap(semanticSchemaResp);
         String sql = databaseReq.getSql();
         log.info("convert name to bizName before:{}", sql);
-        String replaceFields = SqlParserReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, true);
+        String replaceFields = SqlReplaceHelper.replaceFields(sql, fieldNameToBizNameMap, true);
         log.info("convert name to bizName after:{}", replaceFields);
         databaseReq.setSql(replaceFields);
     }
@@ -214,7 +214,7 @@ public class QueryReqConverter {
 
     public void correctTableName(QuerySqlReq querySqlReq) {
         String sql = querySqlReq.getSql();
-        sql = SqlParserReplaceHelper.replaceTable(sql,
+        sql = SqlReplaceHelper.replaceTable(sql,
                 Constants.TABLE_PREFIX + querySqlReq.getViewId());
         querySqlReq.setSql(sql);
     }
@@ -239,7 +239,7 @@ public class QueryReqConverter {
                     measures, replaces);
             if (!CollectionUtils.isEmpty(replaces)) {
                 // metricTable sql use measures replace metric
-                sql = SqlParserReplaceHelper.replaceSqlByExpression(sql, replaces);
+                sql = SqlReplaceHelper.replaceSqlByExpression(sql, replaces);
                 metricTable.setAggOption(AggOption.NATIVE);
                 // metricTable use measures replace metric
                 if (!CollectionUtils.isEmpty(measures)) {

@@ -23,13 +23,13 @@ import java.util.Set;
  * Sql Parser Select function Helper
  */
 @Slf4j
-public class SqlParserSelectFunctionHelper {
+public class SqlSelectFunctionHelper {
 
     public static boolean hasAggregateFunction(String sql) {
         if (!CollectionUtils.isEmpty(getFunctions(sql))) {
             return true;
         }
-        return SqlParserSelectHelper.hasGroupBy(sql);
+        return SqlSelectHelper.hasGroupBy(sql);
     }
 
     public static void main(String[] args) {
@@ -46,7 +46,7 @@ public class SqlParserSelectFunctionHelper {
     }
 
     public static Set<String> getFunctions(String sql) {
-        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
 
         if (!(selectBody instanceof PlainSelect)) {

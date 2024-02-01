@@ -15,8 +15,8 @@ import com.tencent.supersonic.chat.server.service.SemanticService;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlRemoveHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -61,9 +61,9 @@ public class MetricCheckProcessor implements ParseResultProcessor {
 
     public String processCorrectSql(SemanticParseInfo parseInfo, SemanticSchema semanticSchema) {
         String correctSql = parseInfo.getSqlInfo().getCorrectS2SQL();
-        List<String> groupByFields = SqlParserSelectHelper.getGroupByFields(correctSql);
-        List<String> metricFields = SqlParserSelectHelper.getAggregateFields(correctSql);
-        List<String> whereFields = SqlParserSelectHelper.getWhereFields(correctSql);
+        List<String> groupByFields = SqlSelectHelper.getGroupByFields(correctSql);
+        List<String> metricFields = SqlSelectHelper.getAggregateFields(correctSql);
+        List<String> whereFields = SqlSelectHelper.getWhereFields(correctSql);
         List<String> dimensionFields = getDimensionFields(groupByFields, whereFields);
         if (CollectionUtils.isEmpty(metricFields) || StringUtils.isBlank(correctSql)) {
             return correctSql;
@@ -195,8 +195,8 @@ public class MetricCheckProcessor implements ParseResultProcessor {
     }
 
     private boolean checkHasMetric(String correctSql, SemanticSchema semanticSchema) {
-        List<String> selectFields = SqlParserSelectHelper.getSelectFields(correctSql);
-        List<String> aggFields = SqlParserSelectHelper.getAggregateFields(correctSql);
+        List<String> selectFields = SqlSelectHelper.getSelectFields(correctSql);
+        List<String> aggFields = SqlSelectHelper.getAggregateFields(correctSql);
         List<String> collect = semanticSchema.getMetrics().stream()
                 .map(SchemaElement::getName).collect(Collectors.toList());
         for (String field : selectFields) {
@@ -209,11 +209,11 @@ public class MetricCheckProcessor implements ParseResultProcessor {
 
     private static String removeFieldInSql(String sql, Set<String> metricToRemove,
             Set<String> dimensionByToRemove, Set<String> whereFieldsToRemove) {
-        sql = SqlParserRemoveHelper.removeWhereCondition(sql, whereFieldsToRemove);
-        sql = SqlParserRemoveHelper.removeSelect(sql, metricToRemove);
-        sql = SqlParserRemoveHelper.removeSelect(sql, dimensionByToRemove);
-        sql = SqlParserRemoveHelper.removeGroupBy(sql, dimensionByToRemove);
-        sql = SqlParserRemoveHelper.removeNumberFilter(sql);
+        sql = SqlRemoveHelper.removeWhereCondition(sql, whereFieldsToRemove);
+        sql = SqlRemoveHelper.removeSelect(sql, metricToRemove);
+        sql = SqlRemoveHelper.removeSelect(sql, dimensionByToRemove);
+        sql = SqlRemoveHelper.removeGroupBy(sql, dimensionByToRemove);
+        sql = SqlRemoveHelper.removeNumberFilter(sql);
         return sql;
     }
 

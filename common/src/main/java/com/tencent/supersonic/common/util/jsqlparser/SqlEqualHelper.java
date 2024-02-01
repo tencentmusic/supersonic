@@ -8,7 +8,7 @@ import org.apache.commons.collections.CollectionUtils;
  * Sql Parser equal Helper
  */
 @Slf4j
-public class SqlParserEqualHelper {
+public class SqlEqualHelper {
 
     /**
      * determine if two SQL statements are equal.
@@ -19,43 +19,43 @@ public class SqlParserEqualHelper {
      */
     public static boolean equals(String thisSql, String otherSql) {
         //1. select fields
-        List<String> thisSelectFields = SqlParserSelectHelper.getSelectFields(thisSql);
-        List<String> otherSelectFields = SqlParserSelectHelper.getSelectFields(otherSql);
+        List<String> thisSelectFields = SqlSelectHelper.getSelectFields(thisSql);
+        List<String> otherSelectFields = SqlSelectHelper.getSelectFields(otherSql);
 
         if (!CollectionUtils.isEqualCollection(thisSelectFields, otherSelectFields)) {
             return false;
         }
 
         //2. all fields
-        List<String> thisAllFields = SqlParserSelectHelper.getAllFields(thisSql);
-        List<String> otherAllFields = SqlParserSelectHelper.getAllFields(otherSql);
+        List<String> thisAllFields = SqlSelectHelper.getAllFields(thisSql);
+        List<String> otherAllFields = SqlSelectHelper.getAllFields(otherSql);
 
         if (!CollectionUtils.isEqualCollection(thisAllFields, otherAllFields)) {
             return false;
         }
 
         //3. where
-        List<FieldExpression> thisFieldExpressions = SqlParserSelectHelper.getFilterExpression(thisSql);
-        List<FieldExpression> otherFieldExpressions = SqlParserSelectHelper.getFilterExpression(otherSql);
+        List<FieldExpression> thisFieldExpressions = SqlSelectHelper.getFilterExpression(thisSql);
+        List<FieldExpression> otherFieldExpressions = SqlSelectHelper.getFilterExpression(otherSql);
 
         if (!CollectionUtils.isEqualCollection(thisFieldExpressions, otherFieldExpressions)) {
             return false;
         }
         //4. tableName
-        if (!SqlParserSelectHelper.getDbTableName(thisSql)
-                .equalsIgnoreCase(SqlParserSelectHelper.getDbTableName(otherSql))) {
+        if (!SqlSelectHelper.getDbTableName(thisSql)
+                .equalsIgnoreCase(SqlSelectHelper.getDbTableName(otherSql))) {
             return false;
         }
         //5. having
-        List<FieldExpression> thisHavingExpressions = SqlParserSelectHelper.getHavingExpressions(thisSql);
-        List<FieldExpression> otherHavingExpressions = SqlParserSelectHelper.getHavingExpressions(otherSql);
+        List<FieldExpression> thisHavingExpressions = SqlSelectHelper.getHavingExpressions(thisSql);
+        List<FieldExpression> otherHavingExpressions = SqlSelectHelper.getHavingExpressions(otherSql);
 
         if (!CollectionUtils.isEqualCollection(thisHavingExpressions, otherHavingExpressions)) {
             return false;
         }
         //6. orderBy
-        List<FieldExpression> thisOrderByExpressions = SqlParserSelectHelper.getOrderByExpressions(thisSql);
-        List<FieldExpression> otherOrderByExpressions = SqlParserSelectHelper.getOrderByExpressions(otherSql);
+        List<FieldExpression> thisOrderByExpressions = SqlSelectHelper.getOrderByExpressions(thisSql);
+        List<FieldExpression> otherOrderByExpressions = SqlSelectHelper.getOrderByExpressions(otherSql);
 
         if (!CollectionUtils.isEqualCollection(thisOrderByExpressions, otherOrderByExpressions)) {
             return false;

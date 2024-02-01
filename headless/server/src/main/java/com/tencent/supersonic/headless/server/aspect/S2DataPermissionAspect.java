@@ -9,7 +9,7 @@ import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
@@ -283,7 +283,7 @@ public class S2DataPermissionAspect extends AuthCheckBaseAspect {
         try {
             Expression expression = CCJSqlParserUtil.parseCondExpression(" ( " + joiner + " ) ");
             if (StringUtils.isNotEmpty(joiner.toString())) {
-                String sql = SqlParserAddHelper.addWhere(querySqlReq.getSql(), expression);
+                String sql = SqlAddHelper.addWhere(querySqlReq.getSql(), expression);
                 log.info("before doRowPermission, queryS2SQLReq:{}", querySqlReq.getSql());
                 querySqlReq.setSql(sql);
                 log.info("after doRowPermission, queryS2SQLReq:{}", querySqlReq.getSql());
