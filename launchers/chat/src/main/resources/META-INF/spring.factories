@@ -41,7 +41,10 @@ com.tencent.supersonic.chat.postprocessor.PostProcessor=\
     com.tencent.supersonic.chat.postprocessor.RespBuildPostProcessor
 
 com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor=\
-    com.tencent.supersonic.chat.server.processor.execute.MetricRecommendProcessor
+    com.tencent.supersonic.chat.server.processor.execute.MetricRecommendProcessor,\
+    com.tencent.supersonic.chat.server.processor.execute.DimensionRecommendProcessor,\
+    com.tencent.supersonic.chat.server.processor.execute.MetricRatioProcessor
+
 
 com.tencent.supersonic.common.util.embedding.S2EmbeddingStore=\
     com.tencent.supersonic.common.util.embedding.InMemoryS2EmbeddingStore

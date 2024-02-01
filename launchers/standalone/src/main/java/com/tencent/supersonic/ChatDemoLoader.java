@@ -17,13 +17,14 @@ import com.tencent.supersonic.chat.core.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.core.query.plugin.WebBase;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatService;
-import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.chat.server.service.QueryService;
 import com.tencent.supersonic.common.pojo.SysParameter;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.common.util.JsonUtil;
+import java.util.Arrays;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,9 +32,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Component
 @Slf4j
@@ -46,8 +44,6 @@ public class ChatDemoLoader implements CommandLineRunner {
     private QueryService queryService;
     @Autowired
     private ChatService chatService;
-    @Autowired
-    private ConfigService configService;
     @Autowired
     private PluginService pluginService;
     @Autowired
