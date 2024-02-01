@@ -6,9 +6,9 @@ import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectFunctionHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -75,14 +75,14 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
     }
 
     protected void addFieldsToSelect(SemanticParseInfo semanticParseInfo, String correctS2SQL) {
-        Set<String> selectFields = new HashSet<>(SqlParserSelectHelper.getSelectFields(correctS2SQL));
-        Set<String> needAddFields = new HashSet<>(SqlParserSelectHelper.getGroupByFields(correctS2SQL));
-        needAddFields.addAll(SqlParserSelectHelper.getOrderByFields(correctS2SQL));
+        Set<String> selectFields = new HashSet<>(SqlSelectHelper.getSelectFields(correctS2SQL));
+        Set<String> needAddFields = new HashSet<>(SqlSelectHelper.getGroupByFields(correctS2SQL));
+        needAddFields.addAll(SqlSelectHelper.getOrderByFields(correctS2SQL));
 
         // If there is no aggregate function in the S2SQL statement and
         // there is a data field in 'WHERE' statement, add the field to the 'SELECT' statement.
-        if (!SqlParserSelectFunctionHelper.hasAggregateFunction(correctS2SQL)) {
-            List<String> whereFields = SqlParserSelectHelper.getWhereFields(correctS2SQL);
+        if (!SqlSelectFunctionHelper.hasAggregateFunction(correctS2SQL)) {
+            List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
             List<String> timeChNameList = TimeDimensionEnum.getChNameList();
             Set<String> timeFields = whereFields.stream().filter(field -> timeChNameList.contains(field))
                     .collect(Collectors.toSet());
@@ -94,7 +94,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         }
 
         needAddFields.removeAll(selectFields);
-        String replaceFields = SqlParserAddHelper.addFieldsToSelect(correctS2SQL, new ArrayList<>(needAddFields));
+        String replaceFields = SqlAddHelper.addFieldsToSelect(correctS2SQL, new ArrayList<>(needAddFields));
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(replaceFields);
     }
 
@@ -123,7 +123,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         if (CollectionUtils.isEmpty(metricToAggregate)) {
             return;
         }
-        String aggregateSql = SqlParserAddHelper.addAggregateToField(correctS2SQL, metricToAggregate);
+        String aggregateSql = SqlAddHelper.addAggregateToField(correctS2SQL, metricToAggregate);
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(aggregateSql);
     }
 

@@ -8,7 +8,7 @@ import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
@@ -126,7 +126,7 @@ public class QueryStructUtils {
     }
 
     public Set<String> getResName(QuerySqlReq querySqlReq) {
-        Set<String> resNameSet = SqlParserSelectHelper.getAllFields(querySqlReq.getSql())
+        Set<String> resNameSet = SqlSelectHelper.getAllFields(querySqlReq.getSql())
                 .stream().collect(Collectors.toSet());
         return resNameSet;
     }
@@ -170,7 +170,7 @@ public class QueryStructUtils {
 
     public Set<String> getFilterResNameEnExceptInternalCol(QuerySqlReq querySqlReq) {
         String sql = querySqlReq.getSql();
-        Set<String> resNameEnSet = SqlParserSelectHelper.getWhereFields(sql).stream().collect(Collectors.toSet());
+        Set<String> resNameEnSet = SqlSelectHelper.getWhereFields(sql).stream().collect(Collectors.toSet());
         return resNameEnSet.stream().filter(res -> !internalCols.contains(res)).collect(Collectors.toSet());
     }
 
@@ -235,7 +235,7 @@ public class QueryStructUtils {
     }
 
     public DateConf getDateConfBySql(String sql) {
-        List<FieldExpression> fieldExpressions = SqlParserSelectHelper.getFilterExpression(sql);
+        List<FieldExpression> fieldExpressions = SqlSelectHelper.getFilterExpression(sql);
         if (!CollectionUtils.isEmpty(fieldExpressions)) {
             Set<String> dateList = new HashSet<>();
             String startDate = "";

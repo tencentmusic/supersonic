@@ -9,7 +9,7 @@ import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMSqlResp;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserEqualHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlEqualHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
@@ -52,7 +52,7 @@ public class LLMResponseService {
         Map<String, LLMSqlResp> result = new HashMap<>();
         for (Map.Entry<String, LLMSqlResp> entry : llmResp.getSqlRespMap().entrySet()) {
             String key = entry.getKey();
-            if (result.keySet().stream().anyMatch(existKey -> SqlParserEqualHelper.equals(existKey, key))) {
+            if (result.keySet().stream().anyMatch(existKey -> SqlEqualHelper.equals(existKey, key))) {
                 continue;
             }
             result.put(key, entry.getValue());

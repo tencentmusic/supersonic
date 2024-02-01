@@ -8,8 +8,8 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.StringUtil;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
@@ -279,7 +279,7 @@ public class SqlGenerateUtils {
                                         Set<String> visitedMetric,
                                         Set<String> measures,
                                         Set<String> dimensions) {
-        Set<String> fields = SqlParserSelectHelper.getColumnFromExpr(expression);
+        Set<String> fields = SqlSelectHelper.getColumnFromExpr(expression);
         if (!CollectionUtils.isEmpty(fields)) {
             Map<String, String> replace = new HashMap<>();
             for (String field : fields) {
@@ -321,7 +321,7 @@ public class SqlGenerateUtils {
                 }
             }
             if (!CollectionUtils.isEmpty(replace)) {
-                String expr = SqlParserReplaceHelper.replaceExpression(expression, replace);
+                String expr = SqlReplaceHelper.replaceExpression(expression, replace);
                 log.info("derived measure {}->{}", expression, expr);
                 return expr;
             }

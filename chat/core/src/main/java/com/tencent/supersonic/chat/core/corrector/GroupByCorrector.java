@@ -5,8 +5,8 @@ import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
@@ -35,7 +35,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         String correctS2SQL = sqlInfo.getCorrectS2SQL();
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
         // check if has distinct
-        boolean hasDistinct = SqlParserSelectHelper.hasDistinct(correctS2SQL);
+        boolean hasDistinct = SqlSelectHelper.hasDistinct(correctS2SQL);
         if (hasDistinct) {
             log.info("not add group by ,exist distinct in correctS2SQL:{}", correctS2SQL);
             return;
@@ -54,7 +54,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                 ).collect(Collectors.toSet());
         dimensions.add(TimeDimensionEnum.DAY.getChName());
 
-        List<String> selectFields = SqlParserSelectHelper.getSelectFields(correctS2SQL);
+        List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);
 
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(dimensions)) {
             return;
@@ -63,12 +63,12 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         if (selectFields.size() == 1 && selectFields.contains(TimeDimensionEnum.DAY.getChName())) {
             return;
         }
-        if (SqlParserSelectHelper.hasGroupBy(correctS2SQL)) {
+        if (SqlSelectHelper.hasGroupBy(correctS2SQL)) {
             log.info("not add group by ,exist group by in correctS2SQL:{}", correctS2SQL);
             return;
         }
 
-        List<String> aggregateFields = SqlParserSelectHelper.getAggregateFields(correctS2SQL);
+        List<String> aggregateFields = SqlSelectHelper.getAggregateFields(correctS2SQL);
         Set<String> groupByFields = selectFields.stream()
                 .filter(field -> dimensions.contains(field))
                 .filter(field -> {
@@ -78,13 +78,13 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                     return true;
                 })
                 .collect(Collectors.toSet());
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(SqlParserAddHelper.addGroupBy(correctS2SQL, groupByFields));
+        semanticParseInfo.getSqlInfo().setCorrectS2SQL(SqlAddHelper.addGroupBy(correctS2SQL, groupByFields));
 
         addAggregate(queryContext, semanticParseInfo);
     }
 
     private void addAggregate(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        List<String> sqlGroupByFields = SqlParserSelectHelper.getGroupByFields(
+        List<String> sqlGroupByFields = SqlSelectHelper.getGroupByFields(
                 semanticParseInfo.getSqlInfo().getCorrectS2SQL());
         if (CollectionUtils.isEmpty(sqlGroupByFields)) {
             return;

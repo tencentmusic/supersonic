@@ -8,7 +8,7 @@ import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.AggregateEnum;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Perform schema corrections on the Schema information in S2QL.
+ * Perform schema corrections on the Schema information in S2SQL.
  */
 @Slf4j
 public class SchemaCorrector extends BaseSemanticCorrector {
@@ -41,20 +41,20 @@ public class SchemaCorrector extends BaseSemanticCorrector {
     private void correctAggFunction(SemanticParseInfo semanticParseInfo) {
         Map<String, String> aggregateEnum = AggregateEnum.getAggregateEnum();
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String sql = SqlParserReplaceHelper.replaceFunction(sqlInfo.getCorrectS2SQL(), aggregateEnum);
+        String sql = SqlReplaceHelper.replaceFunction(sqlInfo.getCorrectS2SQL(), aggregateEnum);
         sqlInfo.setCorrectS2SQL(sql);
     }
 
     private void replaceAlias(SemanticParseInfo semanticParseInfo) {
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String replaceAlias = SqlParserReplaceHelper.replaceAlias(sqlInfo.getCorrectS2SQL());
+        String replaceAlias = SqlReplaceHelper.replaceAlias(sqlInfo.getCorrectS2SQL());
         sqlInfo.setCorrectS2SQL(replaceAlias);
     }
 
     private void correctFieldName(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
         Map<String, String> fieldNameMap = getFieldNameMap(queryContext, semanticParseInfo.getViewId());
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String sql = SqlParserReplaceHelper.replaceFields(sqlInfo.getCorrectS2SQL(), fieldNameMap);
+        String sql = SqlReplaceHelper.replaceFields(sqlInfo.getCorrectS2SQL(), fieldNameMap);
         sqlInfo.setCorrectS2SQL(sql);
     }
 
@@ -70,7 +70,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
 
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
 
-        String sql = SqlParserReplaceHelper.replaceFieldNameByValue(sqlInfo.getCorrectS2SQL(), fieldValueToFieldNames);
+        String sql = SqlReplaceHelper.replaceFieldNameByValue(sqlInfo.getCorrectS2SQL(), fieldValueToFieldNames);
         sqlInfo.setCorrectS2SQL(sql);
     }
 
@@ -102,7 +102,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
                         )));
 
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        String sql = SqlParserReplaceHelper.replaceValue(sqlInfo.getCorrectS2SQL(), filedNameToValueMap, false);
+        String sql = SqlReplaceHelper.replaceValue(sqlInfo.getCorrectS2SQL(), filedNameToValueMap, false);
         sqlInfo.setCorrectS2SQL(sql);
     }
 }

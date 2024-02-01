@@ -17,7 +17,7 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -60,7 +60,7 @@ public class ParseInfoProcessor implements ParseResultProcessor {
         if (correctS2SQL.equals(sqlInfo.getS2SQL())) {
             return;
         }
-        List<FieldExpression> expressions = SqlParserSelectHelper.getFilterExpression(correctS2SQL);
+        List<FieldExpression> expressions = SqlSelectHelper.getFilterExpression(correctS2SQL);
         //set dataInfo
         try {
             if (!org.apache.commons.collections.CollectionUtils.isEmpty(expressions)) {
@@ -87,15 +87,15 @@ public class ParseInfoProcessor implements ParseResultProcessor {
         if (Objects.isNull(semanticSchema)) {
             return;
         }
-        List<String> allFields = getFieldsExceptDate(SqlParserSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
+        List<String> allFields = getFieldsExceptDate(SqlSelectHelper.getAllFields(sqlInfo.getCorrectS2SQL()));
         Set<SchemaElement> metrics = getElements(viewId, allFields, semanticSchema.getMetrics());
         parseInfo.setMetrics(metrics);
         if (QueryType.METRIC.equals(parseInfo.getQueryType())) {
-            List<String> groupByFields = SqlParserSelectHelper.getGroupByFields(sqlInfo.getCorrectS2SQL());
+            List<String> groupByFields = SqlSelectHelper.getGroupByFields(sqlInfo.getCorrectS2SQL());
             List<String> groupByDimensions = getFieldsExceptDate(groupByFields);
             parseInfo.setDimensions(getElements(viewId, groupByDimensions, semanticSchema.getDimensions()));
         } else if (QueryType.TAG.equals(parseInfo.getQueryType())) {
-            List<String> selectFields = SqlParserSelectHelper.getSelectFields(sqlInfo.getCorrectS2SQL());
+            List<String> selectFields = SqlSelectHelper.getSelectFields(sqlInfo.getCorrectS2SQL());
             List<String> selectDimensions = getFieldsExceptDate(selectFields);
             parseInfo.setDimensions(getElements(viewId, selectDimensions, semanticSchema.getDimensions()));
         }

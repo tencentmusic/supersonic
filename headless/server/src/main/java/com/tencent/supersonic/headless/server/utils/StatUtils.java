@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.QueryStat;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryOptMode;
@@ -100,8 +100,8 @@ public class StatUtils {
 
     public void initSqlStatInfo(QuerySqlReq querySqlReq, User facadeUser) {
         QueryStat queryStatInfo = new QueryStat();
-        List<String> aggFields = SqlParserSelectHelper.getAggregateFields(querySqlReq.getSql());
-        List<String> allFields = SqlParserSelectHelper.getAllFields(querySqlReq.getSql());
+        List<String> aggFields = SqlSelectHelper.getAggregateFields(querySqlReq.getSql());
+        List<String> allFields = SqlSelectHelper.getAllFields(querySqlReq.getSql());
         List<String> dimensions = allFields.stream().filter(aggFields::contains).collect(Collectors.toList());
 
         String userName = getUserName(facadeUser);
