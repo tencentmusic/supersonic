@@ -11,6 +11,8 @@ import com.tencent.supersonic.chat.core.utils.HanlpHelper;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import java.util.List;
+import java.util.Objects;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -37,7 +39,9 @@ public class EmbeddingMapper extends BaseMapper {
 
             SchemaElement schemaElement = JSONObject.parseObject(JSONObject.toJSONString(matchResult.getMetadata()),
                     SchemaElement.class);
-
+            if (Objects.isNull(matchResult.getMetadata())) {
+                continue;
+            }
             String modelIdStr = matchResult.getMetadata().get("modelId");
             if (StringUtils.isBlank(modelIdStr)) {
                 continue;

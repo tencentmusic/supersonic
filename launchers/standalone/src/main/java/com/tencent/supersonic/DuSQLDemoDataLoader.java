@@ -262,10 +262,10 @@ public class DuSQLDemoDataLoader {
         viewReq.setDescription("DuSQL互联网企业数据源相关的指标和维度等");
         viewReq.setAdmins(Lists.newArrayList("admin"));
         List<ViewModelConfig> viewModelConfigs = Lists.newArrayList(
-                new ViewModelConfig(9L, Lists.newArrayList(16L,17L,18L,19L,20L), Lists.newArrayList(10L,11L)),
-                new ViewModelConfig(10L, Lists.newArrayList(21L,22L,23L), Lists.newArrayList(12L)),
-                new ViewModelConfig(11L, Lists.newArrayList(), Lists.newArrayList(13L,14L,15L)),
-                new ViewModelConfig(12L, Lists.newArrayList(24L), Lists.newArrayList(16L,17L,18L,19L)));
+                new ViewModelConfig(9L, Lists.newArrayList(16L, 17L, 18L, 19L, 20L), Lists.newArrayList(10L, 11L)),
+                new ViewModelConfig(10L, Lists.newArrayList(21L, 22L, 23L), Lists.newArrayList(12L)),
+                new ViewModelConfig(11L, Lists.newArrayList(), Lists.newArrayList(13L, 14L, 15L)),
+                new ViewModelConfig(12L, Lists.newArrayList(24L), Lists.newArrayList(16L, 17L, 18L, 19L)));
 
         ViewDetail viewDetail = new ViewDetail();
         viewDetail.setViewModelConfigs(viewModelConfigs);
