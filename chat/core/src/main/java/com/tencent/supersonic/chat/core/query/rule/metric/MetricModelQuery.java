@@ -1,12 +1,12 @@
 package com.tencent.supersonic.chat.core.query.rule.metric;
 
+import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.OPTIONAL;
+import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_MOST;
+
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import org.springframework.stereotype.Component;
-
-import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.OPTIONAL;
-import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_MOST;
 @Component
 public class MetricModelQuery extends MetricSemanticQuery {
 
@@ -25,7 +25,6 @@ public class MetricModelQuery extends MetricSemanticQuery {
     @Override
     public QueryResult execute(User user) {
         QueryResult queryResult = super.execute(user);
-        fillAggregateInfo(user, queryResult);
         return queryResult;
     }
 
