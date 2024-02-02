@@ -220,7 +220,7 @@ public class ChatDemoLoader implements CommandLineRunner {
             LLMParserTool llmParserTool = new LLMParserTool();
             llmParserTool.setId("1");
             llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-            llmParserTool.setViewIds(Lists.newArrayList(5L, 6L, 7L, 8L));
+            llmParserTool.setViewIds(Lists.newArrayList(3L));
             agentConfig.getTools().add(llmParserTool);
         }
 
@@ -242,7 +242,7 @@ public class ChatDemoLoader implements CommandLineRunner {
             LLMParserTool llmParserTool = new LLMParserTool();
             llmParserTool.setId("1");
             llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-            llmParserTool.setViewIds(Lists.newArrayList(9L, 10L, 11L, 12L));
+            llmParserTool.setViewIds(Lists.newArrayList(4L));
             agentConfig.getTools().add(llmParserTool);
         }
 

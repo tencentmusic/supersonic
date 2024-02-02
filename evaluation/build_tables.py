@@ -288,7 +288,7 @@ def build_table():
     with open(config_file, 'r') as file:
         config = yaml.safe_load(file)
     db_path=current_directory+"/data/"
-    db_file=db_path+config["domain"]+".db"
+    db_file=db_path+"internet.db"
     db_exist=os.path.exists(db_file)
     if db_exist:
         os.remove(db_file)
@@ -301,7 +301,7 @@ if __name__ == '__main__':
     with open(config_file, 'r') as file:
         config = yaml.safe_load(file)
     db_path=current_directory+"/data/"
-    db_file=db_path+config["domain"]+".db"
+    db_file=db_path+"internet.db"
     db_exist=os.path.exists(db_file)
     if db_exist:
         os.remove(db_file)
@@ -309,32 +309,5 @@ if __name__ == '__main__':
     print(db_file)
     build_internet(db_path,-1)
     #build_china_travel_agency(path)
-
-
-
-
-
-
-
-    # sql="SELECT T3.company_name, T3.annual_turnover, T2.brand_name, T1.revenue_proportion FROM company_revenue AS T1 JOIN brand AS T2 JOIN company AS T3 ON T1.brand_id = T2.brand_id AND T1.company_id = T3.company_id"
-    # query_sql(sql)
-    # sql =" select * from ( SELECT brand_name, company_name, sum(revenue_proportion), sum(annual_turnover) FROM (select `sys_imp_date`, `company_name`, `brand_name`, `annual_turnover`, `revenue_proportion`from(select `sys_imp_date`, `company_name`, `brand_name`, `annual_turnover` as `annual_turnover`, `revenue_proportion` as `revenue_proportion`from(select `annual_turnover` as `annual_turnover`, `revenue_proportion` as `revenue_proportion`, `sys_imp_date`, `company_name`, `brand_name`from(select `src1_brand`.`sys_imp_date` as `sys_imp_date`, `src1_company`.`annual_turnover` as `annual_turnover`, `src1_company_revenue`.`revenue_proportion` as `revenue_proportion`, `src1_brand`.`company_id` as `company_id`, `src1_company`.`company_name` as `company_name`, `src1_brand`.`brand_name` as `brand_name`, `src1_brand`.`brand_id` as `brand_id`from(select `annual_turnover` as `annual_turnover`, `imp_date` as `sys_imp_date`, `company_id`, `company_name` as `company_name`, `imp_date` as `imp_date`from(select `imp_date`, `company_id`, `company_name`, `headquarter_address`, `company_established_time`, `founder`, `ceo`, `annual_turnover`, `employee_count`from`company`) as `company`) as `src1_company`inner join (select `revenue_proportion` as `revenue_proportion`, `imp_date` as `sys_imp_date`, `company_id`, `brand_id`, `imp_date` as `imp_date`from(select `imp_date`, `company_id`, `brand_id`, `revenue_proportion`, `profit_proportion`, `expenditure_proportion`from`company_revenue`) as `company_revenue`) as `src1_company_revenue` on `src1_company`.`company_id` = `src1_company_revenue`.`company_id`inner join (select `imp_date` as `sys_imp_date`, `company_id`, `brand_name` as `brand_name`, `brand_id`, `imp_date` as `imp_date`from(select `imp_date`, `brand_id`, `brand_name`, `brand_established_time`, `company_id`, `legal_representative`, `registered_capital`from`brand`) as `brand`) as `src1_brand` on `src1_company`.`company_id` = `src1_brand`.`company_id`) as `src11_`) as `company_company_revenue_brand_0`) as `company_company_revenue_brand_1`) t_103 WHERE sys_imp_date = '2024-01-11' GROUP BY brand_name, company_name, sys_imp_date ORDER BY sum(revenue_proportion) DESC ) a limit 1000 "
-    # a=query_sql(sql)
-    # print(a[0][0])
-
-
-    # import pymysql
-    #
-    # db = pymysql.connect(host="11.154.212.211", user="semantic", password="semantic2023", database="internet", port=3306)
-    #
-    # # 使用cursor()方法获取操作游标
-    # cursor = db.cursor()
-    #
-    # # 使用execute方法执行SQL语句
-    # cursor.execute("select * from company")
-    #
-    # # 使用 fetchone() 方法获取一条数据
-    # data = cursor.fetchone()
-    # print(data)
 
 
