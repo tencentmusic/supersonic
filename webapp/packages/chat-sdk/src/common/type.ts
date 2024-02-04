@@ -83,7 +83,6 @@ export type ChatContextType = {
   aggType: string;
   modelId: number;
   modelName: string;
-  // model: ModelType;
   view: ModelType;
   dateInfo: DateInfoType;
   dimensions: FieldType[];
