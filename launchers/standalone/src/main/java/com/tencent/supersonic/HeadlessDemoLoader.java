@@ -39,7 +39,7 @@ public class HeadlessDemoLoader implements CommandLineRunner {
         }
         modelDataDemoLoader.doRun();
         benchMarkDemoLoader.doRun();
-        duSQLDemoDataLoader.doRun();
+        //duSQLDemoDataLoader.doRun();
         isLoad = true;
     }
 
