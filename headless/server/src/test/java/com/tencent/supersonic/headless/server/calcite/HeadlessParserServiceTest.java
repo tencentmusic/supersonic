@@ -29,12 +29,8 @@ class HeadlessParserServiceTest {
 
     private static Map<String, SemanticSchema> headlessSchemaMap = new HashMap<>();
 
-    public static SqlParserResp parser(SemanticSchema semanticSchema, MetricQueryReq metricCommand, boolean isAgg) {
+    public static SqlParserResp parser(SemanticSchema semanticSchema, MetricQueryReq metricQueryReq, boolean isAgg) {
         SqlParserResp sqlParser = new SqlParserResp();
-        if (metricCommand.getRootPath().isEmpty()) {
-            sqlParser.setErrMsg("rootPath empty");
-            return sqlParser;
-        }
         try {
             if (semanticSchema == null) {
                 sqlParser.setErrMsg("headlessSchema not found");
@@ -42,14 +38,14 @@ class HeadlessParserServiceTest {
             }
             AggPlanner aggBuilder = new AggPlanner(semanticSchema);
             QueryStatement queryStatement = new QueryStatement();
-            queryStatement.setMetricReq(metricCommand);
+            queryStatement.setMetricReq(metricQueryReq);
             aggBuilder.explain(queryStatement, AggOption.getAggregation(!isAgg));
             EngineType engineType = EngineType.fromString(semanticSchema.getSemanticModel().getDatabase().getType());
             sqlParser.setSql(aggBuilder.getSql(engineType));
             sqlParser.setSourceId(aggBuilder.getSourceId());
         } catch (Exception e) {
             sqlParser.setErrMsg(e.getMessage());
-            log.error("parser error MetricCommand[{}] error [{}]", metricCommand, e);
+            log.error("parser error metricQueryReq[{}] error [{}]", metricQueryReq, e);
         }
         return sqlParser;
     }
@@ -123,8 +119,7 @@ class HeadlessParserServiceTest {
         identify.setType("primary");
         identifies.add(identify);
         datasource.setIdentifiers(identifies);
-
-        SemanticSchema semanticSchema = SemanticSchema.newBuilder("s2").build();
+        SemanticSchema semanticSchema = SemanticSchema.newBuilder("1").build();
 
         SemanticSchemaManager.update(semanticSchema, SemanticSchemaManager.getDatasource(datasource));
 
@@ -168,7 +163,6 @@ class HeadlessParserServiceTest {
         //HeadlessSchemaManager.update(headlessSchema, HeadlessSchemaManager.getMetrics(metric));
 
         MetricQueryReq metricCommand = new MetricQueryReq();
-        metricCommand.setRootPath("s2");
         metricCommand.setDimensions(new ArrayList<>(Arrays.asList("sys_imp_date")));
         metricCommand.setMetrics(new ArrayList<>(Arrays.asList("pv")));
         metricCommand.setWhere("user_name = 'ab' and (sys_imp_date >= '2023-02-28' and sys_imp_date <= '2023-05-28') ");
@@ -181,7 +175,6 @@ class HeadlessParserServiceTest {
         addDepartment(semanticSchema);
 
         MetricQueryReq metricCommand2 = new MetricQueryReq();
-        metricCommand2.setRootPath("s2");
         metricCommand2.setDimensions(new ArrayList<>(
                 Arrays.asList("sys_imp_date", "user_name__department", "user_name", "user_name__page")));
         metricCommand2.setMetrics(new ArrayList<>(Arrays.asList("pv")));

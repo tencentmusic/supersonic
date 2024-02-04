@@ -1,5 +1,5 @@
-import { request } from "umi";
-import { DimensionType, ModelType, PluginType } from "./type";
+import { request } from 'umi';
+import { DimensionType, ModelType, PluginType } from './type';
 
 export function savePlugin(params: Partial<PluginType>) {
   return request<Result<any>>('/api/chat/plugin', {
@@ -11,7 +11,7 @@ export function savePlugin(params: Partial<PluginType>) {
 export function getPluginList(filters?: any) {
   return request<Result<any[]>>('/api/chat/plugin/query', {
     method: 'POST',
-    data: filters
+    data: filters,
   });
 }
 
@@ -22,18 +22,18 @@ export function deletePlugin(id: number) {
 }
 
 export function getModelList() {
-  return request<Result<ModelType[]>>('/api/chat/conf/modelList', {
+  return request<Result<ModelType[]>>('/api/chat/conf/viewList', {
     method: 'GET',
   });
 }
 
 export function getDimensionList(modelId: number) {
-  return request<Result<{list: DimensionType[]}>>('/api/semantic/dimension/queryDimension', {
+  return request<Result<{ list: DimensionType[] }>>('/api/semantic/dimension/queryDimension', {
     method: 'POST',
     data: {
       modelIds: [modelId],
       current: 1,
-      pageSize: 2000
-    }
+      pageSize: 2000,
+    },
   });
 }

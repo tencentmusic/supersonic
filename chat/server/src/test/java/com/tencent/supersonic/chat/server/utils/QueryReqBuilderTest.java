@@ -5,20 +5,21 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
 import com.tencent.supersonic.common.pojo.Order;
-import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * QueryReqBuilderTest
@@ -29,9 +30,9 @@ class QueryReqBuilderTest {
     void buildS2SQLReq() {
         init();
         QueryStructReq queryStructReq = new QueryStructReq();
-        queryStructReq.addModelId(1L);
+        queryStructReq.setViewId(1L);
+        queryStructReq.setViewName("内容库");
         queryStructReq.setQueryType(QueryType.METRIC);
-        queryStructReq.setModelName("内容库");
 
         Aggregator aggregator = new Aggregator();
         aggregator.setFunc(AggOperatorEnum.UNKNOWN);
@@ -51,18 +52,18 @@ class QueryReqBuilderTest {
         orders.add(order);
         queryStructReq.setOrders(orders);
 
-        QuerySqlReq querySqlReq = queryStructReq.convert(queryStructReq);
+        QuerySqlReq querySQLReq = queryStructReq.convert(queryStructReq);
         Assert.assertEquals(
                 "SELECT department, SUM(pv) AS pv FROM 内容库 "
                         + "WHERE (sys_imp_date IN ('2023-08-01')) GROUP "
-                        + "BY department ORDER BY uv LIMIT 2000", querySqlReq.getSql());
+                        + "BY department ORDER BY uv LIMIT 2000", querySQLReq.getSql());
 
         queryStructReq.setQueryType(QueryType.TAG);
-        querySqlReq = queryStructReq.convert(queryStructReq);
+        querySQLReq = queryStructReq.convert(queryStructReq);
         Assert.assertEquals(
                 "SELECT department, pv FROM 内容库 WHERE (sys_imp_date IN ('2023-08-01')) "
                         + "ORDER BY uv LIMIT 2000",
-                querySqlReq.getSql());
+                querySQLReq.getSql());
 
     }
 

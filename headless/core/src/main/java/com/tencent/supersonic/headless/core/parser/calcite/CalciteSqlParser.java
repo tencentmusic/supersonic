@@ -6,12 +6,13 @@ import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.SqlParser;
 import com.tencent.supersonic.headless.core.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
-import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.RuntimeOptions;
+import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 /**
  * the calcite parse implements
@@ -50,7 +51,7 @@ public class CalciteSqlParser implements SqlParser {
     }
 
     private SemanticSchema getSemanticSchema(SemanticModel semanticModel, QueryStatement queryStatement) {
-        SemanticSchema semanticSchema = SemanticSchema.newBuilder(semanticModel.getRootPath()).build();
+        SemanticSchema semanticSchema = SemanticSchema.newBuilder(semanticModel.getSchemaKey()).build();
         semanticSchema.setSemanticModel(semanticModel);
         semanticSchema.setDatasource(semanticModel.getDatasourceMap());
         semanticSchema.setDimension(semanticModel.getDimensionMap());

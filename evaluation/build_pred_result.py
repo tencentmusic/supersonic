@@ -48,7 +48,7 @@ def get_pred_result():
     config_file=current_directory+"/config/config.yaml"
     with open(config_file, 'r') as file:
         config = yaml.safe_load(file)
-    input_path=current_directory+"/data/"+config["domain"]+".txt"
+    input_path=current_directory+"/data/"+"internet.txt"
     pred_sql_path = current_directory+"/data/"+"pred_example_dusql.txt"
     pred_sql_exist=os.path.exists(pred_sql_path)
     if pred_sql_exist:

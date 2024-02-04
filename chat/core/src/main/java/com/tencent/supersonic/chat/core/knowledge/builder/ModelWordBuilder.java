@@ -4,10 +4,11 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.core.knowledge.DictWord;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * model word nature
@@ -20,13 +21,13 @@ public class ModelWordBuilder extends BaseWordBuilder {
     public List<DictWord> doGet(String word, SchemaElement schemaElement) {
         List<DictWord> result = Lists.newArrayList();
         //modelName
-        DictWord dictWord = buildDictWord(word, schemaElement.getModel());
+        DictWord dictWord = buildDictWord(word, schemaElement.getView());
         result.add(dictWord);
         //alias
         List<String> aliasList = schemaElement.getAlias();
         if (CollectionUtils.isNotEmpty(aliasList)) {
             for (String alias : aliasList) {
-                result.add(buildDictWord(alias, schemaElement.getModel()));
+                result.add(buildDictWord(alias, schemaElement.getView()));
             }
         }
         return result;

@@ -5,6 +5,8 @@ import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeMode;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
@@ -13,14 +15,21 @@ import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
+import com.tencent.supersonic.headless.api.pojo.ViewDetail;
+import com.tencent.supersonic.headless.api.pojo.ViewModelConfig;
+import com.tencent.supersonic.headless.api.pojo.QueryConfig;
+import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
+import com.tencent.supersonic.headless.api.pojo.request.ViewReq;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.ViewService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +55,9 @@ public class DuSQLDemoDataLoader {
     @Autowired
     private MetricService metricService;
 
+    @Autowired
+    private ViewService viewService;
+
     public void doRun() {
         try {
             addDomain();
@@ -53,6 +65,7 @@ public class DuSQLDemoDataLoader {
             addModel_2();
             addModel_3();
             addModel_4();
+            addView_1();
             addModelRela_1();
             addModelRela_2();
             addModelRela_3();
@@ -239,6 +252,34 @@ public class DuSQLDemoDataLoader {
         modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
 
+    }
+
+    public void addView_1() {
+        ViewReq viewReq = new ViewReq();
+        viewReq.setName("DuSQL 互联网企业");
+        viewReq.setBizName("internet");
+        viewReq.setDomainId(4L);
+        viewReq.setDescription("DuSQL互联网企业数据源相关的指标和维度等");
+        viewReq.setAdmins(Lists.newArrayList("admin"));
+        List<ViewModelConfig> viewModelConfigs = Lists.newArrayList(
+                new ViewModelConfig(9L, Lists.newArrayList(16L, 17L, 18L, 19L, 20L), Lists.newArrayList(10L, 11L)),
+                new ViewModelConfig(10L, Lists.newArrayList(21L, 22L, 23L), Lists.newArrayList(12L)),
+                new ViewModelConfig(11L, Lists.newArrayList(), Lists.newArrayList(13L, 14L, 15L)),
+                new ViewModelConfig(12L, Lists.newArrayList(24L), Lists.newArrayList(16L, 17L, 18L, 19L)));
+
+        ViewDetail viewDetail = new ViewDetail();
+        viewDetail.setViewModelConfigs(viewModelConfigs);
+        viewReq.setViewDetail(viewDetail);
+        viewReq.setTypeEnum(TypeEnums.VIEW);
+        QueryConfig queryConfig = new QueryConfig();
+        MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
+        TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
+        timeDefaultConfig.setTimeMode(TimeMode.RECENT);
+        timeDefaultConfig.setUnit(1);
+        metricTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
+        queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
+        viewReq.setQueryConfig(queryConfig);
+        viewService.save(viewReq, User.getFakeUser());
     }
 
     public void addModelRela_1() {

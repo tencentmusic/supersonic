@@ -90,7 +90,7 @@
                         </manifest>
                     </archive>
                     <descriptors>
-                        <descriptor>/src/main/build/build.xml</descriptor>
+                        <descriptor>../../assembly/build/build.xml</descriptor>
                     </descriptors>
                 </configuration>
                 <executions>

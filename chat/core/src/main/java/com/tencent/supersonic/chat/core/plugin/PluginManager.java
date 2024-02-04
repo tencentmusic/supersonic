@@ -23,6 +23,12 @@ import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,11 +38,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -265,14 +266,14 @@ public class PluginManager {
     }
 
     private static Set<Long> getPluginMatchedModel(Plugin plugin, QueryContext queryContext) {
-        Set<Long> matchedModel = queryContext.getMapInfo().getMatchedModels();
+        Set<Long> matchedViews = queryContext.getMapInfo().getMatchedViewInfos();
         if (plugin.isContainsAllModel()) {
             return Sets.newHashSet(plugin.getDefaultMode());
         }
-        List<Long> modelIds = plugin.getModelList();
+        List<Long> modelIds = plugin.getViewList();
         Set<Long> pluginMatchedModel = Sets.newHashSet();
         for (Long modelId : modelIds) {
-            if (matchedModel.contains(modelId)) {
+            if (matchedViews.contains(modelId)) {
                 pluginMatchedModel.add(modelId);
             }
         }

@@ -11,7 +11,7 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -44,8 +44,6 @@ import java.util.stream.Collectors;
 @Data
 @Slf4j
 public class QueryStructReq extends SemanticQueryReq {
-
-    private String modelName;
     private List<String> groups = new ArrayList<>();
     private List<Aggregator> aggregators = new ArrayList<>();
     private List<Order> orders = new ArrayList<>();
@@ -94,7 +92,9 @@ public class QueryStructReq extends SemanticQueryReq {
 
     public String toCustomizedString() {
         StringBuilder stringBuilder = new StringBuilder("{");
-        stringBuilder.append("\"modelId\":")
+        stringBuilder.append("\"viewId\":")
+                .append(viewId);
+        stringBuilder.append("\"modelIds\":")
                 .append(modelIds);
         stringBuilder.append(",\"groups\":")
                 .append(groups);
@@ -125,7 +125,9 @@ public class QueryStructReq extends SemanticQueryReq {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
-        sb.append("\"modelId\":")
+        sb.append("\"viewId\":")
+                .append(viewId);
+        sb.append("\"modelIds\":")
                 .append(modelIds);
         sb.append(",\"groups\":")
                 .append(groups);
@@ -154,7 +156,7 @@ public class QueryStructReq extends SemanticQueryReq {
     }
 
     /**
-     * convert queryStructReq to QueryS2QLReq
+     * convert queryStructReq to QueryS2SQLReq
      *
      * @param queryStructReq
      * @return
@@ -169,6 +171,7 @@ public class QueryStructReq extends SemanticQueryReq {
 
         QuerySqlReq result = new QuerySqlReq();
         result.setSql(sql);
+        result.setViewId(queryStructReq.getViewId());
         result.setModelIds(queryStructReq.getModelIdSet());
         result.setParams(new ArrayList<>());
         return result;
@@ -211,7 +214,7 @@ public class QueryStructReq extends SemanticQueryReq {
         }
         plainSelect.setSelectItems(selectItems);
         //2.Set the table name
-        Table table = new Table(queryStructReq.getModelName());
+        Table table = new Table(queryStructReq.getTableName());
         plainSelect.setFromItem(table);
 
         //3.Set the order by clause
@@ -258,7 +261,7 @@ public class QueryStructReq extends SemanticQueryReq {
         String sql = select.toString();
         if (StringUtils.isNotBlank(whereClause)) {
             Expression expression = CCJSqlParserUtil.parseCondExpression(whereClause);
-            sql = SqlParserAddHelper.addWhere(sql, expression);
+            sql = SqlAddHelper.addWhere(sql, expression);
         }
 
         //7.Set DateInfo
@@ -266,14 +269,19 @@ public class QueryStructReq extends SemanticQueryReq {
         String dateWhereStr = dateModeUtils.getDateWhereStr(queryStructReq.getDateInfo());
         if (StringUtils.isNotBlank(dateWhereStr)) {
             Expression expression = CCJSqlParserUtil.parseCondExpression(dateWhereStr);
-            sql = SqlParserAddHelper.addWhere(sql, expression);
+            sql = SqlAddHelper.addWhere(sql, expression);
         }
         return sql;
     }
 
-    public String getModelName() {
-        return Objects.nonNull(modelName) ? modelName :
-                Constants.TABLE_PREFIX + StringUtils.join(modelIds, "_");
+    public String getTableName() {
+        if (StringUtils.isNotBlank(viewName)) {
+            return viewName;
+        }
+        if (viewId != null) {
+            return Constants.TABLE_PREFIX + viewId;
+        }
+        return Constants.TABLE_PREFIX + StringUtils.join(modelIds, "_");
     }
 
 }

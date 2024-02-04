@@ -77,6 +77,13 @@ public class MetricResp extends SchemaItem {
                 .collect(Collectors.joining(","));
     }
 
+    public List<DrillDownDimension> getDrillDownDimensions() {
+        if (relateDimension == null || CollectionUtils.isEmpty(relateDimension.getDrillDownDimensions())) {
+            return Lists.newArrayList();
+        }
+        return relateDimension.getDrillDownDimensions();
+    }
+
     public String getDefaultAgg() {
         if (metricDefineByMeasureParams != null
                 && CollectionUtils.isNotEmpty(metricDefineByMeasureParams.getMeasures())) {

@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.server.persistence.repository;
 
-import com.tencent.supersonic.chat.server.persistence.dataobject.PluginDOExample;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tencent.supersonic.chat.server.persistence.dataobject.PluginDO;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public interface PluginRepository {
 
     PluginDO getPlugin(Long id);
 
-    List<PluginDO> query(PluginDOExample pluginDOExample);
+    List<PluginDO> query(QueryWrapper<PluginDO> queryWrapper);
 
     void deletePlugin(Long id);
 }

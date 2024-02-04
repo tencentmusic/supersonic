@@ -3,13 +3,14 @@ package com.tencent.supersonic.chat.server.service.impl;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
-import com.tencent.supersonic.chat.api.pojo.ModelSchema;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
+import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.utils.ComponentFactory;
-import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -27,13 +28,13 @@ public class SchemaService {
                         @Override
                         public SemanticSchema load(String key) {
                             log.info("load getDomainSchemaInfo cache [{}]", key);
-                            return new SemanticSchema(semanticInterpreter.getModelSchema());
+                            return new SemanticSchema(semanticInterpreter.getViewSchema());
                         }
                     }
             );
 
-    public ModelSchema getModelSchema(Long id) {
-        return semanticInterpreter.getModelSchema(id, true);
+    public ViewSchema getViewSchema(Long id) {
+        return semanticInterpreter.getViewSchema(id, true);
     }
 
     public SemanticSchema getSemanticSchema() {

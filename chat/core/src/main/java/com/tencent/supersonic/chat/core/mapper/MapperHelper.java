@@ -5,6 +5,11 @@ import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.core.agent.Agent;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
 import com.tencent.supersonic.chat.core.utils.NatureHelper;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -12,10 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Data
 @Service
@@ -61,7 +62,7 @@ public class MapperHelper {
      */
     public boolean existDimensionValues(List<String> natures) {
         for (String nature : natures) {
-            if (NatureHelper.isDimensionValueModelId(nature)) {
+            if (NatureHelper.isDimensionValueViewId(nature)) {
                 return true;
             }
         }
@@ -81,33 +82,33 @@ public class MapperHelper {
                 detectSegment.length());
     }
 
-    public Set<Long> getModelIds(Long modelId, Agent agent) {
+    public Set<Long> getViewIds(Long viewId, Agent agent) {
 
-        Set<Long> detectModelIds = new HashSet<>();
+        Set<Long> detectViewIds = new HashSet<>();
         if (Objects.nonNull(agent)) {
-            detectModelIds = agent.getModelIds(null);
+            detectViewIds = agent.getViewIds(null);
         }
         //contains all
-        if (Agent.containsAllModel(detectModelIds)) {
-            if (Objects.nonNull(modelId) && modelId > 0) {
+        if (Agent.containsAllModel(detectViewIds)) {
+            if (Objects.nonNull(viewId) && viewId > 0) {
                 Set<Long> result = new HashSet<>();
-                result.add(modelId);
+                result.add(viewId);
                 return result;
             }
             return new HashSet<>();
         }
 
-        if (Objects.nonNull(detectModelIds)) {
-            detectModelIds = detectModelIds.stream().filter(entry -> entry > 0).collect(Collectors.toSet());
+        if (Objects.nonNull(detectViewIds)) {
+            detectViewIds = detectViewIds.stream().filter(entry -> entry > 0).collect(Collectors.toSet());
         }
 
-        if (Objects.nonNull(modelId) && modelId > 0 && Objects.nonNull(detectModelIds)) {
-            if (detectModelIds.contains(modelId)) {
+        if (Objects.nonNull(viewId) && viewId > 0 && Objects.nonNull(detectViewIds)) {
+            if (detectViewIds.contains(viewId)) {
                 Set<Long> result = new HashSet<>();
-                result.add(modelId);
+                result.add(viewId);
                 return result;
             }
         }
-        return detectModelIds;
+        return detectViewIds;
     }
 }

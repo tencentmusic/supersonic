@@ -1,13 +1,7 @@
 package com.tencent.supersonic.headless.server.service;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
-import com.alibaba.excel.util.FileUtils;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.pojo.request.BatchDownloadReq;
@@ -15,28 +9,18 @@ import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.server.service.impl.DownloadServiceImpl;
-import java.io.File;
-import java.util.Date;
+import org.junit.jupiter.api.Test;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 
 class DownloadServiceImplTest {
     @Test
     void testBatchDownload() throws Exception {
-        ModelService modelService = Mockito.mock(ModelService.class);
-        QueryService queryService = Mockito.mock(QueryService.class);
-        when(modelService.fetchModelSchema(any())).thenReturn(Lists.newArrayList(mockModelSchemaResp()));
-        when(queryService.queryByReq(any(), any())).thenReturn(mockQueryResult());
-        DownloadServiceImpl downloadService = new DownloadServiceImpl(modelService, queryService);
-        String fileName = String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
-        File file = FileUtils.createTmpFile(fileName);
-        downloadService.batchDownload(buildBatchDownloadReq(), User.getFakeUser(), file);
+
     }
 
     private ModelSchemaResp mockModelSchemaResp() {

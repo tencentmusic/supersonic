@@ -7,9 +7,10 @@ import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
+import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
@@ -17,13 +18,6 @@ import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -34,6 +28,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Aspect
 @Component
@@ -88,9 +90,9 @@ public class DimValueAspect {
         MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(querySqlReq.getModelIds()));
         String sql = querySqlReq.getSql();
         log.info("correctorSql before replacing:{}", sql);
-        List<FieldExpression> fieldExpressionList = SqlParserSelectHelper.getWhereExpressions(sql);
+        List<FieldExpression> fieldExpressionList = SqlSelectHelper.getWhereExpressions(sql);
         List<DimensionResp> dimensions = dimensionService.getDimensions(metaFilter);
-        Set<String> fieldNames = dimensions.stream().map(o -> o.getName()).collect(Collectors.toSet());
+        Set<String> fieldNames = dimensions.stream().map(SchemaItem::getName).collect(Collectors.toSet());
         Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
         for (FieldExpression expression : fieldExpressionList) {
             if (!fieldNames.contains(expression.getFieldName())) {
@@ -115,7 +117,7 @@ public class DimValueAspect {
                 replaceInCondition(expression, dimension, filedNameToValueMap);
             }
         }
-        sql = SqlParserReplaceHelper.replaceValue(sql, filedNameToValueMap);
+        sql = SqlReplaceHelper.replaceValue(sql, filedNameToValueMap);
         log.info("correctorSql after replacing:{}", sql);
         querySqlReq.setSql(sql);
         Map<String, Map<String, String>> techNameToBizName = getTechNameToBizName(dimensions);

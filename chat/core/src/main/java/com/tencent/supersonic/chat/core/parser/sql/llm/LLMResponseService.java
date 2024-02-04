@@ -9,7 +9,7 @@ import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMSqlResp;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserEqualHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlEqualHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
@@ -28,10 +28,9 @@ public class LLMResponseService {
         }
         LLMSemanticQuery semanticQuery = QueryManager.createLLMQuery(LLMSqlQuery.QUERY_MODE);
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
-        parseInfo.setModel(parseResult.getModelCluster());
+        parseInfo.setView(queryCtx.getSemanticSchema().getView(parseResult.getViewId()));
         NL2SQLTool commonAgentTool = parseResult.getCommonAgentTool();
-        parseInfo.getElementMatches().addAll(queryCtx.getModelClusterMapInfo()
-                .getMatchedElements(parseInfo.getModelClusterKey()));
+        parseInfo.getElementMatches().addAll(queryCtx.getMapInfo().getMatchedElements(parseInfo.getViewId()));
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(Constants.CONTEXT, parseResult);
@@ -42,7 +41,6 @@ public class LLMResponseService {
         parseInfo.setScore(queryCtx.getQueryText().length() * (1 + weight));
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
         parseInfo.getSqlInfo().setS2SQL(s2SQL);
-        parseInfo.setModel(parseResult.getModelCluster());
         queryCtx.getCandidateQueries().add(semanticQuery);
         return parseInfo;
     }
@@ -54,7 +52,7 @@ public class LLMResponseService {
         Map<String, LLMSqlResp> result = new HashMap<>();
         for (Map.Entry<String, LLMSqlResp> entry : llmResp.getSqlRespMap().entrySet()) {
             String key = entry.getKey();
-            if (result.keySet().stream().anyMatch(existKey -> SqlParserEqualHelper.equals(existKey, key))) {
+            if (result.keySet().stream().anyMatch(existKey -> SqlEqualHelper.equals(existKey, key))) {
                 continue;
             }
             result.put(key, entry.getValue());

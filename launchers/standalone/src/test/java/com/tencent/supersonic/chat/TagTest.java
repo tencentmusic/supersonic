@@ -1,7 +1,5 @@
 package com.tencent.supersonic.chat;
 
-import static com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum.NONE;
-
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -11,11 +9,13 @@ import com.tencent.supersonic.chat.core.query.rule.tag.TagFilterQuery;
 import com.tencent.supersonic.util.DataUtils;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.DateConf.DateMode;
+import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.Test;
 
 public class TagTest extends BaseTest {
 
@@ -29,7 +29,7 @@ public class TagTest extends BaseTest {
         expectedResult.setChatContext(expectedParseInfo);
 
         expectedResult.setQueryMode(MetricTagQuery.QUERY_MODE);
-        expectedParseInfo.setAggType(NONE);
+        expectedParseInfo.setAggType(AggregateTypeEnum.NONE);
 
         QueryFilter dimensionFilter = DataUtils.getFilter("singer_name", FilterOperatorEnum.EQUALS, "周杰伦", "歌手名", 7L);
         expectedParseInfo.getDimensionFilters().add(dimensionFilter);
@@ -53,7 +53,7 @@ public class TagTest extends BaseTest {
         expectedResult.setChatContext(expectedParseInfo);
 
         expectedResult.setQueryMode(TagFilterQuery.QUERY_MODE);
-        expectedParseInfo.setAggType(NONE);
+        expectedParseInfo.setAggType(AggregateTypeEnum.NONE);
 
         List<String> list = new ArrayList<>();
         list.add("流行");
@@ -73,7 +73,7 @@ public class TagTest extends BaseTest {
         expectedParseInfo.getDimensions().add(dim3);
         expectedParseInfo.getDimensions().add(dim4);
 
-        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, startDay, startDay));
+        expectedParseInfo.setDateInfo(DataUtils.getDateConf(DateConf.DateMode.BETWEEN, startDay, startDay, 7));
         expectedParseInfo.setQueryType(QueryType.TAG);
 
         assertQueryResult(expectedResult, actualResult);

@@ -13,7 +13,15 @@ public class DrillDownDimension {
 
     private boolean necessary;
 
+    private boolean inheritedFromModel;
+
     public DrillDownDimension(Long dimensionId) {
         this.dimensionId = dimensionId;
     }
+
+    public DrillDownDimension(Long dimensionId, boolean necessary) {
+        this.dimensionId = dimensionId;
+        this.necessary = necessary;
+    }
+
 }

@@ -5,11 +5,12 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.core.knowledge.DictWord;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
-import java.util.List;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * dimension value wordNature
@@ -26,8 +27,8 @@ public class EntityWordBuilder extends BaseWordBuilder {
             return result;
         }
 
-        Long domain = schemaElement.getModel();
-        String nature = DictWordType.NATURE_SPILT + domain + DictWordType.NATURE_SPILT + schemaElement.getId()
+        Long view = schemaElement.getView();
+        String nature = DictWordType.NATURE_SPILT + view + DictWordType.NATURE_SPILT + schemaElement.getId()
                 + DictWordType.ENTITY.getType();
 
         if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {

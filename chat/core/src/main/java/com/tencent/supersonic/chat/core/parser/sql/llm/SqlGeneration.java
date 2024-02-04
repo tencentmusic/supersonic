@@ -12,9 +12,9 @@ public interface SqlGeneration {
     /***
      * generate llmResp (sql, schemaLink, prompt, etc.) through LLMReq.
      * @param llmReq
-     * @param modelClusterKey
+     * @param viewId
      * @return
      */
-    LLMResp generation(LLMReq llmReq, String modelClusterKey);
+    LLMResp generation(LLMReq llmReq, Long viewId);
 
 }

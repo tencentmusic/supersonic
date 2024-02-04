@@ -1,14 +1,19 @@
 package com.tencent.supersonic.chat.core.corrector;
 
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectFunctionHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectFunctionHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -16,10 +21,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.util.CollectionUtils;
 
 /**
  * basic semantic correction functionality, offering common methods and an
@@ -42,7 +43,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
     public abstract void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo);
 
-    protected Map<String, String> getFieldNameMap(QueryContext queryContext, Set<Long> modelIds) {
+    protected Map<String, String> getFieldNameMap(QueryContext queryContext, Long viewId) {
 
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
 
@@ -52,7 +53,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
         // support fieldName and field alias
         Map<String, String> result = dbAllFields.stream()
-                .filter(entry -> modelIds.contains(entry.getModel()))
+                .filter(entry -> viewId.equals(entry.getView()))
                 .flatMap(schemaElement -> {
                     Set<String> elements = new HashSet<>();
                     elements.add(schemaElement.getName());
@@ -74,14 +75,14 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
     }
 
     protected void addFieldsToSelect(SemanticParseInfo semanticParseInfo, String correctS2SQL) {
-        Set<String> selectFields = new HashSet<>(SqlParserSelectHelper.getSelectFields(correctS2SQL));
-        Set<String> needAddFields = new HashSet<>(SqlParserSelectHelper.getGroupByFields(correctS2SQL));
-        needAddFields.addAll(SqlParserSelectHelper.getOrderByFields(correctS2SQL));
+        Set<String> selectFields = new HashSet<>(SqlSelectHelper.getSelectFields(correctS2SQL));
+        Set<String> needAddFields = new HashSet<>(SqlSelectHelper.getGroupByFields(correctS2SQL));
+        needAddFields.addAll(SqlSelectHelper.getOrderByFields(correctS2SQL));
 
         // If there is no aggregate function in the S2SQL statement and
         // there is a data field in 'WHERE' statement, add the field to the 'SELECT' statement.
-        if (!SqlParserSelectFunctionHelper.hasAggregateFunction(correctS2SQL)) {
-            List<String> whereFields = SqlParserSelectHelper.getWhereFields(correctS2SQL);
+        if (!SqlSelectFunctionHelper.hasAggregateFunction(correctS2SQL)) {
+            List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
             List<String> timeChNameList = TimeDimensionEnum.getChNameList();
             Set<String> timeFields = whereFields.stream().filter(field -> timeChNameList.contains(field))
                     .collect(Collectors.toSet());
@@ -93,16 +94,15 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         }
 
         needAddFields.removeAll(selectFields);
-        String replaceFields = SqlParserAddHelper.addFieldsToSelect(correctS2SQL, new ArrayList<>(needAddFields));
+        String replaceFields = SqlAddHelper.addFieldsToSelect(correctS2SQL, new ArrayList<>(needAddFields));
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(replaceFields);
     }
 
     protected void addAggregateToMetric(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
         //add aggregate to all metric
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
-        Set<Long> modelIds = semanticParseInfo.getModel().getModelIds();
-
-        List<SchemaElement> metrics = getMetricElements(queryContext, modelIds);
+        Long viewId = semanticParseInfo.getView().getView();
+        List<SchemaElement> metrics = getMetricElements(queryContext, viewId);
 
         Map<String, String> metricToAggregate = metrics.stream()
                 .map(schemaElement -> {
@@ -123,13 +123,13 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         if (CollectionUtils.isEmpty(metricToAggregate)) {
             return;
         }
-        String aggregateSql = SqlParserAddHelper.addAggregateToField(correctS2SQL, metricToAggregate);
+        String aggregateSql = SqlAddHelper.addAggregateToField(correctS2SQL, metricToAggregate);
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(aggregateSql);
     }
 
-    protected List<SchemaElement> getMetricElements(QueryContext queryContext, Set<Long> modelIds) {
+    protected List<SchemaElement> getMetricElements(QueryContext queryContext, Long viewId) {
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
-        return semanticSchema.getMetrics(modelIds);
+        return semanticSchema.getMetrics(viewId);
     }
 
 }

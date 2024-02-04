@@ -57,7 +57,7 @@ public class SimilarQueryManager {
             embeddingQuery.setQuery(queryText);
 
             Map<String, Object> metaData = new HashMap<>();
-            metaData.put("modelId", (similarQueryReq.getModelId()));
+            metaData.put("modelId", similarQueryReq.getViewId());
             metaData.put("agentId", similarQueryReq.getAgentId());
             embeddingQuery.setMetadata(metaData);
             String solvedQueryCollection = embeddingConfig.getSolvedQueryCollection();

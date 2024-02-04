@@ -29,8 +29,6 @@ public class ModelResp extends SchemaItem {
 
     private String depends;
 
-    private String sourceType;
-
     private String filterSql;
 
     private List<String> viewers = new ArrayList<>();
@@ -43,7 +41,7 @@ public class ModelResp extends SchemaItem {
 
     private Integer isOpen;
 
-    private List<DrillDownDimension> drillDownDimensions;
+    private List<DrillDownDimension> drillDownDimensions = Lists.newArrayList();
 
     private String alias;
 

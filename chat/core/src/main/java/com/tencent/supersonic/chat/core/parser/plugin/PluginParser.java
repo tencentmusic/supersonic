@@ -18,7 +18,6 @@ import com.tencent.supersonic.chat.core.query.QueryManager;
 import com.tencent.supersonic.chat.core.query.SemanticQuery;
 import com.tencent.supersonic.chat.core.query.plugin.PluginSemanticQuery;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.ModelCluster;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import org.springframework.util.CollectionUtils;
 import java.util.HashMap;
@@ -56,13 +55,13 @@ public abstract class PluginParser implements SemanticParser {
 
     public void buildQuery(QueryContext queryContext, PluginRecallResult pluginRecallResult) {
         Plugin plugin = pluginRecallResult.getPlugin();
-        Set<Long> modelIds = pluginRecallResult.getModelIds();
+        Set<Long> viewIds = pluginRecallResult.getViewIds();
         if (plugin.isContainsAllModel()) {
-            modelIds = Sets.newHashSet(-1L);
+            viewIds = Sets.newHashSet(-1L);
         }
-        for (Long modelId : modelIds) {
+        for (Long viewId : viewIds) {
             PluginSemanticQuery pluginQuery = QueryManager.createPluginQuery(plugin.getType());
-            SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(modelId, plugin,
+            SemanticParseInfo semanticParseInfo = buildSemanticParseInfo(viewId, plugin,
                     queryContext, pluginRecallResult.getDistance());
             semanticParseInfo.setQueryMode(pluginQuery.getQueryMode());
             semanticParseInfo.setScore(pluginRecallResult.getScore());
@@ -75,20 +74,19 @@ public abstract class PluginParser implements SemanticParser {
         return PluginManager.getPluginAgentCanSupport(queryContext);
     }
 
-    protected SemanticParseInfo buildSemanticParseInfo(Long modelId, Plugin plugin,
+    protected SemanticParseInfo buildSemanticParseInfo(Long viewId, Plugin plugin,
                                                        QueryContext queryContext, double distance) {
-        List<SchemaElementMatch> schemaElementMatches =
-                queryContext.getModelClusterMapInfo().getMatchedElements(modelId);
+        List<SchemaElementMatch> schemaElementMatches = queryContext.getMapInfo().getMatchedElements(viewId);
         QueryFilters queryFilters = queryContext.getQueryFilters();
-        if (modelId == null && !CollectionUtils.isEmpty(plugin.getModelList())) {
-            modelId = plugin.getModelList().get(0);
+        if (viewId == null && !CollectionUtils.isEmpty(plugin.getViewList())) {
+            viewId = plugin.getViewList().get(0);
         }
         if (schemaElementMatches == null) {
             schemaElementMatches = Lists.newArrayList();
         }
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
         semanticParseInfo.setElementMatches(schemaElementMatches);
-        semanticParseInfo.setModel(ModelCluster.build(Sets.newHashSet(modelId)));
+        semanticParseInfo.setView(queryContext.getSemanticSchema().getView(viewId));
         Map<String, Object> properties = new HashMap<>();
         PluginParseResult pluginParseResult = new PluginParseResult();
         pluginParseResult.setPlugin(plugin);

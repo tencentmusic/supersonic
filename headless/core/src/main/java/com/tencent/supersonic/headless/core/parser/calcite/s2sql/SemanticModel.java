@@ -1,18 +1,19 @@
 package com.tencent.supersonic.headless.core.parser.calcite.s2sql;
 
 import com.tencent.supersonic.headless.core.pojo.Database;
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.Data;
 
 @Data
 public class SemanticModel {
 
-    private String rootPath;
+    private String schemaKey;
     private List<Metric> metrics = new ArrayList<>();
     private Map<String, DataSource> datasourceMap = new HashMap<>();
     private Map<String, List<Dimension>> dimensionMap = new HashMap<>();

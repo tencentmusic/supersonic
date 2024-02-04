@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class SemanticSchema extends AbstractSchema {
 
-    private final String rootPath;
+    private final String schemaKey;
     private final Map<String, Table> tableMap;
 
     private SemanticModel semanticModel = new SemanticModel();
@@ -29,17 +29,17 @@ public class SemanticSchema extends AbstractSchema {
     private RuntimeOptions runtimeOptions;
 
 
-    private SemanticSchema(String rootPath, Map<String, Table> tableMap) {
-        this.rootPath = rootPath;
+    private SemanticSchema(String schemaKey, Map<String, Table> tableMap) {
+        this.schemaKey = schemaKey;
         this.tableMap = tableMap;
     }
 
-    public static Builder newBuilder(String rootPath) {
-        return new Builder(rootPath);
+    public static Builder newBuilder(String schemaKey) {
+        return new Builder(schemaKey);
     }
 
-    public String getRootPath() {
-        return rootPath;
+    public String getSchemaKey() {
+        return schemaKey;
     }
 
     public void setSemanticModel(SemanticModel semanticModel) {
@@ -110,15 +110,15 @@ public class SemanticSchema extends AbstractSchema {
 
     public static final class Builder {
 
-        private final String rootPath;
+        private final String schemaKey;
         private final Map<String, Table> tableMap = new HashMap<>();
 
-        private Builder(String rootPath) {
-            if (rootPath == null || rootPath.isEmpty()) {
+        private Builder(String schemaKey) {
+            if (schemaKey == null) {
                 throw new IllegalArgumentException("Schema name cannot be null or empty");
             }
 
-            this.rootPath = rootPath;
+            this.schemaKey = schemaKey;
         }
 
         public Builder addTable(DataSourceTable table) {
@@ -132,7 +132,7 @@ public class SemanticSchema extends AbstractSchema {
         }
 
         public SemanticSchema build() {
-            return new SemanticSchema(rootPath, tableMap);
+            return new SemanticSchema(schemaKey, tableMap);
         }
     }
 

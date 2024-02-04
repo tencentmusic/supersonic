@@ -10,6 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class DimensionConverter {
 
@@ -75,6 +77,13 @@ public class DimensionConverter {
         }
         dimensionResp.setTypeEnum(TypeEnums.DIMENSION);
         return dimensionResp;
+    }
+
+    public static List<DimensionResp> filterByView(List<DimensionResp> dimensionResps, ViewResp viewResp) {
+        return dimensionResps.stream().filter(dimensionResp ->
+                        viewResp.getAllDimensions().contains(dimensionResp.getId())
+                                || viewResp.getAllIncludeAllModels().contains(dimensionResp.getModelId()))
+                .collect(Collectors.toList());
     }
 
 }

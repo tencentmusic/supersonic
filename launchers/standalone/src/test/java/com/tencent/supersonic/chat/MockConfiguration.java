@@ -1,17 +1,17 @@
 package com.tencent.supersonic.chat;
 
 
-import static org.mockito.Mockito.when;
-
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.util.DataUtils;
 import com.tencent.supersonic.chat.core.plugin.PluginManager;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
+import com.tencent.supersonic.util.DataUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
+
+import static org.mockito.Mockito.when;
 
 @Configuration
 @Slf4j

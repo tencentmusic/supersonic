@@ -43,11 +43,15 @@ public class BaseTest extends BaseApplication {
     }
 
     protected QueryStructReq buildQueryStructReq(List<String> groups) {
+        return buildQueryStructReq(groups, QueryType.METRIC);
+    }
+
+    protected QueryStructReq buildQueryStructReq(List<String> groups, QueryType queryType) {
         QueryStructReq queryStructReq = new QueryStructReq();
         for (Long modelId : DataUtils.getMetricAgentIModelIds()) {
             queryStructReq.addModelId(modelId);
         }
-        queryStructReq.setQueryType(QueryType.METRIC);
+        queryStructReq.setQueryType(queryType);
         Aggregator aggregator = new Aggregator();
         aggregator.setFunc(AggOperatorEnum.SUM);
         aggregator.setColumn("pv");
@@ -55,7 +59,6 @@ public class BaseTest extends BaseApplication {
 
         if (CollectionUtils.isNotEmpty(groups)) {
             queryStructReq.setGroups(groups);
-            queryStructReq.setGroups(Arrays.asList("department"));
         }
 
         DateConf dateConf = new DateConf();
@@ -71,5 +74,4 @@ public class BaseTest extends BaseApplication {
         queryStructReq.setOrders(orders);
         return queryStructReq;
     }
-
 }

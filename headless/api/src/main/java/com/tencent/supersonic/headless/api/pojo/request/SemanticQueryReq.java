@@ -3,14 +3,14 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.pojo.Cache;
 import com.tencent.supersonic.headless.api.pojo.Param;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
 
 
 @Data
@@ -19,7 +19,12 @@ public abstract class SemanticQueryReq {
 
     protected boolean needAuth = true;
 
+    protected Long viewId;
+
+    protected String viewName;
+
     protected Set<Long> modelIds = new HashSet<>();
+
     protected List<Param> params = new ArrayList<>();
 
     protected Cache cacheInfo = new Cache();
@@ -36,10 +41,6 @@ public abstract class SemanticQueryReq {
 
     public List<Long> getModelIds() {
         return Lists.newArrayList(modelIds);
-    }
-
-    public String getModelIdStr() {
-        return String.join(",", modelIds.stream().map(Object::toString).collect(Collectors.toList()));
     }
 
     public Set<Long> getModelIdSet() {

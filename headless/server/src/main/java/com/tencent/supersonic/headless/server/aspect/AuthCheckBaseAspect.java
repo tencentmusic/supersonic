@@ -16,13 +16,9 @@ import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
-import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
-import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.service.DimensionService;
-import com.tencent.supersonic.headless.server.service.MetricService;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -46,11 +42,6 @@ public class AuthCheckBaseAspect {
             new SimpleDateFormat(Constants.DAY_FORMAT));
     @Autowired
     private AuthService authService;
-    @Autowired
-    private DimensionService dimensionService;
-    @Autowired
-    private MetricService metricService;
-
     @Autowired
     private ModelService modelService;
 
@@ -85,18 +76,17 @@ public class AuthCheckBaseAspect {
 
     }
 
-    public Set<String> getHighSensitiveColsByModelId(List<Long> modelIds) {
+    public Set<String> getHighSensitiveColsByModelId(SemanticSchemaResp semanticSchemaResp) {
         Set<String> highSensitiveCols = new HashSet<>();
-        MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setModelIds(modelIds);
-        metaFilter.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
-        List<DimensionResp> highSensitiveDimensions = dimensionService.getDimensions(metaFilter);
-        List<MetricResp> highSensitiveMetrics = metricService.getMetrics(metaFilter);
-        if (!CollectionUtils.isEmpty(highSensitiveDimensions)) {
-            highSensitiveDimensions.forEach(dim -> highSensitiveCols.add(dim.getBizName()));
+        if (!CollectionUtils.isEmpty(semanticSchemaResp.getDimensions())) {
+            semanticSchemaResp.getDimensions().stream().filter(dimSchemaResp ->
+                    SensitiveLevelEnum.HIGH.getCode().equals(dimSchemaResp.getSensitiveLevel()))
+                    .forEach(dim -> highSensitiveCols.add(dim.getBizName()));
         }
-        if (!CollectionUtils.isEmpty(highSensitiveMetrics)) {
-            highSensitiveMetrics.forEach(metric -> highSensitiveCols.add(metric.getBizName()));
+        if (!CollectionUtils.isEmpty(semanticSchemaResp.getMetrics())) {
+            semanticSchemaResp.getMetrics().stream().filter(metricSchemaResp ->
+                            SensitiveLevelEnum.HIGH.getCode().equals(metricSchemaResp.getSensitiveLevel()))
+                    .forEach(metric -> highSensitiveCols.add(metric.getBizName()));
         }
         return highSensitiveCols;
     }

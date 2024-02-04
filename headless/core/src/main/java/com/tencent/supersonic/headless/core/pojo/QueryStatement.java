@@ -3,15 +3,17 @@ package com.tencent.supersonic.headless.core.pojo;
 import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.ParseSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
-import java.util.List;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Triple;
 
+import java.util.List;
+
 @Data
 public class QueryStatement {
-
+    private Long viewId;
     private List<Long> modelIds;
     private String sql = "";
     private String sourceId = "";
@@ -30,8 +32,9 @@ public class QueryStatement {
     private String viewSimplifySql = "";
     private Boolean enableLimitWrapper = false;
 
-
     private SemanticModel semanticModel;
+
+    private SemanticSchemaResp semanticSchemaResp;
 
     public boolean isOk() {
         this.ok = "".equals(errMsg) && !"".equals(sql);

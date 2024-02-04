@@ -1,24 +1,31 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
 import com.tencent.supersonic.common.pojo.ItemDateResp;
-import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
-import com.tencent.supersonic.headless.api.pojo.request.ModelSchemaFilterReq;
+import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
+import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
+import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
+import com.tencent.supersonic.headless.server.manager.DimensionYamlManager;
+import com.tencent.supersonic.headless.server.manager.MetricYamlManager;
+import com.tencent.supersonic.headless.server.manager.ModelYamlManager;
+import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.SchemaService;
+import com.tencent.supersonic.headless.server.service.ViewService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -26,7 +33,8 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -35,28 +43,21 @@ public class CatalogImpl implements Catalog {
     private final DatabaseService databaseService;
     private final ModelService modelService;
     private final DimensionService dimensionService;
-    private final ModelService datasourceService;
     private final MetricService metricService;
     private final ModelRelaService modelRelaService;
+    private final ViewService viewService;
+    private final SchemaService schemaService;
 
-    public CatalogImpl(DatabaseService databaseService,
-            ModelService modelService, DimensionService dimensionService,
-            ModelService datasourceService,
+    public CatalogImpl(DatabaseService databaseService, SchemaService schemaService,
+            ModelService modelService, DimensionService dimensionService, ViewService viewService,
             MetricService metricService, ModelRelaService modelRelaService) {
         this.databaseService = databaseService;
         this.modelService = modelService;
         this.dimensionService = dimensionService;
-        this.datasourceService = datasourceService;
+        this.viewService = viewService;
         this.metricService = metricService;
         this.modelRelaService = modelRelaService;
-    }
-
-    public DatabaseResp getDatabase(Long id) {
-        return databaseService.getDatabase(id);
-    }
-
-    public DatabaseResp getDatabaseByModelId(Long modelId) {
-        return modelService.getDatabaseByModelId(modelId);
+        this.schemaService = schemaService;
     }
 
     @Override
@@ -67,11 +68,6 @@ public class CatalogImpl implements Catalog {
     @Override
     public DimensionResp getDimension(Long id) {
         return dimensionService.getDimension(id);
-    }
-
-    @Override
-    public List<ModelRela> getModelRela(List<Long> modelIds) {
-        return modelRelaService.getModelRela(modelIds);
     }
 
     @Override
@@ -91,7 +87,7 @@ public class CatalogImpl implements Catalog {
 
     @Override
     public ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric) {
-        return datasourceService.getItemDate(dimension, metric);
+        return modelService.getItemDate(dimension, metric);
     }
 
     @Override
@@ -106,18 +102,43 @@ public class CatalogImpl implements Catalog {
     }
 
     @Override
-    public List<ModelSchemaResp> getModelSchema(List<Long> modelIds) {
-        ModelSchemaFilterReq modelSchemaFilterReq = new ModelSchemaFilterReq();
-        modelSchemaFilterReq.setModelIds(modelIds);
-        return modelService.fetchModelSchema(modelSchemaFilterReq);
+    public void getSchemaYamlTpl(SemanticSchemaResp semanticSchemaResp,
+                                   Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
+                                   List<DataModelYamlTpl> dataModelYamlTplList,
+                                   List<MetricYamlTpl> metricYamlTplList,
+                                   Map<Long, String> modelIdName) {
+
+        List<ModelResp> modelResps = semanticSchemaResp.getModelResps();
+        if (CollectionUtils.isEmpty(modelResps)) {
+            return;
+        }
+        List<DimSchemaResp> dimensionResps = semanticSchemaResp.getDimensions();
+        Long databaseId = modelResps.get(0).getDatabaseId();
+        DatabaseResp databaseResp = databaseService.getDatabase(databaseId);
+        for (ModelResp modelResp : modelResps) {
+            modelIdName.put(modelResp.getId(), modelResp.getBizName());
+            dataModelYamlTplList.add(ModelYamlManager.convert2YamlObj(modelResp, databaseResp));
+            if (!dimensionYamlMap.containsKey(modelResp.getBizName())) {
+                dimensionYamlMap.put(modelResp.getBizName(), new ArrayList<>());
+            }
+            List<DimensionResp> dimensionRespList = dimensionResps.stream()
+                    .filter(d -> d.getModelBizName().equalsIgnoreCase(modelResp.getBizName()))
+                    .collect(Collectors.toList());
+            dimensionYamlMap.get(modelResp.getBizName()).addAll(DimensionYamlManager.convert2DimensionYaml(
+                    dimensionRespList));
+        }
+        List<MetricResp> metricResps = new ArrayList<>(semanticSchemaResp.getMetrics());
+        metricYamlTplList.addAll(MetricYamlManager.convert2YamlObj(metricResps));
     }
 
     @Override
-    public void getModelYamlTplByModelIds(Set<Long> modelIds, Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
-            List<DataModelYamlTpl> dataModelYamlTplList, List<MetricYamlTpl> metricYamlTplList,
-            Map<Long, String> modelIdName) {
-        datasourceService.getModelYamlTplByModelIds(modelIds, dimensionYamlMap, dataModelYamlTplList,
-                metricYamlTplList, modelIdName);
+    public SemanticSchemaResp fetchSemanticSchema(SchemaFilterReq schemaFilterReq) {
+        return schemaService.fetchSemanticSchema(schemaFilterReq);
+    }
+
+    @Override
+    public List<ItemUseResp> getStatInfo(ItemUseReq itemUseReq) throws ExecutionException {
+        return schemaService.getStatInfo(itemUseReq);
     }
 
 }

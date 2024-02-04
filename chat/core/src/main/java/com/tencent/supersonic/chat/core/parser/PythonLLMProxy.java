@@ -1,19 +1,16 @@
 package com.tencent.supersonic.chat.core.parser;
 
 import com.alibaba.fastjson.JSON;
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.config.LLMParserConfig;
-import com.tencent.supersonic.chat.core.parser.sql.llm.OutputFormat;
 import com.tencent.supersonic.chat.core.parser.plugin.function.FunctionCallConfig;
 import com.tencent.supersonic.chat.core.parser.plugin.function.FunctionReq;
 import com.tencent.supersonic.chat.core.parser.plugin.function.FunctionResp;
+import com.tencent.supersonic.chat.core.parser.sql.llm.OutputFormat;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import java.net.URI;
-import java.net.URL;
-import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +24,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * PythonLLMProxy sends requests to LangChain-based python service.
@@ -47,10 +48,10 @@ public class PythonLLMProxy implements LLMProxy {
         return false;
     }
 
-    public LLMResp query2sql(LLMReq llmReq, String modelClusterKey) {
+    public LLMResp query2sql(LLMReq llmReq, Long viewId) {
         long startTime = System.currentTimeMillis();
-        log.info("requestLLM request, modelId:{},llmReq:{}", modelClusterKey, llmReq);
-        keyPipelineLog.info("modelClusterKey:{},llmReq:{}", modelClusterKey, llmReq);
+        log.info("requestLLM request, viewId:{},llmReq:{}", viewId, llmReq);
+        keyPipelineLog.info("viewId:{},llmReq:{}", viewId, llmReq);
         try {
             LLMParserConfig llmParserConfig = ContextUtils.getBean(LLMParserConfig.class);
 

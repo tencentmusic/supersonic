@@ -6,6 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
+import com.tencent.supersonic.chat.api.pojo.ViewSchema;
 import com.tencent.supersonic.chat.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
@@ -59,20 +60,12 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlRemoveHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -96,6 +89,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Component("chatQueryService")
@@ -290,7 +292,7 @@ public class QueryServiceImpl implements QueryService {
         similarQueryManager.saveSimilarQuery(SimilarQueryReq.builder().parseId(queryReq.getParseId())
                 .queryId(queryReq.getQueryId())
                 .agentId(chatQueryDO.getAgentId())
-                .modelId(parseInfo.getModelClusterKey())
+                .viewId(parseInfo.getViewId())
                 .queryText(queryReq.getQueryText()).build());
     }
 
@@ -316,7 +318,7 @@ public class QueryServiceImpl implements QueryService {
         if (Objects.nonNull(parseInfo.getSqlInfo())
                 && StringUtils.isNotBlank(parseInfo.getSqlInfo().getCorrectS2SQL())) {
             String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
-            fields = SqlParserSelectHelper.getAllFields(correctorSql);
+            fields = SqlSelectHelper.getAllFields(correctorSql);
         }
         if (LLMSqlQuery.QUERY_MODE.equalsIgnoreCase(parseInfo.getQueryMode())
                 && checkMetricReplace(fields, queryData.getMetrics())) {
@@ -346,8 +348,9 @@ public class QueryServiceImpl implements QueryService {
         }
         QueryResult queryResult = semanticQuery.execute(user);
         queryResult.setChatContext(semanticQuery.getParseInfo());
+        ViewSchema viewSchema = semanticSchema.getViewSchemaMap().get(parseInfo.getViewId());
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
-        EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, user);
+        EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, viewSchema, user);
         queryResult.setEntityInfo(entityInfo);
         return queryResult;
     }
@@ -370,8 +373,8 @@ public class QueryServiceImpl implements QueryService {
         String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
         log.info("correctorSql before replacing:{}", correctorSql);
         // get where filter and having filter
-        List<FieldExpression> whereExpressionList = SqlParserSelectHelper.getWhereExpressions(correctorSql);
-        List<FieldExpression> havingExpressionList = SqlParserSelectHelper.getHavingExpressions(correctorSql);
+        List<FieldExpression> whereExpressionList = SqlSelectHelper.getWhereExpressions(correctorSql);
+        List<FieldExpression> havingExpressionList = SqlSelectHelper.getHavingExpressions(correctorSql);
         List<Expression> addWhereConditions = new ArrayList<>();
         List<Expression> addHavingConditions = new ArrayList<>();
         Set<String> removeWhereFieldNames = new HashSet<>();
@@ -381,16 +384,16 @@ public class QueryServiceImpl implements QueryService {
                 parseInfo.getDimensionFilters(), addWhereConditions, removeWhereFieldNames);
         updateDateInfo(queryData, parseInfo, filedNameToValueMap,
                 whereExpressionList, addWhereConditions, removeWhereFieldNames);
-        correctorSql = SqlParserReplaceHelper.replaceValue(correctorSql, filedNameToValueMap);
-        correctorSql = SqlParserRemoveHelper.removeWhereCondition(correctorSql, removeWhereFieldNames);
+        correctorSql = SqlReplaceHelper.replaceValue(correctorSql, filedNameToValueMap);
+        correctorSql = SqlRemoveHelper.removeWhereCondition(correctorSql, removeWhereFieldNames);
         // replace having filter
         updateFilters(havingExpressionList, queryData.getDimensionFilters(),
                 parseInfo.getDimensionFilters(), addHavingConditions, removeHavingFieldNames);
-        correctorSql = SqlParserReplaceHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
-        correctorSql = SqlParserRemoveHelper.removeHavingCondition(correctorSql, removeHavingFieldNames);
+        correctorSql = SqlReplaceHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
+        correctorSql = SqlRemoveHelper.removeHavingCondition(correctorSql, removeHavingFieldNames);
 
-        correctorSql = SqlParserAddHelper.addWhere(correctorSql, addWhereConditions);
-        correctorSql = SqlParserAddHelper.addHaving(correctorSql, addHavingConditions);
+        correctorSql = SqlAddHelper.addWhere(correctorSql, addWhereConditions);
+        correctorSql = SqlAddHelper.addHaving(correctorSql, addHavingConditions);
         log.info("correctorSql after replacing:{}", correctorSql);
         return correctorSql;
     }
@@ -404,7 +407,7 @@ public class QueryServiceImpl implements QueryService {
         Map<String, Pair<String, String>> fieldMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(oriMetrics) && !oriMetrics.contains(metric.getName())) {
             fieldMap.put(oriMetrics.get(0), Pair.of(metric.getName(), metric.getDefaultAgg()));
-            correctorSql = SqlParserReplaceHelper.replaceAggFields(correctorSql, fieldMap);
+            correctorSql = SqlReplaceHelper.replaceAggFields(correctorSql, fieldMap);
         }
         log.info("after replaceMetrics:{}", correctorSql);
         parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);
@@ -415,7 +418,8 @@ public class QueryServiceImpl implements QueryService {
         ChatParseDO chatParseDO = chatService.getParseInfo(queryId, parseId);
         SemanticParseInfo parseInfo = JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
-        return semanticService.getEntityInfo(parseInfo, user);
+        ViewSchema viewSchema = schemaService.getSemanticSchema().getViewSchemaMap().get(parseInfo.getViewId());
+        return semanticService.getEntityInfo(parseInfo, viewSchema, user);
     }
 
     private void updateDateInfo(QueryDataReq queryData, SemanticParseInfo parseInfo,
@@ -632,10 +636,10 @@ public class QueryServiceImpl implements QueryService {
         SemanticQueryResp semanticQueryResp = new SemanticQueryResp();
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();
-        SchemaElement schemaElement = semanticSchema.getDimensions(dimensionValueReq.getElementID());
+        SchemaElement schemaElement = semanticSchema.getDimension(dimensionValueReq.getElementID());
         Set<Long> detectModelIds = new HashSet<>();
-        detectModelIds.add(schemaElement.getModel());
-        dimensionValueReq.setModelId(schemaElement.getModel());
+        detectModelIds.add(schemaElement.getView());
+        dimensionValueReq.setModelId(schemaElement.getView());
         List<String> dimensionValues = getDimensionValues(dimensionValueReq, detectModelIds);
         // if the search results is null,search dimensionValue from database
         if (CollectionUtils.isEmpty(dimensionValues)) {
@@ -692,7 +696,7 @@ public class QueryServiceImpl implements QueryService {
         dateConf.setPeriod("DAY");
         queryStructReq.setDateInfo(dateConf);
         queryStructReq.setLimit(20L);
-        queryStructReq.addModelId(dimensionValueReq.getModelId());
+        queryStructReq.setViewId(dimensionValueReq.getModelId());
         queryStructReq.setQueryType(QueryType.ID);
         List<String> groups = new ArrayList<>();
         groups.add(dimensionValueReq.getBizName());

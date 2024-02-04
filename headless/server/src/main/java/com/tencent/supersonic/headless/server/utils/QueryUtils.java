@@ -1,20 +1,23 @@
 package com.tencent.supersonic.headless.server.utils;
 
-import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
-import static com.tencent.supersonic.common.pojo.Constants.UNIONALL;
-
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-import com.tencent.supersonic.headless.server.service.Catalog;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,11 +27,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+
+import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
+import static com.tencent.supersonic.common.pojo.Constants.UNIONALL;
 
 
 @Slf4j
@@ -43,11 +44,6 @@ public class QueryUtils {
 
     @Value("${query.optimizer.enable:true}")
     private Boolean optimizeEnable;
-    private final Catalog catalog;
-
-    public QueryUtils(Catalog catalog) {
-        this.catalog = catalog;
-    }
 
     @PostConstruct
     public void fillPattern() {
@@ -58,10 +54,9 @@ public class QueryUtils {
         }
     }
 
-    public void fillItemNameInfo(SemanticQueryResp queryResultWithColumns, List<Long> modelIds) {
-        MetaFilter metaFilter = new MetaFilter(modelIds);
-        List<MetricResp> metricDescList = catalog.getMetrics(metaFilter);
-        List<DimensionResp> dimensionDescList = catalog.getDimensions(metaFilter);
+    public void fillItemNameInfo(SemanticQueryResp semanticQueryResp, SemanticSchemaResp semanticSchemaResp) {
+        List<MetricSchemaResp> metricDescList = semanticSchemaResp.getMetrics();
+        List<DimSchemaResp> dimSchemaResps = semanticSchemaResp.getDimensions();
         Map<String, MetricResp> metricRespMap =
                 metricDescList.stream().collect(Collectors.toMap(MetricResp::getBizName, a -> a, (k1, k2) -> k1));
         Map<String, String> namePair = new HashMap<>();
@@ -71,11 +66,11 @@ public class QueryUtils {
             namePair.put(metricDesc.getBizName(), metricDesc.getName());
             nameTypePair.put(metricDesc.getBizName(), SemanticType.NUMBER.name());
         });
-        dimensionDescList.forEach(dimensionDesc -> {
+        dimSchemaResps.forEach(dimensionDesc -> {
             namePair.put(dimensionDesc.getBizName(), dimensionDesc.getName());
             nameTypePair.put(dimensionDesc.getBizName(), dimensionDesc.getSemanticType());
         });
-        List<QueryColumn> columns = queryResultWithColumns.getColumns();
+        List<QueryColumn> columns = semanticQueryResp.getColumns();
         columns.forEach(column -> {
             String nameEn = getName(column.getNameEn().toLowerCase());
             if (nameEn.contains(JOIN_UNDERLINE)) {

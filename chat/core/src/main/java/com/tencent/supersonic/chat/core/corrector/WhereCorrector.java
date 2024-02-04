@@ -1,24 +1,18 @@
 package com.tencent.supersonic.chat.core.corrector;
 
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.core.parser.sql.llm.S2SqlDateHelper;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.StringUtil;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -26,6 +20,12 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Perform SQL corrections on the "Where" section in S2SQL.
@@ -37,8 +37,6 @@ public class WhereCorrector extends BaseSemanticCorrector {
     public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
 
         addDateIfNotExist(queryContext, semanticParseInfo);
-
-        parserDateDiffFunction(semanticParseInfo);
 
         addQueryFilter(queryContext, semanticParseInfo);
 
@@ -58,25 +56,19 @@ public class WhereCorrector extends BaseSemanticCorrector {
             } catch (JSQLParserException e) {
                 log.error("parseCondExpression", e);
             }
-            correctS2SQL = SqlParserAddHelper.addWhere(correctS2SQL, expression);
+            correctS2SQL = SqlAddHelper.addWhere(correctS2SQL, expression);
             semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
         }
     }
 
-    private void parserDateDiffFunction(SemanticParseInfo semanticParseInfo) {
-        String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
-        correctS2SQL = SqlParserReplaceHelper.replaceFunction(correctS2SQL);
-        semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
-    }
-
     private void addDateIfNotExist(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
-        List<String> whereFields = SqlParserSelectHelper.getWhereFields(correctS2SQL);
+        List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
         if (CollectionUtils.isEmpty(whereFields) || !TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
-            String currentDate = S2SqlDateHelper.getReferenceDate(queryContext, semanticParseInfo.getModelId());
+            String currentDate = S2SqlDateHelper.getReferenceDate(queryContext, semanticParseInfo.getViewId());
             if (StringUtils.isNotBlank(currentDate)) {
-                correctS2SQL = SqlParserAddHelper.addParenthesisToWhere(correctS2SQL);
-                correctS2SQL = SqlParserAddHelper.addWhere(
+                correctS2SQL = SqlAddHelper.addParenthesisToWhere(correctS2SQL);
+                correctS2SQL = SqlAddHelper.addWhere(
                         correctS2SQL, TimeDimensionEnum.DAY.getChName(), currentDate);
             }
         }
@@ -99,15 +91,15 @@ public class WhereCorrector extends BaseSemanticCorrector {
 
     private void updateFieldValueByTechName(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
-        Set<Long> modelIds = semanticParseInfo.getModel().getModelIds();
-        List<SchemaElement> dimensions = semanticSchema.getDimensions(modelIds);
+        Long viewId = semanticParseInfo.getViewId();
+        List<SchemaElement> dimensions = semanticSchema.getDimensions(viewId);
 
         if (CollectionUtils.isEmpty(dimensions)) {
             return;
         }
 
         Map<String, Map<String, String>> aliasAndBizNameToTechName = getAliasAndBizNameToTechName(dimensions);
-        String correctS2SQL = SqlParserReplaceHelper.replaceValue(semanticParseInfo.getSqlInfo().getCorrectS2SQL(),
+        String correctS2SQL = SqlReplaceHelper.replaceValue(semanticParseInfo.getSqlInfo().getCorrectS2SQL(),
                 aliasAndBizNameToTechName);
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
     }
