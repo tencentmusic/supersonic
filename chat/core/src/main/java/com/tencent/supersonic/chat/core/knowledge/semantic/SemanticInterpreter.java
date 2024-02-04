@@ -12,6 +12,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
+import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
@@ -55,5 +56,7 @@ public interface SemanticInterpreter {
     List<ViewSchemaResp> fetchViewSchema(List<Long> ids, Boolean cacheEnable);
 
     List<ViewResp> getViewList(Long domainId);
+
+    List<ItemResp> getDomainViewTree();
 
 }

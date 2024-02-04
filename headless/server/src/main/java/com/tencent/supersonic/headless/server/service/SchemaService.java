@@ -11,6 +11,7 @@ import com.tencent.supersonic.headless.api.pojo.request.SchemaItemQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.ViewFilterReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
+import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
@@ -40,4 +41,6 @@ public interface SchemaService {
     SemanticSchemaResp fetchSemanticSchema(SchemaFilterReq schemaFilterReq);
 
     List<ItemUseResp> getStatInfo(ItemUseReq itemUseReq) throws ExecutionException;
+
+    List<ItemResp> getDomainViewTree();
 }

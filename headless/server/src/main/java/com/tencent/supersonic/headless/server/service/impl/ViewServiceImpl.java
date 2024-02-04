@@ -15,8 +15,10 @@ import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ViewDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ViewDOMapper;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.ViewService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -28,6 +30,9 @@ import java.util.stream.Collectors;
 @Service
 public class ViewServiceImpl
         extends ServiceImpl<ViewDOMapper, ViewDO> implements ViewService {
+
+    @Autowired
+    private DomainService domainService;
 
     @Override
     public ViewResp save(ViewReq viewReq, User user) {
