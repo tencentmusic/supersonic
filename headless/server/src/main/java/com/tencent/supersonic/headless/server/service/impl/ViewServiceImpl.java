@@ -5,12 +5,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.ViewDetail;
 import com.tencent.supersonic.headless.api.pojo.request.ViewReq;
+import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ViewDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ViewDOMapper;
@@ -23,8 +25,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,6 +84,43 @@ public class ViewServiceImpl
         updateById(viewDO);
     }
 
+    @Override
+    public List<ViewResp> getViews(User user) {
+        List<ViewResp> viewResps = getViewList(new MetaFilter());
+        return getViewFilterByAuth(viewResps, user);
+    }
+
+    @Override
+    public List<ViewResp> getViewsInheritAuth(User user, Long domainId) {
+        List<ViewResp> viewResps = getViewList(new MetaFilter());
+        List<ViewResp> inheritAuthFormDomain = getViewFilterByDomainAuth(viewResps, user);
+        Set<ViewResp> viewRespSet = new HashSet<>(inheritAuthFormDomain);
+        List<ViewResp> viewFilterByAuth = getViewFilterByAuth(viewResps, user);
+        viewRespSet.addAll(viewFilterByAuth);
+        if (domainId != null && domainId > 0) {
+            viewRespSet = viewRespSet.stream().filter(modelResp ->
+                    modelResp.getDomainId().equals(domainId)).collect(Collectors.toSet());
+        }
+        return viewRespSet.stream().sorted(Comparator.comparingLong(ViewResp::getId))
+                .collect(Collectors.toList());
+    }
+
+    private List<ViewResp> getViewFilterByAuth(List<ViewResp> viewResps, User user) {
+        return viewResps.stream()
+                .filter(viewResp -> checkAdminPermission(user, viewResp))
+                .collect(Collectors.toList());
+    }
+
+    private List<ViewResp> getViewFilterByDomainAuth(List<ViewResp> viewResps, User user) {
+        Set<DomainResp> domainResps = domainService.getDomainAuthSet(user, AuthType.ADMIN);
+        if (CollectionUtils.isEmpty(domainResps)) {
+            return Lists.newArrayList();
+        }
+        Set<Long> domainIds = domainResps.stream().map(DomainResp::getId).collect(Collectors.toSet());
+        return viewResps.stream().filter(viewResp ->
+                domainIds.contains(viewResp.getDomainId())).collect(Collectors.toList());
+    }
+
     private ViewResp convert(ViewDO viewDO) {
         ViewResp viewResp = new ViewResp();
         BeanMapper.mapper(viewDO, viewResp);
@@ -100,6 +142,15 @@ public class ViewServiceImpl
         viewDO.setViewDetail(JSONObject.toJSONString(viewReq.getViewDetail()));
         viewDO.setQueryConfig(JSONObject.toJSONString(viewReq.getQueryConfig()));
         return viewDO;
+    }
+
+    public static boolean checkAdminPermission(User user, ViewResp viewResp) {
+        List<String> admins = viewResp.getAdmins();
+        if (user.isSuperAdmin()) {
+            return true;
+        }
+        String userName = user.getName();
+        return admins.contains(userName) || viewResp.getCreatedBy().equals(userName);
     }
 
 }

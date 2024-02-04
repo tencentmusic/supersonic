@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -336,7 +335,7 @@ public class SchemaServiceImpl implements SchemaService {
                 .collect(Collectors.toList());
     }
 
-    private void fillStaticInfo(List<ViewSchemaResp> viewSchemaResps) throws ExecutionException {
+    private void fillStaticInfo(List<ViewSchemaResp> viewSchemaResps) {
         List<Long> viewIds = viewSchemaResps.stream()
                 .map(ViewSchemaResp::getId).collect(Collectors.toList());
         ItemUseReq itemUseReq = new ItemUseReq();

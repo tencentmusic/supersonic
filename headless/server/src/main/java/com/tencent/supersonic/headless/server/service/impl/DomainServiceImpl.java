@@ -10,10 +10,12 @@ import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainUpdateReq;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DomainDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DomainRepository;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.ViewService;
 import com.tencent.supersonic.headless.server.utils.DomainConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Sets;
@@ -41,14 +43,17 @@ public class DomainServiceImpl implements DomainService {
     private final DomainRepository domainRepository;
     private final ModelService modelService;
     private final UserService userService;
+    private final ViewService viewService;
 
 
     public DomainServiceImpl(DomainRepository domainRepository,
                              @Lazy ModelService modelService,
-                             UserService userService) {
+                             UserService userService,
+                             @Lazy ViewService viewService) {
         this.domainRepository = domainRepository;
         this.modelService = modelService;
         this.userService = userService;
+        this.viewService = viewService;
     }
 
     @Override
@@ -97,6 +102,11 @@ public class DomainServiceImpl implements DomainService {
         List<ModelResp> modelResps = modelService.getModelAuthList(user, AuthType.ADMIN);
         if (!CollectionUtils.isEmpty(modelResps)) {
             List<Long> domainIds = modelResps.stream().map(ModelResp::getDomainId).collect(Collectors.toList());
+            domainWithAuthAll.addAll(getParentDomain(domainIds));
+        }
+        List<ViewResp> viewResps = viewService.getViews(user);
+        if (!CollectionUtils.isEmpty(viewResps)) {
+            List<Long> domainIds = viewResps.stream().map(ViewResp::getDomainId).collect(Collectors.toList());
             domainWithAuthAll.addAll(getParentDomain(domainIds));
         }
         return new ArrayList<>(domainWithAuthAll).stream()

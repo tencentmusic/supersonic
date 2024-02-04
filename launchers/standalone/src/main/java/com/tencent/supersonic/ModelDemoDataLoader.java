@@ -138,9 +138,9 @@ public class ModelDemoDataLoader {
         domainReq.setBizName("supersonic");
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
-        domainReq.setViewers(Arrays.asList("admin", "tom", "jack"));
+        domainReq.setViewers(Arrays.asList("admin", "tom"));
         domainReq.setViewOrgs(Collections.singletonList("1"));
-        domainReq.setAdmins(Collections.singletonList("admin"));
+        domainReq.setAdmins(Arrays.asList("admin", "jack"));
         domainReq.setAdminOrgs(Collections.emptyList());
         domainService.createDomain(domainReq, user);
     }
@@ -154,7 +154,7 @@ public class ModelDemoDataLoader {
         modelReq.setDomainId(1L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
-        modelReq.setAdmins(Collections.singletonList("admin"));
+        modelReq.setAdmins(Arrays.asList("admin", "alice"));
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Identify> identifiers = new ArrayList<>();
@@ -294,7 +294,7 @@ public class ModelDemoDataLoader {
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
         domainReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         domainReq.setViewOrgs(Collections.singletonList("1"));
-        domainReq.setAdmins(Collections.singletonList("admin"));
+        domainReq.setAdmins(Arrays.asList("admin", "alice"));
         domainReq.setAdminOrgs(Collections.emptyList());
         domainService.createDomain(domainReq, user);
     }
@@ -478,7 +478,7 @@ public class ModelDemoDataLoader {
         viewReq.setBizName("singer");
         viewReq.setDomainId(2L);
         viewReq.setDescription("包含艺人相关标签和指标信息");
-        viewReq.setAdmins(Lists.newArrayList("admin"));
+        viewReq.setAdmins(Lists.newArrayList("admin", "jack"));
         List<ViewModelConfig> viewModelConfigs = Lists.newArrayList(
                 new ViewModelConfig(4L, Lists.newArrayList(4L, 5L, 6L, 7L),
                         Lists.newArrayList(5L, 6L, 7L))
