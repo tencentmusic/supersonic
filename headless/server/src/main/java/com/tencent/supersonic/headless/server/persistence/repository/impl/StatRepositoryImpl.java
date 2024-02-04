@@ -48,8 +48,10 @@ public class StatRepositoryImpl implements StatRepository {
         statInfos.stream().forEach(stat -> {
             String dimensions = stat.getDimensions();
             String metrics = stat.getMetrics();
-            updateStatMapInfo(map, dimensions, TypeEnums.DIMENSION.name().toLowerCase(), stat.getViewId());
-            updateStatMapInfo(map, metrics, TypeEnums.METRIC.name().toLowerCase(), stat.getViewId());
+            if (Objects.isNull(stat.getViewId())) {
+                updateStatMapInfo(map, dimensions, TypeEnums.DIMENSION.name().toLowerCase(), stat.getViewId());
+                updateStatMapInfo(map, metrics, TypeEnums.METRIC.name().toLowerCase(), stat.getViewId());
+            }
         });
         log.info("map:{}", map);
         map.forEach((k, v) -> {
