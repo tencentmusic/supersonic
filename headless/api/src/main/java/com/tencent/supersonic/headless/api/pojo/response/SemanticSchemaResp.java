@@ -35,4 +35,24 @@ public class SemanticSchemaResp {
 
     }
 
+    public MetricSchemaResp getMetric(String bizName) {
+        return metrics.stream().filter(metric -> bizName.equalsIgnoreCase(metric.getBizName()))
+                .findFirst().orElse(null);
+    }
+
+    public MetricSchemaResp getMetric(Long id) {
+        return metrics.stream().filter(metric -> id.equals(metric.getId()))
+                .findFirst().orElse(null);
+    }
+
+    public DimSchemaResp getDimension(String bizName) {
+        return dimensions.stream().filter(dimension -> bizName.equalsIgnoreCase(dimension.getBizName()))
+                .findFirst().orElse(null);
+    }
+
+    public DimSchemaResp getDimension(Long id) {
+        return dimensions.stream().filter(dimension -> id.equals(dimension.getId()))
+                .findFirst().orElse(null);
+    }
+
 }
