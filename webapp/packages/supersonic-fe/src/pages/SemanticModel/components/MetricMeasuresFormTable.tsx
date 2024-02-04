@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, Input, Space, Tag } from 'antd';
+import { Input, Space, Tag } from 'antd';
 import ProTable from '@ant-design/pro-table';
 import ProCard from '@ant-design/pro-card';
 import SqlEditor from '@/components/SqlEditor';
-import BindMeasuresTable from './BindMeasuresTable';
+
 import FormLabelRequire from './FormLabelRequire';
 import styles from './style.less';
 import { ISemantic } from '../data';
@@ -26,13 +26,29 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
   onSqlChange,
 }) => {
   const actionRef = useRef<ActionType>();
-  const [measuresModalVisible, setMeasuresModalVisible] = useState<boolean>(false);
+
+  const [tableData, setTableData] = useState<any[]>([]);
+
   const [measuresParams, setMeasuresParams] = useState(
     typeParams || {
       expr: '',
       measures: [],
     },
   );
+
+  const [selectedKeys, setSelectedKeys] = useState<string[]>(() => {
+    return measuresParams?.measures.map((item: any) => {
+      return item.bizName;
+    });
+  });
+
+  useEffect(() => {
+    const datasource =
+      datasourceId && Array.isArray(measuresList)
+        ? measuresList.filter((item) => item.datasourceId === datasourceId)
+        : measuresList;
+    setTableData(datasource);
+  }, [measuresList]);
 
   useEffect(() => {
     setMeasuresParams({ ...typeParams });
@@ -49,8 +65,9 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
     {
       dataIndex: 'constraint',
       title: '限定条件',
+      width: 250,
       tooltip:
-        '该限定条件用于在计算指标时限定口径，作用于度量，所用于过滤的维度必须在创建数据源的时候被标记为日期或者维度，不需要加where关键字。比如：维度A="值1" and 维度B="值2"',
+        '该限定条件用于在计算指标时限定口径，作用于度量，所用于过滤的维度必须在创建模型的时候被标记为日期或者维度，不需要加where关键字。比如：维度A="值1" and 维度B="值2"',
       render: (_: any, record: any) => {
         const { constraint, name } = record;
         const { measures } = measuresParams;
@@ -78,57 +95,59 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
     {
       dataIndex: 'agg',
       title: '聚合函数',
-    },
-
-    {
-      title: '操作',
-      dataIndex: 'x',
-      valueType: 'option',
-      render: (_: any, record: any) => {
-        const { bizName } = record;
-        return (
-          <Space>
-            <a
-              key="deleteBtn"
-              onClick={() => {
-                const { measures } = measuresParams;
-                const list = measures.filter((item: any) => {
-                  return item.bizName !== bizName;
-                });
-                onFieldChange?.(list);
-              }}
-            >
-              删除
-            </a>
-          </Space>
-        );
-      },
+      width: 80,
     },
   ];
+
+  const rowSelection = {
+    selectedRowKeys: selectedKeys,
+    onChange: (_selectedRowKeys: any[], items: ISemantic.IMeasure[]) => {
+      setSelectedKeys([..._selectedRowKeys]);
+
+      const measures = items.map(({ bizName, name, expr, datasourceId, agg }) => {
+        return {
+          bizName,
+          name,
+          expr,
+          agg,
+          datasourceId,
+        };
+      });
+      onFieldChange?.(measures);
+    },
+  };
+
   return (
     <>
       <Space direction="vertical" style={{ width: '100%' }}>
         <ProTable
           actionRef={actionRef}
           headerTitle={<FormLabelRequire title="度量列表" />}
-          rowKey="name"
+          rowKey="bizName"
           columns={columns}
-          dataSource={measuresParams?.measures || []}
-          pagination={false}
+          dataSource={tableData}
           search={false}
+          toolbar={{
+            search: {
+              placeholder: '请输入度量名称',
+              onSearch: (value: string) => {
+                setTableData(
+                  [...tableData].reduce((data: ISemantic.IMeasure[], item: ISemantic.IMeasure) => {
+                    if (item.bizName.includes(value)) {
+                      data.push(item);
+                    }
+                    return data;
+                  }, []),
+                );
+              },
+            },
+          }}
+          pagination={{ defaultPageSize: 10 }}
           size="small"
           options={false}
-          toolBarRender={() => [
-            <Button
-              key="create"
-              type="primary"
-              onClick={() => {
-                setMeasuresModalVisible(true);
-              }}
-            >
-              增加度量
-            </Button>,
-          ]}
+          tableAlertRender={false}
+          scroll={{ y: 500 }}
+          rowSelection={rowSelection}
         />
         <ProCard
           title={<FormLabelRequire title="度量表达式" />}
@@ -161,33 +180,6 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
           />
         </ProCard>
       </Space>
-      {measuresModalVisible && (
-        <BindMeasuresTable
-          measuresList={
-            datasourceId && Array.isArray(measuresList)
-              ? measuresList.filter((item) => item.datasourceId === datasourceId)
-              : measuresList
-          }
-          selectedMeasuresList={measuresParams?.measures || []}
-          onSubmit={async (values: any[]) => {
-            const measures = values.map(({ bizName, name, expr, datasourceId, agg }) => {
-              return {
-                bizName,
-                name,
-                expr,
-                agg,
-                datasourceId,
-              };
-            });
-            onFieldChange?.(measures);
-            setMeasuresModalVisible(false);
-          }}
-          onCancel={() => {
-            setMeasuresModalVisible(false);
-          }}
-          createModalVisible={measuresModalVisible}
-        />
-      )}
     </>
   );
 };

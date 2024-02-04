@@ -4,19 +4,21 @@ import { ISemantic } from '../../data';
 
 import { TransType } from '../../enum';
 import DimensionMetricVisibleTransfer from '../../components/Entity/DimensionMetricVisibleTransfer';
-import { wrapperTransTypeAndId } from '../../components/Entity/utils';
+import { wrapperTransTypeAndId } from '../../utils';
 
 export type ModelCreateFormModalProps = {
-  dimensionList: ISemantic.IDimensionItem[];
-  metricList: ISemantic.IMetricItem[];
+  dimensionList?: ISemantic.IDimensionItem[];
+  metricList?: ISemantic.IMetricItem[];
   modelId?: number;
   selectedTransferKeys: React.Key[];
+  toolbarSolt?: ReactNode;
   onCancel: () => void;
   onSubmit: (values: any, selectedKeys: React.Key[]) => void;
 };
 
 const DimensionMetricTransferModal: React.FC<ModelCreateFormModalProps> = ({
   modelId,
+  toolbarSolt,
   selectedTransferKeys,
   metricList,
   dimensionList,
@@ -36,6 +38,9 @@ const DimensionMetricTransferModal: React.FC<ModelCreateFormModalProps> = ({
   };
 
   useEffect(() => {
+    if (!dimensionList || !metricList) {
+      return;
+    }
     const sourceDimensionList = dimensionList.reduce((mergeList: any[], item) => {
       mergeList.push(addItemKey(item, TransType.DIMENSION));
       return mergeList;
@@ -84,7 +89,7 @@ const DimensionMetricTransferModal: React.FC<ModelCreateFormModalProps> = ({
 
   return (
     <DimensionMetricVisibleTransfer
-      titles={['未关联维度/指标', '已关联维度/指标']}
+      titles={[<>{toolbarSolt}</>, '已加入维度/指标']}
       listStyle={{
         width: 520,
         height: 600,
@@ -94,26 +99,27 @@ const DimensionMetricTransferModal: React.FC<ModelCreateFormModalProps> = ({
       onChange={(newTargetKeys: string[]) => {
         const removeDimensionList: ISemantic.IDimensionItem[] = [];
         const removeMetricList: ISemantic.IMetricItem[] = [];
-        const dimensionItemChangeList = dimensionList.reduce(
-          (dimensionChangeList: any[], item: any) => {
-            if (newTargetKeys.includes(wrapperTransTypeAndId(TransType.DIMENSION, item.id))) {
-              dimensionChangeList.push(item);
-            } else {
-              removeDimensionList.push(item.id);
-            }
-            return dimensionChangeList;
-          },
-          [],
-        );
+        const dimensionItemChangeList = Array.isArray(dimensionList)
+          ? dimensionList.reduce((dimensionChangeList: any[], item: any) => {
+              if (newTargetKeys.includes(wrapperTransTypeAndId(TransType.DIMENSION, item.id))) {
+                dimensionChangeList.push(item);
+              } else {
+                removeDimensionList.push(item.id);
+              }
+              return dimensionChangeList;
+            }, [])
+          : [];
 
-        const metricItemChangeList = metricList.reduce((metricChangeList: any[], item: any) => {
-          if (newTargetKeys.includes(wrapperTransTypeAndId(TransType.METRIC, item.id))) {
-            metricChangeList.push(item);
-          } else {
-            removeMetricList.push(item.id);
-          }
-          return metricChangeList;
-        }, []);
+        const metricItemChangeList = Array.isArray(metricList)
+          ? metricList.reduce((metricChangeList: any[], item: any) => {
+              if (newTargetKeys.includes(wrapperTransTypeAndId(TransType.METRIC, item.id))) {
+                metricChangeList.push(item);
+              } else {
+                removeMetricList.push(item.id);
+              }
+              return metricChangeList;
+            }, [])
+          : [];
 
         setSelectedItemList([...dimensionItemChangeList, ...metricItemChangeList]);
 

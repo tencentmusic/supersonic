@@ -17,7 +17,7 @@ import TransTypeTag from '../TransTypeTag';
 type Props = {
   entityData: any;
   chatConfigKey: string;
-  chatConfigType: ChatConfigType.DETAIL | ChatConfigType.AGG;
+  chatConfigType: ChatConfigType.TAG | ChatConfigType.METRIC;
   metricList: ISemantic.IMetricItem[];
   dimensionList: ISemantic.IDimensionItem[];
   domainId: number;
@@ -59,7 +59,7 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
       ...chatDefaultConfig,
       id,
     });
-    if (chatConfigType === ChatConfigType.DETAIL) {
+    if (chatConfigType === ChatConfigType.TAG) {
       initDataItemValue(chatDefaultConfig);
     }
   }, [entityData, dataItemListOptions]);
@@ -165,7 +165,7 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
           <Input placeholder="id" />
         </FormItem>
 
-        {chatConfigType === ChatConfigType.DETAIL && (
+        {chatConfigType === ChatConfigType.TAG && (
           <FormItem name="dataItemIds" label="圈选结果展示字段">
             <Select
               mode="multiple"
@@ -193,7 +193,7 @@ const DefaultSettingForm: ForwardRefRenderFunction<any, Props> = (
           }
         >
           <Input.Group compact>
-            {chatConfigType === ChatConfigType.DETAIL ? (
+            {chatConfigType === ChatConfigType.TAG ? (
               <span
                 style={{
                   display: 'inline-block',

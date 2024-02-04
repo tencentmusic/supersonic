@@ -12,6 +12,7 @@ import moment from 'moment';
 import styles from '../../components/style.less';
 import { ISemantic } from '../../data';
 import { ColumnsConfig } from '../../components/MetricTableColumnRender';
+import ViewSearchFormModal from './ViewSearchFormModal';
 
 type Props = {
   disabledEdit?: boolean;
@@ -26,6 +27,7 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
   const actionRef = useRef<ActionType>();
 
   const updateViewStatus = async (modelData: ISemantic.IViewItem) => {
@@ -69,9 +71,6 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
       dataIndex: 'name',
       title: '视图名称',
       search: false,
-      // render: (_, record) => {
-      //   return <a>{_}</a>;
-      // },
     },
     {
       dataIndex: 'alias',
@@ -116,7 +115,7 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
       title: '操作',
       dataIndex: 'x',
       valueType: 'option',
-      width: 150,
+      width: 250,
       render: (_, record) => {
         return (
           <Space className={styles.ctrlBtnContainer}>
@@ -128,6 +127,15 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
               }}
             >
               编辑
+            </a>
+            <a
+              key="searchEditBtn"
+              onClick={() => {
+                setViewItem(record);
+                setSearchModalOpen(true);
+              }}
+            >
+              查询设置
             </a>
             {record.status === StatusEnum.ONLINE ? (
               <Button
@@ -220,6 +228,21 @@ const ViewTable: React.FC<Props> = ({ disabledEdit = false, modelList, domainMan
           }}
           onCancel={() => {
             setCreateDataSourceModalOpen(false);
+          }}
+        />
+      )}
+
+      {searchModalOpen && (
+        <ViewSearchFormModal
+          domainId={selectDomainId}
+          viewItem={viewItem}
+          modelList={modelList}
+          onSubmit={() => {
+            queryViewList();
+            setSearchModalOpen(false);
+          }}
+          onCancel={() => {
+            setSearchModalOpen(false);
           }}
         />
       )}

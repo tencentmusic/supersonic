@@ -30,7 +30,7 @@ const DeleteConfirmModal: React.FC<Props> = ({
       deleteQuery = deleteDatasource;
     }
     if (!deleteQuery) {
-      message.error('当前节点类型不是维度，指标，数据源中的一种，请确认节点数据');
+      message.error('当前节点类型不是维度，指标，模型中的一种，请确认节点数据');
       return;
     }
     setConfirmLoading(true);

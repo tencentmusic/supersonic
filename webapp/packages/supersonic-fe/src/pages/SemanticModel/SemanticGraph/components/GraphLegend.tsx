@@ -60,7 +60,7 @@ const GraphLegend: React.FC<Props> = ({
     <div className={styles.graphLegend}>
       <Checkbox.Group style={{ width: '100%' }} onChange={handleChange} value={groupValue}>
         <div style={{ width: '100%', maxWidth: '450px' }}>
-          <div className={styles.title}>可见数据源</div>
+          <div className={styles.title}>可见模型</div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <Space wrap size={[8, 16]}>
               {legendOptions.map((item) => {
