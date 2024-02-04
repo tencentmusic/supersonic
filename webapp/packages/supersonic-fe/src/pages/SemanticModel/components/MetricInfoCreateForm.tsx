@@ -122,14 +122,70 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   const backward = () => setCurrentStep(currentStep - 1);
 
   const queryModelDetail = async () => {
-    // const { code, data } = await getMeasureListByModelId(modelId);
     const { code, data } = await getModelDetail({ modelId: modelId || metricItem?.modelId });
     if (code === 200) {
       if (Array.isArray(data?.modelDetail?.fields)) {
-        setFieldList(data.modelDetail.fields);
+        if (Array.isArray(metricItem?.metricDefineByFieldParams?.fields)) {
+          const fieldList = data.modelDetail.fields.map((item: ISemantic.IFieldTypeParamsItem) => {
+            const { fieldName } = item;
+            if (
+              metricItem?.metricDefineByFieldParams?.fields.find(
+                (measureParamsItem: ISemantic.IFieldTypeParamsItem) =>
+                  measureParamsItem.fieldName === fieldName,
+              )
+            ) {
+              return {
+                ...item,
+                orderNumber: 9999,
+              };
+            }
+            return {
+              ...item,
+              orderNumber: 0,
+            };
+          });
+
+          const sortList = fieldList.sort(
+            (
+              a: ISemantic.IFieldTypeParamsItem & { orderNumber: number },
+              b: ISemantic.IFieldTypeParamsItem & { orderNumber: number },
+            ) => b.orderNumber - a.orderNumber,
+          );
+          setFieldList(sortList);
+        } else {
+          setFieldList(data.modelDetail.fields);
+        }
       }
       if (Array.isArray(data?.modelDetail?.measures)) {
-        setClassMeasureList(data.modelDetail.measures);
+        if (Array.isArray(metricItem?.metricDefineByMeasureParams?.measures)) {
+          const measureList = data.modelDetail.measures.map((item: ISemantic.IMeasure) => {
+            const { bizName } = item;
+            if (
+              metricItem?.metricDefineByMeasureParams?.measures.find(
+                (measureParamsItem: ISemantic.IMeasure) => measureParamsItem.bizName === bizName,
+              )
+            ) {
+              return {
+                ...item,
+                orderNumber: 9999,
+              };
+            }
+            return {
+              ...item,
+              orderNumber: 0,
+            };
+          });
+          const sortMeasureList = measureList.sort(
+            (
+              a: ISemantic.IMeasure & { orderNumber: number },
+              b: ISemantic.IMeasure & { orderNumber: number },
+            ) => b.orderNumber - a.orderNumber,
+          );
+          setClassMeasureList(sortMeasureList);
+        } else {
+          setClassMeasureList(data.modelDetail.measures);
+        }
+
         if (datasourceId) {
           const hasMeasures = data.some(
             (item: ISemantic.IMeasure) => item.datasourceId === datasourceId,
@@ -338,7 +394,6 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   const queryMetricTags = async () => {
     const { code, data } = await getMetricTags();
     if (code === 200) {
-      // form.setFieldValue('alias', Array.from(new Set([...formAlias, ...data])));
       setTagOptions(
         Array.isArray(data)
           ? data.map((tag: string) => {
@@ -355,7 +410,37 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       modelId: modelId || metricItem?.modelId,
     });
     if (code === 200) {
-      setCreateNewMetricList(data);
+      if (Array.isArray(metricItem?.metricDefineByMetricParams?.metrics)) {
+        const fieldList = data.map((item: ISemantic.IMetricTypeParamsItem) => {
+          const { bizName } = item;
+          if (
+            metricItem?.metricDefineByMetricParams?.metrics.find(
+              (measureParamsItem: ISemantic.IMetricTypeParamsItem) =>
+                measureParamsItem.bizName === bizName,
+            )
+          ) {
+            return {
+              ...item,
+              orderNumber: 9999,
+            };
+          }
+          return {
+            ...item,
+            orderNumber: 0,
+          };
+        });
+
+        const sortList = fieldList.sort(
+          (
+            a: ISemantic.IMetricTypeParamsItem & { orderNumber: number },
+            b: ISemantic.IMetricTypeParamsItem & { orderNumber: number },
+          ) => b.orderNumber - a.orderNumber,
+        );
+        setCreateNewMetricList(sortList);
+      } else {
+        setCreateNewMetricList(data);
+      }
+      // setCreateNewMetricList(data);
     } else {
       message.error('获取指标标签失败');
     }
@@ -417,15 +502,11 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
           {defineType === METRIC_DEFINE_TYPE.METRIC && (
             <>
               <p className={styles.desc}>
-                通过
+                基于
                 <Tag color="#2499ef14" className={styles.markerTag}>
-                  字段
+                  已有
                 </Tag>
-                和
-                <Tag color="#2499ef14" className={styles.markerTag}>
-                  度量
-                </Tag>
-                创建的指标可用来创建新的指标
+                指标来衍生新的指标
               </p>
 
               <MetricMetricFormTable
@@ -701,7 +782,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
         <>
           <Steps style={{ marginBottom: 28 }} size="small" current={currentStep}>
             <Step title="基本信息" />
-            <Step title="度量信息" />
+            <Step title="表达式" />
           </Steps>
           <Form
             {...formLayout}

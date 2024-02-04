@@ -175,26 +175,26 @@ const ClassMetricTable: React.FC<Props> = ({ domainManger, dispatch }) => {
       fixed: 'left',
       render: ColumnsConfig.metricInfo.render,
     },
-    {
-      dataIndex: 'modelName',
-      title: '所属模型',
-      render: (_, record: any) => {
-        if (record.hasAdminRes) {
-          return (
-            <a
-              target="blank"
-              href={`/webapp/model/${record.domainId}/${record.modelId}/metric`}
-              // onClick={() => {
-              //   history.push(`/model/${record.domainId}/${record.modelId}/metric`);
-              // }}
-            >
-              {record.modelName}
-            </a>
-          );
-        }
-        return <> {record.modelName}</>;
-      },
-    },
+    // {
+    //   dataIndex: 'modelName',
+    //   title: '所属模型',
+    //   render: (_, record: any) => {
+    //     if (record.hasAdminRes) {
+    //       return (
+    //         <a
+    //           target="blank"
+    //           href={`/webapp/model/${record.domainId}/${record.modelId}/metric`}
+    //           // onClick={() => {
+    //           //   history.push(`/model/${record.domainId}/${record.modelId}/metric`);
+    //           // }}
+    //         >
+    //           {record.modelName}
+    //         </a>
+    //       );
+    //     }
+    //     return <> {record.modelName}</>;
+    //   },
+    // },
     {
       dataIndex: 'sensitiveLevel',
       title: '敏感度',

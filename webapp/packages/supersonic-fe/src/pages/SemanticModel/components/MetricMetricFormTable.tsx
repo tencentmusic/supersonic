@@ -49,7 +49,7 @@ const MetricMetricFormTable: React.FC<Props> = ({
 
   // const [selectMeasuresList, setSelectMeasuresList] = useState<IDataSource.IMeasuresItem[]>([]);
 
-  const [selectedMeasuresKeys, setSelectedMeasuresKeys] = useState<string[]>(() => {
+  const [selectedKeys, setSelectedKeys] = useState<string[]>(() => {
     // return [];
     return defineTypeParams.metrics.map((item: any) => {
       return item.bizName;
@@ -68,9 +68,9 @@ const MetricMetricFormTable: React.FC<Props> = ({
   ];
 
   const rowSelection = {
-    selectedRowKeys: selectedMeasuresKeys,
+    selectedRowKeys: selectedKeys,
     onChange: (_selectedRowKeys: any[]) => {
-      setSelectedMeasuresKeys([..._selectedRowKeys]);
+      setSelectedKeys([..._selectedRowKeys]);
       onFieldChange(
         metricList.reduce(
           (metrics: ISemantic.IMetricTypeParamsItem[], item: ISemantic.IMetricItem) => {
@@ -97,7 +97,7 @@ const MetricMetricFormTable: React.FC<Props> = ({
           rowKey="bizName"
           columns={columns}
           dataSource={tableData}
-          pagination={false}
+          // pagination={false}
           search={false}
           toolbar={{
             search: {
@@ -117,6 +117,7 @@ const MetricMetricFormTable: React.FC<Props> = ({
               },
             },
           }}
+          pagination={{ defaultPageSize: 10 }}
           size="small"
           options={false}
           tableAlertRender={false}

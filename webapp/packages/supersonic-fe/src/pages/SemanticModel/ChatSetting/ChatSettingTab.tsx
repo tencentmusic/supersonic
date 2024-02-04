@@ -38,12 +38,12 @@ const ChatSetting: React.FC<Props> = ({
     {
       label: '指标模式',
       key: 'metric',
-      children: <EntitySection chatConfigType={ChatConfigType.AGG} />,
+      children: <EntitySection chatConfigType={ChatConfigType.METRIC} />,
     },
     {
       label: '标签模式',
       key: 'dimenstion',
-      children: <EntitySection chatConfigType={ChatConfigType.DETAIL} />,
+      children: <EntitySection chatConfigType={ChatConfigType.TAG} />,
     },
     {
       label: '推荐问题',

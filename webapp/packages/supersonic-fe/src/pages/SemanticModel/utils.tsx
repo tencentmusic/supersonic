@@ -5,6 +5,8 @@ import { Form, Input, InputNumber, Switch, Select } from 'antd';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import DisabledWheelNumberInput from '@/components/DisabledWheelNumberInput';
 import { ConfigParametersItem } from '../System/types';
+import { TransType } from './enum';
+
 const FormItem = Form.Item;
 const { TextArea } = Input;
 
@@ -199,4 +201,8 @@ export const genneratorFormItemList = (itemList: ConfigParametersItem[]) => {
       </FormItem>
     );
   });
+};
+
+export const wrapperTransTypeAndId = (exTransType: TransType, id: number) => {
+  return `${exTransType}-${id}`;
 };

@@ -279,7 +279,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
         <FormItem
           name="expr"
           label="表达式"
-          tooltip="表达式中的字段必须在创建数据源的时候被标记为日期或者维度"
+          tooltip="表达式中的字段必须在创建模型的时候被标记为日期或者维度"
           rules={[{ required: true, message: '请输入表达式' }]}
         >
           <SqlEditor height={'150px'} />
