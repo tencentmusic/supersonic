@@ -74,7 +74,7 @@ public class ChatDemoLoader implements CommandLineRunner {
             addAgent1();
             addAgent2();
             addAgent3();
-            addAgent4();
+            //addAgent4();
             addSampleChats();
             addSampleChats2();
             updateQueryScore(1);
@@ -248,6 +248,7 @@ public class ChatDemoLoader implements CommandLineRunner {
         }
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        log.info("agent:{}", JsonUtil.toString(agent));
         agentService.createAgent(agent, User.getFakeUser());
     }
 

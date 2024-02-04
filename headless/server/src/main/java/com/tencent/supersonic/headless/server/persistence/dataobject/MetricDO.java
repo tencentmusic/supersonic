@@ -80,17 +80,17 @@ public class MetricDO {
     private String dataFormat;
 
     /**
-     * 
+     *
      */
     private String alias;
 
     /**
-     * 
+     *
      */
     private String tags;
 
     /**
-     * 
+     *
      */
     private String relateDimensions;
 

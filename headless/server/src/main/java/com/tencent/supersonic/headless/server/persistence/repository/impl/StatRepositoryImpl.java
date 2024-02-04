@@ -48,10 +48,11 @@ public class StatRepositoryImpl implements StatRepository {
         statInfos.stream().forEach(stat -> {
             String dimensions = stat.getDimensions();
             String metrics = stat.getMetrics();
-            updateStatMapInfo(map, dimensions, TypeEnums.DIMENSION.name().toLowerCase(), stat.getModelId());
-            updateStatMapInfo(map, metrics, TypeEnums.METRIC.name().toLowerCase(), stat.getModelId());
+            if (Objects.nonNull(stat.getViewId())) {
+                updateStatMapInfo(map, dimensions, TypeEnums.DIMENSION.name().toLowerCase(), stat.getViewId());
+                updateStatMapInfo(map, metrics, TypeEnums.METRIC.name().toLowerCase(), stat.getViewId());
+            }
         });
-
         map.forEach((k, v) -> {
             Long classId = Long.parseLong(k.split(AT_SYMBOL + AT_SYMBOL)[0]);
             String type = k.split(AT_SYMBOL + AT_SYMBOL)[1];
@@ -68,13 +69,13 @@ public class StatRepositoryImpl implements StatRepository {
         return statMapper.getStatInfo(itemUseCommend);
     }
 
-    private void updateStatMapInfo(Map<String, Long> map, String dimensions, String type, Long modelId) {
+    private void updateStatMapInfo(Map<String, Long> map, String dimensions, String type, Long viewId) {
         if (Strings.isNotEmpty(dimensions)) {
             try {
                 List<String> dimensionList = mapper.readValue(dimensions, new TypeReference<List<String>>() {
                 });
                 dimensionList.stream().forEach(dimension -> {
-                    String key = modelId + AT_SYMBOL + AT_SYMBOL + type + AT_SYMBOL + AT_SYMBOL + dimension;
+                    String key = viewId + AT_SYMBOL + AT_SYMBOL + type + AT_SYMBOL + AT_SYMBOL + dimension;
                     if (map.containsKey(key)) {
                         map.put(key, map.get(key) + 1);
                     } else {
