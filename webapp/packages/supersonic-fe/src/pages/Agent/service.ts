@@ -19,7 +19,7 @@ export function deleteAgent(id: number) {
 }
 
 export function getModelList() {
-  return request<Result<ModelType[]>>('/api/chat/conf/viewList', {
+  return request<Result<ModelType[]>>('/api/chat/conf/getDomainViewTree', {
     method: 'GET',
   });
 }

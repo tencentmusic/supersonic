@@ -3,11 +3,11 @@ import { PlusOutlined } from '@ant-design/icons';
 import { Button, Input, message, Popconfirm, Select, Table, Tag } from 'antd';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import { PARSE_MODE_MAP, PLUGIN_TYPE_MAP } from './constants';
+import { PLUGIN_TYPE_MAP } from './constants';
 import DetailModal from './DetailModal';
 import { deletePlugin, getModelList, getPluginList } from './service';
 import styles from './style.less';
-import { ModelType, ParseModeEnum, PluginType, PluginTypeEnum } from './type';
+import { ModelType, PluginType, PluginTypeEnum } from './type';
 
 const { Search } = Input;
 
@@ -57,9 +57,9 @@ const PluginManage = () => {
       key: 'name',
     },
     {
-      title: '主题域',
-      dataIndex: 'modelList',
-      key: 'modelList',
+      title: '视图',
+      dataIndex: 'viewList',
+      key: 'viewList',
       width: 200,
       render: (value: number[]) => {
         if (value?.includes(-1)) {
@@ -67,7 +67,7 @@ const PluginManage = () => {
         }
         return value ? (
           <div className={styles.modelColumn}>
-            {value.map((id, index) => {
+            {value.map((id) => {
               const name = modelList.find((model) => model.id === +id)?.name;
               return name ? <Tag key={id}>{name}</Tag> : null;
             })}

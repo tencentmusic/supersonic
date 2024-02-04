@@ -8,7 +8,6 @@ export enum AgentToolTypeEnum {
   NL2SQL_RULE = 'NL2SQL_RULE',
   NL2SQL_LLM = 'NL2SQL_LLM',
   PLUGIN = 'PLUGIN',
-  ANALYTICS = 'ANALYTICS',
 }
 
 export const AGENT_TOOL_TYPE_LIST = [
@@ -76,6 +75,7 @@ export type ModelType = {
   parentId: number;
   name: string;
   bizName: string;
+  type: 'DOMAIN' | 'VIEW';
 };
 
 export type MetricType = {
