@@ -28,7 +28,7 @@
     "lint:style": "stylelint --fix \"src/**/*.less\" --syntax less",
     "precommit": "lint-staged",
     "prettier": "prettier -c --write \"src/**/*\"",
-    "start": "npm run start:osdev",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider npm run start:osdev",
     "start:dev": "cross-env REACT_APP_ENV=dev MOCK=none APP_TARGET=inner umi dev",
     "start:osdev": "cross-env REACT_APP_ENV=dev PORT=9000 MOCK=none APP_TARGET=opensource umi dev",
     "start:no-mock": "cross-env MOCK=none umi dev",

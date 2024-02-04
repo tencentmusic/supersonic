@@ -135,18 +135,6 @@ const AgentsSection: React.FC<Props> = ({
             <PlusOutlined />
             新建助理
           </Button>
-          <div className={styles.switchShowType}>
-            <span className={styles.switchShowTypeLabel}>切换为卡片</span>
-            <Switch
-              size="small"
-              checked={showType === 'card'}
-              onChange={(value) => {
-                const showTypeValue = value ? 'card' : 'list';
-                setShowType(showTypeValue);
-                localStorage.setItem('AGENT_SHOW_TYPE', showTypeValue);
-              }}
-            />
-          </div>
         </div>
         {showType === 'list' ? (
           <Table columns={columns} dataSource={showAgents} />

@@ -28,7 +28,7 @@ export type ModelInfoType = {
 };
 
 export type EntityInfoType = {
-  modelInfo: ModelInfoType;
+  viewInfo: ModelInfoType;
   dimensions: FieldType[];
   metrics: FieldType[];
   entityId: number;
@@ -83,7 +83,8 @@ export type ChatContextType = {
   aggType: string;
   modelId: number;
   modelName: string;
-  model: ModelType;
+  // model: ModelType;
+  view: ModelType;
   dateInfo: DateInfoType;
   dimensions: FieldType[];
   metrics: FieldType[];

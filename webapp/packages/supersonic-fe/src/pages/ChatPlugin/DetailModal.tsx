@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Select, Form, Input, InputNumber, message, Button, Radio } from 'antd';
+import { Modal, Select, Form, Input, InputNumber, message, Button, Radio, TreeSelect } from 'antd';
 import { getDimensionList, getModelList, savePlugin } from './service';
 import {
   DimensionType,
@@ -10,7 +10,7 @@ import {
   FunctionParamFormItemType,
   PluginTypeEnum,
 } from './type';
-import { getLeafList, uuid } from '@/utils/utils';
+import { getLeafList, traverseTree, uuid } from '@/utils/utils';
 import styles from './style.less';
 import { PLUGIN_TYPE_MAP } from './constants';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
@@ -38,7 +38,13 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
 
   const initModelList = async () => {
     const res = await getModelList();
-    setModelList([{ id: -1, name: '默认' }, ...getLeafList(res.data)]);
+    const treeData = traverseTree(res.data, (node: any) => {
+      node.title = node.name;
+      node.value = node.type === 'DOMAIN' ? `DOMAIN_${node.id}` : node.id;
+      node.checkable =
+        node.type === 'VIEW' || (node.type === 'DOMAIN' && node.children?.length > 0);
+    });
+    setModelList([{ title: '默认', value: -1, type: 'VIEW' }, ...treeData]);
   };
 
   useEffect(() => {
@@ -181,18 +187,12 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
       onCancel={onCancel}
     >
       <Form {...layout} form={form} style={{ maxWidth: 820 }}>
-        <FormItem name="modelList" label="主题域">
-          <Select
-            placeholder="请选择主题域"
-            options={modelList.map((model) => ({
-              label: model.name,
-              value: model.id,
-            }))}
-            showSearch
-            filterOption={(input, option) =>
-              ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase())
-            }
-            mode="multiple"
+        <FormItem name="viewList" label="视图">
+          <TreeSelect
+            treeData={modelList}
+            placeholder="请选择视图"
+            multiple
+            treeCheckable
             allowClear
           />
         </FormItem>
