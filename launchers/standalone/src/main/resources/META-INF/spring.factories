@@ -20,7 +20,6 @@ com.tencent.supersonic.chat.core.corrector.SemanticCorrector=\
     com.tencent.supersonic.chat.core.corrector.HavingCorrector
 
 com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor=\
-    com.tencent.supersonic.chat.server.processor.parse.MetricCheckProcessor, \
     com.tencent.supersonic.chat.server.processor.parse.ParseInfoProcessor, \
     com.tencent.supersonic.chat.server.processor.parse.QueryRankProcessor, \
     com.tencent.supersonic.chat.server.processor.parse.EntityInfoProcessor, \

@@ -1,13 +1,8 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.CaseExpression;
 import net.sf.jsqlparser.expression.Expression;
@@ -37,6 +32,13 @@ import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Sql Parser Select Helper
@@ -357,6 +359,36 @@ public class SqlSelectHelper {
                                 && !CollectionUtils.isEmpty(function.getParameters().getExpressions())) {
                             String columnName = function.getParameters().getExpressions().get(0).toString();
                             result.add(columnName);
+                        }
+                    }
+                }
+            }
+        }
+        return new ArrayList<>(result);
+    }
+
+    public static List<String> getAggregateAsFields(String sql) {
+        List<PlainSelect> plainSelectList = getPlainSelect(sql);
+        Set<String> result = new HashSet<>();
+        for (PlainSelect plainSelect : plainSelectList) {
+            if (Objects.isNull(plainSelect)) {
+                continue;
+            }
+            List<SelectItem> selectItems = plainSelect.getSelectItems();
+            for (SelectItem selectItem : selectItems) {
+                if (selectItem instanceof SelectExpressionItem) {
+                    SelectExpressionItem expressionItem = (SelectExpressionItem) selectItem;
+                    if (expressionItem.getExpression() instanceof Function) {
+                        Function function = (Function) expressionItem.getExpression();
+                        Alias alias = expressionItem.getAlias();
+                        if (alias != null && StringUtils.isNotBlank(alias.getName())) {
+                            result.add(alias.getName());
+                        } else {
+                            if (Objects.nonNull(function.getParameters())
+                                    && !CollectionUtils.isEmpty(function.getParameters().getExpressions())) {
+                                String columnName = function.getParameters().getExpressions().get(0).toString();
+                                result.add(columnName);
+                            }
                         }
                     }
                 }
