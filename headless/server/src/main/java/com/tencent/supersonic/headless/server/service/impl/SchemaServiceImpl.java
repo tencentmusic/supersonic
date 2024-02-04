@@ -22,6 +22,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
+import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
@@ -305,6 +306,34 @@ public class SchemaServiceImpl implements SchemaService {
             });
         }
         return statUtils.getStatInfo(itemUseReq);
+    }
+
+    @Override
+    public List<ItemResp> getDomainViewTree() {
+        List<DomainResp> domainResps = domainService.getDomainList();
+        List<ItemResp> itemResps = domainResps.stream().map(domain ->
+                        new ItemResp(domain.getId(), domain.getParentId(), domain.getName(), TypeEnums.DOMAIN))
+                .collect(Collectors.toList());
+        Map<Long, ItemResp> itemRespMap = itemResps.stream()
+                .collect(Collectors.toMap(ItemResp::getId, item -> item));
+        for (ItemResp itemResp : itemResps) {
+            ItemResp parentItem = itemRespMap.get(itemResp.getParentId());
+            if (parentItem == null) {
+                continue;
+            }
+            parentItem.getChildren().add(itemResp);
+        }
+        List<ViewResp> viewResps = viewService.getViewList(new MetaFilter());
+        for (ViewResp viewResp : viewResps) {
+            ItemResp itemResp = itemRespMap.get(viewResp.getDomainId());
+            if (itemResp != null) {
+                ItemResp view = new ItemResp(viewResp.getId(), viewResp.getDomainId(),
+                        viewResp.getName(), TypeEnums.VIEW);
+                itemResp.getChildren().add(view);
+            }
+        }
+        return itemResps.stream().filter(itemResp -> itemResp.getParentId() == 0)
+                .collect(Collectors.toList());
     }
 
     private void fillStaticInfo(List<ViewSchemaResp> viewSchemaResps) throws ExecutionException {
