@@ -170,6 +170,7 @@ public class QueryStructReq extends SemanticQueryReq {
         }
 
         QuerySqlReq result = new QuerySqlReq();
+        result.setNeedAuth(queryStructReq.needAuth);
         result.setSql(sql);
         result.setViewId(queryStructReq.getViewId());
         result.setModelIds(queryStructReq.getModelIdSet());
@@ -266,10 +267,12 @@ public class QueryStructReq extends SemanticQueryReq {
 
         //7.Set DateInfo
         DateModeUtils dateModeUtils = ContextUtils.getBean(DateModeUtils.class);
-        String dateWhereStr = dateModeUtils.getDateWhereStr(queryStructReq.getDateInfo());
-        if (StringUtils.isNotBlank(dateWhereStr)) {
-            Expression expression = CCJSqlParserUtil.parseCondExpression(dateWhereStr);
-            sql = SqlParserAddHelper.addWhere(sql, expression);
+        if (Objects.nonNull(queryStructReq.getDateInfo())) {
+            String dateWhereStr = dateModeUtils.getDateWhereStr(queryStructReq.getDateInfo());
+            if (StringUtils.isNotBlank(dateWhereStr)) {
+                Expression expression = CCJSqlParserUtil.parseCondExpression(dateWhereStr);
+                sql = SqlParserAddHelper.addWhere(sql, expression);
+            }
         }
         return sql;
     }

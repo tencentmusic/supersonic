@@ -5,17 +5,19 @@ import com.tencent.supersonic.chat.core.knowledge.DictConfig;
 import com.tencent.supersonic.chat.core.knowledge.DimValueDictInfo;
 import com.tencent.supersonic.chat.server.persistence.dataobject.DictConfDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.DictTaskDO;
-import com.tencent.supersonic.chat.server.persistence.mapper.DictConfMapper;
-import com.tencent.supersonic.chat.server.persistence.mapper.DictTaskMapper;
-import com.tencent.supersonic.chat.server.persistence.repository.DictRepository;
+import com.tencent.supersonic.chat.server.persistence.mapper.ChatDictConfMapper;
+import com.tencent.supersonic.chat.server.persistence.mapper.ChatDictTaskMapper;
+import com.tencent.supersonic.chat.server.persistence.repository.ChatDictRepository;
 import com.tencent.supersonic.chat.server.util.DictTaskConverter;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.util.JsonUtil;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -25,13 +27,13 @@ import org.springframework.util.CollectionUtils;
 
 @Repository
 @Slf4j
-public class DictRepositoryImpl implements DictRepository {
+public class ChatChatDictRepositoryImpl implements ChatDictRepository {
 
-    private final DictTaskMapper dictTaskMapper;
-    private final DictConfMapper dictConfMapper;
+    private final ChatDictTaskMapper dictTaskMapper;
+    private final ChatDictConfMapper dictConfMapper;
 
-    public DictRepositoryImpl(DictTaskMapper dictTaskMapper,
-                              DictConfMapper dictConfMapper) {
+    public ChatChatDictRepositoryImpl(ChatDictTaskMapper dictTaskMapper,
+                                      ChatDictConfMapper dictConfMapper) {
         this.dictTaskMapper = dictTaskMapper;
         this.dictConfMapper = dictConfMapper;
     }

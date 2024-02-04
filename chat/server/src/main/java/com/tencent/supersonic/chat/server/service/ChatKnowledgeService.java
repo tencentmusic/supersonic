@@ -1,9 +1,10 @@
 package com.tencent.supersonic.chat.server.service;
 
 import com.tencent.supersonic.chat.core.knowledge.DictWord;
+
 import java.util.List;
 
-public interface KnowledgeService {
+public interface ChatKnowledgeService {
 
     void updateSemanticKnowledge(List<DictWord> natures);
 

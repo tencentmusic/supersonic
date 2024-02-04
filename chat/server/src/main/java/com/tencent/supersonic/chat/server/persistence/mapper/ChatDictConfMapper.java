@@ -5,7 +5,7 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.DictConfDO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface DictConfMapper {
+public interface ChatDictConfMapper {
 
     Boolean createDictConf(DictConfDO dictConfDO);
 

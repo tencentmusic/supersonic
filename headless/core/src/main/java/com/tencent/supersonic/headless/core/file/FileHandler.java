@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.core.knowledge;
+package com.tencent.supersonic.headless.core.file;
 
 import java.util.List;
 
@@ -53,4 +53,5 @@ public interface FileHandler {
      * @param fileName
      */
     void deleteFile(String fileName);
+
 }

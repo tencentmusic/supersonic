@@ -1,7 +1,9 @@
 package com.tencent.supersonic.chat.core.config;
 
 import com.tencent.supersonic.chat.core.utils.HanlpHelper;
+
 import java.io.FileNotFoundException;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @Slf4j
-public class LocalFileConfig {
+public class ChatLocalFileConfig {
 
 
     @Value("${dict.directory.latest:/data/dictionary/custom}")

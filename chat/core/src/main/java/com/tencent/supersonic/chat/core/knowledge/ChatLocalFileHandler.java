@@ -1,7 +1,8 @@
 package com.tencent.supersonic.chat.core.knowledge;
 
 
-import com.tencent.supersonic.chat.core.config.LocalFileConfig;
+import com.tencent.supersonic.chat.core.config.ChatLocalFileConfig;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -11,17 +12,18 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Component
-public class LocalFileHandler implements FileHandler {
+public class ChatLocalFileHandler implements ChatFileHandler {
 
-    private final LocalFileConfig localFileConfig;
+    private final ChatLocalFileConfig localFileConfig;
 
-    public LocalFileHandler(LocalFileConfig localFileConfig) {
+    public ChatLocalFileHandler(ChatLocalFileConfig localFileConfig) {
         this.localFileConfig = localFileConfig;
     }
 

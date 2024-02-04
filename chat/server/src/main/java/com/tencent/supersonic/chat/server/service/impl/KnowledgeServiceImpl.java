@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.server.service.impl;
 import com.tencent.supersonic.chat.core.knowledge.DictWord;
 import com.tencent.supersonic.chat.core.knowledge.SearchService;
 import com.tencent.supersonic.chat.core.utils.HanlpHelper;
-import com.tencent.supersonic.chat.server.service.KnowledgeService;
+import com.tencent.supersonic.chat.server.service.ChatKnowledgeService;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class KnowledgeServiceImpl implements KnowledgeService {
+public class KnowledgeServiceImpl implements ChatKnowledgeService {
 
     public void updateSemanticKnowledge(List<DictWord> natures) {
 

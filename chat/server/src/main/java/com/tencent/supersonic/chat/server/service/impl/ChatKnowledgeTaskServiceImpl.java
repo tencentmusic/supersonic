@@ -10,18 +10,18 @@ import com.tencent.supersonic.chat.core.knowledge.DictConfig;
 import com.tencent.supersonic.chat.core.knowledge.DictUpdateMode;
 import com.tencent.supersonic.chat.core.knowledge.DimValue2DictCommand;
 import com.tencent.supersonic.chat.core.knowledge.DimValueDictInfo;
-import com.tencent.supersonic.chat.core.knowledge.FileHandler;
+import com.tencent.supersonic.chat.core.knowledge.ChatFileHandler;
 import com.tencent.supersonic.chat.core.utils.DictQueryHelper;
 import com.tencent.supersonic.chat.server.listener.ApplicationStartedListener;
 import com.tencent.supersonic.chat.server.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.DimValueDO;
-import com.tencent.supersonic.chat.server.persistence.repository.DictRepository;
-import com.tencent.supersonic.chat.server.service.KnowledgeTaskService;
+import com.tencent.supersonic.chat.server.persistence.repository.ChatDictRepository;
 import com.tencent.supersonic.chat.server.util.DictMetaHelper;
 import com.tencent.supersonic.chat.server.util.DictTaskConverter;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.util.JsonUtil;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,12 +39,12 @@ import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
-public class ChatKnowledgeTaskServiceImpl implements KnowledgeTaskService {
+public class ChatKnowledgeTaskServiceImpl {
 
     private final DictMetaHelper metaUtils;
     private final DictQueryHelper dictQueryHelper;
-    private final FileHandler fileHandler;
-    private final DictRepository dictRepository;
+    private final ChatFileHandler fileHandler;
+    private final ChatDictRepository dictRepository;
     private final ApplicationStartedListener applicationStartedListener;
 
     @Value("${dict.flush.enable:true}")
@@ -55,10 +56,10 @@ public class ChatKnowledgeTaskServiceImpl implements KnowledgeTaskService {
     private String dimValue = "DimValue_%d_%d";
 
     public ChatKnowledgeTaskServiceImpl(DictMetaHelper metaUtils,
-                                    DictQueryHelper dictQueryHelper,
-                                    FileHandler fileHandler,
-                                    DictRepository dictRepository,
-                                    ApplicationStartedListener applicationStartedListener) {
+                                        DictQueryHelper dictQueryHelper,
+                                        ChatFileHandler fileHandler,
+                                        ChatDictRepository dictRepository,
+                                        ApplicationStartedListener applicationStartedListener) {
         this.metaUtils = metaUtils;
         this.dictQueryHelper = dictQueryHelper;
         this.fileHandler = fileHandler;
@@ -81,7 +82,6 @@ public class ChatKnowledgeTaskServiceImpl implements KnowledgeTaskService {
         return true;
     }
 
-    @Override
     public Long addDictTask(DimValue2DictCommand dimValue2DictCommend, User user) {
         if (!dictFlushEnable) {
             return 0L;
@@ -147,7 +147,6 @@ public class ChatKnowledgeTaskServiceImpl implements KnowledgeTaskService {
         return dimIds;
     }
 
-    @Override
     public Long deleteDictTask(DimValue2DictCommand dimValue2DictCommand, User user) {
         if (!dictFlushEnable) {
             return 0L;
@@ -191,12 +190,10 @@ public class ChatKnowledgeTaskServiceImpl implements KnowledgeTaskService {
         return dimIds;
     }
 
-    @Override
     public String getDictRootPath() {
         return fileHandler.getDictRootPath();
     }
 
-    @Override
     public List<DictLatestTaskResp> searchDictLatestTaskList(DictLatestTaskReq latestFilter, User user) {
         DictTaskFilterReq filter = new DictTaskFilterReq();
         BeanUtils.copyProperties(latestFilter, filter);
@@ -247,17 +244,13 @@ public class ChatKnowledgeTaskServiceImpl implements KnowledgeTaskService {
                     .filter(v -> !v.getCommand().contains(DictUpdateMode.REALTIME_DELETE.name()))
                     .forEach(v -> dictLatestTaskRespList.add(v));
         }
-
-
         return dictLatestTaskRespList;
     }
 
-    @Override
     public List<DimValueDictInfo> searchDictTaskList(DictTaskFilterReq filter, User user) {
         return dictRepository.searchDictTaskList(filter);
     }
 
-    @Override
     public DictConfig getDictInfoByModelId(Long modelId) {
         return dictRepository.getDictInfoByModelId(modelId);
     }

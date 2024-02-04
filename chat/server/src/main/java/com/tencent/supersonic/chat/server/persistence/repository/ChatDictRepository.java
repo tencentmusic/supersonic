@@ -5,9 +5,10 @@ import com.tencent.supersonic.chat.api.pojo.request.DictTaskFilterReq;
 import com.tencent.supersonic.chat.core.knowledge.DictConfig;
 import com.tencent.supersonic.chat.core.knowledge.DimValueDictInfo;
 import com.tencent.supersonic.chat.server.persistence.dataobject.DictTaskDO;
+
 import java.util.List;
 
-public interface DictRepository {
+public interface ChatDictRepository {
 
     Long createDimValueDictTask(DictTaskDO dictTaskDO);
 
