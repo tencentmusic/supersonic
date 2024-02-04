@@ -3,7 +3,6 @@ package com.tencent.supersonic.headless.server.persistence.repository.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
-import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.QueryStat;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
