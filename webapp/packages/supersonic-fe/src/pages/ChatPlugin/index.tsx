@@ -67,7 +67,7 @@ const PluginManage = () => {
         }
         return value ? (
           <div className={styles.modelColumn}>
-            {value.map((id, index) => {
+            {value.map((id) => {
               const name = modelList.find((model) => model.id === +id)?.name;
               return name ? <Tag key={id}>{name}</Tag> : null;
             })}

@@ -13,7 +13,6 @@ import { traverseTree, uuid } from '@/utils/utils';
 import { getModelList } from './service';
 import { PluginType } from '../ChatPlugin/type';
 import { getPluginList } from '../ChatPlugin/service';
-import { cloneDeep } from 'lodash';
 
 const FormItem = Form.Item;
 
@@ -22,27 +21,6 @@ type Props = {
   onSaveTool: (tool: AgentToolType) => Promise<void>;
   onCancel: () => void;
 };
-
-const treeData = [
-  {
-    title: '超音数',
-    value: '1',
-    children: [
-      {
-        title: '超音数',
-        value: '1-1',
-      },
-      {
-        title: 'Child Node2',
-        value: '0-0-2',
-      },
-    ],
-  },
-  {
-    title: 'Node2',
-    value: '0-1',
-  },
-];
 
 const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
   const [toolType, setToolType] = useState<AgentToolTypeEnum>();
