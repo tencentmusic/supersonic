@@ -22,6 +22,7 @@ public abstract class BaseSemanticInterpreter implements SemanticInterpreter {
     @SneakyThrows
     public List<ViewSchemaResp> fetchViewSchema(List<Long> ids, Boolean cacheEnable) {
         if (cacheEnable) {
+            log.info("ids:{}", String.valueOf(ids));
             return viewSchemaCache.get(String.valueOf(ids), () -> {
                 List<ViewSchemaResp> data = doFetchViewSchema(ids);
                 viewSchemaCache.put(String.valueOf(ids), data);
