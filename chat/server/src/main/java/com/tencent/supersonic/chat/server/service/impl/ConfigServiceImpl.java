@@ -3,9 +3,9 @@ package com.tencent.supersonic.chat.server.service.impl;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
+import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.api.pojo.ViewSchema;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;

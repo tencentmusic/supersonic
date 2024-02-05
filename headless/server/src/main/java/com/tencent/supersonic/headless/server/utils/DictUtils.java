@@ -4,14 +4,17 @@ import com.google.common.base.Strings;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.ItemValueConfig;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
@@ -20,17 +23,21 @@ import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictConfDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
+import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -60,16 +67,25 @@ public class DictUtils {
     @Value("${item.value.white.frequency:999999}")
     private Long itemValueWhiteFrequency;
 
+    @Value("${item.value.date.start:1}")
+    private Integer itemValueDateStart;
+    @Value("${item.value.date.end:1}")
+    private Integer itemValueDateEnd;
+
+
     private final DimensionService dimensionService;
     private final MetricService metricService;
     private final QueryService queryService;
+    private final ModelService modelService;
 
     public DictUtils(DimensionService dimensionService,
                      MetricService metricService,
-                     QueryService queryService) {
+                     QueryService queryService,
+                     ModelService modelService) {
         this.dimensionService = dimensionService;
         this.metricService = metricService;
         this.queryService = queryService;
+        this.modelService = modelService;
     }
 
     public String fetchDictFileName(DictItemResp dictItemResp) {
@@ -216,7 +232,8 @@ public class DictUtils {
         String bizName = dictItemResp.getBizName();
         String whereStr = generateWhereStr(dictItemResp);
         String where = Strings.isNullOrEmpty(whereStr) ? "" : "WHERE" + whereStr;
-        Long limit = Objects.isNull(dictItemResp.getConfig().getLimit()) ? itemValueMaxCount :
+        ItemValueConfig config = dictItemResp.getConfig();
+        Long limit = (Objects.isNull(config) || Objects.isNull(config.getLimit())) ? itemValueMaxCount :
                 dictItemResp.getConfig().getLimit();
         String sql = String.format(sqlPattern, bizName, where, bizName, limit);
         Set<Long> modelIds = new HashSet<>();
@@ -244,9 +261,6 @@ public class DictUtils {
         List<Aggregator> aggregators = new ArrayList<>();
         Long metricId = dictItemResp.getConfig().getMetricId();
         MetricResp metric = metricService.getMetric(metricId);
-        if (Objects.isNull(metric) || Strings.isNullOrEmpty(metric.getBizName())) {
-            // todo
-        }
         String metricBizName = metric.getBizName();
         aggregators.add(new Aggregator(metricBizName, AggOperatorEnum.SUM));
         queryStructReq.setAggregators(aggregators);
@@ -255,12 +269,32 @@ public class DictUtils {
         orders.add(new Order(metricBizName, Constants.DESC_UPPER));
         queryStructReq.setOrders(orders);
 
-        // todo 封装时间
+        fillStructDateInfo(queryStructReq, dictItemResp);
+
         Long limit = Objects.isNull(dictItemResp.getConfig().getLimit()) ? itemValueMaxCount :
                 dictItemResp.getConfig().getLimit();
         queryStructReq.setLimit(limit);
         queryStructReq.setNeedAuth(false);
         return queryStructReq;
+    }
+
+    private void fillStructDateInfo(QueryStructReq queryStructReq, DictItemResp dictItemResp) {
+        ModelResp model = modelService.getModel(dictItemResp.getModelId());
+        if (Objects.nonNull(model)) {
+            List<Dim> timeDims = model.getTimeDimension();
+            if (!CollectionUtils.isEmpty(timeDims)) {
+                DateConf dateConf = new DateConf();
+                dateConf.setDateMode(DateConf.DateMode.BETWEEN);
+                String format = timeDims.get(0).getDateFormat();
+                String start = LocalDate.now().minusDays(itemValueDateStart)
+                        .format(DateTimeFormatter.ofPattern(format));
+                String end = LocalDate.now().minusDays(itemValueDateEnd)
+                        .format(DateTimeFormatter.ofPattern(format));
+                dateConf.setStartDate(start);
+                dateConf.setEndDate(end);
+                queryStructReq.setDateInfo(dateConf);
+            }
+        }
     }
 
     private List<Filter> generateFilters(DictItemResp dictItemResp) {
@@ -282,14 +316,30 @@ public class DictUtils {
 
         String bizName = dictItemResp.getBizName();
         ItemValueConfig config = dictItemResp.getConfig();
-        if (!CollectionUtils.isEmpty(config.getBlackList())) {
-            StringJoiner joinerBlack = new StringJoiner(COMMA);
-            config.getBlackList().stream().forEach(black -> joinerBlack.add(APOSTROPHE + black + APOSTROPHE));
-            joiner.add(String.format("(%s not in (%s))", bizName, joinerBlack.toString()));
+        if (Objects.nonNull(config)) {
+            if (!CollectionUtils.isEmpty(config.getBlackList())) {
+                StringJoiner joinerBlack = new StringJoiner(COMMA);
+                config.getBlackList().stream().forEach(black -> joinerBlack.add(APOSTROPHE + black + APOSTROPHE));
+                joiner.add(String.format("(%s not in (%s))", bizName, joinerBlack.toString()));
+            }
+
+            if (!CollectionUtils.isEmpty(config.getRuleList())) {
+                config.getRuleList().stream().forEach(rule -> joiner.add("(" + rule + ")"));
+            }
         }
 
-        if (!CollectionUtils.isEmpty(config.getRuleList())) {
-            config.getRuleList().stream().forEach(rule -> joiner.add(rule));
+        ModelResp model = modelService.getModel(dictItemResp.getModelId());
+        if (Objects.nonNull(model)) {
+            List<Dim> timeDims = model.getTimeDimension();
+            if (!CollectionUtils.isEmpty(timeDims)) {
+                String format = timeDims.get(0).getDateFormat();
+                String start = LocalDate.now().minusDays(itemValueDateStart)
+                        .format(DateTimeFormatter.ofPattern(format));
+                String end = LocalDate.now().minusDays(itemValueDateEnd)
+                        .format(DateTimeFormatter.ofPattern(format));
+                joiner.add(String.format("( %s >= '%s' and %s <= '%s' )", TimeDimensionEnum.DAY.getName(), start,
+                        TimeDimensionEnum.DAY.getName(), end));
+            }
         }
         return joiner.toString();
     }

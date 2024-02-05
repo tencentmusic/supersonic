@@ -19,5 +19,11 @@ public interface DictRepository {
 
     Long addDictTask(DictTaskDO dictTaskDO);
 
+    Long editDictTask(DictTaskDO dictTaskDO);
+
+    DictTaskDO queryDictTask(DictItemFilter filter);
+
+    DictTaskDO queryDictTaskById(Long id);
+
     DictTaskResp queryLatestDictTask(DictSingleTaskReq taskReq);
 }

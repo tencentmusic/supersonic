@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.core.config;
 
-import com.tencent.supersonic.chat.core.utils.HanlpHelper;
+import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
 
 import java.io.FileNotFoundException;
 

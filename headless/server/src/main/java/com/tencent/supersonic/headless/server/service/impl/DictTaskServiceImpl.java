@@ -3,14 +3,17 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;
 import com.tencent.supersonic.headless.api.pojo.response.DictItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.DictTaskResp;
 import com.tencent.supersonic.headless.core.file.FileHandler;
+import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DictRepository;
 import com.tencent.supersonic.headless.server.service.DictTaskService;
+import com.tencent.supersonic.headless.server.service.KnowledgeService;
 import com.tencent.supersonic.headless.server.utils.DictUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +21,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,15 +41,18 @@ public class DictTaskServiceImpl implements DictTaskService {
     private final DictUtils dictConverter;
     private final DictUtils dictUtils;
     private final FileHandler fileHandler;
+    private final KnowledgeService knowledgeService;
 
     public DictTaskServiceImpl(DictRepository dictRepository,
                                DictUtils dictConverter,
                                DictUtils dictUtils,
-                               FileHandler fileHandler) {
+                               FileHandler fileHandler,
+                               KnowledgeService knowledgeService) {
         this.dictRepository = dictRepository;
         this.dictConverter = dictConverter;
         this.dictUtils = dictUtils;
         this.fileHandler = fileHandler;
+        this.knowledgeService = knowledgeService;
     }
 
     @Override
@@ -83,6 +90,11 @@ public class DictTaskServiceImpl implements DictTaskService {
         if (Objects.isNull(dictItemResp)) {
             return;
         }
+
+        DictTaskDO dictTaskDO = dictRepository.queryDictTaskById(dictItemResp.getId());
+        dictTaskDO.setStatus(TaskStatusEnum.RUNNING.getStatus());
+        dictRepository.editDictTask(dictTaskDO);
+
         // 1.生成item字典数据
         List<String> data = dictUtils.fetchItemValue(dictItemResp);
 
@@ -90,7 +102,14 @@ public class DictTaskServiceImpl implements DictTaskService {
         String fileName = dictItemResp.fetchDictFileName() + Constants.DOT + dictFileType;
         fileHandler.writeFile(data, fileName, false);
 
-        //todo 3.实时变更内存中字典数据
+        // 3.实时变更内存中字典数据
+        try {
+            HanlpHelper.reloadCustomDictionary();
+            dictTaskDO.setStatus(TaskStatusEnum.SUCCESS.getStatus());
+            dictRepository.editDictTask(dictTaskDO);
+        } catch (IOException e) {
+            log.error("reloadCustomDictionary error", e);
+        }
 
     }
 
@@ -99,6 +118,13 @@ public class DictTaskServiceImpl implements DictTaskService {
         DictItemResp dictItemResp = fetchDictItemResp(taskReq);
         String fileName = dictItemResp.fetchDictFileName() + Constants.DOT + dictFileType;
         fileHandler.deleteDictFile(fileName);
+
+        try {
+            HanlpHelper.reloadCustomDictionary();
+        } catch (Exception e) {
+            log.error("reloadCustomDictionary error", e);
+        }
+
         return 0L;
     }
 

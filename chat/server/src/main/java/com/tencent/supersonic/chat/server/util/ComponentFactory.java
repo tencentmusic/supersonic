@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.server.util;
 
 import com.tencent.supersonic.chat.core.corrector.SemanticCorrector;
-import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
+import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.mapper.SchemaMapper;
 import com.tencent.supersonic.chat.core.parser.SemanticParser;
 import com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor;

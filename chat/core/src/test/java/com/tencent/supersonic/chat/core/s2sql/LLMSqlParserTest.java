@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.core.s2sql;
 
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.SchemaValueMap;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaValueMap;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

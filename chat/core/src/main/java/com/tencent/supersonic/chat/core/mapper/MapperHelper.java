@@ -1,10 +1,10 @@
 package com.tencent.supersonic.chat.core.mapper;
 
 import com.hankcs.hanlp.algorithm.EditDistance;
-import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.core.agent.Agent;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
-import com.tencent.supersonic.chat.core.utils.NatureHelper;
+import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.core.knowledge.helper.NatureHelper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +36,8 @@ public class MapperHelper {
         return index;
     }
 
-    public Integer getStepOffset(List<Term> termList, Integer index) {
-        List<Integer> offsetList = termList.stream().sorted(Comparator.comparing(Term::getOffset))
+    public Integer getStepOffset(List<S2Term> termList, Integer index) {
+        List<Integer> offsetList = termList.stream().sorted(Comparator.comparing(S2Term::getOffset))
                 .map(term -> term.getOffset()).collect(Collectors.toList());
 
         for (int j = 0; j < termList.size() - 1; j++) {

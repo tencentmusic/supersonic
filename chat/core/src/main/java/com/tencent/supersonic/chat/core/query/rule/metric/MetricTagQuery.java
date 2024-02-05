@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.core.query.rule.metric;
 
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ENTITY;
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.ID;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.ENTITY;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.ID;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.REQUIRED;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
 

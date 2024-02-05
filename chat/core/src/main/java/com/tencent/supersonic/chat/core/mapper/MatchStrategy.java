@@ -1,7 +1,8 @@
 package com.tencent.supersonic.chat.core.mapper;
 
-import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
+import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,6 +13,6 @@ import java.util.Set;
  */
 public interface MatchStrategy<T> {
 
-    Map<MatchText, List<T>> match(QueryContext queryContext, List<Term> terms, Set<Long> detectModelId);
+    Map<MatchText, List<T>> match(QueryContext queryContext, List<S2Term> terms, Set<Long> detectModelId);
 
 }

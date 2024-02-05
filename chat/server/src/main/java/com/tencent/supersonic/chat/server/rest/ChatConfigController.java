@@ -8,7 +8,7 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatConfigEditReqReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigResp;
 import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
-import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
+import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.utils.ComponentFactory;
 import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;

@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.core.query.rule;
 
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import lombok.Data;
 import lombok.ToString;

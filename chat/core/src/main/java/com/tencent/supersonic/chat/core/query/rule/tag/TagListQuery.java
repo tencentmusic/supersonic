@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.core.query.rule.tag;
 
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.ViewSchema;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;

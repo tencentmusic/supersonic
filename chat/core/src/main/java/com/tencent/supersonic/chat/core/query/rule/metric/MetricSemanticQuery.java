@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.core.query.rule.metric;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.ViewSchema;
@@ -44,7 +44,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.METRIC;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.METRIC;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.REQUIRED;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
 import static com.tencent.supersonic.common.pojo.Constants.DAY;

@@ -36,13 +36,7 @@ public class KnowledgeController {
     private DictConfService confService;
 
     /**
-     * @Autowired
-     * private ApplicationStartedListener applicationStartedListener;
-     */
-
-
-    /**
-     * addDictConf
+     * addDictConf-新增item的字典配置
      * Add configuration information for dictionary entries
      *
      * @param dictItemReq
@@ -56,7 +50,7 @@ public class KnowledgeController {
     }
 
     /**
-     * editDictConf
+     * editDictConf-编辑item的字典配置
      * Edit configuration information for dictionary entries
      *
      * @param dictItemReq
@@ -70,7 +64,7 @@ public class KnowledgeController {
     }
 
     /**
-     * queryDictConf
+     * queryDictConf-查询item的字典配置
      * query configuration information for dictionary entries
      *
      * @param filter
@@ -85,7 +79,7 @@ public class KnowledgeController {
 
 
     /**
-     * addDictTask
+     * addDictTask-实时导入一个item的字典数据
      * write specific item values to the knowledge base
      *
      * @param taskReq
@@ -99,7 +93,7 @@ public class KnowledgeController {
     }
 
     /**
-     * deleteDictInfo
+     * deleteDictTask-实时删除某一个item的字典数据
      * remove specific item values from the knowledge base
      *
      * @param taskReq
@@ -113,17 +107,17 @@ public class KnowledgeController {
     }
 
     /**
-     * 手动离线更新所以字典问题
+     * dailyDictTask-手动离线更新所以字典
      */
     @PutMapping("/task/all")
-    public Boolean deleteDictTask(
+    public Boolean dailyDictTask(
             HttpServletRequest request,
             HttpServletResponse response) {
         return taskService.dailyDictTask();
     }
 
     /**
-     * 返回最新的字典任务执行情况
+     * queryLatestDictTask-返回最新的字典任务执行情况
      *
      * @param taskReq
      */

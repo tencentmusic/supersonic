@@ -2,9 +2,8 @@ package com.tencent.supersonic.chat.server.service.impl;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.collect.Lists;
-import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.request.ItemNameVisibilityInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -12,22 +11,24 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.response.SearchResult;
 import com.tencent.supersonic.chat.core.agent.Agent;
-import com.tencent.supersonic.chat.core.knowledge.DictWord;
-import com.tencent.supersonic.chat.core.knowledge.HanlpMapResult;
-import com.tencent.supersonic.chat.core.knowledge.ViewInfoStat;
+import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.core.knowledge.DictWord;
+import com.tencent.supersonic.headless.core.knowledge.HanlpMapResult;
+import com.tencent.supersonic.headless.core.knowledge.ViewInfoStat;
 import com.tencent.supersonic.chat.core.mapper.MapperHelper;
 import com.tencent.supersonic.chat.core.mapper.MatchText;
 import com.tencent.supersonic.chat.core.mapper.ModelWithSemanticType;
 import com.tencent.supersonic.chat.core.mapper.SearchMatchStrategy;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
-import com.tencent.supersonic.chat.core.utils.HanlpHelper;
-import com.tencent.supersonic.chat.core.utils.NatureHelper;
+import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
+import com.tencent.supersonic.headless.core.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatService;
 import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.chat.server.service.SearchService;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.server.service.KnowledgeService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
@@ -72,6 +73,9 @@ public class SearchServiceImpl implements SearchService {
     @Autowired
     private ConfigService configService;
 
+    @Autowired
+    private KnowledgeService knowledgeService;
+
     @Override
     public List<SearchResult> search(QueryReq queryReq) {
         // 1. check search enable
@@ -90,7 +94,7 @@ public class SearchServiceImpl implements SearchService {
         final Map<Long, String> modelToName = semanticSchemaDb.getViewIdToName();
 
         // 3.detect by segment
-        List<Term> originals = HanlpHelper.getTerms(queryText);
+        List<S2Term> originals = knowledgeService.getTerms(queryText);
         log.info("hanlp parse result: {}", originals);
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
         Set<Long> detectModelIds = mapperHelper.getViewIds(queryReq.getModelId(), agentService.getAgent(agentId));
@@ -141,7 +145,7 @@ public class SearchServiceImpl implements SearchService {
         return searchResults.stream().limit(RESULT_SIZE).collect(Collectors.toList());
     }
 
-    private List<Long> getPossibleModels(QueryReq queryCtx, List<Term> originals,
+    private List<Long> getPossibleModels(QueryReq queryCtx, List<S2Term> originals,
                                          ViewInfoStat modelStat, Long webModelId) {
 
         if (Objects.nonNull(webModelId) && webModelId > 0) {

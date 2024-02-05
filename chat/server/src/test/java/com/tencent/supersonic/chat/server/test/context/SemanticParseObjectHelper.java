@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.server.test.context;
 
 import com.google.gson.Gson;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;

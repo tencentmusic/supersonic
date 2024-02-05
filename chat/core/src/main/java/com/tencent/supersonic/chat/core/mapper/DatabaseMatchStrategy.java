@@ -1,10 +1,10 @@
 package com.tencent.supersonic.chat.core.mapper;
 
-import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
-import com.tencent.supersonic.chat.core.knowledge.DatabaseMapResult;
+import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.core.knowledge.DatabaseMapResult;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
     private List<SchemaElement> allElements;
 
     @Override
-    public Map<MatchText, List<DatabaseMapResult>> match(QueryContext queryContext, List<Term> terms,
+    public Map<MatchText, List<DatabaseMapResult>> match(QueryContext queryContext, List<S2Term> terms,
             Set<Long> detectModelIds) {
         this.allElements = getSchemaElements(queryContext);
         return super.match(queryContext, terms, detectModelIds);
