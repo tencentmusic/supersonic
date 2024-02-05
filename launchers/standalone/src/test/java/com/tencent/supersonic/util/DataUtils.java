@@ -37,6 +37,10 @@ public class DataUtils {
         return User.get(2L, "jack");
     }
 
+    public static User getUserTom() {
+        return User.get(3L, "tom");
+    }
+
     public static QueryReq getQueryContextReq(Integer id, String query) {
         QueryReq queryContextReq = new QueryReq();
         queryContextReq.setQueryText(query);

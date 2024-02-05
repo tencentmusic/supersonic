@@ -144,12 +144,12 @@ public class QueryStructUtils {
             List<MetricSchemaResp> metrics = semanticSchemaResp.getMetrics();
             List<DimSchemaResp> dimensions = semanticSchemaResp.getDimensions();
             metrics.stream().forEach(o -> {
-                if (resNameSet.contains(o.getName())) {
+                if (resNameSet.contains(o.getName()) || resNameSet.contains(o.getBizName())) {
                     resNameEnSet.add(o.getBizName());
                 }
             });
             dimensions.stream().forEach(o -> {
-                if (resNameSet.contains(o.getName())) {
+                if (resNameSet.contains(o.getName()) || resNameSet.contains(o.getBizName())) {
                     resNameEnSet.add(o.getBizName());
                 }
             });
