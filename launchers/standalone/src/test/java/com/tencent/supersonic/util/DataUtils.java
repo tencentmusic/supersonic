@@ -29,6 +29,14 @@ public class DataUtils {
         return user_test;
     }
 
+    public static User getUserAlice() {
+        return User.get(5L, "alice");
+    }
+
+    public static User getUserJack() {
+        return User.get(2L, "jack");
+    }
+
     public static QueryReq getQueryContextReq(Integer id, String query) {
         QueryReq queryContextReq = new QueryReq();
         queryContextReq.setQueryText(query);

@@ -124,19 +124,23 @@ public class ConfigServiceImpl implements ConfigService {
         Long modelId = chatConfig.getModelId();
 
         List<Long> blackDimIdList = new ArrayList<>();
-        if (Objects.nonNull(chatConfig.getChatAggConfig()) && Objects.nonNull(chatConfig.getChatAggConfig())) {
+        if (Objects.nonNull(chatConfig.getChatAggConfig())
+                && Objects.nonNull(chatConfig.getChatAggConfig().getVisibility())) {
             blackDimIdList.addAll(chatConfig.getChatAggConfig().getVisibility().getBlackDimIdList());
         }
-        if (Objects.nonNull(chatConfig.getChatDetailConfig()) && Objects.nonNull(chatConfig.getChatDetailConfig())) {
+        if (Objects.nonNull(chatConfig.getChatDetailConfig())
+                && Objects.nonNull(chatConfig.getChatDetailConfig().getVisibility())) {
             blackDimIdList.addAll(chatConfig.getChatDetailConfig().getVisibility().getBlackDimIdList());
         }
         List<Long> filterDimIdList = blackDimIdList.stream().distinct().collect(Collectors.toList());
 
         List<Long> blackMetricIdList = new ArrayList<>();
-        if (Objects.nonNull(chatConfig.getChatAggConfig()) && Objects.nonNull(chatConfig.getChatAggConfig())) {
+        if (Objects.nonNull(chatConfig.getChatAggConfig())
+                && Objects.nonNull(chatConfig.getChatAggConfig().getVisibility())) {
             blackMetricIdList.addAll(chatConfig.getChatAggConfig().getVisibility().getBlackMetricIdList());
         }
-        if (Objects.nonNull(chatConfig.getChatDetailConfig()) && Objects.nonNull(chatConfig.getChatDetailConfig())) {
+        if (Objects.nonNull(chatConfig.getChatDetailConfig())
+                && Objects.nonNull(chatConfig.getChatDetailConfig().getVisibility())) {
             blackMetricIdList.addAll(chatConfig.getChatDetailConfig().getVisibility().getBlackMetricIdList());
         }
         List<Long> filterMetricIdList = blackMetricIdList.stream().distinct().collect(Collectors.toList());

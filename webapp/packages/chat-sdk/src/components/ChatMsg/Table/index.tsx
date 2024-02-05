@@ -26,7 +26,7 @@ const Table: React.FC<Props> = ({ data, size, loading, onApplyAuth }) => {
         title: name || nameEn,
         render: (value: string | number) => {
           if (!authorized) {
-            return <ApplyAuth model={entityInfo?.modelInfo.name || ''} onApplyAuth={onApplyAuth} />;
+            return <ApplyAuth model={entityInfo?.viewInfo.name || ''} onApplyAuth={onApplyAuth} />;
           }
           if (dataFormatType === 'percent') {
             return (

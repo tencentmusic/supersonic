@@ -15,6 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
+import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,6 +105,11 @@ public class ChatConfigController {
                                           HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return semanticInterpreter.getMetricPage(pageMetricReq, user);
+    }
+
+    @GetMapping("/getDomainViewTree")
+    public List<ItemResp> getDomainViewTree() {
+        return semanticInterpreter.getDomainViewTree();
     }
 
 }

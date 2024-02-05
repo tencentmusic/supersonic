@@ -103,6 +103,7 @@ public class BenchMarkDemoDataLoader {
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         dimensions.add(new Dim("活跃区域", "most_popular_in", DimensionType.categorical.name(), 1));
+        dimensions.add(new Dim("音乐类型名称", "g_name", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
 
         List<Identify> identifiers = new ArrayList<>();
@@ -129,6 +130,7 @@ public class BenchMarkDemoDataLoader {
         modelReq.setDatabaseId(1L);
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
+        dimensions.add(new Dim("艺术家名称", "artist_name", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("国籍", "country", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("性别", "gender", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
@@ -157,6 +159,7 @@ public class BenchMarkDemoDataLoader {
         List<Dim> dimensions = new ArrayList<>();
         dimensions.add(new Dim("持续时间", "duration", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("文件格式", "formats", DimensionType.categorical.name(), 1));
+        dimensions.add(new Dim("艺术家名称", "artist_name", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
 
         List<Identify> identifiers = new ArrayList<>();
@@ -184,6 +187,7 @@ public class BenchMarkDemoDataLoader {
         Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
+        dimensions.add(new Dim("歌曲名称", "song_name", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("国家", "country", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("语种", "languages", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("发行时间", "releasedate", DimensionType.categorical.name(), 1));

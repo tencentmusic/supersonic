@@ -89,7 +89,7 @@ const ParseTip: React.FC<Props> = ({
 
   const {
     modelId,
-    model,
+    view,
     dimensions,
     metrics,
     aggType,
@@ -148,12 +148,8 @@ const ParseTip: React.FC<Props> = ({
               </div>
             ) : (
               <div className={`${prefixCls}-tip-item`}>
-                <div className={`${prefixCls}-tip-item-name`}>数据模型：</div>
-                <div className={itemValueClass}>
-                  {model?.modelNames?.length === 1
-                    ? model.modelNames[0]
-                    : model?.modelNames?.map(modelName => <Tag key={modelName}>{modelName}</Tag>)}
-                </div>
+                <div className={`${prefixCls}-tip-item-name`}>数据视图：</div>
+                <div className={itemValueClass}>{view?.name}</div>
               </div>
             )}
             {(queryType === 'METRIC' || queryType === 'METRIC_TAG' || queryType === 'TAG') && (
