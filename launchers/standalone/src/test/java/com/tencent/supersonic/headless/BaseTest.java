@@ -1,7 +1,5 @@
 package com.tencent.supersonic.headless;
 
-import static java.time.LocalDate.now;
-
 import com.tencent.supersonic.BaseApplication;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
@@ -16,11 +14,14 @@ import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.service.QueryService;
 import com.tencent.supersonic.util.DataUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static java.time.LocalDate.now;
 
 public class BaseTest extends BaseApplication {
 
@@ -74,4 +75,26 @@ public class BaseTest extends BaseApplication {
         queryStructReq.setOrders(orders);
         return queryStructReq;
     }
+
+    protected QueryStructReq buildQueryStructReq(List<String> groups,
+                                                 Aggregator aggregator) {
+        QueryStructReq queryStructReq = new QueryStructReq();
+        for (Long modelId : DataUtils.getMetricAgentIModelIds()) {
+            queryStructReq.addModelId(modelId);
+        }
+        queryStructReq.setQueryType(QueryType.METRIC);
+        queryStructReq.setAggregators(Arrays.asList(aggregator));
+
+        if (CollectionUtils.isNotEmpty(groups)) {
+            queryStructReq.setGroups(groups);
+        }
+
+        DateConf dateConf = new DateConf();
+        dateConf.setDateMode(DateMode.BETWEEN);
+        dateConf.setEndDate(now().plusDays(0).toString());
+        dateConf.setStartDate(now().plusDays(-365).toString());
+        queryStructReq.setDateInfo(dateConf);
+        return queryStructReq;
+    }
+
 }

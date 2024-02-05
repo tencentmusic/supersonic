@@ -528,14 +528,9 @@ public class ModelDemoDataLoader {
     public void addAuthGroup_2() {
         AuthGroup authGroupReq = new AuthGroup();
         authGroupReq.setModelId(3L);
-        authGroupReq.setName("tom_sales_permission");
+        authGroupReq.setName("tom_row_permission");
 
         List<AuthRule> authRules = new ArrayList<>();
-        AuthRule authRule = new AuthRule();
-        authRule.setMetrics(Collections.singletonList("stay_hours"));
-        authRule.setDimensions(Collections.singletonList("page"));
-        authRules.add(authRule);
-
         authGroupReq.setAuthRules(authRules);
         authGroupReq.setDimensionFilters(Collections.singletonList("user_name = 'tom'"));
         authGroupReq.setDimensionFilterDescription("用户名='tom'");

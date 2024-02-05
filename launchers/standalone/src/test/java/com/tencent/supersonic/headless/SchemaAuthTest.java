@@ -46,6 +46,15 @@ public class SchemaAuthTest extends BaseTest {
     }
 
     @Test
+    public void test_getVisibleModelList_alice() {
+        User user = DataUtils.getUserAlice();
+        List<ModelResp> modelResps = modelService.getModelListWithAuth(user, 0L, AuthType.VISIBLE);
+        List<Long> expectedModelIds = Lists.newArrayList(1L, 4L);
+        Assertions.assertEquals(expectedModelIds,
+                modelResps.stream().map(ModelResp::getId).collect(Collectors.toList()));
+    }
+
+    @Test
     public void test_getViewList_alice() {
         User user = DataUtils.getUserAlice();
         List<ViewResp> modelResps = viewService.getViewsInheritAuth(user, 0L);
