@@ -468,16 +468,6 @@ const SqlDetail: React.FC<IProps> = ({
         <div className={`${styles.sqlBottmWrap} ${screenSize}`}>
           <div className={styles.sqlResultWrap}>
             <div className={styles.sqlToolBar}>
-              {/* {
-                <Button
-                  className={styles.sqlToolBtn}
-                  type="primary"
-                  onClick={startCreatDataSource}
-                  disabled={!runState}
-                >
-                  生成数据源
-                </Button>
-              } */}
               <Button
                 className={styles.sqlToolBtn}
                 type="primary"

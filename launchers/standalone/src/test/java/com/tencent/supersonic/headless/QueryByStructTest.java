@@ -1,22 +1,43 @@
 package com.tencent.supersonic.headless;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.util.DataUtils;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.jupiter.api.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class QueryByStructTest extends BaseTest {
+
+    @Test
+    public void testDetailQuery() throws Exception {
+        QueryStructReq queryStructReq = buildQueryStructReq(Arrays.asList("user_name", "department"),
+                QueryType.TAG);
+        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryStructReq, User.getFakeUser());
+        assertEquals(3, semanticQueryResp.getColumns().size());
+        QueryColumn firstColumn = semanticQueryResp.getColumns().get(0);
+        assertEquals("用户", firstColumn.getName());
+        QueryColumn secondColumn = semanticQueryResp.getColumns().get(1);
+        assertEquals("部门", secondColumn.getName());
+        QueryColumn thirdColumn = semanticQueryResp.getColumns().get(2);
+        assertEquals("访问次数", thirdColumn.getName());
+        assertTrue(semanticQueryResp.getResultList().size() > 0);
+    }
 
     @Test
     public void testSumQuery() throws Exception {
@@ -68,14 +89,39 @@ public class QueryByStructTest extends BaseTest {
         QueryStructReq queryStructReq2 = buildQueryStructReq(Arrays.asList("department"));
         SemanticQueryResp result1 = queryService.queryByReq(queryStructReq1, User.getFakeUser());
         SemanticQueryResp result2 = queryService.queryByReq(queryStructReq2, User.getFakeUser());
-        assertEquals(result1, result2);
+        assertTrue(result1 == result2);
     }
 
     @Test
-    public void testAuthorization() {
+    public void testAuthorization_model() {
         User alice = new User(2L, "alice", "alice", "alice@email", 0);
         QueryStructReq queryStructReq1 = buildQueryStructReq(Arrays.asList("department"));
         assertThrows(InvalidPermissionException.class,
                 () -> queryService.queryByReq(queryStructReq1, alice));
     }
+
+    @Test
+    public void testAuthorization_sensitive_metric() throws Exception {
+        User tom = DataUtils.getUserTom();
+        Aggregator aggregator = new Aggregator();
+        aggregator.setFunc(AggOperatorEnum.SUM);
+        aggregator.setColumn("stay_hours");
+        QueryStructReq queryStructReq1 = buildQueryStructReq(Arrays.asList("department"), aggregator);
+        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryStructReq1, tom);
+        Assertions.assertEquals(false, semanticQueryResp.getColumns().get(1).getAuthorized());
+        Assertions.assertEquals("******", semanticQueryResp.getResultList().get(0).get("stay_hours"));
+    }
+
+    @Test
+    public void testAuthorization_row_permission() throws Exception {
+        User tom = DataUtils.getUserTom();
+        Aggregator aggregator = new Aggregator();
+        aggregator.setFunc(AggOperatorEnum.SUM);
+        aggregator.setColumn("stay_hours");
+        QueryStructReq queryStructReq1 = buildQueryStructReq(Arrays.asList("department"), aggregator);
+        SemanticQueryResp semanticQueryResp = queryService.queryByReq(queryStructReq1, tom);
+        Assertions.assertNotNull(semanticQueryResp.getQueryAuthorization().getMessage());
+        Assertions.assertTrue(semanticQueryResp.getSql().contains("`user_name` = 'tom'"));
+    }
+
 }

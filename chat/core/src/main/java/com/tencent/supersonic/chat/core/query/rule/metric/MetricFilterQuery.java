@@ -38,9 +38,7 @@ public class MetricFilterQuery extends MetricSemanticQuery {
     @Override
     public QueryResult execute(User user) {
         if (!isMultiStructQuery()) {
-            QueryResult queryResult = super.execute(user);
-            fillAggregateInfo(user, queryResult);
-            return queryResult;
+            return super.execute(user);
         }
         return super.multiStructExecute(user);
     }

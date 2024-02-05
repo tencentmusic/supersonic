@@ -11,7 +11,6 @@ public class DimensionValueReq {
     @NotNull
     private Long elementID;
 
-    @NotNull
     private Long modelId;
 
     private String bizName;

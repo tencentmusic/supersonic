@@ -1,15 +1,13 @@
-import React, { useRef, forwardRef, useImperativeHandle, useState, useEffect } from 'react';
-import type { Ref, ReactNode } from 'react';
+import React, { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
+import type { Ref } from 'react';
 import type { RadioChangeEvent } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { objToList } from '@/utils/utils';
-// import { LatestDateMap } from '@/services/global/type';
 import { DateRangeType, DateRangeTypeToPickerMap, DateRangePicker } from './type';
 import {
   SHORT_CUT_ITEM_LIST,
   datePeriodTypeWordingMap,
   getDynamicDateRangeStringByParams,
-  getDateStrings,
   datePeriodTypeMap,
   dateRangeTypeExchangeDatePeriodTypeMap,
 } from './utils';
@@ -74,7 +72,6 @@ const DynamicDate: React.FC<Props> = forwardRef(
   ) => {
     useImperativeHandle(ref, () => ({
       dynamicDateUpdateAdvancedPanelFormData: () => {
-        // return [...dataSource];
         if (advancedConfigType) {
           updateAdvancedPanelFormData(
             advancedPanelFormData[advancedConfigType],
@@ -420,7 +417,6 @@ const DynamicDate: React.FC<Props> = forwardRef(
                           }}
                         />
                         <Select
-                          // defaultValue={DatePeriodType.DAY}
                           style={{ width: 120 }}
                           disabled={isAdvancedConfigTypeRadioDisabled(
                             DynamicAdvancedConfigType.LAST,

@@ -75,10 +75,10 @@ const ModelRelationFormDrawer: React.FC<ModelRelationFormDrawerProps> = ({
         <FormItem hidden={true} name="id" label="ID">
           <Input placeholder="id" />
         </FormItem>
-        <FormItem label="起始数据源:">
+        <FormItem label="起始模型:">
           <span style={{ color: '#296df3', fontWeight: 500 }}>{nodeModel?.sourceData?.name}</span>
         </FormItem>
-        <FormItem label="目标数据源:">
+        <FormItem label="目标模型:">
           <span style={{ color: '#296df3', fontWeight: 500 }}>{nodeModel?.targetData?.name}</span>
         </FormItem>
         <FormItem
@@ -231,7 +231,7 @@ const ModelRelationFormDrawer: React.FC<ModelRelationFormDrawerProps> = ({
       width={400}
       destroyOnClose
       getContainer={false}
-      title={'数据源关联信息'}
+      title={'模型关联信息'}
       mask={false}
       open={open}
       footer={renderFooter()}

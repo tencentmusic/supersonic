@@ -60,10 +60,10 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserRemoveHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserReplaceHelper;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserSelectHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlRemoveHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import lombok.extern.slf4j.Slf4j;
@@ -318,7 +318,7 @@ public class QueryServiceImpl implements QueryService {
         if (Objects.nonNull(parseInfo.getSqlInfo())
                 && StringUtils.isNotBlank(parseInfo.getSqlInfo().getCorrectS2SQL())) {
             String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
-            fields = SqlParserSelectHelper.getAllFields(correctorSql);
+            fields = SqlSelectHelper.getAllFields(correctorSql);
         }
         if (LLMSqlQuery.QUERY_MODE.equalsIgnoreCase(parseInfo.getQueryMode())
                 && checkMetricReplace(fields, queryData.getMetrics())) {
@@ -373,8 +373,8 @@ public class QueryServiceImpl implements QueryService {
         String correctorSql = parseInfo.getSqlInfo().getCorrectS2SQL();
         log.info("correctorSql before replacing:{}", correctorSql);
         // get where filter and having filter
-        List<FieldExpression> whereExpressionList = SqlParserSelectHelper.getWhereExpressions(correctorSql);
-        List<FieldExpression> havingExpressionList = SqlParserSelectHelper.getHavingExpressions(correctorSql);
+        List<FieldExpression> whereExpressionList = SqlSelectHelper.getWhereExpressions(correctorSql);
+        List<FieldExpression> havingExpressionList = SqlSelectHelper.getHavingExpressions(correctorSql);
         List<Expression> addWhereConditions = new ArrayList<>();
         List<Expression> addHavingConditions = new ArrayList<>();
         Set<String> removeWhereFieldNames = new HashSet<>();
@@ -384,16 +384,16 @@ public class QueryServiceImpl implements QueryService {
                 parseInfo.getDimensionFilters(), addWhereConditions, removeWhereFieldNames);
         updateDateInfo(queryData, parseInfo, filedNameToValueMap,
                 whereExpressionList, addWhereConditions, removeWhereFieldNames);
-        correctorSql = SqlParserReplaceHelper.replaceValue(correctorSql, filedNameToValueMap);
-        correctorSql = SqlParserRemoveHelper.removeWhereCondition(correctorSql, removeWhereFieldNames);
+        correctorSql = SqlReplaceHelper.replaceValue(correctorSql, filedNameToValueMap);
+        correctorSql = SqlRemoveHelper.removeWhereCondition(correctorSql, removeWhereFieldNames);
         // replace having filter
         updateFilters(havingExpressionList, queryData.getDimensionFilters(),
                 parseInfo.getDimensionFilters(), addHavingConditions, removeHavingFieldNames);
-        correctorSql = SqlParserReplaceHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
-        correctorSql = SqlParserRemoveHelper.removeHavingCondition(correctorSql, removeHavingFieldNames);
+        correctorSql = SqlReplaceHelper.replaceHavingValue(correctorSql, havingFiledNameToValueMap);
+        correctorSql = SqlRemoveHelper.removeHavingCondition(correctorSql, removeHavingFieldNames);
 
-        correctorSql = SqlParserAddHelper.addWhere(correctorSql, addWhereConditions);
-        correctorSql = SqlParserAddHelper.addHaving(correctorSql, addHavingConditions);
+        correctorSql = SqlAddHelper.addWhere(correctorSql, addWhereConditions);
+        correctorSql = SqlAddHelper.addHaving(correctorSql, addHavingConditions);
         log.info("correctorSql after replacing:{}", correctorSql);
         return correctorSql;
     }
@@ -407,7 +407,7 @@ public class QueryServiceImpl implements QueryService {
         Map<String, Pair<String, String>> fieldMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(oriMetrics) && !oriMetrics.contains(metric.getName())) {
             fieldMap.put(oriMetrics.get(0), Pair.of(metric.getName(), metric.getDefaultAgg()));
-            correctorSql = SqlParserReplaceHelper.replaceAggFields(correctorSql, fieldMap);
+            correctorSql = SqlReplaceHelper.replaceAggFields(correctorSql, fieldMap);
         }
         log.info("after replaceMetrics:{}", correctorSql);
         parseInfo.getSqlInfo().setCorrectS2SQL(correctorSql);

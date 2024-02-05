@@ -17,7 +17,6 @@ import com.tencent.supersonic.chat.core.query.plugin.ParamOption;
 import com.tencent.supersonic.chat.core.query.plugin.WebBase;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatService;
-import com.tencent.supersonic.chat.server.service.ConfigService;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.chat.server.service.QueryService;
 import com.tencent.supersonic.common.pojo.SysParameter;
@@ -49,8 +48,6 @@ public class ChatDemoLoader implements CommandLineRunner {
     @Autowired
     private ChatService chatService;
     @Autowired
-    private ConfigService configService;
-    @Autowired
     private PluginService pluginService;
     @Autowired
     private AgentService agentService;
@@ -81,7 +78,7 @@ public class ChatDemoLoader implements CommandLineRunner {
             addAgent1();
             addAgent2();
             addAgent3();
-            addAgent4();
+            //addAgent4();
             addSampleChats();
             addSampleChats2();
             updateQueryScore(1);
@@ -175,7 +172,7 @@ public class ChatDemoLoader implements CommandLineRunner {
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setId("0");
-        ruleQueryTool.setViewIds(Lists.newArrayList(-1L));
+        ruleQueryTool.setViewIds(Lists.newArrayList(1L));
         ruleQueryTool.setQueryTypes(Lists.newArrayList(QueryType.METRIC.name()));
         agentConfig.getTools().add(ruleQueryTool);
         if (demoEnabledNl2SqlLlm) {
@@ -201,7 +198,7 @@ public class ChatDemoLoader implements CommandLineRunner {
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setId("0");
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
-        ruleQueryTool.setViewIds(Lists.newArrayList(-1L));
+        ruleQueryTool.setViewIds(Lists.newArrayList(2L));
         ruleQueryTool.setQueryTypes(Lists.newArrayList(QueryType.TAG.name()));
         agentConfig.getTools().add(ruleQueryTool);
 
@@ -231,7 +228,7 @@ public class ChatDemoLoader implements CommandLineRunner {
             LLMParserTool llmParserTool = new LLMParserTool();
             llmParserTool.setId("1");
             llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-            llmParserTool.setViewIds(Lists.newArrayList(5L, 6L, 7L, 8L));
+            llmParserTool.setViewIds(Lists.newArrayList(3L));
             agentConfig.getTools().add(llmParserTool);
         }
 
@@ -253,11 +250,12 @@ public class ChatDemoLoader implements CommandLineRunner {
             LLMParserTool llmParserTool = new LLMParserTool();
             llmParserTool.setId("1");
             llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-            llmParserTool.setViewIds(Lists.newArrayList(9L, 10L, 11L, 12L));
+            llmParserTool.setViewIds(Lists.newArrayList(4L));
             agentConfig.getTools().add(llmParserTool);
         }
 
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
+        log.info("agent:{}", JsonUtil.toString(agent));
         agentService.createAgent(agent, User.getFakeUser());
     }
 

@@ -11,14 +11,14 @@ import type { IChatConfig } from '../../data';
 import { ChatConfigType } from '../../enum';
 
 type Props = {
-  chatConfigType: ChatConfigType.DETAIL | ChatConfigType.AGG;
+  chatConfigType: ChatConfigType.TAG | ChatConfigType.METRIC;
   onConfigSave?: () => void;
   dispatch: Dispatch;
   domainManger: StateType;
 };
 
 const EntitySection: React.FC<Props> = forwardRef(
-  ({ domainManger, chatConfigType = ChatConfigType.DETAIL, onConfigSave }, ref: Ref<any>) => {
+  ({ domainManger, chatConfigType = ChatConfigType.TAG, onConfigSave }, ref: Ref<any>) => {
     const { selectDomainId, selectModelId: modelId, dimensionList, metricList } = domainManger;
 
     const [entityData, setEntityData] = useState<IChatConfig.IChatRichConfig>();
@@ -34,10 +34,10 @@ const EntitySection: React.FC<Props> = forwardRef(
 
       if (code === 200) {
         const { chatAggRichConfig, chatDetailRichConfig, id, domainId, modelId } = data;
-        if (chatConfigType === ChatConfigType.DETAIL) {
+        if (chatConfigType === ChatConfigType.TAG) {
           setEntityData({ ...chatDetailRichConfig, id, domainId, modelId });
         }
-        if (chatConfigType === ChatConfigType.AGG) {
+        if (chatConfigType === ChatConfigType.METRIC) {
           setEntityData({ ...chatAggRichConfig, id, domainId, modelId });
         }
         return;
@@ -66,7 +66,7 @@ const EntitySection: React.FC<Props> = forwardRef(
               entityData={entityData || {}}
               chatConfigType={chatConfigType}
               chatConfigKey={
-                chatConfigType === ChatConfigType.DETAIL ? 'chatDetailConfig' : 'chatAggConfig'
+                chatConfigType === ChatConfigType.TAG ? 'chatDetailConfig' : 'chatAggConfig'
               }
               dimensionList={dimensionList.filter((item) => {
                 const blackDimensionList = entityData?.visibility?.blackDimIdList;

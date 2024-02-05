@@ -6,18 +6,29 @@ import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
-import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
+import com.tencent.supersonic.common.pojo.enums.TimeMode;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.headless.api.pojo.DefaultDisplayInfo;
+import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
+import com.tencent.supersonic.headless.api.pojo.ViewDetail;
+import com.tencent.supersonic.headless.api.pojo.ViewModelConfig;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.ModelDetail;
+import com.tencent.supersonic.headless.api.pojo.QueryConfig;
+import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
+import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
+import com.tencent.supersonic.headless.api.pojo.request.ViewReq;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.ViewService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,6 +51,9 @@ public class BenchMarkDemoDataLoader {
     @Autowired
     private ModelRelaService modelRelaService;
 
+    @Autowired
+    private ViewService viewService;
+
     public void doRun() {
         try {
             addDomain();
@@ -47,6 +61,7 @@ public class BenchMarkDemoDataLoader {
             addModel_2();
             addModel_3();
             addModel_4();
+            addView_1();
             addModelRela_1();
             addModelRela_2();
             addModelRela_3();
@@ -88,6 +103,7 @@ public class BenchMarkDemoDataLoader {
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
         dimensions.add(new Dim("活跃区域", "most_popular_in", DimensionType.categorical.name(), 1));
+        dimensions.add(new Dim("音乐类型名称", "g_name", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
 
         List<Identify> identifiers = new ArrayList<>();
@@ -114,6 +130,7 @@ public class BenchMarkDemoDataLoader {
         modelReq.setDatabaseId(1L);
         ModelDetail modelDetail = new ModelDetail();
         List<Dim> dimensions = new ArrayList<>();
+        dimensions.add(new Dim("艺术家名称", "artist_name", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("国籍", "country", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("性别", "gender", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
@@ -142,6 +159,7 @@ public class BenchMarkDemoDataLoader {
         List<Dim> dimensions = new ArrayList<>();
         dimensions.add(new Dim("持续时间", "duration", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("文件格式", "formats", DimensionType.categorical.name(), 1));
+        dimensions.add(new Dim("艺术家名称", "artist_name", DimensionType.categorical.name(), 1));
         modelDetail.setDimensions(dimensions);
 
         List<Identify> identifiers = new ArrayList<>();
@@ -169,6 +187,7 @@ public class BenchMarkDemoDataLoader {
         Dim dimension1 = new Dim("", "imp_date", DimensionType.time.name(), 0);
         dimension1.setTypeParams(new DimensionTimeTypeParams());
         dimensions.add(dimension1);
+        dimensions.add(new Dim("歌曲名称", "song_name", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("国家", "country", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("语种", "languages", DimensionType.categorical.name(), 1));
         dimensions.add(new Dim("发行时间", "releasedate", DimensionType.categorical.name(), 1));
@@ -192,6 +211,44 @@ public class BenchMarkDemoDataLoader {
                 + " rating, languages, releasedate, resolution FROM song");
         modelReq.setModelDetail(modelDetail);
         modelService.createModel(modelReq, user);
+    }
+
+    public void addView_1() {
+        ViewReq viewReq = new ViewReq();
+        viewReq.setName("cspider");
+        viewReq.setBizName("singer");
+        viewReq.setDomainId(3L);
+        viewReq.setDescription("包含cspider数据集相关标签和指标信息");
+        viewReq.setAdmins(Lists.newArrayList("admin"));
+        List<ViewModelConfig> viewModelConfigs = Lists.newArrayList(
+                new ViewModelConfig(5L, Lists.newArrayList(8L), Lists.newArrayList()),
+                new ViewModelConfig(6L, Lists.newArrayList(9L, 10L), Lists.newArrayList()),
+                new ViewModelConfig(7L, Lists.newArrayList(11L, 12L), Lists.newArrayList()),
+                new ViewModelConfig(8L, Lists.newArrayList(13L, 14L, 15L), Lists.newArrayList(8L, 9L))
+        );
+        ViewDetail viewDetail = new ViewDetail();
+        viewDetail.setViewModelConfigs(viewModelConfigs);
+        viewReq.setViewDetail(viewDetail);
+        viewReq.setTypeEnum(TypeEnums.VIEW);
+        QueryConfig queryConfig = new QueryConfig();
+        TagTypeDefaultConfig tagTypeDefaultConfig = new TagTypeDefaultConfig();
+        TimeDefaultConfig tagTimeDefaultConfig = new TimeDefaultConfig();
+        tagTimeDefaultConfig.setTimeMode(TimeMode.LAST);
+        tagTimeDefaultConfig.setUnit(7);
+        tagTypeDefaultConfig.setTimeDefaultConfig(tagTimeDefaultConfig);
+        DefaultDisplayInfo defaultDisplayInfo = new DefaultDisplayInfo();
+        defaultDisplayInfo.setDimensionIds(Lists.newArrayList());
+        defaultDisplayInfo.setMetricIds(Lists.newArrayList());
+        tagTypeDefaultConfig.setDefaultDisplayInfo(defaultDisplayInfo);
+        MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
+        TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
+        timeDefaultConfig.setTimeMode(TimeMode.RECENT);
+        timeDefaultConfig.setUnit(7);
+        metricTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
+        queryConfig.setTagTypeDefaultConfig(tagTypeDefaultConfig);
+        queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
+        viewReq.setQueryConfig(queryConfig);
+        viewService.save(viewReq, User.getFakeUser());
     }
 
     public void addModelRela_1() {

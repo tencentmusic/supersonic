@@ -13,13 +13,13 @@ com.tencent.supersonic.chat.core.parser.SemanticParser=\
 
 com.tencent.supersonic.chat.core.corrector.SemanticCorrector=\
     com.tencent.supersonic.chat.core.corrector.SchemaCorrector, \
+    com.tencent.supersonic.chat.core.corrector.TimeCorrector, \
     com.tencent.supersonic.chat.core.corrector.SelectCorrector, \
     com.tencent.supersonic.chat.core.corrector.WhereCorrector, \
     com.tencent.supersonic.chat.core.corrector.GroupByCorrector, \
     com.tencent.supersonic.chat.core.corrector.HavingCorrector
 
 com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor=\
-    com.tencent.supersonic.chat.server.processor.parse.MetricCheckProcessor, \
     com.tencent.supersonic.chat.server.processor.parse.ParseInfoProcessor, \
     com.tencent.supersonic.chat.server.processor.parse.QueryRankProcessor, \
     com.tencent.supersonic.chat.server.processor.parse.EntityInfoProcessor, \
@@ -42,7 +42,8 @@ com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor=\
 
 com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor=\
     com.tencent.supersonic.chat.server.processor.execute.MetricRecommendProcessor,\
-    com.tencent.supersonic.chat.server.processor.execute.DimensionRecommendProcessor
+    com.tencent.supersonic.chat.server.processor.execute.DimensionRecommendProcessor,\
+    com.tencent.supersonic.chat.server.processor.execute.MetricRatioProcessor
 
 com.tencent.supersonic.common.util.embedding.S2EmbeddingStore=\
     com.tencent.supersonic.common.util.embedding.InMemoryS2EmbeddingStore

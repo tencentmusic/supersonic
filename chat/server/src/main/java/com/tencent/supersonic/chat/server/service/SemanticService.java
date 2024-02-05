@@ -102,10 +102,10 @@ public class SemanticService {
         }
         entityInfo.setViewInfo(viewInfo);
         TagTypeDefaultConfig tagTypeDefaultConfig = viewSchema.getTagTypeDefaultConfig();
-        if (tagTypeDefaultConfig == null) {
+        if (tagTypeDefaultConfig == null || tagTypeDefaultConfig.getDefaultDisplayInfo() == null) {
             return entityInfo;
         }
-        List<DataInfo> dimensions = tagTypeDefaultConfig.getDimensionIds().stream()
+        List<DataInfo> dimensions = tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
                 .map(id -> {
                     SchemaElement element = viewSchema.getElement(SchemaElementType.DIMENSION, id);
                     if (element == null) {
@@ -113,7 +113,7 @@ public class SemanticService {
                     }
                     return new DataInfo(element.getId().intValue(), element.getName(), element.getBizName(), null);
                 }).filter(Objects::nonNull).collect(Collectors.toList());
-        List<DataInfo> metrics = tagTypeDefaultConfig.getDimensionIds().stream()
+        List<DataInfo> metrics = tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
                 .map(id -> {
                     SchemaElement element = viewSchema.getElement(SchemaElementType.METRIC, id);
                     if (element == null) {

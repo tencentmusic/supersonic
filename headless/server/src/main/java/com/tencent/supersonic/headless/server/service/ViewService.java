@@ -18,4 +18,8 @@ public interface ViewService {
     List<ViewResp> getViewList(MetaFilter metaFilter);
 
     void delete(Long id, User user);
+
+    List<ViewResp> getViews(User user);
+
+    List<ViewResp> getViewsInheritAuth(User user, Long domainId);
 }

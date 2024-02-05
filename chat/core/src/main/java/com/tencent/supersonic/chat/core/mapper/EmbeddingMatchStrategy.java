@@ -106,7 +106,9 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
                                 if (StringUtils.isBlank(modelIdStr)) {
                                     return true;
                                 }
-                                return detectModelIds.contains(Long.parseLong(modelIdStr));
+                                //return detectModelIds.contains(Long.parseLong(modelIdStr));
+                                Double modelId = Double.parseDouble(modelIdStr);
+                                return detectModelIds.contains(modelId.longValue());
                             });
                         }
                     }

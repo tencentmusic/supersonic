@@ -513,7 +513,6 @@ def evaluate(gold, predict, db_dir, etype, kmaps,query_path):
         db_name = db
         # db = os.path.join(db_dir, db, db + ".sqlite")
         db = os.path.join(db_dir,db + ".db")
-        print(db)
         schema = Schema(get_schema(db))
         g_sql = get_sql(schema, g_str)
         hardness = evaluator.eval_hardness(g_sql)
@@ -597,7 +596,7 @@ def evaluate(gold, predict, db_dir, etype, kmaps,query_path):
     print_scores(scores, etype)
     print(scores['all']['exec'])
     current_directory = os.path.dirname(os.path.abspath(__file__))
-    file_name=current_directory+"/eval.json"
+    file_name=current_directory+"/error_case.json"
     json_exist=os.path.exists(file_name)
     if json_exist:
         os.remove(file_name)
@@ -884,11 +883,11 @@ def get_evaluation_result():
         config = yaml.safe_load(file)
     db_dir=current_directory+"/data"
     db_path=current_directory+"/data/"
-    db_file=db_path+config["domain"]+".db"
+    db_file=db_path+"internet.db"
     pred = current_directory+"/data/"+"pred_example_dusql.txt"
     gold = current_directory+"/data/"+"gold_example_dusql.txt"
     table= current_directory+"/data/"+"tables_dusql.json"
-    query_path=current_directory+"/data/"+config["domain"]+".txt"
+    query_path=current_directory+"/data/"+"internet.txt"
     etype="exec"
     kmaps = build_foreign_key_map_from_json(table)
 
@@ -900,7 +899,7 @@ def remove_unused_file():
     with open(config_file, 'r') as file:
         config = yaml.safe_load(file)
     db_path=current_directory+"/data/"
-    db_file=db_path+config["domain"]+".db"
+    db_file=db_path+"internet.db"
     pred_file = current_directory+"/data/"+"pred_example_dusql.txt"
 
     db_exist=os.path.exists(db_file)

@@ -11,7 +11,7 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
-import com.tencent.supersonic.common.util.jsqlparser.SqlParserAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -156,7 +156,7 @@ public class QueryStructReq extends SemanticQueryReq {
     }
 
     /**
-     * convert queryStructReq to QueryS2QLReq
+     * convert queryStructReq to QueryS2SQLReq
      *
      * @param queryStructReq
      * @return
@@ -170,7 +170,6 @@ public class QueryStructReq extends SemanticQueryReq {
         }
 
         QuerySqlReq result = new QuerySqlReq();
-        result.setNeedAuth(queryStructReq.needAuth);
         result.setSql(sql);
         result.setViewId(queryStructReq.getViewId());
         result.setModelIds(queryStructReq.getModelIdSet());
@@ -262,17 +261,15 @@ public class QueryStructReq extends SemanticQueryReq {
         String sql = select.toString();
         if (StringUtils.isNotBlank(whereClause)) {
             Expression expression = CCJSqlParserUtil.parseCondExpression(whereClause);
-            sql = SqlParserAddHelper.addWhere(sql, expression);
+            sql = SqlAddHelper.addWhere(sql, expression);
         }
 
         //7.Set DateInfo
         DateModeUtils dateModeUtils = ContextUtils.getBean(DateModeUtils.class);
-        if (Objects.nonNull(queryStructReq.getDateInfo())) {
-            String dateWhereStr = dateModeUtils.getDateWhereStr(queryStructReq.getDateInfo());
-            if (StringUtils.isNotBlank(dateWhereStr)) {
-                Expression expression = CCJSqlParserUtil.parseCondExpression(dateWhereStr);
-                sql = SqlParserAddHelper.addWhere(sql, expression);
-            }
+        String dateWhereStr = dateModeUtils.getDateWhereStr(queryStructReq.getDateInfo());
+        if (StringUtils.isNotBlank(dateWhereStr)) {
+            Expression expression = CCJSqlParserUtil.parseCondExpression(dateWhereStr);
+            sql = SqlAddHelper.addWhere(sql, expression);
         }
         return sql;
     }

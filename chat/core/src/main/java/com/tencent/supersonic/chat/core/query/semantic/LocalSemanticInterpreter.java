@@ -14,6 +14,7 @@ import com.tencent.supersonic.headless.api.pojo.request.ViewFilterReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
+import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
@@ -102,6 +103,11 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
     public PageInfo<MetricResp> getMetricPage(PageMetricReq pageMetricReq, User user) {
         metricService = ContextUtils.getBean(MetricService.class);
         return metricService.queryMetric(pageMetricReq, user);
+    }
+
+    @Override
+    public List<ItemResp> getDomainViewTree() {
+        return schemaService.getDomainViewTree();
     }
 
 }

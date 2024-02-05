@@ -14,7 +14,7 @@ type Props = {
   onSqlChange: (sql: string) => void;
 };
 
-const MetricMeasuresFormTable: React.FC<Props> = ({
+const MetricFieldFormTable: React.FC<Props> = ({
   typeParams,
   fieldList,
   onFieldChange,
@@ -80,7 +80,6 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
           rowKey="fieldName"
           columns={columns}
           dataSource={tableData}
-          pagination={false}
           search={false}
           toolbar={{
             search: {
@@ -97,6 +96,7 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
               },
             },
           }}
+          pagination={{ defaultPageSize: 10 }}
           size="small"
           options={false}
           tableAlertRender={false}
@@ -134,4 +134,4 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
   );
 };
 
-export default MetricMeasuresFormTable;
+export default MetricFieldFormTable;

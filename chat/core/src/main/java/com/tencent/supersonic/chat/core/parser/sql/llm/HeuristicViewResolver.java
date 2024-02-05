@@ -122,7 +122,9 @@ public class HeuristicViewResolver implements ViewResolver {
             }
             return null;
         }
-        matchedViews.retainAll(agentViewIds);
+        if (CollectionUtils.isNotEmpty(agentViewIds)) {
+            matchedViews.retainAll(agentViewIds);
+        }
         Map<Long, SemanticQuery> viewQueryModes = new HashMap<>();
         for (Long viewIds : matchedViews) {
             viewQueryModes.put(viewIds, null);

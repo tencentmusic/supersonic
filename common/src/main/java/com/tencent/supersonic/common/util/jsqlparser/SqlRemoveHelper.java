@@ -37,10 +37,10 @@ import java.util.Objects;
  * Sql Parser remove Helper
  */
 @Slf4j
-public class SqlParserRemoveHelper {
+public class SqlRemoveHelper {
 
     public static String removeSelect(String sql, Set<String> fields) {
-        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
         if (selectStatement == null) {
             return sql;
         }
@@ -52,7 +52,7 @@ public class SqlParserRemoveHelper {
         selectItems.removeIf(selectItem -> {
             if (selectItem instanceof SelectExpressionItem) {
                 SelectExpressionItem selectExpressionItem = (SelectExpressionItem) selectItem;
-                String columnName = SqlParserSelectHelper.getColumnName(selectExpressionItem.getExpression());
+                String columnName = SqlSelectHelper.getColumnName(selectExpressionItem.getExpression());
                 return fields.contains(columnName);
             }
             return false;
@@ -61,7 +61,7 @@ public class SqlParserRemoveHelper {
     }
 
     public static String removeWhereCondition(String sql, Set<String> removeFieldNames) {
-        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
 
         if (!(selectBody instanceof PlainSelect)) {
@@ -84,7 +84,7 @@ public class SqlParserRemoveHelper {
     }
 
     public static String removeNumberFilter(String sql) {
-        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
         if (selectStatement == null) {
             return sql;
         }
@@ -105,7 +105,7 @@ public class SqlParserRemoveHelper {
     }
 
     private static void removeWhereExpression(Expression whereExpression, Set<String> removeFieldNames) {
-        if (SqlParserSelectHelper.isLogicExpression(whereExpression)) {
+        if (SqlSelectHelper.isLogicExpression(whereExpression)) {
             BinaryExpression binaryExpression = (BinaryExpression) whereExpression;
             Expression leftExpression = binaryExpression.getLeftExpression();
             Expression rightExpression = binaryExpression.getRightExpression();
@@ -140,7 +140,7 @@ public class SqlParserRemoveHelper {
                 || expression instanceof MinorThanEquals
                 || expression instanceof MinorThan) {
             ComparisonOperator comparisonOperator = (ComparisonOperator) expression;
-            String columnName = SqlParserSelectHelper.getColumnName(comparisonOperator.getLeftExpression(),
+            String columnName = SqlSelectHelper.getColumnName(comparisonOperator.getLeftExpression(),
                     comparisonOperator.getRightExpression());
             if (!removeFieldNames.contains(columnName)) {
                 return;
@@ -158,7 +158,7 @@ public class SqlParserRemoveHelper {
         }
         if (expression instanceof InExpression) {
             InExpression inExpression = (InExpression) expression;
-            String columnName = SqlParserSelectHelper.getColumnName(inExpression.getLeftExpression(),
+            String columnName = SqlSelectHelper.getColumnName(inExpression.getLeftExpression(),
                     inExpression.getRightExpression());
             if (!removeFieldNames.contains(columnName)) {
                 return;
@@ -175,7 +175,7 @@ public class SqlParserRemoveHelper {
         }
         if (expression instanceof LikeExpression) {
             LikeExpression likeExpression = (LikeExpression) expression;
-            String columnName = SqlParserSelectHelper.getColumnName(likeExpression.getLeftExpression(),
+            String columnName = SqlSelectHelper.getColumnName(likeExpression.getLeftExpression(),
                     likeExpression.getRightExpression());
             if (!removeFieldNames.contains(columnName)) {
                 return;
@@ -192,7 +192,7 @@ public class SqlParserRemoveHelper {
     }
 
     public static String removeHavingCondition(String sql, Set<String> removeFieldNames) {
-        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
         SelectBody selectBody = selectStatement.getSelectBody();
 
         if (!(selectBody instanceof PlainSelect)) {
@@ -207,26 +207,8 @@ public class SqlParserRemoveHelper {
         return removeNumberFilter(selectStatement.toString());
     }
 
-    public static String removeWhere(String sql, List<String> fields) {
-        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
-        SelectBody selectBody = selectStatement.getSelectBody();
-        if (!(selectBody instanceof PlainSelect)) {
-            return sql;
-        }
-        PlainSelect plainSelect = (PlainSelect) selectBody;
-        Expression where = plainSelect.getWhere();
-
-        if (where == null) {
-            return sql;
-        } else {
-            where.accept(new FilterRemoveVisitor(fields));
-            plainSelect.setWhere(where);
-        }
-        return selectStatement.toString();
-    }
-
     public static String removeGroupBy(String sql, Set<String> fields) {
-        Select selectStatement = SqlParserSelectHelper.getSelect(sql);
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
         if (selectStatement == null) {
             return sql;
         }
@@ -328,7 +310,7 @@ public class SqlParserRemoveHelper {
             return distinguishNumberFilter(leftExpression, expression);
         }
         if (sqlEditEnum.equals(SqlEditEnum.DATEDIFF)) {
-            return SqlParserReplaceHelper.distinguishDateDiffFilter(leftExpression, expression);
+            return SqlReplaceHelper.distinguishDateDiffFilter(leftExpression, expression);
         }
         return expression;
     }
