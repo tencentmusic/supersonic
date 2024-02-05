@@ -145,6 +145,7 @@ public class DictUtils {
     public List<String> fetchItemValue(DictItemResp dictItemResp) {
         List<String> lines = new ArrayList<>();
         QuerySqlReq querySqlReq = constructQueryReq(dictItemResp);
+        querySqlReq.setNeedAuth(false);
         String bizName = dictItemResp.getBizName();
         try {
             SemanticQueryResp semanticQueryResp = queryService.queryByReq(querySqlReq, null);
