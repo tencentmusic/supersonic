@@ -1,9 +1,9 @@
 package com.tencent.supersonic.chat.core.mapper;
 
 import com.google.common.collect.Lists;
-import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.core.knowledge.HanlpMapResult;
-import com.tencent.supersonic.chat.core.knowledge.SearchService;
+import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.core.knowledge.HanlpMapResult;
+import com.tencent.supersonic.headless.core.knowledge.SearchService;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import java.util.List;
@@ -26,7 +26,7 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     private static final int SEARCH_SIZE = 3;
 
     @Override
-    public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<Term> originals,
+    public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<S2Term> originals,
             Set<Long> detectModelIds) {
         String text = queryContext.getQueryText();
         Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(originals);
@@ -52,9 +52,9 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
                     if (StringUtils.isNotEmpty(detectSegment)) {
                         List<HanlpMapResult> hanlpMapResults = SearchService.prefixSearch(detectSegment,
-                                SearchService.SEARCH_SIZE, queryContext.getAgentId(), detectModelIds);
+                                SearchService.SEARCH_SIZE, detectModelIds);
                         List<HanlpMapResult> suffixHanlpMapResults = SearchService.suffixSearch(
-                                detectSegment, SEARCH_SIZE, queryContext.getAgentId(), detectModelIds);
+                                detectSegment, SEARCH_SIZE, detectModelIds);
                         hanlpMapResults.addAll(suffixHanlpMapResults);
                         // remove entity name where search
                         hanlpMapResults = hanlpMapResults.stream().filter(entry -> {

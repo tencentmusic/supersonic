@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.core.utils;
 
-import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
+import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.parser.JavaLLMProxy;
 import com.tencent.supersonic.chat.core.parser.LLMProxy;
 import com.tencent.supersonic.chat.core.parser.sql.llm.ViewResolver;

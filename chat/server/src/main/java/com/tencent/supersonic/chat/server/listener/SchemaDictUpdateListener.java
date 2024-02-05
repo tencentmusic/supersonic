@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.server.listener;
 
-import com.tencent.supersonic.chat.core.knowledge.DictWord;
-import com.tencent.supersonic.chat.core.utils.HanlpHelper;
+import com.tencent.supersonic.headless.core.knowledge.DictWord;
+import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.chat.server.service.impl.SchemaService;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DataEvent;

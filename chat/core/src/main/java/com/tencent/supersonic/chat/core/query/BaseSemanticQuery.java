@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
-import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
+import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.utils.ComponentFactory;
 import com.tencent.supersonic.chat.core.utils.QueryReqBuilder;
 import com.tencent.supersonic.common.pojo.Aggregator;

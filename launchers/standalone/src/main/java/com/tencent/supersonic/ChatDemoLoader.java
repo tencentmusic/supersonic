@@ -23,6 +23,7 @@ import com.tencent.supersonic.common.pojo.SysParameter;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.server.service.KnowledgeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,6 +53,8 @@ public class ChatDemoLoader implements CommandLineRunner {
     private AgentService agentService;
     @Autowired
     private SysParameterService sysParameterService;
+    @Autowired
+    private KnowledgeService knowledgeService;
 
     @Value("${demo.enabled:false}")
     private boolean demoEnabled;
@@ -91,7 +95,10 @@ public class ChatDemoLoader implements CommandLineRunner {
         queryRequest.setAgentId(1);
         queryRequest.setUser(User.getFakeUser());
         ParseResp parseResp = queryService.performParsing(queryRequest);
-
+        if (CollectionUtils.isEmpty(parseResp.getSelectedParses())) {
+            log.info("parseResp.getSelectedParses() is empty");
+            return;
+        }
         ExecuteQueryReq executeReq = ExecuteQueryReq.builder().build();
         executeReq.setQueryId(parseResp.getQueryId());
         executeReq.setParseId(parseResp.getSelectedParses().get(0).getId());

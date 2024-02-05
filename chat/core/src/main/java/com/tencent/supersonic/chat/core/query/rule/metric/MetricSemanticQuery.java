@@ -1,8 +1,8 @@
 package com.tencent.supersonic.chat.core.query.rule.metric;
 
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.METRIC;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.REQUIRED;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.METRIC;
 
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.api.pojo.ViewSchema;
@@ -29,7 +29,7 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
 
     @Override
     public List<SchemaElementMatch> match(List<SchemaElementMatch> candidateElementMatches,
-            QueryContext queryCtx) {
+                                          QueryContext queryCtx) {
         return super.match(candidateElementMatches, queryCtx);
     }
 

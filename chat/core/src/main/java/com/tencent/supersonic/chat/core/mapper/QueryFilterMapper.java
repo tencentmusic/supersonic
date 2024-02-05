@@ -1,13 +1,13 @@
 package com.tencent.supersonic.chat.core.mapper;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilters;
-import com.tencent.supersonic.chat.core.knowledge.builder.BaseWordBuilder;
+import com.tencent.supersonic.headless.core.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import lombok.extern.slf4j.Slf4j;

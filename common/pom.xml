@@ -190,6 +190,11 @@
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-embeddings</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hankcs</groupId>
+            <artifactId>hanlp</artifactId>
+            <version>${hanlp.version}</version>
+        </dependency>
 
     </dependencies>
 

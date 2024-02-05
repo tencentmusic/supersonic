@@ -3,7 +3,7 @@ package com.tencent.supersonic.chat.server.rest;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.chat.api.pojo.request.DimensionValueReq;
+import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;

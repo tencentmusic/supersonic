@@ -3,7 +3,7 @@ package com.tencent.supersonic.util;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.core.agent.Agent;

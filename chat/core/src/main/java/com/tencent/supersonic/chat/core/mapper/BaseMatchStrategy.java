@@ -1,8 +1,8 @@
 package com.tencent.supersonic.chat.core.mapper;
 
-import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
-import com.tencent.supersonic.chat.core.utils.NatureHelper;
+import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.core.knowledge.helper.NatureHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +28,8 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
     private MapperHelper mapperHelper;
 
     @Override
-    public Map<MatchText, List<T>> match(QueryContext queryContext, List<Term> terms, Set<Long> detectViewIds) {
+    public Map<MatchText, List<T>> match(QueryContext queryContext, List<S2Term> terms,
+                                         Set<Long> detectViewIds) {
         String text = queryContext.getQueryText();
         if (Objects.isNull(terms) || StringUtils.isEmpty(text)) {
             return null;
@@ -43,7 +44,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         return result;
     }
 
-    public List<T> detect(QueryContext queryContext, List<Term> terms, Set<Long> detectModelIds) {
+    public List<T> detect(QueryContext queryContext, List<S2Term> terms, Set<Long> detectModelIds) {
         Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(terms);
         String text = queryContext.getQueryText();
         Set<T> results = new HashSet<>();
@@ -72,9 +73,10 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         return;
     }
 
-    public Map<Integer, Integer> getRegOffsetToLength(List<Term> terms) {
-        return terms.stream().sorted(Comparator.comparing(Term::length))
-                .collect(Collectors.toMap(Term::getOffset, term -> term.word.length(), (value1, value2) -> value2));
+    public Map<Integer, Integer> getRegOffsetToLength(List<S2Term> terms) {
+        return terms.stream().sorted(Comparator.comparing(S2Term::length))
+                .collect(Collectors.toMap(S2Term::getOffset, term -> term.word.length(),
+                        (value1, value2) -> value2));
     }
 
     public void selectResultInOneRound(Set<T> existResults, List<T> oneRoundResults) {
@@ -102,7 +104,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         }
     }
 
-    public List<T> getMatches(QueryContext queryContext, List<Term> terms) {
+    public List<T> getMatches(QueryContext queryContext, List<S2Term> terms) {
         Set<Long> viewIds = mapperHelper.getViewIds(queryContext.getViewId(), queryContext.getAgent());
         terms = filterByViewId(terms, viewIds);
         Map<MatchText, List<T>> matchResult = match(queryContext, terms, viewIds);
@@ -120,7 +122,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         return matches;
     }
 
-    public List<Term> filterByViewId(List<Term> terms, Set<Long> viewIds) {
+    public List<S2Term> filterByViewId(List<S2Term> terms, Set<Long> viewIds) {
         logTerms(terms);
         if (CollectionUtils.isNotEmpty(viewIds)) {
             terms = terms.stream().filter(term -> {
@@ -136,11 +138,11 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         return terms;
     }
 
-    public void logTerms(List<Term> terms) {
+    public void logTerms(List<S2Term> terms) {
         if (CollectionUtils.isEmpty(terms)) {
             return;
         }
-        for (Term term : terms) {
+        for (S2Term term : terms) {
             log.debug("word:{},nature:{},frequency:{}", term.word, term.nature.toString(), term.getFrequency());
         }
     }

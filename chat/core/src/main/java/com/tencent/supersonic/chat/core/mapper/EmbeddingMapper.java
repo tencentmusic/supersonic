@@ -1,13 +1,13 @@
 package com.tencent.supersonic.chat.core.mapper;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.core.knowledge.EmbeddingResult;
-import com.tencent.supersonic.chat.core.knowledge.builder.BaseWordBuilder;
-import com.tencent.supersonic.chat.core.utils.HanlpHelper;
+import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.core.knowledge.EmbeddingResult;
+import com.tencent.supersonic.headless.core.knowledge.builder.BaseWordBuilder;
+import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import java.util.List;
@@ -26,7 +26,7 @@ public class EmbeddingMapper extends BaseMapper {
     public void doMap(QueryContext queryContext) {
         //1. query from embedding by queryText
         String queryText = queryContext.getQueryText();
-        List<Term> terms = HanlpHelper.getTerms(queryText);
+        List<S2Term> terms = HanlpHelper.getTerms(queryText);
 
         EmbeddingMatchStrategy matchStrategy = ContextUtils.getBean(EmbeddingMatchStrategy.class);
         List<EmbeddingResult> matchResults = matchStrategy.getMatches(queryContext, terms);

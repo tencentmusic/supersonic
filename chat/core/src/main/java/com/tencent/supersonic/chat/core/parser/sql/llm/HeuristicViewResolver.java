@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.core.parser.sql.llm;
 
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.query.SemanticQuery;

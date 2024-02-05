@@ -156,23 +156,23 @@ CREATE TABLE IF NOT EXISTS `s2_user_department` (
     );
 COMMENT ON TABLE s2_user_department IS 'user_department_info';
 
-
-CREATE TABLE IF NOT EXISTS `s2_dictionary_task` (
-                                                    `id` INT NOT NULL AUTO_INCREMENT,
-                                                    `name` varchar(255) NOT NULL , -- task name
-    `description` varchar(255) ,
-    `command`LONGVARCHAR  NOT NULL , -- task Request Parameters
-    `command_md5` varchar(255)  NOT NULL , -- task Request Parameters md5
-    `status` INT NOT NULL , -- the final status of the task
-    `dimension_ids` varchar(500)  NULL ,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
-    `created_by` varchar(100) NOT NULL ,
-    `progress` DOUBLE default 0.00  ,  -- task real-time progress
-    `elapsed_ms` bigINT DEFAULT NULL , -- the task takes time in milliseconds
-    `message` LONGVARCHAR  , -- remark related information
-    PRIMARY KEY (`id`)
-    );
-COMMENT ON TABLE s2_dictionary_task IS 'dictionary task information table';
+--
+-- CREATE TABLE IF NOT EXISTS `s2_dictionary_task` (
+--                                                     `id` INT NOT NULL AUTO_INCREMENT,
+--                                                     `name` varchar(255) NOT NULL , -- task name
+--     `description` varchar(255) ,
+--     `command`LONGVARCHAR  NOT NULL , -- task Request Parameters
+--     `command_md5` varchar(255)  NOT NULL , -- task Request Parameters md5
+--     `status` INT NOT NULL , -- the final status of the task
+--     `dimension_ids` varchar(500)  NULL ,
+--     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
+--     `created_by` varchar(100) NOT NULL ,
+--     `progress` DOUBLE default 0.00  ,  -- task real-time progress
+--     `elapsed_ms` bigINT DEFAULT NULL , -- the task takes time in milliseconds
+--     `message` LONGVARCHAR  , -- remark related information
+--     PRIMARY KEY (`id`)
+--     );
+-- COMMENT ON TABLE s2_dictionary_task IS 'dictionary task information table';
 
 
 

@@ -201,37 +201,33 @@ CREATE TABLE `s2_database` (
                                PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='数据库实例表';
 
-CREATE TABLE `s2_dictionary` (
-                                 `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-                                 `item_id` bigint(20) DEFAULT NULL COMMENT '对应维度id、指标id等',
-                                 `type` varchar(50) DEFAULT NULL COMMENT '对应维度、指标等',
-                                 `black_list` mediumtext COMMENT '字典黑名单',
-                                 `white_list` mediumtext COMMENT '字典白名单',
-                                 `rule_list` mediumtext COMMENT '字典规则',
-                                 `is_dict_Info` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1-开启写入字典，0-不开启',
-                                 `created_at` datetime NOT NULL COMMENT '创建时间',
-                                 `updated_at` datetime NOT NULL COMMENT '更新时间',
-                                 `created_by` varchar(100) NOT NULL COMMENT '创建人',
-                                 `updated_by` varchar(100) DEFAULT NULL COMMENT '更新人',
-                                 `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1-删除,0-可用',
-                                 PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='字典配置信息表';
+CREATE TABLE IF NOT EXISTS `s2_dictionary_conf` (
+   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+   `description` varchar(255) ,
+   `type` varchar(255)  NOT NULL ,
+   `item_id` INT  NOT NULL , -- task Request Parameters md5
+   `config` mediumtext  , -- remark related information
+   `status` varchar(255) NOT NULL , -- the final status of the task
+   `created_at` datetime NOT NULL COMMENT '创建时间' ,
+   `created_by` varchar(100) NOT NULL ,
+   PRIMARY KEY (`id`)
+);
+COMMENT ON TABLE s2_dictionary_conf IS '字典配置信息表';
 
-CREATE TABLE `s2_dictionary_task` (
-                                      `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-                                      `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务名称',
-                                      `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '任务描述',
-                                      `command` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务请求参数',
-                                      `command_md5` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务请求参数',
-                                      `dimension_ids` mediumtext  NULL COMMENT '本次执行维度列表',
-                                      `status` int(10) NOT NULL COMMENT '任务最终运行状态',
-                                      `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                      `created_by` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '创建人',
-                                      `progress` double(3,2) DEFAULT '0.00' COMMENT '任务进度',
-  `elapsed_ms` bigint(10) DEFAULT NULL COMMENT '任务耗时',
-  `message` mediumtext COLLATE utf8mb4_unicode_ci COMMENT '备注相关信息',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='字典任务信息表';
+CREATE TABLE IF NOT EXISTS `s2_dictionary_task` (
+   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+   `name` varchar(255) NOT NULL , -- task name
+   `description` varchar(255) ,
+   `type` varchar(255)  NOT NULL ,
+   `item_id` INT  NOT NULL , -- task Request Parameters md5
+   `config` mediumtext  , -- remark related information
+   `status` varchar(255) NOT NULL , -- the final status of the task
+   `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   `created_by` varchar(100) NOT NULL ,
+   `elapsed_ms` int(10) DEFAULT NULL , -- the task takes time in milliseconds
+   PRIMARY KEY (`id`)
+);
+COMMENT ON TABLE s2_dictionary_task IS 'dictionary task information table';
 
 
 CREATE TABLE `s2_dimension` (

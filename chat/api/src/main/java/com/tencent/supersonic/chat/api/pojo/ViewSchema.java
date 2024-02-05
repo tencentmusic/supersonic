@@ -1,6 +1,8 @@
 package com.tencent.supersonic.chat.api.pojo;
 
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import lombok.Data;

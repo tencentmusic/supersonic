@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.core.mapper;
 
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.ToString;

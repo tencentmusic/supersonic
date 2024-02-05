@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.core.mapper;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
-import com.tencent.supersonic.chat.core.knowledge.EmbeddingResult;
+import com.tencent.supersonic.headless.core.knowledge.EmbeddingResult;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Constants;

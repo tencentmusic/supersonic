@@ -28,8 +28,8 @@ com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor=\
     com.tencent.supersonic.chat.server.processor.parse.RespBuildProcessor, \
     com.tencent.supersonic.chat.server.processor.parse.QueryRecommendProcessor
 
-com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter=\
-    com.tencent.supersonic.chat.core.knowledge.semantic.LocalSemanticInterpreter
+com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter=\
+    com.tencent.supersonic.chat.core.query.semantic.LocalSemanticInterpreter
 
 com.tencent.supersonic.chat.core.parser.sql.llm.ViewResolver=\
   com.tencent.supersonic.chat.core.parser.sql.llm.HeuristicViewResolver

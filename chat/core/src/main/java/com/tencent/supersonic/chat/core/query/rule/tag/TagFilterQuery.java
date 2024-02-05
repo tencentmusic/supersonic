@@ -1,6 +1,6 @@
 package com.tencent.supersonic.chat.core.query.rule.tag;
 
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.VALUE;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.VALUE;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.REQUIRED;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
 

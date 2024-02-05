@@ -1,10 +1,10 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
-import com.tencent.supersonic.chat.core.knowledge.DictWord;
-import com.tencent.supersonic.chat.core.knowledge.builder.WordBuilderFactory;
-import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
+import com.tencent.supersonic.headless.core.knowledge.DictWord;
+import com.tencent.supersonic.headless.core.knowledge.builder.WordBuilderFactory;
+import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.utils.ComponentFactory;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import lombok.extern.slf4j.Slf4j;
