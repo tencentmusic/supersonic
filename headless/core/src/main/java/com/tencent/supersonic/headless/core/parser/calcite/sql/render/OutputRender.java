@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.parser.calcite.sql.render;
 
 
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
+import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
@@ -25,7 +25,7 @@ import org.springframework.util.CollectionUtils;
 public class OutputRender extends Renderer {
 
     @Override
-    public void render(MetricQueryReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
+    public void render(MetricQueryParam metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
             SemanticSchema schema, boolean nonAgg) throws Exception {
         TableView selectDataSet = super.tableView;
         EngineType engineType = EngineType.fromString(schema.getSemanticModel().getDatabase().getType());

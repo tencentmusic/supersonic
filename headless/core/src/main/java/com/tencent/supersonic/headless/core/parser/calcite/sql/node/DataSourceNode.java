@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.parser.calcite.sql.node;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
+import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
@@ -154,7 +154,7 @@ public class DataSourceNode extends SemanticNode {
         return dataSourceList.stream().map(d -> d.getName()).collect(Collectors.joining("_"));
     }
 
-    public static void getQueryDimensionMeasure(SemanticSchema schema, MetricQueryReq metricCommand,
+    public static void getQueryDimensionMeasure(SemanticSchema schema, MetricQueryParam metricCommand,
             Set<String> queryDimension, List<String> measures) {
         queryDimension.addAll(metricCommand.getDimensions().stream()
                 .map(d -> d.contains(Constants.DIMENSION_IDENTIFY) ? d.split(Constants.DIMENSION_IDENTIFY)[1] : d)
@@ -166,7 +166,7 @@ public class DataSourceNode extends SemanticNode {
 
     }
 
-    public static void mergeQueryFilterDimensionMeasure(SemanticSchema schema, MetricQueryReq metricCommand,
+    public static void mergeQueryFilterDimensionMeasure(SemanticSchema schema, MetricQueryParam metricCommand,
             Set<String> queryDimension, List<String> measures,
             SqlValidatorScope scope) throws Exception {
         EngineType engineType = EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
@@ -191,7 +191,7 @@ public class DataSourceNode extends SemanticNode {
     }
 
     public static List<DataSource> getMatchDataSources(SqlValidatorScope scope, SemanticSchema schema,
-            MetricQueryReq metricCommand) throws Exception {
+            MetricQueryParam metricCommand) throws Exception {
         List<DataSource> dataSources = new ArrayList<>();
 
         // check by metric
@@ -265,7 +265,7 @@ public class DataSourceNode extends SemanticNode {
             Set<String> queryDimension,
             List<String> measures,
             Set<String> dimension,
-            MetricQueryReq metricCommand,
+            MetricQueryParam metricCommand,
             SqlValidatorScope scope,
             EngineType engineType) throws Exception {
         boolean isAllMatch = true;

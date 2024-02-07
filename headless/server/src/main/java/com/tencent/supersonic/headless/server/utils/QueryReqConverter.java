@@ -11,11 +11,12 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.MetricTable;
+import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricType;
-import com.tencent.supersonic.headless.api.pojo.request.ParseSqlReq;
+import com.tencent.supersonic.headless.core.pojo.ViewQueryParam;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
@@ -27,15 +28,6 @@ import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,6 +37,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 @Slf4j
@@ -60,7 +60,7 @@ public class QueryReqConverter {
     private SqlGenerateUtils sqlGenerateUtils;
 
     public QueryStatement convert(QuerySqlReq querySQLReq,
-                                  SemanticSchemaResp semanticSchemaResp) throws Exception {
+            SemanticSchemaResp semanticSchemaResp) throws Exception {
 
         if (semanticSchemaResp == null) {
             return new QueryStatement();
@@ -103,7 +103,7 @@ public class QueryReqConverter {
         List<MetricTable> tables = new ArrayList<>();
         tables.add(metricTable);
         //4.build ParseSqlReq
-        ParseSqlReq result = new ParseSqlReq();
+        ViewQueryParam result = new ViewQueryParam();
         BeanUtils.copyProperties(querySQLReq, result);
 
         result.setTables(tables);
@@ -116,19 +116,29 @@ public class QueryReqConverter {
         //5. do deriveMetric
         generateDerivedMetric(semanticSchemaResp, aggOption, result);
         //6.physicalSql by ParseSqlReq
+
         queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySQLReq.getSql()));
         queryStructReq.setViewId(querySQLReq.getViewId());
         queryStructReq.setQueryType(getQueryType(aggOption));
         log.info("QueryReqConverter queryStructReq[{}]", queryStructReq);
+        QueryParam queryParam = new QueryParam();
+        convert(queryStructReq, queryParam);
         QueryStatement queryStatement = new QueryStatement();
-        queryStatement.setQueryStructReq(queryStructReq);
-        queryStatement.setParseSqlReq(result);
+        queryStatement.setQueryParam(queryParam);
+        queryStatement.setViewQueryParam(result);
         queryStatement.setIsS2SQL(true);
         queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructReq));
         queryStatement.setViewId(querySQLReq.getViewId());
         queryStatement.setEnableLimitWrapper(limitWrapper);
 
         return queryStatement;
+    }
+
+    public void convert(QueryStructReq queryStructReq, QueryParam queryParam) {
+        BeanUtils.copyProperties(queryStructReq, queryParam);
+        queryParam.setOrders(queryStructReq.getOrders());
+        queryParam.setMetrics(queryStructReq.getMetrics());
+        queryParam.setGroups(queryStructReq.getGroups());
     }
 
     private AggOption getAggOption(QuerySqlReq databaseReq) {
@@ -229,9 +239,9 @@ public class QueryReqConverter {
     }
 
     private void generateDerivedMetric(SemanticSchemaResp semanticSchemaResp, AggOption aggOption,
-            ParseSqlReq parseSqlReq) {
-        String sql = parseSqlReq.getSql();
-        for (MetricTable metricTable : parseSqlReq.getTables()) {
+            ViewQueryParam viewQueryParam) {
+        String sql = viewQueryParam.getSql();
+        for (MetricTable metricTable : viewQueryParam.getTables()) {
             List<String> measures = new ArrayList<>();
             Map<String, String> replaces = new HashMap<>();
             generateDerivedMetric(semanticSchemaResp, aggOption, metricTable.getMetrics(),
@@ -247,7 +257,7 @@ public class QueryReqConverter {
                 }
             }
         }
-        parseSqlReq.setSql(sql);
+        viewQueryParam.setSql(sql);
     }
 
     private void generateDerivedMetric(SemanticSchemaResp semanticSchemaResp, AggOption aggOption,

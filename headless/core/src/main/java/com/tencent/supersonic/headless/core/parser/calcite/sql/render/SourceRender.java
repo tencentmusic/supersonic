@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.parser.calcite.sql.render;
 
 
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
+import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
@@ -317,9 +317,9 @@ public class SourceRender extends Renderer {
         }
     }
 
-    public void render(MetricQueryReq metricQueryReq, List<DataSource> dataSources, SqlValidatorScope scope,
+    public void render(MetricQueryParam metricQueryParam, List<DataSource> dataSources, SqlValidatorScope scope,
             SemanticSchema schema, boolean nonAgg) throws Exception {
-        String queryWhere = metricQueryReq.getWhere();
+        String queryWhere = metricQueryParam.getWhere();
         Set<String> whereFields = new HashSet<>();
         List<String> fieldWhere = new ArrayList<>();
         EngineType engineType = EngineType.fromString(schema.getSemanticModel().getDatabase().getType());
@@ -330,13 +330,13 @@ public class SourceRender extends Renderer {
         }
         if (dataSources.size() == 1) {
             DataSource dataSource = dataSources.get(0);
-            super.tableView = renderOne("", fieldWhere, metricQueryReq.getMetrics(),
-                    metricQueryReq.getDimensions(),
-                    metricQueryReq.getWhere(), dataSource, scope, schema, nonAgg);
+            super.tableView = renderOne("", fieldWhere, metricQueryParam.getMetrics(),
+                    metricQueryParam.getDimensions(),
+                    metricQueryParam.getWhere(), dataSource, scope, schema, nonAgg);
             return;
         }
         JoinRender joinRender = new JoinRender();
-        joinRender.render(metricQueryReq, dataSources, scope, schema, nonAgg);
+        joinRender.render(metricQueryParam, dataSources, scope, schema, nonAgg);
         super.tableView = joinRender.getTableView();
     }
 

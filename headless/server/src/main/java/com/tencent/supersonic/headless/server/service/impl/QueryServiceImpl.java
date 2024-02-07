@@ -12,6 +12,7 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.Item;
+import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.SingleItemQueryResult;
 import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
@@ -48,18 +49,17 @@ import com.tencent.supersonic.headless.server.service.QueryService;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.stereotype.Service;
 
 
 @Service
@@ -165,10 +165,13 @@ public class QueryServiceImpl implements QueryService {
         SchemaFilterReq filter = buildSchemaFilterReq(queryStructReq);
         SemanticSchemaResp semanticSchemaResp = catalog.fetchSemanticSchema(filter);
         QueryStatement queryStatement = new QueryStatement();
-        queryStatement.setQueryStructReq(queryStructReq);
+        QueryParam queryParam = new QueryParam();
+        queryReqConverter.convert(queryStructReq, queryParam);
+        //queryStatement.setQueryStructReq(queryStructReq);
+        queryStatement.setQueryParam(queryParam);
         queryStatement.setIsS2SQL(false);
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
-        queryStatement.setViewId(queryStatement.getQueryStructReq().getViewId());
+        queryStatement.setViewId(queryStructReq.getViewId());
         queryStatement.setSemanticSchemaResp(semanticSchemaResp);
         SemanticModel semanticModel = semanticSchemaManager.getSemanticModel(semanticSchemaResp);
         queryStatement.setSemanticModel(semanticModel);
@@ -181,7 +184,7 @@ public class QueryServiceImpl implements QueryService {
         for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
             QueryStatement queryStatement = buildQueryStatement(queryStructReq);
             SemanticModel semanticModel = queryStatement.getSemanticModel();
-            queryStatement.setModelIds(queryStatement.getQueryStructReq().getModelIds());
+            queryStatement.setModelIds(queryStructReq.getModelIds());
             queryStatement.setSemanticModel(semanticModel);
             queryStatement.setEnableOptimize(queryUtils.enableOptimize());
             queryStatement = plan(queryStatement);
