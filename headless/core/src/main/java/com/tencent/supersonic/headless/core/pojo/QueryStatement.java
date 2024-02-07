@@ -1,8 +1,6 @@
 package com.tencent.supersonic.headless.core.pojo;
 
-import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
-import com.tencent.supersonic.headless.api.pojo.request.ParseSqlReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.SemanticModel;
 import lombok.Data;
@@ -19,9 +17,9 @@ public class QueryStatement {
     private String sourceId = "";
     private String errMsg = "";
     private Boolean ok;
-    private QueryStructReq queryStructReq;
-    private MetricQueryReq metricReq;
-    private ParseSqlReq parseSqlReq;
+    private QueryParam queryParam;
+    private MetricQueryParam metricQueryParam;
+    private ViewQueryParam viewQueryParam;
     private Integer status = 0;
     private Boolean isS2SQL = false;
     private List<ImmutablePair<String, String>> timeRanges;
