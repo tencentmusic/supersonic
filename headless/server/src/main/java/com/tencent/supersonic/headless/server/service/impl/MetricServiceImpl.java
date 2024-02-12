@@ -6,6 +6,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
@@ -259,8 +260,8 @@ public class MetricServiceImpl implements MetricService {
         metricFilter.setModelIds(Lists.newArrayList(modelId));
         List<MetricResp> metricResps = getMetrics(metricFilter);
         return metricResps.stream().filter(metricResp ->
-                MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())
-                        || MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType()))
+                        MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())
+                                || MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType()))
                 .collect(Collectors.toList());
     }
 
@@ -450,8 +451,8 @@ public class MetricServiceImpl implements MetricService {
                 new HashMap<>(), Lists.newArrayList());
         return DataItem.builder().id(metricDO.getId()).name(metricDO.getName())
                 .bizName(metricDO.getBizName())
-                .modelId(metricDO.getModelId()).type(TypeEnums.METRIC)
-                .defaultAgg(metricResp.getDefaultAgg()).build();
+                .modelId(metricDO.getModelId() + Constants.UNDERLINE)
+                .type(TypeEnums.METRIC).defaultAgg(metricResp.getDefaultAgg()).build();
     }
 
 }

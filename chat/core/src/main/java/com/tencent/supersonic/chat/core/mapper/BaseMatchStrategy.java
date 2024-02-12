@@ -44,7 +44,7 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
         return result;
     }
 
-    public List<T> detect(QueryContext queryContext, List<S2Term> terms, Set<Long> detectModelIds) {
+    public List<T> detect(QueryContext queryContext, List<S2Term> terms, Set<Long> detectViewIds) {
         Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(terms);
         String text = queryContext.getQueryText();
         Set<T> results = new HashSet<>();
@@ -59,16 +59,16 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
                 if (index <= text.length()) {
                     String detectSegment = text.substring(startIndex, index);
                     detectSegments.add(detectSegment);
-                    detectByStep(queryContext, results, detectModelIds, startIndex, index, offset);
+                    detectByStep(queryContext, results, detectViewIds, startIndex, index, offset);
                 }
             }
             startIndex = mapperHelper.getStepIndex(regOffsetToLength, startIndex);
         }
-        detectByBatch(queryContext, results, detectModelIds, detectSegments);
+        detectByBatch(queryContext, results, detectViewIds, detectSegments);
         return new ArrayList<>(results);
     }
 
-    protected void detectByBatch(QueryContext queryContext, Set<T> results, Set<Long> detectModelIds,
+    protected void detectByBatch(QueryContext queryContext, Set<T> results, Set<Long> detectViewIds,
             Set<String> detectSegments) {
         return;
     }
@@ -152,6 +152,6 @@ public abstract class BaseMatchStrategy<T> implements MatchStrategy<T> {
     public abstract String getMapKey(T a);
 
     public abstract void detectByStep(QueryContext queryContext, Set<T> results,
-            Set<Long> detectModelIds, Integer startIndex, Integer index, int offset);
+            Set<Long> detectViewIds, Integer startIndex, Integer index, int offset);
 
 }

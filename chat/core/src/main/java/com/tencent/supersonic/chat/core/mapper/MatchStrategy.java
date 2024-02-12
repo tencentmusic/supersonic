@@ -13,6 +13,6 @@ import java.util.Set;
  */
 public interface MatchStrategy<T> {
 
-    Map<MatchText, List<T>> match(QueryContext queryContext, List<S2Term> terms, Set<Long> detectModelId);
+    Map<MatchText, List<T>> match(QueryContext queryContext, List<S2Term> terms, Set<Long> detectViewIds);
 
 }

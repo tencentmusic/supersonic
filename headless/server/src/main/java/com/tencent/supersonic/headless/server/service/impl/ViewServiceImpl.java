@@ -3,6 +3,8 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
@@ -19,22 +21,25 @@ import com.tencent.supersonic.headless.server.persistence.mapper.ViewDOMapper;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.ViewService;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class ViewServiceImpl
         extends ServiceImpl<ViewDOMapper, ViewDO> implements ViewService {
+
+    protected final Cache<MetaFilter, List<ViewResp>> viewSchemaCache =
+            CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
 
     @Autowired
     private DomainService domainService;
@@ -151,6 +156,16 @@ public class ViewServiceImpl
         }
         String userName = user.getName();
         return admins.contains(userName) || viewResp.getCreatedBy().equals(userName);
+    }
+
+    @Override
+    public List<ViewResp> getViewListByCache(MetaFilter metaFilter) {
+        List<ViewResp> viewList = viewSchemaCache.getIfPresent(metaFilter);
+        if (CollectionUtils.isEmpty(viewList)) {
+            viewList = getViewList(metaFilter);
+            viewSchemaCache.put(metaFilter, viewList);
+        }
+        return viewList;
     }
 
 }

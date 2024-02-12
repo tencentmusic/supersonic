@@ -37,9 +37,9 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
 
     @Override
     public Map<MatchText, List<DatabaseMapResult>> match(QueryContext queryContext, List<S2Term> terms,
-            Set<Long> detectModelIds) {
+            Set<Long> detectViewIds) {
         this.allElements = getSchemaElements(queryContext);
-        return super.match(queryContext, terms, detectModelIds);
+        return super.match(queryContext, terms, detectViewIds);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
                 + Constants.UNDERLINE + a.getSchemaElement().getName();
     }
 
-    public void detectByStep(QueryContext queryContext, Set<DatabaseMapResult> existResults, Set<Long> detectModelIds,
+    public void detectByStep(QueryContext queryContext, Set<DatabaseMapResult> existResults, Set<Long> detectViewIds,
             Integer startIndex, Integer index, int offset) {
         String detectSegment = queryContext.getQueryText().substring(startIndex, index);
         if (StringUtils.isBlank(detectSegment)) {

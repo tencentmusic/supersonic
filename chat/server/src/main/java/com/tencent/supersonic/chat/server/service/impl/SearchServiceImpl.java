@@ -97,12 +97,12 @@ public class SearchServiceImpl implements SearchService {
         List<S2Term> originals = knowledgeService.getTerms(queryText);
         log.info("hanlp parse result: {}", originals);
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
-        Set<Long> detectModelIds = mapperHelper.getViewIds(queryReq.getModelId(), agentService.getAgent(agentId));
+        Set<Long> detectViewIds = mapperHelper.getViewIds(queryReq.getModelId(), agentService.getAgent(agentId));
 
         QueryContext queryContext = new QueryContext();
         BeanUtils.copyProperties(queryReq, queryContext);
         Map<MatchText, List<HanlpMapResult>> regTextMap =
-                searchMatchStrategy.match(queryContext, originals, detectModelIds);
+                searchMatchStrategy.match(queryContext, originals, detectViewIds);
         regTextMap.entrySet().stream().forEach(m -> HanlpHelper.transLetterOriginal(m.getValue()));
 
         // 4.get the most matching data
