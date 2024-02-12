@@ -19,6 +19,8 @@ public interface ViewService {
 
     void delete(Long id, User user);
 
+    List<ViewResp> getViewListByCache(MetaFilter metaFilter);
+
     List<ViewResp> getViews(User user);
 
     List<ViewResp> getViewsInheritAuth(User user, Long domainId);

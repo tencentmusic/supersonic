@@ -18,7 +18,7 @@ public class DataItem {
 
     private TypeEnums type;
 
-    private Long modelId;
+    private String modelId;
 
     private String defaultAgg;
 

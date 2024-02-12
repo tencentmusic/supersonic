@@ -4,15 +4,13 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
 import com.tencent.supersonic.headless.core.knowledge.EmbeddingResult;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
-import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.util.ComponentFactory;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
-import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
+import com.tencent.supersonic.headless.server.service.MetaEmbeddingService;
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,9 +34,7 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
     private OptimizationConfig optimizationConfig;
 
     @Autowired
-    private EmbeddingConfig embeddingConfig;
-
-    private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
+    private MetaEmbeddingService metaEmbeddingService;
 
     @Override
     public boolean needDelete(EmbeddingResult oneRoundResult, EmbeddingResult existResult) {
@@ -52,7 +48,7 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
     }
 
     @Override
-    protected void detectByBatch(QueryContext queryContext, Set<EmbeddingResult> results, Set<Long> detectModelIds,
+    protected void detectByBatch(QueryContext queryContext, Set<EmbeddingResult> results, Set<Long> detectViewIds,
             Set<String> detectSegments) {
 
         List<String> queryTextsList = detectSegments.stream()
@@ -66,51 +62,29 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
                 optimizationConfig.getEmbeddingMapperBatch());
 
         for (List<String> queryTextsSub : queryTextsSubList) {
-            detectByQueryTextsSub(results, detectModelIds, queryTextsSub);
+            detectByQueryTextsSub(results, detectViewIds, queryTextsSub);
         }
     }
 
-    private void detectByQueryTextsSub(Set<EmbeddingResult> results, Set<Long> detectModelIds,
+    private void detectByQueryTextsSub(Set<EmbeddingResult> results, Set<Long> detectViewIds,
             List<String> queryTextsSub) {
         int embeddingNumber = optimizationConfig.getEmbeddingMapperNumber();
         Double distance = optimizationConfig.getEmbeddingMapperDistanceThreshold();
-        Map<String, String> filterCondition = null;
         // step1. build query params
-        // if only one modelId, add to filterCondition
-        if (CollectionUtils.isNotEmpty(detectModelIds) && detectModelIds.size() == 1) {
-            filterCondition = new HashMap<>();
-            filterCondition.put("modelId", detectModelIds.stream().findFirst().get().toString());
-        }
-
-        RetrieveQuery retrieveQuery = RetrieveQuery.builder()
-                .queryTextsList(queryTextsSub)
-                .filterCondition(filterCondition)
-                .queryEmbeddings(null)
-                .build();
+        RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(queryTextsSub).build();
         // step2. retrieveQuery by detectSegment
-        List<RetrieveQueryResult> retrieveQueryResults = s2EmbeddingStore.retrieveQuery(
-                embeddingConfig.getMetaCollectionName(), retrieveQuery, embeddingNumber);
+        List<RetrieveQueryResult> retrieveQueryResults = metaEmbeddingService.retrieveQuery(
+                new ArrayList<>(detectViewIds), retrieveQuery, embeddingNumber);
 
         if (CollectionUtils.isEmpty(retrieveQueryResults)) {
             return;
         }
-        // step3. build EmbeddingResults. filter by modelId
+        // step3. build EmbeddingResults
         List<EmbeddingResult> collect = retrieveQueryResults.stream()
                 .map(retrieveQueryResult -> {
                     List<Retrieval> retrievals = retrieveQueryResult.getRetrieval();
                     if (CollectionUtils.isNotEmpty(retrievals)) {
                         retrievals.removeIf(retrieval -> retrieval.getDistance() > distance.doubleValue());
-                        if (CollectionUtils.isNotEmpty(detectModelIds)) {
-                            retrievals.removeIf(retrieval -> {
-                                String modelIdStr = retrieval.getMetadata().get("modelId").toString();
-                                if (StringUtils.isBlank(modelIdStr)) {
-                                    return true;
-                                }
-                                //return detectModelIds.contains(Long.parseLong(modelIdStr));
-                                Double modelId = Double.parseDouble(modelIdStr);
-                                return detectModelIds.contains(modelId.longValue());
-                            });
-                        }
                     }
                     return retrieveQueryResult;
                 })
@@ -121,6 +95,9 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
                             BeanUtils.copyProperties(retrieval, embeddingResult);
                             embeddingResult.setDetectWord(retrieveQueryResult.getQuery());
                             embeddingResult.setName(retrieval.getQuery());
+                            Map<String, String> convertedMap = retrieval.getMetadata().entrySet().stream()
+                                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().toString()));
+                            embeddingResult.setMetadata(convertedMap);
                             return embeddingResult;
                         }))
                 .collect(Collectors.toList());
@@ -135,7 +112,7 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
     }
 
     @Override
-    public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults, Set<Long> detectModelIds,
+    public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults, Set<Long> detectViewIds,
             Integer startIndex, Integer index, int offset) {
         return;
     }

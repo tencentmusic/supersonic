@@ -1,20 +1,18 @@
 package com.tencent.supersonic.chat.core.mapper;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tencent.supersonic.chat.core.pojo.QueryContext;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
+import com.tencent.supersonic.chat.core.pojo.QueryContext;
+import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.embedding.Retrieval;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.knowledge.EmbeddingResult;
 import com.tencent.supersonic.headless.core.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
-import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.embedding.Retrieval;
 import java.util.List;
 import java.util.Objects;
-
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 /***
  * A mapper that recognizes schema elements with vector embedding.
@@ -39,15 +37,11 @@ public class EmbeddingMapper extends BaseMapper {
 
             SchemaElement schemaElement = JSONObject.parseObject(JSONObject.toJSONString(matchResult.getMetadata()),
                     SchemaElement.class);
-            if (Objects.isNull(matchResult.getMetadata())) {
+            Long viewId = Retrieval.getLongId(matchResult.getMetadata().get("viewId"));
+            if (Objects.isNull(viewId)) {
                 continue;
             }
-            String modelIdStr = matchResult.getMetadata().get("modelId");
-            if (StringUtils.isBlank(modelIdStr)) {
-                continue;
-            }
-            long modelId = Long.parseLong(modelIdStr);
-            schemaElement = getSchemaElement(modelId, schemaElement.getType(), elementId,
+            schemaElement = getSchemaElement(viewId, schemaElement.getType(), elementId,
                     queryContext.getSemanticSchema());
             if (schemaElement == null) {
                 continue;
@@ -60,7 +54,7 @@ public class EmbeddingMapper extends BaseMapper {
                     .detectWord(matchResult.getDetectWord())
                     .build();
             //3. add to mapInfo
-            addToSchemaMap(queryContext.getMapInfo(), modelId, schemaElementMatch);
+            addToSchemaMap(queryContext.getMapInfo(), viewId, schemaElementMatch);
         }
     }
 }

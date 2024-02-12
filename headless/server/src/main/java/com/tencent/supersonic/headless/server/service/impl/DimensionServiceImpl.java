@@ -7,6 +7,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.ModelRela;
@@ -72,11 +73,11 @@ public class DimensionServiceImpl implements DimensionService {
 
 
     public DimensionServiceImpl(DimensionRepository dimensionRepository,
-                                ModelService modelService,
-                                ChatGptHelper chatGptHelper,
-                                DatabaseService databaseService,
-                                ModelRelaService modelRelaService,
-                                ViewService viewService) {
+            ModelService modelService,
+            ChatGptHelper chatGptHelper,
+            DatabaseService databaseService,
+            ModelRelaService modelRelaService,
+            ViewService viewService) {
         this.modelService = modelService;
         this.dimensionRepository = dimensionRepository;
         this.chatGptHelper = chatGptHelper;
@@ -129,8 +130,8 @@ public class DimensionServiceImpl implements DimensionService {
         DimensionConverter.convert(dimensionDO, dimensionReq);
         dimensionRepository.updateDimension(dimensionDO);
         if (!oldName.equals(dimensionDO.getName())) {
-            sendEvent(DataItem.builder().modelId(dimensionDO.getModelId()).newName(dimensionReq.getName())
-                    .name(oldName).type(TypeEnums.DIMENSION)
+            sendEvent(DataItem.builder().modelId(dimensionDO.getModelId() + Constants.UNDERLINE)
+                    .newName(dimensionReq.getName()).name(oldName).type(TypeEnums.DIMENSION)
                     .id(dimensionDO.getId()).build(), EventType.UPDATE);
         }
     }
@@ -264,7 +265,7 @@ public class DimensionServiceImpl implements DimensionService {
     }
 
     private List<DimensionResp> convertList(List<DimensionDO> dimensionDOS,
-                                            Map<Long, ModelResp> modelRespMap) {
+            Map<Long, ModelResp> modelRespMap) {
         List<DimensionResp> dimensionResps = Lists.newArrayList();
         if (!CollectionUtils.isEmpty(dimensionDOS)) {
             dimensionResps = dimensionDOS.stream()
@@ -364,9 +365,9 @@ public class DimensionServiceImpl implements DimensionService {
     }
 
     private void sendEventBatch(List<DimensionDO> dimensionDOS, EventType eventType) {
-        List<DataItem> dataItems = dimensionDOS.stream().map(dimensionDO ->
-                        DataItem.builder().id(dimensionDO.getId()).name(dimensionDO.getName())
-                                .modelId(dimensionDO.getModelId()).type(TypeEnums.DIMENSION).build())
+        List<DataItem> dataItems = dimensionDOS.stream()
+                .map(dimensionDO -> DataItem.builder().id(dimensionDO.getId()).name(dimensionDO.getName())
+                        .modelId(dimensionDO.getModelId() + Constants.UNDERLINE).type(TypeEnums.DIMENSION).build())
                 .collect(Collectors.toList());
         eventPublisher.publishEvent(new DataEvent(this, dataItems, eventType));
     }
@@ -374,12 +375,6 @@ public class DimensionServiceImpl implements DimensionService {
     private void sendEvent(DataItem dataItem, EventType eventType) {
         eventPublisher.publishEvent(new DataEvent(this,
                 Lists.newArrayList(dataItem), eventType));
-    }
-
-    private DataItem getDataItem(DimensionDO dimensionDO) {
-        return DataItem.builder().id(dimensionDO.getId()).name(dimensionDO.getName())
-                .bizName(dimensionDO.getBizName())
-                .modelId(dimensionDO.getModelId()).type(TypeEnums.DIMENSION).build();
     }
 
 }

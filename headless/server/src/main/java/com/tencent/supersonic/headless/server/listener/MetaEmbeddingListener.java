@@ -2,12 +2,15 @@ package com.tencent.supersonic.headless.server.listener;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DataEvent;
-import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.util.ComponentFactory;
 import com.tencent.supersonic.common.util.embedding.EmbeddingQuery;
 import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,10 +18,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -38,12 +37,13 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
         if (CollectionUtils.isEmpty(event.getDataItems())) {
             return;
         }
+
         List<EmbeddingQuery> embeddingQueries = event.getDataItems()
                 .stream()
                 .map(dataItem -> {
                     EmbeddingQuery embeddingQuery = new EmbeddingQuery();
                     embeddingQuery.setQueryId(
-                            dataItem.getId().toString() + DictWordType.NATURE_SPILT
+                            dataItem.getId().toString() + Constants.UNDERLINE
                                     + dataItem.getType().name().toLowerCase());
                     embeddingQuery.setQuery(dataItem.getName());
                     Map meta = JSONObject.parseObject(JSONObject.toJSONString(dataItem), Map.class);
