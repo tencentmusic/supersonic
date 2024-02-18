@@ -55,15 +55,12 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
     }
 
     public void detectByStep(QueryContext queryContext, Set<DatabaseMapResult> existResults, Set<Long> detectViewIds,
-            Integer startIndex, Integer index, int offset) {
-        String detectSegment = queryContext.getQueryText().substring(startIndex, index);
+            String detectSegment, int offset) {
         if (StringUtils.isBlank(detectSegment)) {
             return;
         }
-        Set<Long> viewIds = mapperHelper.getViewIds(queryContext.getViewId(), queryContext.getAgent());
 
         Double metricDimensionThresholdConfig = getThreshold(queryContext);
-
         Map<String, Set<SchemaElement>> nameToItems = getNameToItems(allElements);
 
         for (Entry<String, Set<SchemaElement>> entry : nameToItems.entrySet()) {
@@ -73,9 +70,9 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
                 continue;
             }
             Set<SchemaElement> schemaElements = entry.getValue();
-            if (!CollectionUtils.isEmpty(viewIds)) {
+            if (!CollectionUtils.isEmpty(detectViewIds)) {
                 schemaElements = schemaElements.stream()
-                        .filter(schemaElement -> viewIds.contains(schemaElement.getView()))
+                        .filter(schemaElement -> detectViewIds.contains(schemaElement.getView()))
                         .collect(Collectors.toSet());
             }
             for (SchemaElement schemaElement : schemaElements) {

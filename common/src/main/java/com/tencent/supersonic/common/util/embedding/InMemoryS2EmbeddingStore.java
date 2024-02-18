@@ -129,7 +129,7 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
             List<Retrieval> retrievals = new ArrayList<>();
             for (EmbeddingMatch<EmbeddingQuery> embeddingMatch : relevant) {
                 Retrieval retrieval = new Retrieval();
-                retrieval.setDistance(embeddingMatch.score());
+                retrieval.setDistance(1 - embeddingMatch.score());
                 retrieval.setId(embeddingMatch.embeddingId());
                 retrieval.setQuery(embeddingMatch.embedded().getQuery());
                 Map<String, Object> metadata = embeddingMatch.embedded().getMetadata();

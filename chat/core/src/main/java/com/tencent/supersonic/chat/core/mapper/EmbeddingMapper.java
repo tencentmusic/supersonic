@@ -1,11 +1,11 @@
 package com.tencent.supersonic.chat.core.mapper;
 
-import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.knowledge.EmbeddingResult;
 import com.tencent.supersonic.headless.core.knowledge.builder.BaseWordBuilder;
@@ -34,14 +34,12 @@ public class EmbeddingMapper extends BaseMapper {
         //2. build SchemaElementMatch by info
         for (EmbeddingResult matchResult : matchResults) {
             Long elementId = Retrieval.getLongId(matchResult.getId());
-
-            SchemaElement schemaElement = JSONObject.parseObject(JSONObject.toJSONString(matchResult.getMetadata()),
-                    SchemaElement.class);
             Long viewId = Retrieval.getLongId(matchResult.getMetadata().get("viewId"));
             if (Objects.isNull(viewId)) {
                 continue;
             }
-            schemaElement = getSchemaElement(viewId, schemaElement.getType(), elementId,
+            SchemaElementType elementType = SchemaElementType.valueOf(matchResult.getMetadata().get("type"));
+            SchemaElement schemaElement = getSchemaElement(viewId, elementType, elementId,
                     queryContext.getSemanticSchema());
             if (schemaElement == null) {
                 continue;

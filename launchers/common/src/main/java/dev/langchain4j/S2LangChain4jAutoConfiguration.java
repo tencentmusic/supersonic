@@ -5,9 +5,9 @@ import static dev.langchain4j.exception.IllegalConfigurationException.illegalCon
 import static dev.langchain4j.internal.Utils.isNullOrBlank;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.embedding.AllMiniLmL6V2EmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.embedding.S2OnnxEmbeddingModel;
+import dev.langchain4j.model.embedding.BgeSmallZhEmbeddingModel;
 import dev.langchain4j.model.huggingface.HuggingFaceChatModel;
 import dev.langchain4j.model.huggingface.HuggingFaceEmbeddingModel;
 import dev.langchain4j.model.huggingface.HuggingFaceLanguageModel;
@@ -248,7 +248,7 @@ public class S2LangChain4jAutoConfiguration {
             case IN_PROCESS:
                 InProcess inProcess = properties.getEmbeddingModel().getInProcess();
                 if (Objects.isNull(inProcess) || isNullOrBlank(inProcess.getModelPath())) {
-                    return new AllMiniLmL6V2EmbeddingModel();
+                    return new BgeSmallZhEmbeddingModel();
                 }
                 return new S2OnnxEmbeddingModel(inProcess.getModelPath(), inProcess.getVocabularyPath());
 

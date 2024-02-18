@@ -132,7 +132,7 @@ public class DimensionServiceImpl implements DimensionService {
         if (!oldName.equals(dimensionDO.getName())) {
             sendEvent(DataItem.builder().modelId(dimensionDO.getModelId() + Constants.UNDERLINE)
                     .newName(dimensionReq.getName()).name(oldName).type(TypeEnums.DIMENSION)
-                    .id(dimensionDO.getId()).build(), EventType.UPDATE);
+                    .id(dimensionDO.getId() + Constants.UNDERLINE).build(), EventType.UPDATE);
         }
     }
 
@@ -366,8 +366,9 @@ public class DimensionServiceImpl implements DimensionService {
 
     private void sendEventBatch(List<DimensionDO> dimensionDOS, EventType eventType) {
         List<DataItem> dataItems = dimensionDOS.stream()
-                .map(dimensionDO -> DataItem.builder().id(dimensionDO.getId()).name(dimensionDO.getName())
-                        .modelId(dimensionDO.getModelId() + Constants.UNDERLINE).type(TypeEnums.DIMENSION).build())
+                .map(dimensionDO -> DataItem.builder().id(dimensionDO.getId() + Constants.UNDERLINE)
+                        .name(dimensionDO.getName()).modelId(dimensionDO.getModelId() + Constants.UNDERLINE)
+                        .type(TypeEnums.DIMENSION).build())
                 .collect(Collectors.toList());
         eventPublisher.publishEvent(new DataEvent(this, dataItems, eventType));
     }
