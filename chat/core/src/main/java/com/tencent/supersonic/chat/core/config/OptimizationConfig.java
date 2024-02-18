@@ -52,7 +52,7 @@ public class OptimizationConfig {
     @Value("${embedding.mapper.round.number:10}")
     private int embeddingMapperRoundNumber;
 
-    @Value("${embedding.mapper.distance.threshold:0.58}")
+    @Value("${embedding.mapper.distance.threshold:0.01}")
     private Double embeddingMapperDistanceThreshold;
 
     @Value("${s2SQL.linking.value.switch:true}")

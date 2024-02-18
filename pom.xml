@@ -145,7 +145,7 @@
             </dependency>
             <dependency>
                 <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-embeddings-all-minilm-l6-v2</artifactId>
+                <artifactId>langchain4j-embeddings-bge-small-zh</artifactId>
                 <version>${langchain4j.version}</version>
             </dependency>
         </dependencies>

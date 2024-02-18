@@ -2,12 +2,12 @@ package com.tencent.supersonic.chat.core.mapper;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
-import com.tencent.supersonic.headless.core.knowledge.EmbeddingResult;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
+import com.tencent.supersonic.headless.core.knowledge.EmbeddingResult;
 import com.tencent.supersonic.headless.server.service.MetaEmbeddingService;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -45,6 +45,12 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
     @Override
     public String getMapKey(EmbeddingResult a) {
         return a.getName() + Constants.UNDERLINE + a.getId();
+    }
+
+    @Override
+    public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults, Set<Long> detectViewIds,
+            String detectSegment, int offset) {
+
     }
 
     @Override
@@ -111,9 +117,4 @@ public class EmbeddingMatchStrategy extends BaseMatchStrategy<EmbeddingResult> {
         selectResultInOneRound(results, oneRoundResults);
     }
 
-    @Override
-    public void detectByStep(QueryContext queryContext, Set<EmbeddingResult> existResults, Set<Long> detectViewIds,
-            Integer startIndex, Integer index, int offset) {
-        return;
-    }
 }

@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.server.listener;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DataEvent;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.util.ComponentFactory;
@@ -43,8 +42,7 @@ public class MetaEmbeddingListener implements ApplicationListener<DataEvent> {
                 .map(dataItem -> {
                     EmbeddingQuery embeddingQuery = new EmbeddingQuery();
                     embeddingQuery.setQueryId(
-                            dataItem.getId().toString() + Constants.UNDERLINE
-                                    + dataItem.getType().name().toLowerCase());
+                            dataItem.getId() + dataItem.getType().name().toLowerCase());
                     embeddingQuery.setQuery(dataItem.getName());
                     Map meta = JSONObject.parseObject(JSONObject.toJSONString(dataItem), Map.class);
                     embeddingQuery.setMetadata(meta);

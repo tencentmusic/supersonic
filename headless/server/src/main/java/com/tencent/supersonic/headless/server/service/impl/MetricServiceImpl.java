@@ -449,7 +449,7 @@ public class MetricServiceImpl implements MetricService {
     private DataItem getDataItem(MetricDO metricDO) {
         MetricResp metricResp = MetricConverter.convert2MetricResp(metricDO,
                 new HashMap<>(), Lists.newArrayList());
-        return DataItem.builder().id(metricDO.getId()).name(metricDO.getName())
+        return DataItem.builder().id(metricDO.getId() + Constants.UNDERLINE).name(metricDO.getName())
                 .bizName(metricDO.getBizName())
                 .modelId(metricDO.getModelId() + Constants.UNDERLINE)
                 .type(TypeEnums.METRIC).defaultAgg(metricResp.getDefaultAgg()).build();
