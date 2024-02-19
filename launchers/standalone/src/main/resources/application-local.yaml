@@ -34,6 +34,11 @@ authentication:
 time:
   threshold: 100
 
+dimension:
+  topn: 20
+metric:
+  topn: 20
+
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
 

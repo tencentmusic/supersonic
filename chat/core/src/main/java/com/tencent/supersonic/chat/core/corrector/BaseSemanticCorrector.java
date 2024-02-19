@@ -77,7 +77,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
     protected void addFieldsToSelect(SemanticParseInfo semanticParseInfo, String correctS2SQL) {
         Set<String> selectFields = new HashSet<>(SqlSelectHelper.getSelectFields(correctS2SQL));
         Set<String> needAddFields = new HashSet<>(SqlSelectHelper.getGroupByFields(correctS2SQL));
-        needAddFields.addAll(SqlSelectHelper.getOrderByFields(correctS2SQL));
+        //needAddFields.addAll(SqlSelectHelper.getOrderByFields(correctS2SQL));
 
         // If there is no aggregate function in the S2SQL statement and
         // there is a data field in 'WHERE' statement, add the field to the 'SELECT' statement.

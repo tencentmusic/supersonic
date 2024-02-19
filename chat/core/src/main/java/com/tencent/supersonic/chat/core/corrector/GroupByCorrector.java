@@ -5,13 +5,21 @@ import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
+import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.ViewService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,9 +31,33 @@ public class GroupByCorrector extends BaseSemanticCorrector {
 
     @Override
     public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-
+        Boolean addGroupBy = addGroupBy(queryContext, semanticParseInfo);
+        log.info("addGroupBy:{}", addGroupBy);
+        if (!addGroupBy) {
+            return;
+        }
         addGroupByFields(queryContext, semanticParseInfo);
 
+    }
+
+    private Boolean addGroupBy(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+        Long viewId = semanticParseInfo.getViewId();
+        ViewService viewService = ContextUtils.getBean(ViewService.class);
+        ModelService modelService = ContextUtils.getBean(ModelService.class);
+        ViewResp viewResp = viewService.getView(viewId);
+        List<Long> modelIds = viewResp.getViewDetail().getViewModelConfigs().stream().map(config -> config.getId()
+        ).collect(Collectors.toList());
+        MetaFilter metaFilter = new MetaFilter(modelIds);
+        List<ModelResp> modelRespList = modelService.getModelList(metaFilter);
+        for (ModelResp modelResp : modelRespList) {
+            List<Dim> dimList = modelResp.getModelDetail().getDimensions();
+            for (Dim dim : dimList) {
+                if (Objects.nonNull(dim.getTypeParams()) && dim.getTypeParams().getTimeGranularity().equals("none")) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void addGroupByFields(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {

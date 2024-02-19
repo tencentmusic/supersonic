@@ -27,7 +27,7 @@ public class HavingCorrector extends BaseSemanticCorrector {
         addHaving(queryContext, semanticParseInfo);
 
         //add having expression filed to select
-        addHavingToSelect(semanticParseInfo);
+        //addHavingToSelect(semanticParseInfo);
 
     }
 

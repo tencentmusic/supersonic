@@ -56,10 +56,10 @@ def build_internet(path,day):
     VALUES (?, ?, ?,?, ?, ?,?)
     '''
     data = [
-        (imp_date,"item_enterprise_13_136","阿里云","2009年9月10日","item_enterprise_13_134","张勇",50000000),
-        (imp_date,"item_enterprise_13_137","天猫","2012年1月11日","item_enterprise_13_134","张勇",100000000),
-        (imp_date,"item_enterprise_13_138","腾讯游戏","2003","item_enterprise_13_131","马化腾",50000000),
-        (imp_date,"item_enterprise_13_139","度小满","2018","item_enterprise_13_132","朱光",100000000),
+        (imp_date,"item_enterprise_13_136","阿里云","2009年9月10日","item_enterprise_13_132","张勇",50000000),
+        (imp_date,"item_enterprise_13_137","天猫","2012年1月11日","item_enterprise_13_132","张勇",100000000),
+        (imp_date,"item_enterprise_13_138","腾讯游戏","2003","item_enterprise_13_133","马化腾",50000000),
+        (imp_date,"item_enterprise_13_139","度小满","2018","item_enterprise_13_131","朱光",100000000),
         (imp_date,"item_enterprise_13_140","京东金融","2017","item_enterprise_13_134","刘强东",100000000)
     ]
     cursor.executemany(insert_data_query, data)
@@ -83,10 +83,10 @@ def build_internet(path,day):
     '''
     data = [
         (imp_date,"item_enterprise_13_131","item_enterprise_13_139",0.1,0.1,0.3),
-        (imp_date,"item_enterprise_13_134","item_enterprise_13_138",0.8,0.8,0.6),
-        (imp_date,"item_enterprise_13_135","item_enterprise_13_139",0.8,0.8,0.6),
-        (imp_date,"item_enterprise_13_131","item_enterprise_13_137",0.8,0.8,0.6),
-        (imp_date,"item_enterprise_13_135","item_enterprise_13_137",0.1,0.1,0.3)
+        (imp_date,"item_enterprise_13_133","item_enterprise_13_138",0.8,0.8,0.6),
+        (imp_date,"item_enterprise_13_134","item_enterprise_13_140",0.8,0.8,0.6),
+        (imp_date,"item_enterprise_13_132","item_enterprise_13_137",0.8,0.8,0.6),
+        (imp_date,"item_enterprise_13_132","item_enterprise_13_136",0.1,0.1,0.3)
     ]
     cursor.executemany(insert_data_query, data)
     conn.commit()
@@ -113,7 +113,7 @@ def build_internet(path,day):
         (imp_date, "2019", "item_enterprise_13_136", 100000000000, 50000000000, 1, 0.5),
         (imp_date, "2018", "item_enterprise_13_137", 100000000000, 50000000000, 1, -0.1),
         (imp_date, "2018", "item_enterprise_13_139", 500000000, 50000000000, 0.1, 0.5),
-        (imp_date, "2018", "item_enterprise_13_138", 100000000000, -300000000, 0.1, 0.5)
+        (imp_date, "2018", "item_enterprise_13_140", 100000000000, -300000000, 0.1, 0.5)
     ]
     cursor.executemany(insert_data_query, data)
     conn.commit()

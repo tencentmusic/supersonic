@@ -25,7 +25,7 @@ def get_pred_sql(query,url,agentId,chatId,authorization,default_sql):
     header["Authorization"] =authorization
     try:
         result = requests.post(url=url, headers=header, json=data)
-        print(result.json())
+        #print(result.json())
         print(result.json()["traceId"])
         if result.status_code == 200:
             data = result.json()["data"]
@@ -68,7 +68,7 @@ def get_pred_result():
     for i in range(0,len(questions)):
         pred_sql=get_pred_sql(questions[i],url,agent_id,chat_id,authorization,default_sql)
         pred_sql_list.append(pred_sql)
-        time.sleep(30)
+        time.sleep(60)
     write_sql(pred_sql_path, pred_sql_list)
 
 if __name__ == "__main__":
