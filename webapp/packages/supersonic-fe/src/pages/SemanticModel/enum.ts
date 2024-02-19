@@ -1,6 +1,6 @@
 export enum ChatConfigType {
-  DETAIL = 'detail',
-  AGG = 'agg',
+  TAG = 'TAG',
+  METRIC = 'METRIC',
 }
 
 export enum TransType {

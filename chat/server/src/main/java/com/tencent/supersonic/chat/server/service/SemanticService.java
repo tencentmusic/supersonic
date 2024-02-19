@@ -2,8 +2,8 @@ package com.tencent.supersonic.chat.server.service;
 
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.ViewSchema;
@@ -11,7 +11,7 @@ import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.DataInfo;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
 import com.tencent.supersonic.chat.api.pojo.response.ViewInfo;
-import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
+import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.utils.ComponentFactory;
 import com.tencent.supersonic.chat.core.utils.QueryReqBuilder;
 import com.tencent.supersonic.chat.server.service.impl.SchemaService;
@@ -102,10 +102,10 @@ public class SemanticService {
         }
         entityInfo.setViewInfo(viewInfo);
         TagTypeDefaultConfig tagTypeDefaultConfig = viewSchema.getTagTypeDefaultConfig();
-        if (tagTypeDefaultConfig == null) {
+        if (tagTypeDefaultConfig == null || tagTypeDefaultConfig.getDefaultDisplayInfo() == null) {
             return entityInfo;
         }
-        List<DataInfo> dimensions = tagTypeDefaultConfig.getDimensionIds().stream()
+        List<DataInfo> dimensions = tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
                 .map(id -> {
                     SchemaElement element = viewSchema.getElement(SchemaElementType.DIMENSION, id);
                     if (element == null) {
@@ -113,7 +113,7 @@ public class SemanticService {
                     }
                     return new DataInfo(element.getId().intValue(), element.getName(), element.getBizName(), null);
                 }).filter(Objects::nonNull).collect(Collectors.toList());
-        List<DataInfo> metrics = tagTypeDefaultConfig.getDimensionIds().stream()
+        List<DataInfo> metrics = tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
                 .map(id -> {
                     SchemaElement element = viewSchema.getElement(SchemaElementType.METRIC, id);
                     if (element == null) {

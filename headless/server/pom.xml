@@ -17,9 +17,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-
-
-
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -115,6 +112,8 @@
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
         </dependency>
+
+
     </dependencies>
 
 </project>

@@ -1,18 +1,16 @@
-import { Form, Modal, Input, Select, Button } from 'antd';
+import { Form, Modal, Input, Select, Button, TreeSelect } from 'antd';
 import {
   AgentToolType,
   AgentToolTypeEnum,
   AGENT_TOOL_TYPE_LIST,
   MetricOptionType,
-  MetricType,
-  ModelType,
   QUERY_MODE_LIST,
 } from './type';
 import { useEffect, useState } from 'react';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import styles from './style.less';
-import { getLeafList, uuid } from '@/utils/utils';
-import { getMetricList, getModelList } from './service';
+import { traverseTree, uuid } from '@/utils/utils';
+import { getModelList } from './service';
 import { PluginType } from '../ChatPlugin/type';
 import { getPluginList } from '../ChatPlugin/service';
 
@@ -26,17 +24,22 @@ type Props = {
 
 const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
   const [toolType, setToolType] = useState<AgentToolTypeEnum>();
-  const [modelList, setModelList] = useState<ModelType[]>([]);
+  const [modelList, setModelList] = useState<any[]>([]);
   const [saveLoading, setSaveLoading] = useState(false);
   const [examples, setExamples] = useState<{ id: string; question?: string }[]>([]);
   const [metricOptions, setMetricOptions] = useState<MetricOptionType[]>([]);
-  const [modelMetricList, setModelMetricList] = useState<MetricType[]>([]);
   const [plugins, setPlugins] = useState<PluginType[]>([]);
   const [form] = Form.useForm();
 
   const initModelList = async () => {
     const res = await getModelList();
-    setModelList([{ id: -1, name: '默认' }, ...getLeafList(res.data)]);
+    const treeData = traverseTree(res.data, (node: any) => {
+      node.title = node.name;
+      node.value = node.type === 'DOMAIN' ? `DOMAIN_${node.id}` : node.id;
+      node.checkable =
+        node.type === 'VIEW' || (node.type === 'DOMAIN' && node.children?.length > 0);
+    });
+    setModelList([{ title: '默认', value: -1, type: 'VIEW' }, ...treeData]);
   };
 
   const initPluginList = async () => {
@@ -49,11 +52,6 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
     initPluginList();
   }, []);
 
-  const initModelMetrics = async (params: any) => {
-    const res = await getMetricList(params[0].modelId);
-    setModelMetricList(res.data.list);
-  };
-
   useEffect(() => {
     if (editTool) {
       form.setFieldsValue({ ...editTool, plugins: editTool.plugins?.[0] });
@@ -62,9 +60,6 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
         (editTool.exampleQuestions || []).map((item) => ({ id: uuid(), question: item })),
       );
       setMetricOptions(editTool.metricOptions || []);
-      if (editTool.metricOptions && editTool.metricOptions.length > 0) {
-        initModelMetrics(editTool.metricOptions || []);
-      }
     } else {
       form.resetFields();
     }
@@ -86,11 +81,6 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
       metricOptions: metricOptions.map((item) => ({ ...item, modelId: values.modelId })),
     });
     setSaveLoading(false);
-  };
-
-  const updateMetricList = async (value: number) => {
-    const res = await getMetricList(value);
-    setModelMetricList(res.data.list);
   };
 
   return (
@@ -115,11 +105,13 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
         </FormItem>
         {(toolType === AgentToolTypeEnum.NL2SQL_RULE ||
           toolType === AgentToolTypeEnum.NL2SQL_LLM) && (
-          <FormItem name="modelIds" label="主题域">
-            <Select
-              options={modelList.map((model) => ({ label: model.name, value: model.id }))}
-              placeholder="请选择主题域"
-              mode="multiple"
+          <FormItem name="viewIds" label="视图">
+            <TreeSelect
+              treeData={modelList}
+              placeholder="请选择视图"
+              multiple
+              treeCheckable
+              allowClear
             />
           </FormItem>
         )}
@@ -158,70 +150,6 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
               </Button>
             </div>
           </FormItem>
-        )}
-        {toolType === AgentToolTypeEnum.ANALYTICS && (
-          <>
-            <FormItem name="modelId" label="主题域">
-              <Select
-                options={modelList.map((model) => ({ label: model.name, value: model.id }))}
-                showSearch
-                filterOption={(input, option) =>
-                  ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase())
-                }
-                placeholder="请选择主题域"
-                onChange={(value) => {
-                  setMetricOptions([...metricOptions]);
-                  updateMetricList(value);
-                }}
-              />
-            </FormItem>
-            <FormItem name="params" label="指标">
-              <div className={styles.paramsSection}>
-                {metricOptions.map((filter: any) => {
-                  return (
-                    <div className={styles.filterRow} key={filter.id}>
-                      <Select
-                        placeholder="请选择指标，需先选择主题域"
-                        options={(modelMetricList || []).map((metric) => ({
-                          label: metric.name,
-                          value: `${metric.id}`,
-                        }))}
-                        showSearch
-                        className={styles.filterParamValueField}
-                        filterOption={(input, option) =>
-                          ((option?.label ?? '') as string)
-                            .toLowerCase()
-                            .includes(input.toLowerCase())
-                        }
-                        allowClear
-                        value={filter.metricId}
-                        onChange={(value) => {
-                          filter.metricId = value;
-                          setMetricOptions([...metricOptions]);
-                        }}
-                      />
-                      <DeleteOutlined
-                        onClick={() => {
-                          setMetricOptions(metricOptions.filter((item) => item.id !== filter.id));
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-                <Button
-                  onClick={() => {
-                    setMetricOptions([
-                      ...metricOptions,
-                      { id: uuid(), metricId: undefined, modelId: undefined },
-                    ]);
-                  }}
-                >
-                  <PlusOutlined />
-                  新增指标
-                </Button>
-              </div>
-            </FormItem>
-          </>
         )}
         {toolType === AgentToolTypeEnum.PLUGIN && (
           <FormItem name="plugins" label="插件">

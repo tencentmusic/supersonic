@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.core.query.rule.tag;
 
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.ViewSchema;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
@@ -33,9 +33,9 @@ public abstract class TagListQuery extends TagSemanticQuery {
                 Set<SchemaElement> metrics = new LinkedHashSet<>();
                 Set<Order> orders = new LinkedHashSet<>();
                 TagTypeDefaultConfig tagTypeDefaultConfig = viewSchema.getTagTypeDefaultConfig();
-                if (tagTypeDefaultConfig != null) {
-                    if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getMetricIds())) {
-                        metrics = tagTypeDefaultConfig.getMetricIds()
+                if (tagTypeDefaultConfig != null && tagTypeDefaultConfig.getDefaultDisplayInfo() != null) {
+                    if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds())) {
+                        metrics = tagTypeDefaultConfig.getDefaultDisplayInfo().getMetricIds()
                                 .stream().map(id -> {
                                     SchemaElement metric = viewSchema.getElement(SchemaElementType.METRIC, id);
                                     if (metric != null) {
@@ -44,8 +44,8 @@ public abstract class TagListQuery extends TagSemanticQuery {
                                     return metric;
                                 }).filter(Objects::nonNull).collect(Collectors.toSet());
                     }
-                    if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDimensionIds())) {
-                        dimensions = tagTypeDefaultConfig.getDimensionIds().stream()
+                    if (CollectionUtils.isNotEmpty(tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds())) {
+                        dimensions = tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
                                 .map(id -> viewSchema.getElement(SchemaElementType.DIMENSION, id))
                                 .filter(Objects::nonNull).collect(Collectors.toSet());
                     }

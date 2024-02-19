@@ -8,7 +8,10 @@ import lombok.Data;
 @Builder
 public class DataItem {
 
-    private Long id;
+    /***
+     * This field uses an underscore (_) at the end.
+     */
+    private String id;
 
     private String bizName;
 
@@ -18,7 +21,10 @@ public class DataItem {
 
     private TypeEnums type;
 
-    private Long modelId;
+    /***
+     * This field uses an underscore (_) at the end.
+     */
+    private String modelId;
 
     private String defaultAgg;
 

@@ -3,11 +3,12 @@ package com.tencent.supersonic.headless.server.calcite;
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SqlParserResp;
 import com.tencent.supersonic.headless.core.parser.calcite.planner.AggPlanner;
 import com.tencent.supersonic.headless.core.parser.calcite.schema.SemanticSchema;
+import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionTimeTypeParamsTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
@@ -15,21 +16,20 @@ import com.tencent.supersonic.headless.server.pojo.yaml.IdentifyYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MeasureYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
-import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 class HeadlessParserServiceTest {
 
     private static Map<String, SemanticSchema> headlessSchemaMap = new HashMap<>();
 
-    public static SqlParserResp parser(SemanticSchema semanticSchema, MetricQueryReq metricQueryReq, boolean isAgg) {
+    public static SqlParserResp parser(SemanticSchema semanticSchema, MetricQueryParam metricQueryParam,
+            boolean isAgg) {
         SqlParserResp sqlParser = new SqlParserResp();
         try {
             if (semanticSchema == null) {
@@ -38,14 +38,14 @@ class HeadlessParserServiceTest {
             }
             AggPlanner aggBuilder = new AggPlanner(semanticSchema);
             QueryStatement queryStatement = new QueryStatement();
-            queryStatement.setMetricReq(metricQueryReq);
+            queryStatement.setMetricQueryParam(metricQueryParam);
             aggBuilder.explain(queryStatement, AggOption.getAggregation(!isAgg));
             EngineType engineType = EngineType.fromString(semanticSchema.getSemanticModel().getDatabase().getType());
             sqlParser.setSql(aggBuilder.getSql(engineType));
             sqlParser.setSourceId(aggBuilder.getSourceId());
         } catch (Exception e) {
             sqlParser.setErrMsg(e.getMessage());
-            log.error("parser error metricQueryReq[{}] error [{}]", metricQueryReq, e);
+            log.error("parser error metricQueryReq[{}] error [{}]", metricQueryParam, e);
         }
         return sqlParser;
     }
@@ -162,7 +162,7 @@ class HeadlessParserServiceTest {
 
         //HeadlessSchemaManager.update(headlessSchema, HeadlessSchemaManager.getMetrics(metric));
 
-        MetricQueryReq metricCommand = new MetricQueryReq();
+        MetricQueryParam metricCommand = new MetricQueryParam();
         metricCommand.setDimensions(new ArrayList<>(Arrays.asList("sys_imp_date")));
         metricCommand.setMetrics(new ArrayList<>(Arrays.asList("pv")));
         metricCommand.setWhere("user_name = 'ab' and (sys_imp_date >= '2023-02-28' and sys_imp_date <= '2023-05-28') ");
@@ -174,7 +174,7 @@ class HeadlessParserServiceTest {
 
         addDepartment(semanticSchema);
 
-        MetricQueryReq metricCommand2 = new MetricQueryReq();
+        MetricQueryParam metricCommand2 = new MetricQueryParam();
         metricCommand2.setDimensions(new ArrayList<>(
                 Arrays.asList("sys_imp_date", "user_name__department", "user_name", "user_name__page")));
         metricCommand2.setMetrics(new ArrayList<>(Arrays.asList("pv")));

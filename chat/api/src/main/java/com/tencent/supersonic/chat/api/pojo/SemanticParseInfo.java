@@ -9,6 +9,7 @@ import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterType;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import lombok.Data;
 
 import java.util.ArrayList;

@@ -1,11 +1,13 @@
 package com.tencent.supersonic.chat.server.listener;
 
-import com.tencent.supersonic.chat.core.knowledge.DictWord;
-import com.tencent.supersonic.chat.server.service.KnowledgeService;
+import com.tencent.supersonic.headless.core.knowledge.DictWord;
 import com.tencent.supersonic.chat.server.service.impl.SchemaService;
 import com.tencent.supersonic.chat.server.service.impl.WordService;
+
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import com.tencent.supersonic.headless.server.service.KnowledgeService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;

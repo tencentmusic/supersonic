@@ -38,15 +38,15 @@ export const IS_TAG_ENUM = {
 
 export const SENSITIVE_LEVEL_COLOR = {
   [SENSITIVE_LEVEL.LOW]: 'default',
-  // [SENSITIVE_LEVEL.MID]: 'orange',
-  [SENSITIVE_LEVEL.MID]: 'geekblue',
+  [SENSITIVE_LEVEL.MID]: 'orange',
+  // [SENSITIVE_LEVEL.MID]: 'geekblue',
   [SENSITIVE_LEVEL.HIGH]: 'volcano',
   // [SENSITIVE_LEVEL.HIGH]: '#1677ff',
 };
 
 export const SEMANTIC_NODE_TYPE_CONFIG = {
   [SemanticNodeType.DATASOURCE]: {
-    label: '数据源',
+    label: '模型',
     value: SemanticNodeType.DATASOURCE,
     color: 'cyan',
   },

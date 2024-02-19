@@ -19,7 +19,7 @@ const ChatSettingSection: React.FC<Props> = () => {
       <ProCard bordered title="指标模式" style={{ marginBottom: 20 }}>
         <EntitySection
           ref={metricRef}
-          chatConfigType={ChatConfigType.AGG}
+          chatConfigType={ChatConfigType.METRIC}
           onConfigSave={() => {
             tagRef.current.refreshConfigData();
           }}
@@ -28,7 +28,7 @@ const ChatSettingSection: React.FC<Props> = () => {
       <ProCard bordered title="标签模式" style={{ marginBottom: 20 }}>
         <EntitySection
           ref={tagRef}
-          chatConfigType={ChatConfigType.DETAIL}
+          chatConfigType={ChatConfigType.TAG}
           onConfigSave={() => {
             metricRef.current.refreshConfigData();
           }}

@@ -1,5 +1,7 @@
 package com.tencent.supersonic.chat.api.pojo;
 
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;

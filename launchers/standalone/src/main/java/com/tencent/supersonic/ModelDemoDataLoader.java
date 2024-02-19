@@ -14,6 +14,7 @@ import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.headless.api.pojo.DefaultDisplayInfo;
 import com.tencent.supersonic.headless.api.pojo.MetricTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.TagTypeDefaultConfig;
@@ -137,23 +138,23 @@ public class ModelDemoDataLoader {
         domainReq.setBizName("supersonic");
         domainReq.setParentId(0L);
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
-        domainReq.setViewers(Arrays.asList("admin", "tom", "jack"));
+        domainReq.setViewers(Arrays.asList("admin", "tom"));
         domainReq.setViewOrgs(Collections.singletonList("1"));
-        domainReq.setAdmins(Collections.singletonList("admin"));
+        domainReq.setAdmins(Arrays.asList("admin", "jack"));
         domainReq.setAdminOrgs(Collections.emptyList());
         domainService.createDomain(domainReq, user);
     }
 
     public void addModel_1() throws Exception {
         ModelReq modelReq = new ModelReq();
-        modelReq.setName("超音数用户部门");
+        modelReq.setName("用户部门");
         modelReq.setBizName("user_department");
         modelReq.setDescription("用户部门信息");
         modelReq.setDatabaseId(1L);
         modelReq.setDomainId(1L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
-        modelReq.setAdmins(Collections.singletonList("admin"));
+        modelReq.setAdmins(Arrays.asList("admin", "alice"));
         modelReq.setAdminOrgs(Collections.emptyList());
         ModelDetail modelDetail = new ModelDetail();
         List<Identify> identifiers = new ArrayList<>();
@@ -178,9 +179,9 @@ public class ModelDemoDataLoader {
 
     public void addModel_2() throws Exception {
         ModelReq modelReq = new ModelReq();
-        modelReq.setName("超音数PVUV统计");
+        modelReq.setName("PVUV统计");
         modelReq.setBizName("s2_pv_uv_statis");
-        modelReq.setDescription("超音数PVUV统计");
+        modelReq.setDescription("PVUV统计");
         modelReq.setDatabaseId(1L);
         modelReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         modelReq.setViewOrgs(Collections.singletonList("1"));
@@ -293,7 +294,7 @@ public class ModelDemoDataLoader {
         domainReq.setStatus(StatusEnum.ONLINE.getCode());
         domainReq.setViewers(Arrays.asList("admin", "tom", "jack"));
         domainReq.setViewOrgs(Collections.singletonList("1"));
-        domainReq.setAdmins(Collections.singletonList("admin"));
+        domainReq.setAdmins(Arrays.asList("admin", "alice"));
         domainReq.setAdminOrgs(Collections.emptyList());
         domainService.createDomain(domainReq, user);
     }
@@ -384,6 +385,7 @@ public class ModelDemoDataLoader {
         metricReq.setId(1L);
         metricReq.setName("访问次数");
         metricReq.setBizName("pv");
+        metricReq.setDescription("一段时间内用户的访问次数");
         MetricDefineByMeasureParams metricTypeParams = new MetricDefineByMeasureParams();
         metricTypeParams.setExpr("s2_pv_uv_statis_pv");
         List<MeasureParam> measures = new ArrayList<>();
@@ -404,7 +406,7 @@ public class ModelDemoDataLoader {
         metricReq.setBizName("uv");
         metricReq.setSensitiveLevel(SensitiveLevelEnum.LOW.getCode());
         metricReq.setDescription("访问的用户个数");
-        metricReq.setAlias("UV");
+        metricReq.setAlias("UV,访问人数");
         MetricDefineByFieldParams metricTypeParams = new MetricDefineByFieldParams();
         metricTypeParams.setExpr("count(distinct user_id)");
         List<FieldParam> fieldParams = new ArrayList<>();
@@ -476,7 +478,7 @@ public class ModelDemoDataLoader {
         viewReq.setBizName("singer");
         viewReq.setDomainId(2L);
         viewReq.setDescription("包含艺人相关标签和指标信息");
-        viewReq.setAdmins(Lists.newArrayList("admin"));
+        viewReq.setAdmins(Lists.newArrayList("admin", "jack"));
         List<ViewModelConfig> viewModelConfigs = Lists.newArrayList(
                 new ViewModelConfig(4L, Lists.newArrayList(4L, 5L, 6L, 7L),
                         Lists.newArrayList(5L, 6L, 7L))
@@ -491,8 +493,10 @@ public class ModelDemoDataLoader {
         tagTimeDefaultConfig.setTimeMode(TimeMode.LAST);
         tagTimeDefaultConfig.setUnit(7);
         tagTypeDefaultConfig.setTimeDefaultConfig(tagTimeDefaultConfig);
-        tagTypeDefaultConfig.setDimensionIds(Lists.newArrayList(4L, 5L, 6L, 7L));
-        tagTypeDefaultConfig.setMetricIds(Lists.newArrayList(5L));
+        DefaultDisplayInfo defaultDisplayInfo = new DefaultDisplayInfo();
+        defaultDisplayInfo.setDimensionIds(Lists.newArrayList(4L, 5L, 6L, 7L));
+        defaultDisplayInfo.setMetricIds(Lists.newArrayList(5L));
+        tagTypeDefaultConfig.setDefaultDisplayInfo(defaultDisplayInfo);
         MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
         TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
         timeDefaultConfig.setTimeMode(TimeMode.RECENT);
@@ -524,14 +528,9 @@ public class ModelDemoDataLoader {
     public void addAuthGroup_2() {
         AuthGroup authGroupReq = new AuthGroup();
         authGroupReq.setModelId(3L);
-        authGroupReq.setName("tom_sales_permission");
+        authGroupReq.setName("tom_row_permission");
 
         List<AuthRule> authRules = new ArrayList<>();
-        AuthRule authRule = new AuthRule();
-        authRule.setMetrics(Collections.singletonList("stay_hours"));
-        authRule.setDimensions(Collections.singletonList("page"));
-        authRules.add(authRule);
-
         authGroupReq.setAuthRules(authRules);
         authGroupReq.setDimensionFilters(Collections.singletonList("user_name = 'tom'"));
         authGroupReq.setDimensionFilterDescription("用户名='tom'");

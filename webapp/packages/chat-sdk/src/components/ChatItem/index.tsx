@@ -84,7 +84,7 @@ const ChatItem: React.FC<Props> = ({
     let data: MsgDataType | undefined = undefined;
     const { queryColumns, queryResults, queryState, queryMode, response, chatContext } =
       res.data || {};
-    if (res.code === 401 || res.code === 412) {
+    if (res.code === 400 || res.code === 401 || res.code === 412) {
       tip = res.msg;
     } else if (res.code !== 200) {
       tip = SEARCH_EXCEPTION_TIP;

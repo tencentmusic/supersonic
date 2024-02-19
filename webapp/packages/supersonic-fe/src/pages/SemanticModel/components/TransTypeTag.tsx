@@ -15,7 +15,7 @@ const TransTypeTag: React.FC<Props> = ({ type }) => {
       ) : type === SemanticNodeType.METRIC ? (
         <Tag color="orange">{'指标'}</Tag>
       ) : type === SemanticNodeType.DATASOURCE ? (
-        <Tag color="green">{'数据源'}</Tag>
+        <Tag color="green">{'模型'}</Tag>
       ) : (
         <></>
       )}

@@ -3,7 +3,7 @@ package com.tencent.supersonic.util;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.QueryReq;
 import com.tencent.supersonic.chat.core.agent.Agent;
@@ -27,6 +27,18 @@ public class DataUtils {
 
     public static User getUser() {
         return user_test;
+    }
+
+    public static User getUserAlice() {
+        return User.get(5L, "alice");
+    }
+
+    public static User getUserJack() {
+        return User.get(2L, "jack");
+    }
+
+    public static User getUserTom() {
+        return User.get(3L, "tom");
     }
 
     public static QueryReq getQueryContextReq(Integer id, String query) {

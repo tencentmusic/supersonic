@@ -371,7 +371,7 @@ function getLeafNodes(treeNodes: any[]): any[] {
   return leafNodes;
 }
 
-function buildTree(nodes: any[]): any[] {
+export function buildTree(nodes: any[]): any[] {
   const map: Record<number, any> = {};
   const roots: any[] = [];
 
@@ -398,6 +398,16 @@ export function getLeafList(flatNodes: any[]): any[] {
   const treeNodes = buildTree(flatNodes);
   const leafNodes = getLeafNodes(treeNodes);
   return leafNodes;
+}
+
+export function traverseTree(treeData: any[], callback: (node: any) => void) {
+  treeData.forEach((node) => {
+    callback(node);
+    if (node.children?.length > 0) {
+      traverseTree(node.children, callback);
+    }
+  });
+  return treeData;
 }
 
 export function traverseRoutes(routes, env: string, result: any[] = []) {

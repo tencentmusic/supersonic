@@ -1,14 +1,13 @@
 package com.tencent.supersonic.headless.core.planner;
 
 import com.google.common.base.Strings;
-import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Remove the default metric added by the system when the query only has dimensions
@@ -19,16 +18,16 @@ public class DetailQueryOptimizer implements QueryOptimizer {
 
     @Override
     public void rewrite(QueryStatement queryStatement) {
-        QueryStructReq queryStructCmd = queryStatement.getQueryStructReq();
+        QueryParam queryParam = queryStatement.getQueryParam();
         String sqlRaw = queryStatement.getSql().trim();
         if (Strings.isNullOrEmpty(sqlRaw)) {
             throw new RuntimeException("sql is empty or null");
         }
         log.debug("before handleNoMetric, sql:{}", sqlRaw);
-        if (isDetailQuery(queryStructCmd)) {
-            if (queryStructCmd.getMetrics().size() == 0 && !CollectionUtils.isEmpty(queryStructCmd.getGroups())) {
+        if (isDetailQuery(queryParam)) {
+            if (queryParam.getMetrics().size() == 0 && !CollectionUtils.isEmpty(queryParam.getGroups())) {
                 String sqlForm = "select %s from ( %s ) src_no_metric";
-                String sql = String.format(sqlForm, queryStructCmd.getGroups().stream().collect(
+                String sql = String.format(sqlForm, queryParam.getGroups().stream().collect(
                         Collectors.joining(",")), sqlRaw);
                 queryStatement.setSql(sql);
             }
@@ -36,8 +35,8 @@ public class DetailQueryOptimizer implements QueryOptimizer {
         log.debug("after handleNoMetric, sql:{}", queryStatement.getSql());
     }
 
-    public boolean isDetailQuery(QueryStructReq queryStructCmd) {
-        return Objects.nonNull(queryStructCmd) && queryStructCmd.getQueryType().isNativeAggQuery()
-                && CollectionUtils.isEmpty(queryStructCmd.getMetrics());
+    public boolean isDetailQuery(QueryParam queryParam) {
+        return Objects.nonNull(queryParam) && queryParam.getQueryType().isNativeAggQuery()
+                && CollectionUtils.isEmpty(queryParam.getMetrics());
     }
 }

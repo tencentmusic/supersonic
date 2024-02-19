@@ -2,8 +2,8 @@ package com.tencent.supersonic.chat.core.query.rule.metric;
 
 import org.springframework.stereotype.Component;
 
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.DIMENSION;
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.VALUE;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.DIMENSION;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.VALUE;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.OPTIONAL;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.REQUIRED;

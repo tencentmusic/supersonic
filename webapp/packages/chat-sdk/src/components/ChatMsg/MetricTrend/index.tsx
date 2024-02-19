@@ -109,7 +109,7 @@ const MetricTrend: React.FC<Props> = ({
               />
             ) : (
               <MetricTrendChart
-                model={entityInfo?.modelInfo.name}
+                model={entityInfo?.viewInfo.name}
                 dateColumnName={dateColumnName}
                 categoryColumnName={categoryColumnName}
                 metricField={currentMetricField}

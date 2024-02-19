@@ -1,13 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Button, Modal, Input, Select, Steps } from 'antd';
+import { Form, Button, Modal, Input, Select, Steps, Tabs, Space } from 'antd';
 import styles from '../../components/style.less';
 import { message } from 'antd';
 import { formLayout } from '@/components/FormHelper/utils';
-import { createView, updateView } from '../../service';
+import { createView, updateView, getDimensionList, queryMetric } from '../../service';
 import { ISemantic } from '../../data';
 import { isString } from 'lodash';
-import ViewModelConfigTable from './ViewModelConfigTable';
+import FormItemTitle from '@/components/FormHelper/FormItemTitle';
+import SelectPartner from '@/components/SelectPartner';
+import SelectTMEPerson from '@/components/SelectTMEPerson';
 import ViewModelConfigTransfer from './ViewModelConfigTransfer';
+import DefaultSettingForm from './DefaultSettingForm';
+import SqlEditor from '@/components/SqlEditor';
+import ProCard from '@ant-design/pro-card';
+import { ChatConfigType } from '../../enum';
 
 const FormItem = Form.Item;
 
@@ -33,7 +39,6 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     currentModel: modelList[0]?.id,
   });
 
-  const [submitData, setSubmitData] = useState({});
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [modalWidth, setModalWidth] = useState<number>(800);
   const [selectedModelItem, setSelectedModelItem] = useState<ISemantic.IModelItem | undefined>(
@@ -48,13 +53,41 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     });
   }, [viewItem]);
 
+  const [dimensionList, setDimensionList] = useState<ISemantic.IDimensionItem[]>();
+  const [metricList, setMetricList] = useState<ISemantic.IMetricItem[]>();
+
+  useEffect(() => {
+    if (selectedModelItem?.id) {
+      queryDimensionList(selectedModelItem.id);
+      queryMetricList(selectedModelItem.id);
+    }
+  }, [selectedModelItem]);
+
+  const queryDimensionList = async (modelId) => {
+    const { code, data, msg } = await getDimensionList({ modelId });
+    if (code === 200 && Array.isArray(data?.list)) {
+      setDimensionList(data.list);
+    } else {
+      message.error(msg);
+    }
+  };
+
+  const queryMetricList = async (modelId) => {
+    const { code, data, msg } = await queryMetric({ modelId });
+    if (code === 200 && Array.isArray(data?.list)) {
+      setMetricList(data.list);
+    } else {
+      message.error(msg);
+    }
+  };
+
   const handleConfirm = async () => {
     const fieldsValue = await form.validateFields();
     const viewModelConfigsMap = configTableRef?.current.getViewModelConfigs() || {};
+
     const queryData: ISemantic.IModelItem = {
       ...formVals,
       ...fieldsValue,
-      ...submitData,
       viewDetail: {
         viewModelConfigs: Object.values(viewModelConfigsMap),
       },
@@ -71,36 +104,24 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     }
   };
 
-  const footer = (
-    <>
-      <Button onClick={onCancel}>取消</Button>
-      <Button type="primary" loading={saveLoading} onClick={handleConfirm}>
-        确定
-      </Button>
-    </>
-  );
+  const stepWidth = {
+    '0': 800,
+    '1': 1200,
+    '2': 800,
+  };
 
   const forward = () => {
-    setModalWidth(1200);
+    setModalWidth(stepWidth[`${currentStep + 1}`]);
     setCurrentStep(currentStep + 1);
   };
   const backward = () => {
-    setModalWidth(800);
+    setModalWidth(stepWidth[`${currentStep - 1}`]);
     setCurrentStep(currentStep - 1);
   };
 
   const handleNext = async () => {
-    const fieldsValue = await form.validateFields();
-    const submitForm = {
-      ...submitData,
-      ...fieldsValue,
-    };
-    setSubmitData(submitForm);
-    if (currentStep < 1) {
-      forward();
-    } else {
-      // await saveMetric(submitForm);
-    }
+    await form.validateFields();
+    forward();
   };
 
   const renderFooter = () => {
@@ -110,34 +131,60 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
           <Button style={{ float: 'left' }} onClick={backward}>
             上一步
           </Button>
-          <Button onClick={onCancel}>取消</Button>
-          {/* <Button type="primary" onClick={handleNext}> */}
+          <Button type="primary" onClick={handleNext}>
+            下一步
+          </Button>
           <Button
             type="primary"
             onClick={() => {
               handleConfirm();
             }}
           >
-            完成
+            保 存
           </Button>
         </>
       );
     }
+    // if (currentStep === 2) {
+    //   return (
+    //     <>
+    //       <Button style={{ float: 'left' }} onClick={backward}>
+    //         上一步
+    //       </Button>
+    //       <Button
+    //         type="primary"
+    //         onClick={() => {
+    //           handleConfirm();
+    //         }}
+    //       >
+    //         保 存
+    //       </Button>
+    //     </>
+    //   );
+    // }
     return (
       <>
         <Button onClick={onCancel}>取消</Button>
         <Button type="primary" onClick={handleNext}>
           下一步
         </Button>
+        <Button
+          type="primary"
+          onClick={() => {
+            handleConfirm();
+          }}
+        >
+          保 存
+        </Button>
       </>
     );
   };
 
   const renderContent = () => {
-    if (currentStep === 1) {
-      return (
-        <div>
-          <FormItem
+    return (
+      <>
+        <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
+          {/* <FormItem
             name="currentModel"
             label="选择模型"
             rules={[{ required: true, message: '请选择模型！' }]}
@@ -152,54 +199,156 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
                 return { label: item.name, value: item.id };
               })}
             />
-          </FormItem>
+          </FormItem> */}
           <ViewModelConfigTransfer
+            toolbarSolt={
+              <Space>
+                <span>切换模型: </span>
+                <Select
+                  value={selectedModelItem?.id}
+                  placeholder="请选择模型，获取当前模型下指标维度信息"
+                  onChange={(val) => {
+                    setDimensionList(undefined);
+                    setMetricList(undefined);
+                    const modelItem = modelList.find((item) => item.id === val);
+                    setSelectedModelItem(modelItem);
+                  }}
+                  options={modelList.map((item) => {
+                    return { label: item.name, value: item.id };
+                  })}
+                />
+              </Space>
+            }
+            dimensionList={dimensionList}
+            metricList={metricList}
             modelItem={selectedModelItem}
             viewItem={viewItem}
             ref={configTableRef}
           />
         </div>
-      );
-    }
 
-    return (
-      <>
-        <FormItem
-          name="name"
-          label="视图名称"
-          rules={[{ required: true, message: '请输入视图名称！' }]}
-        >
-          <Input placeholder="视图名称不可重复" />
-        </FormItem>
-        <FormItem
-          name="bizName"
-          label="视图英文名称"
-          rules={[{ required: true, message: '请输入视图英文名称！' }]}
-        >
-          <Input placeholder="请输入视图英文名称" />
-        </FormItem>
-        <FormItem
-          name="alias"
-          label="别名"
-          getValueFromEvent={(value) => {
-            return Array.isArray(value) ? value.join(',') : '';
-          }}
-          getValueProps={(value) => {
-            return {
-              value: isString(value) ? value.split(',') : [],
-            };
-          }}
-        >
-          <Select
-            mode="tags"
-            placeholder="输入别名后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
-            tokenSeparators={[',']}
-            maxTagCount={9}
+        <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
+          <Tabs
+            items={[
+              // {
+              //   label: 'SQL过滤',
+              //   key: 'sqlFilter',
+              //   children: (
+              //     <>
+              //       <FormItem
+              //         name="filterSql"
+              //         label={<span style={{ fontSize: 14 }}>SQL</span>}
+              //         tooltip="主要用于词典导入场景, 对维度值进行过滤 格式: field1 = 'xxx' and field2 = 'yyy'"
+              //       >
+              //         <SqlEditor height={'150px'} />
+              //       </FormItem>
+              //     </>
+              //   ),
+              // },
+              {
+                label: '权限设置',
+                key: 'permissionSetting',
+                children: (
+                  <>
+                    <FormItem
+                      name="admins"
+                      label={
+                        <FormItemTitle
+                          title={'管理员'}
+                          subTitle={'管理员将拥有主题域下所有编辑及访问权限'}
+                        />
+                      }
+                    >
+                      <SelectTMEPerson placeholder="请邀请团队成员" />
+                    </FormItem>
+                    <FormItem name="adminOrgs" label="按组织">
+                      <SelectPartner
+                        type="selectedDepartment"
+                        treeSelectProps={{
+                          placeholder: '请选择需要授权的部门',
+                        }}
+                      />
+                    </FormItem>
+                    {/* <FormItem
+                      style={{ marginTop: 40, marginBottom: 60 }}
+                      name="filterSql"
+                      label={<span style={{ fontSize: 14 }}>过滤SQL</span>}
+                      tooltip="主要用于词典导入场景, 对维度值进行过滤 格式: field1 = 'xxx' and field2 = 'yyy'"
+                    >
+                      <SqlEditor height={'150px'} />
+                    </FormItem> */}
+                  </>
+                ),
+              },
+              {
+                label: '问答设置',
+                key: 'chatSetting',
+                children: (
+                  <>
+                    <ProCard bordered title="指标模式" style={{ marginBottom: 20 }}>
+                      <DefaultSettingForm
+                        form={form}
+                        dimensionList={dimensionList}
+                        metricList={metricList}
+                        chatConfigType={ChatConfigType.METRIC}
+                      />
+                    </ProCard>
+                    <ProCard bordered title="标签模式" style={{ marginBottom: 20 }}>
+                      <DefaultSettingForm
+                        form={form}
+                        dimensionList={dimensionList}
+                        metricList={metricList}
+                        chatConfigType={ChatConfigType.TAG}
+                      />
+                    </ProCard>
+                  </>
+                ),
+              },
+            ]}
           />
-        </FormItem>
-        <FormItem name="description" label="视图描述">
-          <Input.TextArea placeholder="视图描述" />
-        </FormItem>
+        </div>
+
+        <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
+          <FormItem
+            name="name"
+            label="视图名称"
+            rules={[{ required: true, message: '请输入视图名称！' }]}
+          >
+            <Input placeholder="视图名称不可重复" />
+          </FormItem>
+          <FormItem
+            name="bizName"
+            label="视图英文名称"
+            rules={[{ required: true, message: '请输入视图英文名称！' }]}
+          >
+            <Input placeholder="请输入视图英文名称" />
+          </FormItem>
+          <FormItem
+            name="alias"
+            label="别名"
+            getValueFromEvent={(value) => {
+              return Array.isArray(value) ? value.join(',') : '';
+            }}
+            getValueProps={(value) => {
+              return {
+                value: isString(value) ? value.split(',') : [],
+              };
+            }}
+          >
+            <Select
+              mode="tags"
+              placeholder="输入别名后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
+              tokenSeparators={[',']}
+              maxTagCount={9}
+            />
+          </FormItem>
+          <FormItem name="admins" label={<FormItemTitle title={'责任人'} />}>
+            <SelectTMEPerson placeholder="请邀请团队成员" />
+          </FormItem>
+          <FormItem name="description" label="视图描述">
+            <Input.TextArea placeholder="视图描述" />
+          </FormItem>
+        </div>
       </>
     );
   };
@@ -210,13 +359,14 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
       destroyOnClose
       title={'视图信息'}
       open={true}
-      // footer={footer}
+      maskClosable={false}
       footer={renderFooter()}
       onCancel={onCancel}
     >
       <Steps style={{ marginBottom: 28 }} size="small" current={currentStep}>
         <Step title="基本信息" />
         <Step title="关联信息" />
+        {/* <Step title="进阶设置" /> */}
       </Steps>
       <Form
         {...formLayout}
