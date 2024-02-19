@@ -87,17 +87,17 @@ public class MetricCheckProcessor implements ParseResultProcessor {
             if (!checkInModelSchema(dimensionName, SchemaElementType.DIMENSION, semanticSchema)) {
                 whereFieldsToRemove.add(dimensionName);
             }
-            if (!checkDrillDownDimension(dimensionName, metricFields, semanticSchema)) {
-                whereFieldsToRemove.add(dimensionName);
-            }
+            //if (!checkDrillDownDimension(dimensionName, metricFields, semanticSchema)) {
+            //    whereFieldsToRemove.add(dimensionName);
+            //}
         }
         for (String dimensionName : groupByFields) {
             if (TimeDimensionEnum.containsTimeDimension(dimensionName)) {
                 continue;
             }
-            if (!checkInModelSchema(dimensionName, SchemaElementType.DIMENSION, semanticSchema)) {
-                groupByToRemove.add(dimensionName);
-            }
+            //if (!checkInModelSchema(dimensionName, SchemaElementType.DIMENSION, semanticSchema)) {
+            //    groupByToRemove.add(dimensionName);
+            //}
             if (!checkDrillDownDimension(dimensionName, metricFields, semanticSchema)) {
                 groupByToRemove.add(dimensionName);
             }

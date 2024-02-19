@@ -452,7 +452,18 @@ public class SqlSelectHelper {
         SelectBody selectBody = selectStatement.getSelectBody();
         if (selectBody instanceof PlainSelect) {
             PlainSelect plainSelect = (PlainSelect) selectBody;
-            return (Table) plainSelect.getFromItem();
+            if (plainSelect.getFromItem() instanceof Table) {
+                return (Table) plainSelect.getFromItem();
+            }
+            if (plainSelect.getFromItem() instanceof SubSelect) {
+                SubSelect subSelect = (SubSelect) plainSelect.getFromItem();
+                SelectBody subSelectBody = subSelect.getSelectBody();
+                PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
+                if (subPlainSelect.getFromItem() instanceof Table) {
+                    return (Table) subPlainSelect.getFromItem();
+                }
+            }
+
         } else if (selectBody instanceof SetOperationList) {
             SetOperationList setOperationList = (SetOperationList) selectBody;
             if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
