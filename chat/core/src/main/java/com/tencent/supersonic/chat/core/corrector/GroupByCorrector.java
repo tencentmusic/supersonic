@@ -31,22 +31,20 @@ public class GroupByCorrector extends BaseSemanticCorrector {
 
     @Override
     public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        Boolean addGroupBy = addGroupBy(queryContext, semanticParseInfo);
-        log.info("addGroupBy:{}", addGroupBy);
-        if (!addGroupBy) {
+        Boolean needAddGroupBy = needAddGroupBy(queryContext, semanticParseInfo);
+        if (!needAddGroupBy) {
             return;
         }
         addGroupByFields(queryContext, semanticParseInfo);
-
     }
 
-    private Boolean addGroupBy(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+    private Boolean needAddGroupBy(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
         Long viewId = semanticParseInfo.getViewId();
         ViewService viewService = ContextUtils.getBean(ViewService.class);
         ModelService modelService = ContextUtils.getBean(ModelService.class);
         ViewResp viewResp = viewService.getView(viewId);
-        List<Long> modelIds = viewResp.getViewDetail().getViewModelConfigs().stream().map(config -> config.getId()
-        ).collect(Collectors.toList());
+        List<Long> modelIds = viewResp.getViewDetail().getViewModelConfigs().stream().map(config -> config.getId())
+                .collect(Collectors.toList());
         MetaFilter metaFilter = new MetaFilter(modelIds);
         List<ModelResp> modelRespList = modelService.getModelList(metaFilter);
         for (ModelResp modelResp : modelRespList) {
@@ -57,22 +55,33 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                 }
             }
         }
-        return true;
-    }
-
-    private void addGroupByFields(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        Long viewId = semanticParseInfo.getViewId();
         //add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectS2SQL();
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
-        // check if has distinct
-        boolean hasDistinct = SqlSelectHelper.hasDistinct(correctS2SQL);
-        if (hasDistinct) {
+        // check has distinct
+        if (SqlSelectHelper.hasDistinct(correctS2SQL)) {
             log.info("not add group by ,exist distinct in correctS2SQL:{}", correctS2SQL);
-            return;
+            return false;
         }
         //add alias field name
+        Set<String> dimensions = getDimensions(viewId, semanticSchema);
+        List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);
+        if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(dimensions)) {
+            return false;
+        }
+        // if only date in select not add group by.
+        if (selectFields.size() == 1 && selectFields.contains(TimeDimensionEnum.DAY.getChName())) {
+            return false;
+        }
+        if (SqlSelectHelper.hasGroupBy(correctS2SQL)) {
+            log.info("not add group by ,exist group by in correctS2SQL:{}", correctS2SQL);
+            return false;
+        }
+        return true;
+    }
+
+    private Set<String> getDimensions(Long viewId, SemanticSchema semanticSchema) {
         Set<String> dimensions = semanticSchema.getDimensions(viewId).stream()
                 .flatMap(
                         schemaElement -> {
@@ -85,21 +94,18 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                         }
                 ).collect(Collectors.toSet());
         dimensions.add(TimeDimensionEnum.DAY.getChName());
+        return dimensions;
+    }
 
+    private void addGroupByFields(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+        Long viewId = semanticParseInfo.getViewId();
+        //add dimension group by
+        SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
+        String correctS2SQL = sqlInfo.getCorrectS2SQL();
+        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+        //add alias field name
+        Set<String> dimensions = getDimensions(viewId, semanticSchema);
         List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);
-
-        if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(dimensions)) {
-            return;
-        }
-        // if only date in select not add group by.
-        if (selectFields.size() == 1 && selectFields.contains(TimeDimensionEnum.DAY.getChName())) {
-            return;
-        }
-        if (SqlSelectHelper.hasGroupBy(correctS2SQL)) {
-            log.info("not add group by ,exist group by in correctS2SQL:{}", correctS2SQL);
-            return;
-        }
-
         List<String> aggregateFields = SqlSelectHelper.getAggregateFields(correctS2SQL);
         Set<String> groupByFields = selectFields.stream()
                 .filter(field -> dimensions.contains(field))
@@ -111,7 +117,6 @@ public class GroupByCorrector extends BaseSemanticCorrector {
                 })
                 .collect(Collectors.toSet());
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(SqlAddHelper.addGroupBy(correctS2SQL, groupByFields));
-
         addAggregate(queryContext, semanticParseInfo);
     }
 
