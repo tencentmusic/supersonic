@@ -36,7 +36,6 @@ import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.ViewService;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
@@ -75,8 +74,6 @@ public class ModelServiceImpl implements ModelService {
 
     private DomainService domainService;
 
-    private ModelRelaService modelRelaService;
-
     private UserService userService;
 
     private ViewService viewService;
@@ -87,7 +84,6 @@ public class ModelServiceImpl implements ModelService {
                             DatabaseService databaseService,
                             @Lazy DimensionService dimensionService,
                             @Lazy MetricService metricService,
-                            ModelRelaService modelRelaService,
                             DomainService domainService,
                             UserService userService,
                             ViewService viewService,
@@ -97,7 +93,6 @@ public class ModelServiceImpl implements ModelService {
         this.dimensionService = dimensionService;
         this.metricService = metricService;
         this.domainService = domainService;
-        this.modelRelaService = modelRelaService;
         this.userService = userService;
         this.viewService = viewService;
         this.dateInfoRepository = dateInfoRepository;
@@ -200,6 +195,9 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public UnAvailableItemResp getUnAvailableItem(FieldRemovedReq fieldRemovedReq) {
+        if (CollectionUtils.isEmpty(fieldRemovedReq.getFields())) {
+            return UnAvailableItemResp.builder().build();
+        }
         MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(fieldRemovedReq.getModelId()));
         metaFilter.setFieldsDepend(fieldRemovedReq.getFields());
         List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
