@@ -3,8 +3,8 @@ package com.tencent.supersonic.headless.api.pojo.response;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
+import com.tencent.supersonic.headless.api.pojo.Field;
 import com.tencent.supersonic.headless.api.pojo.Identify;
-import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import lombok.Data;
@@ -78,17 +78,9 @@ public class ModelResp extends SchemaItem {
         if (modelDetail == null) {
             return fieldSet;
         }
-        if (!CollectionUtils.isEmpty(modelDetail.getIdentifiers())) {
-            fieldSet.addAll(modelDetail.getIdentifiers().stream()
-                    .map(Identify::getFieldName).collect(Collectors.toSet()));
-        }
-        if (!CollectionUtils.isEmpty(modelDetail.getDimensions())) {
-            fieldSet.addAll(modelDetail.getDimensions().stream()
-                    .map(Dim::getFieldName).collect(Collectors.toSet()));
-        }
-        if (!CollectionUtils.isEmpty(modelDetail.getMeasures())) {
-            fieldSet.addAll(modelDetail.getMeasures().stream()
-                    .map(Measure::getFieldName).collect(Collectors.toSet()));
+        if (!CollectionUtils.isEmpty(modelDetail.getFields())) {
+            fieldSet.addAll(modelDetail.getFields().stream()
+                    .map(Field::getFieldName).collect(Collectors.toSet()));
         }
         return fieldSet;
     }
