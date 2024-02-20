@@ -2,14 +2,11 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.ComponentFactory;
 import com.tencent.supersonic.common.util.embedding.Retrieval;
 import com.tencent.supersonic.common.util.embedding.RetrieveQuery;
 import com.tencent.supersonic.common.util.embedding.RetrieveQueryResult;
 import com.tencent.supersonic.common.util.embedding.S2EmbeddingStore;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.MetaEmbeddingService;
 import com.tencent.supersonic.headless.server.service.ViewService;
 import java.util.ArrayList;
@@ -22,7 +19,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,16 +37,8 @@ public class MetaEmbeddingServiceImpl implements MetaEmbeddingService {
     @Override
     public List<RetrieveQueryResult> retrieveQuery(List<Long> viewIds, RetrieveQuery retrieveQuery, int num) {
         // viewIds->modelIds
-        MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
-        metaFilter.setIds(viewIds);
-        List<ViewResp> viewListByCache = viewService.getViewListByCache(metaFilter);
-        Set<Long> allModels = getModels(viewListByCache);
-
-        Map<Long, List<Long>> modelIdToViewIds = viewListByCache.stream()
-                .flatMap(viewResp -> viewResp.getAllModels().stream()
-                        .map(modelId -> Pair.of(modelId, viewResp.getId())))
-                .collect(Collectors.groupingBy(Pair::getLeft, Collectors.mapping(Pair::getRight, Collectors.toList())));
+        Map<Long, List<Long>> modelIdToViewIds = viewService.getModelIdToViewIds(viewIds);
+        Set<Long> allModels = modelIdToViewIds.keySet();
 
         if (CollectionUtils.isNotEmpty(allModels) && allModels.size() == 1) {
             Map<String, String> filterCondition = new HashMap<>();
@@ -104,11 +92,5 @@ public class MetaEmbeddingServiceImpl implements MetaEmbeddingService {
                 })
                 .filter(retrieveQueryResult -> CollectionUtils.isNotEmpty(retrieveQueryResult.getRetrieval()))
                 .collect(Collectors.toList());
-    }
-
-    private Set<Long> getModels(List<ViewResp> viewListByCache) {
-        return viewListByCache.stream()
-                .flatMap(viewResp -> viewResp.getAllModels().stream())
-                .collect(Collectors.toSet());
     }
 }

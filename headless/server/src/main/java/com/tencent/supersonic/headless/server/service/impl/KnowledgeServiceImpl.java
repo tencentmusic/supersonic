@@ -2,23 +2,19 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.core.knowledge.DictWord;
 import com.tencent.supersonic.headless.core.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.core.knowledge.SearchService;
 import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
-import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.KnowledgeService;
 import com.tencent.supersonic.headless.server.service.ViewService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
@@ -77,7 +73,8 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     @Override
     public List<HanlpMapResult> prefixSearch(String key, int limit, Set<Long> viewIds) {
-        return prefixSearch(key, limit, viewIds2ModelIdList(viewIds));
+        Map<Long, List<Long>> modelIdToViewIds = viewService.getModelIdToViewIds(new ArrayList<>(viewIds));
+        return prefixSearchByModel(key, limit, modelIdToViewIds.keySet());
     }
 
     public List<HanlpMapResult> prefixSearchByModel(String key, int limit, Set<Long> models) {
@@ -86,22 +83,12 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     @Override
     public List<HanlpMapResult> suffixSearch(String key, int limit, Set<Long> viewIds) {
-        return suffixSearch(key, limit, viewIds2ModelIdList(viewIds));
+        Map<Long, List<Long>> modelIdToViewIds = viewService.getModelIdToViewIds(new ArrayList<>(viewIds));
+        return suffixSearchByModel(key, limit, modelIdToViewIds.keySet());
     }
 
     public List<HanlpMapResult> suffixSearchByModel(String key, int limit, Set<Long> models) {
         return SearchService.suffixSearch(key, limit, models);
     }
 
-    private Set<Long> viewIds2ModelIdList(Set<Long> viewIds) {
-        Set<Long> modelIds = new HashSet<>();
-        MetaFilter filter = new MetaFilter();
-        filter.setIds(new ArrayList<>(viewIds));
-        List<ViewResp> viewList = viewService.getViewList(filter);
-        if (CollectionUtils.isEmpty(viewList)) {
-            return modelIds;
-        }
-        viewList.stream().forEach(view -> modelIds.addAll(view.getAllModels()));
-        return modelIds;
-    }
 }

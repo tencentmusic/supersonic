@@ -66,6 +66,7 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.server.service.KnowledgeService;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -121,6 +122,9 @@ public class QueryServiceImpl implements QueryService {
 
     @Autowired
     private PluginService pluginService;
+
+    @Autowired
+    private KnowledgeService knowledgeService;
 
     @Value("${time.threshold: 100}")
     private Integer timeThreshold;
@@ -637,10 +641,10 @@ public class QueryServiceImpl implements QueryService {
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();
         SchemaElement schemaElement = semanticSchema.getDimension(dimensionValueReq.getElementID());
-        Set<Long> detectModelIds = new HashSet<>();
-        detectModelIds.add(schemaElement.getView());
+        Set<Long> detectViewIds = new HashSet<>();
+        detectViewIds.add(schemaElement.getView());
         dimensionValueReq.setModelId(schemaElement.getView());
-        List<String> dimensionValues = getDimensionValues(dimensionValueReq, detectModelIds);
+        List<String> dimensionValues = getDimensionValues(dimensionValueReq, detectViewIds);
         // if the search results is null,search dimensionValue from database
         if (CollectionUtils.isEmpty(dimensionValues)) {
             semanticQueryResp = queryDatabase(dimensionValueReq, user);
@@ -664,14 +668,14 @@ public class QueryServiceImpl implements QueryService {
         return semanticQueryResp;
     }
 
-    private List<String> getDimensionValues(DimensionValueReq dimensionValueReq, Set<Long> detectModelIds) {
+    private List<String> getDimensionValues(DimensionValueReq dimensionValueReq, Set<Long> viewIds) {
         //if value is null ,then search from NATURE_TO_VALUES
         if (StringUtils.isBlank(dimensionValueReq.getValue())) {
             return SearchService.getDimensionValue(dimensionValueReq);
         }
         //search from prefixSearch
-        List<HanlpMapResult> hanlpMapResultList = SearchService.prefixSearch(dimensionValueReq.getValue(),
-                2000, detectModelIds);
+        List<HanlpMapResult> hanlpMapResultList = knowledgeService.prefixSearch(dimensionValueReq.getValue(),
+                2000, viewIds);
         HanlpHelper.transLetterOriginal(hanlpMapResultList);
         return hanlpMapResultList.stream()
                 .filter(o -> {
