@@ -26,10 +26,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -159,13 +161,18 @@ public class ViewServiceImpl
     }
 
     @Override
-    public List<ViewResp> getViewListByCache(MetaFilter metaFilter) {
+    public Map<Long, List<Long>> getModelIdToViewIds(List<Long> viewIds) {
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
+        metaFilter.setIds(viewIds);
         List<ViewResp> viewList = viewSchemaCache.getIfPresent(metaFilter);
         if (CollectionUtils.isEmpty(viewList)) {
             viewList = getViewList(metaFilter);
             viewSchemaCache.put(metaFilter, viewList);
         }
-        return viewList;
+        return viewList.stream()
+                .flatMap(
+                        viewResp -> viewResp.getAllModels().stream().map(modelId -> Pair.of(modelId, viewResp.getId())))
+                .collect(Collectors.groupingBy(Pair::getLeft, Collectors.mapping(Pair::getRight, Collectors.toList())));
     }
-
 }

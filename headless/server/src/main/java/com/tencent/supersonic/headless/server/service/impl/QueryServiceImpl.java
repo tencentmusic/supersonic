@@ -18,6 +18,7 @@ import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryItemReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
@@ -65,6 +66,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class QueryServiceImpl implements QueryService {
+
     private StatUtils statUtils;
     private final QueryUtils queryUtils;
     private final QueryReqConverter queryReqConverter;
@@ -167,7 +169,6 @@ public class QueryServiceImpl implements QueryService {
         QueryStatement queryStatement = new QueryStatement();
         QueryParam queryParam = new QueryParam();
         queryReqConverter.convert(queryStructReq, queryParam);
-        //queryStatement.setQueryStructReq(queryStructReq);
         queryStatement.setQueryParam(queryParam);
         queryStatement.setIsS2SQL(false);
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
@@ -237,6 +238,11 @@ public class QueryServiceImpl implements QueryService {
             results.add(apiQuerySingleResult);
         }
         return ItemQueryResultResp.builder().results(results).build();
+    }
+
+    @Override
+    public SemanticQueryResp queryByMetric(QueryMetricReq queryMetricReq, User user) throws Exception {
+        return null;
     }
 
     private SingleItemQueryResult dataQuery(Integer appId, Item item, DateConf dateConf, Long limit) throws Exception {

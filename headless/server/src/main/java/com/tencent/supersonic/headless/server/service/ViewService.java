@@ -6,6 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ViewService {
 
@@ -19,7 +20,7 @@ public interface ViewService {
 
     void delete(Long id, User user);
 
-    List<ViewResp> getViewListByCache(MetaFilter metaFilter);
+    Map<Long, List<Long>> getModelIdToViewIds(List<Long> viewIds);
 
     List<ViewResp> getViews(User user);
 
