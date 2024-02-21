@@ -1,20 +1,26 @@
 import { CHART_BLUE_COLOR, CHART_SECONDARY_COLOR, PREFIX_CLS } from '../../../common/constants';
 import { MsgDataType } from '../../../common/type';
-import { getChartLightenColor, getFormattedValue } from '../../../utils/utils';
+import {
+  formatByDecimalPlaces,
+  getChartLightenColor,
+  getFormattedValue,
+} from '../../../utils/utils';
 import type { ECharts } from 'echarts';
 import * as echarts from 'echarts';
 import React, { useEffect, useRef, useState } from 'react';
 import NoPermissionChart from '../NoPermissionChart';
+import { ColumnType } from '../../../common/type';
 import { Spin } from 'antd';
 
 type Props = {
   data: MsgDataType;
   triggerResize?: boolean;
   loading: boolean;
+  metricField: ColumnType;
   onApplyAuth?: (model: string) => void;
 };
 
-const BarChart: React.FC<Props> = ({ data, triggerResize, loading, onApplyAuth }) => {
+const BarChart: React.FC<Props> = ({ data, triggerResize, loading, metricField, onApplyAuth }) => {
   const chartRef = useRef<any>();
   const [instance, setInstance] = useState<ECharts>();
 
@@ -70,7 +76,11 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, loading, onApplyAuth }
         },
         axisLabel: {
           formatter: function (value: any) {
-            return value === 0 ? 0 : getFormattedValue(value);
+            return value === 0
+              ? 0
+              : metricField.dataFormatType === 'percent'
+              ? `${formatByDecimalPlaces(value, metricField.dataFormat?.decimalPlaces || 2)}%`
+              : getFormattedValue(value);
           },
         },
       },
@@ -85,9 +95,17 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, loading, onApplyAuth }
                   item.marker
                 } <span style="display: inline-block; width: 70px; margin-right: 12px;">${
                   item.seriesName
-                }</span><span style="display: inline-block; width: 90px; text-align: right; font-weight: 500;">${getFormattedValue(
-                  item.value
-                )}</span></div>`
+                }</span><span style="display: inline-block; width: 90px; text-align: right; font-weight: 500;">${
+                  item.value === ''
+                    ? '-'
+                    : metricField.dataFormatType === 'percent' ||
+                      metricField.dataFormatType === 'decimal'
+                    ? `${formatByDecimalPlaces(
+                        item.value,
+                        metricField.dataFormat?.decimalPlaces || 2
+                      )}${metricField.dataFormatType === 'percent' ? '%' : ''}`
+                    : getFormattedValue(item.value)
+                }</span></div>`
             )
             .join('');
           return `${param.name}<br />${valueLabels}`;
@@ -115,7 +133,11 @@ const BarChart: React.FC<Props> = ({ data, triggerResize, loading, onApplyAuth }
           show: true,
           position: 'top',
           formatter: function ({ value }: any) {
-            return getFormattedValue(value);
+            return value === 0
+              ? 0
+              : metricField.dataFormatType === 'percent'
+              ? `${formatByDecimalPlaces(value, metricField.dataFormat?.decimalPlaces || 2)}%`
+              : getFormattedValue(value);
           },
         },
         data: data.map(item => {
