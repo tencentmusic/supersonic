@@ -62,7 +62,7 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
       return {
         ...item,
         transType,
-        disabled: checkedMap[id]?.inheritFromModel,
+        disabled: checkedMap[id]?.inheritedFromModel,
         key: `${id}`,
       };
     });
@@ -73,6 +73,7 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
     if (!Array.isArray(relationsInitialValue)) {
       return;
     }
+    console.log(relationsInitialValue, 'relationsInitialValue');
     const ids = relationsInitialValue.map((item) => `${item.dimensionId}`);
     const relationMap = relationsInitialValue.reduce((relationCheckedMap, item: any) => {
       const { dimensionId } = item;
@@ -116,7 +117,7 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
       (relationList: ISemantic.IDrillDownDimensionItem[], dimensionId: string) => {
         const target = relationCheckedMap[dimensionId];
         if (target) {
-          if (target.inheritFromModel === true && !target.necessary) {
+          if (target.inheritedFromModel === true && !target.necessary) {
             return relationList;
           }
           relationList.push(target);
@@ -124,7 +125,7 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
           relationList.push({
             dimensionId: Number(dimensionId),
             necessary: false,
-            inheritFromModel: false,
+            inheritedFromModel: false,
           });
         }
         return relationList;
@@ -238,7 +239,7 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
             },
             selectedRowKeys: listSelectedKeys,
             renderCell: function (checked, record, index, originNode) {
-              if (checkedMap[record.id]?.inheritFromModel === true) {
+              if (checkedMap[record.id]?.inheritedFromModel === true) {
                 return (
                   <Tooltip title="来自模型默认设置维度">
                     <EnvironmentOutlined style={{ color: '#0958d9' }} />
@@ -256,7 +257,7 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
               dataSource={filteredItems as any}
               size="small"
               rowClassName={(record) => {
-                if (checkedMap[record.id]?.inheritFromModel) {
+                if (checkedMap[record.id]?.inheritedFromModel) {
                   return 'inherit-from-model-row';
                 }
                 return '';

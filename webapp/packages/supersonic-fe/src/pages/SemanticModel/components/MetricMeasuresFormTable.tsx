@@ -131,8 +131,16 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
             search: {
               placeholder: '请输入度量名称',
               onSearch: (value: string) => {
+                const datasource =
+                  datasourceId && Array.isArray(measuresList)
+                    ? measuresList.filter((item) => item.datasourceId === datasourceId)
+                    : measuresList;
+                if (!value) {
+                  setTableData(datasource);
+                  return;
+                }
                 setTableData(
-                  [...tableData].reduce((data: ISemantic.IMeasure[], item: ISemantic.IMeasure) => {
+                  [...datasource].reduce((data: ISemantic.IMeasure[], item: ISemantic.IMeasure) => {
                     if (item.bizName.includes(value)) {
                       data.push(item);
                     }

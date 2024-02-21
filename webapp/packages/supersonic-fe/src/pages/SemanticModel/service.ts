@@ -426,6 +426,13 @@ export function deleteModel(modelId: number): Promise<any> {
   });
 }
 
+export function getUnAvailableItem(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}model/getUnAvailableItem`, {
+    method: 'POST',
+    data,
+  });
+}
+
 export function getModelDetail(data: any): Promise<any> {
   return request.get(`${process.env.API_BASE_URL}model/getModel/${data.modelId}`);
 }
