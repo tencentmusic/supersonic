@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.core.utils;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.core.query.QueryManager;
 import com.tencent.supersonic.common.pojo.Aggregator;

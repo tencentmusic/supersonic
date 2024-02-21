@@ -9,7 +9,7 @@ import jwt
 
 
 def get_authorization():
-    exp = time.time() + 1000
+    exp = time.time() + 100000
     token= jwt.encode({"token_user_name": "admin","exp": exp}, "secret", algorithm="HS512")
     return "Bearer "+token
 

@@ -2,12 +2,12 @@ package com.tencent.supersonic.chat.server.service.impl;
 
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.ViewSchema;
-import com.tencent.supersonic.chat.api.pojo.request.DimensionValueReq;
+import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
@@ -21,9 +21,9 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryState;
 import com.tencent.supersonic.chat.core.agent.Agent;
 import com.tencent.supersonic.chat.core.corrector.SemanticCorrector;
-import com.tencent.supersonic.chat.core.knowledge.HanlpMapResult;
-import com.tencent.supersonic.chat.core.knowledge.SearchService;
-import com.tencent.supersonic.chat.core.knowledge.semantic.SemanticInterpreter;
+import com.tencent.supersonic.headless.core.knowledge.HanlpMapResult;
+import com.tencent.supersonic.headless.core.knowledge.SearchService;
+import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.mapper.SchemaMapper;
 import com.tencent.supersonic.chat.core.parser.SemanticParser;
 import com.tencent.supersonic.chat.core.plugin.Plugin;
@@ -33,8 +33,8 @@ import com.tencent.supersonic.chat.core.query.QueryManager;
 import com.tencent.supersonic.chat.core.query.SemanticQuery;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.chat.core.query.rule.RuleSemanticQuery;
-import com.tencent.supersonic.chat.core.utils.HanlpHelper;
-import com.tencent.supersonic.chat.core.utils.NatureHelper;
+import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
+import com.tencent.supersonic.headless.core.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.chat.core.utils.SimilarQueryManager;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
@@ -66,6 +66,7 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.server.service.KnowledgeService;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -121,6 +122,9 @@ public class QueryServiceImpl implements QueryService {
 
     @Autowired
     private PluginService pluginService;
+
+    @Autowired
+    private KnowledgeService knowledgeService;
 
     @Value("${time.threshold: 100}")
     private Integer timeThreshold;
@@ -637,10 +641,10 @@ public class QueryServiceImpl implements QueryService {
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();
         SchemaElement schemaElement = semanticSchema.getDimension(dimensionValueReq.getElementID());
-        Set<Long> detectModelIds = new HashSet<>();
-        detectModelIds.add(schemaElement.getView());
+        Set<Long> detectViewIds = new HashSet<>();
+        detectViewIds.add(schemaElement.getView());
         dimensionValueReq.setModelId(schemaElement.getView());
-        List<String> dimensionValues = getDimensionValues(dimensionValueReq, detectModelIds);
+        List<String> dimensionValues = getDimensionValues(dimensionValueReq, detectViewIds);
         // if the search results is null,search dimensionValue from database
         if (CollectionUtils.isEmpty(dimensionValues)) {
             semanticQueryResp = queryDatabase(dimensionValueReq, user);
@@ -664,14 +668,14 @@ public class QueryServiceImpl implements QueryService {
         return semanticQueryResp;
     }
 
-    private List<String> getDimensionValues(DimensionValueReq dimensionValueReq, Set<Long> detectModelIds) {
+    private List<String> getDimensionValues(DimensionValueReq dimensionValueReq, Set<Long> viewIds) {
         //if value is null ,then search from NATURE_TO_VALUES
         if (StringUtils.isBlank(dimensionValueReq.getValue())) {
             return SearchService.getDimensionValue(dimensionValueReq);
         }
         //search from prefixSearch
-        List<HanlpMapResult> hanlpMapResultList = SearchService.prefixSearch(dimensionValueReq.getValue(),
-                2000, dimensionValueReq.getAgentId(), detectModelIds);
+        List<HanlpMapResult> hanlpMapResultList = knowledgeService.prefixSearch(dimensionValueReq.getValue(),
+                2000, viewIds);
         HanlpHelper.transLetterOriginal(hanlpMapResultList);
         return hanlpMapResultList.stream()
                 .filter(o -> {

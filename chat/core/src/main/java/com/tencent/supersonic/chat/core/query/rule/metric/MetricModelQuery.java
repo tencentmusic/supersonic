@@ -4,7 +4,7 @@ import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.Optio
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_MOST;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import org.springframework.stereotype.Component;
 @Component

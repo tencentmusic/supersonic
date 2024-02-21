@@ -1,15 +1,16 @@
 package com.tencent.supersonic.chat.core.mapper;
 
-import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
-import com.tencent.supersonic.chat.core.knowledge.DatabaseMapResult;
-import com.tencent.supersonic.chat.core.knowledge.HanlpMapResult;
+import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.core.knowledge.DatabaseMapResult;
+import com.tencent.supersonic.headless.core.knowledge.HanlpMapResult;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
-import com.tencent.supersonic.chat.core.utils.HanlpHelper;
-import com.tencent.supersonic.chat.core.utils.NatureHelper;
+import com.tencent.supersonic.headless.server.service.KnowledgeService;
+import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
+import com.tencent.supersonic.headless.core.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -32,7 +33,8 @@ public class KeywordMapper extends BaseMapper {
     public void doMap(QueryContext queryContext) {
         String queryText = queryContext.getQueryText();
         //1.hanlpDict Match
-        List<Term> terms = HanlpHelper.getTerms(queryText);
+        KnowledgeService knowledgeService = ContextUtils.getBean(KnowledgeService.class);
+        List<S2Term> terms = knowledgeService.getTerms(queryText);
         HanlpDictMatchStrategy hanlpMatchStrategy = ContextUtils.getBean(HanlpDictMatchStrategy.class);
 
         List<HanlpMapResult> hanlpMapResults = hanlpMatchStrategy.getMatches(queryContext, terms);
@@ -46,7 +48,7 @@ public class KeywordMapper extends BaseMapper {
     }
 
     private void convertHanlpMapResultToMapInfo(List<HanlpMapResult> mapResults, QueryContext queryContext,
-            List<Term> terms) {
+            List<S2Term> terms) {
         if (CollectionUtils.isEmpty(mapResults)) {
             return;
         }

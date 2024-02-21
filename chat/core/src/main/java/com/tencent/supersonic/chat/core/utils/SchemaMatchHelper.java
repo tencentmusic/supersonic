@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.core.utils;
 
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.SchemaElementType;
+import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;

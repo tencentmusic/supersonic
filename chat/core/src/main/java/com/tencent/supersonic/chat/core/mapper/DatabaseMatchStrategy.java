@@ -1,10 +1,10 @@
 package com.tencent.supersonic.chat.core.mapper;
 
-import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
-import com.tencent.supersonic.chat.core.knowledge.DatabaseMapResult;
+import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.core.knowledge.DatabaseMapResult;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import lombok.extern.slf4j.Slf4j;
@@ -36,10 +36,10 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
     private List<SchemaElement> allElements;
 
     @Override
-    public Map<MatchText, List<DatabaseMapResult>> match(QueryContext queryContext, List<Term> terms,
-            Set<Long> detectModelIds) {
+    public Map<MatchText, List<DatabaseMapResult>> match(QueryContext queryContext, List<S2Term> terms,
+            Set<Long> detectViewIds) {
         this.allElements = getSchemaElements(queryContext);
-        return super.match(queryContext, terms, detectModelIds);
+        return super.match(queryContext, terms, detectViewIds);
     }
 
     @Override
@@ -54,16 +54,13 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
                 + Constants.UNDERLINE + a.getSchemaElement().getName();
     }
 
-    public void detectByStep(QueryContext queryContext, Set<DatabaseMapResult> existResults, Set<Long> detectModelIds,
-            Integer startIndex, Integer index, int offset) {
-        String detectSegment = queryContext.getQueryText().substring(startIndex, index);
+    public void detectByStep(QueryContext queryContext, Set<DatabaseMapResult> existResults, Set<Long> detectViewIds,
+            String detectSegment, int offset) {
         if (StringUtils.isBlank(detectSegment)) {
             return;
         }
-        Set<Long> viewIds = mapperHelper.getViewIds(queryContext.getViewId(), queryContext.getAgent());
 
         Double metricDimensionThresholdConfig = getThreshold(queryContext);
-
         Map<String, Set<SchemaElement>> nameToItems = getNameToItems(allElements);
 
         for (Entry<String, Set<SchemaElement>> entry : nameToItems.entrySet()) {
@@ -73,9 +70,9 @@ public class DatabaseMatchStrategy extends BaseMatchStrategy<DatabaseMapResult> 
                 continue;
             }
             Set<SchemaElement> schemaElements = entry.getValue();
-            if (!CollectionUtils.isEmpty(viewIds)) {
+            if (!CollectionUtils.isEmpty(detectViewIds)) {
                 schemaElements = schemaElements.stream()
-                        .filter(schemaElement -> viewIds.contains(schemaElement.getView()))
+                        .filter(schemaElement -> detectViewIds.contains(schemaElement.getView()))
                         .collect(Collectors.toSet());
             }
             for (SchemaElement schemaElement : schemaElements) {

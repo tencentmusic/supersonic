@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.parser.calcite.sql;
 
 
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
+import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.MeasureNode;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.MetricNode;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.node.SemanticNode;
@@ -110,6 +110,6 @@ public abstract class Renderer {
         return SemanticNode.buildAs(alias, tableView.build());
     }
 
-    public abstract void render(MetricQueryReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
+    public abstract void render(MetricQueryParam metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
             SemanticSchema schema, boolean nonAgg) throws Exception;
 }

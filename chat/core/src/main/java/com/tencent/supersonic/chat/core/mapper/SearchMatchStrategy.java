@@ -1,11 +1,12 @@
 package com.tencent.supersonic.chat.core.mapper;
 
 import com.google.common.collect.Lists;
-import com.hankcs.hanlp.seg.common.Term;
-import com.tencent.supersonic.chat.core.knowledge.HanlpMapResult;
-import com.tencent.supersonic.chat.core.knowledge.SearchService;
+import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.core.knowledge.HanlpMapResult;
+import com.tencent.supersonic.headless.core.knowledge.SearchService;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
+import com.tencent.supersonic.headless.server.service.KnowledgeService;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,9 +27,12 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
     private static final int SEARCH_SIZE = 3;
 
+    @Autowired
+    private KnowledgeService knowledgeService;
+
     @Override
-    public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<Term> originals,
-            Set<Long> detectModelIds) {
+    public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<S2Term> originals,
+            Set<Long> detectViewIds) {
         String text = queryContext.getQueryText();
         Map<Integer, Integer> regOffsetToLength = getRegOffsetToLength(originals);
 
@@ -51,10 +56,10 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
                     String detectSegment = text.substring(detectIndex);
 
                     if (StringUtils.isNotEmpty(detectSegment)) {
-                        List<HanlpMapResult> hanlpMapResults = SearchService.prefixSearch(detectSegment,
-                                SearchService.SEARCH_SIZE, queryContext.getAgentId(), detectModelIds);
-                        List<HanlpMapResult> suffixHanlpMapResults = SearchService.suffixSearch(
-                                detectSegment, SEARCH_SIZE, queryContext.getAgentId(), detectModelIds);
+                        List<HanlpMapResult> hanlpMapResults = knowledgeService.prefixSearch(detectSegment,
+                                SearchService.SEARCH_SIZE, detectViewIds);
+                        List<HanlpMapResult> suffixHanlpMapResults = knowledgeService.suffixSearch(
+                                detectSegment, SEARCH_SIZE, detectViewIds);
                         hanlpMapResults.addAll(suffixHanlpMapResults);
                         // remove entity name where search
                         hanlpMapResults = hanlpMapResults.stream().filter(entry -> {
@@ -88,9 +93,9 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     }
 
     @Override
-    public void detectByStep(QueryContext queryContext, Set<HanlpMapResult> results, Set<Long> detectModelIds,
-            Integer startIndex,
-            Integer i, int offset) {
+    public void detectByStep(QueryContext queryContext, Set<HanlpMapResult> existResults, Set<Long> detectViewIds,
+            String detectSegment, int offset) {
 
     }
+
 }

@@ -1,13 +1,13 @@
 package com.tencent.supersonic.chat.core.query.rule.metric;
 
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.DIMENSION;
-import static com.tencent.supersonic.chat.api.pojo.SchemaElementType.VALUE;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.DIMENSION;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.VALUE;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.OPTIONAL;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.REQUIRED;
 import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
 import static com.tencent.supersonic.common.pojo.Constants.DESC_UPPER;
 
-import com.tencent.supersonic.chat.api.pojo.SchemaElement;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;

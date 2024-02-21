@@ -128,13 +128,14 @@ const ChatMsg: React.FC<Props> = ({ queryId, data, chartIndex, triggerResize }) 
     if (
       categoryField?.length > 0 &&
       metricFields?.length > 0 &&
-      (isMobile ? dataSource?.length <= 20 : dataSource?.length <= 50)
+      (isMobile ? dataSource?.length <= 5 : dataSource?.length <= 50)
     ) {
       return (
         <Bar
           data={{ ...data, queryColumns: columns, queryResults: dataSource }}
           triggerResize={triggerResize}
           loading={loading}
+          metricField={metricFields[0]}
         />
       );
     }

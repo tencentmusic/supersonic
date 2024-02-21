@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.api.pojo;
 
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -3,7 +3,6 @@ package com.tencent.supersonic.headless.core.parser.calcite.planner;
 
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
 import com.tencent.supersonic.headless.core.parser.calcite.Configuration;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
@@ -17,6 +16,7 @@ import com.tencent.supersonic.headless.core.parser.calcite.sql.render.FilterRend
 import com.tencent.supersonic.headless.core.parser.calcite.sql.render.OutputRender;
 import com.tencent.supersonic.headless.core.parser.calcite.sql.render.SourceRender;
 import com.tencent.supersonic.headless.core.pojo.Database;
+import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -35,7 +35,7 @@ import org.apache.calcite.sql.validate.SqlValidatorScope;
 @Slf4j
 public class AggPlanner implements Planner {
 
-    private MetricQueryReq metricReq;
+    private MetricQueryParam metricReq;
     private SemanticSchema schema;
     private SqlValidatorScope scope;
     private Stack<TableView> dataSets = new Stack<>();
@@ -101,7 +101,7 @@ public class AggPlanner implements Planner {
 
     @Override
     public void explain(QueryStatement queryStatement, AggOption aggOption) throws Exception {
-        this.metricReq = queryStatement.getMetricReq();
+        this.metricReq = queryStatement.getMetricQueryParam();
         if (metricReq.getMetrics() == null) {
             metricReq.setMetrics(new ArrayList<>());
         }

@@ -38,10 +38,6 @@ SELECT T1.brand_name, T2.company_name, T1.registered_capital, T2.headquarter_add
 SELECT T1.brand_name, T2.company_name, T1.legal_representative, T2.headquarter_address FROM brand AS T1 JOIN company AS T2 ON T1.company_id = T2.company_id	internet
 SELECT T2.company_name, T2.headquarter_address FROM company_revenue AS T1 JOIN company AS T2 ON T1.company_id = T2.company_id	internet
 SELECT T2.company_name, T2.annual_turnover FROM company_revenue AS T1 JOIN company AS T2 ON T1.company_id = T2.company_id	internet
-SELECT T3.company_name, T3.headquarter_address, T2.brand_name, T1.revenue FROM company_brand_revenue AS T1 JOIN brand AS T2 JOIN company AS T3 ON T1.brand_id = T2.brand_id AND T2.company_id = T3.company_id	internet
-SELECT T3.company_name, T3.annual_turnover, T2.brand_name, T1.revenue FROM company_brand_revenue AS T1 JOIN brand AS T2 JOIN company AS T3 ON T1.brand_id = T2.brand_id AND T2.company_id = T3.company_id	internet
-SELECT T3.company_name, T2.brand_name, T2.legal_representative, T1.revenue FROM company_brand_revenue AS T1 JOIN brand AS T2 JOIN company AS T3 ON T1.brand_id = T2.brand_id AND T2.company_id = T3.company_id	internet
-SELECT T3.company_name, T2.brand_name, T1.revenue FROM company_brand_revenue AS T1 JOIN brand AS T2 JOIN company AS T3 ON T1.brand_id = T2.brand_id AND T2.company_id = T3.company_id	internet
 SELECT T2.company_name, T2.headquarter_address, T1.legal_representative FROM brand AS T1 JOIN company AS T2 ON T1.company_id = T2.company_id WHERE T1.registered_capital >= 100000000	internet
 SELECT T2.company_name, T2.headquarter_address, T1.legal_representative FROM brand AS T1 JOIN company AS T2 ON T1.company_id = T2.company_id WHERE T1.registered_capital < 100000000	internet
 SELECT T2.company_name, T2.headquarter_address, T1.legal_representative FROM brand AS T1 JOIN company AS T2 ON T1.company_id = T2.company_id WHERE T1.registered_capital > 100000000	internet
@@ -98,3 +94,7 @@ SELECT T2.legal_representative, T2.brand_name, sum(T1.revenue) FROM company_bran
 SELECT T2.legal_representative, T2.brand_name, max(T1.revenue) FROM company_brand_revenue AS T1 JOIN brand AS T2 ON T1.brand_id = T2.brand_id GROUP BY T1.brand_id	internet
 SELECT T2.headquarter_address, T2.company_name, sum(T1.registered_capital) FROM brand AS T1 JOIN company AS T2 ON T1.company_id = T2.company_id GROUP BY T1.company_id	internet
 SELECT T2.headquarter_address, T2.company_name, max(T1.registered_capital) FROM brand AS T1 JOIN company AS T2 ON T1.company_id = T2.company_id GROUP BY T1.company_id	internet
+select T2.headquarter_address , T2.company_name, min(T1.registered_capital) from brand as T1 join company as T2 on T1.company_id = T2.company_id group by T1.company_id	internet
+select T2.headquarter_address , T2.company_name, avg(T1.registered_capital) from brand as T1 join company as T2 on T1.company_id = T2.company_id group by T1.company_id	internet
+select T2.headquarter_address , T2.company_name from company_revenue as T1 join company as T2 on T1.company_id = T2.company_id group by T1.company_id having sum(T1.revenue_proportion) > 0.5	internet
+select T2.headquarter_address , T2.company_name from company_revenue as T1 join company as T2 on T1.company_id = T2.company_id group by T1.company_id having count(*) > 5	internet

@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.parser.calcite.sql.render;
 
 
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.api.pojo.request.MetricQueryReq;
+import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Metric;
@@ -29,7 +29,7 @@ import org.apache.calcite.sql.validate.SqlValidatorScope;
 public class FilterRender extends Renderer {
 
     @Override
-    public void render(MetricQueryReq metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
+    public void render(MetricQueryParam metricCommand, List<DataSource> dataSources, SqlValidatorScope scope,
             SemanticSchema schema, boolean nonAgg) throws Exception {
         TableView tableView = super.tableView;
         SqlNode filterNode = null;

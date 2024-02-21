@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.server.listener;
 
-import com.tencent.supersonic.chat.core.knowledge.DictWord;
-import com.tencent.supersonic.chat.core.utils.HanlpHelper;
+import com.tencent.supersonic.headless.core.knowledge.DictWord;
+import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.chat.server.service.impl.SchemaService;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DataEvent;
@@ -32,8 +32,7 @@ public class SchemaDictUpdateListener implements ApplicationListener<DataEvent> 
             DictWord dictWord = new DictWord();
             dictWord.setWord(dataItem.getName());
             String sign = DictWordType.NATURE_SPILT;
-            String nature = sign + 1 + sign + dataItem.getId()
-                    + sign + dataItem.getType().name().toLowerCase();
+            String nature = sign + 1 + sign + dataItem.getId() + dataItem.getType().name().toLowerCase();
             String natureWithFrequency = nature + " " + Constants.DEFAULT_FREQUENCY;
             dictWord.setNature(nature);
             dictWord.setNatureWithFrequency(natureWithFrequency);
