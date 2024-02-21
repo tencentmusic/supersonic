@@ -302,6 +302,7 @@ const DataSourceFieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSq
         dataSource={fields}
         columns={columns}
         rowKey="bizName"
+        virtual
         pagination={false}
         scroll={{ y: 500 }}
       />

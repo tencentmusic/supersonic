@@ -28,11 +28,12 @@ export enum DictTaskState {
 }
 
 export enum StatusEnum {
+  UNKNOWN = -1,
   INITIALIZED = 0,
   ONLINE = 1,
   OFFLINE = 2,
   DELETED = 3,
-  UNKNOWN = -1,
+  UNAVAILABLE = 4,
 }
 
 export enum OperatorEnum {

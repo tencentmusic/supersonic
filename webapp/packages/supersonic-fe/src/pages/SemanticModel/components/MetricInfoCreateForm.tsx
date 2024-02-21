@@ -100,7 +100,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
   const [defineType, setDefineType] = useState(METRIC_DEFINE_TYPE.MEASURE);
 
   const [createNewMetricList, setCreateNewMetricList] = useState<ISemantic.IMetricItem[]>([]);
-  const [fieldList, setFieldList] = useState<string[]>([]);
+  const [fieldList, setFieldList] = useState<ISemantic.IFieldTypeParamsItem[]>([]);
   const [isPercentState, setIsPercentState] = useState<boolean>(false);
   const [isDecimalState, setIsDecimalState] = useState<boolean>(false);
   const [hasMeasuresState, setHasMeasuresState] = useState<boolean>(true);

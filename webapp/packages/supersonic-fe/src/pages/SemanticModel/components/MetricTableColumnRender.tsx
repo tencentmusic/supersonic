@@ -282,6 +282,12 @@ export const ColumnsConfig = {
             label: '已删除',
           };
           break;
+        case StatusEnum.UNAVAILABLE:
+          tagProps = {
+            color: 'default',
+            label: '不可用',
+          };
+          break;
         default:
           break;
       }
