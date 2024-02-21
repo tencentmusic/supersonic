@@ -1,4 +1,4 @@
-import { getLeafList } from '@/utils/utils';
+import { getLeafNodes } from '@/utils/utils';
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Input, message, Popconfirm, Select, Table, Tag } from 'antd';
 import moment from 'moment';
@@ -24,7 +24,7 @@ const PluginManage = () => {
 
   const initModelList = async () => {
     const res = await getModelList();
-    setModelList(getLeafList(res.data));
+    setModelList(getLeafNodes(res.data));
   };
 
   const updateData = async (filters?: any) => {
@@ -68,7 +68,7 @@ const PluginManage = () => {
         return value ? (
           <div className={styles.modelColumn}>
             {value.map((id) => {
-              const name = modelList.find((model) => model.id === +id)?.name;
+              const name = modelList.find((model) => model.id === id)?.name;
               return name ? <Tag key={id}>{name}</Tag> : null;
             })}
           </div>

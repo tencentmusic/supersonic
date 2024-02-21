@@ -10,7 +10,7 @@ import {
   FunctionParamFormItemType,
   PluginTypeEnum,
 } from './type';
-import { getLeafList, traverseTree, uuid } from '@/utils/utils';
+import { traverseTree, uuid } from '@/utils/utils';
 import styles from './style.less';
 import { PLUGIN_TYPE_MAP } from './constants';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
