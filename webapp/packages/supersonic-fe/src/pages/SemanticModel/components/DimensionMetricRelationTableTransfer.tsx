@@ -73,7 +73,6 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
     if (!Array.isArray(relationsInitialValue)) {
       return;
     }
-    console.log(relationsInitialValue, 'relationsInitialValue');
     const ids = relationsInitialValue.map((item) => `${item.dimensionId}`);
     const relationMap = relationsInitialValue.reduce((relationCheckedMap, item: any) => {
       const { dimensionId } = item;
