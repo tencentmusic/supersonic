@@ -24,6 +24,12 @@ const DimensionAndMetricRelationModal: React.FC<Props> = ({
 }) => {
   const [relationList, setRelationList] = useState<ISemantic.IDrillDownDimensionItem[]>([]);
 
+  useEffect(() => {
+    if (Array.isArray(relationsInitialValue)) {
+      setRelationList(relationsInitialValue);
+    }
+  }, [relationsInitialValue]);
+
   const saveMetric = async (relationList: any) => {
     const queryParams = {
       ...metricItem,
