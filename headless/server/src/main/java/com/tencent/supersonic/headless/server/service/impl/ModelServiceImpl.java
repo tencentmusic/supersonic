@@ -81,13 +81,13 @@ public class ModelServiceImpl implements ModelService {
     private DateInfoRepository dateInfoRepository;
 
     public ModelServiceImpl(ModelRepository modelRepository,
-                            DatabaseService databaseService,
-                            @Lazy DimensionService dimensionService,
-                            @Lazy MetricService metricService,
-                            DomainService domainService,
-                            UserService userService,
-                            ViewService viewService,
-                            DateInfoRepository dateInfoRepository) {
+            DatabaseService databaseService,
+            @Lazy DimensionService dimensionService,
+            @Lazy MetricService metricService,
+            DomainService domainService,
+            UserService userService,
+            ViewService viewService,
+            DateInfoRepository dateInfoRepository) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
@@ -348,6 +348,13 @@ public class ModelServiceImpl implements ModelService {
         }
         return modelResps.stream().filter(modelResp ->
                 domainIds.contains(modelResp.getDomainId())).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ModelResp> getAllModelByDomainIds(List<Long> domainIds) {
+        Set<DomainResp> domainResps = domainService.getDomainChildren(domainIds);
+        List<Long> allDomainIds = domainResps.stream().map(DomainResp::getId).collect(Collectors.toList());
+        return getModelByDomainIds(allDomainIds);
     }
 
     @Override

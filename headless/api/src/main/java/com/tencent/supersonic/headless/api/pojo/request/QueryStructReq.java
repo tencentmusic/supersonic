@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 @Data
 @Slf4j
 public class QueryStructReq extends SemanticQueryReq {
+
     private List<String> groups = new ArrayList<>();
     private List<Aggregator> aggregators = new ArrayList<>();
     private List<Order> orders = new ArrayList<>();
@@ -151,28 +152,27 @@ public class QueryStructReq extends SemanticQueryReq {
         return sb.toString();
     }
 
-    public QuerySqlReq convert(QueryStructReq queryStructReq) {
-        return convert(queryStructReq, false);
+    public QuerySqlReq convert() {
+        return convert(false);
     }
 
     /**
      * convert queryStructReq to QueryS2SQLReq
      *
-     * @param queryStructReq
      * @return
      */
-    public QuerySqlReq convert(QueryStructReq queryStructReq, boolean isBizName) {
+    public QuerySqlReq convert(boolean isBizName) {
         String sql = null;
         try {
-            sql = buildSql(queryStructReq, isBizName);
+            sql = buildSql(this, isBizName);
         } catch (Exception e) {
             log.error("buildSql error", e);
         }
 
         QuerySqlReq result = new QuerySqlReq();
         result.setSql(sql);
-        result.setViewId(queryStructReq.getViewId());
-        result.setModelIds(queryStructReq.getModelIdSet());
+        result.setViewId(this.getViewId());
+        result.setModelIds(this.getModelIdSet());
         result.setParams(new ArrayList<>());
         return result;
     }

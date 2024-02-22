@@ -5,6 +5,7 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricQueryDefaultConfigDO;
 import com.tencent.supersonic.headless.server.pojo.MetricFilter;
 
+import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 import java.util.List;
 
 public interface MetricRepository {
@@ -20,6 +21,8 @@ public interface MetricRepository {
     MetricDO getMetricById(Long id);
 
     List<MetricDO> getMetric(MetricFilter metricFilter);
+
+    List<MetricDO> getMetrics(MetricsFilter metricsFilter);
 
     void saveDefaultQueryConfig(MetricQueryDefaultConfigDO defaultConfigDO);
 

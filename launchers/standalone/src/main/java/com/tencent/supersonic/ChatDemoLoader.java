@@ -23,7 +23,6 @@ import com.tencent.supersonic.common.pojo.SysParameter;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.service.SysParameterService;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.server.service.KnowledgeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -53,8 +52,6 @@ public class ChatDemoLoader implements CommandLineRunner {
     private AgentService agentService;
     @Autowired
     private SysParameterService sysParameterService;
-    @Autowired
-    private KnowledgeService knowledgeService;
 
     @Value("${demo.enabled:false}")
     private boolean demoEnabled;

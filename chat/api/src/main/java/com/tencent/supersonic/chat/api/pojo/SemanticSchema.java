@@ -2,16 +2,14 @@ package com.tencent.supersonic.chat.api.pojo;
 
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import org.springframework.util.CollectionUtils;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.util.CollectionUtils;
 
 public class SemanticSchema implements Serializable {
 
@@ -43,35 +41,6 @@ public class SemanticSchema implements Serializable {
                 break;
             case VALUE:
                 element = getElementsById(elementID, getDimensionValues());
-                break;
-            default:
-        }
-
-        if (element.isPresent()) {
-            return element.get();
-        } else {
-            return null;
-        }
-    }
-
-    public SchemaElement getElementByName(SchemaElementType elementType, String name) {
-        Optional<SchemaElement> element = Optional.empty();
-
-        switch (elementType) {
-            case ENTITY:
-                element = getElementsByNameOrAlias(name, getEntities());
-                break;
-            case VIEW:
-                element = getElementsByNameOrAlias(name, getViews());
-                break;
-            case METRIC:
-                element = getElementsByNameOrAlias(name, getMetrics());
-                break;
-            case DIMENSION:
-                element = getElementsByNameOrAlias(name, getDimensions());
-                break;
-            case VALUE:
-                element = getElementsByNameOrAlias(name, getDimensionValues());
                 break;
             default:
         }
@@ -157,14 +126,6 @@ public class SemanticSchema implements Serializable {
         return elements.stream()
                 .filter(schemaElement -> id.equals(schemaElement.getId()))
                 .findFirst();
-    }
-
-    private Optional<SchemaElement> getElementsByNameOrAlias(String name, List<SchemaElement> elements) {
-        return elements.stream()
-                .filter(schemaElement ->
-                        name.equals(schemaElement.getName()) || (Objects.nonNull(schemaElement.getAlias())
-                                && schemaElement.getAlias().contains(name))
-                ).findFirst();
     }
 
     public SchemaElement getView(Long viewId) {

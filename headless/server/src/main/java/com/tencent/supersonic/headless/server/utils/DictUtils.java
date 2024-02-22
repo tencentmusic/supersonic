@@ -1,5 +1,10 @@
 package com.tencent.supersonic.headless.server.utils;
 
+import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
+import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
+import static com.tencent.supersonic.common.pojo.Constants.COMMA;
+import static com.tencent.supersonic.common.pojo.Constants.SPACE;
+
 import com.google.common.base.Strings;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Aggregator;
@@ -31,11 +36,6 @@ import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.QueryService;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -48,11 +48,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
-
-import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
-import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
-import static com.tencent.supersonic.common.pojo.Constants.COMMA;
-import static com.tencent.supersonic.common.pojo.Constants.SPACE;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 public class DictUtils {
@@ -79,9 +78,9 @@ public class DictUtils {
     private final ModelService modelService;
 
     public DictUtils(DimensionService dimensionService,
-                     MetricService metricService,
-                     QueryService queryService,
-                     ModelService modelService) {
+            MetricService metricService,
+            QueryService queryService,
+            ModelService modelService) {
         this.dimensionService = dimensionService;
         this.metricService = metricService;
         this.queryService = queryService;
@@ -222,7 +221,7 @@ public class DictUtils {
                 && Objects.nonNull(dictItemResp.getConfig().getMetricId())) {
             // 查询默认指标
             QueryStructReq queryStructReq = generateQueryStruct(dictItemResp);
-            return queryStructReq.convert(queryStructReq, true);
+            return queryStructReq.convert(true);
         }
         // count(1) 作为指标
         return constructQuerySqlReq(dictItemResp);
