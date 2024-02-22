@@ -66,7 +66,7 @@ public class DownloadServiceImpl implements DownloadService {
     private QueryService queryService;
 
     public DownloadServiceImpl(MetricService metricService,
-                               DimensionService dimensionService, QueryService queryService) {
+            DimensionService dimensionService, QueryService queryService) {
         this.metricService = metricService;
         this.dimensionService = dimensionService;
         this.queryService = queryService;
@@ -74,11 +74,11 @@ public class DownloadServiceImpl implements DownloadService {
 
     @Override
     public void downloadByStruct(DownloadStructReq downloadStructReq,
-                                 User user, HttpServletResponse response) throws Exception {
+            User user, HttpServletResponse response) throws Exception {
         String fileName = String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
         File file = FileUtils.createTmpFile(fileName);
         try {
-            QuerySqlReq querySqlReq = downloadStructReq.convert(downloadStructReq, true);
+            QuerySqlReq querySqlReq = downloadStructReq.convert(true);
             SemanticQueryResp queryResult = queryService.queryByReq(querySqlReq, user);
             DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
             EasyExcel.write(file).sheet("Sheet1").head(dataDownload.getHeaders()).doWrite(dataDownload.getData());
@@ -92,7 +92,7 @@ public class DownloadServiceImpl implements DownloadService {
 
     @Override
     public void batchDownload(BatchDownloadReq batchDownloadReq, User user,
-                              HttpServletResponse response) throws Exception {
+            HttpServletResponse response) throws Exception {
         String fileName = String.format("%s_%s.xlsx", "supersonic", DateUtils.format(new Date(), DateUtils.FORMAT));
         File file = FileUtils.createTmpFile(fileName);
         List<Long> metricIds = batchDownloadReq.getMetricIds();
@@ -126,7 +126,7 @@ public class DownloadServiceImpl implements DownloadService {
             for (MetricResp metric : metrics) {
                 try {
                     DownloadStructReq downloadStructReq = buildDownloadReq(dimensions, metric, batchDownloadReq);
-                    QuerySqlReq querySqlReq = downloadStructReq.convert(downloadStructReq);
+                    QuerySqlReq querySqlReq = downloadStructReq.convert();
                     querySqlReq.setNeedAuth(true);
                     SemanticQueryResp queryResult = queryService.queryByReq(querySqlReq, user);
                     DataDownload dataDownload = buildDataDownload(queryResult, downloadStructReq);
@@ -192,7 +192,7 @@ public class DownloadServiceImpl implements DownloadService {
     }
 
     private List<List<String>> buildData(List<List<String>> headers, Map<String, String> nameMap,
-                                         List<Map<String, Object>> dataTransformed, String metricName) {
+            List<Map<String, Object>> dataTransformed, String metricName) {
         List<List<String>> data = Lists.newArrayList();
         for (Map<String, Object> map : dataTransformed) {
             List<String> row = Lists.newArrayList();
@@ -234,7 +234,7 @@ public class DownloadServiceImpl implements DownloadService {
     }
 
     private DownloadStructReq buildDownloadReq(List<DimensionResp> dimensionResps, MetricResp metricResp,
-                                                     BatchDownloadReq batchDownloadReq) {
+            BatchDownloadReq batchDownloadReq) {
         DateConf dateConf = batchDownloadReq.getDateInfo();
         Set<Long> modelIds = dimensionResps.stream().map(DimensionResp::getModelId).collect(Collectors.toSet());
         modelIds.add(metricResp.getModelId());
@@ -277,7 +277,7 @@ public class DownloadServiceImpl implements DownloadService {
     }
 
     private List<DimensionResp> getMetricRelaDimensions(MetricResp metricResp,
-                                                        Map<Long, DimensionResp> dimensionRespMap) {
+            Map<Long, DimensionResp> dimensionRespMap) {
         if (metricResp.getRelateDimension() == null
                 || CollectionUtils.isEmpty(metricResp.getRelateDimension().getDrillDownDimensions())) {
             return Lists.newArrayList();

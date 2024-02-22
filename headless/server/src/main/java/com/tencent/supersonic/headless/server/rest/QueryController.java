@@ -54,7 +54,7 @@ public class QueryController {
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        QuerySqlReq querySqlReq = queryStructReq.convert(queryStructReq, true);
+        QuerySqlReq querySqlReq = queryStructReq.convert(true);
         return queryService.queryByReq(querySqlReq, user);
     }
 

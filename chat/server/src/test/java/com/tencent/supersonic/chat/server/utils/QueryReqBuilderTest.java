@@ -52,14 +52,14 @@ class QueryReqBuilderTest {
         orders.add(order);
         queryStructReq.setOrders(orders);
 
-        QuerySqlReq querySQLReq = queryStructReq.convert(queryStructReq);
+        QuerySqlReq querySQLReq = queryStructReq.convert();
         Assert.assertEquals(
                 "SELECT department, SUM(pv) AS pv FROM 内容库 "
                         + "WHERE (sys_imp_date IN ('2023-08-01')) GROUP "
                         + "BY department ORDER BY uv LIMIT 2000", querySQLReq.getSql());
 
         queryStructReq.setQueryType(QueryType.TAG);
-        querySQLReq = queryStructReq.convert(queryStructReq);
+        querySQLReq = queryStructReq.convert();
         Assert.assertEquals(
                 "SELECT department, pv FROM 内容库 WHERE (sys_imp_date IN ('2023-08-01')) "
                         + "ORDER BY uv LIMIT 2000",

@@ -15,15 +15,14 @@ import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ChatGptHelper;
-import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.MetricParam;
 import com.tencent.supersonic.headless.api.pojo.MetricQueryDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricBaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
-import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
@@ -33,6 +32,7 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.MetricQuery
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricFilter;
+import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 import com.tencent.supersonic.headless.server.service.CollectService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
@@ -40,12 +40,7 @@ import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.ViewService;
 import com.tencent.supersonic.headless.server.utils.MetricCheckUtils;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,6 +48,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -184,9 +184,7 @@ public class MetricServiceImpl implements MetricService {
     public PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user) {
         MetricFilter metricFilter = new MetricFilter();
         BeanUtils.copyProperties(pageMetricReq, metricFilter);
-        Set<DomainResp> domainResps = domainService.getDomainChildren(pageMetricReq.getDomainIds());
-        List<Long> domainIds = domainResps.stream().map(DomainResp::getId).collect(Collectors.toList());
-        List<ModelResp> modelResps = modelService.getModelByDomainIds(domainIds);
+        List<ModelResp> modelResps = modelService.getAllModelByDomainIds(pageMetricReq.getDomainIds());
         List<Long> modelIds = modelResps.stream().map(ModelResp::getId).collect(Collectors.toList());
         pageMetricReq.getModelIds().addAll(modelIds);
         metricFilter.setModelIds(pageMetricReq.getModelIds());
@@ -433,6 +431,12 @@ public class MetricServiceImpl implements MetricService {
         metricFilter.setModelIds(modelIds);
         List<MetricDO> metricDOS = queryMetric(metricFilter);
         sendEventBatch(metricDOS, eventType);
+    }
+
+    @Override
+    public List<MetricResp> queryMetrics(MetricsFilter metricsFilter) {
+        List<MetricDO> metricDOS = metricRepository.getMetrics(metricsFilter);
+        return convertList(metricDOS, new ArrayList<>());
     }
 
     private void sendEventBatch(List<MetricDO> metricDOS, EventType eventType) {

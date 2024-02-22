@@ -4,6 +4,7 @@ package com.tencent.supersonic.headless.server.persistence.repository;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 
+import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
 import java.util.List;
 
 public interface DimensionRepository {
@@ -19,4 +20,6 @@ public interface DimensionRepository {
     DimensionDO getDimensionById(Long id);
 
     List<DimensionDO> getDimension(DimensionFilter dimensionFilter);
+
+    List<DimensionDO> getDimensions(DimensionsFilter dimensionsFilter);
 }
