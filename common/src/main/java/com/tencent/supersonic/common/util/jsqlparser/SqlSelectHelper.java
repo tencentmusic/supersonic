@@ -1,5 +1,11 @@
 package com.tencent.supersonic.common.util.jsqlparser;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
@@ -9,6 +15,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -32,13 +39,6 @@ import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Sql Parser Select Helper
@@ -542,6 +542,10 @@ public class SqlSelectHelper {
             BinaryExpression expr = (BinaryExpression) expression;
             getColumnFromExpr(expr.getLeftExpression(), columns);
             getColumnFromExpr(expr.getRightExpression(), columns);
+        }
+        if (expression instanceof Parenthesis) {
+            Parenthesis expr = (Parenthesis) expression;
+            getColumnFromExpr(expr.getExpression(), columns);
         }
     }
 }
