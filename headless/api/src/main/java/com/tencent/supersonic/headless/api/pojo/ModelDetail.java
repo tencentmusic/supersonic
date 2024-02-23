@@ -27,6 +27,8 @@ public class ModelDetail {
 
     private List<Field> fields = Lists.newArrayList();
 
+    private List<SqlVariable> sqlVariables = Lists.newArrayList();
+
     public String getSqlQuery() {
         if (StringUtils.isNotBlank(sqlQuery) && sqlQuery.endsWith(";")) {
             sqlQuery = sqlQuery.substring(0, sqlQuery.length() - 1);
