@@ -38,11 +38,11 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
         queryResult.setRecommendedDimensions(dimensionRecommended);
     }
 
-    private List<SchemaElement> getDimensions(Long metricId, Long modelId) {
+    private List<SchemaElement> getDimensions(Long metricId, Long viewId) {
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
-        ViewSchema modelSchema = semanticService.getModelSchema(modelId);
+        ViewSchema viewSchema = semanticService.getViewSchema(viewId);
         List<Long> drillDownDimensions = Lists.newArrayList();
-        Set<SchemaElement> metricElements = modelSchema.getMetrics();
+        Set<SchemaElement> metricElements = viewSchema.getMetrics();
         if (!CollectionUtils.isEmpty(metricElements)) {
             Optional<SchemaElement> metric = metricElements.stream().filter(schemaElement ->
                             metricId.equals(schemaElement.getId())
@@ -54,7 +54,7 @@ public class DimensionRecommendProcessor implements ExecuteResultProcessor {
             }
         }
         final List<Long> drillDownDimensionsFinal = drillDownDimensions;
-        return modelSchema.getDimensions().stream()
+        return viewSchema.getDimensions().stream()
                 .filter(dim -> filterDimension(drillDownDimensionsFinal, dim))
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                 .limit(recommend_dimension_size)

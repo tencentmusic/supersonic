@@ -8,13 +8,14 @@ import com.tencent.supersonic.headless.core.knowledge.SearchService;
 import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.server.service.KnowledgeService;
 import com.tencent.supersonic.headless.server.service.ViewService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
@@ -68,17 +69,19 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     @Override
     public List<S2Term> getTerms(String text) {
-        return HanlpHelper.getTerms(text);
+        Map<Long, List<Long>> modelIdToViewIds = viewService.getModelIdToViewIds(new ArrayList<>());
+        return HanlpHelper.getTerms(text, modelIdToViewIds);
     }
 
     @Override
     public List<HanlpMapResult> prefixSearch(String key, int limit, Set<Long> viewIds) {
         Map<Long, List<Long>> modelIdToViewIds = viewService.getModelIdToViewIds(new ArrayList<>(viewIds));
-        return prefixSearchByModel(key, limit, modelIdToViewIds.keySet());
+        return prefixSearchByModel(key, limit, modelIdToViewIds);
     }
 
-    public List<HanlpMapResult> prefixSearchByModel(String key, int limit, Set<Long> models) {
-        return SearchService.prefixSearch(key, limit, models);
+    public List<HanlpMapResult> prefixSearchByModel(String key, int limit,
+                                                    Map<Long, List<Long>> modelIdToViewIds) {
+        return SearchService.prefixSearch(key, limit, modelIdToViewIds);
     }
 
     @Override

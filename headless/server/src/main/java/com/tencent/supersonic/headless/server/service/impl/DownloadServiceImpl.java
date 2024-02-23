@@ -109,8 +109,9 @@ public class DownloadServiceImpl implements DownloadService {
         metaFilter.setIds(metricIds);
         List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
         Map<String, List<MetricResp>> metricMap = getMetricMap(metricResps);
-        List<Long> dimensionIds = metricResps.stream().map(MetricResp::getRelateDimension)
-                .map(RelateDimension::getDrillDownDimensions).flatMap(Collection::stream)
+        List<Long> dimensionIds = metricResps.stream()
+                .map(metricResp -> metricService.getDrillDownDimension(metricResp.getId()))
+                .flatMap(Collection::stream)
                 .map(DrillDownDimension::getDimensionId).collect(Collectors.toList());
         metaFilter.setIds(dimensionIds);
         Map<Long, DimensionResp> dimensionRespMap = dimensionService.getDimensions(metaFilter)

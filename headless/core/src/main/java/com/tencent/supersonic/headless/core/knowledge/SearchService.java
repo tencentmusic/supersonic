@@ -6,8 +6,15 @@ import com.hankcs.hanlp.corpus.tag.Nature;
 import com.hankcs.hanlp.dictionary.CoreDictionary;
 import com.hankcs.hanlp.seg.common.Term;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
+import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
+import com.tencent.supersonic.headless.core.knowledge.helper.NatureHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,11 +23,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
-import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class SearchService {
@@ -39,14 +41,14 @@ public class SearchService {
      * @param key
      * @return
      */
-    public static List<HanlpMapResult> prefixSearch(String key, int limit, Set<Long> detectModelIds) {
-        return prefixSearch(key, limit, trie, detectModelIds);
+    public static List<HanlpMapResult> prefixSearch(String key, int limit, Map<Long, List<Long>> modelIdToViewIds) {
+        return prefixSearch(key, limit, trie, modelIdToViewIds);
     }
 
     public static List<HanlpMapResult> prefixSearch(String key, int limit, BinTrie<List<String>> binTrie,
-                                                    Set<Long> detectModelIds) {
-        Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie, detectModelIds);
-        return result.stream().map(
+                                                    Map<Long, List<Long>> modelIdToViewIds) {
+        Set<Map.Entry<String, List<String>>> result = prefixSearchLimit(key, limit, binTrie, modelIdToViewIds.keySet());
+        List<HanlpMapResult> hanlpMapResults = result.stream().map(
                         entry -> {
                             String name = entry.getKey().replace("#", " ");
                             return new HanlpMapResult(name, entry.getValue(), key);
@@ -54,6 +56,13 @@ public class SearchService {
                 ).sorted((a, b) -> -(b.getName().length() - a.getName().length()))
                 .limit(SEARCH_SIZE)
                 .collect(Collectors.toList());
+        for (HanlpMapResult hanlpMapResult : hanlpMapResults) {
+            List<String> natures = hanlpMapResult.getNatures().stream()
+                    .map(nature -> NatureHelper.changeModel2View(nature, modelIdToViewIds))
+                    .flatMap(Collection::stream).collect(Collectors.toList());
+            hanlpMapResult.setNatures(natures);
+        }
+        return hanlpMapResults;
     }
 
     /***

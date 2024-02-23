@@ -11,11 +11,13 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import com.tencent.supersonic.headless.server.service.MetricService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import java.util.Collection;
@@ -27,6 +29,9 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class MetricDrillDownChecker {
+
+    @Autowired
+    private MetricService metricService;
 
     @Around("execution(* com.tencent.supersonic.headless.core.parser.QueryParser.parse(..))")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -52,7 +57,7 @@ public class MetricDrillDownChecker {
             List<DimensionResp> necessaryDimensions = getNecessaryDimensions(metric, semanticSchemaResp);
             List<DimensionResp> dimensionsMissing = getNecessaryDimensionMissing(necessaryDimensions, dimensionFields);
             if (!CollectionUtils.isEmpty(dimensionsMissing)) {
-                String errMsg = String.format("指标:%s 缺失必要维度:%s", metric.getName(),
+                String errMsg = String.format("指标:%s 缺失必要下钻维度:%s", metric.getName(),
                         dimensionsMissing.stream().map(DimensionResp::getName).collect(Collectors.toList()));
                 throw new InvalidArgumentException(errMsg);
             }
@@ -92,8 +97,9 @@ public class MetricDrillDownChecker {
             return true;
         }
         List<String> relateDimensions = metricResps.stream()
-                .filter(metric -> !CollectionUtils.isEmpty(metric.getDrillDownDimensions()))
-                .map(metric -> metric.getDrillDownDimensions().stream()
+                .map(this::getDrillDownDimensions)
+                .filter(drillDownDimensions -> !CollectionUtils.isEmpty(drillDownDimensions))
+                .map(drillDownDimensions -> drillDownDimensions.stream()
                         .map(DrillDownDimension::getDimensionId).collect(Collectors.toList()))
                 .flatMap(Collection::stream)
                 .map(id -> convertDimensionIdToBizName(id, semanticSchemaResp))
@@ -111,7 +117,7 @@ public class MetricDrillDownChecker {
         if (metric == null) {
             return Lists.newArrayList();
         }
-        List<DrillDownDimension> drillDownDimensions = metric.getDrillDownDimensions();
+        List<DrillDownDimension> drillDownDimensions = getDrillDownDimensions(metric);
         if (CollectionUtils.isEmpty(drillDownDimensions)) {
             return Lists.newArrayList();
         }
@@ -145,6 +151,10 @@ public class MetricDrillDownChecker {
             return null;
         }
         return dimension.getBizName();
+    }
+
+    private List<DrillDownDimension> getDrillDownDimensions(MetricResp metricResp) {
+        return metricService.getDrillDownDimension(metricResp.getId());
     }
 
 }

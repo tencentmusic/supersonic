@@ -50,7 +50,7 @@ public class SemanticService {
         return schemaService.getSemanticSchema();
     }
 
-    public ViewSchema getModelSchema(Long id) {
+    public ViewSchema getViewSchema(Long id) {
         return schemaService.getViewSchema(id);
     }
 

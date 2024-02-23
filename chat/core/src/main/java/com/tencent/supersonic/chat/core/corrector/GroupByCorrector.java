@@ -45,7 +45,8 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         ViewResp viewResp = viewService.getView(viewId);
         List<Long> modelIds = viewResp.getViewDetail().getViewModelConfigs().stream().map(config -> config.getId())
                 .collect(Collectors.toList());
-        MetaFilter metaFilter = new MetaFilter(modelIds);
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setIds(modelIds);
         List<ModelResp> modelRespList = modelService.getModelList(metaFilter);
         for (ModelResp modelResp : modelRespList) {
             List<Dim> dimList = modelResp.getModelDetail().getDimensions();
