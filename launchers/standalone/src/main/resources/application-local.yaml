@@ -42,6 +42,9 @@ metric:
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
 
+corrector:
+  additional:
+    information: true
 
 llm:
   parser:

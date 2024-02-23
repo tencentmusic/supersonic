@@ -65,11 +65,18 @@ def get_pred_result():
     questions=read_query(input_path)
     pred_sql_list=[]
     default_sql="select * from tablea "
+    time_cost=[]
     for i in range(0,len(questions)):
+        start_time = time.time()
         pred_sql=get_pred_sql(questions[i],url,agent_id,chat_id,authorization,default_sql)
+        end_time = time.time()
+        cost='%.3f'%(end_time-start_time)
+        time_cost.append(cost)
         pred_sql_list.append(pred_sql)
         time.sleep(60)
     write_sql(pred_sql_path, pred_sql_list)
+
+    return [float(cost) for cost in time_cost]
 
 if __name__ == "__main__":
     print("pred")

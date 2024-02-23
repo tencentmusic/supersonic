@@ -3,11 +3,14 @@ package com.tencent.supersonic.chat.core.corrector;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -26,8 +29,12 @@ public class HavingCorrector extends BaseSemanticCorrector {
         //add aggregate to all metric
         addHaving(queryContext, semanticParseInfo);
 
-        //add having expression filed to select
-        //addHavingToSelect(semanticParseInfo);
+        //decide whether add having expression field to select
+        Environment environment = ContextUtils.getBean(Environment.class);
+        String correctorAdditionalInfo = environment.getProperty("corrector.additional.information");
+        if (StringUtils.isNotBlank(correctorAdditionalInfo) && Boolean.parseBoolean(correctorAdditionalInfo)) {
+            addHavingToSelect(semanticParseInfo);
+        }
 
     }
 
