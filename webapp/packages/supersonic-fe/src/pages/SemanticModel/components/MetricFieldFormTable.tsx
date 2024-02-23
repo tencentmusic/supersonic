@@ -49,6 +49,13 @@ const MetricFieldFormTable: React.FC<Props> = ({
     });
   });
 
+  const [selectedKeysMap, setSelectedKeysMap] = useState<{}>(() => {
+    return defineTypeParams.fields.reduce((keyMap, item: any) => {
+      keyMap[item.fieldName] = true;
+      return keyMap;
+    }, {});
+  });
+
   const columns = [
     {
       dataIndex: 'fieldName',
@@ -62,13 +69,20 @@ const MetricFieldFormTable: React.FC<Props> = ({
 
   const rowSelection = {
     selectedRowKeys: selectedKeys,
+    onSelect: (record, selected) => {
+      const updateKeys = { ...selectedKeysMap, [record.fieldName]: selected };
+      setSelectedKeysMap(updateKeys);
+      const fieldList = Object.entries(updateKeys).reduce((list: any[], item) => {
+        const [fieldName, selected] = item;
+        if (selected) {
+          list.push({ fieldName });
+        }
+        return list;
+      }, []);
+      onFieldChange(fieldList);
+    },
     onChange: (_selectedRowKeys: any[]) => {
       setSelectedKeys([..._selectedRowKeys]);
-      onFieldChange(
-        _selectedRowKeys.map((fieldName) => {
-          return { fieldName };
-        }),
-      );
     },
   };
 
