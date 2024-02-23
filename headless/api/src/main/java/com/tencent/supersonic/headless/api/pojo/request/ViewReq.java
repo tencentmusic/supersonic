@@ -16,8 +16,6 @@ public class ViewReq extends SchemaItem {
 
     private String alias;
 
-    private String filterSql;
-
     private QueryConfig queryConfig;
 
     private List<String> admins;
