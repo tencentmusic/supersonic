@@ -26,7 +26,6 @@ const WebPage: React.FC<Props> = ({ id, data }) => {
       const { msgId, height } = payload;
       if (`${msgId}` === `${id}`) {
         setHeight(height);
-        // updateMessageContainerScroll();
       }
       return;
     }

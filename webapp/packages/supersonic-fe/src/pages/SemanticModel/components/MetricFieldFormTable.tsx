@@ -9,7 +9,7 @@ import { ISemantic } from '../data';
 
 type Props = {
   typeParams: ISemantic.IFieldTypeParams;
-  fieldList: string[];
+  fieldList: ISemantic.IFieldTypeParamsItem[];
   onFieldChange: (fields: ISemantic.IFieldTypeParamsItem[]) => void;
   onSqlChange: (sql: string) => void;
 };
@@ -85,10 +85,15 @@ const MetricFieldFormTable: React.FC<Props> = ({
             search: {
               placeholder: '请输入字段名称',
               onSearch: (value: string) => {
+                if (!value) {
+                  setTableData(fieldList);
+                  return;
+                }
+
                 setTableData(
-                  fieldList.reduce((data: ISemantic.IFieldTypeParamsItem[], fieldName) => {
-                    if (fieldName.includes(value)) {
-                      data.push({ fieldName });
+                  fieldList.reduce((data: ISemantic.IFieldTypeParamsItem[], item) => {
+                    if (item.fieldName.includes(value)) {
+                      data.push(item);
                     }
                     return data;
                   }, []),

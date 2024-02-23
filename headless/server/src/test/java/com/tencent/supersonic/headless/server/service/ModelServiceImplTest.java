@@ -74,12 +74,11 @@ class ModelServiceImplTest {
         DatabaseService databaseService = Mockito.mock(DatabaseService.class);
         DomainService domainService = Mockito.mock(DomainService.class);
         UserService userService = Mockito.mock(UserService.class);
-        ModelRelaService modelRelaService = Mockito.mock(ModelRelaService.class);
         DateInfoRepository dateInfoRepository = Mockito.mock(DateInfoRepository.class);
         ViewService viewService = Mockito.mock(ViewService.class);
         return new ModelServiceImpl(modelRepository, databaseService,
-                dimensionService, metricService, modelRelaService, domainService,
-                userService, viewService, dateInfoRepository);
+                dimensionService, metricService, domainService, userService,
+                viewService, dateInfoRepository);
     }
 
     private ModelReq mockModelReq() {

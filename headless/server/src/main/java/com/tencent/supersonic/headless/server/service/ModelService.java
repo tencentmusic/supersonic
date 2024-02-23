@@ -37,6 +37,8 @@ public interface ModelService {
 
     List<ModelResp> getModelByDomainIds(List<Long> domainIds);
 
+    List<ModelResp> getAllModelByDomainIds(List<Long> domainIds);
+
     ModelResp getModel(Long id);
 
     List<String> getModelAdmin(Long id);

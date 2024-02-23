@@ -8,8 +8,8 @@ import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
+import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
-
 import java.util.List;
 
 public interface DimensionService {
@@ -29,6 +29,8 @@ public interface DimensionService {
     void updateDimension(DimensionReq dimensionReq, User user) throws Exception;
 
     PageInfo<DimensionResp> queryDimension(PageDimensionReq pageDimensionReq);
+
+    List<DimensionResp> queryDimensions(DimensionsFilter dimensionsFilter);
 
     void deleteDimension(Long id, User user);
 

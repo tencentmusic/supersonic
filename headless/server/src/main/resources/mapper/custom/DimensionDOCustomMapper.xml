@@ -167,4 +167,40 @@
     </select>
 
 
+    <select id="queryDimensions" resultMap="ResultMapWithBLOBs">
+        select *
+        from s2_dimension
+        where status != 3
+        <if test="modelIds != null and modelIds.size >0">
+            and model_id in
+            <foreach collection="modelIds" index="index" item="model" open="(" close=")"
+                    separator=",">
+                #{model}
+            </foreach>
+        </if>
+        <if test="dimensionIds != null and dimensionIds.size >0">
+            and id in
+            <foreach collection="dimensionIds" index="index" item="dimensionId" open="(" close=")"
+                    separator=",">
+                #{dimensionId}
+            </foreach>
+        </if>
+        <if test="dimensionNames != null and dimensionNames.size > 0">
+            AND (
+            (name IN
+            <foreach collection="dimensionNames" index="index" item="dimensionName" open="(" close=")"
+                    separator=",">
+                #{dimensionName}
+            </foreach>)
+            OR
+            (biz_name IN
+            <foreach collection="dimensionNames" index="index" item="dimensionName" open="(" close=")"
+                    separator=",">
+                #{dimensionName}
+            </foreach>)
+            )
+        </if>
+    </select>
+
+
 </mapper>

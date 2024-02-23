@@ -27,8 +27,8 @@ public class ValueWordBuilder extends BaseWordBuilder {
 
             schemaElement.getAlias().stream().forEach(value -> {
                 DictWord dictWord = new DictWord();
-                Long viewId = schemaElement.getView();
-                String nature = DictWordType.NATURE_SPILT + viewId + DictWordType.NATURE_SPILT + schemaElement.getId();
+                Long modelId = schemaElement.getModel();
+                String nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId();
                 dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));
                 dictWord.setWord(value);
                 result.add(dictWord);

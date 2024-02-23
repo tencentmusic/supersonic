@@ -131,9 +131,9 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
           <Button style={{ float: 'left' }} onClick={backward}>
             上一步
           </Button>
-          <Button type="primary" onClick={handleNext}>
+          {/* <Button type="primary" onClick={handleNext}>
             下一步
-          </Button>
+          </Button> */}
           <Button
             type="primary"
             onClick={() => {
@@ -224,87 +224,6 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
             modelItem={selectedModelItem}
             viewItem={viewItem}
             ref={configTableRef}
-          />
-        </div>
-
-        <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
-          <Tabs
-            items={[
-              // {
-              //   label: 'SQL过滤',
-              //   key: 'sqlFilter',
-              //   children: (
-              //     <>
-              //       <FormItem
-              //         name="filterSql"
-              //         label={<span style={{ fontSize: 14 }}>SQL</span>}
-              //         tooltip="主要用于词典导入场景, 对维度值进行过滤 格式: field1 = 'xxx' and field2 = 'yyy'"
-              //       >
-              //         <SqlEditor height={'150px'} />
-              //       </FormItem>
-              //     </>
-              //   ),
-              // },
-              {
-                label: '权限设置',
-                key: 'permissionSetting',
-                children: (
-                  <>
-                    <FormItem
-                      name="admins"
-                      label={
-                        <FormItemTitle
-                          title={'管理员'}
-                          subTitle={'管理员将拥有主题域下所有编辑及访问权限'}
-                        />
-                      }
-                    >
-                      <SelectTMEPerson placeholder="请邀请团队成员" />
-                    </FormItem>
-                    <FormItem name="adminOrgs" label="按组织">
-                      <SelectPartner
-                        type="selectedDepartment"
-                        treeSelectProps={{
-                          placeholder: '请选择需要授权的部门',
-                        }}
-                      />
-                    </FormItem>
-                    {/* <FormItem
-                      style={{ marginTop: 40, marginBottom: 60 }}
-                      name="filterSql"
-                      label={<span style={{ fontSize: 14 }}>过滤SQL</span>}
-                      tooltip="主要用于词典导入场景, 对维度值进行过滤 格式: field1 = 'xxx' and field2 = 'yyy'"
-                    >
-                      <SqlEditor height={'150px'} />
-                    </FormItem> */}
-                  </>
-                ),
-              },
-              {
-                label: '问答设置',
-                key: 'chatSetting',
-                children: (
-                  <>
-                    <ProCard bordered title="指标模式" style={{ marginBottom: 20 }}>
-                      <DefaultSettingForm
-                        form={form}
-                        dimensionList={dimensionList}
-                        metricList={metricList}
-                        chatConfigType={ChatConfigType.METRIC}
-                      />
-                    </ProCard>
-                    <ProCard bordered title="标签模式" style={{ marginBottom: 20 }}>
-                      <DefaultSettingForm
-                        form={form}
-                        dimensionList={dimensionList}
-                        metricList={metricList}
-                        chatConfigType={ChatConfigType.TAG}
-                      />
-                    </ProCard>
-                  </>
-                ),
-              },
-            ]}
           />
         </div>
 

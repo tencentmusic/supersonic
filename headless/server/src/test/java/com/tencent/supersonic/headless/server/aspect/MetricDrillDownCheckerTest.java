@@ -50,6 +50,14 @@ public class MetricDrillDownCheckerTest {
         metricDrillDownChecker.checkQuery(semanticSchemaResp, sql);
     }
 
+    @Test
+    void test_groupBy_no_necessary_dimension_setting_no_metric() {
+        MetricDrillDownChecker metricDrillDownChecker = new MetricDrillDownChecker();
+        String sql = "select user_name, page, count(*) from t_1 group by user_name,page";
+        SemanticSchemaResp semanticSchemaResp = mockModelSchemaNoDimensionSetting();
+        metricDrillDownChecker.checkQuery(semanticSchemaResp, sql);
+    }
+
     private SemanticSchemaResp mockModelSchemaResp() {
         SemanticSchemaResp semanticSchemaResp = new SemanticSchemaResp();
         semanticSchemaResp.setMetrics(mockMetrics());

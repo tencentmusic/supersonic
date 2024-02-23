@@ -1,11 +1,11 @@
 package com.tencent.supersonic.chat.core.mapper;
 
 import com.tencent.supersonic.chat.core.config.OptimizationConfig;
-import com.tencent.supersonic.headless.api.pojo.response.S2Term;
-import com.tencent.supersonic.headless.core.knowledge.HanlpMapResult;
-import com.tencent.supersonic.headless.core.knowledge.SearchService;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.headless.api.pojo.response.S2Term;
+import com.tencent.supersonic.headless.core.knowledge.HanlpMapResult;
+import com.tencent.supersonic.headless.server.service.KnowledgeService;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,6 +34,9 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
     @Autowired
     private OptimizationConfig optimizationConfig;
 
+    @Autowired
+    private KnowledgeService knowledgeService;
+
     @Override
     public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<S2Term> terms,
             Set<Long> detectViewIds) {
@@ -61,10 +64,10 @@ public class HanlpDictMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
             String detectSegment, int offset) {
         // step1. pre search
         Integer oneDetectionMaxSize = optimizationConfig.getOneDetectionMaxSize();
-        LinkedHashSet<HanlpMapResult> hanlpMapResults = SearchService.prefixSearch(detectSegment, oneDetectionMaxSize,
-                detectViewIds).stream().collect(Collectors.toCollection(LinkedHashSet::new));
+        LinkedHashSet<HanlpMapResult> hanlpMapResults = knowledgeService.prefixSearch(detectSegment,
+                oneDetectionMaxSize, detectViewIds).stream().collect(Collectors.toCollection(LinkedHashSet::new));
         // step2. suffix search
-        LinkedHashSet<HanlpMapResult> suffixHanlpMapResults = SearchService.suffixSearch(detectSegment,
+        LinkedHashSet<HanlpMapResult> suffixHanlpMapResults = knowledgeService.suffixSearch(detectSegment,
                 oneDetectionMaxSize, detectViewIds).stream().collect(Collectors.toCollection(LinkedHashSet::new));
 
         hanlpMapResults.addAll(suffixHanlpMapResults);

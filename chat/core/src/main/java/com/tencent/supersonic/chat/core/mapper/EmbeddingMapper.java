@@ -10,9 +10,10 @@ import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.knowledge.EmbeddingResult;
 import com.tencent.supersonic.headless.core.knowledge.builder.BaseWordBuilder;
 import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
+import com.tencent.supersonic.headless.server.service.KnowledgeService;
+import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Objects;
-import lombok.extern.slf4j.Slf4j;
 
 /***
  * A mapper that recognizes schema elements with vector embedding.
@@ -24,7 +25,8 @@ public class EmbeddingMapper extends BaseMapper {
     public void doMap(QueryContext queryContext) {
         //1. query from embedding by queryText
         String queryText = queryContext.getQueryText();
-        List<S2Term> terms = HanlpHelper.getTerms(queryText);
+        KnowledgeService knowledgeService = ContextUtils.getBean(KnowledgeService.class);
+        List<S2Term> terms = knowledgeService.getTerms(queryText);
 
         EmbeddingMatchStrategy matchStrategy = ContextUtils.getBean(EmbeddingMatchStrategy.class);
         List<EmbeddingResult> matchResults = matchStrategy.getMatches(queryContext, terms);

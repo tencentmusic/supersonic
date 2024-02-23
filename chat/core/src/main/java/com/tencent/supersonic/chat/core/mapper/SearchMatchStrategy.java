@@ -6,6 +6,7 @@ import com.tencent.supersonic.headless.core.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.core.knowledge.SearchService;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
+import com.tencent.supersonic.headless.server.service.KnowledgeService;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,6 +26,9 @@ import org.springframework.stereotype.Service;
 public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
     private static final int SEARCH_SIZE = 3;
+
+    @Autowired
+    private KnowledgeService knowledgeService;
 
     @Override
     public Map<MatchText, List<HanlpMapResult>> match(QueryContext queryContext, List<S2Term> originals,
@@ -51,9 +56,9 @@ public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
                     String detectSegment = text.substring(detectIndex);
 
                     if (StringUtils.isNotEmpty(detectSegment)) {
-                        List<HanlpMapResult> hanlpMapResults = SearchService.prefixSearch(detectSegment,
+                        List<HanlpMapResult> hanlpMapResults = knowledgeService.prefixSearch(detectSegment,
                                 SearchService.SEARCH_SIZE, detectViewIds);
-                        List<HanlpMapResult> suffixHanlpMapResults = SearchService.suffixSearch(
+                        List<HanlpMapResult> suffixHanlpMapResults = knowledgeService.suffixSearch(
                                 detectSegment, SEARCH_SIZE, detectViewIds);
                         hanlpMapResults.addAll(suffixHanlpMapResults);
                         // remove entity name where search

@@ -36,7 +36,6 @@ import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.ViewService;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
@@ -75,8 +74,6 @@ public class ModelServiceImpl implements ModelService {
 
     private DomainService domainService;
 
-    private ModelRelaService modelRelaService;
-
     private UserService userService;
 
     private ViewService viewService;
@@ -84,20 +81,18 @@ public class ModelServiceImpl implements ModelService {
     private DateInfoRepository dateInfoRepository;
 
     public ModelServiceImpl(ModelRepository modelRepository,
-                            DatabaseService databaseService,
-                            @Lazy DimensionService dimensionService,
-                            @Lazy MetricService metricService,
-                            ModelRelaService modelRelaService,
-                            DomainService domainService,
-                            UserService userService,
-                            ViewService viewService,
-                            DateInfoRepository dateInfoRepository) {
+            DatabaseService databaseService,
+            @Lazy DimensionService dimensionService,
+            @Lazy MetricService metricService,
+            DomainService domainService,
+            UserService userService,
+            ViewService viewService,
+            DateInfoRepository dateInfoRepository) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
         this.metricService = metricService;
         this.domainService = domainService;
-        this.modelRelaService = modelRelaService;
         this.userService = userService;
         this.viewService = viewService;
         this.dateInfoRepository = dateInfoRepository;
@@ -200,6 +195,9 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public UnAvailableItemResp getUnAvailableItem(FieldRemovedReq fieldRemovedReq) {
+        if (CollectionUtils.isEmpty(fieldRemovedReq.getFields())) {
+            return UnAvailableItemResp.builder().build();
+        }
         MetaFilter metaFilter = new MetaFilter(Lists.newArrayList(fieldRemovedReq.getModelId()));
         metaFilter.setFieldsDepend(fieldRemovedReq.getFields());
         List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
@@ -350,6 +348,13 @@ public class ModelServiceImpl implements ModelService {
         }
         return modelResps.stream().filter(modelResp ->
                 domainIds.contains(modelResp.getDomainId())).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ModelResp> getAllModelByDomainIds(List<Long> domainIds) {
+        Set<DomainResp> domainResps = domainService.getDomainChildren(domainIds);
+        List<Long> allDomainIds = domainResps.stream().map(DomainResp::getId).collect(Collectors.toList());
+        return getModelByDomainIds(allDomainIds);
     }
 
     @Override
