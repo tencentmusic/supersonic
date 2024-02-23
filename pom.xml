@@ -74,6 +74,7 @@
         <poi.version>3.17</poi.version>
         <langchain4j.version>0.24.0</langchain4j.version>
         <postgresql.version>42.7.1</postgresql.version>
+        <st.version>4.0.8</st.version>
     </properties>
 
     <dependencyManagement>
