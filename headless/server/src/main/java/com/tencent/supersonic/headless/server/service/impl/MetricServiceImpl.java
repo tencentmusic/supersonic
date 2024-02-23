@@ -5,6 +5,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DataEvent;
@@ -16,6 +17,7 @@ import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ChatGptHelper;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
+import com.tencent.supersonic.headless.api.pojo.MeasureParam;
 import com.tencent.supersonic.headless.api.pojo.MetricParam;
 import com.tencent.supersonic.headless.api.pojo.MetricQueryDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
@@ -40,6 +42,12 @@ import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.ViewService;
 import com.tencent.supersonic.headless.server.utils.MetricCheckUtils;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,11 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -228,28 +231,44 @@ public class MetricServiceImpl implements MetricService {
     }
 
     private List<MetricResp> filterByField(List<MetricResp> metricResps, List<String> fields) {
-        List<MetricResp> metricRespFiltered = Lists.newArrayList();
+        Set<MetricResp> metricRespFiltered = Sets.newHashSet();
         for (MetricResp metricResp : metricResps) {
-            for (String field : fields) {
-                if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
-                    List<Long> ids = metricResp.getMetricDefineByMetricParams().getMetrics()
-                            .stream().map(MetricParam::getId).collect(Collectors.toList());
-                    List<MetricResp> metricById = metricResps.stream()
-                            .filter(metric -> ids.contains(metric.getId()))
-                            .collect(Collectors.toList());
-                    for (MetricResp metric : metricById) {
-                        if (metric.getExpr().contains(field)) {
-                            metricRespFiltered.add(metricResp);
-                        }
-                    }
-                } else {
-                    if (metricResp.getExpr().contains(field)) {
-                        metricRespFiltered.add(metricResp);
-                    }
+            filterByField(metricResps, metricResp, fields, metricRespFiltered);
+        }
+        return new ArrayList<>(metricRespFiltered);
+    }
+
+    private boolean filterByField(List<MetricResp> metricResps, MetricResp metricResp,
+                                  List<String> fields, Set<MetricResp> metricRespFiltered) {
+        if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
+            List<Long> ids = metricResp.getMetricDefineByMetricParams().getMetrics()
+                    .stream().map(MetricParam::getId).collect(Collectors.toList());
+            List<MetricResp> metricById = metricResps.stream()
+                    .filter(metric -> ids.contains(metric.getId()))
+                    .collect(Collectors.toList());
+            for (MetricResp metric : metricById) {
+                if (filterByField(metricResps, metric, fields, metricRespFiltered)) {
+                    metricRespFiltered.add(metricResp);
+                    return true;
                 }
             }
+        } else if (MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())) {
+            if (fields.stream().anyMatch(field -> metricResp.getExpr().contains(field))) {
+                metricRespFiltered.add(metricResp);
+                return true;
+            }
+        } else if (MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType())) {
+            List<MeasureParam> measures = metricResp.getMetricDefineByMeasureParams().getMeasures();
+            List<String> fieldNameDepended = measures.stream().map(MeasureParam::getBizName)
+                    //measure bizName = model bizName_fieldName
+                    .map(name -> name.replaceFirst(metricResp.getModelBizName() + "_", ""))
+                    .collect(Collectors.toList());
+            if (fields.stream().anyMatch(fieldNameDepended::contains)) {
+                metricRespFiltered.add(metricResp);
+                return true;
+            }
         }
-        return metricRespFiltered;
+        return false;
     }
 
     @Override

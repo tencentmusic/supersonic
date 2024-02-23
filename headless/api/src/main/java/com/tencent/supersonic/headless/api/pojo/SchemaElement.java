@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +18,7 @@ import java.util.List;
 public class SchemaElement implements Serializable {
 
     private Long view;
+    private Long model;
     private Long id;
     private String name;
     private String bizName;
@@ -52,7 +52,4 @@ public class SchemaElement implements Serializable {
         return Objects.hashCode(view, id, name, bizName, type);
     }
 
-    public List<String> getModelNames() {
-        return Lists.newArrayList(name);
-    }
 }

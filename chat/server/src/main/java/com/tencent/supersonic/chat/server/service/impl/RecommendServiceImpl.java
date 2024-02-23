@@ -48,7 +48,7 @@ public class RecommendServiceImpl implements RecommendService {
         if (Objects.isNull(modelId)) {
             return new RecommendResp();
         }
-        ViewSchema modelSchema = semanticService.getModelSchema(modelId);
+        ViewSchema modelSchema = semanticService.getViewSchema(modelId);
         if (Objects.isNull(modelSchema)) {
             return new RecommendResp();
         }
