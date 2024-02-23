@@ -360,7 +360,12 @@ public class MetricServiceImpl implements MetricService {
         }
         if (metricResp.getRelateDimension() != null
                 && !CollectionUtils.isEmpty(metricResp.getRelateDimension().getDrillDownDimensions())) {
-            drillDownDimensions.addAll(metricResp.getRelateDimension().getDrillDownDimensions());
+            for (DrillDownDimension drillDownDimension : metricResp.getRelateDimension().getDrillDownDimensions()) {
+                if (drillDownDimension.isInheritedFromModel() && !drillDownDimension.isNecessary()) {
+                    continue;
+                }
+                drillDownDimensions.add(drillDownDimension);
+            }
         }
         ModelResp modelResp = modelService.getModel(metricResp.getModelId());
         if (modelResp.getDrillDownDimensions() == null) {
