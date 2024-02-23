@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ModelYamlManager {
 
-    public static DataModelYamlTpl convert2YamlObj(ModelResp modelResp, DatabaseResp databaseResp) {
+    public static synchronized DataModelYamlTpl convert2YamlObj(ModelResp modelResp, DatabaseResp databaseResp) {
         ModelDetail modelDetail = modelResp.getModelDetail();
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
         SysTimeDimensionBuilder.addSysTimeDimension(modelDetail.getDimensions(), engineAdaptor);

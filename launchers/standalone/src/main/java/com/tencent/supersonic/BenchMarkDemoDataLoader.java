@@ -224,7 +224,7 @@ public class BenchMarkDemoDataLoader {
                 new ViewModelConfig(5L, Lists.newArrayList(8L), Lists.newArrayList()),
                 new ViewModelConfig(6L, Lists.newArrayList(9L, 10L), Lists.newArrayList()),
                 new ViewModelConfig(7L, Lists.newArrayList(11L, 12L), Lists.newArrayList()),
-                new ViewModelConfig(8L, Lists.newArrayList(13L, 14L, 15L), Lists.newArrayList(8L, 9L))
+                new ViewModelConfig(8L, Lists.newArrayList(13L, 14L), Lists.newArrayList(8L, 9L))
         );
         ViewDetail viewDetail = new ViewDetail();
         viewDetail.setViewModelConfigs(viewModelConfigs);

@@ -38,11 +38,11 @@ public class MetricWordBuilder extends BaseWordBuilder {
     private DictWord getOnwWordNature(String word, SchemaElement schemaElement, boolean isSuffix) {
         DictWord dictWord = new DictWord();
         dictWord.setWord(word);
-        Long viewId = schemaElement.getView();
-        String nature = DictWordType.NATURE_SPILT + viewId + DictWordType.NATURE_SPILT + schemaElement.getId()
+        Long modelId = schemaElement.getModel();
+        String nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
                 + DictWordType.METRIC.getType();
         if (isSuffix) {
-            nature = DictWordType.NATURE_SPILT + viewId + DictWordType.NATURE_SPILT + schemaElement.getId()
+            nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
                     + DictWordType.SUFFIX.getType() + DictWordType.METRIC.getType();
         }
         dictWord.setNatureWithFrequency(String.format("%s " + DEFAULT_FREQUENCY, nature));

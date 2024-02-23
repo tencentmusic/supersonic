@@ -1,36 +1,27 @@
 package com.tencent.supersonic.chat.core.parser.sql.llm;
 
-import com.tencent.supersonic.chat.api.pojo.request.ChatConfigFilter;
-import com.tencent.supersonic.chat.api.pojo.response.ChatConfigRichResp;
-import com.tencent.supersonic.chat.api.pojo.response.ChatDefaultRichConfigResp;
+import com.tencent.supersonic.chat.api.pojo.ViewSchema;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.util.DatePeriodEnum;
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
+
 import java.util.Objects;
 
 public class S2SqlDateHelper {
 
-    public static String getReferenceDate(QueryContext queryContext, Long modelId) {
+    public static String getReferenceDate(QueryContext queryContext, Long viewId) {
         String defaultDate = DateUtils.getBeforeDate(0);
-        if (Objects.isNull(modelId)) {
+        if (Objects.isNull(viewId)) {
             return defaultDate;
         }
-        ChatConfigFilter filter = new ChatConfigFilter();
-        filter.setModelId(modelId);
-        ChatConfigRichResp chatConfigRichResp = queryContext.getModelIdToChatRichConfig().get(modelId);
-
-        if (Objects.isNull(chatConfigRichResp)) {
+        ViewSchema viewSchema = queryContext.getSemanticSchema().getViewSchemaMap().get(viewId);
+        if (viewSchema == null || viewSchema.getTagTypeTimeDefaultConfig() == null) {
             return defaultDate;
         }
-        if (Objects.isNull(chatConfigRichResp.getChatDetailRichConfig()) || Objects.isNull(
-                chatConfigRichResp.getChatDetailRichConfig().getChatDefaultConfig())) {
-            return defaultDate;
-        }
-
-        ChatDefaultRichConfigResp chatDefaultConfig = chatConfigRichResp.getChatDetailRichConfig()
-                .getChatDefaultConfig();
-        Integer unit = chatDefaultConfig.getUnit();
-        String period = chatDefaultConfig.getPeriod();
+        TimeDefaultConfig tagTypeTimeDefaultConfig = viewSchema.getTagTypeTimeDefaultConfig();
+        Integer unit = tagTypeTimeDefaultConfig.getUnit();
+        String period = tagTypeTimeDefaultConfig.getPeriod();
         if (Objects.nonNull(unit)) {
             // If the unit is set to less than 0, then do not add relative date.
             if (unit < 0) {

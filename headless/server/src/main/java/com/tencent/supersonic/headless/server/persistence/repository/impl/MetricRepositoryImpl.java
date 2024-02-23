@@ -8,9 +8,9 @@ import com.tencent.supersonic.headless.server.persistence.mapper.MetricDOMapper;
 import com.tencent.supersonic.headless.server.persistence.mapper.MetricQueryDefaultConfigDOMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
 import com.tencent.supersonic.headless.server.pojo.MetricFilter;
-import org.springframework.stereotype.Component;
-
+import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 
 @Component
@@ -60,6 +60,11 @@ public class MetricRepositoryImpl implements MetricRepository {
     @Override
     public List<MetricDO> getMetric(MetricFilter metricFilter) {
         return metricDOCustomMapper.query(metricFilter);
+    }
+
+    @Override
+    public List<MetricDO> getMetrics(MetricsFilter metricsFilter) {
+        return metricDOCustomMapper.queryMetrics(metricsFilter);
     }
 
     @Override

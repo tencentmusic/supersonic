@@ -72,6 +72,7 @@ public class MetricConverter {
         ModelResp modelResp = modelMap.get(metricDO.getModelId());
         if (modelResp != null) {
             metricResp.setModelName(modelResp.getName());
+            metricResp.setModelBizName(modelResp.getBizName());
             metricResp.setDomainId(modelResp.getDomainId());
         }
         metricResp.setIsCollect(collect != null && collect.contains(metricDO.getId()));

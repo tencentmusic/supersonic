@@ -19,13 +19,15 @@ public class ModelDetail {
 
     private String tableQuery;
 
-    private List<Identify> identifiers;
+    private List<Identify> identifiers = Lists.newArrayList();
 
-    private List<Dim> dimensions;
+    private List<Dim> dimensions = Lists.newArrayList();
 
-    private List<Measure> measures;
+    private List<Measure> measures = Lists.newArrayList();
 
-    private List<Field> fields;
+    private List<Field> fields = Lists.newArrayList();
+
+    private List<SqlVariable> sqlVariables = Lists.newArrayList();
 
     public String getSqlQuery() {
         if (StringUtils.isNotBlank(sqlQuery) && sqlQuery.endsWith(";")) {
