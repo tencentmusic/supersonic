@@ -1,4 +1,5 @@
-package com.tencent.supersonic.chat.core.parser.sql.llm;
+package com.tencent.supersonic.chat.core.utils;
+
 
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.ViewSchema;

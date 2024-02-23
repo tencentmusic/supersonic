@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.core.parser.sql.llm;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.util.ComponentFactory;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.embedding.EmbeddingQuery;
@@ -19,6 +20,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +33,9 @@ public class SqlExamplarLoader {
     private S2EmbeddingStore s2EmbeddingStore = ComponentFactory.getS2EmbeddingStore();
     private TypeReference<List<SqlExample>> valueTypeRef = new TypeReference<List<SqlExample>>() {
     };
+
+    @Autowired
+    private EmbeddingConfig embeddingConfig;
 
     public List<SqlExample> getSqlExamples() throws IOException {
         ClassPathResource resource = new ClassPathResource(EXAMPLE_JSON_FILE);
@@ -53,8 +58,8 @@ public class SqlExamplarLoader {
         s2EmbeddingStore.addQuery(collectionName, queries);
     }
 
-    public List<Map<String, String>> retrieverSqlExamples(String queryText, String collectionName, int maxResults) {
-
+    public List<Map<String, String>> retrieverSqlExamples(String queryText, int maxResults) {
+        String collectionName = embeddingConfig.getText2sqlCollectionName();
         RetrieveQuery retrieveQuery = RetrieveQuery.builder().queryTextsList(Collections.singletonList(queryText))
                 .queryEmbeddings(null).build();
 

@@ -32,6 +32,9 @@ public class EmbeddingConfig {
     @Value("${embedding.metric.analyzeQuery.collection:solved_query_collection}")
     private String metricAnalyzeQueryCollection;
 
+    @Value("${text2sql.collection.name:text2dsl_agent_collection}")
+    private String text2sqlCollectionName;
+
     @Value("${embedding.metric.analyzeQuery.nResult:5}")
     private int metricAnalyzeQueryResultNum;
 
