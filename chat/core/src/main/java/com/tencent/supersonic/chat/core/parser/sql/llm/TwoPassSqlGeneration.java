@@ -43,7 +43,7 @@ public class TwoPassSqlGeneration implements SqlGeneration, InitializingBean {
     public LLMResp generation(LLMReq llmReq, Long viewId) {
         keyPipelineLog.info("viewId:{},llmReq:{}", viewId, llmReq);
         List<Map<String, String>> sqlExamples = sqlExamplarLoader.retrieverSqlExamples(llmReq.getQueryText(),
-                optimizationConfig.getText2sqlCollectionName(), optimizationConfig.getText2sqlExampleNum());
+                optimizationConfig.getText2sqlExampleNum());
 
         String linkingPromptStr = sqlPromptGenerator.generateLinkingPrompt(llmReq, sqlExamples);
 

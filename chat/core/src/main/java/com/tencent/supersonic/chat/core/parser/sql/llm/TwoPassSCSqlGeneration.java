@@ -44,7 +44,7 @@ public class TwoPassSCSqlGeneration implements SqlGeneration, InitializingBean {
         //1.retriever sqlExamples and generate exampleListPool
         keyPipelineLog.info("viewId:{},llmReq:{}", viewId, llmReq);
         List<Map<String, String>> sqlExamples = sqlExamplarLoader.retrieverSqlExamples(llmReq.getQueryText(),
-                optimizationConfig.getText2sqlCollectionName(), optimizationConfig.getText2sqlExampleNum());
+                optimizationConfig.getText2sqlExampleNum());
 
         List<List<Map<String, String>>> exampleListPool = sqlPromptGenerator.getExampleCombos(sqlExamples,
                 optimizationConfig.getText2sqlFewShotsNum(), optimizationConfig.getText2sqlSelfConsistencyNum());
