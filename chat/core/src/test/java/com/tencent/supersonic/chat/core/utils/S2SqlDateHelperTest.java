@@ -7,6 +7,7 @@ import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;
+import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
@@ -24,10 +25,10 @@ class S2SqlDateHelperTest {
         QueryContext queryContext = buildQueryContext(viewId);
 
         String referenceDate = S2SqlDateHelper.getReferenceDate(queryContext, null);
-        Assert.assertNotNull(referenceDate);
+        Assert.assertEquals(referenceDate, DateUtils.getBeforeDate(0));
 
         referenceDate = S2SqlDateHelper.getReferenceDate(queryContext, viewId);
-        Assert.assertNotNull(referenceDate);
+        Assert.assertEquals(referenceDate, DateUtils.getBeforeDate(0));
 
         ViewSchema viewSchema = queryContext.getSemanticSchema().getViewSchemaMap().get(viewId);
         QueryConfig queryConfig = viewSchema.getQueryConfig();
@@ -38,11 +39,11 @@ class S2SqlDateHelperTest {
         queryConfig.getTagTypeDefaultConfig().setTimeDefaultConfig(timeDefaultConfig);
 
         referenceDate = S2SqlDateHelper.getReferenceDate(queryContext, viewId);
-        Assert.assertNotNull(referenceDate);
+        Assert.assertEquals(referenceDate, DateUtils.getBeforeDate(20));
 
         timeDefaultConfig.setUnit(1);
         referenceDate = S2SqlDateHelper.getReferenceDate(queryContext, viewId);
-        Assert.assertNotNull(referenceDate);
+        Assert.assertEquals(referenceDate, DateUtils.getBeforeDate(1));
 
         timeDefaultConfig.setUnit(-1);
         referenceDate = S2SqlDateHelper.getReferenceDate(queryContext, viewId);
@@ -55,10 +56,12 @@ class S2SqlDateHelperTest {
         QueryContext queryContext = buildQueryContext(viewId);
 
         Pair<String, String> startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, null, QueryType.TAG);
-        Assert.assertNotNull(startEndDate);
+        Assert.assertEquals(startEndDate.getLeft(), DateUtils.getBeforeDate(0));
+        Assert.assertEquals(startEndDate.getRight(), DateUtils.getBeforeDate(0));
 
         startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, viewId, QueryType.TAG);
-        Assert.assertNotNull(startEndDate);
+        Assert.assertNull(startEndDate.getLeft());
+        Assert.assertNull(startEndDate.getRight());
 
         ViewSchema viewSchema = queryContext.getSemanticSchema().getViewSchemaMap().get(viewId);
         QueryConfig queryConfig = viewSchema.getQueryConfig();
@@ -70,20 +73,34 @@ class S2SqlDateHelperTest {
         queryConfig.getMetricTypeDefaultConfig().setTimeDefaultConfig(timeDefaultConfig);
 
         startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, viewId, QueryType.TAG);
-        Assert.assertNotNull(startEndDate);
+        Assert.assertEquals(startEndDate.getLeft(), DateUtils.getBeforeDate(20));
+        Assert.assertEquals(startEndDate.getRight(), DateUtils.getBeforeDate(20));
 
         startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, viewId, QueryType.METRIC);
-        Assert.assertNotNull(startEndDate);
+        Assert.assertEquals(startEndDate.getLeft(), DateUtils.getBeforeDate(20));
+        Assert.assertEquals(startEndDate.getRight(), DateUtils.getBeforeDate(20));
 
-        timeDefaultConfig.setUnit(1);
+        timeDefaultConfig.setUnit(2);
         timeDefaultConfig.setTimeMode(TimeMode.RECENT);
         startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, viewId, QueryType.METRIC);
-        Assert.assertNotNull(startEndDate);
+        Assert.assertEquals(startEndDate.getLeft(), DateUtils.getBeforeDate(2));
+        Assert.assertEquals(startEndDate.getRight(), DateUtils.getBeforeDate(1));
+
+        startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, viewId, QueryType.TAG);
+        Assert.assertEquals(startEndDate.getLeft(), DateUtils.getBeforeDate(2));
+        Assert.assertEquals(startEndDate.getRight(), DateUtils.getBeforeDate(1));
 
         timeDefaultConfig.setUnit(-1);
         startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, viewId, QueryType.METRIC);
         Assert.assertNull(startEndDate.getLeft());
         Assert.assertNull(startEndDate.getRight());
+
+        timeDefaultConfig.setTimeMode(TimeMode.LAST);
+        timeDefaultConfig.setPeriod(Constants.DAY);
+        timeDefaultConfig.setUnit(5);
+        startEndDate = S2SqlDateHelper.getStartEndDate(queryContext, viewId, QueryType.METRIC);
+        Assert.assertEquals(startEndDate.getLeft(), DateUtils.getBeforeDate(5));
+        Assert.assertEquals(startEndDate.getRight(), DateUtils.getBeforeDate(5));
     }
 
     private QueryContext buildQueryContext(Long viewId) {
