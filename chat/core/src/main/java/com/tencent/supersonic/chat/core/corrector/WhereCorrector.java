@@ -72,7 +72,7 @@ public class WhereCorrector extends BaseSemanticCorrector {
                     && StringUtils.isNotBlank(startEndDate.getRight())) {
                 correctS2SQL = SqlAddHelper.addParenthesisToWhere(correctS2SQL);
                 String dateChName = TimeDimensionEnum.DAY.getChName();
-                String condExpr = String.format(" ( %s >= %s  and %s <= %s )", dateChName,
+                String condExpr = String.format(" ( %s >= '%s'  and %s <= '%s' )", dateChName,
                         startEndDate.getLeft(), dateChName, startEndDate.getRight());
                 try {
                     Expression expression = CCJSqlParserUtil.parseCondExpression(condExpr);
