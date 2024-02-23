@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
@@ -18,14 +19,15 @@ import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -58,12 +60,12 @@ public class DatabaseServiceImpl implements DatabaseService {
             database.updatedBy(user.getName());
             DatabaseConverter.convert(database, databaseDO);
             databaseRepository.updateDatabase(databaseDO);
-            return DatabaseConverter.convert(databaseDO);
+            return DatabaseConverter.convertWithPassword(databaseDO);
         }
         database.createdBy(user.getName());
         databaseDO = DatabaseConverter.convert(database);
         databaseRepository.createDatabase(databaseDO);
-        return DatabaseConverter.convert(databaseDO);
+        return DatabaseConverter.convertWithPassword(databaseDO);
     }
 
     @Override
@@ -108,7 +110,19 @@ public class DatabaseServiceImpl implements DatabaseService {
     @Override
     public DatabaseResp getDatabase(Long id) {
         DatabaseDO databaseDO = databaseRepository.getDatabase(id);
-        return DatabaseConverter.convert(databaseDO);
+        return DatabaseConverter.convertWithPassword(databaseDO);
+    }
+
+    @Override
+    public DatabaseResp getDatabase(Long id, User user) {
+        DatabaseResp databaseResp = getDatabase(id);
+        if (!databaseResp.getAdmins().contains(user.getName())
+                && !databaseResp.getViewers().contains(user.getName())
+                && !databaseResp.getCreatedBy().equals(user.getName())) {
+            throw new InvalidPermissionException("您暂无查看该数据库详情的权限, 请联系创建人: "
+                    + databaseResp.getCreatedBy());
+        }
+        return databaseResp;
     }
 
     @Override
