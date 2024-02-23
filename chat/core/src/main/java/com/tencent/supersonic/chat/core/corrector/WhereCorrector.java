@@ -18,6 +18,7 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
 
@@ -65,11 +66,20 @@ public class WhereCorrector extends BaseSemanticCorrector {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectS2SQL();
         List<String> whereFields = SqlSelectHelper.getWhereFields(correctS2SQL);
         if (CollectionUtils.isEmpty(whereFields) || !TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
-            String currentDate = S2SqlDateHelper.getReferenceDate(queryContext, semanticParseInfo.getViewId());
-            if (StringUtils.isNotBlank(currentDate)) {
+            Pair<String, String> startEndDate = S2SqlDateHelper.getStartEndDate(queryContext,
+                    semanticParseInfo.getViewId(), semanticParseInfo.getQueryType());
+            if (StringUtils.isNotBlank(startEndDate.getLeft())
+                    && StringUtils.isNotBlank(startEndDate.getRight())) {
                 correctS2SQL = SqlAddHelper.addParenthesisToWhere(correctS2SQL);
-                correctS2SQL = SqlAddHelper.addWhere(
-                        correctS2SQL, TimeDimensionEnum.DAY.getChName(), currentDate);
+                String dateChName = TimeDimensionEnum.DAY.getChName();
+                String condExpr = String.format(" ( %s >= %s  and %s <= %s )", dateChName,
+                        startEndDate.getLeft(), dateChName, startEndDate.getRight());
+                try {
+                    Expression expression = CCJSqlParserUtil.parseCondExpression(condExpr);
+                    correctS2SQL = SqlAddHelper.addWhere(correctS2SQL, expression);
+                } catch (JSQLParserException e) {
+                    log.error("parseCondExpression:{}", e);
+                }
             }
         }
         semanticParseInfo.getSqlInfo().setCorrectS2SQL(correctS2SQL);
