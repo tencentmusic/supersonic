@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.core.corrector;
 
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
@@ -12,6 +13,7 @@ import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -77,7 +79,13 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
     protected void addFieldsToSelect(SemanticParseInfo semanticParseInfo, String correctS2SQL) {
         Set<String> selectFields = new HashSet<>(SqlSelectHelper.getSelectFields(correctS2SQL));
         Set<String> needAddFields = new HashSet<>(SqlSelectHelper.getGroupByFields(correctS2SQL));
-        //needAddFields.addAll(SqlSelectHelper.getOrderByFields(correctS2SQL));
+
+        //decide whether add order by expression field to select
+        Environment environment = ContextUtils.getBean(Environment.class);
+        String correctorAdditionalInfo = environment.getProperty("corrector.additional.information");
+        if (StringUtils.isNotBlank(correctorAdditionalInfo) && Boolean.parseBoolean(correctorAdditionalInfo)) {
+            needAddFields.addAll(SqlSelectHelper.getOrderByFields(correctS2SQL));
+        }
 
         // If there is no aggregate function in the S2SQL statement and
         // there is a data field in 'WHERE' statement, add the field to the 'SELECT' statement.

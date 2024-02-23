@@ -40,6 +40,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
 
     }
 
+    // if metric model or metric question appear,so add group by to sql.if detail model or detail question appear,not add group by to sql.
     private Boolean addGroupBy(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
         Long viewId = semanticParseInfo.getViewId();
         ViewService viewService = ContextUtils.getBean(ViewService.class);
