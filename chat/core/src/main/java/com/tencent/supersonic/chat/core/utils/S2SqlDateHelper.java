@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.core.utils;
 import com.tencent.supersonic.chat.api.pojo.ViewSchema;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
+import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.common.util.DatePeriodEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
@@ -47,18 +48,19 @@ public class S2SqlDateHelper {
         }
         Integer unit = defaultConfig.getUnit();
         String period = defaultConfig.getPeriod();
+        TimeMode timeMode = defaultConfig.getTimeMode();
         if (Objects.nonNull(unit)) {
             // If the unit is set to less than 0, then do not add relative date.
             if (unit < 0) {
                 return Pair.of(null, null);
             }
             DatePeriodEnum datePeriodEnum = DatePeriodEnum.get(period);
-            if (Objects.isNull(datePeriodEnum)) {
-                return Pair.of(DateUtils.getBeforeDate(unit), DateUtils.getBeforeDate(1));
-            } else {
-                return Pair.of(DateUtils.getBeforeDate(unit, datePeriodEnum),
-                        DateUtils.getBeforeDate(1, datePeriodEnum));
+            String startDate = DateUtils.getBeforeDate(unit, datePeriodEnum);
+            String endDate = DateUtils.getBeforeDate(1, datePeriodEnum);
+            if (TimeMode.LAST.equals(timeMode)) {
+                endDate = startDate;
             }
+            return Pair.of(startDate, endDate);
         }
         return Pair.of(defaultDate, defaultDate);
     }
