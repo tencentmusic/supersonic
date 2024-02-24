@@ -20,7 +20,7 @@ const MetricFieldFormTable: React.FC<Props> = ({
   onFieldChange,
   onSqlChange,
 }) => {
-  const [tableData, setTableData] = useState<any[]>([]);
+  const [tableData, setTableData] = useState<ISemantic.IFieldTypeParamsItem[]>([]);
 
   const [defineTypeParams, setDefineTypeParams] = useState(
     typeParams || {
@@ -49,7 +49,7 @@ const MetricFieldFormTable: React.FC<Props> = ({
     });
   });
 
-  const [selectedKeysMap, setSelectedKeysMap] = useState<{}>(() => {
+  const [selectedKeysMap, setSelectedKeysMap] = useState<Record<string, boolean>>(() => {
     return defineTypeParams.fields.reduce((keyMap, item: any) => {
       keyMap[item.fieldName] = true;
       return keyMap;
@@ -69,21 +69,24 @@ const MetricFieldFormTable: React.FC<Props> = ({
 
   const rowSelection = {
     selectedRowKeys: selectedKeys,
-    onSelect: (record, selected) => {
+    onSelect: (record: ISemantic.IFieldTypeParamsItem, selected: boolean) => {
       const updateKeys = { ...selectedKeysMap, [record.fieldName]: selected };
+      const selectedKeys: string[] = [];
       setSelectedKeysMap(updateKeys);
       const fieldList = Object.entries(updateKeys).reduce((list: any[], item) => {
         const [fieldName, selected] = item;
         if (selected) {
+          selectedKeys.push(fieldName);
           list.push({ fieldName });
         }
         return list;
       }, []);
+      setSelectedKeys(selectedKeys);
       onFieldChange(fieldList);
     },
-    onChange: (_selectedRowKeys: any[]) => {
-      setSelectedKeys([..._selectedRowKeys]);
-    },
+    // onChange: (_selectedRowKeys: any[]) => {
+    //   setSelectedKeys([..._selectedRowKeys]);
+    // },
   };
 
   return (

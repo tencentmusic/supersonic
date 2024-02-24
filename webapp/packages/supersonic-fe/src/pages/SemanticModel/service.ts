@@ -458,7 +458,14 @@ export function deleteDictTask(data: any): Promise<any> {
 }
 
 export function searchDictLatestTaskList(data: any): Promise<any> {
-  return request(`${process.env.CHAT_API_BASE_URL}dict/task/search/latest`, {
+  return request(`${process.env.API_BASE_URL}knowledge/task/search`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function searchKnowledgeConfigQuery(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}knowledge/conf/query`, {
     method: 'POST',
     data,
   });

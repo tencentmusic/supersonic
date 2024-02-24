@@ -56,6 +56,13 @@ const MetricMetricFormTable: React.FC<Props> = ({
     });
   });
 
+  const [selectedKeysMap, setSelectedKeysMap] = useState<Record<string, boolean>>(() => {
+    return defineTypeParams.metrics.reduce((keyMap, item: any) => {
+      keyMap[item.bizName] = true;
+      return keyMap;
+    }, {});
+  });
+
   const columns = [
     {
       dataIndex: 'name',
@@ -69,22 +76,23 @@ const MetricMetricFormTable: React.FC<Props> = ({
 
   const rowSelection = {
     selectedRowKeys: selectedKeys,
-    onChange: (_selectedRowKeys: any[]) => {
-      setSelectedKeys([..._selectedRowKeys]);
-      onFieldChange(
-        metricList.reduce(
-          (metrics: ISemantic.IMetricTypeParamsItem[], item: ISemantic.IMetricItem) => {
-            if (_selectedRowKeys.includes(item.bizName)) {
-              metrics.push({
-                bizName: item.bizName,
-                id: item.id,
-              });
-            }
-            return metrics;
-          },
-          [],
-        ),
-      );
+    onSelect: (record: ISemantic.IMeasure, selected: boolean) => {
+      const updateKeys = { ...selectedKeysMap, [record.bizName]: selected };
+      setSelectedKeysMap(updateKeys);
+      const selectedKeys: string[] = [];
+      const metrics = metricList.reduce((list: any[], item) => {
+        const { bizName, id } = item;
+        if (updateKeys[bizName] === true) {
+          selectedKeys.push(bizName);
+          list.push({
+            bizName,
+            id,
+          });
+        }
+        return list;
+      }, []);
+      setSelectedKeys(selectedKeys);
+      onFieldChange(metrics);
     },
   };
 
