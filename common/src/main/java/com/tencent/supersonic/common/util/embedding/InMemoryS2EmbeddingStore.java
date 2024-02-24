@@ -48,7 +48,9 @@ public class InMemoryS2EmbeddingStore implements S2EmbeddingStore {
         InMemoryEmbeddingStore<EmbeddingQuery> embeddingStore = null;
         Path filePath = getPersistentPath(collectionName);
         try {
-            if (Files.exists(filePath)) {
+            EmbeddingConfig embeddingConfig = ContextUtils.getBean(EmbeddingConfig.class);
+            if (Files.exists(filePath) && !collectionName.equals(embeddingConfig.getMetaCollectionName())
+                    && !collectionName.equals(embeddingConfig.getText2sqlCollectionName())) {
                 embeddingStore = InMemoryEmbeddingStore.fromFile(filePath);
                 embeddingStore.entries = new CopyOnWriteArraySet<>(embeddingStore.entries);
                 log.info("embeddingStore reload from file:{}", filePath);

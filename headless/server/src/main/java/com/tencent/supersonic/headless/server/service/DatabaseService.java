@@ -15,6 +15,10 @@ public interface DatabaseService {
 
     SemanticQueryResp executeSql(String sql, Long id, User user);
 
+    DatabaseResp getDatabase(Long id, User user);
+
+    DatabaseResp getDatabase(Long id);
+
     Map<String, List<DatabaseParameter>> getDatabaseParameters();
 
     boolean testConnect(DatabaseReq databaseReq, User user);
@@ -24,8 +28,6 @@ public interface DatabaseService {
     List<DatabaseResp> getDatabaseList(User user);
 
     void deleteDatabase(Long databaseId);
-
-    DatabaseResp getDatabase(Long id);
 
     SemanticQueryResp getDbNames(Long id);
 

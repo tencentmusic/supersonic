@@ -73,9 +73,6 @@ public class OptimizationConfig {
     @Value("${text2sql.self.consistency.num:5}")
     private int text2sqlSelfConsistencyNum;
 
-    @Value("${text2sql.collection.name:text2dsl_agent_collection}")
-    private String text2sqlCollectionName;
-
     @Value("${parse.show.count:3}")
     private Integer parseShowCount;
 

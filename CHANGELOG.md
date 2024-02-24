@@ -4,6 +4,14 @@
 - "Breaking Changes" describes any changes that may break existing functionality or cause
   compatibility issues with previous versions.
 
+## SuperSonic [0.8.6] - 2024-02-23
+
+### Added
+- support view abstraction to Headless.
+- add the Metric API to Headless and optimizing the Headless API.
+- add integration tests to Headless.
+- add TimeCorrector to Chat.
+
 ## SuperSonic [0.8.4] - 2024-01-19
 
 ### Added
