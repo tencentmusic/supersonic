@@ -42,7 +42,7 @@ public class KnowledgeController {
      * @param dictItemReq
      */
     @PostMapping("/conf")
-    public Long addDictConf(@RequestBody @Valid DictItemReq dictItemReq,
+    public DictItemResp addDictConf(@RequestBody @Valid DictItemReq dictItemReq,
                             HttpServletRequest request,
                             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
@@ -56,7 +56,7 @@ public class KnowledgeController {
      * @param dictItemReq
      */
     @PutMapping("/conf")
-    public Long editDictConf(@RequestBody @Valid DictItemReq dictItemReq,
+    public DictItemResp editDictConf(@RequestBody @Valid DictItemReq dictItemReq,
                              HttpServletRequest request,
                              HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);

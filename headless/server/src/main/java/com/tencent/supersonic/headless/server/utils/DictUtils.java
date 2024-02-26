@@ -92,7 +92,7 @@ public class DictUtils {
                 dictItemResp.getItemId());
     }
 
-    public DictTaskDO generateDictTaskDO(DictItemResp dictItemResp, User user) {
+    public DictTaskDO generateDictTaskDO(DictItemResp dictItemResp, User user, TaskStatusEnum status) {
         DictTaskDO taskDO = new DictTaskDO();
         Date createAt = new Date();
         String name = dictItemResp.fetchDictFileName();
@@ -100,7 +100,7 @@ public class DictUtils {
         taskDO.setType(dictItemResp.getType().name());
         taskDO.setItemId(dictItemResp.getItemId());
         taskDO.setConfig(JsonUtil.toString(dictItemResp.getConfig()));
-        taskDO.setStatus(TaskStatusEnum.PENDING.getStatus());
+        taskDO.setStatus(status.getStatus());
         taskDO.setCreatedAt(createAt);
         String creator = (Objects.isNull(user) || Strings.isNullOrEmpty(user.getName())) ? "" : user.getName();
         taskDO.setCreatedBy(creator);
