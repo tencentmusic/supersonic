@@ -5,6 +5,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DataEvent;
@@ -15,15 +16,15 @@ import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.ChatGptHelper;
-import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
+import com.tencent.supersonic.headless.api.pojo.MeasureParam;
 import com.tencent.supersonic.headless.api.pojo.MetricParam;
 import com.tencent.supersonic.headless.api.pojo.MetricQueryDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricBaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
-import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
@@ -33,6 +34,7 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.MetricQuery
 import com.tencent.supersonic.headless.server.persistence.repository.MetricRepository;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricFilter;
+import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 import com.tencent.supersonic.headless.server.service.CollectService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
@@ -46,6 +48,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -184,9 +187,7 @@ public class MetricServiceImpl implements MetricService {
     public PageInfo<MetricResp> queryMetric(PageMetricReq pageMetricReq, User user) {
         MetricFilter metricFilter = new MetricFilter();
         BeanUtils.copyProperties(pageMetricReq, metricFilter);
-        Set<DomainResp> domainResps = domainService.getDomainChildren(pageMetricReq.getDomainIds());
-        List<Long> domainIds = domainResps.stream().map(DomainResp::getId).collect(Collectors.toList());
-        List<ModelResp> modelResps = modelService.getModelByDomainIds(domainIds);
+        List<ModelResp> modelResps = modelService.getAllModelByDomainIds(pageMetricReq.getDomainIds());
         List<Long> modelIds = modelResps.stream().map(ModelResp::getId).collect(Collectors.toList());
         pageMetricReq.getModelIds().addAll(modelIds);
         metricFilter.setModelIds(pageMetricReq.getModelIds());
@@ -230,28 +231,44 @@ public class MetricServiceImpl implements MetricService {
     }
 
     private List<MetricResp> filterByField(List<MetricResp> metricResps, List<String> fields) {
-        List<MetricResp> metricRespFiltered = Lists.newArrayList();
+        Set<MetricResp> metricRespFiltered = Sets.newHashSet();
         for (MetricResp metricResp : metricResps) {
-            for (String field : fields) {
-                if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
-                    List<Long> ids = metricResp.getMetricDefineByMetricParams().getMetrics()
-                            .stream().map(MetricParam::getId).collect(Collectors.toList());
-                    List<MetricResp> metricById = metricResps.stream()
-                            .filter(metric -> ids.contains(metric.getId()))
-                            .collect(Collectors.toList());
-                    for (MetricResp metric : metricById) {
-                        if (metric.getExpr().contains(field)) {
-                            metricRespFiltered.add(metricResp);
-                        }
-                    }
-                } else {
-                    if (metricResp.getExpr().contains(field)) {
-                        metricRespFiltered.add(metricResp);
-                    }
+            filterByField(metricResps, metricResp, fields, metricRespFiltered);
+        }
+        return new ArrayList<>(metricRespFiltered);
+    }
+
+    private boolean filterByField(List<MetricResp> metricResps, MetricResp metricResp,
+                                  List<String> fields, Set<MetricResp> metricRespFiltered) {
+        if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
+            List<Long> ids = metricResp.getMetricDefineByMetricParams().getMetrics()
+                    .stream().map(MetricParam::getId).collect(Collectors.toList());
+            List<MetricResp> metricById = metricResps.stream()
+                    .filter(metric -> ids.contains(metric.getId()))
+                    .collect(Collectors.toList());
+            for (MetricResp metric : metricById) {
+                if (filterByField(metricResps, metric, fields, metricRespFiltered)) {
+                    metricRespFiltered.add(metricResp);
+                    return true;
                 }
             }
+        } else if (MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())) {
+            if (fields.stream().anyMatch(field -> metricResp.getExpr().contains(field))) {
+                metricRespFiltered.add(metricResp);
+                return true;
+            }
+        } else if (MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType())) {
+            List<MeasureParam> measures = metricResp.getMetricDefineByMeasureParams().getMeasures();
+            List<String> fieldNameDepended = measures.stream().map(MeasureParam::getBizName)
+                    //measure bizName = model bizName_fieldName
+                    .map(name -> name.replaceFirst(metricResp.getModelBizName() + "_", ""))
+                    .collect(Collectors.toList());
+            if (fields.stream().anyMatch(fieldNameDepended::contains)) {
+                metricRespFiltered.add(metricResp);
+                return true;
+            }
         }
-        return metricRespFiltered;
+        return false;
     }
 
     @Override
@@ -343,7 +360,12 @@ public class MetricServiceImpl implements MetricService {
         }
         if (metricResp.getRelateDimension() != null
                 && !CollectionUtils.isEmpty(metricResp.getRelateDimension().getDrillDownDimensions())) {
-            drillDownDimensions.addAll(metricResp.getRelateDimension().getDrillDownDimensions());
+            for (DrillDownDimension drillDownDimension : metricResp.getRelateDimension().getDrillDownDimensions()) {
+                if (drillDownDimension.isInheritedFromModel() && !drillDownDimension.isNecessary()) {
+                    continue;
+                }
+                drillDownDimensions.add(drillDownDimension);
+            }
         }
         ModelResp modelResp = modelService.getModel(metricResp.getModelId());
         if (modelResp.getDrillDownDimensions() == null) {
@@ -433,6 +455,12 @@ public class MetricServiceImpl implements MetricService {
         metricFilter.setModelIds(modelIds);
         List<MetricDO> metricDOS = queryMetric(metricFilter);
         sendEventBatch(metricDOS, eventType);
+    }
+
+    @Override
+    public List<MetricResp> queryMetrics(MetricsFilter metricsFilter) {
+        List<MetricDO> metricDOS = metricRepository.getMetrics(metricsFilter);
+        return convertList(metricDOS, new ArrayList<>());
     }
 
     private void sendEventBatch(List<MetricDO> metricDOS, EventType eventType) {

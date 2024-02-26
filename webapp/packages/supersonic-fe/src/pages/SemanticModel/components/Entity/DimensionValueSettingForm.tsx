@@ -9,6 +9,7 @@ import {
   getDomainExtendDetailConfig,
   addDomainExtend,
   editDomainExtend,
+  searchKnowledgeConfigQuery,
   searchDictLatestTaskList,
   createDictTask,
 } from '../../service';
@@ -83,6 +84,7 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
 
   const queryDictLatestTaskList = async () => {
     setRefreshLoading(true);
+    searchKnowledgeConfigQuery({ itemId: dimensionItem.id });
     const { code, data } = await searchDictLatestTaskList({
       modelId,
     });

@@ -234,7 +234,7 @@ export declare namespace ISemantic {
 
   interface IDrillDownDimensionItem {
     dimensionId: number;
-    inheritFromModel?: boolean;
+    inheritedFromModel?: boolean;
     necessary?: boolean;
   }
 

@@ -29,6 +29,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DimensionRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
+import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -37,19 +38,18 @@ import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.ViewService;
 import com.tencent.supersonic.headless.server.utils.DimensionConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
@@ -215,6 +215,12 @@ public class DimensionServiceImpl implements DimensionService {
 
     private List<DimensionDO> queryDimension(DimensionFilter dimensionFilter) {
         return dimensionRepository.getDimension(dimensionFilter);
+    }
+
+    @Override
+    public List<DimensionResp> queryDimensions(DimensionsFilter dimensionsFilter) {
+        List<DimensionDO> dimensions = dimensionRepository.getDimensions(dimensionsFilter);
+        return convertList(dimensions, modelService.getModelMap());
     }
 
     @Override

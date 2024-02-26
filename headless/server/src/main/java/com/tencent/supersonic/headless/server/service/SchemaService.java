@@ -15,6 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.api.pojo.response.ViewSchemaResp;
@@ -25,6 +26,8 @@ import java.util.concurrent.ExecutionException;
 public interface SchemaService {
 
     List<ViewSchemaResp> fetchViewSchema(ViewFilterReq filter);
+
+    List<ModelSchemaResp> fetchModelSchemaResps(List<Long> modelIds);
 
     PageInfo<DimensionResp> queryDimension(PageDimensionReq pageDimensionReq, User user);
 

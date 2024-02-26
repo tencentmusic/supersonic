@@ -1,12 +1,14 @@
 package com.tencent.supersonic.headless.core.knowledge.helper;
 
+import com.google.common.collect.Lists;
 import com.hankcs.hanlp.corpus.tag.Nature;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.knowledge.ViewInfoStat;
-import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -79,6 +81,43 @@ public class NatureHelper {
             log.error("", e);
         }
         return null;
+    }
+
+    private static Long getModelId(String nature) {
+        try {
+            String[] split = nature.split(DictWordType.NATURE_SPILT);
+            if (split.length <= 1) {
+                return null;
+            }
+            return Long.valueOf(split[1]);
+        } catch (NumberFormatException e) {
+            log.error("", e);
+        }
+        return null;
+    }
+
+    private static Nature changeModel2View(String nature, Long viewId) {
+        try {
+            String[] split = nature.split(DictWordType.NATURE_SPILT);
+            if (split.length <= 1) {
+                return null;
+            }
+            split[1] = String.valueOf(viewId);
+            return Nature.create(StringUtils.join(split, DictWordType.NATURE_SPILT));
+        } catch (NumberFormatException e) {
+            log.error("", e);
+        }
+        return null;
+    }
+
+    public static List<String> changeModel2View(String nature, Map<Long, List<Long>> modelIdToViewIds) {
+        Long modelId = getModelId(nature);
+        List<Long> viewIds = modelIdToViewIds.get(modelId);
+        if (CollectionUtils.isEmpty(viewIds)) {
+            return Lists.newArrayList();
+        }
+        return viewIds.stream().map(viewId -> String.valueOf(changeModel2View(nature, viewId)))
+                .collect(Collectors.toList());
     }
 
     public static boolean isDimensionValueViewId(String nature) {

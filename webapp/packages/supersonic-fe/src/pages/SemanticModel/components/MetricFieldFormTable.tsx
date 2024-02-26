@@ -9,7 +9,7 @@ import { ISemantic } from '../data';
 
 type Props = {
   typeParams: ISemantic.IFieldTypeParams;
-  fieldList: string[];
+  fieldList: ISemantic.IFieldTypeParamsItem[];
   onFieldChange: (fields: ISemantic.IFieldTypeParamsItem[]) => void;
   onSqlChange: (sql: string) => void;
 };
@@ -20,7 +20,7 @@ const MetricFieldFormTable: React.FC<Props> = ({
   onFieldChange,
   onSqlChange,
 }) => {
-  const [tableData, setTableData] = useState<any[]>([]);
+  const [tableData, setTableData] = useState<ISemantic.IFieldTypeParamsItem[]>([]);
 
   const [defineTypeParams, setDefineTypeParams] = useState(
     typeParams || {
@@ -49,6 +49,13 @@ const MetricFieldFormTable: React.FC<Props> = ({
     });
   });
 
+  const [selectedKeysMap, setSelectedKeysMap] = useState<Record<string, boolean>>(() => {
+    return defineTypeParams.fields.reduce((keyMap, item: any) => {
+      keyMap[item.fieldName] = true;
+      return keyMap;
+    }, {});
+  });
+
   const columns = [
     {
       dataIndex: 'fieldName',
@@ -62,14 +69,24 @@ const MetricFieldFormTable: React.FC<Props> = ({
 
   const rowSelection = {
     selectedRowKeys: selectedKeys,
-    onChange: (_selectedRowKeys: any[]) => {
-      setSelectedKeys([..._selectedRowKeys]);
-      onFieldChange(
-        _selectedRowKeys.map((fieldName) => {
-          return { fieldName };
-        }),
-      );
+    onSelect: (record: ISemantic.IFieldTypeParamsItem, selected: boolean) => {
+      const updateKeys = { ...selectedKeysMap, [record.fieldName]: selected };
+      const selectedKeys: string[] = [];
+      setSelectedKeysMap(updateKeys);
+      const fieldList = Object.entries(updateKeys).reduce((list: any[], item) => {
+        const [fieldName, selected] = item;
+        if (selected) {
+          selectedKeys.push(fieldName);
+          list.push({ fieldName });
+        }
+        return list;
+      }, []);
+      setSelectedKeys(selectedKeys);
+      onFieldChange(fieldList);
     },
+    // onChange: (_selectedRowKeys: any[]) => {
+    //   setSelectedKeys([..._selectedRowKeys]);
+    // },
   };
 
   return (
@@ -85,10 +102,15 @@ const MetricFieldFormTable: React.FC<Props> = ({
             search: {
               placeholder: '请输入字段名称',
               onSearch: (value: string) => {
+                if (!value) {
+                  setTableData(fieldList);
+                  return;
+                }
+
                 setTableData(
-                  fieldList.reduce((data: ISemantic.IFieldTypeParamsItem[], fieldName) => {
-                    if (fieldName.includes(value)) {
-                      data.push({ fieldName });
+                  fieldList.reduce((data: ISemantic.IFieldTypeParamsItem[], item) => {
+                    if (item.fieldName.includes(value)) {
+                      data.push(item);
                     }
                     return data;
                   }, []),

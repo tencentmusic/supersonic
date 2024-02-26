@@ -1,34 +1,36 @@
 package com.tencent.supersonic.headless.core.knowledge.helper;
 
-import static com.hankcs.hanlp.HanLP.Config.CustomDictionaryPath;
-
+import com.google.common.collect.Lists;
 import com.hankcs.hanlp.HanLP;
 import com.hankcs.hanlp.corpus.tag.Nature;
 import com.hankcs.hanlp.dictionary.CoreDictionary;
 import com.hankcs.hanlp.dictionary.DynamicCustomDictionary;
 import com.hankcs.hanlp.seg.Segment;
+import com.hankcs.hanlp.seg.common.Term;
+import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.knowledge.DictWord;
 import com.tencent.supersonic.headless.core.knowledge.HadoopFileIOAdapter;
 import com.tencent.supersonic.headless.core.knowledge.MapResult;
 import com.tencent.supersonic.headless.core.knowledge.MultiCustomDictionary;
 import com.tencent.supersonic.headless.core.knowledge.SearchService;
-import com.tencent.supersonic.common.pojo.enums.DictWordType;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.hankcs.hanlp.seg.common.Term;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ResourceUtils;
+import static com.hankcs.hanlp.HanLP.Config.CustomDictionaryPath;
 
 /**
  * HanLP helper
@@ -212,18 +214,25 @@ public class HanlpHelper {
         }
     }
 
-    public static List<com.tencent.supersonic.headless.api.pojo.response.S2Term> getTerms(String text) {
+    public static List<S2Term> getTerms(String text, Map<Long, List<Long>> modelIdToViewIds) {
         return getSegment().seg(text.toLowerCase()).stream()
                 .filter(term -> term.getNature().startsWith(DictWordType.NATURE_SPILT))
-                .map(term -> transform2ApiTerm(term))
+                .map(term -> transform2ApiTerm(term, modelIdToViewIds))
+                .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
-    public static S2Term transform2ApiTerm(Term term) {
-        S2Term knowledgeTerm = new S2Term();
-        BeanUtils.copyProperties(term, knowledgeTerm);
-        knowledgeTerm.setFrequency(term.getFrequency());
-        return knowledgeTerm;
+    public static List<S2Term> transform2ApiTerm(Term term, Map<Long, List<Long>> modelIdToViewIds) {
+        List<S2Term> s2Terms = Lists.newArrayList();
+        List<String> natures = NatureHelper.changeModel2View(String.valueOf(term.getNature()), modelIdToViewIds);
+        for (String nature : natures) {
+            S2Term s2Term = new S2Term();
+            BeanUtils.copyProperties(term, s2Term);
+            s2Term.setNature(Nature.create(nature));
+            s2Term.setFrequency(term.getFrequency());
+            s2Terms.add(s2Term);
+        }
+        return s2Terms;
     }
 
 }

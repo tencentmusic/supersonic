@@ -27,8 +27,8 @@ public class EntityWordBuilder extends BaseWordBuilder {
             return result;
         }
 
-        Long view = schemaElement.getView();
-        String nature = DictWordType.NATURE_SPILT + view + DictWordType.NATURE_SPILT + schemaElement.getId()
+        Long modelId = schemaElement.getModel();
+        String nature = DictWordType.NATURE_SPILT + modelId + DictWordType.NATURE_SPILT + schemaElement.getId()
                 + DictWordType.ENTITY.getType();
 
         if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {

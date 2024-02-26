@@ -116,11 +116,11 @@ const DomainManagerTab: React.FC<Props> = ({
       key: 'permissonSetting',
       children: <PermissionSection permissionTarget={'model'} />,
     },
-    {
-      label: '问答设置',
-      key: 'chatSetting',
-      children: <ChatSettingSection />,
-    },
+    // {
+    //   label: '问答设置',
+    //   key: 'chatSetting',
+    //   children: <ChatSettingSection />,
+    // },
     {
       label: '推荐问题',
       key: 'recommendedQuestions',

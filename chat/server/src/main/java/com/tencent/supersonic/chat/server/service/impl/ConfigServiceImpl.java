@@ -219,7 +219,7 @@ public class ConfigServiceImpl implements ConfigService {
         }
         BeanUtils.copyProperties(chatConfigResp, chatConfigRich);
 
-        ViewSchema viewSchema = semanticService.getModelSchema(modelId);
+        ViewSchema viewSchema = semanticService.getViewSchema(modelId);
         if (viewSchema == null) {
             return chatConfigRich;
         }

@@ -30,6 +30,8 @@ public class MetricResp extends SchemaItem {
 
     private Long domainId;
 
+    private String modelBizName;
+
     private String modelName;
 
     //ATOMIC DERIVED

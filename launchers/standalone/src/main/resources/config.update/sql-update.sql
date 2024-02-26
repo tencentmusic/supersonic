@@ -183,7 +183,10 @@ CREATE TABLE s2_view(
     created_at  datetime,
     created_by  VARCHAR(255),
     updated_at  datetime,
-    updated_by  VARCHAR(255)
+    updated_by  VARCHAR(255),
+    query_config VARCHAR(3000),
+    `admin` varchar(3000) DEFAULT NULL,
+    `admin_org` varchar(3000) DEFAULT NULL
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 alter table s2_plugin change column model `view` varchar(100);

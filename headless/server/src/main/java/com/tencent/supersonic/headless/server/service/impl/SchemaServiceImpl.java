@@ -64,6 +64,13 @@ public class SchemaServiceImpl implements SchemaService {
 
     protected final Cache<String, List<ItemUseResp>> itemUseCache =
             CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).build();
+
+    protected final Cache<ViewFilterReq, List<ViewSchemaResp>> viewSchemaCache =
+            CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
+
+    protected final Cache<SchemaFilterReq, SemanticSchemaResp> semanticSchemaCache =
+            CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
+
     private final StatUtils statUtils;
     private final ModelService modelService;
     private final DimensionService dimensionService;
@@ -91,6 +98,22 @@ public class SchemaServiceImpl implements SchemaService {
     @SneakyThrows
     @Override
     public List<ViewSchemaResp> fetchViewSchema(ViewFilterReq filter) {
+        List<ViewSchemaResp> viewList = viewSchemaCache.getIfPresent(filter);
+        if (CollectionUtils.isEmpty(viewList)) {
+            viewList = buildViewSchema(filter);
+            viewSchemaCache.put(filter, viewList);
+        }
+        return viewList;
+    }
+
+    public ViewSchemaResp fetchViewSchema(Long viewId) {
+        if (viewId == null) {
+            return null;
+        }
+        return fetchViewSchema(new ViewFilterReq(viewId)).stream().findFirst().orElse(null);
+    }
+
+    public List<ViewSchemaResp> buildViewSchema(ViewFilterReq filter) {
         List<ViewSchemaResp> viewSchemaResps = new ArrayList<>();
         List<Long> viewIds = filter.getViewIds();
         MetaFilter metaFilter = new MetaFilter();
@@ -125,13 +148,6 @@ public class SchemaServiceImpl implements SchemaService {
         }
         fillStaticInfo(viewSchemaResps);
         return viewSchemaResps;
-    }
-
-    public ViewSchemaResp fetchViewSchema(Long viewId) {
-        if (viewId == null) {
-            return null;
-        }
-        return fetchViewSchema(new ViewFilterReq(viewId)).stream().findFirst().orElse(null);
     }
 
     public List<ModelSchemaResp> fetchModelSchemaResps(List<Long> modelIds) {
@@ -258,8 +274,7 @@ public class SchemaServiceImpl implements SchemaService {
         return viewService.getViewList(metaFilter);
     }
 
-    @Override
-    public SemanticSchemaResp fetchSemanticSchema(SchemaFilterReq schemaFilterReq) {
+    public SemanticSchemaResp buildSemanticSchema(SchemaFilterReq schemaFilterReq) {
         SemanticSchemaResp semanticSchemaResp = new SemanticSchemaResp();
         semanticSchemaResp.setViewId(schemaFilterReq.getViewId());
         semanticSchemaResp.setModelIds(schemaFilterReq.getModelIds());
@@ -290,6 +305,16 @@ public class SchemaServiceImpl implements SchemaService {
         if (!CollectionUtils.isEmpty(semanticSchemaResp.getModelIds())) {
             DatabaseResp databaseResp = modelService.getDatabaseByModelId(semanticSchemaResp.getModelIds().get(0));
             semanticSchemaResp.setDatabaseResp(databaseResp);
+        }
+        return semanticSchemaResp;
+    }
+
+    @Override
+    public SemanticSchemaResp fetchSemanticSchema(SchemaFilterReq schemaFilterReq) {
+        SemanticSchemaResp semanticSchemaResp = semanticSchemaCache.getIfPresent(schemaFilterReq);
+        if (semanticSchemaResp == null) {
+            semanticSchemaResp = buildSemanticSchema(schemaFilterReq);
+            semanticSchemaCache.put(schemaFilterReq, semanticSchemaResp);
         }
         return semanticSchemaResp;
     }

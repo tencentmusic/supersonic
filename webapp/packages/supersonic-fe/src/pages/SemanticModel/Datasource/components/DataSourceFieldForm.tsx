@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Select, Checkbox, Input, Alert, Space, Tooltip, Form, Switch } from 'antd';
 import TableTitleTooltips from '../../components/TableTitleTooltips';
 import { isUndefined } from 'lodash';
@@ -26,7 +26,7 @@ type FieldItem = {
   entityNames?: string[];
   isTag?: number;
 };
-
+const { Search } = Input;
 const FormItem = Form.Item;
 
 type Props = {
@@ -54,6 +54,7 @@ const DataSourceFieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSq
       [fieldName]: value,
     });
   };
+  const [filterValue, setFliterValue] = useState<string>();
 
   const columns = [
     {
@@ -296,12 +297,32 @@ const DataSourceFieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSq
     },
   ];
 
+  const onSearch = (value: any) => {
+    setFliterValue(value);
+  };
+
+  const tableData = filterValue
+    ? fields.filter((item) => {
+        return item.bizName.includes(filterValue);
+      }) || []
+    : fields;
   return (
     <>
+      <div style={{ marginBottom: 10 }}>
+        <Search
+          allowClear
+          // className={styles.search}
+          style={{ width: 250 }}
+          placeholder="请输入英文名称进行搜索"
+          onSearch={onSearch}
+        />
+      </div>
+
       <Table<FieldItem>
-        dataSource={fields}
+        dataSource={tableData}
         columns={columns}
         rowKey="bizName"
+        virtual
         pagination={false}
         scroll={{ y: 500 }}
       />

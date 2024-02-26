@@ -5,11 +5,13 @@ import DataSourceFieldForm from './DataSourceFieldForm';
 import { formLayout } from '@/components/FormHelper/utils';
 import { EnumDataSourceType } from '../constants';
 import styles from '../style.less';
-import { updateModel, createModel, getColumns } from '../../service';
+import { updateModel, createModel, getColumns, getUnAvailableItem } from '../../service';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
 import { connect } from 'umi';
 import { ISemantic, IDataSource } from '../../data';
+import { isArrayOfValues } from '@/utils/utils';
+import EffectDimensionAndMetricTipsModal from './EffectDimensionAndMetricTipsModal';
 
 export type CreateFormProps = {
   domainManger: StateType;
@@ -54,6 +56,12 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   const [saveLoading, setSaveLoading] = useState(false);
   const [hasEmptyNameField, setHasEmptyNameField] = useState<boolean>(false);
   const [formDatabaseId, setFormDatabaseId] = useState<number>();
+  const [queryParamsState, setQueryParamsState] = useState({});
+  const [effectTipsModalOpenState, setEffectTipsModalOpenState] = useState<boolean>(false);
+  const [effectTipsData, setEffectTipsData] = useState<
+    (ISemantic.IDimensionItem | ISemantic.IMetricItem)[]
+  >([]);
+
   const formValRef = useRef(initFormVal as any);
   const [form] = Form.useForm();
   const { databaseConfigList, selectModelId: modelId, selectDomainId } = domainManger;
@@ -83,6 +91,58 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
 
   const forward = () => setCurrentStep(currentStep + 1);
   const backward = () => setCurrentStep(currentStep - 1);
+
+  const checkAvailableItem = async (fields: string[] = []) => {
+    if (!modelItem) {
+      return false;
+    }
+    const originalFields = modelItem.modelDetail?.fields || [];
+    const hasRemoveFields = originalFields.reduce(
+      (fieldList: string[], item: IDataSource.IDataSourceDetailFieldsItem) => {
+        const { fieldName } = item;
+        if (!fields.includes(fieldName)) {
+          fieldList.push(fieldName);
+        }
+        return fieldList;
+      },
+      [],
+    );
+    if (!isArrayOfValues(hasRemoveFields)) {
+      return false;
+    }
+    const { code, data, msg } = await getUnAvailableItem({
+      modelId: modelItem?.id,
+      fields: hasRemoveFields,
+    });
+    if (code === 200 && data) {
+      const { metricResps = [], dimensionResps = [] } = data;
+      if (!isArrayOfValues(metricResps) && !isArrayOfValues(dimensionResps)) {
+        return false;
+      }
+      setEffectTipsData([...metricResps, ...dimensionResps]);
+      setEffectTipsModalOpenState(true);
+      return true;
+    }
+    message.error(msg);
+    return false;
+  };
+
+  const saveModel = async (queryParams: any) => {
+    setSaveLoading(true);
+    const queryDatasource = isEdit ? updateModel : createModel;
+    const { code, msg, data } = await queryDatasource(queryParams);
+    setSaveLoading(false);
+    if (code === 200) {
+      message.success('保存模型成功！');
+      onSubmit?.({
+        ...queryParams,
+        ...data,
+        resData: data,
+      });
+      return;
+    }
+    message.error(msg);
+  };
 
   const getFieldsClassify = (fieldsList: any[]) => {
     const classify = fieldsList.reduce(
@@ -129,6 +189,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           case EnumDataSourceType.PRIMARY:
             fieldsClassify.identifiers.push({
               bizName: fieldName,
+              isCreateDimension,
               name,
               type,
               entityNames,
@@ -156,6 +217,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     );
     return classify;
   };
+
   const handleNext = async (saveState: boolean = false) => {
     const fieldsValue = await form.validateFields();
 
@@ -175,7 +237,6 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
     if (!saveState && currentStep < 1) {
       forward();
     } else {
-      setSaveLoading(true);
       const { dbName, tableName } = submitForm;
       const queryParams = {
         ...submitForm,
@@ -190,19 +251,12 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           sqlQuery: sql,
         },
       };
-      const queryDatasource = isEdit ? updateModel : createModel;
-      const { code, msg, data } = await queryDatasource(queryParams);
-      setSaveLoading(false);
-      if (code === 200) {
-        message.success('保存模型成功！');
-        onSubmit?.({
-          ...queryParams,
-          ...data,
-          resData: data,
-        });
+      setQueryParamsState(queryParams);
+      const checkState = await checkAvailableItem(fieldColumns.map((item) => item.nameEn));
+      if (checkState) {
         return;
       }
-      message.error(msg);
+      saveModel(queryParams);
     }
   };
 
@@ -484,6 +538,17 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
         {renderContent()}
       </Form>
       {children}
+
+      <EffectDimensionAndMetricTipsModal
+        open={effectTipsModalOpenState}
+        tableDataSource={effectTipsData}
+        onCancel={() => {
+          setEffectTipsModalOpenState(false);
+        }}
+        onOk={() => {
+          saveModel(queryParamsState);
+        }}
+      />
     </Modal>
   );
 };

@@ -494,7 +494,6 @@ CREATE TABLE s2_view
     created_by  VARCHAR(255),
     updated_at  datetime,
     updated_by  VARCHAR(255),
-    filter_sql VARCHAR(1000),
     query_config VARCHAR(3000),
     `admin` varchar(3000) DEFAULT NULL,
     `admin_org` varchar(3000) DEFAULT NULL

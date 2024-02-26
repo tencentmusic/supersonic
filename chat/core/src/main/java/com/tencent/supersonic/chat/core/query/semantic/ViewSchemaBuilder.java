@@ -44,6 +44,7 @@ public class ViewSchemaBuilder {
 
             SchemaElement metricToAdd = SchemaElement.builder()
                     .view(resp.getId())
+                    .model(metric.getModelId())
                     .id(metric.getId())
                     .name(metric.getName())
                     .bizName(metric.getBizName())
@@ -84,6 +85,7 @@ public class ViewSchemaBuilder {
             }
             SchemaElement dimToAdd = SchemaElement.builder()
                     .view(resp.getId())
+                    .model(dim.getModelId())
                     .id(dim.getId())
                     .name(dim.getName())
                     .bizName(dim.getBizName())
@@ -96,6 +98,7 @@ public class ViewSchemaBuilder {
 
             SchemaElement dimValueToAdd = SchemaElement.builder()
                     .view(resp.getId())
+                    .model(dim.getModelId())
                     .id(dim.getId())
                     .name(dim.getName())
                     .bizName(dim.getBizName())
@@ -107,6 +110,7 @@ public class ViewSchemaBuilder {
             if (dim.getIsTag() == 1) {
                 SchemaElement tagToAdd = SchemaElement.builder()
                         .view(resp.getId())
+                        .model(dim.getModelId())
                         .id(dim.getId())
                         .name(dim.getName())
                         .bizName(dim.getBizName())
@@ -126,6 +130,7 @@ public class ViewSchemaBuilder {
         if (dim != null) {
             SchemaElement entity = SchemaElement.builder()
                     .view(resp.getId())
+                    .model(dim.getModelId())
                     .id(dim.getId())
                     .name(dim.getName())
                     .bizName(dim.getBizName())

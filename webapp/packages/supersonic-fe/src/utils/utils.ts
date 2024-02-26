@@ -355,7 +355,7 @@ export const getFormattedValueData = (value: number | string, remainZero?: boole
   return `${formattedValue}${unit === NumericUnit.None ? '' : unit}`;
 };
 
-function getLeafNodes(treeNodes: any[]): any[] {
+export function getLeafNodes(treeNodes: any[]): any[] {
   const leafNodes: any[] = [];
 
   function traverse(node: any) {
