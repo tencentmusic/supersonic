@@ -20,11 +20,11 @@ export enum MetricTypeWording {
 }
 
 export enum DictTaskState {
-  ERROR = '错误',
-  PENDING = '等待',
-  RUNNING = '正在执行',
-  SUCCESS = '成功',
-  UNKNOWN = '未知',
+  error = '错误',
+  pending = '等待',
+  running = '正在执行',
+  success = '成功',
+  unknown = '未知',
 }
 
 export enum StatusEnum {
@@ -40,4 +40,23 @@ export enum OperatorEnum {
   EQUAL = '=',
   IN = 'IN',
   LIKE = 'LIKE',
+}
+
+export enum KnowledgeConfigTypeEnum {
+  DIMENSION = 'DIMENSION',
+  METRIC = 'METRIC',
+  DOMAIN = 'DOMAIN',
+  ENTITY = 'ENTITY',
+  VIEW = 'VIEW',
+  MODEL = 'MODEL',
+  UNKNOWN = 'UNKNOWN',
+}
+
+export enum KnowledgeConfigStatusEnum {
+  ONLINE = 'ONLINE',
+  OFFLINE = 'OFFLINE',
+  DELETED = 'DELETED',
+  INITIALIZED = 'INITIALIZED',
+  UNAVAILABLE = 'UNAVAILABLE',
+  UNKNOWN = 'UNKNOWN',
 }
