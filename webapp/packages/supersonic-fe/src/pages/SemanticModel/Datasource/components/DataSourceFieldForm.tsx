@@ -55,18 +55,6 @@ const DataSourceFieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSq
     });
   };
   const [filterValue, setFliterValue] = useState<string>();
-  const [tableData, setTableData] = useState<FieldItem[]>([]);
-
-  useEffect(() => {
-    if (filterValue) {
-      const filterData = fields.filter((item) => {
-        return item.bizName.includes(filterValue);
-      });
-      setTableData(filterData);
-      return;
-    }
-    setTableData(fields);
-  }, [fields]);
 
   const columns = [
     {
@@ -311,11 +299,13 @@ const DataSourceFieldForm: React.FC<Props> = ({ fields, sql, onFieldChange, onSq
 
   const onSearch = (value: any) => {
     setFliterValue(value);
-    const filterData = fields.filter((item) => {
-      return item.bizName.includes(value);
-    });
-    setTableData(filterData);
   };
+
+  const tableData = filterValue
+    ? fields.filter((item) => {
+        return item.bizName.includes(filterValue);
+      }) || []
+    : fields;
   return (
     <>
       <div style={{ marginBottom: 10 }}>
