@@ -1,10 +1,12 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import com.tencent.supersonic.headless.api.pojo.SqlVariable;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Data
 public class SqlExecuteReq {
@@ -15,6 +17,8 @@ public class SqlExecuteReq {
 
     @NotBlank(message = "sql can not be blank")
     private String sql;
+
+    private List<SqlVariable> sqlVariables;
 
     public String getSql() {
         if (StringUtils.isNotBlank(sql) && sql.endsWith(";")) {

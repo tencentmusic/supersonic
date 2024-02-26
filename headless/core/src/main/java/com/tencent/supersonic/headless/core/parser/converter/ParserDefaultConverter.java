@@ -1,19 +1,19 @@
 package com.tencent.supersonic.headless.core.parser.converter;
 
 import com.tencent.supersonic.common.pojo.ColumnOrder;
-import com.tencent.supersonic.headless.api.pojo.Param;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
-import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
+import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * HeadlessConverter default implement
@@ -59,8 +59,6 @@ public class ParserDefaultConverter implements HeadlessConverter {
         metricQueryParam.setWhere(where);
         metricQueryParam.setOrder(queryParam.getOrders().stream()
                 .map(order -> new ColumnOrder(order.getColumn(), order.getDirection())).collect(Collectors.toList()));
-        metricQueryParam.setVariables(queryParam.getParams().stream()
-                .collect(Collectors.toMap(Param::getName, Param::getValue, (k1, k2) -> k1)));
         metricQueryParam.setLimit(queryParam.getLimit());
 
         // support detail query
