@@ -13,7 +13,6 @@ export type SensitiveLevel = 0 | 1 | 2 | null;
 
 export type ToolBarSearchCallBack = (text: string) => void;
 
-
 export declare namespace IDataSource {
   interface IExecuteSqlColumn {
     name?: string;
@@ -59,15 +58,15 @@ export declare namespace IDataSource {
     fieldName: string;
   }
 
-  type ISqlParamsValueType = 'string' | 'sql' | 'date' | 'boolean' | 'number';
-   interface ISqlParamsItem  {
+  type ISqlParamsValueType = 'STRING' | 'EXPR' | 'NUMBER';
+  interface ISqlParamsItem {
     index?: number;
     defaultValues: (boolean | string | number)[];
     name: string;
-    type: string;
+    // type: string;
     valueType: ISqlParamsValueType;
     udf?: boolean;
-  };
+  }
 
   interface IDataSourceDetail {
     queryType: string;
@@ -77,7 +76,7 @@ export declare namespace IDataSource {
     fields: IDataSourceDetailFieldsItem[];
     dimensions: IDimensionsItem[];
     measures: IMeasuresItem[];
-    sqlVariables: 
+    sqlVariables: ISqlParamsItem[];
   }
 
   interface IDataSourceItem {
@@ -344,7 +343,6 @@ export declare namespace ISemantic {
   }
   type IDatabaseItemList = IDatabaseItem[];
 
-
   interface IDictKnowledgeConfigItemConfig {
     metricId?: number;
     blackList: string[];
@@ -393,7 +391,6 @@ export declare namespace IChatConfig {
       metricList: ISemantic.IMetricList;
     };
   }
-
 
   interface IKnowledgeInfosItem {
     itemId: number;

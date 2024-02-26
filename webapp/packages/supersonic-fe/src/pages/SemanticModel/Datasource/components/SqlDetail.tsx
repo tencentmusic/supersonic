@@ -33,6 +33,7 @@ export type DataSourceSubmitData = {
   sql: string;
   databaseId: number;
   columns: any[];
+  sqlParams: any[];
 };
 
 type IProps = {
@@ -428,9 +429,9 @@ const SqlDetail: React.FC<IProps> = ({
           <Tooltip title="格式化SQL语句">
             <EditOutlined className={styles.sqlOprIcon} onClick={formatSQL} />
           </Tooltip>
-          {/* <Tooltip title="动态变量">
+          <Tooltip title="动态变量">
             <ApiOutlined className={styles.sqlOprIcon} onClick={handleVariable} />
-          </Tooltip> */}
+          </Tooltip>
           <Tooltip title="改变主题">
             <SwapOutlined className={styles.sqlOprIcon} onClick={handleThemeChange} />
           </Tooltip>
@@ -481,7 +482,12 @@ const SqlDetail: React.FC<IProps> = ({
               className={variableCollapsed ? styles.hideSqlParams : styles.sqlParams}
               // style={{ height: sqlEditorHeight }}
             >
-              <SqlParams value={sqlParams} onChange={setSqlParams} />
+              <SqlParams
+                value={sqlParams}
+                onChange={(params) => {
+                  setSqlParams(params);
+                }}
+              />
             </div>
           </div>
         </Pane>
@@ -496,6 +502,7 @@ const SqlDetail: React.FC<IProps> = ({
                     columns: scriptColumns,
                     databaseId: currentDatabaseItem?.key || 0,
                     sql,
+                    sqlParams,
                   });
                 }}
                 disabled={!runState}
