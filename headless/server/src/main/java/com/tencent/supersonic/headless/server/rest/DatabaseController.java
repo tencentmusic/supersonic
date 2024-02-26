@@ -73,7 +73,7 @@ public class DatabaseController {
             HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return databaseService.executeSql(sqlExecuteReq.getSql(), sqlExecuteReq.getId(), user);
+        return databaseService.executeSql(sqlExecuteReq, sqlExecuteReq.getId(), user);
     }
 
     @RequestMapping("/getDbNames/{id}")

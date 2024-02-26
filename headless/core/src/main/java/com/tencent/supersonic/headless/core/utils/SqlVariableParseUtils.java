@@ -30,13 +30,13 @@ public class SqlVariableParseUtils {
     private static final char delimiter = '$';
 
     public static String parse(String sql, List<SqlVariable> sqlVariables, List<Param> params) {
+        Map<String, Object> variables = new HashMap<>();
         if (CollectionUtils.isEmpty(sqlVariables)) {
             return sql;
         }
-        Map<String, Object> queryParams = new HashMap<>();
         //1. handle default variable value
         sqlVariables.forEach(variable -> {
-            queryParams.put(variable.getName().trim(),
+            variables.put(variable.getName().trim(),
                     getValues(variable.getValueType(), variable.getDefaultValues()));
         });
 
@@ -49,21 +49,25 @@ public class SqlVariableParseUtils {
                     List<SqlVariable> list = map.get(p.getName());
                     if (!CollectionUtils.isEmpty(list)) {
                         SqlVariable v = list.get(list.size() - 1);
-                        queryParams.put(p.getName().trim(), getValue(v.getValueType(), p.getValue()));
+                        variables.put(p.getName().trim(), getValue(v.getValueType(), p.getValue()));
                     }
                 }
             });
         }
 
-        queryParams.forEach((k, v) -> {
+        variables.forEach((k, v) -> {
             if (v instanceof List && ((List) v).size() > 0) {
                 v = ((List) v).stream().collect(Collectors.joining(COMMA)).toString();
             }
-            queryParams.put(k, v);
+            variables.put(k, v);
         });
+        return parse(sql, variables);
+    }
+
+    public static String parse(String sql, Map<String, Object> variables) {
         ST st = new ST(sql, delimiter, delimiter);
-        if (!CollectionUtils.isEmpty(queryParams)) {
-            queryParams.forEach(st::add);
+        if (!CollectionUtils.isEmpty(variables)) {
+            variables.forEach(st::add);
         }
         return st.render();
     }

@@ -4,7 +4,7 @@ import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
-import com.tencent.supersonic.headless.api.pojo.enums.DatasourceQuery;
+import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
@@ -46,7 +46,7 @@ public class ModelYamlManager {
                 .collect(Collectors.toList()));
         dataModelYamlTpl.setName(modelResp.getBizName());
         dataModelYamlTpl.setSourceId(modelResp.getDatabaseId());
-        if (modelDetail.getQueryType().equalsIgnoreCase(DatasourceQuery.SQL_QUERY.getName())) {
+        if (modelDetail.getQueryType().equalsIgnoreCase(ModelDefineType.SQL_QUERY.getName())) {
             dataModelYamlTpl.setSqlQuery(modelDetail.getSqlQuery());
         } else {
             dataModelYamlTpl.setTableQuery(modelDetail.getTableQuery());
