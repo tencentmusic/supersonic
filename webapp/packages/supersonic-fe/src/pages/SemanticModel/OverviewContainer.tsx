@@ -233,39 +233,21 @@ const OverviewContainer: React.FC<Props> = ({ mode, domainManger, dispatch }) =>
         <div className={styles.content}>
           {selectDomainId ? (
             <>
-              {mode === 'domain' ? (
-                <DomainManagerTab
-                  isModel={isModel}
-                  activeKey={activeKey}
-                  modelList={modelList}
-                  handleModelChange={(model) => {
-                    handleModelChange(model);
-                  }}
-                  onBackDomainBtnClick={() => {
-                    cleanModelInfo(selectDomainId);
-                  }}
-                  onMenuChange={(menuKey) => {
-                    setActiveKey(menuKey);
-                    pushUrlMenu(selectDomainId, selectModelId, menuKey);
-                  }}
-                />
-              ) : (
-                <ChatSettingTab
-                  isModel={isModel}
-                  activeKey={activeKey}
-                  modelList={modelList}
-                  handleModelChange={(model) => {
-                    handleModelChange(model);
-                  }}
-                  onBackDomainBtnClick={() => {
-                    cleanModelInfo(selectDomainId);
-                  }}
-                  onMenuChange={(menuKey) => {
-                    setActiveKey(menuKey);
-                    pushUrlMenu(selectDomainId, selectModelId, menuKey);
-                  }}
-                />
-              )}
+              <DomainManagerTab
+                isModel={isModel}
+                activeKey={activeKey}
+                modelList={modelList}
+                handleModelChange={(model) => {
+                  handleModelChange(model);
+                }}
+                onBackDomainBtnClick={() => {
+                  cleanModelInfo(selectDomainId);
+                }}
+                onMenuChange={(menuKey) => {
+                  setActiveKey(menuKey);
+                  pushUrlMenu(selectDomainId, selectModelId, menuKey);
+                }}
+              />
             </>
           ) : (
             <h2 className={styles.mainTip}>请选择项目</h2>
