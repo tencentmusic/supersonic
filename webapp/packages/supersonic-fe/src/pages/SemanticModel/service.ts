@@ -1,6 +1,7 @@
 import request from 'umi-request';
 import moment from 'moment';
 import { DatePeridMap } from '@/pages/SemanticModel/constant';
+import { IDataSource } from './data';
 
 const getRunningEnv = () => {
   return window.location.pathname.includes('/chatSetting/') ? 'chat' : 'semantic';
@@ -364,6 +365,7 @@ export function testDatabaseConnect(data: SaveDatabaseParams): Promise<any> {
 type ExcuteSqlParams = {
   sql: string;
   id: number;
+  sqlVariables: IDataSource.ISqlParamsItem[];
 };
 
 // 执行脚本
