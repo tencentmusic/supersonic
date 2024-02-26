@@ -20,6 +20,7 @@ export enum MetricTypeWording {
 }
 
 export enum DictTaskState {
+  initial = '--',
   error = '错误',
   pending = '等待',
   running = '正在执行',

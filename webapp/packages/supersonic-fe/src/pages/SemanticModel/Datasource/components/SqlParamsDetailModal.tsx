@@ -8,17 +8,15 @@ import { IDataSource } from '../../data';
 import TextArea from 'antd/lib/input/TextArea';
 import ParamsSqlEditor from './SqlParamsSqlEditor';
 
-const EnumSqlParamsType = {
-  auth: '权限变量',
-  query: '查询变量',
-};
+// const EnumSqlParamsType = {
+//   auth: '权限变量',
+//   query: '查询变量',
+// };
 
 const EnumSqlValueType = {
-  string: '字符串',
-  sql: 'SQL表达式',
-  date: '日期',
-  boolean: '布尔',
-  number: '数字',
+  STRING: '字符串',
+  NUMBER: '数字',
+  EXPR: 'SQL表达式',
 };
 
 const { Option } = Select;
@@ -56,7 +54,6 @@ const SqlParamsDetailModal: FC<IProps> = ({
   nameList,
 }) => {
   const [valueType, setValueType] = useState<IDataSource.ISqlParamsValueType>();
-  const [udf, setUdf] = useState<boolean>();
   const [oldName, setOldName] = useState<string>();
 
   const formLayout = {
@@ -68,12 +65,11 @@ const SqlParamsDetailModal: FC<IProps> = ({
 
   const submitSave = async () => {
     const fieldsValue = await form.validateFields();
-    onSave({ ...fieldsValue, index: initValue.index, udf });
+    onSave({ ...fieldsValue, index: initValue.index });
   };
 
   const handleCancel = async () => {
     if (onCancel && isFunction(onCancel)) {
-      setUdf(false);
       onCancel(oprType);
     }
   };
@@ -83,7 +79,6 @@ const SqlParamsDetailModal: FC<IProps> = ({
       ...initValue,
     });
     setValueType(initValue.valueType);
-    setUdf(initValue.udf);
     setOldName(initValue.name);
   }, [initValue]);
 
@@ -124,7 +119,7 @@ const SqlParamsDetailModal: FC<IProps> = ({
         >
           <Input placeholder="请输入参数名称" />
         </Form.Item>
-        <Form.Item
+        {/* <Form.Item
           name="type"
           label="参数类型"
           rules={[{ required: true, message: '请选择参数类型' }]}
@@ -136,7 +131,7 @@ const SqlParamsDetailModal: FC<IProps> = ({
               </Option>
             ))}
           </Select>
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item
           name="valueType"
           label="值类型"
@@ -146,7 +141,7 @@ const SqlParamsDetailModal: FC<IProps> = ({
             placeholder="请选择值类型"
             onChange={(e) => {
               setValueType(e as IDataSource.ISqlParamsValueType);
-              if (e === 'sql') {
+              if (e === 'EXPR') {
                 form.setFieldsValue({
                   defaultValues: undefined,
                 });
@@ -160,10 +155,10 @@ const SqlParamsDetailModal: FC<IProps> = ({
             ))}
           </Select>
         </Form.Item>
-        <Form.Item name="alias" label="别名">
+        {/* <Form.Item name="alias" label="别名">
           <Input placeholder="请输入参数别名" />
-        </Form.Item>
-        {valueType !== 'sql' && (
+        </Form.Item> */}
+        {/* {valueType !== 'sql' && (
           <Form.Item name="udf" label="是否使用表达式">
             <Checkbox
               checked={udf}
@@ -177,8 +172,8 @@ const SqlParamsDetailModal: FC<IProps> = ({
               }}
             />
           </Form.Item>
-        )}
-        {valueType === 'sql' || udf ? (
+        )} */}
+        {valueType === 'EXPR' ? (
           <Form.Item name="defaultValues" label="表达式">
             <ParamsTextArea />
           </Form.Item>

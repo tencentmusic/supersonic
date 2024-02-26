@@ -18,6 +18,7 @@ export type CreateFormProps = {
   dispatch: Dispatch;
   createModalVisible: boolean;
   sql?: string;
+  sqlParams?: IDataSource.ISqlParamsItem[];
   databaseId?: number;
   modelItem: ISemantic.IModelItem;
   onCancel?: () => void;
@@ -42,6 +43,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
   createModalVisible,
   scriptColumns,
   sql = '',
+  sqlParams,
   onSubmit,
   modelItem,
   databaseId,
@@ -249,6 +251,7 @@ const DataSourceCreateForm: React.FC<CreateFormProps> = ({
           queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
           tableQuery: dbName && tableName ? `${dbName}.${tableName}` : '',
           sqlQuery: sql,
+          sqlVariables: sqlParams,
         },
       };
       setQueryParamsState(queryParams);

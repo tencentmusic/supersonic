@@ -1,30 +1,28 @@
 import { useState } from 'react';
 import type { FC } from 'react';
-import type { SqlParamsItem, OprType } from '../data';
-
+import type { OprType } from '../data';
+import { IDataSource } from '../../data';
 import styles from '../style.less';
 import { AppstoreAddOutlined, DeleteTwoTone, EditTwoTone } from '@ant-design/icons';
 import SqlParamsDetailModal from './SqlParamsDetailModal';
 import { List } from 'antd';
 
 type Props = {
-  value?: SqlParamsItem[];
-  onChange?: (e: SqlParamsItem[]) => void;
+  value?: IDataSource.ISqlParamsItem[];
+  onChange?: (e: IDataSource.ISqlParamsItem[]) => void;
 };
 
-const defalutItem: SqlParamsItem = {
+const defalutItem: IDataSource.ISqlParamsItem = {
   name: '',
-  type: 'query',
   defaultValues: [],
-  valueType: 'string',
-  udf: false,
+  valueType: 'STRING',
 };
 
 const SqlParams: FC<Props> = ({ value, onChange }) => {
   const [oprType, setOprType] = useState<OprType>('add');
   const [visible, setVisible] = useState<boolean>(false);
-  const [initValue, setInitValue] = useState<SqlParamsItem>();
-  const paramsChange = (params: SqlParamsItem[]) => {
+  const [initValue, setInitValue] = useState<IDataSource.ISqlParamsItem>();
+  const paramsChange = (params: IDataSource.ISqlParamsItem[]) => {
     if (onChange) {
       onChange(params);
     }
@@ -34,7 +32,7 @@ const SqlParams: FC<Props> = ({ value, onChange }) => {
     setVisible(true);
     setInitValue(defalutItem);
   };
-  const handleSave = async (values: SqlParamsItem) => {
+  const handleSave = async (values: IDataSource.ISqlParamsItem) => {
     const newValue = value ? [...value] : [];
     const { index, ...rest } = values;
     if (index || index === 0) {
