@@ -256,12 +256,6 @@ export function getDomainExtendConfig(data: any): Promise<any> {
   });
 }
 
-export function getDomainExtendDetailConfig(data: any): Promise<any> {
-  return request(`${process.env.CHAT_API_BASE_URL}conf/richDesc/${data.modelId}`, {
-    method: 'GET',
-  });
-}
-
 export function getDatasourceRelaList(id?: number): Promise<any> {
   return request(`${process.env.API_BASE_URL}datasource/getDatasourceRelaList/${id}`, {
     method: 'GET',
@@ -444,15 +438,29 @@ export function getMetricsToCreateNewMetric(data: any): Promise<any> {
 }
 
 export function createDictTask(data: any): Promise<any> {
-  return request(`${process.env.CHAT_API_BASE_URL}dict/task`, {
+  return request(`${process.env.API_BASE_URL}knowledge/task`, {
     method: 'POST',
     data,
   });
 }
 
-export function deleteDictTask(data: any): Promise<any> {
-  return request(`${process.env.CHAT_API_BASE_URL}dict/task/delete`, {
+export function createDictConfig(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}knowledge/conf`, {
     method: 'POST',
+    data,
+  });
+}
+
+export function editDictConfig(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}knowledge/conf`, {
+    method: 'PUT',
+    data,
+  });
+}
+
+export function deleteDictTask(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}knowledge/task/delete`, {
+    method: 'PUT',
     data,
   });
 }

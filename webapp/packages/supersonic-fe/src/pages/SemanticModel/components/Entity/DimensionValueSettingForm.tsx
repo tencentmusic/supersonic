@@ -1,107 +1,118 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import type { ForwardRefRenderFunction } from 'react';
-import { Form, Input, Switch, Space, Button, Divider, Tooltip, message } from 'antd';
+import { Form, Switch, Space, Button, Tooltip, message, Select } from 'antd';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import { RedoOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { formLayout } from '@/components/FormHelper/utils';
-import { DictTaskState, TransType } from '../../enum';
+import { DictTaskState, KnowledgeConfigTypeEnum, KnowledgeConfigStatusEnum } from '../../enum';
 import {
-  getDomainExtendDetailConfig,
-  addDomainExtend,
-  editDomainExtend,
   searchKnowledgeConfigQuery,
   searchDictLatestTaskList,
   createDictTask,
+  editDictConfig,
+  createDictConfig,
+  deleteDictTask,
 } from '../../service';
-import type { IChatConfig, ISemantic } from '../../data';
+import type { ISemantic } from '../../data';
 import { isString } from 'lodash';
 import styles from '../style.less';
 import CommonEditList from '../../components/CommonEditList';
 
 type Props = {
-  modelId: number;
   dimensionItem: ISemantic.IDimensionItem;
   onSubmit?: () => void;
 };
 
-type TaskStateMap = Record<string, DictTaskState>;
-
 const FormItem = Form.Item;
 
 const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
-  { modelId, dimensionItem },
+  { dimensionItem },
   ref,
 ) => {
   const [form] = Form.useForm();
 
   const exchangeFields = ['blackList', 'whiteList'];
-  const [modelRichConfigData, setModelRichConfigData] = useState<IChatConfig.IConfig>();
   const [dimensionVisible, setDimensionVisible] = useState<boolean>(false);
-  const [taskStateMap, setTaskStateMap] = useState<TaskStateMap>({});
+  const [taskItemState, setTaskItemState] = useState<ISemantic.IDictKnowledgeTaskItem>();
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [refreshLoading, setRefreshLoading] = useState<boolean>(false);
+  const [knowledgeConfig, setKnowledgeConfig] = useState<ISemantic.IDictKnowledgeConfigItem>();
 
-  const queryThemeListData: any = async () => {
-    const { code, data } = await getDomainExtendDetailConfig({
-      modelId,
-    });
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  const [importDictState, setImportDictState] = useState<boolean>(false);
 
-    if (code === 200) {
-      setModelRichConfigData(data);
-      const targetKnowledgeInfos = data?.chatAggRichConfig?.knowledgeInfos || [];
-      const targetConfig = targetKnowledgeInfos.find(
-        (item: IChatConfig.IKnowledgeInfosItem) => item.itemId === dimensionItem.id,
-      );
-      if (targetConfig) {
-        const { knowledgeAdvancedConfig, searchEnable } = targetConfig;
-        setDimensionVisible(searchEnable);
-        const { blackList, whiteList, ruleList } = knowledgeAdvancedConfig;
-        form.setFieldsValue({
-          blackList: blackList.join(','),
-          whiteList: whiteList.join(','),
-          ruleList: ruleList || [],
-        });
-      }
-      return;
-    }
-
-    message.error('获取问答设置信息失败');
+  const defaultKnowledgeConfig: ISemantic.IDictKnowledgeConfigItemConfig = {
+    blackList: [],
+    whiteList: [],
+    ruleList: [],
   };
 
   useEffect(() => {
-    queryThemeListData();
+    searchKnowledgeConfig();
     queryDictLatestTaskList();
   }, []);
 
-  const taskRender = (dimension: ISemantic.IDimensionItem) => {
-    const { id, type } = dimension;
-    const target = taskStateMap[id];
-    if (type === TransType.DIMENSION && target) {
-      return DictTaskState[target] || '未知状态';
+  const taskRender = () => {
+    if (taskItemState?.taskStatus) {
+      return (
+        <span style={{ color: '#5493ff', fontWeight: 'bold' }}>
+          {DictTaskState[taskItemState.taskStatus] || '未知状态'}
+        </span>
+      );
     }
     return '--';
   };
 
+  const searchKnowledgeConfig = async () => {
+    setRefreshLoading(true);
+    const { code, data } = await searchKnowledgeConfigQuery({
+      type: KnowledgeConfigTypeEnum.DIMENSION,
+      itemId: dimensionItem.id,
+    });
+
+    setRefreshLoading(false);
+    if (code !== 200) {
+      message.error('获取字典导入配置失败!');
+      return;
+    }
+    const configItem = data[0];
+    if (configItem) {
+      const { status, config } = configItem;
+      if (status === KnowledgeConfigStatusEnum.ONLINE) {
+        setDimensionVisible(true);
+      } else {
+        setDimensionVisible(false);
+      }
+      form.setFieldsValue({
+        ...config,
+      });
+      setKnowledgeConfig(configItem);
+    } else {
+      form.setFieldsValue({
+        ...defaultKnowledgeConfig,
+      });
+      createDictConfigQuery(dimensionItem, defaultKnowledgeConfig);
+    }
+  };
+
   const queryDictLatestTaskList = async () => {
     setRefreshLoading(true);
-    searchKnowledgeConfigQuery({ itemId: dimensionItem.id });
     const { code, data } = await searchDictLatestTaskList({
-      modelId,
+      type: KnowledgeConfigTypeEnum.DIMENSION,
+      itemId: dimensionItem.id,
     });
     setRefreshLoading(false);
     if (code !== 200) {
       message.error('获取字典导入任务失败!');
       return;
     }
-    const tastMap = data.reduce(
-      (stateMap: TaskStateMap, item: { dimId: number; status: DictTaskState }) => {
-        const { dimId, status } = item;
-        stateMap[dimId] = status;
-        return stateMap;
-      },
-      {},
-    );
-    setTaskStateMap(tastMap);
+
+    if (data?.id) {
+      if (data.taskStatus !== 'running') {
+        setImportDictState(false);
+      }
+      setTaskItemState(data);
+    }
   };
 
   const getFormValidateFields = async () => {
@@ -128,12 +139,29 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
     getFormValidateFields,
   }));
 
+  const createDictConfigQuery = async (
+    dimension: ISemantic.IDimensionItem,
+    config: ISemantic.IDictKnowledgeConfigItemConfig,
+  ) => {
+    const { code, data } = await createDictConfig({
+      type: KnowledgeConfigTypeEnum.DIMENSION,
+      itemId: dimension.id,
+      config,
+      status: 1,
+    });
+
+    if (code !== 200) {
+      message.error('字典导入配置创建失败!');
+      return;
+    }
+    setKnowledgeConfig(data);
+  };
+
   const createDictTaskQuery = async (dimension: ISemantic.IDimensionItem) => {
+    setImportDictState(true);
     const { code } = await createDictTask({
-      updateMode: 'REALTIME_ADD',
-      modelAndDimPair: {
-        [modelId]: [dimension.id],
-      },
+      type: KnowledgeConfigTypeEnum.DIMENSION,
+      itemId: dimension.id,
     });
 
     if (code !== 200) {
@@ -145,73 +173,40 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
     }, 2000);
   };
 
-  const saveEntity = async (searchEnable = dimensionVisible) => {
-    setSaveLoading(true);
-    const globalKnowledgeConfigFormFields: any = await getFormValidateFields();
-
-    const tempData = { ...modelRichConfigData };
-    const targetKnowledgeInfos = modelRichConfigData?.chatAggRichConfig?.knowledgeInfos || [];
-
-    const hasHistoryConfig = targetKnowledgeInfos.find((item) => item.itemId === dimensionItem.id);
-    let knowledgeInfos: IChatConfig.IKnowledgeInfosItem[] = targetKnowledgeInfos;
-
-    if (hasHistoryConfig) {
-      knowledgeInfos = targetKnowledgeInfos.reduce(
-        (
-          knowledgeInfosList: IChatConfig.IKnowledgeInfosItem[],
-          item: IChatConfig.IKnowledgeInfosItem,
-        ) => {
-          if (item.itemId === dimensionItem.id) {
-            knowledgeInfosList.push({
-              ...item,
-              knowledgeAdvancedConfig: {
-                ...item.knowledgeAdvancedConfig,
-                ...globalKnowledgeConfigFormFields,
-              },
-              searchEnable,
-            });
-          } else {
-            knowledgeInfosList.push({
-              ...item,
-            });
-          }
-          return knowledgeInfosList;
-        },
-        [],
-      );
-    } else {
-      knowledgeInfos.push({
-        itemId: dimensionItem.id,
-        bizName: dimensionItem.bizName,
-        knowledgeAdvancedConfig: {
-          ...globalKnowledgeConfigFormFields,
-        },
-        searchEnable,
-      });
-    }
-
-    const { id, modelId, chatAggRichConfig } = tempData;
-    const saveParams = {
-      id,
-      modelId,
-      chatAggConfig: {
-        ...chatAggRichConfig,
-        knowledgeInfos,
-      },
-    };
-    let saveDomainExtendQuery = addDomainExtend;
-    if (id) {
-      saveDomainExtendQuery = editDomainExtend;
-    }
-
-    const { code, msg } = await saveDomainExtendQuery({
-      ...saveParams,
-    });
-    setSaveLoading(false);
-    if (code === 200) {
+  const editDictTaskQuery = async (
+    status: KnowledgeConfigStatusEnum = KnowledgeConfigStatusEnum.ONLINE,
+  ) => {
+    if (!knowledgeConfig?.id) {
       return;
     }
-    message.error(msg);
+    const config = await form.validateFields();
+    setSaveLoading(true);
+    const { code } = await editDictConfig({
+      ...knowledgeConfig,
+      config: {
+        ...knowledgeConfig.config,
+        ...config,
+      },
+      status,
+    });
+    setSaveLoading(false);
+    if (code !== 200) {
+      message.error('字典导入配置保存失败!');
+      return;
+    }
+  };
+
+  const deleteDictTaskQuery = async (dimension: ISemantic.IDimensionItem) => {
+    setDeleteLoading(true);
+    const { code } = await deleteDictTask({
+      type: KnowledgeConfigTypeEnum.DIMENSION,
+      itemId: dimension.id,
+    });
+    setDeleteLoading(false);
+    if (code !== 200) {
+      message.error('字典清除失败!');
+      return;
+    }
   };
 
   return (
@@ -236,7 +231,11 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
                       size="small"
                       checked={dimensionVisible}
                       onChange={(value) => {
-                        saveEntity(value);
+                        editDictTaskQuery(
+                          value
+                            ? KnowledgeConfigStatusEnum.ONLINE
+                            : KnowledgeConfigStatusEnum.OFFLINE,
+                        );
                         setDimensionVisible(value);
                       }}
                     />
@@ -249,21 +248,27 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
         >
           {dimensionVisible && (
             <Space size={20} style={{ marginBottom: 20 }}>
-              <Button
-                type="link"
-                size="small"
-                style={{ padding: 0 }}
-                onClick={(event) => {
-                  createDictTaskQuery(dimensionItem);
-                  event.stopPropagation();
-                }}
-              >
-                <Tooltip title="立即将维度值导入字典">
+              <Tooltip title="立即将维度值导入字典">
+                <Button
+                  type="link"
+                  size="small"
+                  style={{ padding: 0 }}
+                  disabled={importDictState}
+                  onClick={(event) => {
+                    createDictTaskQuery(dimensionItem);
+                    setTaskItemState({
+                      ...(taskItemState || ({} as ISemantic.IDictKnowledgeTaskItem)),
+                      taskStatus: 'running',
+                    });
+
+                    event.stopPropagation();
+                  }}
+                >
                   <Space>
                     立即导入字典 <InfoCircleOutlined />
                   </Space>
-                </Tooltip>
-              </Button>
+                </Button>
+              </Tooltip>
 
               <Tooltip title="刷新字典任务状态">
                 <Space>
@@ -276,12 +281,34 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
                     }}
                   >
                     导入状态
-                    <RedoOutlined />:
+                    <Space>
+                      <RedoOutlined />: <span>{taskRender(dimensionItem)}</span>
+                    </Space>
                   </Button>
                 </Space>
               </Tooltip>
 
-              <span>{taskRender(dimensionItem)}</span>
+              <Button
+                type="link"
+                size="small"
+                style={{ padding: 0 }}
+                disabled={taskItemState?.taskStatus === 'running'}
+                loading={deleteLoading}
+                onClick={(event) => {
+                  deleteDictTaskQuery(dimensionItem);
+                  setTaskItemState({
+                    ...(taskItemState || ({} as ISemantic.IDictKnowledgeTaskItem)),
+                    taskStatus: '',
+                  });
+                  event.stopPropagation();
+                }}
+              >
+                <Tooltip title="清除当前配置的字典">
+                  <Space>
+                    清除字典 <InfoCircleOutlined />
+                  </Space>
+                </Tooltip>
+              </Button>
             </Space>
           )}
         </FormItem>
@@ -306,7 +333,7 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
                   <Button
                     type="primary"
                     onClick={() => {
-                      saveEntity();
+                      editDictTaskQuery();
                     }}
                     loading={saveLoading}
                   >
@@ -316,11 +343,21 @@ const DimensionValueSettingForm: ForwardRefRenderFunction<any, Props> = (
               </div>
 
               <FormItem name="blackList" label="黑名单">
-                <Input placeholder="多个维度值用英文逗号隔开" />
+                <Select
+                  mode="tags"
+                  placeholder="输入维度值后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
+                  tokenSeparators={[',']}
+                  maxTagCount={9}
+                />
               </FormItem>
 
               <FormItem name="whiteList" label="白名单">
-                <Input placeholder="多个维度值用英文逗号隔开" />
+                <Select
+                  mode="tags"
+                  placeholder="输入维度值后回车确认，多别名输入、复制粘贴支持英文逗号自动分隔"
+                  tokenSeparators={[',']}
+                  maxTagCount={9}
+                />
               </FormItem>
 
               <FormItem name="ruleList">
