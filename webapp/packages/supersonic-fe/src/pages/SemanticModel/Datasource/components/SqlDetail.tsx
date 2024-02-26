@@ -248,6 +248,7 @@ const SqlDetail: React.FC<IProps> = ({
     const { code, data, msg } = await excuteSql({
       sql: value,
       id: currentDatabaseItem.key,
+      sqlVariables: sqlParams,
     });
     setResultTableLoading(false);
     if (code === 200) {
