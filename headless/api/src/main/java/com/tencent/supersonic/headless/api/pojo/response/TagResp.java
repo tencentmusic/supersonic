@@ -16,6 +16,10 @@ public class TagResp extends SchemaItem {
 
     private String type;
 
+    private Boolean isCollect;
+
+    private boolean hasAdminRes;
+
     private Map<String, Object> ext = new HashMap<>();
 
     private TagDefineType tagDefineType = TagDefineType.FIELD;

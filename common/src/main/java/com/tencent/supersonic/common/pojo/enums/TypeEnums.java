@@ -4,6 +4,7 @@ public enum TypeEnums {
 
     METRIC,
     DIMENSION,
+    TAG,
     DOMAIN,
     ENTITY,
     VIEW,
