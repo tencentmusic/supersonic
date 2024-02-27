@@ -74,25 +74,43 @@ const MetricMetricFormTable: React.FC<Props> = ({
     },
   ];
 
+  const handleUpdateKeys = (updateKeys: Record<string, boolean>) => {
+    setSelectedKeysMap(updateKeys);
+    const selectedKeys: string[] = [];
+    const metrics = metricList.reduce((list: any[], item) => {
+      const { bizName, id } = item;
+      if (updateKeys[bizName] === true) {
+        selectedKeys.push(bizName);
+        list.push({
+          bizName,
+          id,
+        });
+      }
+      return list;
+    }, []);
+    setSelectedKeys(selectedKeys);
+    onFieldChange(metrics);
+  };
+
   const rowSelection = {
     selectedRowKeys: selectedKeys,
     onSelect: (record: ISemantic.IMeasure, selected: boolean) => {
       const updateKeys = { ...selectedKeysMap, [record.bizName]: selected };
-      setSelectedKeysMap(updateKeys);
-      const selectedKeys: string[] = [];
-      const metrics = metricList.reduce((list: any[], item) => {
-        const { bizName, id } = item;
-        if (updateKeys[bizName] === true) {
-          selectedKeys.push(bizName);
-          list.push({
-            bizName,
-            id,
-          });
-        }
-        return list;
-      }, []);
-      setSelectedKeys(selectedKeys);
-      onFieldChange(metrics);
+      handleUpdateKeys(updateKeys);
+    },
+    onSelectAll: (
+      selected: boolean,
+      selectedRows: ISemantic.IMetricItem[],
+      changeRows: ISemantic.IMetricItem[],
+    ) => {
+      const updateKeys = changeRows.reduce(
+        (keyMap: Record<string, boolean>, item: ISemantic.IMetricItem) => {
+          keyMap[item.bizName] = selected;
+          return keyMap;
+        },
+        {},
+      );
+      handleUpdateKeys({ ...selectedKeysMap, ...updateKeys });
     },
   };
 
