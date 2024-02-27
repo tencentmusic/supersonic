@@ -67,26 +67,41 @@ const MetricFieldFormTable: React.FC<Props> = ({
     },
   ];
 
+  const handleUpdateKeys = (updateKeys: Record<string, boolean>) => {
+    setSelectedKeysMap(updateKeys);
+    const selectedKeys: string[] = [];
+    const fieldList = Object.entries(updateKeys).reduce((list: any[], item) => {
+      const [fieldName, selected] = item;
+      if (selected) {
+        selectedKeys.push(fieldName);
+        list.push({ fieldName });
+      }
+      return list;
+    }, []);
+    setSelectedKeys(selectedKeys);
+    onFieldChange(fieldList);
+  };
+
   const rowSelection = {
     selectedRowKeys: selectedKeys,
     onSelect: (record: ISemantic.IFieldTypeParamsItem, selected: boolean) => {
       const updateKeys = { ...selectedKeysMap, [record.fieldName]: selected };
-      const selectedKeys: string[] = [];
-      setSelectedKeysMap(updateKeys);
-      const fieldList = Object.entries(updateKeys).reduce((list: any[], item) => {
-        const [fieldName, selected] = item;
-        if (selected) {
-          selectedKeys.push(fieldName);
-          list.push({ fieldName });
-        }
-        return list;
-      }, []);
-      setSelectedKeys(selectedKeys);
-      onFieldChange(fieldList);
+      handleUpdateKeys(updateKeys);
     },
-    // onChange: (_selectedRowKeys: any[]) => {
-    //   setSelectedKeys([..._selectedRowKeys]);
-    // },
+    onSelectAll: (
+      selected: boolean,
+      selectedRows: ISemantic.IFieldTypeParamsItem[],
+      changeRows: ISemantic.IFieldTypeParamsItem[],
+    ) => {
+      const updateKeys = changeRows.reduce(
+        (keyMap: Record<string, boolean>, item: ISemantic.IFieldTypeParamsItem) => {
+          keyMap[item.fieldName] = selected;
+          return keyMap;
+        },
+        {},
+      );
+      handleUpdateKeys({ ...selectedKeysMap, ...updateKeys });
+    },
   };
 
   return (
