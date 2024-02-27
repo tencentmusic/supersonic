@@ -3,6 +3,8 @@ package com.tencent.supersonic.headless.core.file;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,9 +19,9 @@ import java.util.List;
 @Slf4j
 @Component
 public class FileHandlerImpl implements FileHandler {
+    public static final String FILE_SPILT = File.separator;
 
     private final LocalFileConfig localFileConfig;
-
     public FileHandlerImpl(LocalFileConfig localFileConfig) {
         this.localFileConfig = localFileConfig;
     }
@@ -31,8 +33,8 @@ public class FileHandlerImpl implements FileHandler {
             createDir(dictDirectoryBackup);
         }
 
-        String source = localFileConfig.getDictDirectoryLatest() + "/" + fileName;
-        String target = dictDirectoryBackup + "/" + fileName;
+        String source = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
+        String target = dictDirectoryBackup + FILE_SPILT + fileName;
         Path sourcePath = Paths.get(source);
         Path targetPath = Paths.get(target);
         try {
@@ -88,7 +90,7 @@ public class FileHandlerImpl implements FileHandler {
         if (!existPath(dictDirectoryLatest)) {
             createDir(dictDirectoryLatest);
         }
-        String filePath = dictDirectoryLatest + "/" + fileName;
+        String filePath = dictDirectoryLatest + FILE_SPILT + fileName;
         if (existPath(filePath)) {
             backupFile(fileName);
         }
@@ -117,7 +119,7 @@ public class FileHandlerImpl implements FileHandler {
     @Override
     public Boolean deleteDictFile(String fileName) {
         backupFile(fileName);
-        deleteFile(localFileConfig.getDictDirectoryLatest() + "/" + fileName);
+        deleteFile(localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName);
         return true;
     }
 
