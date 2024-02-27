@@ -41,14 +41,6 @@ public class QueryController {
     @Autowired
     private DownloadService downloadService;
 
-    @PostMapping("/sql")
-    public Object queryBySql(@RequestBody QuerySqlReq querySqlReq,
-            HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
-        User user = UserHolder.findUser(request, response);
-        return queryService.queryByReq(querySqlReq, user);
-    }
-
     @PostMapping("/struct")
     public Object queryByStruct(@RequestBody QueryStructReq queryStructReq,
             HttpServletRequest request,

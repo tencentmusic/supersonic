@@ -5,7 +5,6 @@ import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryItemReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemQueryResultResp;
@@ -27,7 +26,5 @@ public interface QueryService {
 
     @ApiHeaderCheck
     ItemQueryResultResp queryMetricDataById(QueryItemReq queryApiReq, HttpServletRequest request) throws Exception;
-
-    SemanticQueryResp queryByMetric(QueryMetricReq queryMetricReq, User user) throws Exception;
 
 }

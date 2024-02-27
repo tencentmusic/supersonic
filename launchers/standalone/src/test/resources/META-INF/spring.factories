@@ -13,10 +13,8 @@ com.tencent.supersonic.chat.core.parser.SemanticParser=\
 
 com.tencent.supersonic.chat.core.corrector.SemanticCorrector=\
     com.tencent.supersonic.chat.core.corrector.SchemaCorrector, \
-    com.tencent.supersonic.chat.core.corrector.SelectCorrector, \
-    com.tencent.supersonic.chat.core.corrector.WhereCorrector, \
-    com.tencent.supersonic.chat.core.corrector.GroupByCorrector, \
-    com.tencent.supersonic.chat.core.corrector.HavingCorrector
+    com.tencent.supersonic.chat.core.corrector.TimeCorrector, \
+    com.tencent.supersonic.chat.core.corrector.GrammarCorrector
 
 com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor=\
     com.tencent.supersonic.chat.server.processor.parse.ParseInfoProcessor, \

@@ -1,5 +1,8 @@
 package com.tencent.supersonic.headless.server.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.common.pojo.DataFormat;
@@ -8,12 +11,12 @@ import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.ChatGptHelper;
-import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
-import com.tencent.supersonic.headless.api.pojo.enums.MetricType;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.MeasureParam;
 import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
+import com.tencent.supersonic.headless.api.pojo.enums.MetricType;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
@@ -22,13 +25,11 @@ import com.tencent.supersonic.headless.server.persistence.repository.MetricRepos
 import com.tencent.supersonic.headless.server.service.impl.MetricServiceImpl;
 import com.tencent.supersonic.headless.server.service.impl.ViewServiceImpl;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
+import java.util.HashMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationEventPublisher;
-import java.util.HashMap;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 public class MetricServiceImplTest {
 
@@ -61,14 +62,14 @@ public class MetricServiceImplTest {
     }
 
     private MetricService mockMetricService(MetricRepository metricRepository,
-                                            ModelService modelService) {
-        DomainService domainService = Mockito.mock(DomainService.class);
+            ModelService modelService) {
         ChatGptHelper chatGptHelper = Mockito.mock(ChatGptHelper.class);
         CollectService collectService = Mockito.mock(CollectService.class);
         ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
         ViewService viewService = Mockito.mock(ViewServiceImpl.class);
-        return new MetricServiceImpl(metricRepository, modelService, domainService,
-                chatGptHelper, collectService, viewService, eventPublisher);
+        DimensionService dimensionService = Mockito.mock(DimensionService.class);
+        return new MetricServiceImpl(metricRepository, modelService, chatGptHelper, collectService, viewService,
+                eventPublisher, dimensionService);
     }
 
     private MetricReq buildMetricReq() {
@@ -96,7 +97,7 @@ public class MetricServiceImplTest {
                 RelateDimension.builder().drillDownDimensions(Lists.newArrayList(
                         new DrillDownDimension(1L),
                         new DrillDownDimension(1L, false))
-        ).build());
+                ).build());
         metricReq.setSensitiveLevel(SensitiveLevelEnum.LOW.getCode());
         metricReq.setExt(new HashMap<>());
         return metricReq;
