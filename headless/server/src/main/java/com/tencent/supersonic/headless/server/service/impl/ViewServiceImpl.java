@@ -14,6 +14,10 @@ import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.ViewDetail;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryViewReq;
+import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.ViewReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
@@ -28,6 +32,7 @@ import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ViewService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -174,6 +179,15 @@ public class ViewServiceImpl
         return viewDO;
     }
 
+    public SemanticQueryReq convert(QueryViewReq queryViewReq) {
+        SemanticQueryReq queryReq = new QueryStructReq();
+        if (StringUtils.isNotBlank(queryViewReq.getSql())) {
+            queryReq = new QuerySqlReq();
+        }
+        BeanUtils.copyProperties(queryViewReq, queryReq);
+        return queryReq;
+    }
+
     public static boolean checkAdminPermission(User user, ViewResp viewResp) {
         List<String> admins = viewResp.getAdmins();
         if (user.isSuperAdmin()) {
@@ -203,27 +217,30 @@ public class ViewServiceImpl
         List<Long> allDimensionIds = viewResp.getAllDimensions();
         List<Long> allMetricIds = viewResp.getAllMetrics();
         MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setIds(allDimensionIds);
-        List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
-        metaFilter.setIds(allMetricIds);
-        List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
+        if (!CollectionUtils.isEmpty(allDimensionIds)) {
+            metaFilter.setIds(allDimensionIds);
+            List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
+            List<String> duplicateDimensionNames = findDuplicates(dimensionResps, DimensionResp::getName);
+            List<String> duplicateDimensionBizNames = findDuplicates(dimensionResps, DimensionResp::getBizName);
+            if (!duplicateDimensionNames.isEmpty()) {
+                throw new InvalidArgumentException("存在相同的维度名: " + duplicateDimensionNames);
+            }
+            if (!duplicateDimensionBizNames.isEmpty()) {
+                throw new InvalidArgumentException("存在相同的维度英文名: " + duplicateDimensionBizNames);
+            }
+        }
+        if (!CollectionUtils.isEmpty(allMetricIds)) {
+            metaFilter.setIds(allMetricIds);
+            List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
+            List<String> duplicateMetricNames = findDuplicates(metricResps, MetricResp::getName);
+            List<String> duplicateMetricBizNames = findDuplicates(metricResps, MetricResp::getBizName);
 
-        List<String> duplicateDimensionNames = findDuplicates(dimensionResps, DimensionResp::getName);
-        List<String> duplicateDimensionBizNames = findDuplicates(dimensionResps, DimensionResp::getBizName);
-
-        List<String> duplicateMetricNames = findDuplicates(metricResps, MetricResp::getName);
-        List<String> duplicateMetricBizNames = findDuplicates(metricResps, MetricResp::getBizName);
-        if (!duplicateDimensionNames.isEmpty()) {
-            throw new InvalidArgumentException("存在相同的维度名: " + duplicateDimensionNames);
-        }
-        if (!duplicateDimensionBizNames.isEmpty()) {
-            throw new InvalidArgumentException("存在相同的维度英文名: " + duplicateDimensionBizNames);
-        }
-        if (!duplicateMetricNames.isEmpty()) {
-            throw new InvalidArgumentException("存在相同的指标名: " + duplicateMetricNames);
-        }
-        if (!duplicateMetricBizNames.isEmpty()) {
-            throw new InvalidArgumentException("存在相同的指标英文名: " + duplicateMetricBizNames);
+            if (!duplicateMetricNames.isEmpty()) {
+                throw new InvalidArgumentException("存在相同的指标名: " + duplicateMetricNames);
+            }
+            if (!duplicateMetricBizNames.isEmpty()) {
+                throw new InvalidArgumentException("存在相同的指标英文名: " + duplicateMetricBizNames);
+            }
         }
     }
 
@@ -236,5 +253,4 @@ public class ViewServiceImpl
                 .map(Object::toString)
                 .collect(Collectors.toList());
     }
-
 }

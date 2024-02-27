@@ -1,16 +1,25 @@
 package com.tencent.supersonic.headless.core.parser.converter;
 
-import com.tencent.supersonic.common.pojo.Filter;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.headless.api.pojo.QueryParam;
+import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Dimension;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.schema.Column;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Component("DefaultDimValueConverter")
@@ -18,36 +27,43 @@ public class DefaultDimValueConverter implements HeadlessConverter {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
-        if (Objects.isNull(queryStatement.getQueryParam()) || queryStatement.getIsS2SQL()) {
-            return false;
-        }
-        return true;
+        return !Objects.isNull(queryStatement.getViewQueryParam())
+                && !StringUtils.isBlank(queryStatement.getViewQueryParam().getSql());
     }
 
     @Override
     public void convert(QueryStatement queryStatement) {
-        QueryParam queryParam = queryStatement.getQueryParam();
         List<Dimension> dimensions = queryStatement.getSemanticModel().getDimensions().stream()
                 .filter(dimension -> !CollectionUtils.isEmpty(dimension.getDefaultValues()))
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dimensions)) {
             return;
         }
-        log.info("dimension with default values:{}, queryStruct:{}", dimensions, queryParam);
-        //add dimension default value to filter
-        List<String> dimensionFilterBizName = queryParam.getDimensionFilters().stream()
-                .map(Filter::getBizName).collect(Collectors.toList());
-        if (!CollectionUtils.isEmpty(dimensionFilterBizName)) {
+        String sql = queryStatement.getViewQueryParam().getSql();
+        List<String> whereFields = SqlSelectHelper.getWhereFields(sql)
+                .stream().filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
+                .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(whereFields)) {
             return;
         }
-        for (Dimension dimensionResp : dimensions) {
-            Filter filter = new Filter();
-            filter.setBizName(dimensionResp.getBizName());
-            filter.setValue(dimensionResp.getDefaultValues());
-            filter.setOperator(FilterOperatorEnum.IN);
-            filter.setName(dimensionResp.getName());
-            queryParam.getDimensionFilters().add(filter);
+        MetricTable metricTable = queryStatement.getViewQueryParam()
+                .getTables().stream().findFirst().orElse(null);
+        List<Expression> expressions = Lists.newArrayList();
+        for (Dimension dimension : dimensions) {
+            ExpressionList expressionList = new ExpressionList();
+            List<Expression> exprs = new ArrayList<>();
+            dimension.getDefaultValues().forEach(value -> exprs.add(new StringValue(value)));
+            expressionList.setExpressions(exprs);
+            InExpression inExpression = new InExpression();
+            inExpression.setLeftExpression(new Column(dimension.getBizName()));
+            inExpression.setRightItemsList(expressionList);
+            expressions.add(inExpression);
+            if (metricTable != null) {
+                metricTable.getDimensions().add(dimension.getBizName());
+            }
         }
+        sql = SqlAddHelper.addWhere(sql, expressions);
+        queryStatement.getViewQueryParam().setSql(sql);
     }
 
 }

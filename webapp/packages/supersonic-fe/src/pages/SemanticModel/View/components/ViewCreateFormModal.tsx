@@ -7,13 +7,8 @@ import { createView, updateView, getDimensionList, queryMetric } from '../../ser
 import { ISemantic } from '../../data';
 import { isString } from 'lodash';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
-import SelectPartner from '@/components/SelectPartner';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
 import ViewModelConfigTransfer from './ViewModelConfigTransfer';
-import DefaultSettingForm from './DefaultSettingForm';
-import SqlEditor from '@/components/SqlEditor';
-import ProCard from '@ant-design/pro-card';
-import { ChatConfigType } from '../../enum';
 
 const FormItem = Form.Item;
 

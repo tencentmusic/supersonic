@@ -41,6 +41,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
   const [dataSourceEditOpen, setDataSourceEditOpen] = useState<boolean>(false);
   const [currentDatabaseId, setCurrentDatabaseId] = useState<number>();
   const [scriptColumns, setScriptColumns] = useState<IDataSource.IExecuteSqlColumn[]>([]);
+  const [sqlParams, setSqlParams] = useState<IDataSource.ISqlParamsItem[]>([]);
 
   useEffect(() => {
     if (!dataSourceItem?.id || !open) {
@@ -87,23 +88,6 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
       );
     }
   }, [dataSourceItem]);
-
-  // const fetchTaskResult = (params) => {
-  //   setScriptColumns(params.columns);
-  // };
-
-  // const queryTableColumnListByScript = async (dataSource: IDataSource.IDataSourceItem) => {
-  //   if (!dataSource?.modelDetail?.sqlQuery) {
-  //     return;
-  //   }
-  //   const { code, data } = await excuteSql({
-  //     sql: dataSource.modelDetail?.sqlQuery,
-  //     id: dataSource.databaseId,
-  //   });
-  //   if (code === 200) {
-  //     fetchTaskResult(data);
-  //   }
-  // };
 
   return (
     <>
@@ -187,6 +171,7 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
           basicInfoFormMode="normal"
           modelItem={dataSourceItem}
           scriptColumns={scriptColumns}
+          sqlParams={sqlParams}
           onCancel={() => {
             setCreateModalVisible(false);
             handleCancel();
@@ -215,9 +200,11 @@ const ClassDataSourceTypeModal: React.FC<Props> = ({
             <DataSource
               initialValues={dataSourceItem}
               onSubmitSuccess={(dataSourceInfo) => {
-                const { columns, sql, databaseId } = dataSourceInfo;
+                console.log('onSubmitSuccess', dataSourceInfo);
+                const { columns, sql, databaseId, sqlParams } = dataSourceInfo;
                 setSql(sql);
                 setScriptColumns(columns);
+                setSqlParams(sqlParams);
                 setCurrentDatabaseId(databaseId);
                 setDataSourceEditOpen(false);
               }}

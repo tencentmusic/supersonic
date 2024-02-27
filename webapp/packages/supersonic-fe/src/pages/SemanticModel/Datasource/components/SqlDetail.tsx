@@ -12,17 +12,17 @@ import {
   SwapOutlined,
   PlayCircleOutlined,
   CloudServerOutlined,
+  ApiOutlined,
 } from '@ant-design/icons';
 import { isFunction } from 'lodash';
 import FullScreen from '@/components/FullScreen';
 import SqlEditor from '@/components/SqlEditor';
 import type { TaskResultItem, TaskResultColumn } from '../data';
 import { excuteSql } from '@/pages/SemanticModel/service';
-// import DataSourceCreateForm from './DataSourceCreateForm';
 import type { Dispatch } from 'umi';
 import type { StateType } from '../../model';
+import SqlParams from './SqlParams';
 import styles from '../style.less';
-
 import 'ace-builds/src-min-noconflict/ext-searchbox';
 import 'ace-builds/src-min-noconflict/theme-sqlserver';
 import 'ace-builds/src-min-noconflict/theme-monokai';
@@ -33,6 +33,7 @@ export type DataSourceSubmitData = {
   sql: string;
   databaseId: number;
   columns: any[];
+  sqlParams: any[];
 };
 
 type IProps = {
@@ -77,7 +78,6 @@ const SqlDetail: React.FC<IProps> = ({
   });
   const [dataBaseItems, setDataBaseItems] = useState<DatabaseItem[]>([]);
   const [currentDatabaseItem, setCurrentDatabaseItem] = useState<DatabaseItem>();
-  // const [dataSourceModalVisible, setDataSourceModalVisible] = useState(false);
 
   const [tableScroll, setTableScroll] = useState({
     scrollToFirstRowOnChange: true,
@@ -88,7 +88,7 @@ const SqlDetail: React.FC<IProps> = ({
   const [runState, setRunState] = useState<boolean | undefined>();
 
   const [taskLog, setTaskLog] = useState('');
-  const [isSqlExcLocked, setIsSqlExcLocked] = useState(false);
+  const [isSqlExcLocked, setIsSqlExcLocked] = useState<boolean>(false);
   const [screenSize, setScreenSize] = useState<ScreenSize>('middle');
 
   const [isSqlIdeFullScreen, setIsSqlIdeFullScreen] = useState<boolean>(false);
@@ -100,8 +100,11 @@ const SqlDetail: React.FC<IProps> = ({
   const DEFAULT_FULLSCREEN_TOP = 0;
 
   const [partialSql, setPartialSql] = useState('');
-  const [isPartial, setIsPartial] = useState(false);
-  const [isRight, setIsRight] = useState(false);
+  const [isPartial, setIsPartial] = useState<boolean>(false);
+  const [isRight, setIsRight] = useState<boolean>(false);
+
+  const [variableCollapsed, setVariableCollapsed] = useState<boolean>(true);
+  const [sqlParams, setSqlParams] = useState<IDataSource.ISqlParamsItem[]>([]);
 
   const [scriptColumns, setScriptColumns] = useState<any[]>([]);
 
@@ -126,6 +129,10 @@ const SqlDetail: React.FC<IProps> = ({
   }, [dataSourceItem, databaseConfigList]);
 
   useEffect(() => {
+    setSqlParams(dataSourceItem?.modelDetail?.sqlVariables || []);
+  }, [dataSourceItem]);
+
+  useEffect(() => {
     setRunState(undefined);
   }, [currentDatabaseItem, sql]);
 
@@ -137,6 +144,11 @@ const SqlDetail: React.FC<IProps> = ({
     line.appendChild(child);
     return line;
   }
+
+  const handleVariable = () => {
+    const collapsedValue = !variableCollapsed;
+    setVariableCollapsed(collapsedValue);
+  };
 
   // 计算每列的宽度，通过容器插入文档中动态得到该列数据(包括表头)的最长宽度，设为列宽度，保证每列的数据都能一行展示完
   function getKeyWidthMap(list: TaskResultItem[]): TaskResultItem {
@@ -236,6 +248,7 @@ const SqlDetail: React.FC<IProps> = ({
     const { code, data, msg } = await excuteSql({
       sql: value,
       id: currentDatabaseItem.key,
+      sqlVariables: sqlParams,
     });
     setResultTableLoading(false);
     if (code === 200) {
@@ -417,6 +430,9 @@ const SqlDetail: React.FC<IProps> = ({
           <Tooltip title="格式化SQL语句">
             <EditOutlined className={styles.sqlOprIcon} onClick={formatSQL} />
           </Tooltip>
+          <Tooltip title="动态变量">
+            <ApiOutlined className={styles.sqlOprIcon} onClick={handleVariable} />
+          </Tooltip>
           <Tooltip title="改变主题">
             <SwapOutlined className={styles.sqlOprIcon} onClick={handleThemeChange} />
           </Tooltip>
@@ -463,6 +479,17 @@ const SqlDetail: React.FC<IProps> = ({
                 onSelect={onSelect}
               />
             </div>
+            <div
+              className={variableCollapsed ? styles.hideSqlParams : styles.sqlParams}
+              // style={{ height: sqlEditorHeight }}
+            >
+              <SqlParams
+                value={sqlParams}
+                onChange={(params) => {
+                  setSqlParams(params);
+                }}
+              />
+            </div>
           </div>
         </Pane>
         <div className={`${styles.sqlBottmWrap} ${screenSize}`}>
@@ -476,6 +503,7 @@ const SqlDetail: React.FC<IProps> = ({
                     columns: scriptColumns,
                     databaseId: currentDatabaseItem?.key || 0,
                     sql,
+                    sqlParams,
                   });
                 }}
                 disabled={!runState}

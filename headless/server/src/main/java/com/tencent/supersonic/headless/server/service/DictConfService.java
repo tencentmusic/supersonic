@@ -12,9 +12,9 @@ import java.util.List;
  */
 public interface DictConfService {
 
-    Long addDictConf(DictItemReq itemValueReq, User user);
+    DictItemResp addDictConf(DictItemReq itemValueReq, User user);
 
-    Long editDictConf(DictItemReq itemValueReq, User user);
+    DictItemResp editDictConf(DictItemReq itemValueReq, User user);
 
     List<DictItemResp> queryDictConf(DictItemFilter dictItemFilter, User user);
 }

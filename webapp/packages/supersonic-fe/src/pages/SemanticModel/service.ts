@@ -1,6 +1,7 @@
 import request from 'umi-request';
 import moment from 'moment';
 import { DatePeridMap } from '@/pages/SemanticModel/constant';
+import { IDataSource } from './data';
 
 const getRunningEnv = () => {
   return window.location.pathname.includes('/chatSetting/') ? 'chat' : 'semantic';
@@ -256,12 +257,6 @@ export function getDomainExtendConfig(data: any): Promise<any> {
   });
 }
 
-export function getDomainExtendDetailConfig(data: any): Promise<any> {
-  return request(`${process.env.CHAT_API_BASE_URL}conf/richDesc/${data.modelId}`, {
-    method: 'GET',
-  });
-}
-
 export function getDatasourceRelaList(id?: number): Promise<any> {
   return request(`${process.env.API_BASE_URL}datasource/getDatasourceRelaList/${id}`, {
     method: 'GET',
@@ -370,6 +365,7 @@ export function testDatabaseConnect(data: SaveDatabaseParams): Promise<any> {
 type ExcuteSqlParams = {
   sql: string;
   id: number;
+  sqlVariables: IDataSource.ISqlParamsItem[];
 };
 
 // 执行脚本
@@ -444,21 +440,42 @@ export function getMetricsToCreateNewMetric(data: any): Promise<any> {
 }
 
 export function createDictTask(data: any): Promise<any> {
-  return request(`${process.env.CHAT_API_BASE_URL}dict/task`, {
+  return request(`${process.env.API_BASE_URL}knowledge/task`, {
     method: 'POST',
+    data,
+  });
+}
+
+export function createDictConfig(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}knowledge/conf`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function editDictConfig(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}knowledge/conf`, {
+    method: 'PUT',
     data,
   });
 }
 
 export function deleteDictTask(data: any): Promise<any> {
-  return request(`${process.env.CHAT_API_BASE_URL}dict/task/delete`, {
-    method: 'POST',
+  return request(`${process.env.API_BASE_URL}knowledge/task/delete`, {
+    method: 'PUT',
     data,
   });
 }
 
 export function searchDictLatestTaskList(data: any): Promise<any> {
-  return request(`${process.env.CHAT_API_BASE_URL}dict/task/search/latest`, {
+  return request(`${process.env.API_BASE_URL}knowledge/task/search`, {
+    method: 'POST',
+    data,
+  });
+}
+
+export function searchKnowledgeConfigQuery(data: any): Promise<any> {
+  return request(`${process.env.API_BASE_URL}knowledge/conf/query`, {
     method: 'POST',
     data,
   });

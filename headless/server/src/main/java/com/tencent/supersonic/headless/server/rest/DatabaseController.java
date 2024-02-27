@@ -8,7 +8,6 @@ import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.DatabaseParameter;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
-import java.util.Map;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/semantic/database")
@@ -49,8 +49,10 @@ public class DatabaseController {
     }
 
     @GetMapping("/{id}")
-    public DatabaseResp getDatabase(@PathVariable("id") Long id) {
-        return databaseService.getDatabase(id);
+    public DatabaseResp getDatabase(@PathVariable("id") Long id, HttpServletRequest request,
+                                    HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return databaseService.getDatabase(id, user);
     }
 
     @GetMapping("/getDatabaseList")
@@ -71,7 +73,7 @@ public class DatabaseController {
             HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return databaseService.executeSql(sqlExecuteReq.getSql(), sqlExecuteReq.getId(), user);
+        return databaseService.executeSql(sqlExecuteReq, sqlExecuteReq.getId(), user);
     }
 
     @RequestMapping("/getDbNames/{id}")

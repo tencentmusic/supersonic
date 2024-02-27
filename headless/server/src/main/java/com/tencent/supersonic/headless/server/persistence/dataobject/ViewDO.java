@@ -35,8 +35,6 @@ public class ViewDO {
 
     private String updatedBy;
 
-    private String filterSql;
-
     private String queryConfig;
 
     private String admin;

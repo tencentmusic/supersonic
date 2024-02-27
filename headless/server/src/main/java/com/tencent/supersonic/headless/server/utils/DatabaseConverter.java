@@ -63,7 +63,6 @@ public class DatabaseConverter {
         BeanUtils.copyProperties(databaseDO, databaseResp);
         ConnectInfo connectInfo = JSONObject.parseObject(databaseDO.getConfig(), ConnectInfo.class);
         databaseResp.setUrl(connectInfo.getUrl());
-        databaseResp.setPassword(connectInfo.getPassword());
         databaseResp.setUsername(connectInfo.getUserName());
         databaseResp.setDatabase(connectInfo.getDatabase());
         if (StringUtils.isNotBlank(databaseDO.getAdmin())) {
@@ -72,6 +71,13 @@ public class DatabaseConverter {
         if (StringUtils.isNotBlank(databaseDO.getViewer())) {
             databaseResp.setViewers(Arrays.asList(databaseDO.getViewer().split(",")));
         }
+        return databaseResp;
+    }
+
+    public static DatabaseResp convertWithPassword(DatabaseDO databaseDO) {
+        DatabaseResp databaseResp = convert(databaseDO);
+        ConnectInfo connectInfo = JSONObject.parseObject(databaseDO.getConfig(), ConnectInfo.class);
+        databaseResp.setPassword(connectInfo.getPassword());
         return databaseResp;
     }
 

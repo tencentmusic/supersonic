@@ -1,7 +1,9 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
+import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
@@ -10,6 +12,7 @@ import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.utils.JdbcDataSourceUtils;
 import com.tencent.supersonic.headless.core.utils.SqlUtils;
+import com.tencent.supersonic.headless.core.utils.SqlVariableParseUtils;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DatabaseRepository;
 import com.tencent.supersonic.headless.server.pojo.DatabaseParameter;
@@ -18,14 +21,15 @@ import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -58,12 +62,12 @@ public class DatabaseServiceImpl implements DatabaseService {
             database.updatedBy(user.getName());
             DatabaseConverter.convert(database, databaseDO);
             databaseRepository.updateDatabase(databaseDO);
-            return DatabaseConverter.convert(databaseDO);
+            return DatabaseConverter.convertWithPassword(databaseDO);
         }
         database.createdBy(user.getName());
         databaseDO = DatabaseConverter.convert(database);
         databaseRepository.createDatabase(databaseDO);
-        return DatabaseConverter.convert(databaseDO);
+        return DatabaseConverter.convertWithPassword(databaseDO);
     }
 
     @Override
@@ -108,26 +112,25 @@ public class DatabaseServiceImpl implements DatabaseService {
     @Override
     public DatabaseResp getDatabase(Long id) {
         DatabaseDO databaseDO = databaseRepository.getDatabase(id);
-        return DatabaseConverter.convert(databaseDO);
+        return DatabaseConverter.convertWithPassword(databaseDO);
     }
 
     @Override
-    public SemanticQueryResp executeSql(String sql, Long id, User user) {
+    public DatabaseResp getDatabase(Long id, User user) {
+        DatabaseResp databaseResp = getDatabase(id);
+        checkPermission(databaseResp, user);
+        return databaseResp;
+    }
+
+    @Override
+    public SemanticQueryResp executeSql(SqlExecuteReq sqlExecuteReq, Long id, User user) {
         DatabaseResp databaseResp = getDatabase(id);
         if (databaseResp == null) {
             return new SemanticQueryResp();
         }
-        List<String> admins = databaseResp.getAdmins();
-        List<String> viewers = databaseResp.getViewers();
-        if (!admins.contains(user.getName())
-                && !viewers.contains(user.getName())
-                && !databaseResp.getCreatedBy().equalsIgnoreCase(user.getName())
-                && !user.isSuperAdmin()) {
-            String message = String.format("您暂无当前数据库%s权限, 请联系数据库管理员%s开通",
-                    databaseResp.getName(),
-                    String.join(",", admins));
-            throw new RuntimeException(message);
-        }
+        checkPermission(databaseResp, user);
+        String sql = sqlExecuteReq.getSql();
+        sql = SqlVariableParseUtils.parse(sql, sqlExecuteReq.getSqlVariables(), Lists.newArrayList());
         return executeSql(sql, databaseResp);
     }
 
@@ -179,6 +182,20 @@ public class DatabaseServiceImpl implements DatabaseService {
         String metaQueryTpl = engineAdaptor.getColumnMetaQueryTpl();
         String metaQuerySql = String.format(metaQueryTpl, db, table);
         return queryWithColumns(metaQuerySql, DatabaseConverter.convert(databaseResp));
+    }
+
+    private void checkPermission(DatabaseResp databaseResp, User user) {
+        List<String> admins = databaseResp.getAdmins();
+        List<String> viewers = databaseResp.getViewers();
+        if (!admins.contains(user.getName())
+                && !viewers.contains(user.getName())
+                && !databaseResp.getCreatedBy().equalsIgnoreCase(user.getName())
+                && !user.isSuperAdmin()) {
+            String message = String.format("您暂无当前数据库%s权限, 请联系数据库创建人:%s开通",
+                    databaseResp.getName(),
+                    databaseResp.getCreatedBy());
+            throw new RuntimeException(message);
+        }
     }
 
 }

@@ -9,6 +9,8 @@ import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricBaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
@@ -52,4 +54,6 @@ public interface MetricService {
     void sendMetricEventBatch(List<Long> modelIds, EventType eventType);
 
     List<MetricResp> queryMetrics(MetricsFilter metricsFilter);
+
+    QueryStructReq convert(QueryMetricReq queryMetricReq);
 }

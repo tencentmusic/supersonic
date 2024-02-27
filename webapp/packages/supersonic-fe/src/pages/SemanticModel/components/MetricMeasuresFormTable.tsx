@@ -42,6 +42,13 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
     });
   });
 
+  const [selectedKeysMap, setSelectedKeysMap] = useState<Record<string, boolean>>(() => {
+    return measuresParams.measures.reduce((keyMap, item: any) => {
+      keyMap[item.bizName] = true;
+      return keyMap;
+    }, {});
+  });
+
   useEffect(() => {
     const datasource =
       datasourceId && Array.isArray(measuresList)
@@ -101,19 +108,32 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
 
   const rowSelection = {
     selectedRowKeys: selectedKeys,
-    onChange: (_selectedRowKeys: any[], items: ISemantic.IMeasure[]) => {
-      setSelectedKeys([..._selectedRowKeys]);
-
-      const measures = items.map(({ bizName, name, expr, datasourceId, agg }) => {
-        return {
-          bizName,
-          name,
-          expr,
-          agg,
-          datasourceId,
-        };
-      });
-      onFieldChange?.(measures);
+    onSelect: (record: ISemantic.IMeasure, selected: boolean) => {
+      const datasource =
+        datasourceId && Array.isArray(measuresList)
+          ? measuresList.filter((item) => item.datasourceId === datasourceId)
+          : measuresList;
+      const updateKeys = { ...selectedKeysMap, [record.bizName]: selected };
+      setSelectedKeysMap(updateKeys);
+      const selectedKeys: string[] = [];
+      const measures = datasource.reduce(
+        (list: any[], { bizName, name, expr, datasourceId, agg }) => {
+          if (updateKeys[bizName] === true) {
+            selectedKeys.push(bizName);
+            list.push({
+              bizName,
+              name,
+              expr,
+              agg,
+              datasourceId,
+            });
+          }
+          return list;
+        },
+        [],
+      );
+      setSelectedKeys(selectedKeys);
+      onFieldChange(measures);
     },
   };
 

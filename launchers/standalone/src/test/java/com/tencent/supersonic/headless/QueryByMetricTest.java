@@ -4,19 +4,25 @@ import static org.junit.Assert.assertThrows;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.server.service.MetricService;
 import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class QueryByMetricTest extends BaseTest {
+
+    @Autowired
+    protected MetricService metricService;
 
     @Test
     public void testWithMetricAndDimensionBizNames() throws Exception {
         QueryMetricReq queryMetricReq = new QueryMetricReq();
         queryMetricReq.setMetricNames(Arrays.asList("stay_hours", "pv"));
         queryMetricReq.setDimensionNames(Arrays.asList("user_name", "department"));
-        SemanticQueryResp queryResp = queryService.queryByMetric(queryMetricReq, User.getFakeUser());
+        SemanticQueryResp queryResp = queryByMetric(queryMetricReq, User.getFakeUser());
         Assert.assertNotNull(queryResp.getResultList());
         Assert.assertEquals(6, queryResp.getResultList().size());
     }
@@ -26,7 +32,7 @@ public class QueryByMetricTest extends BaseTest {
         QueryMetricReq queryMetricReq = new QueryMetricReq();
         queryMetricReq.setMetricNames(Arrays.asList("停留时长", "访问次数"));
         queryMetricReq.setDimensionNames(Arrays.asList("用户", "部门"));
-        SemanticQueryResp queryResp = queryService.queryByMetric(queryMetricReq, User.getFakeUser());
+        SemanticQueryResp queryResp = queryByMetric(queryMetricReq, User.getFakeUser());
         Assert.assertNotNull(queryResp.getResultList());
         Assert.assertEquals(6, queryResp.getResultList().size());
     }
@@ -37,7 +43,7 @@ public class QueryByMetricTest extends BaseTest {
         queryMetricReq.setDomainId(1L);
         queryMetricReq.setMetricNames(Arrays.asList("stay_hours", "pv"));
         queryMetricReq.setDimensionNames(Arrays.asList("user_name", "department"));
-        SemanticQueryResp queryResp = queryService.queryByMetric(queryMetricReq, User.getFakeUser());
+        SemanticQueryResp queryResp = queryByMetric(queryMetricReq, User.getFakeUser());
         Assert.assertNotNull(queryResp.getResultList());
         Assert.assertEquals(6, queryResp.getResultList().size());
 
@@ -45,7 +51,7 @@ public class QueryByMetricTest extends BaseTest {
         queryMetricReq.setMetricNames(Arrays.asList("stay_hours", "pv"));
         queryMetricReq.setDimensionNames(Arrays.asList("user_name", "department"));
         assertThrows(IllegalArgumentException.class,
-                () -> queryService.queryByMetric(queryMetricReq, User.getFakeUser()));
+                () -> queryByMetric(queryMetricReq, User.getFakeUser()));
     }
 
     @Test
@@ -54,9 +60,13 @@ public class QueryByMetricTest extends BaseTest {
         queryMetricReq.setDomainId(1L);
         queryMetricReq.setMetricIds(Arrays.asList(1L, 4L));
         queryMetricReq.setDimensionIds(Arrays.asList(1L, 2L));
-        SemanticQueryResp queryResp = queryService.queryByMetric(queryMetricReq, User.getFakeUser());
+        SemanticQueryResp queryResp = queryByMetric(queryMetricReq, User.getFakeUser());
         Assert.assertNotNull(queryResp.getResultList());
         Assert.assertEquals(6, queryResp.getResultList().size());
     }
 
+    private SemanticQueryResp queryByMetric(QueryMetricReq queryMetricReq, User user) throws Exception {
+        QueryStructReq convert = metricService.convert(queryMetricReq);
+        return queryService.queryByReq(convert.convert(), user);
+    }
 }

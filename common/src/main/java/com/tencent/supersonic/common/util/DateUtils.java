@@ -68,6 +68,9 @@ public class DateUtils {
     }
 
     public static String getBeforeDate(int intervalDay, DatePeriodEnum datePeriodEnum) {
+        if (Objects.isNull(datePeriodEnum)) {
+            return getBeforeDate(intervalDay);
+        }
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         String currentDate = dateFormat.format(new Date());
         return getBeforeDate(currentDate, intervalDay, datePeriodEnum);
@@ -101,7 +104,7 @@ public class DateUtils {
                         int month = tempDate.get(ChronoField.MONTH_OF_YEAR);
                         int firstMonthOfQuarter = ((month - 1) / 3) * 3 + 1;
                         return tempDate.with(ChronoField.MONTH_OF_YEAR, firstMonthOfQuarter)
-                            .with(TemporalAdjusters.firstDayOfMonth());
+                                .with(TemporalAdjusters.firstDayOfMonth());
                     };
                     result = result.with(firstDayOfQuarter);
                 }
