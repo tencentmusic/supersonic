@@ -14,7 +14,7 @@ public interface TagService {
 
     void delete(Long id, User user) throws Exception;
 
-    TagResp getMetric(Long id);
+    TagResp getTag(Long id);
 
     List<TagResp> query(TagFilter tagFilter);
 }

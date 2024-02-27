@@ -85,7 +85,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public TagResp getMetric(Long id) {
+    public TagResp getTag(Long id) {
         return convert(tagRepository.getTagById(id));
     }
 

@@ -53,7 +53,7 @@ public class TagController {
     public TagResp getTag(@PathVariable("id") Long id,
             HttpServletRequest request,
             HttpServletResponse response) {
-        return tagService.getMetric(id);
+        return tagService.getTag(id);
     }
 
 }
