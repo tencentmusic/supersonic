@@ -13,6 +13,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemQueryResultResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
