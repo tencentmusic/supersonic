@@ -1,4 +1,4 @@
-name: supersonic CI
+name: supersonic ubuntu CI
 
 on:
   push:
