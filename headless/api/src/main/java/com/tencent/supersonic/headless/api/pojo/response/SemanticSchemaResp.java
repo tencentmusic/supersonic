@@ -22,6 +22,7 @@ public class SemanticSchemaResp {
     private SchemaType schemaType;
     private List<MetricSchemaResp> metrics = Lists.newArrayList();
     private List<DimSchemaResp> dimensions = Lists.newArrayList();
+    private List<TagResp> tags = Lists.newArrayList();
     private List<ModelRela> modelRelas = Lists.newArrayList();
     private List<ModelResp> modelResps = Lists.newArrayList();
     private ViewResp viewResp;

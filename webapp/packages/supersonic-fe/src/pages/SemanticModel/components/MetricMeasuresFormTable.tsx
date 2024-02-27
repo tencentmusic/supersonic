@@ -106,34 +106,52 @@ const MetricMeasuresFormTable: React.FC<Props> = ({
     },
   ];
 
+  const handleUpdateKeys = (updateKeys: Record<string, boolean>) => {
+    const datasource =
+      datasourceId && Array.isArray(measuresList)
+        ? measuresList.filter((item) => item.datasourceId === datasourceId)
+        : measuresList;
+    setSelectedKeysMap(updateKeys);
+    const selectedKeys: string[] = [];
+    const measures = datasource.reduce(
+      (list: any[], { bizName, name, expr, datasourceId, agg }) => {
+        if (updateKeys[bizName] === true) {
+          selectedKeys.push(bizName);
+          list.push({
+            bizName,
+            name,
+            expr,
+            agg,
+            datasourceId,
+          });
+        }
+        return list;
+      },
+      [],
+    );
+    setSelectedKeys(selectedKeys);
+    onFieldChange(measures);
+  };
+
   const rowSelection = {
     selectedRowKeys: selectedKeys,
     onSelect: (record: ISemantic.IMeasure, selected: boolean) => {
-      const datasource =
-        datasourceId && Array.isArray(measuresList)
-          ? measuresList.filter((item) => item.datasourceId === datasourceId)
-          : measuresList;
       const updateKeys = { ...selectedKeysMap, [record.bizName]: selected };
-      setSelectedKeysMap(updateKeys);
-      const selectedKeys: string[] = [];
-      const measures = datasource.reduce(
-        (list: any[], { bizName, name, expr, datasourceId, agg }) => {
-          if (updateKeys[bizName] === true) {
-            selectedKeys.push(bizName);
-            list.push({
-              bizName,
-              name,
-              expr,
-              agg,
-              datasourceId,
-            });
-          }
-          return list;
+      handleUpdateKeys(updateKeys);
+    },
+    onSelectAll: (
+      selected: boolean,
+      selectedRows: ISemantic.IMeasure[],
+      changeRows: ISemantic.IMeasure[],
+    ) => {
+      const updateKeys = changeRows.reduce(
+        (keyMap: Record<string, boolean>, item: ISemantic.IMeasure) => {
+          keyMap[item.bizName] = selected;
+          return keyMap;
         },
-        [],
+        {},
       );
-      setSelectedKeys(selectedKeys);
-      onFieldChange(measures);
+      handleUpdateKeys({ ...selectedKeysMap, ...updateKeys });
     },
   };
 

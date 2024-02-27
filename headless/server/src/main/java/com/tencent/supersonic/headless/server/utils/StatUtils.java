@@ -16,22 +16,22 @@ import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
 import com.tencent.supersonic.headless.server.persistence.repository.StatRepository;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 
 @Component
@@ -96,6 +96,48 @@ public class StatUtils {
             QueryStructReq queryStructCmd = ((QueryMultiStructReq) semanticQueryReq).getQueryStructReqs().get(0);
             initStructStatInfo(queryStructCmd, facadeUser);
         }
+        if (semanticQueryReq instanceof QueryTagReq) {
+            initTagStatInfo((QueryTagReq) semanticQueryReq, facadeUser);
+        }
+    }
+
+    public void initTagStatInfo(QueryTagReq queryTagReq, User facadeUser) {
+        QueryStat queryStatInfo = new QueryStat();
+        String traceId = "";
+        List<String> dimensions = queryTagReq.getGroups();
+
+        List<String> metrics = new ArrayList<>();
+        queryTagReq.getAggregators().stream().forEach(aggregator -> metrics.add(aggregator.getColumn()));
+        String user = getUserName(facadeUser);
+
+        try {
+            queryStatInfo.setTraceId(traceId)
+                    .setViewId(queryTagReq.getViewId())
+                    .setUser(user)
+                    .setQueryType(QueryType.STRUCT.getValue())
+                    .setQueryTypeBack(QueryTypeBack.NORMAL.getState())
+                    .setQueryStructCmd(queryTagReq.toString())
+                    .setQueryStructCmdMd5(DigestUtils.md5Hex(queryTagReq.toString()))
+                    .setStartTime(System.currentTimeMillis())
+                    .setNativeQuery(CollectionUtils.isEmpty(queryTagReq.getAggregators()))
+                    .setGroupByCols(objectMapper.writeValueAsString(queryTagReq.getGroups()))
+                    .setAggCols(objectMapper.writeValueAsString(queryTagReq.getAggregators()))
+                    .setOrderByCols(objectMapper.writeValueAsString(queryTagReq.getOrders()))
+                    .setFilterCols(objectMapper.writeValueAsString(
+                            sqlFilterUtils.getFiltersCol(queryTagReq.getTagFilters())))
+                    .setUseResultCache(true)
+                    .setUseSqlCache(true)
+                    .setMetrics(objectMapper.writeValueAsString(metrics))
+                    .setDimensions(objectMapper.writeValueAsString(dimensions))
+                    .setQueryOptMode(QueryOptMode.NONE.name());
+            if (!CollectionUtils.isEmpty(queryTagReq.getModelIds())) {
+                queryStatInfo.setModelId(queryTagReq.getModelIds().get(0));
+            }
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        StatUtils.set(queryStatInfo);
+
     }
 
     public void initSqlStatInfo(QuerySqlReq querySqlReq, User facadeUser) {

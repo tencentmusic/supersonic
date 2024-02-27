@@ -97,7 +97,7 @@ public class SearchServiceImpl implements SearchService {
         List<S2Term> originals = knowledgeService.getTerms(queryText);
         log.info("hanlp parse result: {}", originals);
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
-        Set<Long> detectViewIds = mapperHelper.getViewIds(queryReq.getModelId(), agentService.getAgent(agentId));
+        Set<Long> detectViewIds = mapperHelper.getViewIds(queryReq.getViewId(), agentService.getAgent(agentId));
 
         QueryContext queryContext = new QueryContext();
         BeanUtils.copyProperties(queryReq, queryContext);
@@ -123,7 +123,7 @@ public class SearchServiceImpl implements SearchService {
         Set<SearchResult> searchResults = new LinkedHashSet();
         ViewInfoStat modelStat = NatureHelper.getViewStat(originals);
 
-        List<Long> possibleModels = getPossibleModels(queryReq, originals, modelStat, queryReq.getModelId());
+        List<Long> possibleModels = getPossibleModels(queryReq, originals, modelStat, queryReq.getViewId());
 
         // 5.1 priority dimension metric
         boolean existMetricAndDimension = searchMetricAndDimension(new HashSet<>(possibleModels), modelToName,
