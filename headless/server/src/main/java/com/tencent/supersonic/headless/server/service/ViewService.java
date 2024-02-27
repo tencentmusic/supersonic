@@ -1,6 +1,8 @@
 package com.tencent.supersonic.headless.server.service;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.headless.api.pojo.request.QueryViewReq;
+import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.ViewReq;
 import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
@@ -25,4 +27,6 @@ public interface ViewService {
     List<ViewResp> getViews(User user);
 
     List<ViewResp> getViewsInheritAuth(User user, Long domainId);
+
+    SemanticQueryReq convert(QueryViewReq queryViewReq);
 }

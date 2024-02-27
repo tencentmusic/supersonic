@@ -1,9 +1,11 @@
-package com.tencent.supersonic.headless.server.rest;
+package com.tencent.supersonic.headless.server.rest.api;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryViewReq;
+import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.server.service.QueryService;
+import com.tencent.supersonic.headless.server.service.ViewService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -16,17 +18,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/semantic/query")
 @Slf4j
-public class MetricApiController {
+public class ViewQueryApiController {
 
+    @Autowired
+    private ViewService viewService;
     @Autowired
     private QueryService queryService;
 
-    @PostMapping("/metric")
-    public Object queryBySql(@RequestBody QueryMetricReq queryMetricReq,
+    @PostMapping("/view")
+    public Object queryByView(@RequestBody QueryViewReq queryViewReq,
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
-        return queryService.queryByMetric(queryMetricReq, user);
+        SemanticQueryReq queryReq = viewService.convert(queryViewReq);
+        return queryService.queryByReq(queryReq, user);
     }
 
 }
