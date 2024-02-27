@@ -13,11 +13,19 @@ import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -28,14 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Aspect
 @Component
@@ -63,7 +63,15 @@ public class DimValueAspect {
         if (queryReq instanceof QuerySqlReq) {
             return handleSqlDimValue(joinPoint);
         }
+
+        if (queryReq instanceof QueryTagReq) {
+            return handleTagValue(joinPoint);
+        }
         throw new InvalidArgumentException("queryReq is not Invalid:" + queryReq);
+    }
+
+    public Object handleTagValue(ProceedingJoinPoint joinPoint) throws Throwable {
+        return (SemanticQueryResp) joinPoint.proceed();
     }
 
     private SemanticQueryResp handleStructDimValue(ProceedingJoinPoint joinPoint) throws Throwable {
