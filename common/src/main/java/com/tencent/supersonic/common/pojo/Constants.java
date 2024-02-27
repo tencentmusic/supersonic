@@ -11,6 +11,7 @@ public class Constants {
     public static final String AT_SYMBOL = "@";
     public static final String DOT = ".";
     public static String SPACE = " ";
+    public static String POUND = "#";
     public static final String COLON = ":";
     public static final String MINUS = "-";
     public static final String UNDERLINE = "_";

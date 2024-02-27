@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.utils;
 import static com.tencent.supersonic.common.pojo.Constants.AND_UPPER;
 import static com.tencent.supersonic.common.pojo.Constants.APOSTROPHE;
 import static com.tencent.supersonic.common.pojo.Constants.COMMA;
+import static com.tencent.supersonic.common.pojo.Constants.POUND;
 import static com.tencent.supersonic.common.pojo.Constants.SPACE;
 
 import com.google.common.base.Strings;
@@ -36,6 +37,7 @@ import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.QueryService;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -48,6 +50,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -78,9 +81,9 @@ public class DictUtils {
     private final ModelService modelService;
 
     public DictUtils(DimensionService dimensionService,
-            MetricService metricService,
-            QueryService queryService,
-            ModelService modelService) {
+                     MetricService metricService,
+                     QueryService queryService,
+                     ModelService modelService) {
         this.dimensionService = dimensionService;
         this.metricService = metricService;
         this.queryService = queryService;
@@ -185,7 +188,12 @@ public class DictUtils {
             return;
         }
         List<String> whiteList = dictItemResp.getConfig().getWhiteList();
-        whiteList.forEach(white -> lines.add(String.format("%s %s %s", white, nature, itemValueWhiteFrequency)));
+        whiteList.forEach(white -> {
+            if (!Strings.isNullOrEmpty(white)) {
+                white = white.replace(SPACE, POUND);
+            }
+            lines.add(String.format("%s %s %s", white, nature, itemValueWhiteFrequency));
+        });
     }
 
     private void constructDictLines(Map<String, Long> valueAndFrequencyPair, List<String> lines, String nature) {
@@ -194,6 +202,9 @@ public class DictUtils {
         }
 
         valueAndFrequencyPair.forEach((value, frequency) -> {
+            if (!Strings.isNullOrEmpty(value)) {
+                value = value.replace(SPACE, POUND);
+            }
             lines.add(String.format("%s %s %s", value, nature, frequency));
         });
     }
