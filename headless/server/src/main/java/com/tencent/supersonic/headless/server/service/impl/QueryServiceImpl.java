@@ -13,16 +13,15 @@ import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.Item;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
-import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.SingleItemQueryResult;
 import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryDimValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryItemReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.AppDetailResp;
@@ -45,24 +44,14 @@ import com.tencent.supersonic.headless.server.annotation.S2DataPermission;
 import com.tencent.supersonic.headless.server.aspect.ApiHeaderCheckAspect;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
-import com.tencent.supersonic.headless.server.pojo.DimensionsFilter;
-import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
-import com.tencent.supersonic.headless.server.pojo.ModelCluster;
 import com.tencent.supersonic.headless.server.service.AppService;
 import com.tencent.supersonic.headless.server.service.Catalog;
-import com.tencent.supersonic.headless.server.service.DimensionService;
-import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.QueryService;
-import com.tencent.supersonic.headless.server.utils.ModelClusterBuilder;
 import com.tencent.supersonic.headless.server.utils.QueryReqConverter;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
+import com.tencent.supersonic.headless.server.utils.TagReqConverter;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -72,7 +61,6 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 
@@ -83,46 +71,34 @@ public class QueryServiceImpl implements QueryService {
     private StatUtils statUtils;
     private final QueryUtils queryUtils;
     private final QueryReqConverter queryReqConverter;
+    private final TagReqConverter tagReqConverter;
     private final Catalog catalog;
     private final AppService appService;
     private final QueryCache queryCache;
     private final SemanticSchemaManager semanticSchemaManager;
-
     private final QueryParser queryParser;
-
     private final QueryPlanner queryPlanner;
-
-    private final MetricService metricService;
-
-    private final ModelService modelService;
-
-    private final DimensionService dimensionService;
 
     public QueryServiceImpl(
             StatUtils statUtils,
             QueryUtils queryUtils,
             QueryReqConverter queryReqConverter,
-            Catalog catalog,
+            TagReqConverter tagReqConverter, Catalog catalog,
             AppService appService,
             QueryCache queryCache,
             SemanticSchemaManager semanticSchemaManager,
             DefaultQueryParser queryParser,
-            QueryPlanner queryPlanner,
-            MetricService metricService,
-            ModelService modelService,
-            DimensionService dimensionService) {
+            QueryPlanner queryPlanner) {
         this.statUtils = statUtils;
         this.queryUtils = queryUtils;
         this.queryReqConverter = queryReqConverter;
+        this.tagReqConverter = tagReqConverter;
         this.catalog = catalog;
         this.appService = appService;
         this.queryCache = queryCache;
         this.semanticSchemaManager = semanticSchemaManager;
         this.queryParser = queryParser;
         this.queryPlanner = queryPlanner;
-        this.metricService = metricService;
-        this.modelService = modelService;
-        this.dimensionService = dimensionService;
     }
 
     @Override
@@ -185,6 +161,9 @@ public class QueryServiceImpl implements QueryService {
         if (semanticQueryReq instanceof QueryMultiStructReq) {
             return buildMultiStructQueryStatement((QueryMultiStructReq) semanticQueryReq);
         }
+        if (semanticQueryReq instanceof QueryTagReq) {
+            return buildTagQueryStatement((QueryTagReq) semanticQueryReq);
+        }
         return null;
     }
 
@@ -218,6 +197,21 @@ public class QueryServiceImpl implements QueryService {
         }
         log.info("multi sqlParser:{}", sqlParsers);
         return queryUtils.sqlParserUnion(queryMultiStructReq, sqlParsers);
+    }
+
+    private QueryStatement buildTagQueryStatement(QueryTagReq queryTagReq)
+            throws Exception {
+        SchemaFilterReq schemaFilterReq = new SchemaFilterReq();
+        SchemaFilterReq filter = buildSchemaFilterReq(queryTagReq);
+        schemaFilterReq.setModelIds(queryTagReq.getModelIds());
+        SemanticSchemaResp semanticSchemaResp = catalog.fetchSemanticSchema(filter);
+        QueryStatement queryStatement = tagReqConverter.convert(queryTagReq, semanticSchemaResp);
+        queryStatement.setModelIds(queryTagReq.getModelIds());
+        queryStatement.setEnableOptimize(queryUtils.enableOptimize());
+        queryStatement.setSemanticSchemaResp(semanticSchemaResp);
+        SemanticModel semanticModel = semanticSchemaManager.getTagSemanticModel(semanticSchemaResp);
+        queryStatement.setSemanticModel(semanticModel);
+        return queryStatement;
     }
 
     private SchemaFilterReq buildSchemaFilterReq(SemanticQueryReq semanticQueryReq) {
@@ -265,58 +259,6 @@ public class QueryServiceImpl implements QueryService {
         return ItemQueryResultResp.builder().results(results).build();
     }
 
-    @Override
-    public SemanticQueryResp queryByMetric(QueryMetricReq queryMetricReq, User user) {
-        QueryStructReq queryStructReq = buildQueryStructReq(queryMetricReq);
-        return queryByReq(queryStructReq.convert(), user);
-    }
-
-    private QueryStructReq buildQueryStructReq(QueryMetricReq queryMetricReq) {
-        //1. If a domainId exists, the modelIds obtained from the domainId.
-        Set<Long> modelIdsByDomainId = getModelIdsByDomainId(queryMetricReq);
-
-        //2. get metrics and dimensions
-        List<MetricResp> metricResps = getMetricResps(queryMetricReq, modelIdsByDomainId);
-
-        List<DimensionResp> dimensionResps = getDimensionResps(queryMetricReq, modelIdsByDomainId);
-
-        //3. choose ModelCluster
-        Set<Long> modelIds = getModelIds(modelIdsByDomainId, metricResps, dimensionResps);
-        ModelCluster modelCluster = getModelCluster(metricResps, modelIds);
-
-        //4. set groups
-        List<String> dimensionBizNames = dimensionResps.stream()
-                .filter(entry -> modelCluster.getModelIds().contains(entry.getModelId()))
-                .map(entry -> entry.getBizName()).collect(Collectors.toList());
-
-        QueryStructReq queryStructReq = new QueryStructReq();
-        if (CollectionUtils.isNotEmpty(dimensionBizNames)) {
-            queryStructReq.setGroups(dimensionBizNames);
-        }
-        //5. set aggregators
-        List<String> metricBizNames = metricResps.stream()
-                .filter(entry -> modelCluster.getModelIds().contains(entry.getModelId()))
-                .map(entry -> entry.getBizName()).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(metricBizNames)) {
-            throw new IllegalArgumentException("Invalid input parameters, unable to obtain valid metrics");
-        }
-        List<Aggregator> aggregators = new ArrayList<>();
-        for (String metricBizName : metricBizNames) {
-            Aggregator aggregator = new Aggregator();
-            aggregator.setColumn(metricBizName);
-            aggregators.add(aggregator);
-        }
-        queryStructReq.setAggregators(aggregators);
-        queryStructReq.setLimit(queryMetricReq.getLimit());
-        //6. set modelIds
-        for (Long modelId : modelCluster.getModelIds()) {
-            queryStructReq.addModelId(modelId);
-        }
-        //7. set dateInfo
-        queryStructReq.setDateInfo(queryMetricReq.getDateInfo());
-        return queryStructReq;
-    }
-
     private QueryStructReq buildQueryStructReq(List<DimensionResp> dimensionResps,
             MetricResp metricResp, DateConf dateConf, Long limit) {
         Set<Long> modelIds = dimensionResps.stream().map(DimensionResp::getModelId).collect(Collectors.toSet());
@@ -332,64 +274,6 @@ public class QueryServiceImpl implements QueryService {
         queryStructReq.setModelIds(modelIds);
         queryStructReq.setLimit(limit);
         return queryStructReq;
-    }
-
-    private ModelCluster getModelCluster(List<MetricResp> metricResps, Set<Long> modelIds) {
-        Map<String, ModelCluster> modelClusterMap = ModelClusterBuilder.buildModelClusters(new ArrayList<>(modelIds));
-
-        Map<String, List<SchemaItem>> modelClusterToMatchCount = new HashMap<>();
-        for (ModelCluster modelCluster : modelClusterMap.values()) {
-            for (MetricResp metricResp : metricResps) {
-                if (modelCluster.getModelIds().contains(metricResp.getModelId())) {
-                    modelClusterToMatchCount.computeIfAbsent(modelCluster.getKey(), k -> new ArrayList<>())
-                            .add(metricResp);
-                }
-            }
-        }
-        String keyWithMaxSize = modelClusterToMatchCount.entrySet().stream()
-                .max(Comparator.comparingInt(entry -> entry.getValue().size()))
-                .map(Map.Entry::getKey)
-                .orElse(null);
-
-        return modelClusterMap.get(keyWithMaxSize);
-    }
-
-    private Set<Long> getModelIds(Set<Long> modelIdsByDomainId, List<MetricResp> metricResps,
-            List<DimensionResp> dimensionResps) {
-        Set<Long> result = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(modelIdsByDomainId)) {
-            result.addAll(modelIdsByDomainId);
-            return result;
-        }
-        Set<Long> metricModelIds = metricResps.stream().map(entry -> entry.getModelId())
-                .collect(Collectors.toSet());
-        result.addAll(metricModelIds);
-
-        Set<Long> dimensionModelIds = dimensionResps.stream().map(entry -> entry.getModelId())
-                .collect(Collectors.toSet());
-        result.addAll(dimensionModelIds);
-        return result;
-    }
-
-    private List<DimensionResp> getDimensionResps(QueryMetricReq queryMetricReq, Set<Long> modelIds) {
-        DimensionsFilter dimensionsFilter = new DimensionsFilter();
-        BeanUtils.copyProperties(queryMetricReq, dimensionsFilter);
-        dimensionsFilter.setModelIds(new ArrayList<>(modelIds));
-        List<DimensionResp> dimensionResps = dimensionService.queryDimensions(dimensionsFilter);
-        return dimensionResps;
-    }
-
-    private List<MetricResp> getMetricResps(QueryMetricReq queryMetricReq, Set<Long> modelIds) {
-        MetricsFilter metricsFilter = new MetricsFilter();
-        BeanUtils.copyProperties(queryMetricReq, metricsFilter);
-        metricsFilter.setModelIds(new ArrayList<>(modelIds));
-        return metricService.queryMetrics(metricsFilter);
-    }
-
-    private Set<Long> getModelIdsByDomainId(QueryMetricReq queryMetricReq) {
-        List<ModelResp> modelResps = modelService.getAllModelByDomainIds(
-                Collections.singletonList(queryMetricReq.getDomainId()));
-        return modelResps.stream().map(ModelResp::getId).collect(Collectors.toSet());
     }
 
     private SingleItemQueryResult dataQuery(Integer appId, Item item, DateConf dateConf, Long limit) throws Exception {

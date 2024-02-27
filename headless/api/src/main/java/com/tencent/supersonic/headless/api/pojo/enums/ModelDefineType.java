@@ -5,7 +5,7 @@ package com.tencent.supersonic.headless.api.pojo.enums;
  * sql_query : view sql begin as select
  * table_query: dbName.tableName
  */
-public enum DatasourceQuery {
+public enum ModelDefineType {
 
     SQL_QUERY("sql_query"),
     TABLE_QUERY("table_query");
@@ -13,7 +13,7 @@ public enum DatasourceQuery {
     private String name;
 
 
-    DatasourceQuery(String name) {
+    ModelDefineType(String name) {
         this.name = name;
     }
 

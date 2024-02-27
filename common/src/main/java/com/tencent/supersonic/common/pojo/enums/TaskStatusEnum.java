@@ -2,6 +2,8 @@ package com.tencent.supersonic.common.pojo.enums;
 
 public enum TaskStatusEnum {
 
+    INITIAL("initial", -2),
+
     ERROR("error", -1),
 
     PENDING("pending", 0),
@@ -10,7 +12,7 @@ public enum TaskStatusEnum {
 
     SUCCESS("success", 2),
 
-    UNKNOWN("UNKNOWN", 3);
+    UNKNOWN("unknown", 3);
 
     private String status;
     private Integer code;

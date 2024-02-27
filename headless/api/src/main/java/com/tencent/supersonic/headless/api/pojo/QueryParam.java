@@ -6,12 +6,11 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
+import lombok.Data;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import lombok.Data;
 
 @Data
 public class QueryParam {
@@ -34,7 +33,6 @@ public class QueryParam {
     // metric
     private List<String> metrics = new ArrayList();
     private List<String> dimensions;
-    private Map<String, String> variables;
     private String where;
     private List<ColumnOrder> order;
     private boolean nativeQuery = false;

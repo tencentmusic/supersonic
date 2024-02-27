@@ -1,8 +1,9 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
+import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
@@ -11,6 +12,7 @@ import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.utils.JdbcDataSourceUtils;
 import com.tencent.supersonic.headless.core.utils.SqlUtils;
+import com.tencent.supersonic.headless.core.utils.SqlVariableParseUtils;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DatabaseRepository;
 import com.tencent.supersonic.headless.server.pojo.DatabaseParameter;
@@ -116,32 +118,19 @@ public class DatabaseServiceImpl implements DatabaseService {
     @Override
     public DatabaseResp getDatabase(Long id, User user) {
         DatabaseResp databaseResp = getDatabase(id);
-        if (!databaseResp.getAdmins().contains(user.getName())
-                && !databaseResp.getViewers().contains(user.getName())
-                && !databaseResp.getCreatedBy().equals(user.getName())) {
-            throw new InvalidPermissionException("您暂无查看该数据库详情的权限, 请联系创建人: "
-                    + databaseResp.getCreatedBy());
-        }
+        checkPermission(databaseResp, user);
         return databaseResp;
     }
 
     @Override
-    public SemanticQueryResp executeSql(String sql, Long id, User user) {
+    public SemanticQueryResp executeSql(SqlExecuteReq sqlExecuteReq, Long id, User user) {
         DatabaseResp databaseResp = getDatabase(id);
         if (databaseResp == null) {
             return new SemanticQueryResp();
         }
-        List<String> admins = databaseResp.getAdmins();
-        List<String> viewers = databaseResp.getViewers();
-        if (!admins.contains(user.getName())
-                && !viewers.contains(user.getName())
-                && !databaseResp.getCreatedBy().equalsIgnoreCase(user.getName())
-                && !user.isSuperAdmin()) {
-            String message = String.format("您暂无当前数据库%s权限, 请联系数据库管理员%s开通",
-                    databaseResp.getName(),
-                    String.join(",", admins));
-            throw new RuntimeException(message);
-        }
+        checkPermission(databaseResp, user);
+        String sql = sqlExecuteReq.getSql();
+        sql = SqlVariableParseUtils.parse(sql, sqlExecuteReq.getSqlVariables(), Lists.newArrayList());
         return executeSql(sql, databaseResp);
     }
 
@@ -193,6 +182,20 @@ public class DatabaseServiceImpl implements DatabaseService {
         String metaQueryTpl = engineAdaptor.getColumnMetaQueryTpl();
         String metaQuerySql = String.format(metaQueryTpl, db, table);
         return queryWithColumns(metaQuerySql, DatabaseConverter.convert(databaseResp));
+    }
+
+    private void checkPermission(DatabaseResp databaseResp, User user) {
+        List<String> admins = databaseResp.getAdmins();
+        List<String> viewers = databaseResp.getViewers();
+        if (!admins.contains(user.getName())
+                && !viewers.contains(user.getName())
+                && !databaseResp.getCreatedBy().equalsIgnoreCase(user.getName())
+                && !user.isSuperAdmin()) {
+            String message = String.format("您暂无当前数据库%s权限, 请联系数据库创建人:%s开通",
+                    databaseResp.getName(),
+                    databaseResp.getCreatedBy());
+            throw new RuntimeException(message);
+        }
     }
 
 }

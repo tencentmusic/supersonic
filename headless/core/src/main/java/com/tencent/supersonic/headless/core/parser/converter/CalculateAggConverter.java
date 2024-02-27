@@ -9,18 +9,19 @@ import com.tencent.supersonic.headless.api.pojo.MetricTable;
 import com.tencent.supersonic.headless.api.pojo.QueryParam;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.pojo.ViewQueryParam;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.pojo.ViewQueryParam;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 /**
  * supplement the QueryStatement when query with custom aggregation method
@@ -110,7 +111,6 @@ public class CalculateAggConverter implements HeadlessConverter {
                 EngineType.fromString(database.getType().toUpperCase()), database.getVersion());
         sqlCommend.setSql(viewQueryParam.getSql());
         sqlCommend.setTables(viewQueryParam.getTables());
-        sqlCommend.setVariables(viewQueryParam.getVariables());
         sqlCommend.setSupportWith(viewQueryParam.isSupportWith());
     }
 

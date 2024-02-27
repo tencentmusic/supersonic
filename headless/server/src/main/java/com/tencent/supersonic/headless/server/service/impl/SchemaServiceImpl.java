@@ -29,15 +29,18 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.api.pojo.response.ViewSchemaResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
+import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
+import com.tencent.supersonic.headless.server.service.TagService;
 import com.tencent.supersonic.headless.server.service.ViewService;
 import com.tencent.supersonic.headless.server.utils.DimensionConverter;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
@@ -78,14 +81,15 @@ public class SchemaServiceImpl implements SchemaService {
     private final DomainService domainService;
     private final ViewService viewService;
     private final ModelRelaService modelRelaService;
+    private final TagService tagService;
 
     public SchemaServiceImpl(ModelService modelService,
-                             DimensionService dimensionService,
-                             MetricService metricService,
-                             DomainService domainService,
-                             ViewService viewService,
-                             ModelRelaService modelRelaService,
-                             StatUtils statUtils) {
+            DimensionService dimensionService,
+            MetricService metricService,
+            DomainService domainService,
+            ViewService viewService,
+            ModelRelaService modelRelaService,
+            StatUtils statUtils, TagService tagService) {
         this.modelService = modelService;
         this.dimensionService = dimensionService;
         this.metricService = metricService;
@@ -93,6 +97,7 @@ public class SchemaServiceImpl implements SchemaService {
         this.viewService = viewService;
         this.modelRelaService = modelRelaService;
         this.statUtils = statUtils;
+        this.tagService = tagService;
     }
 
     @SneakyThrows
@@ -301,6 +306,11 @@ public class SchemaServiceImpl implements SchemaService {
                     .flatMap(Collection::stream).collect(Collectors.toList()));
             semanticSchemaResp.setModelResps(modelSchemaResps.stream().map(this::convert).collect(Collectors.toList()));
             semanticSchemaResp.setSchemaType(SchemaType.MODEL);
+            // add tag info
+            TagFilter tagFilter = new TagFilter();
+            tagFilter.setModelIds(schemaFilterReq.getModelIds());
+            List<TagResp> tagResps = tagService.query(tagFilter);
+            semanticSchemaResp.setTags(tagResps);
         }
         if (!CollectionUtils.isEmpty(semanticSchemaResp.getModelIds())) {
             DatabaseResp databaseResp = modelService.getDatabaseByModelId(semanticSchemaResp.getModelIds().get(0));
