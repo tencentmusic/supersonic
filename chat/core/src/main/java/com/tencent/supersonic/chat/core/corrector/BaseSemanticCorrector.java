@@ -140,4 +140,19 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
         return semanticSchema.getMetrics(viewId);
     }
 
+    protected Set<String> getDimensions(Long viewId, SemanticSchema semanticSchema) {
+        Set<String> dimensions = semanticSchema.getDimensions(viewId).stream()
+                .flatMap(
+                        schemaElement -> {
+                            Set<String> elements = new HashSet<>();
+                            elements.add(schemaElement.getName());
+                            if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {
+                                elements.addAll(schemaElement.getAlias());
+                            }
+                            return elements.stream();
+                        }
+                ).collect(Collectors.toSet());
+        dimensions.add(TimeDimensionEnum.DAY.getChName());
+        return dimensions;
+    }
 }
