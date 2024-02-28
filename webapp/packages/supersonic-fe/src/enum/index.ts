@@ -1,22 +1,4 @@
 export * from './models/base';
-type ObjToArrayParams = Record<string, string>;
-
-const keyTypeTran = {
-  string: String,
-  number: Number,
-};
-/**
- * obj转成value，label的数组
- * @param _obj
- */
-export const objToArray = (_obj: ObjToArrayParams, keyType: string = 'string') => {
-  return Object.keys(_obj).map((key) => {
-    return {
-      value: keyTypeTran[keyType](key),
-      label: _obj[key],
-    };
-  });
-};
 
 type EnumToArrayItem = {
   value: number;

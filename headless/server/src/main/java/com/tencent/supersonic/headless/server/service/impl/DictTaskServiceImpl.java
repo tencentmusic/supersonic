@@ -65,7 +65,7 @@ public class DictTaskServiceImpl implements DictTaskService {
     }
 
     private Long handleDictTaskByItemResp(DictItemResp dictItemResp, User user) {
-        DictTaskDO dictTaskDO = dictConverter.generateDictTaskDO(dictItemResp, user);
+        DictTaskDO dictTaskDO = dictConverter.generateDictTaskDO(dictItemResp, user, TaskStatusEnum.PENDING);
         log.info("[addDictTask] dictTaskDO:{}", dictTaskDO);
         dictRepository.addDictTask(dictTaskDO);
         Long idInDb = dictTaskDO.getId();
@@ -95,14 +95,14 @@ public class DictTaskServiceImpl implements DictTaskService {
         dictTaskDO.setStatus(TaskStatusEnum.RUNNING.getStatus());
         dictRepository.editDictTask(dictTaskDO);
 
-        // 1.生成item字典数据
+        // 1.Generate item dictionary data
         List<String> data = dictUtils.fetchItemValue(dictItemResp);
 
-        // 2.变更字典文件
+        // 2.Change dictionary file
         String fileName = dictItemResp.fetchDictFileName() + Constants.DOT + dictFileType;
         fileHandler.writeFile(data, fileName, false);
 
-        // 3.实时变更内存中字典数据
+        // 3.Change in-memory dictionary data in real time
         try {
             HanlpHelper.reloadCustomDictionary();
             dictTaskDO.setStatus(TaskStatusEnum.SUCCESS.getStatus());
@@ -124,7 +124,10 @@ public class DictTaskServiceImpl implements DictTaskService {
         } catch (Exception e) {
             log.error("reloadCustomDictionary error", e);
         }
-
+        // Add a clear dictionary file record
+        DictTaskDO dictTaskDO = dictConverter.generateDictTaskDO(dictItemResp, user, TaskStatusEnum.INITIAL);
+        log.info("[addDictTask] dictTaskDO:{}", dictTaskDO);
+        dictRepository.addDictTask(dictTaskDO);
         return 0L;
     }
 

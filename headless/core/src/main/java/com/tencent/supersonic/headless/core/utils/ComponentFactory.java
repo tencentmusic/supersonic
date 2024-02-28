@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.core.utils;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.core.executor.JdbcExecutor;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
+import com.tencent.supersonic.headless.core.parser.converter.SqlVariableParseConverter;
 import com.tencent.supersonic.headless.core.planner.DetailQueryOptimizer;
 import com.tencent.supersonic.headless.core.planner.QueryOptimizer;
 import com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter;
@@ -83,6 +84,7 @@ public class ComponentFactory {
 
     private static void initSemanticConverter() {
         headlessConverters.add(getBean("DefaultDimValueConverter", DefaultDimValueConverter.class));
+        headlessConverters.add(getBean("SqlVariableParseConverter", SqlVariableParseConverter.class));
         headlessConverters.add(getBean("CalculateAggConverter", CalculateAggConverter.class));
         headlessConverters.add(getBean("ParserDefaultConverter", ParserDefaultConverter.class));
     }

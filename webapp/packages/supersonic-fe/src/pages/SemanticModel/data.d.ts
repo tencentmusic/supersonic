@@ -57,6 +57,17 @@ export declare namespace IDataSource {
     dataType: string;
     fieldName: string;
   }
+
+  type ISqlParamsValueType = 'STRING' | 'EXPR' | 'NUMBER';
+  interface ISqlParamsItem {
+    index?: number;
+    defaultValues: (boolean | string | number)[];
+    name: string;
+    // type: string;
+    valueType: ISqlParamsValueType;
+    udf?: boolean;
+  }
+
   interface IDataSourceDetail {
     queryType: string;
     sqlQuery: string;
@@ -65,6 +76,7 @@ export declare namespace IDataSource {
     fields: IDataSourceDetailFieldsItem[];
     dimensions: IDimensionsItem[];
     measures: IMeasuresItem[];
+    sqlVariables: ISqlParamsItem[];
   }
 
   interface IDataSourceItem {
@@ -330,6 +342,41 @@ export declare namespace ISemantic {
     description?: string;
   }
   type IDatabaseItemList = IDatabaseItem[];
+
+  interface IDictKnowledgeConfigItemConfig {
+    metricId?: number;
+    blackList: string[];
+    whiteList: string[];
+    ruleList: any[];
+    limit?: number;
+  }
+  interface IDictKnowledgeConfigItem {
+    id: number;
+    modelId: number;
+    bizName: string;
+    type: string;
+    itemId: number;
+    config: IDictKnowledgeConfigItemConfig;
+    status: string;
+    nature?: string;
+  }
+
+  interface IDictKnowledgeTaskItem {
+    id: number;
+    modelId: number;
+    bizName: string;
+    type: string;
+    itemId: number;
+    config: IDictKnowledgeConfigItemConfig;
+    status: string | null;
+    name: string;
+    description: string | null;
+    taskStatus: string;
+    createdAt: string;
+    createdBy: string;
+    elapsedMs: number | null;
+    nature: string;
+  }
 }
 
 export declare namespace IChatConfig {
@@ -343,21 +390,6 @@ export declare namespace IChatConfig {
       dimensionList: ISemantic.IDimensionList;
       metricList: ISemantic.IMetricList;
     };
-  }
-
-  interface IConfig {
-    id: any;
-    modelId: number;
-    modelName: string;
-    chatAggRichConfig: IChatRichConfig;
-    chatDetailRichConfig: IChatRichConfig;
-    recommendedQuestions: { question: string }[];
-    bizName: string;
-    statusEnum: string;
-    createdBy: string;
-    updatedBy: string;
-    createdAt: string;
-    updatedAt: string;
   }
 
   interface IKnowledgeInfosItem {
