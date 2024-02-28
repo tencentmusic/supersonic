@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.headless.api.pojo.Field;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.Constants;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataSource;
 import com.tencent.supersonic.headless.core.parser.calcite.s2sql.DataType;
@@ -29,11 +30,6 @@ import com.tencent.supersonic.headless.server.pojo.yaml.MetricTypeParamsYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
 import com.tencent.supersonic.headless.server.service.Catalog;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Triple;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,11 +40,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Triple;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 
 @Slf4j
 @Service
 public class SemanticSchemaManager {
+
     private final Catalog catalog;
 
     public SemanticSchemaManager(Catalog catalog) {
@@ -84,6 +85,54 @@ public class SemanticSchemaManager {
         if (!metricYamlTpls.isEmpty()) {
             semanticModel.setMetrics(getMetrics(metricYamlTpls));
         }
+        return semanticModel;
+    }
+
+    public SemanticModel getTagSemanticModel(SemanticSchemaResp semanticSchemaResp) throws Exception {
+        if (CollectionUtils.isEmpty(semanticSchemaResp.getTags())) {
+            throw new Exception("semanticSchemaResp tag is empty");
+        }
+        SemanticModel semanticModel = getSemanticModel(semanticSchemaResp);
+        //Map<String, List<Dimension>> dimensions = new HashMap<>();
+        Map<Long, List<TagResp>> tagMap = new HashMap<>();
+        for (TagResp tagResp : semanticSchemaResp.getTags()) {
+            if (!tagMap.containsKey(tagResp.getModelId())) {
+                tagMap.put(tagResp.getModelId(), new ArrayList<>());
+            }
+            tagMap.get(tagResp.getModelId()).add(tagResp);
+        }
+        if (Objects.nonNull(semanticModel.getDatasourceMap()) && !semanticModel.getDatasourceMap().isEmpty()) {
+            for (Map.Entry<String, DataSource> entry : semanticModel.getDatasourceMap().entrySet()) {
+                List<Dimension> dimensions = new ArrayList<>();
+                List<String> tagNames = new ArrayList<>();
+                if (tagMap.containsKey(entry.getValue().getId())) {
+                    for (TagResp tagResp : tagMap.get(entry.getValue().getId())) {
+                        tagNames.add(tagResp.getBizName());
+                        Dimension dimension = Dimension.builder().build();
+                        dimension.setType("");
+                        dimension.setExpr(tagResp.getExpr());
+                        dimension.setName(tagResp.getBizName());
+                        dimension.setOwners("");
+                        dimension.setBizName(tagResp.getBizName());
+                        if (Objects.isNull(dimension.getDataType())) {
+                            dimension.setDataType(DataType.UNKNOWN);
+                        }
+                        DimensionTimeTypeParams dimensionTimeTypeParams = new DimensionTimeTypeParams();
+                        dimension.setDimensionTimeTypeParams(dimensionTimeTypeParams);
+                        dimensions.add(dimension);
+                    }
+                }
+                if (semanticModel.getDimensionMap().containsKey(entry.getKey())) {
+                    semanticModel.getDimensionMap().get(entry.getKey()).stream()
+                            .filter(d -> !tagNames.contains(d.getBizName())).forEach(d -> {
+                                dimensions.add(d);
+                            });
+                }
+                semanticModel.getDimensionMap().put(entry.getKey(), dimensions);
+            }
+        }
+        // metric ignored
+        semanticModel.setMetrics(new ArrayList<>());
         return semanticModel;
     }
 

@@ -12,6 +12,7 @@ import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.pojo.TagDefineParams;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
+
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
@@ -23,7 +24,6 @@ import com.tencent.supersonic.headless.server.service.CollectService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.TagService;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -183,6 +182,7 @@ public class TagServiceImpl implements TagService {
     private void checkExit(TagReq tagReq) {
         TagFilter tagFilter = new TagFilter();
         tagFilter.setModelIds(Arrays.asList(tagReq.getModelId()));
+
         List<TagResp> tagResps = query(tagFilter);
         if (!CollectionUtils.isEmpty(tagResps)) {
             Long bizNameSameCount = tagResps.stream().filter(tagResp -> !tagResp.getId().equals(tagReq.getId()))

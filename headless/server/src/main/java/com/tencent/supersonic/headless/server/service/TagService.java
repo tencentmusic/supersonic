@@ -6,7 +6,6 @@ import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilterPage;
-
 import java.util.List;
 
 public interface TagService {
@@ -20,6 +19,7 @@ public interface TagService {
     TagResp getTag(Long id);
 
     List<TagResp> query(TagFilter tagFilter);
-
+  
     PageInfo<TagResp> queryPage(TagFilterPage tagFilterPage, User user);
+
 }

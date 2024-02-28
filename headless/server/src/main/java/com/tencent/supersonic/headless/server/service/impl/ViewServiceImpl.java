@@ -14,6 +14,10 @@ import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.ViewDetail;
+import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryViewReq;
+import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.request.ViewReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
@@ -28,6 +32,7 @@ import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ViewService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -174,6 +179,15 @@ public class ViewServiceImpl
         return viewDO;
     }
 
+    public SemanticQueryReq convert(QueryViewReq queryViewReq) {
+        SemanticQueryReq queryReq = new QueryStructReq();
+        if (StringUtils.isNotBlank(queryViewReq.getSql())) {
+            queryReq = new QuerySqlReq();
+        }
+        BeanUtils.copyProperties(queryViewReq, queryReq);
+        return queryReq;
+    }
+
     public static boolean checkAdminPermission(User user, ViewResp viewResp) {
         List<String> admins = viewResp.getAdmins();
         if (user.isSuperAdmin()) {
@@ -239,5 +253,4 @@ public class ViewServiceImpl
                 .map(Object::toString)
                 .collect(Collectors.toList());
     }
-
 }
