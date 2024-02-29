@@ -65,6 +65,10 @@ public class Agent extends RecordInfo {
                 .collect(Collectors.toList());
     }
 
+    public Set<Long> getViewIds() {
+        return getViewIds(null);
+    }
+
     public Set<Long> getViewIds(AgentToolType agentToolType) {
         List<NL2SQLTool> commonAgentTools = getParserTools(agentToolType);
         if (CollectionUtils.isEmpty(commonAgentTools)) {
