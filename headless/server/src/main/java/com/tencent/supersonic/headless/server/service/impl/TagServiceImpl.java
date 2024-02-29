@@ -1,16 +1,27 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.pojo.TagDefineParams;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
+
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
+import com.tencent.supersonic.headless.server.persistence.dataobject.CollectDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.TagDO;
 import com.tencent.supersonic.headless.server.persistence.repository.TagRepository;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
+import com.tencent.supersonic.headless.server.pojo.TagFilterPage;
+import com.tencent.supersonic.headless.server.service.CollectService;
+import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.TagService;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import java.util.ArrayList;
@@ -19,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -31,9 +43,14 @@ import org.springframework.stereotype.Service;
 public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
+    private final ModelService modelService;
+    private final CollectService collectService;
 
-    public TagServiceImpl(TagRepository tagRepository) {
+    public TagServiceImpl(TagRepository tagRepository, ModelService modelService,
+                          CollectService collectService) {
         this.tagRepository = tagRepository;
+        this.modelService = modelService;
+        this.collectService = collectService;
     }
 
     @Override
@@ -98,10 +115,74 @@ public class TagServiceImpl implements TagService {
         return new ArrayList<>();
     }
 
+    @Override
+    public PageInfo<TagResp> queryPage(TagFilterPage tagFilterPage, User user) {
+        TagFilter tagFilter = new TagFilter();
+        BeanUtils.copyProperties(tagFilterPage, tagFilter);
+        List<ModelResp> modelRespList = modelService.getAllModelByDomainIds(tagFilterPage.getDomainIds());
+        List<Long> modelIds = modelRespList.stream().map(ModelResp::getId).collect(Collectors.toList());
+        tagFilterPage.getModelIds().addAll(modelIds);
+        tagFilter.setModelIds(tagFilterPage.getModelIds());
+
+        List<CollectDO> collectList = collectService.getCollectList(user.getName())
+                .stream().filter(collectDO -> TypeEnums.TAG.name().equalsIgnoreCase(collectDO.getType()))
+                .collect(Collectors.toList());
+        List<Long> collectIds = collectList.stream().map(CollectDO::getCollectId).collect(Collectors.toList());
+        if (tagFilterPage.isHasCollect()) {
+            if (CollectionUtils.isEmpty(collectIds)) {
+                tagFilter.setIds(Lists.newArrayList(-1L));
+            } else {
+                tagFilter.setIds(collectIds);
+            }
+        }
+
+        PageInfo<TagDO> tagDOPageInfo = PageHelper.startPage(tagFilterPage.getCurrent(),
+                tagFilterPage.getPageSize())
+                .doSelectPageInfo(() -> query(tagFilter));
+        PageInfo<TagResp> pageInfo = new PageInfo<>();
+        BeanUtils.copyProperties(tagDOPageInfo, pageInfo);
+        List<TagResp> tagRespList = convertList(tagDOPageInfo.getList(), collectIds);
+        fillAdminRes(tagRespList, user);
+        pageInfo.setList(tagRespList);
+
+        return pageInfo;
+    }
+
+    private void fillAdminRes(List<TagResp> tagRespList, User user) {
+        List<ModelResp> modelRespList = modelService.getModelListWithAuth(user, null, AuthType.ADMIN);
+        if (CollectionUtils.isEmpty(modelRespList)) {
+            return;
+        }
+        Set<Long> modelIdSet = modelRespList.stream().map(ModelResp::getId).collect(Collectors.toSet());
+        for (TagResp tagResp : tagRespList) {
+            if (modelIdSet.contains(tagResp.getModelId())) {
+                tagResp.setHasAdminRes(true);
+            } else {
+                tagResp.setHasAdminRes(false);
+            }
+        }
+    }
+
+    private List<TagResp> convertList(List<TagDO> tagDOList, List<Long> collectIds) {
+        List<TagResp> tagRespList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(tagDOList)) {
+            tagDOList.stream().forEach(tagDO -> {
+                TagResp tagResp = convert(tagDO);
+                if (CollectionUtils.isNotEmpty(collectIds) && collectIds.contains(tagDO.getId())) {
+                    tagResp.setIsCollect(true);
+                } else {
+                    tagResp.setIsCollect(false);
+                }
+                tagRespList.add(tagResp);
+            });
+        }
+        return tagRespList;
+    }
+
     private void checkExit(TagReq tagReq) {
         TagFilter tagFilter = new TagFilter();
         tagFilter.setModelIds(Arrays.asList(tagReq.getModelId()));
-        //tagFilter.setStatusList(Arrays.asList(StatusEnum.ONLINE.getCode(),StatusEnum.OFFLINE.getCode()));
+
         List<TagResp> tagResps = query(tagFilter);
         if (!CollectionUtils.isEmpty(tagResps)) {
             Long bizNameSameCount = tagResps.stream().filter(tagResp -> !tagResp.getId().equals(tagReq.getId()))

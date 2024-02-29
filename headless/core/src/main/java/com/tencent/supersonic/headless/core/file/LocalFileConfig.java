@@ -1,9 +1,12 @@
 package com.tencent.supersonic.headless.core.file;
 
+import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+
+import java.io.FileNotFoundException;
 
 @Data
 @Configuration
@@ -18,16 +21,21 @@ public class LocalFileConfig {
     private String dictDirectoryBackup;
 
     public String getDictDirectoryLatest() {
-        return getResourceDir() + dictDirectoryLatest;
+        return getDictDirectoryPrefixDir() + dictDirectoryLatest;
     }
 
     public String getDictDirectoryBackup() {
-        return getResourceDir() + dictDirectoryBackup;
+        return getDictDirectoryPrefixDir() + dictDirectoryBackup;
     }
 
-    private String getResourceDir() {
-        //return hanlpPropertiesPath = HanlpHelper.getHanlpPropertiesPath();
-        return ClassLoader.getSystemClassLoader().getResource("").getPath();
+    private String getDictDirectoryPrefixDir() {
+        try {
+            return HanlpHelper.getHanlpPropertiesPath();
+        } catch (FileNotFoundException e) {
+            log.warn("getDictDirectoryPrefixDir error: " + e);
+            e.printStackTrace();
+        }
+        return "";
     }
 
 }
