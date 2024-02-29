@@ -19,7 +19,7 @@ public interface TagService {
     TagResp getTag(Long id);
 
     List<TagResp> query(TagFilter tagFilter);
-  
+
     PageInfo<TagResp> queryPage(TagFilterPage tagFilterPage, User user);
 
 }

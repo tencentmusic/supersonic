@@ -57,7 +57,7 @@ public class PluginRecognizeTest extends BasePluginTest {
         QueryFilter queryFilter = new QueryFilter();
         queryFilter.setElementID(2L);
         queryFilter.setValue("alice");
-        queryRequest.setModelId(1L);
+        // queryRequest.setModelId(1L);
         queryFilters.getFilters().add(queryFilter);
         queryRequest.setQueryFilters(queryFilters);
 
