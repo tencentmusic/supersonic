@@ -248,7 +248,7 @@ CREATE TABLE IF NOT EXISTS `s2_query_stat_info` (
                                       `id` INT NOT NULL AUTO_INCREMENT,
                                       `trace_id` varchar(200) DEFAULT NULL, -- query unique identifier
                                       `model_id` INT DEFAULT NULL,
-                                      `view_id` INT DEFAULT NULL,
+                                      `data_set_id` INT DEFAULT NULL,
                                       `user`    varchar(200) DEFAULT NULL,
                                       `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
                                       `query_type` varchar(200) DEFAULT NULL, -- the corresponding scene
@@ -326,7 +326,7 @@ CREATE TABLE IF NOT EXISTS `s2_plugin`
 (
     `id`         INT AUTO_INCREMENT,
     `type`      varchar(50)   NULL,
-    `view`     varchar(100)  NULL,
+    `data_set`     varchar(100)  NULL,
     `pattern`    varchar(500)  NULL,
     `parse_mode` varchar(100)  NULL,
     `parse_mode_config` LONGVARCHAR  NULL,
@@ -556,7 +556,7 @@ CREATE TABLE IF NOT EXISTS `s2_app` (
     updated_by  VARCHAR(255)
 );
 
-CREATE TABLE IF NOT EXISTS `s2_view` (
+CREATE TABLE IF NOT EXISTS `s2_data_set` (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     domain_id   BIGINT,
     `name`      VARCHAR(255),
@@ -564,7 +564,7 @@ CREATE TABLE IF NOT EXISTS `s2_view` (
     description VARCHAR(255),
     status      INT,
     alias       VARCHAR(255),
-    view_detail TEXT,
+    data_set_detail TEXT,
     created_at  TIMESTAMP,
     created_by  VARCHAR(255),
     updated_at  TIMESTAMP,

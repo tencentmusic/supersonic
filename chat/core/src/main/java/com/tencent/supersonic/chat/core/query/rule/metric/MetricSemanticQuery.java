@@ -1,21 +1,22 @@
 package com.tencent.supersonic.chat.core.query.rule.metric;
 
-import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.REQUIRED;
-import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
-import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.METRIC;
-
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.chat.api.pojo.ViewSchema;
 import com.tencent.supersonic.chat.core.pojo.ChatContext;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.query.rule.RuleSemanticQuery;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.TimeMode;
 import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import lombok.extern.slf4j.Slf4j;
+
+import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.OptionType.REQUIRED;
+import static com.tencent.supersonic.chat.core.query.rule.QueryMatchOption.RequireNumberType.AT_LEAST;
+import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.METRIC;
 
 @Slf4j
 public abstract class MetricSemanticQuery extends RuleSemanticQuery {
@@ -38,8 +39,9 @@ public abstract class MetricSemanticQuery extends RuleSemanticQuery {
         super.fillParseInfo(queryContext, chatContext);
         parseInfo.setLimit(METRIC_MAX_RESULTS);
         if (parseInfo.getDateInfo() == null) {
-            ViewSchema viewSchema = queryContext.getSemanticSchema().getViewSchemaMap().get(parseInfo.getViewId());
-            TimeDefaultConfig timeDefaultConfig = viewSchema.getMetricTypeTimeDefaultConfig();
+            DataSetSchema dataSetSchema =
+                    queryContext.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
+            TimeDefaultConfig timeDefaultConfig = dataSetSchema.getMetricTypeTimeDefaultConfig();
             DateConf dateInfo = new DateConf();
             if (Objects.nonNull(timeDefaultConfig) && Objects.nonNull(timeDefaultConfig.getUnit())) {
                 int unit = timeDefaultConfig.getUnit();

@@ -1,22 +1,23 @@
 package com.tencent.supersonic.chat.core.utils;
 
-import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.parser.JavaLLMProxy;
 import com.tencent.supersonic.chat.core.parser.LLMProxy;
-import com.tencent.supersonic.chat.core.parser.sql.llm.ViewResolver;
+import com.tencent.supersonic.chat.core.parser.sql.llm.DataSetResolver;
+import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.common.util.ContextUtils;
-import java.util.Map;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
+
+import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 public class ComponentFactory {
 
     private static SemanticInterpreter semanticInterpreter;
     private static LLMProxy llmProxy;
-    private static ViewResolver modelResolver;
+    private static DataSetResolver modelResolver;
 
     public static SemanticInterpreter getSemanticLayer() {
         if (Objects.isNull(semanticInterpreter)) {
@@ -44,9 +45,9 @@ public class ComponentFactory {
         return llmProxy;
     }
 
-    public static ViewResolver getModelResolver() {
+    public static DataSetResolver getModelResolver() {
         if (Objects.isNull(modelResolver)) {
-            modelResolver = init(ViewResolver.class);
+            modelResolver = init(DataSetResolver.class);
         }
         return modelResolver;
     }

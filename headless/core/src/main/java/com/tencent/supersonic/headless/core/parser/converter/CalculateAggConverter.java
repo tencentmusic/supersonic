@@ -11,7 +11,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.pojo.ViewQueryParam;
+import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -42,14 +42,15 @@ public class CalculateAggConverter implements HeadlessConverter {
         String sql(QueryParam queryParam, boolean isOver, boolean asWith, String metricSql);
     }
 
-    public ViewQueryParam generateSqlCommend(QueryStatement queryStatement, EngineType engineTypeEnum, String version)
+    public DataSetQueryParam generateSqlCommend(QueryStatement queryStatement,
+                                                EngineType engineTypeEnum, String version)
             throws Exception {
         QueryParam queryParam = queryStatement.getQueryParam();
         // 同环比
         if (isRatioAccept(queryParam)) {
             return generateRatioSqlCommand(queryStatement, engineTypeEnum, version);
         }
-        ViewQueryParam sqlCommand = new ViewQueryParam();
+        DataSetQueryParam sqlCommand = new DataSetQueryParam();
         String metricTableName = "v_metric_tb_tmp";
         MetricTable metricTable = new MetricTable();
         metricTable.setAlias(metricTableName);
@@ -105,13 +106,13 @@ public class CalculateAggConverter implements HeadlessConverter {
 
     @Override
     public void convert(QueryStatement queryStatement) throws Exception {
-        ViewQueryParam sqlCommend = queryStatement.getViewQueryParam();
+        DataSetQueryParam sqlCommend = queryStatement.getDataSetQueryParam();
         Database database = queryStatement.getSemanticModel().getDatabase();
-        ViewQueryParam viewQueryParam = generateSqlCommend(queryStatement,
+        DataSetQueryParam dataSetQueryParam = generateSqlCommend(queryStatement,
                 EngineType.fromString(database.getType().toUpperCase()), database.getVersion());
-        sqlCommend.setSql(viewQueryParam.getSql());
-        sqlCommend.setTables(viewQueryParam.getTables());
-        sqlCommend.setSupportWith(viewQueryParam.isSupportWith());
+        sqlCommend.setSql(dataSetQueryParam.getSql());
+        sqlCommend.setTables(dataSetQueryParam.getTables());
+        sqlCommend.setSupportWith(dataSetQueryParam.isSupportWith());
     }
 
     /**
@@ -128,13 +129,13 @@ public class CalculateAggConverter implements HeadlessConverter {
         return false;
     }
 
-    public ViewQueryParam generateRatioSqlCommand(QueryStatement queryStatement, EngineType engineTypeEnum,
-            String version)
+    public DataSetQueryParam generateRatioSqlCommand(QueryStatement queryStatement, EngineType engineTypeEnum,
+                                                     String version)
             throws Exception {
         QueryParam queryParam = queryStatement.getQueryParam();
         check(queryParam);
         queryStatement.setEnableOptimize(false);
-        ViewQueryParam sqlCommand = new ViewQueryParam();
+        DataSetQueryParam sqlCommand = new DataSetQueryParam();
         String metricTableName = "v_metric_tb_tmp";
         MetricTable metricTable = new MetricTable();
         metricTable.setAlias(metricTableName);

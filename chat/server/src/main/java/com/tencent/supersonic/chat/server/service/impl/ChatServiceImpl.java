@@ -60,8 +60,8 @@ public class ChatServiceImpl implements ChatService {
             return null;
         }
         SemanticParseInfo originalSemanticParse = chatContext.getParseInfo();
-        if (Objects.nonNull(originalSemanticParse) && Objects.nonNull(originalSemanticParse.getViewId())) {
-            return originalSemanticParse.getViewId();
+        if (Objects.nonNull(originalSemanticParse) && Objects.nonNull(originalSemanticParse.getDataSetId())) {
+            return originalSemanticParse.getDataSetId();
         }
         return null;
     }

@@ -75,7 +75,7 @@ class ModelServiceImplTest {
         DomainService domainService = Mockito.mock(DomainService.class);
         UserService userService = Mockito.mock(UserService.class);
         DateInfoRepository dateInfoRepository = Mockito.mock(DateInfoRepository.class);
-        ViewService viewService = Mockito.mock(ViewService.class);
+        DataSetService viewService = Mockito.mock(DataSetService.class);
         return new ModelServiceImpl(modelRepository, databaseService,
                 dimensionService, metricService, domainService, userService,
                 viewService, dateInfoRepository);

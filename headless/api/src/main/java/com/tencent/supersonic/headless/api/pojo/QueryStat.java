@@ -16,7 +16,7 @@ public class QueryStat {
     private String traceId;
     private Long modelId;
 
-    private Long viewId;
+    private Long dataSetId;
     private String user;
     private String createdAt;
     /**
@@ -93,8 +93,8 @@ public class QueryStat {
         return this;
     }
 
-    public QueryStat setViewId(Long viewId) {
-        this.viewId = viewId;
+    public QueryStat setDataSetId(Long dataSetId) {
+        this.dataSetId = dataSetId;
         return this;
     }
 

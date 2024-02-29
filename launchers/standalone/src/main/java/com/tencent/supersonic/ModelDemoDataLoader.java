@@ -38,21 +38,21 @@ import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
 import com.tencent.supersonic.headless.api.pojo.MetricParam;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
-import com.tencent.supersonic.headless.api.pojo.ViewDetail;
-import com.tencent.supersonic.headless.api.pojo.ViewModelConfig;
+import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
+import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.ViewReq;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.ViewService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +84,7 @@ public class ModelDemoDataLoader {
     @Autowired
     private AuthService authService;
     @Autowired
-    private ViewService viewService;
+    private DataSetService dataSetService;
     @Autowired
     private DataSourceProperties dataSourceProperties;
 
@@ -446,21 +446,21 @@ public class ModelDemoDataLoader {
     }
 
     public void addView_1() {
-        ViewReq viewReq = new ViewReq();
-        viewReq.setName("超音数");
-        viewReq.setBizName("s2");
-        viewReq.setDomainId(1L);
-        viewReq.setDescription("包含超音数访问统计相关的指标和维度等");
-        viewReq.setAdmins(Lists.newArrayList("admin"));
-        List<ViewModelConfig> viewModelConfigs = Lists.newArrayList(
-                new ViewModelConfig(1L, Lists.newArrayList(1L, 2L), Lists.newArrayList()),
-                new ViewModelConfig(2L, Lists.newArrayList(), Lists.newArrayList(1L, 2L, 3L)),
-                new ViewModelConfig(3L, Lists.newArrayList(3L), Lists.newArrayList(4L)));
+        DataSetReq dataSetReq = new DataSetReq();
+        dataSetReq.setName("超音数");
+        dataSetReq.setBizName("s2");
+        dataSetReq.setDomainId(1L);
+        dataSetReq.setDescription("包含超音数访问统计相关的指标和维度等");
+        dataSetReq.setAdmins(Lists.newArrayList("admin"));
+        List<DataSetModelConfig> dataSetModelConfigs = Lists.newArrayList(
+                new DataSetModelConfig(1L, Lists.newArrayList(1L, 2L), Lists.newArrayList()),
+                new DataSetModelConfig(2L, Lists.newArrayList(), Lists.newArrayList(1L, 2L, 3L)),
+                new DataSetModelConfig(3L, Lists.newArrayList(3L), Lists.newArrayList(4L)));
 
-        ViewDetail viewDetail = new ViewDetail();
-        viewDetail.setViewModelConfigs(viewModelConfigs);
-        viewReq.setViewDetail(viewDetail);
-        viewReq.setTypeEnum(TypeEnums.VIEW);
+        DataSetDetail dataSetDetail = new DataSetDetail();
+        dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
+        dataSetReq.setDataSetDetail(dataSetDetail);
+        dataSetReq.setTypeEnum(TypeEnums.DATASET);
         QueryConfig queryConfig = new QueryConfig();
         MetricTypeDefaultConfig metricTypeDefaultConfig = new MetricTypeDefaultConfig();
         TimeDefaultConfig timeDefaultConfig = new TimeDefaultConfig();
@@ -468,25 +468,25 @@ public class ModelDemoDataLoader {
         timeDefaultConfig.setUnit(7);
         metricTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
         queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
-        viewReq.setQueryConfig(queryConfig);
-        viewService.save(viewReq, User.getFakeUser());
+        dataSetReq.setQueryConfig(queryConfig);
+        dataSetService.save(dataSetReq, User.getFakeUser());
     }
 
     public void addView_2() {
-        ViewReq viewReq = new ViewReq();
-        viewReq.setName("艺人库");
-        viewReq.setBizName("singer");
-        viewReq.setDomainId(2L);
-        viewReq.setDescription("包含艺人相关标签和指标信息");
-        viewReq.setAdmins(Lists.newArrayList("admin", "jack"));
-        List<ViewModelConfig> viewModelConfigs = Lists.newArrayList(
-                new ViewModelConfig(4L, Lists.newArrayList(4L, 5L, 6L, 7L),
+        DataSetReq dataSetReq = new DataSetReq();
+        dataSetReq.setName("艺人库");
+        dataSetReq.setBizName("singer");
+        dataSetReq.setDomainId(2L);
+        dataSetReq.setDescription("包含艺人相关标签和指标信息");
+        dataSetReq.setAdmins(Lists.newArrayList("admin", "jack"));
+        List<DataSetModelConfig> dataSetModelConfigs = Lists.newArrayList(
+                new DataSetModelConfig(4L, Lists.newArrayList(4L, 5L, 6L, 7L),
                         Lists.newArrayList(5L, 6L, 7L))
         );
-        ViewDetail viewDetail = new ViewDetail();
-        viewDetail.setViewModelConfigs(viewModelConfigs);
-        viewReq.setViewDetail(viewDetail);
-        viewReq.setTypeEnum(TypeEnums.VIEW);
+        DataSetDetail dataSetDetail = new DataSetDetail();
+        dataSetDetail.setDataSetModelConfigs(dataSetModelConfigs);
+        dataSetReq.setDataSetDetail(dataSetDetail);
+        dataSetReq.setTypeEnum(TypeEnums.DATASET);
         QueryConfig queryConfig = new QueryConfig();
         TagTypeDefaultConfig tagTypeDefaultConfig = new TagTypeDefaultConfig();
         TimeDefaultConfig tagTimeDefaultConfig = new TimeDefaultConfig();
@@ -504,8 +504,8 @@ public class ModelDemoDataLoader {
         metricTypeDefaultConfig.setTimeDefaultConfig(timeDefaultConfig);
         queryConfig.setTagTypeDefaultConfig(tagTypeDefaultConfig);
         queryConfig.setMetricTypeDefaultConfig(metricTypeDefaultConfig);
-        viewReq.setQueryConfig(queryConfig);
-        viewService.save(viewReq, User.getFakeUser());
+        dataSetReq.setQueryConfig(queryConfig);
+        dataSetService.save(dataSetReq, User.getFakeUser());
     }
 
     public void addAuthGroup_1() {

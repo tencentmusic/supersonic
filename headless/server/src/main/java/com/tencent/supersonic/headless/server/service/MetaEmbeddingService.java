@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface MetaEmbeddingService {
 
-    List<RetrieveQueryResult> retrieveQuery(List<Long> viewIds, RetrieveQuery retrieveQuery, int num);
+    List<RetrieveQueryResult> retrieveQuery(List<Long> dataSetIds, RetrieveQuery retrieveQuery, int num);
 
 }

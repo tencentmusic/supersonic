@@ -9,7 +9,7 @@
         <id column="id" property="id"/>
         <result column="trace_id" property="traceId"/>
         <result column="model_id" property="modelId"/>
-        <result column="view_id" property="viewId"/>
+        <result column="data_set_id" property="dataSetId"/>
         <result column="user" property="user"/>
         <result column="created_at" property="createdAt"/>
         <result column="query_type" property="queryType"/>
@@ -43,13 +43,13 @@
     <insert id="createRecord">
         insert into s2_query_stat_info
         (
-            trace_id, model_id, view_id, `user`, query_type, query_type_back, query_sql_cmd, sql_cmd_md5, query_struct_cmd, struct_cmd_md5, `sql`, sql_md5, query_engine,
+            trace_id, model_id, data_set_id, `user`, query_type, query_type_back, query_sql_cmd, sql_cmd_md5, query_struct_cmd, struct_cmd_md5, `sql`, sql_md5, query_engine,
             elapsed_ms, query_state, native_query, start_date, end_date, dimensions, metrics, select_cols, agg_cols, filter_cols, group_by_cols,
             order_by_cols, use_result_cache, use_sql_cache, sql_cache_key, result_cache_key, query_opt_mode
         )
         values
         (
-            #{traceId}, #{modelId}, #{viewId}, #{user}, #{queryType}, #{queryTypeBack}, #{querySqlCmd}, #{querySqlCmdMd5}, #{queryStructCmd}, #{queryStructCmdMd5}, #{sql}, #{sqlMd5}, #{queryEngine},
+            #{traceId}, #{modelId}, #{dataSetId}, #{user}, #{queryType}, #{queryTypeBack}, #{querySqlCmd}, #{querySqlCmdMd5}, #{queryStructCmd}, #{queryStructCmdMd5}, #{sql}, #{sqlMd5}, #{queryEngine},
             #{elapsedMs}, #{queryState}, #{nativeQuery}, #{startDate}, #{endDate}, #{dimensions}, #{metrics}, #{selectCols}, #{aggCols}, #{filterCols}, #{groupByCols},
             #{orderByCols}, #{useResultCache}, #{useSqlCache}, #{sqlCacheKey}, #{resultCacheKey}, #{queryOptMode}
         )
@@ -61,7 +61,7 @@
         from s2_query_stat_info
         <where>
             <if test="startTime != null">
-                and start_time >= #{startTime}
+                and start_time >= #{startTime}String.valueOf(queryFilter.getValue())
             </if>
             <if test="modelId != null">
                 and model_id = #{modelId}

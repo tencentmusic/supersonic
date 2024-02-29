@@ -10,12 +10,12 @@ import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainUpdateReq;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DomainDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DomainRepository;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.ViewService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.utils.DomainConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Sets;
@@ -43,17 +43,17 @@ public class DomainServiceImpl implements DomainService {
     private final DomainRepository domainRepository;
     private final ModelService modelService;
     private final UserService userService;
-    private final ViewService viewService;
+    private final DataSetService dataSetService;
 
 
     public DomainServiceImpl(DomainRepository domainRepository,
                              @Lazy ModelService modelService,
                              UserService userService,
-                             @Lazy ViewService viewService) {
+                             @Lazy DataSetService dataSetService) {
         this.domainRepository = domainRepository;
         this.modelService = modelService;
         this.userService = userService;
-        this.viewService = viewService;
+        this.dataSetService = dataSetService;
     }
 
     @Override
@@ -104,9 +104,9 @@ public class DomainServiceImpl implements DomainService {
             List<Long> domainIds = modelResps.stream().map(ModelResp::getDomainId).collect(Collectors.toList());
             domainWithAuthAll.addAll(getParentDomain(domainIds));
         }
-        List<ViewResp> viewResps = viewService.getViews(user);
-        if (!CollectionUtils.isEmpty(viewResps)) {
-            List<Long> domainIds = viewResps.stream().map(ViewResp::getDomainId).collect(Collectors.toList());
+        List<DataSetResp> dataSetResps = dataSetService.getDataSets(user);
+        if (!CollectionUtils.isEmpty(dataSetResps)) {
+            List<Long> domainIds = dataSetResps.stream().map(DataSetResp::getDomainId).collect(Collectors.toList());
             domainWithAuthAll.addAll(getParentDomain(domainIds));
         }
         return new ArrayList<>(domainWithAuthAll).stream()
@@ -125,7 +125,7 @@ public class DomainServiceImpl implements DomainService {
         }
         if (authTypeEnum.equals(AuthType.VISIBLE)) {
             domainWithAuth = domainResps.stream()
-                    .filter(domainResp -> checkViewerPermission(orgIds, user, domainResp))
+                    .filter(domainResp -> checkDataSeterPermission(orgIds, user, domainResp))
                     .collect(Collectors.toList());
         }
         List<Long> domainIds = domainWithAuth.stream().map(DomainResp::getId)
@@ -253,7 +253,7 @@ public class DomainServiceImpl implements DomainService {
         return false;
     }
 
-    private boolean checkViewerPermission(Set<String> orgIds, User user, DomainResp domainDesc) {
+    private boolean checkDataSeterPermission(Set<String> orgIds, User user, DomainResp domainDesc) {
         List<String> admins = domainDesc.getAdmins();
         List<String> viewers = domainDesc.getViewers();
         List<String> adminOrgs = domainDesc.getAdminOrgs();

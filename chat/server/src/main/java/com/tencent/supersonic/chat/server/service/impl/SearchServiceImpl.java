@@ -14,7 +14,7 @@ import com.tencent.supersonic.chat.core.agent.Agent;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.core.knowledge.DictWord;
 import com.tencent.supersonic.headless.core.knowledge.HanlpMapResult;
-import com.tencent.supersonic.headless.core.knowledge.ViewInfoStat;
+import com.tencent.supersonic.headless.core.knowledge.DataSetInfoStat;
 import com.tencent.supersonic.chat.core.mapper.MapperHelper;
 import com.tencent.supersonic.chat.core.mapper.MatchText;
 import com.tencent.supersonic.chat.core.mapper.ModelWithSemanticType;
@@ -91,18 +91,19 @@ public class SearchServiceImpl implements SearchService {
         // 2.get meta info
         SemanticSchema semanticSchemaDb = schemaService.getSemanticSchema();
         List<SchemaElement> metricsDb = semanticSchemaDb.getMetrics();
-        final Map<Long, String> modelToName = semanticSchemaDb.getViewIdToName();
+        final Map<Long, String> modelToName = semanticSchemaDb.getDataSetIdToName();
 
         // 3.detect by segment
         List<S2Term> originals = knowledgeService.getTerms(queryText);
         log.info("hanlp parse result: {}", originals);
         MapperHelper mapperHelper = ContextUtils.getBean(MapperHelper.class);
-        Set<Long> detectViewIds = mapperHelper.getViewIds(queryReq.getViewId(), agentService.getAgent(agentId));
+        Set<Long> detectDataSetIds = mapperHelper.getDataSetIds(queryReq.getDataSetId(),
+                agentService.getAgent(agentId));
 
         QueryContext queryContext = new QueryContext();
         BeanUtils.copyProperties(queryReq, queryContext);
         Map<MatchText, List<HanlpMapResult>> regTextMap =
-                searchMatchStrategy.match(queryContext, originals, detectViewIds);
+                searchMatchStrategy.match(queryContext, originals, detectDataSetIds);
         regTextMap.entrySet().stream().forEach(m -> HanlpHelper.transLetterOriginal(m.getValue()));
 
         // 4.get the most matching data
@@ -121,9 +122,9 @@ public class SearchServiceImpl implements SearchService {
         log.info("searchTextEntry:{},queryReq:{}", searchTextEntry, queryReq);
 
         Set<SearchResult> searchResults = new LinkedHashSet();
-        ViewInfoStat modelStat = NatureHelper.getViewStat(originals);
+        DataSetInfoStat modelStat = NatureHelper.getDataSetStat(originals);
 
-        List<Long> possibleModels = getPossibleModels(queryReq, originals, modelStat, queryReq.getViewId());
+        List<Long> possibleModels = getPossibleModels(queryReq, originals, modelStat, queryReq.getDataSetId());
 
         // 5.1 priority dimension metric
         boolean existMetricAndDimension = searchMetricAndDimension(new HashSet<>(possibleModels), modelToName,
@@ -137,7 +138,7 @@ public class SearchServiceImpl implements SearchService {
         for (Map.Entry<String, String> natureToNameEntry : natureToNameMap.entrySet()) {
 
             Set<SearchResult> searchResultSet = searchDimensionValue(metricsDb, modelToName,
-                    modelStat.getMetricViewCount(), existMetricAndDimension,
+                    modelStat.getMetricDataSetCount(), existMetricAndDimension,
                     matchText, natureToNameMap, natureToNameEntry, queryReq.getQueryFilters());
 
             searchResults.addAll(searchResultSet);
@@ -146,7 +147,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private List<Long> getPossibleModels(QueryReq queryCtx, List<S2Term> originals,
-                                         ViewInfoStat modelStat, Long webModelId) {
+                                         DataSetInfoStat modelStat, Long webModelId) {
 
         if (Objects.nonNull(webModelId) && webModelId > 0) {
             List<Long> result = new ArrayList<>();
@@ -154,7 +155,7 @@ public class SearchServiceImpl implements SearchService {
             return result;
         }
 
-        List<Long> possibleModels = NatureHelper.selectPossibleViews(originals);
+        List<Long> possibleModels = NatureHelper.selectPossibleDataSets(originals);
 
         Long contextModel = chatService.getContextModel(queryCtx.getChatId());
 
@@ -167,9 +168,9 @@ public class SearchServiceImpl implements SearchService {
         return possibleModels;
     }
 
-    private boolean nothingOrOnlyMetric(ViewInfoStat modelStat) {
-        return modelStat.getMetricViewCount() >= 0 && modelStat.getDimensionViewCount() <= 0
-                && modelStat.getDimensionValueViewCount() <= 0 && modelStat.getViewCount() <= 0;
+    private boolean nothingOrOnlyMetric(DataSetInfoStat modelStat) {
+        return modelStat.getMetricDataSetCount() >= 0 && modelStat.getDimensionDataSetCount() <= 0
+                && modelStat.getDimensionValueDataSetCount() <= 0 && modelStat.getDataSetCount() <= 0;
     }
 
     private boolean effectiveModel(Long contextModel) {
@@ -189,7 +190,7 @@ public class SearchServiceImpl implements SearchService {
         String nature = natureToNameEntry.getKey();
         String wordName = natureToNameEntry.getValue();
 
-        Long modelId = NatureHelper.getViewId(nature);
+        Long modelId = NatureHelper.getDataSetId(nature);
         SchemaElementType schemaElementType = NatureHelper.convertToElementType(nature);
 
         if (SchemaElementType.ENTITY.equals(schemaElementType)) {
@@ -266,7 +267,7 @@ public class SearchServiceImpl implements SearchService {
             return Lists.newArrayList();
         }
         return metricsDb.stream()
-                .filter(mapDO -> Objects.nonNull(mapDO) && model.equals(mapDO.getView()))
+                .filter(mapDO -> Objects.nonNull(mapDO) && model.equals(mapDO.getDataSet()))
                 .sorted(Comparator.comparing(SchemaElement::getUseCnt).reversed())
                 .flatMap(entry -> {
                     List<String> result = new ArrayList<>();
@@ -290,7 +291,7 @@ public class SearchServiceImpl implements SearchService {
                             if (CollectionUtils.isEmpty(possibleModels)) {
                                 return true;
                             }
-                            Long model = NatureHelper.getViewId(nature);
+                            Long model = NatureHelper.getDataSetId(nature);
                             return possibleModels.contains(model);
                         })
                         .map(nature -> {
@@ -313,7 +314,7 @@ public class SearchServiceImpl implements SearchService {
         for (HanlpMapResult hanlpMapResult : hanlpMapResults) {
 
             List<ModelWithSemanticType> dimensionMetricClassIds = hanlpMapResult.getNatures().stream()
-                    .map(nature -> new ModelWithSemanticType(NatureHelper.getViewId(nature),
+                    .map(nature -> new ModelWithSemanticType(NatureHelper.getDataSetId(nature),
                             NatureHelper.convertToElementType(nature)))
                     .filter(entry -> matchCondition(entry, possibleModels)).collect(Collectors.toList());
 

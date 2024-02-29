@@ -29,7 +29,7 @@ public class LoadRemoveService {
                 if (Objects.isNull(nature)) {
                     return false;
                 }
-                Long modelId = getViewId(nature);
+                Long modelId = getDataSetId(nature);
                 if (Objects.nonNull(modelId)) {
                     return !detectModelIds.contains(modelId);
                 }
@@ -47,7 +47,7 @@ public class LoadRemoveService {
         return resultList;
     }
 
-    public Long getViewId(String nature) {
+    public Long getDataSetId(String nature) {
         try {
             String[] split = nature.split(DictWordType.NATURE_SPILT);
             if (split.length <= 1) {

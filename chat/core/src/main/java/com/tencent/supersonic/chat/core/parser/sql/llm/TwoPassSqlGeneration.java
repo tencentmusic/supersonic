@@ -40,8 +40,8 @@ public class TwoPassSqlGeneration implements SqlGeneration, InitializingBean {
     private SqlPromptGenerator sqlPromptGenerator;
 
     @Override
-    public LLMResp generation(LLMReq llmReq, Long viewId) {
-        keyPipelineLog.info("viewId:{},llmReq:{}", viewId, llmReq);
+    public LLMResp generation(LLMReq llmReq, Long dataSetId) {
+        keyPipelineLog.info("dataSetId:{},llmReq:{}", dataSetId, llmReq);
         List<Map<String, String>> sqlExamples = sqlExamplarLoader.retrieverSqlExamples(llmReq.getQueryText(),
                 optimizationConfig.getText2sqlExampleNum());
 

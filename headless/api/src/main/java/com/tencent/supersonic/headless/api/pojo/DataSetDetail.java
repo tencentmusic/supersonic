@@ -4,8 +4,8 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class ViewDetail {
+public class DataSetDetail {
 
-    private List<ViewModelConfig> viewModelConfigs;
+    private List<DataSetModelConfig> dataSetModelConfigs;
 
 }

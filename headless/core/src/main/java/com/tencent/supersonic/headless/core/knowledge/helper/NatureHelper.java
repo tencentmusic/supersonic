@@ -5,7 +5,7 @@ import com.hankcs.hanlp.corpus.tag.Nature;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
-import com.tencent.supersonic.headless.core.knowledge.ViewInfoStat;
+import com.tencent.supersonic.headless.core.knowledge.DataSetInfoStat;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -41,7 +41,7 @@ public class NatureHelper {
                 result = SchemaElementType.ENTITY;
                 break;
             case VIEW:
-                result = SchemaElementType.VIEW;
+                result = SchemaElementType.DATASET;
                 break;
             case VALUE:
                 result = SchemaElementType.VALUE;
@@ -55,12 +55,12 @@ public class NatureHelper {
         return result;
     }
 
-    private static boolean isViewOrEntity(S2Term term, Integer model) {
+    private static boolean isDataSetOrEntity(S2Term term, Integer model) {
         return (DictWordType.NATURE_SPILT + model).equals(term.nature.toString()) || term.nature.toString()
                 .endsWith(DictWordType.ENTITY.getType());
     }
 
-    public static Integer getViewByNature(Nature nature) {
+    public static Integer getDataSetByNature(Nature nature) {
         if (nature.startsWith(DictWordType.NATURE_SPILT)) {
             String[] dimensionValues = nature.toString().split(DictWordType.NATURE_SPILT);
             if (StringUtils.isNumeric(dimensionValues[1])) {
@@ -70,7 +70,7 @@ public class NatureHelper {
         return 0;
     }
 
-    public static Long getViewId(String nature) {
+    public static Long getDataSetId(String nature) {
         try {
             String[] split = nature.split(DictWordType.NATURE_SPILT);
             if (split.length <= 1) {
@@ -96,13 +96,13 @@ public class NatureHelper {
         return null;
     }
 
-    private static Nature changeModel2View(String nature, Long viewId) {
+    private static Nature changeModel2DataSet(String nature, Long dataSetId) {
         try {
             String[] split = nature.split(DictWordType.NATURE_SPILT);
             if (split.length <= 1) {
                 return null;
             }
-            split[1] = String.valueOf(viewId);
+            split[1] = String.valueOf(dataSetId);
             return Nature.create(StringUtils.join(split, DictWordType.NATURE_SPILT));
         } catch (NumberFormatException e) {
             log.error("", e);
@@ -110,17 +110,17 @@ public class NatureHelper {
         return null;
     }
 
-    public static List<String> changeModel2View(String nature, Map<Long, List<Long>> modelIdToViewIds) {
+    public static List<String> changeModel2DataSet(String nature, Map<Long, List<Long>> modelIdToDataSetIds) {
         Long modelId = getModelId(nature);
-        List<Long> viewIds = modelIdToViewIds.get(modelId);
-        if (CollectionUtils.isEmpty(viewIds)) {
+        List<Long> dataSetIds = modelIdToDataSetIds.get(modelId);
+        if (CollectionUtils.isEmpty(dataSetIds)) {
             return Lists.newArrayList();
         }
-        return viewIds.stream().map(viewId -> String.valueOf(changeModel2View(nature, viewId)))
+        return dataSetIds.stream().map(dataSetId -> String.valueOf(changeModel2DataSet(nature, dataSetId)))
                 .collect(Collectors.toList());
     }
 
-    public static boolean isDimensionValueViewId(String nature) {
+    public static boolean isDimensionValueDataSetId(String nature) {
         if (StringUtils.isEmpty(nature)) {
             return false;
         }
@@ -135,21 +135,21 @@ public class NatureHelper {
                 && StringUtils.isNumeric(split[1]);
     }
 
-    public static ViewInfoStat getViewStat(List<S2Term> terms) {
-        return ViewInfoStat.builder()
-                .viewCount(getViewCount(terms))
-                .dimensionViewCount(getDimensionCount(terms))
-                .metricViewCount(getMetricCount(terms))
-                .dimensionValueViewCount(getDimensionValueCount(terms))
+    public static DataSetInfoStat getDataSetStat(List<S2Term> terms) {
+        return DataSetInfoStat.builder()
+                .dataSetCount(getDataSetCount(terms))
+                .dimensionDataSetCount(getDimensionCount(terms))
+                .metricDataSetCount(getMetricCount(terms))
+                .dimensionValueDataSetCount(getDimensionValueCount(terms))
                 .build();
     }
 
-    private static long getViewCount(List<S2Term> terms) {
-        return terms.stream().filter(term -> isViewOrEntity(term, getViewByNature(term.nature))).count();
+    private static long getDataSetCount(List<S2Term> terms) {
+        return terms.stream().filter(term -> isDataSetOrEntity(term, getDataSetByNature(term.nature))).count();
     }
 
     private static long getDimensionValueCount(List<S2Term> terms) {
-        return terms.stream().filter(term -> isDimensionValueViewId(term.nature.toString())).count();
+        return terms.stream().filter(term -> isDimensionValueDataSetId(term.nature.toString())).count();
     }
 
     private static long getDimensionCount(List<S2Term> terms) {
@@ -169,13 +169,13 @@ public class NatureHelper {
      * @param terms
      * @return
      */
-    public static Map<Long, Map<DictWordType, Integer>> getViewToNatureStat(List<S2Term> terms) {
+    public static Map<Long, Map<DictWordType, Integer>> getDataSetToNatureStat(List<S2Term> terms) {
         Map<Long, Map<DictWordType, Integer>> modelToNature = new HashMap<>();
         terms.stream().filter(
                 term -> term.nature.startsWith(DictWordType.NATURE_SPILT)
         ).forEach(term -> {
             DictWordType dictWordType = DictWordType.getNatureType(String.valueOf(term.nature));
-            Long model = getViewId(String.valueOf(term.nature));
+            Long model = getDataSetId(String.valueOf(term.nature));
 
             Map<DictWordType, Integer> natureTypeMap = new HashMap<>();
             natureTypeMap.put(dictWordType, 1);
@@ -196,15 +196,15 @@ public class NatureHelper {
         return modelToNature;
     }
 
-    public static List<Long> selectPossibleViews(List<S2Term> terms) {
-        Map<Long, Map<DictWordType, Integer>> modelToNatureStat = getViewToNatureStat(terms);
-        Integer maxViewTypeSize = modelToNatureStat.entrySet().stream()
+    public static List<Long> selectPossibleDataSets(List<S2Term> terms) {
+        Map<Long, Map<DictWordType, Integer>> modelToNatureStat = getDataSetToNatureStat(terms);
+        Integer maxDataSetTypeSize = modelToNatureStat.entrySet().stream()
                 .max(Comparator.comparingInt(o -> o.getValue().size())).map(entry -> entry.getValue().size())
                 .orElse(null);
-        if (Objects.isNull(maxViewTypeSize) || maxViewTypeSize == 0) {
+        if (Objects.isNull(maxDataSetTypeSize) || maxDataSetTypeSize == 0) {
             return new ArrayList<>();
         }
-        return modelToNatureStat.entrySet().stream().filter(entry -> entry.getValue().size() == maxViewTypeSize)
+        return modelToNatureStat.entrySet().stream().filter(entry -> entry.getValue().size() == maxDataSetTypeSize)
                 .map(entry -> entry.getKey()).collect(Collectors.toList());
     }
 

@@ -38,12 +38,12 @@ public class JavaLLMProxy implements LLMProxy {
         return false;
     }
 
-    public LLMResp query2sql(LLMReq llmReq, Long viewId) {
+    public LLMResp query2sql(LLMReq llmReq, Long dataSetId) {
 
         SqlGeneration sqlGeneration = SqlGenerationFactory.get(
                 SqlGenerationMode.getMode(llmReq.getSqlGenerationMode()));
-        String modelName = llmReq.getSchema().getViewName();
-        LLMResp result = sqlGeneration.generation(llmReq, viewId);
+        String modelName = llmReq.getSchema().getDataSetName();
+        LLMResp result = sqlGeneration.generation(llmReq, dataSetId);
         result.setQuery(llmReq.getQueryText());
         result.setModelName(modelName);
         return result;

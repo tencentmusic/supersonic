@@ -36,12 +36,12 @@ public class EmbeddingMapper extends BaseMapper {
         //2. build SchemaElementMatch by info
         for (EmbeddingResult matchResult : matchResults) {
             Long elementId = Retrieval.getLongId(matchResult.getId());
-            Long viewId = Retrieval.getLongId(matchResult.getMetadata().get("viewId"));
-            if (Objects.isNull(viewId)) {
+            Long dataSetId = Retrieval.getLongId(matchResult.getMetadata().get("dataSetId"));
+            if (Objects.isNull(dataSetId)) {
                 continue;
             }
             SchemaElementType elementType = SchemaElementType.valueOf(matchResult.getMetadata().get("type"));
-            SchemaElement schemaElement = getSchemaElement(viewId, elementType, elementId,
+            SchemaElement schemaElement = getSchemaElement(dataSetId, elementType, elementId,
                     queryContext.getSemanticSchema());
             if (schemaElement == null) {
                 continue;
@@ -54,7 +54,7 @@ public class EmbeddingMapper extends BaseMapper {
                     .detectWord(matchResult.getDetectWord())
                     .build();
             //3. add to mapInfo
-            addToSchemaMap(queryContext.getMapInfo(), viewId, schemaElementMatch);
+            addToSchemaMap(queryContext.getMapInfo(), dataSetId, schemaElementMatch);
         }
     }
 }

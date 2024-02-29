@@ -12,17 +12,18 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryTagReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.pojo.ViewQueryParam;
+import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 @Slf4j
@@ -61,7 +62,7 @@ public class TagReqConverter {
             List<MetricTable> tables = new ArrayList<>();
             tables.add(metricTable);
             //.build ParseSqlReq
-            ViewQueryParam result = new ViewQueryParam();
+            DataSetQueryParam result = new DataSetQueryParam();
             BeanUtils.copyProperties(querySqlReq, result);
             result.setTables(tables);
             DatabaseResp database = semanticSchemaResp.getDatabaseResp();
@@ -72,15 +73,15 @@ public class TagReqConverter {
             }
             //.physicalSql by ParseSqlReq
             queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySqlReq.getSql()));
-            queryStructReq.setViewId(querySqlReq.getViewId());
+            queryStructReq.setDataSetId(querySqlReq.getDataSetId());
             queryStructReq.setQueryType(QueryType.TAG);
             QueryParam queryParam = new QueryParam();
             convert(queryTagReq, queryParam);
             queryStatement.setQueryParam(queryParam);
-            queryStatement.setViewQueryParam(result);
+            queryStatement.setDataSetQueryParam(result);
             queryStatement.setIsS2SQL(true);
             queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructReq));
-            queryStatement.setViewId(queryTagReq.getViewId());
+            queryStatement.setDataSetId(queryTagReq.getDataSetId());
             queryStatement.setEnableLimitWrapper(limitWrapper);
         }
         return queryStatement;

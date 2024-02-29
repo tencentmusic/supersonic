@@ -30,7 +30,7 @@ public class QueryContext {
 
     private String queryText;
     private Integer chatId;
-    private Long viewId;
+    private Long dataSetId;
     private User user;
     private boolean saveAnswer = true;
     private Integer agentId;

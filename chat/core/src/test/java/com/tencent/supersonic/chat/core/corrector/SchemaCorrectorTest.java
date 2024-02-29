@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
-import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.core.parser.sql.llm.ParseResult;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 class SchemaCorrectorTest {
 
     private String json = "{\n"
-            + "          \"viewId\":  1,\n"
+            + "          \"dataSetId\":  1,\n"
             + "          \"llmReq\":  {\n"
             + "                    \"queryText\":  \"xxx2024年播放量最高的十首歌\",\n"
             + "                    \"filterCondition\":  {\n"
@@ -31,7 +31,7 @@ class SchemaCorrectorTest {
             + "                    },\n"
             + "                    \"schema\":  {\n"
             + "                              \"domainName\":  \"歌曲\",\n"
-            + "                              \"viewName\":  \"歌曲\",\n"
+            + "                              \"dataSetName\":  \"歌曲\",\n"
             + "                              \"fieldNameList\":  [\n"
             + "                                        \"商务组\",\n"
             + "                                        \"歌曲名\",\n"
@@ -52,7 +52,7 @@ class SchemaCorrectorTest {
             + "                    \"id\":  \"y3LqVSRL\",\n"
             + "                    \"name\":  \"大模型语义解析\",\n"
             + "                    \"type\":  \"NL2SQL_LLM\",\n"
-            + "                    \"viewIds\":  [\n"
+            + "                    \"dataSetIds\":  [\n"
             + "                              1\n"
             + "                    ]\n"
             + "          },\n"
@@ -63,8 +63,8 @@ class SchemaCorrectorTest {
 
     @Test
     void doCorrect() throws JsonProcessingException {
-        Long viewId = 1L;
-        QueryContext queryContext = buildQueryContext(viewId);
+        Long dataSetId = 1L;
+        QueryContext queryContext = buildQueryContext(dataSetId);
         ObjectMapper objectMapper = new ObjectMapper();
         ParseResult parseResult = objectMapper.readValue(json, ParseResult.class);
 
@@ -78,8 +78,8 @@ class SchemaCorrectorTest {
         semanticParseInfo.setSqlInfo(sqlInfo);
 
         SchemaElement schemaElement = new SchemaElement();
-        schemaElement.setView(viewId);
-        semanticParseInfo.setView(schemaElement);
+        schemaElement.setDataSet(dataSetId);
+        semanticParseInfo.setDataSet(schemaElement);
 
 
         semanticParseInfo.getProperties().put(Constants.CONTEXT, parseResult);
@@ -108,35 +108,35 @@ class SchemaCorrectorTest {
 
     }
 
-    private QueryContext buildQueryContext(Long viewId) {
+    private QueryContext buildQueryContext(Long dataSetId) {
         QueryContext queryContext = new QueryContext();
-        List<ViewSchema> viewSchemaList = new ArrayList<>();
-        ViewSchema viewSchema = new ViewSchema();
+        List<DataSetSchema> dataSetSchemaList = new ArrayList<>();
+        DataSetSchema dataSetSchema = new DataSetSchema();
         QueryConfig queryConfig = new QueryConfig();
-        viewSchema.setQueryConfig(queryConfig);
+        dataSetSchema.setQueryConfig(queryConfig);
         SchemaElement schemaElement = new SchemaElement();
-        schemaElement.setView(viewId);
-        viewSchema.setView(schemaElement);
+        schemaElement.setDataSet(dataSetId);
+        dataSetSchema.setDataSet(schemaElement);
         Set<SchemaElement> dimensions = new HashSet<>();
         SchemaElement element1 = new SchemaElement();
-        element1.setView(1L);
+        element1.setDataSet(1L);
         element1.setName("歌曲名");
         dimensions.add(element1);
 
         SchemaElement element2 = new SchemaElement();
-        element2.setView(1L);
+        element2.setDataSet(1L);
         element2.setName("商务组");
         dimensions.add(element2);
 
         SchemaElement element3 = new SchemaElement();
-        element3.setView(1L);
+        element3.setDataSet(1L);
         element3.setName("发行日期");
         dimensions.add(element3);
 
-        viewSchema.setDimensions(dimensions);
-        viewSchemaList.add(viewSchema);
+        dataSetSchema.setDimensions(dimensions);
+        dataSetSchemaList.add(dataSetSchema);
 
-        SemanticSchema semanticSchema = new SemanticSchema(viewSchemaList);
+        SemanticSchema semanticSchema = new SemanticSchema(dataSetSchemaList);
         queryContext.setSemanticSchema(semanticSchema);
         return queryContext;
     }

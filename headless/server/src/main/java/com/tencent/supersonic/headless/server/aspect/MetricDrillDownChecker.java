@@ -37,10 +37,10 @@ public class MetricDrillDownChecker {
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] objects = joinPoint.getArgs();
         QueryStatement queryStatement = (QueryStatement) objects[0];
-        if (queryStatement.getViewQueryParam() == null) {
+        if (queryStatement.getDataSetQueryParam() == null) {
             return joinPoint.proceed();
         }
-        checkQuery(queryStatement.getSemanticSchemaResp(), queryStatement.getViewQueryParam().getSql());
+        checkQuery(queryStatement.getSemanticSchemaResp(), queryStatement.getDataSetQueryParam().getSql());
         return joinPoint.proceed();
     }
 

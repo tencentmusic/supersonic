@@ -13,8 +13,8 @@ import com.tencent.supersonic.headless.api.pojo.TimeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
-import com.tencent.supersonic.headless.api.pojo.ViewDetail;
-import com.tencent.supersonic.headless.api.pojo.ViewModelConfig;
+import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
+import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
@@ -24,11 +24,11 @@ import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.ViewReq;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.ViewService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,7 +52,7 @@ public class BenchMarkDemoDataLoader {
     private ModelRelaService modelRelaService;
 
     @Autowired
-    private ViewService viewService;
+    private DataSetService viewService;
 
     public void doRun() {
         try {
@@ -214,22 +214,22 @@ public class BenchMarkDemoDataLoader {
     }
 
     public void addView_1() {
-        ViewReq viewReq = new ViewReq();
+        DataSetReq viewReq = new DataSetReq();
         viewReq.setName("cspider");
         viewReq.setBizName("singer");
         viewReq.setDomainId(3L);
         viewReq.setDescription("包含cspider数据集相关标签和指标信息");
         viewReq.setAdmins(Lists.newArrayList("admin"));
-        List<ViewModelConfig> viewModelConfigs = Lists.newArrayList(
-                new ViewModelConfig(5L, Lists.newArrayList(8L), Lists.newArrayList()),
-                new ViewModelConfig(6L, Lists.newArrayList(9L, 10L), Lists.newArrayList()),
-                new ViewModelConfig(7L, Lists.newArrayList(11L, 12L), Lists.newArrayList()),
-                new ViewModelConfig(8L, Lists.newArrayList(13L, 14L), Lists.newArrayList(8L, 9L))
+        List<DataSetModelConfig> viewModelConfigs = Lists.newArrayList(
+                new DataSetModelConfig(5L, Lists.newArrayList(8L), Lists.newArrayList()),
+                new DataSetModelConfig(6L, Lists.newArrayList(9L, 10L), Lists.newArrayList()),
+                new DataSetModelConfig(7L, Lists.newArrayList(11L, 12L), Lists.newArrayList()),
+                new DataSetModelConfig(8L, Lists.newArrayList(13L, 14L), Lists.newArrayList(8L, 9L))
         );
-        ViewDetail viewDetail = new ViewDetail();
-        viewDetail.setViewModelConfigs(viewModelConfigs);
-        viewReq.setViewDetail(viewDetail);
-        viewReq.setTypeEnum(TypeEnums.VIEW);
+        DataSetDetail viewDetail = new DataSetDetail();
+        viewDetail.setDataSetModelConfigs(viewModelConfigs);
+        viewReq.setDataSetDetail(viewDetail);
+        viewReq.setTypeEnum(TypeEnums.DATASET);
         QueryConfig queryConfig = new QueryConfig();
         TagTypeDefaultConfig tagTypeDefaultConfig = new TagTypeDefaultConfig();
         TimeDefaultConfig tagTimeDefaultConfig = new TimeDefaultConfig();

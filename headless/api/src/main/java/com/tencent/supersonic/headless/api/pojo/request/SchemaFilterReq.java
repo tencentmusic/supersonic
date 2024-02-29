@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class SchemaFilterReq {
 
-    private Long viewId;
+    private Long dataSetId;
 
     private List<Long> modelIds = Lists.newArrayList();
 

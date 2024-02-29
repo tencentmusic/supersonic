@@ -65,16 +65,16 @@ public class Agent extends RecordInfo {
                 .collect(Collectors.toList());
     }
 
-    public Set<Long> getViewIds() {
-        return getViewIds(null);
+    public Set<Long> getDataSetIds() {
+        return getDataSetIds(null);
     }
 
-    public Set<Long> getViewIds(AgentToolType agentToolType) {
+    public Set<Long> getDataSetIds(AgentToolType agentToolType) {
         List<NL2SQLTool> commonAgentTools = getParserTools(agentToolType);
         if (CollectionUtils.isEmpty(commonAgentTools)) {
             return new HashSet<>();
         }
-        return commonAgentTools.stream().map(NL2SQLTool::getViewIds)
+        return commonAgentTools.stream().map(NL2SQLTool::getDataSetIds)
                 .filter(modelIds -> !CollectionUtils.isEmpty(modelIds))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());

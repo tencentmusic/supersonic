@@ -24,7 +24,7 @@ import java.util.List;
 @Service
 public class CanvasServiceImpl {
 
-    private CanvasRepository viewInfoRepository;
+    private CanvasRepository canvasRepository;
 
     private ModelService modelService;
 
@@ -32,16 +32,16 @@ public class CanvasServiceImpl {
 
     private MetricService metricService;
 
-    public CanvasServiceImpl(CanvasRepository viewInfoRepository, ModelService modelService,
+    public CanvasServiceImpl(CanvasRepository canvasRepository, ModelService modelService,
                              MetricService metricService, DimensionService dimensionService) {
-        this.viewInfoRepository = viewInfoRepository;
+        this.canvasRepository = canvasRepository;
         this.dimensionService = dimensionService;
         this.metricService = metricService;
         this.modelService = modelService;
     }
 
     public List<CanvasDO> getCanvasList(Long domainId) {
-        return viewInfoRepository.getCanvasList(domainId);
+        return canvasRepository.getCanvasList(domainId);
     }
 
     public List<CanvasSchemaResp> getCanvasSchema(Long domainId, User user) {
@@ -70,20 +70,20 @@ public class CanvasServiceImpl {
             viewInfoDO.setCreatedBy(user.getName());
             viewInfoDO.setUpdatedAt(new Date());
             viewInfoDO.setUpdatedBy(user.getName());
-            viewInfoRepository.createCanvas(viewInfoDO);
+            canvasRepository.createCanvas(viewInfoDO);
             return viewInfoDO;
         }
         Long id = canvasReq.getId();
-        CanvasDO viewInfoDO = viewInfoRepository.getCanvasById(id);
+        CanvasDO viewInfoDO = canvasRepository.getCanvasById(id);
         BeanUtils.copyProperties(canvasReq, viewInfoDO);
         viewInfoDO.setUpdatedAt(new Date());
         viewInfoDO.setUpdatedBy(user.getName());
-        viewInfoRepository.updateCanvas(viewInfoDO);
+        canvasRepository.updateCanvas(viewInfoDO);
         return viewInfoDO;
     }
 
     public void deleteCanvas(Long id) {
-        viewInfoRepository.deleteCanvas(id);
+        canvasRepository.deleteCanvas(id);
     }
 
 }

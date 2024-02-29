@@ -25,7 +25,7 @@ import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
-import com.tencent.supersonic.headless.server.service.ViewService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -45,16 +45,16 @@ public class CatalogImpl implements Catalog {
     private final DimensionService dimensionService;
     private final MetricService metricService;
     private final ModelRelaService modelRelaService;
-    private final ViewService viewService;
+    private final DataSetService dataSetService;
     private final SchemaService schemaService;
 
     public CatalogImpl(DatabaseService databaseService, SchemaService schemaService,
-            ModelService modelService, DimensionService dimensionService, ViewService viewService,
+            ModelService modelService, DimensionService dimensionService, DataSetService dataSetService,
             MetricService metricService, ModelRelaService modelRelaService) {
         this.databaseService = databaseService;
         this.modelService = modelService;
         this.dimensionService = dimensionService;
-        this.viewService = viewService;
+        this.dataSetService = dataSetService;
         this.metricService = metricService;
         this.modelRelaService = modelRelaService;
         this.schemaService = schemaService;

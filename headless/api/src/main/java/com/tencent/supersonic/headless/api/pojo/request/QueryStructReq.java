@@ -94,8 +94,8 @@ public class QueryStructReq extends SemanticQueryReq {
 
     public String toCustomizedString() {
         StringBuilder stringBuilder = new StringBuilder("{");
-        stringBuilder.append("\"viewId\":")
-                .append(viewId);
+        stringBuilder.append("\"dataSetId\":")
+                .append(dataSetId);
         stringBuilder.append("\"modelIds\":")
                 .append(modelIds);
         stringBuilder.append(",\"groups\":")
@@ -127,8 +127,8 @@ public class QueryStructReq extends SemanticQueryReq {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
-        sb.append("\"viewId\":")
-                .append(viewId);
+        sb.append("\"dataSetId\":")
+                .append(dataSetId);
         sb.append("\"modelIds\":")
                 .append(modelIds);
         sb.append(",\"groups\":")
@@ -172,7 +172,7 @@ public class QueryStructReq extends SemanticQueryReq {
 
         QuerySqlReq result = new QuerySqlReq();
         result.setSql(sql);
-        result.setViewId(this.getViewId());
+        result.setDataSetId(this.getDataSetId());
         result.setModelIds(this.getModelIdSet());
         result.setParams(new ArrayList<>());
         return result;
@@ -276,11 +276,11 @@ public class QueryStructReq extends SemanticQueryReq {
     }
 
     public String getTableName() {
-        if (StringUtils.isNotBlank(viewName)) {
-            return viewName;
+        if (StringUtils.isNotBlank(dataSetName)) {
+            return dataSetName;
         }
-        if (viewId != null) {
-            return Constants.TABLE_PREFIX + viewId;
+        if (dataSetId != null) {
+            return Constants.TABLE_PREFIX + dataSetId;
         }
         return Constants.TABLE_PREFIX + StringUtils.join(modelIds, "_");
     }

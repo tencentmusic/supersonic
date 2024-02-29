@@ -6,11 +6,11 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
-import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.chat.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.chat.api.pojo.response.DataInfo;
 import com.tencent.supersonic.chat.api.pojo.response.EntityInfo;
-import com.tencent.supersonic.chat.api.pojo.response.ViewInfo;
+import com.tencent.supersonic.chat.api.pojo.response.DataSetInfo;
 import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
 import com.tencent.supersonic.chat.core.utils.ComponentFactory;
 import com.tencent.supersonic.chat.core.utils.QueryReqBuilder;
@@ -50,19 +50,19 @@ public class SemanticService {
         return schemaService.getSemanticSchema();
     }
 
-    public ViewSchema getViewSchema(Long id) {
-        return schemaService.getViewSchema(id);
+    public DataSetSchema getDataSetSchema(Long id) {
+        return schemaService.getDataSetSchema(id);
     }
 
-    public EntityInfo getEntityInfo(SemanticParseInfo parseInfo, ViewSchema viewSchema, User user) {
-        if (parseInfo != null && parseInfo.getViewId() > 0) {
-            EntityInfo entityInfo = getEntityBasicInfo(viewSchema);
-            if (parseInfo.getDimensionFilters().size() <= 0 || entityInfo.getViewInfo() == null) {
+    public EntityInfo getEntityInfo(SemanticParseInfo parseInfo, DataSetSchema dataSetSchema, User user) {
+        if (parseInfo != null && parseInfo.getDataSetId() > 0) {
+            EntityInfo entityInfo = getEntityBasicInfo(dataSetSchema);
+            if (parseInfo.getDimensionFilters().size() <= 0 || entityInfo.getDataSetInfo() == null) {
                 entityInfo.setMetrics(null);
                 entityInfo.setDimensions(null);
                 return entityInfo;
             }
-            String primaryKey = entityInfo.getViewInfo().getPrimaryKey();
+            String primaryKey = entityInfo.getDataSetInfo().getPrimaryKey();
             if (StringUtils.isNotBlank(primaryKey)) {
                 String entityId = "";
                 for (QueryFilter chatFilter : parseInfo.getDimensionFilters()) {
@@ -75,7 +75,7 @@ public class SemanticService {
                 }
                 entityInfo.setEntityId(entityId);
                 try {
-                    fillEntityInfoValue(entityInfo, viewSchema, user);
+                    fillEntityInfoValue(entityInfo, dataSetSchema, user);
                     return entityInfo;
                 } catch (Exception e) {
                     log.error("setMainModel error", e);
@@ -85,29 +85,29 @@ public class SemanticService {
         return null;
     }
 
-    private EntityInfo getEntityBasicInfo(ViewSchema viewSchema) {
+    private EntityInfo getEntityBasicInfo(DataSetSchema dataSetSchema) {
 
         EntityInfo entityInfo = new EntityInfo();
-        if (viewSchema == null) {
+        if (dataSetSchema == null) {
             return entityInfo;
         }
-        Long viewId = viewSchema.getView().getView();
-        ViewInfo viewInfo = new ViewInfo();
-        viewInfo.setItemId(viewId.intValue());
-        viewInfo.setName(viewSchema.getView().getName());
-        viewInfo.setWords(viewSchema.getView().getAlias());
-        viewInfo.setBizName(viewSchema.getView().getBizName());
-        if (Objects.nonNull(viewSchema.getEntity())) {
-            viewInfo.setPrimaryKey(viewSchema.getEntity().getBizName());
+        Long dataSetId = dataSetSchema.getDataSet().getDataSet();
+        DataSetInfo dataSetInfo = new DataSetInfo();
+        dataSetInfo.setItemId(dataSetId.intValue());
+        dataSetInfo.setName(dataSetSchema.getDataSet().getName());
+        dataSetInfo.setWords(dataSetSchema.getDataSet().getAlias());
+        dataSetInfo.setBizName(dataSetSchema.getDataSet().getBizName());
+        if (Objects.nonNull(dataSetSchema.getEntity())) {
+            dataSetInfo.setPrimaryKey(dataSetSchema.getEntity().getBizName());
         }
-        entityInfo.setViewInfo(viewInfo);
-        TagTypeDefaultConfig tagTypeDefaultConfig = viewSchema.getTagTypeDefaultConfig();
+        entityInfo.setDataSetInfo(dataSetInfo);
+        TagTypeDefaultConfig tagTypeDefaultConfig = dataSetSchema.getTagTypeDefaultConfig();
         if (tagTypeDefaultConfig == null || tagTypeDefaultConfig.getDefaultDisplayInfo() == null) {
             return entityInfo;
         }
         List<DataInfo> dimensions = tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
                 .map(id -> {
-                    SchemaElement element = viewSchema.getElement(SchemaElementType.DIMENSION, id);
+                    SchemaElement element = dataSetSchema.getElement(SchemaElementType.DIMENSION, id);
                     if (element == null) {
                         return null;
                     }
@@ -115,7 +115,7 @@ public class SemanticService {
                 }).filter(Objects::nonNull).collect(Collectors.toList());
         List<DataInfo> metrics = tagTypeDefaultConfig.getDefaultDisplayInfo().getDimensionIds().stream()
                 .map(id -> {
-                    SchemaElement element = viewSchema.getElement(SchemaElementType.METRIC, id);
+                    SchemaElement element = dataSetSchema.getElement(SchemaElementType.METRIC, id);
                     if (element == null) {
                         return null;
                     }
@@ -126,9 +126,9 @@ public class SemanticService {
         return entityInfo;
     }
 
-    public void fillEntityInfoValue(EntityInfo entityInfo, ViewSchema viewSchema, User user) {
+    public void fillEntityInfoValue(EntityInfo entityInfo, DataSetSchema dataSetSchema, User user) {
         SemanticQueryResp queryResultWithColumns =
-                getQueryResultWithSchemaResp(entityInfo, viewSchema, user);
+                getQueryResultWithSchemaResp(entityInfo, dataSetSchema, user);
         if (queryResultWithColumns != null) {
             if (!CollectionUtils.isEmpty(queryResultWithColumns.getResultList())
                     && queryResultWithColumns.getResultList().size() > 0) {
@@ -147,15 +147,16 @@ public class SemanticService {
         }
     }
 
-    public SemanticQueryResp getQueryResultWithSchemaResp(EntityInfo entityInfo, ViewSchema viewSchema, User user) {
+    public SemanticQueryResp getQueryResultWithSchemaResp(EntityInfo entityInfo,
+                                                          DataSetSchema dataSetSchema, User user) {
         SemanticParseInfo semanticParseInfo = new SemanticParseInfo();
-        semanticParseInfo.setView(viewSchema.getView());
+        semanticParseInfo.setDataSet(dataSetSchema.getDataSet());
         semanticParseInfo.setQueryType(QueryType.TAG);
         semanticParseInfo.setMetrics(getMetrics(entityInfo));
         semanticParseInfo.setDimensions(getDimensions(entityInfo));
         DateConf dateInfo = new DateConf();
         int unit = 1;
-        TimeDefaultConfig timeDefaultConfig = viewSchema.getTagTypeTimeDefaultConfig();
+        TimeDefaultConfig timeDefaultConfig = dataSetSchema.getTagTypeTimeDefaultConfig();
         if (Objects.nonNull(timeDefaultConfig)) {
             unit = timeDefaultConfig.getUnit();
             String date = LocalDate.now().plusDays(-unit).toString();
@@ -222,7 +223,7 @@ public class SemanticService {
     }
 
     private String getEntityPrimaryName(EntityInfo entityInfo) {
-        return entityInfo.getViewInfo().getPrimaryKey();
+        return entityInfo.getDataSetInfo().getPrimaryKey();
     }
 
 }

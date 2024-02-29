@@ -58,13 +58,13 @@ public class AgentCheckParser implements SemanticParser {
                         }
                     }
                 }
-                if (CollectionUtils.isEmpty(tool.getViewIds())) {
+                if (CollectionUtils.isEmpty(tool.getDataSetIds())) {
                     return true;
                 }
                 if (tool.isContainsAllModel()) {
                     return false;
                 }
-                return !tool.getViewIds().contains(query.getParseInfo().getViewId());
+                return !tool.getDataSetIds().contains(query.getParseInfo().getDataSetId());
             }
             return true;
         });

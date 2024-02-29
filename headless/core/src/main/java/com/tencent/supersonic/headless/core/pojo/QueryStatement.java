@@ -11,7 +11,7 @@ import java.util.List;
 
 @Data
 public class QueryStatement {
-    private Long viewId;
+    private Long dataSetId;
     private List<Long> modelIds;
     private String sql = "";
     private String sourceId = "";
@@ -19,15 +19,15 @@ public class QueryStatement {
     private Boolean ok;
     private QueryParam queryParam;
     private MetricQueryParam metricQueryParam;
-    private ViewQueryParam viewQueryParam;
+    private DataSetQueryParam dataSetQueryParam;
     private Integer status = 0;
     private Boolean isS2SQL = false;
     private List<ImmutablePair<String, String>> timeRanges;
     private Boolean enableOptimize = true;
     private Triple<String, String, String> minMaxTime;
-    private String viewSql = "";
-    private String viewAlias = "";
-    private String viewSimplifySql = "";
+    private String dataSetSql = "";
+    private String dataSetAlias = "";
+    private String dataSetSimplifySql = "";
     private Boolean enableLimitWrapper = false;
 
     private SemanticModel semanticModel;

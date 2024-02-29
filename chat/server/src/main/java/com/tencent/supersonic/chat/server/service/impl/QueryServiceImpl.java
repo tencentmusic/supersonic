@@ -1,12 +1,11 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
-
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
-import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.chat.api.pojo.request.ExecuteQueryReq;
 import com.tencent.supersonic.chat.api.pojo.request.QueryDataReq;
@@ -296,7 +295,7 @@ public class QueryServiceImpl implements QueryService {
         similarQueryManager.saveSimilarQuery(SimilarQueryReq.builder().parseId(queryReq.getParseId())
                 .queryId(queryReq.getQueryId())
                 .agentId(chatQueryDO.getAgentId())
-                .viewId(parseInfo.getViewId())
+                .dataSetId(parseInfo.getDataSetId())
                 .queryText(queryReq.getQueryText()).build());
     }
 
@@ -352,9 +351,9 @@ public class QueryServiceImpl implements QueryService {
         }
         QueryResult queryResult = semanticQuery.execute(user);
         queryResult.setChatContext(semanticQuery.getParseInfo());
-        ViewSchema viewSchema = semanticSchema.getViewSchemaMap().get(parseInfo.getViewId());
+        DataSetSchema dataSetSchema = semanticSchema.getDataSetSchemaMap().get(parseInfo.getDataSetId());
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
-        EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, viewSchema, user);
+        EntityInfo entityInfo = semanticService.getEntityInfo(parseInfo, dataSetSchema, user);
         queryResult.setEntityInfo(entityInfo);
         return queryResult;
     }
@@ -422,8 +421,9 @@ public class QueryServiceImpl implements QueryService {
         ChatParseDO chatParseDO = chatService.getParseInfo(queryId, parseId);
         SemanticParseInfo parseInfo = JsonUtil.toObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
-        ViewSchema viewSchema = schemaService.getSemanticSchema().getViewSchemaMap().get(parseInfo.getViewId());
-        return semanticService.getEntityInfo(parseInfo, viewSchema, user);
+        DataSetSchema dataSetSchema =
+                schemaService.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
+        return semanticService.getEntityInfo(parseInfo, dataSetSchema, user);
     }
 
     private void updateDateInfo(QueryDataReq queryData, SemanticParseInfo parseInfo,
@@ -641,10 +641,10 @@ public class QueryServiceImpl implements QueryService {
         SemanticService semanticService = ContextUtils.getBean(SemanticService.class);
         SemanticSchema semanticSchema = semanticService.getSemanticSchema();
         SchemaElement schemaElement = semanticSchema.getDimension(dimensionValueReq.getElementID());
-        Set<Long> detectViewIds = new HashSet<>();
-        detectViewIds.add(schemaElement.getView());
-        dimensionValueReq.setModelId(schemaElement.getView());
-        List<String> dimensionValues = getDimensionValues(dimensionValueReq, detectViewIds);
+        Set<Long> detectDataSetIds = new HashSet<>();
+        detectDataSetIds.add(schemaElement.getDataSet());
+        dimensionValueReq.setModelId(schemaElement.getDataSet());
+        List<String> dimensionValues = getDimensionValues(dimensionValueReq, detectDataSetIds);
         // if the search results is null,search dimensionValue from database
         if (CollectionUtils.isEmpty(dimensionValues)) {
             semanticQueryResp = queryDatabase(dimensionValueReq, user);
@@ -668,14 +668,14 @@ public class QueryServiceImpl implements QueryService {
         return semanticQueryResp;
     }
 
-    private List<String> getDimensionValues(DimensionValueReq dimensionValueReq, Set<Long> viewIds) {
+    private List<String> getDimensionValues(DimensionValueReq dimensionValueReq, Set<Long> dataSetIds) {
         //if value is null ,then search from NATURE_TO_VALUES
         if (StringUtils.isBlank(dimensionValueReq.getValue())) {
             return SearchService.getDimensionValue(dimensionValueReq);
         }
         //search from prefixSearch
         List<HanlpMapResult> hanlpMapResultList = knowledgeService.prefixSearch(dimensionValueReq.getValue(),
-                2000, viewIds);
+                2000, dataSetIds);
         HanlpHelper.transLetterOriginal(hanlpMapResultList);
         return hanlpMapResultList.stream()
                 .filter(o -> {
@@ -700,7 +700,7 @@ public class QueryServiceImpl implements QueryService {
         dateConf.setPeriod("DAY");
         queryStructReq.setDateInfo(dateConf);
         queryStructReq.setLimit(20L);
-        queryStructReq.setViewId(dimensionValueReq.getModelId());
+        queryStructReq.setDataSetId(dimensionValueReq.getModelId());
         queryStructReq.setQueryType(QueryType.ID);
         List<String> groups = new ArrayList<>();
         groups.add(dimensionValueReq.getBizName());
