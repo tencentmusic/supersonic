@@ -1,19 +1,21 @@
 package com.tencent.supersonic.common.util;
 
+import com.tencent.supersonic.common.pojo.Constants;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import com.tencent.supersonic.common.pojo.Constants;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -166,4 +168,27 @@ public class DateUtils {
         return datesInRange;
     }
 
+    public static boolean isAnyDateString(String value) {
+        List<String> formats = Arrays.asList("yyyy-MM-dd", "yyyy-MM", "yyyy/MM/dd");
+        return isAnyDateString(value, formats);
+    }
+
+    public static boolean isAnyDateString(String value, List<String> formats) {
+        for (String format : formats) {
+            if (isDateString(value, format)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isDateString(String value, String format) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+            LocalDate.parse(value, formatter);
+            return true;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+    }
 }
