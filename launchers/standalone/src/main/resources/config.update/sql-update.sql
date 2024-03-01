@@ -213,3 +213,32 @@ CREATE TABLE s2_tag(
                        `ext` LONGVARCHAR DEFAULT NULL  ,
                        PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--20240301
+CREATE TABLE IF NOT EXISTS `s2_dictionary_conf` (
+   `id` INT NOT NULL AUTO_INCREMENT,
+   `description` varchar(255) ,
+   `type` varchar(255)  NOT NULL ,
+   `item_id` INT  NOT NULL ,
+   `config` text  ,
+   `status` varchar(255) NOT NULL ,
+   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
+   `created_by` varchar(100) NOT NULL ,
+   PRIMARY KEY (`id`)
+);
+COMMENT ON TABLE s2_dictionary_conf IS 'dictionary conf information table';
+
+CREATE TABLE IF NOT EXISTS `s2_dictionary_task` (
+   `id` INT NOT NULL AUTO_INCREMENT,
+   `name` varchar(255) NOT NULL ,
+   `description` varchar(255) ,
+   `type` varchar(255)  NOT NULL ,
+   `item_id` INT  NOT NULL ,
+   `config` text  ,
+   `status` varchar(255) NOT NULL ,
+   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
+   `created_by` varchar(100) NOT NULL ,
+   `elapsed_ms` bigINT DEFAULT NULL ,
+   PRIMARY KEY (`id`)
+);
+COMMENT ON TABLE s2_dictionary_task IS 'dictionary task information table';

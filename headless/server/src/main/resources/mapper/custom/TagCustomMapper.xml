@@ -107,4 +107,14 @@
         </if>
     </select>
 
+    <update id="batchUpdateStatus" parameterType="java.util.List">
+        <foreach collection="list" item="tag" separator=";">
+            update s2_tag
+            set status = #{tag.status,jdbcType=INTEGER},
+            updated_at = #{tag.updatedAt,jdbcType=TIMESTAMP},
+            updated_by = #{tag.updatedBy,jdbcType=VARCHAR}
+            where id = #{tag.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
 </mapper>

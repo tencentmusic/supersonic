@@ -8,4 +8,6 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface TagCustomMapper {
     List<TagDO> query(TagFilter tagFilter);
+
+    Boolean batchUpdateStatus(List<TagDO> tagDOList);
 }

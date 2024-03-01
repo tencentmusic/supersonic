@@ -41,4 +41,9 @@ public class TagRepositoryImpl implements TagRepository {
     public List<TagDO> query(TagFilter tagFilter) {
         return tagCustomMapper.query(tagFilter);
     }
+
+    @Override
+    public Boolean batchUpdateStatus(List<TagDO> tagDOList) {
+        return tagCustomMapper.batchUpdateStatus(tagDOList);
+    }
 }

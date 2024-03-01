@@ -33,15 +33,24 @@ public class CollectController {
             HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return collectService.createCollectionIndicators(user, collectDO.getId());
+        return collectService.createCollectionIndicators(user, collectDO);
     }
 
+    @Deprecated
     @DeleteMapping("/deleteCollectionIndicators/{id}")
     public boolean deleteCollectionIndicators(@PathVariable Long id,
             HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return collectService.deleteCollectionIndicators(user, id);
+    }
+
+    @PostMapping("/deleteCollectionIndicators")
+    public boolean deleteCollectionIndicators(@RequestBody CollectDO collectDO,
+                                              HttpServletRequest request,
+                                              HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return collectService.deleteCollectionIndicators(user, collectDO);
     }
 
 }

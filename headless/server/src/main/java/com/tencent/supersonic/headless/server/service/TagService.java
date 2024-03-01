@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.service;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
+import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
@@ -16,10 +17,11 @@ public interface TagService {
 
     void delete(Long id, User user) throws Exception;
 
-    TagResp getTag(Long id);
+    TagResp getTag(Long id, User user);
 
     List<TagResp> query(TagFilter tagFilter);
 
     PageInfo<TagResp> queryPage(TagFilterPage tagFilterPage, User user);
 
+    Boolean batchUpdateStatus(MetaBatchReq metaBatchReq, User user);
 }
