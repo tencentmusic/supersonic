@@ -27,7 +27,7 @@ public class CollectServiceImpl implements CollectService {
         CollectDO collect = new CollectDO();
         collect.setType(Strings.isEmpty(collectReq.getType()) ? type : collectReq.getType());
         collect.setUsername(user.getName());
-        collect.setCollectId(collectReq.getId());
+        collect.setCollectId(collectReq.getCollectId());
         collectMapper.insert(collect);
         return true;
     }

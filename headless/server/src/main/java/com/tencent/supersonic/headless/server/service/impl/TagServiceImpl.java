@@ -57,19 +57,23 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public TagResp create(TagReq tagReq, User user) throws Exception {
+    public TagResp create(TagReq tagReq, User user) {
         checkParam(tagReq);
         checkExit(tagReq);
         TagDO tagDO = convert(tagReq);
         tagDO.setCreatedBy(user.getName());
         tagDO.setCreatedAt(new Date());
-        tagDO.setStatus(StatusEnum.ONLINE.getCode());
+        if (Objects.nonNull(tagReq.getStatus())) {
+            tagDO.setStatus(tagReq.getStatus());
+        } else {
+            tagDO.setStatus(StatusEnum.ONLINE.getCode());
+        }
         tagRepository.create(tagDO);
         return convert(tagDO);
     }
 
     @Override
-    public TagResp update(TagReq tagReq, User user) throws Exception {
+    public TagResp update(TagReq tagReq, User user) {
         if (Objects.isNull(tagReq.getId()) || tagReq.getId() <= 0) {
             throw new RuntimeException("id is empty");
         }
@@ -93,7 +97,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public void delete(Long id, User user) throws Exception {
+    public void delete(Long id, User user) {
         TagDO tagDO = tagRepository.getTagById(id);
         if (Objects.isNull(tagDO)) {
             throw new RuntimeException("tag not found");

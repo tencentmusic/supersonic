@@ -9,6 +9,6 @@ public enum TypeEnums {
     ENTITY,
     VIEW,
     MODEL,
-    UNKNOWN;
+    UNKNOWN
 
 }
