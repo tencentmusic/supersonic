@@ -77,4 +77,4 @@ logging:
 
 inMemoryEmbeddingStore:
   persistent:
-    path: /tmp
+    path: d://
