@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.rest;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.TagReq;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
 import com.tencent.supersonic.headless.server.pojo.TagFilterPage;
@@ -42,6 +43,14 @@ public class TagController {
         return tagService.update(tagReq, user);
     }
 
+    @PostMapping("/batchUpdateStatus")
+    public Boolean batchUpdateStatus(@RequestBody MetaBatchReq metaBatchReq,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return tagService.batchUpdateStatus(metaBatchReq, user);
+    }
+
     @DeleteMapping("delete/{id}")
     public Boolean delete(@PathVariable("id") Long id,
             HttpServletRequest request,
@@ -55,7 +64,8 @@ public class TagController {
     public TagResp getTag(@PathVariable("id") Long id,
             HttpServletRequest request,
             HttpServletResponse response) {
-        return tagService.getTag(id);
+        User user = UserHolder.findUser(request, response);
+        return tagService.getTag(id, user);
     }
 
     @PostMapping("/queryTag")

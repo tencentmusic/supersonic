@@ -7,6 +7,7 @@ import com.tencent.supersonic.headless.server.persistence.mapper.CollectMapper;
 import com.tencent.supersonic.headless.server.service.CollectService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -22,12 +23,12 @@ public class CollectServiceImpl implements CollectService {
     private CollectMapper collectMapper;
 
     @Override
-    public Boolean createCollectionIndicators(User user, Long id) {
-        CollectDO collectDO = new CollectDO();
-        collectDO.setType(type);
-        collectDO.setUsername(user.getName());
-        collectDO.setCollectId(id);
-        collectMapper.insert(collectDO);
+    public Boolean createCollectionIndicators(User user, CollectDO collectReq) {
+        CollectDO collect = new CollectDO();
+        collect.setType(Strings.isEmpty(collectReq.getType()) ? type : collectReq.getType());
+        collect.setUsername(user.getName());
+        collect.setCollectId(collectReq.getId());
+        collectMapper.insert(collect);
         return true;
     }
 
@@ -37,6 +38,16 @@ public class CollectServiceImpl implements CollectService {
         collectDOQueryWrapper.lambda().eq(CollectDO::getUsername, user.getName());
         collectDOQueryWrapper.lambda().eq(CollectDO::getCollectId, id);
         collectDOQueryWrapper.lambda().eq(CollectDO::getType, type);
+        collectMapper.delete(collectDOQueryWrapper);
+        return true;
+    }
+
+    @Override
+    public Boolean deleteCollectionIndicators(User user, CollectDO collectReq) {
+        QueryWrapper<CollectDO> collectDOQueryWrapper = new QueryWrapper<>();
+        collectDOQueryWrapper.lambda().eq(CollectDO::getUsername, user.getName());
+        collectDOQueryWrapper.lambda().eq(CollectDO::getCollectId, collectReq.getCollectId());
+        collectDOQueryWrapper.lambda().eq(CollectDO::getType, collectReq.getType());
         collectMapper.delete(collectDOQueryWrapper);
         return true;
     }
