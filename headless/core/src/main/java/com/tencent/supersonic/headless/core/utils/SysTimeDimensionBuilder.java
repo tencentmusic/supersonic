@@ -16,7 +16,7 @@ import java.util.List;
 public class SysTimeDimensionBuilder {
 
     public static void addSysTimeDimension(List<Dim> dims, DbAdaptor engineAdaptor) {
-        log.info("addSysTimeDimension before:{}, engineAdaptor:{}", dims, engineAdaptor);
+        log.debug("addSysTimeDimension before:{}, engineAdaptor:{}", dims, engineAdaptor);
         Dim timeDim = getTimeDim(dims);
         if (timeDim == null) {
             timeDim = Dim.getDefault();

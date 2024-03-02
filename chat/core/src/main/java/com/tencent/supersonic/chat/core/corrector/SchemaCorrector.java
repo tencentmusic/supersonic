@@ -1,22 +1,30 @@
 package com.tencent.supersonic.chat.core.corrector;
 
 import com.tencent.supersonic.chat.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
 import com.tencent.supersonic.chat.api.pojo.response.SqlInfo;
 import com.tencent.supersonic.chat.core.parser.sql.llm.ParseResult;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import com.tencent.supersonic.chat.core.query.llm.s2sql.LLMReq.ElementValue;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.jsqlparser.AggregateEnum;
+import com.tencent.supersonic.common.util.jsqlparser.FieldExpression;
+import com.tencent.supersonic.common.util.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlReplaceHelper;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
-
+import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Perform schema corrections on the Schema information in S2SQL.
@@ -26,6 +34,8 @@ public class SchemaCorrector extends BaseSemanticCorrector {
 
     @Override
     public void doCorrect(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+
+        removeFilterIfNotInLinkingValue(queryContext, semanticParseInfo);
 
         correctAggFunction(semanticParseInfo);
 
@@ -105,4 +115,35 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         String sql = SqlReplaceHelper.replaceValue(sqlInfo.getCorrectS2SQL(), filedNameToValueMap, false);
         sqlInfo.setCorrectS2SQL(sql);
     }
+
+    public void removeFilterIfNotInLinkingValue(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
+        SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
+        String correctS2SQL = sqlInfo.getCorrectS2SQL();
+        List<FieldExpression> whereExpressionList = SqlSelectHelper.getWhereExpressions(correctS2SQL);
+        if (CollectionUtils.isEmpty(whereExpressionList)) {
+            return;
+        }
+        List<ElementValue> linkingValues = getLinkingValues(semanticParseInfo);
+        SemanticSchema semanticSchema = queryContext.getSemanticSchema();
+        Set<String> dimensions = getDimensions(semanticParseInfo.getViewId(), semanticSchema);
+
+        if (CollectionUtils.isEmpty(linkingValues)) {
+            linkingValues = new ArrayList<>();
+        }
+        Set<String> linkingFieldNames = linkingValues.stream().map(linking -> linking.getFieldName())
+                .collect(Collectors.toSet());
+
+        Set<String> removeFieldNames = whereExpressionList.stream()
+                .filter(fieldExpression -> StringUtils.isBlank(fieldExpression.getFunction()))
+                .filter(fieldExpression -> !TimeDimensionEnum.containsTimeDimension(fieldExpression.getFieldName()))
+                .filter(fieldExpression -> FilterOperatorEnum.EQUALS.getValue().equals(fieldExpression.getOperator()))
+                .filter(fieldExpression -> dimensions.contains(fieldExpression.getFieldName()))
+                .filter(fieldExpression -> !DateUtils.isAnyDateString(fieldExpression.getFieldValue().toString()))
+                .filter(fieldExpression -> !linkingFieldNames.contains(fieldExpression.getFieldName()))
+                .map(fieldExpression -> fieldExpression.getFieldName()).collect(Collectors.toSet());
+
+        String sql = SqlRemoveHelper.removeWhereCondition(correctS2SQL, removeFieldNames);
+        sqlInfo.setCorrectS2SQL(sql);
+    }
+
 }

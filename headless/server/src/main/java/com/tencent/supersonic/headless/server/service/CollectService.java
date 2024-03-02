@@ -10,9 +10,11 @@ import java.util.List;
 
 public interface CollectService {
 
-    Boolean createCollectionIndicators(User user, Long id);
+    Boolean createCollectionIndicators(User user, CollectDO collectDO);
 
     Boolean deleteCollectionIndicators(User user, Long id);
+
+    Boolean deleteCollectionIndicators(User user, CollectDO collectDO);
 
     List<CollectDO> getCollectList(String username);
 

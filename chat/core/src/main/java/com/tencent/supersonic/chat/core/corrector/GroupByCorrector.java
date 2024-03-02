@@ -14,14 +14,12 @@ import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.ViewService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
-
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Perform SQL corrections on the "Group by" section in S2SQL.
@@ -80,22 +78,6 @@ public class GroupByCorrector extends BaseSemanticCorrector {
             return false;
         }
         return true;
-    }
-
-    private Set<String> getDimensions(Long viewId, SemanticSchema semanticSchema) {
-        Set<String> dimensions = semanticSchema.getDimensions(viewId).stream()
-                .flatMap(
-                        schemaElement -> {
-                            Set<String> elements = new HashSet<>();
-                            elements.add(schemaElement.getName());
-                            if (!CollectionUtils.isEmpty(schemaElement.getAlias())) {
-                                elements.addAll(schemaElement.getAlias());
-                            }
-                            return elements.stream();
-                        }
-                ).collect(Collectors.toSet());
-        dimensions.add(TimeDimensionEnum.DAY.getChName());
-        return dimensions;
     }
 
     private void addGroupByFields(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {

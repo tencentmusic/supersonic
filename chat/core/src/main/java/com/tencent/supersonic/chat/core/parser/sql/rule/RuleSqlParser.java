@@ -20,9 +20,9 @@ public class RuleSqlParser implements SemanticParser {
 
     private static List<SemanticParser> auxiliaryParsers = Arrays.asList(
             new ContextInheritParser(),
-            new AgentCheckParser(),
             new TimeRangeParser(),
-            new AggregateTypeParser()
+            new AggregateTypeParser(),
+            new AgentCheckParser()
     );
 
     @Override

@@ -15,4 +15,6 @@ public interface TagRepository {
     TagDO getTagById(Long id);
 
     List<TagDO> query(TagFilter tagFilter);
+
+    Boolean batchUpdateStatus(List<TagDO> tagDOList);
 }
