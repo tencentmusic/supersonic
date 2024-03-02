@@ -56,8 +56,8 @@ const DomainManagerTab: React.FC<Props> = ({
       ),
     },
     {
-      label: '视图管理',
-      key: 'viewManange',
+      label: '数据集管理',
+      key: 'dataSetManange',
       children: (
         <View
           modelList={modelList}

@@ -82,14 +82,14 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
     };
 
     useEffect(() => {
-      const viewModelConfigs = viewItem?.viewDetail?.viewModelConfigs;
-      if (Array.isArray(viewModelConfigs)) {
+      const dataSetModelConfigs = viewItem?.dataSetDetail?.dataSetModelConfigs;
+      if (Array.isArray(dataSetModelConfigs)) {
         const idList: number[] = [];
         const transferKeys: React.Key[] = [];
         const viewConfigMap = {};
         const allMetrics: number[] = [];
         const allDimensions: number[] = [];
-        viewModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
+        dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
           const { id, metrics, dimensions } = item;
           idList.push(id);
           allMetrics.push(...metrics);
@@ -115,13 +115,13 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
       if (!dimensionList || !metricList) {
         return;
       }
-      const viewModelConfigs = isArrayOfValues(Object.values(viewModelConfigsMap))
+      const dataSetModelConfigs = isArrayOfValues(Object.values(viewModelConfigsMap))
         ? (Object.values(viewModelConfigsMap) as ISemantic.IViewModelConfigItem[])
-        : viewItem?.viewDetail?.viewModelConfigs;
-      if (isArrayOfValues(viewModelConfigs)) {
+        : viewItem?.dataSetDetail?.dataSetModelConfigs;
+      if (isArrayOfValues(dataSetModelConfigs)) {
         const allMetrics: number[] = [];
         const allDimensions: number[] = [];
-        viewModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
+        dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
           const { metrics, dimensions } = item;
           allMetrics.push(...metrics);
           allDimensions.push(...dimensions);
@@ -146,12 +146,14 @@ const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
             submitData: Record<string, ISemantic.IViewModelConfigItem>,
             selectedKeys: React.Key[],
           ) => {
-            const viewModelConfigs = Object.values(submitData) as ISemantic.IViewModelConfigItem[];
+            const dataSetModelConfigs = Object.values(
+              submitData,
+            ) as ISemantic.IViewModelConfigItem[];
 
-            if (isArrayOfValues(viewModelConfigs)) {
+            if (isArrayOfValues(dataSetModelConfigs)) {
               const allMetrics: number[] = [];
               const allDimensions: number[] = [];
-              viewModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
+              dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
                 const { metrics, dimensions } = item;
                 allMetrics.push(...metrics);
                 allDimensions.push(...dimensions);

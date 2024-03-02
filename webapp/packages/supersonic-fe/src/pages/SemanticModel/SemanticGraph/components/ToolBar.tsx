@@ -20,7 +20,7 @@ const visibleModeIconSvgPath = `<path d="M880 112H144c-17.7 0-32 14.3-32 32v736c
 //   });
 
 //   if (lastFoundNode) {
-//     // 将视图移动到找到的节点位置
+//     // 将数据集移动到找到的节点位置
 //     graph.focusItem(lastFoundNode, true, {
 //       duration: 300,
 //       easing: 'easeCubic',

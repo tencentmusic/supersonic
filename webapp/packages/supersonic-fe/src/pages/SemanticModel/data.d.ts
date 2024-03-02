@@ -171,8 +171,8 @@ export declare namespace ISemantic {
     typeEnum?: any;
     sensitiveLevel: number;
     domainId: number;
-    viewDetail: {
-      viewModelConfigs: IViewModelConfigItem[];
+    dataSetDetail: {
+      dataSetModelConfigs: IViewModelConfigItem[];
     };
   }
 
