@@ -33,11 +33,11 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
   const [metricList, setMetricList] = useState<ISemantic.IMetricItem[]>();
 
   useEffect(() => {
-    const viewModelConfigs = viewItem?.viewDetail?.viewModelConfigs;
-    if (Array.isArray(viewModelConfigs)) {
+    const dataSetModelConfigs = viewItem?.dataSetDetail?.dataSetModelConfigs;
+    if (Array.isArray(dataSetModelConfigs)) {
       const allMetrics: number[] = [];
       const allDimensions: number[] = [];
-      viewModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
+      dataSetModelConfigs.forEach((item: ISemantic.IViewModelConfigItem) => {
         const { metrics, dimensions } = item;
         allMetrics.push(...metrics);
         allDimensions.push(...dimensions);
@@ -135,7 +135,7 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
     <Modal
       width={800}
       destroyOnClose
-      title={'视图信息'}
+      title={'数据集信息'}
       open={true}
       maskClosable={false}
       footer={renderFooter()}

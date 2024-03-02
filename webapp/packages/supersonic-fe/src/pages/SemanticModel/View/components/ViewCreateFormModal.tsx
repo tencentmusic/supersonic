@@ -83,8 +83,8 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     const queryData: ISemantic.IModelItem = {
       ...formVals,
       ...fieldsValue,
-      viewDetail: {
-        viewModelConfigs: Object.values(viewModelConfigsMap),
+      dataSetDetail: {
+        dataSetModelConfigs: Object.values(viewModelConfigsMap),
       },
       domainId,
     };
@@ -225,17 +225,17 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
         <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
           <FormItem
             name="name"
-            label="视图名称"
-            rules={[{ required: true, message: '请输入视图名称！' }]}
+            label="数据集名称"
+            rules={[{ required: true, message: '请输入数据集名称！' }]}
           >
-            <Input placeholder="视图名称不可重复" />
+            <Input placeholder="数据集名称不可重复" />
           </FormItem>
           <FormItem
             name="bizName"
-            label="视图英文名称"
-            rules={[{ required: true, message: '请输入视图英文名称！' }]}
+            label="数据集英文名称"
+            rules={[{ required: true, message: '请输入数据集英文名称！' }]}
           >
-            <Input placeholder="请输入视图英文名称" />
+            <Input placeholder="请输入数据集英文名称" />
           </FormItem>
           <FormItem
             name="alias"
@@ -259,8 +259,8 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
           <FormItem name="admins" label={<FormItemTitle title={'责任人'} />}>
             <SelectTMEPerson placeholder="请邀请团队成员" />
           </FormItem>
-          <FormItem name="description" label="视图描述">
-            <Input.TextArea placeholder="视图描述" />
+          <FormItem name="description" label="数据集描述">
+            <Input.TextArea placeholder="数据集描述" />
           </FormItem>
         </div>
       </>
@@ -271,7 +271,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     <Modal
       width={modalWidth}
       destroyOnClose
-      title={'视图信息'}
+      title={'数据集信息'}
       open={true}
       maskClosable={false}
       footer={renderFooter()}

@@ -140,7 +140,7 @@ const DimensionMetricTransferModal: React.FC<ModelCreateFormModalProps> = ({
         });
         setSourceList([...preUpdateSourceData]);
 
-        const viewModelConfigs = [...dimensionItemChangeList, ...metricItemChangeList].reduce(
+        const dataSetModelConfigs = [...dimensionItemChangeList, ...metricItemChangeList].reduce(
           (config, item) => {
             const { modelId, id, typeEnum } = item;
             if (config[modelId]) {
@@ -162,7 +162,7 @@ const DimensionMetricTransferModal: React.FC<ModelCreateFormModalProps> = ({
           {},
         );
 
-        onSubmit?.(viewModelConfigs, newTargetKeys);
+        onSubmit?.(dataSetModelConfigs, newTargetKeys);
       }}
     />
   );
