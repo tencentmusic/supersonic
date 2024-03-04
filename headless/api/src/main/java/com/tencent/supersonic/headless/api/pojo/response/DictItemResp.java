@@ -32,7 +32,7 @@ public class DictItemResp {
     private StatusEnum status;
 
     public String getNature() {
-        return UNDERLINE + modelId + UNDERLINE + itemId;
+        return UNDERLINE + modelId + UNDERLINE + itemId + UNDERLINE + type.name().toLowerCase().substring(0, 1);
     }
 
     public String fetchDictFileName() {
