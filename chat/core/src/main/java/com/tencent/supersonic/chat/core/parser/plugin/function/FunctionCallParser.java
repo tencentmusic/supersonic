@@ -57,19 +57,19 @@ public class FunctionCallParser extends PluginParser {
         plugin.setParseMode(ParseMode.FUNCTION_CALL);
         Pair<Boolean, Set<Long>> pluginResolveResult = PluginManager.resolve(plugin, queryContext);
         if (pluginResolveResult.getLeft()) {
-            Set<Long> viewList = pluginResolveResult.getRight();
-            if (CollectionUtils.isEmpty(viewList)) {
+            Set<Long> dataSetList = pluginResolveResult.getRight();
+            if (CollectionUtils.isEmpty(dataSetList)) {
                 return null;
             }
             double score = queryContext.getQueryText().length();
-            return PluginRecallResult.builder().plugin(plugin).viewIds(viewList).score(score).build();
+            return PluginRecallResult.builder().plugin(plugin).dataSetIds(dataSetList).score(score).build();
         }
         return null;
     }
 
     public FunctionResp functionCall(QueryContext queryContext) {
         List<PluginParseConfig> pluginToFunctionCall =
-                getPluginToFunctionCall(queryContext.getViewId(), queryContext);
+                getPluginToFunctionCall(queryContext.getDataSetId(), queryContext);
         if (CollectionUtils.isEmpty(pluginToFunctionCall)) {
             log.info("function call parser, plugin is empty, skip");
             return null;

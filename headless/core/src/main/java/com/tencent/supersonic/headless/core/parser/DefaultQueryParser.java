@@ -9,17 +9,18 @@ import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
 import com.tencent.supersonic.headless.core.parser.converter.HeadlessConverter;
 import com.tencent.supersonic.headless.core.pojo.MetricQueryParam;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.pojo.ViewQueryParam;
+import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -28,8 +29,8 @@ public class DefaultQueryParser implements QueryParser {
 
     public void parse(QueryStatement queryStatement) throws Exception {
         QueryParam queryParam = queryStatement.getQueryParam();
-        if (Objects.isNull(queryStatement.getViewQueryParam())) {
-            queryStatement.setViewQueryParam(new ViewQueryParam());
+        if (Objects.isNull(queryStatement.getDataSetQueryParam())) {
+            queryStatement.setDataSetQueryParam(new DataSetQueryParam());
         }
         if (Objects.isNull(queryStatement.getMetricQueryParam())) {
             queryStatement.setMetricQueryParam(new MetricQueryParam());
@@ -41,10 +42,10 @@ public class DefaultQueryParser implements QueryParser {
                 headlessConverter.convert(queryStatement);
             }
         }
-        log.info("SemanticConverter after {} {} {}", queryParam, queryStatement.getViewQueryParam(),
+        log.info("SemanticConverter after {} {} {}", queryParam, queryStatement.getDataSetQueryParam(),
                 queryStatement.getMetricQueryParam());
-        if (!queryStatement.getViewQueryParam().getSql().isEmpty()) {
-            queryStatement = parser(queryStatement.getViewQueryParam(), queryStatement);
+        if (!queryStatement.getDataSetQueryParam().getSql().isEmpty()) {
+            queryStatement = parser(queryStatement.getDataSetQueryParam(), queryStatement);
         } else {
             queryStatement.getMetricQueryParam().setNativeQuery(queryParam.getQueryType().isNativeAggQuery());
             queryStatement = parser(queryStatement);
@@ -61,37 +62,37 @@ public class DefaultQueryParser implements QueryParser {
         queryStatement.setSql(querySql);
     }
 
-    public QueryStatement parser(ViewQueryParam viewQueryParam, QueryStatement queryStatement) {
-        log.info("parser MetricReq [{}] ", viewQueryParam);
+    public QueryStatement parser(DataSetQueryParam dataSetQueryParam, QueryStatement queryStatement) {
+        log.info("parser MetricReq [{}] ", dataSetQueryParam);
         try {
-            if (!CollectionUtils.isEmpty(viewQueryParam.getTables())) {
+            if (!CollectionUtils.isEmpty(dataSetQueryParam.getTables())) {
                 List<String[]> tables = new ArrayList<>();
-                Boolean isSingleTable = viewQueryParam.getTables().size() == 1;
-                for (MetricTable metricTable : viewQueryParam.getTables()) {
-                    QueryStatement tableSql = parserSql(metricTable, isSingleTable, viewQueryParam, queryStatement);
-                    if (isSingleTable && Objects.nonNull(tableSql.getViewSimplifySql())
-                            && !tableSql.getViewSimplifySql().isEmpty()) {
-                        queryStatement.setSql(tableSql.getViewSimplifySql());
-                        queryStatement.setViewQueryParam(viewQueryParam);
+                Boolean isSingleTable = dataSetQueryParam.getTables().size() == 1;
+                for (MetricTable metricTable : dataSetQueryParam.getTables()) {
+                    QueryStatement tableSql = parserSql(metricTable, isSingleTable, dataSetQueryParam, queryStatement);
+                    if (isSingleTable && Objects.nonNull(tableSql.getDataSetQueryParam())
+                            && !tableSql.getDataSetSimplifySql().isEmpty()) {
+                        queryStatement.setSql(tableSql.getDataSetSimplifySql());
+                        queryStatement.setDataSetQueryParam(dataSetQueryParam);
                         return queryStatement;
                     }
                     tables.add(new String[]{metricTable.getAlias(), tableSql.getSql()});
                 }
                 if (!tables.isEmpty()) {
                     String sql = "";
-                    if (viewQueryParam.isSupportWith()) {
+                    if (dataSetQueryParam.isSupportWith()) {
                         sql = "with " + String.join(",",
                                 tables.stream().map(t -> String.format("%s as (%s)", t[0], t[1])).collect(
-                                        Collectors.toList())) + "\n" + viewQueryParam.getSql();
+                                        Collectors.toList())) + "\n" + dataSetQueryParam.getSql();
                     } else {
-                        sql = viewQueryParam.getSql();
+                        sql = dataSetQueryParam.getSql();
                         for (String[] tb : tables) {
                             sql = StringUtils.replace(sql, tb[0],
-                                    "(" + tb[1] + ") " + (viewQueryParam.isWithAlias() ? "" : tb[0]), -1);
+                                    "(" + tb[1] + ") " + (dataSetQueryParam.isWithAlias() ? "" : tb[0]), -1);
                         }
                     }
                     queryStatement.setSql(sql);
-                    queryStatement.setViewQueryParam(viewQueryParam);
+                    queryStatement.setDataSetQueryParam(dataSetQueryParam);
                     return queryStatement;
                 }
             }
@@ -119,7 +120,7 @@ public class DefaultQueryParser implements QueryParser {
     }
 
     private QueryStatement parserSql(MetricTable metricTable, Boolean isSingleMetricTable,
-            ViewQueryParam viewQueryParam,
+            DataSetQueryParam dataSetQueryParam,
             QueryStatement queryStatement) throws Exception {
         MetricQueryParam metricReq = new MetricQueryParam();
         metricReq.setMetrics(metricTable.getMetrics());
@@ -131,11 +132,11 @@ public class DefaultQueryParser implements QueryParser {
         tableSql.setMetricQueryParam(metricReq);
         tableSql.setMinMaxTime(queryStatement.getMinMaxTime());
         tableSql.setEnableOptimize(queryStatement.getEnableOptimize());
-        tableSql.setViewId(queryStatement.getViewId());
+        tableSql.setDataSetId(queryStatement.getDataSetId());
         tableSql.setSemanticModel(queryStatement.getSemanticModel());
         if (isSingleMetricTable) {
-            tableSql.setViewSql(viewQueryParam.getSql());
-            tableSql.setViewAlias(metricTable.getAlias());
+            tableSql.setDataSetSql(dataSetQueryParam.getSql());
+            tableSql.setDataSetAlias(metricTable.getAlias());
         }
         tableSql = parser(tableSql, metricTable.getAggOption());
         if (!tableSql.isOk()) {

@@ -17,7 +17,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -84,14 +84,14 @@ public class ChatConfigController {
     }
 
     //Compatible with front-end
-    @GetMapping("/viewList")
-    public List<ViewResp> getViewList() {
-        return semanticInterpreter.getViewList(null);
+    @GetMapping("/dataSetList")
+    public List<DataSetResp> getDataSetList() {
+        return semanticInterpreter.getDataSetList(null);
     }
 
-    @GetMapping("/viewList/{domainId}")
-    public List<ViewResp> getViewList(@PathVariable("domainId") Long domainId) {
-        return semanticInterpreter.getViewList(domainId);
+    @GetMapping("/dataSetList/{domainId}")
+    public List<DataSetResp> getDataSetList(@PathVariable("domainId") Long domainId) {
+        return semanticInterpreter.getDataSetList(domainId);
     }
 
     @PostMapping("/dimension/page")
@@ -107,9 +107,9 @@ public class ChatConfigController {
         return semanticInterpreter.getMetricPage(pageMetricReq, user);
     }
 
-    @GetMapping("/getDomainViewTree")
-    public List<ItemResp> getDomainViewTree() {
-        return semanticInterpreter.getDomainViewTree();
+    @GetMapping("/getDomainDataSetTree")
+    public List<ItemResp> getDomainDataSetTree() {
+        return semanticInterpreter.getDomainDataSetTree();
     }
 
 }

@@ -30,8 +30,8 @@ class QueryReqBuilderTest {
     void buildS2SQLReq() {
         init();
         QueryStructReq queryStructReq = new QueryStructReq();
-        queryStructReq.setViewId(1L);
-        queryStructReq.setViewName("内容库");
+        queryStructReq.setDataSetId(1L);
+        queryStructReq.setDataSetName("内容库");
         queryStructReq.setQueryType(QueryType.METRIC);
 
         Aggregator aggregator = new Aggregator();

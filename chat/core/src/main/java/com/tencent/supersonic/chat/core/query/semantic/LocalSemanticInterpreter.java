@@ -10,15 +10,15 @@ import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.pojo.request.ViewFilterReq;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.QueryService;
@@ -44,7 +44,7 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
         if (StringUtils.isNotBlank(queryStructReq.getCorrectS2SQL())) {
             QuerySqlReq querySqlReq = new QuerySqlReq();
             querySqlReq.setSql(queryStructReq.getCorrectS2SQL());
-            querySqlReq.setViewId(queryStructReq.getViewId());
+            querySqlReq.setDataSetId(queryStructReq.getDataSetId());
             querySqlReq.setParams(new ArrayList<>());
             return queryByS2SQL(querySqlReq, user);
         }
@@ -68,11 +68,11 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
     }
 
     @Override
-    public List<ViewSchemaResp> doFetchViewSchema(List<Long> ids) {
-        ViewFilterReq filter = new ViewFilterReq();
-        filter.setViewIds(ids);
+    public List<DataSetSchemaResp> doFetchDataSetSchema(List<Long> ids) {
+        DataSetFilterReq filter = new DataSetFilterReq();
+        filter.setDataSetIds(ids);
         schemaService = ContextUtils.getBean(SchemaService.class);
-        return schemaService.fetchViewSchema(filter);
+        return schemaService.fetchDataSetSchema(filter);
     }
 
     @Override
@@ -82,9 +82,9 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
     }
 
     @Override
-    public List<ViewResp> getViewList(Long domainId) {
+    public List<DataSetResp> getDataSetList(Long domainId) {
         schemaService = ContextUtils.getBean(SchemaService.class);
-        return schemaService.getViewList(domainId);
+        return schemaService.getDataSetList(domainId);
     }
 
     @Override
@@ -106,8 +106,8 @@ public class LocalSemanticInterpreter extends BaseSemanticInterpreter {
     }
 
     @Override
-    public List<ItemResp> getDomainViewTree() {
-        return schemaService.getDomainViewTree();
+    public List<ItemResp> getDomainDataSetTree() {
+        return schemaService.getDomainDataSetTree();
     }
 
 }

@@ -21,13 +21,13 @@ public class ModelWordBuilder extends BaseWordBuilder {
     public List<DictWord> doGet(String word, SchemaElement schemaElement) {
         List<DictWord> result = Lists.newArrayList();
         //modelName
-        DictWord dictWord = buildDictWord(word, schemaElement.getView());
+        DictWord dictWord = buildDictWord(word, schemaElement.getDataSet());
         result.add(dictWord);
         //alias
         List<String> aliasList = schemaElement.getAlias();
         if (CollectionUtils.isNotEmpty(aliasList)) {
             for (String alias : aliasList) {
-                result.add(buildDictWord(alias, schemaElement.getView()));
+                result.add(buildDictWord(alias, schemaElement.getDataSet()));
             }
         }
         return result;

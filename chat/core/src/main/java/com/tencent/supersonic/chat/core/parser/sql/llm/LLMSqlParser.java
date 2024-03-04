@@ -29,21 +29,21 @@ public class LLMSqlParser implements SemanticParser {
         }
         try {
             //2.get modelId from queryCtx and chatCtx.
-            Long viewId = requestService.getViewId(queryCtx);
-            if (viewId == null) {
+            Long dataSetId = requestService.getDataSetId(queryCtx);
+            if (dataSetId == null) {
                 return;
             }
             //3.get agent tool and determine whether to skip this parser.
-            NL2SQLTool commonAgentTool = requestService.getParserTool(queryCtx, viewId);
+            NL2SQLTool commonAgentTool = requestService.getParserTool(queryCtx, dataSetId);
             if (Objects.isNull(commonAgentTool)) {
                 log.info("no tool in this agent, skip {}", LLMSqlParser.class);
                 return;
             }
             //4.construct a request, call the API for the large model, and retrieve the results.
-            List<ElementValue> linkingValues = requestService.getValueList(queryCtx, viewId);
+            List<ElementValue> linkingValues = requestService.getValueList(queryCtx, dataSetId);
             SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
-            LLMReq llmReq = requestService.getLlmReq(queryCtx, viewId, semanticSchema, linkingValues);
-            LLMResp llmResp = requestService.requestLLM(llmReq, viewId);
+            LLMReq llmReq = requestService.getLlmReq(queryCtx, dataSetId, semanticSchema, linkingValues);
+            LLMResp llmResp = requestService.requestLLM(llmReq, dataSetId);
 
             if (Objects.isNull(llmResp)) {
                 return;
@@ -52,7 +52,7 @@ public class LLMSqlParser implements SemanticParser {
             LLMResponseService responseService = ContextUtils.getBean(LLMResponseService.class);
             Map<String, LLMSqlResp> deduplicationSqlResp = responseService.getDeduplicationSqlResp(llmResp);
             ParseResult parseResult = ParseResult.builder()
-                    .viewId(viewId)
+                    .dataSetId(dataSetId)
                     .commonAgentTool(commonAgentTool)
                     .llmReq(llmReq)
                     .llmResp(llmResp)

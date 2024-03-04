@@ -37,8 +37,8 @@ public class QueryReqBuilder {
 
     public static QueryStructReq buildStructReq(SemanticParseInfo parseInfo) {
         QueryStructReq queryStructReq = new QueryStructReq();
-        queryStructReq.setViewId(parseInfo.getViewId());
-        queryStructReq.setViewName(parseInfo.getView().getName());
+        queryStructReq.setDataSetId(parseInfo.getDataSetId());
+        queryStructReq.setDataSetName(parseInfo.getDataSet().getName());
         queryStructReq.setQueryType(parseInfo.getQueryType());
         queryStructReq.setDateInfo(rewrite2Between(parseInfo.getDateInfo()));
 
@@ -119,7 +119,7 @@ public class QueryReqBuilder {
         for (Filter dimensionFilter : queryStructReq.getDimensionFilters()) {
             QueryStructReq req = new QueryStructReq();
             BeanUtils.copyProperties(queryStructReq, req);
-            req.setViewId(parseInfo.getViewId());
+            req.setDataSetId(parseInfo.getDataSetId());
             req.setDimensionFilters(Lists.newArrayList(dimensionFilter));
             queryStructReqs.add(req);
         }
@@ -131,15 +131,15 @@ public class QueryReqBuilder {
      * convert to QueryS2SQLReq
      *
      * @param querySql
-     * @param viewId
+     * @param dataSetId
      * @return
      */
-    public static QuerySqlReq buildS2SQLReq(String querySql, Long viewId) {
+    public static QuerySqlReq buildS2SQLReq(String querySql, Long dataSetId) {
         QuerySqlReq querySQLReq = new QuerySqlReq();
         if (Objects.nonNull(querySql)) {
             querySQLReq.setSql(querySql);
         }
-        querySQLReq.setViewId(viewId);
+        querySQLReq.setDataSetId(dataSetId);
         return querySQLReq;
     }
 

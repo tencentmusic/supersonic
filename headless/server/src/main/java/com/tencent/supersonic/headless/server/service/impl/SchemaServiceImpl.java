@@ -17,7 +17,7 @@ import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaItemQueryReq;
-import com.tencent.supersonic.headless.api.pojo.request.ViewFilterReq;
+import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
@@ -30,8 +30,8 @@ import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.TagResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
@@ -41,7 +41,7 @@ import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.headless.server.service.TagService;
-import com.tencent.supersonic.headless.server.service.ViewService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.utils.DimensionConverter;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
@@ -68,7 +68,7 @@ public class SchemaServiceImpl implements SchemaService {
     protected final Cache<String, List<ItemUseResp>> itemUseCache =
             CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).build();
 
-    protected final Cache<ViewFilterReq, List<ViewSchemaResp>> viewSchemaCache =
+    protected final Cache<DataSetFilterReq, List<DataSetSchemaResp>> dataSetSchemaCache =
             CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
 
     protected final Cache<SchemaFilterReq, SemanticSchemaResp> semanticSchemaCache =
@@ -79,7 +79,7 @@ public class SchemaServiceImpl implements SchemaService {
     private final DimensionService dimensionService;
     private final MetricService metricService;
     private final DomainService domainService;
-    private final ViewService viewService;
+    private final DataSetService dataSetService;
     private final ModelRelaService modelRelaService;
     private final TagService tagService;
 
@@ -87,14 +87,14 @@ public class SchemaServiceImpl implements SchemaService {
             DimensionService dimensionService,
             MetricService metricService,
             DomainService domainService,
-            ViewService viewService,
+            DataSetService dataSetService,
             ModelRelaService modelRelaService,
             StatUtils statUtils, TagService tagService) {
         this.modelService = modelService;
         this.dimensionService = dimensionService;
         this.metricService = metricService;
         this.domainService = domainService;
-        this.viewService = viewService;
+        this.dataSetService = dataSetService;
         this.modelRelaService = modelRelaService;
         this.statUtils = statUtils;
         this.tagService = tagService;
@@ -102,30 +102,30 @@ public class SchemaServiceImpl implements SchemaService {
 
     @SneakyThrows
     @Override
-    public List<ViewSchemaResp> fetchViewSchema(ViewFilterReq filter) {
-        List<ViewSchemaResp> viewList = viewSchemaCache.getIfPresent(filter);
-        if (CollectionUtils.isEmpty(viewList)) {
-            viewList = buildViewSchema(filter);
-            viewSchemaCache.put(filter, viewList);
+    public List<DataSetSchemaResp> fetchDataSetSchema(DataSetFilterReq filter) {
+        List<DataSetSchemaResp> dataSetList = dataSetSchemaCache.getIfPresent(filter);
+        if (CollectionUtils.isEmpty(dataSetList)) {
+            dataSetList = buildDataSetSchema(filter);
+            dataSetSchemaCache.put(filter, dataSetList);
         }
-        return viewList;
+        return dataSetList;
     }
 
-    public ViewSchemaResp fetchViewSchema(Long viewId) {
-        if (viewId == null) {
+    public DataSetSchemaResp fetchDataSetSchema(Long dataSetId) {
+        if (dataSetId == null) {
             return null;
         }
-        return fetchViewSchema(new ViewFilterReq(viewId)).stream().findFirst().orElse(null);
+        return fetchDataSetSchema(new DataSetFilterReq(dataSetId)).stream().findFirst().orElse(null);
     }
 
-    public List<ViewSchemaResp> buildViewSchema(ViewFilterReq filter) {
-        List<ViewSchemaResp> viewSchemaResps = new ArrayList<>();
-        List<Long> viewIds = filter.getViewIds();
+    public List<DataSetSchemaResp> buildDataSetSchema(DataSetFilterReq filter) {
+        List<DataSetSchemaResp> dataSetSchemaResps = new ArrayList<>();
+        List<Long> dataSetIds = filter.getDataSetIds();
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setStatus(StatusEnum.ONLINE.getCode());
-        metaFilter.setIds(viewIds);
-        List<ViewResp> viewResps = viewService.getViewList(metaFilter);
-        List<Long> modelIds = viewResps.stream().map(ViewResp::getAllModels)
+        metaFilter.setIds(dataSetIds);
+        List<DataSetResp> dataSetResps = dataSetService.getDataSetList(metaFilter);
+        List<Long> modelIds = dataSetResps.stream().map(DataSetResp::getAllModels)
                 .flatMap(Collection::stream).collect(Collectors.toList());
         metaFilter.setModelIds(modelIds);
         metaFilter.setIds(Lists.newArrayList());
@@ -133,26 +133,26 @@ public class SchemaServiceImpl implements SchemaService {
         List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
         metaFilter.setIds(modelIds);
         List<ModelResp> modelResps = modelService.getModelList(metaFilter);
-        Map<Long, ViewResp> viewRespMap = getViewMap(viewResps);
-        for (Long viewId : viewRespMap.keySet()) {
-            ViewResp viewResp = viewRespMap.get(viewId);
-            if (viewResp == null || !StatusEnum.ONLINE.getCode().equals(viewResp.getStatus())) {
+        Map<Long, DataSetResp> dataSetRespMap = getDataSetMap(dataSetResps);
+        for (Long dataSetId : dataSetRespMap.keySet()) {
+            DataSetResp dataSetResp = dataSetRespMap.get(dataSetId);
+            if (dataSetResp == null || !StatusEnum.ONLINE.getCode().equals(dataSetResp.getStatus())) {
                 continue;
             }
-            List<MetricSchemaResp> metricSchemaResps = MetricConverter.filterByView(metricResps, viewResp)
+            List<MetricSchemaResp> metricSchemaResps = MetricConverter.filterByDataSet(metricResps, dataSetResp)
                     .stream().map(this::convert).collect(Collectors.toList());
-            List<DimSchemaResp> dimSchemaResps = DimensionConverter.filterByView(dimensionResps, viewResp)
+            List<DimSchemaResp> dimSchemaResps = DimensionConverter.filterByDataSet(dimensionResps, dataSetResp)
                     .stream().map(this::convert).collect(Collectors.toList());
-            ViewSchemaResp viewSchemaResp = new ViewSchemaResp();
-            BeanUtils.copyProperties(viewResp, viewSchemaResp);
-            viewSchemaResp.setDimensions(dimSchemaResps);
-            viewSchemaResp.setMetrics(metricSchemaResps);
-            viewSchemaResp.setModelResps(modelResps.stream().filter(modelResp ->
-                    viewResp.getAllModels().contains(modelResp.getId())).collect(Collectors.toList()));
-            viewSchemaResps.add(viewSchemaResp);
+            DataSetSchemaResp dataSetSchemaResp = new DataSetSchemaResp();
+            BeanUtils.copyProperties(dataSetResp, dataSetSchemaResp);
+            dataSetSchemaResp.setDimensions(dimSchemaResps);
+            dataSetSchemaResp.setMetrics(metricSchemaResps);
+            dataSetSchemaResp.setModelResps(modelResps.stream().filter(modelResp ->
+                    dataSetResp.getAllModels().contains(modelResp.getId())).collect(Collectors.toList()));
+            dataSetSchemaResps.add(dataSetSchemaResp);
         }
-        fillStaticInfo(viewSchemaResps);
-        return viewSchemaResps;
+        fillStaticInfo(dataSetSchemaResps);
+        return dataSetSchemaResps;
     }
 
     public List<ModelSchemaResp> fetchModelSchemaResps(List<Long> modelIds) {
@@ -191,7 +191,7 @@ public class SchemaServiceImpl implements SchemaService {
 
     }
 
-    private void fillCnt(List<ViewSchemaResp> viewSchemaResps, List<ItemUseResp> statInfos) {
+    private void fillCnt(List<DataSetSchemaResp> dataSetSchemaResps, List<ItemUseResp> statInfos) {
 
         Map<String, ItemUseResp> typeIdAndStatPair = statInfos.stream()
                 .collect(Collectors.toMap(
@@ -199,15 +199,15 @@ public class SchemaServiceImpl implements SchemaService {
                         itemUseInfo -> itemUseInfo,
                         (item1, item2) -> item1));
         log.debug("typeIdAndStatPair:{}", typeIdAndStatPair);
-        for (ViewSchemaResp viewSchemaResp : viewSchemaResps) {
-            fillDimCnt(viewSchemaResp, typeIdAndStatPair);
-            fillMetricCnt(viewSchemaResp, typeIdAndStatPair);
+        for (DataSetSchemaResp dataSetSchemaResp : dataSetSchemaResps) {
+            fillDimCnt(dataSetSchemaResp, typeIdAndStatPair);
+            fillMetricCnt(dataSetSchemaResp, typeIdAndStatPair);
         }
     }
 
-    private void fillMetricCnt(ViewSchemaResp viewSchemaResp, Map<String, ItemUseResp> typeIdAndStatPair) {
-        List<MetricSchemaResp> metrics = viewSchemaResp.getMetrics();
-        if (CollectionUtils.isEmpty(viewSchemaResp.getMetrics())) {
+    private void fillMetricCnt(DataSetSchemaResp dataSetSchemaResp, Map<String, ItemUseResp> typeIdAndStatPair) {
+        List<MetricSchemaResp> metrics = dataSetSchemaResp.getMetrics();
+        if (CollectionUtils.isEmpty(dataSetSchemaResp.getMetrics())) {
             return;
         }
 
@@ -220,12 +220,12 @@ public class SchemaServiceImpl implements SchemaService {
                 }
             });
         }
-        viewSchemaResp.setMetrics(metrics);
+        dataSetSchemaResp.setMetrics(metrics);
     }
 
-    private void fillDimCnt(ViewSchemaResp viewSchemaResp, Map<String, ItemUseResp> typeIdAndStatPair) {
-        List<DimSchemaResp> dimensions = viewSchemaResp.getDimensions();
-        if (CollectionUtils.isEmpty(viewSchemaResp.getDimensions())) {
+    private void fillDimCnt(DataSetSchemaResp dataSetSchemaResp, Map<String, ItemUseResp> typeIdAndStatPair) {
+        List<DimSchemaResp> dimensions = dataSetSchemaResp.getDimensions();
+        if (CollectionUtils.isEmpty(dataSetSchemaResp.getDimensions())) {
             return;
         }
         if (!CollectionUtils.isEmpty(dimensions)) {
@@ -237,7 +237,7 @@ public class SchemaServiceImpl implements SchemaService {
                 }
             });
         }
-        viewSchemaResp.setDimensions(dimensions);
+        dataSetSchemaResp.setDimensions(dimensions);
     }
 
     @Override
@@ -273,20 +273,20 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
-    public List<ViewResp> getViewList(Long domainId) {
+    public List<DataSetResp> getDataSetList(Long domainId) {
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setDomainId(domainId);
-        return viewService.getViewList(metaFilter);
+        return dataSetService.getDataSetList(metaFilter);
     }
 
     public SemanticSchemaResp buildSemanticSchema(SchemaFilterReq schemaFilterReq) {
         SemanticSchemaResp semanticSchemaResp = new SemanticSchemaResp();
-        semanticSchemaResp.setViewId(schemaFilterReq.getViewId());
+        semanticSchemaResp.setDataSetId(schemaFilterReq.getDataSetId());
         semanticSchemaResp.setModelIds(schemaFilterReq.getModelIds());
-        if (schemaFilterReq.getViewId() != null) {
-            ViewSchemaResp viewSchemaResp = fetchViewSchema(schemaFilterReq.getViewId());
-            BeanUtils.copyProperties(viewSchemaResp, semanticSchemaResp);
-            List<Long> modelIds = viewSchemaResp.getAllModels();
+        if (schemaFilterReq.getDataSetId() != null) {
+            DataSetSchemaResp dataSetSchemaResp = fetchDataSetSchema(schemaFilterReq.getDataSetId());
+            BeanUtils.copyProperties(dataSetSchemaResp, semanticSchemaResp);
+            List<Long> modelIds = dataSetSchemaResp.getAllModels();
             MetaFilter metaFilter = new MetaFilter();
             metaFilter.setIds(modelIds);
             List<ModelResp> modelList = modelService.getModelList(metaFilter);
@@ -343,7 +343,7 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
-    public List<ItemResp> getDomainViewTree() {
+    public List<ItemResp> getDomainDataSetTree() {
         List<DomainResp> domainResps = domainService.getDomainList();
         List<ItemResp> itemResps = domainResps.stream().map(domain ->
                         new ItemResp(domain.getId(), domain.getParentId(), domain.getName(), TypeEnums.DOMAIN))
@@ -357,36 +357,36 @@ public class SchemaServiceImpl implements SchemaService {
             }
             parentItem.getChildren().add(itemResp);
         }
-        List<ViewResp> viewResps = viewService.getViewList(new MetaFilter());
-        for (ViewResp viewResp : viewResps) {
-            ItemResp itemResp = itemRespMap.get(viewResp.getDomainId());
+        List<DataSetResp> dataSetResps = dataSetService.getDataSetList(new MetaFilter());
+        for (DataSetResp dataSetResp : dataSetResps) {
+            ItemResp itemResp = itemRespMap.get(dataSetResp.getDomainId());
             if (itemResp != null) {
-                ItemResp view = new ItemResp(viewResp.getId(), viewResp.getDomainId(),
-                        viewResp.getName(), TypeEnums.VIEW);
-                itemResp.getChildren().add(view);
+                ItemResp dataSet = new ItemResp(dataSetResp.getId(), dataSetResp.getDomainId(),
+                        dataSetResp.getName(), TypeEnums.DATASET);
+                itemResp.getChildren().add(dataSet);
             }
         }
         return itemResps.stream().filter(itemResp -> itemResp.getParentId() == 0)
                 .collect(Collectors.toList());
     }
 
-    private void fillStaticInfo(List<ViewSchemaResp> viewSchemaResps) {
-        List<Long> viewIds = viewSchemaResps.stream()
-                .map(ViewSchemaResp::getId).collect(Collectors.toList());
+    private void fillStaticInfo(List<DataSetSchemaResp> dataSetSchemaResps) {
+        List<Long> dataSetIds = dataSetSchemaResps.stream()
+                .map(DataSetSchemaResp::getId).collect(Collectors.toList());
         ItemUseReq itemUseReq = new ItemUseReq();
-        itemUseReq.setModelIds(viewIds);
+        itemUseReq.setModelIds(dataSetIds);
 
         List<ItemUseResp> statInfos = getStatInfo(itemUseReq);
         log.debug("statInfos:{}", statInfos);
-        fillCnt(viewSchemaResps, statInfos);
+        fillCnt(dataSetSchemaResps, statInfos);
     }
 
-    private Map<Long, ViewResp> getViewMap(List<ViewResp> viewResps) {
-        if (CollectionUtils.isEmpty(viewResps)) {
+    private Map<Long, DataSetResp> getDataSetMap(List<DataSetResp> dataSetResps) {
+        if (CollectionUtils.isEmpty(dataSetResps)) {
             return new HashMap<>();
         }
-        return viewResps.stream().collect(
-                Collectors.toMap(ViewResp::getId, viewResp -> viewResp));
+        return dataSetResps.stream().collect(
+                Collectors.toMap(DataSetResp::getId, dataSetResp -> dataSetResp));
     }
 
     private DimSchemaResp convert(DimensionResp dimensionResp) {

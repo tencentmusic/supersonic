@@ -49,7 +49,7 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
                 explainSqlReq = ExplainSqlReq.builder()
                         .queryTypeEnum(QueryType.SQL)
                         .queryReq(QueryReqBuilder.buildS2SQLReq(
-                                sqlInfo.getCorrectS2SQL(), parseInfo.getViewId()
+                                sqlInfo.getCorrectS2SQL(), parseInfo.getDataSetId()
                         ))
                         .build();
             } else {
@@ -84,7 +84,7 @@ public abstract class BaseSemanticQuery implements SemanticQuery, Serializable {
     }
 
     protected void convertBizNameToName(SemanticSchema semanticSchema, QueryStructReq queryStructReq) {
-        Map<String, String> bizNameToName = semanticSchema.getBizNameToName(queryStructReq.getViewId());
+        Map<String, String> bizNameToName = semanticSchema.getBizNameToName(queryStructReq.getDataSetId());
         bizNameToName.putAll(TimeDimensionEnum.getNameToNameMap());
 
         List<Order> orders = queryStructReq.getOrders();

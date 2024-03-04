@@ -4,7 +4,7 @@ package com.tencent.supersonic.chat.server.service.impl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
 import com.tencent.supersonic.chat.core.query.semantic.SemanticInterpreter;
-import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.chat.api.pojo.request.ChatAggConfigReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatConfigBaseReq;
@@ -177,7 +177,7 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     private ItemVisibilityInfo fetchVisibilityDescByConfig(ItemVisibility visibility,
-            ViewSchema modelSchema) {
+            DataSetSchema modelSchema) {
         ItemVisibilityInfo itemVisibilityDesc = new ItemVisibilityInfo();
 
         List<Long> dimIdAllList = chatConfigHelper.generateAllDimIdList(modelSchema);
@@ -219,20 +219,20 @@ public class ConfigServiceImpl implements ConfigService {
         }
         BeanUtils.copyProperties(chatConfigResp, chatConfigRich);
 
-        ViewSchema viewSchema = semanticService.getViewSchema(modelId);
-        if (viewSchema == null) {
+        DataSetSchema dataSetSchema = semanticService.getDataSetSchema(modelId);
+        if (dataSetSchema == null) {
             return chatConfigRich;
         }
-        chatConfigRich.setBizName(viewSchema.getView().getBizName());
-        chatConfigRich.setModelName(viewSchema.getView().getName());
+        chatConfigRich.setBizName(dataSetSchema.getDataSet().getBizName());
+        chatConfigRich.setModelName(dataSetSchema.getDataSet().getName());
 
-        chatConfigRich.setChatAggRichConfig(fillChatAggRichConfig(viewSchema, chatConfigResp));
-        chatConfigRich.setChatDetailRichConfig(fillChatDetailRichConfig(viewSchema, chatConfigRich, chatConfigResp));
+        chatConfigRich.setChatAggRichConfig(fillChatAggRichConfig(dataSetSchema, chatConfigResp));
+        chatConfigRich.setChatDetailRichConfig(fillChatDetailRichConfig(dataSetSchema, chatConfigRich, chatConfigResp));
 
         return chatConfigRich;
     }
 
-    private ChatDetailRichConfigResp fillChatDetailRichConfig(ViewSchema modelSchema,
+    private ChatDetailRichConfigResp fillChatDetailRichConfig(DataSetSchema modelSchema,
                                                               ChatConfigRichResp chatConfigRich,
                                                               ChatConfigResp chatConfigResp) {
         if (Objects.isNull(chatConfigResp) || Objects.isNull(chatConfigResp.getChatDetailConfig())) {
@@ -251,7 +251,7 @@ public class ConfigServiceImpl implements ConfigService {
         return detailRichConfig;
     }
 
-    private EntityRichInfoResp generateRichEntity(Entity entity, ViewSchema modelSchema) {
+    private EntityRichInfoResp generateRichEntity(Entity entity, DataSetSchema modelSchema) {
         EntityRichInfoResp entityRichInfo = new EntityRichInfoResp();
         if (Objects.isNull(entity) || Objects.isNull(entity.getEntityId())) {
             return entityRichInfo;
@@ -264,7 +264,7 @@ public class ConfigServiceImpl implements ConfigService {
         return entityRichInfo;
     }
 
-    private ChatAggRichConfigResp fillChatAggRichConfig(ViewSchema modelSchema, ChatConfigResp chatConfigResp) {
+    private ChatAggRichConfigResp fillChatAggRichConfig(DataSetSchema modelSchema, ChatConfigResp chatConfigResp) {
         if (Objects.isNull(chatConfigResp) || Objects.isNull(chatConfigResp.getChatAggConfig())) {
             return null;
         }
@@ -281,7 +281,7 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     private ChatDefaultRichConfigResp fetchDefaultConfig(ChatDefaultConfigReq chatDefaultConfig,
-            ViewSchema modelSchema,
+            DataSetSchema modelSchema,
             ItemVisibilityInfo itemVisibilityInfo) {
         ChatDefaultRichConfigResp defaultRichConfig = new ChatDefaultRichConfigResp();
         if (Objects.isNull(chatDefaultConfig)) {
@@ -331,7 +331,7 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     private List<KnowledgeInfoReq> fillKnowledgeBizName(List<KnowledgeInfoReq> knowledgeInfos,
-            ViewSchema modelSchema) {
+            DataSetSchema modelSchema) {
         if (CollectionUtils.isEmpty(knowledgeInfos)) {
             return new ArrayList<>();
         }
@@ -351,9 +351,9 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public List<ChatConfigRichResp> getAllChatRichConfig() {
         List<ChatConfigRichResp> chatConfigRichInfoList = new ArrayList<>();
-        List<ViewSchema> modelSchemas = semanticInterpreter.getViewSchema();
+        List<DataSetSchema> modelSchemas = semanticInterpreter.getDataSetSchema();
         modelSchemas.stream().forEach(modelSchema -> {
-            ChatConfigRichResp chatConfigRichInfo = getConfigRichInfo(modelSchema.getView().getId());
+            ChatConfigRichResp chatConfigRichInfo = getConfigRichInfo(modelSchema.getDataSet().getId());
             if (Objects.nonNull(chatConfigRichInfo)) {
                 chatConfigRichInfoList.add(chatConfigRichInfo);
             }

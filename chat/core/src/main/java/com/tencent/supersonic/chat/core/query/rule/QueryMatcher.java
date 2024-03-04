@@ -25,7 +25,7 @@ public class QueryMatcher {
 
     public QueryMatcher() {
         for (SchemaElementType type : SchemaElementType.values()) {
-            if (type.equals(SchemaElementType.VIEW)) {
+            if (type.equals(SchemaElementType.DATASET)) {
                 elementOptionMap.put(type, QueryMatchOption.optional());
             } else {
                 elementOptionMap.put(type, QueryMatchOption.unused());

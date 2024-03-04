@@ -6,7 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.chat.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.chat.api.pojo.SemanticSchema;
-import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.chat.core.pojo.QueryContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -24,12 +24,12 @@ public class EntityMapper extends BaseMapper {
     @Override
     public void doMap(QueryContext queryContext) {
         SchemaMapInfo schemaMapInfo = queryContext.getMapInfo();
-        for (Long viewId : schemaMapInfo.getMatchedViewInfos()) {
-            List<SchemaElementMatch> schemaElementMatchList = schemaMapInfo.getMatchedElements(viewId);
+        for (Long dataSetId : schemaMapInfo.getMatchedDataSetInfos()) {
+            List<SchemaElementMatch> schemaElementMatchList = schemaMapInfo.getMatchedElements(dataSetId);
             if (CollectionUtils.isEmpty(schemaElementMatchList)) {
                 continue;
             }
-            SchemaElement entity = getEntity(viewId, queryContext);
+            SchemaElement entity = getEntity(dataSetId, queryContext);
             if (entity == null || entity.getId() == null) {
                 continue;
             }
@@ -65,9 +65,9 @@ public class EntityMapper extends BaseMapper {
         return false;
     }
 
-    private SchemaElement getEntity(Long viewId, QueryContext queryContext) {
+    private SchemaElement getEntity(Long dataSetId, QueryContext queryContext) {
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
-        ViewSchema modelSchema = semanticSchema.getViewSchemaMap().get(viewId);
+        DataSetSchema modelSchema = semanticSchema.getDataSetSchemaMap().get(dataSetId);
         if (modelSchema != null && modelSchema.getEntity() != null) {
             return modelSchema.getEntity();
         }

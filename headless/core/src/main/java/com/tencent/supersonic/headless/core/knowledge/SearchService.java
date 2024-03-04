@@ -58,7 +58,7 @@ public class SearchService {
                 .collect(Collectors.toList());
         for (HanlpMapResult hanlpMapResult : hanlpMapResults) {
             List<String> natures = hanlpMapResult.getNatures().stream()
-                    .map(nature -> NatureHelper.changeModel2View(nature, modelIdToViewIds))
+                    .map(nature -> NatureHelper.changeModel2DataSet(nature, modelIdToViewIds))
                     .flatMap(Collection::stream).collect(Collectors.toList());
             hanlpMapResult.setNatures(natures);
         }

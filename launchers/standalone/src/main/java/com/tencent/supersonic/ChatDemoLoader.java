@@ -134,7 +134,7 @@ public class ChatDemoLoader implements CommandLineRunner {
     private void addPlugin_1() {
         Plugin plugin1 = new Plugin();
         plugin1.setType("WEB_PAGE");
-        plugin1.setViewList(Arrays.asList(1L));
+        plugin1.setDataSetList(Arrays.asList(1L));
         plugin1.setPattern("用于分析超音数的流量概况，包含UV、PV等核心指标的追踪。P.S. 仅作为示例展示，无实际看板");
         plugin1.setName("超音数流量分析看板");
         PluginParseConfig pluginParseConfig = new PluginParseConfig();
@@ -169,14 +169,14 @@ public class ChatDemoLoader implements CommandLineRunner {
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
         ruleQueryTool.setId("0");
-        ruleQueryTool.setViewIds(Lists.newArrayList(1L));
+        ruleQueryTool.setDataSetIds(Lists.newArrayList(1L));
         ruleQueryTool.setQueryTypes(Lists.newArrayList(QueryType.METRIC.name()));
         agentConfig.getTools().add(ruleQueryTool);
         if (demoEnabledNl2SqlLlm) {
             LLMParserTool llmParserTool = new LLMParserTool();
             llmParserTool.setId("1");
             llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-            llmParserTool.setViewIds(Lists.newArrayList(-1L));
+            llmParserTool.setDataSetIds(Lists.newArrayList(-1L));
             agentConfig.getTools().add(llmParserTool);
         }
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
@@ -195,7 +195,7 @@ public class ChatDemoLoader implements CommandLineRunner {
         RuleParserTool ruleQueryTool = new RuleParserTool();
         ruleQueryTool.setId("0");
         ruleQueryTool.setType(AgentToolType.NL2SQL_RULE);
-        ruleQueryTool.setViewIds(Lists.newArrayList(2L));
+        ruleQueryTool.setDataSetIds(Lists.newArrayList(2L));
         ruleQueryTool.setQueryTypes(Lists.newArrayList(QueryType.TAG.name()));
         agentConfig.getTools().add(ruleQueryTool);
 
@@ -203,7 +203,7 @@ public class ChatDemoLoader implements CommandLineRunner {
             LLMParserTool llmParserTool = new LLMParserTool();
             llmParserTool.setId("1");
             llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-            llmParserTool.setViewIds(Lists.newArrayList(-1L));
+            llmParserTool.setDataSetIds(Lists.newArrayList(-1L));
             agentConfig.getTools().add(llmParserTool);
         }
         agent.setAgentConfig(JSONObject.toJSONString(agentConfig));
@@ -225,7 +225,7 @@ public class ChatDemoLoader implements CommandLineRunner {
             LLMParserTool llmParserTool = new LLMParserTool();
             llmParserTool.setId("1");
             llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-            llmParserTool.setViewIds(Lists.newArrayList(3L));
+            llmParserTool.setDataSetIds(Lists.newArrayList(3L));
             agentConfig.getTools().add(llmParserTool);
         }
 
@@ -247,7 +247,7 @@ public class ChatDemoLoader implements CommandLineRunner {
             LLMParserTool llmParserTool = new LLMParserTool();
             llmParserTool.setId("1");
             llmParserTool.setType(AgentToolType.NL2SQL_LLM);
-            llmParserTool.setViewIds(Lists.newArrayList(4L));
+            llmParserTool.setDataSetIds(Lists.newArrayList(4L));
             agentConfig.getTools().add(llmParserTool);
         }
 

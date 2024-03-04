@@ -5,13 +5,13 @@ import com.tencent.supersonic.headless.api.pojo.RelatedSchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SchemaValueMap;
-import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
@@ -23,19 +23,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ViewSchemaBuilder {
+public class DataSetSchemaBuilder {
 
-    public static ViewSchema build(ViewSchemaResp resp) {
-        ViewSchema viewSchema = new ViewSchema();
-        viewSchema.setQueryConfig(resp.getQueryConfig());
-        SchemaElement model = SchemaElement.builder()
-                .view(resp.getId())
+    public static DataSetSchema build(DataSetSchemaResp resp) {
+        DataSetSchema dataSetSchema = new DataSetSchema();
+        dataSetSchema.setQueryConfig(resp.getQueryConfig());
+        SchemaElement dataSet = SchemaElement.builder()
+                .dataSet(resp.getId())
                 .id(resp.getId())
                 .name(resp.getName())
                 .bizName(resp.getBizName())
-                .type(SchemaElementType.VIEW)
+                .type(SchemaElementType.DATASET)
                 .build();
-        viewSchema.setView(model);
+        dataSetSchema.setDataSet(dataSet);
 
         Set<SchemaElement> metrics = new HashSet<>();
         for (MetricSchemaResp metric : resp.getMetrics()) {
@@ -43,7 +43,7 @@ public class ViewSchemaBuilder {
             List<String> alias = SchemaItem.getAliasList(metric.getAlias());
 
             SchemaElement metricToAdd = SchemaElement.builder()
-                    .view(resp.getId())
+                    .dataSet(resp.getId())
                     .model(metric.getModelId())
                     .id(metric.getId())
                     .name(metric.getName())
@@ -57,7 +57,7 @@ public class ViewSchemaBuilder {
             metrics.add(metricToAdd);
 
         }
-        viewSchema.getMetrics().addAll(metrics);
+        dataSetSchema.getMetrics().addAll(metrics);
 
         Set<SchemaElement> dimensions = new HashSet<>();
         Set<SchemaElement> dimensionValues = new HashSet<>();
@@ -84,7 +84,7 @@ public class ViewSchemaBuilder {
 
             }
             SchemaElement dimToAdd = SchemaElement.builder()
-                    .view(resp.getId())
+                    .dataSet(resp.getId())
                     .model(dim.getModelId())
                     .id(dim.getId())
                     .name(dim.getName())
@@ -97,7 +97,7 @@ public class ViewSchemaBuilder {
             dimensions.add(dimToAdd);
 
             SchemaElement dimValueToAdd = SchemaElement.builder()
-                    .view(resp.getId())
+                    .dataSet(resp.getId())
                     .model(dim.getModelId())
                     .id(dim.getId())
                     .name(dim.getName())
@@ -109,7 +109,7 @@ public class ViewSchemaBuilder {
             dimensionValues.add(dimValueToAdd);
             if (dim.getIsTag() == 1) {
                 SchemaElement tagToAdd = SchemaElement.builder()
-                        .view(resp.getId())
+                        .dataSet(resp.getId())
                         .model(dim.getModelId())
                         .id(dim.getId())
                         .name(dim.getName())
@@ -122,14 +122,14 @@ public class ViewSchemaBuilder {
                 tags.add(tagToAdd);
             }
         }
-        viewSchema.getDimensions().addAll(dimensions);
-        viewSchema.getDimensionValues().addAll(dimensionValues);
-        viewSchema.getTags().addAll(tags);
+        dataSetSchema.getDimensions().addAll(dimensions);
+        dataSetSchema.getDimensionValues().addAll(dimensionValues);
+        dataSetSchema.getTags().addAll(tags);
 
         DimSchemaResp dim = resp.getPrimaryKey();
         if (dim != null) {
             SchemaElement entity = SchemaElement.builder()
-                    .view(resp.getId())
+                    .dataSet(resp.getId())
                     .model(dim.getModelId())
                     .id(dim.getId())
                     .name(dim.getName())
@@ -138,9 +138,9 @@ public class ViewSchemaBuilder {
                     .useCnt(dim.getUseCnt())
                     .alias(dim.getEntityAlias())
                     .build();
-            viewSchema.setEntity(entity);
+            dataSetSchema.setEntity(entity);
         }
-        return viewSchema;
+        return dataSetSchema;
     }
 
     private static List<RelatedSchemaElement> getRelateSchemaElement(MetricSchemaResp metricSchemaResp) {

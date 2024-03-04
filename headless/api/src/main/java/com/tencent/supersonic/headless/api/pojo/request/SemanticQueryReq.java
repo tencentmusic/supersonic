@@ -19,9 +19,9 @@ public abstract class SemanticQueryReq {
 
     protected boolean needAuth = true;
 
-    protected Long viewId;
+    protected Long dataSetId;
 
-    protected String viewName;
+    protected String dataSetName;
 
     protected Set<Long> modelIds = new HashSet<>();
 

@@ -24,7 +24,7 @@ public class WordService {
 
     public List<DictWord> getAllDictWords() {
         SemanticInterpreter semanticInterpreter = ComponentFactory.getSemanticLayer();
-        SemanticSchema semanticSchema = new SemanticSchema(semanticInterpreter.getViewSchema());
+        SemanticSchema semanticSchema = new SemanticSchema(semanticInterpreter.getDataSetSchema());
 
         List<DictWord> words = new ArrayList<>();
 

@@ -8,12 +8,13 @@ import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.util.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.Dim;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.pojo.MetaFilter;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.ViewService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -37,11 +38,12 @@ public class GroupByCorrector extends BaseSemanticCorrector {
     }
 
     private Boolean needAddGroupBy(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        Long viewId = semanticParseInfo.getViewId();
-        ViewService viewService = ContextUtils.getBean(ViewService.class);
+        Long dataSetId = semanticParseInfo.getDataSetId();
+        DataSetService dataSetService = ContextUtils.getBean(DataSetService.class);
         ModelService modelService = ContextUtils.getBean(ModelService.class);
-        ViewResp viewResp = viewService.getView(viewId);
-        List<Long> modelIds = viewResp.getViewDetail().getViewModelConfigs().stream().map(config -> config.getId())
+        DataSetResp dataSetResp = dataSetService.getDataSet(dataSetId);
+        List<Long> modelIds = dataSetResp.getDataSetDetail()
+                .getDataSetModelConfigs().stream().map(DataSetModelConfig::getId)
                 .collect(Collectors.toList());
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setIds(modelIds);
@@ -64,7 +66,7 @@ public class GroupByCorrector extends BaseSemanticCorrector {
             return false;
         }
         //add alias field name
-        Set<String> dimensions = getDimensions(viewId, semanticSchema);
+        Set<String> dimensions = getDimensions(dataSetId, semanticSchema);
         List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(dimensions)) {
             return false;
@@ -81,13 +83,13 @@ public class GroupByCorrector extends BaseSemanticCorrector {
     }
 
     private void addGroupByFields(QueryContext queryContext, SemanticParseInfo semanticParseInfo) {
-        Long viewId = semanticParseInfo.getViewId();
+        Long dataSetId = semanticParseInfo.getDataSetId();
         //add dimension group by
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectS2SQL();
         SemanticSchema semanticSchema = queryContext.getSemanticSchema();
         //add alias field name
-        Set<String> dimensions = getDimensions(viewId, semanticSchema);
+        Set<String> dimensions = getDimensions(dataSetId, semanticSchema);
         List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);
         List<String> aggregateFields = SqlSelectHelper.getAggregateFields(correctS2SQL);
         Set<String> groupByFields = selectFields.stream()

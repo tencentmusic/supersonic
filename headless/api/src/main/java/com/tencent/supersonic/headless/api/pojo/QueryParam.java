@@ -25,8 +25,8 @@ public class QueryParam {
     private QueryType queryType;
     private String s2SQL;
     private String correctS2SQL;
-    private Long viewId;
-    private String viewName;
+    private Long dataSetId;
+    private String dataSetName;
     private Set<Long> modelIds = new HashSet<>();
     private List<Param> params = new ArrayList<>();
 

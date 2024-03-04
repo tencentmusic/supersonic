@@ -242,14 +242,14 @@ create table IF NOT EXISTS s2_canvas
     updated_by varchar(100) not null,
     PRIMARY KEY (`id`)
 );
-COMMENT ON TABLE s2_canvas IS 'view information table';
+COMMENT ON TABLE s2_canvas IS 'canvas table';
 
 
 CREATE TABLE IF NOT EXISTS `s2_query_stat_info` (
                                       `id` INT NOT NULL AUTO_INCREMENT,
                                       `trace_id` varchar(200) DEFAULT NULL, -- query unique identifier
                                       `model_id` INT DEFAULT NULL,
-                                      `view_id` INT DEFAULT NULL,
+                                      `data_set_id` INT DEFAULT NULL,
                                       `user`    varchar(200) DEFAULT NULL,
                                       `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
                                       `query_type` varchar(200) DEFAULT NULL, -- the corresponding scene
@@ -327,7 +327,7 @@ CREATE TABLE IF NOT EXISTS `s2_plugin`
 (
     `id`         INT AUTO_INCREMENT,
     `type`      varchar(50)   NULL,
-    `view`     varchar(100)  NULL,
+    `data_set`     varchar(100)  NULL,
     `pattern`    varchar(500)  NULL,
     `parse_mode` varchar(100)  NULL,
     `parse_mode_config` LONGVARCHAR  NULL,
@@ -467,6 +467,51 @@ CREATE TABLE IF NOT EXISTS `song` (
     );
 COMMENT ON TABLE song IS 'song';
 
+CREATE TABLE IF NOT EXISTS `company` (
+    `imp_date` varchar(50) ,
+    `company_id` varchar(50) NOT NULL ,
+    `company_name` varchar(50) NOT NULL ,
+    `headquarter_address` varchar(50) NOT NULL ,
+    `company_established_time` varchar(20) NOT NULL ,
+    `founder` varchar(20) NOT NULL ,
+    `ceo` varchar(20) NOT NULL ,
+    `annual_turnover` bigint(15)  ,
+    `employee_count` int(7) ,
+    PRIMARY KEY (`company_id`)
+    );
+
+CREATE TABLE IF NOT EXISTS `brand` (
+    `imp_date` varchar(50) ,
+    `brand_id` varchar(50) NOT NULL ,
+    `brand_name` varchar(50) NOT NULL ,
+    `brand_established_time` varchar(20) NOT NULL ,
+    `company_id` varchar(50) NOT NULL ,
+    `legal_representative` varchar(20) NOT NULL ,
+    `registered_capital` bigint(15)  ,
+    PRIMARY KEY (`brand_id`)
+    );
+
+CREATE TABLE IF NOT EXISTS `company_revenue` (
+    `imp_date` varchar(50) ,
+    `company_id` varchar(50) NOT NULL ,
+    `brand_id` varchar(50) NOT NULL ,
+    `revenue_proportion` double NOT NULL,
+    `profit_proportion` double NOT NULL ,
+    `expenditure_proportion` double NOT NULL
+    );
+
+CREATE TABLE IF NOT EXISTS `company_brand_revenue` (
+    `imp_date` varchar(50) ,
+    `year_time` varchar(10) NOT NULL ,
+    `brand_id` varchar(50) NOT NULL ,
+    `revenue` bigint(15) NOT NULL,
+    `profit` bigint(15) NOT NULL ,
+    `revenue_growth_year_on_year` double NOT NULL ,
+    `profit_growth_year_on_year` double NOT NULL
+    );
+
+
+
 CREATE TABLE IF NOT EXISTS s2_sys_parameter
 (
     id  INT PRIMARY KEY AUTO_INCREMENT,
@@ -512,7 +557,7 @@ CREATE TABLE IF NOT EXISTS `s2_app` (
     updated_by  VARCHAR(255)
 );
 
-CREATE TABLE IF NOT EXISTS `s2_view` (
+CREATE TABLE IF NOT EXISTS `s2_data_set` (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     domain_id   BIGINT,
     `name`      VARCHAR(255),
@@ -520,12 +565,11 @@ CREATE TABLE IF NOT EXISTS `s2_view` (
     description VARCHAR(255),
     status      INT,
     alias       VARCHAR(255),
-    view_detail TEXT,
+    data_set_detail TEXT,
     created_at  TIMESTAMP,
     created_by  VARCHAR(255),
     updated_at  TIMESTAMP,
     updated_by  VARCHAR(255),
-    filter_sql VARCHAR(1000),
     query_config VARCHAR(3000),
     `admin` varchar(3000) DEFAULT NULL,
     `admin_org` varchar(3000) DEFAULT NULL

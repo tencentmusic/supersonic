@@ -5,7 +5,7 @@ import com.tencent.supersonic.chat.core.pojo.QueryContext;
 
 import java.util.Set;
 
-public interface ViewResolver {
+public interface DataSetResolver {
 
     Long resolve(QueryContext queryContext, Set<Long> restrictiveModels);
 

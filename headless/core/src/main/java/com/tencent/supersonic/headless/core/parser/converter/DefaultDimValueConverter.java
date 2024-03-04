@@ -27,8 +27,8 @@ public class DefaultDimValueConverter implements HeadlessConverter {
 
     @Override
     public boolean accept(QueryStatement queryStatement) {
-        return !Objects.isNull(queryStatement.getViewQueryParam())
-                && !StringUtils.isBlank(queryStatement.getViewQueryParam().getSql());
+        return !Objects.isNull(queryStatement.getDataSetQueryParam())
+                && !StringUtils.isBlank(queryStatement.getDataSetQueryParam().getSql());
     }
 
     @Override
@@ -39,14 +39,14 @@ public class DefaultDimValueConverter implements HeadlessConverter {
         if (CollectionUtils.isEmpty(dimensions)) {
             return;
         }
-        String sql = queryStatement.getViewQueryParam().getSql();
+        String sql = queryStatement.getDataSetQueryParam().getSql();
         List<String> whereFields = SqlSelectHelper.getWhereFields(sql)
                 .stream().filter(field -> !TimeDimensionEnum.containsTimeDimension(field))
                 .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(whereFields)) {
             return;
         }
-        MetricTable metricTable = queryStatement.getViewQueryParam()
+        MetricTable metricTable = queryStatement.getDataSetQueryParam()
                 .getTables().stream().findFirst().orElse(null);
         List<Expression> expressions = Lists.newArrayList();
         for (Dimension dimension : dimensions) {
@@ -63,7 +63,7 @@ public class DefaultDimValueConverter implements HeadlessConverter {
             }
         }
         sql = SqlAddHelper.addWhere(sql, expressions);
-        queryStatement.getViewQueryParam().setSql(sql);
+        queryStatement.getDataSetQueryParam().setSql(sql);
     }
 
 }

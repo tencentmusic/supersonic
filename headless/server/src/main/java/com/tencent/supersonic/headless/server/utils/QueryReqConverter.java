@@ -16,7 +16,6 @@ import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricType;
-import com.tencent.supersonic.headless.core.pojo.ViewQueryParam;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
@@ -27,7 +26,17 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.pojo.DataSetQueryParam;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,14 +46,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 @Component
 @Slf4j
@@ -103,7 +104,7 @@ public class QueryReqConverter {
         List<MetricTable> tables = new ArrayList<>();
         tables.add(metricTable);
         //4.build ParseSqlReq
-        ViewQueryParam result = new ViewQueryParam();
+        DataSetQueryParam result = new DataSetQueryParam();
         BeanUtils.copyProperties(querySQLReq, result);
 
         result.setTables(tables);
@@ -118,17 +119,17 @@ public class QueryReqConverter {
         //6.physicalSql by ParseSqlReq
 
         queryStructReq.setDateInfo(queryStructUtils.getDateConfBySql(querySQLReq.getSql()));
-        queryStructReq.setViewId(querySQLReq.getViewId());
+        queryStructReq.setDataSetId(querySQLReq.getDataSetId());
         queryStructReq.setQueryType(getQueryType(aggOption));
         log.info("QueryReqConverter queryStructReq[{}]", queryStructReq);
         QueryParam queryParam = new QueryParam();
         convert(queryStructReq, queryParam);
         QueryStatement queryStatement = new QueryStatement();
         queryStatement.setQueryParam(queryParam);
-        queryStatement.setViewQueryParam(result);
+        queryStatement.setDataSetQueryParam(result);
         queryStatement.setIsS2SQL(true);
         queryStatement.setMinMaxTime(queryStructUtils.getBeginEndTime(queryStructReq));
-        queryStatement.setViewId(querySQLReq.getViewId());
+        queryStatement.setDataSetId(querySQLReq.getDataSetId());
         queryStatement.setEnableLimitWrapper(limitWrapper);
 
         return queryStatement;
@@ -225,7 +226,7 @@ public class QueryReqConverter {
     public void correctTableName(QuerySqlReq querySqlReq) {
         String sql = querySqlReq.getSql();
         sql = SqlReplaceHelper.replaceTable(sql,
-                Constants.TABLE_PREFIX + querySqlReq.getViewId());
+                Constants.TABLE_PREFIX + querySqlReq.getDataSetId());
         querySqlReq.setSql(sql);
     }
 
@@ -239,7 +240,7 @@ public class QueryReqConverter {
     }
 
     private void generateDerivedMetric(SemanticSchemaResp semanticSchemaResp, AggOption aggOption,
-            ViewQueryParam viewQueryParam) {
+            DataSetQueryParam viewQueryParam) {
         String sql = viewQueryParam.getSql();
         for (MetricTable metricTable : viewQueryParam.getTables()) {
             List<String> measures = new ArrayList<>();

@@ -2,17 +2,17 @@ package com.tencent.supersonic.headless.api.pojo.request;
 
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
-import com.tencent.supersonic.headless.api.pojo.ViewDetail;
+import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class ViewReq extends SchemaItem {
+public class DataSetReq extends SchemaItem {
 
     private Long domainId;
 
-    private ViewDetail viewDetail;
+    private DataSetDetail dataSetDetail;
 
     private String alias;
 

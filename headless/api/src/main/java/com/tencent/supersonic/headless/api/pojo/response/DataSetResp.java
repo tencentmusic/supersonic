@@ -3,8 +3,8 @@ package com.tencent.supersonic.headless.api.pojo.response;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
-import com.tencent.supersonic.headless.api.pojo.ViewDetail;
-import com.tencent.supersonic.headless.api.pojo.ViewModelConfig;
+import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
+import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
 
@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class ViewResp extends SchemaItem {
+public class DataSetResp extends SchemaItem {
 
     private Long domainId;
 
-    private ViewDetail viewDetail;
+    private DataSetDetail dataSetDetail;
 
     private String alias;
 
@@ -31,31 +31,31 @@ public class ViewResp extends SchemaItem {
     private QueryConfig queryConfig;
 
     public List<Long> getAllMetrics() {
-        return getViewModelConfigs().stream().map(ViewModelConfig::getMetrics)
+        return getDataSetModelConfigs().stream().map(DataSetModelConfig::getMetrics)
                 .flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     public List<Long> getAllDimensions() {
-        return getViewModelConfigs().stream().map(ViewModelConfig::getDimensions)
+        return getDataSetModelConfigs().stream().map(DataSetModelConfig::getDimensions)
                 .flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     public List<Long> getAllModels() {
-        return getViewModelConfigs().stream().map(ViewModelConfig::getId)
+        return getDataSetModelConfigs().stream().map(DataSetModelConfig::getId)
                 .collect(Collectors.toList());
     }
 
     public List<Long> getAllIncludeAllModels() {
-        return getViewModelConfigs().stream().filter(ViewModelConfig::isIncludesAll)
-                .map(ViewModelConfig::getId)
+        return getDataSetModelConfigs().stream().filter(DataSetModelConfig::isIncludesAll)
+                .map(DataSetModelConfig::getId)
                 .collect(Collectors.toList());
     }
 
-    private List<ViewModelConfig> getViewModelConfigs() {
-        if (viewDetail == null || CollectionUtils.isEmpty(viewDetail.getViewModelConfigs())) {
+    private List<DataSetModelConfig> getDataSetModelConfigs() {
+        if (dataSetDetail == null || CollectionUtils.isEmpty(dataSetDetail.getDataSetModelConfigs())) {
             return Lists.newArrayList();
         }
-        return viewDetail.getViewModelConfigs();
+        return dataSetDetail.getDataSetModelConfigs();
     }
 
 }

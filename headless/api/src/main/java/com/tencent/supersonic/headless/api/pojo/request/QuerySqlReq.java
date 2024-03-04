@@ -12,8 +12,8 @@ public class QuerySqlReq extends SemanticQueryReq {
     @Override
     public String toCustomizedString() {
         StringBuilder stringBuilder = new StringBuilder("{");
-        stringBuilder.append("\"viewId\":")
-                .append(viewId);
+        stringBuilder.append("\"dataSetId\":")
+                .append(dataSetId);
         stringBuilder.append("\"modelIds\":")
                 .append(modelIds);
         stringBuilder.append(",\"params\":")

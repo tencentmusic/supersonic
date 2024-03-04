@@ -14,7 +14,7 @@ import com.tencent.supersonic.headless.api.pojo.RelateDimension;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import org.springframework.beans.BeanUtils;
 
@@ -99,10 +99,10 @@ public class MetricConverter {
         return metricResp;
     }
 
-    public static List<MetricResp> filterByView(List<MetricResp> metricResps, ViewResp viewResp) {
+    public static List<MetricResp> filterByDataSet(List<MetricResp> metricResps, DataSetResp dataSetResp) {
         return metricResps.stream().filter(metricResp ->
-                        viewResp.getAllMetrics().contains(metricResp.getId())
-                                || viewResp.getAllIncludeAllModels().contains(metricResp.getModelId()))
+                        dataSetResp.getAllMetrics().contains(metricResp.getId())
+                                || dataSetResp.getAllIncludeAllModels().contains(metricResp.getModelId()))
                 .collect(Collectors.toList());
     }
 

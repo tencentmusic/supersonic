@@ -29,8 +29,8 @@ public class RuleSqlParser implements SemanticParser {
     public void parse(QueryContext queryContext, ChatContext chatContext) {
         SchemaMapInfo mapInfo = queryContext.getMapInfo();
         // iterate all schemaElementMatches to resolve query mode
-        for (Long viewId : mapInfo.getMatchedViewInfos()) {
-            List<SchemaElementMatch> elementMatches = mapInfo.getMatchedElements(viewId);
+        for (Long dataSetId : mapInfo.getMatchedDataSetInfos()) {
+            List<SchemaElementMatch> elementMatches = mapInfo.getMatchedElements(dataSetId);
             List<RuleSemanticQuery> queries = RuleSemanticQuery.resolve(elementMatches, queryContext);
             for (RuleSemanticQuery query : queries) {
                 query.fillParseInfo(queryContext, chatContext);

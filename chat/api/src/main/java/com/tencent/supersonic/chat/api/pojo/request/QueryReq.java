@@ -7,7 +7,7 @@ import lombok.Data;
 public class QueryReq {
     private String queryText;
     private Integer chatId;
-    private Long viewId;
+    private Long dataSetId;
     private User user;
     private QueryFilters queryFilters;
     private boolean saveAnswer = true;

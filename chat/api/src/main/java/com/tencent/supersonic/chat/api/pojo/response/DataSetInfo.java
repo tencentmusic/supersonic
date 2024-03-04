@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class ViewInfo extends DataInfo implements Serializable {
+public class DataSetInfo extends DataInfo implements Serializable {
 
     private List<String> words;
     private String primaryKey;

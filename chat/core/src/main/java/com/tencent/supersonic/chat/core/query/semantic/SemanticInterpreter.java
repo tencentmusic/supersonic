@@ -2,7 +2,7 @@ package com.tencent.supersonic.chat.core.query.semantic;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.pojo.User;
-import com.tencent.supersonic.chat.api.pojo.ViewSchema;
+import com.tencent.supersonic.chat.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.request.ExplainSqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageMetricReq;
@@ -15,14 +15,14 @@ import com.tencent.supersonic.headless.api.pojo.response.ExplainResp;
 import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewResp;
-import com.tencent.supersonic.headless.api.pojo.response.ViewSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 
 import java.util.List;
 
 /**
- * A semantic layer provides a simplified and consistent view of data from multiple sources.
- * It abstracts away the complexity of the underlying data sources and provides a unified view
+ * A semantic layer provides a simplified and consistent dataSet of data from multiple sources.
+ * It abstracts away the complexity of the underlying data sources and provides a unified dataSet
  * of the data that is easier to understand and use.
  * <p>
  * The interface defines methods for getting metadata as well as querying data in the semantic layer.
@@ -39,11 +39,11 @@ public interface SemanticInterpreter {
 
     SemanticQueryResp queryByS2SQL(QuerySqlReq querySQLReq, User user);
 
-    List<ViewSchema> getViewSchema();
+    List<DataSetSchema> getDataSetSchema();
 
-    List<ViewSchema> getViewSchema(List<Long> ids);
+    List<DataSetSchema> getDataSetSchema(List<Long> ids);
 
-    ViewSchema getViewSchema(Long model, Boolean cacheEnable);
+    DataSetSchema getDataSetSchema(Long model, Boolean cacheEnable);
 
     PageInfo<DimensionResp> getDimensionPage(PageDimensionReq pageDimensionReq);
 
@@ -53,10 +53,10 @@ public interface SemanticInterpreter {
 
     <T> ExplainResp explain(ExplainSqlReq<T> explainSqlReq, User user) throws Exception;
 
-    List<ViewSchemaResp> fetchViewSchema(List<Long> ids, Boolean cacheEnable);
+    List<DataSetSchemaResp> fetchDataSetSchema(List<Long> ids, Boolean cacheEnable);
 
-    List<ViewResp> getViewList(Long domainId);
+    List<DataSetResp> getDataSetList(Long domainId);
 
-    List<ItemResp> getDomainViewTree();
+    List<ItemResp> getDomainDataSetTree();
 
 }

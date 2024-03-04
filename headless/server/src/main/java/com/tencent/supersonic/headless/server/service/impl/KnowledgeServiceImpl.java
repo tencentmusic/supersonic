@@ -7,7 +7,7 @@ import com.tencent.supersonic.headless.core.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.core.knowledge.SearchService;
 import com.tencent.supersonic.headless.core.knowledge.helper.HanlpHelper;
 import com.tencent.supersonic.headless.server.service.KnowledgeService;
-import com.tencent.supersonic.headless.server.service.ViewService;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class KnowledgeServiceImpl implements KnowledgeService {
 
-    private final ViewService viewService;
+    private final DataSetService dataSetService;
 
-    public KnowledgeServiceImpl(ViewService viewService) {
-        this.viewService = viewService;
+    public KnowledgeServiceImpl(DataSetService dataSetService) {
+        this.dataSetService = dataSetService;
     }
 
     @Override
@@ -69,25 +69,25 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     @Override
     public List<S2Term> getTerms(String text) {
-        Map<Long, List<Long>> modelIdToViewIds = viewService.getModelIdToViewIds(new ArrayList<>());
-        return HanlpHelper.getTerms(text, modelIdToViewIds);
+        Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds(new ArrayList<>());
+        return HanlpHelper.getTerms(text, modelIdToDataSetIds);
     }
 
     @Override
-    public List<HanlpMapResult> prefixSearch(String key, int limit, Set<Long> viewIds) {
-        Map<Long, List<Long>> modelIdToViewIds = viewService.getModelIdToViewIds(new ArrayList<>(viewIds));
-        return prefixSearchByModel(key, limit, modelIdToViewIds);
+    public List<HanlpMapResult> prefixSearch(String key, int limit, Set<Long> dataSetIds) {
+        Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds(new ArrayList<>(dataSetIds));
+        return prefixSearchByModel(key, limit, modelIdToDataSetIds);
     }
 
     public List<HanlpMapResult> prefixSearchByModel(String key, int limit,
-                                                    Map<Long, List<Long>> modelIdToViewIds) {
-        return SearchService.prefixSearch(key, limit, modelIdToViewIds);
+                                                    Map<Long, List<Long>> modelIdToDataSetIds) {
+        return SearchService.prefixSearch(key, limit, modelIdToDataSetIds);
     }
 
     @Override
-    public List<HanlpMapResult> suffixSearch(String key, int limit, Set<Long> viewIds) {
-        Map<Long, List<Long>> modelIdToViewIds = viewService.getModelIdToViewIds(new ArrayList<>(viewIds));
-        return suffixSearchByModel(key, limit, modelIdToViewIds.keySet());
+    public List<HanlpMapResult> suffixSearch(String key, int limit, Set<Long> dataSetIds) {
+        Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds(new ArrayList<>(dataSetIds));
+        return suffixSearchByModel(key, limit, modelIdToDataSetIds.keySet());
     }
 
     public List<HanlpMapResult> suffixSearchByModel(String key, int limit, Set<Long> models) {

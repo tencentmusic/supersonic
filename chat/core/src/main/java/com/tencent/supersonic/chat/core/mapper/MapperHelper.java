@@ -62,7 +62,7 @@ public class MapperHelper {
      */
     public boolean existDimensionValues(List<String> natures) {
         for (String nature : natures) {
-            if (NatureHelper.isDimensionValueViewId(nature)) {
+            if (NatureHelper.isDimensionValueDataSetId(nature)) {
                 return true;
             }
         }
@@ -82,33 +82,33 @@ public class MapperHelper {
                 detectSegment.length());
     }
 
-    public Set<Long> getViewIds(Long viewId, Agent agent) {
+    public Set<Long> getDataSetIds(Long dataSetId, Agent agent) {
 
-        Set<Long> detectViewIds = new HashSet<>();
+        Set<Long> detectDataSetIds = new HashSet<>();
         if (Objects.nonNull(agent)) {
-            detectViewIds = agent.getViewIds(null);
+            detectDataSetIds = agent.getDataSetIds();
         }
         //contains all
-        if (Agent.containsAllModel(detectViewIds)) {
-            if (Objects.nonNull(viewId) && viewId > 0) {
+        if (Agent.containsAllModel(detectDataSetIds)) {
+            if (Objects.nonNull(dataSetId) && dataSetId > 0) {
                 Set<Long> result = new HashSet<>();
-                result.add(viewId);
+                result.add(dataSetId);
                 return result;
             }
             return new HashSet<>();
         }
 
-        if (Objects.nonNull(detectViewIds)) {
-            detectViewIds = detectViewIds.stream().filter(entry -> entry > 0).collect(Collectors.toSet());
+        if (Objects.nonNull(detectDataSetIds)) {
+            detectDataSetIds = detectDataSetIds.stream().filter(entry -> entry > 0).collect(Collectors.toSet());
         }
 
-        if (Objects.nonNull(viewId) && viewId > 0 && Objects.nonNull(detectViewIds)) {
-            if (detectViewIds.contains(viewId)) {
+        if (Objects.nonNull(dataSetId) && dataSetId > 0 && Objects.nonNull(detectDataSetIds)) {
+            if (detectDataSetIds.contains(dataSetId)) {
                 Set<Long> result = new HashSet<>();
-                result.add(viewId);
+                result.add(dataSetId);
                 return result;
             }
         }
-        return detectViewIds;
+        return detectDataSetIds;
     }
 }
