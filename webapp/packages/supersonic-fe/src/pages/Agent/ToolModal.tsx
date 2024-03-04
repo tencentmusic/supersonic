@@ -37,9 +37,9 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
       node.title = node.name;
       node.value = node.type === 'DOMAIN' ? `DOMAIN_${node.id}` : node.id;
       node.checkable =
-        node.type === 'VIEW' || (node.type === 'DOMAIN' && node.children?.length > 0);
+        node.type === 'DATASET' || (node.type === 'DOMAIN' && node.children?.length > 0);
     });
-    setModelList([{ title: '默认', value: -1, type: 'VIEW' }, ...treeData]);
+    setModelList([{ title: '默认', value: -1, type: 'DATASET' }, ...treeData]);
   };
 
   const initPluginList = async () => {
@@ -105,10 +105,10 @@ const ToolModal: React.FC<Props> = ({ editTool, onSaveTool, onCancel }) => {
         </FormItem>
         {(toolType === AgentToolTypeEnum.NL2SQL_RULE ||
           toolType === AgentToolTypeEnum.NL2SQL_LLM) && (
-          <FormItem name="viewIds" label="视图">
+          <FormItem name="dataSetIds" label="数据集">
             <TreeSelect
               treeData={modelList}
-              placeholder="请选择视图"
+              placeholder="请选择数据集"
               multiple
               treeCheckable
               allowClear

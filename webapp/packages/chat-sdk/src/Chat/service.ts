@@ -5,14 +5,12 @@ import { AgentType, ModelType } from './type';
 const prefix = isMobile ? '/openapi' : '/api';
 
 export function saveConversation(chatName: string, agentId: number) {
-  return axios.post<any>(
-    `${prefix}/chat/manage/save?chatName=${chatName}&agentId=${agentId}`
-  );
+  return axios.post<any>(`${prefix}/chat/manage/save?chatName=${chatName}&agentId=${agentId}`);
 }
 
 export function updateConversationName(chatName: string, chatId: number = 0) {
   return axios.post<any>(
-    `${prefix}/chat/manage/updateChatName?chatName=${chatName}&chatId=${chatId}`,
+    `${prefix}/chat/manage/updateChatName?chatName=${chatName}&chatId=${chatId}`
   );
 }
 
@@ -25,12 +23,12 @@ export function getAllConversations(agentId?: number) {
 }
 
 export function getModelList() {
-  return axios.get<ModelType[]>(`${prefix}/chat/conf/modelList/view`);
+  return axios.get<ModelType[]>(`${prefix}/chat/conf/modelList/dataSet`);
 }
 
 export function updateQAFeedback(questionId: number, score: number) {
   return axios.post<any>(
-    `${prefix}/chat/manage/updateQAFeedback?id=${questionId}&score=${score}&feedback=`,
+    `${prefix}/chat/manage/updateQAFeedback?id=${questionId}&score=${score}&feedback=`
   );
 }
 

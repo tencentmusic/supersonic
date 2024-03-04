@@ -48,7 +48,7 @@ const MetricCard: React.FC<Props> = ({ data, loading, onApplyAuth }) => {
       <Spin spinning={loading}>
         <div className={`${prefixCls}-indicator`}>
           {indicatorColumn && !indicatorColumn?.authorized ? (
-            <ApplyAuth model={entityInfo?.viewInfo.name || ''} onApplyAuth={onApplyAuth} />
+            <ApplyAuth model={entityInfo?.dataSetInfo.name || ''} onApplyAuth={onApplyAuth} />
           ) : (
             <div style={{ display: 'flex', alignItems: 'flex-end' }}>
               <div className={`${prefixCls}-indicator-value`}>

@@ -28,7 +28,7 @@ export type ModelInfoType = {
 };
 
 export type EntityInfoType = {
-  viewInfo: ModelInfoType;
+  dataSetInfo: ModelInfoType;
   dimensions: FieldType[];
   metrics: FieldType[];
   entityId: number;
@@ -51,6 +51,7 @@ export type FilterItemType = {
   operator?: string;
   type?: string;
   value: any;
+  entityName?: string;
 };
 
 export type ModelType = {
@@ -83,7 +84,7 @@ export type ChatContextType = {
   aggType: string;
   modelId: number;
   modelName: string;
-  view: ModelType;
+  dataSet: ModelType;
   dateInfo: DateInfoType;
   dimensions: FieldType[];
   metrics: FieldType[];
@@ -92,7 +93,7 @@ export type ChatContextType = {
   elementMatches: any[];
   nativeQuery: boolean;
   queryMode: string;
-  queryType: 'METRIC' | 'METRIC_TAG' | 'TAG' | 'OTHER';
+  queryType: 'METRIC' | 'METRIC_TAG' | 'ID' | 'TAG' | 'OTHER';
   dimensionFilters: FilterItemType[];
   properties: any;
   sqlInfo: SqlInfoType;
