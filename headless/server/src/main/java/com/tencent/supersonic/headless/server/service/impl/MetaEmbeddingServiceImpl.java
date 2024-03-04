@@ -87,13 +87,6 @@ public class MetaEmbeddingServiceImpl implements MetaEmbeddingService {
                         Set<Retrieval> result = new HashSet<>();
                         result.add(retrieval);
                         return result.stream();
-                    }).filter(retrieval -> {
-                        Long dataSetId = Long.parseLong(String.valueOf(retrieval.getMetadata().getOrDefault("dataSetId", "-1"))
-                                .replace(Constants.UNDERLINE, ""));
-                        if (CollectionUtils.isNotEmpty(dataSetIds)) {
-                            return dataSetIds.contains(dataSetId);
-                        }
-                        return true;
                     }).collect(Collectors.toList());
                     retrieveQueryResult.setRetrieval(retrievals);
                     return retrieveQueryResult;
