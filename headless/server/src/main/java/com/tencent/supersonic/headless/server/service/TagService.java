@@ -11,11 +11,11 @@ import java.util.List;
 
 public interface TagService {
 
-    TagResp create(TagReq tagReq, User user) throws Exception;
+    TagResp create(TagReq tagReq, User user);
 
-    TagResp update(TagReq tagReq, User user) throws Exception;
+    TagResp update(TagReq tagReq, User user);
 
-    void delete(Long id, User user) throws Exception;
+    void delete(Long id, User user);
 
     TagResp getTag(Long id, User user);
 

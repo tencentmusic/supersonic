@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -57,23 +58,34 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public TagResp create(TagReq tagReq, User user) throws Exception {
+    public TagResp create(TagReq tagReq, User user) {
         checkParam(tagReq);
         checkExit(tagReq);
         TagDO tagDO = convert(tagReq);
+        Date date = new Date();
         tagDO.setCreatedBy(user.getName());
-        tagDO.setCreatedAt(new Date());
+        tagDO.setCreatedAt(date);
+        tagDO.setUpdatedBy(user.getName());
+        tagDO.setUpdatedAt(date);
         tagDO.setStatus(StatusEnum.ONLINE.getCode());
         tagRepository.create(tagDO);
         return convert(tagDO);
     }
 
     @Override
-    public TagResp update(TagReq tagReq, User user) throws Exception {
+    public TagResp update(TagReq tagReq, User user) {
         if (Objects.isNull(tagReq.getId()) || tagReq.getId() <= 0) {
             throw new RuntimeException("id is empty");
         }
         TagDO tagDO = tagRepository.getTagById(tagReq.getId());
+        tagDO = fillUpdateInfo(tagReq, tagDO);
+        tagDO.setUpdatedBy(user.getName());
+        tagDO.setUpdatedAt(new Date());
+        tagRepository.update(tagDO);
+        return convert(tagDO);
+    }
+
+    private TagDO fillUpdateInfo(TagReq tagReq, TagDO tagDO) {
         if (Objects.nonNull(tagDO) && tagDO.getId() > 0) {
             if (Objects.nonNull(tagReq.getExt()) && !tagReq.getExt().isEmpty()) {
                 tagDO.setExt(tagReq.getExtJson());
@@ -86,14 +98,24 @@ public class TagServiceImpl implements TagService {
                 tagReq.getTagDefineParams().getExpr())) {
             tagDO.setTypeParams(tagReq.getTypeParamsJson());
         }
-        tagDO.setUpdatedBy(user.getName());
-        tagDO.setUpdatedAt(new Date());
-        tagRepository.update(tagDO);
-        return convert(tagDO);
+        if (Strings.isNotEmpty(tagReq.getDescription())) {
+            tagDO.setDescription(tagReq.getDescription());
+        }
+        if (Objects.nonNull(tagReq.getSensitiveLevel())) {
+            tagDO.setSensitiveLevel(tagReq.getSensitiveLevel());
+        }
+        if (Objects.nonNull(tagReq.getName())) {
+            tagDO.setName(tagReq.getName());
+        }
+        if (Objects.nonNull(tagReq.getStatus())) {
+            tagDO.setStatus(tagReq.getStatus());
+        }
+
+        return tagDO;
     }
 
     @Override
-    public void delete(Long id, User user) throws Exception {
+    public void delete(Long id, User user) {
         TagDO tagDO = tagRepository.getTagById(id);
         if (Objects.isNull(tagDO)) {
             throw new RuntimeException("tag not found");
