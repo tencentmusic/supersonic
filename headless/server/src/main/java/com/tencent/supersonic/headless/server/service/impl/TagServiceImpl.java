@@ -104,7 +104,7 @@ public class TagServiceImpl implements TagService {
         if (Objects.nonNull(tagReq.getSensitiveLevel())) {
             tagDO.setSensitiveLevel(tagReq.getSensitiveLevel());
         }
-        if (Objects.nonNull(tagReq.getName())) {
+        if (Strings.isNotEmpty(tagReq.getName())) {
             tagDO.setName(tagReq.getName());
         }
         if (Objects.nonNull(tagReq.getStatus())) {
